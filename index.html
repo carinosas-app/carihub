@@ -6,86 +6,201 @@
 <title>Cariñosas</title>
 
 <style>
-body { margin: 0; font-family: Arial; background: #fff; }
+body { margin: 0; font-family: Arial, sans-serif; background: #fff; }
 
-/* PORTADA */
+.contenedor { position: relative; }
+
 .portada {
   width: 100%;
   display: block;
 }
 
-/* FORMULARIO */
+.menu-btn {
+  position: absolute;
+  top: 1%;
+  right: 2%;
+  width: 13%;
+  height: 5%;
+  cursor: pointer;
+  z-index: 20;
+}
+
+.menu {
+  position: fixed;
+  top: 0;
+  right: -100%;
+  width: 82%;
+  height: 100%;
+  background: white;
+  box-shadow: -5px 0 15px rgba(0,0,0,0.25);
+  transition: 0.3s;
+  padding: 25px;
+  z-index: 999;
+  overflow-y: auto;
+}
+
+.menu.active { right: 0; }
+
+.menu a {
+  display: block;
+  padding: 18px 10px;
+  text-decoration: none;
+  color: #c2185b;
+  font-size: 22px;
+  font-weight: bold;
+  border-bottom: 1px solid #eee;
+}
+
+.cerrar-menu {
+  text-align: right;
+  font-size: 28px;
+  cursor: pointer;
+  color: #c2185b;
+  margin-bottom: 10px;
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 2000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.55);
+  overflow-y: auto;
+}
+
 .form-box {
   background: white;
-  margin: -60px 20px 20px;
-  padding: 20px;
-  border-radius: 15px;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+  margin: 35px auto;
+  padding: 22px;
+  width: 86%;
+  border-radius: 18px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.35);
 }
 
 .form-box h2 {
   text-align: center;
   color: #ff2e7a;
+  font-size: 32px;
+  margin-top: 5px;
 }
 
 .form-box input, .form-box textarea {
   width: 100%;
-  padding: 10px;
-  margin: 8px 0;
-  border-radius: 8px;
+  box-sizing: border-box;
+  padding: 15px;
+  margin: 9px 0;
+  border-radius: 12px;
   border: 1px solid #ddd;
+  font-size: 16px;
+}
+
+.form-box textarea {
+  height: 95px;
 }
 
 .btn {
   width: 100%;
-  padding: 12px;
+  padding: 15px;
   background: #ff2e7a;
   color: white;
   border: none;
-  border-radius: 10px;
+  border-radius: 14px;
+  font-size: 18px;
   font-weight: bold;
   cursor: pointer;
+  margin-top: 10px;
 }
 
-/* LISTA */
+.btn-cerrar {
+  background: #777;
+}
+
 .lista {
   padding: 20px;
 }
 
 .card {
   background: white;
-  border-radius: 10px;
+  border-radius: 14px;
   padding: 15px;
   margin-bottom: 15px;
-  box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+  box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+}
+
+.card h3 {
+  color: #c2185b;
 }
 </style>
 </head>
 
 <body>
 
-<img src="portada.png" class="portada">
+<div class="contenedor">
+  <img src="portada.png" class="portada">
+  <div class="menu-btn" onclick="abrirMenu()"></div>
+</div>
 
-<div class="form-box">
-  <h2>Publicar anuncio</h2>
+<div class="menu" id="menu">
+  <div class="cerrar-menu" onclick="abrirMenu()">✕</div>
+  <a href="#" onclick="abrirRegistro()">👤 Regístrate</a>
+  <a href="#">📢 Banners</a>
+  <a href="#">⚠️ Denunciar</a>
+  <a href="#">📄 Términos y condiciones</a>
+  <a href="#">📘 Condiciones de uso</a>
+  <a href="#">🔒 Política de privacidad</a>
+  <a href="#">🍪 Política de cookies</a>
+  <a href="#">💳 Política de pagos</a>
+</div>
 
-  <input id="nombre" placeholder="Nombre o alias">
-  <input id="email" placeholder="Correo">
-  <input id="password" placeholder="Contraseña">
-  <input id="whatsapp" placeholder="WhatsApp">
-  <input id="ciudad" placeholder="Ciudad">
-  <textarea id="descripcion" placeholder="Descripción"></textarea>
-  <input id="precio" placeholder="Precio">
+<div class="modal" id="modalRegistro">
+  <div class="form-box">
+    <h2>Registro</h2>
 
-  <button class="btn" onclick="registrar()">Publicar</button>
+    <input id="nombre" placeholder="Nombre o alias">
+    <input id="email" placeholder="Correo">
+    <input id="password" type="password" placeholder="Contraseña">
+    <input id="whatsapp" placeholder="WhatsApp">
+    <input id="categoria" placeholder="Categoría">
+    <input id="estado" placeholder="Estado">
+    <input id="ciudad" placeholder="Municipio / ciudad">
+    <textarea id="descripcion" placeholder="Descripción breve"></textarea>
+    <input id="precio" placeholder="Precio o forma de manejarse">
+    <input id="modalidad" placeholder="Modalidad: con lugar / domicilio / hotel">
+
+    <label style="display:block; margin:12px 0; font-size:15px;">
+      <input type="checkbox" id="mayorEdad">
+      Confirmo que soy mayor de edad
+    </label>
+
+    <button class="btn" onclick="registrar()">Enviar registro</button>
+    <button class="btn btn-cerrar" onclick="cerrarRegistro()">Cerrar</button>
+  </div>
 </div>
 
 <div class="lista" id="lista"></div>
 
+<script>
+function abrirMenu() {
+  document.getElementById("menu").classList.toggle("active");
+}
+
+function abrirRegistro() {
+  document.getElementById("menu").classList.remove("active");
+  document.getElementById("modalRegistro").style.display = "block";
+}
+
+function cerrarRegistro() {
+  document.getElementById("modalRegistro").style.display = "none";
+}
+</script>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, addDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, addDoc, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBL4LNLtPqbyIxfF0NAqxi4rQG4XF_vkI",
@@ -105,26 +220,44 @@ window.registrar = async function() {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
   const whatsapp = document.getElementById("whatsapp").value;
+  const categoria = document.getElementById("categoria").value;
+  const estado = document.getElementById("estado").value;
   const ciudad = document.getElementById("ciudad").value;
   const descripcion = document.getElementById("descripcion").value;
   const precio = document.getElementById("precio").value;
+  const modalidad = document.getElementById("modalidad").value;
+  const mayorEdad = document.getElementById("mayorEdad").checked;
+
+  if (!mayorEdad) {
+    alert("Debes confirmar que eres mayor de edad.");
+    return;
+  }
+
+  if (!email || !password || !nombre) {
+    alert("Falta correo, contraseña o nombre.");
+    return;
+  }
 
   try {
     await createUserWithEmailAndPassword(auth, email, password);
 
     await addDoc(collection(db, "usuarios"), {
       nombre,
+      email,
       whatsapp,
+      categoria,
+      estado,
       ciudad,
       descripcion,
       precio,
-      email,
+      modalidad,
+      mayorEdad,
       aprobado: false,
       fecha: new Date()
     });
 
-    alert("Publicación enviada 🔥");
-    cargar();
+    alert("Registro enviado. Queda pendiente de aprobación.");
+    cerrarRegistro();
   } catch (error) {
     alert("Error: " + error.message);
   }
@@ -134,21 +267,21 @@ async function cargar() {
   const lista = document.getElementById("lista");
   lista.innerHTML = "";
 
-  const querySnapshot = await getDocs(collection(db, "usuarios"));
+  const q = query(collection(db, "usuarios"), where("aprobado", "==", true));
+  const querySnapshot = await getDocs(q);
 
   querySnapshot.forEach((doc) => {
     const data = doc.data();
 
-    if (data.aprobado === true) {
-      lista.innerHTML += `
-        <div class="card">
-          <h3>${data.nombre}</h3>
-          <p>${data.descripcion}</p>
-          <p><b>${data.precio}</b></p>
-          <a href="https://wa.me/${data.whatsapp}" target="_blank">WhatsApp</a>
-        </div>
-      `;
-    }
+    lista.innerHTML += `
+      <div class="card">
+        <h3>${data.nombre}</h3>
+        <p>${data.descripcion || ""}</p>
+        <p><b>${data.ciudad || ""}</b></p>
+        <p><b>${data.precio || ""}</b></p>
+        <a href="https://wa.me/${data.whatsapp}" target="_blank">Contactar por WhatsApp</a>
+      </div>
+    `;
   });
 }
 
