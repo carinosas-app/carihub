@@ -7,13 +7,8 @@
 
 <style>
 body { margin: 0; font-family: Arial, sans-serif; background: #fff; }
-
 .contenedor { position: relative; }
-
-.portada {
-  width: 100%;
-  display: block;
-}
+.portada { width: 100%; display: block; }
 
 .menu-btn {
   position: absolute;
@@ -56,7 +51,6 @@ body { margin: 0; font-family: Arial, sans-serif; background: #fff; }
   font-size: 28px;
   cursor: pointer;
   color: #c2185b;
-  margin-bottom: 10px;
 }
 
 .modal {
@@ -73,32 +67,24 @@ body { margin: 0; font-family: Arial, sans-serif; background: #fff; }
 
 .form-box {
   background: white;
-  margin: 35px auto;
-  padding: 22px;
-  width: 86%;
+  margin: 25px auto;
+  padding: 20px;
+  width: 90%;
   border-radius: 18px;
-  box-shadow: 0 8px 25px rgba(0,0,0,0.35);
 }
 
 .form-box h2 {
   text-align: center;
   color: #ff2e7a;
-  font-size: 32px;
-  margin-top: 5px;
 }
 
 .form-box input, .form-box textarea {
   width: 100%;
   box-sizing: border-box;
-  padding: 15px;
-  margin: 9px 0;
-  border-radius: 12px;
+  padding: 14px;
+  margin: 8px 0;
+  border-radius: 10px;
   border: 1px solid #ddd;
-  font-size: 16px;
-}
-
-.form-box textarea {
-  height: 95px;
 }
 
 .btn {
@@ -107,31 +93,19 @@ body { margin: 0; font-family: Arial, sans-serif; background: #fff; }
   background: #ff2e7a;
   color: white;
   border: none;
-  border-radius: 14px;
-  font-size: 18px;
+  border-radius: 12px;
   font-weight: bold;
-  cursor: pointer;
   margin-top: 10px;
 }
 
-.btn-cerrar {
-  background: #777;
-}
-
-.lista {
-  padding: 20px;
-}
+.btn-cerrar { background: gray; }
+.lista { padding: 20px; }
 
 .card {
   background: white;
-  border-radius: 14px;
   padding: 15px;
+  border-radius: 12px;
   margin-bottom: 15px;
-  box-shadow: 0 3px 10px rgba(0,0,0,0.15);
-}
-
-.card h3 {
-  color: #c2185b;
 }
 </style>
 </head>
@@ -170,9 +144,29 @@ body { margin: 0; font-family: Arial, sans-serif; background: #fff; }
     <input id="precio" placeholder="Precio o forma de manejarse">
     <input id="modalidad" placeholder="Modalidad: con lugar / domicilio / hotel">
 
+    <h3>Verificación obligatoria</h3>
+    <input id="nombreReal" placeholder="Nombre real para verificación">
+    <input id="identificacion" placeholder="INE / identificación">
+    <input id="selfieTexto" placeholder='Selfie con papel: "Cariñosas + fecha de hoy"'>
+
     <label style="display:block; margin:12px 0; font-size:15px;">
       <input type="checkbox" id="mayorEdad">
       Confirmo que soy mayor de edad
+    </label>
+
+    <label style="display:block; margin:12px 0; font-size:15px;">
+      <input type="checkbox" id="fotosMias">
+      Confirmo que las fotos son mías
+    </label>
+
+    <label style="display:block; margin:12px 0; font-size:15px;">
+      <input type="checkbox" id="voluntario">
+      Confirmo que publico voluntariamente
+    </label>
+
+    <label style="display:block; margin:12px 0; font-size:15px;">
+      <input type="checkbox" id="acepto">
+      Acepto términos, condiciones y verificación
     </label>
 
     <button class="btn" onclick="registrar()">Enviar registro</button>
@@ -226,15 +220,22 @@ window.registrar = async function() {
   const descripcion = document.getElementById("descripcion").value;
   const precio = document.getElementById("precio").value;
   const modalidad = document.getElementById("modalidad").value;
-  const mayorEdad = document.getElementById("mayorEdad").checked;
+  const nombreReal = document.getElementById("nombreReal").value;
+  const identificacion = document.getElementById("identificacion").value;
+  const selfieTexto = document.getElementById("selfieTexto").value;
 
-  if (!mayorEdad) {
-    alert("Debes confirmar que eres mayor de edad.");
+  const mayorEdad = document.getElementById("mayorEdad").checked;
+  const fotosMias = document.getElementById("fotosMias").checked;
+  const voluntario = document.getElementById("voluntario").checked;
+  const acepto = document.getElementById("acepto").checked;
+
+  if (!nombre || !email || !password || !whatsapp || !categoria || !estado || !ciudad) {
+    alert("Faltan datos obligatorios.");
     return;
   }
 
-  if (!email || !password || !nombre) {
-    alert("Falta correo, contraseña o nombre.");
+  if (!mayorEdad || !fotosMias || !voluntario || !acepto) {
+    alert("Debes completar todas las confirmaciones.");
     return;
   }
 
@@ -251,7 +252,17 @@ window.registrar = async function() {
       descripcion,
       precio,
       modalidad,
-      mayorEdad,
+      verificacion: {
+        nombreReal,
+        identificacion,
+        selfieTexto
+      },
+      confirmaciones: {
+        mayorEdad,
+        fotosMias,
+        voluntario,
+        acepto
+      },
       aprobado: false,
       fecha: new Date()
     });
@@ -275,11 +286,11 @@ async function cargar() {
 
     lista.innerHTML += `
       <div class="card">
-        <h3>${data.nombre}</h3>
+        <h3>${data.nombre || ""}</h3>
         <p>${data.descripcion || ""}</p>
         <p><b>${data.ciudad || ""}</b></p>
         <p><b>${data.precio || ""}</b></p>
-        <a href="https://wa.me/${data.whatsapp}" target="_blank">Contactar por WhatsApp</a>
+        <a href="https://wa.me/${data.whatsapp || ""}" target="_blank">Contactar por WhatsApp</a>
       </div>
     `;
   });
