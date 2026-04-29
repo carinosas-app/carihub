@@ -2,22 +2,23 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>CariHub</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cariñosas</title>
 
 <style>
-body { margin: 0; font-family: Arial, sans-serif; }
-
-.contenedor { position: relative; }
-.portada { width: 100%; display: block; }
+body {
+  font-family: Arial;
+  margin: 0;
+  background: #fff;
+}
 
 .menu-btn {
-  position: absolute;
-  top: 0.8%;
-  right: 1.5%;
-  width: 12%;
-  height: 5%;
+  position: fixed;
+  top: 15px;
+  right: 15px;
+  font-size: 25px;
   cursor: pointer;
-  z-index: 10;
+  z-index: 1000;
 }
 
 .menu {
@@ -26,160 +27,103 @@ body { margin: 0; font-family: Arial, sans-serif; }
   right: -100%;
   width: 80%;
   height: 100%;
-  background: white;
-  box-shadow: -5px 0 10px rgba(0,0,0,0.3);
+  background: #fff;
+  box-shadow: -2px 0 5px rgba(0,0,0,0.2);
   transition: 0.3s;
   padding: 20px;
-  z-index: 999;
 }
 
-.menu.active { right: 0; }
+.menu.active {
+  right: 0;
+}
 
 .menu a {
   display: block;
-  padding: 14px;
-  margin: 6px 0;
-  text-decoration: none;
-  color: #d63384;
-  font-weight: bold;
+  padding: 15px;
   border-bottom: 1px solid #eee;
-}
-
-/* VENTANA REGISTRO */
-.modal {
-  display: none;
-  position: fixed;
-  z-index: 2000;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0,0,0,0.55);
-}
-
-.modal-contenido {
-  background: #fff;
-  margin: 8% auto;
-  padding: 22px;
-  border-radius: 18px;
-  width: 85%;
-  max-width: 430px;
-  color: #333;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.35);
-}
-
-.modal-contenido h2 {
-  color: #d63384;
-  text-align: center;
-}
-
-.modal-contenido h3 {
-  color: #9b1b55;
-}
-
-.modal-contenido p {
-  line-height: 1.5;
-}
-
-.continuar {
-  background: linear-gradient(90deg, #ff4b8b, #d63384);
-  color: white;
-  border: none;
-  padding: 14px;
-  width: 100%;
-  border-radius: 12px;
-  font-size: 18px;
+  color: #e91e63;
+  text-decoration: none;
   font-weight: bold;
-  margin-top: 15px;
-  cursor: pointer;
 }
 
-.cerrar {
-  background: #eee;
-  color: #333;
-  border: none;
-  padding: 12px;
-  width: 100%;
-  border-radius: 12px;
-  margin-top: 10px;
-  cursor: pointer;
-}
 </style>
 </head>
 
 <body>
 
-<div class="contenedor">
-  <img src="portada.png" class="portada">
-  <div class="menu-btn" onclick="abrirMenu()"></div>
-</div>
+<!-- BOTÓN ☰ -->
+<div class="menu-btn" onclick="abrirMenu()">☰</div>
 
+<!-- MENÚ -->
 <div class="menu" id="menu">
-  <a href="#" onclick="mostrarRegistro()">👤 Regístrate</a>
+  <a href="#" onclick="registrarUsuario()">👤 Regístrate</a>
   <a href="#">📢 Banners</a>
   <a href="#">⚠️ Denunciar</a>
-  <a href="#">📄 Términos y condiciones</a>
-  <a href="#">📘 Condiciones de uso</a>
-  <a href="#">🔒 Política de privacidad</a>
-  <a href="#">🍪 Política de cookies</a>
-  <a href="#">💳 Política de pagos</a>
-</div>
-
-<div class="modal" id="registroModal">
-  <div class="modal-contenido">
-    <h2>Registro en CariHub</h2>
-
-    <h3>Requisitos obligatorios</h3>
-    <p>
-      • Nombre o alias<br>
-      • Edad: mayor de 18<br>
-      • WhatsApp<br>
-      • Categoría<br>
-      • Estado<br>
-      • Ciudad<br>
-      • Descripción breve<br>
-      • Precio o forma de trabajo<br>
-      • Modalidad: lugar / domicilio / hotel<br>
-      • Máximo 3 fotos
-    </p>
-
-    <h3>Verificación obligatoria</h3>
-    <p>
-      • INE frente<br>
-      • INE reverso<br>
-      • Selfie sosteniendo papel con:<br>
-      “Cariñosas + fecha de hoy”
-    </p>
-
-    <h3>Confirmaciones</h3>
-    <p>
-      • Soy mayor de edad<br>
-      • Las fotos son mías<br>
-      • Publico voluntariamente<br>
-      • Acepto términos y condiciones
-    </p>
-
-    <button class="continuar" onclick="continuarRegistro()">Continuar registro</button>
-    <button class="cerrar" onclick="cerrarRegistro()">Cerrar</button>
-  </div>
+  <a href="#">📄 Términos</a>
+  <a href="#">📘 Condiciones</a>
+  <a href="#">🔒 Privacidad</a>
+  <a href="#">🍪 Cookies</a>
+  <a href="#">💰 Pagos</a>
 </div>
 
 <script>
 function abrirMenu() {
   document.getElementById("menu").classList.toggle("active");
 }
+</script>
 
-function mostrarRegistro() {
-  document.getElementById("registroModal").style.display = "block";
-}
+<!-- 🔥 FIREBASE -->
+<script type="module">
 
-function cerrarRegistro() {
-  document.getElementById("registroModal").style.display = "none";
-}
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, addDoc, collection } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-function continuarRegistro() {
-  window.open("https://wa.me/524791950206?text=Hola,%20ya%20leí%20los%20requisitos%20y%20quiero%20registrarme%20en%20CariHub", "_blank");
-}
+const firebaseConfig = {
+  apiKey: "AIzaSyBL4LNLtPqbyIxfF0NAqxi4rQG4XF_vkI",
+  authDomain: "carinosas-app.firebaseapp.com",
+  projectId: "carinosas-app",
+  storageBucket: "carinosas-app.appspot.com",
+  messagingSenderId: "267078845023",
+  appId: "1:267078845023:web:a82e626df90ca28858d1ea"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+window.registrarUsuario = async function() {
+
+  const email = prompt("Correo:");
+  const password = prompt("Contraseña:");
+  const nombre = prompt("Nombre o alias:");
+  const whatsapp = prompt("WhatsApp:");
+  const ciudad = prompt("Ciudad:");
+  const descripcion = prompt("Descripción breve:");
+  const precio = prompt("Precio o forma de trabajo:");
+
+  try {
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+
+    await addDoc(collection(db, "usuarios"), {
+      nombre,
+      whatsapp,
+      ciudad,
+      descripcion,
+      precio,
+      email,
+      aprobado: false,
+      fecha: new Date()
+    });
+
+    alert("Registro enviado. Espera aprobación.");
+
+  } catch (error) {
+    alert("Error: " + error.message);
+  }
+
+};
+
 </script>
 
 </body>
