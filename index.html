@@ -6,91 +6,86 @@
 <title>Cariñosas</title>
 
 <style>
-body { margin: 0; font-family: Arial, sans-serif; background: #fff; }
+body { margin: 0; font-family: Arial; background: #fff; }
 
-.contenedor { position: relative; }
-
+/* PORTADA */
 .portada {
   width: 100%;
   display: block;
 }
 
-.menu-btn {
-  position: absolute;
-  top: 0.8%;
-  right: 1.5%;
-  width: 12%;
-  height: 5%;
-  cursor: pointer;
-  z-index: 10;
-}
-
-.menu {
-  position: fixed;
-  top: 0;
-  right: -100%;
-  width: 80%;
-  height: 100%;
+/* FORMULARIO */
+.form-box {
   background: white;
-  box-shadow: -5px 0 10px rgba(0,0,0,0.3);
-  transition: 0.3s;
+  margin: -60px 20px 20px;
   padding: 20px;
-  z-index: 999;
+  border-radius: 15px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
 }
 
-.menu.active { right: 0; }
-
-.menu a {
-  display: block;
-  padding: 14px;
-  margin: 6px 0;
-  text-decoration: none;
-  color: #d63384;
-  font-weight: bold;
-  border-bottom: 1px solid #eee;
+.form-box h2 {
+  text-align: center;
+  color: #ff2e7a;
 }
 
-.btn-test {
-  position: fixed;
-  bottom: 20px;
-  left: 20px;
+.form-box input, .form-box textarea {
+  width: 100%;
+  padding: 10px;
+  margin: 8px 0;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+}
+
+.btn {
+  width: 100%;
+  padding: 12px;
   background: #ff2e7a;
   color: white;
   border: none;
-  padding: 12px 18px;
   border-radius: 10px;
   font-weight: bold;
   cursor: pointer;
+}
+
+/* LISTA */
+.lista {
+  padding: 20px;
+}
+
+.card {
+  background: white;
+  border-radius: 10px;
+  padding: 15px;
+  margin-bottom: 15px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.1);
 }
 </style>
 </head>
 
 <body>
 
-<div class="contenedor">
-  <img src="portada.png" class="portada">
-  <div class="menu-btn" onclick="abrirMenu()"></div>
+<img src="portada.png" class="portada">
+
+<div class="form-box">
+  <h2>Publicar anuncio</h2>
+
+  <input id="nombre" placeholder="Nombre o alias">
+  <input id="email" placeholder="Correo">
+  <input id="password" placeholder="Contraseña">
+  <input id="whatsapp" placeholder="WhatsApp">
+  <input id="ciudad" placeholder="Ciudad">
+  <textarea id="descripcion" placeholder="Descripción"></textarea>
+  <input id="precio" placeholder="Precio">
+
+  <button class="btn" onclick="registrar()">Publicar</button>
 </div>
 
-<div class="menu" id="menu">
-  <a href="#" onclick="registrarUsuario()">👤 Regístrate</a>
-  <a href="#">📢 Banners</a>
-  <a href="#">⚠️ Denunciar</a>
-  <a href="#">📄 Términos</a>
-</div>
-
-<button class="btn-test" onclick="guardarRegistro()">🔥 Probar Firebase</button>
-
-<script>
-function abrirMenu() {
-  document.getElementById("menu").classList.toggle("active");
-}
-</script>
+<div class="lista" id="lista"></div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, addDoc, collection } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, addDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBL4LNLtPqbyIxfF0NAqxi4rQG4XF_vkI",
@@ -105,14 +100,14 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-window.registrarUsuario = async function() {
-  const email = prompt("Correo:");
-  const password = prompt("Contraseña:");
-  const nombre = prompt("Nombre:");
-  const whatsapp = prompt("WhatsApp:");
-  const ciudad = prompt("Ciudad:");
-  const descripcion = prompt("Descripción:");
-  const precio = prompt("Precio:");
+window.registrar = async function() {
+  const nombre = document.getElementById("nombre").value;
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+  const whatsapp = document.getElementById("whatsapp").value;
+  const ciudad = document.getElementById("ciudad").value;
+  const descripcion = document.getElementById("descripcion").value;
+  const precio = document.getElementById("precio").value;
 
   try {
     await createUserWithEmailAndPassword(auth, email, password);
@@ -128,19 +123,36 @@ window.registrarUsuario = async function() {
       fecha: new Date()
     });
 
-    alert("Registro enviado 🔥");
+    alert("Publicación enviada 🔥");
+    cargar();
   } catch (error) {
     alert("Error: " + error.message);
   }
 };
 
-window.guardarRegistro = async function () {
-  await addDoc(collection(db, "registros"), {
-    nombre: "prueba",
-    fecha: new Date()
+async function cargar() {
+  const lista = document.getElementById("lista");
+  lista.innerHTML = "";
+
+  const querySnapshot = await getDocs(collection(db, "usuarios"));
+
+  querySnapshot.forEach((doc) => {
+    const data = doc.data();
+
+    if (data.aprobado === true) {
+      lista.innerHTML += `
+        <div class="card">
+          <h3>${data.nombre}</h3>
+          <p>${data.descripcion}</p>
+          <p><b>${data.precio}</b></p>
+          <a href="https://wa.me/${data.whatsapp}" target="_blank">WhatsApp</a>
+        </div>
+      `;
+    }
   });
-  alert("Guardado en Firebase 🔥");
-};
+}
+
+cargar();
 </script>
 
 </body>
