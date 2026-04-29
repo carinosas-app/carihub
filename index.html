@@ -15,7 +15,7 @@ body { margin: 0; font-family: Arial, sans-serif; background: #fff; }
   display: block;
 }
 
-/* botón invisible sobre las 3 rayitas de la imagen */
+/* botón invisible del menú */
 .menu-btn {
   position: absolute;
   top: 0.8%;
@@ -50,12 +50,27 @@ body { margin: 0; font-family: Arial, sans-serif; background: #fff; }
   font-weight: bold;
   border-bottom: 1px solid #eee;
 }
+
+/* botón Firebase prueba */
+.btn-test {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  background: #ff2e7a;
+  color: white;
+  border: none;
+  padding: 12px 18px;
+  border-radius: 10px;
+  font-weight: bold;
+  cursor: pointer;
+}
 </style>
 </head>
 
 <body>
 
 <div class="contenedor">
+  <!-- ✅ YA CORREGIDO -->
   <img src="portada.png" class="portada">
   <div class="menu-btn" onclick="abrirMenu()"></div>
 </div>
@@ -64,12 +79,10 @@ body { margin: 0; font-family: Arial, sans-serif; background: #fff; }
   <a href="#" onclick="registrarUsuario()">👤 Regístrate</a>
   <a href="#">📢 Banners</a>
   <a href="#">⚠️ Denunciar</a>
-  <a href="#">📄 Términos y condiciones</a>
-  <a href="#">📘 Condiciones de uso</a>
-  <a href="#">🔒 Política de privacidad</a>
-  <a href="#">🍪 Política de cookies</a>
-  <a href="#">💳 Política de pagos</a>
+  <a href="#">📄 Términos</a>
 </div>
+
+<button class="btn-test" onclick="guardarRegistro()">🔥 Probar Firebase</button>
 
 <script>
 function abrirMenu() {
@@ -77,6 +90,7 @@ function abrirMenu() {
 }
 </script>
 
+<!-- 🔥 FIREBASE COMPLETO -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
@@ -95,14 +109,15 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
+// 🔥 REGISTRO REAL
 window.registrarUsuario = async function() {
   const email = prompt("Correo:");
   const password = prompt("Contraseña:");
   const nombre = prompt("Nombre o alias:");
   const whatsapp = prompt("WhatsApp:");
   const ciudad = prompt("Ciudad:");
-  const descripcion = prompt("Descripción breve:");
-  const precio = prompt("Precio o forma de trabajo:");
+  const descripcion = prompt("Descripción:");
+  const precio = prompt("Precio:");
 
   try {
     await createUserWithEmailAndPassword(auth, email, password);
@@ -118,10 +133,19 @@ window.registrarUsuario = async function() {
       fecha: new Date()
     });
 
-    alert("Registro enviado. Espera aprobación.");
+    alert("Registro enviado 🔥");
   } catch (error) {
     alert("Error: " + error.message);
   }
+};
+
+// 🔥 PRUEBA FIREBASE
+window.guardarRegistro = async function () {
+  await addDoc(collection(db, "registros"), {
+    nombre: "prueba",
+    fecha: new Date()
+  });
+  alert("Guardado en Firebase 🔥");
 };
 </script>
 
