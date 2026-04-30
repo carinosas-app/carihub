@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel Admin CariHub</title>
+
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyBl4LNLtPqbyIxfTfONAqxi4rOG4XF_vkI",
+  authDomain: "carinosas-app.firebaseapp.com",
+  projectId: "carinosas-app",
+  storageBucket: "carinosas-app.appspot.com",
+  messagingSenderId: "267078845023",
+  appId: "1:267078845023:web:a82e626d9f0ca28858d1ea"
+};
+
+firebase.initializeApp(firebaseConfig);
+
+const ADMIN_EMAIL = "carinosas.anuncios@gmail.com";
+</script>
+
+<style>
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f3f3f3;
+  padding: 15px;
+}
+
+h1 {
+  color: #c2185b;
+  text-align: center;
+}
+
+.box {
+  max-width: 800px;
+  margin: auto;
+  background: white;
+  padding: 20px;
+  border-radius: 14px;
+}
+
+input {
+  width: 100%;
+  padding: 14px;
+  margin: 8px 0;
+  box-sizing: border-box;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+}
+
+button {
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  margin: 5px 3px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.btn-login {
+  width: 100%;
+  background: #c2185b;
+  color: white;
+}
+
+.btn-salir {
+  background: #555;
+  color: white;
+}
+
+.card {
+  background: white;
+  padding: 15px;
+  margin: 15px 0;
+  border-radius: 12px;
+  box-shadow: 0 3px 10px rgba(0,0,0,.15);
+}
+
+.aprobado {
+  color: green;
+  font-weight: bold;
+}
+
+.pendiente {
+  color: orange;
+  font-weight: bold;
+}
+
+.btn-aprobar {
+  background: green;
+  color: white;
+}
+
+.btn-quitar {
+  background: orange;
+  color: white;
+}
+
+.btn-borrar {
+  background: red;
+  color: white;
+}
+</style>
+</head>
+
+<body>
+
+<div class="box" id="loginBox">
+  <h1>Panel Admin</h1>
+  <input id="email" type="email" placeholder="Correo admin">
+  <input id="password" type="password" placeholder="Contraseña">
+  <button class="btn-login" onclick="login()">Entrar</button>
+</div>
+
+<div class="box" id="panelBox" style="display:none;">
+  <h1>Usuarios registrados</h1>
+  <button class="btn-salir" onclick="salir()">Cerrar sesión</button>
+  <div id="usuarios">Cargando...</div>
+</div>
+
+<script>
+async function login() {
+  const email = document.getElementById("email").value.trim().toLowerCase();
+  const password = document.getElementById("password").value;
+
+  try {
+    const cred = await firebase.auth().signInWithEmailAndPassword(email, password);
+
+    if (cred.user.email !== ADMIN_EMAIL) {
+      alert("No tienes permiso de administrador.");
+      await firebase.auth().signOut();
+      return;
+    }
+
+    document.getElementById("loginBox").style.display = "none";
+    document.getElementById("panelBox").style.display = "block";
+    cargarUsuarios();
+
+  } catch (error) {
+    alert("Error: " + error.message);
+  }
+}
+
+async function cargarUsuarios() {
+  const contenedor = document.getElementById("usuarios");
+  contenedor.innerHTML = "Cargando usuarios...";
+
+  try {
+    const snap = await firebase.firestore().collection("usuarios").get();
+    contenedor.innerHTML = "";
+
+    if (snap.empty) {
+      contenedor.innerHTML = "<p>No hay usuarios registrados.</p>";
+      return;
+    }
+
+    snap.forEach(doc => {
+      const u = doc.data();
+      const estado = u.aprobado ? "APROBADO" : "PENDIENTE";
+
+      contenedor.innerHTML += `
+        <div class="card">
+          <h2>${u.nombre || "Sin nombre"}</h2>
+          <p><b>Correo:</b> ${u.email || ""}</p>
+          <p><b>WhatsApp:</b> ${u.telefono || ""}</p>
+          <p><b>Ciudad:</b> ${u.ciudad || ""}</p>
+          <p><b>Categoría:</b> ${u.categoria || ""}</p>
+          <p><b>Descripción:</b> ${u.descripcion || ""}</p>
+          <p><b>Estado:</b> <span class="${u.aprobado ? "aprobado" : "pendiente"}">${estado}</span></p>
+
+          <button class="btn-aprobar" onclick="aprobar('${doc.id}')">Aprobar</button>
+          <button class="btn-quitar" onclick="quitarAprobacion('${doc.id}')">Quitar aprobación</button>
+          <button class="btn-borrar" onclick="borrarUsuario('${doc.id}')">Borrar</button>
+        </div>
+      `;
+    });
+
+  } catch (error) {
+    contenedor.innerHTML = "Error al cargar usuarios.";
+    alert("Error: " + error.message);
+  }
+}
+
+async function aprobar(id) {
+  await firebase.firestore().collection("usuarios").doc(id).update({
+    aprobado: true
+  });
+  alert("Usuario aprobado");
+  cargarUsuarios();
+}
+
+async function quitarAprobacion(id) {
+  await firebase.firestore().collection("usuarios").doc(id).update({
+    aprobado: false
+  });
+  alert("Aprobación quitada");
+  cargarUsuarios();
+}
+
+async function borrarUsuario(id) {
+  if (!confirm("¿Seguro que quieres borrar este usuario?")) return;
+
+  await firebase.firestore().collection("usuarios").doc(id).delete();
+  alert("Usuario borrado");
+  cargarUsuarios();
+}
+
+async function salir() {
+  await firebase.auth().signOut();
+  location.reload();
+}
+</script>
+
+</body>
+</html>
