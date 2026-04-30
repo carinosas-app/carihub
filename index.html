@@ -35,74 +35,120 @@ const firebaseConfig = {
   authDomain: "carinosas-app.firebaseapp.com",
   projectId: "carinosas-app",
   storageBucket: "carinosas-app.appspot.com",
+  messagingSenderId: "267078845023",…
+[10:33 p.m., 29/4/2026] Angel Perez: <!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CariHub</title>
+
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage-compat.js"></script>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyBl4LNLtPqbyIxfTfONAqxi4rOG4XF_vkI",
+  authDomain: "carinosas-app.firebaseapp.com",
+  projectId: "carinosas-app",
+  storageBucket: "carinosas-app.appspot.com",
   messagingSenderId: "267078845023",
   appId: "1:267078845023:web:a82e626d9f0ca28858d1ea"
 };
 
 firebase.initializeApp(firebaseConfig);
+
 const db = firebase.firestore();
 const auth = firebase.auth();
 const storage = firebase.storage();
 </script>
 
 <style>
-body {
-  margin: 0;
-  font-family: Arial;
-  background: #fff;
+body { margin:0; font-family:Arial; }
+
+.contenedor { position:relative; }
+.portada { width:100%; }
+
+/* BOTÓN MENÚ */
+.menu-btn{
+  position:absolute;
+  top:10px;
+  right:10px;
+  width:60px;
+  height:60px;
+  z-index:9999;
+  cursor:pointer;
 }
 
-.contenedor {
-  position: relative;
-  width: 100%;
+/* MENÚ */
+.menu{
+  position:fixed;
+  top:0;
+  right:-100%;
+  width:80%;
+  height:100%;
+  background:white;
+  transition:.3s;
+  z-index:10000;
+  padding:20px;
+}
+.menu.active{ right:0; }
+
+.menu a{
+  display:block;
+  padding:15px;
+  color:#c2185b;
+  font-size:20px;
+  text-decoration:none;
+  border-bottom:1px solid #eee;
 }
 
-.portada {
-  width: 100%;
+.cerrar{
+  text-align:right;
+  font-size:25px;
+  cursor:pointer;
 }
 
-/* 🔥 BOTÓN MENÚ CORREGIDO */
-.menu-btn {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  width: 60px;
-  height: 60px;
-  background: transparent;
-  z-index: 9999;
-  cursor: pointer;
+/* MODAL */
+.modal{
+  display:none;
+  position:fixed;
+  width:100%;
+  height:100%;
+  background:rgba(0,0,0,.6);
+  top:0;
+  left:0;
+  z-index:20000;
 }
 
-/* 🔥 MENÚ */
-.menu {
-  position: fixed;
-  top: 0;
-  right: -100%;
-  width: 80%;
-  height: 100%;
-  background: white;
-  transition: .3s;
-  z-index: 10000;
-  padding: 20px;
+.form-box{
+  background:white;
+  margin:30px auto;
+  padding:20px;
+  width:90%;
+  max-width:500px;
+  border-radius:15px;
 }
 
-.menu.active {
-  right: 0;
+.form-box input,
+.form-box textarea{
+  width:100%;
+  padding:12px;
+  margin:8px 0;
+  border-radius:10px;
+  border:1px solid #ddd;
 }
 
-.menu a {
-  display: block;
-  padding: 15px;
-  color: #c2185b;
-  font-size: 20px;
-  text-decoration: none;
-  border-bottom: 1px solid #eee;
-}
-
-.cerrar {
-  text-align: right;
-  font-size: 25px;
-  cursor: pointer;
+.btn{
+  width:100%;
+  padding:12px;
+  margin-top:10px;
+  background:#c2185b;
+  color:white;
+  border:none;
+  border-radius:10px;
 }
 </style>
 </head>
@@ -111,27 +157,94 @@ body {
 
 <div class="contenedor">
   <img src="portada.png" class="portada">
-
-  <!-- 🔥 BOTÓN MENÚ -->
   <div class="menu-btn" onclick="abrirMenu()"></div>
 </div>
 
-<!-- 🔥 MENÚ -->
+<!-- MENÚ -->
 <div class="menu" id="menu">
   <div class="cerrar" onclick="cerrarMenu()">✖️</div>
 
-  <a href="#" onclick="alert('Registro aquí')">👤 Registrarse</a>
+  <a href="#" onclick="abrirRegistro()">👤 Registrarse</a>
   <a href="#">📢 Banners</a>
   <a href="#">⚠️ Denunciar</a>
 </div>
 
+<!-- REGISTRO -->
+<div class="modal" id="modalRegistro">
+  <div class="form-box">
+    <h2>Registro</h2>
+
+    <input id="nombre" placeholder="Nombre">
+    <input id="email" type="email" placeholder="Correo">
+    <input id="password" type="password" placeholder="Contraseña">
+    <input id="telefono" placeholder="WhatsApp">
+    <input id="categoria" placeholder="Categoría">
+    <input id="estado" placeholder="Estado">
+    <input id="ciudad" placeholder="Ciudad">
+    <textarea id="descripcion" placeholder="Descripción"></textarea>
+
+    <input id="foto" type="file">
+
+    <button class="btn" onclick="registrar()">Enviar</button>
+    <button class="btn" onclick="cerrarRegistro()">Cerrar</button>
+  </div>
+</div>
+
 <script>
-function abrirMenu() {
+function abrirMenu(){
   document.getElementById("menu").classList.add("active");
 }
 
-function cerrarMenu() {
+function cerrarMenu(){
   document.getElementById("menu").classList.remove("active");
+}
+
+function abrirRegistro(){
+  cerrarMenu();
+  document.getElementById("modalRegistro").style.display="block";
+}
+
+function cerrarRegistro(){
+  document.getElementById("modalRegistro").style.display="none";
+}
+
+async function registrar(){
+  const nombre = document.getElementById("nombre").value;
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+  const telefono = document.getElementById("telefono").value;
+  const categoria = document.getElementById("categoria").value;
+  const estado = document.getElementById("estado").value;
+  const ciudad = document.getElementById("ciudad").value;
+  const descripcion = document.getElementById("descripcion").value;
+  const foto = document.getElementById("foto").files[0];
+
+  if(!nombre || !email || !password || !telefono || !foto){
+    alert("Completa todos los datos");
+    return;
+  }
+
+  try{
+    const cred = await auth.createUserWithEmailAndPassword(email,password);
+    const user = cred.user;
+
+    const ref = storage.ref("fotos/"+user.uid);
+    await ref.put(foto);
+    const url = await ref.getDownloadURL();
+
+    await db.collection("usuarios").doc(user.uid).set({
+      nombre,email,telefono,categoria,estado,ciudad,descripcion,
+      fotoURL:url,
+      aprobado:false,
+      fecha:new Date()
+    });
+
+    alert("Registro enviado 🔥");
+    cerrarRegistro();
+
+  }catch(e){
+    alert(e.message);
+  }
 }
 </script>
 
