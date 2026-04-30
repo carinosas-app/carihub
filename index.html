@@ -2,110 +2,45 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cariñosas</title>
+<title>CariHub</title>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyB14LNLtPqbyIxfTfONAqxi4rOG4XF_vkI",
+  authDomain: "carinosas-app.firebaseapp.com",
+  projectId: "carinosas-app",
+  storageBucket: "carinosas-app.appspot.com",
+  messagingSenderId: "267078845023",
+  appId: "1:267078845023:web:a82e626d9f0ca28858d1ea"
+};
+
+firebase.initializeApp(firebaseConfig);
+</script>
 
 <style>
-body { margin: 0; font-family: Arial, sans-serif; background: #fff; }
-.contenedor { position: relative; }
-.portada { width: 100%; display: block; }
-
-.menu-btn {
-  position: absolute;
-  top: 1%;
-  right: 2%;
-  width: 13%;
-  height: 5%;
-  cursor: pointer;
-  z-index: 20;
+body {
+  margin: 0;
+  background: #fff;
 }
 
-.menu {
-  position: fixed;
-  top: 0;
-  right: -100%;
-  width: 82%;
-  height: 100%;
-  background: white;
-  box-shadow: -5px 0 15px rgba(0,0,0,0.25);
-  transition: 0.3s;
-  padding: 25px;
-  z-index: 999;
-  overflow-y: auto;
+.contenedor {
+  position: relative;
+  width: 100%;
 }
 
-.menu.active { right: 0; }
-
-.menu a {
+.portada {
+  width: 100%;
   display: block;
-  padding: 18px 10px;
-  text-decoration: none;
-  color: #c2185b;
-  font-size: 22px;
-  font-weight: bold;
-  border-bottom: 1px solid #eee;
 }
 
-.cerrar-menu {
-  text-align: right;
-  font-size: 28px;
+.boton-invisible {
+  position: absolute;
   cursor: pointer;
-  color: #c2185b;
-}
-
-.modal {
-  display: none;
-  position: fixed;
-  z-index: 2000;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0,0,0,0.55);
-  overflow-y: auto;
-}
-
-.form-box {
-  background: white;
-  margin: 25px auto;
-  padding: 20px;
-  width: 90%;
-  border-radius: 18px;
-}
-
-.form-box h2 {
-  text-align: center;
-  color: #ff2e7a;
-}
-
-.form-box input, .form-box textarea {
-  width: 100%;
-  box-sizing: border-box;
-  padding: 14px;
-  margin: 8px 0;
-  border-radius: 10px;
-  border: 1px solid #ddd;
-}
-
-.btn {
-  width: 100%;
-  padding: 15px;
-  background: #ff2e7a;
-  color: white;
-  border: none;
-  border-radius: 12px;
-  font-weight: bold;
-  margin-top: 10px;
-}
-
-.btn-cerrar { background: gray; }
-.lista { padding: 20px; }
-
-.card {
-  background: white;
-  padding: 15px;
-  border-radius: 12px;
-  margin-bottom: 15px;
 }
 </style>
 </head>
@@ -114,189 +49,55 @@ body { margin: 0; font-family: Arial, sans-serif; background: #fff; }
 
 <div class="contenedor">
   <img src="portada.png" class="portada">
-  <div class="menu-btn" onclick="abrirMenu()"></div>
-</div>
 
-<div class="menu" id="menu">
-  <div class="cerrar-menu" onclick="abrirMenu()">✕</div>
-  <a href="#" onclick="abrirRegistro()">👤 Regístrate</a>
-  <a href="#">📢 Banners</a>
-  <a href="#">⚠️ Denunciar</a>
-  <a href="#">📄 Términos y condiciones</a>
-  <a href="#">📘 Condiciones de uso</a>
-  <a href="#">🔒 Política de privacidad</a>
-  <a href="#">🍪 Política de cookies</a>
-  <a href="#">💳 Política de pagos</a>
-</div>
-
-<div class="modal" id="modalRegistro">
-  <div class="form-box">
-    <h2>Registro</h2>
-
-    <input id="nombre" placeholder="Nombre o alias">
-    <input id="email" placeholder="Correo">
-    <input id="password" type="password" placeholder="Contraseña">
-    <input id="whatsapp" placeholder="WhatsApp">
-    <input id="categoria" placeholder="Categoría">
-    <input id="estado" placeholder="Estado">
-    <input id="ciudad" placeholder="Municipio / ciudad">
-    <textarea id="descripcion" placeholder="Descripción breve"></textarea>
-    <input id="precio" placeholder="Precio o forma de manejarse">
-    <input id="modalidad" placeholder="Modalidad: con lugar / domicilio / hotel">
-
-    <h3>Verificación obligatoria</h3>
-    <input id="nombreReal" placeholder="Nombre real para verificación">
-    <input id="identificacion" placeholder="INE / identificación">
-    <input id="selfieTexto" placeholder='Selfie con papel: "Cariñosas + fecha de hoy"'>
-
-    <label style="display:block; margin:12px 0; font-size:15px;">
-      <input type="checkbox" id="mayorEdad">
-      Confirmo que soy mayor de edad
-    </label>
-
-    <label style="display:block; margin:12px 0; font-size:15px;">
-      <input type="checkbox" id="fotosMias">
-      Confirmo que las fotos son mías
-    </label>
-
-    <label style="display:block; margin:12px 0; font-size:15px;">
-      <input type="checkbox" id="voluntario">
-      Confirmo que publico voluntariamente
-    </label>
-
-    <label style="display:block; margin:12px 0; font-size:15px;">
-      <input type="checkbox" id="acepto">
-      Acepto términos, condiciones y verificación
-    </label>
-
-    <button class="btn" onclick="registrar()">Enviar registro</button>
-    <button class="btn btn-cerrar" onclick="cerrarRegistro()">Cerrar</button>
+  <!-- BOTÓN -->
+  <div class="boton-invisible"
+    onclick="registrar()"
+    style="top: 6.5%; right: 2.5%; width: 10%; height: 6%;">
   </div>
 </div>
 
-<div class="lista" id="lista"></div>
-
 <script>
-function abrirMenu() {
-  document.getElementById("menu").classList.toggle("active");
-}
+async function registrar() {
+  const nombre = prompt("Nombre:");
+  const email = prompt("Correo:");
+  const password = prompt("Contraseña mínimo 6 caracteres:");
+  const telefono = prompt("WhatsApp:");
 
-function abrirRegistro() {
-  document.getElementById("menu").classList.remove("active");
-  document.getElementById("modalRegistro").style.display = "block";
-}
-
-function cerrarRegistro() {
-  document.getElementById("modalRegistro").style.display = "none";
-}
-</script>
-
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, addDoc, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyBL4LNLtPqbyIxfF0NAqxi4rQG4XF_vkI",
-  authDomain: "carinosas-app.firebaseapp.com",
-  projectId: "carinosas-app",
-  storageBucket: "carinosas-app.appspot.com",
-  messagingSenderId: "267078845023",
-  appId: "1:267078845023:web:a82e626df90ca28858d1ea"
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-
-window.registrar = async function() {
-  const nombre = document.getElementById("nombre").value;
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
-  const whatsapp = document.getElementById("whatsapp").value;
-  const categoria = document.getElementById("categoria").value;
-  const estado = document.getElementById("estado").value;
-  const ciudad = document.getElementById("ciudad").value;
-  const descripcion = document.getElementById("descripcion").value;
-  const precio = document.getElementById("precio").value;
-  const modalidad = document.getElementById("modalidad").value;
-  const nombreReal = document.getElementById("nombreReal").value;
-  const identificacion = document.getElementById("identificacion").value;
-  const selfieTexto = document.getElementById("selfieTexto").value;
-
-  const mayorEdad = document.getElementById("mayorEdad").checked;
-  const fotosMias = document.getElementById("fotosMias").checked;
-  const voluntario = document.getElementById("voluntario").checked;
-  const acepto = document.getElementById("acepto").checked;
-
-  if (!nombre || !email || !password || !whatsapp || !categoria || !estado || !ciudad) {
-    alert("Faltan datos obligatorios.");
+  if (!nombre || !email || !password || !telefono) {
+    alert("Completa todos los datos");
     return;
   }
 
-  if (!mayorEdad || !fotosMias || !voluntario || !acepto) {
-    alert("Debes completar todas las confirmaciones.");
+  if (password.length < 6) {
+    alert("La contraseña debe tener mínimo 6 caracteres");
     return;
   }
 
   try {
-    await createUserWithEmailAndPassword(auth, email, password);
+    const cred = await firebase.auth().createUserWithEmailAndPassword(email, password);
+    const user = cred.user;
 
-    await addDoc(collection(db, "usuarios"), {
-      nombre,
-      email,
-      whatsapp,
-      categoria,
-      estado,
-      ciudad,
-      descripcion,
-      precio,
-      modalidad,
-      verificacion: {
-        nombreReal,
-        identificacion,
-        selfieTexto
-      },
-      confirmaciones: {
-        mayorEdad,
-        fotosMias,
-        voluntario,
-        acepto
-      },
+    await firebase.firestore().collection("usuarios").doc(user.uid).set({
+      nombre: nombre,
+      email: email,
+      telefono: telefono,
       aprobado: false,
       fecha: new Date()
     });
 
-    alert("Registro enviado. Queda pendiente de aprobación.");
-    cerrarRegistro();
+    alert("Registro enviado 🔥");
+
   } catch (error) {
-    alert("Error: " + error.message);
+    console.error(error);
+
+    if (error.code === "auth/email-already-in-use") {
+      alert("Este correo ya está registrado");
+    } else {
+      alert("Error: " + error.message);
+    }
   }
-};
-
-async function cargar() {
-  const lista = document.getElementById("lista");
-  lista.innerHTML = "";
-
-  const q = query(collection(db, "usuarios"), where("aprobado", "==", true));
-  const querySnapshot = await getDocs(q);
-
-  querySnapshot.forEach((doc) => {
-    const data = doc.data();
-
-    lista.innerHTML += `
-      <div class="card">
-        <h3>${data.nombre || ""}</h3>
-        <p>${data.descripcion || ""}</p>
-        <p><b>${data.ciudad || ""}</b></p>
-        <p><b>${data.precio || ""}</b></p>
-        <a href="https://wa.me/${data.whatsapp || ""}" target="_blank">Contactar por WhatsApp</a>
-      </div>
-    `;
-  });
 }
-
-cargar();
 </script>
 
 </body>
