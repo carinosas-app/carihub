@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+[10:17 p.m., 29/4/2026] Angel Perez: <!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -16,6 +16,25 @@ const firebaseConfig = {
   authDomain: "carinosas-app.firebaseapp.com",
   projectId: "carinosas-app",
   storageBucket: "carinosas-app.firebasestorage.app",
+  messagingSenderId: "267078…
+[10:26 p.m., 29/4/2026] Angel Perez: <!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CariHub</title>
+
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage-compat.js"></script>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyBl4LNLtPqbyIxfTfONAqxi4rOG4XF_vkI",
+  authDomain: "carinosas-app.firebaseapp.com",
+  projectId: "carinosas-app",
+  storageBucket: "carinosas-app.appspot.com",
   messagingSenderId: "267078845023",
   appId: "1:267078845023:web:a82e626d9f0ca28858d1ea"
 };
@@ -29,7 +48,7 @@ const storage = firebase.storage();
 <style>
 body {
   margin: 0;
-  font-family: Arial, sans-serif;
+  font-family: Arial;
   background: #fff;
 }
 
@@ -40,30 +59,31 @@ body {
 
 .portada {
   width: 100%;
-  display: block;
 }
 
+/* 🔥 BOTÓN MENÚ CORREGIDO */
 .menu-btn {
   position: absolute;
-  top: 6.2%;
-  right: 2.2%;
-  width: 12%;
-  height: 6%;
+  top: 10px;
+  right: 10px;
+  width: 60px;
+  height: 60px;
+  background: transparent;
+  z-index: 9999;
   cursor: pointer;
-  z-index: 20;
 }
 
+/* 🔥 MENÚ */
 .menu {
   position: fixed;
   top: 0;
   right: -100%;
-  width: 82%;
+  width: 80%;
   height: 100%;
   background: white;
-  box-shadow: -5px 0 15px rgba(0,0,0,.25);
   transition: .3s;
-  padding: 25px;
-  z-index: 999;
+  z-index: 10000;
+  padding: 20px;
 }
 
 .menu.active {
@@ -72,129 +92,17 @@ body {
 
 .menu a {
   display: block;
-  padding: 18px 10px;
+  padding: 15px;
   color: #c2185b;
+  font-size: 20px;
   text-decoration: none;
-  font-size: 22px;
-  font-weight: bold;
   border-bottom: 1px solid #eee;
 }
 
-.cerrar-menu {
+.cerrar {
   text-align: right;
-  font-size: 30px;
-  color: #c2185b;
+  font-size: 25px;
   cursor: pointer;
-}
-
-.modal {
-  display: none;
-  position: fixed;
-  z-index: 2000;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0,0,0,.55);
-  overflow-y: auto;
-}
-
-.form-box {
-  background: white;
-  margin: 25px auto;
-  padding: 22px;
-  width: 88%;
-  max-width: 520px;
-  border-radius: 18px;
-  box-shadow: 0 8px 25px rgba(0,0,0,.35);
-}
-
-.form-box h2 {
-  text-align: center;
-  color: #e83e7c;
-  font-size: 34px;
-}
-
-.form-box input,
-.form-box textarea {
-  width: 100%;
-  box-sizing: border-box;
-  padding: 15px;
-  margin: 9px 0;
-  border-radius: 12px;
-  border: 1px solid #ddd;
-  font-size: 16px;
-}
-
-.password-box {
-  position: relative;
-}
-
-.password-box button {
-  position: absolute;
-  right: 8px;
-  top: 14px;
-  border: none;
-  background: none;
-  font-size: 20px;
-  cursor: pointer;
-}
-
-.btn {
-  width: 100%;
-  padding: 15px;
-  background: #e83e7c;
-  color: white;
-  border: none;
-  border-radius: 14px;
-  font-size: 18px;
-  font-weight: bold;
-  margin-top: 10px;
-}
-
-.btn-cerrar {
-  background: #777;
-}
-
-label {
-  display: block;
-  margin: 12px 0;
-  font-size: 15px;
-}
-
-#lista-perfiles {
-  padding: 20px;
-}
-
-.card {
-  background: white;
-  border-radius: 16px;
-  padding: 15px;
-  margin-bottom: 18px;
-  box-shadow: 0 3px 12px rgba(0,0,0,.18);
-}
-
-.card img {
-  width: 100%;
-  max-height: 360px;
-  object-fit: cover;
-  border-radius: 14px;
-}
-
-.card h3 {
-  color: #c2185b;
-  font-size: 26px;
-}
-
-.whatsapp {
-  display: block;
-  text-align: center;
-  background: #25D366;
-  color: white;
-  padding: 13px;
-  border-radius: 12px;
-  text-decoration: none;
-  font-weight: bold;
 }
 </style>
 </head>
@@ -203,55 +111,19 @@ label {
 
 <div class="contenedor">
   <img src="portada.png" class="portada">
+
+  <!-- 🔥 BOTÓN MENÚ -->
   <div class="menu-btn" onclick="abrirMenu()"></div>
 </div>
 
+<!-- 🔥 MENÚ -->
 <div class="menu" id="menu">
-  <div class="cerrar-menu" onclick="cerrarMenu()">✕</div>
-  <a href="#" onclick="abrirRegistro()">👤 Regístrate</a>
+  <div class="cerrar" onclick="cerrarMenu()">✖️</div>
+
+  <a href="#" onclick="alert('Registro aquí')">👤 Registrarse</a>
   <a href="#">📢 Banners</a>
   <a href="#">⚠️ Denunciar</a>
-  <a href="#">📄 Términos y condiciones</a>
-  <a href="#">📘 Condiciones de uso</a>
-  <a href="#">🔒 Política de privacidad</a>
-  <a href="#">🍪 Política de cookies</a>
-  <a href="#">💳 Política de pagos</a>
 </div>
-
-<div class="modal" id="modalRegistro">
-  <div class="form-box">
-    <h2>Registro</h2>
-
-    <input id="nombre" placeholder="Nombre o alias">
-    <input id="email" type="email" placeholder="Correo">
-
-    <div class="password-box">
-      <input id="password" type="password" placeholder="Contraseña mínimo 6 caracteres">
-      <button type="button" onclick="verPassword()">👁️</button>
-    </div>
-
-    <input id="telefono" placeholder="WhatsApp solo números">
-    <input id="categoria" placeholder="Categoría">
-    <input id="estado" placeholder="Estado">
-    <input id="ciudad" placeholder="Municipio / ciudad">
-    <textarea id="descripcion" placeholder="Descripción breve"></textarea>
-    <input id="precio" placeholder="Precio o forma de manejarse">
-    <input id="modalidad" placeholder="Modalidad: con lugar / domicilio / hotel">
-
-    <p><b>Foto de perfil:</b></p>
-    <input id="foto" type="file" accept="image/*">
-
-    <label><input type="checkbox" id="mayorEdad"> Confirmo que soy mayor de edad</label>
-    <label><input type="checkbox" id="fotosMias"> Confirmo que la foto es mía</label>
-    <label><input type="checkbox" id="voluntario"> Confirmo que publico voluntariamente</label>
-    <label><input type="checkbox" id="acepto"> Acepto términos, condiciones y verificación</label>
-
-    <button class="btn" onclick="registrar()">Enviar registro</button>
-    <button class="btn btn-cerrar" onclick="cerrarRegistro()">Cerrar</button>
-  </div>
-</div>
-
-<div id="lista-perfiles"></div>
 
 <script>
 function abrirMenu() {
@@ -261,153 +133,6 @@ function abrirMenu() {
 function cerrarMenu() {
   document.getElementById("menu").classList.remove("active");
 }
-
-function abrirRegistro() {
-  cerrarMenu();
-  document.getElementById("modalRegistro").style.display = "block";
-}
-
-function cerrarRegistro() {
-  document.getElementById("modalRegistro").style.display = "none";
-}
-
-function verPassword() {
-  const p = document.getElementById("password");
-  p.type = p.type === "password" ? "text" : "password";
-}
-
-function limpiarTelefono(t) {
-  return t.replace(/\D/g, "");
-}
-
-function textoSeguro(texto) {
-  return String(texto || "")
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-}
-
-async function registrar() {
-  const nombre = document.getElementById("nombre").value.trim();
-  const email = document.getElementById("email").value.trim().toLowerCase();
-  const password = document.getElementById("password").value;
-  const telefono = limpiarTelefono(document.getElementById("telefono").value);
-  const categoria = document.getElementById("categoria").value.trim();
-  const estado = document.getElementById("estado").value.trim();
-  const ciudad = document.getElementById("ciudad").value.trim();
-  const descripcion = document.getElementById("descripcion").value.trim();
-  const precio = document.getElementById("precio").value.trim();
-  const modalidad = document.getElementById("modalidad").value.trim();
-  const foto = document.getElementById("foto").files[0];
-
-  const mayorEdad = document.getElementById("mayorEdad").checked;
-  const fotosMias = document.getElementById("fotosMias").checked;
-  const voluntario = document.getElementById("voluntario").checked;
-  const acepto = document.getElementById("acepto").checked;
-
-  if (!nombre || !email || !password || !telefono || !categoria || !estado || !ciudad || !descripcion || !precio || !modalidad || !foto) {
-    alert("Faltan datos obligatorios.");
-    return;
-  }
-
-  if (password.length < 6) {
-    alert("La contraseña debe tener mínimo 6 caracteres.");
-    return;
-  }
-
-  if (telefono.length < 10 || telefono.length > 15) {
-    alert("WhatsApp inválido. Usa solo números.");
-    return;
-  }
-
-  if (!foto.type.startsWith("image/")) {
-    alert("El archivo debe ser una imagen.");
-    return;
-  }
-
-  if (foto.size > 5 * 1024 * 1024) {
-    alert("La foto debe pesar máximo 5 MB.");
-    return;
-  }
-
-  if (!mayorEdad || !fotosMias || !voluntario || !acepto) {
-    alert("Debes completar todas las confirmaciones.");
-    return;
-  }
-
-  try {
-    const cred = await auth.createUserWithEmailAndPassword(email, password);
-    const user = cred.user;
-
-    const fotoRef = storage.ref("fotos/" + user.uid);
-    await fotoRef.put(foto);
-    const fotoURL = await fotoRef.getDownloadURL();
-
-    await db.collection("usuarios").doc(user.uid).set({
-      uid: user.uid,
-      nombre,
-      email,
-      telefono,
-      categoria,
-      estado,
-      ciudad,
-      descripcion,
-      precio,
-      modalidad,
-      fotoURL,
-      aprobado: false,
-      fecha: new Date()
-    });
-
-    alert("Registro enviado. Pendiente de aprobación 🔥");
-    cerrarRegistro();
-
-  } catch (error) {
-    alert("Error: " + error.message);
-  }
-}
-
-async function cargarPerfiles() {
-  const lista = document.getElementById("lista-perfiles");
-  lista.innerHTML = "";
-
-  try {
-    const snap = await db.collection("usuarios")
-      .where("aprobado", "==", true)
-      .get();
-
-    if (snap.empty) {
-      lista.innerHTML = "<p style='text-align:center;'>No hay perfiles aprobados todavía.</p>";
-      return;
-    }
-
-    snap.forEach(doc => {
-      const u = doc.data();
-      const telefono = limpiarTelefono(u.telefono || "");
-
-      lista.innerHTML += `
-        <div class="card">
-          ${u.fotoURL ? <img src="${textoSeguro(u.fotoURL)}" alt="Foto de perfil"> : ""}
-          <h3>${textoSeguro(u.nombre)}</h3>
-          <p><b>Ciudad:</b> ${textoSeguro(u.ciudad)}</p>
-          <p><b>Categoría:</b> ${textoSeguro(u.categoria)}</p>
-          <p><b>Descripción:</b> ${textoSeguro(u.descripcion)}</p>
-          <p><b>Precio:</b> ${textoSeguro(u.precio)}</p>
-          <p><b>Modalidad:</b> ${textoSeguro(u.modalidad)}</p>
-          <a class="whatsapp" href="https://wa.me/${telefono}" target="_blank">Contactar por WhatsApp</a>
-        </div>
-      `;
-    });
-
-  } catch (error) {
-    console.error(error);
-    lista.innerHTML = "<p style='text-align:center;'>Error al cargar perfiles.</p>";
-  }
-}
-
-cargarPerfiles();
 </script>
 
 </body>
