@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CariHub</title>
 
 <!-- Firebase -->
@@ -24,23 +25,89 @@ firebase.initializeApp(firebaseConfig);
 
 <style>
 body {
-  margin: 0;
-  background: #fff;
+  margin:0;
+  font-family:Arial;
 }
 
 .contenedor {
-  position: relative;
-  width: 100%;
+  position:relative;
 }
 
 .portada {
-  width: 100%;
-  display: block;
+  width:100%;
 }
 
-.boton-invisible {
-  position: absolute;
-  cursor: pointer;
+.menu-btn {
+  position:absolute;
+  top:6.2%;
+  right:2.2%;
+  width:12%;
+  height:6%;
+  cursor:pointer;
+}
+
+.menu {
+  position:fixed;
+  top:0;
+  right:-100%;
+  width:80%;
+  height:100%;
+  background:white;
+  transition:.3s;
+  padding:20px;
+  z-index:999;
+}
+
+.menu.active {
+  right:0;
+}
+
+.menu a {
+  display:block;
+  padding:18px 10px;
+  color:#c2185b;
+  text-decoration:none;
+  font-size:20px;
+  border-bottom:1px solid #eee;
+}
+
+.cerrar-menu {
+  text-align:right;
+  font-size:30px;
+  cursor:pointer;
+}
+
+.modal {
+  display:none;
+  position:fixed;
+  width:100%;
+  height:100%;
+  background:rgba(0,0,0,.6);
+  top:0;
+  left:0;
+}
+
+.form-box {
+  background:white;
+  margin:30px auto;
+  padding:20px;
+  width:90%;
+  border-radius:10px;
+}
+
+input, textarea {
+  width:100%;
+  padding:12px;
+  margin:8px 0;
+}
+
+button {
+  width:100%;
+  padding:12px;
+  background:#e83e7c;
+  color:white;
+  border:none;
+  margin-top:10px;
 }
 </style>
 </head>
@@ -49,20 +116,55 @@ body {
 
 <div class="contenedor">
   <img src="portada.png" class="portada">
+  <div class="menu-btn" onclick="abrirMenu()"></div>
+</div>
 
-  <!-- BOTÓN -->
-  <div class="boton-invisible"
-    onclick="registrar()"
-    style="top: 6.5%; right: 2.5%; width: 10%; height: 6%;">
+<div class="menu" id="menu">
+  <div class="cerrar-menu" onclick="cerrarMenu()">✕</div>
+  <a href="#" onclick="abrirRegistro()">Regístrate</a>
+  <a href="#">Banners</a>
+  <a href="#">Denunciar</a>
+  <a href="#">Términos</a>
+</div>
+
+<div class="modal" id="modal">
+  <div class="form-box">
+
+    <input id="nombre" placeholder="Nombre">
+    <input id="email" placeholder="Correo">
+    <input id="password" type="password" placeholder="Contraseña mínimo 6 caracteres">
+    <input id="telefono" placeholder="WhatsApp">
+
+    <button onclick="registrar()">Enviar</button>
+    <button onclick="cerrarRegistro()">Cerrar</button>
+
   </div>
 </div>
 
 <script>
+function abrirMenu() {
+  document.getElementById("menu").classList.add("active");
+}
+
+function cerrarMenu() {
+  document.getElementById("menu").classList.remove("active");
+}
+
+function abrirRegistro() {
+  cerrarMenu();
+  document.getElementById("modal").style.display = "block";
+}
+
+function cerrarRegistro() {
+  document.getElementById("modal").style.display = "none";
+}
+
 async function registrar() {
-  const nombre = prompt("Nombre:");
-  const email = prompt("Correo:");
-  const password = prompt("Contraseña mínimo 6 caracteres:");
-  const telefono = prompt("WhatsApp:");
+
+  const nombre = document.getElementById("nombre").value;
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+  const telefono = document.getElementById("telefono").value;
 
   if (!nombre || !email || !password || !telefono) {
     alert("Completa todos los datos");
@@ -70,32 +172,28 @@ async function registrar() {
   }
 
   if (password.length < 6) {
-    alert("La contraseña debe tener mínimo 6 caracteres");
+    alert("Contraseña mínimo 6 caracteres");
     return;
   }
 
   try {
+
     const cred = await firebase.auth().createUserWithEmailAndPassword(email, password);
     const user = cred.user;
 
     await firebase.firestore().collection("usuarios").doc(user.uid).set({
-      nombre: nombre,
-      email: email,
-      telefono: telefono,
-      aprobado: false,
-      fecha: new Date()
+      nombre,
+      email,
+      telefono,
+      aprobado:false,
+      fecha:new Date()
     });
 
     alert("Registro enviado 🔥");
+    cerrarRegistro();
 
   } catch (error) {
-    console.error(error);
-
-    if (error.code === "auth/email-already-in-use") {
-      alert("Este correo ya está registrado");
-    } else {
-      alert("Error: " + error.message);
-    }
+    alert(error.message);
   }
 }
 </script>
