@@ -134,6 +134,14 @@ button{
   margin-top:12px;
 }
 
+.fotos-extra{
+  background:#f7f7f7;
+  padding:12px;
+  border-radius:12px;
+  border-left:5px solid #777;
+  margin-top:12px;
+}
+
 .dato{
   margin:7px 0;
 }
@@ -218,15 +226,29 @@ async function cargarUsuarios() {
       const estado = u.aprobado ? "APROBADO" : "PENDIENTE";
 
       const fotoPerfil = u.fotoURL || "";
-      const ineURL = u.verificacion && u.verificacion.ineURL ? u.verificacion.ineURL : "";
-      const selfieURL = u.verificacion && u.verificacion.selfieURL ? u.verificacion.selfieURL : "";
-      const nombreReal = u.verificacion && u.verificacion.nombreReal ? u.verificacion.nombreReal : "";
+      const fotosExtraURL = Array.isArray(u.fotosExtraURL) ? u.fotosExtraURL : [];
+
+      const verificacion = u.verificacion || {};
+      const ineURL = verificacion.ineURL || "";
+      const ineReversoURL = verificacion.ineReversoURL || "";
+      const selfieURL = verificacion.selfieURL || "";
+      const nombreReal = verificacion.nombreReal || "";
 
       contenedor.innerHTML += `
         <div class="card">
           <h2>${textoSeguro(u.nombre || "Sin nombre")}</h2>
 
           ${fotoPerfil ? `<img src="${textoSeguro(fotoPerfil)}" alt="Foto perfil">` : "<p class='aviso'>Sin foto de perfil</p>"}
+
+          ${fotosExtraURL.length > 0 ? `
+            <div class="fotos-extra">
+              <h3>Fotos adicionales del perfil</h3>
+              ${fotosExtraURL.map((url, i) => `
+                <p><b>Foto extra ${i + 1}:</b></p>
+                <img src="${textoSeguro(url)}" alt="Foto extra ${i + 1}">
+              `).join("")}
+            </div>
+          ` : "<p class='aviso'>Sin fotos adicionales</p>"}
 
           <p class="dato"><b>Correo:</b> ${textoSeguro(u.email)}</p>
           <p class="dato"><b>WhatsApp:</b> ${textoSeguro(u.telefono)}</p>
@@ -250,7 +272,9 @@ async function cargarUsuarios() {
             <h3>Verificación privada</h3>
             <p><b>Nombre real:</b> ${textoSeguro(nombreReal)}</p>
 
-            ${ineURL ? `<p><b>INE / identificación:</b><br><img src="${textoSeguro(ineURL)}" alt="INE"></p>` : "<p class='aviso'>INE no subida</p>"}
+            ${ineURL ? `<p><b>INE frente / identificación:</b><br><img src="${textoSeguro(ineURL)}" alt="INE frente"></p>` : "<p class='aviso'>INE frente no subida</p>"}
+
+            ${ineReversoURL ? `<p><b>INE reverso:</b><br><img src="${textoSeguro(ineReversoURL)}" alt="INE reverso"></p>` : "<p class='aviso'>INE reverso no subida</p>"}
 
             ${selfieURL ? `<p><b>Selfie de verificación:</b><br><img src="${textoSeguro(selfieURL)}" alt="Selfie"></p>` : "<p class='aviso'>Selfie no subida</p>"}
 
