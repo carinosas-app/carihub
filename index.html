@@ -31,16 +31,18 @@ body{margin:0;font-family:Arial,sans-serif;background:#fff;color:#222}
 .contenedor{position:relative;width:100%}
 .portada{width:100%;display:block}
 .menu-btn{position:absolute;top:10px;right:10px;width:70px;height:70px;z-index:9999;cursor:pointer}
-.menu{position:fixed;top:0;right:-100%;width:82%;height:100%;background:#fff;transition:.3s;z-index:10000;padding:25px;box-shadow:-5px 0 20px rgba(0,0,0,.25)}
+.menu{position:fixed;top:0;right:-100%;width:82%;height:100%;background:#fff;transition:.3s;z-index:10000;padding:25px;box-shadow:-5px 0 20px rgba(0,0,0,.25);overflow-y:auto}
 .menu.active{right:0}
-.menu a{display:block;padding:18px 10px;color:#b7195b;font-size:22px;text-decoration:none;border-bottom:1px solid #eee;font-weight:bold}
+.menu a{display:block;padding:18px 10px;color:#b7195b;font-size:21px;text-decoration:none;border-bottom:1px solid #eee;font-weight:bold}
 .cerrar-menu{text-align:right;font-size:30px;cursor:pointer;color:#b7195b}
+.volver-menu{display:block;margin-top:25px;text-align:center;background:#777;color:white;padding:14px;border-radius:12px;text-decoration:none;font-weight:bold}
+
 .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.60);z-index:20000;overflow-y:auto}
-.form-box{background:#fff;margin:20px auto;padding:24px;width:88%;max-width:520px;border-radius:22px;box-shadow:0 10px 35px rgba(0,0,0,.35)}
-h2{color:#b7195b;font-size:32px;margin-bottom:5px}
+.form-box{background:linear-gradient(180deg,#fff,#fff1f7);margin:20px auto;padding:24px;width:88%;max-width:540px;border-radius:22px;box-shadow:0 10px 35px rgba(0,0,0,.35)}
+h2{color:#b7195b;font-size:30px;margin-bottom:5px}
 .subtitulo{color:#555;margin-bottom:18px}
-input,textarea,select{width:100%;box-sizing:border-box;padding:15px;margin:9px 0;border-radius:14px;border:1px solid #ddd;font-size:16px}
-textarea{min-height:90px}
+input,textarea,select{width:100%;box-sizing:border-box;padding:15px;margin:9px 0;border-radius:14px;border:1px solid #ddd;font-size:16px;background:white}
+textarea{min-height:95px}
 label{display:block;margin:14px 0;font-size:16px}
 .step{display:none}
 .step.active{display:block}
@@ -49,7 +51,7 @@ label{display:block;margin:14px 0;font-size:16px}
 .btn-continuar{background:#b7195b;color:white}
 .btn-atras{background:#777;color:white}
 .btn-enviar{background:#138a36;color:white}
-.aviso{background:#fff1f7;border-left:5px solid #b7195b;padding:12px;border-radius:10px;color:#333;margin:12px 0}
+.aviso{background:#fff;border-left:5px solid #b7195b;padding:12px;border-radius:10px;color:#333;margin:12px 0}
 #lista-perfiles{padding:20px}
 .card{background:white;border-radius:18px;padding:15px;margin-bottom:18px;box-shadow:0 3px 12px rgba(0,0,0,.18)}
 .card img{width:100%;max-height:360px;object-fit:cover;border-radius:15px}
@@ -72,60 +74,99 @@ label{display:block;margin:14px 0;font-size:16px}
   <a href="#">⚠️ Denunciar</a>
   <a href="#">📄 Términos y condiciones</a>
   <a href="#">🔒 Política de privacidad</a>
+  <a href="#">📃 Condiciones de uso</a>
+  <a href="#" class="volver-menu" onclick="cerrarMenu()">← Volver</a>
 </div>
 
 <div class="modal" id="modalRegistro">
   <div class="form-box">
 
     <div class="step active" id="step1">
-      <h2>Registro</h2>
-      <p class="subtitulo">Información básica del perfil.</p>
+      <h2>Datos básicos</h2>
+      <p class="subtitulo">Completa la información principal para iniciar tu registro.</p>
 
       <input id="nombre" placeholder="Nombre o alias">
       <input id="email" type="email" placeholder="Correo">
       <input id="password" type="password" placeholder="Contraseña mínimo 6 caracteres">
       <input id="telefono" placeholder="WhatsApp solo números">
-      <input id="categoria" placeholder="Categoría">
+      <input id="pais" placeholder="País">
       <input id="estado" placeholder="Estado">
-      <input id="ciudad" placeholder="Municipio / ciudad">
-      <textarea id="descripcion" placeholder="Descripción breve"></textarea>
-      <input id="precio" placeholder="Precio o forma de manejarse">
-      <input id="modalidad" placeholder="Modalidad: con lugar / domicilio / hotel">
+      <input id="ciudad" placeholder="Ciudad / municipio">
+
+      <select id="categoria">
+        <option value="">Selecciona categoría</option>
+        <option value="Independiente">Independiente</option>
+        <option value="Agencia">Agencia</option>
+        <option value="Masajes">Masajes</option>
+        <option value="Acompañante">Acompañante</option>
+        <option value="VIP">VIP</option>
+        <option value="Otro">Otro</option>
+      </select>
+
+      <textarea id="descripcionCorta" placeholder="Descripción breve"></textarea>
+      <input id="precio" placeholder="Precio / forma de trabajo">
+
+      <select id="modalidad">
+        <option value="">Selecciona modalidad</option>
+        <option value="Con lugar">Con lugar</option>
+        <option value="Hotel">Hotel</option>
+        <option value="Domicilio">Domicilio</option>
+        <option value="Mixto">Mixto</option>
+      </select>
 
       <div class="botones">
-        <button class="btn btn-atras" onclick="cerrarRegistro()">Cerrar</button>
-        <button class="btn btn-continuar" onclick="irPaso(2)">Continuar</button>
+        <button class="btn btn-atras" onclick="cerrarRegistro()">← Volver</button>
+        <button class="btn btn-continuar" onclick="validarPaso1()">Continuar →</button>
       </div>
     </div>
 
     <div class="step" id="step2">
-      <h2>Fotos del perfil</h2>
-      <p class="subtitulo">Sube una foto principal para el perfil.</p>
+      <h2>Información de tu página</h2>
+      <p class="subtitulo">Esta información será la que verá el público cuando tu perfil sea aprobado.</p>
 
-      <div class="aviso">La foto será visible solo cuando el perfil sea aprobado.</div>
+      <textarea id="descripcionCompleta" placeholder="Descripción completa de tu perfil"></textarea>
+      <input id="horario" placeholder="Horario de atención">
+      <input id="zona" placeholder="Zona o referencia">
+      <input id="servicios" placeholder="Servicios o detalles que quieras mostrar">
 
-      <label><b>Foto principal</b></label>
+      <label><b>Foto principal obligatoria</b></label>
       <input id="fotoPerfil" type="file" accept="image/*">
 
+      <label><b>Fotos adicionales opcionales</b></label>
+      <input id="fotosExtra" type="file" accept="image/*" multiple>
+
+      <div class="aviso">La foto principal será visible solo cuando el perfil sea aprobado.</div>
+
       <div class="botones">
-        <button class="btn btn-atras" onclick="irPaso(1)">Atrás</button>
-        <button class="btn btn-continuar" onclick="irPaso(3)">Continuar</button>
+        <button class="btn btn-atras" onclick="irPaso(1)">← Volver</button>
+        <button class="btn btn-continuar" onclick="validarPaso2()">Continuar →</button>
       </div>
     </div>
 
     <div class="step" id="step3">
-      <h2>Confirmación</h2>
-      <p class="subtitulo">Último paso antes de enviar tu registro.</p>
+      <h2>Verificación y consentimiento</h2>
+      <p class="subtitulo">Esta información será usada únicamente para revisión interna. No será publicada.</p>
+
+      <input id="nombreReal" placeholder="Nombre real completo">
+
+      <label><b>INE / identificación</b></label>
+      <input id="ineFoto" type="file" accept="image/*">
+
+      <label><b>Selfie con papel: “CariHub + fecha de hoy”</b></label>
+      <input id="selfieFoto" type="file" accept="image/*">
 
       <label><input type="checkbox" id="mayorEdad"> Confirmo que soy mayor de edad</label>
-      <label><input type="checkbox" id="fotosMias"> Confirmo que las fotos son mías</label>
-      <label><input type="checkbox" id="voluntario"> Confirmo que publico voluntariamente</label>
-      <label><input type="checkbox" id="acepto"> Acepto términos, condiciones y revisión</label>
+      <label><input type="checkbox" id="fotosMias"> Confirmo que las fotos y datos son míos</label>
+      <label><input type="checkbox" id="voluntario"> Confirmo que publico mi perfil por voluntad propia</label>
+      <label><input type="checkbox" id="aceptoTerminos"> Acepto términos y condiciones</label>
+      <label><input type="checkbox" id="aceptoUso"> Acepto condiciones de uso</label>
+      <label><input type="checkbox" id="aceptoPrivacidad"> Acepto política de privacidad</label>
+      <label><input type="checkbox" id="aceptoRevision"> Autorizo la revisión de mi información para aprobar o rechazar mi perfil</label>
 
       <div class="aviso">Tu perfil quedará pendiente hasta que sea revisado y aprobado.</div>
 
       <div class="botones">
-        <button class="btn btn-atras" onclick="irPaso(2)">Atrás</button>
+        <button class="btn btn-atras" onclick="irPaso(2)">← Volver</button>
         <button class="btn btn-enviar" id="btnEnviar" onclick="registrar()">Enviar registro</button>
       </div>
     </div>
@@ -151,10 +192,57 @@ function validarImagen(file,nombre){
   return true
 }
 
+function validarPaso1(){
+  const campos = ["nombre","email","password","telefono","pais","estado","ciudad","categoria","descripcionCorta","precio","modalidad"];
+  for(const id of campos){
+    if(!document.getElementById(id).value.trim()){
+      alert("Completa todos los datos de la primera pantalla.");
+      return;
+    }
+  }
+
+  const password=document.getElementById("password").value;
+  const telefono=limpiarTelefono(document.getElementById("telefono").value);
+
+  if(password.length<6){alert("La contraseña debe tener mínimo 6 caracteres.");return}
+  if(telefono.length<10||telefono.length>15){alert("WhatsApp inválido. Usa solo números.");return}
+
+  irPaso(2);
+}
+
+function validarPaso2(){
+  const descripcionCompleta=document.getElementById("descripcionCompleta").value.trim();
+  const horario=document.getElementById("horario").value.trim();
+  const zona=document.getElementById("zona").value.trim();
+  const servicios=document.getElementById("servicios").value.trim();
+  const fotoPerfil=document.getElementById("fotoPerfil").files[0];
+
+  if(!descripcionCompleta || !horario || !zona || !servicios){
+    alert("Completa toda la información de tu página.");
+    return;
+  }
+
+  if(!validarImagen(fotoPerfil,"Foto principal")) return;
+
+  irPaso(3);
+}
+
 async function subirImagen(ruta,archivo){
   const ref=storage.ref(ruta);
   await ref.put(archivo);
   return await ref.getDownloadURL();
+}
+
+async function subirMultiplesFotos(userId, archivos){
+  const urls=[];
+  for(let i=0;i<archivos.length;i++){
+    const file=archivos[i];
+    if(file && file.type.startsWith("image/") && file.size <= 5 * 1024 * 1024){
+      const url=await subirImagen("perfiles/"+userId+"/extra-"+Date.now()+"-"+i+".jpg", file);
+      urls.push(url);
+    }
+  }
+  return urls;
 }
 
 async function registrar(){
@@ -166,36 +254,74 @@ async function registrar(){
   const email=document.getElementById("email").value.trim().toLowerCase();
   const password=document.getElementById("password").value;
   const telefono=limpiarTelefono(document.getElementById("telefono").value);
-  const categoria=document.getElementById("categoria").value.trim();
+  const pais=document.getElementById("pais").value.trim();
   const estado=document.getElementById("estado").value.trim();
   const ciudad=document.getElementById("ciudad").value.trim();
-  const descripcion=document.getElementById("descripcion").value.trim();
+  const categoria=document.getElementById("categoria").value.trim();
+  const descripcionCorta=document.getElementById("descripcionCorta").value.trim();
   const precio=document.getElementById("precio").value.trim();
   const modalidad=document.getElementById("modalidad").value.trim();
+
+  const descripcionCompleta=document.getElementById("descripcionCompleta").value.trim();
+  const horario=document.getElementById("horario").value.trim();
+  const zona=document.getElementById("zona").value.trim();
+  const servicios=document.getElementById("servicios").value.trim();
+
+  const nombreReal=document.getElementById("nombreReal").value.trim();
   const fotoPerfil=document.getElementById("fotoPerfil").files[0];
+  const fotosExtra=document.getElementById("fotosExtra").files;
+  const ineFoto=document.getElementById("ineFoto").files[0];
+  const selfieFoto=document.getElementById("selfieFoto").files[0];
 
   const mayorEdad=document.getElementById("mayorEdad").checked;
   const fotosMias=document.getElementById("fotosMias").checked;
   const voluntario=document.getElementById("voluntario").checked;
-  const acepto=document.getElementById("acepto").checked;
+  const aceptoTerminos=document.getElementById("aceptoTerminos").checked;
+  const aceptoUso=document.getElementById("aceptoUso").checked;
+  const aceptoPrivacidad=document.getElementById("aceptoPrivacidad").checked;
+  const aceptoRevision=document.getElementById("aceptoRevision").checked;
 
   try{
-    if(!nombre||!email||!password||!telefono||!categoria||!estado||!ciudad||!descripcion||!precio||!modalidad){
-      alert("Faltan datos en Registro.");irPaso(1);throw new Error("validacion")
+    if(!nombreReal){alert("Falta nombre real.");irPaso(3);throw new Error("validacion")}
+    if(!validarImagen(ineFoto,"INE / identificación")){irPaso(3);throw new Error("validacion")}
+    if(!validarImagen(selfieFoto,"Selfie de verificación")){irPaso(3);throw new Error("validacion")}
+
+    if(!mayorEdad||!fotosMias||!voluntario||!aceptoTerminos||!aceptoUso||!aceptoPrivacidad||!aceptoRevision){
+      alert("Debes aceptar todas las confirmaciones.");
+      irPaso(3);
+      throw new Error("validacion");
     }
-    if(password.length<6){alert("La contraseña debe tener mínimo 6 caracteres.");irPaso(1);throw new Error("validacion")}
-    if(telefono.length<10||telefono.length>15){alert("WhatsApp inválido. Usa solo números.");irPaso(1);throw new Error("validacion")}
-    if(!validarImagen(fotoPerfil,"Foto principal")){irPaso(2);throw new Error("validacion")}
-    if(!mayorEdad||!fotosMias||!voluntario||!acepto){alert("Debes aceptar todas las confirmaciones.");irPaso(3);throw new Error("validacion")}
 
     const cred=await auth.createUserWithEmailAndPassword(email,password);
     const user=cred.user;
 
     const fotoURL=await subirImagen("perfiles/"+user.uid+"/foto-principal-"+Date.now()+".jpg",fotoPerfil);
+    const fotosExtraURL=await subirMultiplesFotos(user.uid,fotosExtra);
+
+    const ineURL=await subirImagen("verificaciones/"+user.uid+"/ine-"+Date.now()+".jpg",ineFoto);
+    const selfieURL=await subirImagen("verificaciones/"+user.uid+"/selfie-"+Date.now()+".jpg",selfieFoto);
 
     await db.collection("usuarios").doc(user.uid).set({
-      uid:user.uid,nombre,email,telefono,categoria,estado,ciudad,descripcion,precio,modalidad,
+      uid:user.uid,
+      nombre,email,telefono,pais,estado,ciudad,categoria,
+      descripcion:descripcionCorta,
+      descripcionCompleta,
+      precio,modalidad,horario,zona,servicios,
       fotoURL,
+      fotosExtraURL,
+      verificacion:{
+        nombreReal,
+        ineURL,
+        selfieURL,
+        mayorEdad,
+        fotosMias,
+        voluntario,
+        aceptoTerminos,
+        aceptoUso,
+        aceptoPrivacidad,
+        aceptoRevision,
+        fecha:new Date()
+      },
       aprobado:false,
       fecha:new Date()
     });
@@ -223,6 +349,8 @@ async function cargarPerfiles(){
 
     snap.forEach(doc=>{
       const u=doc.data();
+      if(!u.fotoURL || !u.nombre || !u.ciudad || !u.categoria || !u.descripcion || !u.precio || !u.modalidad) return;
+
       const tel=limpiarTelefono(u.telefono||"");
 
       lista.innerHTML+=`
@@ -234,6 +362,8 @@ async function cargarPerfiles(){
           <p><b>Descripción:</b> ${textoSeguro(u.descripcion)}</p>
           <p><b>Precio:</b> ${textoSeguro(u.precio)}</p>
           <p><b>Modalidad:</b> ${textoSeguro(u.modalidad)}</p>
+          ${u.horario ? `<p><b>Horario:</b> ${textoSeguro(u.horario)}</p>` : ""}
+          ${u.zona ? `<p><b>Zona:</b> ${textoSeguro(u.zona)}</p>` : ""}
           <a class="whatsapp" href="https://wa.me/${tel}" target="_blank">Contactar por WhatsApp</a>
         </div>
       `;
