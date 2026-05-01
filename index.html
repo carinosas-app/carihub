@@ -94,10 +94,22 @@ label{display:block;margin:14px 0;font-size:16px}
 
       <select id="categoria">
         <option value="">Selecciona categoría</option>
-        <option value="Independiente">Independiente</option>
-        <option value="Agencia">Agencia</option>
-        <option value="Masajes">Masajes</option>
         <option value="Acompañante">Acompañante</option>
+        <option value="Escort">Escort</option>
+        <option value="Escort gay">Escort gay</option>
+        <option value="Spa">Spa</option>
+        <option value="Trans">Trans</option>
+        <option value="Sex shop">Sex shop</option>
+        <option value="Gigolo">Gigolo</option>
+        <option value="Madura">Madura</option>
+        <option value="Petit">Petit</option>
+        <option value="SW 🍍">SW 🍍</option>
+        <option value="Unicorns 🦄">Unicorns 🦄</option>
+        <option value="Hotwife 🔥">Hotwife 🔥</option>
+        <option value="Contenido">Contenido</option>
+        <option value="Singles">Singles</option>
+        <option value="Fetiche">Fetiche</option>
+        <option value="Sado">Sado</option>
         <option value="VIP">VIP</option>
         <option value="Otro">Otro</option>
       </select>
@@ -165,7 +177,11 @@ label{display:block;margin:14px 0;font-size:16px}
       <label><input type="checkbox" id="aceptoPrivacidad"> Acepto política de privacidad</label>
       <label><input type="checkbox" id="aceptoRevision"> Autorizo la revisión de mi información para aprobar o rechazar mi perfil</label>
 
-      <div class="aviso">Tu perfil quedará pendiente hasta que sea revisado y aprobado.</div>
+      <div class="aviso">
+        🎉 Primer mes GRATIS.<br>
+        Si tu perfil es aprobado, estará visible durante 30 días sin costo.
+        Después podrás renovar por $200 MXN cada 30 días.
+      </div>
 
       <div class="botones">
         <button class="btn btn-atras" onclick="irPaso(2)">← Volver</button>
@@ -329,6 +345,13 @@ async function registrar(){
         fecha:new Date()
       },
       aprobado:false,
+      activo:false,
+      vencido:false,
+      primerMesGratis:false,
+      pagado:false,
+      estadoPago:"pendiente_aprobacion",
+      fechaPublicacion:null,
+      fechaVencimiento:null,
       fecha:new Date()
     });
 
@@ -350,11 +373,23 @@ async function cargarPerfiles(){
   lista.innerHTML="";
 
   try{
-    const snap=await db.collection("usuarios").where("aprobado","==",true).get();
+    const snap=await db.collection("usuarios")
+      .where("aprobado","==",true)
+      .get();
+
     if(snap.empty)return;
 
     snap.forEach(doc=>{
       const u=doc.data();
+
+      if(u.activo !== true) return;
+      if(u.vencido === true) return;
+
+      if(u.fechaVencimiento){
+        const fechaV = u.fechaVencimiento.toDate ? u.fechaVencimiento.toDate() : new Date(u.fechaVencimiento);
+        if(fechaV < new Date()) return;
+      }
+
       if(!u.fotoURL||!u.nombre||!u.ciudad||!u.categoria||!u.descripcion||!u.precio||!u.modalidad)return;
 
       const tel=limpiarTelefono(u.telefono||"");
