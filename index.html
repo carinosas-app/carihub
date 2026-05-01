@@ -36,7 +36,6 @@ body{margin:0;font-family:Arial,sans-serif;background:#fff;color:#222}
 .menu a{display:block;padding:18px 10px;color:#b7195b;font-size:21px;text-decoration:none;border-bottom:1px solid #eee;font-weight:bold}
 .cerrar-menu{text-align:right;font-size:30px;cursor:pointer;color:#b7195b}
 .volver-menu{display:block;margin-top:25px;text-align:center;background:#777;color:white;padding:14px;border-radius:12px;text-decoration:none;font-weight:bold}
-
 .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.60);z-index:20000;overflow-y:auto}
 .form-box{background:linear-gradient(180deg,#fff,#fff1f7);margin:20px auto;padding:24px;width:88%;max-width:540px;border-radius:22px;box-shadow:0 10px 35px rgba(0,0,0,.35)}
 h2{color:#b7195b;font-size:30px;margin-bottom:5px}
@@ -129,7 +128,12 @@ label{display:block;margin:14px 0;font-size:16px}
       <input id="zona" placeholder="Zona o referencia">
       <input id="servicios" placeholder="Servicios o detalles que quieras mostrar">
 
-     
+      <label><b>Foto principal obligatoria</b></label>
+      <input id="fotoPerfil" type="file" accept="image/*">
+
+      <label><b>Fotos adicionales opcionales</b></label>
+      <input id="fotosExtra" type="file" accept="image/*" multiple>
+
       <div class="aviso">La foto principal será visible solo cuando el perfil sea aprobado.</div>
 
       <div class="botones">
@@ -143,17 +147,15 @@ label{display:block;margin:14px 0;font-size:16px}
       <p class="subtitulo">Esta información será usada únicamente para revisión interna. No será publicada.</p>
 
       <input id="nombreReal" placeholder="Nombre real completo">
-<label><b>INE / identificación (frente)</b></label>
-<input id="ineFoto" type="file" accept="image/*">
 
-<label><b>INE reverso</b></label>
-<input id="ineReversoFoto" type="file" accept="image/*">
+      <label><b>INE / identificación (frente)</b></label>
+      <input id="ineFoto" type="file" accept="image/*">
 
-<label><b>Selfie con papel: “CariHub + fecha de hoy”</b></label>
-<input id="selfieFoto" type="file" accept="image/*">
-      
+      <label><b>INE reverso</b></label>
+      <input id="ineReversoFoto" type="file" accept="image/*">
 
-      
+      <label><b>Selfie con papel: “CariHub + fecha de hoy”</b></label>
+      <input id="selfieFoto" type="file" accept="image/*">
 
       <label><input type="checkbox" id="mayorEdad"> Confirmo que soy mayor de edad</label>
       <label><input type="checkbox" id="fotosMias"> Confirmo que las fotos y datos son míos</label>
@@ -193,7 +195,7 @@ function validarImagen(file,nombre){
 }
 
 function validarPaso1(){
-  const campos = ["nombre","email","password","telefono","pais","estado","ciudad","categoria","descripcionCorta","precio","modalidad"];
+  const campos=["nombre","email","password","telefono","pais","estado","ciudad","categoria","descripcionCorta","precio","modalidad"];
   for(const id of campos){
     if(!document.getElementById(id).value.trim()){
       alert("Completa todos los datos de la primera pantalla.");
@@ -237,8 +239,8 @@ async function subirMultiplesFotos(userId, archivos){
   const urls=[];
   for(let i=0;i<archivos.length;i++){
     const file=archivos[i];
-    if(file && file.type.startsWith("image/") && file.size <= 5 * 1024 * 1024){
-      const url=await subirImagen("perfiles/"+userId+"/extra-"+Date.now()+"-"+i+".jpg", file);
+    if(file && file.type.startsWith("image/") && file.size<=5*1024*1024){
+      const url=await subirImagen("perfiles/"+userId+"/extra-"+Date.now()+"-"+i+".jpg",file);
       urls.push(url);
     }
   }
@@ -312,14 +314,11 @@ async function registrar(){
       precio,modalidad,horario,zona,servicios,
       fotoURL,
       fotosExtraURL,
-  verificacion:{
-  nombreReal,
-  ineURL,
-  ineReversoURL,
-  selfieURL,
-        
-        
-  
+      verificacion:{
+        nombreReal,
+        ineURL,
+        ineReversoURL,
+        selfieURL,
         mayorEdad,
         fotosMias,
         voluntario,
@@ -356,7 +355,7 @@ async function cargarPerfiles(){
 
     snap.forEach(doc=>{
       const u=doc.data();
-      if(!u.fotoURL || !u.nombre || !u.ciudad || !u.categoria || !u.descripcion || !u.precio || !u.modalidad) return;
+      if(!u.fotoURL||!u.nombre||!u.ciudad||!u.categoria||!u.descripcion||!u.precio||!u.modalidad)return;
 
       const tel=limpiarTelefono(u.telefono||"");
 
