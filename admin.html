@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -9,6 +8,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage-compat.js"></script>
 
 <script>
 const firebaseConfig = {
@@ -24,24 +24,124 @@ firebase.initializeApp(firebaseConfig);
 
 const auth = firebase.auth();
 const db = firebase.firestore();
+const storage = firebase.storage();
+
 const ADMIN_EMAIL = "carinosas.anuncios@gmail.com";
 </script>
 
 <style>
-body{margin:0;font-family:Arial,sans-serif;background:#f3f3f3;padding:15px}
-h1{color:#c2185b;text-align:center}
-.box{max-width:800px;margin:auto;background:white;padding:20px;border-radius:14px}
-input{width:100%;padding:14px;margin:8px 0;box-sizing:border-box;border:1px solid #ddd;border-radius:10px}
-button{padding:12px;border:none;border-radius:8px;margin:5px 3px;font-weight:bold;cursor:pointer}
-.btn-login{width:100%;background:#c2185b;color:white}
-.btn-salir{background:#555;color:white}
-.card{background:white;padding:15px;margin:15px 0;border-radius:12px;box-shadow:0 3px 10px rgba(0,0,0,.15)}
-.card img{width:100%;max-height:320px;object-fit:cover;border-radius:12px;margin-bottom:10px}
-.aprobado{color:green;font-weight:bold}
-.pendiente{color:orange;font-weight:bold}
-.btn-aprobar{background:green;color:white}
-.btn-quitar{background:orange;color:white}
-.btn-borrar{background:red;color:white}
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:#f3f3f3;
+  padding:15px;
+}
+
+h1{
+  color:#c2185b;
+  text-align:center;
+}
+
+h2{
+  margin-bottom:8px;
+}
+
+.box{
+  max-width:850px;
+  margin:auto;
+  background:white;
+  padding:20px;
+  border-radius:16px;
+}
+
+input{
+  width:100%;
+  padding:14px;
+  margin:8px 0;
+  box-sizing:border-box;
+  border:1px solid #ddd;
+  border-radius:10px;
+  font-size:16px;
+}
+
+button{
+  padding:12px;
+  border:none;
+  border-radius:10px;
+  margin:5px 3px;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+.btn-login{
+  width:100%;
+  background:#c2185b;
+  color:white;
+  font-size:16px;
+}
+
+.btn-salir{
+  background:#555;
+  color:white;
+}
+
+.card{
+  background:white;
+  padding:15px;
+  margin:18px 0;
+  border-radius:14px;
+  box-shadow:0 3px 12px rgba(0,0,0,.18);
+}
+
+.card img{
+  width:100%;
+  max-height:360px;
+  object-fit:cover;
+  border-radius:12px;
+  margin:8px 0 14px;
+}
+
+.aprobado{
+  color:green;
+  font-weight:bold;
+}
+
+.pendiente{
+  color:orange;
+  font-weight:bold;
+}
+
+.btn-aprobar{
+  background:green;
+  color:white;
+}
+
+.btn-quitar{
+  background:orange;
+  color:white;
+}
+
+.btn-borrar{
+  background:red;
+  color:white;
+}
+
+.verificacion{
+  background:#fff1f7;
+  padding:12px;
+  border-radius:12px;
+  border-left:5px solid #c2185b;
+  margin-top:12px;
+}
+
+.dato{
+  margin:7px 0;
+}
+
+.aviso{
+  color:#777;
+  font-size:14px;
+}
 </style>
 </head>
 
@@ -105,7 +205,7 @@ async function cargarUsuarios() {
   contenedor.innerHTML = "Cargando usuarios...";
 
   try {
-    const snap = await firebase.firestore().collection("usuarios").get();
+    const snap = await db.collection("usuarios").orderBy("fecha", "desc").get();
     contenedor.innerHTML = "";
 
     if (snap.empty) {
@@ -113,54 +213,56 @@ async function cargarUsuarios() {
       return;
     }
 
-    for (const doc of snap.docs) {
+    snap.forEach(doc => {
       const u = doc.data();
-      const uid = doc.id;
-
       const estado = u.aprobado ? "APROBADO" : "PENDIENTE";
 
-      let fotoPerfil = u.fotoURL || "";
-      let ineURL = "";
-      let selfieURL = "";
-
-      try {
-        ineURL = await firebase.storage().ref(`verificaciones/${uid}/ine.jpg`).getDownloadURL();
-      } catch {}
-
-      try {
-        selfieURL = await firebase.storage().ref(`verificaciones/${uid}/selfie.jpg`).getDownloadURL();
-      } catch {}
+      const fotoPerfil = u.fotoURL || "";
+      const ineURL = u.verificacion && u.verificacion.ineURL ? u.verificacion.ineURL : "";
+      const selfieURL = u.verificacion && u.verificacion.selfieURL ? u.verificacion.selfieURL : "";
+      const nombreReal = u.verificacion && u.verificacion.nombreReal ? u.verificacion.nombreReal : "";
 
       contenedor.innerHTML += `
         <div class="card">
+          <h2>${textoSeguro(u.nombre || "Sin nombre")}</h2>
 
-          <h2>${u.nombre || "Sin nombre"}</h2>
+          ${fotoPerfil ? `<img src="${textoSeguro(fotoPerfil)}" alt="Foto perfil">` : "<p class='aviso'>Sin foto de perfil</p>"}
 
-          ${fotoPerfil ? `<img src="${fotoPerfil}" style="width:100%;border-radius:10px;margin-bottom:10px;">` : ""}
+          <p class="dato"><b>Correo:</b> ${textoSeguro(u.email)}</p>
+          <p class="dato"><b>WhatsApp:</b> ${textoSeguro(u.telefono)}</p>
+          <p class="dato"><b>País:</b> ${textoSeguro(u.pais)}</p>
+          <p class="dato"><b>Estado:</b> ${textoSeguro(u.estado)}</p>
+          <p class="dato"><b>Ciudad:</b> ${textoSeguro(u.ciudad)}</p>
+          <p class="dato"><b>Categoría:</b> ${textoSeguro(u.categoria)}</p>
+          <p class="dato"><b>Descripción corta:</b> ${textoSeguro(u.descripcion)}</p>
+          <p class="dato"><b>Descripción completa:</b> ${textoSeguro(u.descripcionCompleta)}</p>
+          <p class="dato"><b>Precio:</b> ${textoSeguro(u.precio)}</p>
+          <p class="dato"><b>Modalidad:</b> ${textoSeguro(u.modalidad)}</p>
+          <p class="dato"><b>Horario:</b> ${textoSeguro(u.horario)}</p>
+          <p class="dato"><b>Zona:</b> ${textoSeguro(u.zona)}</p>
+          <p class="dato"><b>Servicios:</b> ${textoSeguro(u.servicios)}</p>
 
-          <p><b>Correo:</b> ${u.email || ""}</p>
-          <p><b>WhatsApp:</b> ${u.telefono || ""}</p>
-          <p><b>Ciudad:</b> ${u.ciudad || ""}</p>
-          <p><b>Categoría:</b> ${u.categoria || ""}</p>
-          <p><b>Descripción:</b> ${u.descripcion || ""}</p>
+          <p class="dato"><b>Estado:</b> 
+            <span class="${u.aprobado ? "aprobado" : "pendiente"}">${estado}</span>
+          </p>
 
-          <p><b>Estado:</b> <span class="${u.aprobado ? "aprobado" : "pendiente"}">${estado}</span></p>
+          <div class="verificacion">
+            <h3>Verificación privada</h3>
+            <p><b>Nombre real:</b> ${textoSeguro(nombreReal)}</p>
 
-          <hr>
+            ${ineURL ? `<p><b>INE / identificación:</b><br><img src="${textoSeguro(ineURL)}" alt="INE"></p>` : "<p class='aviso'>INE no subida</p>"}
 
-          <h3>Verificación</h3>
+            ${selfieURL ? `<p><b>Selfie de verificación:</b><br><img src="${textoSeguro(selfieURL)}" alt="Selfie"></p>` : "<p class='aviso'>Selfie no subida</p>"}
 
-          ${ineURL ? `<p><b>INE:</b><br><img src="${ineURL}" style="width:100%;border-radius:10px;"></p>` : "<p>INE no subida</p>"}
+            <p class="aviso">Estas imágenes no son públicas. Solo el admin debe revisarlas.</p>
+          </div>
 
-          ${selfieURL ? `<p><b>Selfie:</b><br><img src="${selfieURL}" style="width:100%;border-radius:10px;"></p>` : "<p>Selfie no subida</p>"}
-
-          <button class="btn-aprobar" onclick="aprobar('${uid}')">Aprobar</button>
-          <button class="btn-quitar" onclick="quitarAprobacion('${uid}')">Quitar aprobación</button>
-          <button class="btn-borrar" onclick="borrarUsuario('${uid}')">Borrar</button>
-
+          <button class="btn-aprobar" onclick="aprobar('${doc.id}')">Aprobar</button>
+          <button class="btn-quitar" onclick="quitarAprobacion('${doc.id}')">Quitar aprobación</button>
+          <button class="btn-borrar" onclick="borrarUsuario('${doc.id}')">Borrar</button>
         </div>
       `;
-    }
+    });
 
   } catch (error) {
     contenedor.innerHTML = "Error al cargar usuarios.";
