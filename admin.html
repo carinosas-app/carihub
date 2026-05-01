@@ -105,7 +105,7 @@ async function cargarUsuarios() {
   contenedor.innerHTML = "Cargando usuarios...";
 
   try {
-    const snap = await db.collection("usuarios").orderBy("fecha", "desc").get();
+    const snap = await firebase.firestore().collection("usuarios").get();
     contenedor.innerHTML = "";
 
     if (snap.empty) {
@@ -113,29 +113,54 @@ async function cargarUsuarios() {
       return;
     }
 
-    snap.forEach(doc => {
+    for (const doc of snap.docs) {
       const u = doc.data();
+      const uid = doc.id;
+
       const estado = u.aprobado ? "APROBADO" : "PENDIENTE";
+
+      let fotoPerfil = u.fotoURL || "";
+      let ineURL = "";
+      let selfieURL = "";
+
+      try {
+        ineURL = await firebase.storage().ref(`verificaciones/${uid}/ine.jpg`).getDownloadURL();
+      } catch {}
+
+      try {
+        selfieURL = await firebase.storage().ref(`verificaciones/${uid}/selfie.jpg`).getDownloadURL();
+      } catch {}
 
       contenedor.innerHTML += `
         <div class="card">
-          ${u.fotoURL ? `<img src="${textoSeguro(u.fotoURL)}" alt="Foto">` : ""}
-          <h2>${textoSeguro(u.nombre || "Sin nombre")}</h2>
-          <p><b>Correo:</b> ${textoSeguro(u.email)}</p>
-          <p><b>WhatsApp:</b> ${textoSeguro(u.telefono)}</p>
-          <p><b>Ciudad:</b> ${textoSeguro(u.ciudad)}</p>
-          <p><b>Categoría:</b> ${textoSeguro(u.categoria)}</p>
-          <p><b>Descripción:</b> ${textoSeguro(u.descripcion)}</p>
-          <p><b>Precio:</b> ${textoSeguro(u.precio)}</p>
-          <p><b>Modalidad:</b> ${textoSeguro(u.modalidad)}</p>
+
+          <h2>${u.nombre || "Sin nombre"}</h2>
+
+          ${fotoPerfil ? `<img src="${fotoPerfil}" style="width:100%;border-radius:10px;margin-bottom:10px;">` : ""}
+
+          <p><b>Correo:</b> ${u.email || ""}</p>
+          <p><b>WhatsApp:</b> ${u.telefono || ""}</p>
+          <p><b>Ciudad:</b> ${u.ciudad || ""}</p>
+          <p><b>Categoría:</b> ${u.categoria || ""}</p>
+          <p><b>Descripción:</b> ${u.descripcion || ""}</p>
+
           <p><b>Estado:</b> <span class="${u.aprobado ? "aprobado" : "pendiente"}">${estado}</span></p>
 
-          <button class="btn-aprobar" onclick="aprobar('${doc.id}')">Aprobar</button>
-          <button class="btn-quitar" onclick="quitarAprobacion('${doc.id}')">Quitar aprobación</button>
-          <button class="btn-borrar" onclick="borrarUsuario('${doc.id}')">Borrar</button>
+          <hr>
+
+          <h3>Verificación</h3>
+
+          ${ineURL ? `<p><b>INE:</b><br><img src="${ineURL}" style="width:100%;border-radius:10px;"></p>` : "<p>INE no subida</p>"}
+
+          ${selfieURL ? `<p><b>Selfie:</b><br><img src="${selfieURL}" style="width:100%;border-radius:10px;"></p>` : "<p>Selfie no subida</p>"}
+
+          <button class="btn-aprobar" onclick="aprobar('${uid}')">Aprobar</button>
+          <button class="btn-quitar" onclick="quitarAprobacion('${uid}')">Quitar aprobación</button>
+          <button class="btn-borrar" onclick="borrarUsuario('${uid}')">Borrar</button>
+
         </div>
       `;
-    });
+    }
 
   } catch (error) {
     contenedor.innerHTML = "Error al cargar usuarios.";
