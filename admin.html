@@ -25,131 +25,30 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 const storage = firebase.storage();
-
 const ADMIN_EMAIL = "carinosas.anuncios@gmail.com";
 </script>
 
 <style>
-body{
-  margin:0;
-  font-family:Arial,sans-serif;
-  background:#f3f3f3;
-  padding:15px;
-}
-
-h1{
-  color:#c2185b;
-  text-align:center;
-}
-
-h2{
-  margin-bottom:8px;
-}
-
-.box{
-  max-width:850px;
-  margin:auto;
-  background:white;
-  padding:20px;
-  border-radius:16px;
-}
-
-input{
-  width:100%;
-  padding:14px;
-  margin:8px 0;
-  box-sizing:border-box;
-  border:1px solid #ddd;
-  border-radius:10px;
-  font-size:16px;
-}
-
-button{
-  padding:12px;
-  border:none;
-  border-radius:10px;
-  margin:5px 3px;
-  font-weight:bold;
-  cursor:pointer;
-}
-
-.btn-login{
-  width:100%;
-  background:#c2185b;
-  color:white;
-  font-size:16px;
-}
-
-.btn-salir{
-  background:#555;
-  color:white;
-}
-
-.card{
-  background:white;
-  padding:15px;
-  margin:18px 0;
-  border-radius:14px;
-  box-shadow:0 3px 12px rgba(0,0,0,.18);
-}
-
-.card img{
-  width:100%;
-  max-height:360px;
-  object-fit:cover;
-  border-radius:12px;
-  margin:8px 0 14px;
-}
-
-.aprobado{
-  color:green;
-  font-weight:bold;
-}
-
-.pendiente{
-  color:orange;
-  font-weight:bold;
-}
-
-.btn-aprobar{
-  background:green;
-  color:white;
-}
-
-.btn-quitar{
-  background:orange;
-  color:white;
-}
-
-.btn-borrar{
-  background:red;
-  color:white;
-}
-
-.verificacion{
-  background:#fff1f7;
-  padding:12px;
-  border-radius:12px;
-  border-left:5px solid #c2185b;
-  margin-top:12px;
-}
-
-.fotos-extra{
-  background:#f7f7f7;
-  padding:12px;
-  border-radius:12px;
-  border-left:5px solid #777;
-  margin-top:12px;
-}
-
-.dato{
-  margin:7px 0;
-}
-
-.aviso{
-  color:#777;
-  font-size:14px;
-}
+body{margin:0;font-family:Arial,sans-serif;background:#f3f3f3;padding:15px}
+h1{color:#c2185b;text-align:center}
+h2{margin-bottom:8px}
+.box{max-width:850px;margin:auto;background:white;padding:20px;border-radius:16px}
+input{width:100%;padding:14px;margin:8px 0;box-sizing:border-box;border:1px solid #ddd;border-radius:10px;font-size:16px}
+button{padding:12px;border:none;border-radius:10px;margin:5px 3px;font-weight:bold;cursor:pointer}
+.btn-login{width:100%;background:#c2185b;color:white;font-size:16px}
+.btn-salir{background:#555;color:white}
+.card{background:white;padding:15px;margin:18px 0;border-radius:14px;box-shadow:0 3px 12px rgba(0,0,0,.18)}
+.card img{width:100%;max-height:360px;object-fit:cover;border-radius:12px;margin:8px 0 14px}
+.aprobado{color:green;font-weight:bold}
+.pendiente{color:orange;font-weight:bold}
+.vencido{color:red;font-weight:bold}
+.btn-aprobar{background:green;color:white}
+.btn-quitar{background:orange;color:white}
+.btn-borrar{background:red;color:white}
+.verificacion{background:#fff1f7;padding:12px;border-radius:12px;border-left:5px solid #c2185b;margin-top:12px}
+.fotos-extra{background:#f7f7f7;padding:12px;border-radius:12px;border-left:5px solid #777;margin-top:12px}
+.dato{margin:7px 0}
+.aviso{color:#777;font-size:14px}
 </style>
 </head>
 
@@ -176,6 +75,23 @@ function textoSeguro(texto){
     .replace(/>/g,"&gt;")
     .replace(/"/g,"&quot;")
     .replace(/'/g,"&#039;");
+}
+
+function formatearFecha(fecha){
+  if(!fecha) return "Sin fecha";
+  try{
+    const d = fecha.toDate ? fecha.toDate() : new Date(fecha);
+    return d.toLocaleDateString("es-MX");
+  }catch(e){
+    return "Sin fecha";
+  }
+}
+
+function diasRestantes(fecha){
+  if(!fecha) return "";
+  const d = fecha.toDate ? fecha.toDate() : new Date(fecha);
+  const hoy = new Date();
+  return Math.ceil((d - hoy) / (1000 * 60 * 60 * 24));
 }
 
 auth.onAuthStateChanged(async (user) => {
@@ -223,7 +139,15 @@ async function cargarUsuarios() {
 
     snap.forEach(doc => {
       const u = doc.data();
-      const estado = u.aprobado ? "APROBADO" : "PENDIENTE";
+
+      // Detectar vencimiento automáticamente para mostrarlo correctamente en admin
+      if(u.fechaVencimiento){
+        const fechaV = u.fechaVencimiento.toDate ? u.fechaVencimiento.toDate() : new Date(u.fechaVencimiento);
+        if(fechaV < new Date()){
+          u.vencido = true;
+          u.activo = false;
+        }
+      }
 
       const fotoPerfil = u.fotoURL || "";
       const fotosExtraURL = Array.isArray(u.fotosExtraURL) ? u.fotosExtraURL : [];
@@ -233,6 +157,19 @@ async function cargarUsuarios() {
       const ineReversoURL = verificacion.ineReversoURL || "";
       const selfieURL = verificacion.selfieURL || "";
       const nombreReal = verificacion.nombreReal || "";
+
+      const dias = diasRestantes(u.fechaVencimiento);
+      const textoDias = dias === "" ? "Sin vencimiento" : (dias >= 0 ? dias + " días restantes" : "Vencido hace " + Math.abs(dias) + " días");
+
+      let estadoHTML = `<span class="pendiente">PENDIENTE</span>`;
+
+      if(u.aprobado && u.activo){
+        estadoHTML = `<span class="aprobado">APROBADO / ACTIVO</span>`;
+      }
+
+      if(u.vencido || (u.fechaVencimiento && dias < 0)){
+        estadoHTML = `<span class="vencido">VENCIDO</span>`;
+      }
 
       contenedor.innerHTML += `
         <div class="card">
@@ -264,9 +201,15 @@ async function cargarUsuarios() {
           <p class="dato"><b>Zona:</b> ${textoSeguro(u.zona)}</p>
           <p class="dato"><b>Servicios:</b> ${textoSeguro(u.servicios)}</p>
 
-          <p class="dato"><b>Estado:</b> 
-            <span class="${u.aprobado ? "aprobado" : "pendiente"}">${estado}</span>
-          </p>
+          <p class="dato"><b>Estado del perfil:</b> ${estadoHTML}</p>
+          <p class="dato"><b>Activo:</b> ${u.activo ? "Sí" : "No"}</p>
+          <p class="dato"><b>Vencido:</b> ${u.vencido ? "Sí" : "No"}</p>
+          <p class="dato"><b>Primer mes gratis:</b> ${u.primerMesGratis ? "Sí" : "No"}</p>
+          <p class="dato"><b>Pago:</b> ${u.pagado ? "PAGADO ✅" : "NO PAGADO / GRATIS o pendiente"}</p>
+          <p class="dato"><b>Estado pago:</b> ${textoSeguro(u.estadoPago || "sin_estado")}</p>
+          <p class="dato"><b>Fecha publicación:</b> ${formatearFecha(u.fechaPublicacion)}</p>
+          <p class="dato"><b>Fecha vencimiento:</b> ${formatearFecha(u.fechaVencimiento)}</p>
+          <p class="dato"><b>Días:</b> ${textoSeguro(textoDias)}</p>
 
           <div class="verificacion">
             <h3>Verificación privada</h3>
@@ -281,8 +224,10 @@ async function cargarUsuarios() {
             <p class="aviso">Estas imágenes no son públicas. Solo el admin debe revisarlas.</p>
           </div>
 
-          <button class="btn-aprobar" onclick="aprobar('${doc.id}')">Aprobar</button>
+          <button class="btn-aprobar" onclick="aprobar('${doc.id}')">Aprobar y activar 30 días gratis</button>
           <button class="btn-quitar" onclick="quitarAprobacion('${doc.id}')">Quitar aprobación</button>
+          <button class="btn-quitar" onclick="marcarVencido('${doc.id}')">Marcar vencido</button>
+          <button class="btn-aprobar" onclick="renovar30Dias('${doc.id}')">Renovar 30 días</button>
           <button class="btn-borrar" onclick="borrarUsuario('${doc.id}')">Borrar</button>
         </div>
       `;
@@ -295,14 +240,61 @@ async function cargarUsuarios() {
 }
 
 async function aprobar(id) {
-  await db.collection("usuarios").doc(id).update({ aprobado: true });
-  alert("Usuario aprobado");
+  const hoy = new Date();
+  const vencimiento = new Date();
+  vencimiento.setDate(hoy.getDate() + 30);
+
+  await db.collection("usuarios").doc(id).update({
+    aprobado: true,
+    activo: true,
+    vencido: false,
+    primerMesGratis: true,
+    pagado: false,
+    estadoPago: "gratis_30_dias",
+    fechaPublicacion: hoy,
+    fechaVencimiento: vencimiento
+  });
+
+  alert("Usuario aprobado. Primer mes gratis activado por 30 días.");
+  cargarUsuarios();
+}
+
+async function renovar30Dias(id) {
+  const hoy = new Date();
+  const vencimiento = new Date();
+  vencimiento.setDate(hoy.getDate() + 30);
+
+  await db.collection("usuarios").doc(id).update({
+    aprobado: true,
+    activo: true,
+    vencido: false,
+    pagado: true,
+    estadoPago: "pagado",
+    fechaPublicacion: hoy,
+    fechaVencimiento: vencimiento
+  });
+
+  alert("Perfil renovado por 30 días.");
+  cargarUsuarios();
+}
+
+async function marcarVencido(id) {
+  await db.collection("usuarios").doc(id).update({
+    activo: false,
+    vencido: true
+  });
+
+  alert("Perfil marcado como vencido.");
   cargarUsuarios();
 }
 
 async function quitarAprobacion(id) {
-  await db.collection("usuarios").doc(id).update({ aprobado: false });
-  alert("Aprobación quitada");
+  await db.collection("usuarios").doc(id).update({
+    aprobado: false,
+    activo: false
+  });
+
+  alert("Aprobación quitada.");
   cargarUsuarios();
 }
 
