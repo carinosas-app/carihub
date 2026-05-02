@@ -24,6 +24,11 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const auth = firebase.auth();
 const storage = firebase.storage();
+
+const LINK_MERCADO_PAGO = "https://mpago.la/1KQ3iuP";
+const LINK_STRIPE = "https://buy.stripe.com/eVq8wR5Wr9GccXUbmbcAo00";
+const WHATSAPP_ADMIN = "528112304664";
+const PAISES_MERCADO_PAGO = ["MX","CO","PE","CL","AR","BR"];
 </script>
 
 <style>
@@ -58,7 +63,13 @@ label{display:block;margin:14px 0;font-size:16px}
 .galeria{display:flex;gap:12px;overflow-x:auto;padding:10px 0;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}
 .galeria img{min-width:90%;height:360px;object-fit:cover;border-radius:15px;scroll-snap-align:center;flex-shrink:0}
 .galeria::-webkit-scrollbar{display:none}
-.whatsapp{display:block;text-align:center;background:#25D366;color:white;padding:14px;border-radius:12px;text-decoration:none;font-weight:bold}
+.whatsapp{display:block;text-align:center;background:#25D366;color:white;padding:14px;border-radius:12px;text-decoration:none;font-weight:bold;margin-top:12px}
+.btn-pago{display:block;text-align:center;padding:14px;border-radius:12px;text-decoration:none;font-weight:bold;margin:10px 0}
+.mp{background:#ffe600;color:#111}
+.stripe{background:#635bff;color:white}
+.vencido-box{border:2px solid red;background:#fff6f6}
+.es .en{display:none}
+.en .es{display:none}
 </style>
 </head>
 
@@ -163,7 +174,7 @@ label{display:block;margin:14px 0;font-size:16px}
 
       <input id="nombreReal" placeholder="Nombre real completo">
 
-      <label><b>INE / identificación (frente)</b></label>
+      <label><b>INE / identificación frente</b></label>
       <input id="ineFoto" type="file" accept="image/*">
 
       <label><b>INE reverso</b></label>
@@ -205,6 +216,46 @@ function cerrarRegistro(){document.getElementById("modalRegistro").style.display
 function irPaso(num){document.querySelectorAll(".step").forEach(s=>s.classList.remove("active"));document.getElementById("step"+num).classList.add("active")}
 function limpiarTelefono(t){return String(t||"").replace(/\D/g,"")}
 function textoSeguro(texto){return String(texto||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;")}
+
+function detectarIdioma(){
+  const idioma=navigator.language || navigator.userLanguage;
+  if(idioma && idioma.startsWith("es")){
+    document.body.classList.add("es");
+  }else{
+    document.body.classList.add("en");
+  }
+}
+
+async function pagoAutomatico(){
+  try{
+    const res=await fetch("https://ipapi.co/json/");
+    const data=await res.json();
+    const pais=data.country_code;
+
+    if(PAISES_MERCADO_PAGO.includes(pais)){
+      window.open(LINK_MERCADO_PAGO,"_blank");
+    }else{
+      window.open(LINK_STRIPE,"_blank");
+    }
+  }catch(e){
+    alert("No se pudo detectar tu país. Usa el selector manual.");
+  }
+}
+
+function pagoManual(){
+  const pais=document.getElementById("paisManual").value;
+
+  if(!pais){
+    alert("Selecciona tu país");
+    return;
+  }
+
+  if(["mx","co","pe","cl","ar","br"].includes(pais)){
+    window.open(LINK_MERCADO_PAGO,"_blank");
+  }else{
+    window.open(LINK_STRIPE,"_blank");
+  }
+}
 
 function validarImagen(file,nombre){
   if(!file){alert("Falta subir: "+nombre);return false}
@@ -254,7 +305,7 @@ async function subirImagen(ruta,archivo){
   return await ref.getDownloadURL();
 }
 
-async function subirMultiplesFotos(userId, archivos){
+async function subirMultiplesFotos(userId,archivos){
   const urls=[];
   for(let i=0;i<archivos.length;i++){
     const file=archivos[i];
@@ -385,22 +436,74 @@ async function cargarPerfiles(){
     snap.forEach(doc=>{
       const u=doc.data();
 
-      if(u.activo !== true) return;
-      if(u.vencido === true) return;
+      if(u.vencido === true || (u.fechaVencimiento && ((u.fechaVencimiento.toDate ? u.fechaVencimiento.toDate() : new Date(u.fechaVencimiento)) < new Date()))){
+        lista.innerHTML+=`
+          <div class="card vencido-box">
+            <h3 style="color:red;">⚠️ Perfil vencido</h3>
 
-      if(u.fechaVencimiento){
-        const fechaV = u.fechaVencimiento.toDate ? u.fechaVencimiento.toDate() : new Date(u.fechaVencimiento);
-        if(fechaV < new Date()) return;
+            <h2>
+              <span class="es">Activa tu perfil por $200 MXN</span>
+              <span class="en">Activate your profile for $200 MXN</span>
+            </h2>
+
+            <p>
+              <span class="es">Para seguir visible en CariHub, realiza tu renovación.</span>
+              <span class="en">To stay visible on CariHub, complete your renewal.</span>
+            </p>
+
+            <p><b>💳 Pago mensual:</b> $200 MXN / 30 días</p>
+
+            <button onclick="pagoAutomatico()" class="btn-pago stripe" style="width:100%;border:none;cursor:pointer;">
+              <span class="es">Pagar ahora automáticamente</span>
+              <span class="en">Pay automatically</span>
+            </button>
+
+            <p><b>O selecciona tu país manualmente:</b></p>
+
+            <select id="paisManual">
+              <option value="">Selecciona tu país</option>
+              <option value="mx">🇲🇽 México</option>
+              <option value="co">🇨🇴 Colombia</option>
+              <option value="pe">🇵🇪 Perú</option>
+              <option value="cl">🇨🇱 Chile</option>
+              <option value="ar">🇦🇷 Argentina</option>
+              <option value="br">🇧🇷 Brasil</option>
+              <option value="us">🇺🇸 Estados Unidos</option>
+              <option value="es">🇪🇸 España</option>
+              <option value="ca">🇨🇦 Canadá</option>
+              <option value="uk">🇬🇧 Reino Unido</option>
+              <option value="fr">🇫🇷 Francia</option>
+              <option value="de">🇩🇪 Alemania</option>
+              <option value="otro">🌍 Otros países</option>
+            </select>
+
+            <button onclick="pagoManual()" class="btn-pago mp" style="width:100%;border:none;cursor:pointer;">
+              Continuar al pago
+            </button>
+
+            <a class="whatsapp" href="https://wa.me/${WHATSAPP_ADMIN}?text=${encodeURIComponent('Hola, quiero renovar mi perfil en CariHub. Ya realicé mi pago y quiero enviar mi comprobante.')}" target="_blank">
+              Enviar comprobante por WhatsApp
+            </a>
+
+            <p><b>📲 WhatsApp:</b><br>+52 81 1230 4664</p>
+          </div>
+        `;
+        return;
       }
+
+      if(u.activo !== true) return;
 
       if(!u.fotoURL||!u.nombre||!u.ciudad||!u.categoria||!u.descripcion||!u.precio||!u.modalidad)return;
 
       const tel=limpiarTelefono(u.telefono||"");
+      const mensajeCliente=encodeURIComponent("Hola, vi tu perfil en Cariñosas y me gustaría recibir más información.");
 
       lista.innerHTML+=`
         <div class="card">
           ${u.fotoURL ? `<img src="${textoSeguro(u.fotoURL)}" alt="Foto">` : ""}
+
           <h3>${textoSeguro(u.nombre)}</h3>
+
           <p><b>Ciudad:</b> ${textoSeguro(u.ciudad)}</p>
           <p><b>Categoría:</b> ${textoSeguro(u.categoria)}</p>
           <p><b>Descripción:</b> ${textoSeguro(u.descripcion)}</p>
@@ -421,7 +524,9 @@ async function cargarPerfiles(){
             </div>
           ` : ""}
 
-          <a class="whatsapp" href="https://wa.me/${tel}" target="_blank">Contactar por WhatsApp</a>
+          <a class="whatsapp" href="https://wa.me/${tel}?text=${mensajeCliente}" target="_blank">
+            Contactar por WhatsApp
+          </a>
         </div>
       `;
     });
@@ -431,6 +536,7 @@ async function cargarPerfiles(){
   }
 }
 
+detectarIdioma();
 cargarPerfiles();
 </script>
 
