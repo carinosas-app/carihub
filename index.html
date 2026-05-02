@@ -64,10 +64,10 @@ label{display:block;margin:14px 0;font-size:16px}
 .galeria img{min-width:90%;height:360px;object-fit:cover;border-radius:15px;scroll-snap-align:center;flex-shrink:0}
 .galeria::-webkit-scrollbar{display:none}
 .whatsapp{display:block;text-align:center;background:#25D366;color:white;padding:14px;border-radius:12px;text-decoration:none;font-weight:bold;margin-top:12px}
-.btn-pago{display:block;text-align:center;padding:14px;border-radius:12px;text-decoration:none;font-weight:bold;margin:10px 0}
+.btn-pago{display:block;width:100%;text-align:center;padding:14px;border-radius:12px;text-decoration:none;font-weight:bold;margin:10px 0;border:none;font-size:16px;cursor:pointer}
 .mp{background:#ffe600;color:#111}
 .stripe{background:#635bff;color:white}
-.vencido-box{border:2px solid red;background:#fff6f6}
+.estado-box{background:#fff;border-radius:18px;padding:18px;box-shadow:0 3px 12px rgba(0,0,0,.16)}
 .es .en{display:none}
 .en .es{display:none}
 </style>
@@ -83,12 +83,28 @@ label{display:block;margin:14px 0;font-size:16px}
 <div class="menu" id="menu">
   <div class="cerrar-menu" onclick="cerrarMenu()">✕</div>
   <a href="#" onclick="abrirRegistro()">👤 Registrarse</a>
+  <a href="#" onclick="abrirMiPerfil()">💳 Mi perfil / Activar</a>
   <a href="#">📢 Banners</a>
   <a href="#">⚠️ Denunciar</a>
   <a href="#">📄 Términos y condiciones</a>
   <a href="#">🔒 Política de privacidad</a>
   <a href="#">📃 Condiciones de uso</a>
   <a href="#" class="volver-menu" onclick="cerrarMenu()">← Volver</a>
+</div>
+
+<div class="modal" id="modalMiPerfil">
+  <div class="form-box">
+    <h2>Mi perfil</h2>
+    <p class="subtitulo">Entra con el correo y contraseña con los que te registraste.</p>
+
+    <input id="loginEmail" type="email" placeholder="Correo">
+    <input id="loginPassword" type="password" placeholder="Contraseña">
+
+    <button class="btn btn-continuar" style="width:100%;margin-top:10px;" onclick="loginMiPerfil()">Entrar</button>
+    <button class="btn btn-atras" style="width:100%;margin-top:10px;" onclick="cerrarMiPerfil()">← Volver</button>
+
+    <div id="estadoPerfil" style="margin-top:18px;"></div>
+  </div>
 </div>
 
 <div class="modal" id="modalRegistro">
@@ -213,17 +229,16 @@ function abrirMenu(){document.getElementById("menu").classList.add("active")}
 function cerrarMenu(){document.getElementById("menu").classList.remove("active")}
 function abrirRegistro(){cerrarMenu();document.getElementById("modalRegistro").style.display="block";irPaso(1)}
 function cerrarRegistro(){document.getElementById("modalRegistro").style.display="none"}
+function abrirMiPerfil(){cerrarMenu();document.getElementById("modalMiPerfil").style.display="block"}
+function cerrarMiPerfil(){document.getElementById("modalMiPerfil").style.display="none"}
 function irPaso(num){document.querySelectorAll(".step").forEach(s=>s.classList.remove("active"));document.getElementById("step"+num).classList.add("active")}
 function limpiarTelefono(t){return String(t||"").replace(/\D/g,"")}
 function textoSeguro(texto){return String(texto||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;")}
 
 function detectarIdioma(){
   const idioma=navigator.language || navigator.userLanguage;
-  if(idioma && idioma.startsWith("es")){
-    document.body.classList.add("es");
-  }else{
-    document.body.classList.add("en");
-  }
+  if(idioma && idioma.startsWith("es")) document.body.classList.add("es");
+  else document.body.classList.add("en");
 }
 
 async function pagoAutomatico(){
@@ -232,11 +247,8 @@ async function pagoAutomatico(){
     const data=await res.json();
     const pais=data.country_code;
 
-    if(PAISES_MERCADO_PAGO.includes(pais)){
-      window.open(LINK_MERCADO_PAGO,"_blank");
-    }else{
-      window.open(LINK_STRIPE,"_blank");
-    }
+    if(PAISES_MERCADO_PAGO.includes(pais)) window.open(LINK_MERCADO_PAGO,"_blank");
+    else window.open(LINK_STRIPE,"_blank");
   }catch(e){
     alert("No se pudo detectar tu país. Usa el selector manual.");
   }
@@ -244,17 +256,121 @@ async function pagoAutomatico(){
 
 function pagoManual(){
   const pais=document.getElementById("paisManual").value;
+  if(!pais){alert("Selecciona tu país");return}
+  if(["mx","co","pe","cl","ar","br"].includes(pais)) window.open(LINK_MERCADO_PAGO,"_blank");
+  else window.open(LINK_STRIPE,"_blank");
+}
 
-  if(!pais){
-    alert("Selecciona tu país");
-    return;
-  }
+async function loginMiPerfil(){
+  const email=document.getElementById("loginEmail").value.trim().toLowerCase();
+  const password=document.getElementById("loginPassword").value;
+  const estado=document.getElementById("estadoPerfil");
 
-  if(["mx","co","pe","cl","ar","br"].includes(pais)){
-    window.open(LINK_MERCADO_PAGO,"_blank");
-  }else{
-    window.open(LINK_STRIPE,"_blank");
+  if(!email||!password){alert("Escribe correo y contraseña.");return}
+
+  estado.innerHTML="<p>Revisando perfil...</p>";
+
+  try{
+    const cred=await auth.signInWithEmailAndPassword(email,password);
+    const uid=cred.user.uid;
+    const doc=await db.collection("usuarios").doc(uid).get();
+
+    if(!doc.exists){
+      estado.innerHTML="<div class='estado-box'><h3>No encontramos tu perfil.</h3></div>";
+      return;
+    }
+
+    const u=doc.data();
+    let vencido=false;
+
+    if(u.vencido===true) vencido=true;
+
+    if(u.fechaVencimiento){
+      const fechaV=u.fechaVencimiento.toDate ? u.fechaVencimiento.toDate() : new Date(u.fechaVencimiento);
+      if(fechaV < new Date()) vencido=true;
+    }
+
+    if(u.aprobado!==true){
+      estado.innerHTML=`
+        <div class="estado-box">
+          <h3>⏳ Perfil en revisión</h3>
+          <p>Tu registro fue enviado. Espera aprobación del administrador.</p>
+        </div>
+      `;
+      return;
+    }
+
+    if(u.aprobado===true && u.activo!==true && !vencido){
+      estado.innerHTML=plantillaPago("✅ Perfil aprobado", "Tu perfil ya fue aprobado. Actívalo por $200 MXN para aparecer en la plataforma.");
+      return;
+    }
+
+    if(vencido){
+      estado.innerHTML=plantillaPago("⚠️ Perfil vencido", "Tu perfil necesita renovación para seguir visible.");
+      return;
+    }
+
+    if(u.activo===true){
+      let fechaTexto="No disponible";
+      if(u.fechaVencimiento){
+        const fechaV=u.fechaVencimiento.toDate ? u.fechaVencimiento.toDate() : new Date(u.fechaVencimiento);
+        fechaTexto=fechaV.toLocaleDateString("es-MX");
+      }
+
+      estado.innerHTML=`
+        <div class="estado-box">
+          <h3>🟢 Perfil activo</h3>
+          <p>Tu perfil está visible en CariHub.</p>
+          <p><b>Vence:</b> ${fechaTexto}</p>
+        </div>
+      `;
+      return;
+    }
+
+  }catch(error){
+    estado.innerHTML=`<div class="estado-box"><h3>Error</h3><p>${textoSeguro(error.message)}</p></div>`;
   }
+}
+
+function plantillaPago(titulo,texto){
+  return `
+    <div class="estado-box">
+      <h3>${titulo}</h3>
+      <p>${texto}</p>
+      <p><b>💳 Pago:</b> $200 MXN / 30 días</p>
+
+      <button onclick="pagoAutomatico()" class="btn-pago stripe">
+        Pagar ahora automáticamente
+      </button>
+
+      <p><b>O selecciona tu país manualmente:</b></p>
+
+      <select id="paisManual">
+        <option value="">Selecciona tu país</option>
+        <option value="mx">🇲🇽 México</option>
+        <option value="co">🇨🇴 Colombia</option>
+        <option value="pe">🇵🇪 Perú</option>
+        <option value="cl">🇨🇱 Chile</option>
+        <option value="ar">🇦🇷 Argentina</option>
+        <option value="br">🇧🇷 Brasil</option>
+        <option value="us">🇺🇸 Estados Unidos</option>
+        <option value="es">🇪🇸 España</option>
+        <option value="ca">🇨🇦 Canadá</option>
+        <option value="uk">🇬🇧 Reino Unido</option>
+        <option value="fr">🇫🇷 Francia</option>
+        <option value="de">🇩🇪 Alemania</option>
+        <option value="otro">🌍 Otros países</option>
+      </select>
+
+      <button onclick="pagoManual()" class="btn-pago mp">
+        Continuar al pago
+      </button>
+
+      <a class="whatsapp" href="https://wa.me/${WHATSAPP_ADMIN}?text=${encodeURIComponent('Hola, quiero activar o renovar mi perfil en CariHub. Ya realicé mi pago y quiero enviar mi comprobante.')}" target="_blank">
+        Enviar comprobante por WhatsApp
+      </a>
+    </div>
+  `;
 }
 
 function validarImagen(file,nombre){
@@ -272,13 +388,10 @@ function validarPaso1(){
       return;
     }
   }
-
   const password=document.getElementById("password").value;
   const telefono=limpiarTelefono(document.getElementById("telefono").value);
-
   if(password.length<6){alert("La contraseña debe tener mínimo 6 caracteres.");return}
   if(telefono.length<10||telefono.length>15){alert("WhatsApp inválido. Usa solo números.");return}
-
   irPaso(2);
 }
 
@@ -293,9 +406,7 @@ function validarPaso2(){
     alert("Completa toda la información de tu página.");
     return;
   }
-
   if(!validarImagen(fotoPerfil,"Foto principal")) return;
-
   irPaso(3);
 }
 
@@ -413,9 +524,7 @@ async function registrar(){
     cerrarRegistro();
 
   }catch(error){
-    if(error.message!=="validacion"){
-      alert("Error: "+error.message);
-    }
+    if(error.message!=="validacion") alert("Error: "+error.message);
   }
 
   btn.disabled=false;
@@ -427,70 +536,21 @@ async function cargarPerfiles(){
   lista.innerHTML="";
 
   try{
-    const snap=await db.collection("usuarios")
-      .where("aprobado","==",true)
-      .get();
+    const snap=await db.collection("usuarios").where("aprobado","==",true).get();
 
     if(snap.empty)return;
 
     snap.forEach(doc=>{
       const u=doc.data();
 
-      if(u.vencido === true || (u.fechaVencimiento && ((u.fechaVencimiento.toDate ? u.fechaVencimiento.toDate() : new Date(u.fechaVencimiento)) < new Date()))){
-        lista.innerHTML+=`
-          <div class="card vencido-box">
-            <h3 style="color:red;">⚠️ Perfil vencido</h3>
-
-            <h2>
-              <span class="es">Activa tu perfil por $200 MXN</span>
-              <span class="en">Activate your profile for $200 MXN</span>
-            </h2>
-
-            <p>
-              <span class="es">Para seguir visible en CariHub, realiza tu renovación.</span>
-              <span class="en">To stay visible on CariHub, complete your renewal.</span>
-            </p>
-
-            <p><b>💳 Pago mensual:</b> $200 MXN / 30 días</p>
-
-            <button onclick="pagoAutomatico()" class="btn-pago stripe" style="width:100%;border:none;cursor:pointer;">
-              <span class="es">Pagar ahora automáticamente</span>
-              <span class="en">Pay automatically</span>
-            </button>
-
-            <p><b>O selecciona tu país manualmente:</b></p>
-
-            <select id="paisManual">
-              <option value="">Selecciona tu país</option>
-              <option value="mx">🇲🇽 México</option>
-              <option value="co">🇨🇴 Colombia</option>
-              <option value="pe">🇵🇪 Perú</option>
-              <option value="cl">🇨🇱 Chile</option>
-              <option value="ar">🇦🇷 Argentina</option>
-              <option value="br">🇧🇷 Brasil</option>
-              <option value="us">🇺🇸 Estados Unidos</option>
-              <option value="es">🇪🇸 España</option>
-              <option value="ca">🇨🇦 Canadá</option>
-              <option value="uk">🇬🇧 Reino Unido</option>
-              <option value="fr">🇫🇷 Francia</option>
-              <option value="de">🇩🇪 Alemania</option>
-              <option value="otro">🌍 Otros países</option>
-            </select>
-
-            <button onclick="pagoManual()" class="btn-pago mp" style="width:100%;border:none;cursor:pointer;">
-              Continuar al pago
-            </button>
-
-            <a class="whatsapp" href="https://wa.me/${WHATSAPP_ADMIN}?text=${encodeURIComponent('Hola, quiero renovar mi perfil en CariHub. Ya realicé mi pago y quiero enviar mi comprobante.')}" target="_blank">
-              Enviar comprobante por WhatsApp
-            </a>
-
-            <p><b>📲 WhatsApp:</b><br>+52 81 1230 4664</p>
-          </div>
-        `;
-        return;
+      let vencido=false;
+      if(u.vencido===true) vencido=true;
+      if(u.fechaVencimiento){
+        const fechaV=u.fechaVencimiento.toDate ? u.fechaVencimiento.toDate() : new Date(u.fechaVencimiento);
+        if(fechaV < new Date()) vencido=true;
       }
 
+      if(vencido) return;
       if(u.activo !== true) return;
 
       if(!u.fotoURL||!u.nombre||!u.ciudad||!u.categoria||!u.descripcion||!u.precio||!u.modalidad)return;
