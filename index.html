@@ -54,6 +54,8 @@ label{display:block;margin:14px 0;font-size:16px}
 #lista-perfiles{padding:20px}
 .card{background:white;border-radius:18px;padding:15px;margin-bottom:18px;box-shadow:0 3px 12px rgba(0,0,0,.18)}
 .card img{width:100%;max-height:360px;object-fit:cover;border-radius:15px}
+.galeria{display:flex;gap:10px;overflow-x:auto;padding:10px 0}
+.galeria img{min-width:85%;height:360px;object-fit:cover;border-radius:15px}
 .card h3{color:#b7195b;font-size:26px}
 .whatsapp{display:block;text-align:center;background:#25D366;color:white;padding:14px;border-radius:12px;text-decoration:none;font-weight:bold}
 </style>
@@ -409,9 +411,11 @@ async function cargarPerfiles(){
           ${u.fotosExtraURL && u.fotosExtraURL.length > 0 ? `
             <div style="margin-top:10px;">
               <b>Fotos:</b>
-              ${u.fotosExtraURL.map(f => `
-                <img src="${textoSeguro(f)}" style="width:100%;margin-top:8px;border-radius:12px;">
-              `).join("")}
+              <div class="galeria">
+                ${u.fotosExtraURL.map(f => `
+                  <img src="${textoSeguro(f)}" alt="Foto extra">
+                `).join("")}
+              </div>
             </div>
           ` : ""}
 
