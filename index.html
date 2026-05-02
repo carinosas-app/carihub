@@ -22,8 +22,6 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
-const auth = firebase.auth();
-const storage = firebase.storage();
 </script>
 
 <style>
@@ -70,7 +68,6 @@ body{margin:0;font-family:Arial;background:#fff}
   cursor:pointer;
 }
 
-/* TARJETAS */
 #lista-perfiles{padding:20px}
 
 .card{
@@ -159,10 +156,6 @@ function limpiarTelefono(t){
   return String(t||"").replace(/\D/g,"")
 }
 
-function textoSeguro(texto){
-  return String(texto||"")
-}
-
 async function cargarPerfiles(){
   const lista=document.getElementById("lista-perfiles");
   lista.innerHTML="";
@@ -179,10 +172,14 @@ async function cargarPerfiles(){
     <div class="card">
       <img src="${u.fotoURL}">
       <h3>${u.nombre}</h3>
+
       <p><b>Ciudad:</b> ${u.ciudad}</p>
       <p><b>Categoría:</b> ${u.categoria}</p>
       <p><b>Descripción:</b> ${u.descripcion}</p>
       <p><b>Precio:</b> ${u.precio}</p>
+      <p><b>Modalidad:</b> ${u.modalidad}</p>
+      <p><b>Horario:</b> ${u.horario}</p>
+      <p><b>Zona:</b> ${u.zona}</p>
 
       ${u.fotosExtraURL && u.fotosExtraURL.length > 0 ? `
         <div class="galeria">
