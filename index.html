@@ -29,6 +29,9 @@ const LINK_MERCADO_PAGO = "https://mpago.la/1KQ3iuP";
 const LINK_STRIPE = "https://buy.stripe.com/eVq8wR5Wr9GccXUbmbcAo00";
 const WHATSAPP_ADMIN = "528112304664";
 const PAISES_MERCADO_PAGO = ["MX","CO","PE","CL","AR","BR"];
+
+let UID_PANEL = null;
+let UID_EDITANDO = null;
 </script>
 
 <style>
@@ -67,7 +70,7 @@ label{display:block;margin:14px 0;font-size:16px}
 .btn-pago{display:block;width:100%;text-align:center;padding:14px;border-radius:12px;text-decoration:none;font-weight:bold;margin:10px 0;border:none;font-size:16px;cursor:pointer}
 .mp{background:#ffe600;color:#111}
 .stripe{background:#635bff;color:white}
-.estado-box{background:#fff;border-radius:18px;padding:18px;box-shadow:0 3px 12px rgba(0,0,0,.16)}
+.estado-box{background:#fff;border-radius:18px;padding:18px;box-shadow:0 3px 12px rgba(0,0,0,.16);margin-bottom:15px}
 .es .en{display:none}
 .en .es{display:none}
 </style>
@@ -83,7 +86,7 @@ label{display:block;margin:14px 0;font-size:16px}
 <div class="menu" id="menu">
   <div class="cerrar-menu" onclick="cerrarMenu()">✕</div>
   <a href="#" onclick="abrirRegistro()">👤 Registrarse</a>
-  <a href="#" onclick="abrirMiPerfil()">💳 Mi perfil / Activar</a>
+  <a href="#" onclick="abrirMiPerfil()">👤 Mi perfil</a>
   <a href="#">📢 Banners</a>
   <a href="#">⚠️ Denunciar</a>
   <a href="#">📄 Términos y condiciones</a>
@@ -102,8 +105,35 @@ label{display:block;margin:14px 0;font-size:16px}
 
     <button class="btn btn-continuar" style="width:100%;margin-top:10px;" onclick="loginMiPerfil()">Entrar</button>
     <button class="btn btn-atras" style="width:100%;margin-top:10px;" onclick="cerrarMiPerfil()">← Volver</button>
+  </div>
+</div>
 
-    <div id="estadoPerfil" style="margin-top:18px;"></div>
+<div class="modal" id="modalPanel">
+  <div class="form-box">
+    <h2>Panel de perfil</h2>
+    <div id="panelContenido"></div>
+    <button class="btn btn-atras" style="width:100%;" onclick="cerrarPanel()">← Volver</button>
+  </div>
+</div>
+
+<div class="modal" id="modalEditar">
+  <div class="form-box">
+    <h2>Actualizar datos públicos</h2>
+    <p class="subtitulo">Solo puedes actualizar la información que aparece publicada. Tus datos personales y verificación no se modifican aquí.</p>
+
+    <textarea id="editDescripcion" placeholder="Descripción breve"></textarea>
+    <input id="editPrecio" placeholder="Precio / forma de trabajo">
+    <input id="editModalidad" placeholder="Modalidad">
+    <input id="editHorario" placeholder="Horario">
+    <input id="editZona" placeholder="Zona">
+    <input id="editServicios" placeholder="Servicios">
+
+    <div class="aviso">
+      Al guardar cambios, tu perfil quedará pendiente de revisión antes de volver a mostrarse con la nueva información.
+    </div>
+
+    <button class="btn btn-enviar" style="width:100%;margin-top:10px;" onclick="guardarCambiosPublicos()">Guardar cambios</button>
+    <button class="btn btn-atras" style="width:100%;margin-top:10px;" onclick="cerrarEditar()">← Volver</button>
   </div>
 </div>
 
@@ -231,6 +261,10 @@ function abrirRegistro(){cerrarMenu();document.getElementById("modalRegistro").s
 function cerrarRegistro(){document.getElementById("modalRegistro").style.display="none"}
 function abrirMiPerfil(){cerrarMenu();document.getElementById("modalMiPerfil").style.display="block"}
 function cerrarMiPerfil(){document.getElementById("modalMiPerfil").style.display="none"}
+function abrirPanel(uid){UID_PANEL=uid;document.getElementById("modalPanel").style.display="block";cargarPanel(uid)}
+function cerrarPanel(){document.getElementById("modalPanel").style.display="none"}
+function abrirEditar(){document.getElementById("modalEditar").style.display="block"}
+function cerrarEditar(){document.getElementById("modalEditar").style.display="none"}
 function irPaso(num){document.querySelectorAll(".step").forEach(s=>s.classList.remove("active"));document.getElementById("step"+num).classList.add("active")}
 function limpiarTelefono(t){return String(t||"").replace(/\D/g,"")}
 function textoSeguro(texto){return String(texto||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;")}
@@ -264,19 +298,30 @@ function pagoManual(){
 async function loginMiPerfil(){
   const email=document.getElementById("loginEmail").value.trim().toLowerCase();
   const password=document.getElementById("loginPassword").value;
-  const estado=document.getElementById("estadoPerfil");
 
   if(!email||!password){alert("Escribe correo y contraseña.");return}
-
-  estado.innerHTML="<p>Revisando perfil...</p>";
 
   try{
     const cred=await auth.signInWithEmailAndPassword(email,password);
     const uid=cred.user.uid;
+
+    cerrarMiPerfil();
+    abrirPanel(uid);
+
+  }catch(error){
+    alert("Error: "+error.message);
+  }
+}
+
+async function cargarPanel(uid){
+  const contenedor=document.getElementById("panelContenido");
+  contenedor.innerHTML="<p>Cargando perfil...</p>";
+
+  try{
     const doc=await db.collection("usuarios").doc(uid).get();
 
     if(!doc.exists){
-      estado.innerHTML="<div class='estado-box'><h3>No encontramos tu perfil.</h3></div>";
+      contenedor.innerHTML="<div class='estado-box'><h3>No encontramos tu perfil.</h3></div>";
       return;
     }
 
@@ -290,54 +335,64 @@ async function loginMiPerfil(){
       if(fechaV < new Date()) vencido=true;
     }
 
+    let fechaTexto="No disponible";
+    if(u.fechaVencimiento){
+      const fechaV=u.fechaVencimiento.toDate ? u.fechaVencimiento.toDate() : new Date(u.fechaVencimiento);
+      fechaTexto=fechaV.toLocaleDateString("es-MX");
+    }
+
+    let estadoHTML="";
+    let pagoHTML="";
+
     if(u.aprobado!==true){
-      estado.innerHTML=`
-        <div class="estado-box">
-          <h3>⏳ Perfil en revisión</h3>
-          <p>Tu registro fue enviado. Espera aprobación del administrador.</p>
-        </div>
+      estadoHTML=`
+        <h3>⏳ Perfil en revisión</h3>
+        <p>Tu perfil está pendiente de aprobación del administrador.</p>
       `;
-      return;
-    }
-
-    if(u.aprobado===true && u.activo!==true && !vencido){
-      estado.innerHTML=plantillaPago("✅ Perfil aprobado", "Tu perfil ya fue aprobado. Actívalo por $200 MXN para aparecer en la plataforma.");
-      return;
-    }
-
-    if(vencido){
-      estado.innerHTML=plantillaPago("⚠️ Perfil vencido", "Tu perfil necesita renovación para seguir visible.");
-      return;
-    }
-
-    if(u.activo===true){
-      let fechaTexto="No disponible";
-      if(u.fechaVencimiento){
-        const fechaV=u.fechaVencimiento.toDate ? u.fechaVencimiento.toDate() : new Date(u.fechaVencimiento);
-        fechaTexto=fechaV.toLocaleDateString("es-MX");
-      }
-
-      estado.innerHTML=`
-        <div class="estado-box">
-          <h3>🟢 Perfil activo</h3>
-          <p>Tu perfil está visible en CariHub.</p>
-          <p><b>Vence:</b> ${fechaTexto}</p>
-        </div>
+    }else if(vencido){
+      estadoHTML=`
+        <h3>⚠️ Perfil vencido</h3>
+        <p>Tu perfil no está visible. Renueva para volver a aparecer.</p>
+        <p><b>Vence:</b> ${fechaTexto}</p>
       `;
-      return;
+      pagoHTML=plantillaPagoPanel();
+    }else if(u.activo===true){
+      estadoHTML=`
+        <h3>🟢 Perfil activo</h3>
+        <p>Tu perfil está visible en CariHub.</p>
+        <p><b>Vence:</b> ${fechaTexto}</p>
+      `;
+      pagoHTML=plantillaPagoPanel();
+    }else{
+      estadoHTML=`
+        <h3>✅ Perfil aprobado</h3>
+        <p>Tu perfil fue aprobado. Actívalo para aparecer en la plataforma.</p>
+      `;
+      pagoHTML=plantillaPagoPanel();
     }
+
+    contenedor.innerHTML=`
+      <div class="estado-box">
+        ${estadoHTML}
+      </div>
+
+      ${pagoHTML}
+
+      <button class="btn btn-continuar" style="width:100%;margin-top:10px;" onclick="abrirEdicionPublica('${uid}')">
+        ✏️ Actualizar datos públicos
+      </button>
+    `;
 
   }catch(error){
-    estado.innerHTML=`<div class="estado-box"><h3>Error</h3><p>${textoSeguro(error.message)}</p></div>`;
+    contenedor.innerHTML=`<div class="estado-box"><h3>Error</h3><p>${textoSeguro(error.message)}</p></div>`;
   }
 }
 
-function plantillaPago(titulo,texto){
+function plantillaPagoPanel(){
   return `
     <div class="estado-box">
-      <h3>${titulo}</h3>
-      <p>${texto}</p>
-      <p><b>💳 Pago:</b> $200 MXN / 30 días</p>
+      <h3>💳 Pago / renovación</h3>
+      <p><b>Costo:</b> $200 MXN / 30 días</p>
 
       <button onclick="pagoAutomatico()" class="btn-pago stripe">
         Pagar ahora automáticamente
@@ -373,6 +428,70 @@ function plantillaPago(titulo,texto){
   `;
 }
 
+async function abrirEdicionPublica(uid){
+  UID_EDITANDO=uid;
+
+  try{
+    const doc=await db.collection("usuarios").doc(uid).get();
+    if(!doc.exists){alert("No encontramos tu perfil.");return}
+
+    const u=doc.data();
+
+    document.getElementById("editDescripcion").value=u.descripcion||"";
+    document.getElementById("editPrecio").value=u.precio||"";
+    document.getElementById("editModalidad").value=u.modalidad||"";
+    document.getElementById("editHorario").value=u.horario||"";
+    document.getElementById("editZona").value=u.zona||"";
+    document.getElementById("editServicios").value=u.servicios||"";
+
+    abrirEditar();
+
+  }catch(error){
+    alert("Error: "+error.message);
+  }
+}
+
+async function guardarCambiosPublicos(){
+  if(!UID_EDITANDO){alert("No hay perfil seleccionado.");return}
+
+  const descripcion=document.getElementById("editDescripcion").value.trim();
+  const precio=document.getElementById("editPrecio").value.trim();
+  const modalidad=document.getElementById("editModalidad").value.trim();
+  const horario=document.getElementById("editHorario").value.trim();
+  const zona=document.getElementById("editZona").value.trim();
+  const servicios=document.getElementById("editServicios").value.trim();
+
+  if(!descripcion || !precio || !modalidad || !horario || !zona || !servicios){
+    alert("Completa todos los datos públicos.");
+    return;
+  }
+
+  try{
+    await db.collection("usuarios").doc(UID_EDITANDO).update({
+      descripcion,
+      precio,
+      modalidad,
+      horario,
+      zona,
+      servicios,
+      aprobado:false,
+      activo:false,
+      actualizacionPendiente:true,
+      estadoRevision:"actualizacion_pendiente",
+      fechaActualizacion:new Date()
+    });
+
+    alert("Actualización enviada. Pendiente de revisión.");
+
+    cerrarEditar();
+    cargarPanel(UID_EDITANDO);
+    cargarPerfiles();
+
+  }catch(error){
+    alert("Error: "+error.message);
+  }
+}
+
 function validarImagen(file,nombre){
   if(!file){alert("Falta subir: "+nombre);return false}
   if(!file.type.startsWith("image/")){alert(nombre+" debe ser una imagen.");return false}
@@ -388,10 +507,13 @@ function validarPaso1(){
       return;
     }
   }
+
   const password=document.getElementById("password").value;
   const telefono=limpiarTelefono(document.getElementById("telefono").value);
+
   if(password.length<6){alert("La contraseña debe tener mínimo 6 caracteres.");return}
   if(telefono.length<10||telefono.length>15){alert("WhatsApp inválido. Usa solo números.");return}
+
   irPaso(2);
 }
 
@@ -406,7 +528,9 @@ function validarPaso2(){
     alert("Completa toda la información de tu página.");
     return;
   }
+
   if(!validarImagen(fotoPerfil,"Foto principal")) return;
+
   irPaso(3);
 }
 
@@ -514,7 +638,9 @@ async function registrar(){
       vencido:false,
       primerMesGratis:false,
       pagado:false,
+      actualizacionPendiente:false,
       estadoPago:"pendiente_aprobacion",
+      estadoRevision:"registro_pendiente",
       fechaPublicacion:null,
       fechaVencimiento:null,
       fecha:new Date()
@@ -524,7 +650,13 @@ async function registrar(){
     cerrarRegistro();
 
   }catch(error){
-    if(error.message!=="validacion") alert("Error: "+error.message);
+    if(error.message!=="validacion"){
+      if(error.code==="auth/email-already-in-use"){
+        alert("Este correo ya está registrado. Entra en Mi perfil.");
+      }else{
+        alert("Error: "+error.message);
+      }
+    }
   }
 
   btn.disabled=false;
