@@ -71,6 +71,8 @@ label{display:block;margin:14px 0;font-size:16px}
 .mp{background:#ffe600;color:#111}
 .stripe{background:#635bff;color:white}
 .estado-box{background:#fff;border-radius:18px;padding:18px;box-shadow:0 3px 12px rgba(0,0,0,.16);margin-bottom:15px}
+.es .en{display:none}
+.en .es{display:none}
 </style>
 </head>
 
@@ -96,9 +98,13 @@ label{display:block;margin:14px 0;font-size:16px}
 <div class="modal" id="modalMiPerfil">
   <div class="form-box">
     <h2>Mi perfil</h2>
+    <p class="subtitulo">Entra con el correo y contraseña con los que te registraste.</p>
+
     <input id="loginEmail" type="email" placeholder="Correo">
     <input id="loginPassword" type="password" placeholder="Contraseña">
-    <button class="btn btn-continuar" onclick="loginMiPerfil()">Entrar</button>
+
+    <button class="btn btn-continuar" style="width:100%;margin-top:10px;" onclick="loginMiPerfil()">Entrar</button>
+    <button class="btn btn-atras" style="width:100%;margin-top:10px;" onclick="cerrarMiPerfil()">← Volver</button>
   </div>
 </div>
 
@@ -106,78 +112,624 @@ label{display:block;margin:14px 0;font-size:16px}
   <div class="form-box">
     <h2>Panel de perfil</h2>
     <div id="panelContenido"></div>
+    <button class="btn btn-atras" style="width:100%;" onclick="cerrarPanel()">← Volver</button>
   </div>
 </div>
 
-<script>
+<div class="modal" id="modalEditar">
+  <div class="form-box">
+    <h2>Actualizar datos públicos</h2>
+    <p class="subtitulo">Solo puedes actualizar la información que aparece publicada. Tus datos personales y verificación no se modifican aquí.</p>
 
+    <textarea id="editDescripcion" placeholder="Descripción breve"></textarea>
+    <input id="editPrecio" placeholder="Precio / forma de trabajo">
+    <input id="editModalidad" placeholder="Modalidad">
+    <input id="editHorario" placeholder="Horario">
+    <input id="editZona" placeholder="Zona">
+    <input id="editServicios" placeholder="Servicios">
+
+    <div class="aviso">
+      Al guardar cambios, tu perfil quedará pendiente de revisión antes de volver a mostrarse con la nueva información.
+    </div>
+
+    <button class="btn btn-enviar" style="width:100%;margin-top:10px;" onclick="guardarCambiosPublicos()">Guardar cambios</button>
+    <button class="btn btn-atras" style="width:100%;margin-top:10px;" onclick="cerrarEditar()">← Volver</button>
+  </div>
+</div>
+
+<div class="modal" id="modalRegistro">
+  <div class="form-box">
+
+    <div class="step active" id="step1">
+      <h2>Datos básicos</h2>
+      <p class="subtitulo">Completa la información principal para iniciar tu registro.</p>
+
+      <input id="nombre" placeholder="Nombre o alias">
+      <input id="email" type="email" placeholder="Correo">
+      <input id="password" type="password" placeholder="Contraseña mínimo 6 caracteres">
+      <input id="telefono" placeholder="WhatsApp solo números">
+      <input id="pais" placeholder="País">
+      <input id="estado" placeholder="Estado">
+      <input id="ciudad" placeholder="Ciudad / municipio">
+
+      <select id="categoria">
+        <option value="">Selecciona categoría</option>
+        <option value="Acompañante">Acompañante</option>
+        <option value="Escort">Escort</option>
+        <option value="Escort gay">Escort gay</option>
+        <option value="Spa">Spa</option>
+        <option value="Trans">Trans</option>
+        <option value="Sex shop">Sex shop</option>
+        <option value="Gigolo">Gigolo</option>
+        <option value="Madura">Madura</option>
+        <option value="Petit">Petit</option>
+        <option value="SW 🍍">SW 🍍</option>
+        <option value="Unicorns 🦄">Unicorns 🦄</option>
+        <option value="Hotwife 🔥">Hotwife 🔥</option>
+        <option value="Contenido">Contenido</option>
+        <option value="Singles">Singles</option>
+        <option value="Fetiche">Fetiche</option>
+        <option value="Sado">Sado</option>
+        <option value="VIP">VIP</option>
+        <option value="Otro">Otro</option>
+      </select>
+
+      <textarea id="descripcionCorta" placeholder="Descripción breve"></textarea>
+      <input id="precio" placeholder="Precio / forma de trabajo">
+
+      <select id="modalidad">
+        <option value="">Selecciona modalidad</option>
+        <option value="Con lugar">Con lugar</option>
+        <option value="Hotel">Hotel</option>
+        <option value="Domicilio">Domicilio</option>
+        <option value="Mixto">Mixto</option>
+      </select>
+
+      <div class="botones">
+        <button class="btn btn-atras" onclick="cerrarRegistro()">← Volver</button>
+        <button class="btn btn-continuar" onclick="validarPaso1()">Continuar →</button>
+      </div>
+    </div>
+
+    <div class="step" id="step2">
+      <h2>Información de tu página</h2>
+      <p class="subtitulo">Esta información será la que verá el público cuando tu perfil sea aprobado.</p>
+
+      <textarea id="descripcionCompleta" placeholder="Descripción completa de tu perfil"></textarea>
+      <input id="horario" placeholder="Horario de atención">
+      <input id="zona" placeholder="Zona o referencia">
+      <input id="servicios" placeholder="Servicios o detalles que quieras mostrar">
+
+      <label><b>Foto principal obligatoria</b></label>
+      <input id="fotoPerfil" type="file" accept="image/*">
+
+      <label><b>Fotos adicionales opcionales</b></label>
+      <input id="fotosExtra" type="file" accept="image/*" multiple>
+
+      <div class="aviso">La foto principal será visible solo cuando el perfil sea aprobado.</div>
+
+      <div class="botones">
+        <button class="btn btn-atras" onclick="irPaso(1)">← Volver</button>
+        <button class="btn btn-continuar" onclick="validarPaso2()">Continuar →</button>
+      </div>
+    </div>
+
+    <div class="step" id="step3">
+      <h2>Verificación y consentimiento</h2>
+      <p class="subtitulo">Esta información será usada únicamente para revisión interna. No será publicada.</p>
+
+      <input id="nombreReal" placeholder="Nombre real completo">
+
+      <label><b>INE / identificación frente</b></label>
+      <input id="ineFoto" type="file" accept="image/*">
+
+      <label><b>INE reverso</b></label>
+      <input id="ineReversoFoto" type="file" accept="image/*">
+
+      <label><b>Selfie con papel: “CariHub + fecha de hoy”</b></label>
+      <input id="selfieFoto" type="file" accept="image/*">
+
+      <label><input type="checkbox" id="mayorEdad"> Confirmo que soy mayor de edad</label>
+      <label><input type="checkbox" id="fotosMias"> Confirmo que las fotos y datos son míos</label>
+      <label><input type="checkbox" id="voluntario"> Confirmo que publico mi perfil por voluntad propia</label>
+      <label><input type="checkbox" id="aceptoTerminos"> Acepto términos y condiciones</label>
+      <label><input type="checkbox" id="aceptoUso"> Acepto condiciones de uso</label>
+      <label><input type="checkbox" id="aceptoPrivacidad"> Acepto política de privacidad</label>
+      <label><input type="checkbox" id="aceptoRevision"> Autorizo la revisión de mi información para aprobar o rechazar mi perfil</label>
+
+      <div class="aviso">
+        🎉 Primer mes GRATIS.<br>
+        Si tu perfil es aprobado, estará visible durante 30 días sin costo.
+        Después podrás renovar por $200 MXN cada 30 días.
+      </div>
+
+      <div class="botones">
+        <button class="btn btn-atras" onclick="irPaso(2)">← Volver</button>
+        <button class="btn btn-enviar" id="btnEnviar" onclick="registrar()">Enviar registro</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div id="lista-perfiles"></div>
+
+<script>
 function abrirMenu(){document.getElementById("menu").classList.add("active")}
 function cerrarMenu(){document.getElementById("menu").classList.remove("active")}
-function abrirMiPerfil(){document.getElementById("modalMiPerfil").style.display="block"}
+function abrirRegistro(){cerrarMenu();document.getElementById("modalRegistro").style.display="block";irPaso(1)}
+function cerrarRegistro(){document.getElementById("modalRegistro").style.display="none"}
+function abrirMiPerfil(){cerrarMenu();document.getElementById("modalMiPerfil").style.display="block"}
+function cerrarMiPerfil(){document.getElementById("modalMiPerfil").style.display="none"}
+function abrirPanel(uid){UID_PANEL=uid;document.getElementById("modalPanel").style.display="block";cargarPanel(uid)}
+function cerrarPanel(){document.getElementById("modalPanel").style.display="none"}
+function abrirEditar(){document.getElementById("modalEditar").style.display="block"}
+function cerrarEditar(){document.getElementById("modalEditar").style.display="none"}
+function irPaso(num){document.querySelectorAll(".step").forEach(s=>s.classList.remove("active"));document.getElementById("step"+num).classList.add("active")}
+function limpiarTelefono(t){return String(t||"").replace(/\D/g,"")}
+function textoSeguro(texto){return String(texto||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;")}
 
-async function loginMiPerfil(){
-  const email=document.getElementById("loginEmail").value;
-  const password=document.getElementById("loginPassword").value;
-
-  const cred=await auth.signInWithEmailAndPassword(email,password);
-  abrirPanel(cred.user.uid);
+function detectarIdioma(){
+  const idioma=navigator.language || navigator.userLanguage;
+  if(idioma && idioma.startsWith("es")) document.body.classList.add("es");
+  else document.body.classList.add("en");
 }
 
-function abrirPanel(uid){
-  document.getElementById("modalPanel").style.display="block";
-  cargarPanel(uid);
+async function pagoAutomatico(){
+  try{
+    const res=await fetch("https://ipapi.co/json/");
+    const data=await res.json();
+    const pais=data.country_code;
+
+    if(PAISES_MERCADO_PAGO.includes(pais)) window.open(LINK_MERCADO_PAGO,"_blank");
+    else window.open(LINK_STRIPE,"_blank");
+  }catch(e){
+    alert("No se pudo detectar tu país. Usa el selector manual.");
+  }
+}
+
+function pagoManual(){
+  const pais=document.getElementById("paisManual").value;
+  if(!pais){alert("Selecciona tu país");return}
+  if(["mx","co","pe","cl","ar","br"].includes(pais)) window.open(LINK_MERCADO_PAGO,"_blank");
+  else window.open(LINK_STRIPE,"_blank");
+}
+
+async function loginMiPerfil(){
+  const email=document.getElementById("loginEmail").value.trim().toLowerCase();
+  const password=document.getElementById("loginPassword").value;
+
+  if(!email||!password){alert("Escribe correo y contraseña.");return}
+
+  try{
+    const cred=await auth.signInWithEmailAndPassword(email,password);
+    const uid=cred.user.uid;
+
+    cerrarMiPerfil();
+    abrirPanel(uid);
+
+  }catch(error){
+    alert("Error: "+error.message);
+  }
 }
 
 async function cargarPanel(uid){
-  const doc=await db.collection("usuarios").doc(uid).get();
-  const u=doc.data();
+  const contenedor=document.getElementById("panelContenido");
+  contenedor.innerHTML="<p>Cargando perfil...</p>";
 
-  let html = `
-  <div class="estado-box">
-    <h3>🟢 Perfil activo</h3>
-  </div>
+  try{
+    const doc=await db.collection("usuarios").doc(uid).get();
 
-  <div class="estado-box">
-    <h3>💳 Pago</h3>
+    if(!doc.exists){
+      contenedor.innerHTML="<div class='estado-box'><h3>No encontramos tu perfil.</h3></div>";
+      return;
+    }
 
-    <select id="paisManual">
-      <option value="">Selecciona país</option>
-      <option value="mx">México</option>
-      <option value="us">USA</option>
-    </select>
+    const u=doc.data();
+    let vencido=false;
 
-    <button type="button" onclick="pagoManual()" class="btn-pago mp">
-      Continuar al pago
-    </button>
-  </div>
+    if(u.vencido===true) vencido=true;
+
+    if(u.fechaVencimiento){
+      const fechaV=u.fechaVencimiento.toDate ? u.fechaVencimiento.toDate() : new Date(u.fechaVencimiento);
+      if(fechaV < new Date()) vencido=true;
+    }
+
+    let fechaTexto="No disponible";
+    if(u.fechaVencimiento){
+      const fechaV=u.fechaVencimiento.toDate ? u.fechaVencimiento.toDate() : new Date(u.fechaVencimiento);
+      fechaTexto=fechaV.toLocaleDateString("es-MX");
+    }
+
+    let estadoHTML="";
+    let pagoHTML="";
+
+    if(u.aprobado!==true){
+      estadoHTML=`
+        <h3>⏳ Perfil en revisión</h3>
+        <p>Tu perfil está pendiente de aprobación del administrador.</p>
+      `;
+    }else if(vencido){
+      estadoHTML=`
+        <h3>⚠️ Perfil vencido</h3>
+        <p>Tu perfil no está visible. Renueva para volver a aparecer.</p>
+        <p><b>Vence:</b> ${fechaTexto}</p>
+      `;
+      pagoHTML=plantillaPagoPanel();
+    }else if(u.activo===true){
+      estadoHTML=`
+        <h3>🟢 Perfil activo</h3>
+        <p>Tu perfil está visible en CariHub.</p>
+        <p><b>Vence:</b> ${fechaTexto}</p>
+      `;
+      pagoHTML=plantillaPagoPanel();
+    }else{
+      estadoHTML=`
+        <h3>✅ Perfil aprobado</h3>
+        <p>Tu perfil fue aprobado. Actívalo para aparecer en la plataforma.</p>
+      `;
+      pagoHTML=plantillaPagoPanel();
+    }
+
+    contenedor.innerHTML=`
+      <div class="estado-box">
+        ${estadoHTML}
+      </div>
+
+      ${pagoHTML}
+
+      <button class="btn btn-continuar" style="width:100%;margin-top:10px;" onclick="abrirEdicionPublica('${uid}')">
+        ✏️ Actualizar datos públicos
+      </button>
+    `;
+
+  }catch(error){
+    contenedor.innerHTML=`<div class="estado-box"><h3>Error</h3><p>${textoSeguro(error.message)}</p></div>`;
+  }
+}
+
+function plantillaPagoPanel(){
+  return `
+    <div class="estado-box">
+      <h3>💳 Pago / renovación</h3>
+      <p><b>Costo:</b> $200 MXN / 30 días</p>
+
+      <button onclick="pagoAutomatico()" class="btn-pago stripe">
+        Pagar ahora automáticamente
+      </button>
+
+      <p><b>O selecciona tu país manualmente:</b></p>
+
+      <select id="paisManual">
+        <option value="">Selecciona tu país</option>
+        <option value="mx">🇲🇽 México</option>
+        <option value="co">🇨🇴 Colombia</option>
+        <option value="pe">🇵🇪 Perú</option>
+        <option value="cl">🇨🇱 Chile</option>
+        <option value="ar">🇦🇷 Argentina</option>
+        <option value="br">🇧🇷 Brasil</option>
+        <option value="us">🇺🇸 Estados Unidos</option>
+        <option value="es">🇪🇸 España</option>
+        <option value="ca">🇨🇦 Canadá</option>
+        <option value="uk">🇬🇧 Reino Unido</option>
+        <option value="fr">🇫🇷 Francia</option>
+        <option value="de">🇩🇪 Alemania</option>
+        <option value="otro">🌍 Otros países</option>
+      </select>
+
+      <button onclick="pagoManual()" class="btn-pago mp">
+        Continuar al pago
+      </button>
+
+      <a class="whatsapp" href="https://wa.me/${WHATSAPP_ADMIN}?text=${encodeURIComponent('Hola, quiero activar o renovar mi perfil en CariHub. Ya realicé mi pago y quiero enviar mi comprobante.')}" target="_blank">
+        Enviar comprobante por WhatsApp
+      </a>
+    </div>
   `;
-
-  document.getElementById("panelContenido").innerHTML = html;
 }
 
-/* 🔥 CORREGIDO */
-function pagoManual(){
-  const select = document.getElementById("paisManual");
+async function abrirEdicionPublica(uid){
+  UID_EDITANDO=uid;
 
-  if(!select){
-    alert("No se encontró el selector de país.");
+  try{
+    const doc=await db.collection("usuarios").doc(uid).get();
+    if(!doc.exists){alert("No encontramos tu perfil.");return}
+
+    const u=doc.data();
+
+    document.getElementById("editDescripcion").value=u.descripcion||"";
+    document.getElementById("editPrecio").value=u.precio||"";
+    document.getElementById("editModalidad").value=u.modalidad||"";
+    document.getElementById("editHorario").value=u.horario||"";
+    document.getElementById("editZona").value=u.zona||"";
+    document.getElementById("editServicios").value=u.servicios||"";
+
+    abrirEditar();
+
+  }catch(error){
+    alert("Error: "+error.message);
+  }
+}
+
+async function guardarCambiosPublicos(){
+  if(!UID_EDITANDO){alert("No hay perfil seleccionado.");return}
+
+  const descripcion=document.getElementById("editDescripcion").value.trim();
+  const precio=document.getElementById("editPrecio").value.trim();
+  const modalidad=document.getElementById("editModalidad").value.trim();
+  const horario=document.getElementById("editHorario").value.trim();
+  const zona=document.getElementById("editZona").value.trim();
+  const servicios=document.getElementById("editServicios").value.trim();
+
+  if(!descripcion || !precio || !modalidad || !horario || !zona || !servicios){
+    alert("Completa todos los datos públicos.");
     return;
   }
 
-  const pais = select.value;
+  try{
+    await db.collection("usuarios").doc(UID_EDITANDO).update({
+      descripcion,
+      precio,
+      modalidad,
+      horario,
+      zona,
+      servicios,
+      aprobado:false,
+      activo:false,
+      actualizacionPendiente:true,
+      estadoRevision:"actualizacion_pendiente",
+      fechaActualizacion:new Date()
+    });
 
-  if(!pais){
-    alert("Selecciona tu país");
-    return;
-  }
+    alert("Actualización enviada. Pendiente de revisión.");
 
-  if(["mx","co","pe","cl","ar","br"].includes(pais)){
-    window.location.href = LINK_MERCADO_PAGO;
-  }else{
-    window.location.href = LINK_STRIPE;
+    cerrarEditar();
+    cargarPanel(UID_EDITANDO);
+    cargarPerfiles();
+
+  }catch(error){
+    alert("Error: "+error.message);
   }
 }
 
+function validarImagen(file,nombre){
+  if(!file){alert("Falta subir: "+nombre);return false}
+  if(!file.type.startsWith("image/")){alert(nombre+" debe ser una imagen.");return false}
+  if(file.size>5*1024*1024){alert(nombre+" debe pesar máximo 5 MB.");return false}
+  return true
+}
+
+function validarPaso1(){
+  const campos=["nombre","email","password","telefono","pais","estado","ciudad","categoria","descripcionCorta","precio","modalidad"];
+  for(const id of campos){
+    if(!document.getElementById(id).value.trim()){
+      alert("Completa todos los datos de la primera pantalla.");
+      return;
+    }
+  }
+
+  const password=document.getElementById("password").value;
+  const telefono=limpiarTelefono(document.getElementById("telefono").value);
+
+  if(password.length<6){alert("La contraseña debe tener mínimo 6 caracteres.");return}
+  if(telefono.length<10||telefono.length>15){alert("WhatsApp inválido. Usa solo números.");return}
+
+  irPaso(2);
+}
+
+function validarPaso2(){
+  const descripcionCompleta=document.getElementById("descripcionCompleta").value.trim();
+  const horario=document.getElementById("horario").value.trim();
+  const zona=document.getElementById("zona").value.trim();
+  const servicios=document.getElementById("servicios").value.trim();
+  const fotoPerfil=document.getElementById("fotoPerfil").files[0];
+
+  if(!descripcionCompleta || !horario || !zona || !servicios){
+    alert("Completa toda la información de tu página.");
+    return;
+  }
+
+  if(!validarImagen(fotoPerfil,"Foto principal")) return;
+
+  irPaso(3);
+}
+
+async function subirImagen(ruta,archivo){
+  const ref=storage.ref(ruta);
+  await ref.put(archivo);
+  return await ref.getDownloadURL();
+}
+
+async function subirMultiplesFotos(userId,archivos){
+  const urls=[];
+  for(let i=0;i<archivos.length;i++){
+    const file=archivos[i];
+    if(file && file.type.startsWith("image/") && file.size<=5*1024*1024){
+      const url=await subirImagen("perfiles/"+userId+"/extra-"+Date.now()+"-"+i+".jpg",file);
+      urls.push(url);
+    }
+  }
+  return urls;
+}
+
+async function registrar(){
+  const btn=document.getElementById("btnEnviar");
+  btn.disabled=true;
+  btn.innerText="Enviando...";
+
+  const nombre=document.getElementById("nombre").value.trim();
+  const email=document.getElementById("email").value.trim().toLowerCase();
+  const password=document.getElementById("password").value;
+  const telefono=limpiarTelefono(document.getElementById("telefono").value);
+  const pais=document.getElementById("pais").value.trim();
+  const estado=document.getElementById("estado").value.trim();
+  const ciudad=document.getElementById("ciudad").value.trim();
+  const categoria=document.getElementById("categoria").value.trim();
+  const descripcionCorta=document.getElementById("descripcionCorta").value.trim();
+  const precio=document.getElementById("precio").value.trim();
+  const modalidad=document.getElementById("modalidad").value.trim();
+
+  const descripcionCompleta=document.getElementById("descripcionCompleta").value.trim();
+  const horario=document.getElementById("horario").value.trim();
+  const zona=document.getElementById("zona").value.trim();
+  const servicios=document.getElementById("servicios").value.trim();
+
+  const nombreReal=document.getElementById("nombreReal").value.trim();
+  const fotoPerfil=document.getElementById("fotoPerfil").files[0];
+  const fotosExtra=document.getElementById("fotosExtra").files;
+  const ineFoto=document.getElementById("ineFoto").files[0];
+  const ineReversoFoto=document.getElementById("ineReversoFoto").files[0];
+  const selfieFoto=document.getElementById("selfieFoto").files[0];
+
+  const mayorEdad=document.getElementById("mayorEdad").checked;
+  const fotosMias=document.getElementById("fotosMias").checked;
+  const voluntario=document.getElementById("voluntario").checked;
+  const aceptoTerminos=document.getElementById("aceptoTerminos").checked;
+  const aceptoUso=document.getElementById("aceptoUso").checked;
+  const aceptoPrivacidad=document.getElementById("aceptoPrivacidad").checked;
+  const aceptoRevision=document.getElementById("aceptoRevision").checked;
+
+  try{
+    if(!nombreReal){alert("Falta nombre real.");irPaso(3);throw new Error("validacion")}
+    if(!validarImagen(ineFoto,"INE / identificación")){irPaso(3);throw new Error("validacion")}
+    if(!validarImagen(ineReversoFoto,"INE reverso")){irPaso(3);throw new Error("validacion")}
+    if(!validarImagen(selfieFoto,"Selfie de verificación")){irPaso(3);throw new Error("validacion")}
+
+    if(!mayorEdad||!fotosMias||!voluntario||!aceptoTerminos||!aceptoUso||!aceptoPrivacidad||!aceptoRevision){
+      alert("Debes aceptar todas las confirmaciones.");
+      irPaso(3);
+      throw new Error("validacion");
+    }
+
+    const cred=await auth.createUserWithEmailAndPassword(email,password);
+    const user=cred.user;
+
+    const fotoURL=await subirImagen("perfiles/"+user.uid+"/foto-principal-"+Date.now()+".jpg",fotoPerfil);
+    const fotosExtraURL=await subirMultiplesFotos(user.uid,fotosExtra);
+
+    const ineURL=await subirImagen("verificaciones/"+user.uid+"/ine-"+Date.now()+".jpg",ineFoto);
+    const ineReversoURL=await subirImagen("verificaciones/"+user.uid+"/ine-reverso-"+Date.now()+".jpg",ineReversoFoto);
+    const selfieURL=await subirImagen("verificaciones/"+user.uid+"/selfie-"+Date.now()+".jpg",selfieFoto);
+
+    await db.collection("usuarios").doc(user.uid).set({
+      uid:user.uid,
+      nombre,email,telefono,pais,estado,ciudad,categoria,
+      descripcion:descripcionCorta,
+      descripcionCompleta,
+      precio,modalidad,horario,zona,servicios,
+      fotoURL,
+      fotosExtraURL,
+      verificacion:{
+        nombreReal,
+        ineURL,
+        ineReversoURL,
+        selfieURL,
+        mayorEdad,
+        fotosMias,
+        voluntario,
+        aceptoTerminos,
+        aceptoUso,
+        aceptoPrivacidad,
+        aceptoRevision,
+        fecha:new Date()
+      },
+      aprobado:false,
+      activo:false,
+      vencido:false,
+      primerMesGratis:false,
+      pagado:false,
+      actualizacionPendiente:false,
+      estadoPago:"pendiente_aprobacion",
+      estadoRevision:"registro_pendiente",
+      fechaPublicacion:null,
+      fechaVencimiento:null,
+      fecha:new Date()
+    });
+
+    alert("Registro enviado. Pendiente de aprobación 🔥");
+    cerrarRegistro();
+
+  }catch(error){
+    if(error.message!=="validacion"){
+      if(error.code==="auth/email-already-in-use"){
+        alert("Este correo ya está registrado. Entra en Mi perfil.");
+      }else{
+        alert("Error: "+error.message);
+      }
+    }
+  }
+
+  btn.disabled=false;
+  btn.innerText="Enviar registro";
+}
+
+async function cargarPerfiles(){
+  const lista=document.getElementById("lista-perfiles");
+  lista.innerHTML="";
+
+  try{
+    const snap=await db.collection("usuarios").where("aprobado","==",true).get();
+
+    if(snap.empty)return;
+
+    snap.forEach(doc=>{
+      const u=doc.data();
+
+      let vencido=false;
+      if(u.vencido===true) vencido=true;
+      if(u.fechaVencimiento){
+        const fechaV=u.fechaVencimiento.toDate ? u.fechaVencimiento.toDate() : new Date(u.fechaVencimiento);
+        if(fechaV < new Date()) vencido=true;
+      }
+
+      if(vencido) return;
+      if(u.activo !== true) return;
+
+      if(!u.fotoURL||!u.nombre||!u.ciudad||!u.categoria||!u.descripcion||!u.precio||!u.modalidad)return;
+
+      const tel=limpiarTelefono(u.telefono||"");
+      const mensajeCliente=encodeURIComponent("Hola, vi tu perfil en Cariñosas y me gustaría recibir más información.");
+
+      lista.innerHTML+=`
+        <div class="card">
+          ${u.fotoURL ? `<img src="${textoSeguro(u.fotoURL)}" alt="Foto">` : ""}
+
+          <h3>${textoSeguro(u.nombre)}</h3>
+
+          <p><b>Ciudad:</b> ${textoSeguro(u.ciudad)}</p>
+          <p><b>Categoría:</b> ${textoSeguro(u.categoria)}</p>
+          <p><b>Descripción:</b> ${textoSeguro(u.descripcion)}</p>
+          <p><b>Precio:</b> ${textoSeguro(u.precio)}</p>
+          <p><b>Modalidad:</b> ${textoSeguro(u.modalidad)}</p>
+          ${u.horario ? `<p><b>Horario:</b> ${textoSeguro(u.horario)}</p>` : ""}
+          ${u.zona ? `<p><b>Zona:</b> ${textoSeguro(u.zona)}</p>` : ""}
+          ${u.servicios ? `<p><b>Servicios:</b> ${textoSeguro(u.servicios)}</p>` : ""}
+
+          ${u.fotosExtraURL && u.fotosExtraURL.length > 0 ? `
+            <div style="margin-top:10px;">
+              <b>Fotos:</b>
+              <div class="galeria">
+                ${u.fotosExtraURL.map(f => `
+                  <img src="${textoSeguro(f)}" alt="Foto extra">
+                `).join("")}
+              </div>
+            </div>
+          ` : ""}
+
+          <a class="whatsapp" href="https://wa.me/${tel}?text=${mensajeCliente}" target="_blank">
+            Contactar por WhatsApp
+          </a>
+        </div>
+      `;
+    });
+
+  }catch(error){
+    console.error(error);
+  }
+}
+
+detectarIdioma();
+cargarPerfiles();
 </script>
 
 </body>
