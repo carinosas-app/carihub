@@ -32,47 +32,41 @@ const PAISES_MERCADO_PAGO = ["MX","CO","PE","CL","AR","BR"];
 
 let UID_PANEL = null;
 let UID_EDITANDO = null;
-let METODO_PAGO = "stripe";
 let LINK_PAGO_ACTUAL = LINK_STRIPE;
 let TEXTO_PAGO_ACTUAL = "Pagar con Stripe";
+let METODO_PAGO = "stripe";
 </script>
 
 <style>
-/* TODO TU CSS IGUAL (NO SE TOCÓ NADA) */
 body{margin:0;font-family:Arial,sans-serif;background:#fff;color:#222}
-/* ... todo tu CSS igual ... */
+.form-box{background:#fff;padding:20px;border-radius:20px}
+.btn{padding:15px;border:none;border-radius:12px;font-weight:bold;width:100%;margin-top:10px}
+.btn-continuar{background:#b7195b;color:white}
+.btn-atras{background:#777;color:white}
+.btn-pago{padding:15px;border-radius:12px;border:none;width:100%;margin-top:10px;font-weight:bold}
+.mp{background:#ffe600}
+.stripe{background:#635bff;color:white}
+.estado-box{background:#fff;padding:15px;border-radius:15px;margin-bottom:15px}
 </style>
 </head>
 
 <body>
 
-<!-- TODO TU HTML IGUAL (NO SE MODIFICÓ NADA) -->
+<!-- LOGIN -->
+<div id="loginBox" class="form-box">
+<h2>Mi perfil</h2>
+<input id="loginEmail" placeholder="Correo">
+<input id="loginPassword" type="password" placeholder="Contraseña">
+<button class="btn btn-continuar" onclick="login()">Entrar</button>
+</div>
+
+<!-- PANEL -->
+<div id="panel" style="display:none" class="form-box">
+<h2>Panel de perfil</h2>
+<div id="panelContenido"></div>
+</div>
 
 <script>
-
-/* ===== FUNCIONES ORIGINALES ===== */
-
-function abrirMenu(){document.getElementById("menu").classList.add("active")}
-function cerrarMenu(){document.getElementById("menu").classList.remove("active")}
-function abrirRegistro(){cerrarMenu();document.getElementById("modalRegistro").style.display="block";irPaso(1)}
-function cerrarRegistro(){document.getElementById("modalRegistro").style.display="none"}
-function abrirMiPerfil(){cerrarMenu();document.getElementById("modalMiPerfil").style.display="block"}
-function cerrarMiPerfil(){document.getElementById("modalMiPerfil").style.display="none"}
-function abrirPanel(uid){UID_PANEL=uid;document.getElementById("modalPanel").style.display="block";cargarPanel(uid)}
-function cerrarPanel(){document.getElementById("modalPanel").style.display="none"}
-function abrirEditar(){document.getElementById("modalEditar").style.display="block"}
-function cerrarEditar(){document.getElementById("modalEditar").style.display="none"}
-function irPaso(num){document.querySelectorAll(".step").forEach(s=>s.classList.remove("active"));document.getElementById("step"+num).classList.add("active")}
-function limpiarTelefono(t){return String(t||"").replace(/\D/g,"")}
-function textoSeguro(texto){return String(texto||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;")}
-
-function detectarIdioma(){
-  const idioma=navigator.language || navigator.userLanguage;
-  if(idioma && idioma.startsWith("es")) document.body.classList.add("es");
-  else document.body.classList.add("en");
-}
-
-/* ===== DETECTAR MÉTODO DE PAGO ===== */
 
 async function detectarMetodoPago(){
   try{
@@ -81,56 +75,93 @@ async function detectarMetodoPago(){
     const pais=data.country_code;
 
     if(PAISES_MERCADO_PAGO.includes(pais)){
-      METODO_PAGO="mp";
       LINK_PAGO_ACTUAL=LINK_MERCADO_PAGO;
       TEXTO_PAGO_ACTUAL="Pagar con Mercado Pago";
+      METODO_PAGO="mp";
     }else{
-      METODO_PAGO="stripe";
       LINK_PAGO_ACTUAL=LINK_STRIPE;
       TEXTO_PAGO_ACTUAL="Pagar con Stripe";
+      METODO_PAGO="stripe";
     }
   }catch(e){
     LINK_PAGO_ACTUAL=LINK_STRIPE;
   }
-
-  actualizarBotonesPago();
 }
-
-function actualizarBotonesPago(){
-  document.querySelectorAll(".botonPagoAuto").forEach(btn=>{
-    btn.innerText=TEXTO_PAGO_ACTUAL;
-    btn.classList.remove("mp","stripe");
-    btn.classList.add(METODO_PAGO==="mp" ? "mp" : "stripe");
-  });
-
-  document.querySelectorAll(".textoMetodoPago").forEach(el=>{
-    el.innerText=METODO_PAGO==="mp"
-      ? "Método detectado: Mercado Pago"
-      : "Método detectado: Stripe";
-  });
-}
-
-/* ===== 🔥 BOTÓN DE PAGO CORREGIDO ===== */
 
 function irPago(){
   if(!LINK_PAGO_ACTUAL){
-    alert("Error cargando método de pago, intenta de nuevo.");
+    alert("Error cargando pago");
     return;
   }
-
-  // REDIRECCIÓN DIRECTA (SOLUCIONA TU PROBLEMA)
   window.location.href = LINK_PAGO_ACTUAL;
 }
 
-/* ===== RESTO DE TU SISTEMA IGUAL ===== */
+async function login(){
+  const email=document.getElementById("loginEmail").value;
+  const pass=document.getElementById("loginPassword").value;
 
-/* TODO lo demás lo dejé EXACTAMENTE igual (registro, panel, firebase, etc) */
+  const cred=await auth.signInWithEmailAndPassword(email,pass);
 
-/* ===== INIT ===== */
+  document.getElementById("loginBox").style.display="none";
+  document.getElementById("panel").style.display="block";
 
-detectarIdioma();
-detectarMetodoPago();
-cargarPerfiles();
+  cargarPanel(cred.user.uid);
+}
+
+async function cargarPanel(uid){
+  const cont=document.getElementById("panelContenido");
+
+  await detectarMetodoPago();
+
+  const doc=await db.collection("usuarios").doc(uid).get();
+  const u=doc.data();
+
+  let vencido=false;
+
+  if(u.fechaVencimiento){
+    const f=new Date(u.fechaVencimiento);
+    if(f < new Date()) vencido=true;
+  }
+
+  let estadoHTML="";
+  let pagoHTML="";
+
+  if(u.aprobado!==true){
+    estadoHTML="<h3>⏳ En revisión</h3>";
+  }
+
+  else if(vencido){
+    estadoHTML="<h3>⚠️ Vencido</h3>";
+    pagoHTML=mostrarPago();
+  }
+
+  else if(u.activo===true){
+    estadoHTML="<h3>🟢 Activo</h3>";
+    pagoHTML=mostrarPago(); // 🔥 AQUÍ YA INCLUYE PAGO AUN ACTIVO
+  }
+
+  else{
+    estadoHTML="<h3>✅ Aprobado</h3>";
+    pagoHTML=mostrarPago();
+  }
+
+  cont.innerHTML=`
+  <div class="estado-box">${estadoHTML}</div>
+  ${pagoHTML}
+  <button class="btn btn-continuar">Actualizar datos</button>
+  `;
+}
+
+function mostrarPago(){
+  return `
+  <div class="estado-box">
+  <h3>💳 Pago</h3>
+  <p>${TEXTO_PAGO_ACTUAL}</p>
+  <button onclick="irPago()" class="btn-pago ${METODO_PAGO}">${TEXTO_PAGO_ACTUAL}</button>
+  <a href="https://wa.me/${WHATSAPP_ADMIN}" class="btn btn-continuar">Enviar comprobante</a>
+  </div>
+  `;
+}
 
 </script>
 
