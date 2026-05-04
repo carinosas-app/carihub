@@ -69,27 +69,30 @@ body{margin:0;font-family:Arial,sans-serif;background:#fff;color:#222}
 .hs-sannicolas{top:77%;left:67%;width:27%;height:4.8%}
 .hs-masciudades{top:84%;left:30%;width:40%;height:4.5%}
 
+/* BOTONES VISUALES LIMPIOS */
 .texto-filtro{
   position:absolute;
   z-index:75;
-  color:#333;
+  color:#3a2430;
   font-size:12px;
-  font-weight:700;
+  font-weight:800;
   pointer-events:none;
   white-space:nowrap;
   overflow:hidden;
   text-overflow:ellipsis;
-  background:#fff;
-  padding:3px 3px;
-  border-radius:5px;
+  background:linear-gradient(180deg,#ffffff,#fff3f8);
+  padding:7px 5px;
+  border-radius:11px;
   text-align:center;
-  line-height:14px;
+  line-height:15px;
+  box-sizing:border-box;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.95),0 1px 4px rgba(183,25,91,.10);
 }
 
-.txt-categoria{top:46.15%;left:11.8%;width:12.8%}
-.txt-pais{top:46.15%;left:35.5%;width:9.8%}
-.txt-estado{top:46.15%;left:58%;width:10.5%}
-.txt-ciudad{top:46.15%;left:81%;width:9.8%}
+.txt-categoria{top:45.65%;left:7.8%;width:18.5%}
+.txt-pais{top:45.65%;left:30.5%;width:18%}
+.txt-estado{top:45.65%;left:53%;width:18%}
+.txt-ciudad{top:45.65%;left:75.8%;width:17%}
 
 .menu{position:fixed;top:0;right:-100%;width:82%;height:100%;background:#fff;transition:.3s;z-index:10000;padding:25px;box-shadow:-5px 0 20px rgba(0,0,0,.25);overflow-y:auto}
 .menu.active{right:0}
@@ -132,7 +135,64 @@ label{display:block;margin:14px 0;font-size:16px}
 .galeria img{min-width:90%;height:360px;object-fit:cover;border-radius:15px;scroll-snap-align:center;flex-shrink:0}
 .galeria::-webkit-scrollbar{display:none}
 .whatsapp{display:block;text-align:center;background:#25D366;color:white;padding:14px;border-radius:12px;text-decoration:none;font-weight:bold;margin-top:12px}
+
 .estado-box{background:#fff;border-radius:18px;padding:18px;box-shadow:0 3px 12px rgba(0,0,0,.16);margin-bottom:15px}
+
+.recuadro-extra{
+  background:linear-gradient(180deg,#fff,#fff0f7);
+  border:1px solid rgba(233,30,99,.25);
+  border-radius:22px;
+  padding:20px;
+  margin:18px 0;
+  box-shadow:0 8px 24px rgba(183,25,91,.18);
+  text-align:center;
+}
+.recuadro-extra h3{
+  color:#b7195b;
+  font-size:24px;
+  margin:0 0 8px 0;
+}
+.recuadro-extra p{
+  color:#555;
+  font-size:15px;
+  margin:8px 0 14px 0;
+}
+.btn-cerca{
+  width:100%;
+  background:linear-gradient(90deg,#e91e63,#b7195b);
+  color:white;
+  padding:15px;
+  border:none;
+  border-radius:14px;
+  font-size:16px;
+  font-weight:bold;
+  margin-top:10px;
+  cursor:pointer;
+}
+.btn-registro{
+  width:100%;
+  background:#fff;
+  color:#b7195b;
+  padding:15px;
+  border:2px solid #f2b3cc;
+  border-radius:14px;
+  font-size:16px;
+  font-weight:bold;
+  margin-top:10px;
+  cursor:pointer;
+}
+.btn-volver-bonito{
+  width:100%;
+  background:#777;
+  color:white;
+  padding:15px;
+  border:none;
+  border-radius:14px;
+  font-size:16px;
+  font-weight:bold;
+  margin-top:10px;
+  cursor:pointer;
+}
 </style>
 </head>
 
@@ -150,10 +210,10 @@ label{display:block;margin:14px 0;font-size:16px}
   <button class="hotspot hs-ciudad" onclick="abrirSelector('ciudad')">ciudad</button>
   <button class="hotspot hs-buscar" onclick="buscarPerfilesFiltrados()">buscar</button>
 
-  <div class="texto-filtro txt-categoria" id="txtCategoria">Categoría</div>
-  <div class="texto-filtro txt-pais" id="txtPais">País</div>
-  <div class="texto-filtro txt-estado" id="txtEstado">Estado</div>
-  <div class="texto-filtro txt-ciudad" id="txtCiudad">Ciudad</div>
+  <div class="texto-filtro txt-categoria" id="txtCategoria">👤 Categoría</div>
+  <div class="texto-filtro txt-pais" id="txtPais">📍 País</div>
+  <div class="texto-filtro txt-estado" id="txtEstado">📍 Estado</div>
+  <div class="texto-filtro txt-ciudad" id="txtCiudad">📍 Ciudad</div>
 
   <button class="hotspot hs-monterrey" onclick="buscarCiudadRapida('Monterrey')">Monterrey</button>
   <button class="hotspot hs-garcia" onclick="buscarCiudadRapida('García')">García</button>
@@ -328,10 +388,10 @@ label{display:block;margin:14px 0;font-size:16px}
 
 <script>
 function actualizarTextoFiltros(){
-  document.getElementById("txtCategoria").innerText=categoriaSeleccionada||"Categoría";
-  document.getElementById("txtPais").innerText=paisSeleccionado||"País";
-  document.getElementById("txtEstado").innerText=estadoSeleccionado||"Estado";
-  document.getElementById("txtCiudad").innerText=ciudadSeleccionada||"Ciudad";
+  document.getElementById("txtCategoria").innerText=categoriaSeleccionada ? "👤 " + categoriaSeleccionada : "👤 Categoría";
+  document.getElementById("txtPais").innerText=paisSeleccionado ? "📍 " + paisSeleccionado : "📍 País";
+  document.getElementById("txtEstado").innerText=estadoSeleccionado ? "📍 " + estadoSeleccionado : "📍 Estado";
+  document.getElementById("txtCiudad").innerText=ciudadSeleccionada ? "📍 " + ciudadSeleccionada : "📍 Ciudad";
 }
 
 function abrirMenu(){document.getElementById("menu").classList.add("active")}
@@ -452,6 +512,27 @@ function buscarCiudadRapida(ciudad){
   buscarPerfilesFiltrados();
 }
 
+function recuadroBusquedaExtra(hayResultados){
+  return `
+    <div class="recuadro-extra">
+      <h3>${hayResultados ? "¿Quieres ver más opciones cerca?" : "No encontramos perfiles en esta zona"}</h3>
+      <p>${hayResultados ? "Puedes buscar más personas disponibles cerca de la ubicación seleccionada." : "Podemos mostrarte perfiles cercanos o puedes registrarte para aparecer aquí."}</p>
+
+      <button class="btn-cerca" onclick="mostrarPerfilesCercanos()">
+        🔎 Sí, buscar cerca
+      </button>
+
+      <button class="btn-registro" onclick="abrirRegistro()">
+        👤 Registrarse
+      </button>
+
+      <button class="btn-volver-bonito" onclick="volverInicio()">
+        ← Volver
+      </button>
+    </div>
+  `;
+}
+
 async function buscarPerfilesFiltrados(){
   if(!categoriaSeleccionada||!paisSeleccionado||!estadoSeleccionado||!ciudadSeleccionada){
     alert("Selecciona categoría, país, estado y ciudad.");
@@ -500,20 +581,9 @@ async function buscarPerfilesFiltrados(){
     }
 
     if(encontrados===0){
-      lista.innerHTML+=`
-        <div class="estado-box">
-          <h3>No encontramos perfiles en ${textoSeguro(ciudadSeleccionada)}.</h3>
-          <p>¿Deseas buscar perfiles cerca de esta zona?</p>
-
-          <button class="btn btn-continuar" style="width:100%;margin-top:10px;" onclick="mostrarPerfilesCercanos()">
-            Sí, buscar cerca
-          </button>
-
-          <button class="btn btn-atras" style="width:100%;margin-top:10px;" onclick="volverInicio()">
-            ← Volver
-          </button>
-        </div>
-      `;
+      lista.innerHTML+=recuadroBusquedaExtra(false);
+    }else{
+      lista.innerHTML+=recuadroBusquedaExtra(true);
     }
 
     lista.scrollIntoView({behavior:"smooth"});
@@ -569,18 +639,36 @@ async function mostrarPerfilesCercanos(){
 
     if(encontrados===0){
       lista.innerHTML+=`
-        <div class="estado-box">
-          <h3>No hay perfiles cercanos todavía.</h3>
-          <p>Intenta con otra ciudad o estado.</p>
+        <div class="recuadro-extra">
+          <h3>No hay perfiles cercanos todavía</h3>
+          <p>Intenta con otra ciudad o registra tu perfil para aparecer en la plataforma.</p>
+
+          <button class="btn-registro" onclick="abrirRegistro()">
+            👤 Registrarse
+          </button>
+
+          <button class="btn-volver-bonito" onclick="volverInicio()">
+            ← Volver
+          </button>
+        </div>
+      `;
+    }else{
+      lista.innerHTML+=`
+        <div class="recuadro-extra">
+          <h3>¿Quieres aparecer aquí?</h3>
+          <p>Registra tu perfil y empieza a aparecer en las búsquedas de tu ciudad.</p>
+
+          <button class="btn-registro" onclick="abrirRegistro()">
+            👤 Registrarse
+          </button>
+
+          <button class="btn-volver-bonito" onclick="volverInicio()">
+            ← Volver
+          </button>
         </div>
       `;
     }
 
-    lista.innerHTML+=`
-      <button class="btn btn-atras" style="width:100%;margin:20px 0;" onclick="volverInicio()">
-        ← Volver
-      </button>
-    `;
   }catch(error){
     alert("Error buscando perfiles cercanos: "+error.message);
   }
@@ -592,7 +680,7 @@ function volverInicio(){
   estadoSeleccionado="";
   ciudadSeleccionada="";
   actualizarTextoFiltros();
-  cargarPerfiles();
+  document.getElementById("lista-perfiles").innerHTML="";
   window.scrollTo({top:0,behavior:"smooth"});
 }
 
@@ -706,7 +794,6 @@ async function eliminarFavoritoDesdeModal(perfilId){
   if(!user)return;
   await db.collection("usuarios").doc(user.uid).collection("favoritos").doc(perfilId).delete();
   abrirFavoritos();
-  cargarPerfiles();
 }
 
 async function loginMiPerfil(){
@@ -790,7 +877,6 @@ async function guardarCambiosPublicos(){
   alert("Actualización enviada. Pendiente de revisión.");
   cerrarEditar();
   cargarPanel(UID_EDITANDO);
-  cargarPerfiles();
 }
 
 function validarImagen(file,nombre){
@@ -965,35 +1051,14 @@ async function plantillaCardPerfil(id,u){
   `;
 }
 
-async function cargarPerfiles(){
-  const lista=document.getElementById("lista-perfiles");
-  lista.innerHTML="";
-
-  try{
-    const snap=await db.collection("usuarios").where("aprobado","==",true).get();
-
-    for(const doc of snap.docs){
-      const u=doc.data();
-
-      if(u.vencido===true||u.activo!==true)continue;
-      if(!u.fotoURL||!u.nombre||!u.ciudad||!u.categoria||!u.descripcion||!u.precio||!u.modalidad)continue;
-
-      lista.innerHTML+=await plantillaCardPerfil(doc.id,u);
-    }
-  }catch(error){
-    console.error(error);
-  }
-}
-
 auth.onAuthStateChanged(async function(user){
   if(!user){
     try{await prepararUsuarioFavoritos()}catch(e){}
   }
   actualizarTextoFiltros();
-  cargarPerfiles();
+  document.getElementById("lista-perfiles").innerHTML="";
 });
 </script>
 
 </body>
 </html>
-  
