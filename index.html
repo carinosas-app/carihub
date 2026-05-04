@@ -74,22 +74,22 @@ body{margin:0;font-family:Arial,sans-serif;background:#fff;color:#222}
   z-index:75;
   color:#333;
   font-size:12px;
-  font-weight:600;
+  font-weight:700;
   pointer-events:none;
   white-space:nowrap;
   overflow:hidden;
   text-overflow:ellipsis;
   background:#fff;
-  padding:6px 4px;
-  border-radius:8px;
+  padding:3px 3px;
+  border-radius:5px;
   text-align:center;
-  line-height:16px;
+  line-height:14px;
 }
 
-.txt-categoria{top:45.85%;left:9.5%;width:16.5%}
-.txt-pais{top:45.85%;left:32.4%;width:16.2%}
-.txt-estado{top:45.85%;left:54.7%;width:16.2%}
-.txt-ciudad{top:45.85%;left:77.2%;width:15%}
+.txt-categoria{top:46.15%;left:11.8%;width:12.8%}
+.txt-pais{top:46.15%;left:35.5%;width:9.8%}
+.txt-estado{top:46.15%;left:58%;width:10.5%}
+.txt-ciudad{top:46.15%;left:81%;width:9.8%}
 
 .menu{position:fixed;top:0;right:-100%;width:82%;height:100%;background:#fff;transition:.3s;z-index:10000;padding:25px;box-shadow:-5px 0 20px rgba(0,0,0,.25);overflow-y:auto}
 .menu.active{right:0}
@@ -151,9 +151,9 @@ label{display:block;margin:14px 0;font-size:16px}
   <button class="hotspot hs-buscar" onclick="buscarPerfilesFiltrados()">buscar</button>
 
   <div class="texto-filtro txt-categoria" id="txtCategoria">Categoría</div>
-  <div class="texto-filtro txt-pais" id="txtPais">Elegir país</div>
-  <div class="texto-filtro txt-estado" id="txtEstado">Elegir estado</div>
-  <div class="texto-filtro txt-ciudad" id="txtCiudad">Elegir ciudad</div>
+  <div class="texto-filtro txt-pais" id="txtPais">País</div>
+  <div class="texto-filtro txt-estado" id="txtEstado">Estado</div>
+  <div class="texto-filtro txt-ciudad" id="txtCiudad">Ciudad</div>
 
   <button class="hotspot hs-monterrey" onclick="buscarCiudadRapida('Monterrey')">Monterrey</button>
   <button class="hotspot hs-garcia" onclick="buscarCiudadRapida('García')">García</button>
@@ -329,9 +329,9 @@ label{display:block;margin:14px 0;font-size:16px}
 <script>
 function actualizarTextoFiltros(){
   document.getElementById("txtCategoria").innerText=categoriaSeleccionada||"Categoría";
-  document.getElementById("txtPais").innerText=paisSeleccionado||"Elegir país";
-  document.getElementById("txtEstado").innerText=estadoSeleccionado||"Elegir estado";
-  document.getElementById("txtCiudad").innerText=ciudadSeleccionada||"Elegir ciudad";
+  document.getElementById("txtPais").innerText=paisSeleccionado||"País";
+  document.getElementById("txtEstado").innerText=estadoSeleccionado||"Estado";
+  document.getElementById("txtCiudad").innerText=ciudadSeleccionada||"Ciudad";
 }
 
 function abrirMenu(){document.getElementById("menu").classList.add("active")}
@@ -399,7 +399,9 @@ function pintarOpcionesSelector(listaPersonalizada){
   listaDiv.innerHTML="";
 
   if(selectorActual==="pais"&&!listaPersonalizada){
-    opciones.forEach(op=>listaDiv.innerHTML+=`<div class="opcion-selector" onclick="seleccionarOpcion('${textoSeguro(op)}')">${textoSeguro(op)}</div>`);
+    opciones.forEach(op=>{
+      listaDiv.innerHTML+=`<div class="opcion-selector" onclick='seleccionarOpcion(${JSON.stringify(op)})'>${textoSeguro(op)}</div>`;
+    });
     listaDiv.innerHTML+=`<div class="opcion-selector" onclick="mostrarTodosLosPaises()">🌍 Ver más países</div>`;
     return;
   }
@@ -409,7 +411,9 @@ function pintarOpcionesSelector(listaPersonalizada){
     return;
   }
 
-  opciones.forEach(op=>listaDiv.innerHTML+=`<div class="opcion-selector" onclick="seleccionarOpcion('${textoSeguro(op)}')">${textoSeguro(op)}</div>`);
+  opciones.forEach(op=>{
+    listaDiv.innerHTML+=`<div class="opcion-selector" onclick='seleccionarOpcion(${JSON.stringify(op)})'>${textoSeguro(op)}</div>`;
+  });
 }
 
 function mostrarTodosLosPaises(){
@@ -455,14 +459,20 @@ async function buscarPerfilesFiltrados(){
   }
 
   const lista=document.getElementById("lista-perfiles");
-  lista.innerHTML=`<div class="estado-box"><h3>Buscando perfiles...</h3><p>${textoSeguro(categoriaSeleccionada)} / ${textoSeguro(paisSeleccionado)} / ${textoSeguro(estadoSeleccionado)} / ${textoSeguro(ciudadSeleccionada)}</p></div>`;
+  lista.innerHTML=`<div class="estado-box"><h3>Buscando perfiles...</h3></div>`;
 
   try{
     const snap=await db.collection("usuarios").where("aprobado","==",true).get();
-    lista.innerHTML=`<div class="estado-box"><h3>Resultados</h3><p><b>Categoría:</b> ${textoSeguro(categoriaSeleccionada)}</p><p><b>Ubicación:</b> ${textoSeguro(ciudadSeleccionada)}, ${textoSeguro(estadoSeleccionado)}, ${textoSeguro(paisSeleccionado)}</p><button class="btn btn-atras" style="width:100%;" onclick="volverInicio()">← Volver</button></div>`;
+
+    lista.innerHTML=`
+      <div class="estado-box">
+        <h3>Resultados</h3>
+        <p><b>Categoría:</b> ${textoSeguro(categoriaSeleccionada)}</p>
+        <p><b>Ubicación:</b> ${textoSeguro(ciudadSeleccionada)}, ${textoSeguro(estadoSeleccionado)}, ${textoSeguro(paisSeleccionado)}</p>
+      </div>
+    `;
 
     let encontrados=0;
-    let cercanos="";
 
     for(const doc of snap.docs){
       const u=doc.data();
@@ -483,31 +493,96 @@ async function buscarPerfilesFiltrados(){
         String(u.estado||"").toLowerCase()===estadoSeleccionado.toLowerCase() &&
         String(u.ciudad||"").toLowerCase()===ciudadSeleccionada.toLowerCase();
 
+      if(exacto){
+        encontrados++;
+        lista.innerHTML+=await plantillaCardPerfil(doc.id,u);
+      }
+    }
+
+    if(encontrados===0){
+      lista.innerHTML+=`
+        <div class="estado-box">
+          <h3>No encontramos perfiles en ${textoSeguro(ciudadSeleccionada)}.</h3>
+          <p>¿Deseas buscar perfiles cerca de esta zona?</p>
+
+          <button class="btn btn-continuar" style="width:100%;margin-top:10px;" onclick="mostrarPerfilesCercanos()">
+            Sí, buscar cerca
+          </button>
+
+          <button class="btn btn-atras" style="width:100%;margin-top:10px;" onclick="volverInicio()">
+            ← Volver
+          </button>
+        </div>
+      `;
+    }
+
+    lista.scrollIntoView({behavior:"smooth"});
+  }catch(error){
+    alert("Error en búsqueda: "+error.message);
+  }
+}
+
+async function mostrarPerfilesCercanos(){
+  const lista=document.getElementById("lista-perfiles");
+
+  lista.innerHTML=`
+    <div class="estado-box">
+      <h3>Buscando perfiles cercanos...</h3>
+    </div>
+  `;
+
+  try{
+    const snap=await db.collection("usuarios").where("aprobado","==",true).get();
+
+    lista.innerHTML=`
+      <div class="estado-box">
+        <h3>Perfiles cercanos</h3>
+        <p>Mostrando perfiles disponibles en ${textoSeguro(estadoSeleccionado)}, ${textoSeguro(paisSeleccionado)}.</p>
+      </div>
+    `;
+
+    let encontrados=0;
+
+    for(const doc of snap.docs){
+      const u=doc.data();
+
+      let vencido=false;
+      if(u.vencido===true)vencido=true;
+      if(u.fechaVencimiento){
+        const fechaV=u.fechaVencimiento.toDate?u.fechaVencimiento.toDate():new Date(u.fechaVencimiento);
+        if(fechaV<new Date())vencido=true;
+      }
+
+      if(vencido)continue;
+      if(u.activo!==true)continue;
+
       const cerca=
         String(u.pais||"").toLowerCase()===paisSeleccionado.toLowerCase() &&
         String(u.estado||"").toLowerCase()===estadoSeleccionado.toLowerCase() &&
         String(u.ciudad||"").toLowerCase()!==ciudadSeleccionada.toLowerCase();
 
-      if(exacto){
+      if(cerca){
         encontrados++;
         lista.innerHTML+=await plantillaCardPerfil(doc.id,u);
-      }else if(cerca){
-        cercanos+=await plantillaCardPerfil(doc.id,u);
       }
     }
 
     if(encontrados===0){
-      lista.innerHTML+=`<div class="estado-box"><h3>No encontramos perfiles exactos.</h3><p>Prueba otra ciudad o revisa perfiles cercanos abajo.</p></div>`;
+      lista.innerHTML+=`
+        <div class="estado-box">
+          <h3>No hay perfiles cercanos todavía.</h3>
+          <p>Intenta con otra ciudad o estado.</p>
+        </div>
+      `;
     }
 
-    if(cercanos){
-      lista.innerHTML+=`<div class="estado-box"><h3>Perfiles cercanos</h3><p>Estos perfiles están en el mismo estado.</p></div>${cercanos}`;
-    }
-
-    lista.innerHTML+=`<button class="btn btn-atras" style="width:100%;margin:20px 0;" onclick="volverInicio()">← Volver</button>`;
-    lista.scrollIntoView({behavior:"smooth"});
+    lista.innerHTML+=`
+      <button class="btn btn-atras" style="width:100%;margin:20px 0;" onclick="volverInicio()">
+        ← Volver
+      </button>
+    `;
   }catch(error){
-    alert("Error en búsqueda: "+error.message);
+    alert("Error buscando perfiles cercanos: "+error.message);
   }
 }
 
