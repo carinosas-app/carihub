@@ -15,35 +15,32 @@
 <script src="ciudades.js"></script>
 
 <script>
-const firebaseConfig = {
-  apiKey: "AIzaSyBl4LNLtPqbyIxfTfONAqxi4rOG4XF_vkI",
-  authDomain: "carinosas-app.firebaseapp.com",
-  projectId: "carinosas-app",
-  storageBucket: "carinosas-app.firebasestorage.app",
-  messagingSenderId: "267078845023",
-  appId: "1:267078845023:web:a82e626d9f0ca28858d1ea"
+const firebaseConfig={
+  apiKey:"AIzaSyBl4LNLtPqbyIxfTfONAqxi4rOG4XF_vkI",
+  authDomain:"carinosas-app.firebaseapp.com",
+  projectId:"carinosas-app",
+  storageBucket:"carinosas-app.firebasestorage.app",
+  messagingSenderId:"267078845023",
+  appId:"1:267078845023:web:a82e626d9f0ca28858d1ea"
 };
 
 firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-const auth = firebase.auth();
-const storage = firebase.storage();
+const db=firebase.firestore();
+const auth=firebase.auth();
+const storage=firebase.storage();
 
-const LINK_MERCADO_PAGO = "https://mpago.la/1KQ3iuP";
-const LINK_STRIPE = "https://buy.stripe.com/eVq8wR5Wr9GccXUbmbcAo00";
-const WHATSAPP_ADMIN = "528112304664";
-const PAISES_MERCADO_PAGO = ["MX","CO","PE","CL","AR","BR"];
+const WHATSAPP_ADMIN="528112304664";
 
-let UID_PANEL = null;
-let UID_EDITANDO = null;
+let UID_PANEL=null;
+let UID_EDITANDO=null;
 
-let categoriaSeleccionada = "";
-let paisSeleccionado = "";
-let estadoSeleccionado = "";
-let ciudadSeleccionada = "";
-let selectorActual = "";
+let categoriaSeleccionada="Acompañante";
+let paisSeleccionado="";
+let estadoSeleccionado="";
+let ciudadSeleccionada="";
+let selectorActual="";
 
-const CATEGORIAS_BUSCADOR = [
+const CATEGORIAS_BUSCADOR=[
   "Acompañante","Escort","Spa","Trans","Sex shop","Gigolo","Madura",
   "Dotados","Petit","Swinger 🍍","Unicorns 🦄","Hotwife 🔥","Contenido","Singles"
 ];
@@ -53,48 +50,34 @@ const CATEGORIAS_BUSCADOR = [
 body{margin:0;font-family:Arial,sans-serif;background:#fff;color:#222}
 .contenedor{position:relative;width:100%}
 .portada{width:100%;display:block}
-.menu-btn{position:absolute;top:10px;right:10px;width:70px;height:70px;z-index:9999;cursor:pointer}
-.favoritos-btn{position:absolute;top:10px;right:85px;width:65px;height:70px;z-index:9999;cursor:pointer}
 
-.buscador-home{
-  position:absolute;
-  left:6%;
-  right:6%;
-  bottom:6%;
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:8px;
-  z-index:50;
-}
-.buscador-home button{
-  background:white;
-  color:#b7195b;
-  border:2px solid #f2b3cc;
-  border-radius:14px;
-  padding:13px 8px;
-  font-size:15px;
-  font-weight:bold;
-  box-shadow:0 3px 10px rgba(0,0,0,.18);
-  cursor:pointer;
-}
-.buscador-home .buscar-btn{
-  grid-column:1 / 3;
-  background:#b7195b;
-  color:white;
-  border:none;
-  font-size:18px;
-}
+/* BOTONES INVISIBLES SOBRE TU PORTADA */
+.hotspot{position:absolute;z-index:50;background:transparent;border:none;cursor:pointer;color:transparent;font-size:0;padding:0;margin:0}
+.favoritos-btn{top:2.8%;right:10.8%;width:8%;height:4.5%}
+.menu-btn{top:2.8%;right:2.5%;width:8%;height:4.5%}
+.hs-categoria{top:45.2%;left:6.5%;width:21.5%;height:4.5%}
+.hs-pais{top:45.2%;left:29%;width:21.5%;height:4.5%}
+.hs-estado{top:45.2%;left:51.5%;width:21.5%;height:4.5%}
+.hs-ciudad{top:45.2%;left:74%;width:20%;height:4.5%}
+.hs-buscar{top:51%;left:6.5%;width:87.5%;height:5%}
+.hs-monterrey{top:70.3%;left:7%;width:27%;height:4.8%}
+.hs-garcia{top:70.3%;left:37%;width:27%;height:4.8%}
+.hs-santacatarina{top:70.3%;left:67%;width:27%;height:4.8%}
+.hs-apodaca{top:77%;left:7%;width:27%;height:4.8%}
+.hs-escobedo{top:77%;left:37%;width:27%;height:4.8%}
+.hs-sannicolas{top:77%;left:67%;width:27%;height:4.8%}
+.hs-masciudades{top:84%;left:30%;width:40%;height:4.5%}
 
 .menu{position:fixed;top:0;right:-100%;width:82%;height:100%;background:#fff;transition:.3s;z-index:10000;padding:25px;box-shadow:-5px 0 20px rgba(0,0,0,.25);overflow-y:auto}
 .menu.active{right:0}
 .menu a{display:block;padding:18px 10px;color:#b7195b;font-size:21px;text-decoration:none;border-bottom:1px solid #eee;font-weight:bold}
 .cerrar-menu{text-align:right;font-size:30px;cursor:pointer;color:#b7195b}
 .volver-menu{display:block;margin-top:25px;text-align:center;background:#777;color:white;padding:14px;border-radius:12px;text-decoration:none;font-weight:bold}
+
 .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.60);z-index:20000;overflow-y:auto}
 .form-box{background:linear-gradient(180deg,#fff,#fff1f7);margin:20px auto;padding:24px;width:88%;max-width:540px;border-radius:22px;box-shadow:0 10px 35px rgba(0,0,0,.35)}
 h2{color:#b7195b;font-size:30px;margin-bottom:5px}
 .subtitulo{color:#555;margin-bottom:18px}
-.nota-selector{font-size:13px;color:#777;margin-top:-5px;margin-bottom:10px}
 input,textarea,select{width:100%;box-sizing:border-box;padding:15px;margin:9px 0;border-radius:14px;border:1px solid #ddd;font-size:16px;background:white}
 textarea{min-height:95px}
 label{display:block;margin:14px 0;font-size:16px}
@@ -106,39 +89,56 @@ label{display:block;margin:14px 0;font-size:16px}
 .btn-atras{background:#777;color:white}
 .btn-enviar{background:#138a36;color:white}
 .aviso{background:#fff;border-left:5px solid #b7195b;padding:12px;border-radius:10px;color:#333;margin:12px 0}
-#lista-perfiles{padding:20px}
 
+.selector-modal{
+  background:rgba(0,0,0,.18);
+  display:none;
+  align-items:flex-start;
+  justify-content:center;
+}
+.selector-box{
+  background:rgba(255,245,250,.90);
+  backdrop-filter:blur(18px);
+  -webkit-backdrop-filter:blur(18px);
+  margin:95px auto 0 auto;
+  padding:22px;
+  width:82%;
+  max-width:500px;
+  max-height:68vh;
+  overflow-y:auto;
+  border-radius:30px;
+  border:1px solid rgba(233,30,99,.25);
+  box-shadow:0 18px 45px rgba(183,25,91,.35);
+}
+.selector-box h2{text-align:center;color:#b7195b;font-size:28px;margin:0 0 8px 0}
+.selector-box input{border:2px solid #f2b3cc;border-radius:18px;padding:16px;font-size:18px;box-shadow:0 4px 14px rgba(183,25,91,.12)}
+.nota-selector{text-align:center;font-size:13px;color:#7a4a5d;margin:0 0 12px 0}
+#selectorLista{max-height:43vh;overflow-y:auto;padding-right:4px}
+.opcion-selector{
+  background:rgba(255,255,255,.70);
+  border:1px solid rgba(233,30,99,.20);
+  border-radius:20px;
+  padding:18px;
+  margin:10px 0;
+  color:#9f174f;
+  font-size:22px;
+  font-weight:bold;
+  cursor:pointer;
+  box-shadow:0 4px 14px rgba(183,25,91,.12);
+}
+.opcion-selector:active{transform:scale(.98);background:#ffe4f0}
+
+#lista-perfiles{padding:20px}
 .card{position:relative;background:white;border-radius:18px;padding:15px;margin-bottom:18px;box-shadow:0 3px 12px rgba(0,0,0,.18);overflow:hidden}
 .card img{width:100%;max-height:360px;object-fit:cover;border-radius:15px}
 .card h3{color:#b7195b;font-size:30px}
-
 .btn-favorito{position:absolute;top:25px;right:25px;width:48px;height:48px;border:none;border-radius:50%;background:white;color:#e91e63;font-size:30px;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.25);z-index:20}
 .btn-favorito.activo{background:#e91e63;color:white}
-
-#selectorLista{max-height:420px;overflow-y:auto;margin-top:12px}
-.opcion-selector{
-  background:white;
-  border:1px solid #eee;
-  border-radius:14px;
-  padding:15px;
-  margin:8px 0;
-  color:#b7195b;
-  font-weight:bold;
-  cursor:pointer;
-  box-shadow:0 2px 8px rgba(0,0,0,.08);
-}
-.opcion-selector:hover{background:#fff1f7}
-
 .galeria{display:flex;gap:12px;overflow-x:auto;padding:10px 0;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}
 .galeria img{min-width:90%;height:360px;object-fit:cover;border-radius:15px;scroll-snap-align:center;flex-shrink:0}
 .galeria::-webkit-scrollbar{display:none}
 .whatsapp{display:block;text-align:center;background:#25D366;color:white;padding:14px;border-radius:12px;text-decoration:none;font-weight:bold;margin-top:12px}
-.btn-pago{display:block;width:100%;text-align:center;padding:14px;border-radius:12px;text-decoration:none;font-weight:bold;margin:10px 0;border:none;font-size:16px;cursor:pointer}
-.mp{background:#ffe600;color:#111}
-.stripe{background:#635bff;color:white}
 .estado-box{background:#fff;border-radius:18px;padding:18px;box-shadow:0 3px 12px rgba(0,0,0,.16);margin-bottom:15px}
-.es .en{display:none}
-.en .es{display:none}
 </style>
 </head>
 
@@ -146,16 +146,23 @@ label{display:block;margin:14px 0;font-size:16px}
 
 <div class="contenedor">
   <img src="portada.png" class="portada">
-  <div class="favoritos-btn" onclick="abrirFavoritos()"></div>
-  <div class="menu-btn" onclick="abrirMenu()"></div>
 
-  <div class="buscador-home">
-    <button onclick="abrirSelector('categoria')" id="campoCategoria">Acompañante</button>
-    <button onclick="abrirSelector('pais')" id="campoPais">País</button>
-    <button onclick="abrirSelector('estado')" id="campoEstado">Elegir estado</button>
-    <button onclick="abrirSelector('ciudad')" id="campoCiudad">Elegir ciudad</button>
-    <button class="buscar-btn" onclick="buscarPerfilesFiltrados()">BUSCAR</button>
-  </div>
+  <button class="hotspot favoritos-btn" onclick="abrirFavoritos()">favoritos</button>
+  <button class="hotspot menu-btn" onclick="abrirMenu()">menu</button>
+
+  <button class="hotspot hs-categoria" onclick="abrirSelector('categoria')">categoría</button>
+  <button class="hotspot hs-pais" onclick="abrirSelector('pais')">país</button>
+  <button class="hotspot hs-estado" onclick="abrirSelector('estado')">estado</button>
+  <button class="hotspot hs-ciudad" onclick="abrirSelector('ciudad')">ciudad</button>
+  <button class="hotspot hs-buscar" onclick="buscarPerfilesFiltrados()">buscar</button>
+
+  <button class="hotspot hs-monterrey" onclick="buscarCiudadRapida('Monterrey')">Monterrey</button>
+  <button class="hotspot hs-garcia" onclick="buscarCiudadRapida('García')">García</button>
+  <button class="hotspot hs-santacatarina" onclick="buscarCiudadRapida('Santa Catarina')">Santa Catarina</button>
+  <button class="hotspot hs-apodaca" onclick="buscarCiudadRapida('Apodaca')">Apodaca</button>
+  <button class="hotspot hs-escobedo" onclick="buscarCiudadRapida('Escobedo')">Escobedo</button>
+  <button class="hotspot hs-sannicolas" onclick="buscarCiudadRapida('San Nicolás')">San Nicolás</button>
+  <button class="hotspot hs-masciudades" onclick="abrirSelector('ciudad')">más ciudades</button>
 </div>
 
 <div class="menu" id="menu">
@@ -171,14 +178,13 @@ label{display:block;margin:14px 0;font-size:16px}
   <a href="#" class="volver-menu" onclick="cerrarMenu()">← Volver</a>
 </div>
 
-<div class="modal" id="modalSelector">
-  <div class="form-box">
+<div class="modal selector-modal" id="modalSelector">
+  <div class="selector-box">
     <h2 id="selectorTitulo">Seleccionar</h2>
-    <p class="subtitulo">Selecciona de la lista o escríbelo manualmente.</p>
-    <p class="nota-selector">Si no está en la lista, tecléalo aquí arriba y presiona Enter.</p>
+    <p class="nota-selector">Si no aparece en la lista, escríbelo y presiona Enter.</p>
     <input id="selectorInput" placeholder="Escribe aquí..." oninput="filtrarSelector()" onkeydown="enterSelector(event)">
     <div id="selectorLista"></div>
-    <button class="btn btn-atras" style="width:100%;margin-top:10px;" onclick="cerrarSelector()">← Volver</button>
+    <button class="btn btn-atras" style="width:100%;margin-top:12px;" onclick="cerrarSelector()">← Volver</button>
   </div>
 </div>
 
@@ -213,14 +219,12 @@ label{display:block;margin:14px 0;font-size:16px}
 <div class="modal" id="modalEditar">
   <div class="form-box">
     <h2>Actualizar datos públicos</h2>
-    <p class="subtitulo">Solo puedes actualizar la información que aparece publicada. Tus datos personales y verificación no se modifican aquí.</p>
     <textarea id="editDescripcion" placeholder="Descripción breve"></textarea>
     <input id="editPrecio" placeholder="Precio / forma de trabajo">
     <input id="editModalidad" placeholder="Modalidad">
     <input id="editHorario" placeholder="Horario">
     <input id="editZona" placeholder="Zona">
     <input id="editServicios" placeholder="Servicios">
-    <div class="aviso">Al guardar cambios, tu perfil quedará pendiente de revisión antes de volver a mostrarse con la nueva información.</div>
     <button class="btn btn-enviar" style="width:100%;margin-top:10px;" onclick="guardarCambiosPublicos()">Guardar cambios</button>
     <button class="btn btn-atras" style="width:100%;margin-top:10px;" onclick="cerrarEditar()">← Volver</button>
   </div>
@@ -230,7 +234,6 @@ label{display:block;margin:14px 0;font-size:16px}
   <div class="form-box">
     <div class="step active" id="step1">
       <h2>Datos básicos</h2>
-      <p class="subtitulo">Completa la información principal para iniciar tu registro.</p>
       <input id="nombre" placeholder="Nombre o alias">
       <input id="email" type="email" placeholder="Correo">
       <input id="password" type="password" placeholder="Contraseña mínimo 6 caracteres">
@@ -280,7 +283,6 @@ label{display:block;margin:14px 0;font-size:16px}
 
     <div class="step" id="step2">
       <h2>Información de tu página</h2>
-      <p class="subtitulo">Esta información será la que verá el público cuando tu perfil sea aprobado.</p>
       <textarea id="descripcionCompleta" placeholder="Descripción completa de tu perfil"></textarea>
       <input id="horario" placeholder="Horario de atención">
       <input id="zona" placeholder="Zona o referencia">
@@ -289,7 +291,6 @@ label{display:block;margin:14px 0;font-size:16px}
       <input id="fotoPerfil" type="file" accept="image/*">
       <label><b>Fotos adicionales opcionales</b></label>
       <input id="fotosExtra" type="file" accept="image/*" multiple>
-      <div class="aviso">La foto principal será visible solo cuando el perfil sea aprobado.</div>
       <div class="botones">
         <button class="btn btn-atras" onclick="irPaso(1)">← Volver</button>
         <button class="btn btn-continuar" onclick="validarPaso2()">Continuar →</button>
@@ -298,7 +299,6 @@ label{display:block;margin:14px 0;font-size:16px}
 
     <div class="step" id="step3">
       <h2>Verificación y consentimiento</h2>
-      <p class="subtitulo">Esta información será usada únicamente para revisión interna. No será publicada.</p>
       <input id="nombreReal" placeholder="Nombre real completo">
       <label><b>INE / identificación frente</b></label>
       <input id="ineFoto" type="file" accept="image/*">
@@ -306,21 +306,14 @@ label{display:block;margin:14px 0;font-size:16px}
       <input id="ineReversoFoto" type="file" accept="image/*">
       <label><b>Selfie con papel: “CariHub + fecha de hoy”</b></label>
       <input id="selfieFoto" type="file" accept="image/*">
-
       <label><input type="checkbox" id="mayorEdad"> Confirmo que soy mayor de edad</label>
       <label><input type="checkbox" id="fotosMias"> Confirmo que las fotos y datos son míos</label>
       <label><input type="checkbox" id="voluntario"> Confirmo que publico mi perfil por voluntad propia</label>
       <label><input type="checkbox" id="aceptoTerminos"> Acepto términos y condiciones</label>
       <label><input type="checkbox" id="aceptoUso"> Acepto condiciones de uso</label>
       <label><input type="checkbox" id="aceptoPrivacidad"> Acepto política de privacidad</label>
-      <label><input type="checkbox" id="aceptoRevision"> Autorizo la revisión de mi información para aprobar o rechazar mi perfil</label>
-
-      <div class="aviso">
-        🎉 Primer mes GRATIS.<br>
-        Si tu perfil es aprobado, estará visible durante 30 días sin costo.
-        Después podrás renovar por $200 MXN cada 30 días.
-      </div>
-
+      <label><input type="checkbox" id="aceptoRevision"> Autorizo la revisión de mi información</label>
+      <div class="aviso">🎉 Primer mes GRATIS. Después podrás renovar por $200 MXN cada 30 días.</div>
       <div class="botones">
         <button class="btn btn-atras" onclick="irPaso(2)">← Volver</button>
         <button class="btn btn-enviar" id="btnEnviar" onclick="registrar()">Enviar registro</button>
@@ -331,7 +324,7 @@ label{display:block;margin:14px 0;font-size:16px}
 
 <div id="lista-perfiles"></div>
 
-  <script>
+<script>
 function abrirMenu(){document.getElementById("menu").classList.add("active")}
 function cerrarMenu(){document.getElementById("menu").classList.remove("active")}
 function abrirRegistro(){cerrarMenu();document.getElementById("modalRegistro").style.display="block";irPaso(1)}
@@ -344,906 +337,307 @@ function abrirEditar(){document.getElementById("modalEditar").style.display="blo
 function cerrarEditar(){document.getElementById("modalEditar").style.display="none"}
 function cerrarFavoritos(){document.getElementById("modalFavoritos").style.display="none"}
 function cerrarSelector(){document.getElementById("modalSelector").style.display="none"}
-
-function irPaso(num){
-  document.querySelectorAll(".step").forEach(s=>s.classList.remove("active"));
-  document.getElementById("step"+num).classList.add("active");
-}
-
+function irPaso(num){document.querySelectorAll(".step").forEach(s=>s.classList.remove("active"));document.getElementById("step"+num).classList.add("active")}
 function limpiarTelefono(t){return String(t||"").replace(/\D/g,"")}
-function textoSeguro(texto){
-  return String(texto||"")
-    .replace(/&/g,"&amp;")
-    .replace(/</g,"&lt;")
-    .replace(/>/g,"&gt;")
-    .replace(/"/g,"&quot;")
-    .replace(/'/g,"&#039;");
-}
-
-function detectarIdioma(){
-  const idioma=navigator.language || navigator.userLanguage;
-  if(idioma && idioma.startsWith("es")) document.body.classList.add("es");
-  else document.body.classList.add("en");
-}
-
-/* =========================
-   BUSCADOR PRINCIPAL
-========================= */
+function textoSeguro(texto){return String(texto||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;")}
 
 function abrirSelector(tipo){
-  selectorActual = tipo;
+  selectorActual=tipo;
+  const modal=document.getElementById("modalSelector");
+  const titulo=document.getElementById("selectorTitulo");
+  const input=document.getElementById("selectorInput");
+  input.value="";
 
-  const modal = document.getElementById("modalSelector");
-  const titulo = document.getElementById("selectorTitulo");
-  const input = document.getElementById("selectorInput");
+  if(tipo==="categoria")titulo.innerText="Selecciona categoría";
+  if(tipo==="pais")titulo.innerText="Selecciona país";
+  if(tipo==="estado")titulo.innerText="Selecciona estado";
+  if(tipo==="ciudad")titulo.innerText="Selecciona ciudad";
 
-  input.value = "";
+  if(tipo==="estado"&&!paisSeleccionado){alert("Primero selecciona país.");return}
+  if(tipo==="ciudad"&&(!paisSeleccionado||!estadoSeleccionado)){alert("Primero selecciona país y estado.");return}
 
-  if(tipo === "categoria") titulo.innerText = "Selecciona categoría";
-  if(tipo === "pais") titulo.innerText = "Selecciona país";
-  if(tipo === "estado") titulo.innerText = "Selecciona estado";
-  if(tipo === "ciudad") titulo.innerText = "Selecciona ciudad";
-
-  if(tipo === "estado" && !paisSeleccionado){
-    alert("Primero selecciona un país.");
-    return;
-  }
-
-  if(tipo === "ciudad" && (!paisSeleccionado || !estadoSeleccionado)){
-    alert("Primero selecciona país y estado.");
-    return;
-  }
-
-  modal.style.display = "block";
+  modal.style.display="flex";
   pintarOpcionesSelector();
   setTimeout(()=>input.focus(),200);
 }
 
 function obtenerOpcionesSelector(){
-  if(selectorActual === "categoria"){
-    return CATEGORIAS_BUSCADOR;
-  }
-
-  if(selectorActual === "pais"){
-    if(typeof PAISES_PRINCIPALES !== "undefined"){
-      return PAISES_PRINCIPALES;
-    }
+  if(selectorActual==="categoria")return CATEGORIAS_BUSCADOR;
+  if(selectorActual==="pais")return typeof PAISES_PRINCIPALES!=="undefined"?PAISES_PRINCIPALES:[];
+  if(selectorActual==="estado")return typeof ESTADOS!=="undefined"&&ESTADOS[paisSeleccionado]?ESTADOS[paisSeleccionado]:[];
+  if(selectorActual==="ciudad"){
+    if(typeof CIUDADES!=="undefined"&&CIUDADES[paisSeleccionado]&&CIUDADES[paisSeleccionado][estadoSeleccionado])return CIUDADES[paisSeleccionado][estadoSeleccionado];
     return [];
   }
-
-  if(selectorActual === "estado"){
-    if(typeof ESTADOS !== "undefined" && ESTADOS[paisSeleccionado]){
-      return ESTADOS[paisSeleccionado];
-    }
-    return [];
-  }
-
-  if(selectorActual === "ciudad"){
-    if(
-      typeof CIUDADES !== "undefined" &&
-      CIUDADES[paisSeleccionado] &&
-      CIUDADES[paisSeleccionado][estadoSeleccionado]
-    ){
-      return CIUDADES[paisSeleccionado][estadoSeleccionado];
-    }
-    return [];
-  }
-
   return [];
 }
 
 function pintarOpcionesSelector(listaPersonalizada){
-  const listaDiv = document.getElementById("selectorLista");
-  let opciones = listaPersonalizada || obtenerOpcionesSelector();
+  const listaDiv=document.getElementById("selectorLista");
+  let opciones=listaPersonalizada||obtenerOpcionesSelector();
+  listaDiv.innerHTML="";
 
-  listaDiv.innerHTML = "";
-
-  if(selectorActual === "pais" && !listaPersonalizada){
-    opciones.forEach(op=>{
-      listaDiv.innerHTML += `
-        <div class="opcion-selector" onclick="seleccionarOpcion('${textoSeguro(op)}')">
-          ${textoSeguro(op)}
-        </div>
-      `;
-    });
-
-    listaDiv.innerHTML += `
-      <div class="opcion-selector" onclick="mostrarTodosLosPaises()">
-        🌍 Ver más países
-      </div>
-    `;
+  if(selectorActual==="pais"&&!listaPersonalizada){
+    opciones.forEach(op=>listaDiv.innerHTML+=`<div class="opcion-selector" onclick="seleccionarOpcion('${textoSeguro(op)}')">${textoSeguro(op)}</div>`);
+    listaDiv.innerHTML+=`<div class="opcion-selector" onclick="mostrarTodosLosPaises()">🌍 Ver más países</div>`;
     return;
   }
 
-  if(opciones.length === 0){
-    listaDiv.innerHTML = `
-      <div class="estado-box">
-        <p>No hay lista cargada. Puedes escribirlo manualmente arriba y presionar Enter.</p>
-      </div>
-    `;
+  if(opciones.length===0){
+    listaDiv.innerHTML=`<div class="estado-box"><p>No hay lista cargada. Puedes escribirlo manualmente arriba y presionar Enter.</p></div>`;
     return;
   }
 
-  opciones.forEach(op=>{
-    listaDiv.innerHTML += `
-      <div class="opcion-selector" onclick="seleccionarOpcion('${textoSeguro(op)}')">
-        ${textoSeguro(op)}
-      </div>
-    `;
-  });
+  opciones.forEach(op=>listaDiv.innerHTML+=`<div class="opcion-selector" onclick="seleccionarOpcion('${textoSeguro(op)}')">${textoSeguro(op)}</div>`);
 }
 
-function mostrarTodosLosPaises(){
-  if(typeof TODOS_LOS_PAISES !== "undefined"){
-    pintarOpcionesSelector(TODOS_LOS_PAISES);
-  }
-}
-
+function mostrarTodosLosPaises(){if(typeof TODOS_LOS_PAISES!=="undefined")pintarOpcionesSelector(TODOS_LOS_PAISES)}
 function filtrarSelector(){
-  const texto = document.getElementById("selectorInput").value.trim().toLowerCase();
-
-  let base = [];
-
-  if(selectorActual === "pais" && typeof TODOS_LOS_PAISES !== "undefined"){
-    base = TODOS_LOS_PAISES;
-  }else{
-    base = obtenerOpcionesSelector();
-  }
-
-  const filtradas = base.filter(op => String(op).toLowerCase().includes(texto));
-  pintarOpcionesSelector(filtradas);
+  const texto=document.getElementById("selectorInput").value.trim().toLowerCase();
+  let base=selectorActual==="pais"&&typeof TODOS_LOS_PAISES!=="undefined"?TODOS_LOS_PAISES:obtenerOpcionesSelector();
+  pintarOpcionesSelector(base.filter(op=>String(op).toLowerCase().includes(texto)));
 }
-
 function enterSelector(event){
-  if(event.key === "Enter"){
-    const valor = document.getElementById("selectorInput").value.trim();
-    if(valor){
-      seleccionarOpcion(valor);
-    }
+  if(event.key==="Enter"){
+    const valor=document.getElementById("selectorInput").value.trim();
+    if(valor)seleccionarOpcion(valor);
   }
 }
-
 function seleccionarOpcion(valor){
-  if(selectorActual === "categoria"){
-    categoriaSeleccionada = valor;
-    document.getElementById("campoCategoria").innerText = valor;
-  }
-
-  if(selectorActual === "pais"){
-    paisSeleccionado = valor;
-    estadoSeleccionado = "";
-    ciudadSeleccionada = "";
-
-    document.getElementById("campoPais").innerText = valor;
-    document.getElementById("campoEstado").innerText = "Elegir estado";
-    document.getElementById("campoCiudad").innerText = "Elegir ciudad";
-  }
-
-  if(selectorActual === "estado"){
-    estadoSeleccionado = valor;
-    ciudadSeleccionada = "";
-
-    document.getElementById("campoEstado").innerText = valor;
-    document.getElementById("campoCiudad").innerText = "Elegir ciudad";
-  }
-
-  if(selectorActual === "ciudad"){
-    ciudadSeleccionada = valor;
-    document.getElementById("campoCiudad").innerText = valor;
-  }
-
+  if(selectorActual==="categoria")categoriaSeleccionada=valor;
+  if(selectorActual==="pais"){paisSeleccionado=valor;estadoSeleccionado="";ciudadSeleccionada=""}
+  if(selectorActual==="estado"){estadoSeleccionado=valor;ciudadSeleccionada=""}
+  if(selectorActual==="ciudad")ciudadSeleccionada=valor;
   cerrarSelector();
 }
 
+function buscarCiudadRapida(ciudad){
+  categoriaSeleccionada="Acompañante";
+  paisSeleccionado="México";
+  estadoSeleccionado="Nuevo León";
+  ciudadSeleccionada=ciudad;
+  buscarPerfilesFiltrados();
+}
+
 async function buscarPerfilesFiltrados(){
-  if(!categoriaSeleccionada){
-    categoriaSeleccionada = document.getElementById("campoCategoria").innerText;
-  }
+  if(!categoriaSeleccionada)categoriaSeleccionada="Acompañante";
+  if(!paisSeleccionado||!estadoSeleccionado||!ciudadSeleccionada){alert("Selecciona categoría, país, estado y ciudad.");return}
 
-  if(!categoriaSeleccionada || !paisSeleccionado || !estadoSeleccionado || !ciudadSeleccionada){
-    alert("Selecciona categoría, país, estado y ciudad.");
-    return;
-  }
-
-  const lista = document.getElementById("lista-perfiles");
-
-  lista.innerHTML = `
-    <div class="estado-box">
-      <h3>Buscando perfiles...</h3>
-      <p>${textoSeguro(categoriaSeleccionada)} / ${textoSeguro(paisSeleccionado)} / ${textoSeguro(estadoSeleccionado)} / ${textoSeguro(ciudadSeleccionada)}</p>
-    </div>
-  `;
+  const lista=document.getElementById("lista-perfiles");
+  lista.innerHTML=`<div class="estado-box"><h3>Buscando perfiles...</h3><p>${textoSeguro(categoriaSeleccionada)} / ${textoSeguro(paisSeleccionado)} / ${textoSeguro(estadoSeleccionado)} / ${textoSeguro(ciudadSeleccionada)}</p></div>`;
 
   try{
-    const snap = await db.collection("usuarios")
-      .where("aprobado","==",true)
-      .where("activo","==",true)
-      .get();
+    const snap=await db.collection("usuarios").where("aprobado","==",true).where("activo","==",true).get();
 
-    lista.innerHTML = `
-      <div class="estado-box">
-        <h3>Resultados</h3>
-        <p><b>Categoría:</b> ${textoSeguro(categoriaSeleccionada)}</p>
-        <p><b>Ubicación:</b> ${textoSeguro(ciudadSeleccionada)}, ${textoSeguro(estadoSeleccionado)}, ${textoSeguro(paisSeleccionado)}</p>
-        <button class="btn btn-atras" style="width:100%;" onclick="volverInicio()">← Volver</button>
-      </div>
-    `;
+    lista.innerHTML=`<div class="estado-box"><h3>Resultados</h3><p><b>Categoría:</b> ${textoSeguro(categoriaSeleccionada)}</p><p><b>Ubicación:</b> ${textoSeguro(ciudadSeleccionada)}, ${textoSeguro(estadoSeleccionado)}, ${textoSeguro(paisSeleccionado)}</p><button class="btn btn-atras" style="width:100%;" onclick="volverInicio()">← Volver</button></div>`;
 
-    let encontrados = 0;
-    let cercanos = "";
-
+    let encontrados=0,cercanos="";
     for(const doc of snap.docs){
-      const u = doc.data();
-
+      const u=doc.data();
       let vencido=false;
-      if(u.vencido===true) vencido=true;
+      if(u.vencido===true)vencido=true;
       if(u.fechaVencimiento){
-        const fechaV=u.fechaVencimiento.toDate ? u.fechaVencimiento.toDate() : new Date(u.fechaVencimiento);
-        if(fechaV < new Date()) vencido=true;
+        const fechaV=u.fechaVencimiento.toDate?u.fechaVencimiento.toDate():new Date(u.fechaVencimiento);
+        if(fechaV<new Date())vencido=true;
       }
+      if(vencido)continue;
 
-      if(vencido) continue;
+      const exacto=String(u.categoria||"").toLowerCase()===categoriaSeleccionada.toLowerCase()&&String(u.pais||"").toLowerCase()===paisSeleccionado.toLowerCase()&&String(u.estado||"").toLowerCase()===estadoSeleccionado.toLowerCase()&&String(u.ciudad||"").toLowerCase()===ciudadSeleccionada.toLowerCase();
 
-      const coincideExacto =
-        String(u.categoria||"").toLowerCase() === categoriaSeleccionada.toLowerCase() &&
-        String(u.pais||"").toLowerCase() === paisSeleccionado.toLowerCase() &&
-        String(u.estado||"").toLowerCase() === estadoSeleccionado.toLowerCase() &&
-        String(u.ciudad||"").toLowerCase() === ciudadSeleccionada.toLowerCase();
+      const cerca=String(u.pais||"").toLowerCase()===paisSeleccionado.toLowerCase()&&String(u.estado||"").toLowerCase()===estadoSeleccionado.toLowerCase()&&String(u.ciudad||"").toLowerCase()!==ciudadSeleccionada.toLowerCase();
 
-      const estaCerca =
-        String(u.pais||"").toLowerCase() === paisSeleccionado.toLowerCase() &&
-        String(u.estado||"").toLowerCase() === estadoSeleccionado.toLowerCase() &&
-        String(u.ciudad||"").toLowerCase() !== ciudadSeleccionada.toLowerCase();
-
-      if(coincideExacto){
-        encontrados++;
-        lista.innerHTML += await plantillaCardPerfil(doc.id,u);
-      }else if(estaCerca){
-        cercanos += await plantillaCardPerfil(doc.id,u);
-      }
+      if(exacto){encontrados++;lista.innerHTML+=await plantillaCardPerfil(doc.id,u)}
+      else if(cerca)cercanos+=await plantillaCardPerfil(doc.id,u);
     }
 
-    if(encontrados === 0){
-      lista.innerHTML += `
-        <div class="estado-box">
-          <h3>No encontramos perfiles exactos.</h3>
-          <p>Prueba otra ciudad o revisa perfiles cercanos abajo.</p>
-        </div>
-      `;
-    }
-
-    if(cercanos){
-      lista.innerHTML += `
-        <div class="estado-box">
-          <h3>Perfiles cercanos</h3>
-          <p>Estos perfiles están en el mismo estado.</p>
-        </div>
-        ${cercanos}
-      `;
-    }
-
-    lista.innerHTML += `
-      <button class="btn btn-atras" style="width:100%;margin:20px 0;" onclick="volverInicio()">← Volver</button>
-    `;
-
-    document.getElementById("lista-perfiles").scrollIntoView({behavior:"smooth"});
-
-  }catch(error){
-    alert("Error en búsqueda: " + error.message);
-  }
+    if(encontrados===0)lista.innerHTML+=`<div class="estado-box"><h3>No encontramos perfiles exactos.</h3><p>Prueba otra ciudad o revisa perfiles cercanos abajo.</p></div>`;
+    if(cercanos)lista.innerHTML+=`<div class="estado-box"><h3>Perfiles cercanos</h3><p>Estos perfiles están en el mismo estado.</p></div>${cercanos}`;
+    lista.innerHTML+=`<button class="btn btn-atras" style="width:100%;margin:20px 0;" onclick="volverInicio()">← Volver</button>`;
+    lista.scrollIntoView({behavior:"smooth"});
+  }catch(error){alert("Error en búsqueda: "+error.message)}
 }
 
-function volverInicio(){
-  categoriaSeleccionada = "";
-  paisSeleccionado = "";
-  estadoSeleccionado = "";
-  ciudadSeleccionada = "";
+function volverInicio(){cargarPerfiles();window.scrollTo({top:0,behavior:"smooth"})}
 
-  document.getElementById("campoCategoria").innerText = "Acompañante";
-  document.getElementById("campoPais").innerText = "País";
-  document.getElementById("campoEstado").innerText = "Elegir estado";
-  document.getElementById("campoCiudad").innerText = "Elegir ciudad";
-
-  cargarPerfiles();
-  window.scrollTo({top:0,behavior:"smooth"});
-}
-
-/* =========================
-   FAVORITOS
-========================= */
-
-async function prepararUsuarioFavoritos(){
-  if(!auth.currentUser){
-    await auth.signInAnonymously();
-  }
-}
-
-async function toggleFavorito(perfilId, boton){
+async function toggleFavorito(perfilId,boton){
   try{
-    let user = auth.currentUser;
-    if(!user){
-      await auth.signInAnonymously();
-      user = auth.currentUser;
+    let user=auth.currentUser;
+    if(!user){await auth.signInAnonymously();user=auth.currentUser}
+    const favRef=db.collection("usuarios").doc(user.uid).collection("favoritos").doc(perfilId);
+    const favDoc=await favRef.get();
+    if(favDoc.exists){await favRef.delete();boton.classList.remove("activo");boton.innerHTML="♡"}
+    else{
+      const perfilDoc=await db.collection("usuarios").doc(perfilId).get();
+      if(!perfilDoc.exists)return;
+      const p=perfilDoc.data();
+      await favRef.set({perfilId,nombre:p.nombre||"",ciudad:p.ciudad||"",estado:p.estado||"",pais:p.pais||"",categoria:p.categoria||"",fotoURL:p.fotoURL||"",precio:p.precio||"",modalidad:p.modalidad||"",telefono:p.telefono||"",fechaGuardado:firebase.firestore.FieldValue.serverTimestamp()});
+      boton.classList.add("activo");boton.innerHTML="♥";
     }
-
-    const favRef = db.collection("usuarios").doc(user.uid).collection("favoritos").doc(perfilId);
-    const favDoc = await favRef.get();
-
-    if(favDoc.exists){
-      await favRef.delete();
-      boton.classList.remove("activo");
-      boton.innerHTML = "♡";
-    }else{
-      const perfilDoc = await db.collection("usuarios").doc(perfilId).get();
-      if(!perfilDoc.exists){
-        alert("No se encontró este perfil.");
-        return;
-      }
-
-      const p = perfilDoc.data();
-
-      await favRef.set({
-        perfilId: perfilId,
-        nombre: p.nombre || "",
-        ciudad: p.ciudad || "",
-        estado: p.estado || "",
-        pais: p.pais || "",
-        categoria: p.categoria || "",
-        fotoURL: p.fotoURL || "",
-        precio: p.precio || "",
-        modalidad: p.modalidad || "",
-        telefono: p.telefono || "",
-        fechaGuardado: firebase.firestore.FieldValue.serverTimestamp()
-      });
-
-      boton.classList.add("activo");
-      boton.innerHTML = "♥";
-    }
-  }catch(error){
-    alert("Error al guardar favorito: " + error.message);
-  }
+  }catch(error){alert("Favoritos se activarán cuando habilitemos Firebase Anonymous.")}
 }
-
 async function esFavorito(perfilId){
   try{
-    const user = auth.currentUser;
-    if(!user) return false;
-
-    const favDoc = await db.collection("usuarios").doc(user.uid).collection("favoritos").doc(perfilId).get();
+    const user=auth.currentUser;if(!user)return false;
+    const favDoc=await db.collection("usuarios").doc(user.uid).collection("favoritos").doc(perfilId).get();
     return favDoc.exists;
-  }catch(error){
-    return false;
-  }
+  }catch(e){return false}
 }
 
 async function abrirFavoritos(){
   cerrarMenu();
-
   const modal=document.getElementById("modalFavoritos");
   const contenedor=document.getElementById("favoritosContenido");
-
   modal.style.display="block";
   contenedor.innerHTML="<p>Cargando favoritos...</p>";
-
   try{
     let user=auth.currentUser;
-    if(!user){
-      await auth.signInAnonymously();
-      user=auth.currentUser;
-    }
-
+    if(!user){await auth.signInAnonymously();user=auth.currentUser}
     const snap=await db.collection("usuarios").doc(user.uid).collection("favoritos").orderBy("fechaGuardado","desc").get();
-
-    if(snap.empty){
-      contenedor.innerHTML="<div class='estado-box'><h3>No tienes favoritos todavía.</h3><p>Presiona el corazón en un perfil para guardarlo aquí.</p></div>";
-      return;
-    }
-
+    if(snap.empty){contenedor.innerHTML="<div class='estado-box'><h3>No tienes favoritos todavía.</h3><p>Presiona el corazón en un perfil para guardarlo aquí.</p></div>";return}
     contenedor.innerHTML="";
-
     snap.forEach(doc=>{
       const f=doc.data();
-      const tel=limpiarTelefono(f.telefono || "");
-      const mensajeCliente=encodeURIComponent("Hola, vi tu perfil en CariHub y te guardé en favoritos. Me gustaría recibir más información.");
-
-      contenedor.innerHTML+=`
-        <div class="estado-box">
-          ${f.fotoURL ? `<img src="${textoSeguro(f.fotoURL)}" style="width:100%;border-radius:15px;max-height:320px;object-fit:cover;">` : ""}
-          <h3 style="color:#b7195b;">${textoSeguro(f.nombre)}</h3>
-          <p><b>Ciudad:</b> ${textoSeguro(f.ciudad)}</p>
-          <p><b>Estado:</b> ${textoSeguro(f.estado)}</p>
-          <p><b>País:</b> ${textoSeguro(f.pais)}</p>
-          <p><b>Categoría:</b> ${textoSeguro(f.categoria)}</p>
-          <p><b>Precio:</b> ${textoSeguro(f.precio)}</p>
-          <p><b>Modalidad:</b> ${textoSeguro(f.modalidad)}</p>
-
-          ${tel ? `
-            <a class="whatsapp" href="https://wa.me/${tel}?text=${mensajeCliente}" target="_blank">
-              Contactar por WhatsApp
-            </a>
-          ` : ""}
-
-          <button class="btn btn-atras" style="width:100%;margin-top:10px;" onclick="eliminarFavoritoDesdeModal('${doc.id}')">
-            Quitar de favoritos
-          </button>
-        </div>
-      `;
+      const tel=limpiarTelefono(f.telefono||"");
+      const msg=encodeURIComponent("Hola, vi tu perfil en CariHub y te guardé en favoritos. Me gustaría recibir más información.");
+      contenedor.innerHTML+=`<div class="estado-box">${f.fotoURL?`<img src="${textoSeguro(f.fotoURL)}" style="width:100%;border-radius:15px;max-height:320px;object-fit:cover;">`:""}<h3 style="color:#b7195b;">${textoSeguro(f.nombre)}</h3><p><b>Ciudad:</b> ${textoSeguro(f.ciudad)}</p><p><b>Estado:</b> ${textoSeguro(f.estado)}</p><p><b>País:</b> ${textoSeguro(f.pais)}</p><p><b>Categoría:</b> ${textoSeguro(f.categoria)}</p>${tel?`<a class="whatsapp" href="https://wa.me/${tel}?text=${msg}" target="_blank">Contactar por WhatsApp</a>`:""}<button class="btn btn-atras" style="width:100%;margin-top:10px;" onclick="eliminarFavoritoDesdeModal('${doc.id}')">Quitar de favoritos</button></div>`;
     });
-
-  }catch(error){
-    contenedor.innerHTML=`<div class="estado-box"><h3>Error</h3><p>${textoSeguro(error.message)}</p></div>`;
-  }
+  }catch(error){contenedor.innerHTML="<div class='estado-box'><h3>Favoritos pendiente</h3><p>Se activará cuando habilitemos Firebase Anonymous.</p></div>"}
 }
-
 async function eliminarFavoritoDesdeModal(perfilId){
-  try{
-    const user=auth.currentUser;
-    if(!user)return;
-
-    await db.collection("usuarios").doc(user.uid).collection("favoritos").doc(perfilId).delete();
-
-    abrirFavoritos();
-    cargarPerfiles();
-
-  }catch(error){
-    alert("Error al eliminar favorito: "+error.message);
-  }
+  const user=auth.currentUser;if(!user)return;
+  await db.collection("usuarios").doc(user.uid).collection("favoritos").doc(perfilId).delete();
+  abrirFavoritos();cargarPerfiles();
 }
-
-/* =========================
-   PAGOS
-========================= */
-
-async function pagoAutomatico(){
-  try{
-    const res=await fetch("https://ipapi.co/json/");
-    const data=await res.json();
-    const pais=data.country_code;
-    if(PAISES_MERCADO_PAGO.includes(pais)) window.open(LINK_MERCADO_PAGO,"_blank");
-    else window.open(LINK_STRIPE,"_blank");
-  }catch(e){
-    alert("No se pudo detectar tu país. Usa el selector manual.");
-  }
-}
-
-function pagoManual(){
-  const pais=document.getElementById("paisManual").value;
-  if(!pais){alert("Selecciona tu país");return}
-  if(["mx","co","pe","cl","ar","br"].includes(pais)) window.open(LINK_MERCADO_PAGO,"_blank");
-  else window.open(LINK_STRIPE,"_blank");
-}
-
-function plantillaPagoPanel(){
-  return `
-    <div class="estado-box">
-      <h3>💳 Pago / renovación</h3>
-      <p><b>Costo:</b> $200 MXN / 30 días</p>
-      <button onclick="pagoAutomatico()" class="btn-pago stripe">Pagar ahora automáticamente</button>
-
-      <p><b>O selecciona tu país manualmente:</b></p>
-
-      <select id="paisManual">
-        <option value="">Selecciona tu país</option>
-        <option value="mx">🇲🇽 México</option>
-        <option value="co">🇨🇴 Colombia</option>
-        <option value="pe">🇵🇪 Perú</option>
-        <option value="cl">🇨🇱 Chile</option>
-        <option value="ar">🇦🇷 Argentina</option>
-        <option value="br">🇧🇷 Brasil</option>
-        <option value="us">🇺🇸 Estados Unidos</option>
-        <option value="es">🇪🇸 España</option>
-        <option value="ca">🇨🇦 Canadá</option>
-        <option value="uk">🇬🇧 Reino Unido</option>
-        <option value="fr">🇫🇷 Francia</option>
-        <option value="de">🇩🇪 Alemania</option>
-        <option value="otro">🌍 Otros países</option>
-      </select>
-
-      <button onclick="pagoManual()" class="btn-pago mp">Continuar al pago</button>
-
-      <a class="whatsapp" href="https://wa.me/${WHATSAPP_ADMIN}?text=${encodeURIComponent('Hola, quiero activar o renovar mi perfil en CariHub. Ya realicé mi pago y quiero enviar mi comprobante.')}" target="_blank">
-        Enviar comprobante por WhatsApp
-      </a>
-    </div>
-  `;
-}
-
-/* =========================
-   LOGIN / PANEL
-========================= */
 
 async function loginMiPerfil(){
   const email=document.getElementById("loginEmail").value.trim().toLowerCase();
   const password=document.getElementById("loginPassword").value;
-
   if(!email||!password){alert("Escribe correo y contraseña.");return}
-
-  try{
-    const cred=await auth.signInWithEmailAndPassword(email,password);
-    cerrarMiPerfil();
-    abrirPanel(cred.user.uid);
-  }catch(error){
-    alert("Error: "+error.message);
-  }
+  try{const cred=await auth.signInWithEmailAndPassword(email,password);cerrarMiPerfil();abrirPanel(cred.user.uid)}
+  catch(error){alert("Error: "+error.message)}
 }
 
 async function cargarPanel(uid){
   const contenedor=document.getElementById("panelContenido");
   contenedor.innerHTML="<p>Cargando perfil...</p>";
-
   try{
     const doc=await db.collection("usuarios").doc(uid).get();
-
-    if(!doc.exists){
-      contenedor.innerHTML="<div class='estado-box'><h3>No encontramos tu perfil.</h3></div>";
-      return;
-    }
-
+    if(!doc.exists){contenedor.innerHTML="<div class='estado-box'><h3>No encontramos tu perfil.</h3></div>";return}
     const u=doc.data();
-    let vencido=false;
-
-    if(u.vencido===true) vencido=true;
-
-    if(u.fechaVencimiento){
-      const fechaV=u.fechaVencimiento.toDate ? u.fechaVencimiento.toDate() : new Date(u.fechaVencimiento);
-      if(fechaV < new Date()) vencido=true;
-    }
-
-    let fechaTexto="No disponible";
-    if(u.fechaVencimiento){
-      const fechaV=u.fechaVencimiento.toDate ? u.fechaVencimiento.toDate() : new Date(u.fechaVencimiento);
-      fechaTexto=fechaV.toLocaleDateString("es-MX");
-    }
-
-    let estadoHTML="";
-    let pagoHTML="";
-
-    if(u.aprobado!==true){
-      estadoHTML=`<h3>⏳ Perfil en revisión</h3><p>Tu perfil está pendiente de aprobación del administrador.</p>`;
-    }else if(vencido){
-      estadoHTML=`<h3>⚠️ Perfil vencido</h3><p>Tu perfil no está visible. Renueva para volver a aparecer.</p><p><b>Vence:</b> ${fechaTexto}</p>`;
-      pagoHTML=plantillaPagoPanel();
-    }else if(u.activo===true){
-      estadoHTML=`<h3>🟢 Perfil activo</h3><p>Tu perfil está visible en CariHub.</p><p><b>Vence:</b> ${fechaTexto}</p>`;
-      pagoHTML=plantillaPagoPanel();
-    }else{
-      estadoHTML=`<h3>✅ Perfil aprobado</h3><p>Tu perfil fue aprobado. Actívalo para aparecer en la plataforma.</p>`;
-      pagoHTML=plantillaPagoPanel();
-    }
-
-    contenedor.innerHTML=`
-      <div class="estado-box">${estadoHTML}</div>
-      ${pagoHTML}
-      <button class="btn btn-continuar" style="width:100%;margin-top:10px;" onclick="abrirEdicionPublica('${uid}')">
-        ✏️ Actualizar datos públicos
-      </button>
-    `;
-  }catch(error){
-    contenedor.innerHTML=`<div class="estado-box"><h3>Error</h3><p>${textoSeguro(error.message)}</p></div>`;
-  }
+    contenedor.innerHTML=`<div class="estado-box"><h3>${u.aprobado?"Perfil":"Perfil en revisión"}</h3><p>${u.aprobado?"Tu perfil existe en CariHub.":"Pendiente de aprobación."}</p></div><button class="btn btn-continuar" style="width:100%;margin-top:10px;" onclick="abrirEdicionPublica('${uid}')">✏️ Actualizar datos públicos</button>`;
+  }catch(error){contenedor.innerHTML=`<div class="estado-box"><h3>Error</h3><p>${textoSeguro(error.message)}</p></div>`}
 }
 
 async function abrirEdicionPublica(uid){
   UID_EDITANDO=uid;
-
-  try{
-    const doc=await db.collection("usuarios").doc(uid).get();
-    if(!doc.exists){alert("No encontramos tu perfil.");return}
-
-    const u=doc.data();
-
-    document.getElementById("editDescripcion").value=u.descripcion||"";
-    document.getElementById("editPrecio").value=u.precio||"";
-    document.getElementById("editModalidad").value=u.modalidad||"";
-    document.getElementById("editHorario").value=u.horario||"";
-    document.getElementById("editZona").value=u.zona||"";
-    document.getElementById("editServicios").value=u.servicios||"";
-
-    abrirEditar();
-  }catch(error){
-    alert("Error: "+error.message);
-  }
+  const doc=await db.collection("usuarios").doc(uid).get();
+  if(!doc.exists)return;
+  const u=doc.data();
+  document.getElementById("editDescripcion").value=u.descripcion||"";
+  document.getElementById("editPrecio").value=u.precio||"";
+  document.getElementById("editModalidad").value=u.modalidad||"";
+  document.getElementById("editHorario").value=u.horario||"";
+  document.getElementById("editZona").value=u.zona||"";
+  document.getElementById("editServicios").value=u.servicios||"";
+  abrirEditar();
 }
-
 async function guardarCambiosPublicos(){
-  if(!UID_EDITANDO){alert("No hay perfil seleccionado.");return}
-
-  const descripcion=document.getElementById("editDescripcion").value.trim();
-  const precio=document.getElementById("editPrecio").value.trim();
-  const modalidad=document.getElementById("editModalidad").value.trim();
-  const horario=document.getElementById("editHorario").value.trim();
-  const zona=document.getElementById("editZona").value.trim();
-  const servicios=document.getElementById("editServicios").value.trim();
-
-  if(!descripcion || !precio || !modalidad || !horario || !zona || !servicios){
-    alert("Completa todos los datos públicos.");
-    return;
-  }
-
-  try{
-    await db.collection("usuarios").doc(UID_EDITANDO).update({
-      descripcion,precio,modalidad,horario,zona,servicios,
-      aprobado:false,
-      activo:false,
-      actualizacionPendiente:true,
-      estadoRevision:"actualizacion_pendiente",
-      fechaActualizacion:new Date()
-    });
-
-    alert("Actualización enviada. Pendiente de revisión.");
-    cerrarEditar();
-    cargarPanel(UID_EDITANDO);
-    cargarPerfiles();
-  }catch(error){
-    alert("Error: "+error.message);
-  }
+  if(!UID_EDITANDO)return;
+  await db.collection("usuarios").doc(UID_EDITANDO).update({
+    descripcion:document.getElementById("editDescripcion").value.trim(),
+    precio:document.getElementById("editPrecio").value.trim(),
+    modalidad:document.getElementById("editModalidad").value.trim(),
+    horario:document.getElementById("editHorario").value.trim(),
+    zona:document.getElementById("editZona").value.trim(),
+    servicios:document.getElementById("editServicios").value.trim(),
+    aprobado:false,activo:false,actualizacionPendiente:true,estadoRevision:"actualizacion_pendiente",fechaActualizacion:new Date()
+  });
+  alert("Actualización enviada. Pendiente de revisión.");
+  cerrarEditar();cargarPanel(UID_EDITANDO);cargarPerfiles();
 }
 
-/* =========================
-   REGISTRO
-========================= */
-
-function validarImagen(file,nombre){
-  if(!file){alert("Falta subir: "+nombre);return false}
-  if(!file.type.startsWith("image/")){alert(nombre+" debe ser una imagen.");return false}
-  if(file.size>5*1024*1024){alert(nombre+" debe pesar máximo 5 MB.");return false}
-  return true
-}
-
+function validarImagen(file,nombre){if(!file){alert("Falta subir: "+nombre);return false}if(!file.type.startsWith("image/")){alert(nombre+" debe ser imagen.");return false}if(file.size>5*1024*1024){alert(nombre+" máximo 5 MB.");return false}return true}
 function validarPaso1(){
   const campos=["nombre","email","password","telefono","pais","estado","ciudad","categoria","descripcionCorta","precio","modalidad"];
-
-  for(const id of campos){
-    if(!document.getElementById(id).value.trim()){
-      alert("Completa todos los datos de la primera pantalla.");
-      return;
-    }
-  }
-
-  const password=document.getElementById("password").value;
-  const telefono=limpiarTelefono(document.getElementById("telefono").value);
-
-  if(password.length<6){alert("La contraseña debe tener mínimo 6 caracteres.");return}
-  if(telefono.length<10||telefono.length>15){alert("WhatsApp inválido. Usa solo números.");return}
-
+  for(const id of campos){if(!document.getElementById(id).value.trim()){alert("Completa todos los datos.");return}}
+  if(document.getElementById("password").value.length<6){alert("La contraseña debe tener mínimo 6 caracteres.");return}
   irPaso(2);
 }
-
 function validarPaso2(){
-  const descripcionCompleta=document.getElementById("descripcionCompleta").value.trim();
-  const horario=document.getElementById("horario").value.trim();
-  const zona=document.getElementById("zona").value.trim();
-  const servicios=document.getElementById("servicios").value.trim();
-  const fotoPerfil=document.getElementById("fotoPerfil").files[0];
-
-  if(!descripcionCompleta || !horario || !zona || !servicios){
-    alert("Completa toda la información de tu página.");
-    return;
-  }
-
-  if(!validarImagen(fotoPerfil,"Foto principal")) return;
-
+  if(!document.getElementById("descripcionCompleta").value.trim()||!document.getElementById("horario").value.trim()||!document.getElementById("zona").value.trim()||!document.getElementById("servicios").value.trim()){alert("Completa toda la información.");return}
+  if(!validarImagen(document.getElementById("fotoPerfil").files[0],"Foto principal"))return;
   irPaso(3);
 }
-
-async function subirImagen(ruta,archivo){
-  const ref=storage.ref(ruta);
-  await ref.put(archivo);
-  return await ref.getDownloadURL();
-}
-
-async function subirMultiplesFotos(userId,archivos){
-  const urls=[];
-  for(let i=0;i<archivos.length;i++){
-    const file=archivos[i];
-
-    if(file && file.type.startsWith("image/") && file.size<=5*1024*1024){
-      const url=await subirImagen("perfiles/"+userId+"/extra-"+Date.now()+"-"+i+".jpg",file);
-      urls.push(url);
-    }
-  }
-  return urls;
-}
+async function subirImagen(ruta,archivo){const ref=storage.ref(ruta);await ref.put(archivo);return await ref.getDownloadURL()}
+async function subirMultiplesFotos(userId,archivos){const urls=[];for(let i=0;i<archivos.length;i++){const f=archivos[i];if(f&&f.type.startsWith("image/")&&f.size<=5*1024*1024)urls.push(await subirImagen("perfiles/"+userId+"/extra-"+Date.now()+"-"+i+".jpg",f))}return urls}
 
 async function registrar(){
-  const btn=document.getElementById("btnEnviar");
-  btn.disabled=true;
-  btn.innerText="Enviando...";
-
-  const nombre=document.getElementById("nombre").value.trim();
-  const email=document.getElementById("email").value.trim().toLowerCase();
-  const password=document.getElementById("password").value;
-  const telefono=limpiarTelefono(document.getElementById("telefono").value);
-  const pais=document.getElementById("pais").value.trim();
-  const estado=document.getElementById("estado").value.trim();
-  const ciudad=document.getElementById("ciudad").value.trim();
-  const categoria=document.getElementById("categoria").value.trim();
-  const descripcionCorta=document.getElementById("descripcionCorta").value.trim();
-  const precio=document.getElementById("precio").value.trim();
-  const modalidad=document.getElementById("modalidad").value.trim();
-
-  const descripcionCompleta=document.getElementById("descripcionCompleta").value.trim();
-  const horario=document.getElementById("horario").value.trim();
-  const zona=document.getElementById("zona").value.trim();
-  const servicios=document.getElementById("servicios").value.trim();
-
-  const nombreReal=document.getElementById("nombreReal").value.trim();
-  const fotoPerfil=document.getElementById("fotoPerfil").files[0];
-  const fotosExtra=document.getElementById("fotosExtra").files;
-  const ineFoto=document.getElementById("ineFoto").files[0];
-  const ineReversoFoto=document.getElementById("ineReversoFoto").files[0];
-  const selfieFoto=document.getElementById("selfieFoto").files[0];
-
-  const mayorEdad=document.getElementById("mayorEdad").checked;
-  const fotosMias=document.getElementById("fotosMias").checked;
-  const voluntario=document.getElementById("voluntario").checked;
-  const aceptoTerminos=document.getElementById("aceptoTerminos").checked;
-  const aceptoUso=document.getElementById("aceptoUso").checked;
-  const aceptoPrivacidad=document.getElementById("aceptoPrivacidad").checked;
-  const aceptoRevision=document.getElementById("aceptoRevision").checked;
-
+  const btn=document.getElementById("btnEnviar");btn.disabled=true;btn.innerText="Enviando...";
   try{
-    if(!nombreReal){alert("Falta nombre real.");irPaso(3);throw new Error("validacion")}
-    if(!validarImagen(ineFoto,"INE / identificación")){irPaso(3);throw new Error("validacion")}
-    if(!validarImagen(ineReversoFoto,"INE reverso")){irPaso(3);throw new Error("validacion")}
-    if(!validarImagen(selfieFoto,"Selfie de verificación")){irPaso(3);throw new Error("validacion")}
+    const fotoPerfil=document.getElementById("fotoPerfil").files[0];
+    const ineFoto=document.getElementById("ineFoto").files[0];
+    const ineReversoFoto=document.getElementById("ineReversoFoto").files[0];
+    const selfieFoto=document.getElementById("selfieFoto").files[0];
 
-    if(!mayorEdad||!fotosMias||!voluntario||!aceptoTerminos||!aceptoUso||!aceptoPrivacidad||!aceptoRevision){
-      alert("Debes aceptar todas las confirmaciones.");
-      irPaso(3);
-      throw new Error("validacion");
-    }
+    if(!validarImagen(ineFoto,"INE"))throw new Error("validacion");
+    if(!validarImagen(ineReversoFoto,"INE reverso"))throw new Error("validacion");
+    if(!validarImagen(selfieFoto,"Selfie"))throw new Error("validacion");
 
-    const cred=await auth.createUserWithEmailAndPassword(email,password);
+    const cred=await auth.createUserWithEmailAndPassword(document.getElementById("email").value.trim().toLowerCase(),document.getElementById("password").value);
     const user=cred.user;
-
     const fotoURL=await subirImagen("perfiles/"+user.uid+"/foto-principal-"+Date.now()+".jpg",fotoPerfil);
-    const fotosExtraURL=await subirMultiplesFotos(user.uid,fotosExtra);
+    const fotosExtraURL=await subirMultiplesFotos(user.uid,document.getElementById("fotosExtra").files);
     const ineURL=await subirImagen("verificaciones/"+user.uid+"/ine-"+Date.now()+".jpg",ineFoto);
     const ineReversoURL=await subirImagen("verificaciones/"+user.uid+"/ine-reverso-"+Date.now()+".jpg",ineReversoFoto);
     const selfieURL=await subirImagen("verificaciones/"+user.uid+"/selfie-"+Date.now()+".jpg",selfieFoto);
 
     await db.collection("usuarios").doc(user.uid).set({
       uid:user.uid,
-      nombre,email,telefono,pais,estado,ciudad,categoria,
-      descripcion:descripcionCorta,
-      descripcionCompleta,
-      precio,modalidad,horario,zona,servicios,
-      fotoURL,
-      fotosExtraURL,
-      verificacion:{
-        nombreReal,
-        ineURL,
-        ineReversoURL,
-        selfieURL,
-        mayorEdad,
-        fotosMias,
-        voluntario,
-        aceptoTerminos,
-        aceptoUso,
-        aceptoPrivacidad,
-        aceptoRevision,
-        fecha:new Date()
-      },
-      aprobado:false,
-      activo:false,
-      vencido:false,
-      primerMesGratis:false,
-      pagado:false,
-      actualizacionPendiente:false,
-      estadoPago:"pendiente_aprobacion",
-      estadoRevision:"registro_pendiente",
-      fechaPublicacion:null,
-      fechaVencimiento:null,
-      fecha:new Date()
+      nombre:document.getElementById("nombre").value.trim(),
+      email:document.getElementById("email").value.trim().toLowerCase(),
+      telefono:limpiarTelefono(document.getElementById("telefono").value),
+      pais:document.getElementById("pais").value.trim(),
+      estado:document.getElementById("estado").value.trim(),
+      ciudad:document.getElementById("ciudad").value.trim(),
+      categoria:document.getElementById("categoria").value.trim(),
+      descripcion:document.getElementById("descripcionCorta").value.trim(),
+      descripcionCompleta:document.getElementById("descripcionCompleta").value.trim(),
+      precio:document.getElementById("precio").value.trim(),
+      modalidad:document.getElementById("modalidad").value.trim(),
+      horario:document.getElementById("horario").value.trim(),
+      zona:document.getElementById("zona").value.trim(),
+      servicios:document.getElementById("servicios").value.trim(),
+      fotoURL,fotosExtraURL,
+      verificacion:{nombreReal:document.getElementById("nombreReal").value.trim(),ineURL,ineReversoURL,selfieURL,fecha:new Date()},
+      aprobado:false,activo:false,vencido:false,primerMesGratis:false,pagado:false,actualizacionPendiente:false,estadoPago:"pendiente_aprobacion",estadoRevision:"registro_pendiente",fechaPublicacion:null,fechaVencimiento:null,fecha:new Date()
     });
-
-    alert("Registro enviado. Pendiente de aprobación 🔥");
-    cerrarRegistro();
-
-  }catch(error){
-    if(error.message!=="validacion"){
-      if(error.code==="auth/email-already-in-use"){
-        alert("Este correo ya está registrado. Entra en Mi perfil.");
-      }else{
-        alert("Error: "+error.message);
-      }
-    }
-  }
-
-  btn.disabled=false;
-  btn.innerText="Enviar registro";
+    alert("Registro enviado. Pendiente de aprobación 🔥");cerrarRegistro();
+  }catch(error){if(error.message!=="validacion")alert("Error: "+error.message)}
+  btn.disabled=false;btn.innerText="Enviar registro";
 }
 
-/* =========================
-   PERFILES
-========================= */
-
 async function plantillaCardPerfil(id,u){
-  const favorito = await esFavorito(id);
-  const claseFavorito = favorito ? "activo" : "";
-  const iconoFavorito = favorito ? "♥" : "♡";
+  const favorito=await esFavorito(id);
   const tel=limpiarTelefono(u.telefono||"");
-  const mensajeCliente=encodeURIComponent("Hola, vi tu perfil en CariHub y me gustaría recibir más información.");
-
-  return `
-    <div class="card">
-      <button class="btn-favorito ${claseFavorito}" onclick="toggleFavorito('${id}', this)">
-        ${iconoFavorito}
-      </button>
-
-      ${u.fotoURL ? `<img src="${textoSeguro(u.fotoURL)}" alt="Foto">` : ""}
-
-      <h3>${textoSeguro(u.nombre)}</h3>
-      <p><b>País:</b> ${textoSeguro(u.pais)}</p>
-      <p><b>Estado:</b> ${textoSeguro(u.estado)}</p>
-      <p><b>Ciudad:</b> ${textoSeguro(u.ciudad)}</p>
-      <p><b>Categoría:</b> ${textoSeguro(u.categoria)}</p>
-      <p><b>Descripción:</b> ${textoSeguro(u.descripcion)}</p>
-      <p><b>Precio:</b> ${textoSeguro(u.precio)}</p>
-      <p><b>Modalidad:</b> ${textoSeguro(u.modalidad)}</p>
-      ${u.horario ? `<p><b>Horario:</b> ${textoSeguro(u.horario)}</p>` : ""}
-      ${u.zona ? `<p><b>Zona:</b> ${textoSeguro(u.zona)}</p>` : ""}
-      ${u.servicios ? `<p><b>Servicios:</b> ${textoSeguro(u.servicios)}</p>` : ""}
-
-      ${u.fotosExtraURL && u.fotosExtraURL.length > 0 ? `
-        <div style="margin-top:10px;">
-          <b>Fotos:</b>
-          <div class="galeria">
-            ${u.fotosExtraURL.map(f => `<img src="${textoSeguro(f)}" alt="Foto extra">`).join("")}
-          </div>
-        </div>
-      ` : ""}
-
-      <a class="whatsapp" href="https://wa.me/${tel}?text=${mensajeCliente}" target="_blank">
-        Contactar por WhatsApp
-      </a>
-    </div>
-  `;
+  const msg=encodeURIComponent("Hola, vi tu perfil en CariHub y me gustaría recibir más información.");
+  return `<div class="card"><button class="btn-favorito ${favorito?"activo":""}" onclick="toggleFavorito('${id}', this)">${favorito?"♥":"♡"}</button>${u.fotoURL?`<img src="${textoSeguro(u.fotoURL)}" alt="Foto">`:""}<h3>${textoSeguro(u.nombre)}</h3><p><b>País:</b> ${textoSeguro(u.pais)}</p><p><b>Estado:</b> ${textoSeguro(u.estado)}</p><p><b>Ciudad:</b> ${textoSeguro(u.ciudad)}</p><p><b>Categoría:</b> ${textoSeguro(u.categoria)}</p><p><b>Descripción:</b> ${textoSeguro(u.descripcion)}</p><p><b>Precio:</b> ${textoSeguro(u.precio)}</p><p><b>Modalidad:</b> ${textoSeguro(u.modalidad)}</p>${u.horario?`<p><b>Horario:</b> ${textoSeguro(u.horario)}</p>`:""}${u.zona?`<p><b>Zona:</b> ${textoSeguro(u.zona)}</p>`:""}${u.servicios?`<p><b>Servicios:</b> ${textoSeguro(u.servicios)}</p>`:""}${u.fotosExtraURL&&u.fotosExtraURL.length>0?`<div style="margin-top:10px;"><b>Fotos:</b><div class="galeria">${u.fotosExtraURL.map(f=>`<img src="${textoSeguro(f)}" alt="Foto extra">`).join("")}</div></div>`:""}<a class="whatsapp" href="https://wa.me/${tel}?text=${msg}" target="_blank">Contactar por WhatsApp</a></div>`;
 }
 
 async function cargarPerfiles(){
   const lista=document.getElementById("lista-perfiles");
   lista.innerHTML="";
-
   try{
     const snap=await db.collection("usuarios").where("aprobado","==",true).get();
-
-    if(snap.empty)return;
-
     for(const doc of snap.docs){
       const u=doc.data();
-
-      let vencido=false;
-      if(u.vencido===true) vencido=true;
-      if(u.fechaVencimiento){
-        const fechaV=u.fechaVencimiento.toDate ? u.fechaVencimiento.toDate() : new Date(u.fechaVencimiento);
-        if(fechaV < new Date()) vencido=true;
-      }
-
-      if(vencido) continue;
-      if(u.activo !== true) continue;
+      if(u.vencido===true||u.activo!==true)continue;
       if(!u.fotoURL||!u.nombre||!u.ciudad||!u.categoria||!u.descripcion||!u.precio||!u.modalidad)continue;
-
-      lista.innerHTML += await plantillaCardPerfil(doc.id,u);
+      lista.innerHTML+=await plantillaCardPerfil(doc.id,u);
     }
-  }catch(error){
-    console.error(error);
-  }
+  }catch(error){console.error(error)}
 }
 
-/* =========================
-   INICIO
-========================= */
-
-detectarIdioma();
-
-auth.onAuthStateChanged(async function(user){
-  if(!user){
-    await prepararUsuarioFavoritos();
-  }
-  cargarPerfiles();
-});
+auth.onAuthStateChanged(function(){cargarPerfiles()});
 </script>
 
 </body>
