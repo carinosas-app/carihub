@@ -3,350 +3,1765 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin CariHub</title>
+<title>Panel Admin CariHub</title>
 
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage-compat.js"></script>
 
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyBl4LNLtPqbyIxfTfONAqxi4rOG4XF_vkI",
+  authDomain: "carinosas-app.firebaseapp.com",
+  projectId: "carinosas-app",
+  storageBucket: "carinosas-app.firebasestorage.app",
+  messagingSenderId: "267078845023",
+  appId: "1:267078845023:web:a82e626d9f0ca28858d1ea"
+};
+
+firebase.initializeApp(firebaseConfig);
+
+const auth = firebase.auth();
+const db = firebase.firestore();
+const storage = firebase.storage();
+
+const ADMIN_EMAIL = "carinosas.anuncios@gmail.com";
+const LIMITE_USUARIOS = 80;
+
+let usuariosCache = [];
+let seccionActual = "dashboard";
+let procesando = false;
+</script>
+
 <style>
-:root{--rosa:#c12665;--rosa2:#ec2d7a;--fondo:#fff1f7;--texto:#282433;--ok:#1f8f45;--azul:#316cc7;--rojo:#c62828;--gris:#777}
+:root{
+  --rosa:#c2185b;
+  --rosa2:#ec407a;
+  --rosa3:#ff6fa7;
+  --rosaSuave:#fff1f7;
+  --fondo:#fff7fb;
+  --texto:#2b2530;
+  --muted:#7b6f78;
+  --borde:#ffd1e4;
+  --card:#ffffff;
+  --verde:#168a3a;
+  --azul:#1565c0;
+  --morado:#6a1b9a;
+  --naranja:#ef8b00;
+  --rojo:#c62828;
+  --sombra:0 12px 30px rgba(194,24,91,.12);
+  --sombra2:0 8px 24px rgba(0,0,0,.10);
+}
+
 *{box-sizing:border-box}
-body{margin:0;font-family:Arial,sans-serif;background:linear-gradient(180deg,#fff1f7,#ffe4ef);color:var(--texto)}
-header{position:sticky;top:0;z-index:50;background:linear-gradient(90deg,var(--rosa),var(--rosa2));color:white;padding:18px 16px;box-shadow:0 5px 18px rgba(0,0,0,.18)}
-header h1{margin:0;font-size:28px}header p{margin:4px 0 0;font-size:16px}
-.wrap{max-width:1120px;margin:0 auto;padding:18px}.card{background:white;border-radius:24px;padding:22px;margin:18px 0;box-shadow:0 8px 25px rgba(193,38,101,.14);border:1px solid #ffd1e4}
-h2{margin:0 0 14px;color:var(--rosa);font-size:28px}h3{color:var(--rosa);margin:10px 0}
-input,textarea,select{width:100%;padding:14px;margin:8px 0;border-radius:14px;border:1px solid #ddd;font-size:16px;background:white}
-button,.btn{border:0;border-radius:14px;padding:13px 16px;font-weight:800;font-size:15px;cursor:pointer;margin:5px 4px 5px 0}
-.btn-rosa{background:var(--rosa);color:white}.btn-gris{background:var(--gris);color:white}.btn-ok{background:var(--ok);color:white}.btn-azul{background:var(--azul);color:white}.btn-rojo{background:var(--rojo);color:white}.btn-outline{background:white;color:var(--rosa);border:2px solid var(--rosa)}
-.hidden{display:none!important}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px}.stat{background:#fff;border:1px solid #ffd1e4;border-radius:18px;padding:18px}.stat b{color:var(--rosa);font-size:32px}
-.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.tabs button{background:white;color:var(--rosa);border:2px solid var(--rosa)}.tabs button.active{background:var(--rosa);color:white}
-.item{border:1px solid #f5bdd3;border-radius:22px;padding:18px;margin:16px 0;background:linear-gradient(180deg,#fff,#fff8fb)}
-.item p{line-height:1.45;margin:9px 0}.notice{background:#fff6fb;border-left:6px solid var(--rosa);padding:12px;border-radius:14px;margin:10px 0}
-.badge{display:inline-block;padding:5px 10px;border-radius:999px;font-weight:800;font-size:12px;margin:3px 4px 3px 0}.badge-pendiente{background:#fff3cd;color:#795600}.badge-ok{background:#dcf8e8;color:#116133}.badge-rojo{background:#ffe1e1;color:#a10000}.badge-azul{background:#e3edff;color:#16499b}
-.fotos{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-top:12px}.fotos img,.evidencia-img{width:100%;max-height:360px;object-fit:cover;border-radius:16px;border:1px solid #ffd1e4;background:#f6f6f6}.evidencia-img{display:block;max-width:520px;margin:12px 0}
-a.link{color:var(--azul);font-weight:800;word-break:break-all}pre{white-space:pre-wrap;background:#f6f6f6;padding:12px;border-radius:14px;overflow:auto}
-@media(max-width:600px){.wrap{padding:12px}.card{padding:18px;border-radius:22px}header h1{font-size:26px}h2{font-size:25px}button,.btn{width:100%;margin:6px 0}.tabs button{width:100%}}
+
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:
+    radial-gradient(circle at top left, #ffd6e8 0, transparent 32%),
+    linear-gradient(180deg,#fff7fb,#ffe6f0);
+  color:var(--texto);
+  min-height:100vh;
+}
+
+button,input,select,textarea{
+  font-family:inherit;
+}
+
+button{
+  border:none;
+  cursor:pointer;
+  font-weight:800;
+}
+
+button:disabled{
+  opacity:.55;
+  cursor:not-allowed;
+}
+
+input,select,textarea{
+  width:100%;
+  padding:14px;
+  margin:8px 0;
+  border:1px solid #ead6df;
+  border-radius:14px;
+  font-size:16px;
+  background:white;
+}
+
+textarea{min-height:100px}
+
+h1,h2,h3,p{margin-top:0}
+
+.login-screen{
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:18px;
+}
+
+.login-card{
+  width:100%;
+  max-width:430px;
+  background:white;
+  border:1px solid var(--borde);
+  border-radius:28px;
+  box-shadow:var(--sombra);
+  padding:28px;
+}
+
+.login-logo{
+  width:74px;
+  height:74px;
+  border-radius:22px;
+  background:linear-gradient(135deg,var(--rosa),var(--rosa3));
+  color:white;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:34px;
+  margin:0 auto 16px;
+  box-shadow:0 12px 24px rgba(194,24,91,.25);
+}
+
+.login-card h1{
+  color:var(--rosa);
+  text-align:center;
+  margin-bottom:8px;
+}
+
+.login-card p{
+  color:var(--muted);
+  text-align:center;
+  margin-bottom:18px;
+}
+
+.btn-login{
+  width:100%;
+  background:linear-gradient(135deg,var(--rosa),var(--rosa2));
+  color:white;
+  border-radius:16px;
+  padding:15px;
+  font-size:17px;
+  margin-top:8px;
+}
+
+.app{
+  display:none;
+  min-height:100vh;
+}
+
+.sidebar{
+  position:fixed;
+  top:18px;
+  left:18px;
+  bottom:18px;
+  width:270px;
+  background:rgba(255,255,255,.92);
+  border:1px solid var(--borde);
+  border-radius:30px;
+  box-shadow:var(--sombra);
+  padding:18px;
+  overflow-y:auto;
+  z-index:100;
+  backdrop-filter:blur(12px);
+}
+
+.brand{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:8px 8px 18px;
+  border-bottom:1px solid #ffe0ed;
+  margin-bottom:14px;
+}
+
+.brand-icon{
+  width:48px;
+  height:48px;
+  border-radius:16px;
+  background:linear-gradient(135deg,var(--rosa),var(--rosa3));
+  color:white;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:24px;
+}
+
+.brand h2{
+  margin:0;
+  color:var(--rosa);
+  font-size:21px;
+}
+
+.brand small{
+  color:var(--muted);
+  font-weight:700;
+}
+
+.nav-btn{
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  padding:13px 12px;
+  border-radius:16px;
+  background:transparent;
+  color:#5d4150;
+  margin:4px 0;
+  font-size:15px;
+  text-align:left;
+}
+
+.nav-btn:hover,
+.nav-btn.active{
+  background:linear-gradient(135deg,#fff1f7,#ffe1ee);
+  color:var(--rosa);
+}
+
+.nav-left{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.nav-count{
+  background:var(--rosa);
+  color:white;
+  min-width:28px;
+  padding:5px 8px;
+  border-radius:999px;
+  font-size:12px;
+  text-align:center;
+}
+
+.btn-salir{
+  width:100%;
+  margin-top:16px;
+  background:#4b4148;
+  color:white;
+  border-radius:16px;
+  padding:13px;
+  font-size:15px;
+}
+
+.main{
+  margin-left:306px;
+  padding:18px 18px 28px;
+}
+
+.topbar{
+  background:rgba(255,255,255,.88);
+  border:1px solid var(--borde);
+  border-radius:28px;
+  box-shadow:var(--sombra);
+  padding:18px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  margin-bottom:18px;
+  backdrop-filter:blur(12px);
+}
+
+.topbar h1{
+  margin:0;
+  color:var(--texto);
+  font-size:26px;
+}
+
+.topbar p{
+  margin:5px 0 0;
+  color:var(--muted);
+  font-weight:700;
+}
+
+.top-actions{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+.pill-btn{
+  background:white;
+  color:var(--rosa);
+  border:1px solid var(--borde);
+  border-radius:999px;
+  padding:12px 16px;
+  box-shadow:0 4px 12px rgba(194,24,91,.08);
+}
+
+.pill-btn.primary{
+  background:linear-gradient(135deg,var(--rosa),var(--rosa2));
+  color:white;
+  border:none;
+}
+
+.hero{
+  background:
+    linear-gradient(135deg,rgba(194,24,91,.92),rgba(236,64,122,.82)),
+    radial-gradient(circle at top right,#fff 0,transparent 35%);
+  border-radius:30px;
+  color:white;
+  padding:24px;
+  box-shadow:0 16px 34px rgba(194,24,91,.25);
+  margin-bottom:18px;
+  display:grid;
+  grid-template-columns:1.5fr .9fr;
+  gap:18px;
+  align-items:center;
+}
+
+.hero h2{
+  font-size:28px;
+  margin-bottom:8px;
+}
+
+.hero p{
+  margin:0;
+  opacity:.92;
+  font-weight:700;
+  line-height:1.5;
+}
+
+.hero-stats{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+}
+
+.hero-mini{
+  background:rgba(255,255,255,.18);
+  border:1px solid rgba(255,255,255,.25);
+  border-radius:20px;
+  padding:14px;
+}
+
+.hero-mini b{
+  font-size:26px;
+  display:block;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:14px;
+  margin-bottom:18px;
+}
+
+.stat-card{
+  background:white;
+  border:1px solid var(--borde);
+  border-radius:24px;
+  padding:18px;
+  box-shadow:var(--sombra2);
+  cursor:pointer;
+  transition:.15s;
+  min-height:132px;
+}
+
+.stat-card:hover{
+  transform:translateY(-2px);
+  box-shadow:0 14px 28px rgba(194,24,91,.14);
+}
+
+.stat-icon{
+  width:42px;
+  height:42px;
+  border-radius:15px;
+  background:var(--rosaSuave);
+  color:var(--rosa);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:22px;
+  margin-bottom:10px;
+}
+
+.stat-card h3{
+  margin:0;
+  color:var(--muted);
+  font-size:14px;
+}
+
+.stat-card .num{
+  font-size:34px;
+  font-weight:900;
+  color:#222;
+  margin:5px 0;
+}
+
+.stat-card p{
+  margin:0;
+  color:var(--muted);
+  font-size:13px;
+}
+
+.content-grid{
+  display:grid;
+  grid-template-columns:1.1fr .9fr;
+  gap:18px;
+}
+
+.panel-card{
+  background:white;
+  border:1px solid var(--borde);
+  border-radius:26px;
+  box-shadow:var(--sombra2);
+  padding:18px;
+}
+
+.panel-card h2{
+  color:var(--rosa);
+  margin-bottom:12px;
+}
+
+.quick-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+
+.quick-btn{
+  background:linear-gradient(135deg,#fff,#fff1f7);
+  border:1px solid #ffd1e4;
+  border-radius:18px;
+  padding:14px;
+  color:#5d4150;
+  text-align:left;
+  font-size:15px;
+}
+
+.quick-btn b{
+  display:block;
+  color:var(--rosa);
+  margin-bottom:4px;
+}
+
+.notice{
+  display:flex;
+  gap:12px;
+  align-items:flex-start;
+  padding:12px;
+  border-radius:18px;
+  background:#fff7fb;
+  border:1px solid #ffe1ee;
+  margin-bottom:10px;
+}
+
+.notice-icon{
+  width:38px;
+  height:38px;
+  border-radius:13px;
+  background:var(--rosaSuave);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.notice p{
+  margin:2px 0 0;
+  color:var(--muted);
+  font-size:14px;
+}
+
+.seccion{
+  display:none;
+}
+
+.section-head{
+  background:white;
+  border:1px solid var(--borde);
+  border-radius:26px;
+  box-shadow:var(--sombra2);
+  padding:18px;
+  margin-bottom:16px;
+}
+
+.section-head h2{
+  color:var(--rosa);
+  margin-bottom:8px;
+}
+
+.section-head p{
+  color:var(--muted);
+  margin-bottom:0;
+}
+
+.section-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  margin-top:14px;
+}
+
+.btn{
+  padding:12px 15px;
+  border-radius:14px;
+  font-size:15px;
+  margin:4px;
+}
+
+.btn-volver{background:#777;color:white}
+.btn-refresh{background:var(--rosa);color:white}
+.btn-aprobar{background:var(--verde);color:white}
+.btn-cambios{background:var(--azul);color:white}
+.btn-pago{background:var(--morado);color:white}
+.btn-quitar{background:var(--naranja);color:white}
+.btn-borrar{background:var(--rojo);color:white}
+.btn-ver{background:var(--rosa);color:white}
+.btn-denuncia{background:#d32f2f;color:white}
+
+.search-row{
+  display:grid;
+  grid-template-columns:1fr 220px;
+  gap:10px;
+  margin-top:12px;
+}
+
+.list-wrap{
+  background:white;
+  border:1px solid var(--borde);
+  border-radius:26px;
+  box-shadow:var(--sombra2);
+  padding:16px;
+}
+
+.item{
+  background:#fff;
+  border:1px solid #ffe1ee;
+  border-radius:22px;
+  padding:16px;
+  margin-bottom:12px;
+  box-shadow:0 4px 12px rgba(0,0,0,.06);
+}
+
+.item h3{
+  color:var(--rosa);
+  margin-bottom:8px;
+}
+
+.badge{
+  display:inline-block;
+  padding:8px 12px;
+  border-radius:999px;
+  font-size:13px;
+  font-weight:bold;
+  margin:4px 4px 8px 0;
+}
+
+.badge-rojo{background:#ffe5e5;color:#b00000}
+.badge-verde{background:#e8f8ed;color:#087a2b}
+.badge-azul{background:#e5f0ff;color:#064b9b}
+.badge-rosa{background:#fff1f7;color:#9f174f}
+.badge-naranja{background:#fff0d9;color:#a85b00}
+
+.detalle-box{
+  background:#fff;
+  border:1px solid var(--borde);
+  border-radius:26px;
+  box-shadow:var(--sombra2);
+  padding:18px;
+}
+
+.detalle-box h2{
+  color:var(--rosa);
+}
+
+.detalle-box img,
+.item img{
+  width:100%;
+  max-height:380px;
+  object-fit:cover;
+  border-radius:18px;
+  margin:8px 0 14px;
+}
+
+.aprobado{color:green;font-weight:bold}
+.pendiente{color:orange;font-weight:bold}
+.vencido{color:red;font-weight:bold}
+.revision{color:#c2185b;font-weight:bold}
+
+.verificacion{
+  background:#fff1f7;
+  padding:14px;
+  border-radius:18px;
+  border-left:5px solid var(--rosa);
+  margin-top:14px;
+}
+
+.fotos-extra{
+  background:#f7f7f7;
+  padding:14px;
+  border-radius:18px;
+  border-left:5px solid #777;
+  margin-top:14px;
+}
+
+.dato{
+  margin:7px 0;
+  line-height:1.45;
+}
+
+.aviso{
+  color:var(--muted);
+  font-size:14px;
+}
+
+.actions-row{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-top:12px;
+}
+
+pre{
+  white-space:pre-wrap;
+  background:#f7f7f7;
+  padding:12px;
+  border-radius:14px;
+  overflow:auto;
+  font-size:13px;
+}
+
+.mobile-menu-btn{
+  display:none;
+  position:fixed;
+  top:12px;
+  left:12px;
+  z-index:200;
+  background:var(--rosa);
+  color:white;
+  border-radius:16px;
+  padding:12px 14px;
+  box-shadow:var(--sombra);
+}
+
+.overlay{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.35);
+  z-index:90;
+}
+
+@media(max-width:1050px){
+  .grid{grid-template-columns:repeat(2,1fr)}
+  .content-grid{grid-template-columns:1fr}
+  .hero{grid-template-columns:1fr}
+}
+
+@media(max-width:760px){
+  body{padding-top:58px}
+
+  .mobile-menu-btn{display:block}
+
+  .sidebar{
+    transform:translateX(-115%);
+    transition:.25s;
+    top:10px;
+    left:10px;
+    bottom:10px;
+    width:285px;
+    z-index:150;
+  }
+
+  .sidebar.active{
+    transform:translateX(0);
+  }
+
+  .overlay.active{
+    display:block;
+  }
+
+  .main{
+    margin-left:0;
+    padding:10px;
+  }
+
+  .topbar{
+    display:block;
+    border-radius:22px;
+  }
+
+  .top-actions{
+    margin-top:12px;
+  }
+
+  .hero{
+    border-radius:24px;
+    padding:18px;
+  }
+
+  .hero h2{
+    font-size:24px;
+  }
+
+  .hero-stats{
+    grid-template-columns:1fr 1fr;
+  }
+
+  .grid{
+    grid-template-columns:1fr;
+  }
+
+  .quick-grid{
+    grid-template-columns:1fr;
+  }
+
+  .search-row{
+    grid-template-columns:1fr;
+  }
+
+  .section-actions button,
+  .actions-row button,
+  .top-actions button{
+    width:100%;
+  }
+}
 </style>
 </head>
 
 <body>
-<header>
-  <h1>Panel Admin CariHub</h1>
-  <p>Registros, perfiles, denuncias, pagos, vencidos y revisiones.</p>
-</header>
 
-<div class="wrap">
+<button class="mobile-menu-btn" onclick="toggleMenu()">☰</button>
+<div class="overlay" id="overlay" onclick="cerrarMenuMovil()"></div>
 
-<section class="card" id="loginBox">
-  <h2>🔐 Acceso administrador</h2>
-  <p>Entra con el correo administrador autorizado.</p>
-  <input id="adminEmail" type="email" placeholder="Correo admin">
-  <input id="adminPassword" type="password" placeholder="Contraseña">
-  <button class="btn-rosa" onclick="loginAdmin()">Entrar</button>
-  <div id="loginMsg"></div>
-</section>
-
-<section id="adminBox" class="hidden">
-  <div class="card">
-    <h2>📊 Panel general</h2>
-    <p id="adminInfo"></p>
-
-    <div class="tabs">
-      <button id="tabUsuarios" class="active" onclick="mostrarModulo('usuarios')">👤 Usuarios</button>
-      <button id="tabPendientes" onclick="mostrarModulo('pendientes')">⏳ Pendientes <span id="contadorPendientes">0</span></button>
-      <button id="tabActualizaciones" onclick="mostrarModulo('actualizaciones')">🔄 Actualizaciones <span id="contadorActualizaciones">0</span></button>
-      <button id="tabDenuncias" onclick="mostrarModulo('denuncias')">🚨 Denuncias <span id="contadorDenuncias">0</span></button>
-      <button id="tabVencidos" onclick="mostrarModulo('vencidos')">⌛ Vencidos</button>
-      <button id="tabPagos" onclick="mostrarModulo('pagos')">💳 Pagos</button>
-    </div>
-
-    <button class="btn-azul" onclick="actualizarTodo()">Actualizar todo</button>
-    <button class="btn-gris" onclick="logoutAdmin()">Salir</button>
+<div class="login-screen" id="loginBox">
+  <div class="login-card">
+    <div class="login-logo">CH</div>
+    <h1>Panel Admin</h1>
+    <p>CariHub · Control privado de perfiles, pagos y seguridad.</p>
+    <input id="email" type="email" placeholder="Correo admin">
+    <input id="password" type="password" placeholder="Contraseña">
+    <button class="btn-login" onclick="login()">Entrar</button>
   </div>
-
-  <div class="grid">
-    <div class="stat"><p>Usuarios</p><b id="statUsuarios">0</b></div>
-    <div class="stat"><p>Pendientes</p><b id="statPendientes">0</b></div>
-    <div class="stat"><p>Actualizaciones</p><b id="statActualizaciones">0</b></div>
-    <div class="stat"><p>Denuncias</p><b id="statDenuncias">0</b></div>
-    <div class="stat"><p>Vencidos</p><b id="statVencidos">0</b></div>
-  </div>
-
-  <section class="card modulo" id="modUsuarios">
-    <h2>👤 Usuarios / perfiles</h2>
-    <input id="filtroUsuarios" placeholder="Buscar por nombre, correo, ciudad, categoría..." oninput="pintarUsuarios()">
-    <div id="listaUsuarios">Cargando...</div>
-  </section>
-
-  <section class="card modulo hidden" id="modPendientes">
-    <h2>⏳ Registros pendientes</h2>
-    <div id="listaPendientes">Cargando...</div>
-  </section>
-
-  <section class="card modulo hidden" id="modActualizaciones">
-    <h2>🔄 Actualizaciones pendientes</h2>
-    <div id="listaActualizaciones">Cargando...</div>
-  </section>
-
-  <section class="card modulo hidden" id="modDenuncias">
-    <h2>🚨 Denuncias pendientes</h2>
-    <p class="notice">Aquí deben aparecer denuncias con imagen/evidencia anexada cuando exista evidenciaURL.</p>
-    <button class="btn-rosa" onclick="cargarDenuncias()">Actualizar denuncias</button>
-    <div id="listaDenuncias">Cargando...</div>
-  </section>
-
-  <section class="card modulo hidden" id="modVencidos">
-    <h2>⌛ Perfiles vencidos / desactivados</h2>
-    <div id="listaVencidos">Cargando...</div>
-  </section>
-
-  <section class="card modulo hidden" id="modPagos">
-    <h2>💳 Pagos / renovaciones</h2>
-    <p class="notice">Aquí aparecen perfiles vencidos, pagados o pendientes de renovar para activarlos manualmente.</p>
-    <div id="listaPagos">Cargando...</div>
-  </section>
-</section>
-
 </div>
 
+<div class="app" id="panelBox">
+
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-icon">💗</div>
+      <div>
+        <h2>CariHub</h2>
+        <small>Admin premium</small>
+      </div>
+    </div>
+
+    <button class="nav-btn active" id="nav-dashboard" onclick="mostrarDashboard()">
+      <span class="nav-left">🏠 Inicio</span>
+    </button>
+
+    <button class="nav-btn" id="nav-nuevos" onclick="abrirSeccion('nuevos')">
+      <span class="nav-left">🆕 Perfiles nuevos</span>
+      <span class="nav-count" id="sideNuevos">0</span>
+    </button>
+
+    <button class="nav-btn" id="nav-actualizaciones" onclick="abrirSeccion('actualizaciones')">
+      <span class="nav-left">✏️ Actualizaciones</span>
+      <span class="nav-count" id="sideActualizaciones">0</span>
+    </button>
+
+    <button class="nav-btn" id="nav-denuncias" onclick="abrirSeccion('denuncias')">
+      <span class="nav-left">🚨 Denuncias</span>
+      <span class="nav-count" id="sideDenuncias">0</span>
+    </button>
+
+    <button class="nav-btn" id="nav-pagos" onclick="abrirSeccion('pagos')">
+      <span class="nav-left">💳 Pagos</span>
+      <span class="nav-count" id="sidePagos">0</span>
+    </button>
+
+    <button class="nav-btn" id="nav-vencidos" onclick="abrirSeccion('vencidos')">
+      <span class="nav-left">⏳ Vencidos</span>
+      <span class="nav-count" id="sideVencidos">0</span>
+    </button>
+
+    <button class="nav-btn" id="nav-activos" onclick="abrirSeccion('activos')">
+      <span class="nav-left">✅ Activos</span>
+      <span class="nav-count" id="sideActivos">0</span>
+    </button>
+
+    <button class="nav-btn" id="nav-historial" onclick="abrirSeccion('historial')">
+      <span class="nav-left">📜 Historial</span>
+      <span class="nav-count" id="sideHistorial">0</span>
+    </button>
+
+    <button class="nav-btn" id="nav-seguridad" onclick="abrirSeccion('seguridad')">
+      <span class="nav-left">🛡 Seguridad</span>
+      <span class="nav-count" id="sideSeguridad">0</span>
+    </button>
+
+    <button class="nav-btn" id="nav-anuncios" onclick="abrirSeccion('anuncios')">
+      <span class="nav-left">📢 Anuncios</span>
+      <span class="nav-count" id="sideAnuncios">0</span>
+    </button>
+
+    <button class="nav-btn" id="nav-categorias" onclick="abrirSeccion('categorias')">
+      <span class="nav-left">💡 Categorías</span>
+      <span class="nav-count" id="sideCategorias">0</span>
+    </button>
+
+    <button class="btn-salir" onclick="salir()">Cerrar sesión</button>
+  </aside>
+
+  <main class="main">
+
+    <div class="topbar">
+      <div>
+        <h1 id="mainTitle">Dashboard CariHub</h1>
+        <p id="mainSub">Resumen general de operación y moderación.</p>
+      </div>
+      <div class="top-actions">
+        <button class="pill-btn" onclick="cargarDashboard()">Actualizar</button>
+        <button class="pill-btn primary" onclick="abrirSeccion('nuevos')">Revisar pendientes</button>
+      </div>
+    </div>
+
+    <section id="vistaDashboard">
+
+      <div class="hero">
+        <div>
+          <h2>Centro de control</h2>
+          <p id="resumenPrincipal">Cargando resumen...</p>
+        </div>
+        <div class="hero-stats">
+          <div class="hero-mini">
+            <b id="heroPendientes">0</b>
+            Pendientes
+          </div>
+          <div class="hero-mini">
+            <b id="heroActivos">0</b>
+            Activos
+          </div>
+          <div class="hero-mini">
+            <b id="heroVencidos">0</b>
+            Vencidos
+          </div>
+          <div class="hero-mini">
+            <b id="heroDenuncias">0</b>
+            Denuncias
+          </div>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="stat-card" onclick="abrirSeccion('nuevos')">
+          <div class="stat-icon">🆕</div>
+          <h3>Perfiles nuevos</h3>
+          <div class="num" id="numNuevos">0</div>
+          <p>Registros pendientes de revisión.</p>
+        </div>
+
+        <div class="stat-card" onclick="abrirSeccion('actualizaciones')">
+          <div class="stat-icon">✏️</div>
+          <h3>Actualizaciones</h3>
+          <div class="num" id="numActualizaciones">0</div>
+          <p>Cambios pendientes por aprobar.</p>
+        </div>
+
+        <div class="stat-card" onclick="abrirSeccion('denuncias')">
+          <div class="stat-icon">🚨</div>
+          <h3>Denuncias</h3>
+          <div class="num" id="numDenuncias">0</div>
+          <p>Reportes y alertas de usuarios.</p>
+        </div>
+
+        <div class="stat-card" onclick="abrirSeccion('pagos')">
+          <div class="stat-icon">💳</div>
+          <h3>Pagos</h3>
+          <div class="num" id="numPagos">0</div>
+          <p>Pagos y renovaciones.</p>
+        </div>
+
+        <div class="stat-card" onclick="abrirSeccion('vencidos')">
+          <div class="stat-icon">⏳</div>
+          <h3>Vencidos</h3>
+          <div class="num" id="numVencidos">0</div>
+          <p>Perfiles vencidos o inactivos.</p>
+        </div>
+
+        <div class="stat-card" onclick="abrirSeccion('activos')">
+          <div class="stat-icon">✅</div>
+          <h3>Activos</h3>
+          <div class="num" id="numActivos">0</div>
+          <p>Perfiles visibles actualmente.</p>
+        </div>
+
+        <div class="stat-card" onclick="abrirSeccion('seguridad')">
+          <div class="stat-icon">🛡</div>
+          <h3>Seguridad</h3>
+          <div class="num" id="numSeguridad">0</div>
+          <p>Logs y sospechosos.</p>
+        </div>
+
+        <div class="stat-card" onclick="abrirSeccion('anuncios')">
+          <div class="stat-icon">📢</div>
+          <h3>Anuncios</h3>
+          <div class="num" id="numAnuncios">0</div>
+          <p>Publicidad interna.</p>
+        </div>
+      </div>
+
+      <div class="content-grid">
+        <div class="panel-card">
+          <h2>Accesos rápidos</h2>
+          <div class="quick-grid">
+            <button class="quick-btn" onclick="abrirSeccion('nuevos')"><b>🆕 Nuevos</b>Revisar registros recientes</button>
+            <button class="quick-btn" onclick="abrirSeccion('actualizaciones')"><b>✏️ Cambios</b>Aprobar actualizaciones</button>
+            <button class="quick-btn" onclick="abrirSeccion('vencidos')"><b>⏳ Vencidos</b>Renovar o ocultar</button>
+            <button class="quick-btn" onclick="abrirSeccion('categorias')"><b>💡 Categorías</b>Sugerencias pendientes</button>
+          </div>
+        </div>
+
+        <div class="panel-card">
+          <h2>Notificaciones recientes</h2>
+          <div class="notice">
+            <div class="notice-icon">🔴</div>
+            <div>
+              <b>Pendientes</b>
+              <p id="noticePendientes">Cargando...</p>
+            </div>
+          </div>
+          <div class="notice">
+            <div class="notice-icon">🚨</div>
+            <div>
+              <b>Denuncias</b>
+              <p id="noticeDenuncias">Cargando...</p>
+            </div>
+          </div>
+          <div class="notice">
+            <div class="notice-icon">🛡</div>
+            <div>
+              <b>Seguridad</b>
+              <p id="noticeSeguridad">Módulo preparado para logs.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <section id="vistaSeccion" class="seccion">
+      <div class="section-head">
+        <h2 id="tituloSeccion">Sección</h2>
+        <p id="descripcionSeccion">Cargando...</p>
+        <div class="section-actions">
+          <button class="btn btn-volver" onclick="mostrarDashboard()">← Volver al inicio</button>
+          <button class="btn btn-refresh" onclick="recargarSeccionActual()">Actualizar</button>
+        </div>
+
+        <div class="search-row" id="buscadorSeccion">
+          <input id="buscarTexto" placeholder="Buscar nombre, correo, teléfono..." oninput="filtrarCards()">
+          <select id="filtroEstado" onchange="filtrarCards()">
+            <option value="">Todos</option>
+            <option value="activo">Activos</option>
+            <option value="vencido">Vencidos</option>
+            <option value="pendiente">Pendientes</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="list-wrap" id="contenidoSeccion">Cargando...</div>
+    </section>
+
+  </main>
+</div>
+
+<audio id="sonidoAlerta">
+  <source src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" type="audio/ogg">
+</audio>
+
 <script>
-const firebaseConfig={
-  apiKey:"AIzaSyBl4LNLtPqbyIxfTfONAqxi4rOG4XF_vkI",
-  authDomain:"carinosas-app.firebaseapp.com",
-  projectId:"carinosas-app",
-  storageBucket:"carinosas-app.firebasestorage.app",
-  messagingSenderId:"267078845023",
-  appId:"1:267078845023:web:a82e626d9f0ca28858d1ea"
-};
-
-firebase.initializeApp(firebaseConfig);
-const db=firebase.firestore();
-const auth=firebase.auth();
-const ADMIN_EMAIL="carinosas.anuncios@gmail.com";
-
-let USUARIOS=[];
-let DENUNCIAS=[];
-
-function $(id){return document.getElementById(id)}
-function txt(v){return String(v??"").trim()}
-function safe(v){return String(v??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#039;")}
-function fechaLegible(v){if(!v)return"Sin fecha";try{const d=v.toDate?v.toDate():new Date(v);return d.toLocaleString("es-MX")}catch(e){return"Fecha inválida"}}
-function esVencido(u){if(u.vencido===true)return true;if(u.fechaVencimiento){try{const d=u.fechaVencimiento.toDate?u.fechaVencimiento.toDate():new Date(u.fechaVencimiento);if(d<new Date())return true}catch(e){}}return false}
-function badgeEstado(u){
-  if(u.actualizacionPendiente===true)return `<span class="badge badge-azul">actualización pendiente</span>`;
-  if(u.aprobado===true&&u.activo===true&&!esVencido(u))return `<span class="badge badge-ok">activo</span>`;
-  if(esVencido(u)||u.activo!==true)return `<span class="badge badge-rojo">vencido/desactivado</span>`;
-  return `<span class="badge badge-pendiente">pendiente</span>`;
+function textoSeguro(texto){
+  return String(texto || "")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
 }
 
-auth.onAuthStateChanged(async user=>{
-  if(user&&user.email===ADMIN_EMAIL){
-    $("loginBox").classList.add("hidden");
-    $("adminBox").classList.remove("hidden");
-    $("adminInfo").innerHTML=`Conectado como <b>${safe(user.email)}</b>`;
-    await actualizarTodo();
-  }else{
-    $("loginBox").classList.remove("hidden");
-    $("adminBox").classList.add("hidden");
+function fechaValida(fecha){
+  if(!fecha) return null;
+  try{
+    return fecha.toDate ? fecha.toDate() : new Date(fecha);
+  }catch(e){
+    return null;
   }
+}
+
+function formatearFecha(fecha){
+  const d = fechaValida(fecha);
+  if(!d || isNaN(d.getTime())) return "Sin fecha";
+  return d.toLocaleString("es-MX");
+}
+
+function diasRestantes(fecha){
+  const d = fechaValida(fecha);
+  if(!d || isNaN(d.getTime())) return "";
+  const hoy = new Date();
+  return Math.ceil((d - hoy) / (1000 * 60 * 60 * 24));
+}
+
+function estaVencido(u){
+  if(u.vencido === true) return true;
+  const d = fechaValida(u.fechaVencimiento);
+  if(d && d < new Date()) return true;
+  return false;
+}
+
+function toggleMenu(){
+  document.getElementById("sidebar").classList.toggle("active");
+  document.getElementById("overlay").classList.toggle("active");
+}
+
+function cerrarMenuMovil(){
+  document.getElementById("sidebar").classList.remove("active");
+  document.getElementById("overlay").classList.remove("active");
+}
+
+function marcarNav(tipo){
+  document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("active"));
+  const nav = document.getElementById("nav-" + tipo);
+  if(nav) nav.classList.add("active");
+}
+
+function bloquearAcciones(valor){
+  procesando = valor;
+  document.querySelectorAll("button").forEach(b => {
+    if(!b.classList.contains("btn-salir")) b.disabled = valor;
+  });
+}
+
+auth.onAuthStateChanged(async (user) => {
+  if (!user) {
+    document.getElementById("loginBox").style.display = "flex";
+    document.getElementById("panelBox").style.display = "none";
+    return;
+  }
+
+  if (user.email !== ADMIN_EMAIL) {
+    alert("Acceso no autorizado. Solo el administrador puede entrar.");
+    await auth.signOut();
+    window.location.href = "index.html";
+    return;
+  }
+
+  document.getElementById("loginBox").style.display = "none";
+  document.getElementById("panelBox").style.display = "block";
+  await cargarDashboard();
 });
 
-async function loginAdmin(){
-  $("loginMsg").innerHTML="";
-  const email=$("adminEmail").value.trim().toLowerCase();
-  const pass=$("adminPassword").value;
-  if(!email||!pass){$("loginMsg").innerHTML=`<p class="notice">Escribe correo y contraseña.</p>`;return}
-  if(email!==ADMIN_EMAIL){$("loginMsg").innerHTML=`<p class="notice">Ese correo no es el admin autorizado.</p>`;return}
-  try{await auth.signInWithEmailAndPassword(email,pass)}catch(e){$("loginMsg").innerHTML=`<p class="notice">Error: ${safe(e.message)}</p>`}
-}
-async function logoutAdmin(){await auth.signOut()}
+async function login() {
+  const email = document.getElementById("email").value.trim().toLowerCase();
+  const password = document.getElementById("password").value;
 
-function mostrarModulo(nombre){
-  document.querySelectorAll(".modulo").forEach(m=>m.classList.add("hidden"));
-  document.querySelectorAll(".tabs button").forEach(b=>b.classList.remove("active"));
-  if(nombre==="usuarios"){$("modUsuarios").classList.remove("hidden");$("tabUsuarios").classList.add("active")}
-  if(nombre==="pendientes"){$("modPendientes").classList.remove("hidden");$("tabPendientes").classList.add("active")}
-  if(nombre==="actualizaciones"){$("modActualizaciones").classList.remove("hidden");$("tabActualizaciones").classList.add("active")}
-  if(nombre==="denuncias"){$("modDenuncias").classList.remove("hidden");$("tabDenuncias").classList.add("active")}
-  if(nombre==="vencidos"){$("modVencidos").classList.remove("hidden");$("tabVencidos").classList.add("active")}
-  if(nombre==="pagos"){$("modPagos").classList.remove("hidden");$("tabPagos").classList.add("active")}
+  if(!email || !password){
+    alert("Escribe correo y contraseña.");
+    return;
+  }
+
+  try {
+    await auth.signInWithEmailAndPassword(email, password);
+  } catch (error) {
+    alert("Error: " + error.message);
+  }
 }
 
-async function actualizarTodo(){await cargarUsuarios();await cargarDenuncias()}
+async function cargarDashboard(){
+  await cargarUsuariosCache();
+  await cargarContadoresExtras();
+  pintarResumen();
+}
 
-async function cargarUsuarios(){
-  $("listaUsuarios").innerHTML="Cargando usuarios...";
+async function cargarUsuariosCache(){
   try{
-    const snap=await db.collection("usuarios").get();
-    USUARIOS=snap.docs.map(d=>({id:d.id,...d.data()}));
-    USUARIOS.sort((a,b)=>{const fa=a.fecha?.toDate?a.fecha.toDate().getTime():0;const fb=b.fecha?.toDate?b.fecha.toDate().getTime():0;return fb-fa});
-    pintarUsuarios();pintarPendientes();pintarActualizaciones();pintarVencidos();pintarPagos();actualizarStats();
-  }catch(e){$("listaUsuarios").innerHTML=`<div class="notice">Error cargando usuarios: ${safe(e.message)}</div>`}
+    const snap = await db.collection("usuarios")
+      .orderBy("fecha", "desc")
+      .limit(LIMITE_USUARIOS)
+      .get();
+
+    usuariosCache = [];
+
+    snap.forEach(doc => {
+      const u = doc.data();
+      u.id = doc.id;
+      usuariosCache.push(u);
+    });
+  }catch(error){
+    alert("Error cargando usuarios: " + error.message);
+  }
 }
 
-function pintarUsuarios(){
-  const filtro=txt($("filtroUsuarios").value).toLowerCase();
-  const lista=USUARIOS.filter(u=>[u.nombre,u.email,u.telefono,u.pais,u.estado,u.ciudad,u.categoria,u.estadoRevision,u.estadoPago].join(" ").toLowerCase().includes(filtro));
-  $("listaUsuarios").innerHTML=lista.length?lista.map(cardUsuario).join(""):`<div class="notice">No hay usuarios para mostrar.</div>`;
-}
-function pintarPendientes(){
-  const lista=USUARIOS.filter(u=>u.aprobado!==true&&u.actualizacionPendiente!==true);
-  $("listaPendientes").innerHTML=lista.length?lista.map(cardUsuario).join(""):`<div class="notice">No hay registros pendientes.</div>`;
-}
-function pintarActualizaciones(){
-  const lista=USUARIOS.filter(u=>u.actualizacionPendiente===true||u.estadoRevision==="actualizacion_pendiente");
-  $("listaActualizaciones").innerHTML=lista.length?lista.map(cardUsuario).join(""):`<div class="notice">No hay actualizaciones pendientes.</div>`;
-}
-function pintarVencidos(){
-  const lista=USUARIOS.filter(u=>esVencido(u)||u.activo!==true);
-  $("listaVencidos").innerHTML=lista.length?lista.map(cardUsuario).join(""):`<div class="notice">No hay vencidos/desactivados.</div>`;
-}
-function pintarPagos(){
-  const lista=USUARIOS.filter(u=>u.estadoPago||u.pagado===true||esVencido(u)||u.activo!==true);
-  $("listaPagos").innerHTML=lista.length?lista.map(cardUsuario).join(""):`<div class="notice">No hay pagos/renovaciones para mostrar.</div>`;
+async function contarColeccion(idElemento,nombre,whereCampo,whereValor){
+  try{
+    let ref = db.collection(nombre);
+
+    if(whereCampo){
+      ref = ref.where(whereCampo,"==",whereValor);
+    }
+
+    const snap = await ref.limit(200).get();
+    const el = document.getElementById(idElemento);
+    if(el) el.innerText = snap.size;
+    return snap.size;
+  }catch(e){
+    const el = document.getElementById(idElemento);
+    if(el) el.innerText = "0";
+    return 0;
+  }
 }
 
-function fotosUsuario(u){
-  let html="";
-  if(u.fotoURL)html+=`<img src="${safe(u.fotoURL)}" alt="Foto principal">`;
-  if(Array.isArray(u.fotosExtraURL)){u.fotosExtraURL.forEach(url=>{if(url)html+=`<img src="${safe(url)}" alt="Foto extra">`})}
-  return html?`<div class="fotos">${html}</div>`:"";
-}
-function verificacionesUsuario(u){
-  const v=u.verificacion||{};
-  let html="";
-  if(v.ineURL)html+=`<p><a class="link" href="${safe(v.ineURL)}" target="_blank">Ver INE frente</a></p>`;
-  if(v.ineReversoURL)html+=`<p><a class="link" href="${safe(v.ineReversoURL)}" target="_blank">Ver INE reverso</a></p>`;
-  if(v.selfieURL)html+=`<p><a class="link" href="${safe(v.selfieURL)}" target="_blank">Ver selfie</a></p>`;
-  return html?`<details><summary><b>🪪 Verificación privada</b></summary>${html}</details>`:"";
+async function cargarContadoresExtras(){
+  const denuncias = await contarColeccion("numDenuncias","denuncias","estado","pendiente");
+  const pagos = await contarColeccion("numPagos","pagos");
+  const historial = await contarColeccion("numHistorial","historialCambios");
+  const seguridad = await contarColeccion("numSeguridad","logsSeguridad");
+  const anuncios = await contarColeccion("numAnuncios","anuncios");
+  const categorias = await contarColeccion("numCategorias","categoriasSugeridas","estado","pendiente");
+
+  document.getElementById("sideDenuncias").innerText = denuncias;
+  document.getElementById("sidePagos").innerText = pagos;
+  document.getElementById("sideHistorial").innerText = historial;
+  document.getElementById("sideSeguridad").innerText = seguridad;
+  document.getElementById("sideAnuncios").innerText = anuncios;
+  document.getElementById("sideCategorias").innerText = categorias;
+
+  document.getElementById("heroDenuncias").innerText = denuncias;
+  document.getElementById("noticeDenuncias").innerText = denuncias + " denuncia(s) pendiente(s).";
 }
 
-function cardUsuario(u){
-  return `
-  <div class="item">
-    <h3>${safe(u.nombre||"Sin nombre")} ${badgeEstado(u)}</h3>
-    <p><b>ID:</b> ${safe(u.id)}</p>
-    <p><b>Email:</b> ${safe(u.email)}</p>
-    <p><b>Teléfono:</b> ${safe(u.telefono)}</p>
-    <p><b>Ubicación:</b> ${safe(u.ciudad)}, ${safe(u.estado)}, ${safe(u.pais)}</p>
-    <p><b>Categoría:</b> ${safe(u.categoria)}</p>
-    <p><b>Descripción:</b> ${safe(u.descripcion)}</p>
-    <p><b>Precio:</b> ${safe(u.precio)}</p>
-    <p><b>Modalidad:</b> ${safe(u.modalidad)}</p>
-    <p><b>Estado revisión:</b> ${safe(u.estadoRevision)}</p>
-    <p><b>Estado pago:</b> ${safe(u.estadoPago)}</p>
-    <p><b>Fecha registro:</b> ${fechaLegible(u.fecha)}</p>
-    <p><b>Vencimiento:</b> ${fechaLegible(u.fechaVencimiento)}</p>
-    ${fotosUsuario(u)}
-    ${verificacionesUsuario(u)}
-    <button class="btn-ok" onclick="aprobarGratis('${u.id}')">Aprobar gratis / activar 30 días</button>
-    <button class="btn-azul" onclick="aprobarCambios('${u.id}')">Aprobar cambios</button>
-    <button class="btn-rosa" onclick="activarRenovacionPagada('${u.id}')">Activar renovación pagada</button>
-    <button class="btn-gris" onclick="marcarVencido('${u.id}')">Marcar vencido</button>
-    <button class="btn-rojo" onclick="quitarAprobacion('${u.id}')">Ocultar / quitar aprobación</button>
-    <button class="btn-rojo" onclick="borrarUsuario('${u.id}')">Borrar usuario</button>
-  </div>`;
+function pintarResumen(){
+  let nuevos = 0;
+  let actualizaciones = 0;
+  let vencidos = 0;
+  let activos = 0;
+
+  usuariosCache.forEach(u => {
+    if(u.estadoRevision === "registro_pendiente") nuevos++;
+    if(u.estadoRevision === "actualizacion_pendiente" || u.actualizacionPendiente === true) actualizaciones++;
+    if(estaVencido(u) || u.activo === false) vencidos++;
+    if(u.aprobado === true && u.activo === true && !estaVencido(u)) activos++;
+  });
+
+  const pendientes = nuevos + actualizaciones;
+
+  document.getElementById("numNuevos").innerText = nuevos;
+  document.getElementById("numActualizaciones").innerText = actualizaciones;
+  document.getElementById("numVencidos").innerText = vencidos;
+  document.getElementById("numActivos").innerText = activos;
+
+  document.getElementById("sideNuevos").innerText = nuevos;
+  document.getElementById("sideActualizaciones").innerText = actualizaciones;
+  document.getElementById("sideVencidos").innerText = vencidos;
+  document.getElementById("sideActivos").innerText = activos;
+
+  document.getElementById("heroPendientes").innerText = pendientes;
+  document.getElementById("heroActivos").innerText = activos;
+  document.getElementById("heroVencidos").innerText = vencidos;
+
+  document.getElementById("resumenPrincipal").innerHTML = `
+    Pendientes: ${pendientes}<br>
+    Registros nuevos: ${nuevos}<br>
+    Actualizaciones: ${actualizaciones}<br>
+    Activos: ${activos}<br>
+    Vencidos/Inactivos: ${vencidos}
+  `;
+
+  document.getElementById("noticePendientes").innerText = pendientes + " perfil(es) requieren revisión.";
+
+  if(pendientes > 0){
+    const sonido = document.getElementById("sonidoAlerta");
+    if(sonido) sonido.play().catch(()=>{});
+  }
 }
 
-async function aprobarGratis(uid){
-  if(!confirm("¿Aprobar y activar gratis 30 días?"))return;
-  const ahora=new Date();const venc=new Date();venc.setDate(venc.getDate()+30);
-  await db.collection("usuarios").doc(uid).update({aprobado:true,activo:true,vencido:false,primerMesGratis:true,actualizacionPendiente:false,estadoRevision:"aprobado",estadoPago:"gratis_activo",fechaPublicacion:ahora,fechaVencimiento:venc});
-  await cargarUsuarios();
+function mostrarDashboard(){
+  seccionActual = "dashboard";
+  marcarNav("dashboard");
+  cerrarMenuMovil();
+  document.getElementById("vistaDashboard").style.display = "block";
+  document.getElementById("vistaSeccion").style.display = "none";
+  document.getElementById("mainTitle").innerText = "Dashboard CariHub";
+  document.getElementById("mainSub").innerText = "Resumen general de operación y moderación.";
+  cargarDashboard();
 }
-async function aprobarCambios(uid){
-  if(!confirm("¿Aprobar cambios públicos de este perfil?"))return;
-  await db.collection("usuarios").doc(uid).update({aprobado:true,activo:true,vencido:false,actualizacionPendiente:false,estadoRevision:"aprobado"});
-  await cargarUsuarios();
+
+function abrirSeccion(tipo){
+  seccionActual = tipo;
+  marcarNav(tipo);
+  cerrarMenuMovil();
+  document.getElementById("vistaDashboard").style.display = "none";
+  document.getElementById("vistaSeccion").style.display = "block";
+  document.getElementById("buscarTexto").value = "";
+  document.getElementById("filtroEstado").value = "";
+  cargarSeccion(tipo);
 }
-async function activarRenovacionPagada(uid){
-  if(!confirm("¿Activar renovación pagada por 30 días?"))return;
-  const venc=new Date();venc.setDate(venc.getDate()+30);
-  await db.collection("usuarios").doc(uid).update({aprobado:true,activo:true,vencido:false,pagado:true,actualizacionPendiente:false,estadoPago:"pagado_activo",estadoRevision:"aprobado",fechaVencimiento:venc});
-  await cargarUsuarios();
+
+function recargarSeccionActual(){
+  if(seccionActual === "dashboard"){
+    cargarDashboard();
+  }else{
+    cargarSeccion(seccionActual);
+  }
 }
-async function marcarVencido(uid){
-  if(!confirm("¿Marcar perfil como vencido/desactivado?"))return;
-  await db.collection("usuarios").doc(uid).update({activo:false,vencido:true,estadoPago:"vencido"});
-  await cargarUsuarios();
+
+async function cargarSeccion(tipo){
+  const titulo = document.getElementById("tituloSeccion");
+  const desc = document.getElementById("descripcionSeccion");
+  const cont = document.getElementById("contenidoSeccion");
+  const buscador = document.getElementById("buscadorSeccion");
+
+  cont.innerHTML = "Cargando...";
+  buscador.style.display = "grid";
+
+  document.getElementById("mainTitle").innerText = "Sección admin";
+  document.getElementById("mainSub").innerText = "Revisión detallada de módulos.";
+
+  if(tipo === "nuevos"){
+    titulo.innerText = "🆕 Perfiles nuevos";
+    desc.innerText = "Registros nuevos pendientes de revisión.";
+    pintarListaPerfiles(usuariosCache.filter(u => u.estadoRevision === "registro_pendiente"));
+    return;
+  }
+
+  if(tipo === "actualizaciones"){
+    titulo.innerText = "✏️ Actualizaciones pendientes";
+    desc.innerText = "Perfiles que editaron datos públicos y requieren aprobación.";
+    pintarListaPerfiles(usuariosCache.filter(u => u.estadoRevision === "actualizacion_pendiente" || u.actualizacionPendiente === true));
+    return;
+  }
+
+  if(tipo === "vencidos"){
+    titulo.innerText = "⏳ Perfiles vencidos / inactivos";
+    desc.innerText = "Perfiles que ya no deben aparecer públicamente.";
+    pintarListaPerfiles(usuariosCache.filter(u => estaVencido(u) || u.activo === false));
+    return;
+  }
+
+  if(tipo === "activos"){
+    titulo.innerText = "✅ Perfiles activos";
+    desc.innerText = "Perfiles visibles actualmente en CariHub.";
+    pintarListaPerfiles(usuariosCache.filter(u => u.aprobado === true && u.activo === true && !estaVencido(u)));
+    return;
+  }
+
+  buscador.style.display = "none";
+
+  if(tipo === "denuncias"){
+    titulo.innerText = "🚨 Denuncias pendientes";
+    desc.innerText = "Reportes enviados por usuarios. Se revisan desde admin.";
+    await cargarDenuncias();
+    return;
+  }
+
+  if(tipo === "pagos"){
+    titulo.innerText = "💳 Pagos";
+    desc.innerText = "Pagos y renovaciones. Pendiente de webhook automático.";
+    await cargarColeccionSimple("pagos");
+    return;
+  }
+
+  if(tipo === "historial"){
+    titulo.innerText = "📜 Historial de cambios";
+    desc.innerText = "Cambios y acciones guardadas.";
+    await cargarColeccionSimple("historialCambios");
+    return;
+  }
+
+  if(tipo === "seguridad"){
+    titulo.innerText = "🛡 Seguridad / actividad sospechosa";
+    desc.innerText = "Logs de seguridad, bots, abuso o acciones sospechosas.";
+    await cargarColeccionSimple("logsSeguridad");
+    return;
+  }
+
+  if(tipo === "anuncios"){
+    titulo.innerText = "📢 Anuncios";
+    desc.innerText = "Publicidad interna de portada y resultados.";
+    await cargarColeccionSimple("anuncios");
+    return;
+  }
+
+  if(tipo === "categorias"){
+    titulo.innerText = "💡 Categorías sugeridas";
+    desc.innerText = "Sugerencias enviadas por usuarios.";
+    await cargarColeccionSimple("categoriasSugeridas");
+    return;
+  }
 }
-async function quitarAprobacion(uid){
-  if(!confirm("¿Ocultar perfil y quitar aprobación?"))return;
-  await db.collection("usuarios").doc(uid).update({aprobado:false,activo:false,estadoRevision:"oculto_admin"});
-  await cargarUsuarios();
+
+function pintarListaPerfiles(lista){
+  const cont = document.getElementById("contenidoSeccion");
+
+  if(!lista.length){
+    cont.innerHTML = `<div class="item"><h3>Sin resultados</h3><p>No hay elementos en esta sección.</p></div>`;
+    return;
+  }
+
+  cont.innerHTML = "";
+
+  lista.forEach(u => {
+    const vencido = estaVencido(u);
+    let estado = `<span class="badge badge-naranja">Pendiente</span>`;
+
+    if(u.aprobado && u.activo && !vencido){
+      estado = `<span class="badge badge-verde">Activo</span>`;
+    }
+
+    if(vencido || u.activo === false){
+      estado = `<span class="badge badge-rojo">Vencido/Inactivo</span>`;
+    }
+
+    const textoBusqueda = textoSeguro(
+      `${u.nombre||""} ${u.email||""} ${u.telefono||""} ${u.ciudad||""} ${u.categoria||""}`
+    );
+
+    cont.innerHTML += `
+      <div class="item item-filtrable"
+        data-texto="${textoBusqueda}"
+        data-estado="${u.aprobado && u.activo && !vencido ? "activo" : vencido ? "vencido" : "pendiente"}">
+
+        <h3>${textoSeguro(u.nombre || "Sin nombre")}</h3>
+        ${estado}
+
+        ${u.estadoRevision==="registro_pendiente" ? `<span class="badge badge-rosa">Registro nuevo</span>` : ""}
+        ${(u.estadoRevision==="actualizacion_pendiente" || u.actualizacionPendiente) ? `<span class="badge badge-azul">Actualización pendiente</span>` : ""}
+
+        <p><b>Correo:</b> ${textoSeguro(u.email)}</p>
+        <p><b>WhatsApp:</b> ${textoSeguro(u.telefono)}</p>
+        <p><b>Ubicación:</b> ${textoSeguro(u.ciudad)}, ${textoSeguro(u.estado)}, ${textoSeguro(u.pais)}</p>
+        <p><b>Categoría:</b> ${textoSeguro(u.categoria)}</p>
+
+        <button class="btn btn-ver" onclick="abrirDetallePerfil('${u.id}')">Abrir perfil</button>
+      </div>
+    `;
+  });
 }
-async function borrarUsuario(uid){
-  if(!confirm("¿BORRAR este usuario? Esta acción elimina el documento de Firestore."))return;
-  await db.collection("usuarios").doc(uid).delete();
-  await cargarUsuarios();
+
+function abrirDetallePerfil(id){
+  const u = usuariosCache.find(x => x.id === id);
+
+  if(!u){
+    alert("Perfil no encontrado.");
+    return;
+  }
+
+  const cont = document.getElementById("contenidoSeccion");
+  const fotoPerfil = u.fotoURL || "";
+  const fotosExtraURL = Array.isArray(u.fotosExtraURL) ? u.fotosExtraURL : [];
+  const verificacion = u.verificacion || {};
+
+  const ineURL = verificacion.ineURL || "";
+  const ineReversoURL = verificacion.ineReversoURL || "";
+  const selfieURL = verificacion.selfieURL || "";
+  const nombreReal = verificacion.nombreReal || "";
+
+  const dias = diasRestantes(u.fechaVencimiento);
+  const textoDias = dias === "" ? "Sin vencimiento" : (dias >= 0 ? dias + " días restantes" : "Vencido hace " + Math.abs(dias) + " días");
+
+  let estadoHTML = `<span class="pendiente">PENDIENTE</span>`;
+
+  if(u.aprobado && u.activo && !estaVencido(u)){
+    estadoHTML = `<span class="aprobado">APROBADO / ACTIVO</span>`;
+  }
+
+  if(estaVencido(u) || u.activo === false){
+    estadoHTML = `<span class="vencido">VENCIDO / INACTIVO</span>`;
+  }
+
+  cont.innerHTML = `
+    <button class="btn btn-volver" onclick="cargarSeccion('${seccionActual}')">← Volver a sección</button>
+
+    <div class="detalle-box">
+      <h2>${textoSeguro(u.nombre || "Sin nombre")}</h2>
+
+      ${fotoPerfil ? `<img loading="lazy" src="${textoSeguro(fotoPerfil)}" alt="Foto perfil">` : "<p class='aviso'>Sin foto de perfil</p>"}
+
+      ${fotosExtraURL.length > 0 ? `
+        <div class="fotos-extra">
+          <h3>Fotos adicionales</h3>
+          ${fotosExtraURL.map((url, i) => `
+            <p><b>Foto extra ${i + 1}:</b></p>
+            <img loading="lazy" src="${textoSeguro(url)}" alt="Foto extra ${i + 1}">
+          `).join("")}
+        </div>
+      ` : "<p class='aviso'>Sin fotos adicionales</p>"}
+
+      <p class="dato"><b>ID:</b> ${textoSeguro(id)}</p>
+      <p class="dato"><b>Correo:</b> ${textoSeguro(u.email)}</p>
+      <p class="dato"><b>WhatsApp:</b> ${textoSeguro(u.telefono)}</p>
+      <p class="dato"><b>País:</b> ${textoSeguro(u.pais)}</p>
+      <p class="dato"><b>Estado:</b> ${textoSeguro(u.estado)}</p>
+      <p class="dato"><b>Ciudad:</b> ${textoSeguro(u.ciudad)}</p>
+      <p class="dato"><b>Categoría:</b> ${textoSeguro(u.categoria)}</p>
+      <p class="dato"><b>Descripción corta:</b> ${textoSeguro(u.descripcion)}</p>
+      <p class="dato"><b>Descripción completa:</b> ${textoSeguro(u.descripcionCompleta)}</p>
+      <p class="dato"><b>Precio:</b> ${textoSeguro(u.precio)}</p>
+      <p class="dato"><b>Modalidad:</b> ${textoSeguro(u.modalidad)}</p>
+      <p class="dato"><b>Horario:</b> ${textoSeguro(u.horario)}</p>
+      <p class="dato"><b>Zona:</b> ${textoSeguro(u.zona)}</p>
+      <p class="dato"><b>Servicios:</b> ${textoSeguro(u.servicios)}</p>
+
+      <p class="dato"><b>Estado del perfil:</b> ${estadoHTML}</p>
+      <p class="dato"><b>Estado revisión:</b> <span class="revision">${textoSeguro(u.estadoRevision || "sin_revision")}</span></p>
+      <p class="dato"><b>Actualización pendiente:</b> ${u.actualizacionPendiente ? "Sí" : "No"}</p>
+      <p class="dato"><b>Activo:</b> ${u.activo ? "Sí" : "No"}</p>
+      <p class="dato"><b>Vencido:</b> ${u.vencido ? "Sí" : "No"}</p>
+      <p class="dato"><b>Primer mes gratis:</b> ${u.primerMesGratis ? "Sí" : "No"}</p>
+      <p class="dato"><b>Pago:</b> ${u.pagado ? "PAGADO ✅" : "NO PAGADO / GRATIS o pendiente"}</p>
+      <p class="dato"><b>Estado pago:</b> ${textoSeguro(u.estadoPago || "sin_estado")}</p>
+      <p class="dato"><b>Fecha publicación:</b> ${formatearFecha(u.fechaPublicacion)}</p>
+      <p class="dato"><b>Fecha vencimiento:</b> ${formatearFecha(u.fechaVencimiento)}</p>
+      <p class="dato"><b>Días:</b> ${textoSeguro(textoDias)}</p>
+
+      <div class="verificacion">
+        <h3>Verificación privada</h3>
+        <p><b>Nombre real:</b> ${textoSeguro(nombreReal)}</p>
+
+        ${ineURL ? `<p><b>INE frente / identificación:</b><br><img loading="lazy" src="${textoSeguro(ineURL)}" alt="INE frente"></p>` : "<p class='aviso'>INE frente no subida</p>"}
+        ${ineReversoURL ? `<p><b>INE reverso:</b><br><img loading="lazy" src="${textoSeguro(ineReversoURL)}" alt="INE reverso"></p>` : "<p class='aviso'>INE reverso no subida</p>"}
+        ${selfieURL ? `<p><b>Selfie de verificación:</b><br><img loading="lazy" src="${textoSeguro(selfieURL)}" alt="Selfie"></p>` : "<p class='aviso'>Selfie no subida</p>"}
+
+        <p class="aviso">Estas imágenes no son públicas. Solo el admin debe revisarlas.</p>
+      </div>
+
+      <div class="actions-row">
+        <button class="btn btn-aprobar" onclick="aprobarGratis('${id}')">🟢 Aprobar + 30 días gratis</button>
+        <button class="btn btn-cambios" onclick="aprobarCambios('${id}')">🔵 Aprobar cambios</button>
+        <button class="btn btn-pago" onclick="activarRenovacionPagada('${id}')">💳 Activar renovación pagada 30 días</button>
+        <button class="btn btn-quitar" onclick="quitarAprobacion('${id}')">Quitar aprobación</button>
+        <button class="btn btn-quitar" onclick="marcarVencido('${id}')">Marcar vencido</button>
+        <button class="btn btn-borrar" onclick="borrarUsuario('${id}')">Borrar</button>
+      </div>
+    </div>
+  `;
 }
 
 async function cargarDenuncias(){
-  $("listaDenuncias").innerHTML="Cargando denuncias...";
+  const cont = document.getElementById("contenidoSeccion");
+
   try{
-    const snap=await db.collection("denuncias").get();
-    DENUNCIAS=snap.docs.map(d=>({id:d.id,...d.data()}));
-    DENUNCIAS.sort((a,b)=>{const fa=a.fecha?.toDate?a.fecha.toDate().getTime():0;const fb=b.fecha?.toDate?b.fecha.toDate().getTime():0;return fb-fa});
-    pintarDenuncias();actualizarStats();
-  }catch(e){$("listaDenuncias").innerHTML=`<div class="notice">Error cargando denuncias: ${safe(e.message)}</div>`}
-}
-function pintarDenuncias(){
-  const pendientes=DENUNCIAS.filter(d=>d.estado!=="revisada"&&d.estado!=="resuelta");
-  $("listaDenuncias").innerHTML=pendientes.length?pendientes.map(cardDenuncia).join(""):`<div class="notice">No hay denuncias pendientes.</div>`;
-}
-function cardDenuncia(d){
-  const evidenciaImg=d.evidenciaURL?`
-    <p><b>📸 Evidencia anexada:</b></p>
-    <a href="${safe(d.evidenciaURL)}" target="_blank"><img class="evidencia-img" src="${safe(d.evidenciaURL)}" alt="Evidencia denuncia"></a>
-    <p><a class="link" href="${safe(d.evidenciaURL)}" target="_blank">Abrir evidencia en otra pestaña</a></p>
-  `:`<p class="notice">Esta denuncia no tiene imagen anexada.</p>`;
-  const evidenciaLink=d.evidenciaLink?`<p><b>Link evidencia:</b> <a class="link" href="${safe(d.evidenciaLink)}" target="_blank">${safe(d.evidenciaLink)}</a></p>`:`<p><b>Link evidencia:</b> Sin link.</p>`;
-  return `
-  <div class="item">
-    <h3>🚨 Denuncia <span class="badge badge-pendiente">${safe(d.estado||"pendiente")}</span></h3>
-    <p><b>ID denuncia:</b> ${safe(d.id)}</p>
-    <p><b>Perfil denunciado:</b> ${safe(d.perfilNombre)}</p>
-    <p><b>Motivo:</b> ${safe(d.motivo)}</p>
-    <p><b>Mensaje:</b> ${safe(d.mensaje)}</p>
-    <p><b>Denunciante:</b> ${safe(d.denuncianteNombre||"Sin nombre")}</p>
-    <p><b>Contacto denunciante:</b> ${safe(d.contactoDenunciante)}</p>
-    ${evidenciaLink}
-    ${evidenciaImg}
-    <p><b>Fecha:</b> ${fechaLegible(d.fecha)}</p>
-    <p><b>Creado por UID:</b> ${safe(d.creadoPorUid)}</p>
-    <details><summary><b>Datos técnicos</b></summary><p><b>Origen:</b> ${safe(d.origen)}</p><p><b>URL página:</b> ${safe(d.urlPagina)}</p><pre>${safe(d.navegador)}</pre></details>
-    <button class="btn-ok" onclick="marcarDenunciaRevisada('${d.id}')">Marcar revisada</button>
-    <button class="btn-rojo" onclick="marcarDenunciaResuelta('${d.id}')">Marcar resuelta</button>
-  </div>`;
-}
-async function marcarDenunciaRevisada(id){
-  if(!confirm("¿Marcar denuncia como revisada?"))return;
-  await db.collection("denuncias").doc(id).update({estado:"revisada",revisada:true,fechaRevision:new Date(),revisadaPor:auth.currentUser?auth.currentUser.email:""});
-  await cargarDenuncias();
-}
-async function marcarDenunciaResuelta(id){
-  if(!confirm("¿Marcar denuncia como resuelta?"))return;
-  await db.collection("denuncias").doc(id).update({estado:"resuelta",resuelta:true,fechaResolucion:new Date(),resueltaPor:auth.currentUser?auth.currentUser.email:""});
-  await cargarDenuncias();
+    const snap = await db.collection("denuncias")
+      .orderBy("fecha","desc")
+      .limit(50)
+      .get();
+
+    if(snap.empty){
+      cont.innerHTML = `<div class="item"><h3>Sin denuncias</h3><p>No hay denuncias guardadas todavía.</p></div>`;
+      return;
+    }
+
+    cont.innerHTML = "";
+
+    snap.forEach(doc => {
+      const d = doc.data();
+
+      cont.innerHTML += `
+        <div class="item">
+          <h3>🚨 ${textoSeguro(d.perfilNombre || d.perfilId || "Perfil denunciado")}</h3>
+          <span class="badge ${d.estado==="pendiente" ? "badge-rojo" : "badge-verde"}">${textoSeguro(d.estado || "pendiente")}</span>
+          <p><b>Motivo:</b> ${textoSeguro(d.motivo)}</p>
+          <p><b>Fecha:</b> ${formatearFecha(d.fecha)}</p>
+          <button class="btn btn-denuncia" onclick="abrirDetalleDenuncia('${doc.id}')">Abrir denuncia</button>
+        </div>
+      `;
+    });
+  }catch(e){
+    cont.innerHTML = `<div class="item"><h3>Denuncias no configuradas</h3><p>Cuando conectemos el formulario de denuncias, aparecerán aquí.</p></div>`;
+  }
 }
 
-function actualizarStats(){
-  const pendientes=USUARIOS.filter(u=>u.aprobado!==true&&u.actualizacionPendiente!==true);
-  const actualizaciones=USUARIOS.filter(u=>u.actualizacionPendiente===true||u.estadoRevision==="actualizacion_pendiente");
-  const vencidos=USUARIOS.filter(u=>esVencido(u)||u.activo!==true);
-  const denunciasPend=DENUNCIAS.filter(d=>d.estado!=="revisada"&&d.estado!=="resuelta");
-  $("statUsuarios").innerText=USUARIOS.length;
-  $("statPendientes").innerText=pendientes.length;
-  $("statActualizaciones").innerText=actualizaciones.length;
-  $("statVencidos").innerText=vencidos.length;
-  $("statDenuncias").innerText=denunciasPend.length;
-  $("contadorPendientes").innerText=pendientes.length;
-  $("contadorActualizaciones").innerText=actualizaciones.length;
-  $("contadorDenuncias").innerText=denunciasPend.length;
+async function abrirDetalleDenuncia(id){
+  const cont = document.getElementById("contenidoSeccion");
+
+  try{
+    const doc = await db.collection("denuncias").doc(id).get();
+
+    if(!doc.exists){
+      alert("Denuncia no encontrada.");
+      return;
+    }
+
+    const d = doc.data();
+
+    cont.innerHTML = `
+      <button class="btn btn-volver" onclick="cargarDenuncias()">← Volver a denuncias</button>
+
+      <div class="detalle-box">
+        <h2>🚨 Denuncia</h2>
+        <p><b>Perfil denunciado:</b> ${textoSeguro(d.perfilNombre || d.perfilId)}</p>
+        <p><b>Motivo:</b> ${textoSeguro(d.motivo)}</p>
+        <p><b>Mensaje:</b> ${textoSeguro(d.mensaje)}</p>
+        <p><b>Contacto denunciante:</b> ${textoSeguro(d.contactoDenunciante)}</p>
+        <p><b>Fecha:</b> ${formatearFecha(d.fecha)}</p>
+        <p><b>Estado:</b> ${textoSeguro(d.estado || "pendiente")}</p>
+
+        <button class="btn btn-cambios" onclick="marcarDenunciaRevisada('${id}')">Marcar revisada</button>
+        ${d.perfilId ? `<button class="btn btn-quitar" onclick="marcarVencido('${d.perfilId}')">Ocultar perfil denunciado</button>` : ""}
+      </div>
+    `;
+  }catch(e){
+    alert("Error abriendo denuncia: " + e.message);
+  }
+}
+
+async function marcarDenunciaRevisada(id){
+  if(!confirm("¿Marcar esta denuncia como revisada?")) return;
+
+  await db.collection("denuncias").doc(id).update({
+    estado:"revisada",
+    fechaRevision:new Date(),
+    adminEmail:ADMIN_EMAIL
+  });
+
+  await registrarLogAdmin("denuncia_revisada",id,"Denuncia marcada como revisada");
+
+  alert("Denuncia marcada como revisada.");
+  cargarDenuncias();
+}
+
+async function cargarColeccionSimple(nombre){
+  const cont = document.getElementById("contenidoSeccion");
+
+  try{
+    const snap = await db.collection(nombre)
+      .limit(50)
+      .get();
+
+    if(snap.empty){
+      cont.innerHTML = `<div class="item"><h3>Sin datos</h3><p>La colección ${textoSeguro(nombre)} todavía no tiene documentos.</p></div>`;
+      return;
+    }
+
+    cont.innerHTML = "";
+
+    snap.forEach(doc => {
+      const data = doc.data();
+
+      cont.innerHTML += `
+        <div class="item">
+          <h3>${textoSeguro(nombre)} / ${textoSeguro(doc.id)}</h3>
+          <pre>${textoSeguro(JSON.stringify(data,null,2))}</pre>
+        </div>
+      `;
+    });
+  }catch(e){
+    cont.innerHTML = `<div class="item"><h3>${textoSeguro(nombre)} no configurado</h3><p>Esta colección aún no existe o falta permiso para leerla.</p></div>`;
+  }
+}
+
+function filtrarCards(){
+  const texto = document.getElementById("buscarTexto").value.toLowerCase().trim();
+  const estado = document.getElementById("filtroEstado").value;
+
+  document.querySelectorAll(".item-filtrable").forEach(card => {
+    const t = (card.dataset.texto || "").toLowerCase();
+    const e = card.dataset.estado || "";
+
+    const pasaTexto = !texto || t.includes(texto);
+    const pasaEstado = !estado || e === estado;
+
+    card.style.display = pasaTexto && pasaEstado ? "block" : "none";
+  });
+}
+
+async function registrarLogAdmin(accion,id,descripcion){
+  try{
+    await db.collection("logsAdmin").add({
+      accion,
+      perfilId:id || "",
+      descripcion:descripcion || "",
+      adminEmail:ADMIN_EMAIL,
+      fecha:new Date()
+    });
+  }catch(e){}
+}
+
+async function aprobarGratis(id) {
+  if(procesando) return;
+  if(!confirm("¿Aprobar este perfil con 30 días gratis?")) return;
+
+  bloquearAcciones(true);
+
+  try{
+    const hoy = new Date();
+    const vencimiento = new Date();
+    vencimiento.setDate(hoy.getDate() + 30);
+
+    await db.collection("usuarios").doc(id).update({
+      aprobado: true,
+      activo: true,
+      vencido: false,
+      primerMesGratis: true,
+      pagado: false,
+      estadoPago: "gratis_30_dias",
+      actualizacionPendiente:false,
+      estadoRevision:"aprobado",
+      fechaPublicacion: hoy,
+      fechaVencimiento: vencimiento
+    });
+
+    await registrarLogAdmin("aprobar_gratis",id,"Perfil aprobado con 30 días gratis");
+
+    alert("Usuario aprobado. Primer mes gratis activado por 30 días.");
+    await cargarUsuariosCache();
+    abrirDetallePerfil(id);
+  }catch(e){
+    alert("Error: " + e.message);
+  }
+
+  bloquearAcciones(false);
+}
+
+async function aprobarCambios(id) {
+  if(procesando) return;
+  if(!confirm("¿Aprobar los cambios de este perfil?")) return;
+
+  bloquearAcciones(true);
+
+  try{
+    await db.collection("usuarios").doc(id).update({
+      aprobado: true,
+      activo: true,
+      vencido: false,
+      actualizacionPendiente:false,
+      estadoRevision:"aprobado"
+    });
+
+    await registrarLogAdmin("aprobar_cambios",id,"Cambios aprobados y perfil visible");
+
+    alert("Cambios aprobados. Perfil visible nuevamente.");
+    await cargarUsuariosCache();
+    abrirDetallePerfil(id);
+  }catch(e){
+    alert("Error: " + e.message);
+  }
+
+  bloquearAcciones(false);
+}
+
+async function activarRenovacionPagada(id) {
+  if(procesando) return;
+  if(!confirm("¿Activar renovación pagada por 30 días?")) return;
+
+  bloquearAcciones(true);
+
+  try{
+    const hoy = new Date();
+    const vencimiento = new Date();
+    vencimiento.setDate(hoy.getDate() + 30);
+
+    await db.collection("usuarios").doc(id).update({
+      aprobado: true,
+      activo: true,
+      vencido: false,
+      pagado: true,
+      estadoPago: "pagado",
+      actualizacionPendiente:false,
+      estadoRevision:"aprobado",
+      fechaPublicacion: hoy,
+      fechaVencimiento: vencimiento
+    });
+
+    await registrarLogAdmin("activar_renovacion_pagada",id,"Renovación pagada activada 30 días");
+
+    alert("Renovación pagada activada por 30 días.");
+    await cargarUsuariosCache();
+    abrirDetallePerfil(id);
+  }catch(e){
+    alert("Error: " + e.message);
+  }
+
+  bloquearAcciones(false);
+}
+
+async function marcarVencido(id) {
+  if(procesando) return;
+  if(!confirm("¿Marcar este perfil como vencido/inactivo?")) return;
+
+  bloquearAcciones(true);
+
+  try{
+    await db.collection("usuarios").doc(id).update({
+      activo: false,
+      vencido: true,
+      estadoRevision:"vencido"
+    });
+
+    await registrarLogAdmin("marcar_vencido",id,"Perfil marcado como vencido");
+
+    alert("Perfil marcado como vencido.");
+    await cargarUsuariosCache();
+
+    if(seccionActual === "denuncias"){
+      cargarDenuncias();
+    }else{
+      abrirDetallePerfil(id);
+    }
+  }catch(e){
+    alert("Error: " + e.message);
+  }
+
+  bloquearAcciones(false);
+}
+
+async function quitarAprobacion(id) {
+  if(procesando) return;
+  if(!confirm("¿Quitar aprobación y ocultar este perfil?")) return;
+
+  bloquearAcciones(true);
+
+  try{
+    await db.collection("usuarios").doc(id).update({
+      aprobado: false,
+      activo: false,
+      estadoRevision:"no_aprobado"
+    });
+
+    await registrarLogAdmin("quitar_aprobacion",id,"Aprobación quitada");
+
+    alert("Aprobación quitada.");
+    await cargarUsuariosCache();
+    abrirDetallePerfil(id);
+  }catch(e){
+    alert("Error: " + e.message);
+  }
+
+  bloquearAcciones(false);
+}
+
+async function borrarUsuario(id) {
+  if(procesando) return;
+  if (!confirm("¿Seguro que quieres borrar este usuario? Esta acción no se puede deshacer.")) return;
+
+  bloquearAcciones(true);
+
+  try{
+    await registrarLogAdmin("borrar_usuario",id,"Usuario borrado");
+    await db.collection("usuarios").doc(id).delete();
+
+    alert("Usuario borrado");
+    await cargarUsuariosCache();
+    cargarSeccion(seccionActual);
+  }catch(e){
+    alert("Error: " + e.message);
+  }
+
+  bloquearAcciones(false);
+}
+
+async function salir() {
+  await auth.signOut();
+  location.reload();
 }
 </script>
+
 </body>
 </html>
