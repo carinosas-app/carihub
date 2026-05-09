@@ -136,17 +136,17 @@ function safe(v){return String(v??"").replace(/&/g,"&amp;").replace(/</g,"&lt;")
 function fechaLegible(v){if(!v)return"Sin fecha";try{const d=v.toDate?v.toDate():new Date(v);return d.toLocaleString("es-MX")}catch(e){return"Fecha inválida"}}
 function esVencido(u){if(u.vencido===true)return true;if(u.fechaVencimiento){try{const d=u.fechaVencimiento.toDate?u.fechaVencimiento.toDate():new Date(u.fechaVencimiento);if(d<new Date())return true}catch(e){}}return false}
 function badgeEstado(u){
-  if(u.actualizacionPendiente===true)return <span class="badge badge-azul">actualización pendiente</span>;
-  if(u.aprobado===true&&u.activo===true&&!esVencido(u))return <span class="badge badge-ok">activo</span>;
-  if(esVencido(u)||u.activo!==true)return <span class="badge badge-rojo">vencido/desactivado</span>;
-  return <span class="badge badge-pendiente">pendiente</span>;
+  if(u.actualizacionPendiente===true)return `<span class="badge badge-azul">actualización pendiente</span>`;
+  if(u.aprobado===true&&u.activo===true&&!esVencido(u))return `<span class="badge badge-ok">activo</span>`;
+  if(esVencido(u)||u.activo!==true)return `<span class="badge badge-rojo">vencido/desactivado</span>`;
+  return `<span class="badge badge-pendiente">pendiente</span>`;
 }
 
 auth.onAuthStateChanged(async user=>{
   if(user&&user.email===ADMIN_EMAIL){
     $("loginBox").classList.add("hidden");
     $("adminBox").classList.remove("hidden");
-    $("adminInfo").innerHTML=Conectado como <b>${safe(user.email)}</b>;
+    $("adminInfo").innerHTML=`Conectado como <b>${safe(user.email)}</b>`;
     await actualizarTodo();
   }else{
     $("loginBox").classList.remove("hidden");
@@ -158,9 +158,9 @@ async function loginAdmin(){
   $("loginMsg").innerHTML="";
   const email=$("adminEmail").value.trim().toLowerCase();
   const pass=$("adminPassword").value;
-  if(!email||!pass){$("loginMsg").innerHTML=<p class="notice">Escribe correo y contraseña.</p>;return}
-  if(email!==ADMIN_EMAIL){$("loginMsg").innerHTML=<p class="notice">Ese correo no es el admin autorizado.</p>;return}
-  try{await auth.signInWithEmailAndPassword(email,pass)}catch(e){$("loginMsg").innerHTML=<p class="notice">Error: ${safe(e.message)}</p>}
+  if(!email||!pass){$("loginMsg").innerHTML=`<p class="notice">Escribe correo y contraseña.</p>`;return}
+  if(email!==ADMIN_EMAIL){$("loginMsg").innerHTML=`<p class="notice">Ese correo no es el admin autorizado.</p>`;return}
+  try{await auth.signInWithEmailAndPassword(email,pass)}catch(e){$("loginMsg").innerHTML=`<p class="notice">Error: ${safe(e.message)}</p>`}
 }
 async function logoutAdmin(){await auth.signOut()}
 
@@ -184,44 +184,44 @@ async function cargarUsuarios(){
     USUARIOS=snap.docs.map(d=>({id:d.id,...d.data()}));
     USUARIOS.sort((a,b)=>{const fa=a.fecha?.toDate?a.fecha.toDate().getTime():0;const fb=b.fecha?.toDate?b.fecha.toDate().getTime():0;return fb-fa});
     pintarUsuarios();pintarPendientes();pintarActualizaciones();pintarVencidos();pintarPagos();actualizarStats();
-  }catch(e){$("listaUsuarios").innerHTML=<div class="notice">Error cargando usuarios: ${safe(e.message)}</div>}
+  }catch(e){$("listaUsuarios").innerHTML=`<div class="notice">Error cargando usuarios: ${safe(e.message)}</div>`}
 }
 
 function pintarUsuarios(){
   const filtro=txt($("filtroUsuarios").value).toLowerCase();
   const lista=USUARIOS.filter(u=>[u.nombre,u.email,u.telefono,u.pais,u.estado,u.ciudad,u.categoria,u.estadoRevision,u.estadoPago].join(" ").toLowerCase().includes(filtro));
-  $("listaUsuarios").innerHTML=lista.length?lista.map(cardUsuario).join(""):<div class="notice">No hay usuarios para mostrar.</div>;
+  $("listaUsuarios").innerHTML=lista.length?lista.map(cardUsuario).join(""):`<div class="notice">No hay usuarios para mostrar.</div>`;
 }
 function pintarPendientes(){
   const lista=USUARIOS.filter(u=>u.aprobado!==true&&u.actualizacionPendiente!==true);
-  $("listaPendientes").innerHTML=lista.length?lista.map(cardUsuario).join(""):<div class="notice">No hay registros pendientes.</div>;
+  $("listaPendientes").innerHTML=lista.length?lista.map(cardUsuario).join(""):`<div class="notice">No hay registros pendientes.</div>`;
 }
 function pintarActualizaciones(){
   const lista=USUARIOS.filter(u=>u.actualizacionPendiente===true||u.estadoRevision==="actualizacion_pendiente");
-  $("listaActualizaciones").innerHTML=lista.length?lista.map(cardUsuario).join(""):<div class="notice">No hay actualizaciones pendientes.</div>;
+  $("listaActualizaciones").innerHTML=lista.length?lista.map(cardUsuario).join(""):`<div class="notice">No hay actualizaciones pendientes.</div>`;
 }
 function pintarVencidos(){
   const lista=USUARIOS.filter(u=>esVencido(u)||u.activo!==true);
-  $("listaVencidos").innerHTML=lista.length?lista.map(cardUsuario).join(""):<div class="notice">No hay vencidos/desactivados.</div>;
+  $("listaVencidos").innerHTML=lista.length?lista.map(cardUsuario).join(""):`<div class="notice">No hay vencidos/desactivados.</div>`;
 }
 function pintarPagos(){
   const lista=USUARIOS.filter(u=>u.estadoPago||u.pagado===true||esVencido(u)||u.activo!==true);
-  $("listaPagos").innerHTML=lista.length?lista.map(cardUsuario).join(""):<div class="notice">No hay pagos/renovaciones para mostrar.</div>;
+  $("listaPagos").innerHTML=lista.length?lista.map(cardUsuario).join(""):`<div class="notice">No hay pagos/renovaciones para mostrar.</div>`;
 }
 
 function fotosUsuario(u){
   let html="";
-  if(u.fotoURL)html+=<img src="${safe(u.fotoURL)}" alt="Foto principal">;
-  if(Array.isArray(u.fotosExtraURL)){u.fotosExtraURL.forEach(url=>{if(url)html+=<img src="${safe(url)}" alt="Foto extra">})}
-  return html?<div class="fotos">${html}</div>:"";
+  if(u.fotoURL)html+=`<img src="${safe(u.fotoURL)}" alt="Foto principal">`;
+  if(Array.isArray(u.fotosExtraURL)){u.fotosExtraURL.forEach(url=>{if(url)html+=`<img src="${safe(url)}" alt="Foto extra">`})}
+  return html?`<div class="fotos">${html}</div>`:"";
 }
 function verificacionesUsuario(u){
   const v=u.verificacion||{};
   let html="";
-  if(v.ineURL)html+=<p><a class="link" href="${safe(v.ineURL)}" target="_blank">Ver INE frente</a></p>;
-  if(v.ineReversoURL)html+=<p><a class="link" href="${safe(v.ineReversoURL)}" target="_blank">Ver INE reverso</a></p>;
-  if(v.selfieURL)html+=<p><a class="link" href="${safe(v.selfieURL)}" target="_blank">Ver selfie</a></p>;
-  return html?<details><summary><b>🪪 Verificación privada</b></summary>${html}</details>:"";
+  if(v.ineURL)html+=`<p><a class="link" href="${safe(v.ineURL)}" target="_blank">Ver INE frente</a></p>`;
+  if(v.ineReversoURL)html+=`<p><a class="link" href="${safe(v.ineReversoURL)}" target="_blank">Ver INE reverso</a></p>`;
+  if(v.selfieURL)html+=`<p><a class="link" href="${safe(v.selfieURL)}" target="_blank">Ver selfie</a></p>`;
+  return html?`<details><summary><b>🪪 Verificación privada</b></summary>${html}</details>`:"";
 }
 
 function cardUsuario(u){
@@ -291,19 +291,19 @@ async function cargarDenuncias(){
     DENUNCIAS=snap.docs.map(d=>({id:d.id,...d.data()}));
     DENUNCIAS.sort((a,b)=>{const fa=a.fecha?.toDate?a.fecha.toDate().getTime():0;const fb=b.fecha?.toDate?b.fecha.toDate().getTime():0;return fb-fa});
     pintarDenuncias();actualizarStats();
-  }catch(e){$("listaDenuncias").innerHTML=<div class="notice">Error cargando denuncias: ${safe(e.message)}</div>}
+  }catch(e){$("listaDenuncias").innerHTML=`<div class="notice">Error cargando denuncias: ${safe(e.message)}</div>`}
 }
 function pintarDenuncias(){
   const pendientes=DENUNCIAS.filter(d=>d.estado!=="revisada"&&d.estado!=="resuelta");
-  $("listaDenuncias").innerHTML=pendientes.length?pendientes.map(cardDenuncia).join(""):<div class="notice">No hay denuncias pendientes.</div>;
+  $("listaDenuncias").innerHTML=pendientes.length?pendientes.map(cardDenuncia).join(""):`<div class="notice">No hay denuncias pendientes.</div>`;
 }
 function cardDenuncia(d){
   const evidenciaImg=d.evidenciaURL?`
     <p><b>📸 Evidencia anexada:</b></p>
     <a href="${safe(d.evidenciaURL)}" target="_blank"><img class="evidencia-img" src="${safe(d.evidenciaURL)}" alt="Evidencia denuncia"></a>
     <p><a class="link" href="${safe(d.evidenciaURL)}" target="_blank">Abrir evidencia en otra pestaña</a></p>
-  :<p class="notice">Esta denuncia no tiene imagen anexada.</p>`;
-  const evidenciaLink=d.evidenciaLink?<p><b>Link evidencia:</b> <a class="link" href="${safe(d.evidenciaLink)}" target="_blank">${safe(d.evidenciaLink)}</a></p>:<p><b>Link evidencia:</b> Sin link.</p>;
+  `:`<p class="notice">Esta denuncia no tiene imagen anexada.</p>`;
+  const evidenciaLink=d.evidenciaLink?`<p><b>Link evidencia:</b> <a class="link" href="${safe(d.evidenciaLink)}" target="_blank">${safe(d.evidenciaLink)}</a></p>`:`<p><b>Link evidencia:</b> Sin link.</p>`;
   return `
   <div class="item">
     <h3>🚨 Denuncia <span class="badge badge-pendiente">${safe(d.estado||"pendiente")}</span></h3>
