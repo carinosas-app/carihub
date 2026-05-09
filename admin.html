@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin CariHub</title>
+
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage-compat.js"></script>
+
+<style>
+:root{
+  --rosa:#c12665;
+  --rosa2:#ec2d7a;
+  --fondo:#fff1f7;
+  --texto:#282433;
+  --gris:#777;
+  --ok:#1f8f45;
+  --azul:#316cc7;
+  --rojo:#c62828;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:linear-gradient(180deg,#fff1f7,#ffe4ef);
+  color:var(--texto);
+}
+header{
+  position:sticky;
+  top:0;
+  z-index:50;
+  background:linear-gradient(90deg,var(--rosa),var(--rosa2));
+  color:white;
+  padding:18px 16px;
+  box-shadow:0 5px 18px rgba(0,0,0,.18);
+}
+header h1{margin:0;font-size:26px}
+header p{margin:4px 0 0;opacity:.95}
+.wrap{max-width:1100px;margin:0 auto;padding:18px}
+.card{
+  background:white;
+  border-radius:24px;
+  padding:22px;
+  margin:18px 0;
+  box-shadow:0 8px 25px rgba(193,38,101,.14);
+  border:1px solid #ffd1e4;
+}
+h2{margin:0 0 14px;color:var(--rosa);font-size:28px}
+h3{color:var(--rosa);margin:10px 0}
+input,textarea,select{
+  width:100%;
+  padding:14px;
+  margin:8px 0;
+  border-radius:14px;
+  border:1px solid #ddd;
+  font-size:16px;
+  background:white;
+}
+button{
+  border:0;
+  border-radius:14px;
+  padding:13px 16px;
+  font-weight:800;
+  font-size:15px;
+  cursor:pointer;
+  margin:5px 4px 5px 0;
+}
+.btn-rosa{background:var(--rosa);color:white}
+.btn-gris{background:#777;color:white}
+.btn-ok{background:var(--ok);color:white}
+.btn-azul{background:var(--azul);color:white}
+.btn-rojo{background:var(--rojo);color:white}
+.hidden{display:none!important}
+
+.item{
+  border:1px solid #f5bdd3;
+  border-radius:22px;
+  padding:18px;
+  margin:16px 0;
+  background:linear-gradient(180deg,#fff,#fff8fb);
+}
+
+.evidencia-img{
+  width:100%;
+  max-width:520px;
+  max-height:520px;
+  object-fit:contain;
+  border-radius:16px;
+  border:1px solid #ffd1e4;
+  margin-top:12px;
+  background:#fafafa;
+}
+
+.notice{
+  background:#fff6fb;
+  border-left:6px solid var(--rosa);
+  padding:12px;
+  border-radius:14px;
+  margin:10px 0;
+}
+
+@media(max-width:600px){
+  .wrap{padding:12px}
+  .card{padding:18px}
+  button{width:100%}
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>Panel Admin CariHub</h1>
+  <p>Denuncias, perfiles y revisiones.</p>
+</header>
+
+<div class="wrap">
+
+<section class="card" id="loginBox">
+  <h2>🔐 Acceso administrador</h2>
+
+  <input id="adminEmail" type="email" placeholder="Correo admin">
+  <input id="adminPassword" type="password" placeholder="Contraseña">
+
+  <button class="btn-rosa" onclick="loginAdmin()">Entrar</button>
+
+  <div id="loginMsg"></div>
+</section>
+
+<section id="adminBox" class="hidden">
+
+  <div class="card">
+    <h2>🚨 Denuncias pendientes</h2>
+
+    <button class="btn-rosa" onclick="cargarDenuncias()">
+      Actualizar
+    </button>
+
+    <button class="btn-gris" onclick="logoutAdmin()">
+      Salir
+    </button>
+
+    <div id="listaDenuncias"></div>
+  </div>
+
+</section>
+
+</div>
+
+<script>
+const firebaseConfig={
+  apiKey:"AIzaSyBl4LNLtPqbyIxfTfONAqxi4rOG4XF_vkI",
+  authDomain:"carinosas-app.firebaseapp.com",
+  projectId:"carinosas-app",
+  storageBucket:"carinosas-app.firebasestorage.app",
+  messagingSenderId:"267078845023",
+  appId:"1:267078845023:web:a82e626d9f0ca28858d1ea"
+};
+
+firebase.initializeApp(firebaseConfig);
+
+const db=firebase.firestore();
+const auth=firebase.auth();
+
+const ADMIN_EMAIL="carinosas.anuncios@gmail.com";
+
+function $(id){
+  return document.getElementById(id);
+}
+
+function safe(v){
+  return String(v || "")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;");
+}
+
+function fechaLegible(v){
+  if(!v)return "Sin fecha";
+
+  try{
+    const d=v.toDate ? v.toDate() : new Date(v);
+    return d.toLocaleString("es-MX");
+  }catch(e){
+    return "Fecha inválida";
+  }
+}
+
+auth.onAuthStateChanged(async user=>{
+
+  if(user && user.email===ADMIN_EMAIL){
+
+    $("loginBox").classList.add("hidden");
+    $("adminBox").classList.remove("hidden");
+
+    await cargarDenuncias();
+
+  }else{
+
+    $("loginBox").classList.remove("hidden");
+    $("adminBox").classList.add("hidden");
+
+  }
+
+});
+
+async function loginAdmin(){
+
+  $("loginMsg").innerHTML="";
+
+  const email=$("adminEmail").value.trim().toLowerCase();
+  const pass=$("adminPassword").value;
+
+  if(email!==ADMIN_EMAIL){
+
+    $("loginMsg").innerHTML=`
+      <div class="notice">
+        Correo no autorizado.
+      </div>
+    `;
+    return;
+  }
+
+  try{
+
+    await auth.signInWithEmailAndPassword(email,pass);
+
+  }catch(e){
+
+    $("loginMsg").innerHTML=`
+      <div class="notice">
+        ${safe(e.message)}
+      </div>
+    `;
+
+  }
+
+}
+
+async function logoutAdmin(){
+  await auth.signOut();
+}
+
+async function cargarDenuncias(){
+
+  $("listaDenuncias").innerHTML="Cargando denuncias...";
+
+  try{
+
+    const snap=await db.collection("denuncias").get();
+
+    const denuncias=snap.docs.map(doc=>({
+      id:doc.id,
+      ...doc.data()
+    }));
+
+    denuncias.sort((a,b)=>{
+
+      const fa=a.fecha?.toDate ? a.fecha.toDate().getTime() : 0;
+      const fb=b.fecha?.toDate ? b.fecha.toDate().getTime() : 0;
+
+      return fb-fa;
+
+    });
+
+    if(denuncias.length===0){
+
+      $("listaDenuncias").innerHTML=`
+        <div class="notice">
+          No hay denuncias.
+        </div>
+      `;
+
+      return;
+    }
+
+    $("listaDenuncias").innerHTML=denuncias.map(d=>{
+
+      return `
+      <div class="item">
+
+        <h3>🚨 Denuncia</h3>
+
+        <p>
+          <b>Perfil denunciado:</b>
+          ${safe(d.perfilNombre)}
+        </p>
+
+        <p>
+          <b>Motivo:</b>
+          ${safe(d.motivo)}
+        </p>
+
+        <p>
+          <b>Mensaje:</b>
+          ${safe(d.mensaje)}
+        </p>
+
+        <p>
+          <b>Contacto denunciante:</b>
+          ${safe(d.contactoDenunciante)}
+        </p>
+
+        <p>
+          <b>Fecha:</b>
+          ${fechaLegible(d.fecha)}
+        </p>
+
+        <p>
+          <b>Estado:</b>
+          ${safe(d.estado || "pendiente")}
+        </p>
+
+        ${
+          d.evidenciaURL
+          ?
+          `
+          <div>
+            <p><b>📸 Evidencia anexada:</b></p>
+
+            <a href="${safe(d.evidenciaURL)}" target="_blank">
+
+              <img
+                src="${safe(d.evidenciaURL)}"
+                class="evidencia-img"
+                alt="evidencia"
+              >
+
+            </a>
+
+          </div>
+          `
+          :
+          `
+          <div class="notice">
+            Esta denuncia no tiene imagen anexada.
+          </div>
+          `
+        }
+
+        <button
+          class="btn-ok"
+          onclick="marcarRevisada('${d.id}')"
+        >
+          Marcar revisada
+        </button>
+
+      </div>
+      `;
+
+    }).join("");
+
+  }catch(e){
+
+    $("listaDenuncias").innerHTML=`
+      <div class="notice">
+        Error: ${safe(e.message)}
+      </div>
+    `;
+
+  }
+
+}
+
+async function marcarRevisada(id){
+
+  await db.collection("denuncias").doc(id).update({
+    estado:"revisada",
+    fechaRevision:new Date()
+  });
+
+  await cargarDenuncias();
+
+}
+</script>
+
+</body>
+</html>
