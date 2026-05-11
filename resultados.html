@@ -25,34 +25,29 @@ html,body{
   padding:0;
   width:100%;
   height:100%;
-  overflow:hidden;
 }
 
 body{
   font-family:Arial,sans-serif;
   background:var(--fondo);
   color:var(--texto);
+  overflow:hidden;
 }
 
-/* PANTALLA ACOSTADA SIMULADA */
-.app-horizontal{
-  width:100vw;
-  height:100vh;
-  overflow-y:auto;
-  overflow-x:hidden;
-  background:var(--fondo);
-  -webkit-overflow-scrolling:touch;
-  padding:14px;
-}
-
-/* PUBLICIDAD SUPERIOR */
+/* PUBLICIDAD SUPERIOR FIJA */
 .publicidad-top{
-  width:100%;
-  min-height:78px;
+  position:fixed;
+  top:8px;
+  left:50%;
+  transform:translateX(-50%);
+  width:94%;
+  max-width:900px;
+  height:88px;
   background:linear-gradient(90deg,#ffffff,#ffe0ed);
   border:3px solid var(--rosa);
   border-radius:20px;
   box-shadow:0 4px 16px rgba(0,0,0,.18);
+  z-index:9999;
   display:flex;
   flex-direction:column;
   align-items:center;
@@ -61,7 +56,6 @@ body{
   color:var(--rosa);
   font-weight:900;
   cursor:pointer;
-  margin-bottom:14px;
 }
 
 .publicidad-top .titulo{
@@ -70,63 +64,73 @@ body{
 }
 
 .publicidad-top .subtitulo{
-  font-size:15px;
+  font-size:14px;
   margin-top:5px;
 }
 
-/* CUERPO HORIZONTAL */
-.layout-horizontal{
-  display:grid;
-  grid-template-columns:115px minmax(460px, 1fr) 115px;
-  gap:14px;
-  align-items:start;
-  min-height:calc(100vh - 120px);
+/* TODO ESTO HACE SCROLL */
+.scroll-area{
+  position:fixed;
+  top:108px;
+  bottom:0;
+  left:0;
+  right:0;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+  padding:12px 10px 130px;
 }
 
-/* BANNERS LATERALES CON SCROLL */
-.columna-banner{
+/* CUERPO: PERFILES + BANNERS A UN SOLO LADO */
+.layout{
+  max-width:980px;
+  margin:0 auto;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 82px;
+  gap:12px;
+  align-items:start;
+}
+
+.resultados{
+  min-width:0;
+}
+
+.columna-anuncios{
   display:flex;
   flex-direction:column;
-  gap:14px;
-  min-height:100%;
+  gap:12px;
 }
 
+/* BANNERS DEL LADO DERECHO */
 .side-box{
   width:100%;
-  border-radius:22px;
-  box-shadow:0 4px 14px rgba(0,0,0,.25);
+  border-radius:18px;
+  box-shadow:0 4px 14px rgba(0,0,0,.22);
   display:flex;
   align-items:center;
   justify-content:center;
   text-align:center;
   font-weight:900;
-  line-height:1.1;
   cursor:pointer;
-  padding:10px;
   writing-mode:vertical-rl;
   text-orientation:mixed;
   letter-spacing:2px;
+  padding:10px 5px;
 }
 
 .side-destacado{
-  min-height:260px;
+  height:230px;
   background:linear-gradient(180deg,#ff4f9a,#ec2d7a);
   color:white;
   border:3px solid white;
-  font-size:16px;
+  font-size:14px;
 }
 
 .side-publicidad{
-  min-height:430px;
+  height:360px;
   background:white;
   color:var(--rosa);
   border:3px solid var(--rosa);
-  font-size:16px;
-}
-
-/* RESULTADOS */
-.resultados{
-  width:100%;
+  font-size:14px;
 }
 
 .estado-box{
@@ -150,16 +154,9 @@ body{
   box-shadow:0 4px 18px rgba(0,0,0,.16);
 }
 
-.card-grid{
-  display:grid;
-  grid-template-columns:220px 1fr;
-  gap:16px;
-  align-items:center;
-}
-
 .card img{
   width:100%;
-  height:240px;
+  height:330px;
   object-fit:cover;
   border-radius:20px;
   display:block;
@@ -167,14 +164,14 @@ body{
 
 .card h3{
   color:var(--rosa);
-  font-size:32px;
-  margin:0 0 12px;
+  font-size:34px;
+  margin:18px 0 12px;
 }
 
 .card p{
-  font-size:19px;
+  font-size:20px;
   line-height:1.35;
-  margin:10px 0;
+  margin:12px 0;
 }
 
 .card b{
@@ -187,12 +184,12 @@ body{
   background:var(--rosa);
   color:white;
   text-align:center;
-  padding:16px;
+  padding:17px;
   border-radius:16px;
   text-decoration:none;
-  font-size:19px;
+  font-size:20px;
   font-weight:900;
-  margin-top:16px;
+  margin-top:22px;
 }
 
 .acciones-finales{
@@ -225,30 +222,12 @@ body{
   color:white;
 }
 
-/* FORZAR ACOSTADO CUANDO EL CELULAR ESTÁ VERTICAL */
-@media (orientation: portrait){
-  body{
-    width:100vh;
-    height:100vw;
-  }
-
-  .app-horizontal{
-    position:fixed;
-    top:0;
-    left:100vw;
-    width:100vh;
-    height:100vw;
-    transform:rotate(90deg);
-    transform-origin:top left;
-    overflow-y:auto;
-    overflow-x:hidden;
-    padding:10px;
-  }
-
+@media(max-width:600px){
   .publicidad-top{
-    min-height:62px;
-    margin-bottom:10px;
-    border-radius:16px;
+    top:8px;
+    height:82px;
+    width:92%;
+    border-radius:18px;
   }
 
   .publicidad-top .titulo{
@@ -259,74 +238,56 @@ body{
     font-size:12px;
   }
 
-  .layout-horizontal{
-    grid-template-columns:82px minmax(420px, 1fr) 82px;
-    gap:10px;
-    min-height:calc(100vw - 86px);
+  .scroll-area{
+    top:102px;
+    padding:10px 8px 130px;
+  }
+
+  .layout{
+    grid-template-columns:minmax(0,1fr) 58px;
+    gap:8px;
   }
 
   .side-box{
-    border-radius:16px;
-    padding:7px;
+    border-radius:15px;
     letter-spacing:1px;
+    padding:8px 4px;
   }
 
   .side-destacado{
-    min-height:190px;
-    font-size:12px;
+    height:210px;
+    font-size:11px;
   }
 
   .side-publicidad{
-    min-height:320px;
-    font-size:12px;
+    height:320px;
+    font-size:11px;
   }
 
   .card{
-    padding:12px;
-    border-radius:20px;
-    margin-bottom:16px;
-  }
-
-  .card-grid{
-    grid-template-columns:175px 1fr;
-    gap:12px;
+    padding:14px;
+    border-radius:22px;
   }
 
   .card img{
-    height:185px;
-    border-radius:16px;
+    height:285px;
   }
 
   .card h3{
-    font-size:25px;
+    font-size:31px;
   }
 
   .card p{
-    font-size:16px;
-    margin:7px 0;
+    font-size:19px;
   }
 
   .btn-ver{
-    font-size:16px;
-    padding:13px;
-    margin-top:10px;
+    font-size:19px;
+    padding:16px;
   }
 
   .acciones-finales{
-    padding:12px;
-    margin-top:18px;
-  }
-
-  .acciones-finales button{
-    padding:14px;
-    font-size:16px;
-  }
-}
-
-/* SI YA ESTÁ ACOSTADO NORMAL */
-@media (orientation: landscape){
-  .app-horizontal{
-    position:relative;
+    flex-direction:column;
   }
 }
 </style>
@@ -334,19 +295,13 @@ body{
 
 <body>
 
-<div class="app-horizontal">
+<div class="publicidad-top" onclick="irCuestionarioAnuncio()">
+  <div class="titulo">PUBLICIDAD</div>
+  <div class="subtitulo">Anúnciate aquí o anuncia tu negocio aquí</div>
+</div>
 
-  <div class="publicidad-top" onclick="irCuestionarioAnuncio()">
-    <div class="titulo">PUBLICIDAD</div>
-    <div class="subtitulo">Anúnciate aquí o anuncia tu negocio aquí</div>
-  </div>
-
-  <div class="layout-horizontal">
-
-    <div class="columna-banner">
-      <div class="side-box side-destacado" onclick="irCuestionarioAnuncio()">DESTACADO</div>
-      <div class="side-box side-publicidad" onclick="irCuestionarioAnuncio()">PUBLICIDAD</div>
-    </div>
+<div class="scroll-area">
+  <div class="layout">
 
     <div class="resultados" id="lista">
       <div class="estado-box">
@@ -354,13 +309,13 @@ body{
       </div>
     </div>
 
-    <div class="columna-banner">
+    <div class="columna-anuncios">
+      <div class="side-box side-destacado" onclick="irCuestionarioAnuncio()">DESTACADO</div>
       <div class="side-box side-destacado" onclick="irCuestionarioAnuncio()">DESTACADO</div>
       <div class="side-box side-publicidad" onclick="irCuestionarioAnuncio()">PUBLICIDAD</div>
     </div>
 
   </div>
-
 </div>
 
 <script>
@@ -472,27 +427,21 @@ async function cargarResultados(){
 
         lista.innerHTML += `
           <div class="card">
-            <div class="card-grid">
 
-              <div>
-                ${u.fotoURL ? `
-                  <img src="${textoSeguro(u.fotoURL)}" alt="Foto pública">
-                ` : ""}
-              </div>
+            ${u.fotoURL ? `
+              <img src="${textoSeguro(u.fotoURL)}" alt="Foto pública">
+            ` : ""}
 
-              <div>
-                <h3>${textoSeguro(u.nombre || "Perfil")}</h3>
+            <h3>${textoSeguro(u.nombre || "Perfil")}</h3>
 
-                <p><b>Categoría:</b> ${textoSeguro(u.categoria || "")}</p>
-                <p><b>Ciudad:</b> ${textoSeguro(u.ciudad || "")}</p>
-                <p><b>Precio:</b> ${textoSeguro(u.precio || "")}</p>
+            <p><b>Categoría:</b> ${textoSeguro(u.categoria || "")}</p>
+            <p><b>Ciudad:</b> ${textoSeguro(u.ciudad || "")}</p>
+            <p><b>Precio:</b> ${textoSeguro(u.precio || "")}</p>
 
-                <a class="btn-ver" href="perfil.html?id=${encodeURIComponent(doc.id)}">
-                  Ver perfil
-                </a>
-              </div>
+            <a class="btn-ver" href="perfil.html?id=${encodeURIComponent(doc.id)}">
+              Ver perfil
+            </a>
 
-            </div>
           </div>
         `;
       }
