@@ -42,7 +42,7 @@ body{
   padding:14px 12px 40px;
 }
 
-/* BLOQUE SUPERIOR: DESTACADO ESTADO - PUBLICIDAD - DESTACADO ESTADO */
+/* BLOQUE SUPERIOR */
 .top-banners{
   display:grid;
   grid-template-columns:.82fr 1.9fr .82fr;
@@ -284,6 +284,9 @@ body{
   font-weight:900;
   margin-top:20px;
   box-shadow:0 8px 20px rgba(217,68,129,.27);
+  border:none;
+  cursor:pointer;
+  font-family:Arial,sans-serif;
 }
 
 .acciones-finales{
@@ -316,7 +319,7 @@ body{
   color:white;
 }
 
-/* MODAL PUBLICIDAD / DESTACADO */
+/* MODAL */
 .modal-anuncio{
   position:fixed;
   inset:0;
@@ -584,6 +587,16 @@ const pais = obtenerParametro("pais");
 const estado = obtenerParametro("estado");
 const ciudad = obtenerParametro("ciudad");
 
+function abrirPerfil(id){
+  if(!id){
+    alert("No se encontró el ID del perfil.");
+    return;
+  }
+
+  const url = "./perfil.html?id=" + encodeURIComponent(id) + "&v=" + Date.now();
+  window.location.assign(url);
+}
+
 function abrirInfoAnuncio(tipo){
   const modal = document.getElementById("modalAnuncio");
   const titulo = document.getElementById("modalTitulo");
@@ -702,9 +715,9 @@ async function cargarResultados(){
           <p><b>Ciudad:</b> ${textoSeguro(u.ciudad || "")}</p>
           <p><b>Precio:</b> ${textoSeguro(u.precio || "")}</p>
 
-          <a class="btn-ver" href="./perfil.html?id=${encodeURIComponent(doc.id)}&v=${Date.now()}">
+          <button class="btn-ver" type="button" onclick="abrirPerfil('${doc.id}')">
             Ver perfil
-          </a>
+          </button>
 
         </div>
       `;
