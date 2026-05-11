@@ -1161,7 +1161,13 @@ function buscarCiudadRapida(ciudad){
 }
 
 async function buscarPerfilesFiltrados(){
-  if(!categoriaSeleccionada||!paisSeleccionado||!estadoSeleccionado||!ciudadSeleccionada){
+
+  if(
+    !categoriaSeleccionada ||
+    !paisSeleccionado ||
+    !estadoSeleccionado ||
+    !ciudadSeleccionada
+  ){
     alert("Selecciona categoría, país, estado y ciudad.");
     return;
   }
@@ -1332,6 +1338,120 @@ async function buscarPerfilesFiltrados(){
 
     alert(
       "Error en búsqueda: "+error.message
+    );
+  }
+}
+
+async function mostrarPerfilesCercanos(){
+
+  if(!paisSeleccionado || !estadoSeleccionado){
+    alert("Primero selecciona país y estado.");
+    return;
+  }
+
+  const lista=document.getElementById("lista-perfiles");
+
+  lista.style.display="block";
+
+  lista.innerHTML=`
+    <div class="estado-box">
+      <h3>Buscando perfiles cercanos...</h3>
+    </div>
+  `;
+
+  try{
+
+    const snap=await db.collection("usuarios")
+      .where("aprobado","==",true)
+      .get();
+
+    lista.innerHTML=`
+      <div class="estado-box">
+        <h3>Perfiles cercanos</h3>
+
+        <p>
+          Mostrando perfiles disponibles en
+          ${textoSeguro(estadoSeleccionado)},
+          ${textoSeguro(paisSeleccionado)}.
+        </p>
+      </div>
+    `;
+
+    let encontrados=0;
+
+    for(const doc of snap.docs){
+
+      const u=doc.data();
+
+      let vencido=false;
+
+      if(u.vencido===true){
+        vencido=true;
+      }
+
+      if(u.fechaVencimiento){
+
+        const fechaV=u.fechaVencimiento.toDate
+          ? u.fechaVencimiento.toDate()
+          : new Date(u.fechaVencimiento);
+
+        if(fechaV < new Date()){
+          vencido=true;
+        }
+      }
+
+      if(vencido) continue;
+
+      if(u.activo!==true) continue;
+
+      const cerca =
+        normalizarTexto(u.pais)===normalizarTexto(paisSeleccionado) &&
+        normalizarTexto(u.estado)===normalizarTexto(estadoSeleccionado) &&
+        normalizarTexto(u.ciudad)!==normalizarTexto(ciudadSeleccionada);
+
+      if(cerca){
+
+        encontrados++;
+
+        lista.innerHTML+=await plantillaCardPerfil(doc.id,u);
+      }
+    }
+
+    if(encontrados===0){
+
+      lista.innerHTML+=`
+        <div class="estado-box">
+          <h3>No hay perfiles cercanos todavía.</h3>
+
+          <p>
+            Intenta con otra ciudad o estado.
+          </p>
+
+          <button
+            class="btn btn-continuar"
+            style="width:100%;margin-top:10px;"
+            onclick="abrirRegistro()"
+          >
+            Registrarse
+          </button>
+        </div>
+      `;
+    }
+
+    lista.innerHTML+=`
+      <button
+        class="btn btn-atras"
+        style="width:100%;margin:20px 0;"
+        onclick="volverInicio()"
+      >
+        ← Volver
+      </button>
+    `;
+
+  }catch(error){
+
+    alert(
+      "Error buscando perfiles cercanos: "+error.message
     );
   }
 }
