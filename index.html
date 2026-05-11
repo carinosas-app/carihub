@@ -1,3 +1,7 @@
+Index hit hub
+
+Siguió igual abre en la misma pantalla, pero abajo los resultados , te voy a anexar el index de la primer pantalla 
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -1160,264 +1164,23 @@ function buscarCiudadRapida(ciudad){
   buscarPerfilesFiltrados();
 }
 
-async function buscarPerfilesFiltrados(){
+function buscarPerfilesFiltrados(){
   if(!categoriaSeleccionada||!paisSeleccionado||!estadoSeleccionado||!ciudadSeleccionada){
     alert("Selecciona categoría, país, estado y ciudad.");
     return;
   }
 
-  const lista=document.getElementById("lista-perfiles");
+  const url =
+    "resultados.html?categoria=" + encodeURIComponent(categoriaSeleccionada) +
+    "&pais=" + encodeURIComponent(paisSeleccionado) +
+    "&estado=" + encodeURIComponent(estadoSeleccionado) +
+    "&ciudad=" + encodeURIComponent(ciudadSeleccionada);
 
-  lista.style.display="block";
-
-  lista.innerHTML=`
-    <div class="estado-box">
-      <h3>Buscando perfiles...</h3>
-    </div>
-  `;
-
-  try{
-
-    const snap=await db.collection("usuarios")
-      .where("aprobado","==",true)
-      .get();
-
-    lista.innerHTML=`
-      <div class="estado-box">
-        <h3>Resultados</h3>
-
-        <p>
-          <b>Categoría:</b>
-          ${textoSeguro(categoriaSeleccionada)}
-        </p>
-
-        <p>
-          <b>Ubicación:</b>
-          ${textoSeguro(ciudadSeleccionada)},
-          ${textoSeguro(estadoSeleccionado)},
-          ${textoSeguro(paisSeleccionado)}
-        </p>
-      </div>
-    `;
-
-    let encontrados=0;
-
-    for(const doc of snap.docs){
-
-      const u=doc.data();
-
-      let vencido=false;
-
-      if(u.vencido===true){
-        vencido=true;
-      }
-
-      if(u.fechaVencimiento){
-
-        const fechaV=u.fechaVencimiento.toDate
-          ? u.fechaVencimiento.toDate()
-          : new Date(u.fechaVencimiento);
-
-        if(fechaV < new Date()){
-          vencido=true;
-        }
-      }
-
-      if(vencido) continue;
-
-      if(u.activo!==true) continue;
-
-      const exacto =
-        normalizarTexto(u.categoria)===normalizarTexto(categoriaSeleccionada) &&
-        normalizarTexto(u.pais)===normalizarTexto(paisSeleccionado) &&
-        normalizarTexto(u.estado)===normalizarTexto(estadoSeleccionado) &&
-        normalizarTexto(u.ciudad)===normalizarTexto(ciudadSeleccionada);
-
-      if(exacto){
-
-        encontrados++;
-
-        lista.innerHTML+=await plantillaCardPerfil(doc.id,u);
-      }
-    }
-
-    if(encontrados===0){
-
-      lista.innerHTML+=`
-        <div class="estado-box">
-
-          <h3>
-            No encontramos perfiles en
-            ${textoSeguro(ciudadSeleccionada)}.
-          </h3>
-
-          <p>
-            ¿Deseas buscar perfiles cerca de esta zona?
-          </p>
-
-          <button
-            class="btn btn-continuar"
-            style="width:100%;margin-top:10px;"
-            onclick="mostrarPerfilesCercanos()"
-          >
-            Sí, buscar cerca
-          </button>
-
-          <button
-            class="btn btn-continuar"
-            style="width:100%;margin-top:10px;"
-            onclick="abrirRegistro()"
-          >
-            Registrarse
-          </button>
-
-          <button
-            class="btn btn-atras"
-            style="width:100%;margin-top:10px;"
-            onclick="volverInicio()"
-          >
-            ← Volver
-          </button>
-
-        </div>
-      `;
-
-    }else{
-
-      lista.innerHTML+=`
-        <div class="estado-box">
-
-          <h3>
-            ¿Quieres ver más personas cerca?
-          </h3>
-
-          <p>
-            También puedes revisar perfiles disponibles
-            en el mismo estado o registrarte.
-          </p>
-
-          <button
-            class="btn btn-continuar"
-            style="width:100%;margin-top:10px;"
-            onclick="mostrarPerfilesCercanos()"
-          >
-            Buscar cerca
-          </button>
-
-          <button
-            class="btn btn-continuar"
-            style="width:100%;margin-top:10px;"
-            onclick="abrirRegistro()"
-          >
-            Registrarse
-          </button>
-
-          <button
-            class="btn btn-atras"
-            style="width:100%;margin-top:10px;"
-            onclick="volverInicio()"
-          >
-            ← Volver
-          </button>
-
-        </div>
-      `;
-    }
-
-    lista.scrollIntoView({
-      behavior:"smooth"
-    });
-
-  }catch(error){
-
-    alert(
-      "Error en búsqueda: "+error.message
-    );
-  }
-}
-
-async function mostrarPerfilesCercanos(){
-  if(!paisSeleccionado||!estadoSeleccionado){
-    alert("Primero selecciona país y estado.");
-    return;
-  }
-
-  const lista=document.getElementById("lista-perfiles");
-lista.style.display="block";
- lista.innerHTML=`<div class="estado-box"><h3>Buscando perfiles cercanos...</h3></div>`;
-
-  try{
-    const snap=await db.collection("usuarios").where("aprobado","==",true).get();
-
-    lista.innerHTML=`
-      <div class="estado-box">
-        <h3>Perfiles cercanos</h3>
-        <p>Mostrando perfiles disponibles en ${textoSeguro(estadoSeleccionado)}, ${textoSeguro(paisSeleccionado)}.</p>
-      </div>
-    `;
-
-    let encontrados=0;
-
-    for(const doc of snap.docs){
-      const u=doc.data();
-
-      let vencido=false;
-
-      if(u.vencido===true)vencido=true;
-
-   if(u.fechaVencimiento){
-  const fechaV=u.fechaVencimiento.toDate ? u.fechaVencimiento.toDate() : new Date(u.fechaVencimiento);
-  if(fechaV<new Date())vencido=true;
-}
-
-if(vencido)continue;
-if(u.activo!==true)continue;
-
-const cerca =
-  normalizarTexto(u.pais)===normalizarTexto(paisSeleccionado) &&
-  normalizarTexto(u.estado)===normalizarTexto(estadoSeleccionado) &&
-  normalizarTexto(u.ciudad)!==normalizarTexto(ciudadSeleccionada);
-
-      if(cerca){
-        encontrados++;
-        lista.innerHTML+=await plantillaCardPerfil(doc.id,u);
-      }
-    }
-
-    if(encontrados===0){
-      lista.innerHTML+=`
-        <div class="estado-box">
-          <h3>No hay perfiles cercanos todavía.</h3>
-          <p>Intenta con otra ciudad o estado.</p>
-          <button class="btn btn-continuar" style="width:100%;margin-top:10px;" onclick="abrirRegistro()">Registrarse</button>
-        </div>
-      `;
-    }
-
-    lista.innerHTML+=`
-      <button class="btn btn-atras" style="width:100%;margin:20px 0;" onclick="volverInicio()">← Volver</button>
-    `;
-  }catch(error){
-    alert("Error buscando perfiles cercanos: "+error.message);
-  }
+  window.location.href = url;
 }
 
 function volverInicio(){
-  categoriaSeleccionada="";
-  paisSeleccionado="";
-  estadoSeleccionado="";
-  ciudadSeleccionada="";
-
-  limpiarTextoSeleccionado("textoCategoria");
-  limpiarTextoSeleccionado("textoPais");
-  limpiarTextoSeleccionado("textoEstado");
-  limpiarTextoSeleccionado("textoCiudad");
-
-  const lista=document.getElementById("lista-perfiles");
-  lista.innerHTML="";
-  lista.style.display="none";
-
-  window.scrollTo({top:0,behavior:"smooth"});
+  window.location.href = "index.html";
 }
 
 function detectarUbicacion(){
