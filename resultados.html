@@ -12,8 +12,10 @@
 :root{
   --rosa:#ec2d7a;
   --rosa2:#ff4f9a;
+  --rosa3:#d83b78;
   --fondo:#fff1f7;
   --texto:#252432;
+  --gris:#6b6170;
 }
 
 *{
@@ -28,92 +30,112 @@ html,body{
 body{
   font-family:Arial,sans-serif;
   background:
-    radial-gradient(circle at left 18%, rgba(236,45,122,.13), transparent 30%),
-    radial-gradient(circle at right 40%, rgba(236,45,122,.12), transparent 30%),
-    #f7edf2;
+    radial-gradient(circle at left 18%, rgba(236,45,122,.17), transparent 28%),
+    radial-gradient(circle at right 38%, rgba(236,45,122,.12), transparent 30%),
+    linear-gradient(180deg,#fff6fb 0%,#f7edf2 55%,#fff7fb 100%);
   color:var(--texto);
 }
 
 .pagina{
   max-width:930px;
   margin:0 auto;
-  padding:14px 12px 38px;
+  padding:14px 12px 40px;
 }
 
-/* ARRIBA: DESTACADO ESTADO - PUBLICIDAD GRANDE - DESTACADO ESTADO */
+/* BLOQUE SUPERIOR */
 .top-banners{
   display:grid;
-  grid-template-columns:.85fr 1.8fr .85fr;
-  gap:10px;
+  grid-template-columns:.82fr 1.9fr .82fr;
+  gap:8px;
   margin-bottom:20px;
   align-items:stretch;
 }
 
 .banner-publicidad,
 .banner-destacado{
-  min-height:98px;
+  min-height:94px;
   border-radius:24px;
   cursor:pointer;
   overflow:hidden;
   position:relative;
+  user-select:none;
 }
 
 .banner-publicidad{
-  background:linear-gradient(90deg,#fff,#ffe1ef,#fff);
-  border:3px solid #ec2d7a;
+  background:linear-gradient(90deg,#ffffff,#ffe0ef,#ffffff);
+  border:3px solid var(--rosa);
   display:flex;
   align-items:center;
   justify-content:space-between;
-  gap:10px;
-  padding:12px 14px;
+  gap:8px;
+  padding:10px 12px;
   box-shadow:
-    0 8px 24px rgba(236,45,122,.20),
-    inset 0 0 20px rgba(255,255,255,.65);
+    0 12px 30px rgba(236,45,122,.24),
+    0 0 0 5px rgba(255,255,255,.68),
+    inset 0 0 22px rgba(255,255,255,.75);
+}
+
+.banner-publicidad::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(120deg,transparent,rgba(255,255,255,.60),transparent);
+  transform:translateX(-120%);
+  animation:brilloCariHub 4s infinite;
+  pointer-events:none;
+}
+
+@keyframes brilloCariHub{
+  0%{transform:translateX(-120%);}
+  45%{transform:translateX(120%);}
+  100%{transform:translateX(120%);}
 }
 
 .banner-publicidad .icono{
-  width:54px;
-  height:54px;
-  min-width:54px;
-  border-radius:17px;
+  width:42px;
+  height:42px;
+  min-width:42px;
+  border-radius:14px;
   background:linear-gradient(180deg,#ff5ca3,#ec2d7a);
   color:white;
   display:flex;
   align-items:center;
   justify-content:center;
-  font-size:30px;
-  box-shadow:0 4px 12px rgba(236,45,122,.28);
+  font-size:23px;
+  box-shadow:0 5px 14px rgba(236,45,122,.30);
+  z-index:1;
 }
 
 .banner-publicidad .texto{
   flex:1;
   text-align:center;
+  z-index:1;
 }
 
 .banner-publicidad .texto h3{
   margin:0;
   color:#d53378;
-  font-size:19px;
+  font-size:16px;
   font-weight:900;
   line-height:1;
-  letter-spacing:.8px;
+  letter-spacing:.6px;
 }
 
 .banner-publicidad .texto p{
-  margin:6px 0 8px;
+  margin:5px 0 7px;
   color:#5c4b55;
-  font-size:12px;
+  font-size:9px;
   font-weight:700;
   line-height:1.15;
 }
 
 .banner-publicidad .texto span{
   display:inline-block;
-  background:#ec2d7a;
+  background:var(--rosa);
   color:white;
-  font-size:9px;
+  font-size:8px;
   font-weight:900;
-  padding:6px 10px;
+  padding:5px 8px;
   border-radius:999px;
 }
 
@@ -126,38 +148,52 @@ body{
   align-items:center;
   justify-content:center;
   text-align:center;
-  padding:10px 8px;
+  padding:8px;
   box-shadow:
-    0 8px 22px rgba(236,45,122,.22),
-    inset 0 0 14px rgba(255,255,255,.18);
+    0 10px 24px rgba(236,45,122,.26),
+    inset 0 0 15px rgba(255,255,255,.20);
+}
+
+.banner-destacado::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:radial-gradient(circle at top,rgba(255,255,255,.28),transparent 45%);
+  pointer-events:none;
 }
 
 .banner-destacado .estrella{
-  font-size:25px;
-  margin-bottom:5px;
+  font-size:20px;
+  margin-bottom:4px;
+  z-index:1;
 }
 
 .banner-destacado h3{
   margin:0;
-  font-size:15px;
+  font-size:11px;
   font-weight:900;
-  letter-spacing:1px;
+  letter-spacing:.5px;
+  z-index:1;
 }
 
 .banner-destacado p{
-  margin:5px 0 0;
-  font-size:9px;
+  margin:4px 0 0;
+  font-size:7px;
   font-weight:700;
   line-height:1.15;
+  z-index:1;
 }
 
 /* CAJAS */
 .estado-box{
   background:white;
   padding:18px;
-  border-radius:22px;
+  border-radius:24px;
   margin-bottom:18px;
-  box-shadow:0 6px 20px rgba(0,0,0,.10);
+  box-shadow:
+    0 8px 24px rgba(0,0,0,.10),
+    -8px 0 22px rgba(236,45,122,.06),
+    8px 0 22px rgba(236,45,122,.06);
 }
 
 .estado-box h2,
@@ -166,16 +202,23 @@ body{
   margin:0 0 8px;
 }
 
+.estado-box p{
+  margin:8px 0 0;
+  color:var(--gris);
+  font-size:16px;
+  line-height:1.35;
+}
+
 .card{
   position:relative;
   background:white;
-  border-radius:30px;
+  border-radius:32px;
   padding:18px;
-  margin-bottom:26px;
+  margin-bottom:28px;
   box-shadow:
-    0 12px 34px rgba(0,0,0,.14),
-    -10px 0 24px rgba(236,45,122,.07),
-    10px 0 24px rgba(236,45,122,.07);
+    0 16px 38px rgba(0,0,0,.15),
+    -12px 0 28px rgba(236,45,122,.08),
+    12px 0 28px rgba(236,45,122,.08);
   overflow:hidden;
 }
 
@@ -183,27 +226,39 @@ body{
   content:"";
   position:absolute;
   left:0;
-  top:22px;
-  bottom:22px;
+  top:24px;
+  bottom:24px;
   width:5px;
   background:linear-gradient(180deg,#ff7bb7,#ec2d7a);
   border-radius:999px;
-  opacity:.55;
+  opacity:.62;
+}
+
+.card::after{
+  content:"";
+  position:absolute;
+  right:-45px;
+  top:-45px;
+  width:120px;
+  height:120px;
+  background:radial-gradient(circle,rgba(236,45,122,.10),transparent 65%);
+  pointer-events:none;
 }
 
 .card img{
   width:100%;
   height:330px;
   object-fit:cover;
-  border-radius:22px;
+  border-radius:24px;
   display:block;
-  box-shadow:0 6px 18px rgba(0,0,0,.12);
+  box-shadow:0 8px 24px rgba(0,0,0,.16);
 }
 
 .card h3{
-  color:#d83b78;
+  color:var(--rosa3);
   font-size:34px;
   margin:18px 0 12px;
+  line-height:1;
 }
 
 .card p{
@@ -219,23 +274,23 @@ body{
 .btn-ver{
   display:block;
   width:100%;
-  background:#d94481;
+  background:linear-gradient(90deg,#d94481,#ec2d7a);
   color:white;
   text-align:center;
   padding:18px;
-  border-radius:20px;
+  border-radius:22px;
   text-decoration:none;
   font-size:21px;
   font-weight:900;
   margin-top:20px;
-  box-shadow:0 6px 18px rgba(217,68,129,.24);
+  box-shadow:0 8px 20px rgba(217,68,129,.27);
 }
 
 .acciones-finales{
   background:white;
   border-radius:24px;
   padding:16px;
-  box-shadow:0 8px 24px rgba(0,0,0,.12);
+  box-shadow:0 10px 26px rgba(0,0,0,.12);
   margin-top:28px;
   display:flex;
   gap:12px;
@@ -261,7 +316,7 @@ body{
   color:white;
 }
 
-/* MODAL PUBLICIDAD / DESTACADO */
+/* MODAL */
 .modal-anuncio{
   position:fixed;
   inset:0;
@@ -281,7 +336,7 @@ body{
   width:100%;
   max-width:460px;
   background:white;
-  border-radius:26px;
+  border-radius:28px;
   overflow:hidden;
   box-shadow:0 18px 45px rgba(0,0,0,.35);
 }
@@ -345,19 +400,19 @@ body{
 
 @media(max-width:600px){
   .pagina{
-    padding:10px 10px 28px;
+    padding:10px 10px 30px;
   }
 
   .top-banners{
-    grid-template-columns:.8fr 1.9fr .8fr;
+    grid-template-columns:.82fr 1.9fr .82fr;
     gap:6px;
-    margin-bottom:14px;
+    margin-bottom:16px;
   }
 
   .banner-publicidad,
   .banner-destacado{
     min-height:84px;
-    border-radius:18px;
+    border-radius:19px;
   }
 
   .banner-publicidad{
@@ -406,12 +461,12 @@ body{
 
   .card{
     padding:15px;
-    border-radius:26px;
+    border-radius:28px;
   }
 
   .card img{
     height:300px;
-    border-radius:20px;
+    border-radius:22px;
   }
 
   .card h3{
@@ -425,7 +480,7 @@ body{
   .btn-ver{
     font-size:19px;
     padding:16px;
-    border-radius:18px;
+    border-radius:19px;
   }
 
   .acciones-finales{
@@ -439,12 +494,12 @@ body{
 
 <div class="pagina">
 
-  <div class="top-banners">
+  <div id="bannersSuperioresCariHub" class="top-banners">
 
     <div class="banner-destacado" onclick="abrirInfoAnuncio('destacado_estado_1')">
       <div class="estrella">⭐</div>
       <h3>DESTACADO</h3>
-      <p>Destacado del estado.</p>
+      <p>Destacado del estado</p>
     </div>
 
     <div class="banner-publicidad" onclick="abrirInfoAnuncio('publicidad')">
@@ -460,7 +515,7 @@ body{
     <div class="banner-destacado" onclick="abrirInfoAnuncio('destacado_estado_2')">
       <div class="estrella">🔥</div>
       <h3>DESTACADO</h3>
-      <p>Más visibilidad estatal.</p>
+      <p>Más visibilidad estatal</p>
     </div>
 
   </div>
@@ -468,6 +523,7 @@ body{
   <div id="lista">
     <div class="estado-box">
       <h2>Buscando perfiles...</h2>
+      <p>Estamos revisando perfiles disponibles.</p>
     </div>
   </div>
 
@@ -507,7 +563,7 @@ function obtenerParametro(nombre){
 }
 
 function normalizarTexto(t){
-  return String(t||"")
+  return String(t || "")
     .trim()
     .toLowerCase()
     .normalize("NFD")
@@ -515,13 +571,18 @@ function normalizarTexto(t){
 }
 
 function textoSeguro(t){
-  return String(t||"")
+  return String(t || "")
     .replace(/&/g,"&amp;")
     .replace(/</g,"&lt;")
     .replace(/>/g,"&gt;")
     .replace(/"/g,"&quot;")
     .replace(/'/g,"&#039;");
 }
+
+const categoria = obtenerParametro("categoria");
+const pais = obtenerParametro("pais");
+const estado = obtenerParametro("estado");
+const ciudad = obtenerParametro("ciudad");
 
 function abrirInfoAnuncio(tipo){
   const modal = document.getElementById("modalAnuncio");
@@ -570,11 +631,6 @@ function cerrarInfoAnuncio(){
   document.getElementById("modalAnuncio").classList.remove("activo");
 }
 
-const categoria = obtenerParametro("categoria");
-const pais = obtenerParametro("pais");
-const estado = obtenerParametro("estado");
-const ciudad = obtenerParametro("ciudad");
-
 function botonesFinales(){
   return `
     <div class="acciones-finales">
@@ -585,7 +641,6 @@ function botonesFinales(){
 }
 
 async function cargarResultados(){
-
   const lista = document.getElementById("lista");
 
   lista.innerHTML = `
@@ -647,7 +702,7 @@ async function cargarResultados(){
           <p><b>Ciudad:</b> ${textoSeguro(u.ciudad || "")}</p>
           <p><b>Precio:</b> ${textoSeguro(u.precio || "")}</p>
 
-          <a class="btn-ver" href="perfil.html?id=${encodeURIComponent(doc.id)}">
+          <a class="btn-ver" href="perfil.html?id=${encodeURIComponent(doc.id)}&v=${Date.now()}">
             Ver perfil
           </a>
 
