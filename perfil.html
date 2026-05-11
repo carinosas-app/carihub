@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Perfil - CariHub</title>
+
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+
+<style>
+:root{
+  --rosa:#ec2d7a;
+  --rosa2:#ff4f9a;
+  --rosa-suave:#fff1f7;
+  --texto:#252432;
+}
+
+*{
+  box-sizing:border-box;
+}
+
+html,body{
+  margin:0;
+  padding:0;
+  min-height:100%;
+}
+
+body{
+  font-family:Arial,sans-serif;
+  background:#fff1f7;
+  color:var(--texto);
+  overflow-x:hidden;
+}
+
+.header{
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:72px;
+  background:linear-gradient(90deg,var(--rosa),var(--rosa2));
+  color:white;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:24px;
+  font-weight:900;
+  z-index:9999;
+  box-shadow:0 4px 14px rgba(0,0,0,.18);
+}
+
+.nav{
+  position:fixed;
+  top:82px;
+  left:50%;
+  transform:translateX(-50%);
+  width:92%;
+  max-width:780px;
+  z-index:9998;
+  display:flex;
+  gap:10px;
+}
+
+.nav button{
+  flex:1;
+  border:none;
+  padding:15px;
+  border-radius:14px;
+  font-size:16px;
+  font-weight:900;
+  cursor:pointer;
+}
+
+.btn-atras{
+  background:#777;
+  color:white;
+}
+
+.btn-registro{
+  background:var(--rosa);
+  color:white;
+}
+
+/* BANNER FIJO ARRIBA */
+.banner-top{
+  position:fixed;
+  top:145px;
+  left:50%;
+  transform:translateX(-50%);
+  width:92%;
+  max-width:780px;
+  height:68px;
+  background:linear-gradient(90deg,#fff,#ffd6e8);
+  border:2px solid #ec2d7a;
+  border-radius:18px;
+  box-shadow:0 4px 14px rgba(0,0,0,.18);
+  z-index:9997;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#ec2d7a;
+  font-size:18px;
+  font-weight:900;
+  text-align:center;
+}
+
+/* BANNERS LATERALES FIJOS */
+.banner-left,
+.banner-right{
+  position:fixed;
+  top:230px;
+  width:44px;
+  z-index:9996;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+
+.banner-left{
+  left:4px;
+}
+
+.banner-right{
+  right:4px;
+}
+
+.banner-ad{
+  width:44px;
+  height:140px;
+  background:linear-gradient(180deg,#ffffff,#ffd6e8);
+  border:2px solid #ec2d7a;
+  border-radius:14px;
+  box-shadow:0 4px 12px rgba(0,0,0,.22);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#ec2d7a;
+  font-weight:900;
+  font-size:10px;
+  writing-mode:vertical-rl;
+  text-orientation:mixed;
+  text-align:center;
+}
+
+/* SOLO ESTA PARTE HACE SCROLL */
+.contenido{
+  max-width:780px;
+  margin:0 auto;
+  padding:325px 58px 35px;
+}
+
+.card{
+  background:white;
+  border-radius:24px;
+  padding:16px;
+  box-shadow:0 4px 18px rgba(0,0,0,.16);
+  margin-bottom:20px;
+}
+
+.foto-principal{
+  width:100%;
+  max-height:520px;
+  object-fit:cover;
+  border-radius:20px;
+  display:block;
+}
+
+h1{
+  color:var(--rosa);
+  font-size:36px;
+  margin:18px 0 12px;
+}
+
+.info p{
+  font-size:19px;
+  line-height:1.45;
+  margin:12px 0;
+}
+
+.info b{
+  color:#111;
+}
+
+.whatsapp{
+  display:block;
+  text-align:center;
+  background:#25D366;
+  color:white;
+  padding:16px;
+  border-radius:14px;
+  text-decoration:none;
+  font-size:19px;
+  font-weight:900;
+  margin-top:18px;
+}
+
+.galeria{
+  margin-top:22px;
+}
+
+.galeria h2{
+  color:var(--rosa);
+  font-size:28px;
+  margin:0 0 16px;
+}
+
+.galeria img{
+  width:100%;
+  border-radius:18px;
+  margin-bottom:16px;
+  display:block;
+}
+
+.estado-box{
+  background:white;
+  padding:18px;
+  border-radius:18px;
+  box-shadow:0 3px 12px rgba(0,0,0,.14);
+}
+
+@media(max-width:600px){
+  .header{
+    height:64px;
+    font-size:21px;
+  }
+
+  .nav{
+    top:74px;
+    width:90%;
+  }
+
+  .nav button{
+    padding:14px;
+    font-size:15px;
+  }
+
+  .banner-top{
+    top:134px;
+    height:58px;
+    font-size:14px;
+    border-radius:14px;
+    width:90%;
+  }
+
+  .banner-left,
+  .banner-right{
+    top:205px;
+    width:38px;
+  }
+
+  .banner-left{
+    left:3px;
+  }
+
+  .banner-right{
+    right:3px;
+  }
+
+  .banner-ad{
+    width:38px;
+    height:125px;
+    font-size:9px;
+    border-radius:12px;
+  }
+
+  .contenido{
+    padding:285px 48px 35px;
+  }
+
+  h1{
+    font-size:32px;
+  }
+
+  .info p{
+    font-size:18px;
+  }
+
+  .foto-principal{
+    max-height:480px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+Perfil CariHub
+</div>
+
+<div class="nav">
+  <button class="btn-atras" onclick="history.back()">← Atrás</button>
+  <button class="btn-registro" onclick="window.location.href='index.html'">Registrarse</button>
+</div>
+
+<div class="banner-top">
+  Anúnciate aquí
+</div>
+
+<div class="banner-left">
+  <div class="banner-ad">Anuncio</div>
+  <div class="banner-ad">Destacado</div>
+</div>
+
+<div class="banner-right">
+  <div class="banner-ad">Promoción</div>
+  <div class="banner-ad">Publicidad</div>
+</div>
+
+<div class="contenido" id="contenido">
+  <div class="estado-box">
+    <h2>Cargando perfil...</h2>
+  </div>
+</div>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyBl4LNLtPqbyIxfTfONAqxi4rOG4XF_vkI",
+  authDomain: "carinosas-app.firebaseapp.com",
+  projectId: "carinosas-app",
+  storageBucket: "carinosas-app.firebasestorage.app",
+  messagingSenderId: "267078845023",
+  appId: "1:267078845023:web:a82e626d9f0ca28858d1ea"
+};
+
+firebase.initializeApp(firebaseConfig);
+
+const db = firebase.firestore();
+
+function obtenerParametro(nombre){
+  const url = new URL(window.location.href);
+  return url.searchParams.get(nombre) || "";
+}
+
+function textoSeguro(t){
+  return String(t||"")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
+}
+
+function limpiarTelefono(t){
+  return String(t||"").replace(/\D/g,"");
+}
+
+async function cargarPerfil(){
+  const id = obtenerParametro("id");
+  const contenido = document.getElementById("contenido");
+
+  if(!id){
+    contenido.innerHTML = `
+      <div class="estado-box">
+        <h2>Perfil no encontrado</h2>
+        <p>No llegó el ID del perfil.</p>
+      </div>
+    `;
+    return;
+  }
+
+  try{
+    const doc = await db.collection("usuarios").doc(id).get();
+
+    if(!doc.exists){
+      contenido.innerHTML = `
+        <div class="estado-box">
+          <h2>Perfil no encontrado</h2>
+          <p>Este perfil no existe o fue eliminado.</p>
+        </div>
+      `;
+      return;
+    }
+
+    const u = doc.data();
+
+    let vencido = false;
+
+    if(u.vencido === true){
+      vencido = true;
+    }
+
+    if(u.fechaVencimiento){
+      const fechaV = u.fechaVencimiento.toDate
+        ? u.fechaVencimiento.toDate()
+        : new Date(u.fechaVencimiento);
+
+      if(fechaV < new Date()){
+        vencido = true;
+      }
+    }
+
+    if(u.aprobado !== true || u.activo !== true || vencido){
+      contenido.innerHTML = `
+        <div class="estado-box">
+          <h2>Perfil no disponible</h2>
+          <p>Este perfil no está activo públicamente.</p>
+        </div>
+      `;
+      return;
+    }
+
+    const tel = limpiarTelefono(u.telefono || "");
+    const msg = encodeURIComponent("Hola, vi tu perfil en CariHub y me gustaría recibir más información.");
+
+    contenido.innerHTML = `
+      <div class="card">
+
+        ${u.fotoURL ? `
+          <img class="foto-principal" src="${textoSeguro(u.fotoURL)}" alt="Foto pública">
+        ` : ""}
+
+        <h1>${textoSeguro(u.nombre || "Perfil")}</h1>
+
+        <div class="info">
+          <p><b>Categoría:</b> ${textoSeguro(u.categoria || "")}</p>
+          <p><b>País:</b> ${textoSeguro(u.pais || "")}</p>
+          <p><b>Estado:</b> ${textoSeguro(u.estado || "")}</p>
+          <p><b>Ciudad:</b> ${textoSeguro(u.ciudad || "")}</p>
+          <p><b>Descripción:</b> ${textoSeguro(u.descripcion || "")}</p>
+          <p><b>Precio:</b> ${textoSeguro(u.precio || "")}</p>
+          <p><b>Modalidad:</b> ${textoSeguro(u.modalidad || "")}</p>
+          ${u.horario ? `<p><b>Horario:</b> ${textoSeguro(u.horario)}</p>` : ""}
+          ${u.zona ? `<p><b>Zona:</b> ${textoSeguro(u.zona)}</p>` : ""}
+          ${u.servicios ? `<p><b>Servicios:</b> ${textoSeguro(u.servicios)}</p>` : ""}
+        </div>
+
+        ${tel ? `
+          <a class="whatsapp" href="https://wa.me/${tel}?text=${msg}" target="_blank">
+            Contactar por WhatsApp
+          </a>
+        ` : ""}
+
+        ${u.fotosExtraURL && u.fotosExtraURL.length > 0 ? `
+          <div class="galeria">
+            <h2>Fotos públicas</h2>
+            ${u.fotosExtraURL.map(f=>`
+              <img src="${textoSeguro(f)}" alt="Foto pública extra">
+            `).join("")}
+          </div>
+        ` : ""}
+
+      </div>
+    `;
+
+  }catch(error){
+    contenido.innerHTML = `
+      <div class="estado-box">
+        <h2>Error</h2>
+        <p>${textoSeguro(error.message)}</p>
+      </div>
+    `;
+  }
+}
+
+cargarPerfil();
+</script>
+
+</body>
+</html>
