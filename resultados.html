@@ -9,57 +9,132 @@
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
 
 <style>
-body{
-  margin:0;
-  font-family:Arial,sans-serif;
-  background:#fff1f7;
+:root{
+  --rosa:#ec2d7a;
+  --rosa2:#ff4f9a;
+  --rosa-suave:#fff1f7;
+  --texto:#252432;
 }
 
-.header{
-  background:#e91e63;
+*{
+  box-sizing:border-box;
+}
+
+html,body{
+  margin:0;
+  padding:0;
+  font-family:Arial,sans-serif;
+  background:#fff1f7;
+  color:var(--texto);
+  overflow:hidden;
+}
+
+/* BANNER SUPERIOR FIJO */
+.banner-top{
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:72px;
+  background:linear-gradient(90deg,#ec2d7a,#ff4f9a);
   color:white;
-  padding:18px;
+  z-index:9999;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:22px;
+  font-weight:900;
   text-align:center;
-  font-size:24px;
-  font-weight:bold;
+  box-shadow:0 4px 14px rgba(0,0,0,.18);
+}
+
+/* BOTONES FIJOS */
+.nav-botones{
+  position:fixed;
+  top:82px;
+  left:50%;
+  transform:translateX(-50%);
+  width:calc(100% - 120px);
+  max-width:760px;
+  z-index:9998;
+  display:flex;
+  gap:10px;
+}
+
+.btn-nav{
+  flex:1;
+  border:none;
+  border-radius:14px;
+  padding:14px;
+  font-size:16px;
+  font-weight:900;
+  cursor:pointer;
+  box-shadow:0 4px 12px rgba(0,0,0,.14);
+}
+
+.btn-atras{
+  background:#777;
+  color:white;
+}
+
+.btn-registro{
+  background:var(--rosa);
+  color:white;
+}
+
+/* BANNERS LATERALES FIJOS */
+.banner-left,
+.banner-right{
+  position:fixed;
+  top:150px;
+  width:52px;
+  z-index:9997;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+
+.banner-left{
+  left:4px;
+}
+
+.banner-right{
+  right:4px;
+}
+
+.banner-ad{
+  width:52px;
+  height:155px;
+  background:linear-gradient(180deg,#fff,#ffd6e8);
+  border:1px solid #ffc0d8;
+  border-radius:14px;
+  box-shadow:0 4px 12px rgba(0,0,0,.14);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:var(--rosa);
+  font-weight:900;
+  font-size:12px;
+  writing-mode:vertical-rl;
+  text-orientation:mixed;
+  text-align:center;
+}
+
+/* ÁREA QUE SÍ HACE SCROLL */
+.resultados-wrap{
+  position:fixed;
+  top:140px;
+  left:64px;
+  right:64px;
+  bottom:0;
+  overflow-y:auto;
+  padding:16px 0 40px;
 }
 
 .resultados{
   max-width:900px;
-  margin:auto;
-  padding:15px;
-}
-
-.card{
-  background:white;
-  border-radius:18px;
-  padding:15px;
-  margin-bottom:18px;
-  box-shadow:0 3px 12px rgba(0,0,0,.18);
-}
-
-.card img{
-  width:100%;
-  border-radius:15px;
-  max-height:420px;
-  object-fit:cover;
-}
-
-.card h3{
-  color:#e91e63;
-  font-size:28px;
-}
-
-.whatsapp{
-  display:block;
-  text-align:center;
-  background:#25D366;
-  color:white;
-  padding:14px;
-  border-radius:12px;
-  text-decoration:none;
-  font-weight:bold;
-  margin-top:12px;
+  margin:0 auto;
+  padding:0 8px;
 }
 
 .estado-box{
@@ -67,20 +142,143 @@ body{
   padding:18px;
   border-radius:18px;
   margin-bottom:18px;
+  box-shadow:0 3px 12px rgba(0,0,0,.14);
+}
+
+.estado-box h2{
+  margin:0 0 8px;
+  color:var(--rosa);
+}
+
+.card{
+  background:white;
+  border-radius:22px;
+  padding:14px;
+  margin-bottom:20px;
+  box-shadow:0 4px 15px rgba(0,0,0,.17);
+  overflow:hidden;
+}
+
+.card img{
+  width:100%;
+  height:260px;
+  border-radius:18px;
+  object-fit:cover;
+  display:block;
+  margin-bottom:14px;
+}
+
+.card h3{
+  color:var(--rosa);
+  font-size:28px;
+  margin:8px 0 16px;
+}
+
+.card p{
+  font-size:19px;
+  margin:12px 0;
+  line-height:1.35;
+}
+
+.btn-ver{
+  width:100%;
+  border:none;
+  background:var(--rosa);
+  color:white;
+  padding:16px;
+  border-radius:14px;
+  font-size:18px;
+  font-weight:900;
+  margin-top:14px;
+  cursor:pointer;
+}
+
+.btn-ver:hover{
+  background:#d81b60;
+}
+
+@media(max-width:600px){
+  .banner-top{
+    height:64px;
+    font-size:20px;
+  }
+
+  .nav-botones{
+    top:74px;
+    width:calc(100% - 96px);
+  }
+
+  .btn-nav{
+    padding:12px;
+    font-size:14px;
+  }
+
+  .banner-left,
+  .banner-right{
+    top:132px;
+    width:40px;
+  }
+
+  .banner-ad{
+    width:40px;
+    height:132px;
+    font-size:10px;
+    border-radius:12px;
+  }
+
+  .resultados-wrap{
+    top:124px;
+    left:48px;
+    right:48px;
+    padding-top:12px;
+  }
+
+  .card{
+    padding:12px;
+    border-radius:20px;
+  }
+
+  .card img{
+    height:230px;
+  }
+
+  .card h3{
+    font-size:25px;
+  }
+
+  .card p{
+    font-size:17px;
+  }
 }
 </style>
 </head>
 
 <body>
 
-<div class="header">
-Resultados CariHub
+<div class="banner-top">
+  Resultados CariHub
 </div>
 
-<div class="resultados" id="lista"></div>
+<div class="nav-botones">
+  <button class="btn-nav btn-atras" onclick="volverInicio()">← Atrás</button>
+  <button class="btn-nav btn-registro" onclick="irRegistro()">Registrarse</button>
+</div>
+
+<div class="banner-left">
+  <div class="banner-ad">ANUNCIO</div>
+  <div class="banner-ad">PROMO</div>
+</div>
+
+<div class="banner-right">
+  <div class="banner-ad">DESTACADO</div>
+  <div class="banner-ad">PUBLICIDAD</div>
+</div>
+
+<div class="resultados-wrap">
+  <div class="resultados" id="lista"></div>
+</div>
 
 <script>
-
 const firebaseConfig = {
   apiKey: "AIzaSyBl4LNLtPqbyIxfTfONAqxi4rOG4XF_vkI",
   authDomain: "carinosas-app.firebaseapp.com",
@@ -107,8 +305,21 @@ function normalizarTexto(t){
     .replace(/[\u0300-\u036f]/g,"");
 }
 
-function limpiarTelefono(t){
-  return String(t||"").replace(/\D/g,"");
+function textoSeguro(t){
+  return String(t||"")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
+}
+
+function volverInicio(){
+  window.location.href = "index.html";
+}
+
+function irRegistro(){
+  window.location.href = "index.html";
 }
 
 const categoria = obtenerParametro("categoria");
@@ -118,93 +329,105 @@ const ciudad = obtenerParametro("ciudad");
 
 async function cargarResultados(){
 
-  const lista=document.getElementById("lista");
+  const lista = document.getElementById("lista");
 
-  lista.innerHTML=`
+  lista.innerHTML = `
     <div class="estado-box">
       <h2>Buscando perfiles...</h2>
+      <p>Espera un momento.</p>
     </div>
   `;
 
   try{
 
-    const snap=await db.collection("usuarios")
+    const snap = await db.collection("usuarios")
       .where("aprobado","==",true)
       .get();
 
-    lista.innerHTML="";
+    lista.innerHTML = "";
 
-    let encontrados=0;
+    let encontrados = 0;
 
     for(const doc of snap.docs){
 
-      const u=doc.data();
+      const u = doc.data();
 
-      if(u.activo!==true) continue;
+      let vencido = false;
+
+      if(u.vencido === true){
+        vencido = true;
+      }
+
+      if(u.fechaVencimiento){
+        const fechaV = u.fechaVencimiento.toDate
+          ? u.fechaVencimiento.toDate()
+          : new Date(u.fechaVencimiento);
+
+        if(fechaV < new Date()){
+          vencido = true;
+        }
+      }
+
+      if(vencido) continue;
+      if(u.activo !== true) continue;
 
       const exacto =
-        normalizarTexto(u.categoria)===normalizarTexto(categoria) &&
-        normalizarTexto(u.pais)===normalizarTexto(pais) &&
-        normalizarTexto(u.estado)===normalizarTexto(estado) &&
-        normalizarTexto(u.ciudad)===normalizarTexto(ciudad);
+        normalizarTexto(u.categoria) === normalizarTexto(categoria) &&
+        normalizarTexto(u.pais) === normalizarTexto(pais) &&
+        normalizarTexto(u.estado) === normalizarTexto(estado) &&
+        normalizarTexto(u.ciudad) === normalizarTexto(ciudad);
 
       if(exacto){
 
         encontrados++;
 
-        const tel=limpiarTelefono(u.telefono||"");
-
         lista.innerHTML += `
           <div class="card">
 
             ${u.fotoURL ? `
-              <img src="${u.fotoURL}">
+              <img src="${textoSeguro(u.fotoURL)}" alt="Foto pública">
             ` : ""}
 
-            <h3>${u.nombre||""}</h3>
+            <h3>${textoSeguro(u.nombre || "Perfil")}</h3>
 
-            <p><b>Categoría:</b> ${u.categoria||""}</p>
-            <p><b>País:</b> ${u.pais||""}</p>
-            <p><b>Estado:</b> ${u.estado||""}</p>
-            <p><b>Ciudad:</b> ${u.ciudad||""}</p>
-            <p><b>Descripción:</b> ${u.descripcion||""}</p>
-            <p><b>Precio:</b> ${u.precio||""}</p>
+            <p><b>Categoría:</b> ${textoSeguro(u.categoria || "")}</p>
+            <p><b>Ciudad:</b> ${textoSeguro(u.ciudad || "")}</p>
+            <p><b>Precio:</b> ${textoSeguro(u.precio || "")}</p>
 
-            ${tel ? `
-              <a class="whatsapp"
-              href="https://wa.me/${tel}"
-              target="_blank">
-              Contactar por WhatsApp
-              </a>
-            ` : ""}
+            <button class="btn-ver" onclick="verPerfil('${doc.id}')">
+              Ver perfil
+            </button>
 
           </div>
         `;
       }
     }
 
-    if(encontrados===0){
-      lista.innerHTML=`
+    if(encontrados === 0){
+      lista.innerHTML = `
         <div class="estado-box">
           <h2>No encontramos perfiles</h2>
-          <p>Intenta otra búsqueda.</p>
+          <p>Intenta con otra ciudad, categoría o estado.</p>
         </div>
       `;
     }
 
   }catch(error){
 
-    document.getElementById("lista").innerHTML=`
+    lista.innerHTML = `
       <div class="estado-box">
         <h2>Error</h2>
-        <p>${error.message}</p>
+        <p>${textoSeguro(error.message)}</p>
       </div>
     `;
   }
 }
 
-cargarResultados();
+function verPerfil(id){
+  window.location.href = "perfil.html?id=" + encodeURIComponent(id);
+}
 
+cargarResultados();
 </script>
 
 </body>
