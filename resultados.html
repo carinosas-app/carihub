@@ -27,50 +27,55 @@ html,body{
 
 body{
   font-family:Arial,sans-serif;
-  background:#f7edf2;
+  background:
+    radial-gradient(circle at left 18%, rgba(236,45,122,.13), transparent 30%),
+    radial-gradient(circle at right 40%, rgba(236,45,122,.12), transparent 30%),
+    #f7edf2;
   color:var(--texto);
 }
 
-.resultados{
-  max-width:900px;
+.pagina{
+  max-width:930px;
   margin:0 auto;
-  padding:14px 12px 35px;
+  padding:14px 12px 38px;
 }
 
-/* ORDEN: DESTACADO - PUBLICIDAD GRANDE - DESTACADO */
+/* ARRIBA: DESTACADO ESTADO - PUBLICIDAD GRANDE - DESTACADO ESTADO */
 .top-banners{
   display:grid;
   grid-template-columns:.85fr 1.8fr .85fr;
   gap:10px;
-  margin-bottom:18px;
+  margin-bottom:20px;
   align-items:stretch;
 }
 
 .banner-publicidad,
 .banner-destacado{
   min-height:98px;
-  border-radius:22px;
-  box-shadow:0 5px 18px rgba(0,0,0,.12);
+  border-radius:24px;
   cursor:pointer;
   overflow:hidden;
+  position:relative;
 }
 
-/* PUBLICIDAD MÁS GRANDE Y MÁS LLAMATIVA */
 .banner-publicidad{
-  background:linear-gradient(90deg,#ffffff,#ffe0ef,#ffffff);
+  background:linear-gradient(90deg,#fff,#ffe1ef,#fff);
   border:3px solid #ec2d7a;
   display:flex;
   align-items:center;
   justify-content:space-between;
   gap:10px;
   padding:12px 14px;
+  box-shadow:
+    0 8px 24px rgba(236,45,122,.20),
+    inset 0 0 20px rgba(255,255,255,.65);
 }
 
 .banner-publicidad .icono{
   width:54px;
   height:54px;
   min-width:54px;
-  border-radius:16px;
+  border-radius:17px;
   background:linear-gradient(180deg,#ff5ca3,#ec2d7a);
   color:white;
   display:flex;
@@ -112,7 +117,6 @@ body{
   border-radius:999px;
 }
 
-/* DESTACADOS MÁS PEQUEÑOS */
 .banner-destacado{
   background:linear-gradient(180deg,#ff4f9a,#ec2d7a);
   border:2px solid white;
@@ -123,6 +127,9 @@ body{
   justify-content:center;
   text-align:center;
   padding:10px 8px;
+  box-shadow:
+    0 8px 22px rgba(236,45,122,.22),
+    inset 0 0 14px rgba(255,255,255,.18);
 }
 
 .banner-destacado .estrella{
@@ -144,12 +151,13 @@ body{
   line-height:1.15;
 }
 
+/* CAJAS */
 .estado-box{
   background:white;
   padding:18px;
-  border-radius:20px;
+  border-radius:22px;
   margin-bottom:18px;
-  box-shadow:0 3px 12px rgba(0,0,0,.14);
+  box-shadow:0 6px 20px rgba(0,0,0,.10);
 }
 
 .estado-box h2,
@@ -159,11 +167,28 @@ body{
 }
 
 .card{
+  position:relative;
   background:white;
-  border-radius:28px;
+  border-radius:30px;
   padding:18px;
-  margin-bottom:22px;
-  box-shadow:0 6px 20px rgba(0,0,0,.10);
+  margin-bottom:26px;
+  box-shadow:
+    0 12px 34px rgba(0,0,0,.14),
+    -10px 0 24px rgba(236,45,122,.07),
+    10px 0 24px rgba(236,45,122,.07);
+  overflow:hidden;
+}
+
+.card::before{
+  content:"";
+  position:absolute;
+  left:0;
+  top:22px;
+  bottom:22px;
+  width:5px;
+  background:linear-gradient(180deg,#ff7bb7,#ec2d7a);
+  border-radius:999px;
+  opacity:.55;
 }
 
 .card img{
@@ -172,6 +197,7 @@ body{
   object-fit:cover;
   border-radius:22px;
   display:block;
+  box-shadow:0 6px 18px rgba(0,0,0,.12);
 }
 
 .card h3{
@@ -202,13 +228,14 @@ body{
   font-size:21px;
   font-weight:900;
   margin-top:20px;
+  box-shadow:0 6px 18px rgba(217,68,129,.24);
 }
 
 .acciones-finales{
   background:white;
-  border-radius:22px;
+  border-radius:24px;
   padding:16px;
-  box-shadow:0 4px 18px rgba(0,0,0,.12);
+  box-shadow:0 8px 24px rgba(0,0,0,.12);
   margin-top:28px;
   display:flex;
   gap:12px;
@@ -234,8 +261,90 @@ body{
   color:white;
 }
 
+/* MODAL PUBLICIDAD / DESTACADO */
+.modal-anuncio{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.58);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:99999;
+  padding:18px;
+}
+
+.modal-anuncio.activo{
+  display:flex;
+}
+
+.modal-card{
+  width:100%;
+  max-width:460px;
+  background:white;
+  border-radius:26px;
+  overflow:hidden;
+  box-shadow:0 18px 45px rgba(0,0,0,.35);
+}
+
+.modal-header{
+  background:linear-gradient(90deg,#ec2d7a,#ff4f9a);
+  color:white;
+  padding:18px;
+  text-align:center;
+}
+
+.modal-header h2{
+  margin:0;
+  font-size:25px;
+}
+
+.modal-body{
+  padding:18px;
+}
+
+.modal-body p{
+  margin:10px 0;
+  font-size:16px;
+  line-height:1.35;
+}
+
+.modal-body b{
+  color:#111;
+}
+
+.modal-botones{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  padding:0 18px 18px;
+}
+
+.modal-botones a,
+.modal-botones button{
+  display:block;
+  width:100%;
+  border:none;
+  border-radius:16px;
+  padding:15px;
+  text-align:center;
+  font-weight:900;
+  font-size:16px;
+  text-decoration:none;
+  cursor:pointer;
+}
+
+.btn-wa{
+  background:#25D366;
+  color:white;
+}
+
+.btn-cerrar{
+  background:#777;
+  color:white;
+}
+
 @media(max-width:600px){
-  .resultados{
+  .pagina{
     padding:10px 10px 28px;
   }
 
@@ -248,7 +357,7 @@ body{
   .banner-publicidad,
   .banner-destacado{
     min-height:84px;
-    border-radius:17px;
+    border-radius:18px;
   }
 
   .banner-publicidad{
@@ -297,12 +406,12 @@ body{
 
   .card{
     padding:15px;
-    border-radius:24px;
+    border-radius:26px;
   }
 
   .card img{
     height:300px;
-    border-radius:18px;
+    border-radius:20px;
   }
 
   .card h3{
@@ -328,30 +437,30 @@ body{
 
 <body>
 
-<div class="resultados">
+<div class="pagina">
 
   <div class="top-banners">
 
-    <div class="banner-destacado" onclick="irCuestionarioAnuncio()">
+    <div class="banner-destacado" onclick="abrirInfoAnuncio('destacado_estado_1')">
       <div class="estrella">⭐</div>
       <h3>DESTACADO</h3>
-      <p>Aparece primero en la zona.</p>
+      <p>Destacado del estado.</p>
     </div>
 
-    <div class="banner-publicidad" onclick="irCuestionarioAnuncio()">
+    <div class="banner-publicidad" onclick="abrirInfoAnuncio('publicidad')">
       <div class="icono">📣</div>
       <div class="texto">
         <h3>PUBLICIDAD</h3>
         <p>Anuncia tu negocio o promociona tu perfil en CariHub.</p>
-        <span>MÁS INFORMACIÓN</span>
+        <span>VER DATOS</span>
       </div>
       <div class="icono">📈</div>
     </div>
 
-    <div class="banner-destacado" onclick="irCuestionarioAnuncio()">
+    <div class="banner-destacado" onclick="abrirInfoAnuncio('destacado_estado_2')">
       <div class="estrella">🔥</div>
       <h3>DESTACADO</h3>
-      <p>Más visibilidad para tu perfil.</p>
+      <p>Más visibilidad estatal.</p>
     </div>
 
   </div>
@@ -362,6 +471,21 @@ body{
     </div>
   </div>
 
+</div>
+
+<div class="modal-anuncio" id="modalAnuncio">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h2 id="modalTitulo">Publicidad</h2>
+    </div>
+
+    <div class="modal-body" id="modalContenido"></div>
+
+    <div class="modal-botones">
+      <a class="btn-wa" id="modalWhatsApp" href="#" target="_blank">Contactar por WhatsApp</a>
+      <button class="btn-cerrar" onclick="cerrarInfoAnuncio()">Cerrar</button>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -399,9 +523,51 @@ function textoSeguro(t){
     .replace(/'/g,"&#039;");
 }
 
-function irCuestionarioAnuncio(){
+function abrirInfoAnuncio(tipo){
+  const modal = document.getElementById("modalAnuncio");
+  const titulo = document.getElementById("modalTitulo");
+  const contenido = document.getElementById("modalContenido");
+  const wa = document.getElementById("modalWhatsApp");
+
+  let datos = {
+    titulo:"Publicidad disponible",
+    nombre:"Espacio disponible para anunciante",
+    categoria:"Publicidad / negocio / perfil",
+    ubicacion:"Disponible por estado o ciudad",
+    horario:"Atención por WhatsApp",
+    promocion:"Pregunta por precios, duración y destacado",
+    descripcion:"Este espacio puede mostrar tu negocio, marca, servicio o perfil destacado.",
+    telefono:"528112304664"
+  };
+
+  if(tipo.includes("destacado")){
+    datos.titulo = "Perfil destacado del estado";
+    datos.nombre = "Espacio destacado disponible";
+    datos.categoria = "Destacado estatal";
+    datos.ubicacion = estado || "Estado seleccionado";
+    datos.promocion = "Aparece arriba en resultados del estado.";
+    datos.descripcion = "Ideal para perfiles que quieren más visibilidad dentro del estado.";
+  }
+
+  titulo.textContent = datos.titulo;
+
+  contenido.innerHTML = `
+    <p><b>Nombre:</b> ${textoSeguro(datos.nombre)}</p>
+    <p><b>Categoría:</b> ${textoSeguro(datos.categoria)}</p>
+    <p><b>Ubicación:</b> ${textoSeguro(datos.ubicacion)}</p>
+    <p><b>Horario:</b> ${textoSeguro(datos.horario)}</p>
+    <p><b>Promoción:</b> ${textoSeguro(datos.promocion)}</p>
+    <p><b>Descripción:</b> ${textoSeguro(datos.descripcion)}</p>
+  `;
+
   const msg = encodeURIComponent("Hola, quiero información para anunciarme o destacar mi perfil en CariHub.");
-  window.open("https://wa.me/528112304664?text=" + msg, "_blank");
+  wa.href = "https://wa.me/" + datos.telefono + "?text=" + msg;
+
+  modal.classList.add("activo");
+}
+
+function cerrarInfoAnuncio(){
+  document.getElementById("modalAnuncio").classList.remove("activo");
 }
 
 const categoria = obtenerParametro("categoria");
@@ -413,7 +579,7 @@ function botonesFinales(){
   return `
     <div class="acciones-finales">
       <button class="btn-atras" onclick="window.location.href='index.html'">← Atrás</button>
-      <button class="btn-registro" onclick="window.location.href='index.html'">Registrarse</button>
+      <button class="btn-registro" onclick="window.location.href='index.html?abrir=registro'">Registrarse</button>
     </div>
   `;
 }
