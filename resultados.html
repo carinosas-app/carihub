@@ -3,415 +3,207 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Resultados | CariHub</title>
+<title>Resultados - CariHub</title>
 
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
 
 <style>
-
-:root{
---rosa:#ff0a78;
---rosa2:#ff4da0;
---fondo:#fff5fa;
---texto:#222;
-}
-
-*{
-box-sizing:border-box;
-margin:0;
-padding:0;
-}
-
 body{
-font-family:Arial,sans-serif;
-background:var(--fondo);
-color:var(--texto);
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:#fff1f7;
 }
 
-.topo{
-background:white;
-padding:18px;
-position:sticky;
-top:0;
-z-index:1000;
-box-shadow:0 2px 12px rgba(0,0,0,.08);
+.header{
+  background:#e91e63;
+  color:white;
+  padding:18px;
+  text-align:center;
+  font-size:24px;
+  font-weight:bold;
 }
 
-.logo{
-font-size:34px;
-font-weight:bold;
-color:var(--rosa);
-text-align:center;
-}
-
-.sub{
-text-align:center;
-margin-top:6px;
-font-size:15px;
-color:#666;
-}
-
-.filtros{
-padding:18px;
-background:white;
-margin:18px;
-border-radius:22px;
-box-shadow:0 4px 18px rgba(0,0,0,.08);
-}
-
-.filtros h2{
-color:var(--rosa);
-margin-bottom:14px;
-font-size:24px;
-}
-
-.grid{
-display:grid;
-grid-template-columns:1fr 1fr;
-gap:12px;
-}
-
-.box{
-background:#fff5fa;
-padding:14px;
-border-radius:16px;
-font-weight:bold;
-color:#444;
-border:1px solid #ffd3e6;
-}
-
-.boton{
-display:block;
-width:100%;
-padding:16px;
-margin-top:16px;
-border:none;
-border-radius:16px;
-background:linear-gradient(90deg,var(--rosa),var(--rosa2));
-color:white;
-font-size:18px;
-font-weight:bold;
-cursor:pointer;
-}
-
-.banner{
-margin:18px;
-background:linear-gradient(135deg,#ffe1ef,#fff);
-padding:20px;
-border-radius:24px;
-box-shadow:0 4px 15px rgba(0,0,0,.08);
-}
-
-.banner h3{
-color:var(--rosa);
-font-size:28px;
-margin-bottom:8px;
-}
-
-.banner p{
-color:#555;
-line-height:1.5;
-}
-
-.lista{
-padding:18px;
+.resultados{
+  max-width:900px;
+  margin:auto;
+  padding:15px;
 }
 
 .card{
-background:white;
-border-radius:24px;
-overflow:hidden;
-margin-bottom:24px;
-box-shadow:0 4px 18px rgba(0,0,0,.10);
+  background:white;
+  border-radius:18px;
+  padding:15px;
+  margin-bottom:18px;
+  box-shadow:0 3px 12px rgba(0,0,0,.18);
 }
 
 .card img{
-width:100%;
-height:340px;
-object-fit:cover;
-display:block;
-}
-
-.card-body{
-padding:18px;
+  width:100%;
+  border-radius:15px;
+  max-height:420px;
+  object-fit:cover;
 }
 
 .card h3{
-color:var(--rosa);
-font-size:30px;
-margin-bottom:10px;
+  color:#e91e63;
+  font-size:28px;
 }
 
-.card p{
-margin:7px 0;
-font-size:16px;
+.whatsapp{
+  display:block;
+  text-align:center;
+  background:#25D366;
+  color:white;
+  padding:14px;
+  border-radius:12px;
+  text-decoration:none;
+  font-weight:bold;
+  margin-top:12px;
 }
 
-.acciones{
-display:flex;
-gap:10px;
-margin-top:16px;
+.estado-box{
+  background:white;
+  padding:18px;
+  border-radius:18px;
+  margin-bottom:18px;
 }
-
-.btn{
-flex:1;
-padding:14px;
-border:none;
-border-radius:14px;
-font-weight:bold;
-cursor:pointer;
-font-size:15px;
-}
-
-.btn-whats{
-background:#25D366;
-color:white;
-}
-
-.btn-ver{
-background:var(--rosa);
-color:white;
-}
-
-.vacio{
-background:white;
-padding:30px;
-border-radius:24px;
-text-align:center;
-box-shadow:0 4px 15px rgba(0,0,0,.08);
-}
-
-.footer-space{
-height:60px;
-}
-
-@media(max-width:700px){
-
-.grid{
-grid-template-columns:1fr;
-}
-
-.card img{
-height:280px;
-}
-
-}
-
 </style>
 </head>
 
 <body>
 
-<div class="topo">
-<div class="logo">CariHub</div>
-<div class="sub">Resultados disponibles</div>
+<div class="header">
+Resultados CariHub
 </div>
 
-<div class="filtros">
-
-<h2>🔎 Búsqueda actual</h2>
-
-<div class="grid">
-
-<div class="box" id="boxCategoria">
-Categoría
-</div>
-
-<div class="box" id="boxPais">
-País
-</div>
-
-<div class="box" id="boxEstado">
-Estado
-</div>
-
-<div class="box" id="boxCiudad">
-Ciudad
-</div>
-
-</div>
-
-<button class="boton" onclick="window.location.href='index.html'">
-← Nueva búsqueda
-</button>
-
-</div>
-
-<div class="banner">
-
-<h3>🔥 Destacados disponibles</h3>
-
-<p>
-Explora perfiles verificados, anuncios destacados y nuevos registros disponibles cerca de ti.
-</p>
-
-</div>
-
-<div class="lista" id="listaPerfiles">
-
-<div class="vacio">
-<h2>Cargando perfiles...</h2>
-</div>
-
-</div>
-
-<div class="footer-space"></div>
+<div class="resultados" id="lista"></div>
 
 <script>
 
-const firebaseConfig={
-apiKey:"AIzaSyBl4LNLtPqbyIxfTfONAqxi4rOG4XF_vkI",
-authDomain:"carinosas-app.firebaseapp.com",
-projectId:"carinosas-app",
-storageBucket:"carinosas-app.firebasestorage.app",
-messagingSenderId:"267078845023",
-appId:"1:267078845023:web:a82e626d9f0ca28858d1ea"
+const firebaseConfig = {
+  apiKey: "AIzaSyBl4LNLtPqbyIxfTfONAqxi4rOG4XF_vkI",
+  authDomain: "carinosas-app.firebaseapp.com",
+  projectId: "carinosas-app",
+  storageBucket: "carinosas-app.firebasestorage.app",
+  messagingSenderId: "267078845023",
+  appId: "1:267078845023:web:a82e626d9f0ca28858d1ea"
 };
 
 firebase.initializeApp(firebaseConfig);
 
-const db=firebase.firestore();
+const db = firebase.firestore();
 
 function obtenerParametro(nombre){
-const url=new URL(window.location.href);
-return url.searchParams.get(nombre)||"";
+  const url = new URL(window.location.href);
+  return url.searchParams.get(nombre) || "";
 }
 
-const categoria=obtenerParametro("categoria");
-const pais=obtenerParametro("pais");
-const estado=obtenerParametro("estado");
-const ciudad=obtenerParametro("ciudad");
-
-document.getElementById("boxCategoria").innerText="📌 "+categoria;
-document.getElementById("boxPais").innerText="🌎 "+pais;
-document.getElementById("boxEstado").innerText="📍 "+estado;
-document.getElementById("boxCiudad").innerText="🏙️ "+ciudad;
-
-function normalizar(t){
-return String(t||"")
-.trim()
-.toLowerCase()
-.normalize("NFD")
-.replace(/[\u0300-\u036f]/g,"");
+function normalizarTexto(t){
+  return String(t||"")
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g,"");
 }
 
-async function cargarPerfiles(){
-
-const lista=document.getElementById("listaPerfiles");
-
-try{
-
-const snap=await db.collection("usuarios")
-.where("aprobado","==",true)
-.get();
-
-lista.innerHTML="";
-
-let encontrados=0;
-
-snap.forEach(doc=>{
-
-const u=doc.data();
-
-if(u.activo!==true)return;
-
-const coincide=
-normalizar(u.categoria)===normalizar(categoria)&&
-normalizar(u.pais)===normalizar(pais)&&
-normalizar(u.estado)===normalizar(estado)&&
-normalizar(u.ciudad)===normalizar(ciudad);
-
-if(!coincide)return;
-
-encontrados++;
-
-const tel=(u.telefono||"").replace(/\D/g,"");
-
-lista.innerHTML+=`
-
-<div class="card">
-
-<img src="${u.fotoURL||''}">
-
-<div class="card-body">
-
-<h3>${u.nombre||'Perfil'}</h3>
-
-<p><b>Categoría:</b> ${u.categoria||''}</p>
-<p><b>Ciudad:</b> ${u.ciudad||''}</p>
-<p><b>Estado:</b> ${u.estado||''}</p>
-
-${u.descripcion?`<p>${u.descripcion}</p>`:''}
-
-<div class="acciones">
-
-<button class="btn btn-ver">
-Ver perfil
-</button>
-
-<a class="btn btn-whats"
-href="https://wa.me/${tel}"
-target="_blank"
-style="text-decoration:none;text-align:center;">
-WhatsApp
-</a>
-
-</div>
-
-</div>
-
-</div>
-
-`;
-
-});
-
-if(encontrados===0){
-
-lista.innerHTML=`
-
-<div class="vacio">
-
-<h2>😕 No encontramos perfiles</h2>
-
-<p style="margin-top:10px;">
-Intenta otra ciudad o categoría.
-</p>
-
-<button class="boton"
-onclick="window.location.href='index.html'">
-Volver
-</button>
-
-</div>
-
-`;
-
+function limpiarTelefono(t){
+  return String(t||"").replace(/\D/g,"");
 }
 
-}catch(error){
+const categoria = obtenerParametro("categoria");
+const pais = obtenerParametro("pais");
+const estado = obtenerParametro("estado");
+const ciudad = obtenerParametro("ciudad");
 
-lista.innerHTML=`
+async function cargarResultados(){
 
-<div class="vacio">
+  const lista=document.getElementById("lista");
 
-<h2>Error cargando perfiles</h2>
+  lista.innerHTML=`
+    <div class="estado-box">
+      <h2>Buscando perfiles...</h2>
+    </div>
+  `;
 
-<p style="margin-top:10px;">
-${error.message}
-</p>
+  try{
 
-</div>
+    const snap=await db.collection("usuarios")
+      .where("aprobado","==",true)
+      .get();
 
-`;
+    lista.innerHTML="";
 
+    let encontrados=0;
+
+    for(const doc of snap.docs){
+
+      const u=doc.data();
+
+      if(u.activo!==true) continue;
+
+      const exacto =
+        normalizarTexto(u.categoria)===normalizarTexto(categoria) &&
+        normalizarTexto(u.pais)===normalizarTexto(pais) &&
+        normalizarTexto(u.estado)===normalizarTexto(estado) &&
+        normalizarTexto(u.ciudad)===normalizarTexto(ciudad);
+
+      if(exacto){
+
+        encontrados++;
+
+        const tel=limpiarTelefono(u.telefono||"");
+
+        lista.innerHTML += `
+          <div class="card">
+
+            ${u.fotoURL ? `
+              <img src="${u.fotoURL}">
+            ` : ""}
+
+            <h3>${u.nombre||""}</h3>
+
+            <p><b>Categoría:</b> ${u.categoria||""}</p>
+            <p><b>País:</b> ${u.pais||""}</p>
+            <p><b>Estado:</b> ${u.estado||""}</p>
+            <p><b>Ciudad:</b> ${u.ciudad||""}</p>
+            <p><b>Descripción:</b> ${u.descripcion||""}</p>
+            <p><b>Precio:</b> ${u.precio||""}</p>
+
+            ${tel ? `
+              <a class="whatsapp"
+              href="https://wa.me/${tel}"
+              target="_blank">
+              Contactar por WhatsApp
+              </a>
+            ` : ""}
+
+          </div>
+        `;
+      }
+    }
+
+    if(encontrados===0){
+      lista.innerHTML=`
+        <div class="estado-box">
+          <h2>No encontramos perfiles</h2>
+          <p>Intenta otra búsqueda.</p>
+        </div>
+      `;
+    }
+
+  }catch(error){
+
+    document.getElementById("lista").innerHTML=`
+      <div class="estado-box">
+        <h2>Error</h2>
+        <p>${error.message}</p>
+      </div>
+    `;
+  }
 }
 
-}
-
-cargarPerfiles();
+cargarResultados();
 
 </script>
 
