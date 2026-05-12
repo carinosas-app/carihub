@@ -16,15 +16,19 @@
   --fondo:#fff1f7;
   --texto:#252432;
   --gris:#6b6170;
+  --verde:#25D366;
+  --sombra:0 16px 40px rgba(0,0,0,.14);
 }
 
 *{
   box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;
 }
 
 html,body{
   margin:0;
   padding:0;
+  min-height:100%;
 }
 
 body{
@@ -36,19 +40,35 @@ body{
   color:var(--texto);
 }
 
+button{
+  font-family:Arial,sans-serif;
+}
+
 .pagina{
   max-width:930px;
   margin:0 auto;
-  padding:14px 12px 40px;
+  padding:14px 12px 42px;
 }
 
-/* BLOQUE SUPERIOR: DESTACADO CIUDAD - PUBLICIDAD - DESTACADO CIUDAD */
+/* BANNERS SUPERIORES - SAFARI */
 .top-banners{
-  display:grid;
-  grid-template-columns:.82fr 1.9fr .82fr;
+  display:-webkit-box;
+  display:-webkit-flex;
+  display:flex;
   gap:8px;
-  margin-bottom:20px;
+  margin-bottom:18px;
   align-items:stretch;
+  width:100%;
+}
+
+.banner-destacado{
+  width:23%;
+  min-width:0;
+}
+
+.banner-publicidad{
+  width:54%;
+  min-width:0;
 }
 
 .banner-publicidad,
@@ -59,6 +79,7 @@ body{
   overflow:hidden;
   position:relative;
   user-select:none;
+  -webkit-user-select:none;
 }
 
 .banner-publicidad{
@@ -81,7 +102,9 @@ body{
   inset:0;
   background:linear-gradient(120deg,transparent,rgba(255,255,255,.60),transparent);
   transform:translateX(-120%);
+  -webkit-transform:translateX(-120%);
   animation:brilloCariHub 4s infinite;
+  -webkit-animation:brilloCariHub 4s infinite;
   pointer-events:none;
 }
 
@@ -89,6 +112,12 @@ body{
   0%{transform:translateX(-120%);}
   45%{transform:translateX(120%);}
   100%{transform:translateX(120%);}
+}
+
+@-webkit-keyframes brilloCariHub{
+  0%{-webkit-transform:translateX(-120%);}
+  45%{-webkit-transform:translateX(120%);}
+  100%{-webkit-transform:translateX(120%);}
 }
 
 .banner-publicidad .icono{
@@ -110,6 +139,7 @@ body{
   flex:1;
   text-align:center;
   z-index:1;
+  min-width:0;
 }
 
 .banner-publicidad .texto h3{
@@ -184,98 +214,214 @@ body{
   z-index:1;
 }
 
-/* PERFIL */
-.card{
-  position:relative;
+/* LOADER */
+.loader-card{
   background:white;
-  border-radius:32px;
   padding:18px;
-  box-shadow:
-    0 16px 38px rgba(0,0,0,.15),
-    -12px 0 28px rgba(236,45,122,.08),
-    12px 0 28px rgba(236,45,122,.08);
-  margin-bottom:28px;
+  border-radius:28px;
+  box-shadow:var(--sombra);
   overflow:hidden;
 }
 
-.card::before{
+.loader-line,
+.loader-img{
+  background:linear-gradient(90deg,#f3dbe6,#fff,#f3dbe6);
+  background-size:220% 100%;
+  animation:skeleton 1.4s infinite;
+  border-radius:16px;
+}
+
+.loader-img{
+  height:340px;
+  margin-bottom:16px;
+}
+
+.loader-line{
+  height:18px;
+  margin:10px 0;
+}
+
+.loader-line.corta{width:55%;}
+.loader-line.media{width:78%;}
+
+@keyframes skeleton{
+  0%{background-position:200% 0;}
+  100%{background-position:-200% 0;}
+}
+
+/* PERFIL PREMIUM */
+.perfil-card{
+  background:white;
+  border-radius:34px;
+  overflow:hidden;
+  box-shadow:
+    0 18px 44px rgba(0,0,0,.16),
+    -12px 0 28px rgba(236,45,122,.08),
+    12px 0 28px rgba(236,45,122,.08);
+  margin-bottom:28px;
+}
+
+.hero-perfil{
+  position:relative;
+  width:100%;
+  background:#ffe4ef;
+}
+
+.hero-perfil img{
+  width:100%;
+  height:520px;
+  object-fit:cover;
+  display:block;
+}
+
+.hero-perfil::after{
   content:"";
   position:absolute;
   left:0;
-  top:24px;
-  bottom:24px;
-  width:5px;
-  background:linear-gradient(180deg,#ff7bb7,#ec2d7a);
-  border-radius:999px;
-  opacity:.62;
-}
-
-.card::after{
-  content:"";
-  position:absolute;
-  right:-45px;
-  top:-45px;
-  width:120px;
-  height:120px;
-  background:radial-gradient(circle,rgba(236,45,122,.10),transparent 65%);
+  right:0;
+  bottom:0;
+  height:48%;
+  background:linear-gradient(180deg,transparent,rgba(0,0,0,.68));
   pointer-events:none;
 }
 
-.foto-principal{
-  width:100%;
-  border-radius:24px;
-  max-height:560px;
-  object-fit:cover;
-  display:block;
-  box-shadow:0 8px 24px rgba(0,0,0,.16);
+.badge-top{
+  position:absolute;
+  top:14px;
+  left:14px;
+  z-index:3;
+  display:flex;
+  flex-wrap:wrap;
+  gap:7px;
 }
 
-h1{
-  color:var(--rosa3);
-  font-size:40px;
-  margin:18px 0 14px;
+.badge{
+  background:rgba(255,255,255,.95);
+  color:#b51558;
+  padding:7px 10px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:900;
+  box-shadow:0 5px 14px rgba(0,0,0,.18);
+}
+
+.badge.verificada{
+  background:linear-gradient(90deg,#ec2d7a,#ff4f9a);
+  color:white;
+}
+
+.titulo-hero{
+  position:absolute;
+  left:18px;
+  right:18px;
+  bottom:18px;
+  z-index:4;
+  color:white;
+}
+
+.titulo-hero h1{
+  margin:0 0 7px;
+  font-size:42px;
   line-height:1;
+  text-shadow:0 3px 12px rgba(0,0,0,.38);
 }
 
-.info p{
-  margin:12px 0;
-  font-size:18px;
-  line-height:1.38;
+.titulo-hero p{
+  margin:0;
+  font-size:16px;
+  font-weight:900;
+  text-shadow:0 2px 8px rgba(0,0,0,.35);
 }
 
-.info b{
-  color:#111;
+.perfil-body{
+  padding:17px;
+}
+
+.info-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin-bottom:14px;
+}
+
+.info-item{
+  background:#fff3f8;
+  border:1px solid #ffd3e4;
+  padding:12px;
+  border-radius:18px;
+}
+
+.info-item span{
+  display:block;
+  color:#9f174f;
+  font-size:11px;
+  font-weight:900;
+  margin-bottom:4px;
+  text-transform:uppercase;
+}
+
+.info-item b{
+  display:block;
+  color:#231c25;
+  font-size:15px;
+  line-height:1.25;
+}
+
+.seccion-texto{
+  background:white;
+  border-left:5px solid var(--rosa);
+  padding:13px;
+  border-radius:15px;
+  color:#4a3f48;
+  font-size:16px;
+  line-height:1.42;
+  margin:13px 0;
+}
+
+.seccion-texto h3{
+  margin:0 0 8px;
+  color:var(--rosa3);
+  font-size:19px;
 }
 
 .whatsapp{
   display:block;
   width:100%;
   text-align:center;
-  margin-top:20px;
+  margin-top:17px;
   background:#25D366;
   color:white;
   text-decoration:none;
-  padding:18px;
+  padding:17px;
   border-radius:22px;
-  font-size:21px;
+  font-size:20px;
   font-weight:900;
   box-shadow:0 8px 20px rgba(37,211,102,.25);
 }
 
+.whatsapp:active{
+  transform:scale(.985);
+}
+
 .galeria{
-  margin-top:24px;
+  margin-top:22px;
 }
 
 .galeria h2{
-  margin:0 0 14px;
+  margin:0 0 13px;
   color:var(--rosa3);
-  font-size:28px;
+  font-size:25px;
 }
 
-.galeria img{
+.galeria-grid{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:14px;
+}
+
+.galeria-grid img{
   width:100%;
-  border-radius:20px;
-  margin-bottom:14px;
+  border-radius:22px;
   display:block;
   box-shadow:0 8px 22px rgba(0,0,0,.14);
 }
@@ -416,11 +562,10 @@ h1{
 
 @media(max-width:600px){
   .pagina{
-    padding:10px 10px 30px;
+    padding:10px 10px 32px;
   }
 
   .top-banners{
-    grid-template-columns:.82fr 1.9fr .82fr;
     gap:6px;
     margin-bottom:16px;
   }
@@ -475,32 +620,40 @@ h1{
     font-size:7px;
   }
 
-  .card{
-    padding:15px;
-    border-radius:28px;
+  .hero-perfil img{
+    height:440px;
   }
 
-  .foto-principal{
-    border-radius:22px;
-    max-height:520px;
+  .titulo-hero h1{
+    font-size:34px;
   }
 
-  h1{
-    font-size:32px;
+  .titulo-hero p{
+    font-size:14px;
   }
 
-  .info p{
-    font-size:17px;
+  .perfil-card{
+    border-radius:30px;
+  }
+
+  .info-grid{
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+  }
+
+  .info-item{
+    padding:10px;
+    border-radius:16px;
+  }
+
+  .info-item b{
+    font-size:14px;
   }
 
   .whatsapp{
     font-size:18px;
     padding:16px;
     border-radius:19px;
-  }
-
-  .galeria h2{
-    font-size:24px;
   }
 
   .acciones-finales{
@@ -541,9 +694,11 @@ h1{
   </div>
 
   <div id="contenido">
-    <div class="estado-box">
-      <h2>Cargando perfil...</h2>
-      <p>Estamos revisando la información pública.</p>
+    <div class="loader-card">
+      <div class="loader-img"></div>
+      <div class="loader-line corta"></div>
+      <div class="loader-line media"></div>
+      <div class="loader-line"></div>
     </div>
   </div>
 
@@ -608,7 +763,7 @@ function abrirInfoAnuncio(tipo){
     nombre:"Espacio disponible para anunciante",
     categoria:"Publicidad / negocio / perfil",
     ubicacion:"Disponible por ciudad",
-    horario:"Atención por WhatsApp",
+    horario:"Atención por panel interno próximamente",
     promocion:"Pregunta por precios, duración y destacado",
     descripcion:"Este espacio puede mostrar tu negocio, marca, servicio o perfil destacado.",
     telefono:"528112304664"
@@ -716,43 +871,124 @@ async function cargarPerfil(){
     const tel = limpiarTelefono(u.telefono || "");
     const msg = encodeURIComponent("Hola, vi tu perfil en CariHub y me gustaría recibir más información.");
 
+    const nombre = u.nombre || "Perfil";
+    const foto = u.fotoURL || "";
+    const categoria = u.categoria || "";
+    const pais = u.pais || "";
+    const estado = u.estado || "";
+    const ciudad = u.ciudad || "";
+    const descripcion = u.descripcion || "";
+    const descripcionCompleta = u.descripcionCompleta || "";
+    const precio = u.precio || "Consultar";
+    const modalidad = u.modalidad || "Consultar";
+    const horario = u.horario || "";
+    const zona = u.zona || "";
+    const servicios = u.servicios || "";
+
     contenido.innerHTML = `
-      <div class="card">
+      <div class="perfil-card">
 
-        ${u.fotoURL ? `
-          <img class="foto-principal" src="${textoSeguro(u.fotoURL)}" alt="Foto pública">
-        ` : ""}
+        <div class="hero-perfil">
+          ${foto ? `<img src="${textoSeguro(foto)}" alt="Foto pública" loading="eager">` : ""}
 
-        <h1>${textoSeguro(u.nombre || "Perfil")}</h1>
+          <div class="badge-top">
+            <span class="badge verificada">Verificada</span>
+            ${categoria ? `<span class="badge">${textoSeguro(categoria)}</span>` : ""}
+          </div>
 
-        <div class="info">
-          <p><b>Categoría:</b> ${textoSeguro(u.categoria || "")}</p>
-          <p><b>País:</b> ${textoSeguro(u.pais || "")}</p>
-          <p><b>Estado:</b> ${textoSeguro(u.estado || "")}</p>
-          <p><b>Ciudad:</b> ${textoSeguro(u.ciudad || "")}</p>
-          <p><b>Descripción:</b> ${textoSeguro(u.descripcion || "")}</p>
-          <p><b>Precio:</b> ${textoSeguro(u.precio || "")}</p>
-          <p><b>Modalidad:</b> ${textoSeguro(u.modalidad || "")}</p>
-          ${u.horario ? `<p><b>Horario:</b> ${textoSeguro(u.horario)}</p>` : ""}
-          ${u.zona ? `<p><b>Zona:</b> ${textoSeguro(u.zona)}</p>` : ""}
-          ${u.servicios ? `<p><b>Servicios:</b> ${textoSeguro(u.servicios)}</p>` : ""}
+          <div class="titulo-hero">
+            <h1>${textoSeguro(nombre)}</h1>
+            <p>📍 ${textoSeguro(ciudad)}, ${textoSeguro(estado)}</p>
+          </div>
         </div>
 
-        ${tel ? `
-          <a class="whatsapp" href="https://wa.me/${tel}?text=${msg}" target="_blank">
-            Contactar por WhatsApp
-          </a>
-        ` : ""}
+        <div class="perfil-body">
 
-        ${u.fotosExtraURL && u.fotosExtraURL.length > 0 ? `
-          <div class="galeria">
-            <h2>Fotos públicas</h2>
-            ${u.fotosExtraURL.map(f => `
-              <img src="${textoSeguro(f)}" alt="Foto pública extra">
-            `).join("")}
+          <div class="info-grid">
+            <div class="info-item">
+              <span>Categoría</span>
+              <b>${textoSeguro(categoria)}</b>
+            </div>
+
+            <div class="info-item">
+              <span>Ciudad</span>
+              <b>${textoSeguro(ciudad)}</b>
+            </div>
+
+            <div class="info-item">
+              <span>Precio</span>
+              <b>${textoSeguro(precio)}</b>
+            </div>
+
+            <div class="info-item">
+              <span>Modalidad</span>
+              <b>${textoSeguro(modalidad)}</b>
+            </div>
+
+            <div class="info-item">
+              <span>Estado</span>
+              <b>${textoSeguro(estado)}</b>
+            </div>
+
+            <div class="info-item">
+              <span>País</span>
+              <b>${textoSeguro(pais)}</b>
+            </div>
           </div>
-        ` : ""}
 
+          ${descripcion ? `
+            <div class="seccion-texto">
+              <h3>Descripción</h3>
+              ${textoSeguro(descripcion)}
+            </div>
+          ` : ""}
+
+          ${descripcionCompleta ? `
+            <div class="seccion-texto">
+              <h3>Información completa</h3>
+              ${textoSeguro(descripcionCompleta)}
+            </div>
+          ` : ""}
+
+          ${horario ? `
+            <div class="seccion-texto">
+              <h3>Horario</h3>
+              ${textoSeguro(horario)}
+            </div>
+          ` : ""}
+
+          ${zona ? `
+            <div class="seccion-texto">
+              <h3>Zona</h3>
+              ${textoSeguro(zona)}
+            </div>
+          ` : ""}
+
+          ${servicios ? `
+            <div class="seccion-texto">
+              <h3>Servicios / detalles</h3>
+              ${textoSeguro(servicios)}
+            </div>
+          ` : ""}
+
+          ${tel ? `
+            <a class="whatsapp" href="https://wa.me/${tel}?text=${msg}" target="_blank">
+              Contactar por WhatsApp
+            </a>
+          ` : ""}
+
+          ${u.fotosExtraURL && u.fotosExtraURL.length > 0 ? `
+            <div class="galeria">
+              <h2>Fotos públicas</h2>
+              <div class="galeria-grid">
+                ${u.fotosExtraURL.map(f => `
+                  <img src="${textoSeguro(f)}" alt="Foto pública extra" loading="lazy">
+                `).join("")}
+              </div>
+            </div>
+          ` : ""}
+
+        </div>
       </div>
 
       ${botonesFinales()}
