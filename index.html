@@ -1,3 +1,5 @@
+Index.html.carihub 11 mayo
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -29,6 +31,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 
 const db = firebase.firestore();
+
 const auth = firebase.auth();
 const storage = firebase.storage();
 
@@ -38,6 +41,10 @@ const LINK_MERCADO_PAGO = "https://mpago.la/1KQ3iuP";
 
 let UID_PANEL = null;
 let UID_EDITANDO = null;
+
+let visitasTotales = 0;
+let visitasHoy = 0;
+let usuariosOnline = 0;
 
 let categoriaSeleccionada = "";
 let paisSeleccionado = "";
@@ -1770,6 +1777,38 @@ function validarAcceso(){
   cerrarModal("modalAntiBot");
 }
 
+async function registrarVisita(){
+  try{
+
+    const hoy = new Date();
+
+    const fecha =
+      hoy.getFullYear() + "-" +
+      String(hoy.getMonth()+1).padStart(2,"0") + "-" +
+      String(hoy.getDate()).padStart(2,"0");
+
+    const dispositivo = /iPhone|iPad|iPod/i.test(navigator.userAgent)
+      ? "iPhone"
+      : /Android/i.test(navigator.userAgent)
+      ? "Android"
+      : "Otro";
+
+    await db.collection("estadisticas_visitas").add({
+      fecha,
+      timestamp:new Date(),
+      userAgent:navigator.userAgent,
+      dispositivo,
+      idioma:navigator.language || "",
+      pantalla:window.innerWidth + "x" + window.innerHeight,
+      url: location.href || "",
+      referrer: document.referrer || ""
+    });
+
+  }catch(e){
+    console.log("Error registrando visita",e);
+  }
+}
+
 auth.onAuthStateChanged(async function(user){
   if(!user){
     try{
@@ -1780,7 +1819,9 @@ auth.onAuthStateChanged(async function(user){
 
 window.addEventListener("load",function(){
 
-  const params = new URLSearchParams(window.location.search);
+registrarVisita();
+
+const params = new URLSearchParams(window.location.search);
   const abrir = params.get("abrir");
 
   if(localStorage.getItem("carihub_acceso_ok")!=="1"){
