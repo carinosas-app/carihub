@@ -40,6 +40,8 @@ let contadoresGlobales = {};
   --rosa:#c2185b;
   --rosa2:#ec407a;
   --rosa3:#ff6fa7;
+  --vino:#67153b;
+  --vino2:#3b1027;
   --rosaSuave:#fff1f7;
   --fondo:#fff7fb;
   --texto:#2b2530;
@@ -51,8 +53,8 @@ let contadoresGlobales = {};
   --morado:#6a1b9a;
   --naranja:#ef8b00;
   --rojo:#c62828;
-  --sombra:0 12px 30px rgba(194,24,91,.12);
-  --sombra2:0 8px 24px rgba(0,0,0,.10);
+  --sombra:0 12px 30px rgba(194,24,91,.14);
+  --sombra2:0 8px 22px rgba(0,0,0,.09);
 }
 
 *{
@@ -63,9 +65,7 @@ let contadoresGlobales = {};
 body{
   margin:0;
   font-family:Arial,sans-serif;
-  background:
-    radial-gradient(circle at top left, #ffd6e8 0, transparent 32%),
-    linear-gradient(180deg,#fff7fb,#ffe6f0);
+  background:linear-gradient(135deg,#ff2d86,#ff8fbd);
   color:var(--texto);
   min-height:100vh;
 }
@@ -87,11 +87,11 @@ button:disabled{
 
 input,select,textarea{
   width:100%;
-  padding:14px;
-  margin:8px 0;
+  padding:13px;
+  margin:7px 0;
   border:1px solid #ead6df;
-  border-radius:14px;
-  font-size:16px;
+  border-radius:13px;
+  font-size:15px;
   background:white;
 }
 
@@ -132,7 +132,6 @@ h1,h2,h3,p{
   justify-content:center;
   font-size:34px;
   margin:0 auto 16px;
-  box-shadow:0 12px 24px rgba(194,24,91,.25);
 }
 
 .login-card h1{
@@ -160,160 +159,141 @@ h1,h2,h3,p{
 .app{
   display:none;
   min-height:100vh;
+  padding:8px;
+}
+
+.admin-shell{
+  display:grid;
+  grid-template-columns:250px 1fr;
+  gap:8px;
+  min-height:calc(100vh - 16px);
+}
+
+.sidebar{
+  background:linear-gradient(180deg,#3a1028,#8c1e4b);
+  border-radius:16px;
+  padding:12px;
+  color:white;
+  box-shadow:0 12px 30px rgba(0,0,0,.25);
+  overflow:auto;
+}
+
+.brand{
+  text-align:center;
+  padding:8px 8px 13px;
+  border-bottom:1px solid rgba(255,255,255,.14);
+  margin-bottom:10px;
+}
+
+.brand h1{
+  margin:0;
+  font-size:30px;
+  color:#ff5ca3;
+}
+
+.brand span{
+  color:white;
+}
+
+.brand p{
+  margin:4px 0 0;
+  font-size:12px;
+  color:#ffe6f0;
+}
+
+.side-btn{
+  width:100%;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  background:rgba(255,255,255,.08);
+  color:white;
+  border-radius:9px;
+  padding:10px;
+  margin:4px 0;
+  text-align:left;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.06);
+}
+
+.side-btn.active,
+.side-btn:hover{
+  background:linear-gradient(90deg,#ff3c8e,#ff6fa7);
+}
+
+.side-ico{
+  width:28px;
+  font-size:20px;
+  text-align:center;
+}
+
+.side-text b{
+  display:block;
+  font-size:13px;
+}
+
+.side-text small{
+  display:block;
+  font-size:11px;
+  color:#ffe6f0;
+  font-weight:700;
 }
 
 .main{
-  max-width:1320px;
-  margin:0 auto;
-  padding:14px;
+  background:#fff7fb;
+  border-radius:16px;
+  padding:8px;
+  overflow:auto;
 }
 
 .topbar{
-  background:rgba(255,255,255,.92);
-  border:1px solid var(--borde);
-  border-radius:26px;
+  height:78px;
+  background:linear-gradient(90deg,#9d1d55,#c02b6b);
+  border-radius:14px;
   box-shadow:var(--sombra);
-  padding:16px;
+  color:white;
   display:flex;
   align-items:center;
   justify-content:space-between;
-  gap:14px;
-  margin-bottom:14px;
-  backdrop-filter:blur(12px);
-  -webkit-backdrop-filter:blur(12px);
+  padding:12px 18px;
+  margin-bottom:10px;
 }
 
-.topbar h1{
-  margin:0;
-  color:var(--rosa);
-  font-size:25px;
-}
-
-.topbar p{
-  margin:5px 0 0;
-  color:var(--muted);
-  font-weight:700;
-}
-
-.top-actions{
+.top-left{
   display:flex;
-  gap:8px;
-  flex-wrap:wrap;
-}
-
-.pill-btn{
-  background:white;
-  color:var(--rosa);
-  border:1px solid var(--borde);
-  border-radius:999px;
-  padding:12px 16px;
-  box-shadow:0 4px 12px rgba(194,24,91,.08);
-}
-
-.pill-btn.primary{
-  background:linear-gradient(135deg,var(--rosa),var(--rosa2));
-  color:white;
-  border:none;
-}
-
-.hero{
-  background:
-    linear-gradient(135deg,rgba(194,24,91,.94),rgba(236,64,122,.84)),
-    radial-gradient(circle at top right,#fff 0,transparent 35%);
-  border-radius:28px;
-  color:white;
-  padding:20px;
-  box-shadow:0 16px 34px rgba(194,24,91,.25);
-  margin-bottom:14px;
-  display:grid;
-  grid-template-columns:1.3fr 1fr;
-  gap:14px;
   align-items:center;
-}
-
-.hero h2{
-  font-size:27px;
-  margin-bottom:8px;
-}
-
-.hero p{
-  margin:0;
-  opacity:.94;
-  font-weight:700;
-  line-height:1.45;
-}
-
-.hero-stats{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:10px;
-}
-
-.hero-mini{
-  background:rgba(255,255,255,.18);
-  border:1px solid rgba(255,255,255,.25);
-  border-radius:18px;
-  padding:13px;
-}
-
-.hero-mini b{
-  font-size:25px;
-  display:block;
-}
-
-.dashboard-grid{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
   gap:12px;
-  margin-bottom:14px;
 }
 
-.stat-card{
-  background:white;
-  border:1px solid var(--borde);
-  border-radius:22px;
-  padding:15px;
-  box-shadow:var(--sombra2);
-  cursor:pointer;
-  transition:.15s;
-  min-height:128px;
-}
-
-.stat-card:hover{
-  transform:translateY(-2px);
-  box-shadow:0 14px 28px rgba(194,24,91,.14);
-}
-
-.stat-icon{
-  width:42px;
-  height:42px;
-  border-radius:15px;
-  background:var(--rosaSuave);
-  color:var(--rosa);
+.crown{
+  width:50px;
+  height:50px;
+  border-radius:14px;
+  background:rgba(255,255,255,.16);
   display:flex;
   align-items:center;
   justify-content:center;
-  font-size:22px;
-  margin-bottom:9px;
+  font-size:28px;
 }
 
-.stat-card h3{
+.topbar h2{
   margin:0;
-  color:var(--muted);
-  font-size:14px;
+  font-size:20px;
 }
 
-.stat-card .num{
-  font-size:31px;
-  font-weight:900;
-  color:#222;
-  margin:4px 0;
-}
-
-.stat-card p{
-  margin:0;
-  color:var(--muted);
+.topbar p{
+  margin:4px 0 0;
   font-size:13px;
+  color:#ffe6f0;
+  font-weight:700;
+}
+
+.time-box{
+  background:rgba(255,255,255,.16);
+  border-radius:13px;
+  padding:10px 18px;
+  text-align:right;
+  font-size:13px;
+  font-weight:900;
 }
 
 .vista{
@@ -324,13 +304,193 @@ h1,h2,h3,p{
   display:block;
 }
 
+.metrics-row{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:10px;
+  margin-bottom:10px;
+}
+
+.metric-card{
+  background:white;
+  border:1px solid #ffe0ed;
+  border-radius:14px;
+  padding:14px;
+  min-height:125px;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  box-shadow:var(--sombra2);
+  cursor:pointer;
+}
+
+.metric-icon{
+  width:58px;
+  height:58px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:28px;
+  color:white;
+  flex:0 0 auto;
+}
+
+.bg-pink{background:linear-gradient(135deg,#ff2d86,#ff6fa7)}
+.bg-blue{background:linear-gradient(135deg,#1565c0,#4d8df7)}
+.bg-yellow{background:linear-gradient(135deg,#ffb300,#ff8f00)}
+.bg-green{background:linear-gradient(135deg,#11a64a,#28d66f)}
+.bg-purple{background:linear-gradient(135deg,#8e24aa,#d044ff)}
+
+.metric-card h3{
+  margin:0;
+  font-size:12px;
+  color:#1f1a20;
+}
+
+.metric-card .num{
+  font-size:29px;
+  font-weight:900;
+  color:#111;
+  margin:4px 0;
+}
+
+.metric-card p{
+  margin:0;
+  color:#655a63;
+  font-size:12px;
+  font-weight:700;
+}
+
+.panel-card{
+  background:white;
+  border:1px solid #ffd1e4;
+  border-radius:14px;
+  padding:14px;
+  box-shadow:var(--sombra2);
+  margin-bottom:10px;
+}
+
+.panel-card h2{
+  color:#ff2d86;
+  font-size:18px;
+  margin-bottom:12px;
+}
+
+.quick-grid{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:9px;
+}
+
+.quick-btn{
+  background:white;
+  border:1px solid #ffd1e4;
+  border-radius:12px;
+  min-height:72px;
+  padding:10px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  text-align:left;
+}
+
+.quick-ico{
+  width:42px;
+  height:42px;
+  border-radius:50%;
+  background:#fff1f7;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:23px;
+  flex:0 0 auto;
+}
+
+.quick-btn b{
+  display:block;
+  font-size:13px;
+  color:#171217;
+}
+
+.quick-btn small{
+  color:#655a63;
+  font-weight:700;
+  font-size:11px;
+}
+
+.bottom-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:10px;
+}
+
+.mini-panel{
+  background:white;
+  border:1px solid #ffd1e4;
+  border-radius:14px;
+  padding:14px;
+  box-shadow:var(--sombra2);
+  min-height:245px;
+}
+
+.mini-panel h3{
+  color:#ff2d86;
+  font-size:16px;
+  margin-bottom:10px;
+}
+
+.feed-item{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  border-bottom:1px solid #f0e3e9;
+  padding:8px 0;
+  font-size:12px;
+}
+
+.feed-left{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.avatar{
+  width:34px;
+  height:34px;
+  border-radius:50%;
+  background:#e7f1ff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.feed-item b{
+  display:block;
+}
+
+.feed-item small{
+  display:block;
+  color:#655a63;
+  font-weight:700;
+}
+
+.feed-btn{
+  background:#ff2d86;
+  color:white;
+  border-radius:7px;
+  padding:7px 10px;
+  font-size:12px;
+}
+
 .section-head{
   background:white;
   border:1px solid var(--borde);
-  border-radius:24px;
+  border-radius:14px;
   box-shadow:var(--sombra2);
-  padding:16px;
-  margin-bottom:14px;
+  padding:14px;
+  margin-bottom:10px;
 }
 
 .section-head h2{
@@ -351,9 +511,9 @@ h1,h2,h3,p{
 }
 
 .btn{
-  padding:12px 14px;
-  border-radius:14px;
-  font-size:15px;
+  padding:11px 13px;
+  border-radius:12px;
+  font-size:14px;
   margin:3px;
 }
 
@@ -378,22 +538,22 @@ h1,h2,h3,p{
 .list-wrap{
   background:white;
   border:1px solid var(--borde);
-  border-radius:24px;
+  border-radius:14px;
   box-shadow:var(--sombra2);
   padding:14px;
 }
 
 .cards-list{
   display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:12px;
+  grid-template-columns:repeat(4,1fr);
+  gap:10px;
 }
 
 .item{
   background:#fff;
   border:1px solid #ffe1ee;
-  border-radius:20px;
-  padding:14px;
+  border-radius:14px;
+  padding:12px;
   box-shadow:0 4px 12px rgba(0,0,0,.06);
 }
 
@@ -406,6 +566,7 @@ h1,h2,h3,p{
   color:#3b333a;
   margin:6px 0;
   line-height:1.35;
+  font-size:13px;
 }
 
 .item-profile{
@@ -414,10 +575,10 @@ h1,h2,h3,p{
 
 .item-profile img{
   width:100%;
-  height:210px;
+  height:170px;
   object-fit:cover;
-  border-radius:16px;
-  margin-bottom:10px;
+  border-radius:12px;
+  margin-bottom:8px;
   background:#fff1f7;
 }
 
@@ -440,9 +601,9 @@ h1,h2,h3,p{
 .detalle-box{
   background:#fff;
   border:1px solid var(--borde);
-  border-radius:24px;
+  border-radius:14px;
   box-shadow:var(--sombra2);
-  padding:16px;
+  padding:14px;
 }
 
 .detalle-box h2{
@@ -453,7 +614,7 @@ h1,h2,h3,p{
   width:100%;
   max-height:420px;
   object-fit:cover;
-  border-radius:18px;
+  border-radius:14px;
   margin:8px 0 14px;
 }
 
@@ -465,7 +626,7 @@ h1,h2,h3,p{
 .verificacion{
   background:#fff1f7;
   padding:14px;
-  border-radius:18px;
+  border-radius:14px;
   border-left:5px solid var(--rosa);
   margin-top:14px;
 }
@@ -473,7 +634,7 @@ h1,h2,h3,p{
 .fotos-extra{
   background:#f7f7f7;
   padding:14px;
-  border-radius:18px;
+  border-radius:14px;
   border-left:5px solid #777;
   margin-top:14px;
 }
@@ -490,7 +651,7 @@ h1,h2,h3,p{
 
 .actions-row{
   display:grid;
-  grid-template-columns:repeat(3,1fr);
+  grid-template-columns:repeat(4,1fr);
   gap:8px;
   margin-top:12px;
 }
@@ -506,51 +667,86 @@ pre{
 
 .graph-grid{
   display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:12px;
+  grid-template-columns:repeat(4,1fr);
+  gap:10px;
 }
 
 .graph-card{
   background:#fff;
   border:1px solid #ffe1ee;
-  border-radius:20px;
-  padding:15px;
+  border-radius:14px;
+  padding:13px;
   min-height:150px;
   box-shadow:0 4px 12px rgba(0,0,0,.06);
 }
 
 .graph-card h3{
   color:var(--rosa);
+  font-size:15px;
 }
 
 .graph-placeholder{
   height:78px;
-  border-radius:14px;
+  border-radius:12px;
   background:linear-gradient(90deg,#fff1f7,#ffe1ee,#fff1f7);
   display:flex;
   align-items:center;
   justify-content:center;
   color:#9f174f;
   font-weight:900;
+  font-size:12px;
 }
 
-@media(max-width:1050px){
-  .dashboard-grid{grid-template-columns:repeat(3,1fr)}
-  .cards-list{grid-template-columns:repeat(2,1fr)}
-  .hero{grid-template-columns:1fr}
+.footer{
+  color:white;
+  padding:10px 12px;
+  display:flex;
+  justify-content:space-between;
+  font-size:12px;
+  font-weight:700;
+}
+
+.rotate-warning{
+  display:none;
+  background:#fff;
+  border:1px solid #ffd1e4;
+  border-radius:14px;
+  padding:12px;
+  margin-bottom:10px;
+  color:#9f174f;
+  font-weight:900;
+  text-align:center;
+}
+
+@media(max-width:1180px){
+  .admin-shell{grid-template-columns:220px 1fr}
+  .metrics-row{grid-template-columns:repeat(3,1fr)}
+  .quick-grid{grid-template-columns:repeat(3,1fr)}
+  .bottom-grid{grid-template-columns:repeat(2,1fr)}
+  .cards-list{grid-template-columns:repeat(3,1fr)}
+  .graph-grid{grid-template-columns:repeat(2,1fr)}
 }
 
 @media(max-width:760px){
-  .main{padding:10px}
-  .topbar{display:block}
-  .top-actions{margin-top:12px}
-  .dashboard-grid{grid-template-columns:repeat(2,1fr)}
+  .app{padding:6px}
+  .admin-shell{grid-template-columns:1fr}
+  .sidebar{display:none}
+  .rotate-warning{display:block}
+  .topbar{
+    height:auto;
+    display:block;
+  }
+  .time-box{
+    margin-top:10px;
+    text-align:left;
+  }
+  .metrics-row{grid-template-columns:repeat(2,1fr)}
+  .quick-grid{grid-template-columns:repeat(2,1fr)}
+  .bottom-grid{grid-template-columns:1fr}
   .cards-list{grid-template-columns:1fr}
   .graph-grid{grid-template-columns:1fr}
-  .search-row{grid-template-columns:1fr}
   .actions-row{grid-template-columns:1fr}
-  .section-actions button,
-  .top-actions button{width:100%}
+  .search-row{grid-template-columns:1fr}
 }
 </style>
 </head>
@@ -569,98 +765,122 @@ pre{
 </div>
 
 <div class="app" id="panelBox">
-  <main class="main">
+  <div class="admin-shell">
 
-    <div class="topbar">
-      <div>
-        <h1 id="mainTitle">Dashboard CariHub</h1>
-        <p id="mainSub">Resumen general de operación y moderación.</p>
-      </div>
-      <div class="top-actions">
-        <button class="pill-btn" onclick="cargarDashboard()">Actualizar</button>
-        <button class="pill-btn primary" onclick="abrirModulo('pendientes')">Revisar pendientes</button>
-        <button class="pill-btn" onclick="salir()">Cerrar sesión</button>
-      </div>
-    </div>
-
-    <section id="vistaDashboard" class="vista active">
-      <div class="hero">
-        <div>
-          <h2>Centro de control</h2>
-          <p id="resumenPrincipal">Cargando resumen...</p>
-        </div>
-        <div class="hero-stats">
-          <div class="hero-mini"><b id="heroPendientes">0</b>Pendientes</div>
-          <div class="hero-mini"><b id="heroActivos">0</b>Activos</div>
-          <div class="hero-mini"><b id="heroVencidos">0</b>Vencidos</div>
-          <div class="hero-mini"><b id="heroDenuncias">0</b>Denuncias</div>
-        </div>
+    <aside class="sidebar">
+      <div class="brand">
+        <h1>💗 Cari<span>Hub</span></h1>
+        <p>Panel de Administración</p>
       </div>
 
-      <div class="dashboard-grid">
-        <div class="stat-card" onclick="abrirModulo('vistas')">
-          <div class="stat-icon">👁️</div><h3>Vistas totales</h3><div class="num" id="numVistas">0</div><p>Visitas del sitio y perfiles.</p>
-        </div>
-        <div class="stat-card" onclick="abrirModulo('usuarios')">
-          <div class="stat-icon">👥</div><h3>Usuarios registrados</h3><div class="num" id="numUsuarios">0</div><p>Todos los perfiles registrados.</p>
-        </div>
-        <div class="stat-card" onclick="abrirModulo('activos')">
-          <div class="stat-icon">✅</div><h3>Perfiles activos</h3><div class="num" id="numActivos">0</div><p>Perfiles visibles al público.</p>
-        </div>
-        <div class="stat-card" onclick="abrirModulo('pendientes')">
-          <div class="stat-icon">⏳</div><h3>Pendientes</h3><div class="num" id="numPendientes">0</div><p>Registros y cambios por revisar.</p>
-        </div>
-        <div class="stat-card" onclick="abrirModulo('pagos')">
-          <div class="stat-icon">💳</div><h3>Pagos recibidos</h3><div class="num" id="numPagos">0</div><p>Pagos y renovaciones.</p>
-        </div>
-        <div class="stat-card" onclick="abrirModulo('denuncias')">
-          <div class="stat-icon">🚨</div><h3>Denuncias</h3><div class="num" id="numDenuncias">0</div><p>Reportes pendientes.</p>
-        </div>
-        <div class="stat-card" onclick="abrirModulo('mensajes')">
-          <div class="stat-icon">📩</div><h3>Mensajes soporte</h3><div class="num" id="numMensajes">0</div><p>Conversaciones con usuarios.</p>
-        </div>
-        <div class="stat-card" onclick="abrirModulo('graficas')">
-          <div class="stat-icon">📊</div><h3>Gráficas</h3><div class="num">↗</div><p>Tráfico, dispositivos y búsquedas.</p>
-        </div>
-        <div class="stat-card" onclick="abrirModulo('vencidos')">
-          <div class="stat-icon">📴</div><h3>Vencidos / inactivos</h3><div class="num" id="numVencidos">0</div><p>Perfiles ocultos o expirados.</p>
-        </div>
-        <div class="stat-card" onclick="abrirModulo('anuncios')">
-          <div class="stat-icon">📢</div><h3>Anuncios</h3><div class="num" id="numAnuncios">0</div><p>Banners y destacados.</p>
-        </div>
-        <div class="stat-card" onclick="abrirModulo('seguridad')">
-          <div class="stat-icon">🛡️</div><h3>Seguridad</h3><div class="num" id="numSeguridad">0</div><p>Logs y actividad sospechosa.</p>
-        </div>
-        <div class="stat-card" onclick="abrirModulo('historial')">
-          <div class="stat-icon">📜</div><h3>Historial</h3><div class="num" id="numHistorial">0</div><p>Acciones del admin.</p>
-        </div>
-      </div>
-    </section>
+      <button class="side-btn active" onclick="mostrarDashboard()"><span class="side-ico">🏠</span><span class="side-text"><b>Inicio / Resumen</b><small>Panel principal</small></span></button>
+      <button class="side-btn" onclick="abrirModulo('usuarios')"><span class="side-ico">👤</span><span class="side-text"><b>Usuarios</b><small>Gestionar usuarios</small></span></button>
+      <button class="side-btn" onclick="abrirModulo('pendientes')"><span class="side-ico">👥</span><span class="side-text"><b>Perfiles</b><small>Aprobar / Rechazar</small></span></button>
+      <button class="side-btn" onclick="abrirModulo('graficas')"><span class="side-ico">📊</span><span class="side-text"><b>Estadísticas</b><small>Datos del sistema</small></span></button>
+      <button class="side-btn" onclick="abrirModulo('mensajes')"><span class="side-ico">✉️</span><span class="side-text"><b>Mensajes</b><small>Buzón de mensajes</small></span></button>
+      <button class="side-btn" onclick="abrirModulo('pagos')"><span class="side-ico">💲</span><span class="side-text"><b>Pagos</b><small>Ver pagos realizados</small></span></button>
+      <button class="side-btn" onclick="abrirModulo('vencidos')"><span class="side-ico">⭐</span><span class="side-text"><b>Renovaciones</b><small>Perfiles por vencer</small></span></button>
+      <button class="side-btn" onclick="abrirModulo('denuncias')"><span class="side-ico">⚠️</span><span class="side-text"><b>Denuncias</b><small>Reportes de usuarios</small></span></button>
+      <button class="side-btn" onclick="abrirModulo('anuncios')"><span class="side-ico">📢</span><span class="side-text"><b>Publicidad</b><small>Banners y anuncios</small></span></button>
+      <button class="side-btn" onclick="abrirModulo('historial')"><span class="side-ico">📜</span><span class="side-text"><b>Historial</b><small>Actividad admin</small></span></button>
+      <button class="side-btn" onclick="abrirModulo('seguridad')"><span class="side-ico">⚙️</span><span class="side-text"><b>Seguridad</b><small>Logs y ajustes</small></span></button>
+      <button class="side-btn" onclick="salir()"><span class="side-ico">⏻</span><span class="side-text"><b>Cerrar Sesión</b><small>Salir del panel</small></span></button>
+    </aside>
 
-    <section id="vistaModulo" class="vista">
-      <div class="section-head">
-        <h2 id="tituloModulo">Módulo</h2>
-        <p id="descripcionModulo">Cargando...</p>
-        <div class="section-actions">
-          <button class="btn btn-volver" onclick="mostrarDashboard()">← Volver al panel principal</button>
-          <button class="btn btn-refresh" onclick="recargarModulo()">Actualizar</button>
-        </div>
+    <main class="main">
+      <div class="rotate-warning">📱 Para ver el admin completo, gira el celular horizontal.</div>
 
-        <div class="search-row" id="buscadorModulo">
-          <input id="buscarTexto" placeholder="Buscar nombre, correo, teléfono, ciudad..." oninput="filtrarCards()">
-          <select id="filtroEstado" onchange="filtrarCards()">
-            <option value="">Todos</option>
-            <option value="activo">Activos</option>
-            <option value="vencido">Vencidos</option>
-            <option value="pendiente">Pendientes</option>
-          </select>
+      <div class="topbar">
+        <div class="top-left">
+          <div class="crown">👑</div>
+          <div>
+            <h2 id="mainTitle">Bienvenido, Administrador</h2>
+            <p id="mainSub">Aquí puedes gestionar todo el sistema de CariHub</p>
+          </div>
         </div>
+        <div class="time-box" id="timeBox">Cargando fecha...</div>
       </div>
 
-      <div class="list-wrap" id="contenidoModulo">Cargando...</div>
-    </section>
+      <section id="vistaDashboard" class="vista active">
 
-  </main>
+        <div class="metrics-row">
+          <div class="metric-card" onclick="abrirModulo('usuarios')"><div class="metric-icon bg-pink">👥</div><div><h3>Usuarios Totales</h3><div class="num" id="numUsuarios">0</div><p>Usuarios registrados</p></div></div>
+          <div class="metric-card" onclick="abrirModulo('activos')"><div class="metric-icon bg-blue">✅</div><div><h3>Perfiles Aprobados</h3><div class="num" id="numActivos">0</div><p>Perfiles activos</p></div></div>
+          <div class="metric-card" onclick="abrirModulo('pendientes')"><div class="metric-icon bg-yellow">⏱️</div><div><h3>Pendientes de Aprobación</h3><div class="num" id="numPendientes">0</div><p>Esperando revisión</p></div></div>
+          <div class="metric-card" onclick="abrirModulo('pagos')"><div class="metric-icon bg-green">💲</div><div><h3>Pagos Recibidos</h3><div class="num" id="numPagos">0</div><p>Total pagos</p></div></div>
+          <div class="metric-card" onclick="abrirModulo('denuncias')"><div class="metric-icon bg-purple">⚠️</div><div><h3>Denuncias</h3><div class="num" id="numDenuncias">0</div><p>Reportes recibidos</p></div></div>
+        </div>
+
+        <div class="panel-card">
+          <h2>Acciones Rápidas</h2>
+          <div class="quick-grid">
+            <button class="quick-btn" onclick="abrirModulo('usuarios')"><span class="quick-ico">👥</span><span><b>Gestionar Usuarios</b><small>Ver y editar usuarios</small></span></button>
+            <button class="quick-btn" onclick="abrirModulo('pendientes')"><span class="quick-ico">✅</span><span><b>Aprobar Perfiles</b><small>Revisar pendientes</small></span></button>
+            <button class="quick-btn" onclick="abrirModulo('mensajes')"><span class="quick-ico">✉️</span><span><b>Ver Mensajes</b><small>Abrir buzón</small></span></button>
+            <button class="quick-btn" onclick="abrirModulo('pagos')"><span class="quick-ico">💲</span><span><b>Ver Pagos</b><small>Pagos realizados</small></span></button>
+            <button class="quick-btn" onclick="abrirModulo('denuncias')"><span class="quick-ico">🚨</span><span><b>Ver Denuncias</b><small>Reportes</small></span></button>
+            <button class="quick-btn" onclick="abrirModulo('vencidos')"><span class="quick-ico">⭐</span><span><b>Perfiles por Vencer</b><small>Renovaciones</small></span></button>
+            <button class="quick-btn" onclick="abrirModulo('graficas')"><span class="quick-ico">📊</span><span><b>Estadísticas</b><small>Reportes del sistema</small></span></button>
+            <button class="quick-btn" onclick="abrirModulo('seguridad')"><span class="quick-ico">⚙️</span><span><b>Seguridad</b><small>Logs y ajustes</small></span></button>
+            <button class="quick-btn" onclick="abrirModulo('anuncios')"><span class="quick-ico">📢</span><span><b>Publicidad</b><small>Banners y anuncios</small></span></button>
+            <button class="quick-btn" onclick="abrirModulo('historial')"><span class="quick-ico">📋</span><span><b>Historial</b><small>Logs admin</small></span></button>
+          </div>
+        </div>
+
+        <div class="bottom-grid">
+          <div class="mini-panel">
+            <h3>Últimos Perfiles Pendientes</h3>
+            <div id="feedPendientes"></div>
+            <button class="feed-btn" onclick="abrirModulo('pendientes')">Ver todos →</button>
+          </div>
+          <div class="mini-panel">
+            <h3>Últimos Mensajes</h3>
+            <div id="feedMensajes"></div>
+            <button class="feed-btn" onclick="abrirModulo('mensajes')">Ver todos →</button>
+          </div>
+          <div class="mini-panel">
+            <h3>Pagos Recientes</h3>
+            <div id="feedPagos"></div>
+            <button class="feed-btn" onclick="abrirModulo('pagos')">Ver todos →</button>
+          </div>
+          <div class="mini-panel">
+            <h3>Denuncias Recientes</h3>
+            <div id="feedDenuncias"></div>
+            <button class="feed-btn" onclick="abrirModulo('denuncias')">Ver todas →</button>
+          </div>
+        </div>
+
+      </section>
+
+      <section id="vistaModulo" class="vista">
+        <div class="section-head">
+          <h2 id="tituloModulo">Módulo</h2>
+          <p id="descripcionModulo">Cargando...</p>
+          <div class="section-actions">
+            <button class="btn btn-volver" onclick="mostrarDashboard()">← Volver al panel principal</button>
+            <button class="btn btn-refresh" onclick="recargarModulo()">Actualizar</button>
+          </div>
+
+          <div class="search-row" id="buscadorModulo">
+            <input id="buscarTexto" placeholder="Buscar nombre, correo, teléfono, ciudad..." oninput="filtrarCards()">
+            <select id="filtroEstado" onchange="filtrarCards()">
+              <option value="">Todos</option>
+              <option value="activo">Activos</option>
+              <option value="vencido">Vencidos</option>
+              <option value="pendiente">Pendientes</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="list-wrap" id="contenidoModulo">Cargando...</div>
+      </section>
+
+      <div class="footer">
+        <span>♡ CariHub - Panel de Administración</span>
+        <span>Versión 2.1.0</span>
+      </div>
+    </main>
+  </div>
 </div>
 
 <audio id="sonidoAlerta">
@@ -711,6 +931,14 @@ function bloquearAcciones(valor){
   document.querySelectorAll("button").forEach(b => b.disabled = valor);
 }
 
+function actualizarFecha(){
+  const box = document.getElementById("timeBox");
+  const d = new Date();
+  box.innerHTML = "📅 " + d.toLocaleDateString("es-MX",{weekday:"long",year:"numeric",month:"long",day:"numeric"}) + "<br>" + d.toLocaleTimeString("es-MX",{hour:"2-digit",minute:"2-digit"});
+}
+
+setInterval(actualizarFecha,30000);
+
 auth.onAuthStateChanged(async (user) => {
   if (!user) {
     document.getElementById("loginBox").style.display = "flex";
@@ -727,6 +955,7 @@ auth.onAuthStateChanged(async (user) => {
 
   document.getElementById("loginBox").style.display = "none";
   document.getElementById("panelBox").style.display = "block";
+  actualizarFecha();
   await cargarDashboard();
 });
 
@@ -750,6 +979,7 @@ async function cargarDashboard(){
   await cargarUsuariosCache();
   await cargarContadoresExtras();
   pintarResumen();
+  pintarFeedsDashboard();
 }
 
 async function cargarUsuariosCache(){
@@ -795,12 +1025,6 @@ async function cargarContadoresExtras(){
 
   document.getElementById("numDenuncias").innerText = contadoresGlobales.denuncias;
   document.getElementById("numPagos").innerText = contadoresGlobales.pagos;
-  document.getElementById("numHistorial").innerText = contadoresGlobales.historial;
-  document.getElementById("numSeguridad").innerText = contadoresGlobales.seguridad;
-  document.getElementById("numAnuncios").innerText = contadoresGlobales.anuncios;
-  document.getElementById("numMensajes").innerText = contadoresGlobales.mensajes;
-  document.getElementById("numVistas").innerText = contadoresGlobales.vistas;
-  document.getElementById("heroDenuncias").innerText = contadoresGlobales.denuncias;
 }
 
 function pintarResumen(){
@@ -820,20 +1044,7 @@ function pintarResumen(){
 
   document.getElementById("numUsuarios").innerText = usuariosCache.length;
   document.getElementById("numPendientes").innerText = pendientes;
-  document.getElementById("numVencidos").innerText = vencidos;
   document.getElementById("numActivos").innerText = activos;
-
-  document.getElementById("heroPendientes").innerText = pendientes;
-  document.getElementById("heroActivos").innerText = activos;
-  document.getElementById("heroVencidos").innerText = vencidos;
-
-  document.getElementById("resumenPrincipal").innerHTML = `
-    Usuarios registrados: ${usuariosCache.length}<br>
-    Pendientes: ${pendientes}<br>
-    Activos: ${activos}<br>
-    Vencidos/Inactivos: ${vencidos}<br>
-    Denuncias pendientes: ${contadoresGlobales.denuncias || 0}
-  `;
 
   if(pendientes > 0 || (contadoresGlobales.denuncias || 0) > 0){
     const sonido = document.getElementById("sonidoAlerta");
@@ -841,12 +1052,27 @@ function pintarResumen(){
   }
 }
 
+function pintarFeedsDashboard(){
+  const pendientes = usuariosCache.filter(u => u.estadoRevision === "registro_pendiente" || u.estadoRevision === "actualizacion_pendiente" || u.actualizacionPendiente === true).slice(0,5);
+
+  document.getElementById("feedPendientes").innerHTML = pendientes.length ? pendientes.map(u => `
+    <div class="feed-item">
+      <div class="feed-left"><span class="avatar">👤</span><span><b>${textoSeguro(u.nombre)}</b><small>${formatearFecha(u.fecha)}</small></span></div>
+      <button class="feed-btn" onclick="abrirModulo('pendientes')">Revisar</button>
+    </div>
+  `).join("") : `<p class="aviso">Sin pendientes.</p>`;
+
+  document.getElementById("feedMensajes").innerHTML = `<p class="aviso">Mensajes pendientes de conectar desde Mi perfil.</p>`;
+  document.getElementById("feedPagos").innerHTML = `<p class="aviso">Pagos aparecerán al conectar Stripe/MercadoPago.</p>`;
+  document.getElementById("feedDenuncias").innerHTML = `<p class="aviso">${contadoresGlobales.denuncias || 0} denuncia(s) pendiente(s).</p>`;
+}
+
 function mostrarDashboard(){
   seccionActual = "dashboard";
   document.getElementById("vistaDashboard").classList.add("active");
   document.getElementById("vistaModulo").classList.remove("active");
-  document.getElementById("mainTitle").innerText = "Dashboard CariHub";
-  document.getElementById("mainSub").innerText = "Resumen general de operación y moderación.";
+  document.getElementById("mainTitle").innerText = "Bienvenido, Administrador";
+  document.getElementById("mainSub").innerText = "Aquí puedes gestionar todo el sistema de CariHub";
   cargarDashboard();
 }
 
