@@ -27,11 +27,12 @@ const db = firebase.firestore();
 const storage = firebase.storage();
 
 const ADMIN_EMAIL = "carinosas.anuncios@gmail.com";
-const LIMITE_USUARIOS = 80;
+const LIMITE_USUARIOS = 150;
 
 let usuariosCache = [];
 let seccionActual = "dashboard";
 let procesando = false;
+let contadoresGlobales = {};
 </script>
 
 <style>
@@ -54,7 +55,10 @@ let procesando = false;
   --sombra2:0 8px 24px rgba(0,0,0,.10);
 }
 
-*{box-sizing:border-box}
+*{
+  box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;
+}
 
 body{
   margin:0;
@@ -73,7 +77,7 @@ button,input,select,textarea{
 button{
   border:none;
   cursor:pointer;
-  font-weight:800;
+  font-weight:900;
 }
 
 button:disabled{
@@ -91,9 +95,13 @@ input,select,textarea{
   background:white;
 }
 
-textarea{min-height:100px}
+textarea{
+  min-height:110px;
+}
 
-h1,h2,h3,p{margin-top:0}
+h1,h2,h3,p{
+  margin-top:0;
+}
 
 .login-screen{
   min-height:100vh;
@@ -154,124 +162,31 @@ h1,h2,h3,p{margin-top:0}
   min-height:100vh;
 }
 
-.sidebar{
-  position:fixed;
-  top:18px;
-  left:18px;
-  bottom:18px;
-  width:270px;
-  background:rgba(255,255,255,.92);
-  border:1px solid var(--borde);
-  border-radius:30px;
-  box-shadow:var(--sombra);
-  padding:18px;
-  overflow-y:auto;
-  z-index:100;
-  backdrop-filter:blur(12px);
-}
-
-.brand{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  padding:8px 8px 18px;
-  border-bottom:1px solid #ffe0ed;
-  margin-bottom:14px;
-}
-
-.brand-icon{
-  width:48px;
-  height:48px;
-  border-radius:16px;
-  background:linear-gradient(135deg,var(--rosa),var(--rosa3));
-  color:white;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:24px;
-}
-
-.brand h2{
-  margin:0;
-  color:var(--rosa);
-  font-size:21px;
-}
-
-.brand small{
-  color:var(--muted);
-  font-weight:700;
-}
-
-.nav-btn{
-  width:100%;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:10px;
-  padding:13px 12px;
-  border-radius:16px;
-  background:transparent;
-  color:#5d4150;
-  margin:4px 0;
-  font-size:15px;
-  text-align:left;
-}
-
-.nav-btn:hover,
-.nav-btn.active{
-  background:linear-gradient(135deg,#fff1f7,#ffe1ee);
-  color:var(--rosa);
-}
-
-.nav-left{
-  display:flex;
-  align-items:center;
-  gap:10px;
-}
-
-.nav-count{
-  background:var(--rosa);
-  color:white;
-  min-width:28px;
-  padding:5px 8px;
-  border-radius:999px;
-  font-size:12px;
-  text-align:center;
-}
-
-.btn-salir{
-  width:100%;
-  margin-top:16px;
-  background:#4b4148;
-  color:white;
-  border-radius:16px;
-  padding:13px;
-  font-size:15px;
-}
-
 .main{
-  margin-left:306px;
-  padding:18px 18px 28px;
+  max-width:1320px;
+  margin:0 auto;
+  padding:14px;
 }
 
 .topbar{
-  background:rgba(255,255,255,.88);
+  background:rgba(255,255,255,.92);
   border:1px solid var(--borde);
-  border-radius:28px;
+  border-radius:26px;
   box-shadow:var(--sombra);
-  padding:18px;
+  padding:16px;
   display:flex;
   align-items:center;
   justify-content:space-between;
-  gap:16px;
-  margin-bottom:18px;
+  gap:14px;
+  margin-bottom:14px;
   backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
 }
 
 .topbar h1{
   margin:0;
-  color:var(--texto);
-  font-size:26px;
+  color:var(--rosa);
+  font-size:25px;
 }
 
 .topbar p{
@@ -282,7 +197,7 @@ h1,h2,h3,p{margin-top:0}
 
 .top-actions{
   display:flex;
-  gap:10px;
+  gap:8px;
   flex-wrap:wrap;
 }
 
@@ -303,65 +218,65 @@ h1,h2,h3,p{margin-top:0}
 
 .hero{
   background:
-    linear-gradient(135deg,rgba(194,24,91,.92),rgba(236,64,122,.82)),
+    linear-gradient(135deg,rgba(194,24,91,.94),rgba(236,64,122,.84)),
     radial-gradient(circle at top right,#fff 0,transparent 35%);
-  border-radius:30px;
+  border-radius:28px;
   color:white;
-  padding:24px;
+  padding:20px;
   box-shadow:0 16px 34px rgba(194,24,91,.25);
-  margin-bottom:18px;
+  margin-bottom:14px;
   display:grid;
-  grid-template-columns:1.5fr .9fr;
-  gap:18px;
+  grid-template-columns:1.3fr 1fr;
+  gap:14px;
   align-items:center;
 }
 
 .hero h2{
-  font-size:28px;
+  font-size:27px;
   margin-bottom:8px;
 }
 
 .hero p{
   margin:0;
-  opacity:.92;
+  opacity:.94;
   font-weight:700;
-  line-height:1.5;
+  line-height:1.45;
 }
 
 .hero-stats{
   display:grid;
   grid-template-columns:1fr 1fr;
-  gap:12px;
+  gap:10px;
 }
 
 .hero-mini{
   background:rgba(255,255,255,.18);
   border:1px solid rgba(255,255,255,.25);
-  border-radius:20px;
-  padding:14px;
+  border-radius:18px;
+  padding:13px;
 }
 
 .hero-mini b{
-  font-size:26px;
+  font-size:25px;
   display:block;
 }
 
-.grid{
+.dashboard-grid{
   display:grid;
   grid-template-columns:repeat(4,1fr);
-  gap:14px;
-  margin-bottom:18px;
+  gap:12px;
+  margin-bottom:14px;
 }
 
 .stat-card{
   background:white;
   border:1px solid var(--borde);
-  border-radius:24px;
-  padding:18px;
+  border-radius:22px;
+  padding:15px;
   box-shadow:var(--sombra2);
   cursor:pointer;
   transition:.15s;
-  min-height:132px;
+  min-height:128px;
 }
 
 .stat-card:hover{
@@ -379,7 +294,7 @@ h1,h2,h3,p{margin-top:0}
   align-items:center;
   justify-content:center;
   font-size:22px;
-  margin-bottom:10px;
+  margin-bottom:9px;
 }
 
 .stat-card h3{
@@ -389,10 +304,10 @@ h1,h2,h3,p{margin-top:0}
 }
 
 .stat-card .num{
-  font-size:34px;
+  font-size:31px;
   font-weight:900;
   color:#222;
-  margin:5px 0;
+  margin:4px 0;
 }
 
 .stat-card p{
@@ -401,90 +316,26 @@ h1,h2,h3,p{margin-top:0}
   font-size:13px;
 }
 
-.content-grid{
-  display:grid;
-  grid-template-columns:1.1fr .9fr;
-  gap:18px;
-}
-
-.panel-card{
-  background:white;
-  border:1px solid var(--borde);
-  border-radius:26px;
-  box-shadow:var(--sombra2);
-  padding:18px;
-}
-
-.panel-card h2{
-  color:var(--rosa);
-  margin-bottom:12px;
-}
-
-.quick-grid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:10px;
-}
-
-.quick-btn{
-  background:linear-gradient(135deg,#fff,#fff1f7);
-  border:1px solid #ffd1e4;
-  border-radius:18px;
-  padding:14px;
-  color:#5d4150;
-  text-align:left;
-  font-size:15px;
-}
-
-.quick-btn b{
-  display:block;
-  color:var(--rosa);
-  margin-bottom:4px;
-}
-
-.notice{
-  display:flex;
-  gap:12px;
-  align-items:flex-start;
-  padding:12px;
-  border-radius:18px;
-  background:#fff7fb;
-  border:1px solid #ffe1ee;
-  margin-bottom:10px;
-}
-
-.notice-icon{
-  width:38px;
-  height:38px;
-  border-radius:13px;
-  background:var(--rosaSuave);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
-
-.notice p{
-  margin:2px 0 0;
-  color:var(--muted);
-  font-size:14px;
-}
-
-.seccion{
+.vista{
   display:none;
+}
+
+.vista.active{
+  display:block;
 }
 
 .section-head{
   background:white;
   border:1px solid var(--borde);
-  border-radius:26px;
+  border-radius:24px;
   box-shadow:var(--sombra2);
-  padding:18px;
-  margin-bottom:16px;
+  padding:16px;
+  margin-bottom:14px;
 }
 
 .section-head h2{
   color:var(--rosa);
-  margin-bottom:8px;
+  margin-bottom:6px;
 }
 
 .section-head p{
@@ -495,15 +346,15 @@ h1,h2,h3,p{margin-top:0}
 .section-actions{
   display:flex;
   flex-wrap:wrap;
-  gap:10px;
-  margin-top:14px;
+  gap:8px;
+  margin-top:12px;
 }
 
 .btn{
-  padding:12px 15px;
+  padding:12px 14px;
   border-radius:14px;
   font-size:15px;
-  margin:4px;
+  margin:3px;
 }
 
 .btn-volver{background:#777;color:white}
@@ -515,6 +366,7 @@ h1,h2,h3,p{margin-top:0}
 .btn-borrar{background:var(--rojo);color:white}
 .btn-ver{background:var(--rosa);color:white}
 .btn-denuncia{background:#d32f2f;color:white}
+.btn-mensaje{background:#00897b;color:white}
 
 .search-row{
   display:grid;
@@ -526,32 +378,56 @@ h1,h2,h3,p{margin-top:0}
 .list-wrap{
   background:white;
   border:1px solid var(--borde);
-  border-radius:26px;
+  border-radius:24px;
   box-shadow:var(--sombra2);
-  padding:16px;
+  padding:14px;
+}
+
+.cards-list{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:12px;
 }
 
 .item{
   background:#fff;
   border:1px solid #ffe1ee;
-  border-radius:22px;
-  padding:16px;
-  margin-bottom:12px;
+  border-radius:20px;
+  padding:14px;
   box-shadow:0 4px 12px rgba(0,0,0,.06);
 }
 
 .item h3{
   color:var(--rosa);
-  margin-bottom:8px;
+  margin-bottom:7px;
+}
+
+.item p{
+  color:#3b333a;
+  margin:6px 0;
+  line-height:1.35;
+}
+
+.item-profile{
+  cursor:pointer;
+}
+
+.item-profile img{
+  width:100%;
+  height:210px;
+  object-fit:cover;
+  border-radius:16px;
+  margin-bottom:10px;
+  background:#fff1f7;
 }
 
 .badge{
   display:inline-block;
-  padding:8px 12px;
+  padding:7px 10px;
   border-radius:999px;
-  font-size:13px;
+  font-size:12px;
   font-weight:bold;
-  margin:4px 4px 8px 0;
+  margin:3px 3px 7px 0;
 }
 
 .badge-rojo{background:#ffe5e5;color:#b00000}
@@ -559,23 +435,23 @@ h1,h2,h3,p{margin-top:0}
 .badge-azul{background:#e5f0ff;color:#064b9b}
 .badge-rosa{background:#fff1f7;color:#9f174f}
 .badge-naranja{background:#fff0d9;color:#a85b00}
+.badge-morado{background:#f4e8ff;color:#5e1486}
 
 .detalle-box{
   background:#fff;
   border:1px solid var(--borde);
-  border-radius:26px;
+  border-radius:24px;
   box-shadow:var(--sombra2);
-  padding:18px;
+  padding:16px;
 }
 
 .detalle-box h2{
   color:var(--rosa);
 }
 
-.detalle-box img,
-.item img{
+.detalle-box img{
   width:100%;
-  max-height:380px;
+  max-height:420px;
   object-fit:cover;
   border-radius:18px;
   margin:8px 0 14px;
@@ -613,8 +489,8 @@ h1,h2,h3,p{margin-top:0}
 }
 
 .actions-row{
-  display:flex;
-  flex-wrap:wrap;
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
   gap:8px;
   margin-top:12px;
 }
@@ -628,114 +504,64 @@ pre{
   font-size:13px;
 }
 
-.mobile-menu-btn{
-  display:none;
-  position:fixed;
-  top:12px;
-  left:12px;
-  z-index:200;
-  background:var(--rosa);
-  color:white;
-  border-radius:16px;
-  padding:12px 14px;
-  box-shadow:var(--sombra);
+.graph-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:12px;
 }
 
-.overlay{
-  display:none;
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.35);
-  z-index:90;
+.graph-card{
+  background:#fff;
+  border:1px solid #ffe1ee;
+  border-radius:20px;
+  padding:15px;
+  min-height:150px;
+  box-shadow:0 4px 12px rgba(0,0,0,.06);
+}
+
+.graph-card h3{
+  color:var(--rosa);
+}
+
+.graph-placeholder{
+  height:78px;
+  border-radius:14px;
+  background:linear-gradient(90deg,#fff1f7,#ffe1ee,#fff1f7);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#9f174f;
+  font-weight:900;
 }
 
 @media(max-width:1050px){
-  .grid{grid-template-columns:repeat(2,1fr)}
-  .content-grid{grid-template-columns:1fr}
+  .dashboard-grid{grid-template-columns:repeat(3,1fr)}
+  .cards-list{grid-template-columns:repeat(2,1fr)}
   .hero{grid-template-columns:1fr}
 }
 
 @media(max-width:760px){
-  body{padding-top:58px}
-
-  .mobile-menu-btn{display:block}
-
-  .sidebar{
-    transform:translateX(-115%);
-    transition:.25s;
-    top:10px;
-    left:10px;
-    bottom:10px;
-    width:285px;
-    z-index:150;
-  }
-
-  .sidebar.active{
-    transform:translateX(0);
-  }
-
-  .overlay.active{
-    display:block;
-  }
-
-  .main{
-    margin-left:0;
-    padding:10px;
-  }
-
-  .topbar{
-    display:block;
-    border-radius:22px;
-  }
-
-  .top-actions{
-    margin-top:12px;
-  }
-
-  .hero{
-    border-radius:24px;
-    padding:18px;
-  }
-
-  .hero h2{
-    font-size:24px;
-  }
-
-  .hero-stats{
-    grid-template-columns:1fr 1fr;
-  }
-
-  .grid{
-    grid-template-columns:1fr;
-  }
-
-  .quick-grid{
-    grid-template-columns:1fr;
-  }
-
-  .search-row{
-    grid-template-columns:1fr;
-  }
-
+  .main{padding:10px}
+  .topbar{display:block}
+  .top-actions{margin-top:12px}
+  .dashboard-grid{grid-template-columns:repeat(2,1fr)}
+  .cards-list{grid-template-columns:1fr}
+  .graph-grid{grid-template-columns:1fr}
+  .search-row{grid-template-columns:1fr}
+  .actions-row{grid-template-columns:1fr}
   .section-actions button,
-  .actions-row button,
-  .top-actions button{
-    width:100%;
-  }
+  .top-actions button{width:100%}
 }
 </style>
 </head>
 
 <body>
 
-<button class="mobile-menu-btn" onclick="toggleMenu()">☰</button>
-<div class="overlay" id="overlay" onclick="cerrarMenuMovil()"></div>
-
 <div class="login-screen" id="loginBox">
   <div class="login-card">
     <div class="login-logo">CH</div>
     <h1>Panel Admin</h1>
-    <p>CariHub · Control privado de perfiles, pagos y seguridad.</p>
+    <p>CariHub · Control privado de perfiles, pagos, denuncias, mensajes y estadísticas.</p>
     <input id="email" type="email" placeholder="Correo admin">
     <input id="password" type="password" placeholder="Contraseña">
     <button class="btn-login" onclick="login()">Entrar</button>
@@ -743,73 +569,6 @@ pre{
 </div>
 
 <div class="app" id="panelBox">
-
-  <aside class="sidebar" id="sidebar">
-    <div class="brand">
-      <div class="brand-icon">💗</div>
-      <div>
-        <h2>CariHub</h2>
-        <small>Admin premium</small>
-      </div>
-    </div>
-
-    <button class="nav-btn active" id="nav-dashboard" onclick="mostrarDashboard()">
-      <span class="nav-left">🏠 Inicio</span>
-    </button>
-
-    <button class="nav-btn" id="nav-nuevos" onclick="abrirSeccion('nuevos')">
-      <span class="nav-left">🆕 Perfiles nuevos</span>
-      <span class="nav-count" id="sideNuevos">0</span>
-    </button>
-
-    <button class="nav-btn" id="nav-actualizaciones" onclick="abrirSeccion('actualizaciones')">
-      <span class="nav-left">✏️ Actualizaciones</span>
-      <span class="nav-count" id="sideActualizaciones">0</span>
-    </button>
-
-    <button class="nav-btn" id="nav-denuncias" onclick="abrirSeccion('denuncias')">
-      <span class="nav-left">🚨 Denuncias</span>
-      <span class="nav-count" id="sideDenuncias">0</span>
-    </button>
-
-    <button class="nav-btn" id="nav-pagos" onclick="abrirSeccion('pagos')">
-      <span class="nav-left">💳 Pagos</span>
-      <span class="nav-count" id="sidePagos">0</span>
-    </button>
-
-    <button class="nav-btn" id="nav-vencidos" onclick="abrirSeccion('vencidos')">
-      <span class="nav-left">⏳ Vencidos</span>
-      <span class="nav-count" id="sideVencidos">0</span>
-    </button>
-
-    <button class="nav-btn" id="nav-activos" onclick="abrirSeccion('activos')">
-      <span class="nav-left">✅ Activos</span>
-      <span class="nav-count" id="sideActivos">0</span>
-    </button>
-
-    <button class="nav-btn" id="nav-historial" onclick="abrirSeccion('historial')">
-      <span class="nav-left">📜 Historial</span>
-      <span class="nav-count" id="sideHistorial">0</span>
-    </button>
-
-    <button class="nav-btn" id="nav-seguridad" onclick="abrirSeccion('seguridad')">
-      <span class="nav-left">🛡 Seguridad</span>
-      <span class="nav-count" id="sideSeguridad">0</span>
-    </button>
-
-    <button class="nav-btn" id="nav-anuncios" onclick="abrirSeccion('anuncios')">
-      <span class="nav-left">📢 Anuncios</span>
-      <span class="nav-count" id="sideAnuncios">0</span>
-    </button>
-
-    <button class="nav-btn" id="nav-categorias" onclick="abrirSeccion('categorias')">
-      <span class="nav-left">💡 Categorías</span>
-      <span class="nav-count" id="sideCategorias">0</span>
-    </button>
-
-    <button class="btn-salir" onclick="salir()">Cerrar sesión</button>
-  </aside>
-
   <main class="main">
 
     <div class="topbar">
@@ -819,145 +578,76 @@ pre{
       </div>
       <div class="top-actions">
         <button class="pill-btn" onclick="cargarDashboard()">Actualizar</button>
-        <button class="pill-btn primary" onclick="abrirSeccion('nuevos')">Revisar pendientes</button>
+        <button class="pill-btn primary" onclick="abrirModulo('pendientes')">Revisar pendientes</button>
+        <button class="pill-btn" onclick="salir()">Cerrar sesión</button>
       </div>
     </div>
 
-    <section id="vistaDashboard">
-
+    <section id="vistaDashboard" class="vista active">
       <div class="hero">
         <div>
           <h2>Centro de control</h2>
           <p id="resumenPrincipal">Cargando resumen...</p>
         </div>
         <div class="hero-stats">
-          <div class="hero-mini">
-            <b id="heroPendientes">0</b>
-            Pendientes
-          </div>
-          <div class="hero-mini">
-            <b id="heroActivos">0</b>
-            Activos
-          </div>
-          <div class="hero-mini">
-            <b id="heroVencidos">0</b>
-            Vencidos
-          </div>
-          <div class="hero-mini">
-            <b id="heroDenuncias">0</b>
-            Denuncias
-          </div>
+          <div class="hero-mini"><b id="heroPendientes">0</b>Pendientes</div>
+          <div class="hero-mini"><b id="heroActivos">0</b>Activos</div>
+          <div class="hero-mini"><b id="heroVencidos">0</b>Vencidos</div>
+          <div class="hero-mini"><b id="heroDenuncias">0</b>Denuncias</div>
         </div>
       </div>
 
-      <div class="grid">
-        <div class="stat-card" onclick="abrirSeccion('nuevos')">
-          <div class="stat-icon">🆕</div>
-          <h3>Perfiles nuevos</h3>
-          <div class="num" id="numNuevos">0</div>
-          <p>Registros pendientes de revisión.</p>
+      <div class="dashboard-grid">
+        <div class="stat-card" onclick="abrirModulo('vistas')">
+          <div class="stat-icon">👁️</div><h3>Vistas totales</h3><div class="num" id="numVistas">0</div><p>Visitas del sitio y perfiles.</p>
         </div>
-
-        <div class="stat-card" onclick="abrirSeccion('actualizaciones')">
-          <div class="stat-icon">✏️</div>
-          <h3>Actualizaciones</h3>
-          <div class="num" id="numActualizaciones">0</div>
-          <p>Cambios pendientes por aprobar.</p>
+        <div class="stat-card" onclick="abrirModulo('usuarios')">
+          <div class="stat-icon">👥</div><h3>Usuarios registrados</h3><div class="num" id="numUsuarios">0</div><p>Todos los perfiles registrados.</p>
         </div>
-
-        <div class="stat-card" onclick="abrirSeccion('denuncias')">
-          <div class="stat-icon">🚨</div>
-          <h3>Denuncias</h3>
-          <div class="num" id="numDenuncias">0</div>
-          <p>Reportes y alertas de usuarios.</p>
+        <div class="stat-card" onclick="abrirModulo('activos')">
+          <div class="stat-icon">✅</div><h3>Perfiles activos</h3><div class="num" id="numActivos">0</div><p>Perfiles visibles al público.</p>
         </div>
-
-        <div class="stat-card" onclick="abrirSeccion('pagos')">
-          <div class="stat-icon">💳</div>
-          <h3>Pagos</h3>
-          <div class="num" id="numPagos">0</div>
-          <p>Pagos y renovaciones.</p>
+        <div class="stat-card" onclick="abrirModulo('pendientes')">
+          <div class="stat-icon">⏳</div><h3>Pendientes</h3><div class="num" id="numPendientes">0</div><p>Registros y cambios por revisar.</p>
         </div>
-
-        <div class="stat-card" onclick="abrirSeccion('vencidos')">
-          <div class="stat-icon">⏳</div>
-          <h3>Vencidos</h3>
-          <div class="num" id="numVencidos">0</div>
-          <p>Perfiles vencidos o inactivos.</p>
+        <div class="stat-card" onclick="abrirModulo('pagos')">
+          <div class="stat-icon">💳</div><h3>Pagos recibidos</h3><div class="num" id="numPagos">0</div><p>Pagos y renovaciones.</p>
         </div>
-
-        <div class="stat-card" onclick="abrirSeccion('activos')">
-          <div class="stat-icon">✅</div>
-          <h3>Activos</h3>
-          <div class="num" id="numActivos">0</div>
-          <p>Perfiles visibles actualmente.</p>
+        <div class="stat-card" onclick="abrirModulo('denuncias')">
+          <div class="stat-icon">🚨</div><h3>Denuncias</h3><div class="num" id="numDenuncias">0</div><p>Reportes pendientes.</p>
         </div>
-
-        <div class="stat-card" onclick="abrirSeccion('seguridad')">
-          <div class="stat-icon">🛡</div>
-          <h3>Seguridad</h3>
-          <div class="num" id="numSeguridad">0</div>
-          <p>Logs y sospechosos.</p>
+        <div class="stat-card" onclick="abrirModulo('mensajes')">
+          <div class="stat-icon">📩</div><h3>Mensajes soporte</h3><div class="num" id="numMensajes">0</div><p>Conversaciones con usuarios.</p>
         </div>
-
-        <div class="stat-card" onclick="abrirSeccion('anuncios')">
-          <div class="stat-icon">📢</div>
-          <h3>Anuncios</h3>
-          <div class="num" id="numAnuncios">0</div>
-          <p>Publicidad interna.</p>
+        <div class="stat-card" onclick="abrirModulo('graficas')">
+          <div class="stat-icon">📊</div><h3>Gráficas</h3><div class="num">↗</div><p>Tráfico, dispositivos y búsquedas.</p>
+        </div>
+        <div class="stat-card" onclick="abrirModulo('vencidos')">
+          <div class="stat-icon">📴</div><h3>Vencidos / inactivos</h3><div class="num" id="numVencidos">0</div><p>Perfiles ocultos o expirados.</p>
+        </div>
+        <div class="stat-card" onclick="abrirModulo('anuncios')">
+          <div class="stat-icon">📢</div><h3>Anuncios</h3><div class="num" id="numAnuncios">0</div><p>Banners y destacados.</p>
+        </div>
+        <div class="stat-card" onclick="abrirModulo('seguridad')">
+          <div class="stat-icon">🛡️</div><h3>Seguridad</h3><div class="num" id="numSeguridad">0</div><p>Logs y actividad sospechosa.</p>
+        </div>
+        <div class="stat-card" onclick="abrirModulo('historial')">
+          <div class="stat-icon">📜</div><h3>Historial</h3><div class="num" id="numHistorial">0</div><p>Acciones del admin.</p>
         </div>
       </div>
-
-      <div class="content-grid">
-        <div class="panel-card">
-          <h2>Accesos rápidos</h2>
-          <div class="quick-grid">
-            <button class="quick-btn" onclick="abrirSeccion('nuevos')"><b>🆕 Nuevos</b>Revisar registros recientes</button>
-            <button class="quick-btn" onclick="abrirSeccion('actualizaciones')"><b>✏️ Cambios</b>Aprobar actualizaciones</button>
-            <button class="quick-btn" onclick="abrirSeccion('vencidos')"><b>⏳ Vencidos</b>Renovar o ocultar</button>
-            <button class="quick-btn" onclick="abrirSeccion('categorias')"><b>💡 Categorías</b>Sugerencias pendientes</button>
-          </div>
-        </div>
-
-        <div class="panel-card">
-          <h2>Notificaciones recientes</h2>
-          <div class="notice">
-            <div class="notice-icon">🔴</div>
-            <div>
-              <b>Pendientes</b>
-              <p id="noticePendientes">Cargando...</p>
-            </div>
-          </div>
-          <div class="notice">
-            <div class="notice-icon">🚨</div>
-            <div>
-              <b>Denuncias</b>
-              <p id="noticeDenuncias">Cargando...</p>
-            </div>
-          </div>
-          <div class="notice">
-            <div class="notice-icon">🛡</div>
-            <div>
-              <b>Seguridad</b>
-              <p id="noticeSeguridad">Módulo preparado para logs.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
     </section>
 
-    <section id="vistaSeccion" class="seccion">
+    <section id="vistaModulo" class="vista">
       <div class="section-head">
-        <h2 id="tituloSeccion">Sección</h2>
-        <p id="descripcionSeccion">Cargando...</p>
+        <h2 id="tituloModulo">Módulo</h2>
+        <p id="descripcionModulo">Cargando...</p>
         <div class="section-actions">
-          <button class="btn btn-volver" onclick="mostrarDashboard()">← Volver al inicio</button>
-          <button class="btn btn-refresh" onclick="recargarSeccionActual()">Actualizar</button>
+          <button class="btn btn-volver" onclick="mostrarDashboard()">← Volver al panel principal</button>
+          <button class="btn btn-refresh" onclick="recargarModulo()">Actualizar</button>
         </div>
 
-        <div class="search-row" id="buscadorSeccion">
-          <input id="buscarTexto" placeholder="Buscar nombre, correo, teléfono..." oninput="filtrarCards()">
+        <div class="search-row" id="buscadorModulo">
+          <input id="buscarTexto" placeholder="Buscar nombre, correo, teléfono, ciudad..." oninput="filtrarCards()">
           <select id="filtroEstado" onchange="filtrarCards()">
             <option value="">Todos</option>
             <option value="activo">Activos</option>
@@ -967,7 +657,7 @@ pre{
         </div>
       </div>
 
-      <div class="list-wrap" id="contenidoSeccion">Cargando...</div>
+      <div class="list-wrap" id="contenidoModulo">Cargando...</div>
     </section>
 
   </main>
@@ -1016,27 +706,9 @@ function estaVencido(u){
   return false;
 }
 
-function toggleMenu(){
-  document.getElementById("sidebar").classList.toggle("active");
-  document.getElementById("overlay").classList.toggle("active");
-}
-
-function cerrarMenuMovil(){
-  document.getElementById("sidebar").classList.remove("active");
-  document.getElementById("overlay").classList.remove("active");
-}
-
-function marcarNav(tipo){
-  document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("active"));
-  const nav = document.getElementById("nav-" + tipo);
-  if(nav) nav.classList.add("active");
-}
-
 function bloquearAcciones(valor){
   procesando = valor;
-  document.querySelectorAll("button").forEach(b => {
-    if(!b.classList.contains("btn-salir")) b.disabled = valor;
-  });
+  document.querySelectorAll("button").forEach(b => b.disabled = valor);
 }
 
 auth.onAuthStateChanged(async (user) => {
@@ -1099,42 +771,36 @@ async function cargarUsuariosCache(){
   }
 }
 
-async function contarColeccion(idElemento,nombre,whereCampo,whereValor){
+async function contarColeccion(nombre,whereCampo,whereValor){
   try{
     let ref = db.collection(nombre);
-
     if(whereCampo){
       ref = ref.where(whereCampo,"==",whereValor);
     }
-
-    const snap = await ref.limit(200).get();
-    const el = document.getElementById(idElemento);
-    if(el) el.innerText = snap.size;
+    const snap = await ref.limit(500).get();
     return snap.size;
   }catch(e){
-    const el = document.getElementById(idElemento);
-    if(el) el.innerText = "0";
     return 0;
   }
 }
 
 async function cargarContadoresExtras(){
-  const denuncias = await contarColeccion("numDenuncias","denuncias","estado","pendiente");
-  const pagos = await contarColeccion("numPagos","pagos");
-  const historial = await contarColeccion("numHistorial","historialCambios");
-  const seguridad = await contarColeccion("numSeguridad","logsSeguridad");
-  const anuncios = await contarColeccion("numAnuncios","anuncios");
-  const categorias = await contarColeccion("numCategorias","categoriasSugeridas","estado","pendiente");
+  contadoresGlobales.denuncias = await contarColeccion("denuncias","estado","pendiente");
+  contadoresGlobales.pagos = await contarColeccion("pagos");
+  contadoresGlobales.historial = await contarColeccion("logsAdmin");
+  contadoresGlobales.seguridad = await contarColeccion("logsSeguridad");
+  contadoresGlobales.anuncios = await contarColeccion("anuncios");
+  contadoresGlobales.mensajes = await contarColeccion("soporte_mensajes");
+  contadoresGlobales.vistas = await contarColeccion("analytics_eventos");
 
-  document.getElementById("sideDenuncias").innerText = denuncias;
-  document.getElementById("sidePagos").innerText = pagos;
-  document.getElementById("sideHistorial").innerText = historial;
-  document.getElementById("sideSeguridad").innerText = seguridad;
-  document.getElementById("sideAnuncios").innerText = anuncios;
-  document.getElementById("sideCategorias").innerText = categorias;
-
-  document.getElementById("heroDenuncias").innerText = denuncias;
-  document.getElementById("noticeDenuncias").innerText = denuncias + " denuncia(s) pendiente(s).";
+  document.getElementById("numDenuncias").innerText = contadoresGlobales.denuncias;
+  document.getElementById("numPagos").innerText = contadoresGlobales.pagos;
+  document.getElementById("numHistorial").innerText = contadoresGlobales.historial;
+  document.getElementById("numSeguridad").innerText = contadoresGlobales.seguridad;
+  document.getElementById("numAnuncios").innerText = contadoresGlobales.anuncios;
+  document.getElementById("numMensajes").innerText = contadoresGlobales.mensajes;
+  document.getElementById("numVistas").innerText = contadoresGlobales.vistas;
+  document.getElementById("heroDenuncias").innerText = contadoresGlobales.denuncias;
 }
 
 function pintarResumen(){
@@ -1152,31 +818,24 @@ function pintarResumen(){
 
   const pendientes = nuevos + actualizaciones;
 
-  document.getElementById("numNuevos").innerText = nuevos;
-  document.getElementById("numActualizaciones").innerText = actualizaciones;
+  document.getElementById("numUsuarios").innerText = usuariosCache.length;
+  document.getElementById("numPendientes").innerText = pendientes;
   document.getElementById("numVencidos").innerText = vencidos;
   document.getElementById("numActivos").innerText = activos;
-
-  document.getElementById("sideNuevos").innerText = nuevos;
-  document.getElementById("sideActualizaciones").innerText = actualizaciones;
-  document.getElementById("sideVencidos").innerText = vencidos;
-  document.getElementById("sideActivos").innerText = activos;
 
   document.getElementById("heroPendientes").innerText = pendientes;
   document.getElementById("heroActivos").innerText = activos;
   document.getElementById("heroVencidos").innerText = vencidos;
 
   document.getElementById("resumenPrincipal").innerHTML = `
+    Usuarios registrados: ${usuariosCache.length}<br>
     Pendientes: ${pendientes}<br>
-    Registros nuevos: ${nuevos}<br>
-    Actualizaciones: ${actualizaciones}<br>
     Activos: ${activos}<br>
-    Vencidos/Inactivos: ${vencidos}
+    Vencidos/Inactivos: ${vencidos}<br>
+    Denuncias pendientes: ${contadoresGlobales.denuncias || 0}
   `;
 
-  document.getElementById("noticePendientes").innerText = pendientes + " perfil(es) requieren revisión.";
-
-  if(pendientes > 0){
+  if(pendientes > 0 || (contadoresGlobales.denuncias || 0) > 0){
     const sonido = document.getElementById("sonidoAlerta");
     if(sonido) sonido.play().catch(()=>{});
   }
@@ -1184,64 +843,43 @@ function pintarResumen(){
 
 function mostrarDashboard(){
   seccionActual = "dashboard";
-  marcarNav("dashboard");
-  cerrarMenuMovil();
-  document.getElementById("vistaDashboard").style.display = "block";
-  document.getElementById("vistaSeccion").style.display = "none";
+  document.getElementById("vistaDashboard").classList.add("active");
+  document.getElementById("vistaModulo").classList.remove("active");
   document.getElementById("mainTitle").innerText = "Dashboard CariHub";
   document.getElementById("mainSub").innerText = "Resumen general de operación y moderación.";
   cargarDashboard();
 }
 
-function abrirSeccion(tipo){
+function abrirModulo(tipo){
   seccionActual = tipo;
-  marcarNav(tipo);
-  cerrarMenuMovil();
-  document.getElementById("vistaDashboard").style.display = "none";
-  document.getElementById("vistaSeccion").style.display = "block";
+  document.getElementById("vistaDashboard").classList.remove("active");
+  document.getElementById("vistaModulo").classList.add("active");
   document.getElementById("buscarTexto").value = "";
   document.getElementById("filtroEstado").value = "";
-  cargarSeccion(tipo);
+  cargarModulo(tipo);
 }
 
-function recargarSeccionActual(){
-  if(seccionActual === "dashboard"){
-    cargarDashboard();
-  }else{
-    cargarSeccion(seccionActual);
-  }
+function recargarModulo(){
+  if(seccionActual === "dashboard") cargarDashboard();
+  else cargarModulo(seccionActual);
 }
 
-async function cargarSeccion(tipo){
-  const titulo = document.getElementById("tituloSeccion");
-  const desc = document.getElementById("descripcionSeccion");
-  const cont = document.getElementById("contenidoSeccion");
-  const buscador = document.getElementById("buscadorSeccion");
+async function cargarModulo(tipo){
+  const titulo = document.getElementById("tituloModulo");
+  const desc = document.getElementById("descripcionModulo");
+  const cont = document.getElementById("contenidoModulo");
+  const buscador = document.getElementById("buscadorModulo");
 
   cont.innerHTML = "Cargando...";
   buscador.style.display = "grid";
 
-  document.getElementById("mainTitle").innerText = "Sección admin";
-  document.getElementById("mainSub").innerText = "Revisión detallada de módulos.";
+  document.getElementById("mainTitle").innerText = "Módulo admin";
+  document.getElementById("mainSub").innerText = "Pantalla interna con detalle y botón de volver.";
 
-  if(tipo === "nuevos"){
-    titulo.innerText = "🆕 Perfiles nuevos";
-    desc.innerText = "Registros nuevos pendientes de revisión.";
-    pintarListaPerfiles(usuariosCache.filter(u => u.estadoRevision === "registro_pendiente"));
-    return;
-  }
-
-  if(tipo === "actualizaciones"){
-    titulo.innerText = "✏️ Actualizaciones pendientes";
-    desc.innerText = "Perfiles que editaron datos públicos y requieren aprobación.";
-    pintarListaPerfiles(usuariosCache.filter(u => u.estadoRevision === "actualizacion_pendiente" || u.actualizacionPendiente === true));
-    return;
-  }
-
-  if(tipo === "vencidos"){
-    titulo.innerText = "⏳ Perfiles vencidos / inactivos";
-    desc.innerText = "Perfiles que ya no deben aparecer públicamente.";
-    pintarListaPerfiles(usuariosCache.filter(u => estaVencido(u) || u.activo === false));
+  if(tipo === "usuarios"){
+    titulo.innerText = "👥 Usuarios registrados";
+    desc.innerText = "Lista resumida: foto principal y nombre. Presiona un perfil para ver toda su información.";
+    pintarListaPerfiles(usuariosCache);
     return;
   }
 
@@ -1252,60 +890,89 @@ async function cargarSeccion(tipo){
     return;
   }
 
+  if(tipo === "pendientes"){
+    titulo.innerText = "⏳ Pendientes de aprobación";
+    desc.innerText = "Registros nuevos y actualizaciones pendientes.";
+    pintarListaPerfiles(usuariosCache.filter(u => u.estadoRevision === "registro_pendiente" || u.estadoRevision === "actualizacion_pendiente" || u.actualizacionPendiente === true));
+    return;
+  }
+
+  if(tipo === "vencidos"){
+    titulo.innerText = "📴 Perfiles vencidos / inactivos";
+    desc.innerText = "Perfiles que ya no deben aparecer públicamente.";
+    pintarListaPerfiles(usuariosCache.filter(u => estaVencido(u) || u.activo === false));
+    return;
+  }
+
   buscador.style.display = "none";
 
   if(tipo === "denuncias"){
-    titulo.innerText = "🚨 Denuncias pendientes";
-    desc.innerText = "Reportes enviados por usuarios. Se revisan desde admin.";
+    titulo.innerText = "🚨 Denuncias";
+    desc.innerText = "Lista de denuncias. Presiona una denuncia para ver detalle completo.";
     await cargarDenuncias();
     return;
   }
 
+  if(tipo === "mensajes"){
+    titulo.innerText = "📩 Mensajes de soporte";
+    desc.innerText = "Conversaciones entre usuarios y admin. Pendiente de conectar desde Mi perfil.";
+    await cargarMensajesSoporte();
+    return;
+  }
+
+  if(tipo === "vistas"){
+    titulo.innerText = "👁️ Vistas totales";
+    desc.innerText = "Eventos de visitas del sitio, búsquedas y perfiles.";
+    await cargarColeccionSimple("analytics_eventos");
+    return;
+  }
+
+  if(tipo === "graficas"){
+    titulo.innerText = "📊 Gráficas";
+    desc.innerText = "Resumen visual de tráfico, dispositivos, búsquedas, favoritos y anuncios.";
+    pintarGraficas();
+    return;
+  }
+
   if(tipo === "pagos"){
-    titulo.innerText = "💳 Pagos";
-    desc.innerText = "Pagos y renovaciones. Pendiente de webhook automático.";
+    titulo.innerText = "💳 Pagos recibidos";
+    desc.innerText = "Pagos y renovaciones.";
     await cargarColeccionSimple("pagos");
     return;
   }
 
   if(tipo === "historial"){
-    titulo.innerText = "📜 Historial de cambios";
-    desc.innerText = "Cambios y acciones guardadas.";
-    await cargarColeccionSimple("historialCambios");
+    titulo.innerText = "📜 Historial admin";
+    desc.innerText = "Acciones realizadas desde el panel.";
+    await cargarColeccionSimple("logsAdmin");
     return;
   }
 
   if(tipo === "seguridad"){
-    titulo.innerText = "🛡 Seguridad / actividad sospechosa";
-    desc.innerText = "Logs de seguridad, bots, abuso o acciones sospechosas.";
+    titulo.innerText = "🛡️ Seguridad";
+    desc.innerText = "Logs de seguridad, abuso, bots o actividad sospechosa.";
     await cargarColeccionSimple("logsSeguridad");
     return;
   }
 
   if(tipo === "anuncios"){
-    titulo.innerText = "📢 Anuncios";
-    desc.innerText = "Publicidad interna de portada y resultados.";
+    titulo.innerText = "📢 Anuncios / destacados";
+    desc.innerText = "Publicidad, banners, destacados y conversiones.";
     await cargarColeccionSimple("anuncios");
-    return;
-  }
-
-  if(tipo === "categorias"){
-    titulo.innerText = "💡 Categorías sugeridas";
-    desc.innerText = "Sugerencias enviadas por usuarios.";
-    await cargarColeccionSimple("categoriasSugeridas");
     return;
   }
 }
 
 function pintarListaPerfiles(lista){
-  const cont = document.getElementById("contenidoSeccion");
+  const cont = document.getElementById("contenidoModulo");
 
   if(!lista.length){
     cont.innerHTML = `<div class="item"><h3>Sin resultados</h3><p>No hay elementos en esta sección.</p></div>`;
     return;
   }
 
-  cont.innerHTML = "";
+  cont.innerHTML = `<div class="cards-list"></div>`;
+  const grid = cont.querySelector(".cards-list");
 
   lista.forEach(u => {
     const vencido = estaVencido(u);
@@ -1319,27 +986,21 @@ function pintarListaPerfiles(lista){
       estado = `<span class="badge badge-rojo">Vencido/Inactivo</span>`;
     }
 
-    const textoBusqueda = textoSeguro(
-      `${u.nombre||""} ${u.email||""} ${u.telefono||""} ${u.ciudad||""} ${u.categoria||""}`
-    );
+    const textoBusqueda = textoSeguro(`${u.nombre||""} ${u.email||""} ${u.telefono||""} ${u.ciudad||""} ${u.categoria||""}`);
 
-    cont.innerHTML += `
-      <div class="item item-filtrable"
+    grid.innerHTML += `
+      <div class="item item-profile item-filtrable"
+        onclick="abrirDetallePerfil('${u.id}')"
         data-texto="${textoBusqueda}"
         data-estado="${u.aprobado && u.activo && !vencido ? "activo" : vencido ? "vencido" : "pendiente"}">
 
+        ${u.fotoURL ? `<img loading="lazy" src="${textoSeguro(u.fotoURL)}" alt="Foto principal">` : `<img alt="Sin foto">`}
         <h3>${textoSeguro(u.nombre || "Sin nombre")}</h3>
         ${estado}
-
         ${u.estadoRevision==="registro_pendiente" ? `<span class="badge badge-rosa">Registro nuevo</span>` : ""}
         ${(u.estadoRevision==="actualizacion_pendiente" || u.actualizacionPendiente) ? `<span class="badge badge-azul">Actualización pendiente</span>` : ""}
-
-        <p><b>Correo:</b> ${textoSeguro(u.email)}</p>
-        <p><b>WhatsApp:</b> ${textoSeguro(u.telefono)}</p>
-        <p><b>Ubicación:</b> ${textoSeguro(u.ciudad)}, ${textoSeguro(u.estado)}, ${textoSeguro(u.pais)}</p>
         <p><b>Categoría:</b> ${textoSeguro(u.categoria)}</p>
-
-        <button class="btn btn-ver" onclick="abrirDetallePerfil('${u.id}')">Abrir perfil</button>
+        <p><b>Ciudad:</b> ${textoSeguro(u.ciudad)}</p>
       </div>
     `;
   });
@@ -1347,17 +1008,15 @@ function pintarListaPerfiles(lista){
 
 function abrirDetallePerfil(id){
   const u = usuariosCache.find(x => x.id === id);
-
   if(!u){
     alert("Perfil no encontrado.");
     return;
   }
 
-  const cont = document.getElementById("contenidoSeccion");
+  const cont = document.getElementById("contenidoModulo");
   const fotoPerfil = u.fotoURL || "";
   const fotosExtraURL = Array.isArray(u.fotosExtraURL) ? u.fotosExtraURL : [];
   const verificacion = u.verificacion || {};
-
   const ineURL = verificacion.ineURL || "";
   const ineReversoURL = verificacion.ineReversoURL || "";
   const selfieURL = verificacion.selfieURL || "";
@@ -1367,32 +1026,16 @@ function abrirDetallePerfil(id){
   const textoDias = dias === "" ? "Sin vencimiento" : (dias >= 0 ? dias + " días restantes" : "Vencido hace " + Math.abs(dias) + " días");
 
   let estadoHTML = `<span class="pendiente">PENDIENTE</span>`;
-
-  if(u.aprobado && u.activo && !estaVencido(u)){
-    estadoHTML = `<span class="aprobado">APROBADO / ACTIVO</span>`;
-  }
-
-  if(estaVencido(u) || u.activo === false){
-    estadoHTML = `<span class="vencido">VENCIDO / INACTIVO</span>`;
-  }
+  if(u.aprobado && u.activo && !estaVencido(u)) estadoHTML = `<span class="aprobado">APROBADO / ACTIVO</span>`;
+  if(estaVencido(u) || u.activo === false) estadoHTML = `<span class="vencido">VENCIDO / INACTIVO</span>`;
 
   cont.innerHTML = `
-    <button class="btn btn-volver" onclick="cargarSeccion('${seccionActual}')">← Volver a sección</button>
+    <button class="btn btn-volver" onclick="cargarModulo('${seccionActual}')">← Volver a sección</button>
 
     <div class="detalle-box">
       <h2>${textoSeguro(u.nombre || "Sin nombre")}</h2>
 
       ${fotoPerfil ? `<img loading="lazy" src="${textoSeguro(fotoPerfil)}" alt="Foto perfil">` : "<p class='aviso'>Sin foto de perfil</p>"}
-
-      ${fotosExtraURL.length > 0 ? `
-        <div class="fotos-extra">
-          <h3>Fotos adicionales</h3>
-          ${fotosExtraURL.map((url, i) => `
-            <p><b>Foto extra ${i + 1}:</b></p>
-            <img loading="lazy" src="${textoSeguro(url)}" alt="Foto extra ${i + 1}">
-          `).join("")}
-        </div>
-      ` : "<p class='aviso'>Sin fotos adicionales</p>"}
 
       <p class="dato"><b>ID:</b> ${textoSeguro(id)}</p>
       <p class="dato"><b>Correo:</b> ${textoSeguro(u.email)}</p>
@@ -1421,21 +1064,30 @@ function abrirDetallePerfil(id){
       <p class="dato"><b>Fecha vencimiento:</b> ${formatearFecha(u.fechaVencimiento)}</p>
       <p class="dato"><b>Días:</b> ${textoSeguro(textoDias)}</p>
 
+      ${fotosExtraURL.length > 0 ? `
+        <div class="fotos-extra">
+          <h3>Fotos adicionales</h3>
+          ${fotosExtraURL.map((url, i) => `
+            <p><b>Foto extra ${i + 1}:</b></p>
+            <img loading="lazy" src="${textoSeguro(url)}" alt="Foto extra ${i + 1}">
+          `).join("")}
+        </div>
+      ` : "<p class='aviso'>Sin fotos adicionales</p>"}
+
       <div class="verificacion">
         <h3>Verificación privada</h3>
         <p><b>Nombre real:</b> ${textoSeguro(nombreReal)}</p>
-
-        ${ineURL ? `<p><b>INE frente / identificación:</b><br><img loading="lazy" src="${textoSeguro(ineURL)}" alt="INE frente"></p>` : "<p class='aviso'>INE frente no subida</p>"}
+        ${ineURL ? `<p><b>INE frente:</b><br><img loading="lazy" src="${textoSeguro(ineURL)}" alt="INE frente"></p>` : "<p class='aviso'>INE frente no subida</p>"}
         ${ineReversoURL ? `<p><b>INE reverso:</b><br><img loading="lazy" src="${textoSeguro(ineReversoURL)}" alt="INE reverso"></p>` : "<p class='aviso'>INE reverso no subida</p>"}
-        ${selfieURL ? `<p><b>Selfie de verificación:</b><br><img loading="lazy" src="${textoSeguro(selfieURL)}" alt="Selfie"></p>` : "<p class='aviso'>Selfie no subida</p>"}
-
+        ${selfieURL ? `<p><b>Selfie:</b><br><img loading="lazy" src="${textoSeguro(selfieURL)}" alt="Selfie"></p>` : "<p class='aviso'>Selfie no subida</p>"}
         <p class="aviso">Estas imágenes no son públicas. Solo el admin debe revisarlas.</p>
       </div>
 
       <div class="actions-row">
         <button class="btn btn-aprobar" onclick="aprobarGratis('${id}')">🟢 Aprobar + 30 días gratis</button>
         <button class="btn btn-cambios" onclick="aprobarCambios('${id}')">🔵 Aprobar cambios</button>
-        <button class="btn btn-pago" onclick="activarRenovacionPagada('${id}')">💳 Activar renovación pagada 30 días</button>
+        <button class="btn btn-pago" onclick="activarRenovacionPagada('${id}')">💳 Activar renovación pagada</button>
+        <button class="btn btn-mensaje" onclick="crearMensajeAdmin('${id}')">📩 Mensaje soporte</button>
         <button class="btn btn-quitar" onclick="quitarAprobacion('${id}')">Quitar aprobación</button>
         <button class="btn btn-quitar" onclick="marcarVencido('${id}')">Marcar vencido</button>
         <button class="btn btn-borrar" onclick="borrarUsuario('${id}')">Borrar</button>
@@ -1445,41 +1097,38 @@ function abrirDetallePerfil(id){
 }
 
 async function cargarDenuncias(){
-  const cont = document.getElementById("contenidoSeccion");
+  const cont = document.getElementById("contenidoModulo");
 
   try{
-    const snap = await db.collection("denuncias")
-      .orderBy("fecha","desc")
-      .limit(50)
-      .get();
+    const snap = await db.collection("denuncias").orderBy("fecha","desc").limit(80).get();
 
     if(snap.empty){
       cont.innerHTML = `<div class="item"><h3>Sin denuncias</h3><p>No hay denuncias guardadas todavía.</p></div>`;
       return;
     }
 
-    cont.innerHTML = "";
+    cont.innerHTML = `<div class="cards-list"></div>`;
+    const grid = cont.querySelector(".cards-list");
 
     snap.forEach(doc => {
       const d = doc.data();
-
-      cont.innerHTML += `
-        <div class="item">
+      grid.innerHTML += `
+        <div class="item" onclick="abrirDetalleDenuncia('${doc.id}')">
           <h3>🚨 ${textoSeguro(d.perfilNombre || d.perfilId || "Perfil denunciado")}</h3>
           <span class="badge ${d.estado==="pendiente" ? "badge-rojo" : "badge-verde"}">${textoSeguro(d.estado || "pendiente")}</span>
           <p><b>Motivo:</b> ${textoSeguro(d.motivo)}</p>
           <p><b>Fecha:</b> ${formatearFecha(d.fecha)}</p>
-          <button class="btn btn-denuncia" onclick="abrirDetalleDenuncia('${doc.id}')">Abrir denuncia</button>
+          <button class="btn btn-denuncia">Abrir denuncia</button>
         </div>
       `;
     });
   }catch(e){
-    cont.innerHTML = `<div class="item"><h3>Denuncias no configuradas</h3><p>Cuando conectemos el formulario de denuncias, aparecerán aquí.</p></div>`;
+    cont.innerHTML = `<div class="item"><h3>Denuncias no configuradas</h3><p>Cuando conectemos denuncias en Firebase aparecerán aquí.</p></div>`;
   }
 }
 
 async function abrirDetalleDenuncia(id){
-  const cont = document.getElementById("contenidoSeccion");
+  const cont = document.getElementById("contenidoModulo");
 
   try{
     const doc = await db.collection("denuncias").doc(id).get();
@@ -1493,16 +1142,14 @@ async function abrirDetalleDenuncia(id){
 
     cont.innerHTML = `
       <button class="btn btn-volver" onclick="cargarDenuncias()">← Volver a denuncias</button>
-
       <div class="detalle-box">
         <h2>🚨 Denuncia</h2>
         <p><b>Perfil denunciado:</b> ${textoSeguro(d.perfilNombre || d.perfilId)}</p>
         <p><b>Motivo:</b> ${textoSeguro(d.motivo)}</p>
-        <p><b>Mensaje:</b> ${textoSeguro(d.mensaje)}</p>
-        <p><b>Contacto denunciante:</b> ${textoSeguro(d.contactoDenunciante)}</p>
+        <p><b>Mensaje:</b> ${textoSeguro(d.mensaje || d.detalle)}</p>
+        <p><b>Contacto denunciante:</b> ${textoSeguro(d.contactoDenunciante || d.contacto)}</p>
         <p><b>Fecha:</b> ${formatearFecha(d.fecha)}</p>
         <p><b>Estado:</b> ${textoSeguro(d.estado || "pendiente")}</p>
-
         <button class="btn btn-cambios" onclick="marcarDenunciaRevisada('${id}')">Marcar revisada</button>
         ${d.perfilId ? `<button class="btn btn-quitar" onclick="marcarVencido('${d.perfilId}')">Ocultar perfil denunciado</button>` : ""}
       </div>
@@ -1522,30 +1169,135 @@ async function marcarDenunciaRevisada(id){
   });
 
   await registrarLogAdmin("denuncia_revisada",id,"Denuncia marcada como revisada");
-
   alert("Denuncia marcada como revisada.");
   cargarDenuncias();
 }
 
-async function cargarColeccionSimple(nombre){
-  const cont = document.getElementById("contenidoSeccion");
+async function cargarMensajesSoporte(){
+  const cont = document.getElementById("contenidoModulo");
 
   try{
-    const snap = await db.collection(nombre)
-      .limit(50)
-      .get();
+    const snap = await db.collection("soporte_mensajes").limit(80).get();
+
+    if(snap.empty){
+      cont.innerHTML = `<div class="item"><h3>Sin mensajes</h3><p>Aún no hay conversaciones de soporte. Falta conectar el botón desde Mi perfil.</p></div>`;
+      return;
+    }
+
+    cont.innerHTML = `<div class="cards-list"></div>`;
+    const grid = cont.querySelector(".cards-list");
+
+    snap.forEach(doc => {
+      const m = doc.data();
+      grid.innerHTML += `
+        <div class="item" onclick="abrirDetalleMensaje('${doc.id}')">
+          <h3>📩 ${textoSeguro(m.nombre || m.usuarioNombre || "Conversación")}</h3>
+          <span class="badge ${m.estado==="pendiente" ? "badge-rojo" : "badge-verde"}">${textoSeguro(m.estado || "abierto")}</span>
+          <p><b>Último mensaje:</b> ${textoSeguro(m.ultimoMensaje || m.mensaje || "")}</p>
+          <p><b>Fecha:</b> ${formatearFecha(m.fecha || m.fechaUltimoMensaje)}</p>
+          <button class="btn btn-mensaje">Abrir conversación</button>
+        </div>
+      `;
+    });
+  }catch(e){
+    cont.innerHTML = `<div class="item"><h3>Mensajes no configurados</h3><p>Falta crear colección soporte_mensajes y reglas.</p></div>`;
+  }
+}
+
+async function abrirDetalleMensaje(id){
+  const cont = document.getElementById("contenidoModulo");
+
+  try{
+    const doc = await db.collection("soporte_mensajes").doc(id).get();
+
+    if(!doc.exists){
+      alert("Mensaje no encontrado.");
+      return;
+    }
+
+    const m = doc.data();
+
+    cont.innerHTML = `
+      <button class="btn btn-volver" onclick="cargarMensajesSoporte()">← Volver a mensajes</button>
+      <div class="detalle-box">
+        <h2>📩 Conversación soporte</h2>
+        <p><b>Usuario:</b> ${textoSeguro(m.nombre || m.usuarioNombre)}</p>
+        <p><b>UID:</b> ${textoSeguro(m.uid || m.usuarioId)}</p>
+        <p><b>Estado:</b> ${textoSeguro(m.estado || "abierto")}</p>
+        <p><b>Fecha:</b> ${formatearFecha(m.fecha || m.fechaUltimoMensaje)}</p>
+        <p><b>Mensaje:</b></p>
+        <pre>${textoSeguro(JSON.stringify(m,null,2))}</pre>
+        <textarea id="respuestaAdmin" placeholder="Escribe respuesta del admin..."></textarea>
+        <button class="btn btn-mensaje" onclick="responderMensajeSoporte('${id}')">Enviar respuesta</button>
+      </div>
+    `;
+  }catch(e){
+    alert("Error abriendo mensaje: " + e.message);
+  }
+}
+
+async function responderMensajeSoporte(id){
+  const texto = document.getElementById("respuestaAdmin").value.trim();
+
+  if(!texto){
+    alert("Escribe una respuesta.");
+    return;
+  }
+
+  await db.collection("soporte_mensajes").doc(id).collection("mensajes").add({
+    de:"admin",
+    mensaje:texto,
+    fecha:new Date(),
+    adminEmail:ADMIN_EMAIL
+  });
+
+  await db.collection("soporte_mensajes").doc(id).set({
+    estado:"respondido",
+    ultimoMensaje:texto,
+    fechaUltimoMensaje:new Date(),
+    adminEmail:ADMIN_EMAIL
+  },{merge:true});
+
+  await registrarLogAdmin("respuesta_soporte",id,"Admin respondió mensaje de soporte");
+  alert("Respuesta guardada.");
+  cargarMensajesSoporte();
+}
+
+function pintarGraficas(){
+  const cont = document.getElementById("contenidoModulo");
+
+  cont.innerHTML = `
+    <div class="graph-grid">
+      <div class="graph-card"><h3>📈 Gráficas por día</h3><div class="graph-placeholder">Pendiente de eventos</div></div>
+      <div class="graph-card"><h3>⏰ Tráfico por hora</h3><div class="graph-placeholder">Pendiente de eventos</div></div>
+      <div class="graph-card"><h3>📱 Android vs iPhone</h3><div class="graph-placeholder">Pendiente de eventos</div></div>
+      <div class="graph-card"><h3>🌎 País de visitas</h3><div class="graph-placeholder">Pendiente de eventos</div></div>
+      <div class="graph-card"><h3>🔎 Búsquedas más usadas</h3><div class="graph-placeholder">Pendiente de eventos</div></div>
+      <div class="graph-card"><h3>❤️ Perfiles favoritos</h3><div class="graph-placeholder">Pendiente de eventos</div></div>
+      <div class="graph-card"><h3>💰 Conversión de anuncios</h3><div class="graph-placeholder">Pendiente de eventos</div></div>
+      <div class="graph-card"><h3>👁️ Perfiles más vistos</h3><div class="graph-placeholder">Pendiente de eventos</div></div>
+    </div>
+  `;
+}
+
+async function cargarColeccionSimple(nombre){
+  const cont = document.getElementById("contenidoModulo");
+
+  try{
+    const snap = await db.collection(nombre).limit(80).get();
 
     if(snap.empty){
       cont.innerHTML = `<div class="item"><h3>Sin datos</h3><p>La colección ${textoSeguro(nombre)} todavía no tiene documentos.</p></div>`;
       return;
     }
 
-    cont.innerHTML = "";
+    cont.innerHTML = `<div class="cards-list"></div>`;
+    const grid = cont.querySelector(".cards-list");
 
     snap.forEach(doc => {
       const data = doc.data();
 
-      cont.innerHTML += `
+      grid.innerHTML += `
         <div class="item">
           <h3>${textoSeguro(nombre)} / ${textoSeguro(doc.id)}</h3>
           <pre>${textoSeguro(JSON.stringify(data,null,2))}</pre>
@@ -1564,10 +1316,8 @@ function filtrarCards(){
   document.querySelectorAll(".item-filtrable").forEach(card => {
     const t = (card.dataset.texto || "").toLowerCase();
     const e = card.dataset.estado || "";
-
     const pasaTexto = !texto || t.includes(texto);
     const pasaEstado = !estado || e === estado;
-
     card.style.display = pasaTexto && pasaEstado ? "block" : "none";
   });
 }
@@ -1699,12 +1449,7 @@ async function marcarVencido(id) {
 
     alert("Perfil marcado como vencido.");
     await cargarUsuariosCache();
-
-    if(seccionActual === "denuncias"){
-      cargarDenuncias();
-    }else{
-      abrirDetallePerfil(id);
-    }
+    abrirDetallePerfil(id);
   }catch(e){
     alert("Error: " + e.message);
   }
@@ -1749,12 +1494,35 @@ async function borrarUsuario(id) {
 
     alert("Usuario borrado");
     await cargarUsuariosCache();
-    cargarSeccion(seccionActual);
+    cargarModulo(seccionActual);
   }catch(e){
     alert("Error: " + e.message);
   }
 
   bloquearAcciones(false);
+}
+
+async function crearMensajeAdmin(id){
+  const texto = prompt("Escribe mensaje interno para este usuario:");
+
+  if(!texto) return;
+
+  const u = usuariosCache.find(x => x.id === id) || {};
+
+  await db.collection("soporte_mensajes").add({
+    uid:id,
+    nombre:u.nombre || "",
+    email:u.email || "",
+    estado:"admin_iniciado",
+    ultimoMensaje:texto,
+    fechaUltimoMensaje:new Date(),
+    fecha:new Date(),
+    creadoPor:"admin",
+    adminEmail:ADMIN_EMAIL
+  });
+
+  await registrarLogAdmin("mensaje_admin_creado",id,"Admin creó conversación de soporte");
+  alert("Mensaje/conversación creada.");
 }
 
 async function salir() {
