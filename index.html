@@ -1223,27 +1223,78 @@ function detectarUbicacion(){
   );
 }
 
-function enviarSolicitudAnuncio(){
+async function enviarSolicitudAnuncio(){
+
   if(!document.getElementById("anuncioAcepto").checked){
     alert("Debes aceptar las condiciones.");
     return;
   }
 
-  const msg =
-`Hola, quiero anunciarme en CariHub.
+  try{
 
-Tipo: ${document.getElementById("anuncioTipo").value}
-Duración: ${document.getElementById("anuncioDuracion").value}
-Nombre/negocio: ${document.getElementById("anuncioNombre").value}
-WhatsApp: ${document.getElementById("anuncioWhats").value}
-Correo: ${document.getElementById("anuncioCorreo").value}
-Ciudad/Zona: ${document.getElementById("anuncioCiudad").value}
-Link: ${document.getElementById("anuncioLink").value}
-Texto: ${document.getElementById("anuncioTexto").value}
+    let imagenURL = "";
 
-Pago disponible por Stripe o Mercado Pago.`;
+    const imagen = document.getElementById("anuncioImagen").files[0];
 
-  window.open("https://wa.me/"+WHATSAPP_ADMIN+"?text="+encodeURIComponent(msg),"_blank");
+    if(imagen){
+
+      if(!imagen.type.startsWith("image/")){
+        alert("La imagen debe ser válida.");
+        return;
+      }
+
+      if(imagen.size > 5 * 1024 * 1024){
+        alert("La imagen no debe superar 5 MB.");
+        return;
+      }
+
+      const ruta =
+        "solicitudes_anuncios/" +
+        Date.now() +
+        "-" +
+        imagen.name;
+
+      imagenURL = await subirImagen(ruta, imagen);
+    }
+
+    await db.collection("solicitudes_anuncios").add({
+
+      tipo: document.getElementById("anuncioTipo").value,
+
+      duracion: document.getElementById("anuncioDuracion").value,
+
+      nombre: document.getElementById("anuncioNombre").value.trim(),
+
+      whatsapp: limpiarTelefono(
+        document.getElementById("anuncioWhats").value
+      ),
+
+      correo: document.getElementById("anuncioCorreo").value.trim(),
+
+      ciudad: document.getElementById("anuncioCiudad").value.trim(),
+
+      link: document.getElementById("anuncioLink").value.trim(),
+
+      texto: document.getElementById("anuncioTexto").value.trim(),
+
+      imagenURL,
+
+      estado: "pendiente",
+
+      fecha: new Date()
+
+    });
+
+    alert("Solicitud enviada correctamente 🔥");
+
+    cerrarModal("modalAnuncio");
+
+  }catch(error){
+
+    alert("Error enviando solicitud: " + error.message);
+
+  }
+
 }
 
 function enviarContacto(){
