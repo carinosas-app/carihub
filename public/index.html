@@ -525,15 +525,162 @@ label{
 
 @media(max-width:600px){
   .contenedor-portada{
-    height:100vh;
+    height:auto;
+    min-height:0;
   }
 
   .portada{
     width:100%;
-    height:100vh;
-    object-fit:fill;
+    height:auto;
+    object-fit:contain;
     display:block;
   }
+
+  .home-ad-premium{
+    margin-top:12px;
+  }
+}
+
+/* PUBLICIDAD PREMIUM HOME */
+.home-ad-premium{
+  max-width:1180px;
+  margin:0 auto;
+  padding:16px 14px 22px;
+  background:var(--rosa-suave);
+  display:grid;
+  gap:12px;
+  grid-template-columns:1fr;
+  line-height:normal;
+}
+
+@media(min-width:520px){
+  .home-ad-premium{
+    grid-template-columns:1fr 1fr;
+    gap:14px;
+    padding:18px 16px 24px;
+  }
+}
+
+.home-ad-card{
+  background:#fff;
+  border:1px solid var(--borde);
+  border-radius:14px;
+  box-shadow:var(--sombra);
+  padding:18px 16px 16px;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  cursor:pointer;
+  transition:transform .15s ease, box-shadow .15s ease;
+  position:relative;
+  overflow:hidden;
+  margin:0;
+  width:100%;
+  text-align:left;
+  font-family:inherit;
+  color:inherit;
+  -webkit-tap-highlight-color:transparent;
+}
+
+.home-ad-card:hover,
+.home-ad-card:focus-visible{
+  transform:translateY(-2px);
+  box-shadow:0 14px 32px rgba(236,45,122,.18);
+  outline:2px solid var(--rosa2);
+  outline-offset:2px;
+}
+
+.home-ad-card::before{
+  content:"";
+  position:absolute;
+  top:0;
+  left:0;
+  right:0;
+  height:4px;
+  background:linear-gradient(90deg,var(--rosa),var(--rosa2));
+}
+
+.home-ad-card--left{
+  align-items:flex-start;
+}
+
+.home-ad-card--right{
+  align-items:flex-start;
+}
+
+@media(min-width:520px){
+  .home-ad-card--right{
+    align-items:flex-end;
+    text-align:right;
+  }
+}
+
+.home-ad-card h3{
+  margin:0;
+  font-size:clamp(15px,4vw,18px);
+  font-weight:900;
+  text-transform:uppercase;
+  letter-spacing:.4px;
+  color:var(--rosa);
+  line-height:1.2;
+}
+
+.home-ad-card p{
+  margin:0;
+  font-size:13px;
+  line-height:1.45;
+  color:#5a5568;
+  max-width:28ch;
+}
+
+.home-ad-card--right p{
+  margin-left:auto;
+}
+
+.home-ad-icon{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:42px;
+  height:42px;
+  border-radius:12px;
+  background:linear-gradient(135deg,var(--rosa-suave),#ffe8f2);
+  border:1px solid #ffd6e5;
+  font-size:22px;
+  line-height:1;
+  flex-shrink:0;
+}
+
+.home-ad-cta{
+  display:inline-block;
+  margin-top:6px;
+  padding:9px 16px;
+  border-radius:999px;
+  background:linear-gradient(135deg,var(--rosa),var(--rosa2));
+  color:#fff;
+  font-size:11px;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.5px;
+  box-shadow:0 6px 16px rgba(236,45,122,.28);
+}
+
+.home-ad-metric{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:42px;
+  height:42px;
+  border-radius:12px;
+  background:linear-gradient(135deg,var(--rosa-suave),#ffe8f2);
+  border:1px solid #ffd6e5;
+  font-size:24px;
+  line-height:1;
+  margin-top:4px;
+}
+
+.home-ad-card--right .home-ad-metric{
+  margin-left:auto;
 }
 
 </style>
@@ -582,6 +729,21 @@ label{
 <div class="texto-select texto-ciudad" id="textoCiudad"></div>
 
 </div>
+
+<section class="home-ad-premium" aria-label="Publicidad premium">
+  <article class="home-ad-card home-ad-card--left" role="button" tabindex="0" onclick="abrirAnuncio()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();abrirAnuncio();}">
+    <span class="home-ad-icon" aria-hidden="true">📣</span>
+    <h3>¡Anúnciate aquí!</h3>
+    <p>Más visibilidad, más clientes, mejores resultados.</p>
+    <span class="home-ad-cta">Más información</span>
+  </article>
+  <article class="home-ad-card home-ad-card--right" role="button" tabindex="0" onclick="abrirAnuncio()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();abrirAnuncio();}">
+    <h3>Promociona tu negocio</h3>
+    <p>Haz crecer tu marca y llega a más personas.</p>
+    <span class="home-ad-cta">Más información</span>
+    <span class="home-ad-metric" aria-hidden="true">📈</span>
+  </article>
+</section>
 
 <div class="menu" id="menu">
   <div class="cerrar-menu" onclick="cerrarMenu()">✕</div>
