@@ -1,0 +1,206 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Helpers globales ──────────────────────────────────────────────
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn()
+        && request.auth.token.email == 'carinosas.anuncios@gmail.com';
+    }
+
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    function isPublicProfile() {
+      return resource.data.aprobado == true
+        && resource.data.activo == true
+        && resource.data.vencido != true
+        && (
+          !('fechaVencimiento' in resource.data)
+          || resource.data.fechaVencimiento == null
+          || resource.data.fechaVencimiento > request.time
+        );
+    }
+
+    function isNonAnonymous() {
+      return isSignedIn()
+        && request.auth.token.firebase.sign_in_provider != 'anonymous';
+    }
+
+    function usuarioCreateValido(userId) {
+      let data = request.resource.data;
+      return data.uid == userId
+        && data.aprobado == false
+        && data.activo == false
+        && data.vencido == false
+        && data.estadoRevision == 'registro_pendiente'
+        && data.estadoPago == 'pendiente_aprobacion'
+        && data.actualizacionPendiente == false
+        && (
+          !('email' in request.auth.token)
+          || data.email == request.auth.token.email
+        );
+    }
+
+    function usuarioUpdateDueñoValido() {
+      let diff = request.resource.data.diff(resource.data);
+      return !diff.affectedKeys().hasAny([
+          'uid',
+          'email',
+          'verificacion',
+          'fechaPublicacion',
+          'fechaVencimiento',
+          'estadoPago',
+          'primerMesGratis',
+          'pagado',
+          'vencido'
+        ])
+        && request.resource.data.actualizacionPendiente == true
+        && request.resource.data.estadoRevision == 'actualizacion_pendiente'
+        && request.resource.data.aprobado == false
+        && request.resource.data.activo == false;
+    }
+
+    function solicitudCreateValida() {
+      let data = request.resource.data;
+      return data.uidAnunciante == request.auth.uid
+        && data.correoSolicitante == request.auth.token.email
+        && data.estado == 'pendiente'
+        && data.fecha is timestamp
+        && data.vinculadoEn is timestamp
+        && !('notaAdmin' in data)
+        && !('actualizadoPor' in data)
+        && !('actualizadoEn' in data);
+    }
+
+    function visitaCreateValida() {
+      let data = request.resource.data;
+      return data.keys().hasOnly([
+          'fecha',
+          'timestamp',
+          'userAgent',
+          'dispositivo',
+          'idioma',
+          'pantalla',
+          'url',
+          'referrer'
+        ])
+        && data.fecha is string
+        && data.fecha.size() <= 10
+        && data.timestamp is timestamp
+        && data.dispositivo is string
+        && data.dispositivo.size() <= 20
+        && (
+          data.dispositivo in ['iPhone', 'Android', 'Otro']
+        )
+        && (!('userAgent' in data) || (data.userAgent is string && data.userAgent.size() <= 500))
+        && (!('idioma' in data) || (data.idioma is string && data.idioma.size() <= 20))
+        && (!('pantalla' in data) || (data.pantalla is string && data.pantalla.size() <= 20))
+        && (!('url' in data) || (data.url is string && data.url.size() <= 500))
+        && (!('referrer' in data) || (data.referrer is string && data.referrer.size() <= 500));
+    }
+
+    // ── Colecciones raíz ──────────────────────────────────────────────
+
+    match /usuarios/{userId} {
+      allow read: if isPublicProfile() || isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId) && usuarioCreateValido(userId);
+      allow update: if (isOwner(userId) && usuarioUpdateDueñoValido()) || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    match /solicitudes_anuncios/{solicitudId} {
+      allow read: if (isNonAnonymous()
+          && resource.data.uidAnunciante == request.auth.uid)
+        || isAdmin();
+      allow create: if isNonAnonymous() && solicitudCreateValida();
+      allow update: if isAdmin();
+      allow delete: if false;
+    }
+
+    match /denuncias/{denunciaId} {
+      allow read: if isAdmin();
+      allow create: if false;
+      allow update: if isAdmin();
+      allow delete: if false;
+    }
+
+    match /soporte_mensajes/{conversacionId} {
+      allow read: if isAdmin();
+      allow create: if isAdmin();
+      allow update: if isAdmin();
+      allow delete: if false;
+
+      match /mensajes/{mensajeId} {
+        allow read: if isAdmin();
+        allow create: if isAdmin();
+        allow update: if false;
+        allow delete: if false;
+      }
+    }
+
+    match /estadisticas_visitas/{visitaId} {
+      allow read: if isAdmin();
+      allow create: if visitaCreateValida();
+      allow update: if false;
+      allow delete: if false;
+    }
+
+    match /logsAdmin/{logId} {
+      allow read: if isAdmin();
+      allow create: if isAdmin();
+      allow update: if false;
+      allow delete: if false;
+    }
+
+    match /logsSeguridad/{docId} {
+      allow read: if isAdmin();
+      allow create: if false;
+      allow update: if false;
+      allow delete: if false;
+    }
+
+    match /pagos/{pagoId} {
+      allow read: if isAdmin();
+      allow create: if false;
+      allow update: if false;
+      allow delete: if false;
+    }
+
+    match /anuncios/{anuncioId} {
+      allow read: if isAdmin();
+      allow create: if false;
+      allow update: if false;
+      allow delete: if false;
+    }
+
+    match /analytics_eventos/{eventoId} {
+      allow read: if isAdmin();
+      allow create: if false;
+      allow update: if false;
+      allow delete: if false;
+    }
+
+    // ── Subcolecciones ────────────────────────────────────────────────
+
+    match /usuarios/{userId}/favoritos/{perfilId} {
+      allow read: if isOwner(userId);
+      allow create: if isOwner(userId);
+      allow update: if isOwner(userId);
+      allow delete: if isOwner(userId);
+    }
+
+    // ── Denegar todo lo demás ─────────────────────────────────────────
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
