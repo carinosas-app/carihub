@@ -925,6 +925,27 @@ function cardPerfil(id,u){
   `;
 }
 
+async function cargarPerfilesPublicos(){
+  const base = db.collection("usuarios")
+    .where("aprobado","==",true)
+    .where("activo","==",true)
+    .where("vencido","==",false);
+
+  const ahora = firebase.firestore.Timestamp.now();
+
+  const [snapVigentes, snapSinFecha] = await Promise.all([
+    base.where("fechaVencimiento",">",ahora).get(),
+    base.where("fechaVencimiento","==",null).get()
+  ]);
+
+  const porId = new Map();
+
+  snapVigentes.forEach(doc => porId.set(doc.id, doc));
+  snapSinFecha.forEach(doc => porId.set(doc.id, doc));
+
+  return Array.from(porId.values());
+}
+
 async function cargarResultados(){
   pintarResumenBusqueda();
 
@@ -940,15 +961,13 @@ async function cargarResultados(){
   `;
 
   try{
-    const snap = await db.collection("usuarios")
-      .where("aprobado","==",true)
-      .get();
+    const docs = await cargarPerfilesPublicos();
 
     lista.innerHTML = "";
 
     let encontrados = 0;
 
-    for(const doc of snap.docs){
+    for(const doc of docs){
       const u = doc.data();
 
       let vencido = false;
