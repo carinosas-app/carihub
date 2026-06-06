@@ -30,9 +30,35 @@ const ADMIN_EMAIL = "carinosas.anuncios@gmail.com";
 const LIMITE_USUARIOS = 150;
 
 let usuariosCache = [];
+let solicitudesPublicidadCache = [];
 let seccionActual = "dashboard";
 let procesando = false;
 let contadoresGlobales = {};
+
+const ESTADOS_SOLICITUD_PUBLICIDAD = [
+  "pendiente",
+  "en_revision",
+  "requiere_correccion",
+  "autorizado_pago",
+  "activo",
+  "rechazado",
+  "vencido"
+];
+
+const ETIQUETAS_ESTADO_SOLICITUD_PUBLICIDAD = {
+  pendiente: "Pendiente",
+  en_revision: "En revisión",
+  requiere_correccion: "Requiere corrección",
+  autorizado_pago: "Autorizado pago",
+  activo: "Activo",
+  rechazado: "Rechazado",
+  vencido: "Vencido"
+};
+
+const FILTRO_PERFILES_HTML = `<option value="">Todos</option>
+              <option value="activo">Activos</option>
+              <option value="vencido">Vencidos</option>
+              <option value="pendiente">Pendientes</option>`;
 </script>
 
 <style>
@@ -781,6 +807,7 @@ pre{
       <button class="side-btn" onclick="abrirModulo('pagos')"><span class="side-ico">💲</span><span class="side-text"><b>Pagos</b><small>Ver pagos realizados</small></span></button>
       <button class="side-btn" onclick="abrirModulo('vencidos')"><span class="side-ico">⭐</span><span class="side-text"><b>Renovaciones</b><small>Perfiles por vencer</small></span></button>
       <button class="side-btn" onclick="abrirModulo('denuncias')"><span class="side-ico">⚠️</span><span class="side-text"><b>Denuncias</b><small>Reportes de usuarios</small></span></button>
+      <button class="side-btn" onclick="abrirModulo('solicitudes_publicidad')"><span class="side-ico">📋</span><span class="side-text"><b>Solicitudes de publicidad</b><small>Revisar y cambiar estado</small></span></button>
       <button class="side-btn" onclick="abrirModulo('anuncios')"><span class="side-ico">📢</span><span class="side-text"><b>Publicidad</b><small>Banners y anuncios</small></span></button>
       <button class="side-btn" onclick="abrirModulo('historial')"><span class="side-ico">📜</span><span class="side-text"><b>Historial</b><small>Actividad admin</small></span></button>
       <button class="side-btn" onclick="abrirModulo('seguridad')"><span class="side-ico">⚙️</span><span class="side-text"><b>Seguridad</b><small>Logs y ajustes</small></span></button>
@@ -1103,6 +1130,7 @@ async function cargarModulo(tipo){
   document.getElementById("mainSub").innerText = "Pantalla interna con detalle y botón de volver.";
 
   if(tipo === "usuarios"){
+    restaurarFiltroPerfiles();
     titulo.innerText = "👥 Usuarios registrados";
     desc.innerText = "Lista resumida: foto principal y nombre. Presiona un perfil para ver toda su información.";
     pintarListaPerfiles(usuariosCache);
@@ -1110,6 +1138,7 @@ async function cargarModulo(tipo){
   }
 
   if(tipo === "activos"){
+    restaurarFiltroPerfiles();
     titulo.innerText = "✅ Perfiles activos";
     desc.innerText = "Perfiles visibles actualmente en CariHub.";
     pintarListaPerfiles(usuariosCache.filter(u => u.aprobado === true && u.activo === true && !estaVencido(u)));
@@ -1117,6 +1146,7 @@ async function cargarModulo(tipo){
   }
 
   if(tipo === "pendientes"){
+    restaurarFiltroPerfiles();
     titulo.innerText = "⏳ Pendientes de aprobación";
     desc.innerText = "Registros nuevos y actualizaciones pendientes.";
     pintarListaPerfiles(usuariosCache.filter(u => u.estadoRevision === "registro_pendiente" || u.estadoRevision === "actualizacion_pendiente" || u.actualizacionPendiente === true));
@@ -1124,6 +1154,7 @@ async function cargarModulo(tipo){
   }
 
   if(tipo === "vencidos"){
+    restaurarFiltroPerfiles();
     titulo.innerText = "📴 Perfiles vencidos / inactivos";
     desc.innerText = "Perfiles que ya no deben aparecer públicamente.";
     pintarListaPerfiles(usuariosCache.filter(u => estaVencido(u) || u.activo === false));
@@ -1178,6 +1209,15 @@ async function cargarModulo(tipo){
     titulo.innerText = "🛡️ Seguridad";
     desc.innerText = "Logs de seguridad, abuso, bots o actividad sospechosa.";
     await cargarColeccionSimple("logsSeguridad");
+    return;
+  }
+
+  if(tipo === "solicitudes_publicidad"){
+    titulo.innerText = "📋 Solicitudes de publicidad";
+    desc.innerText = "Revisa solicitudes enviadas desde el sitio y cambia su estado manualmente.";
+    buscador.style.display = "grid";
+    configurarFiltroSolicitudesPublicidad();
+    await cargarSolicitudesPublicidad();
     return;
   }
 
@@ -1397,6 +1437,215 @@ async function marcarDenunciaRevisada(id){
   await registrarLogAdmin("denuncia_revisada",id,"Denuncia marcada como revisada");
   alert("Denuncia marcada como revisada.");
   cargarDenuncias();
+}
+
+function etiquetaEstadoSolicitudPublicidad(estado){
+  return ETIQUETAS_ESTADO_SOLICITUD_PUBLICIDAD[estado] || estado || "pendiente";
+}
+
+function claseBadgeSolicitudPublicidad(estado){
+  if(estado === "activo" || estado === "autorizado_pago") return "badge-verde";
+  if(estado === "rechazado" || estado === "vencido") return "badge-rojo";
+  if(estado === "en_revision" || estado === "requiere_correccion") return "badge-azul";
+  return "badge-naranja";
+}
+
+function restaurarFiltroPerfiles(){
+  const select = document.getElementById("filtroEstado");
+  if(select) select.innerHTML = FILTRO_PERFILES_HTML;
+  const input = document.getElementById("buscarTexto");
+  if(input) input.placeholder = "Buscar nombre, correo, teléfono, ciudad...";
+}
+
+function configurarFiltroSolicitudesPublicidad(){
+  const select = document.getElementById("filtroEstado");
+  if(!select) return;
+  select.innerHTML = `<option value="">Todos</option>` + ESTADOS_SOLICITUD_PUBLICIDAD.map(e =>
+    `<option value="${e}">${textoSeguro(etiquetaEstadoSolicitudPublicidad(e))}</option>`
+  ).join("");
+  const input = document.getElementById("buscarTexto");
+  if(input) input.placeholder = "Buscar nombre, whatsapp, correo, ciudad, tipo...";
+}
+
+function fechaSolicitudPublicidad(s){
+  return s.fecha || s.actualizadoEn || null;
+}
+
+function ordenarSolicitudesPublicidad(lista){
+  return lista.slice().sort((a,b) => {
+    const fa = fechaValida(fechaSolicitudPublicidad(a));
+    const fb = fechaValida(fechaSolicitudPublicidad(b));
+    return (fb ? fb.getTime() : 0) - (fa ? fa.getTime() : 0);
+  });
+}
+
+function enlaceSeguroSolicitud(url){
+  const u = String(url || "").trim();
+  if(!/^https?:\/\//i.test(u)) return "";
+  return textoSeguro(u);
+}
+
+async function cargarSolicitudesPublicidad(){
+  const cont = document.getElementById("contenidoModulo");
+  solicitudesPublicidadCache = [];
+
+  try{
+    let docs = [];
+
+    try{
+      const snap = await db.collection("solicitudes_anuncios").orderBy("fecha","desc").limit(100).get();
+      snap.forEach(doc => docs.push({ id:doc.id, ...doc.data() }));
+    }catch(e){
+      const snap = await db.collection("solicitudes_anuncios").limit(100).get();
+      snap.forEach(doc => docs.push({ id:doc.id, ...doc.data() }));
+      docs = ordenarSolicitudesPublicidad(docs);
+    }
+
+    solicitudesPublicidadCache = docs;
+
+    if(!docs.length){
+      cont.innerHTML = `<div class="item"><h3>Sin solicitudes</h3><p>No hay solicitudes de publicidad guardadas todavía.</p></div>`;
+      return;
+    }
+
+    cont.innerHTML = `<div class="cards-list"></div>`;
+    const grid = cont.querySelector(".cards-list");
+
+    docs.forEach(s => {
+      const estado = s.estado || "pendiente";
+      const textoBusqueda = textoSeguro(`${s.nombre || ""} ${s.whatsapp || ""} ${s.correo || ""} ${s.ciudad || ""} ${s.tipo || ""} ${s.duracion || ""}`);
+      const miniImg = s.imagenURL
+        ? `<img loading="lazy" src="${textoSeguro(s.imagenURL)}" alt="Vista previa" style="max-width:120px;max-height:80px;object-fit:cover;border-radius:8px;margin-top:8px;">`
+        : "";
+
+      grid.innerHTML += `
+        <div class="item item-filtrable"
+          onclick="abrirDetalleSolicitudPublicidad('${s.id}')"
+          data-texto="${textoBusqueda}"
+          data-estado="${estado}">
+          <h3>📋 ${textoSeguro(s.nombre || "Sin nombre")}</h3>
+          <span class="badge ${claseBadgeSolicitudPublicidad(estado)}">${textoSeguro(etiquetaEstadoSolicitudPublicidad(estado))}</span>
+          <p><b>Tipo:</b> ${textoSeguro(s.tipo || "—")}</p>
+          <p><b>Ciudad:</b> ${textoSeguro(s.ciudad || "—")}</p>
+          <p><b>WhatsApp:</b> ${textoSeguro(s.whatsapp || "—")}</p>
+          <p><b>Fecha:</b> ${textoSeguro(formatearFecha(s.fecha))}</p>
+          ${miniImg}
+          <button class="btn btn-cambios" type="button">Abrir solicitud</button>
+        </div>
+      `;
+    });
+  }catch(e){
+    cont.innerHTML = `<div class="item"><h3>Error al cargar solicitudes</h3><p>${textoSeguro(e.message)}</p></div>`;
+  }
+}
+
+async function abrirDetalleSolicitudPublicidad(id){
+  const cont = document.getElementById("contenidoModulo");
+
+  try{
+    let s = solicitudesPublicidadCache.find(x => x.id === id);
+
+    if(!s){
+      const doc = await db.collection("solicitudes_anuncios").doc(id).get();
+      if(!doc.exists){
+        alert("Solicitud no encontrada.");
+        return;
+      }
+      s = { id:doc.id, ...doc.data() };
+    }
+
+    const estado = s.estado || "pendiente";
+    const opcionesEstado = ESTADOS_SOLICITUD_PUBLICIDAD.map(e =>
+      `<option value="${e}" ${e === estado ? "selected" : ""}>${textoSeguro(etiquetaEstadoSolicitudPublicidad(e))}</option>`
+    ).join("");
+
+    const linkSeguro = enlaceSeguroSolicitud(s.link);
+    const linkHTML = linkSeguro
+      ? `<p><b>Link:</b> <a href="${linkSeguro}" target="_blank" rel="noopener noreferrer">${textoSeguro(s.link)}</a></p>`
+      : `<p><b>Link:</b> ${textoSeguro(s.link || "—")}</p>`;
+
+    const imagenHTML = s.imagenURL
+      ? `<p><b>Imagen del anuncio:</b></p><img loading="lazy" src="${textoSeguro(s.imagenURL)}" alt="Imagen solicitud" style="max-width:100%;border-radius:12px;">`
+      : `<p class="aviso">Sin imagen adjunta.</p>`;
+
+    const metaActualizacion = [
+      s.actualizadoEn ? `<p><b>Actualizado en:</b> ${textoSeguro(formatearFecha(s.actualizadoEn))}</p>` : "",
+      s.actualizadoPor ? `<p><b>Actualizado por:</b> ${textoSeguro(s.actualizadoPor)}</p>` : "",
+      s.notaAdmin ? `<p><b>Nota admin anterior:</b> ${textoSeguro(s.notaAdmin)}</p>` : ""
+    ].join("");
+
+    cont.innerHTML = `
+      <button class="btn btn-volver" onclick="cargarSolicitudesPublicidad()">← Volver a solicitudes</button>
+      <div class="detalle-box">
+        <h2>📋 Solicitud de publicidad</h2>
+        <p><b>Nombre:</b> ${textoSeguro(s.nombre || "—")}</p>
+        <p><b>WhatsApp:</b> ${textoSeguro(s.whatsapp || "—")}</p>
+        <p><b>Correo:</b> ${textoSeguro(s.correo || "—")}</p>
+        <p><b>Ciudad:</b> ${textoSeguro(s.ciudad || "—")}</p>
+        <p><b>Tipo:</b> ${textoSeguro(s.tipo || "—")}</p>
+        <p><b>Duración:</b> ${textoSeguro(s.duracion || "—")}</p>
+        ${linkHTML}
+        <p><b>Texto:</b> ${textoSeguro(s.texto || "—")}</p>
+        <p><b>Estado actual:</b> <span class="badge ${claseBadgeSolicitudPublicidad(estado)}">${textoSeguro(etiquetaEstadoSolicitudPublicidad(estado))}</span></p>
+        <p><b>Fecha solicitud:</b> ${textoSeguro(formatearFecha(s.fecha))}</p>
+        ${metaActualizacion}
+        ${imagenHTML}
+
+        <div class="actions-row" style="margin-top:16px;">
+          <p><b>Cambiar estado</b></p>
+          <select id="selectEstadoSolicitud" style="width:100%;padding:10px;margin-bottom:10px;">
+            ${opcionesEstado}
+          </select>
+          <p><b>Nota admin (opcional)</b></p>
+          <textarea id="notaAdminSolicitud" placeholder="Comentario interno para el equipo..." style="width:100%;min-height:80px;padding:10px;margin-bottom:10px;">${textoSeguro(s.notaAdmin || "")}</textarea>
+          <button class="btn btn-cambios" onclick="guardarEstadoSolicitudPublicidad('${s.id}')">Guardar estado</button>
+        </div>
+      </div>
+    `;
+  }catch(e){
+    alert("Error abriendo solicitud: " + e.message);
+  }
+}
+
+async function guardarEstadoSolicitudPublicidad(id){
+  if(procesando) return;
+
+  const select = document.getElementById("selectEstadoSolicitud");
+  const notaInput = document.getElementById("notaAdminSolicitud");
+  if(!select) return;
+
+  const nuevoEstado = select.value;
+  if(!ESTADOS_SOLICITUD_PUBLICIDAD.includes(nuevoEstado)){
+    alert("Estado no válido.");
+    return;
+  }
+
+  if(!confirm("¿Guardar nuevo estado: " + etiquetaEstadoSolicitudPublicidad(nuevoEstado) + "?")) return;
+
+  const payload = {
+    estado: nuevoEstado,
+    actualizadoEn: new Date(),
+    actualizadoPor: ADMIN_EMAIL
+  };
+
+  const nota = (notaInput?.value || "").trim();
+  if(nota) payload.notaAdmin = nota;
+
+  try{
+    bloquearAcciones(true);
+    await db.collection("solicitudes_anuncios").doc(id).update(payload);
+    await registrarLogAdmin("solicitud_publicidad_estado", id, "Estado cambiado a " + nuevoEstado);
+    alert("Estado actualizado correctamente.");
+
+    const idx = solicitudesPublicidadCache.findIndex(x => x.id === id);
+    if(idx >= 0) solicitudesPublicidadCache[idx] = { ...solicitudesPublicidadCache[idx], ...payload };
+
+    await abrirDetalleSolicitudPublicidad(id);
+  }catch(e){
+    alert("Error guardando estado: " + e.message);
+  }finally{
+    bloquearAcciones(false);
+  }
 }
 
 async function cargarMensajesSoporte(){
