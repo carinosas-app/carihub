@@ -1,0 +1,1347 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard rentero | Cariñosas</title>
+  <style>
+    :root{
+      --bg-a:#fff3f9;
+      --bg-b:#ffe1ef;
+      --accent:#e60072;
+      --accent-2:#ff4fa3;
+      --ink:#311021;
+      --muted:#7b5066;
+      --card:rgba(255,255,255,.72);
+      --card-strong:rgba(255,255,255,.9);
+      --line:rgba(230,0,114,.18);
+      --shadow:0 22px 55px rgba(184,0,88,.16);
+      --glow:0 0 0 1px rgba(255,255,255,.55),0 18px 40px rgba(230,0,114,.14);
+    }
+
+    *{box-sizing:border-box}
+
+    body{
+      margin:0;
+      min-height:100vh;
+      font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      color:var(--ink);
+      background:
+        radial-gradient(circle at 12% 8%, rgba(255,88,170,.2), transparent 26%),
+        radial-gradient(circle at 90% 18%, rgba(255,191,221,.28), transparent 30%),
+        linear-gradient(135deg,var(--bg-a),var(--bg-b));
+    }
+
+    body.tema-rojo{--bg-a:#fff0f2;--bg-b:#ffd4dc;--accent:#d41445;--accent-2:#ff567a;--line:rgba(212,20,69,.2)}
+    body.tema-morado{--bg-a:#f8f0ff;--bg-b:#ead6ff;--accent:#8d37d1;--accent-2:#c26dff;--line:rgba(141,55,209,.2)}
+    body.tema-negro{--bg-a:#151019;--bg-b:#261327;--accent:#ff1493;--accent-2:#00f0ff;--ink:#fff4fb;--muted:#d7b9cb;--card:rgba(37,20,38,.72);--card-strong:rgba(44,25,45,.92);--line:rgba(255,20,147,.28);--shadow:0 24px 60px rgba(0,0,0,.38)}
+    body.tema-dorado{--bg-a:#fff8e5;--bg-b:#f9df9a;--accent:#b98510;--accent-2:#f5c542;--line:rgba(185,133,16,.22)}
+    body.tema-azul{--bg-a:#eef5ff;--bg-b:#cfe0ff;--accent:#2457d6;--accent-2:#62a1ff;--line:rgba(36,87,214,.18)}
+    body.tema-verde{--bg-a:#effff5;--bg-b:#c7f2d6;--accent:#148a55;--accent-2:#42c985;--line:rgba(20,138,85,.2)}
+    body.tema-arcoiris{--bg-a:#fff6fb;--bg-b:#dff3ff;--accent:#e60072;--accent-2:#6b5cff;--line:rgba(230,0,114,.2)}
+    body.tema-trans{--bg-a:#effbff;--bg-b:#ffd7e8;--accent:#4aa6d9;--accent-2:#ff75ae;--line:rgba(74,166,217,.22)}
+    body.tema-femboy{--bg-a:#fff2fb;--bg-b:#e9ddff;--accent:#e35bb7;--accent-2:#9d7cff;--line:rgba(227,91,183,.22)}
+    body.tema-hotel{--bg-a:#fff7f1;--bg-b:#ead0b5;--accent:#9b5b35;--accent-2:#d39c62;--line:rgba(155,91,53,.2)}
+    body.tema-spa{--bg-a:#f4fff9;--bg-b:#d7efe2;--accent:#40866b;--accent-2:#91d6ba;--line:rgba(64,134,107,.2)}
+    body.tema-sexshop{--bg-a:#fff0fa;--bg-b:#221025;--accent:#ff007f;--accent-2:#9c27ff;--ink:#fff5fb;--muted:#eec8dc;--card:rgba(42,18,44,.72);--card-strong:rgba(54,24,58,.9);--line:rgba(255,0,127,.25)}
+
+    button,input,textarea{font:inherit}
+
+    .page{
+      width:min(1480px,100%);
+      margin:0 auto;
+      padding:16px;
+    }
+
+    .dashboard-rentero{
+      display:grid;
+      grid-template-columns:240px minmax(520px,1fr) 270px;
+      gap:14px;
+      align-items:start;
+    }
+
+    .dashboard-col{
+      min-width:0;
+      display:flex;
+      flex-direction:column;
+      gap:11px;
+    }
+
+    .glass{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:22px;
+      box-shadow:var(--shadow);
+      backdrop-filter:blur(18px);
+      -webkit-backdrop-filter:blur(18px);
+    }
+
+    .panel{padding:12px}
+
+    .brand{
+      padding:13px 12px;
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+
+    .brand-mark{
+      width:38px;
+      height:38px;
+      border-radius:50%;
+      display:grid;
+      place-items:center;
+      color:white;
+      font-weight:900;
+      background:linear-gradient(135deg,var(--accent),var(--accent-2));
+      box-shadow:0 12px 24px rgba(230,0,114,.28);
+    }
+
+    .brand h1{
+      margin:0;
+      font-size:20px;
+      line-height:1;
+      color:var(--accent);
+    }
+
+    .brand p,.section-title p,.quick-summary p{
+      margin:4px 0 0;
+      color:var(--muted);
+      font-size:12px;
+    }
+
+    .section-title{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-end;
+      gap:10px;
+      margin-bottom:9px;
+    }
+
+    .section-title h2,.section-title h3{
+      margin:0;
+      font-size:16px;
+    }
+
+    .metric-grid{
+      display:grid;
+      gap:7px;
+    }
+
+    .metric{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:8px;
+      padding:8px 10px;
+      background:rgba(255,255,255,.58);
+      border:1px solid var(--line);
+      border-radius:16px;
+    }
+
+    .metric b{font-size:17px}
+    .metric span{color:var(--muted);font-size:11px}
+
+    .publication-list{
+      display:flex;
+      flex-direction:column;
+      gap:7px;
+    }
+
+    .publication-card{
+      width:100%;
+      border:1px solid transparent;
+      border-radius:15px;
+      padding:7px;
+      display:grid;
+      grid-template-columns:50px 1fr;
+      gap:8px;
+      text-align:left;
+      color:var(--ink);
+      background:rgba(255,255,255,.55);
+      cursor:pointer;
+      transition:transform .2s ease,border-color .2s ease,box-shadow .2s ease;
+    }
+
+    .publication-card:hover,.publication-card.active{
+      transform:translateY(-1px);
+      border-color:rgba(230,0,114,.38);
+      box-shadow:var(--glow);
+    }
+
+    .publication-card img{
+      width:50px;
+      height:50px;
+      border-radius:12px;
+      object-fit:cover;
+    }
+
+    .publication-card h3{
+      margin:1px 0 3px;
+      font-size:13px;
+    }
+
+    .publication-card p{
+      margin:0;
+      color:var(--muted);
+      font-size:11px;
+    }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      width:max-content;
+      gap:5px;
+      margin-top:6px;
+      padding:3px 7px;
+      border-radius:999px;
+      font-size:11px;
+      font-weight:800;
+      color:#7a0048;
+      background:rgba(255,220,238,.9);
+    }
+
+    .badge.ok{color:#0a6b38;background:rgba(210,255,229,.9)}
+    .badge.warn{color:#9a6200;background:rgba(255,239,201,.92)}
+    .badge.off{color:#8a1b2b;background:rgba(255,217,224,.92)}
+
+    .action-stack{
+      display:grid;
+      gap:8px;
+    }
+
+    .btn{
+      border:0;
+      border-radius:16px;
+      padding:10px 12px;
+      cursor:pointer;
+      font-weight:900;
+      color:white;
+      background:linear-gradient(135deg,var(--accent),var(--accent-2));
+      box-shadow:0 14px 26px rgba(230,0,114,.22);
+      transition:transform .2s ease,filter .2s ease;
+    }
+
+    .btn:hover{transform:translateY(-1px);filter:saturate(1.08)}
+    .btn.secondary{
+      color:var(--accent);
+      background:rgba(255,255,255,.72);
+      border:1px solid var(--line);
+      box-shadow:none;
+    }
+
+    .hero-media{
+      overflow:hidden;
+      padding:0;
+    }
+
+    .main-media{
+      position:relative;
+      height:340px;
+      border-radius:22px;
+      overflow:hidden;
+      background:linear-gradient(135deg,rgba(230,0,114,.16),rgba(255,255,255,.78));
+    }
+
+    .main-media img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+    }
+
+    .media-overlay{
+      position:absolute;
+      inset:auto 18px 18px 18px;
+      padding:12px;
+      border-radius:18px;
+      color:white;
+      background:linear-gradient(135deg,rgba(49,16,33,.78),rgba(230,0,114,.46));
+      backdrop-filter:blur(8px);
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      align-items:center;
+    }
+
+    .media-overlay h2{
+      margin:0;
+      font-size:21px;
+    }
+
+    .media-overlay p{
+      margin:4px 0 0;
+      color:rgba(255,255,255,.82);
+      font-size:13px;
+    }
+
+    .edit-btn,.theme-btn{
+      border:0;
+      width:38px;
+      height:38px;
+      border-radius:50%;
+      display:grid;
+      place-items:center;
+      cursor:pointer;
+      color:white;
+      background:linear-gradient(135deg,var(--accent),var(--accent-2));
+      box-shadow:0 10px 22px rgba(0,0,0,.18);
+      flex:0 0 auto;
+    }
+
+    .thumb-grid{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:10px;
+    }
+
+    .thumb{
+      position:relative;
+      min-height:104px;
+      border-radius:18px;
+      overflow:hidden;
+      background:rgba(255,255,255,.6);
+      border:1px solid var(--line);
+    }
+
+    .thumb img{
+      width:100%;
+      height:100%;
+      min-height:104px;
+      object-fit:cover;
+      display:block;
+    }
+
+    .thumb .edit-btn{
+      position:absolute;
+      right:10px;
+      bottom:10px;
+      width:34px;
+      height:34px;
+    }
+
+    .info-grid{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:8px;
+    }
+
+    .field-card{
+      position:relative;
+      min-height:70px;
+      padding:10px 40px 10px 10px;
+      border:1px solid var(--line);
+      border-radius:16px;
+      background:rgba(255,255,255,.58);
+    }
+
+    .field-card.wide{grid-column:1/-1}
+
+    .field-card small{
+      display:block;
+      color:var(--muted);
+      font-weight:800;
+      margin-bottom:5px;
+    }
+
+    .field-card b{
+      display:block;
+      font-size:15px;
+      line-height:1.35;
+    }
+
+    .field-card .edit-btn{
+      position:absolute;
+      top:10px;
+      right:10px;
+      width:30px;
+      height:30px;
+      font-size:13px;
+    }
+
+    .contacts{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:8px;
+    }
+
+    .contact-row{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:8px;
+      min-height:54px;
+      padding:9px;
+      border:1px solid var(--line);
+      border-radius:16px;
+      background:rgba(255,255,255,.58);
+    }
+
+    .contact-row b{
+      display:block;
+      font-size:14px;
+    }
+
+    .contact-row small{
+      display:block;
+      max-width:170px;
+      color:var(--muted);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .switch{
+      position:relative;
+      width:48px;
+      height:28px;
+      flex:0 0 auto;
+    }
+
+    .switch input{
+      position:absolute;
+      opacity:0;
+      pointer-events:none;
+    }
+
+    .switch span{
+      position:absolute;
+      inset:0;
+      border-radius:999px;
+      background:#ded1d8;
+      cursor:pointer;
+      transition:background .2s ease;
+    }
+
+    .switch span::after{
+      content:"";
+      position:absolute;
+      top:4px;
+      left:4px;
+      width:20px;
+      height:20px;
+      border-radius:50%;
+      background:white;
+      box-shadow:0 3px 8px rgba(0,0,0,.22);
+      transition:transform .2s ease;
+    }
+
+    .switch input:checked + span{
+      background:linear-gradient(135deg,#1dbb67,#43e891);
+    }
+
+    .switch input:checked + span::after{
+      transform:translateX(20px);
+    }
+
+    .profile-mini{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      position:relative;
+    }
+
+    .avatar{
+      width:66px;
+      height:56px;
+      width:56px;
+      border-radius:50%;
+      object-fit:cover;
+      border:3px solid rgba(255,255,255,.8);
+      box-shadow:var(--glow);
+    }
+
+    .profile-mini h2{
+      margin:0;
+      font-size:16px;
+    }
+
+    .theme-btn{
+      margin-left:auto;
+      background:conic-gradient(from 90deg,#e60072,#ffcb3d,#2bd66f,#47a4ff,#bb5cff,#e60072);
+    }
+
+    .theme-picker{
+      display:none;
+      margin-top:14px;
+      grid-template-columns:1fr;
+      gap:8px;
+    }
+
+    .theme-picker.open{display:grid}
+
+    .theme-option{
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:10px 12px;
+      text-align:left;
+      color:var(--ink);
+      background:rgba(255,255,255,.58);
+      cursor:pointer;
+      font-weight:800;
+    }
+
+    .theme-option.active{
+      color:white;
+      background:linear-gradient(135deg,var(--accent),var(--accent-2));
+    }
+
+    .quick-summary{
+      display:grid;
+      gap:7px;
+    }
+
+    .quick-item{
+      padding:9px 10px;
+      border-radius:16px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.56);
+    }
+
+    .quick-item span{
+      display:block;
+      color:var(--muted);
+      font-size:12px;
+      font-weight:800;
+    }
+
+    .quick-item b{
+      display:block;
+      margin-top:4px;
+      font-size:14px;
+    }
+
+    .security-list{
+      display:grid;
+      gap:7px;
+    }
+
+    .security-line{
+      display:flex;
+      align-items:center;
+      gap:7px;
+      color:var(--muted);
+      font-size:12px;
+    }
+
+    @media(max-width:1180px){
+      .dashboard-rentero{
+        grid-template-columns:220px minmax(440px,1fr) 250px;
+      }
+    }
+
+    @media(max-width:960px){
+      .dashboard-rentero{
+        grid-template-columns:1fr;
+      }
+
+      .dashboard-center{order:1}
+      .dashboard-right{order:2}
+      .dashboard-left{order:3}
+    }
+
+    @media(max-width:768px){
+      .page{padding:4px}
+      .dashboard-rentero{
+        grid-template-columns:minmax(0,1fr) 194px minmax(0,1fr);
+        grid-template-areas:
+          "left hero right"
+          "left thumbs right"
+          "left contacts right"
+          "left info right";
+        column-gap:4px;
+        row-gap:1px;
+        align-items:stretch;
+      }
+      .dashboard-col{gap:4px}
+      .dashboard-center{display:contents}
+      .dashboard-left,
+      .dashboard-right{
+        width:100%;
+        max-width:178px;
+        height:100%;
+        margin:0 auto;
+        align-self:stretch;
+        justify-content:space-between;
+      }
+      .dashboard-left{grid-area:left}
+      .dashboard-right{grid-area:right}
+      .dashboard-center .hero-media{grid-area:hero}
+      .dashboard-center .thumb-grid{grid-area:thumbs}
+      .dashboard-center > .panel.glass:nth-of-type(4){grid-area:contacts;width:100%;margin:0 auto}
+      .dashboard-center > .panel.glass:nth-of-type(3){grid-area:info;width:100%;margin:0 auto}
+      .dashboard-left .panel{padding:4px}
+      .dashboard-right .panel{padding:4px}
+      .dashboard-left .section-title{margin-bottom:2px}
+      .dashboard-right .section-title{margin-bottom:2px}
+      .dashboard-left .section-title h2,
+      .dashboard-left .section-title h3,
+      .dashboard-right .section-title h2,
+      .dashboard-right .section-title h3{font-size:10px}
+      .dashboard-left .section-title p,
+      .dashboard-right .section-title p{font-size:8px}
+      .panel{padding:5px}
+      .brand{padding:5px 6px;gap:5px}
+      .brand-mark{width:24px;height:24px;font-size:11px}
+      .brand h1{font-size:13px}
+      .brand p,.section-title p,.quick-summary p{font-size:9px}
+      .section-title{margin-bottom:3px;gap:4px}
+      .section-title h2,.section-title h3{font-size:12px}
+      .main-media{width:min(200px,100%);height:120px;margin:0 auto;border-radius:13px}
+      .media-overlay{
+        inset:auto 5px 5px 5px;
+        align-items:flex-start;
+        padding:5px;
+        border-radius:10px;
+      }
+      .media-overlay h2{font-size:13px}
+      .media-overlay p{font-size:9px}
+      .edit-btn,.theme-btn{width:24px;height:24px;font-size:10px}
+      .thumb-grid{
+        display:flex;
+        grid-template-columns:none;
+        gap:6px;
+        justify-content:center;
+        padding-bottom:2px;
+        scroll-snap-type:x proximity;
+      }
+      .thumb{
+        flex:0 0 calc((100% - 12px)/3);
+        min-height:68px;
+        border-radius:11px;
+        scroll-snap-align:start;
+      }
+      .thumb img{min-height:68px}
+      .thumb .edit-btn{width:24px;height:24px;right:4px;bottom:4px}
+      .info-grid,.contacts{
+        grid-template-columns:1fr;
+      }
+      .info-grid,.contacts,.metric-grid,.publication-list,.quick-summary,.security-list{gap:1px}
+      .dashboard-center > .panel.glass:nth-of-type(3),
+      .dashboard-center > .panel.glass:nth-of-type(4){padding:2px 3px}
+      .dashboard-center > .panel.glass:nth-of-type(3) .section-title,
+      .dashboard-center > .panel.glass:nth-of-type(4) .section-title{margin-bottom:1px}
+      .dashboard-center > .panel.glass:nth-of-type(3) .section-title h2,
+      .dashboard-center > .panel.glass:nth-of-type(4) .section-title h2{font-size:9px}
+      .dashboard-center > .panel.glass:nth-of-type(3) .section-title p,
+      .dashboard-center > .panel.glass:nth-of-type(4) .section-title p{font-size:6px}
+      .field-card{
+        min-height:0;
+        padding:1px 3px;
+        border-radius:6px;
+        display:grid;
+        grid-template-columns:62px minmax(0,1fr) 18px;
+        gap:2px;
+        align-items:center;
+      }
+      .field-card.wide{grid-column:auto}
+      .field-card small{font-size:7px;margin:0}
+      .field-card b{font-size:8px;line-height:1.05;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+      .field-card .edit-btn{position:static;width:17px;height:17px;font-size:8px}
+      .metric{padding:4px 6px;border-radius:8px}
+      .metric b{font-size:12px}
+      .metric span{font-size:9px}
+      .publication-card{grid-template-columns:30px 1fr;padding:3px;gap:4px;border-radius:8px}
+      .publication-card img{width:30px;height:30px;border-radius:8px}
+      .publication-card h3{font-size:10px;margin:0}
+      .publication-card p{display:none}
+      .badge{margin-top:2px;padding:1px 5px;font-size:9px}
+      .btn{padding:5px 7px;border-radius:9px;font-size:10px}
+      .dashboard-left .brand{padding:4px 5px}
+      .dashboard-left .brand-mark{width:20px;height:20px;font-size:9px}
+      .dashboard-left .brand h1{font-size:11px}
+      .dashboard-left .brand p{font-size:8px}
+      .dashboard-left .metric{padding:3px 5px}
+      .dashboard-left .metric b{font-size:10px}
+      .dashboard-left .metric span{font-size:8px}
+      .dashboard-left .publication-card{grid-template-columns:24px 1fr;padding:3px;gap:4px}
+      .dashboard-left .publication-card img{width:24px;height:24px;border-radius:7px}
+      .dashboard-left .publication-card h3{font-size:9px}
+      .dashboard-left .badge{font-size:8px;padding:1px 4px}
+      .dashboard-left .btn{padding:4px 5px;font-size:9px;border-radius:8px}
+      .profile-mini{gap:5px}
+      .avatar{width:38px;height:38px}
+      .profile-mini h2{font-size:12px}
+      .dashboard-right .profile-mini{gap:4px}
+      .dashboard-right .avatar{width:32px;height:32px;border-width:2px}
+      .dashboard-right .profile-mini h2{font-size:10px}
+      .dashboard-right .profile-mini p{font-size:8px}
+      .dashboard-right .theme-btn{width:22px;height:22px}
+      .theme-picker{gap:3px;margin-top:4px}
+      .theme-option{padding:5px 7px;border-radius:8px;font-size:10px}
+      .dashboard-right .theme-option{padding:4px 5px;font-size:9px}
+      .quick-item{
+        padding:2px 0;
+        border:0;
+        border-bottom:1px solid var(--line);
+        border-radius:0;
+        background:transparent;
+        display:flex;
+        justify-content:space-between;
+        gap:8px;
+      }
+      .quick-item span{font-size:9px}
+      .quick-item b{font-size:10px;margin-top:0;text-align:right}
+      .dashboard-right .quick-item span{font-size:8px}
+      .dashboard-right .quick-item b{font-size:9px}
+      .contact-row{
+        min-height:18px;
+        padding:1px 3px;
+        border-radius:6px;
+        display:grid;
+        grid-template-columns:minmax(0,1fr) auto 18px;
+        align-items:center;
+      }
+      .contact-row::after{
+        content:"✏️";
+        width:16px;
+        height:16px;
+        display:grid;
+        place-items:center;
+        border-radius:50%;
+        color:white;
+        background:linear-gradient(135deg,var(--accent),var(--accent-2));
+        font-size:7px;
+      }
+      .contact-row b{font-size:8px}
+      .contact-row small{display:none}
+      .switch{width:24px;height:14px}
+      .switch span::after{top:2px;left:2px;width:10px;height:10px}
+      .switch input:checked + span::after{transform:translateX(10px)}
+      .security-line{font-size:10px;gap:4px}
+      .dashboard-right .security-line{font-size:8px;gap:3px}
+      .dashboard-right .btn{padding:4px 5px;font-size:9px;border-radius:8px}
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <main class="dashboard-rentero">
+      <aside class="dashboard-col dashboard-left">
+        <section class="brand glass">
+          <div class="brand-mark">C</div>
+          <div>
+            <h1>Cariñosas</h1>
+            <p>Dashboard rentero</p>
+          </div>
+        </section>
+
+        <section class="panel glass">
+          <div class="section-title">
+            <div>
+              <h2>Resumen</h2>
+              <p>Actividad mock de tus publicaciones</p>
+            </div>
+          </div>
+          <div class="metric-grid">
+            <div class="metric"><span>Corazones recibidos ❤️</span><b id="metricCorazones">248</b></div>
+            <div class="metric"><span>Mensajes 💬</span><b id="metricMensajes">36</b></div>
+            <div class="metric"><span>Clics en WhatsApp 🟢</span><b id="metricWhatsapp">112</b></div>
+          </div>
+        </section>
+
+        <section class="panel glass">
+          <div class="section-title">
+            <div>
+              <h3>Mis perfiles / banners / destacados / publicidad rentada</h3>
+              <p>Selecciona una publicación mock</p>
+            </div>
+          </div>
+          <div class="publication-list" id="publicationList"></div>
+        </section>
+
+        <section class="panel glass action-stack">
+          <button class="btn" type="button">Publicar nuevo perfil</button>
+          <button class="btn secondary" type="button">Publicar nuevo banner</button>
+        </section>
+      </aside>
+
+      <section class="dashboard-col dashboard-center">
+        <section class="hero-media glass">
+          <div class="main-media">
+            <img id="mainImage" src="" alt="Imagen principal mock">
+            <div class="media-overlay">
+              <div>
+                <h2 id="mainTitle">Valentina</h2>
+                <p id="mainSubtitle">Perfil activo en Monterrey</p>
+              </div>
+              <button class="edit-btn" type="button" aria-label="Editar imagen principal">✏️</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="thumb-grid" id="thumbGrid"></section>
+
+        <section class="panel glass">
+          <div class="section-title">
+            <div>
+              <h2>Información pública</h2>
+              <p>Datos editables mock del perfil/anuncio seleccionado</p>
+            </div>
+          </div>
+          <div class="info-grid" id="infoGrid"></div>
+        </section>
+
+        <section class="panel glass">
+          <div class="section-title">
+            <div>
+              <h2>Medios de contacto</h2>
+              <p>Switches visuales mock, sin guardar datos</p>
+            </div>
+          </div>
+          <div class="contacts" id="contactsGrid"></div>
+        </section>
+      </section>
+
+      <aside class="dashboard-col dashboard-right">
+        <section class="panel glass">
+          <div class="profile-mini">
+            <img class="avatar" id="avatarImage" src="" alt="Avatar mock">
+            <div>
+              <h2 id="sideName">Valentina</h2>
+              <p>Cuenta verificada mock</p>
+            </div>
+            <button class="theme-btn" id="themeToggle" type="button" aria-label="Cambiar tema visual"></button>
+          </div>
+          <div class="theme-picker" id="themePicker" aria-label="Selector mock de temas">
+            <button class="theme-option active" type="button" data-theme="">Rosa premium</button>
+            <button class="theme-option" type="button" data-theme="tema-rojo">Rojo pasión</button>
+            <button class="theme-option" type="button" data-theme="tema-morado">Morado elegante</button>
+            <button class="theme-option" type="button" data-theme="tema-negro">Negro neón</button>
+            <button class="theme-option" type="button" data-theme="tema-dorado">Dorado VIP</button>
+            <button class="theme-option" type="button" data-theme="tema-azul">Azul noche</button>
+            <button class="theme-option" type="button" data-theme="tema-verde">Verde swinger</button>
+            <button class="theme-option" type="button" data-theme="tema-arcoiris">Arcoíris LGBT</button>
+            <button class="theme-option" type="button" data-theme="tema-trans">Trans Pride</button>
+            <button class="theme-option" type="button" data-theme="tema-femboy">Femboy pastel</button>
+            <button class="theme-option" type="button" data-theme="tema-hotel">Hotel/Motel lujo</button>
+            <button class="theme-option" type="button" data-theme="tema-spa">Spa relajante</button>
+            <button class="theme-option" type="button" data-theme="tema-sexshop">Sex Shop neón</button>
+          </div>
+        </section>
+
+        <section class="panel glass">
+          <div class="section-title">
+            <div>
+              <h2>Resumen rápido</h2>
+              <p>Estado general mock</p>
+            </div>
+          </div>
+          <div class="quick-summary" id="quickSummary"></div>
+        </section>
+
+        <section class="panel glass">
+          <div class="section-title">
+            <div>
+              <h2>Seguridad y verificación</h2>
+              <p>Controles informativos mock</p>
+            </div>
+          </div>
+          <div class="security-list">
+            <div class="security-line">✅ Cuenta con acceso seguro</div>
+            <div class="security-line">🛡️ Cambios públicos sujetos a revisión</div>
+            <div class="security-line">🔒 Datos privados no visibles al público</div>
+          </div>
+        </section>
+
+        <section class="panel glass">
+          <div class="section-title">
+            <div>
+              <h2>Estado de revisión</h2>
+              <p id="reviewStatus">Activo y aprobado</p>
+            </div>
+          </div>
+          <button class="btn secondary" type="button">Contactar soporte</button>
+        </section>
+      </aside>
+    </main>
+  </div>
+
+  <script>
+    const documentosMockDashboard=[
+      {
+        id:"perfil-valentina",
+        nombre:"Valentina",
+        tipo:"perfil",
+        estado:"Activo",
+        estadoClase:"ok",
+        ubicacion:"Monterrey, Nuevo León",
+        imagen:"https://images.unsplash.com/photo-1512310604669-443f26c35f52?auto=format&fit=crop&w=1200&q=80",
+        avatar:"https://images.unsplash.com/photo-1512310604669-443f26c35f52?auto=format&fit=crop&w=240&q=80",
+        secundarias:[
+          "https://images.unsplash.com/photo-1509967419530-da38b4704bc6?auto=format&fit=crop&w=600&q=80",
+          "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=600&q=80",
+          "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=600&q=80"
+        ],
+        resumen:{corazones:248,mensajes:36,whatsapp:112},
+        datos:{
+          "Nombre público":"Valentina",
+          "Categoría":"Escort VIP",
+          "País":"México",
+          "Estado":"Nuevo León",
+          "Ciudad":"Monterrey",
+          "Descripción":"Perfil premium con atención discreta, fotos verificadas y disponibilidad programada.",
+          "Servicios":"Compañía social, cenas, eventos privados",
+          "Horario":"Lunes a sábado · 14:00 a 23:00",
+          "Tarifas":"Desde $2,500 MXN",
+          "Modalidad":"Presencial con cita",
+          "Zona":"San Pedro / Valle"
+        },
+        contactos:{
+          "WhatsApp":{valor:"+52 81 0000 0000",activo:true},
+          "Telegram":{valor:"@valentina_mock",activo:true},
+          "Instagram":{valor:"@valentina.carihub",activo:true},
+          "X/Twitter":{valor:"",activo:false},
+          "Sitio web":{valor:"",activo:false},
+          "Teléfono":{valor:"+52 81 0000 0000",activo:true},
+          "Mensaje interno":{valor:"Activo en Cariñosas",activo:true},
+          "Maps/Ubicación":{valor:"Zona aproximada",activo:false}
+        },
+        quick:{
+          "Plan actual":"VIP mensual",
+          "Perfiles activos":"1 perfil",
+          "Días restantes del plan":"18 días",
+          "Anuncio destacado":"Resultados centro",
+          "Última actualización":"Hoy, 09:20"
+        },
+        revision:"Activo y aprobado"
+      },
+      {
+        id:"banner-spa",
+        nombre:"Spa Aurora",
+        tipo:"banner",
+        estado:"Pendiente",
+        estadoClase:"warn",
+        ubicacion:"Guadalajara, Jalisco",
+        imagen:"https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=1200&q=80",
+        avatar:"https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=240&q=80",
+        secundarias:[
+          "https://images.unsplash.com/photo-1519823551278-64ac92734fb1?auto=format&fit=crop&w=600&q=80",
+          "https://images.unsplash.com/photo-1515377905703-c4788e51af15?auto=format&fit=crop&w=600&q=80",
+          "https://images.unsplash.com/photo-1600334129128-685c5582fd35?auto=format&fit=crop&w=600&q=80"
+        ],
+        resumen:{corazones:82,mensajes:14,whatsapp:49},
+        datos:{
+          "Nombre público":"Spa Aurora",
+          "Categoría":"Spa",
+          "País":"México",
+          "Estado":"Jalisco",
+          "Ciudad":"Guadalajara",
+          "Descripción":"Banner de spa relajante con campaña pendiente de autorización para pago.",
+          "Servicios":"Masajes relajantes, aromaterapia, paquetes wellness",
+          "Horario":"Todos los días · 10:00 a 20:00",
+          "Tarifas":"Campaña mensual mock",
+          "Modalidad":"Publicidad banner",
+          "Zona":"Providencia"
+        },
+        contactos:{
+          "WhatsApp":{valor:"+52 33 0000 0000",activo:true},
+          "Telegram":{valor:"",activo:false},
+          "Instagram":{valor:"@spa.aurora",activo:true},
+          "X/Twitter":{valor:"",activo:false},
+          "Sitio web":{valor:"spa-aurora.example",activo:false},
+          "Teléfono":{valor:"",activo:false},
+          "Mensaje interno":{valor:"Pendiente",activo:false},
+          "Maps/Ubicación":{valor:"Guadalajara",activo:true}
+        },
+        quick:{
+          "Plan actual":"Banner mensual",
+          "Perfiles activos":"0 perfiles",
+          "Días restantes del plan":"Pendiente de pago",
+          "Anuncio destacado":"Home inferior",
+          "Última actualización":"Ayer, 18:45"
+        },
+        revision:"Pendiente de revisión"
+      },
+      {
+        id:"destacado-club",
+        nombre:"Club Velvet",
+        tipo:"destacado",
+        estado:"Corrección solicitada",
+        estadoClase:"off",
+        ubicacion:"CDMX",
+        imagen:"https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1200&q=80",
+        avatar:"https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=240&q=80",
+        secundarias:[
+          "https://images.unsplash.com/photo-1566737236500-c8ac43014a8e?auto=format&fit=crop&w=600&q=80",
+          "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=600&q=80",
+          "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=600&q=80"
+        ],
+        resumen:{corazones:126,mensajes:22,whatsapp:73},
+        datos:{
+          "Nombre público":"Club Velvet",
+          "Categoría":"Antro / Restaurant Bar LGBT",
+          "País":"México",
+          "Estado":"CDMX",
+          "Ciudad":"Cuauhtémoc",
+          "Descripción":"Destacado nocturno con solicitud de ajustar texto público antes de activarse.",
+          "Servicios":"Reservaciones, eventos privados, noches temáticas",
+          "Horario":"Jueves a domingo · 21:00 a 03:00",
+          "Tarifas":"Promoción por evento",
+          "Modalidad":"Destacado",
+          "Zona":"Roma Norte"
+        },
+        contactos:{
+          "WhatsApp":{valor:"",activo:false},
+          "Telegram":{valor:"",activo:false},
+          "Instagram":{valor:"@clubvelvet",activo:true},
+          "X/Twitter":{valor:"@clubvelvet",activo:true},
+          "Sitio web":{valor:"clubvelvet.example",activo:true},
+          "Teléfono":{valor:"+52 55 0000 0000",activo:true},
+          "Mensaje interno":{valor:"Activo",activo:true},
+          "Maps/Ubicación":{valor:"Roma Norte",activo:true}
+        },
+        quick:{
+          "Plan actual":"Destacado quincenal",
+          "Perfiles activos":"0 perfiles",
+          "Días restantes del plan":"En corrección",
+          "Anuncio destacado":"Perfil superior",
+          "Última actualización":"12/06/2026"
+        },
+        revision:"Corrección solicitada"
+      }
+    ];
+
+    function datosDocumento(doc){
+      if(doc&&typeof doc.data==="function")return {id:doc.id||"",...doc.data()};
+      return doc&&typeof doc==="object"?doc:{};
+    }
+
+    function valorDatoPublico(data,campo,alternativo=""){
+      return data?.datos?.[campo] ?? alternativo ?? "";
+    }
+
+    function normalizarContactosPerfil(u){
+      const contactos=u.contactos||{};
+      const legacy=nombre=>contactos[nombre]||{};
+      const telefono=u.telefono||contactos.whatsapp?.valor||"";
+      return {
+        "WhatsApp":{valor:telefono||legacy("WhatsApp").valor||"",activo:Boolean(telefono||contactos.whatsapp?.activo||legacy("WhatsApp").activo),visiblePublico:true,actualizadoEn:contactos.whatsapp?.actualizadoEn||null},
+        "Telegram":{valor:contactos.telegram?.valor||legacy("Telegram").valor||"",activo:Boolean(contactos.telegram?.activo||legacy("Telegram").activo),visiblePublico:Boolean(contactos.telegram?.visiblePublico||legacy("Telegram").visiblePublico),actualizadoEn:contactos.telegram?.actualizadoEn||null},
+        "Instagram":{valor:contactos.instagram?.valor||legacy("Instagram").valor||"",activo:Boolean(contactos.instagram?.activo||legacy("Instagram").activo),visiblePublico:Boolean(contactos.instagram?.visiblePublico||legacy("Instagram").visiblePublico),actualizadoEn:contactos.instagram?.actualizadoEn||null},
+        "X/Twitter":{valor:contactos.twitter?.valor||legacy("X/Twitter").valor||"",activo:Boolean(contactos.twitter?.activo||legacy("X/Twitter").activo),visiblePublico:Boolean(contactos.twitter?.visiblePublico||legacy("X/Twitter").visiblePublico),actualizadoEn:contactos.twitter?.actualizadoEn||null},
+        "Sitio web":{valor:contactos.sitioWeb?.valor||legacy("Sitio web").valor||"",activo:Boolean(contactos.sitioWeb?.activo||legacy("Sitio web").activo),visiblePublico:Boolean(contactos.sitioWeb?.visiblePublico||legacy("Sitio web").visiblePublico),actualizadoEn:contactos.sitioWeb?.actualizadoEn||null},
+        "Teléfono":{valor:telefono||legacy("Teléfono").valor||"",activo:Boolean(telefono||legacy("Teléfono").activo),visiblePublico:true,actualizadoEn:contactos.telefono?.actualizadoEn||null},
+        "Mensaje interno":{valor:contactos.interno?.valor||legacy("Mensaje interno").valor||"Activo en Cariñosas",activo:contactos.interno?.activo!==false&&legacy("Mensaje interno").activo!==false,visiblePublico:true,actualizadoEn:contactos.interno?.actualizadoEn||null},
+        "Maps/Ubicación":{valor:contactos.maps?.valor||legacy("Maps/Ubicación").valor||u.zona||"",activo:Boolean(contactos.maps?.activo||legacy("Maps/Ubicación").activo),visiblePublico:Boolean(contactos.maps?.visiblePublico||legacy("Maps/Ubicación").visiblePublico),actualizadoEn:contactos.maps?.actualizadoEn||null}
+      };
+    }
+
+    function normalizarContactosPublicidad(s){
+      const c=s.contactoPublico||s.contactos||{};
+      const legacy=nombre=>c[nombre]||{};
+      return {
+        "WhatsApp":{valor:c.whatsapp||c.whatsapp?.valor||legacy("WhatsApp").valor||"",activo:Boolean(c.whatsappActivo||c.whatsapp?.activo||legacy("WhatsApp").activo),visiblePublico:true,actualizadoEn:c.whatsapp?.actualizadoEn||null},
+        "Telegram":{valor:c.telegram||c.telegram?.valor||legacy("Telegram").valor||"",activo:Boolean(c.telegramActivo||c.telegram?.activo||legacy("Telegram").activo),visiblePublico:true,actualizadoEn:c.telegram?.actualizadoEn||null},
+        "Instagram":{valor:c.instagram||c.instagram?.valor||legacy("Instagram").valor||"",activo:Boolean(c.instagramActivo||c.instagram?.activo||legacy("Instagram").activo),visiblePublico:true,actualizadoEn:c.instagram?.actualizadoEn||null},
+        "X/Twitter":{valor:c.twitter||c.twitter?.valor||legacy("X/Twitter").valor||"",activo:Boolean(c.twitterActivo||c.twitter?.activo||legacy("X/Twitter").activo),visiblePublico:true,actualizadoEn:c.twitter?.actualizadoEn||null},
+        "Sitio web":{valor:c.sitioWeb||c.sitioWeb?.valor||legacy("Sitio web").valor||"",activo:Boolean(c.sitioWebActivo||c.sitioWeb?.activo||legacy("Sitio web").activo),visiblePublico:true,actualizadoEn:c.sitioWeb?.actualizadoEn||null},
+        "Teléfono":{valor:c.telefono||legacy("Teléfono").valor||"",activo:Boolean(c.telefonoActivo||legacy("Teléfono").activo),visiblePublico:true,actualizadoEn:c.telefono?.actualizadoEn||null},
+        "Mensaje interno":{valor:c.mensajeInternoActivo||legacy("Mensaje interno").activo?"Activo en Cariñosas":"",activo:Boolean(c.mensajeInternoActivo||legacy("Mensaje interno").activo),visiblePublico:true,actualizadoEn:c.mensajeInterno?.actualizadoEn||null},
+        "Maps/Ubicación":{valor:c.googleMaps||c.maps?.valor||legacy("Maps/Ubicación").valor||"",activo:Boolean(c.googleMapsActivo||c.maps?.activo||legacy("Maps/Ubicación").activo),visiblePublico:true,actualizadoEn:c.maps?.actualizadoEn||null}
+      };
+    }
+
+    function normalizarMediaPerfil(u){
+      return {
+        mediaPrincipal:{url:u.fotoURL||u.imagen||"",path:u.fotoPath||"",tipo:"image/jpeg",mediaKind:"imagen"},
+        mediaSecundaria:Array.isArray(u.fotosExtraURL)?u.fotosExtraURL:(u.secundarias||[])
+      };
+    }
+
+    function normalizarMediaPublicidad(s){
+      const principal=s.imagenPrincipalURL||s.imagen||s.mediaPrincipal?.url||"";
+      return {
+        mediaPrincipal:{
+          url:principal,
+          path:s.imagenPrincipalPath||s.mediaPrincipal?.path||"",
+          tipo:s.imagenPrincipalTipo||s.mediaPrincipal?.tipo||"",
+          mediaKind:(s.imagenPrincipalTipo||"").startsWith("video/")?"video":"imagen"
+        },
+        mediaSecundaria:Array.isArray(s.imagenesAdicionales)
+          ? s.imagenesAdicionales.map(item=>typeof item==="string"?item:(item.url||item.path||"")).filter(Boolean)
+          : (s.secundarias||[])
+      };
+    }
+
+    function normalizarEstadoPublicacion(data){
+      const estadosVisuales=["Activo","Pendiente","Corrección solicitada","Vencido","Inactivo"];
+      const estadoVisual=estadosVisuales.includes(data.estado)?data.estado:"";
+      const revision=data.estadoRevision||data.estadoAdmin||data.revision||estadoVisual||"sin_estado";
+      const pago=data.estadoPago||"";
+      const activo=data.activo===true||estadoVisual==="Activo";
+      const vencido=data.vencido===true||estadoVisual==="Vencido";
+      const autorizadoParaPago=Boolean(data.autorizadoParaPago);
+      const etiqueta=estadoVisual||revision;
+      const estadoClase=activo?"ok":(revision.includes("pendiente")||revision.includes("revision")||etiqueta==="Pendiente"?"warn":"off");
+      return {publicoActivo:activo,revision,pago,admin:data.estadoAdmin||"",vencido,autorizadoParaPago,etiqueta,estadoClase};
+    }
+
+    function normalizarPlanPublicacion(data){
+      const quick=data.quick||{};
+      return {
+        nombre:data.planActual||quick["Plan actual"]||data.periodoPublicidad||"",
+        perfilesActivos:data.perfilesActivos||quick["Perfiles activos"]||"",
+        fechaInicio:data.fechaInicio||data.fechaPublicacion||null,
+        fechaVencimiento:data.fechaVencimiento||null,
+        diasRestantes:data.diasRestantes||quick["Días restantes del plan"]||quick["DÃ­as restantes del plan"]||"",
+        anuncioDestacado:data.anuncioDestacado||quick["Anuncio destacado"]||"",
+        ultimaActualizacion:data.ultimaActualizacion||quick["Última actualización"]||quick["Ãšltima actualización"]||quick["Ãšltima actualizaciÃ³n"]||"",
+        renovacionActiva:Boolean(data.renovacionActiva)
+      };
+    }
+
+    function normalizarMetricasPublicacion(data){
+      const resumen=data.resumen||data.metricas||{};
+      return {
+        visitas:Number(resumen.visitas||0),
+        favoritos:Number(resumen.favoritos||resumen.corazones||0),
+        mensajes:Number(resumen.mensajes||0),
+        clicksWhatsApp:Number(resumen.clicksWhatsApp||resumen.whatsapp||0),
+        clicksTelegram:Number(resumen.clicksTelegram||0),
+        clicksInstagram:Number(resumen.clicksInstagram||0),
+        clicksLlamada:Number(resumen.clicksLlamada||0),
+        clicksSitioWeb:Number(resumen.clicksSitioWeb||0),
+        vistasPerfil:Number(resumen.vistasPerfil||0),
+        vistasBanner:Number(resumen.vistasBanner||0)
+      };
+    }
+
+    function normalizarPerfilUsuario(doc){
+      const u=datosDocumento(doc);
+      const media=normalizarMediaPerfil(u);
+      return {
+        id:u.id||u.uid||"perfil-mock",
+        origen:"usuarios",
+        tipo:"perfil",
+        ownerUid:u.uid||u.ownerUid||"",
+        nombrePublico:valorDatoPublico(u,"Nombre público",u.nombrePublico||u.nombre||""),
+        categoria:valorDatoPublico(u,"Categoría",u.categoria||""),
+        pais:valorDatoPublico(u,"País",u.pais||""),
+        estado:valorDatoPublico(u,"Estado",u.estado||""),
+        ciudad:valorDatoPublico(u,"Ciudad",u.ciudad||""),
+        zona:valorDatoPublico(u,"Zona",u.zona||""),
+        descripcion:valorDatoPublico(u,"Descripción",u.descripcion||""),
+        descripcionCompleta:u.descripcionCompleta||"",
+        servicios:valorDatoPublico(u,"Servicios",u.servicios||""),
+        horario:valorDatoPublico(u,"Horario",u.horario||""),
+        tarifas:valorDatoPublico(u,"Tarifas",u.tarifas||u.precio||""),
+        modalidad:valorDatoPublico(u,"Modalidad",u.modalidad||""),
+        disponibilidad:u.disponibilidad||"",
+        idiomas:u.idiomas||"",
+        mediaPrincipal:media.mediaPrincipal,
+        mediaSecundaria:media.mediaSecundaria,
+        contactos:normalizarContactosPerfil(u),
+        estadoPublicacion:normalizarEstadoPublicacion(u),
+        plan:normalizarPlanPublicacion(u),
+        publicidad:{pantalla:"",espacio:"",slotId:"",periodo:"",tipoContenido:"",precio:""},
+        metricas:normalizarMetricasPublicacion(u),
+        temaDashboard:u.temaDashboard||"rosa_premium",
+        temaPerfil:u.temaPerfil||"rosa_premium",
+        cambiosPendientes:u.cambiosPendientes||null
+      };
+    }
+
+    function normalizarSolicitudAnuncio(doc){
+      const s=datosDocumento(doc);
+      const media=normalizarMediaPublicidad(s);
+      return {
+        id:s.id||s.solicitudTemporalId||"publicidad-mock",
+        origen:"solicitudes_anuncios",
+        tipo:s.tipoDashboard||s.tipo||"publicidad",
+        ownerUid:s.uidAnunciante||s.ownerUid||"",
+        nombrePublico:valorDatoPublico(s,"Nombre público",s.nombrePublico||s.nombreNegocio||s.nombre||""),
+        categoria:valorDatoPublico(s,"Categoría",s.categoria||""),
+        pais:valorDatoPublico(s,"País",s.pais||""),
+        estado:valorDatoPublico(s,"Estado",s.estado||""),
+        ciudad:valorDatoPublico(s,"Ciudad",s.ciudad||""),
+        zona:valorDatoPublico(s,"Zona",s.zona||""),
+        descripcion:valorDatoPublico(s,"Descripción",s.descripcion||s.mensajeContactoPublicidad||""),
+        descripcionCompleta:s.descripcionCompleta||"",
+        servicios:valorDatoPublico(s,"Servicios",s.servicios||""),
+        horario:valorDatoPublico(s,"Horario",s.horario||""),
+        tarifas:valorDatoPublico(s,"Tarifas",s.tarifas||s.precioAnuncio||""),
+        modalidad:valorDatoPublico(s,"Modalidad",s.modalidad||s.tipoContenidoPublicidad||""),
+        disponibilidad:s.disponibilidad||"",
+        idiomas:s.idiomas||"",
+        mediaPrincipal:media.mediaPrincipal,
+        mediaSecundaria:media.mediaSecundaria,
+        contactos:normalizarContactosPublicidad(s),
+        estadoPublicacion:normalizarEstadoPublicacion(s),
+        plan:normalizarPlanPublicacion(s),
+        publicidad:{
+          pantalla:s.pantalla||"",
+          espacio:s.espacio||"",
+          slotId:s.slotId||"",
+          periodo:s.periodoPublicidad||"",
+          tipoContenido:s.tipoContenidoPublicidad||"",
+          precio:s.precioAnuncio||""
+        },
+        metricas:normalizarMetricasPublicacion(s),
+        temaDashboard:s.temaDashboard||"rosa_premium",
+        temaPerfil:s.temaPerfil||"rosa_premium",
+        cambiosPendientes:s.cambiosPendientes||null
+      };
+    }
+
+    function normalizarDocumentoDashboard(doc){
+      const data=datosDocumento(doc);
+      if(data.origen==="usuarios"||data.tipo==="perfil"||data.uid)return normalizarPerfilUsuario(data);
+      return normalizarSolicitudAnuncio(data);
+    }
+
+    function ubicacionPublicacion(pub){
+      return [pub.ciudad,pub.estado].filter(Boolean).join(", ")||pub.pais||"Sin ubicación";
+    }
+
+    function datosPublicosPublicacion(pub){
+      return {
+        "Nombre público":pub.nombrePublico,
+        "Categoría":pub.categoria,
+        "País":pub.pais,
+        "Estado":pub.estado,
+        "Ciudad":pub.ciudad,
+        "Descripción":pub.descripcion,
+        "Servicios":pub.servicios,
+        "Horario":pub.horario,
+        "Tarifas":pub.tarifas,
+        "Modalidad":pub.modalidad,
+        "Zona":pub.zona
+      };
+    }
+
+    function resumenRapidoPublicacion(pub){
+      return {
+        "Plan actual":pub.plan.nombre||"Sin plan",
+        "Perfiles activos":pub.plan.perfilesActivos||"",
+        "Días restantes del plan":pub.plan.diasRestantes||"",
+        "Anuncio destacado":pub.plan.anuncioDestacado||pub.publicidad.espacio||"",
+        "Última actualización":pub.plan.ultimaActualizacion||""
+      };
+    }
+
+    const publicacionesMock=documentosMockDashboard.map(normalizarDocumentoDashboard);
+    let publicacionActual=publicacionesMock[0];
+
+    function textoSeguro(valor){
+      return String(valor||"")
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+
+    function pintarPublicaciones(){
+      const lista=document.getElementById("publicationList");
+      lista.innerHTML=publicacionesMock.map(pub=>`
+        <button type="button" class="publication-card ${pub.id===publicacionActual.id?"active":""}" data-id="${pub.id}">
+          <img src="${pub.mediaPrincipal.url}" alt="${textoSeguro(pub.nombrePublico)}">
+          <span>
+            <h3>${textoSeguro(pub.nombrePublico)}</h3>
+            <p>${textoSeguro(pub.tipo)} · ${textoSeguro(ubicacionPublicacion(pub))}</p>
+            <span class="badge ${pub.estadoPublicacion.estadoClase}">${textoSeguro(pub.estadoPublicacion.etiqueta)}</span>
+          </span>
+        </button>
+      `).join("");
+
+      lista.querySelectorAll(".publication-card").forEach(card=>{
+        card.addEventListener("click",()=>{
+          const seleccion=publicacionesMock.find(pub=>pub.id===card.dataset.id);
+          if(seleccion){
+            publicacionActual=seleccion;
+            renderDashboard();
+          }
+        });
+      });
+    }
+
+    function pintarMetricas(){
+      document.getElementById("metricCorazones").textContent=publicacionActual.metricas.favoritos;
+      document.getElementById("metricMensajes").textContent=publicacionActual.metricas.mensajes;
+      document.getElementById("metricWhatsapp").textContent=publicacionActual.metricas.clicksWhatsApp;
+    }
+
+    function pintarMedios(){
+      const cont=document.getElementById("contactsGrid");
+      cont.innerHTML=Object.entries(publicacionActual.contactos).map(([nombre,info])=>`
+        <div class="contact-row">
+          <div>
+            <b>${textoSeguro(nombre)}</b>
+            <small>${textoSeguro(info.valor||"Listo para llenar")}</small>
+          </div>
+          <label class="switch" aria-label="Activar ${textoSeguro(nombre)}">
+            <input type="checkbox" ${info.activo?"checked":""}>
+            <span></span>
+          </label>
+        </div>
+      `).join("");
+    }
+
+    function pintarInformacion(){
+      const cont=document.getElementById("infoGrid");
+      cont.innerHTML=Object.entries(datosPublicosPublicacion(publicacionActual)).map(([campo,valor])=>`
+        <div class="field-card ${campo==="Descripción"||campo==="Servicios"?"wide":""}">
+          <small>${textoSeguro(campo)}</small>
+          <b>${textoSeguro(valor)}</b>
+          <button class="edit-btn" type="button" aria-label="Editar ${textoSeguro(campo)}">✏️</button>
+        </div>
+      `).join("");
+    }
+
+    function pintarImagenes(){
+      document.getElementById("mainImage").src=publicacionActual.mediaPrincipal.url;
+      document.getElementById("mainTitle").textContent=publicacionActual.nombrePublico;
+      document.getElementById("mainSubtitle").textContent=publicacionActual.tipo+" · "+ubicacionPublicacion(publicacionActual);
+      document.getElementById("avatarImage").src=publicacionActual.mediaPrincipal.url;
+      document.getElementById("sideName").textContent=publicacionActual.nombrePublico;
+      document.getElementById("thumbGrid").innerHTML=publicacionActual.mediaSecundaria.map((src,index)=>`
+        <div class="thumb">
+          <img src="${src}" alt="Imagen secundaria ${index+1}">
+          <button class="edit-btn" type="button" aria-label="Editar imagen secundaria ${index+1}">✏️</button>
+        </div>
+      `).join("");
+    }
+
+    function pintarResumenRapido(){
+      document.getElementById("quickSummary").innerHTML=Object.entries(resumenRapidoPublicacion(publicacionActual)).map(([campo,valor])=>`
+        <div class="quick-item">
+          <span>${textoSeguro(campo)}</span>
+          <b>${textoSeguro(valor)}</b>
+        </div>
+      `).join("");
+      document.getElementById("reviewStatus").textContent=publicacionActual.estadoPublicacion.revision;
+    }
+
+    function renderDashboard(){
+      pintarPublicaciones();
+      pintarMetricas();
+      pintarImagenes();
+      pintarInformacion();
+      pintarMedios();
+      pintarResumenRapido();
+    }
+
+    function inicializarTemas(){
+      const picker=document.getElementById("themePicker");
+      document.getElementById("themeToggle").addEventListener("click",()=>{
+        picker.classList.toggle("open");
+      });
+
+      document.querySelectorAll(".theme-option").forEach(button=>{
+        button.addEventListener("click",()=>{
+          document.body.className=button.dataset.theme||"";
+          document.querySelectorAll(".theme-option").forEach(option=>option.classList.remove("active"));
+          button.classList.add("active");
+          picker.classList.remove("open");
+        });
+      });
+    }
+
+    document.addEventListener("DOMContentLoaded",()=>{
+      renderDashboard();
+      inicializarTemas();
+    });
+  </script>
+</body>
+</html>
