@@ -2037,6 +2037,8 @@ async function registrar(){
 
     const user=cred.user;
 
+    await user.getIdToken(true);
+
     const fotoURL=await subirImagen("perfiles/"+user.uid+"/foto-principal-"+Date.now()+".jpg",fotoPerfil);
     const fotosExtraURL=await subirMultiplesFotos(user.uid,document.getElementById("fotosExtra").files);
     const ineURL=await subirImagen("verificaciones/"+user.uid+"/ine-"+Date.now()+".jpg",ineFoto);
@@ -2046,7 +2048,7 @@ async function registrar(){
     await db.collection("usuarios").doc(user.uid).set({
       uid:user.uid,
       nombre:document.getElementById("nombre").value.trim(),
-      email:document.getElementById("email").value.trim().toLowerCase(),
+      email:(user.email||"").trim().toLowerCase(),
       telefono:limpiarTelefono(document.getElementById("telefono").value),
       pais:document.getElementById("pais").value.trim(),
       estado:document.getElementById("estado").value.trim(),
