@@ -1,0 +1,5485 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Publicidad Premium | Cariñosas</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/modal-carihub.css">
+
+<script src="paises.js"></script>
+<script src="estados.js"></script>
+<script src="ciudades.js"></script>
+<script src="/js/modal-carihub.js"></script>
+<script src="/js/catalogos-carihub.js"></script>
+<script src="/js/precios-publicidad.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage-compat.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyCp68DynjT63T9wHorCLxwBGkSEo_mYPUI",
+  authDomain: "carihub-app.firebaseapp.com",
+  projectId: "carihub-app",
+  storageBucket: "carihub-app.firebasestorage.app",
+  messagingSenderId: "236894758884",
+  appId: "1:236894758884:web:5713e39a26c71f025a49f1"
+};
+
+if(!firebase.apps.length){
+  firebase.initializeApp(firebaseConfig);
+}
+
+const auth = firebase.auth();
+const db = firebase.firestore();
+const storage = firebase.storage();
+</script>
+
+<style>
+/* WIZARD */
+
+.wizard-header{
+display:flex;
+align-items:center;
+justify-content:center;
+gap:10px;
+margin:30px auto;
+padding:0 20px;
+max-width:700px;
+}
+
+.wizard-paso{
+width:45px;
+height:45px;
+border-radius:50%;
+background:#ffd6e8;
+color:#7a003c;
+font-weight:bold;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:18px;
+border:3px solid #ff4fa0;
+transition:.3s;
+}
+
+.wizard-paso.activo{
+background:#ff1493;
+color:white;
+box-shadow:0 0 15px rgba(255,20,147,.4);
+}
+
+.wizard-linea{
+height:4px;
+width:50px;
+background:#ffb6d5;
+border-radius:20px;
+}
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Poppins',sans-serif;
+}
+.hero-anunciantes{
+width:100%;
+max-width:1450px;
+margin:20px auto 20px;
+padding:0 6px;
+}
+
+.hero-anunciantes img{
+width:100%;
+display:block;
+border-radius:30px;
+box-shadow:
+0 0 30px rgba(255,20,147,.18),
+0 0 60px rgba(255,20,147,.10);
+}
+
+.banner-premium-info{
+width:102%;
+margin:-55px auto 0px;
+padding:0;
+display:flex;
+justify-content:center;
+align-items:center;
+}
+
+.banner-premium-info img{
+width:96%;
+max-width:1200px;
+height:auto;
+display:block;
+margin:auto;
+border-radius:26px;
+object-fit:contain;
+object-position:center;
+box-shadow:
+0 0 20px rgba(255,20,147,.16),
+0 0 45px rgba(255,20,147,.10);
+}
+
+.btn-close-floating{
+position:fixed;
+top:22px;
+right:28px;
+width:48px;
+height:48px;
+border-radius:50%;
+border:2px solid rgba(255,20,147,.45);
+background:rgba(255,255,255,.78);
+backdrop-filter:blur(12px);
+-webkit-backdrop-filter:blur(12px);
+
+display:flex;
+align-items:center;
+justify-content:center;
+
+font-size:28px;
+font-weight:700;
+color:#c2185b;
+
+cursor:pointer;
+z-index:99999;
+
+box-shadow:
+0 0 25px rgba(255,20,147,.20);
+
+transition:.25s;
+}
+
+.btn-close-floating:hover{
+transform:scale(1.08);
+background:white;
+box-shadow:
+0 0 35px rgba(255,20,147,.35);
+}
+body{
+font-family:'Inter',sans-serif;
+background:
+linear-gradient(180deg,#ffd9e8 0%,#ffc2da 100%);
+
+min-height:100vh;
+
+overflow-x:hidden;
+
+color:#3b1024;
+
+}
+
+/* GLOWS */
+
+.bg-glow{
+
+position:fixed;
+
+top:-200px;
+left:-200px;
+
+width:500px;
+height:500px;
+
+background:rgba(255,0,120,.15);
+
+filter:blur(120px);
+
+pointer-events:none;
+
+}
+
+.bg-glow2{
+
+position:fixed;
+
+bottom:-200px;
+right:-200px;
+
+width:500px;
+height:500px;
+
+background:rgba(255,0,180,.10);
+
+filter:blur(120px);
+
+pointer-events:none;
+
+}
+
+/* MAIN */
+
+.main{
+
+position:relative;
+
+z-index:2;
+
+width:100%;
+max-width:1150px;
+
+margin:auto;
+
+padding:20px;
+
+}
+
+/* TOP */
+
+.top-bar{
+
+display:flex;
+justify-content:space-between;
+align-items:center;
+
+margin-bottom:25px;
+
+}
+
+.logo-area{
+
+display:flex;
+align-items:center;
+gap:15px;
+
+}
+
+.logo-img{
+
+width:80px;
+
+}
+
+.logo-text h1{
+
+font-size:48px;
+font-weight:800;
+
+font-style:italic;
+
+color:#d6006c;
+
+line-height:1;
+
+}
+
+.logo-text p{
+
+font-size:13px;
+
+letter-spacing:1px;
+
+color:#6d2345;
+
+margin-top:5px;
+
+font-weight:600;
+
+}
+
+.close-btn{
+
+width:52px;
+height:52px;
+
+border:none;
+
+border-radius:50%;
+
+background:rgba(255,255,255,.6);
+
+font-size:28px;
+
+cursor:pointer;
+
+color:#d6006c;
+
+transition:.25s;
+
+box-shadow:
+0 4px 15px rgba(0,0,0,.08);
+
+}
+
+.close-btn:hover{
+
+transform:scale(1.08);
+
+background:#ff2d8d;
+
+color:white;
+
+}
+
+/* HERO */
+
+.hero{
+
+background:
+rgba(255,255,255,.55);
+
+backdrop-filter:blur(18px);
+
+border-radius:35px;
+
+padding:48px 56px;
+
+margin:0 auto 25px;
+
+text-align:center;
+
+border:1px solid rgba(255,255,255,.6);
+
+box-shadow:
+0 8px 35px rgba(255,0,120,.12);
+
+}
+
+.hero h1{
+
+font-size:46px;
+
+line-height:1.12;
+
+margin:0 auto 28px;
+
+color:#4a1028;
+
+font-weight:800;
+
+}
+
+.hero span{
+
+color:#ff007f;
+
+}
+
+.hero p{
+
+font-size:18px;
+
+line-height:1.85;
+
+color:#5b2140;
+
+max-width:920px;
+
+font-weight:500;
+
+margin:0 auto 18px;
+
+}
+
+/* STEPS */
+
+.steps{
+
+display:flex;
+
+gap:10px;
+
+margin-top:30px;
+
+}
+
+.step{
+
+flex:1;
+
+height:10px;
+
+border-radius:999px;
+
+background:rgba(255,255,255,.45);
+
+}
+
+.step.active{
+
+background:
+linear-gradient(90deg,#ff008c,#ff4fc3);
+
+box-shadow:
+0 0 18px rgba(255,0,140,.35);
+
+}
+
+/* CARD */
+
+.card{
+
+background:
+rgba(255,255,255,.50);
+
+backdrop-filter:blur(16px);
+
+border-radius:30px;
+
+padding:35px;
+
+margin-bottom:25px;
+
+border:1px solid rgba(255,255,255,.6);
+
+box-shadow:
+0 10px 35px rgba(255,0,120,.10);
+
+}
+
+.card h2{
+
+font-size:40px;
+
+margin-bottom:20px;
+
+color:#5c1432;
+
+}
+
+/* BENEFITS */
+
+.benefits-grid{
+
+display:grid;
+
+grid-template-columns:1fr 1fr;
+
+gap:18px;
+
+margin-top:25px;
+
+}
+
+.benefit-box{
+
+background:
+rgba(255,255,255,.50);
+
+border-radius:24px;
+
+padding:24px;
+
+border:1px solid rgba(255,255,255,.7);
+
+transition:.25s;
+
+}
+
+.benefit-box:hover{
+
+transform:translateY(-4px);
+
+box-shadow:
+0 10px 25px rgba(255,0,120,.12);
+
+}
+
+.benefit-icon{
+
+font-size:40px;
+
+margin-bottom:12px;
+
+}
+
+.benefit-box h3{
+
+font-size:24px;
+
+margin-bottom:10px;
+
+color:#5c1432;
+
+}
+
+.benefit-box p{
+
+line-height:1.8;
+
+color:#5a2840;
+
+}
+
+/* PREVIEW */
+
+.preview-box{
+
+margin-top:30px;
+
+padding:25px;
+
+border-radius:26px;
+
+background:
+linear-gradient(135deg,
+rgba(255,255,255,.55),
+rgba(255,255,255,.35));
+
+border:1px solid rgba(255,255,255,.8);
+
+}
+
+.preview-box h3{
+
+font-size:28px;
+
+margin-bottom:10px;
+
+color:#5c1432;
+
+}
+
+.preview-box p{
+
+line-height:1.9;
+
+color:#5a2840;
+
+}
+
+.preview-banner{
+
+margin-top:20px;
+
+height:130px;
+
+border-radius:25px;
+
+background:
+linear-gradient(90deg,#ff008c,#ff4fc3);
+
+display:flex;
+justify-content:center;
+align-items:center;
+
+font-size:34px;
+font-weight:800;
+
+color:white;
+
+box-shadow:
+0 8px 25px rgba(255,0,120,.25);
+
+}
+
+/* FORM */
+
+.form-grid{
+
+display:grid;
+
+grid-template-columns:minmax(0,1fr) minmax(280px,420px);
+
+gap:18px;
+
+margin-top:30px;
+
+align-items:start;
+
+overflow-x:clip;
+
+}
+.mapa-publicidad{
+width:100%;
+margin:18px auto;
+padding:18px;
+border-radius:24px;
+background:rgba(255,255,255,.22);
+border:1px solid rgba(255,255,255,.35);
+}
+
+.mapa-publicidad h2{
+text-align:center;
+font-size:26px;
+font-weight:800;
+margin-bottom:18px;
+color:#5b0036;
+}
+
+.pantallas-publicidad{
+display:grid;
+grid-template-columns:1fr 1fr 1fr;
+gap:14px;
+}
+
+.mini-pantalla{
+background:rgba(255,255,255,.32);
+border-radius:20px;
+padding:14px;
+border:1px solid rgba(255,255,255,.45);
+}
+
+.mini-pantalla h3{
+text-align:center;
+font-size:17px;
+margin-bottom:12px;
+color:#69003f;
+font-weight:800;
+}
+
+.layout-top,
+.layout-top.tres{
+display:grid;
+grid-template-columns:1fr 1fr 1fr;
+gap:8px;
+margin-bottom:8px;
+}
+
+.layout-top{
+grid-template-columns:1fr 1fr;
+}
+
+.espacio-btn{
+border:none;
+border-radius:14px;
+padding:10px 6px;
+font-size:12px;
+font-weight:800;
+cursor:pointer;
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+gap:4px;
+min-height:54px;
+}
+
+.espacio-btn span{
+font-size:10px;
+font-weight:600;
+opacity:.9;
+}
+
+.espacio-btn.disponible{
+background:linear-gradient(135deg,#ff4fa1,#ff82c3);
+color:white;
+}
+
+.espacio-btn.grande{
+width:100%;
+min-height:54px;
+}
+
+.phone-preview{
+transform:scale(.92);
+transform-origin:top center;
+margin:auto;
+}
+
+.espacio-btn{
+font-size:12px;
+min-height:50px;
+}
+
+.espacio-btn span{
+font-size:9px;
+}
+
+.input-group{
+display:flex;
+flex-direction:column;
+}
+
+
+.input-group label{
+
+margin-bottom:8px;
+
+font-size:15px;
+
+font-weight:600;
+
+color:#7a003c;
+
+}
+
+.input-group input,
+.input-group select,
+.input-group textarea{
+
+background:#fff0f6;
+
+border:2px solid #ffb4d2;
+
+border-radius:18px;
+
+padding:16px;
+
+font-size:15px;
+
+color:#3b1024;
+
+outline:none;
+
+width:100%;
+
+}
+
+/* SELECT */
+
+.input-group select{
+
+appearance:none;
+-webkit-appearance:none;
+-moz-appearance:none;
+
+background:
+#fff0f6
+url("data:image/svg+xml;utf8,<svg fill='%23d6006c' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>")
+no-repeat right 15px center;
+
+padding-right:50px;
+
+cursor:pointer;
+
+}
+
+/* OPTIONS */
+
+select option{
+
+background:#fff0f6;
+
+color:#3b1024;
+
+}
+
+/* FOCUS */
+
+.input-group input:focus,
+.input-group select:focus,
+.input-group textarea:focus{
+
+border-color:#ff008c;
+
+box-shadow:
+0 0 18px rgba(255,0,140,.20);
+
+}
+
+/* TEXTAREA */
+
+.input-group textarea{
+
+resize:none;
+
+min-height:120px;
+
+}
+
+.full{
+
+grid-column:1/-1;
+
+}
+
+/* PASSWORD */
+
+.password-box{
+
+position:relative;
+
+}
+
+.eye-btn{
+
+position:absolute;
+
+right:15px;
+top:50%;
+
+transform:translateY(-50%);
+
+background:none;
+border:none;
+
+font-size:20px;
+
+cursor:pointer;
+
+color:#d6006c;
+
+}
+.password-msg{
+display:block;
+margin-top:8px;
+font-size:13px;
+font-weight:800;
+line-height:1.35;
+}
+
+.password-msg.error{
+color:#c1004e;
+}
+
+.password-msg.ok{
+color:#138a36;
+}
+/* SLOT */
+
+.slot-box{
+
+margin-top:20px;
+
+padding:22px;
+
+border-radius:22px;
+
+background:
+rgba(255,255,255,.45);
+
+border:1px solid rgba(255,255,255,.7);
+
+}
+
+.slot-title{
+
+font-size:24px;
+
+font-weight:700;
+
+margin-bottom:14px;
+
+color:#5c1432;
+
+}
+
+.slot-status{
+
+display:inline-block;
+
+padding:10px 18px;
+
+border-radius:14px;
+
+font-weight:700;
+
+margin-top:10px;
+
+font-size:14px;
+
+}
+
+.available{
+
+background:rgba(0,255,120,.15);
+
+color:#007f42;
+
+}
+
+.full-slot{
+
+background:rgba(255,0,90,.12);
+
+color:#c1004e;
+
+}
+
+.info-visible-texto{
+margin:0 0 14px;
+font-size:15px;
+line-height:1.7;
+color:#5a2840;
+font-weight:500;
+}
+
+.info-visible-grid{
+display:grid;
+grid-template-columns:repeat(4,minmax(0,1fr));
+gap:12px;
+}
+
+.info-visible-opcion{
+display:flex;
+align-items:center;
+gap:10px;
+padding:14px 16px;
+border:2px solid #ffb4d2;
+border-radius:18px;
+background:#fff0f6;
+color:#3b1024;
+font-weight:600;
+cursor:pointer;
+}
+
+.info-visible-opcion input{
+width:18px;
+height:18px;
+accent-color:#ff008c;
+}
+
+@media(max-width:900px){
+.info-visible-grid{
+grid-template-columns:1fr 1fr;
+}
+}
+
+.enlace-seguro-texto{
+margin:10px 0 0;
+font-size:14px;
+line-height:1.7;
+color:#5a2840;
+font-weight:500;
+}
+
+/* INFO */
+
+.info-box{
+
+margin-top:28px;
+
+padding:25px;
+
+border-radius:24px;
+
+background:
+rgba(255,255,255,.45);
+
+line-height:2;
+
+border:1px solid rgba(255,255,255,.7);
+
+color:#5a2840;
+
+font-weight:500;
+
+}
+
+/* CHECK */
+
+.check-box{
+
+margin-top:25px;
+
+display:flex;
+align-items:flex-start;
+gap:12px;
+
+color:#5a2840;
+
+font-weight:500;
+
+}
+
+/* LOGIN */
+
+.login-box{
+
+margin-top:30px;
+
+padding:28px;
+
+border-radius:26px;
+
+background:
+linear-gradient(135deg,
+rgba(255,255,255,.60),
+rgba(255,255,255,.35));
+
+border:1px solid rgba(255,255,255,.7);
+
+}
+
+.login-box h3{
+
+font-size:32px;
+
+margin-bottom:12px;
+
+color:#5c1432;
+
+}
+
+.login-box p{
+
+line-height:1.9;
+
+color:#5a2840;
+
+}
+
+/* BUTTONS */
+
+.actions{
+
+display:flex;
+
+gap:15px;
+
+flex-wrap:wrap;
+
+margin-top:28px;
+
+}
+
+.btn{
+
+border:none;
+
+padding:16px 30px;
+
+border-radius:18px;
+
+font-size:16px;
+
+font-weight:700;
+
+cursor:pointer;
+
+transition:.25s;
+
+}
+
+.btn-primary{
+
+background:
+linear-gradient(90deg,#ff008c,#ff4fc3);
+
+color:white;
+
+box-shadow:
+0 8px 25px rgba(255,0,140,.25);
+
+}
+
+.btn-primary:hover{
+
+transform:translateY(-3px);
+
+}
+
+
+.oculto{
+display:none;
+}
+
+.wizard-contenido{
+display:block;
+}
+
+.wizard-contenido.oculto{
+display:none;
+}
+
+.pantalla-revision-visual{
+grid-column:1/-1;
+border-radius:26px;
+overflow:hidden;
+box-shadow:0 0 24px rgba(255,20,147,.16);
+background:#fff;
+}
+
+.pantalla-revision-visual img{
+width:100%;
+display:block;
+}
+
+.seccion-revision{
+grid-column:1/-1;
+padding:18px;
+border:2px solid #ffb4d2;
+border-radius:22px;
+background:#fff7fb;
+}
+
+.seccion-revision h3{
+font-size:22px;
+color:#c2185b;
+margin-bottom:8px;
+}
+
+.seccion-revision p{
+font-size:14px;
+line-height:1.55;
+color:#6d2443;
+}
+
+.upload-grid{
+grid-column:1/-1;
+display:grid;
+grid-template-columns:repeat(2,minmax(0,1fr));
+gap:18px;
+}
+
+.upload-box{
+border:2px dashed #ff8fc1;
+border-radius:22px;
+background:#fff0f6;
+padding:18px;
+display:flex;
+flex-direction:column;
+gap:10px;
+}
+
+.upload-box span{
+font-weight:800;
+color:#7a003c;
+}
+
+.upload-box small{
+color:#8a4a62;
+line-height:1.4;
+}
+
+.upload-box input{
+padding:12px;
+border-radius:14px;
+background:#fff;
+}
+
+.preview-publicacion{
+grid-column:1/-1;
+display:grid;
+grid-template-columns:minmax(0,1.2fr) minmax(260px,.8fr);
+gap:18px;
+align-items:stretch;
+}
+
+.preview-banner-auto{
+min-height:220px;
+border-radius:24px;
+background:linear-gradient(135deg,#2a0617,#ff0a86);
+display:flex;
+align-items:center;
+justify-content:center;
+text-align:center;
+padding:24px;
+color:white;
+font-size:26px;
+font-weight:800;
+overflow:hidden;
+}
+
+.preview-banner-auto img{
+width:100%;
+height:100%;
+object-fit:cover;
+display:block;
+}
+
+.preview-banner-auto video{
+width:100%;
+height:100%;
+object-fit:cover;
+display:block;
+}
+
+.reglas-publicacion{
+border-radius:24px;
+background:#fff7fb;
+border:2px solid #ffb4d2;
+padding:18px;
+}
+
+.reglas-publicacion strong{
+display:block;
+color:#c2185b;
+font-size:18px;
+margin-bottom:10px;
+}
+
+.reglas-publicacion p{
+font-size:14px;
+line-height:1.55;
+color:#6d2443;
+}
+
+.facturacion-opciones{
+display:grid;
+grid-template-columns:repeat(2,minmax(0,1fr));
+gap:12px;
+}
+
+.facturacion-opciones label{
+padding:14px;
+border:2px solid #ffb4d2;
+border-radius:18px;
+background:#fff0f6;
+display:flex;
+gap:10px;
+align-items:center;
+font-weight:700;
+color:#7a003c;
+}
+
+.facturacion-opciones input,
+.toggle-opcion input,
+.duracion-opcion input,
+.precio-opcion input,
+.validacion-grid input{
+width:auto;
+padding:0;
+accent-color:#ff008c;
+}
+
+.campos-factura{
+grid-column:1/-1;
+display:grid;
+grid-template-columns:repeat(2,minmax(0,1fr));
+gap:18px;
+}
+
+.toggle-grid,
+.duracion-grid,
+.precio-grid,
+.futuro-grid{
+grid-column:1/-1;
+display:grid;
+grid-template-columns:repeat(4,minmax(0,1fr));
+gap:12px;
+}
+
+.toggle-opcion,
+.duracion-opcion,
+.precio-opcion,
+.futuro-opcion{
+padding:14px;
+border:2px solid #ffb4d2;
+border-radius:18px;
+background:#fff0f6;
+font-weight:700;
+color:#7a003c;
+display:flex;
+align-items:center;
+gap:10px;
+}
+
+.duracion-opcion,
+.precio-opcion{
+flex-direction:column;
+align-items:flex-start;
+gap:6px;
+}
+
+.duracion-opcion span,
+.precio-opcion span{
+font-size:18px;
+color:#c2185b;
+}
+
+.precio-opcion b{
+font-size:26px;
+color:#ff008c;
+}
+
+.precio-seleccionado{
+grid-column:1/-1;
+padding:20px;
+border-radius:24px;
+background:#fff;
+border:2px solid rgba(255,20,147,.30);
+box-shadow:0 10px 24px rgba(255,20,147,.10);
+}
+
+.precio-seleccionado strong{
+display:block;
+font-size:18px;
+color:#7a003c;
+margin-bottom:8px;
+}
+
+.precio-seleccionado b{
+display:block;
+font-size:32px;
+color:#ff008c;
+margin-bottom:6px;
+}
+
+.precio-seleccionado small{
+color:#8a4a62;
+font-weight:700;
+}
+
+.precio-controles-publicos{
+grid-column:1/-1;
+display:grid;
+grid-template-columns:minmax(0,1fr);
+gap:16px;
+}
+
+.exploracion-publicidad-card{
+grid-column:1/-1;
+padding:20px;
+border-radius:26px;
+background:#fff;
+border:2px solid rgba(255,20,147,.24);
+box-shadow:0 10px 24px rgba(255,20,147,.08);
+}
+
+.exploracion-publicidad-card h3{
+margin:0 0 8px;
+font-size:24px;
+color:#7a003c;
+}
+
+.exploracion-publicidad-card p{
+margin:0;
+font-size:14px;
+line-height:1.55;
+color:#7c4059;
+}
+
+.categoria-publicidad-grid{
+grid-column:1/-1;
+display:grid;
+grid-template-columns:minmax(0,1fr) minmax(280px,420px);
+gap:18px;
+align-items:end;
+}
+
+.categoria-manual-note{
+grid-column:1/-1;
+padding:14px 16px;
+border-radius:18px;
+background:#fff7fb;
+border:2px solid rgba(255,20,147,.18);
+color:#7a003c;
+font-weight:700;
+line-height:1.45;
+}
+
+.precio-control-card{
+padding:18px;
+border-radius:22px;
+background:#fff7fb;
+border:2px solid rgba(255,20,147,.20);
+}
+
+.precio-control-card strong{
+display:block;
+margin-bottom:12px;
+font-size:16px;
+color:#7a003c;
+}
+
+.opciones-chip-grid{
+display:grid;
+grid-template-columns:repeat(3,minmax(0,1fr));
+gap:10px;
+}
+
+.opcion-chip{
+display:flex;
+align-items:center;
+justify-content:center;
+min-height:48px;
+padding:10px 12px;
+border-radius:16px;
+background:#fff;
+border:2px solid #ffb4d2;
+font-weight:800;
+color:#7a003c;
+cursor:pointer;
+text-align:center;
+}
+
+.opcion-chip input{
+width:auto;
+padding:0;
+margin-right:8px;
+accent-color:#ff008c;
+}
+
+.opcion-chip:has(input:checked){
+border-color:#ff008c;
+background:#fff0f7;
+box-shadow:0 8px 18px rgba(255,0,140,.14);
+}
+
+.metodos-visibles-panel{
+grid-column:1/-1;
+padding:20px;
+border-radius:26px;
+background:#fff;
+border:2px solid rgba(255,20,147,.24);
+box-shadow:0 10px 24px rgba(255,20,147,.08);
+}
+
+.metodos-visibles-panel h3{
+margin:0 0 8px;
+font-size:22px;
+color:#7a003c;
+}
+
+.metodos-visibles-panel p{
+margin:0 0 16px;
+font-size:14px;
+line-height:1.55;
+color:#7c4059;
+}
+
+.switch-grid-publicidad{
+display:grid;
+grid-template-columns:repeat(4,minmax(0,1fr));
+gap:12px;
+}
+
+.switch-publicidad{
+display:flex;
+align-items:center;
+justify-content:space-between;
+gap:12px;
+padding:14px;
+border-radius:18px;
+background:#fff7fb;
+border:2px solid #ffb4d2;
+font-weight:800;
+color:#7a003c;
+cursor:pointer;
+}
+
+.switch-publicidad input{
+width:auto;
+padding:0;
+accent-color:#ff008c;
+}
+
+.switch-publicidad span{
+display:flex;
+align-items:center;
+gap:8px;
+}
+
+.switch-publicidad small{
+display:inline-flex;
+align-items:center;
+justify-content:center;
+min-width:44px;
+padding:5px 8px;
+border-radius:999px;
+background:#e2e2e2;
+color:#555;
+font-size:12px;
+font-weight:900;
+text-transform:uppercase;
+}
+
+.switch-publicidad:has(input:checked){
+border-color:#18b979;
+background:#f2fff8;
+box-shadow:0 8px 18px rgba(24,185,121,.12);
+}
+
+.switch-publicidad:has(input:checked) small{
+background:#18b979;
+color:white;
+}
+
+.feedback-pulso{
+animation:feedbackPulso .36s ease;
+}
+
+button,
+select,
+.opcion-chip,
+.switch-publicidad,
+.slot-movil-btn{
+transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease, background-color .18s ease;
+}
+
+button.feedback-pulso,
+select.feedback-pulso,
+.opcion-chip.feedback-pulso,
+.switch-publicidad.feedback-pulso,
+.slot-movil-btn.feedback-pulso{
+box-shadow:0 0 0 4px rgba(255,0,140,.16),0 8px 20px rgba(255,0,140,.18);
+}
+
+@keyframes feedbackPulso{
+0%{transform:scale(1);box-shadow:0 0 0 rgba(255,0,140,0);}
+45%{transform:scale(.985);box-shadow:0 0 0 6px rgba(255,0,140,.18);}
+100%{transform:scale(1);box-shadow:0 0 0 rgba(255,0,140,0);}
+}
+
+.material-publico-panel{
+grid-column:1/-1;
+display:grid;
+grid-template-columns:minmax(0,1fr) minmax(320px,.9fr);
+gap:18px;
+align-items:stretch;
+}
+
+.material-publico-panel .preview-publicacion{
+grid-column:auto;
+display:block;
+}
+
+.material-publico-panel .preview-banner-auto{
+height:100%;
+min-height:240px;
+}
+
+.material-publico-info{
+padding:20px;
+border-radius:24px;
+background:#fff;
+border:2px solid rgba(255,20,147,.24);
+box-shadow:0 10px 24px rgba(255,20,147,.08);
+}
+
+.material-publico-info h3{
+margin:0 0 8px;
+font-size:22px;
+color:#7a003c;
+}
+
+.material-publico-info p{
+margin:0 0 14px;
+font-size:14px;
+line-height:1.55;
+color:#7c4059;
+}
+
+.mensaje-interno-fijo{
+grid-column:1/-1;
+padding:18px;
+border-radius:22px;
+background:#f7fff9;
+border:2px solid #78d99b;
+color:#155c2d;
+font-weight:800;
+line-height:1.45;
+}
+
+.mensaje-interno-fijo small{
+display:block;
+margin-top:6px;
+font-weight:600;
+color:#2f7443;
+}
+
+.mensaje-contacto-card{
+grid-column:1/-1;
+padding:20px;
+border-radius:24px;
+background:#fff;
+border:2px solid rgba(255,20,147,.24);
+box-shadow:0 10px 24px rgba(255,20,147,.08);
+}
+
+.mensaje-contacto-card h3{
+margin:0 0 8px;
+font-size:22px;
+color:#7a003c;
+}
+
+.mensaje-contacto-card p{
+margin:0 0 14px;
+font-size:14px;
+line-height:1.55;
+color:#7c4059;
+}
+
+.mensaje-contacto-card textarea{
+min-height:86px;
+}
+
+.mensaje-contacto-preview{
+margin-top:14px;
+padding:14px 16px;
+border-radius:18px;
+background:#fff7fb;
+border:2px solid rgba(255,20,147,.18);
+color:#3b1024;
+font-weight:700;
+line-height:1.45;
+}
+
+.mensaje-contacto-preview span{
+display:block;
+margin-bottom:6px;
+font-size:13px;
+color:#8a4a62;
+font-weight:800;
+}
+
+.aviso-link-interno{
+grid-column:1/-1;
+padding:16px 18px;
+border-radius:20px;
+background:#fff7fb;
+border:2px solid rgba(255,20,147,.20);
+color:#7a003c;
+font-weight:700;
+line-height:1.45;
+}
+
+.tabla-precios-publicidad{
+grid-column:1/-1;
+display:grid;
+grid-template-columns:repeat(2,minmax(0,1fr));
+gap:12px;
+}
+
+.tabla-precios-publicidad div{
+padding:16px;
+border-radius:18px;
+background:#fff0f6;
+border:2px solid #ffb4d2;
+color:#7a003c;
+font-weight:700;
+line-height:1.45;
+}
+
+.tabla-precios-publicidad b{
+color:#ff008c;
+font-size:20px;
+}
+
+.duracion-opcion small,
+.precio-opcion small,
+.futuro-opcion small{
+font-weight:600;
+color:#8a4a62;
+line-height:1.35;
+}
+
+.enlace-interno-box{
+grid-column:1/-1;
+padding:18px;
+border-radius:22px;
+background:#f7fff9;
+border:2px solid #78d99b;
+color:#155c2d;
+font-weight:700;
+}
+
+.validacion-grid{
+grid-column:1/-1;
+display:grid;
+gap:12px;
+}
+
+.validacion-grid label{
+padding:14px;
+border-radius:18px;
+background:#fff;
+border:2px solid #ffb4d2;
+display:flex;
+gap:10px;
+align-items:center;
+font-weight:700;
+color:#7a003c;
+}
+
+.obtendra-grid{
+grid-column:1/-1;
+display:grid;
+grid-template-columns:repeat(4,minmax(0,1fr));
+gap:12px;
+}
+
+.obtendra-grid span{
+padding:16px;
+border-radius:18px;
+background:#fff;
+border:2px solid rgba(255,20,147,.22);
+font-weight:800;
+color:#c2185b;
+text-align:center;
+}
+
+.estado-revision{
+grid-column:1/-1;
+padding:20px;
+border-radius:24px;
+background:linear-gradient(135deg,#fff0f6,#ffffff);
+border:2px solid rgba(255,20,147,.25);
+box-shadow:0 10px 25px rgba(255,20,147,.10);
+}
+
+.estado-revision strong{
+display:block;
+color:#c2185b;
+font-size:20px;
+margin-bottom:8px;
+}
+
+.estado-revision p{
+font-size:14px;
+line-height:1.55;
+color:#6d2443;
+}
+
+.btn-preview-paso2{
+position:fixed;
+right:24px;
+bottom:24px;
+z-index:99998;
+border:0;
+border-radius:999px;
+padding:14px 18px;
+background:#111;
+color:#fff;
+font-weight:800;
+box-shadow:0 12px 28px rgba(0,0,0,.25);
+cursor:pointer;
+}
+
+/* MOBILE */
+
+@media(max-width:700px){
+
+.hero{
+
+padding:30px;
+
+}
+
+.hero h1{
+
+font-size:40px;
+
+}
+
+.hero p{
+
+font-size:16px;
+
+}
+
+.benefits-grid,
+.upload-grid,
+.facturacion-opciones,
+.preview-publicacion,
+.campos-factura,
+.toggle-grid,
+.duracion-grid,
+.precio-grid,
+.precio-controles-publicos,
+.material-publico-panel,
+.categoria-publicidad-grid,
+.tabla-precios-publicidad,
+.futuro-grid,
+.obtendra-grid{
+
+grid-template-columns:1fr;
+
+}
+
+.opciones-chip-grid{
+grid-template-columns:1fr;
+}
+
+.switch-grid-publicidad{
+grid-template-columns:1fr;
+}
+
+.form-grid{
+
+grid-template-columns:minmax(0,1fr);
+
+}
+
+.mockup-premium-real{
+grid-column:1;
+grid-row:auto;
+max-width:420px;
+}
+
+.logo-text h1{
+
+font-size:34px;
+
+}
+
+.card h2{
+
+font-size:30px;
+
+}
+
+.preview-banner{
+
+font-size:24px;
+
+height:100px;
+
+}
+
+}
+.btn-back{
+background:transparent;
+border:2px solid #ff1493;
+color:#ff1493;
+padding:16px 28px;
+border-radius:18px;
+font-size:18px;
+font-weight:700;
+cursor:pointer;
+transition:.3s;
+margin-right:12px;
+}
+
+.btn-back:hover{
+background:#ff1493;
+color:white;
+box-shadow:0 0 20px rgba(255,20,147,.35);
+}
+
+.actions{
+display:flex;
+gap:12px;
+align-items:center;
+justify-content:center;
+flex-wrap:wrap;
+}
+.separador-solicitud{
+grid-column:1/-1;
+text-align:center;
+font-size:16px;
+font-weight:700;
+color:#5e0034;
+margin:18px 0 18px;
+letter-spacing:.3px;
+}
+/* MOCKUPS PREMIUM */
+
+.mapa-publicidad-mini{
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:14px;
+margin-top:18px;
+margin-bottom:24px;
+}
+
+.mockup-pantalla{
+background:rgba(255,255,255,.72);
+border:1px solid rgba(255,255,255,.9);
+border-radius:22px;
+padding:10px;
+box-shadow:0 10px 30px rgba(0,0,0,.12);
+min-height:420px;
+}
+
+.mockup-titulo{
+text-align:center;
+font-size:15px;
+font-weight:800;
+color:#d6006c;
+margin-bottom:10px;
+}
+
+.phone-preview{
+position:relative;
+display:block;
+width:100%;
+height:360px;
+border-radius:28px;
+overflow:hidden;
+background:#1a0610;
+border:4px solid #55132e;
+}
+
+.phone-screen{
+position:relative;
+width:100%;
+height:100%;
+overflow:hidden;
+padding:8px;
+}
+
+/* FONDOS */
+
+.preview-home{
+background:linear-gradient(180deg,#5c0b2c,#1f0711);
+}
+
+.preview-resultados{
+background:linear-gradient(180deg,#22000f,#490821);
+}
+
+.preview-perfil{
+background:linear-gradient(180deg,#ffd5e8,#fff1f8);
+}
+
+/* HOME */
+
+.fake-search{
+height:34px;
+border-radius:12px;
+background:white;
+margin-bottom:10px;
+}
+
+.fake-hero{
+height:92px;
+border-radius:16px;
+background:linear-gradient(135deg,#ff4fa1,#7d003f);
+margin-bottom:12px;
+}
+
+.fake-cards{
+display:grid;
+grid-template-columns:1fr 1fr 1fr;
+gap:6px;
+}
+
+.fake-card{
+height:50px;
+border-radius:10px;
+background:rgba(255,255,255,.18);
+}
+
+/* RESULTADOS */
+
+.fake-list{
+display:flex;
+flex-direction:column;
+gap:10px;
+margin-top:72px;
+}
+
+.fake-row{
+height:58px;
+border-radius:12px;
+background:rgba(255,255,255,.12);
+}
+
+/* PERFIL */
+
+.fake-profile-img{
+height:180px;
+border-radius:18px;
+background:linear-gradient(135deg,#ff5fa9,#520923);
+margin-top:56px;
+margin-bottom:10px;
+}
+
+.fake-profile-info{
+height:80px;
+border-radius:14px;
+background:rgba(255,255,255,.45);
+}
+
+/* BOTONES */
+
+.slot-visual{
+position:absolute;
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+text-align:center;
+border:none;
+border-radius:12px;
+font-size:12px;
+font-weight:900;
+color:white;
+background:linear-gradient(135deg,#ff4da1,#c30063);
+box-shadow:0 0 0 2px rgba(255,255,255,.55);
+z-index:5;
+}
+
+.slot-visual span{
+font-size:10px;
+font-weight:700;
+margin-top:2px;
+}
+
+/* HOME */
+
+.slot-home-izq{
+top:118px;
+left:8px;
+width:43%;
+height:48px;
+}
+
+.slot-home-der{
+top:118px;
+right:8px;
+width:43%;
+height:48px;
+}
+
+.slot-home-inf{
+bottom:10px;
+left:8px;
+right:8px;
+height:60px;
+}
+
+/* RESULTADOS */
+
+.slot-res-izq{
+top:10px;
+left:8px;
+width:30%;
+height:48px;
+}
+
+.slot-res-centro{
+top:10px;
+left:35%;
+width:30%;
+height:48px;
+}
+
+.slot-res-der{
+top:10px;
+right:8px;
+width:30%;
+height:48px;
+}
+
+.slot-res-inf{
+bottom:10px;
+left:8px;
+right:8px;
+height:60px;
+}
+
+/* PERFIL */
+
+.slot-perfil-izq{
+top:10px;
+left:8px;
+width:30%;
+height:48px;
+}
+
+.slot-perfil-centro{
+top:10px;
+left:35%;
+width:30%;
+height:48px;
+}
+
+.slot-perfil-der{
+top:10px;
+right:8px;
+width:30%;
+height:48px;
+}
+
+.slot-perfil-inf{
+bottom:10px;
+left:8px;
+right:8px;
+height:60px;
+}
+
+/* MOVIL */
+
+@media(max-width:900px){
+
+.mapa-publicidad-mini{
+grid-template-columns:repeat(3,1fr);
+gap:6px;
+}
+
+.mockup-pantalla{
+padding:5px;
+border-radius:14px;
+}
+
+.mockup-titulo{
+font-size:11px;
+}
+
+.phone-preview{
+height:190px;
+border-radius:16px;
+}
+
+.slot-visual{
+font-size:7px;
+border-radius:7px;
+}
+
+.slot-visual span{
+font-size:6px;
+}
+
+.fake-search{
+height:18px;
+margin-bottom:4px;
+}
+
+.fake-hero{
+height:44px;
+margin-bottom:5px;
+}
+
+.fake-card{
+height:22px;
+}
+
+.fake-row{
+height:30px;
+}
+
+.fake-profile-img{
+height:90px;
+margin-top:34px;
+}
+
+.fake-profile-info{
+height:40px;
+}
+
+/* HOME */
+
+.slot-home-izq{
+top:58px;
+height:30px;
+}
+
+.slot-home-der{
+top:58px;
+height:30px;
+}
+
+.slot-home-inf{
+height:34px;
+}
+
+/* RESULTADOS */
+
+.slot-res-izq{
+top:6px;
+height:30px;
+}
+
+.slot-res-centro{
+top:6px;
+height:30px;
+}
+
+.slot-res-der{
+top:6px;
+height:30px;
+}
+
+.slot-res-inf{
+height:34px;
+}
+
+/* PERFIL */
+
+.slot-perfil-izq{
+top:6px;
+height:30px;
+}
+
+.slot-perfil-centro{
+top:6px;
+height:30px;
+}
+
+.slot-perfil-der{
+top:6px;
+height:30px;
+}
+
+.slot-perfil-inf{
+height:34px;
+}
+
+}
+
+@media(max-width:900px){
+.mapa-publicidad-mini{
+grid-template-columns:repeat(3,1fr) !important;
+gap:4px !important;
+overflow:visible !important;
+}
+
+.mockup-pantalla{
+padding:4px;
+border-radius:14px;
+}
+
+.mockup-titulo{
+font-size:11px;
+margin-bottom:4px;
+}
+
+.phone-preview{
+height:145px;
+border-radius:16px;
+border-width:3px;
+}
+
+.phone-top{
+height:14px;
+font-size:6px;
+}
+
+.phone-screen{
+height:calc(100% - 14px);
+padding:4px;
+}
+
+.slot-visual{
+font-size:7px;
+border-radius:7px;
+padding:3px;
+}
+
+.slot-visual span{
+font-size:6px;
+}
+
+.fake-search{height:18px;margin-bottom:4px;}
+.fake-hero{height:46px;margin-bottom:4px;}
+.fake-card{height:24px;}
+.fake-row{height:28px;}
+.fake-profile-img{height:92px;margin-top:34px;}
+.fake-profile-info{height:42px;}
+
+.slot-home-izq{top:74px;left:4px;width:43%;height:32px;}
+.slot-home-der{top:74px;right:4px;width:43%;height:32px;}
+.slot-home-inf{bottom:6px;left:4px;right:4px;height:34px;}
+
+.slot-res-izq{top:46px;left:3px;width:30%;height:32px;}
+.slot-res-centro{top:46px;left:35%;width:30%;height:32px;}
+.slot-res-der{top:46px;right:3px;width:30%;height:32px;}
+.slot-res-inf{bottom:6px;left:4px;right:4px;height:34px;}
+
+.slot-perfil-izq{top:34px;left:3px;width:30%;height:32px;}
+.slot-perfil-centro{top:34px;left:35%;width:30%;height:32px;}
+.slot-perfil-der{top:34px;right:3px;width:30%;height:32px;}
+.slot-perfil-inf{bottom:6px;left:4px;right:4px;height:34px;}
+}
+.mockup-premium-real{
+grid-column:1/-1;
+position:relative;
+width:100%;
+max-width:100%;
+margin:18px auto 22px;
+display:flex;
+justify-content:center;
+flex-direction:column;
+align-items:center;
+justify-self:center;
+align-self:start;
+}
+
+.mockup-premium-real img{
+width:100%;
+max-width:1400px;
+display:block;
+border-radius:28px;
+box-shadow:0 10px 35px rgba(255,0,140,.15);
+}
+.mockup-premium-real{
+overflow:visible;
+}
+
+.mockup-premium-real{
+margin-bottom:18px;
+}
+
+.descripcion-publica-group{
+grid-column:1/-1;
+margin-top:42px;
+position:relative;
+z-index:1;
+}
+
+.descripcion-publica-group label{
+display:block;
+width:100%;
+margin:0 0 16px;
+text-align:center;
+font-size:18px;
+font-weight:700;
+color:#8a0045;
+}
+
+
+.mockup-premium-real::before{
+content:"";
+display:none;
+}
+
+.categoria-publicidad-overlay{
+position:absolute;
+left:.95%;
+top:7.95%;
+width:73.5%;
+z-index:22;
+pointer-events:auto;
+display:grid;
+grid-template-columns:repeat(3,minmax(0,1fr));
+gap:10px;
+}
+
+.categoria-publicidad-overlay select{
+width:100%;
+height:42px;
+border-radius:12px;
+border:1.5px solid rgba(122,0,60,.20);
+background:#fff;
+color:#111;
+-webkit-text-fill-color:#111;
+font-size:15px;
+font-weight:600;
+padding:0 42px 0 16px;
+box-shadow:0 6px 16px rgba(122,0,60,.08);
+appearance:none;
+-webkit-appearance:none;
+background-image:linear-gradient(45deg,transparent 50%,#c2185b 50%),linear-gradient(135deg,#c2185b 50%,transparent 50%);
+background-position:calc(100% - 20px) 50%,calc(100% - 14px) 50%;
+background-size:6px 6px,6px 6px;
+background-repeat:no-repeat;
+}
+
+.mockup-premium-real::after{
+content:"";
+display:none;
+}
+
+.mockup-premium-real #paso2{
+display:none !important;
+}
+
+.mockup-premium-real #paso2.oculto{
+display:none;
+}
+
+.mockup-premium-real #paso2 > label{
+display:none;
+}
+
+.mockup-premium-real #selectorPublicidad{
+width:100%;
+height:38px;
+font-size:14px;
+background:#fff;
+color:#111;
+-webkit-text-fill-color:#111;
+opacity:1;
+}
+
+.mockup-premium-real #paso2::before{
+display:none;
+}
+
+.mockup-premium-real #selectorPublicidad{
+position:relative;
+z-index:4;
+}
+
+.mockup-selects{
+width:96%;
+margin:16px auto 0;
+display:grid;
+grid-template-columns:repeat(4,minmax(0,1fr));
+gap:18px;
+align-items:start;
+pointer-events:auto;
+}
+
+.mockup-ubicacion-field{
+display:flex;
+flex-direction:column;
+gap:8px;
+min-width:0;
+position:relative;
+}
+
+.mockup-ubicacion-field:nth-child(1),
+.mockup-ubicacion-field:nth-child(3){
+transform:none;
+}
+
+.mockup-selects .select-premium-carihub{
+width:100%;
+min-width:0;
+min-height:48px;
+height:auto;
+position:relative;
+}
+
+.mockup-selects .select-premium-boton{
+height:48px;
+min-height:48px;
+}
+
+.mockup-selects .select-premium-panel{
+top:calc(100% + 7px);
+z-index:90;
+}
+
+.mockup-selects select{
+width:100%;
+height:48px;
+border-radius:12px;
+border:1.5px solid rgba(122,0,60,.22);
+background:#fff;
+opacity:1;
+color:#111;
+font-weight:600;
+padding:0 42px 0 16px;
+box-shadow:0 6px 16px rgba(122,0,60,.08);
+appearance:none;
+-webkit-appearance:none;
+background-image:linear-gradient(45deg,transparent 50%,#c2185b 50%),linear-gradient(135deg,#c2185b 50%,transparent 50%);
+background-position:calc(100% - 20px) 50%,calc(100% - 14px) 50%;
+background-size:6px 6px,6px 6px;
+background-repeat:no-repeat;
+}
+
+.mockup-selects select:disabled{
+background:#fff;
+opacity:1;
+color:#111;
+-webkit-text-fill-color:#111;
+}
+
+.mockup-ubicacion-field > input,
+.mockup-selects .select-premium-carihub > input{
+width:100%;
+height:44px;
+border-radius:12px;
+padding:10px 14px;
+font-size:14px;
+margin-top:8px;
+position:relative;
+z-index:1;
+}
+
+.mockup-ubicacion-field > input.oculto,
+.mockup-selects .select-premium-carihub > input.oculto{
+display:none !important;
+margin-top:0;
+}
+
+.mockup-slots{
+position:absolute;
+top:0;
+left:0;
+right:0;
+height:auto;
+aspect-ratio:1600/957;
+z-index:12;
+pointer-events:none;
+}
+
+.slot-hotspot{
+position:absolute;
+border:2px solid rgba(255,255,255,.42);
+border-radius:16px;
+background:rgba(255,0,140,.04);
+opacity:0;
+pointer-events:none;
+cursor:pointer;
+transition:.2s;
+display:flex;
+align-items:center;
+justify-content:center;
+text-align:center;
+font-size:12px;
+font-weight:800;
+line-height:1.05;
+color:#7a0048;
+padding:6px;
+overflow:hidden;
+text-shadow:0 1px 1px rgba(255,255,255,.55);
+}
+
+.mockup-premium-real.ubicacion-lista .slot-hotspot{
+opacity:.94;
+pointer-events:auto;
+}
+
+.slot-hotspot.disponible{
+background:rgba(255,0,140,.08);
+border-color:rgba(255,255,255,.88);
+box-shadow:0 0 0 2px rgba(255,20,147,.28),0 0 18px rgba(255,0,140,.24);
+}
+
+.slot-hotspot.no-disponible{
+background:rgba(20,5,15,.92);
+border-color:rgba(255,190,225,.72);
+box-shadow:0 0 0 2px rgba(255,255,255,.38),0 0 18px rgba(60,0,35,.42);
+cursor:not-allowed;
+color:#fff;
+text-shadow:0 1px 4px rgba(0,0,0,.55);
+}
+
+.slot-hotspot.seleccionado{
+opacity:1;
+background:rgba(255,0,140,.18);
+border-color:#fff;
+box-shadow:0 0 0 3px rgba(255,0,140,.92),0 0 28px rgba(255,0,140,.72);
+transform:scale(1.02);
+}
+
+.slot-hotspot::after{
+content:"";
+display:none;
+}
+
+.slot-hotspot .slot-texto-dinamico{
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+gap:2px;
+width:100%;
+min-width:0;
+}
+
+.slot-hotspot .slot-texto-dinamico b,
+.slot-hotspot .slot-texto-dinamico small,
+.slot-hotspot .slot-texto-dinamico strong{
+display:block;
+max-width:100%;
+overflow:hidden;
+text-overflow:ellipsis;
+}
+
+.slot-hotspot .slot-texto-dinamico b{
+font-size:12px;
+line-height:1.05;
+}
+
+.slot-hotspot .slot-texto-dinamico small,
+.slot-hotspot .slot-texto-dinamico strong{
+font-size:11px;
+line-height:1.05;
+}
+
+.slot-hotspot .slot-texto-dinamico strong{
+color:#7a0048;
+}
+
+.precio-estimado-oculto{
+display:none;
+}
+
+.disponibilidad-general-publicidad,
+.formato-periodo-publicidad,
+.selector-espacio-inline{
+width:96%;
+max-width:980px;
+margin:14px auto 0;
+position:relative;
+z-index:24;
+pointer-events:auto;
+}
+
+.disponibilidad-general-publicidad{
+padding:14px 16px;
+border-radius:18px;
+background:#fff7fb;
+border:2px solid rgba(255,20,147,.18);
+color:#7a003c;
+font-weight:800;
+line-height:1.45;
+text-align:center;
+}
+
+.disponibilidad-general-publicidad.oculto{
+display:none;
+}
+
+.formato-periodo-publicidad{
+display:grid;
+grid-template-columns:repeat(2,minmax(0,1fr));
+gap:12px;
+}
+
+.formato-periodo-publicidad.oculto{
+display:none;
+}
+
+.formato-periodo-publicidad select,
+.selector-espacio-inline select{
+width:100%;
+height:44px;
+border-radius:12px;
+border:1.5px solid rgba(122,0,60,.22);
+background:#fff;
+color:#111;
+font-weight:600;
+padding:0 42px 0 16px;
+box-shadow:0 6px 16px rgba(122,0,60,.08);
+}
+
+.select-premium-carihub{
+position:relative;
+width:100%;
+}
+
+.select-premium-carihub select{
+position:absolute !important;
+inset:0 !important;
+width:100% !important;
+height:100% !important;
+min-height:0 !important;
+opacity:0 !important;
+pointer-events:none !important;
+appearance:none !important;
+-webkit-appearance:none !important;
+z-index:-1;
+}
+
+.select-premium-boton{
+width:100%;
+height:44px;
+min-height:44px;
+border:1.5px solid rgba(255,140,200,.42);
+border-radius:12px;
+background:linear-gradient(135deg,rgba(255,255,255,.76),rgba(255,238,247,.58));
+box-shadow:0 6px 16px rgba(122,0,60,.08),inset 0 1px 0 rgba(255,255,255,.78);
+color:#4a1830;
+font-size:14px;
+font-weight:700;
+line-height:1;
+padding:0 38px 0 12px;
+text-align:left;
+position:relative;
+cursor:pointer;
+backdrop-filter:blur(12px);
+-webkit-backdrop-filter:blur(12px);
+transition:box-shadow .22s ease,border-color .22s ease,transform .22s ease,background .22s ease;
+}
+
+.select-premium-boton::after{
+content:"";
+position:absolute;
+right:15px;
+top:50%;
+width:7px;
+height:7px;
+border-right:2px solid rgba(209,0,114,.82);
+border-bottom:2px solid rgba(209,0,114,.82);
+transform:translateY(-65%) rotate(45deg);
+transition:transform .22s ease;
+}
+
+.select-premium-boton::before{
+content:"";
+position:absolute;
+inset:1px;
+border-radius:11px;
+background:radial-gradient(circle at 18% 0%,rgba(255,255,255,.62),transparent 36%),radial-gradient(circle at 92% 16%,rgba(255,0,140,.10),transparent 32%);
+pointer-events:none;
+}
+
+.select-premium-boton span{
+position:relative;
+z-index:1;
+display:block;
+overflow:hidden;
+text-overflow:ellipsis;
+white-space:nowrap;
+}
+
+.select-premium-carihub.abierto .select-premium-boton,
+.select-premium-boton:hover{
+border-color:rgba(255,0,140,.38);
+box-shadow:0 10px 24px rgba(255,0,140,.13),0 0 0 3px rgba(255,0,140,.06),inset 0 1px 0 rgba(255,255,255,.86);
+}
+
+.select-premium-carihub.abierto .select-premium-boton::after{
+transform:translateY(-35%) rotate(225deg);
+}
+
+.select-premium-boton:disabled{
+opacity:.72;
+cursor:not-allowed;
+background:linear-gradient(135deg,rgba(255,255,255,.64),rgba(246,236,242,.58));
+color:#8a7280;
+}
+
+.select-premium-panel{
+position:absolute;
+left:0;
+right:0;
+top:calc(100% + 8px);
+z-index:80;
+padding:6px;
+border:1.5px solid rgba(255,170,215,.46);
+border-radius:16px;
+background:linear-gradient(145deg,rgba(255,255,255,.84),rgba(255,232,245,.68));
+box-shadow:0 18px 34px rgba(122,0,60,.16),0 0 0 1px rgba(255,255,255,.52) inset;
+backdrop-filter:blur(20px);
+-webkit-backdrop-filter:blur(20px);
+opacity:0;
+transform:translateY(-6px) scale(.98);
+pointer-events:none;
+transition:opacity .22s ease,transform .22s ease;
+max-height:260px;
+overflow:auto;
+}
+
+.select-premium-carihub.abierto .select-premium-panel{
+opacity:1;
+transform:translateY(0) scale(1);
+pointer-events:auto;
+}
+
+.select-premium-opcion{
+width:100%;
+border:0;
+border-radius:11px;
+background:transparent;
+color:#5a1838;
+font-size:14px;
+font-weight:700;
+line-height:1.2;
+padding:10px 11px;
+text-align:left;
+cursor:pointer;
+transition:background .18s ease,box-shadow .18s ease,color .18s ease,transform .18s ease;
+}
+
+.select-premium-opcion:hover,
+.select-premium-opcion:focus{
+outline:none;
+background:rgba(255,0,140,.08);
+box-shadow:0 8px 18px rgba(255,0,140,.08);
+}
+
+.select-premium-opcion.activa{
+background:linear-gradient(135deg,rgba(255,0,140,.82),rgba(255,96,190,.72));
+color:#fff;
+box-shadow:0 8px 18px rgba(255,0,140,.18);
+}
+
+.selector-espacio-inline label{
+display:block;
+margin:0 0 8px;
+font-weight:800;
+color:#8a0045;
+}
+
+#precioEstimadoPublicidadBox{
+width:96%;
+max-width:980px;
+margin:34px auto 0;
+position:relative;
+z-index:24;
+pointer-events:auto;
+display:none !important;
+}
+
+.slots-movil{
+display:none;
+}
+
+.mockup-premium-movil{
+display:none;
+}
+
+.slots-movil h3{
+font-size:16px;
+color:#c2185b;
+margin-bottom:10px;
+}
+
+.slots-movil-grid{
+display:grid;
+grid-template-columns:1fr;
+gap:10px;
+}
+
+.slot-movil-aviso{
+margin:0 0 12px;
+padding:12px 14px;
+border-radius:16px;
+background:#fff7fb;
+border:2px solid rgba(255,20,147,.18);
+color:#7a003c;
+font-weight:700;
+line-height:1.45;
+}
+
+.slot-movil-btn{
+border:2px solid #ffb4d2;
+border-radius:16px;
+background:#fff0f6;
+padding:12px;
+display:flex;
+align-items:center;
+justify-content:space-between;
+gap:10px;
+font-weight:800;
+color:#7a003c;
+text-align:left;
+width:100%;
+min-width:0;
+}
+
+.slot-movil-btn span{
+display:block;
+font-size:13px;
+font-weight:700;
+color:#8a4a62;
+min-width:0;
+overflow-wrap:anywhere;
+}
+
+.slot-movil-btn b{
+color:#ff008c;
+white-space:nowrap;
+font-size:13px;
+flex:0 0 auto;
+}
+
+.slot-movil-btn.disponible{
+border-color:#19b56b;
+background:#f1fff7;
+}
+
+.slot-movil-btn.ocupado{
+opacity:.68;
+background:#f4f4f4;
+border-color:#d0d0d0;
+color:#666;
+}
+
+.slot-movil-btn.seleccionado{
+border-color:#ff008c;
+box-shadow:0 0 0 3px rgba(255,0,140,.18);
+}
+
+.slot-hotspot-movil-premium.disponible{
+border-color:rgba(255,255,255,.88);
+box-shadow:0 0 0 2px rgba(255,20,147,.34),0 0 18px rgba(255,0,140,.32);
+}
+
+.slot-hotspot-movil-premium.no-disponible{
+background:rgba(20,5,15,.92);
+border-color:rgba(255,190,225,.72);
+box-shadow:0 0 0 2px rgba(255,255,255,.38),0 0 18px rgba(60,0,35,.42);
+}
+
+.slot-hotspot-movil-premium.seleccionado{
+background:rgba(255,0,140,.18);
+border-color:#fff;
+box-shadow:0 0 0 3px rgba(255,0,140,.92),0 0 28px rgba(255,0,140,.72);
+}
+
+.slot-home-izquierda{left:2.0%;top:55.9%;width:14.9%;height:12.3%;}
+.slot-home-derecha{left:17.6%;top:55.9%;width:14.9%;height:12.3%;}
+.slot-home-inferior{left:2.0%;top:74.0%;width:30.4%;height:13.3%;}
+.slot-resultados-izquierda{left:35.6%;top:18.9%;width:8.9%;height:9.1%;}
+.slot-resultados-centro{left:44.9%;top:18.9%;width:9.6%;height:9.1%;}
+.slot-resultados-derecha{left:54.9%;top:18.9%;width:9.1%;height:9.1%;}
+.slot-resultados-inferior{left:35.8%;top:74.0%;width:28.4%;height:13.4%;}
+.slot-perfil-izquierda{left:67.9%;top:12.9%;width:9.6%;height:8.7%;}
+.slot-perfil-centro{left:77.9%;top:12.9%;width:9.7%;height:8.7%;}
+.slot-perfil-derecha{left:88.2%;top:12.9%;width:9.7%;height:8.7%;}
+.slot-perfil-inferior{left:68.0%;top:74.0%;width:30.0%;height:13.4%;}
+
+#selectorPublicidad:disabled{
+opacity:1;
+cursor:not-allowed;
+background:#fff;
+color:#111;
+-webkit-text-fill-color:#111;
+}
+
+@media(max-width:1100px){
+.btn-close-floating{
+top:14px;
+right:14px;
+width:46px;
+height:46px;
+font-size:28px;
+}
+
+.mockup-premium-real{
+max-width:calc(100% - 72px);
+}
+}
+
+@media(max-width:700px){
+.btn-close-floating{
+top:10px;
+right:10px;
+width:42px;
+height:42px;
+font-size:26px;
+}
+
+.mockup-premium-real{
+max-width:100%;
+margin:14px auto 18px;
+padding:10px;
+background:#fff;
+border-radius:26px;
+overflow:hidden;
+display:flex;
+flex-direction:column;
+}
+
+.mockup-premium-real img{
+display:none;
+}
+
+.mockup-premium-real::before{
+display:none;
+}
+
+.categoria-publicidad-overlay{
+position:static;
+order:-2;
+left:auto;
+top:auto;
+width:100%;
+max-width:none;
+height:auto;
+overflow:visible;
+grid-template-columns:1fr;
+gap:8px;
+margin:0 0 12px;
+padding:0;
+}
+
+.categoria-publicidad-overlay select{
+width:100%;
+height:44px;
+min-height:0;
+font-size:14px;
+border-radius:14px;
+padding:0 38px 0 12px;
+box-shadow:0 6px 14px rgba(122,0,60,.08);
+background-position:calc(100% - 18px) 50%,calc(100% - 12px) 50%;
+background-size:6px 6px,6px 6px;
+}
+
+.mockup-premium-real::after,
+.mockup-premium-real #paso2::before{
+display:none;
+}
+
+.mockup-premium-real #paso2{
+display:none !important;
+}
+
+.mockup-premium-real #paso2 > label{
+display:none;
+}
+
+.mockup-premium-real #selectorPublicidad{
+height:44px !important;
+font-size:14px !important;
+border-radius:12px;
+padding:0 12px;
+appearance:auto;
+-webkit-text-size-adjust:100%;
+}
+
+.mockup-slots{
+display:none;
+top:10px;
+left:10px;
+right:10px;
+aspect-ratio:1536/1024;
+z-index:15;
+pointer-events:none;
+}
+
+.slot-hotspot{
+opacity:0 !important;
+pointer-events:none !important;
+font-size:7px;
+border-radius:8px;
+border-width:1px;
+line-height:1.05;
+}
+
+.slot-hotspot::after{
+content:"";
+}
+
+.slot-hotspot.seleccionado{
+opacity:1 !important;
+background:linear-gradient(135deg,rgba(255,0,140,.96),rgba(155,0,86,.94));
+border-color:#ff008c;
+box-shadow:0 0 0 2px rgba(255,255,255,.85),0 0 16px rgba(255,0,140,.60);
+transform:scale(1.08);
+}
+
+.slot-hotspot.seleccionado::after{
+content:"Seleccionado";
+}
+
+.mockup-selects{
+width:100%;
+margin:12px auto 0;
+grid-template-columns:1fr;
+gap:10px;
+}
+
+.mockup-ubicacion-field{
+gap:8px;
+transform:none;
+}
+
+.mockup-selects .select-premium-carihub{
+height:44px;
+}
+
+.mockup-selects .select-premium-boton{
+height:44px;
+min-height:44px;
+}
+
+.mockup-selects select,
+.mockup-ubicacion-field:nth-child(1) select,
+.mockup-ubicacion-field:nth-child(3) select,
+.mockup-ubicacion-field input{
+width:100% !important;
+height:44px !important;
+justify-self:stretch;
+font-size:14px !important;
+padding:0 12px;
+}
+
+.slots-movil{
+display:block;
+width:100%;
+margin:14px auto 0;
+padding:12px;
+border-radius:18px;
+background:#fff;
+border:1px solid rgba(255,20,147,.18);
+order:6;
+}
+
+.mockup-premium-movil{
+display:block;
+width:100%;
+margin:14px auto 0;
+overflow-x:auto;
+padding:4px 24px 14px;
+order:2;
+-webkit-overflow-scrolling:touch;
+}
+
+.mockup-premium-movil-stage{
+position:relative;
+min-width:980px;
+width:980px;
+max-width:none;
+}
+
+.mockup-premium-movil-stage img{
+display:block;
+width:100%;
+height:auto;
+border-radius:18px;
+box-shadow:0 10px 28px rgba(255,0,140,.14);
+}
+
+.slot-hotspot-movil-premium{
+position:absolute;
+border:2px solid rgba(255,255,255,.42);
+border-radius:14px;
+background:rgba(255,0,140,.04);
+color:#7a0048;
+font-size:8px;
+font-weight:800;
+line-height:1;
+z-index:3;
+display:flex;
+align-items:center;
+justify-content:center;
+text-align:center;
+padding:3px;
+overflow:hidden;
+text-shadow:0 1px 1px rgba(255,255,255,.55);
+transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease, background .18s ease;
+}
+
+.slot-hotspot-movil-premium .slot-texto-dinamico{
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+gap:0;
+width:100%;
+min-width:0;
+}
+
+.slot-hotspot-movil-premium .slot-texto-dinamico b,
+.slot-hotspot-movil-premium .slot-texto-dinamico small,
+.slot-hotspot-movil-premium .slot-texto-dinamico strong{
+display:block;
+max-width:100%;
+overflow:hidden;
+text-overflow:ellipsis;
+}
+
+.slot-hotspot-movil-premium .slot-texto-dinamico b{
+font-size:8px;
+line-height:1;
+}
+
+.slot-hotspot-movil-premium .slot-texto-dinamico small{
+font-size:7px;
+line-height:1;
+}
+
+.slot-hotspot-movil-premium .slot-texto-dinamico strong{
+font-size:7px;
+line-height:1;
+color:#7a0048;
+}
+
+.slot-mobile-home-izquierda{left:2.0%;top:55.9%;width:14.9%;height:12.3%;}
+.slot-mobile-home-derecha{left:17.6%;top:55.9%;width:14.9%;height:12.3%;}
+.slot-mobile-home-inferior{left:2.0%;top:74.0%;width:30.4%;height:13.3%;}
+.slot-mobile-resultados-izquierda{left:35.6%;top:18.9%;width:8.9%;height:9.1%;}
+.slot-mobile-resultados-centro{left:44.9%;top:18.9%;width:9.6%;height:9.1%;}
+.slot-mobile-resultados-derecha{left:54.9%;top:18.9%;width:9.1%;height:9.1%;}
+.slot-mobile-resultados-inferior{left:35.8%;top:74.0%;width:28.4%;height:13.4%;}
+.slot-mobile-perfil-izquierda{left:67.9%;top:12.9%;width:9.6%;height:8.7%;}
+.slot-mobile-perfil-centro{left:77.9%;top:12.9%;width:9.7%;height:8.7%;}
+.slot-mobile-perfil-derecha{left:88.2%;top:12.9%;width:9.7%;height:8.7%;}
+.slot-mobile-perfil-inferior{left:68.0%;top:74.0%;width:30.0%;height:13.4%;}
+
+.slot-hotspot-movil-premium.seleccionado{
+background:rgba(255,0,140,.24);
+border-color:#fff;
+border-width:3px;
+box-shadow:0 0 0 3px rgba(255,0,140,.95),0 0 36px rgba(255,0,140,.88),0 10px 26px rgba(120,0,65,.28);
+transform:scale(1.04);
+}
+
+.disponibilidad-general-publicidad{
+order:1;
+}
+
+.selector-espacio-inline{
+order:3;
+}
+
+.formato-periodo-publicidad{
+order:4;
+}
+
+#precioEstimadoPublicidadBox{
+order:5;
+display:none !important;
+}
+}
+
+@media(max-width:700px){
+
+  .actions{
+    width:100% !important;
+    display:flex !important;
+    justify-content:center !important;
+    align-items:center !important;
+    gap:12px !important;
+    flex-wrap:nowrap !important;
+    padding:0 10px 38px !important;
+  }
+
+  .actions .btn-back,
+  .actions #btnSiguiente{
+    display:flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+    width:48% !important;
+    max-width:220px !important;
+    min-width:0 !important;
+    height:64px !important;
+    padding:12px 8px !important;
+    font-size:18px !important;
+    border-radius:20px !important;
+    white-space:nowrap !important;
+  }
+
+  .actions #btnSiguiente{
+    background:linear-gradient(90deg,#ff008c,#ff4fc3) !important;
+    color:white !important;
+    border:none !important;
+    opacity:1 !important;
+    visibility:visible !important;
+  }
+
+}
+body.paso-2 .hero-anunciantes,
+body.paso-2 .banner-premium-info,
+body.paso-2 > .hero,
+body.paso-3 .hero-anunciantes,
+body.paso-3 .banner-premium-info,
+body.paso-3 > .hero{
+  display:none !important;
+}
+/* OCULTAR CONTENIDO DEL PASO 1 EN PASO 2 Y 3 - GLOBAL Y MÓVIL */
+body.paso-2 #contenidoSoloPaso1,
+body.paso-3 #contenidoSoloPaso1{
+  display:none !important;
+  visibility:hidden !important;
+  height:0 !important;
+  overflow:hidden !important;
+  margin:0 !important;
+  padding:0 !important;
+}
+
+@media(max-width:700px){
+  body.paso-2 #contenidoSoloPaso1,
+  body.paso-3 #contenidoSoloPaso1{
+    display:none !important;
+    visibility:hidden !important;
+    height:0 !important;
+    overflow:hidden !important;
+    margin:0 !important;
+    padding:0 !important;
+  }
+}
+</style>
+<script src="https://www.google.com/recaptcha/api.js?render=6Lc1HgUtAAAAAGorTTfFK9E-VV5AUs9DeRST-Bf-"></script>
+</head>
+
+<body>
+<button 
+class="btn-close-floating"
+onclick="volverPagina()">
+✕
+</button>
+<div class="bg-glow"></div>
+<div class="bg-glow2"></div>
+
+
+<div class="main">
+
+</div>
+
+<!-- HERO -->
+<div id="contenidoSoloPaso1">
+<div class="banner-premium-info">
+
+<img src="img/banner-premium-info.webp">
+
+</div>
+
+<div class="hero">
+
+<h1>
+Beneficios de tu cuenta
+</h1>
+
+<p>
+Con tu cuenta podrás:
+</p>
+
+<ul class="beneficios-lista">
+
+<li>Administrar tu perfil, negocio o anuncio desde un solo lugar.</li>
+<li>Recibir mensajes, favoritos, visitas y estadísticas de tu publicación.</li>
+<li>Activar o desactivar los métodos de contacto que deseas mostrar.</li>
+<li>Mostrar WhatsApp, Telegram, Instagram, TikTok, X/Twitter, llamadas, correo electrónico, ubicación y mensajes internos.</li>
+<li>Crear y administrar múltiples perfiles, negocios, ciudades o campañas desde una misma cuenta.</li>
+<li>Obtener verificaciones, insignias, favoritos, destacados y mayor visibilidad dentro de Cariñosas.</li>
+<li>Actualizar imágenes, promociones, ubicación y datos de contacto cuando lo necesites.</li>
+<li>Compartir tu publicación mediante un enlace seguro dentro de Cariñosas.</li>
+<li>Acceder a nuevas herramientas, estadísticas y opciones de crecimiento conforme se agreguen a la plataforma.</li>
+</ul>
+</div>
+
+<!-- FORM -->
+<div class="wizard-contenido" id="paso1">
+<div class="form-grid">
+
+<datalist id="sugerenciasPaisPublicidad"></datalist>
+<datalist id="sugerenciasEstadoPublicidad"></datalist>
+<datalist id="sugerenciasCiudadPublicidad"></datalist>
+<datalist id="sugerenciasPaisPublicidadManual"></datalist>
+<datalist id="sugerenciasEstadoPublicidadManual"></datalist>
+<datalist id="sugerenciasCiudadPublicidadManual"></datalist>
+
+<div class="mockup-premium-real">
+
+  <img
+  src="img/imgmockup-banners-movil-vacio.jpg"
+  alt="Espacios publicitarios premium">
+
+  <div class="mockup-slots" aria-hidden="true">
+    <button type="button" class="slot-hotspot slot-home-izquierda" data-slot-id="home_izquierda" aria-label="Publicidad izquierda en pantalla principal"></button>
+    <button type="button" class="slot-hotspot slot-home-derecha" data-slot-id="home_derecha" aria-label="Publicidad derecha en pantalla principal"></button>
+    <button type="button" class="slot-hotspot slot-home-inferior" data-slot-id="home_inferior" aria-label="Publicidad inferior en pantalla principal"></button>
+    <button type="button" class="slot-hotspot slot-resultados-izquierda" data-slot-id="resultados_izquierda" aria-label="Publicidad izquierda en pantalla de resultados"></button>
+    <button type="button" class="slot-hotspot slot-resultados-centro" data-slot-id="resultados_centro" aria-label="Publicidad central en pantalla de resultados"></button>
+    <button type="button" class="slot-hotspot slot-resultados-derecha" data-slot-id="resultados_derecha" aria-label="Publicidad derecha en pantalla de resultados"></button>
+    <button type="button" class="slot-hotspot slot-resultados-inferior" data-slot-id="resultados_inferior" aria-label="Publicidad inferior en pantalla de resultados"></button>
+    <button type="button" class="slot-hotspot slot-perfil-izquierda" data-slot-id="perfil_izquierda" aria-label="Publicidad izquierda en pantalla de perfil"></button>
+    <button type="button" class="slot-hotspot slot-perfil-centro" data-slot-id="perfil_centro" aria-label="Publicidad central en pantalla de perfil"></button>
+    <button type="button" class="slot-hotspot slot-perfil-derecha" data-slot-id="perfil_derecha" aria-label="Publicidad derecha en pantalla de perfil"></button>
+    <button type="button" class="slot-hotspot slot-perfil-inferior" data-slot-id="perfil_inferior" aria-label="Publicidad inferior en pantalla de perfil"></button>
+  </div>
+
+  <div class="mockup-selects" aria-label="Ubicación de publicidad premium">
+    <div class="mockup-ubicacion-field">
+    <select id="categoriaPublicidad" name="categoriaPublicidad" aria-label="Categoría del anuncio">
+      <option value="">Selecciona una categoría</option>
+      <option value="general">✨ Todas las categorías</option>
+      <option value="Hotel">🏨 Hotel</option>
+      <option value="Motel">🏩 Motel</option>
+      <option value="Spa">🪷 Spa</option>
+      <option value="Sex shop">🛍️ Sex shop</option>
+      <option value="Escort">💎 Escort</option>
+      <option value="Escort gay">🌈 Escort gay</option>
+      <option value="Escort VIP">⭐ Escort VIP</option>
+      <option value="Evento swinger">🪩 Evento swinger</option>
+      <option value="Club SW">🥂 Club SW</option>
+      <option value="Masajes">💆 Masajes</option>
+      <option value="Agencia">🏢 Agencia</option>
+      <option value="Negocio local">📍 Negocio local</option>
+      <option value="Bar LGBTIQ+">🏳️‍🌈 Bar LGBTIQ+</option>
+      <option value="Cabinas / Glory holes">🚪 Cabinas / Glory holes</option>
+      <option value="Lesbians">🌈 Lesbians</option>
+      <option value="Tom boy">♂ Tom boy</option>
+      <option value="Tom fem">♀ Tom fem</option>
+      <option value="Cine xxx">🎬 Cine xxx</option>
+      <option value="Hotwife-Cuckcold">💍 Hotwife-Cuckcold</option>
+    </select>
+    </div>
+
+    <div class="mockup-ubicacion-field">
+    <select id="paisPublicidad" class="mockup-select" aria-label="País">
+      <option value="">Selecciona un país</option>
+    </select>
+    <input id="paisPublicidadManual" class="oculto" type="text" placeholder="Escribe el país" list="sugerenciasPaisPublicidadManual">
+    </div>
+
+    <div class="mockup-ubicacion-field">
+    <select id="estadoPublicidad" class="mockup-select" aria-label="Estado" disabled>
+      <option value="">Selecciona un Estado</option>
+    </select>
+    <input id="estadoPublicidadManual" class="oculto" type="text" placeholder="Escribe el Estado" list="sugerenciasEstadoPublicidadManual">
+    </div>
+
+    <div class="mockup-ubicacion-field">
+    <select id="ciudadPublicidad" class="mockup-select" aria-label="Ciudad" disabled>
+      <option value="">Selecciona una Ciudad</option>
+    </select>
+    <input id="ciudadPublicidadManual" class="oculto" type="text" placeholder="Escribe la Ciudad" list="sugerenciasCiudadPublicidadManual">
+    </div>
+  </div>
+
+<div class="disponibilidad-general-publicidad oculto" id="disponibilidadGeneralPublicidad" aria-live="polite"></div>
+
+<div class="mockup-premium-movil" id="mockupPremiumPublicidadMovil" aria-label="Mockup premium móvil de espacios publicitarios">
+  <div class="mockup-premium-movil-stage">
+    <img src="img/imgmockup-banners-movil-vacio.jpg" alt="Mockup premium de espacios publicitarios Cariñosas">
+    <button type="button" class="slot-hotspot-movil-premium slot-mobile-home-izquierda" data-slot-id="home_izquierda" aria-label="Home izquierda"></button>
+    <button type="button" class="slot-hotspot-movil-premium slot-mobile-home-derecha" data-slot-id="home_derecha" aria-label="Home derecha"></button>
+    <button type="button" class="slot-hotspot-movil-premium slot-mobile-home-inferior" data-slot-id="home_inferior" aria-label="Home inferior"></button>
+    <button type="button" class="slot-hotspot-movil-premium slot-mobile-resultados-izquierda" data-slot-id="resultados_izquierda" aria-label="Resultados izquierda"></button>
+    <button type="button" class="slot-hotspot-movil-premium slot-mobile-resultados-centro" data-slot-id="resultados_centro" aria-label="Resultados centro"></button>
+    <button type="button" class="slot-hotspot-movil-premium slot-mobile-resultados-derecha" data-slot-id="resultados_derecha" aria-label="Resultados derecha"></button>
+    <button type="button" class="slot-hotspot-movil-premium slot-mobile-resultados-inferior" data-slot-id="resultados_inferior" aria-label="Resultados inferior"></button>
+    <button type="button" class="slot-hotspot-movil-premium slot-mobile-perfil-izquierda" data-slot-id="perfil_izquierda" aria-label="Perfil izquierda"></button>
+    <button type="button" class="slot-hotspot-movil-premium slot-mobile-perfil-centro" data-slot-id="perfil_centro" aria-label="Perfil centro"></button>
+    <button type="button" class="slot-hotspot-movil-premium slot-mobile-perfil-derecha" data-slot-id="perfil_derecha" aria-label="Perfil derecha"></button>
+    <button type="button" class="slot-hotspot-movil-premium slot-mobile-perfil-inferior" data-slot-id="perfil_inferior" aria-label="Perfil inferior"></button>
+  </div>
+</div>
+
+<div class="slots-movil" id="slotsMovilPublicidad" aria-live="polite"></div>
+
+<div class="selector-espacio-inline oculto" id="selectorEspacioPublicidadBox">
+
+<label>
+Selecciona el espacio que deseas rentar
+</label>
+
+<select id="selectorPublicidad">
+<option value="">Presiona aquí para seleccionar publicidad disponible</option>
+<option value="home_izquierda">Publicidad izquierda — Pantalla principal</option>
+<option value="home_derecha">Publicidad derecha — Pantalla principal</option>
+<option value="home_inferior">Publicidad inferior — Pantalla principal</option>
+<option value="resultados_izquierda">Publicidad izquierda — Pantalla de resultados</option>
+<option value="resultados_centro">Publicidad central — Pantalla de resultados</option>
+<option value="resultados_derecha">Publicidad derecha — Pantalla de resultados</option>
+<option value="resultados_inferior">Publicidad inferior — Pantalla de resultados</option>
+<option value="perfil_izquierda">Publicidad izquierda — Pantalla de perfil</option>
+<option value="perfil_centro">Publicidad central — Pantalla de perfil</option>
+<option value="perfil_derecha">Publicidad derecha — Pantalla de perfil</option>
+<option value="perfil_inferior">Publicidad inferior — Pantalla de perfil</option>
+</select>
+
+</div>
+
+<div class="formato-periodo-publicidad oculto" id="formatoPeriodoPublicidadBox">
+  <select id="tipoContenidoPublicidadControl" name="tipoContenidoPublicidad" aria-label="Formato del anuncio">
+    <option value="">Formato del anuncio</option>
+    <option value="imagen">Imagen</option>
+    <option value="video">Video</option>
+  </select>
+  <select id="periodoPublicidadControl" name="periodoPublicidad" aria-label="Periodo de renta">
+    <option value="">Selecciona periodo de renta</option>
+    <option value="semanal">Semanal</option>
+    <option value="quincenal">Quincenal</option>
+    <option value="mensual">Mensual</option>
+  </select>
+</div>
+
+<div class="input-group full precio-estimado-oculto" id="precioEstimadoPublicidadBox">
+<label>Precio estimado</label>
+<div class="precio-seleccionado">
+<strong id="precioAnuncioTitulo">Precio según espacio seleccionado</strong>
+<b id="precioAnuncioMonto">Selecciona un espacio</b>
+<small id="precioAnuncioDetalle">El cálculo se guarda según espacio, periodo y tipo de contenido. Precio + IVA.</small>
+<input type="hidden" id="precioAnuncio" name="precioAnuncio" value="">
+<input type="hidden" id="precioAnuncioTipo" name="precioAnuncioTipo" value="imagen">
+<input type="hidden" id="precioAnuncioPeriodo" name="precioAnuncioPeriodo" value="mensual">
+</div>
+</div>
+
+</div>
+
+<div class="metodos-visibles-panel">
+<h3>Qué quieres mostrar cuando abran tu anuncio</h3>
+<p>
+Elige qué botones y métodos de contacto quieres preparar. Podrás activarlos y desactivarlos desde tu cuenta; cambiar números, usuarios o ubicación puede requerir revisión.
+</p>
+<div class="switch-grid-publicidad">
+<label class="switch-publicidad"><span>Mensaje interno</span><input type="checkbox" id="mostrarMensajeInterno" name="mostrarContacto[]" value="mensaje-interno" checked><small>On</small></label>
+<label class="switch-publicidad"><span>WhatsApp</span><input type="checkbox" id="mostrarWhatsApp" name="mostrarContacto[]" value="whatsapp" checked><small>On</small></label>
+<label class="switch-publicidad"><span>Telegram</span><input type="checkbox" id="mostrarTelegram" name="mostrarContacto[]" value="telegram"><small>Off</small></label>
+<label class="switch-publicidad"><span>Instagram</span><input type="checkbox" id="mostrarInstagram" name="mostrarContacto[]" value="instagram"><small>Off</small></label>
+<label class="switch-publicidad"><span>X / Twitter</span><input type="checkbox" id="mostrarTwitter" name="mostrarContacto[]" value="twitter"><small>Off</small></label>
+<label class="switch-publicidad"><span>OnlyFans</span><input type="checkbox" id="mostrarOnlyFans" name="mostrarContacto[]" value="onlyfans"><small>Off</small></label>
+<label class="switch-publicidad"><span>Sitio web</span><input type="checkbox" id="mostrarSitioWeb" name="mostrarContacto[]" value="sitio-web"><small>Off</small></label>
+<label class="switch-publicidad"><span>Correo electrónico</span><input type="checkbox" id="mostrarCorreo" name="mostrarContacto[]" value="correo"><small>Off</small></label>
+<label class="switch-publicidad"><span>Llamadas</span><input type="checkbox" id="mostrarLlamadas" name="mostrarContacto[]" value="llamadas"><small>Off</small></label>
+<label class="switch-publicidad"><span>Ubicación</span><input type="checkbox" id="mostrarUbicacion" name="mostrarContacto[]" value="ubicacion"><small>Off</small></label>
+</div>
+</div>
+
+<div class="mensaje-contacto-card">
+<h3>Cómo quieres identificar tu anuncio</h3>
+<p>
+Prepara el mensaje inicial que recibirás cuando alguien toque WhatsApp, Telegram u otro contacto externo. Puedes editarlo a tu manera, siempre que conserve que la persona vio tu anuncio en Cariñosas y cumpla las reglas de la plataforma.
+</p>
+<div class="input-group">
+<label>Mensaje sugerido</label>
+<textarea id="mensajeContactoPublicidad" name="mensajeContactoPublicidad" data-auto="1" placeholder="Hola, vi tu anuncio en Cariñosas: Nombre público."></textarea>
+</div>
+<div class="mensaje-contacto-preview">
+<span>Vista previa del mensaje</span>
+<div id="previewMensajeContactoPublicidad">Hola, vi tu anuncio en Cariñosas: Nombre público.</div>
+</div>
+</div>
+
+<div class="mensaje-interno-fijo">
+<span id="estadoMensajeInternoTexto">Mensajes internos activados</span>
+<small>Si están activos, los usuarios registrados podrán escribirte dentro de Cariñosas. Si una persona no tiene cuenta, se le pedirá registrarse para enviar mensaje interno.</small>
+</div>
+
+<div class="aviso-link-interno">
+Cariñosas generará automáticamente un enlace interno seguro para este anuncio. No se solicitará sitio web externo en esta etapa para proteger a los usuarios.
+</div>
+
+<div class="seccion-revision">
+<h3>Crea tu cuenta para enviar la solicitud</h3>
+<p>
+Usaremos estos datos para dar seguimiento a tu solicitud, enviarte notificaciones y permitirte entrar después a administrar tu anuncio. Esta información no se mostrará al público.
+</p>
+</div>
+
+<div class="input-group">
+<label>Nombre completo del responsable</label>
+<input type="text" placeholder="Tu nombre">
+</div>
+
+<div class="input-group">
+<label>Teléfono o WhatsApp privado</label>
+<input type="text" placeholder="528112345678">
+</div>
+
+<div class="check-box full">
+<input type="checkbox" name="crearCuentaAnunciante">
+<label>Entiendo que se creará una cuenta de anunciante para dar seguimiento a mi solicitud.</label>
+</div>
+
+<div class="input-group full descripcion-publica-group">
+
+<label>
+Descripción pública
+</label>
+
+<textarea
+aria-label="Descripción pública"
+placeholder="Describe tu negocio, perfil o campaña premium..."></textarea>
+
+</div>
+
+<div class="input-group">
+<label>Nombre público del anuncio</label>
+<input type="text" id="nombreComercialVisible" placeholder="Ejemplo: Hotel Marbella">
+</div>
+
+<div class="input-group">
+<label>WhatsApp que quieres mostrar</label>
+<input type="text" data-contact-field="whatsapp" placeholder="528112345678">
+</div>
+
+<div class="input-group">
+<label>Teléfono para llamadas públicas</label>
+<input type="text" data-contact-field="llamadas" placeholder="Número para llamadas">
+</div>
+
+<div class="input-group">
+<label>Correo público que quieres mostrar</label>
+<input type="email" data-contact-field="correo" placeholder="contacto@email.com">
+</div>
+
+<div class="input-group">
+<label>OnlyFans que quieres mostrar</label>
+<input type="text" data-contact-field="onlyfans" placeholder="@usuario o enlace de OnlyFans">
+</div>
+
+<div class="input-group">
+<label>Sitio web que quieres mostrar</label>
+<input type="text" data-contact-field="sitioWeb" placeholder="https://tusitio.com">
+</div>
+
+<div class="input-group">
+<label>Instagram que quieres mostrar</label>
+<input type="text" data-contact-field="instagram" placeholder="@usuario">
+</div>
+
+<div class="input-group">
+<label>TikTok que quieres mostrar</label>
+<input type="text" data-contact-field="tiktok" placeholder="@usuario">
+</div>
+
+<div class="input-group">
+<label>Telegram que quieres mostrar</label>
+<input type="text" data-contact-field="telegram" placeholder="@usuario o enlace de Telegram">
+</div>
+
+<div class="input-group">
+<label>X / Twitter que quieres mostrar</label>
+<input type="text" data-contact-field="twitter" placeholder="@usuario">
+</div>
+
+<div class="input-group">
+<label>Ubicación o Google Maps</label>
+<input type="text" data-contact-field="ubicacion" placeholder="Enlace de Google Maps o zona pública">
+</div>
+
+<div class="upload-grid">
+<label class="upload-box">
+<span>Subir imagen o video principal</span>
+<small>Será la portada visible en el banner. Formatos recomendados: PNG, JPG, WEBP o MP4 corto.</small>
+<input type="file" id="imagenPublicidadPrincipal" name="materialPublicidadPrincipal" accept="image/png,image/jpeg,image/webp,video/mp4">
+</label>
+
+<label class="upload-box">
+<span>Subir imágenes para la página interna</span>
+<small>Opcional. Puedes agregar hasta 3 fotos adicionales para mostrar habitaciones, instalaciones, promociones o detalles del negocio.</small>
+<input type="file" name="imagenesPublicidadSecundarias" accept="image/png,image/jpeg,image/webp" multiple>
+</label>
+</div>
+
+</div>
+
+<div class="info-box">
+
+Todos los anuncios y campañas son revisados manualmente.<br>
+
+Puedes realizar hasta 3 cambios mensuales.<br>
+
+Los cambios requieren aprobación antes de publicarse.<br>
+
+Desde tu dashboard podrás administrar banners, favoritos, mensajes, estadísticas y campañas.<br>
+
+Cada perfil aprobado contará con un enlace interno de Cariñosas para compartirlo de forma profesional y mantener la información autorizada dentro de la plataforma.<br>
+
+Las campañas tienen duración limitada y renovable.<br>
+
+Los favoritos y corazones permanecerán ligados al perfil, no a la imagen.<br>
+
+Los mensajes y audios pueden eliminarse automáticamente después de cierto tiempo por optimización y seguridad.
+
+</div>
+
+<div class="check-box">
+
+<input type="checkbox">
+
+<label>
+
+Acepto términos, políticas, revisión manual y administración de campañas publicitarias.
+
+</label>
+
+</div>
+</div>
+</div>
+
+</div>
+
+
+<div class="actions">
+<button 
+type="button" 
+class="btn-back"
+onclick="volverPublicidad()">
+← Volver
+</button>
+
+<button
+type="button"
+id="btnSiguiente"
+class="btn btn-primary"
+onclick="continuarPaso1Publicidad(event)">
+Continuar →
+</button>
+</div>
+
+</div>
+
+<script>
+let pasoActual=1;
+document.addEventListener("DOMContentLoaded", () => {
+  const actions = document.querySelector(".actions");
+  const btn = document.getElementById("btnSiguiente");
+
+  if (actions && btn) {
+    actions.style.display = "flex";
+    actions.style.flexDirection = "row";
+    actions.style.justifyContent = "center";
+    actions.style.alignItems = "center";
+    actions.style.gap = "12px";
+    actions.style.flexWrap = "nowrap";
+
+    btn.style.display = "flex";
+    btn.style.visibility = "visible";
+    btn.style.opacity = "1";
+    btn.style.width = "48%";
+    btn.style.maxWidth = "220px";
+    btn.style.height = "64px";
+    btn.style.alignItems = "center";
+    btn.style.justifyContent = "center";
+    btn.style.background = "linear-gradient(90deg,#ff008c,#ff4fc3)";
+    btn.style.color = "white";
+    btn.style.border = "none";
+    btn.disabled = false;
+  }
+});
+function activarIndicadorPublicidad(numero){
+  document.querySelectorAll(".wizard-paso").forEach(indicador=>indicador.classList.remove("activo"));
+  document.getElementById("paso"+numero+"-indicador")?.classList.add("activo");
+}
+
+function actualizarBotonesPublicidad(){
+  const boton=document.getElementById("btnSiguiente");
+  if(!boton)return;
+
+  boton.disabled=false;
+
+  if(pasoActual===2){
+    boton.textContent="Enviar a revisión →";
+    return;
+  }
+
+  if(pasoActual===3){
+    boton.textContent="Solicitud enviada";
+    boton.disabled=true;
+    return;
+  }
+
+  boton.textContent="Continuar →";
+}
+
+function aplicarClasePantalla(numero){
+  document.body.classList.remove("paso-1","paso-2","paso-3");
+  document.body.classList.add("paso-"+numero);
+}
+
+
+function mostrarPantallaPublicidad(numero){
+  document.querySelectorAll(".wizard-contenido").forEach(pantalla=>{
+    pantalla.classList.add("oculto");
+  });
+
+  let idPantalla = "";
+
+  if(numero === 2){
+    idPantalla = "paso2";
+  }else{
+    idPantalla = "paso" + numero;
+  }
+
+  const pantalla = document.getElementById(idPantalla);
+
+  if(!pantalla){
+    alert("No se encontró la pantalla: " + idPantalla);
+    return;
+  }
+
+  pantalla.classList.remove("oculto");
+  activarIndicadorPublicidad(numero);
+  pasoActual = numero;
+  const contenidoPaso1 = document.getElementById("contenidoSoloPaso1");
+
+if(contenidoPaso1){
+  if(numero === 1){
+    contenidoPaso1.style.display = "block";
+  }else{
+    contenidoPaso1.style.display = "none";
+  }
+}
+  actualizarBotonesPublicidad();
+
+  pantalla.scrollIntoView({
+    behavior:"smooth",
+    block:"start"
+  });
+}
+
+function valorInput(selector){
+  return document.querySelector(selector)?.value?.trim() || "";
+}
+function correoValido(valor){
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(valor);
+}
+
+function telefonoValido(valor){
+  const limpio=valor.replace(/\D/g,"");
+  return limpio.length>=10 && limpio.length<=15;
+}
+function nombreValido(valor){
+  const limpio=valor.trim();
+
+  if(limpio.length < 5) return false;
+
+  const palabras=limpio.split(/\s+/);
+
+  if(palabras.length < 2) return false;
+
+  if(/^\d+$/.test(limpio)) return false;
+
+  return true;
+}
+function textoPublicoValido(valor,minimo){
+  const limpio=valor.trim();
+
+  if(limpio.length < minimo) return false;
+
+  if(/^[0-9\s]+$/.test(limpio)) return false;
+
+  if(!/[a-zA-ZáéíóúÁÉÍÓÚñÑ]/.test(limpio)) return false;
+
+  return true;
+}
+function archivoSeleccionado(selector){
+  return Boolean(document.querySelector(selector)?.files?.length);
+}
+
+function passwordSeguraValor(valor){
+  return (
+    valor.length >= 8 &&
+    /[A-Z]/.test(valor) &&
+    /[a-z]/.test(valor) &&
+    /[0-9]/.test(valor) &&
+    /[^A-Za-z0-9]/.test(valor)
+  );
+}
+
+function validarPaso1Publicidad(){
+  const faltantes=[];
+
+  const selector=document.getElementById("selectorPublicidad");
+
+  if(!valorCategoriaPublicidad()) faltantes.push("Seleccionar categoría");
+  if(!valorInput('[name="periodoPublicidad"]')) faltantes.push("Seleccionar periodo de renta");
+  if(!valorInput('[name="tipoContenidoPublicidad"]')) faltantes.push("Seleccionar formato del anuncio");
+
+  if(!valorUbicacionPublicidad("pais")) faltantes.push("Seleccionar país");
+  if(!valorUbicacionPublicidad("estado")) faltantes.push("Seleccionar estado");
+  if(!valorUbicacionPublicidad("ciudad")) faltantes.push("Seleccionar ciudad");
+
+  if(!selector?.value) faltantes.push("Seleccionar espacio publicitario");
+
+  const nombreResponsable=
+valorInput('input[placeholder="Tu nombre"]');
+
+if(!nombreResponsable){
+  faltantes.push("Nombre completo del responsable");
+}else if(!nombreValido(nombreResponsable)){
+  faltantes.push("Nombre completo válido (nombre y apellido)");
+}
+
+const telefonoPrivado=valorInput('input[placeholder="528112345678"]');
+
+if(!telefonoPrivado){
+  faltantes.push("Teléfono o WhatsApp privado");
+}else if(!telefonoValido(telefonoPrivado)){
+  faltantes.push("Teléfono o WhatsApp válido, de 10 a 15 dígitos");
+}
+
+  if(!document.querySelector('[name="crearCuentaAnunciante"]')?.checked){
+    faltantes.push("Aceptar creación de cuenta de anunciante");
+  }
+
+ const descripcionPublica=valorInput('.descripcion-publica-group textarea');
+const nombreComercial=valorInput('#nombreComercialVisible');
+
+if(!descripcionPublica){
+  faltantes.push("Descripción pública");
+}else if(!textoPublicoValido(descripcionPublica,30)){
+  faltantes.push("Descripción pública válida, mínimo 30 caracteres");
+}
+
+if(!nombreComercial){
+  faltantes.push("Nombre público del anuncio");
+}else if(!textoPublicoValido(nombreComercial,3)){
+  faltantes.push("Nombre público del anuncio válido");
+}
+
+  if(document.getElementById("mostrarWhatsApp")?.checked){
+    if(!valorInput('[data-contact-field="whatsapp"]')) faltantes.push("WhatsApp público");
+  }
+
+  if(!archivoSeleccionado('.upload-box input[type="file"]')){
+    faltantes.push("Subir imagen o video principal");
+  }
+
+  if(!document.querySelector('.check-box input[type="checkbox"]:last-of-type')?.checked){
+    faltantes.push("Aceptar términos, políticas y revisión manual");
+  }
+
+  if(faltantes.length){
+    const mensajePendientes =
+"Información pendiente\n\n" +
+"Antes de continuar, completa los siguientes campos:\n\n" +
+"• " + faltantes.join("\n• ") + "\n\n" +
+"Corrige la información faltante para continuar.";
+
+alert(mensajePendientes);
+return false;
+  }
+
+  return true;
+}
+
+function continuarPublicidad(event){
+  if(event) event.preventDefault();
+
+  if(pasoActual===1){
+    if(!validarPaso1Publicidad()) return;
+    mostrarPantallaPublicidad(2);
+    return;
+  }
+
+  if(pasoActual===2){
+    mostrarPantallaPublicidad(3);
+    return;
+  }
+}
+
+function volverPublicidad(){
+  const paso2=document.getElementById("paso2");
+
+  if(pasoActual===2){
+    mostrarPantallaPublicidad(1);
+    paso2?.classList.remove("oculto");
+    actualizarVistaPublicidad();
+    return;
+  }
+
+  if(pasoActual===4){
+    mostrarPantallaPublicidad(3);
+    return;
+  }
+
+  volverPagina();
+}
+</script>
+
+<script>
+    
+function togglePass(id){
+
+const input=document.getElementById(id);
+
+if(input.type==="password"){
+input.type="text";
+}else{
+input.type="password";
+}
+
+}
+</script>
+<script>
+
+function volverPagina(){
+
+if(document.referrer){
+history.back();
+}else{
+window.location.href="index.html";
+}
+
+}
+
+</script>
+
+<script>
+const disponibilidadPublicidadDemo={
+  "Monterrey":["resultados_centro","perfil_centro"],
+  "Garc\u00eda":["home_izquierda","perfil_derecha"],
+  "Apodaca":["resultados_derecha","perfil_izquierda"],
+  "Santa Catarina":["resultados_inferior","perfil_inferior"],
+  "San Nicol\u00e1s":["home_derecha","resultados_izquierda"]
+};
+
+const CONFIG_PRECIOS_PUBLICIDAD_FALLBACK=PreciosPublicidad.CONFIG_PRECIOS_PUBLICIDAD_FALLBACK;
+
+let configPreciosPublicidad=CONFIG_PRECIOS_PUBLICIDAD_FALLBACK;
+let configPreciosPublicidadGlobal=CONFIG_PRECIOS_PUBLICIDAD_FALLBACK;
+let overridesPreciosPublicidad=[];
+let lecturaOverridesPreciosPublicidad={intentada:false,permitida:false,error:null};
+
+function preciosManualVacioPublicidad(){
+  return PreciosPublicidad.preciosManualVacioPublicidad();
+}
+
+function obtenerPrecioMensualImagenBaseSlot(slot){
+  return PreciosPublicidad.obtenerPrecioMensualImagenBaseSlot(slot);
+}
+
+function normalizarFactoresAutomaticosPublicidad(fuente){
+  return PreciosPublicidad.normalizarFactoresAutomaticosPublicidad(fuente);
+}
+
+function normalizarSlotPrecioPublicidad(slot,slotId){
+  return PreciosPublicidad.normalizarSlotPrecioPublicidad(slot,slotId);
+}
+
+function normalizarConfigPreciosPublicidad(data){
+  return PreciosPublicidad.normalizarConfigPreciosPublicidad(data);
+}
+
+function normalizarTextoPrecioScope(valor){
+  return PreciosPublicidad.normalizarTextoPrecioScope(valor);
+}
+
+function normalizarScopePrecioPublicidad(scope){
+  return PreciosPublicidad.normalizarScopePrecioPublicidad(scope);
+}
+
+function normalizarOverridePrecioPublicidad(data,overrideId=""){
+  return PreciosPublicidad.normalizarOverridePrecioPublicidad(data,overrideId);
+}
+
+function calcularEspecificidadOverridePrecio(override,contexto){
+  return PreciosPublicidad.calcularEspecificidadOverridePrecio(override,contexto);
+}
+
+function resolverOverridePrecioPublicidad(configGlobal,overrides,contexto){
+  return PreciosPublicidad.resolverOverridePrecioPublicidad(configGlobal,overrides,contexto);
+}
+
+async function cargarConfigPreciosPublicidad(){
+  try{
+    const doc=await db.collection("configuracion_publicidad").doc("precios_banners").get();
+    if(doc.exists){
+      configPreciosPublicidadGlobal=normalizarConfigPreciosPublicidad(doc.data());
+    }else{
+      configPreciosPublicidadGlobal=CONFIG_PRECIOS_PUBLICIDAD_FALLBACK;
+    }
+  }catch(error){
+    console.warn("No se pudo cargar configuracion_publicidad/precios_banners. Se usara fallback local.",error);
+    configPreciosPublicidadGlobal=CONFIG_PRECIOS_PUBLICIDAD_FALLBACK;
+  }
+
+  configPreciosPublicidad=configPreciosPublicidadGlobal;
+  await cargarOverridesPreciosPublicidad();
+  actualizarVistaPublicidad();
+  actualizarPrecioAnuncio();
+}
+
+async function cargarOverridesPreciosPublicidad(){
+  lecturaOverridesPreciosPublicidad={intentada:true,permitida:false,error:null};
+  try{
+    const snap=await db.collection("configuracion_publicidad")
+      .doc("precios_banners")
+      .collection("overrides")
+      .where("activo","==",true)
+      .get();
+    overridesPreciosPublicidad=[];
+    snap.forEach(doc=>{
+      overridesPreciosPublicidad.push({id:doc.id,...doc.data()});
+    });
+    lecturaOverridesPreciosPublicidad.permitida=true;
+  }catch(error){
+    overridesPreciosPublicidad=[];
+    lecturaOverridesPreciosPublicidad.error=error;
+    console.warn("No se pudieron cargar overrides de precios publicitarios. Se usara precio global.",error);
+  }
+}
+
+const nombresSlotsPublicidad={
+  home_izquierda:"Home - izquierda superior",
+  home_derecha:"Home - derecha superior",
+  home_inferior:"Home - inferior",
+  resultados_izquierda:"Resultados - izquierda superior",
+  resultados_centro:"Resultados - centro superior",
+  resultados_derecha:"Resultados - derecha superior",
+  resultados_inferior:"Resultados - inferior",
+  perfil_izquierda:"Perfil - izquierda superior",
+  perfil_centro:"Perfil - centro superior",
+  perfil_derecha:"Perfil - derecha superior",
+  perfil_inferior:"Perfil - inferior"
+};
+
+const nombresHotspotsPublicidad={
+  home_izquierda:"Home izquierdo",
+  home_derecha:"Home derecho",
+  home_inferior:"Home inferior",
+  resultados_izquierda:"Resultados izquierdo",
+  resultados_centro:"Resultados centro",
+  resultados_derecha:"Resultados derecho",
+  resultados_inferior:"Resultados inferior",
+  perfil_izquierda:"Perfil izquierdo",
+  perfil_centro:"Perfil centro",
+  perfil_derecha:"Perfil derecho",
+  perfil_inferior:"Perfil inferior"
+};
+
+function opcionesPrecioPublicidadActual(){
+  const periodo=document.querySelector('[name="periodoPublicidad"]')?.value||"";
+  const tipo=document.querySelector('[name="tipoContenidoPublicidad"]')?.value||"";
+  return {periodo,tipo};
+}
+
+function redondearPrecioHaciaArriba(valor,multiplo=50){
+  return PreciosPublicidad.redondearPrecioHaciaArriba(valor,multiplo);
+}
+
+function obtenerFactorAutomatico(config,periodo){
+  return PreciosPublicidad.obtenerFactorAutomatico(config,periodo);
+}
+
+function obtenerPrecioManualSlot(slot,tipo,periodo){
+  return PreciosPublicidad.obtenerPrecioManualSlot(slot,tipo,periodo);
+}
+
+function calcularPrecioAutomaticoSlot(config,slot,tipo,periodo,espacios=1){
+  return PreciosPublicidad.calcularPrecioAutomaticoSlot(config,slot,tipo,periodo,espacios);
+}
+
+function calcularPrecioPublicidadDesdeConfig(config,slotId,tipo,periodo,espacios=1){
+  return PreciosPublicidad.calcularPrecioPublicidadDesdeConfig(config,slotId,tipo,periodo,espacios);
+}
+
+function contextoPrecioPublicidadActual(){
+  return {
+    categoria:document.getElementById("categoriaPublicidad")?.value||"",
+    pais:valorUbicacionPublicidad("pais"),
+    estado:valorUbicacionPublicidad("estado"),
+    ciudad:valorUbicacionPublicidad("ciudad")
+  };
+}
+
+function camposPrecioPublicidadCompletos(slotId,tipo,periodo){
+  const contexto=contextoPrecioPublicidadActual();
+  return Boolean(
+    contexto.categoria
+    && contexto.pais
+    && contexto.estado
+    && contexto.ciudad
+    && slotId
+    && tipo
+    && periodo
+  );
+}
+
+function configPrecioPublicidadEfectiva(){
+  const contexto=contextoPrecioPublicidadActual();
+  const contextoCompleto=Boolean(contexto.categoria&&contexto.pais&&contexto.estado&&contexto.ciudad);
+  if(!contextoCompleto){
+    configPreciosPublicidad=configPreciosPublicidadGlobal;
+    return configPreciosPublicidad;
+  }
+
+  configPreciosPublicidad=resolverOverridePrecioPublicidad(configPreciosPublicidadGlobal,overridesPreciosPublicidad,contexto);
+  return configPreciosPublicidad;
+}
+
+function calcularPrecioPublicidad(slotId){
+  const {periodo,tipo}=opcionesPrecioPublicidadActual();
+  if(!camposPrecioPublicidadCompletos(slotId,tipo,periodo))return null;
+  return calcularPrecioPublicidadDesdeConfig(configPrecioPublicidadEfectiva(),slotId,tipo,periodo,1);
+}
+
+function contenidoHotspotPublicidad(slotId,disponible){
+  const nombre=nombresHotspotsPublicidad[slotId]||nombresSlotsPublicidad[slotId]||"Banner";
+  const slot=configPrecioPublicidadEfectiva().slots?.[slotId]||{};
+  const capacidad=Number(slot.capacidadMaxima)||1;
+
+  if(!disponible){
+    return `<span class="slot-texto-dinamico"><b>${nombre}</b><small>Ocupado</small></span>`;
+  }
+
+  const {tipo,periodo}=opcionesPrecioPublicidadActual();
+  const calculo=camposPrecioPublicidadCompletos(slotId,tipo,periodo)
+    ? calcularPrecioPublicidadDesdeConfig(configPrecioPublicidadEfectiva(),slotId,tipo,periodo,1)
+    : null;
+  const precio=calculo?`<strong>$${calculo.total.toLocaleString("es-MX")} ${calculo.moneda||"MXN"}</strong>`:"";
+
+  return `<span class="slot-texto-dinamico"><b>${nombre}</b><small>Disponible 1/${capacidad}</small>${precio}</span>`;
+}
+
+const aliasUbicacionPublicidad={
+  pais:{
+    "mexico":"M\u00e9xico",
+    "mejico":"M\u00e9xico",
+    "usa":"Estados Unidos",
+    "eeuu":"Estados Unidos",
+    "estados unidos de america":"Estados Unidos"
+  },
+  estado:{
+    "nuevo leon":"Nuevo Le\u00f3n",
+    "nl":"Nuevo Le\u00f3n",
+    "cdmx":"Ciudad de M\u00e9xico",
+    "df":"Ciudad de M\u00e9xico"
+  },
+  ciudad:{
+    "mty":"Monterrey",
+    "monterei":"Monterrey",
+    "monterrey nl":"Monterrey",
+    "garcia":"Garc\u00eda",
+    "san nicolas":"San Nicol\u00e1s",
+    "san nicolas de los garza":"San Nicol\u00e1s"
+  }
+};
+
+function limpiarNombrePais(valor){
+  return String(valor||"").replace(/[\u{1F1E6}-\u{1F1FF}]/gu,"").trim();
+}
+
+function normalizarUbicacionTexto(valor){
+  return limpiarNombrePais(valor)
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g,"")
+    .replace(/[^a-zA-Z0-9\s]/g," ")
+    .toLowerCase()
+    .replace(/\s+/g," ")
+    .trim();
+}
+
+function distanciaTexto(a,b){
+  a=normalizarUbicacionTexto(a);
+  b=normalizarUbicacionTexto(b);
+  if(!a||!b)return 99;
+
+  const matriz=Array.from({length:a.length+1},()=>Array(b.length+1).fill(0));
+  for(let i=0;i<=a.length;i++)matriz[i][0]=i;
+  for(let j=0;j<=b.length;j++)matriz[0][j]=j;
+
+  for(let i=1;i<=a.length;i++){
+    for(let j=1;j<=b.length;j++){
+      const costo=a[i-1]===b[j-1]?0:1;
+      matriz[i][j]=Math.min(
+        matriz[i-1][j]+1,
+        matriz[i][j-1]+1,
+        matriz[i-1][j-1]+costo
+      );
+    }
+  }
+  return matriz[a.length][b.length];
+}
+
+function llenarSelect(select,opciones,placeholder,textoManual){
+  select.innerHTML="";
+  const inicial=document.createElement("option");
+  inicial.value="";
+  inicial.textContent=placeholder;
+  select.appendChild(inicial);
+
+  opciones.forEach(opcion=>{
+    const opt=document.createElement("option");
+    opt.value=opcion;
+    opt.textContent=limpiarNombrePais(opcion);
+    select.appendChild(opt);
+  });
+
+  const manual=document.createElement("option");
+  manual.value="__manual__";
+  manual.textContent=textoManual;
+  select.appendChild(manual);
+}
+
+function claveUbicacionObjeto(obj,valor){
+  if(!obj||!valor)return "";
+  const buscada=normalizarUbicacionTexto(valor);
+  return Object.keys(obj).find(clave=>normalizarUbicacionTexto(clave)===buscada||normalizarUbicacionTexto(limpiarNombrePais(clave))===buscada)||"";
+}
+
+function opcionesUbicacionPublicidad(tipo){
+  const paisValor=valorUbicacionPublicidad("pais");
+  const estadoValor=valorUbicacionPublicidad("estado");
+
+  if(tipo==="pais")return typeof TODOS_LOS_PAISES!=="undefined"?TODOS_LOS_PAISES:[];
+
+  if(tipo==="estado"){
+    const paisClave=typeof ESTADOS!=="undefined"?claveUbicacionObjeto(ESTADOS,paisValor):"";
+    return paisClave?ESTADOS[paisClave]:[];
+  }
+
+  if(tipo==="ciudad"){
+    const paisClave=typeof CIUDADES!=="undefined"?claveUbicacionObjeto(CIUDADES,paisValor):"";
+    const estadosPais=paisClave?CIUDADES[paisClave]:null;
+    const estadoClave=claveUbicacionObjeto(estadosPais,estadoValor);
+    return estadoClave?estadosPais[estadoClave]:[];
+  }
+
+  return [];
+}
+
+function opcionesUbicacionFallback(tipo){
+  if(tipo==="pais")return typeof TODOS_LOS_PAISES!=="undefined"?TODOS_LOS_PAISES:[];
+
+  if(tipo==="estado"&&typeof ESTADOS!=="undefined"){
+    return Array.from(new Set(Object.values(ESTADOS).flat()));
+  }
+
+  if(tipo==="ciudad"&&typeof CIUDADES!=="undefined"){
+    const ciudades=[];
+    Object.values(CIUDADES).forEach(estadosPais=>{
+      if(!estadosPais)return;
+      Object.values(estadosPais).forEach(lista=>{
+        if(Array.isArray(lista))ciudades.push(...lista);
+      });
+    });
+    return Array.from(new Set(ciudades));
+  }
+
+  return [];
+}
+
+function buscarCoincidenciaUbicacion(tipo,valor){
+  const key=normalizarUbicacionTexto(valor);
+  if(!key)return "";
+
+  if(aliasUbicacionPublicidad[tipo]?.[key])return aliasUbicacionPublicidad[tipo][key];
+
+  const opciones=opcionesUbicacionPublicidad(tipo);
+  const exacta=opciones.find(opcion=>normalizarUbicacionTexto(opcion)===key);
+  if(exacta)return exacta;
+
+  const empieza=opciones.find(opcion=>normalizarUbicacionTexto(opcion).startsWith(key)&&key.length>=3);
+  if(empieza)return empieza;
+
+  let mejor="";
+  let mejorDistancia=99;
+  opciones.forEach(opcion=>{
+    const distancia=distanciaTexto(valor,opcion);
+    if(distancia<mejorDistancia){
+      mejor=opcion;
+      mejorDistancia=distancia;
+    }
+  });
+
+  return mejorDistancia<=2?mejor:"";
+}
+function buscarCoincidenciaExactaUbicacion(tipo,valor){
+  const key=normalizarUbicacionTexto(valor);
+  if(!key)return "";
+  if(aliasUbicacionPublicidad[tipo]?.[key])return aliasUbicacionPublicidad[tipo][key];
+  return opcionesUbicacionPublicidad(tipo).find(opcion=>normalizarUbicacionTexto(opcion)===key)||"";
+}
+
+function aplicarCorreccionExactaUbicacion(tipo){
+  const select=document.getElementById(tipo+"Publicidad");
+  const input=document.getElementById(tipo+"PublicidadManual");
+  if(select?.value!=="__manual__"||!input?.value.trim())return;
+  const coincidencia=buscarCoincidenciaExactaUbicacion(tipo,input.value);
+  if(coincidencia)input.value=coincidencia;
+}
+
+
+function actualizarSugerenciasUbicacion(tipo){
+  const input=document.getElementById(tipo+"PublicidadManual");
+  const datalist=document.getElementById("sugerencias"+tipo.charAt(0).toUpperCase()+tipo.slice(1)+"PublicidadManual");
+  if(!input||!datalist)return;
+
+  const valor=normalizarUbicacionTexto(input.value);
+  const base=opcionesUbicacionPublicidad(tipo);
+  const opciones=base
+    .filter(opcion=>{
+      const key=normalizarUbicacionTexto(opcion);
+      return valor.length<2||key.includes(valor)||distanciaTexto(valor,key)<=2;
+    })
+    .slice(0,8);
+
+  datalist.innerHTML="";
+  opciones.forEach(opcion=>{
+    const opt=document.createElement("option");
+    opt.value=opcion;
+    datalist.appendChild(opt);
+  });
+}
+
+function corregirManualUbicacion(tipo){
+  const input=document.getElementById(tipo+"PublicidadManual");
+  if(!input||input.classList.contains("oculto"))return;
+
+  const coincidencia=buscarCoincidenciaUbicacion(tipo,input.value);
+  if(coincidencia)input.value=coincidencia;
+}
+
+function valorUbicacionPublicidad(tipo){
+  const select=document.getElementById(tipo+"Publicidad");
+  const manual=document.getElementById(tipo+"PublicidadManual");
+  const valorManual=manual?.value.trim()||"";
+
+  if(select?.value==="__manual__"&&valorManual){
+    return valorManual;
+  }
+
+  if(select?.value==="__manual__"){
+    return "";
+  }
+
+  return select?.value||"";
+}
+
+function limpiarManualUbicacion(tipo){
+  const manual=document.getElementById(tipo+"PublicidadManual");
+  const datalist=document.getElementById("sugerencias"+tipo.charAt(0).toUpperCase()+tipo.slice(1)+"PublicidadManual");
+  if(manual){
+    manual.value="";
+    manual.classList.add("oculto");
+  }
+  if(datalist)datalist.innerHTML="";
+  restaurarTextoManualUbicacion(tipo);
+}
+
+function restaurarTextoManualUbicacion(tipo){
+  const select=document.getElementById(tipo+"Publicidad");
+  const option=[...select?.options||[]].find(opt=>opt.value==="__manual__");
+  if(option?.dataset.textoOriginal)option.textContent=option.dataset.textoOriginal;
+}
+
+function resetearEstadoPublicidad(){
+  const estado=document.getElementById("estadoPublicidad");
+  const ciudad=document.getElementById("ciudadPublicidad");
+  limpiarManualUbicacion("estado");
+  limpiarManualUbicacion("ciudad");
+  llenarSelect(estado,[],"Selecciona un Estado","No aparece mi Estado");
+  estado.value="";
+  estado.disabled=true;
+  llenarSelect(ciudad,[],"Selecciona una Ciudad","No aparece mi Ciudad");
+  ciudad.value="";
+  ciudad.disabled=true;
+}
+
+function resetearCiudadPublicidad(){
+  const ciudad=document.getElementById("ciudadPublicidad");
+  limpiarManualUbicacion("ciudad");
+  llenarSelect(ciudad,[],"Selecciona una Ciudad","No aparece mi Ciudad");
+  ciudad.value="";
+  ciudad.disabled=true;
+}
+
+function ubicacionPublicidadActual(){
+  const pais=valorUbicacionPublicidad("pais");
+  const estado=valorUbicacionPublicidad("estado");
+  const ciudad=valorUbicacionPublicidad("ciudad");
+
+  return {
+    pais,
+    estado,
+    ciudad,
+    paisKey:normalizarUbicacionTexto(pais),
+    estadoKey:normalizarUbicacionTexto(estado),
+    ciudadKey:normalizarUbicacionTexto(ciudad),
+    pendienteRevision:["pais","estado","ciudad"].some(tipo=>{
+      const select=document.getElementById(tipo+"Publicidad");
+      const manual=document.getElementById(tipo+"PublicidadManual");
+      return select?.value==="__manual__"&&manual?.value.trim()&&!buscarCoincidenciaUbicacion(tipo,manual.value);
+    })
+  };
+}
+
+function alternarCampoManualPublicidad(tipo){
+  const select=document.getElementById(tipo+"Publicidad");
+  const manual=document.getElementById(tipo+"PublicidadManual");
+
+  if(!select||!manual)return;
+
+  if(manual.previousElementSibling!==select){
+    select.insertAdjacentElement("afterend",manual);
+  }
+
+  const activo=select.value==="__manual__";
+  manual.classList.toggle("oculto",!activo);
+  if(!activo)manual.value="";
+  if(!activo)restaurarTextoManualUbicacion(tipo);
+  actualizarSugerenciasUbicacion(tipo);
+}
+
+function confirmarUbicacionManual(tipo){
+  const select=document.getElementById(tipo+"Publicidad");
+  const manual=document.getElementById(tipo+"PublicidadManual");
+  const valor=manual?.value.trim()||"";
+
+  if(!select||!manual||!valor)return;
+
+  prepararSelectManualUbicacion(tipo);
+  manual.classList.add("oculto");
+
+  if(tipo==="pais"){
+    actualizarEstadosPublicidad();
+    return;
+  }
+
+  if(tipo==="estado"){
+    actualizarCiudadesPublicidad();
+    return;
+  }
+
+  actualizarVistaPublicidad();
+}
+
+function prepararSiguienteManualUbicacion(tipo){
+  const valor=prepararSelectManualUbicacion(tipo);
+
+  if(tipo==="pais"){
+    resetearEstadoPublicidad();
+    const estado=document.getElementById("estadoPublicidad");
+    const lista=opcionesUbicacionPublicidad("estado");
+    llenarSelect(estado,lista,"Selecciona un Estado","No aparece mi Estado");
+    estado.disabled=!valor;
+  }
+
+  if(tipo==="estado"){
+    const ciudad=document.getElementById("ciudadPublicidad");
+    resetearCiudadPublicidad();
+    const lista=opcionesUbicacionPublicidad("ciudad");
+    llenarSelect(ciudad,lista,"Selecciona una Ciudad","No aparece mi Ciudad");
+    ciudad.disabled=!valor;
+  }
+
+  if(tipo==="ciudad"){
+    prepararSelectManualUbicacion("ciudad");
+  }
+}
+
+function sincronizarUbicacionManual(){
+  return;
+}
+
+function actualizarManualUbicacion(tipo){
+  actualizarSugerenciasUbicacion(tipo);
+  prepararSiguienteManualUbicacion(tipo);
+  actualizarVistaPublicidad();
+}
+
+function actualizarTextoManualEnSelector(tipo){
+  const select=document.getElementById(tipo+"Publicidad");
+  const manual=document.getElementById(tipo+"PublicidadManual");
+  const option=[...select?.options||[]].find(opt=>opt.value==="__manual__");
+
+  if(!select||!manual||!option)return;
+  if(!option.dataset.textoOriginal)option.dataset.textoOriginal=option.textContent;
+
+  const valor=manual.value.trim();
+  option.textContent=valor||option.dataset.textoOriginal;
+}
+
+function prepararSelectManualUbicacion(tipo){
+  const select=document.getElementById(tipo+"Publicidad");
+  const manual=document.getElementById(tipo+"PublicidadManual");
+  if(!select||!manual)return "";
+
+  const valor=manual.value.trim();
+  select.value="__manual__";
+  actualizarTextoManualEnSelector(tipo);
+  return valor;
+}
+
+function todosSlotsPublicidad(){
+  return Array.from(document.querySelectorAll(".slot-hotspot")).map(slot=>slot.dataset.slotId).filter(Boolean);
+}
+
+function pantallaDeSlotPublicidad(slotId){
+  const valor=String(slotId||"");
+  if(valor.startsWith("home_"))return "home";
+  if(valor.startsWith("resultados_"))return "resultados";
+  if(valor.startsWith("perfil_"))return "perfil";
+  return "";
+}
+
+function enfocarPantallaPublicidad(slotId){
+  if(!window.matchMedia("(max-width:700px)").matches)return;
+  const pantalla=pantallaDeSlotPublicidad(slotId);
+  if(!pantalla)return;
+
+  const contenedor=document.getElementById("mockupPremiumPublicidadMovil");
+  const stage=contenedor?.querySelector(".mockup-premium-movil-stage");
+  if(contenedor&&stage){
+    const centros={home:.183,resultados:.504,perfil:.820};
+    const centroPantalla=stage.offsetLeft+(stage.offsetWidth*(centros[pantalla]||1/2));
+    const maxScroll=contenedor.scrollWidth-contenedor.clientWidth;
+    const scrollObjetivo=Math.max(0,Math.min(maxScroll,centroPantalla-(contenedor.clientWidth/2)));
+    contenedor.scrollTo({left:scrollObjetivo,behavior:"smooth"});
+    return;
+  }
+
+  document.querySelector(`[data-pantalla-publicidad="${pantalla}"]`)?.scrollIntoView({
+    behavior:"smooth",
+    block:"nearest",
+    inline:"center"
+  });
+}
+
+function inicializarUbicacionPublicidad(){
+  const pais=document.getElementById("paisPublicidad");
+  const estado=document.getElementById("estadoPublicidad");
+  const ciudad=document.getElementById("ciudadPublicidad");
+
+  if(!pais||!estado||!ciudad)return;
+
+  const paises=typeof TODOS_LOS_PAISES!=="undefined"?TODOS_LOS_PAISES:[];
+  llenarSelect(pais,paises,"Selecciona un pa\u00eds","No aparece mi pa\u00eds");
+  resetearEstadoPublicidad();
+}
+
+function ocultarSelectorEspacioPublicidad(){
+  const paso2=document.getElementById("paso2");
+  const selector=document.getElementById("selectorPublicidad");
+  const selectorBox=document.getElementById("selectorEspacioPublicidadBox");
+  const formatoBox=document.getElementById("formatoPeriodoPublicidadBox");
+  const precioBox=document.getElementById("precioEstimadoPublicidadBox");
+
+  if(paso2)paso2.classList.add("oculto");
+  selectorBox?.classList.add("oculto");
+  formatoBox?.classList.add("oculto");
+  precioBox?.classList.add("precio-estimado-oculto");
+
+  if(selector){
+    selector.value="";
+  }
+
+  actualizarPrecioAnuncio();
+}
+
+function actualizarEstadosPublicidad(){
+  const estado=document.getElementById("estadoPublicidad");
+  const pais=document.getElementById("paisPublicidad");
+
+  ocultarSelectorEspacioPublicidad();
+  if(pais?.value==="__manual__"){
+    alternarCampoManualPublicidad("pais");
+    prepararSelectManualUbicacion("pais");
+  }else{
+    limpiarManualUbicacion("pais");
+  }
+
+  // Cada cambio de país empieza limpio: no conserva Estado ni Ciudad anteriores.
+  resetearEstadoPublicidad();
+
+  const paisValor=valorUbicacionPublicidad("pais");
+  const lista=opcionesUbicacionPublicidad("estado");
+  llenarSelect(estado,lista,"Selecciona un Estado","No aparece mi Estado");
+  estado.disabled=!paisValor;
+
+  actualizarVistaPublicidad();
+}
+
+function manejarTeclaManualUbicacion(event,tipo){
+  if(event.key!=="Enter")return;
+  event.preventDefault();
+  confirmarUbicacionManual(tipo);
+}
+
+function actualizarCiudadesPublicidad(){
+  const ciudad=document.getElementById("ciudadPublicidad");
+  const estadoSelect=document.getElementById("estadoPublicidad");
+
+  ocultarSelectorEspacioPublicidad();
+
+  if(estadoSelect?.value==="__manual__"){
+    alternarCampoManualPublicidad("estado");
+    prepararSelectManualUbicacion("estado");
+  }else{
+    limpiarManualUbicacion("estado");
+  }
+
+  // Cada cambio de Estado empieza con Ciudad limpia.
+  resetearCiudadPublicidad();
+
+  const estadoValor=valorUbicacionPublicidad("estado");
+  const lista=opcionesUbicacionPublicidad("ciudad");
+  llenarSelect(ciudad,lista,"Selecciona una Ciudad","No aparece mi Ciudad");
+  ciudad.disabled=!estadoValor;
+
+  actualizarVistaPublicidad();
+}
+
+function slotsDisponiblesActuales(ciudad){
+  // Temporal hasta conectar Firestore: si es ciudad nueva, todos los espacios aparecen disponibles.
+  if(disponibilidadPublicidadDemo[ciudad]){
+    return Array.from(new Set([...disponibilidadPublicidadDemo[ciudad],"resultados_centro"]));
+  }
+  return todosSlotsPublicidad();
+}
+
+function actualizarOpcionesSelectorPublicidad(disponibles){
+  const selector=document.getElementById("selectorPublicidad");
+  if(!selector)return "";
+
+  const seleccionActual=selector.value;
+  const disponiblesSet=new Set(disponibles||[]);
+  const slotsDisponibles=todosSlotsPublicidad().filter(slotId=>disponiblesSet.has(slotId));
+
+  selector.innerHTML="";
+
+  const inicial=document.createElement("option");
+  inicial.value="";
+
+  if(slotsDisponibles.length===0){
+    inicial.textContent="No hay espacios disponibles por ahora";
+    inicial.disabled=true;
+    inicial.selected=true;
+    selector.appendChild(inicial);
+    selector.value="";
+    return "";
+  }
+
+  inicial.textContent="Presiona aquí para seleccionar publicidad disponible";
+  selector.appendChild(inicial);
+
+  slotsDisponibles.forEach(slotId=>{
+    const option=document.createElement("option");
+    option.value=slotId;
+    option.textContent=nombresSlotsPublicidad[slotId]||slotId;
+    selector.appendChild(option);
+  });
+
+  if(disponiblesSet.has(seleccionActual)){
+    selector.value=seleccionActual;
+    return seleccionActual;
+  }
+
+  selector.value="";
+  return "";
+}
+
+function textoDisponibilidadGeneralPublicidad(cantidad){
+  if(cantidad === 1)return "Hay 1 espacio disponible";
+  if(cantidad > 1)return "Hay " + cantidad + " espacios disponibles";
+  return "No hay disponibilidad por ahora";
+}
+
+function actualizarDisponibilidadGeneralPublicidad(disponibilidadLista,disponibles){
+  const contenedor=document.getElementById("disponibilidadGeneralPublicidad");
+  if(!contenedor)return;
+
+  contenedor.classList.toggle("oculto",!disponibilidadLista);
+
+  if(!disponibilidadLista){
+    contenedor.textContent="";
+    return;
+  }
+
+  contenedor.textContent=textoDisponibilidadGeneralPublicidad(disponibles.length);
+}
+
+function actualizarSlotsMovilPublicidad(disponibilidadLista,disponibles){
+  const contenedor=document.getElementById("slotsMovilPublicidad");
+  const selector=document.getElementById("selectorPublicidad");
+  const ubicacion=ubicacionPublicidadActual();
+  const categoria=valorCategoriaPublicidad();
+  const categoriaTexto=categoria==="general"?"todas las categor\u00edas":categoria;
+
+  if(!contenedor)return;
+
+  if(!disponibilidadLista){
+    contenedor.innerHTML='<h3>Espacios publicitarios</h3><div class="slots-movil-grid"><div class="slot-movil-btn ocupado">Elige categoría, país, estado y ciudad para ver espacios disponibles.</div></div>';
+    return;
+  }
+
+  const slots=todosSlotsPublicidad();
+  const titulo=categoria==="general"?`Espacios en ${ubicacion.ciudad}`:`Espacios de ${categoriaTexto} en ${ubicacion.ciudad}`;
+  const ciudadConHistorial=Boolean(disponibilidadPublicidadDemo[ubicacion.ciudad]);
+ const slotSeleccionado=selector?.value || "";
+
+  const aviso=slotSeleccionado
+? `Espacio seleccionado:<br><strong>${nombresSlotsPublicidad[slotSeleccionado] || slotSeleccionado}</strong>`
+: disponibles.length === 0
+  ? "No hay disponibilidad por ahora en este espacio."
+  : ciudadConHistorial
+  ? `Estos espacios corresponden a ${categoriaTexto} en ${ubicacion.ciudad}. Si el espacio que quieres está ocupado, puedes revisar otra zona cercana.`
+  : `Ciudad nueva o sin historial exacto para ${categoriaTexto}. Puedes elegir un espacio disponible y administración revisará la ubicación.`;
+
+  contenedor.innerHTML=`
+    <h3>${titulo}</h3>
+    <div class="slot-movil-aviso">${aviso}</div>
+    <div class="slots-movil-grid">
+      ${slots.map(slotId=>{
+        const disponible=disponibles.includes(slotId);
+        const seleccionado=selector?.value===slotId;
+        const estado=seleccionado?"Seleccionado":(disponible?"Disponible":"Ocupado");
+        return `
+          <button type="button" class="slot-movil-btn ${disponible?"disponible":"ocupado"} ${seleccionado?"seleccionado":""}" data-slot-movil="${slotId}" ${disponible?"":"disabled"}>
+            <span>${nombresSlotsPublicidad[slotId]||slotId}<br>${estado}</span>
+          </button>
+        `;
+      }).join("")}
+    </div>
+  `;
+
+  contenedor.querySelectorAll("[data-slot-movil]").forEach(boton=>{
+    boton.addEventListener("click",()=>{
+      feedbackInteraccion(boton);
+      seleccionarSlotPublicidad(boton.dataset.slotMovil||"");
+      if(window.matchMedia("(max-width:700px)").matches){
+        document.querySelector(".mockup-premium-real img")?.scrollIntoView({behavior:"smooth",block:"center"});
+      }
+    });
+  });
+}
+
+function actualizarVistaPublicidad(){
+  const selector=document.getElementById("selectorPublicidad");
+  const selectorBox=document.getElementById("selectorEspacioPublicidadBox");
+  const formatoBox=document.getElementById("formatoPeriodoPublicidadBox");
+  const mockup=document.querySelector(".mockup-premium-real");
+  const slots=document.querySelectorAll(".slot-hotspot, .slot-hotspot-movil-premium");
+
+  sincronizarUbicacionManual();
+  alternarCampoManualPublicidad("ciudad");
+  aplicarCorreccionExactaUbicacion("ciudad");
+  const ubicacionActual=ubicacionPublicidadActual();
+  window.ubicacionPublicidadPendiente=ubicacionActual;
+
+  const ubicacionLista=Boolean(ubicacionActual.pais&&ubicacionActual.estado&&ubicacionActual.ciudad);
+  const categoriaLista=Boolean(valorCategoriaPublicidad());
+  const disponibilidadLista=ubicacionLista&&categoriaLista;
+  const disponibles=disponibilidadLista?slotsDisponiblesActuales(ubicacionActual.ciudad):[];
+  configPrecioPublicidadEfectiva();
+  actualizarOpcionesSelectorPublicidad(disponibles);
+
+  if(mockup)mockup.classList.toggle("ubicacion-lista",disponibilidadLista);
+  selectorBox?.classList.toggle("oculto",!disponibilidadLista);
+  formatoBox?.classList.toggle("oculto",!selector?.value);
+  actualizarDisponibilidadGeneralPublicidad(disponibilidadLista,disponibles);
+
+  if(selector){
+    selector.disabled=false;
+    if(!disponibilidadLista){
+      selector.value="";
+      selector.options[0].textContent="Primero selecciona categoría, país, estado y ciudad";
+    }else if(disponibles.length === 0){
+      selector.value="";
+      selector.options[0].textContent="No hay disponibilidad por ahora";
+    }else{
+      selector.options[0].textContent="Presiona aquí para seleccionar publicidad disponible";
+    }
+  }
+
+  formatoBox?.classList.toggle("oculto",!selector?.value || !disponibilidadLista);
+
+  slots.forEach(slot=>{
+    const slotId=slot.dataset.slotId||"";
+    const disponible=disponibles.includes(slotId);
+    const seleccionado=selector?.value===slotId;
+    slot.classList.toggle("disponible",disponibilidadLista&&disponible);
+    slot.classList.toggle("no-disponible",disponibilidadLista&&!disponible);
+    slot.classList.toggle("seleccionado",seleccionado);
+    slot.dataset.estadoLabel=disponibilidadLista
+      ? (disponible?`${seleccionado?"Seleccionado":"Disponible"}`:"Ocupado")
+      : "";
+    if(slot.classList.contains("slot-hotspot")||slot.classList.contains("slot-hotspot-movil-premium")){
+      slot.innerHTML=disponibilidadLista?contenidoHotspotPublicidad(slotId,disponible):"";
+    }
+  });
+
+  actualizarSlotsMovilPublicidad(disponibilidadLista,disponibles);
+  actualizarPrecioAnuncio();
+}
+
+function seleccionarSlotPublicidad(slotId){
+  const selector=document.getElementById("selectorPublicidad");
+  const ubicacionLista=Boolean(valorUbicacionPublicidad("pais")&&valorUbicacionPublicidad("estado")&&valorUbicacionPublicidad("ciudad"));
+  const categoriaLista=Boolean(valorCategoriaPublicidad());
+  const disponibles=slotsDisponiblesActuales(valorUbicacionPublicidad("ciudad"));
+
+  if(!selector||selector.disabled)return;
+  if(!slotId){
+    actualizarVistaPublicidad();
+    return;
+  }
+
+  if(!categoriaLista||!ubicacionLista){
+    selector.value="";
+    alert("Primero selecciona categoría, país, estado y ciudad.");
+    actualizarVistaPublicidad();
+    return;
+  }
+
+  if(!disponibles.includes(slotId)){
+    selector.value="";
+    if(typeof mostrarModalCariHub==="function"){
+      mostrarModalCariHub({
+        tipo:"advertencia",
+        titulo:"Sin disponibilidad",
+        mensaje:"No hay disponibilidad por ahora en este espacio.",
+        textoBoton:"Entendido"
+      });
+    }else{
+      alert("No hay disponibilidad por ahora en este espacio.");
+    }
+    actualizarVistaPublicidad();
+    return;
+  }
+
+  selector.value=slotId;
+  const slot=document.querySelector(`[data-slot-id="${slotId}"]`);
+  feedbackInteraccion(slot||selector);
+  actualizarVistaPublicidad();
+  actualizarPrecioAnuncio();
+  enfocarPantallaPublicidad(slotId);
+}
+
+function actualizarPrecioAnuncio(){
+  const selector=document.getElementById("selectorPublicidad");
+  const configEfectiva=configPrecioPublicidadEfectiva();
+  const slot=configEfectiva.slots?.[selector?.value||""];
+  const precioBox=document.getElementById("precioEstimadoPublicidadBox");
+  const titulo=document.getElementById("precioAnuncioTitulo");
+  const monto=document.getElementById("precioAnuncioMonto");
+  const detalle=document.getElementById("precioAnuncioDetalle");
+  const input=document.getElementById("precioAnuncio");
+  const inputTipo=document.getElementById("precioAnuncioTipo");
+  const inputPeriodo=document.getElementById("precioAnuncioPeriodo");
+  const {tipo,periodo}=opcionesPrecioPublicidadActual();
+  const listoParaPrecio=camposPrecioPublicidadCompletos(selector?.value||"",tipo,periodo);
+
+  if(!titulo||!monto||!detalle||!input)return;
+  precioBox?.classList.toggle("precio-estimado-oculto",!listoParaPrecio);
+
+  if(!slot||!listoParaPrecio){
+    titulo.textContent="Precio según espacio seleccionado";
+    monto.textContent="Precio pendiente";
+    detalle.textContent="Selecciona categoría, ubicación, banner, contenido y periodo para calcular el precio.";
+    input.value="";
+    if(inputTipo)inputTipo.value=tipo;
+    if(inputPeriodo)inputPeriodo.value=periodo;
+    return;
+  }
+
+  const calculo=calcularPrecioPublicidad(selector?.value||"");
+  if(!calculo){
+    titulo.textContent=slot.nombre || "Precio según espacio seleccionado";
+    monto.textContent="Selecciona periodo y formato";
+    detalle.textContent="El precio se calcula con el periodo de renta y el formato del anuncio.";
+    input.value="";
+    if(inputTipo)inputTipo.value=tipo;
+    if(inputPeriodo)inputPeriodo.value=periodo;
+    return;
+  }
+
+  const total=calculo.total;
+  const etiquetaPeriodo={semanal:"semanal",quincenal:"quincenal",mensual:"mensual recomendado"}[periodo]||"mensual recomendado";
+  const etiquetaTipo=tipo==="video"?"video":"imagen";
+
+  titulo.textContent=slot.nombre || "Precio según espacio seleccionado";
+  monto.textContent="$"+total.toLocaleString("es-MX")+" "+(calculo.moneda||"MXN")+" IVA incluido";
+  detalle.textContent="Precio "+etiquetaPeriodo+" para "+etiquetaTipo+" por 1 espacio. "+(tipo==="video"?"Demo: video cuesta el doble que imagen.":"Demo: precio base de imagen.");
+  input.value=String(total);
+  if(inputTipo)inputTipo.value=tipo;
+  if(inputPeriodo)inputPeriodo.value=periodo;
+}
+
+function feedbackInteraccion(elemento){
+  if(navigator.vibrate){
+    navigator.vibrate(18);
+  }
+
+  if(!elemento||!elemento.classList)return;
+
+  elemento.classList.remove("feedback-pulso");
+  void elemento.offsetWidth;
+  elemento.classList.add("feedback-pulso");
+  setTimeout(()=>elemento.classList.remove("feedback-pulso"),420);
+}
+
+function alternarCamposFacturaCfdi(){
+  const factura=document.getElementById("necesitaFacturaCfdi");
+  const campos=document.getElementById("camposFacturaCfdi");
+  campos?.classList.toggle("oculto",!factura?.checked);
+}
+
+function actualizarPreviewBannerPrincipal(input){
+  const preview=document.getElementById("previewBannerPrincipal");
+  const archivo=input.files?.[0];
+
+  if(!preview||!archivo)return;
+
+  const url=URL.createObjectURL(archivo);
+  preview.innerHTML="";
+
+  if(archivo.type.startsWith("video/")){
+    const video=document.createElement("video");
+    video.src=url;
+    video.controls=true;
+    video.muted=true;
+    video.playsInline=true;
+    video.onloadeddata=()=>URL.revokeObjectURL(url);
+    preview.appendChild(video);
+    return;
+  }
+
+  const imagen=document.createElement("img");
+  imagen.src=url;
+  imagen.alt="Vista previa del banner principal";
+  imagen.onload=()=>URL.revokeObjectURL(url);
+  preview.appendChild(imagen);
+}
+
+function mensajeContactoBase(){
+  const nombre=document.getElementById("nombreComercialVisible")?.value.trim()||"Nombre público";
+  return "Hola, vi tu anuncio en Cariñosas: "+nombre+".";
+}
+
+function actualizarMensajeContactoPublicidad(){
+  const textarea=document.getElementById("mensajeContactoPublicidad");
+  const preview=document.getElementById("previewMensajeContactoPublicidad");
+
+  if(!textarea||!preview)return;
+
+  if(textarea.dataset.auto==="1"){
+    textarea.value=mensajeContactoBase();
+  }
+
+  preview.textContent=textarea.value.trim()||mensajeContactoBase();
+}
+
+function valorCategoriaPublicidad(){
+  const select=document.getElementById("categoriaPublicidad");
+  return select?.value.trim()||"";
+}
+
+function cargarCategoriasPublicidadDesdeCatalogo(){
+  const select=document.getElementById("categoriaPublicidad");
+  if(!select||!window.CariHubCatalogos?.categorias)return;
+
+  const valorActual=select.value;
+  select.innerHTML='<option value="">Selecciona una categoría</option>';
+  window.CariHubCatalogos.categorias().forEach(categoria=>{
+    const option=document.createElement("option");
+    option.value=categoria.nombre;
+    option.textContent=categoria.label;
+    select.appendChild(option);
+  });
+
+  const idActual=window.CariHubCatalogos.idCategoria(valorActual);
+  const opcionCompatible=Array.from(select.options).find(option=>window.CariHubCatalogos.idCategoria(option.value)===idActual);
+  if(opcionCompatible)select.value=opcionCompatible.value;
+}
+
+function actualizarCategoriaPublicidad(conFeedback=false){
+  const select=document.getElementById("categoriaPublicidad");
+  const manual=document.getElementById("categoriaPublicidadManual");
+  if(!select)return;
+
+  if(manual){
+    const manualActiva=select.value==="__manual__";
+    manual.classList.toggle("oculto",!manualActiva);
+    if(!manualActiva)manual.value="";
+  }
+  if(conFeedback)feedbackInteraccion(select);
+  actualizarVistaPublicidad();
+}
+
+function actualizarSwitchesPublicidad(){
+  const relaciones={
+    mostrarWhatsApp:"whatsapp",
+    mostrarTelegram:"telegram",
+    mostrarInstagram:"instagram",
+    mostrarTwitter:"twitter",
+    mostrarOnlyFans:"onlyfans",
+    mostrarSitioWeb:"sitioWeb",
+    mostrarCorreo:"correo",
+    mostrarUbicacion:"ubicacion",
+    mostrarLlamadas:"llamadas"
+  };
+
+  Object.entries(relaciones).forEach(([switchId,campo])=>{
+    const activo=Boolean(document.getElementById(switchId)?.checked);
+    document.querySelectorAll(`[data-contact-field="${campo}"]`).forEach(input=>{
+      input.closest(".input-group")?.classList.toggle("oculto",!activo);
+    });
+  });
+
+  const mensajesActivos=Boolean(document.getElementById("mostrarMensajeInterno")?.checked);
+  const texto=document.getElementById("estadoMensajeInternoTexto");
+  if(texto)texto.textContent=mensajesActivos?"Mensajes internos activados":"Mensajes internos apagados";
+}
+
+function agregarAccesoPreviewPantalla2(){
+  const esLocal=location.protocol==="file:"||location.hostname==="127.0.0.1"||location.hostname==="localhost";
+  if(!esLocal||document.getElementById("btnPreviewPaso2"))return;
+
+  const boton=document.createElement("button");
+  boton.type="button";
+  boton.id="btnPreviewPaso2";
+  boton.className="btn-preview-paso2";
+  boton.textContent="Ver pantalla 2";
+  boton.addEventListener("click",()=>{
+    const selector=document.getElementById("selectorPublicidad");
+    if(selector&&!selector.value)selector.value="resultados_centro";
+    mostrarPantallaPublicidad(3);
+    actualizarPrecioAnuncio();
+  });
+  document.body.appendChild(boton);
+}
+
+function cerrarSelectoresPremiumCarihub(excepto=null){
+  document.querySelectorAll(".select-premium-carihub.abierto").forEach(wrapper=>{
+    if(wrapper===excepto)return;
+    wrapper.classList.remove("abierto");
+    wrapper.querySelector(".select-premium-boton")?.setAttribute("aria-expanded","false");
+  });
+}
+
+function selectorPremiumCarihub(select){
+  if(!select||select.dataset.selectorPremiumCarihub==="1")return;
+
+  const wrapper=document.createElement("div");
+  wrapper.className="select-premium-carihub";
+
+  const boton=document.createElement("button");
+  boton.type="button";
+  boton.className="select-premium-boton";
+  boton.setAttribute("aria-haspopup","listbox");
+  boton.setAttribute("aria-expanded","false");
+
+  const texto=document.createElement("span");
+  boton.appendChild(texto);
+
+  const panel=document.createElement("div");
+  panel.className="select-premium-panel";
+  panel.setAttribute("role","listbox");
+
+  select.parentNode.insertBefore(wrapper,select);
+  wrapper.appendChild(select);
+  wrapper.appendChild(boton);
+  wrapper.appendChild(panel);
+  select.dataset.selectorPremiumCarihub="1";
+
+  function sincronizar(){
+    const opcionActiva=select.selectedOptions?.[0]||select.options[0];
+    texto.textContent=opcionActiva?.textContent||"Selecciona una opción";
+    boton.disabled=select.disabled;
+    panel.innerHTML="";
+
+    Array.from(select.options).forEach(option=>{
+      const item=document.createElement("button");
+      item.type="button";
+      item.className="select-premium-opcion";
+      item.textContent=option.textContent;
+      item.dataset.value=option.value;
+      item.setAttribute("role","option");
+      item.setAttribute("aria-selected",String(option.value===select.value));
+      item.classList.toggle("activa",option.value===select.value);
+      item.disabled=option.disabled;
+      item.addEventListener("click",()=>{
+        if(item.disabled)return;
+        select.value=option.value;
+        select.dispatchEvent(new Event("change",{bubbles:true}));
+        sincronizar();
+        cerrarSelectoresPremiumCarihub();
+      });
+      panel.appendChild(item);
+    });
+  }
+
+  boton.addEventListener("click",()=>{
+    if(select.disabled)return;
+    const abrira=!wrapper.classList.contains("abierto");
+    cerrarSelectoresPremiumCarihub(wrapper);
+    wrapper.classList.toggle("abierto",abrira);
+    boton.setAttribute("aria-expanded",String(abrira));
+    if(abrira)sincronizar();
+  });
+
+  select.addEventListener("change",sincronizar);
+
+  const observer=new MutationObserver(sincronizar);
+  observer.observe(select,{childList:true,subtree:true,attributes:true,attributeFilter:["disabled"]});
+
+  sincronizar();
+}
+
+function inicializarSelectoresPremiumCarihub(){
+  [
+    "categoriaPublicidad",
+    "paisPublicidad",
+    "estadoPublicidad",
+    "ciudadPublicidad",
+    "tipoContenidoPublicidadControl",
+    "periodoPublicidadControl"
+  ].forEach(id=>{
+    selectorPremiumCarihub(document.getElementById(id));
+  });
+}
+
+document.addEventListener("click",event=>{
+  if(event.target.closest(".select-premium-carihub"))return;
+  cerrarSelectoresPremiumCarihub();
+});
+
+document.addEventListener("keydown",event=>{
+  if(event.key==="Escape")cerrarSelectoresPremiumCarihub();
+});
+
+document.addEventListener("DOMContentLoaded",()=>{
+  inicializarUbicacionPublicidad();
+  cargarConfigPreciosPublicidad();
+
+  document.addEventListener("click",event=>{
+    const elemento=event.target.closest('button, select, input[type="checkbox"], input[type="radio"], .opcion-chip, .switch-publicidad, .slot-movil-btn, .slot-hotspot-movil-premium, .upload-box');
+    if(!elemento||elemento.disabled||elemento.classList.contains("feedback-pulso"))return;
+    feedbackInteraccion(elemento.closest(".opcion-chip")||elemento.closest(".switch-publicidad")||elemento.closest(".upload-box")||elemento);
+  },true);
+
+  document.getElementById("paisPublicidad")?.addEventListener("change",actualizarEstadosPublicidad);
+  document.getElementById("paisPublicidadManual")?.addEventListener("input",()=>actualizarManualUbicacion("pais"));
+  document.getElementById("paisPublicidadManual")?.addEventListener("keyup",()=>actualizarManualUbicacion("pais"));
+  document.getElementById("paisPublicidadManual")?.addEventListener("change",()=>actualizarManualUbicacion("pais"));
+  document.getElementById("paisPublicidadManual")?.addEventListener("keydown",event=>manejarTeclaManualUbicacion(event,"pais"));
+  document.getElementById("paisPublicidadManual")?.addEventListener("blur",()=>{corregirManualUbicacion("pais");confirmarUbicacionManual("pais");});
+  document.getElementById("estadoPublicidad")?.addEventListener("change",actualizarCiudadesPublicidad);
+  document.getElementById("estadoPublicidadManual")?.addEventListener("input",()=>actualizarManualUbicacion("estado"));
+  document.getElementById("estadoPublicidadManual")?.addEventListener("keyup",()=>actualizarManualUbicacion("estado"));
+  document.getElementById("estadoPublicidadManual")?.addEventListener("change",()=>actualizarManualUbicacion("estado"));
+  document.getElementById("estadoPublicidadManual")?.addEventListener("keydown",event=>manejarTeclaManualUbicacion(event,"estado"));
+  document.getElementById("estadoPublicidadManual")?.addEventListener("blur",()=>{corregirManualUbicacion("estado");confirmarUbicacionManual("estado");});
+ document.getElementById("ciudadPublicidad")?.addEventListener("change",()=>{
+  ocultarSelectorEspacioPublicidad();
+  alternarCampoManualPublicidad("ciudad");
+  actualizarVistaPublicidad();
+});
+  document.getElementById("ciudadPublicidadManual")?.addEventListener("input",()=>actualizarManualUbicacion("ciudad"));
+  document.getElementById("ciudadPublicidadManual")?.addEventListener("keyup",()=>actualizarManualUbicacion("ciudad"));
+  document.getElementById("ciudadPublicidadManual")?.addEventListener("change",()=>actualizarManualUbicacion("ciudad"));
+  document.getElementById("ciudadPublicidadManual")?.addEventListener("keydown",event=>manejarTeclaManualUbicacion(event,"ciudad"));
+  document.getElementById("ciudadPublicidadManual")?.addEventListener("blur",()=>{corregirManualUbicacion("ciudad");confirmarUbicacionManual("ciudad");});
+  const selectorPublicidad=document.getElementById("selectorPublicidad");
+  selectorPublicidad?.addEventListener("change",()=>{
+    seleccionarSlotPublicidad(selectorPublicidad.value);
+    actualizarPrecioAnuncio();
+  });
+  document.getElementById("necesitaFacturaCfdi")?.addEventListener("change",alternarCamposFacturaCfdi);
+  document.getElementById("imagenPublicidadPrincipal")?.addEventListener("change",event=>actualizarPreviewBannerPrincipal(event.currentTarget));
+ document.getElementById("categoriaPublicidad")?.addEventListener("change",()=>{
+  ocultarSelectorEspacioPublicidad();
+  actualizarCategoriaPublicidad(true);
+});
+  document.getElementById("nombreComercialVisible")?.addEventListener("input",actualizarMensajeContactoPublicidad);
+  document.getElementById("mensajeContactoPublicidad")?.addEventListener("input",event=>{
+    event.currentTarget.dataset.auto="0";
+    actualizarMensajeContactoPublicidad();
+  });
+  document.querySelectorAll('[name="periodoPublicidad"], [name="tipoContenidoPublicidad"]').forEach(input=>{
+  input.addEventListener("change",event=>{
+    feedbackInteraccion(event.currentTarget.closest(".opcion-chip")||event.currentTarget);
+    actualizarVistaPublicidad();
+    actualizarPrecioAnuncio();
+  });
+});
+  document.querySelectorAll(".switch-publicidad input").forEach(input=>{
+    input.addEventListener("change",event=>{
+      const label=event.currentTarget.closest(".switch-publicidad");
+      const estado=label?.querySelector("small");
+      if(estado)estado.textContent=event.currentTarget.checked?"On":"Off";
+      feedbackInteraccion(label);
+      actualizarSwitchesPublicidad();
+    });
+  });
+
+  document.querySelectorAll(".slot-hotspot").forEach(slot=>{
+    slot.addEventListener("click",()=>{
+      feedbackInteraccion(slot);
+      seleccionarSlotPublicidad(slot.dataset.slotId||"");
+    });
+  });
+
+  document.querySelectorAll(".slot-hotspot-movil-premium").forEach(slot=>{
+    slot.addEventListener("click",()=>{
+      feedbackInteraccion(slot);
+      seleccionarSlotPublicidad(slot.dataset.slotId||"");
+    });
+  });
+
+  document.querySelectorAll(".mockup-select,.upload-box input,.eye-btn,.btn,.btn-back").forEach(elemento=>{
+    elemento.addEventListener("click",()=>feedbackInteraccion(elemento.closest("label")||elemento));
+  });
+
+  agregarAccesoPreviewPantalla2();
+  cargarCategoriasPublicidadDesdeCatalogo();
+  inicializarSelectoresPremiumCarihub();
+  alternarCamposFacturaCfdi();
+  actualizarPrecioAnuncio();
+  actualizarCategoriaPublicidad();
+  actualizarSwitchesPublicidad();
+  actualizarMensajeContactoPublicidad();
+  actualizarVistaPublicidad();
+});
+</script>
+<script>
+function validarEnlaceSeguro(input){
+  const valor=input.value.trim();
+
+  if(!valor){
+    input.setCustomValidity("");
+    return;
+  }
+
+
+  try{
+    const url=new URL(valor);
+    if(url.protocol!=="https:"){
+      input.setCustomValidity("Usa un enlace seguro que comience con https://");
+      return;
+    }
+
+
+    input.setCustomValidity("");
+  }catch(error){
+    input.setCustomValidity("Escribe un enlace válido que comience con https://");
+  }
+}
+
+document.addEventListener("DOMContentLoaded",()=>{
+  document.querySelectorAll(".enlace-seguro").forEach(input=>{
+    input.addEventListener("input",()=>validarEnlaceSeguro(input));
+    input.addEventListener("blur",()=>validarEnlaceSeguro(input));
+  });
+});
+</script>
+<script>
+function dividirPantallaEspacio(slotId){
+  const partes = String(slotId || "").split("_");
+
+  return {
+    pantalla: partes[0] || "",
+    espacio: partes.slice(1).join("_") || ""
+  };
+}
+
+async function asegurarSesionAnonima(){
+  if(firebase.auth().currentUser){
+    return firebase.auth().currentUser;
+  }
+
+  const cred = await firebase.auth().signInAnonymously();
+  return cred.user;
+}
+
+function obtenerSolicitudTemporalId(){
+  const existente = localStorage.getItem("solicitudTemporalId");
+
+  if(existente){
+    return existente;
+  }
+
+  const nuevo = "tmp_" + Date.now() + "_" + Math.random().toString(36).slice(2,10);
+  localStorage.setItem("solicitudTemporalId", nuevo);
+  return nuevo;
+}
+
+async function prepararImagenPrincipalParaStorage(file){
+  const LIMITE_BYTES = 5 * 1024 * 1024;
+
+  if(!file.type.startsWith("image/")){
+    throw new Error("Por ahora solo se permiten imágenes para el anuncio principal.");
+  }
+
+  const imagen = await new Promise((resolve,reject)=>{
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => reject(new Error("No se pudo procesar la imagen principal."));
+    img.src = URL.createObjectURL(file);
+  });
+
+  const max = 1600;
+  let width = imagen.width;
+  let height = imagen.height;
+
+  if(width > height && width > max){
+    height = Math.round(height * max / width);
+    width = max;
+  }else if(height > max){
+    width = Math.round(width * max / height);
+    height = max;
+  }
+
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+
+  const ctx = canvas.getContext("2d");
+  ctx.drawImage(imagen,0,0,width,height);
+
+  const blob = await new Promise(resolve=>{
+    canvas.toBlob(resolve,"image/jpeg",0.75);
+  });
+
+  if(!blob){
+    throw new Error("No se pudo comprimir la imagen principal.");
+  }
+
+  if(blob.size > LIMITE_BYTES){
+    throw new Error("La imagen principal sigue superando 5MB después de comprimir. Sube una imagen más ligera.");
+  }
+
+  const nombreBase = file.name.replace(/\.[^.]+$/,"");
+  const nombreJpg = nombreBase + ".jpg";
+
+  return {
+    archivo: blob,
+    nombre: nombreJpg,
+    contentType: "image/jpeg",
+    size: blob.size
+  };
+}
+
+async function subirImagenPrincipalPublicidad(file, solicitudTemporalId){
+  await asegurarSesionAnonima();
+
+  const preparado = await prepararImagenPrincipalParaStorage(file);
+  const nombreSeguro = preparado.nombre.replace(/[^\w.\-]+/g, "_");
+  const ruta = `solicitudes_anuncios/${solicitudTemporalId}/publicidad/imagen_principal/${Date.now()}-${nombreSeguro}`;
+  const ref = storage.ref(ruta);
+
+  await ref.put(preparado.archivo, {
+    contentType: preparado.contentType
+  });
+
+  return {
+    nombre: preparado.nombre,
+    path: ruta,
+    tipo: preparado.contentType,
+    size: preparado.size
+  };
+}
+
+async function subirImagenesAdicionalesPublicidad(files, solicitudTemporalId){
+  await asegurarSesionAnonima();
+
+  const archivos = Array.from(files || []).slice(0,3);
+  const imagenes = [];
+
+  for(const [index,file] of archivos.entries()){
+    const preparado = await prepararImagenPrincipalParaStorage(file);
+    const nombreSeguro = preparado.nombre.replace(/[^\w.\-]+/g, "_");
+    const ruta = `solicitudes_anuncios/${solicitudTemporalId}/publicidad/fotos_adicionales/${index + 1}-${Date.now()}-${nombreSeguro}`;
+    const ref = storage.ref(ruta);
+
+    await ref.put(preparado.archivo, {
+      contentType: preparado.contentType
+    });
+
+    imagenes.push({
+      nombre: preparado.nombre,
+      path: ruta,
+      tipo: preparado.contentType,
+      size: preparado.size
+    });
+  }
+
+  return imagenes;
+}
+
+async function continuarPaso1Publicidad(event){
+  if(event) event.preventDefault();
+
+  if(!validarPaso1Publicidad()){
+    return;
+  }
+
+  const slotId = document.getElementById("selectorPublicidad")?.value || "";
+  const division = dividirPantallaEspacio(slotId);
+
+  const archivoPrincipal =
+    document.getElementById("imagenPublicidadPrincipal")?.files?.[0] || null;
+  const archivosAdicionales =
+    document.querySelector('input[name="imagenesPublicidadSecundarias"]')?.files || [];
+
+  if(!archivoPrincipal || !archivoPrincipal.type.startsWith("image/")){
+    alert("Por ahora solo se permiten imágenes para el anuncio principal.");
+    return;
+  }
+
+  let imagenPrincipal = null;
+  let imagenesAdicionales = [];
+  let solicitudTemporalId = "";
+
+  try{
+    solicitudTemporalId = obtenerSolicitudTemporalId();
+    imagenPrincipal = await subirImagenPrincipalPublicidad(archivoPrincipal, solicitudTemporalId);
+    imagenesAdicionales = await subirImagenesAdicionalesPublicidad(archivosAdicionales, solicitudTemporalId);
+  }catch(error){
+    alert("Error subiendo imagen principal: " + error.message);
+    return;
+  }
+
+  const datosPaso1 = {
+    solicitudTemporalId: solicitudTemporalId,
+    nombreNegocio: document.getElementById("nombreComercialVisible")?.value.trim() || "",
+    categoria: document.getElementById("categoriaPublicidad")?.value || "",
+    pais: valorUbicacionPublicidad("pais"),
+    estado: valorUbicacionPublicidad("estado"),
+    ciudad: valorUbicacionPublicidad("ciudad"),
+    pantalla: division.pantalla,
+    espacio: division.espacio,
+    slotId: slotId,
+    imagenPrincipalNombre: imagenPrincipal.nombre,
+    imagenPrincipalPath: imagenPrincipal.path,
+    imagenPrincipalTipo: imagenPrincipal.tipo,
+    imagenPrincipalSize: imagenPrincipal.size,
+    imagenesAdicionales: imagenesAdicionales,
+    periodoPublicidad: document.querySelector('[name="periodoPublicidad"]')?.value || "",
+    tipoContenidoPublicidad: document.querySelector('[name="tipoContenidoPublicidad"]')?.value || "",
+    precioAnuncio: document.getElementById("precioAnuncio")?.value || "",
+    mensajeContactoPublicidad: document.getElementById("mensajeContactoPublicidad")?.value.trim() || "",
+    contactoPublico: {
+      mensajeInternoActivo: Boolean(document.getElementById("mostrarMensajeInterno")?.checked),
+      whatsappActivo: Boolean(document.getElementById("mostrarWhatsApp")?.checked),
+      whatsapp: document.querySelector('[data-contact-field="whatsapp"]')?.value.trim() || "",
+      telegramActivo: Boolean(document.getElementById("mostrarTelegram")?.checked),
+      telegram: document.querySelector('[data-contact-field="telegram"]')?.value.trim() || "",
+      instagramActivo: Boolean(document.getElementById("mostrarInstagram")?.checked),
+      instagram: document.querySelector('[data-contact-field="instagram"]')?.value.trim() || "",
+      twitterActivo: Boolean(document.getElementById("mostrarTwitter")?.checked),
+      twitter: document.querySelector('[data-contact-field="twitter"]')?.value.trim() || "",
+      onlyFansActivo: Boolean(document.getElementById("mostrarOnlyFans")?.checked),
+      onlyFans: document.querySelector('[data-contact-field="onlyfans"]')?.value.trim() || "",
+      sitioWebActivo: Boolean(document.getElementById("mostrarSitioWeb")?.checked),
+      sitioWeb: document.querySelector('[data-contact-field="sitioWeb"]')?.value.trim() || "",
+      googleMapsActivo: Boolean(document.getElementById("mostrarUbicacion")?.checked),
+      googleMaps: document.querySelector('[data-contact-field="ubicacion"]')?.value.trim() || "",
+      correoActivo: Boolean(document.getElementById("mostrarCorreo")?.checked),
+      correo: document.querySelector('[data-contact-field="correo"]')?.value.trim() || ""
+    }
+  };
+
+  localStorage.setItem("solicitudPublicidadPaso1", JSON.stringify(datosPaso1));
+
+  window.location.href = "registro-banner2.html";
+}
+</script>
+</body>
+</html>
