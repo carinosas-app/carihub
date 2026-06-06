@@ -1485,6 +1485,12 @@ function enlaceSeguroSolicitud(url){
   return textoSeguro(u);
 }
 
+function imagenSeguraSolicitud(url){
+  const u = String(url || "").trim();
+  if(!/^https?:\/\//i.test(u)) return "";
+  return textoSeguro(u);
+}
+
 async function cargarSolicitudesPublicidad(){
   const cont = document.getElementById("contenidoModulo");
   solicitudesPublicidadCache = [];
@@ -1514,9 +1520,10 @@ async function cargarSolicitudesPublicidad(){
     docs.forEach(s => {
       const estado = s.estado || "pendiente";
       const textoBusqueda = textoSeguro(`${s.nombre || ""} ${s.whatsapp || ""} ${s.correo || ""} ${s.ciudad || ""} ${s.tipo || ""} ${s.duracion || ""}`);
-      const miniImg = s.imagenURL
-        ? `<img loading="lazy" src="${textoSeguro(s.imagenURL)}" alt="Vista previa" style="max-width:120px;max-height:80px;object-fit:cover;border-radius:8px;margin-top:8px;">`
-        : "";
+      const imagenLista = imagenSeguraSolicitud(s.imagenURL);
+      const miniImg = imagenLista
+        ? `<img loading="lazy" src="${imagenLista}" alt="Vista previa" style="max-width:120px;max-height:80px;object-fit:cover;border-radius:8px;margin-top:8px;">`
+        : (s.imagenURL ? `<p class="aviso">Sin imagen válida</p>` : "");
 
       grid.innerHTML += `
         <div class="item item-filtrable"
@@ -1564,9 +1571,10 @@ async function abrirDetalleSolicitudPublicidad(id){
       ? `<p><b>Link:</b> <a href="${linkSeguro}" target="_blank" rel="noopener noreferrer">${textoSeguro(s.link)}</a></p>`
       : `<p><b>Link:</b> ${textoSeguro(s.link || "—")}</p>`;
 
-    const imagenHTML = s.imagenURL
-      ? `<p><b>Imagen del anuncio:</b></p><img loading="lazy" src="${textoSeguro(s.imagenURL)}" alt="Imagen solicitud" style="max-width:100%;border-radius:12px;">`
-      : `<p class="aviso">Sin imagen adjunta.</p>`;
+    const imagenDetalle = imagenSeguraSolicitud(s.imagenURL);
+    const imagenHTML = imagenDetalle
+      ? `<p><b>Imagen del anuncio:</b></p><img loading="lazy" src="${imagenDetalle}" alt="Imagen solicitud" style="max-width:100%;border-radius:12px;">`
+      : (s.imagenURL ? `<p class="aviso">Sin imagen válida</p>` : `<p class="aviso">Sin imagen adjunta.</p>`);
 
     const metaActualizacion = [
       s.actualizadoEn ? `<p><b>Actualizado en:</b> ${textoSeguro(formatearFecha(s.actualizadoEn))}</p>` : "",
