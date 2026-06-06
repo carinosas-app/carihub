@@ -1493,6 +1493,131 @@ async function loginMiPerfil(){
   }
 }
 
+function fechaPerfilValida(fecha){
+  if(!fecha) return null;
+  try{
+    return fecha.toDate ? fecha.toDate() : new Date(fecha);
+  }catch(e){
+    return null;
+  }
+}
+
+function formatearFechaPerfil(fecha){
+  const d=fechaPerfilValida(fecha);
+  if(!d || isNaN(d.getTime())) return "Sin fecha";
+  return d.toLocaleString("es-MX");
+}
+
+function diasRestantesPerfil(fecha){
+  const d=fechaPerfilValida(fecha);
+  if(!d || isNaN(d.getTime())) return "";
+  const hoy=new Date();
+  return Math.ceil((d-hoy)/(1000*60*60*24));
+}
+
+function perfilEstaVencido(u){
+  if(u.vencido===true) return true;
+  const d=fechaPerfilValida(u.fechaVencimiento);
+  if(d && d<new Date()) return true;
+  return false;
+}
+
+function perfilTieneActualizacionPendiente(u){
+  return u.actualizacionPendiente===true || u.estadoRevision==="actualizacion_pendiente";
+}
+
+function perfilNecesitaRenovacion(u){
+  if(!u.aprobado) return false;
+  if(perfilTieneActualizacionPendiente(u)) return false;
+  if(u.estadoRevision==="registro_pendiente" || u.estadoRevision==="no_aprobado") return false;
+  if(perfilEstaVencido(u) || u.estadoPago==="vencido") return true;
+  const dias=diasRestantesPerfil(u.fechaVencimiento);
+  if(dias!=="" && dias<=0) return true;
+  if(dias!=="" && dias<=7) return true;
+  return false;
+}
+
+function resolverEstadoPerfilPanel(u){
+  const revision=u.estadoRevision || "sin_estado";
+  const pago=u.estadoPago || "sin_estado";
+
+  if(revision==="no_aprobado"){
+    return {
+      titulo:"Perfil no aprobado",
+      mensaje:"Tu perfil no fue aprobado. Contacta soporte si necesitas más información."
+    };
+  }
+
+  if(perfilTieneActualizacionPendiente(u)){
+    return {
+      titulo:"Actualización pendiente de aprobación",
+      mensaje:"Los cambios enviados están en revisión. Tu perfil permanece oculto hasta que el administrador los apruebe."
+    };
+  }
+
+  if(perfilEstaVencido(u) || u.vencido===true || pago==="vencido"){
+    return {
+      titulo:"Perfil vencido",
+      mensaje:"Tu perfil no está visible en el directorio. Puedes renovar para volver a publicarlo."
+    };
+  }
+
+  if(revision==="registro_pendiente" || !u.aprobado){
+    return {
+      titulo:"Perfil pendiente de revisión",
+      mensaje:"Tu registro fue recibido y está en cola de revisión."
+    };
+  }
+
+  if(u.aprobado && u.activo && !perfilEstaVencido(u)){
+    const dias=diasRestantesPerfil(u.fechaVencimiento);
+    let mensaje="Tu perfil está publicado en CariHub.";
+    if(dias!=="" && dias<=7 && dias>0){
+      mensaje+=" Tu periodo vence pronto ("+dias+" días restantes).";
+    }
+    return {
+      titulo:"Perfil aprobado y activo",
+      mensaje:mensaje
+    };
+  }
+
+  return {
+    titulo:"Estado del perfil",
+    mensaje:"Revisa el detalle de tu trámite abajo. Si necesitas ayuda, usa Contacto / Soporte."
+  };
+}
+
+function textoDiasRestantesPerfil(u){
+  const dias=diasRestantesPerfil(u.fechaVencimiento);
+  if(dias==="") return "No aplica";
+  if(dias>0) return dias+" días restantes";
+  if(dias===0) return "Vence hoy";
+  return "Vencido hace "+Math.abs(dias)+" días";
+}
+
+function textoContextoPagoPerfil(u){
+  const pago=u.estadoPago || "sin_estado";
+  if(pago==="pendiente_aprobacion") return "Pago pendiente de aprobación inicial.";
+  if(pago==="gratis_30_dias") return "Periodo gratuito activo.";
+  if(pago==="pagado") return "Renovación pagada registrada.";
+  if(pago==="vencido") return "Renovación pendiente.";
+  return "";
+}
+
+function bloqueRenovacionPagoPanel(u){
+  if(!perfilNecesitaRenovacion(u)) return "";
+
+  return `
+    <div class="estado-box">
+      <p><b>Renovar perfil</b></p>
+      <p>Puedes pagar tu renovación con Stripe o Mercado Pago.</p>
+      <p class="aviso">Después del pago, la renovación podrá validarse automáticamente si tu perfil no tiene cambios pendientes. Si modificaste datos o fotos, quedará sujeto a revisión.</p>
+      <a class="btn btn-continuar" style="display:block;width:100%;margin-top:10px;text-align:center;text-decoration:none;box-sizing:border-box;" href="${LINK_STRIPE}" target="_blank" rel="noopener noreferrer">💳 Pagar con Stripe</a>
+      <a class="btn btn-continuar" style="display:block;width:100%;margin-top:10px;text-align:center;text-decoration:none;box-sizing:border-box;" href="${LINK_MERCADO_PAGO}" target="_blank" rel="noopener noreferrer">💳 Pagar con Mercado Pago</a>
+    </div>
+  `;
+}
+
 async function cargarPanel(uid){
   const contenedor=document.getElementById("panelContenido");
   contenedor.innerHTML="<p>Cargando perfil...</p>";
@@ -1506,12 +1631,26 @@ async function cargarPanel(uid){
     }
 
     const u=doc.data();
+    const resumen=resolverEstadoPerfilPanel(u);
+    const contextoPago=textoContextoPagoPerfil(u);
 
     contenedor.innerHTML=`
       <div class="estado-box">
-        <h3>${u.aprobado?"Perfil activo o aprobado":"Perfil en revisión"}</h3>
-        <p>${u.aprobado?"Tu perfil existe en CariHub.":"Pendiente de aprobación."}</p>
+        <h3>${textoSeguro(resumen.titulo)}</h3>
+        <p>${textoSeguro(resumen.mensaje)}</p>
+        ${contextoPago?`<p>${textoSeguro(contextoPago)}</p>`:""}
       </div>
+      <div class="estado-box">
+        <p><b>Estado de revisión:</b> ${textoSeguro(u.estadoRevision || "sin_estado")}</p>
+        <p><b>Estado de pago:</b> ${textoSeguro(u.estadoPago || "sin_estado")}</p>
+        <p><b>Aprobado:</b> ${u.aprobado?"Sí":"No"}</p>
+        <p><b>Activo:</b> ${u.activo?"Sí":"No"}</p>
+        <p><b>Vencido:</b> ${u.vencido?"Sí":"No"}</p>
+        <p><b>Actualización pendiente:</b> ${u.actualizacionPendiente?"Sí":"No"}</p>
+        <p><b>Fecha de vencimiento:</b> ${textoSeguro(formatearFechaPerfil(u.fechaVencimiento))}</p>
+        <p><b>Días restantes:</b> ${textoSeguro(textoDiasRestantesPerfil(u))}</p>
+      </div>
+      ${bloqueRenovacionPagoPanel(u)}
       <button class="btn btn-continuar" style="width:100%;margin-top:10px;" onclick="abrirEdicionPublica('${uid}')">
         ✏️ Actualizar datos públicos
       </button>
