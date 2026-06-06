@@ -49,7 +49,7 @@ service cloud.firestore {
         );
     }
 
-    function usuarioUpdateDueñoValido() {
+    function usuarioUpdateDuenoValido() {
       let diff = request.resource.data.diff(resource.data);
       return !diff.affectedKeys().hasAny([
           'uid',
@@ -112,7 +112,7 @@ service cloud.firestore {
     match /usuarios/{userId} {
       allow read: if isPublicProfile() || isOwner(userId) || isAdmin();
       allow create: if isOwner(userId) && usuarioCreateValido(userId);
-      allow update: if (isOwner(userId) && usuarioUpdateDueñoValido()) || isAdmin();
+      allow update: if (isOwner(userId) && usuarioUpdateDuenoValido()) || isAdmin();
       allow delete: if isAdmin();
     }
 
