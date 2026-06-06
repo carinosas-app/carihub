@@ -37,6 +37,16 @@ const WHATSAPP_ADMIN = "528112304664";
 const LINK_STRIPE = "https://buy.stripe.com/eVq8wR5Wr9GccXUbmbcAo00";
 const LINK_MERCADO_PAGO = "https://mpago.la/1KQ3iuP";
 
+const ETIQUETAS_ESTADO_SOLICITUD_PUBLICIDAD = {
+  pendiente: "Pendiente",
+  en_revision: "En revisión",
+  requiere_correccion: "Requiere corrección",
+  autorizado_pago: "Autorizado pago",
+  activo: "Activo",
+  rechazado: "Rechazado",
+  vencido: "Vencido"
+};
+
 let UID_PANEL = null;
 let UID_EDITANDO = null;
 
@@ -578,7 +588,7 @@ label{
   <div class="menu-note">🔞 Sitio para mayores de 18 años. Uso responsable y discreto.</div>
 
   <a href="#" onclick="abrirRegistro()">👤 Registrarse</a>
-  <a href="#" onclick="abrirMiPerfil()">👤 Mi perfil</a>
+  <a href="#" onclick="abrirMiPerfil()">👤 Mi cuenta</a>
   <a href="#" onclick="abrirFavoritos()">❤️ Mis favoritos</a>
 
   <div class="sep"></div>
@@ -720,18 +730,31 @@ label{
 
 <div class="modal" id="modalMiPerfil">
   <div class="form-box">
-    <h2>Mi perfil</h2>
-    <p class="subtitulo">Entra con el correo y contraseña con los que te registraste.</p>
-    <input id="loginEmail" type="email" placeholder="Correo">
-    <input id="loginPassword" type="password" placeholder="Contraseña">
-    <button class="btn btn-continuar" style="width:100%;margin-top:10px;" onclick="loginMiPerfil()">Entrar</button>
+    <h2>Mi cuenta</h2>
+
+    <div id="vistaCuentaEntrar">
+      <p class="subtitulo">Entra con tu correo y contraseña para ver tu cuenta, solicitudes de publicidad y perfil público (si lo tienes).</p>
+      <input id="loginEmail" type="email" placeholder="Correo">
+      <input id="loginPassword" type="password" placeholder="Contraseña">
+      <button class="btn btn-continuar" style="width:100%;margin-top:10px;" onclick="loginMiPerfil()">Entrar</button>
+      <button class="btn btn-atras" style="width:100%;margin-top:10px;" onclick="mostrarVistaCuenta('crear')">Crear cuenta</button>
+    </div>
+
+    <div id="vistaCuentaCrear" style="display:none;">
+      <p class="subtitulo">Crea tu cuenta para enviar solicitudes de publicidad. No necesitas perfil público.</p>
+      <input id="cuentaEmail" type="email" placeholder="Correo">
+      <input id="cuentaPassword" type="password" placeholder="Contraseña (mín. 6 caracteres)">
+      <button class="btn btn-continuar" style="width:100%;margin-top:10px;" onclick="crearCuentaMinima()">Crear cuenta</button>
+      <button class="btn btn-atras" style="width:100%;margin-top:10px;" onclick="mostrarVistaCuenta('entrar')">Ya tengo cuenta</button>
+    </div>
+
     <button class="btn btn-atras" style="width:100%;margin-top:10px;" onclick="cerrarMiPerfil()">← Volver</button>
   </div>
 </div>
 
 <div class="modal" id="modalPanel">
   <div class="form-box">
-    <h2>Panel de perfil</h2>
+    <h2>Mi cuenta</h2>
     <div id="panelContenido"></div>
     <button class="btn btn-atras" style="width:100%;" onclick="cerrarPanel()">← Volver</button>
   </div>
@@ -890,7 +913,44 @@ function cerrarRegistro(){
 
 function abrirMiPerfil(){
   cerrarMenu();
+  mostrarVistaCuenta("entrar");
   document.getElementById("modalMiPerfil").style.display="block";
+}
+
+function mostrarVistaCuenta(modo){
+  const entrar=document.getElementById("vistaCuentaEntrar");
+  const crear=document.getElementById("vistaCuentaCrear");
+  if(!entrar||!crear)return;
+  entrar.style.display=modo==="crear"?"none":"block";
+  crear.style.display=modo==="crear"?"block":"none";
+}
+
+function usuarioCuentaAutenticada(){
+  const user=auth.currentUser;
+  return !!(user&&!user.isAnonymous);
+}
+
+async function crearCuentaMinima(){
+  const email=document.getElementById("cuentaEmail").value.trim().toLowerCase();
+  const password=document.getElementById("cuentaPassword").value;
+
+  if(!email||!password){
+    alert("Escribe correo y contraseña.");
+    return;
+  }
+
+  if(password.length<6){
+    alert("La contraseña debe tener al menos 6 caracteres.");
+    return;
+  }
+
+  try{
+    const cred=await auth.createUserWithEmailAndPassword(email,password);
+    cerrarMiPerfil();
+    abrirPanel(cred.user.uid);
+  }catch(error){
+    alert("Error: "+error.message);
+  }
 }
 
 function cerrarMiPerfil(){
@@ -1228,6 +1288,14 @@ async function enviarSolicitudAnuncio(){
     return;
   }
 
+  if(!usuarioCuentaAutenticada()){
+    alert("Debes iniciar sesión o crear una cuenta para enviar tu solicitud.");
+    abrirMiPerfil();
+    return;
+  }
+
+  const user=auth.currentUser;
+
   try{
 
     let imagenURL = "";
@@ -1276,6 +1344,12 @@ async function enviarSolicitudAnuncio(){
       texto: document.getElementById("anuncioTexto").value.trim(),
 
       imagenURL,
+
+      uidAnunciante: user.uid,
+
+      correoSolicitante: (user.email||"").trim().toLowerCase(),
+
+      vinculadoEn: new Date(),
 
       estado: "pendiente",
 
@@ -1618,43 +1692,147 @@ function bloqueRenovacionPagoPanel(u){
   `;
 }
 
-async function cargarPanel(uid){
-  const contenedor=document.getElementById("panelContenido");
-  contenedor.innerHTML="<p>Cargando perfil...</p>";
+function etiquetaEstadoSolicitudPublicidad(estado){
+  return ETIQUETAS_ESTADO_SOLICITUD_PUBLICIDAD[estado]||estado||"pendiente";
+}
 
+function bloqueEncabezadoCuenta(email){
+  return `
+    <div class="estado-box">
+      <h3>Tu cuenta</h3>
+      <p><b>Correo:</b> ${textoSeguro(email||"Sin correo")}</p>
+    </div>
+  `;
+}
+
+function bloqueSinPerfilPublico(){
+  return `
+    <div class="estado-box">
+      <h3>Perfil público</h3>
+      <p>Aún no tienes perfil público.</p>
+      <p class="aviso">Puedes usar tu cuenta para enviar solicitudes de publicidad. La creación de perfil público con esta misma cuenta se habilitará en una siguiente fase.</p>
+    </div>
+  `;
+}
+
+function bloquePerfilPublicoPanel(u,uid){
+  const resumen=resolverEstadoPerfilPanel(u);
+  const contextoPago=textoContextoPagoPerfil(u);
+
+  return `
+    <div class="estado-box">
+      <h3>${textoSeguro(resumen.titulo)}</h3>
+      <p>${textoSeguro(resumen.mensaje)}</p>
+      ${contextoPago?`<p>${textoSeguro(contextoPago)}</p>`:""}
+    </div>
+    <div class="estado-box">
+      <p><b>Estado de revisión:</b> ${textoSeguro(u.estadoRevision || "sin_estado")}</p>
+      <p><b>Estado de pago:</b> ${textoSeguro(u.estadoPago || "sin_estado")}</p>
+      <p><b>Aprobado:</b> ${u.aprobado?"Sí":"No"}</p>
+      <p><b>Activo:</b> ${u.activo?"Sí":"No"}</p>
+      <p><b>Vencido:</b> ${u.vencido?"Sí":"No"}</p>
+      <p><b>Actualización pendiente:</b> ${u.actualizacionPendiente?"Sí":"No"}</p>
+      <p><b>Fecha de vencimiento:</b> ${textoSeguro(formatearFechaPerfil(u.fechaVencimiento))}</p>
+      <p><b>Días restantes:</b> ${textoSeguro(textoDiasRestantesPerfil(u))}</p>
+    </div>
+    ${bloqueRenovacionPagoPanel(u)}
+    <button class="btn btn-continuar" style="width:100%;margin-top:10px;" onclick="abrirEdicionPublica('${uid}')">
+      ✏️ Actualizar datos públicos
+    </button>
+  `;
+}
+
+function fechaSolicitudPublicidad(s){
+  return s.fecha||s.vinculadoEn||s.actualizadoEn||null;
+}
+
+function ordenarSolicitudesPorFecha(lista){
+  return lista.slice().sort((a,b)=>{
+    const fa=fechaPerfilValida(fechaSolicitudPublicidad(a));
+    const fb=fechaPerfilValida(fechaSolicitudPublicidad(b));
+    return (fb?fb.getTime():0)-(fa?fa.getTime():0);
+  });
+}
+
+function htmlMisSolicitudesPublicidad(solicitudes){
+  if(!solicitudes.length){
+    return `
+      <div class="estado-box">
+        <h3>Mis solicitudes de publicidad</h3>
+        <p>Aún no tienes solicitudes de publicidad vinculadas a esta cuenta.</p>
+      </div>
+    `;
+  }
+
+  const items=solicitudes.map(s=>{
+    const estado=s.estado||"pendiente";
+    return `
+      <div style="border-top:1px solid #eee;padding-top:10px;margin-top:10px;">
+        <p><b>Tipo:</b> ${textoSeguro(s.tipo||"—")}</p>
+        <p><b>Ciudad:</b> ${textoSeguro(s.ciudad||"—")}</p>
+        <p><b>Duración:</b> ${textoSeguro(s.duracion||"—")}</p>
+        <p><b>Estado:</b> ${textoSeguro(etiquetaEstadoSolicitudPublicidad(estado))}</p>
+        <p><b>Fecha:</b> ${textoSeguro(formatearFechaPerfil(s.fecha))}</p>
+        ${s.actualizadoEn?`<p><b>Actualizado en:</b> ${textoSeguro(formatearFechaPerfil(s.actualizadoEn))}</p>`:""}
+        ${s.notaAdmin?`<p><b>Nota admin:</b> ${textoSeguro(s.notaAdmin)}</p>`:""}
+      </div>
+    `;
+  }).join("");
+
+  return `
+    <div class="estado-box">
+      <h3>Mis solicitudes de publicidad</h3>
+      ${items}
+    </div>
+  `;
+}
+
+async function cargarMisSolicitudesPublicidad(uid){
   try{
-    const doc=await db.collection("usuarios").doc(uid).get();
+    let docs=[];
 
-    if(!doc.exists){
-      contenedor.innerHTML="<div class='estado-box'><h3>No encontramos tu perfil.</h3></div>";
-      return;
+    try{
+      const snap=await db.collection("solicitudes_anuncios").where("uidAnunciante","==",uid).orderBy("fecha","desc").limit(30).get();
+      snap.forEach(doc=>docs.push({ id:doc.id, ...doc.data() }));
+    }catch(e){
+      const snap=await db.collection("solicitudes_anuncios").where("uidAnunciante","==",uid).limit(30).get();
+      snap.forEach(doc=>docs.push({ id:doc.id, ...doc.data() }));
+      docs=ordenarSolicitudesPorFecha(docs);
     }
 
-    const u=doc.data();
-    const resumen=resolverEstadoPerfilPanel(u);
-    const contextoPago=textoContextoPagoPerfil(u);
-
-    contenedor.innerHTML=`
+    return htmlMisSolicitudesPublicidad(docs);
+  }catch(e){
+    return `
       <div class="estado-box">
-        <h3>${textoSeguro(resumen.titulo)}</h3>
-        <p>${textoSeguro(resumen.mensaje)}</p>
-        ${contextoPago?`<p>${textoSeguro(contextoPago)}</p>`:""}
+        <h3>Mis solicitudes de publicidad</h3>
+        <p>${textoSeguro(e.message)}</p>
       </div>
-      <div class="estado-box">
-        <p><b>Estado de revisión:</b> ${textoSeguro(u.estadoRevision || "sin_estado")}</p>
-        <p><b>Estado de pago:</b> ${textoSeguro(u.estadoPago || "sin_estado")}</p>
-        <p><b>Aprobado:</b> ${u.aprobado?"Sí":"No"}</p>
-        <p><b>Activo:</b> ${u.activo?"Sí":"No"}</p>
-        <p><b>Vencido:</b> ${u.vencido?"Sí":"No"}</p>
-        <p><b>Actualización pendiente:</b> ${u.actualizacionPendiente?"Sí":"No"}</p>
-        <p><b>Fecha de vencimiento:</b> ${textoSeguro(formatearFechaPerfil(u.fechaVencimiento))}</p>
-        <p><b>Días restantes:</b> ${textoSeguro(textoDiasRestantesPerfil(u))}</p>
-      </div>
-      ${bloqueRenovacionPagoPanel(u)}
-      <button class="btn btn-continuar" style="width:100%;margin-top:10px;" onclick="abrirEdicionPublica('${uid}')">
-        ✏️ Actualizar datos públicos
-      </button>
     `;
+  }
+}
+
+async function cargarPanel(uid){
+  const contenedor=document.getElementById("panelContenido");
+  contenedor.innerHTML="<p>Cargando cuenta...</p>";
+
+  try{
+    const user=auth.currentUser;
+    const email=user?.email||"";
+    let html=bloqueEncabezadoCuenta(email);
+
+    const doc=await db.collection("usuarios").doc(uid).get();
+
+    if(doc.exists){
+      html+=bloquePerfilPublicoPanel(doc.data(),uid);
+    }else{
+      html+=bloqueSinPerfilPublico();
+    }
+
+    if(usuarioCuentaAutenticada()){
+      html+=await cargarMisSolicitudesPublicidad(uid);
+    }
+
+    contenedor.innerHTML=html;
   }catch(error){
     contenedor.innerHTML=`<div class="estado-box"><h3>Error</h3><p>${textoSeguro(error.message)}</p></div>`;
   }
