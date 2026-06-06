@@ -1,0 +1,150 @@
+<!-- =========================
+CAMBIOS ACTUALIZADOS CARIÑOSAS
+========================= -->
+
+<!-- 1. CAMBIAR TITLE -->
+
+<title>Cariñosas</title>
+
+
+<!-- 2. AGREGAR SEO -->
+
+<meta name="description" content="Cariñosas - perfiles y anuncios por ciudad, categoría y ubicación.">
+<meta property="og:title" content="Cariñosas">
+<meta property="og:description" content="Perfiles y anuncios por ciudad y categoría.">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#ec2d7a">
+
+
+<!-- 3. CAMBIAR PORTADA MÓVIL -->
+
+/* REEMPLAZAR */
+object-fit:fill;
+
+/* POR */
+object-fit:cover;
+
+
+<!-- 4. AGREGAR CSS NUEVO -->
+
+.selector-registro{
+  width:100%;
+  padding:15px;
+  margin:8px 0;
+  border-radius:14px;
+  border:1px solid #ddd;
+  background:white;
+  cursor:pointer;
+  font-size:16px;
+}
+
+.selector-registro span{
+  color:#444;
+  font-weight:bold;
+}
+
+
+<!-- 5. REEMPLAZAR INPUTS DE REGISTRO -->
+
+<div onclick="abrirSelectorRegistro('pais')" class="selector-registro">
+  <span id="textoPaisRegistro">Seleccionar país</span>
+</div>
+
+<div onclick="abrirSelectorRegistro('estado')" class="selector-registro">
+  <span id="textoEstadoRegistro">Seleccionar estado</span>
+</div>
+
+<div onclick="abrirSelectorRegistro('ciudad')" class="selector-registro">
+  <span id="textoCiudadRegistro">Seleccionar ciudad</span>
+</div>
+
+
+<!-- 6. VARIABLES NUEVAS -->
+
+let selectorRegistroActual = "";
+let paisRegistro = "";
+let estadoRegistro = "";
+let ciudadRegistro = "";
+
+
+<!-- 7. FUNCIONES NUEVAS -->
+
+function abrirSelectorRegistro(tipo){
+
+  selectorRegistroActual = tipo;
+
+  selectorActual = tipo;
+
+  if(tipo === "estado" && !paisRegistro){
+    alert("Primero selecciona país.");
+    return;
+  }
+
+  if(tipo === "ciudad" && (!paisRegistro || !estadoRegistro)){
+    alert("Primero selecciona estado.");
+    return;
+  }
+
+  abrirSelector(tipo);
+
+}
+
+const seleccionarOpcionOriginal = seleccionarOpcion;
+
+seleccionarOpcion = function(valor){
+
+  seleccionarOpcionOriginal(valor);
+
+  if(selectorRegistroActual === "pais"){
+
+    paisRegistro = valor;
+    estadoRegistro = "";
+    ciudadRegistro = "";
+
+    document.getElementById("textoPaisRegistro").innerText = valor;
+    document.getElementById("textoEstadoRegistro").innerText = "Seleccionar estado";
+    document.getElementById("textoCiudadRegistro").innerText = "Seleccionar ciudad";
+
+  }
+
+  if(selectorRegistroActual === "estado"){
+
+    estadoRegistro = valor;
+    ciudadRegistro = "";
+
+    document.getElementById("textoEstadoRegistro").innerText = valor;
+    document.getElementById("textoCiudadRegistro").innerText = "Seleccionar ciudad";
+
+  }
+
+  if(selectorRegistroActual === "ciudad"){
+
+    ciudadRegistro = valor;
+
+    document.getElementById("textoCiudadRegistro").innerText = valor;
+
+  }
+
+}
+
+
+<!-- 8. REEMPLAZAR REGISTRO -->
+
+pais:paisRegistro,
+estado:estadoRegistro,
+ciudad:ciudadRegistro,
+
+
+<!-- 9. VALIDACIÓN NUEVA -->
+
+if(!paisRegistro || !estadoRegistro || !ciudadRegistro){
+  alert("Selecciona país, estado y ciudad.");
+  return;
+}
+
+
+<!-- 10. PREPARAR COMPRESIÓN FUTURA -->
+
+async function comprimirImagen(file){
+  return file;
+}

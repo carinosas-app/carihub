@@ -1,86 +1,364 @@
 const ESTADOS = {
 
-  "México": [
-    "Nuevo León","Jalisco","CDMX","Estado de México","Puebla","Querétaro",
-    "Baja California","Chihuahua","Coahuila","Sonora","Veracruz","Yucatán",
-    "Sinaloa","Durango","Guanajuato","Hidalgo","Oaxaca","Tabasco","Tamaulipas"
-  ],
+"🇲🇽 México":[
+"Aguascalientes",
+"Baja California",
+"Baja California Sur",
+"Campeche",
+"Chiapas",
+"Chihuahua",
+"Coahuila",
+"Colima",
+"CDMX",
+"Durango",
+"Estado de México",
+"Guanajuato",
+"Guerrero",
+"Hidalgo",
+"Jalisco",
+"Michoacán",
+"Morelos",
+"Nayarit",
+"Nuevo León",
+"Oaxaca",
+"Puebla",
+"Querétaro",
+"Quintana Roo",
+"San Luis Potosí",
+"Sinaloa",
+"Sonora",
+"Tabasco",
+"Tamaulipas",
+"Tlaxcala",
+"Veracruz",
+"Yucatán",
+"Zacatecas"
+],
 
-  "Estados Unidos": [
-    "Texas","California","Florida","New York","Illinois","Nevada","Arizona",
-    "Colorado","Washington","Georgia"
-  ],
+"🇺🇸 Estados Unidos":[
+"Alabama",
+"Alaska",
+"Arizona",
+"Arkansas",
+"California",
+"Colorado",
+"Connecticut",
+"Delaware",
+"Florida",
+"Georgia",
+"Hawaii",
+"Idaho",
+"Illinois",
+"Indiana",
+"Iowa",
+"Kansas",
+"Kentucky",
+"Louisiana",
+"Maine",
+"Maryland",
+"Massachusetts",
+"Michigan",
+"Minnesota",
+"Mississippi",
+"Missouri",
+"Montana",
+"Nebraska",
+"Nevada",
+"New Hampshire",
+"New Jersey",
+"New Mexico",
+"New York",
+"North Carolina",
+"North Dakota",
+"Ohio",
+"Oklahoma",
+"Oregon",
+"Pennsylvania",
+"Rhode Island",
+"South Carolina",
+"South Dakota",
+"Tennessee",
+"Texas",
+"Utah",
+"Vermont",
+"Virginia",
+"Washington",
+"West Virginia",
+"Wisconsin",
+"Wyoming"
+],
 
-  "Colombia": [
-    "Antioquia","Bogotá","Valle del Cauca","Atlántico","Cundinamarca","Santander"
-  ],
+"🇨🇴 Colombia":[
+"Amazonas",
+"Antioquia",
+"Arauca",
+"Atlántico",
+"Bogotá",
+"Bolívar",
+"Boyacá",
+"Caldas",
+"Caquetá",
+"Casanare",
+"Cauca",
+"Cesar",
+"Chocó",
+"Córdoba",
+"Cundinamarca",
+"Guainía",
+"Guaviare",
+"Huila",
+"La Guajira",
+"Magdalena",
+"Meta",
+"Nariño",
+"Norte de Santander",
+"Putumayo",
+"Quindío",
+"Risaralda",
+"San Andrés",
+"Santander",
+"Sucre",
+"Tolima",
+"Valle del Cauca",
+"Vaupés",
+"Vichada"
+],
 
-  "España": [
-    "Madrid","Cataluña","Andalucía","Valencia","Galicia","País Vasco"
-  ],
+"🇪🇸 España":[
+"Andalucía",
+"Aragón",
+"Asturias",
+"Baleares",
+"Canarias",
+"Cantabria",
+"Castilla-La Mancha",
+"Castilla y León",
+"Cataluña",
+"Ceuta",
+"Comunidad Valenciana",
+"Extremadura",
+"Galicia",
+"La Rioja",
+"Madrid",
+"Melilla",
+"Murcia",
+"Navarra",
+"País Vasco"
+],
 
-  "Perú": [
-    "Lima","Arequipa","Cusco","La Libertad"
-  ],
+"🇦🇷 Argentina":[
+"Buenos Aires",
+"Catamarca",
+"Chaco",
+"Chubut",
+"Córdoba",
+"Corrientes",
+"Entre Ríos",
+"Formosa",
+"Jujuy",
+"La Pampa",
+"La Rioja",
+"Mendoza",
+"Misiones",
+"Neuquén",
+"Río Negro",
+"Salta",
+"San Juan",
+"San Luis",
+"Santa Cruz",
+"Santa Fe",
+"Santiago del Estero",
+"Tierra del Fuego",
+"Tucumán"
+],
 
-  "Chile": [
-    "Santiago","Valparaíso","Biobío","Antofagasta"
-  ],
+"🇧🇷 Brasil":[
+"Acre",
+"Alagoas",
+"Amapá",
+"Amazonas",
+"Bahía",
+"Ceará",
+"Distrito Federal",
+"Espírito Santo",
+"Goiás",
+"Maranhão",
+"Mato Grosso",
+"Mato Grosso do Sul",
+"Minas Gerais",
+"Pará",
+"Paraíba",
+"Paraná",
+"Pernambuco",
+"Piauí",
+"Rio de Janeiro",
+"Rio Grande do Norte",
+"Rio Grande do Sul",
+"Rondônia",
+"Roraima",
+"Santa Catarina",
+"São Paulo",
+"Sergipe",
+"Tocantins"
+],
 
-  "Argentina": [
-    "Buenos Aires","Córdoba","Santa Fe","Mendoza"
-  ],
+"🇨🇱 Chile":[
+"Antofagasta",
+"Araucanía",
+"Arica y Parinacota",
+"Atacama",
+"Aysén",
+"Biobío",
+"Coquimbo",
+"Los Lagos",
+"Los Ríos",
+"Magallanes",
+"Maule",
+"Ñuble",
+"O’Higgins",
+"Santiago",
+"Tarapacá",
+"Valparaíso"
+],
 
-  "Brasil": [
-    "São Paulo","Rio de Janeiro","Minas Gerais","Bahía","Paraná"
-  ],
+"🇵🇪 Perú":[
+"Amazonas",
+"Áncash",
+"Apurímac",
+"Arequipa",
+"Ayacucho",
+"Cajamarca",
+"Callao",
+"Cusco",
+"Huancavelica",
+"Huánuco",
+"Ica",
+"Junín",
+"La Libertad",
+"Lambayeque",
+"Lima",
+"Loreto",
+"Madre de Dios",
+"Moquegua",
+"Pasco",
+"Piura",
+"Puno",
+"San Martín",
+"Tacna",
+"Tumbes",
+"Ucayali"
+],
 
-  "Canadá": [
-    "Ontario","Quebec","British Columbia","Alberta","Manitoba"
-  ],
+"🇨🇦 Canadá":[
+"Alberta",
+"British Columbia",
+"Manitoba",
+"New Brunswick",
+"Newfoundland and Labrador",
+"Nova Scotia",
+"Ontario",
+"Prince Edward Island",
+"Quebec",
+"Saskatchewan"
+],
 
-  "Reino Unido": [
-    "Inglaterra","Escocia","Gales","Irlanda del Norte"
-  ],
+"🇫🇷 Francia":[
+"Auvernia-Ródano-Alpes",
+"Borgoña",
+"Bretaña",
+"Centro-Valle del Loira",
+"Córcega",
+"Gran Este",
+"Hauts-de-France",
+"Île-de-France",
+"Normandía",
+"Nueva Aquitania",
+"Occitania",
+"País del Loira",
+"Provenza-Alpes-Costa Azul"
+],
 
-  "Australia": [
-    "New South Wales","Victoria","Queensland","Western Australia"
-  ],
+"🇩🇪 Alemania":[
+"Baden-Württemberg",
+"Baviera",
+"Berlín",
+"Brandeburgo",
+"Bremen",
+"Hamburgo",
+"Hesse",
+"Mecklemburgo",
+"Baja Sajonia",
+"Renania del Norte-Westfalia",
+"Renania-Palatinado",
+"Sarre",
+"Sajonia",
+"Sajonia-Anhalt",
+"Schleswig-Holstein",
+"Turingia"
+],
 
-  "Francia": [
-    "Île-de-France","Provence-Alpes-Côte d'Azur","Occitania"
-  ],
+"🇮🇹 Italia":[
+"Abruzos",
+"Basilicata",
+"Calabria",
+"Campania",
+"Emilia-Romaña",
+"Lacio",
+"Liguria",
+"Lombardía",
+"Marcas",
+"Molise",
+"Piamonte",
+"Puglia",
+"Cerdeña",
+"Sicilia",
+"Toscana",
+"Trentino",
+"Umbría",
+"Véneto"
+],
 
-  "Alemania": [
-    "Baviera","Berlín","Hamburgo","Hesse"
-  ],
-
-  "Italia": [
-    "Lombardía","Lazio","Campania","Sicilia"
-  ],
-
-  "Japón": [
-    "Tokyo","Osaka","Kanagawa","Aichi"
-  ],
-
-  "India": [
-    "Maharashtra","Delhi","Karnataka","Tamil Nadu"
-  ],
-
-  "Sudáfrica": [
-    "Gauteng","Western Cape","KwaZulu-Natal"
-  ],
-
-  "Turquía": [
-    "Estambul","Ankara","Izmir"
-  ],
-
-  "Rusia": [
-    "Moscú","San Petersburgo","Novosibirsk"
-  ],
-
-  "China": [
-    "Beijing","Shanghai","Guangdong","Shenzhen"
-  ]
+"🇯🇵 Japón":[
+"Aichi",
+"Akita",
+"Aomori",
+"Chiba",
+"Ehime",
+"Fukuoka",
+"Fukushima",
+"Gifu",
+"Hiroshima",
+"Hokkaido",
+"Hyogo",
+"Ibaraki",
+"Ishikawa",
+"Iwate",
+"Kagawa",
+"Kagoshima",
+"Kanagawa",
+"Kochi",
+"Kyoto",
+"Miyagi",
+"Miyazaki",
+"Nagasaki",
+"Nagano",
+"Nara",
+"Niigata",
+"Oita",
+"Okayama",
+"Osaka",
+"Saitama",
+"Shiga",
+"Shimane",
+"Shizuoka",
+"Tokyo",
+"Tochigi",
+"Tokushima",
+"Tottori",
+"Wakayama",
+"Yamagata",
+"Yamaguchi",
+"Yamanashi"
+]
 
 };

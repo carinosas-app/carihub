@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Resultados - Cariñosas</title>
+
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+<script src="paises.js"></script>
+<script src="estados.js"></script>
+<script src="ciudades.js"></script>
+<link rel="stylesheet" href="/css/modal-carihub.css">
+<script src="/js/modal-carihub.js"></script>
+
+<style>
+
+*{
+  box-sizing:border-box;
+}
+
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:#14050d;
+  color:white;
+}
+
+/* HERO */
+
+.hero{
+  width:100%;
+  max-width:1400px;
+  margin:auto;
+  position:relative;
+}
+
+.hero img{
+  width:100%;
+  display:block;
+}
+
+/* HOTSPOTS */
+
+.hero-click{
+  position:absolute;
+  cursor:pointer;
+}
+
+.btn-destacada-izq{
+  left:2%;
+  top:52%;
+  width:30%;
+  height:34%;
+}
+
+.btn-anuncio{
+  left:35%;
+  top:52%;
+  width:30%;
+  height:34%;
+}
+
+.btn-destacada-der{
+  right:2%;
+  top:52%;
+  width:30%;
+  height:34%;
+}
+
+/* RESULTADOS */
+
+.resultados{
+  max-width:1100px;
+  margin:auto;
+  padding:20px;
+}
+
+.info-busqueda{
+  background:linear-gradient(180deg,#2a0b18,#1a0710);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:30px;
+  padding:25px;
+  margin-bottom:25px;
+  box-shadow:0 10px 30px rgba(0,0,0,.35);
+}
+
+.info-busqueda h2{
+  margin:0;
+  color:#ff4fa0;
+  font-size:58px;
+}
+
+.card{
+  background:linear-gradient(180deg,#2b0d18,#1a0710);
+  border-radius:28px;
+  padding:18px;
+  margin-bottom:28px;
+  box-shadow:0 8px 28px rgba(0,0,0,.45);
+  border:1px solid rgba(255,255,255,.06);
+  overflow:hidden;
+}
+
+.card img{
+  width:100%;
+  border-radius:22px;
+  margin-bottom:15px;
+  object-fit:cover;
+}
+
+.card h3{
+  color:#ff4fa0;
+  font-size:42px;
+  margin:0 0 10px;
+}
+
+.card p{
+  color:#ffe6f0;
+  line-height:1.7;
+  font-size:22px;
+}
+
+.card b{
+  color:white;
+}
+
+.precio{
+  font-size:30px !important;
+  color:#00ff99 !important;
+  font-weight:bold;
+}
+
+.botones-card{
+  display:flex;
+  gap:14px;
+  margin-top:20px;
+  flex-wrap:wrap;
+}
+
+.btn-contacto{
+  flex:1;
+  display:block;
+  text-align:center;
+  color:white;
+  padding:16px;
+  border-radius:16px;
+  text-decoration:none;
+  font-weight:bold;
+  font-size:20px;
+}
+
+.whatsapp{
+  background:#25D366;
+}
+
+.telegram{
+  background:#229ED9;
+}
+
+.instagram{
+  background:#E1306C;
+}
+
+.interno{
+  background:#8b5cf6;
+}
+
+.ver-perfil{
+  background:#ff1493;
+}
+
+.estado-box{
+  background:linear-gradient(180deg,#2b0d18,#1a0710);
+  padding:25px;
+  border-radius:25px;
+  margin-bottom:18px;
+  text-align:center;
+}
+
+.estado-box h2{
+  color:#ff4fa0;
+}
+
+/* FILTROS ABAJO */
+
+.busqueda-box{
+  max-width:1000px;
+  margin:30px auto;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  padding:0 14px 40px;
+}
+
+.busqueda-box select,
+.busqueda-box input{
+  width:100%;
+  padding:14px;
+  border:none;
+  border-radius:22px;
+  font-size:18px;
+  background:white;
+  color:#222;
+  font-weight:bold;
+}
+
+.btn-buscar{
+  grid-column:1/3;
+  background:#ff1493;
+  color:white;
+  border:none;
+  border-radius:22px;
+  padding:18px;
+  font-size:18px;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+.btn-cerca{
+  grid-column:1/3;
+  background:#8b5cf6;
+  color:white;
+  border:none;
+  border-radius:22px;
+  padding:18px;
+  font-size:18px;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+.btn-volver{
+  grid-column:1/3;
+  background:#777;
+  color:white;
+  border:none;
+  border-radius:22px;
+  padding:18px;
+  font-size:18px;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+/* MOBILE */
+
+@media(max-width:700px){
+
+.info-busqueda h2{
+  font-size:36px;
+}
+
+.card h3{
+  font-size:32px;
+}
+
+.card p{
+  font-size:18px;
+}
+
+.precio{
+  font-size:24px !important;
+}
+
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- HERO -->
+
+<div class="hero">
+
+<img src="banner-premium.webp">
+
+<div class="hero-click btn-destacada-izq"
+onclick="abrirAnuncio()"></div>
+
+<div class="hero-click btn-anuncio"
+onclick="abrirAnuncio()"></div>
+
+<div class="hero-click btn-destacada-der"
+onclick="abrirAnuncio()"></div>
+
+</div>
+
+<!-- RESULTADOS -->
+
+<div class="resultados">
+
+<div class="info-busqueda">
+<h2>Resultados encontrados</h2>
+</div>
+
+<div id="lista"></div>
+
+</div>
+
+<!-- FILTROS ABAJO -->
+
+<div class="busqueda-box">
+
+<select id="filtroCategoria">
+
+<option value="">
+🔥 Categoría
+</option>
+
+<option value="Acompañante">💋 Acompañante</option>
+<option value="Escort">👠 Escort</option>
+<option value="Escort gay">Escort gay</option>
+<option value="Spa">💆 Spa</option>
+<option value="Masajes">🧴 Masajes</option>
+<option value="Trans">⚧️ Trans</option>
+<option value="Escort VIP">Escort VIP</option>
+<option value="Femboy">💗 Femboy</option>
+<option value="Stripper">💃🕺 Stripper</option>
+<option value="Edecán">🎤 Edecán</option>
+<option value="Sex shop">🛍️ Sex shop</option>
+<option value="Gigolo">🕴️ Gigolo</option>
+<option value="Madura">🔥 Madura</option>
+<option value="Dotados">🍆 Dotados</option>
+<option value="Petit">✨ Petit</option>
+<option value="Swinger">🍍 Swinger</option>
+<option value="Unicorns">🦄 Unicorns</option>
+<option value="Hotwife">🔥 Hotwife</option>
+<option value="Contenido">🎬 Contenido</option>
+<option value="Singles">🖤 Singles</option>
+<option value="Club SW">🍸 Club SW</option>
+<option value="Tabledance">🎶 Tabledance</option>
+<option value="Bares">🍹 Bares</option>
+<option value="Fetiche">⛓️ Fetiche</option>
+<option value="Sado">🖤 Sado</option>
+<option value="Lesbianas">🌈 Lesbianas</option>
+<option value="Modelos">📸 Modelos</option>
+<option value="Dominatrix">👑 Dominatrix</option>
+
+<option value="Hotwife-Cuckcold">💍 Hotwife-Cuckcold</option>
+<option value="Hotel">🏨 Hotel</option>
+<option value="Motel">🏩 Motel</option>
+<option value="Bar LGBTIQ+">🏳️‍🌈 Bar LGBTIQ+</option>
+<option value="Cabinas / Glory holes">🚪 Cabinas / Glory holes</option>
+<option value="Lesbians">🌈 Lesbians</option>
+<option value="Tom boy">♂ Tom boy</option>
+<option value="Tom fem">♀ Tom fem</option>
+<option value="Cine XXX">🎬 Cine XXX</option>
+</select>
+
+<input
+type="text"
+id="otraCategoria"
+placeholder="✍️ Escribe tu categoría">
+
+<input
+type="text"
+id="filtroPais"
+list="listaPaises"
+placeholder="🌎 País">
+
+<datalist id="listaPaises">
+
+
+</datalist>
+
+<input
+type="text"
+id="filtroEstado"
+list="listaEstados"
+placeholder="🗺️ Estado">
+
+<datalist id="listaEstados">
+
+</datalist>
+
+<input
+type="text"
+id="filtroCiudad"
+list="listaCiudades"
+placeholder="🏙️ Ciudad">
+
+<datalist id="listaCiudades">
+
+</datalist>
+
+<button class="btn-buscar"
+onclick="actualizarBusqueda()">
+🔍 BUSCAR AHORA
+</button>
+
+<button class="btn-cerca"
+onclick="buscarCerca()">
+📍 BUSCAR CERCA DE MÍ
+</button>
+
+<button class="btn-volver"
+onclick="history.back()">
+← VOLVER
+</button>
+
+</div>
+
+<script>
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCp68DynjT63T9wHorCLxwBGkSEo_mYPUI",
+  authDomain: "carihub-app.firebaseapp.com",
+  projectId: "carihub-app",
+  storageBucket: "carihub-app.firebasestorage.app",
+  messagingSenderId: "236894758884",
+  appId: "1:236894758884:web:5713e39a26c71f025a49f1"
+};
+
+firebase.initializeApp(firebaseConfig);
+
+const db = firebase.firestore();
+
+
+
+function abrirAnuncio(){
+
+window.location.href = "registro-banner.html";
+
+}
+function obtenerParametro(nombre){
+
+const url = new URL(window.location.href);
+
+return url.searchParams.get(nombre) || "";
+
+}
+
+function normalizarTexto(t){
+
+return String(t||"")
+.replace(/[^\p{L}\p{N}\s]/gu,"")
+.trim()
+.toLowerCase()
+.normalize("NFD")
+.replace(/[\u0300-\u036f]/g,"");
+
+}
+
+const categoria = obtenerParametro("categoria");
+const pais = obtenerParametro("pais");
+const estado = obtenerParametro("estado");
+const ciudad = obtenerParametro("ciudad");
+function cargarListas(){
+
+const paisSeleccionado =
+document.getElementById("filtroPais").value || pais;
+
+const estadoSeleccionado =
+document.getElementById("filtroEstado").value || estado;
+
+const listaPaises =
+document.getElementById("listaPaises");
+
+listaPaises.innerHTML = "";
+
+TODOS_LOS_PAISES
+.sort((a,b)=>a.localeCompare(b))
+.forEach(nombrePais=>{
+
+listaPaises.innerHTML +=
+`<option value="${nombrePais}">`;
+
+});
+const listaEstados =
+document.getElementById("listaEstados");
+
+listaEstados.innerHTML = "";
+
+if(ESTADOS[paisSeleccionado]){
+
+ESTADOS[paisSeleccionado]
+.sort((a,b)=>a.localeCompare(b))
+.forEach(nombreEstado=>{
+
+listaEstados.innerHTML +=
+`<option value="${nombreEstado}">`;
+
+});
+
+}
+const listaCiudades =
+document.getElementById("listaCiudades");
+
+listaCiudades.innerHTML = "";
+
+if(
+CIUDADES[paisSeleccionado]
+&&
+CIUDADES[paisSeleccionado][estadoSeleccionado]
+){
+
+CIUDADES[paisSeleccionado][estadoSeleccionado]
+.sort((a,b)=>a.localeCompare(b))
+.forEach(nombreCiudad=>{
+
+listaCiudades.innerHTML +=
+`<option value="${nombreCiudad}">`;
+
+});
+
+}
+}
+document
+.getElementById("filtroPais")
+.addEventListener("change",()=>{
+
+document.getElementById("filtroEstado").value = "";
+document.getElementById("filtroCiudad").value = "";
+
+cargarListas();
+
+});
+
+document
+.getElementById("filtroEstado")
+.addEventListener("change",()=>{
+
+document.getElementById("filtroCiudad").value = "";
+
+cargarListas();
+
+});
+function llenarFiltros(){
+
+document.getElementById("filtroCategoria").value = categoria;
+if(
+!document.getElementById("filtroCategoria").value
+&& categoria
+){
+document.getElementById("otraCategoria").value = categoria;
+}
+
+document.getElementById("filtroPais").value = pais;
+
+document.getElementById("filtroEstado").value = estado;
+
+document.getElementById("filtroCiudad").value = ciudad;
+
+}
+
+function actualizarBusqueda(){
+
+let nuevaCategoria =
+document.getElementById("filtroCategoria").value;
+
+const categoriaManual =
+document.getElementById("otraCategoria").value;
+
+if(categoriaManual.trim()!==""){
+
+nuevaCategoria = categoriaManual.trim();
+
+}
+
+const nuevoPais =
+document.getElementById("filtroPais").value;
+
+const nuevoEstado =
+document.getElementById("filtroEstado").value;
+
+const nuevaCiudad =
+document.getElementById("filtroCiudad").value;
+
+history.replaceState(
+null,
+"",
+`resultados.html?categoria=${encodeURIComponent(nuevaCategoria)}&pais=${encodeURIComponent(nuevoPais)}&estado=${encodeURIComponent(nuevoEstado)}&ciudad=${encodeURIComponent(nuevaCiudad)}`
+);
+
+cargarResultados();
+
+}
+
+function buscarCerca(){
+
+navigator.geolocation.getCurrentPosition(
+
+(posicion)=>{
+
+if(window.mostrarModalCariHub){
+mostrarModalCariHub({
+tipo: "exito",
+titulo: "Ubicación detectada",
+mensaje: "📍 Ubicación detectada correctamente"
+});
+} else {
+alert("📍 Ubicación detectada correctamente");
+}
+
+console.log(
+posicion.coords.latitude,
+posicion.coords.longitude
+);
+
+},
+
+(error)=>{
+
+if(window.mostrarModalCariHub){
+mostrarModalCariHub({
+tipo: "error",
+titulo: "Ubicación no disponible",
+mensaje: "❌ No pudimos obtener tu ubicación."
+});
+} else {
+alert("❌ No pudimos obtener tu ubicación.");
+}
+
+}
+
+);
+
+}
+
+async function cargarResultados(){
+
+const lista = document.getElementById("lista");
+
+lista.innerHTML = `
+<div class="estado-box">
+<h2>Buscando perfiles...</h2>
+</div>
+`;
+
+try{
+const snap = await db.collection("usuarios")
+.where("aprobado","==",true)
+.get();
+
+lista.innerHTML = "";
+
+let encontrados = 0;
+
+for(const doc of snap.docs){
+
+const u = doc.data();
+
+if(u.activo !== true) continue;
+const categoriaActual =
+document.getElementById("filtroCategoria").value
+||
+document.getElementById("otraCategoria").value;
+
+const paisActual =
+document.getElementById("filtroPais").value;
+
+const estadoActual =
+document.getElementById("filtroEstado").value;
+
+const ciudadActual =
+document.getElementById("filtroCiudad").value;
+
+const coincideCategoria =
+!categoriaActual ||
+normalizarTexto(u.categoria)
+.includes(normalizarTexto(categoriaActual));
+
+const coincidePais =
+!paisActual ||
+normalizarTexto(u.pais)
+.includes(normalizarTexto(paisActual));
+
+const coincideEstado =
+!estadoActual ||
+normalizarTexto(u.estado)
+.includes(normalizarTexto(estadoActual));
+
+const coincideCiudad =
+!ciudadActual ||
+normalizarTexto(u.ciudad)
+.includes(normalizarTexto(ciudadActual));
+
+const exacto =
+coincideCategoria &&
+coincidePais &&
+coincideEstado &&
+coincideCiudad;
+
+if(exacto){
+
+encontrados++;
+
+lista.innerHTML += `
+
+<div class="card">
+
+${u.fotoURL ? `
+<img src="${u.fotoURL}">
+` : ""}
+
+<h3>${u.nombre || ""}</h3>
+
+<p>
+<b>💋 Categoría:</b>
+${u.categoria || ""}
+</p>
+
+<p class="precio">
+💰 ${u.precio || "Sin precio"}
+</p>
+
+${u.lugar ? `
+<p>
+<b>📍 Lugar:</b>
+${u.lugar}
+</p>
+` : ""}
+
+<p>
+<b>🏙️ Ciudad:</b>
+${u.ciudad || ""}
+</p>
+
+<div class="botones-card">
+
+${u.contactos?.whatsapp?.activo ? `
+<a class="btn-contacto whatsapp"
+href="https://wa.me/${u.contactos.whatsapp.valor}"
+target="_blank">
+WhatsApp
+</a>
+` : ""}
+
+${u.contactos?.telegram?.activo ? `
+<a class="btn-contacto telegram"
+href="https://t.me/${u.contactos.telegram.valor.replace("@","")}"
+target="_blank">
+Telegram
+</a>
+` : ""}
+
+${u.contactos?.instagram?.activo ? `
+<a class="btn-contacto instagram"
+href="https://instagram.com/${u.contactos.instagram.valor.replace("@","")}"
+target="_blank">
+Instagram
+</a>
+` : ""}
+
+${u.contactos?.interno?.activo ? `
+<a class="btn-contacto interno"
+href="mensajes.html?id=${doc.id}">
+Mensaje
+</a>
+` : ""}
+
+<a class="btn-contacto ver-perfil"
+href="perfil.html?id=${doc.id}">
+Ver perfil
+</a>
+
+</div>
+
+</div>
+
+`;
+
+}
+
+}
+
+if(encontrados === 0){
+
+lista.innerHTML = `
+
+<div class="estado-box">
+
+<h2>No encontramos perfiles</h2>
+
+<p>Intenta otra búsqueda.</p>
+
+<a
+href="registro.html"
+class="btn-contacto ver-perfil"
+style="margin-top:20px;display:block;">
+
+🔥 REGISTRARSE
+
+</a>
+
+</div>
+
+`;
+
+}
+
+}catch(error){
+
+lista.innerHTML = `
+
+<div class="estado-box">
+
+<h2>Error</h2>
+
+<p>${error.message}</p>
+
+</div>
+
+`;
+
+}
+
+}
+
+cargarListas();
+
+llenarFiltros();
+
+cargarResultados();
+</script>
+
+</body>
+</html>
+
+

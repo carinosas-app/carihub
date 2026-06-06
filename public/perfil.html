@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Perfil - Cariñosas</title>
+
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+
+<style>
+
+:root{
+  --rosa:#ff2d8d;
+  --rosa2:#ff4fa3;
+  --morado:#7b1fff;
+  --fondo:#14010f;
+  --fondo2:#250018;
+}
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;
+}
+
+html{
+  scroll-behavior:smooth;
+}
+
+body{
+  font-family:Arial,sans-serif;
+  background:
+  radial-gradient(circle at top,#3b0024 0%,#14010f 45%,#090008 100%);
+  color:white;
+  overflow-x:hidden;
+}
+
+/* SCROLL */
+
+::-webkit-scrollbar{
+  width:8px;
+}
+
+::-webkit-scrollbar-thumb{
+  background:#ff2d8d;
+  border-radius:20px;
+}
+
+/* LINKS */
+
+a{
+  text-decoration:none;
+}
+
+.pagina{
+  width:100%;
+  max-width:1000px;
+  margin:auto;
+  padding-bottom:120px;
+}
+
+/* HERO */
+
+.hero-superior{
+  width:100%;
+  position:relative;
+  overflow:hidden;
+}
+
+.hero-superior img{
+  width:100%;
+  display:block;
+  max-height:420px;
+  object-fit:cover;
+  border-bottom-left-radius:34px;
+  border-bottom-right-radius:34px;
+  box-shadow:
+  0 15px 50px rgba(255,0,140,.25);
+}
+
+/* PERFIL */
+
+.perfil-card{
+  width:100%;
+  margin-top:20px;
+  position:relative;
+  z-index:10;
+  background:
+  linear-gradient(180deg,#240015,#14010f);
+  border-radius:38px;
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,.08);
+  box-shadow:
+  0 25px 70px rgba(0,0,0,.45),
+  0 0 45px rgba(255,0,140,.12);
+}
+
+/* HERO PERFIL */
+
+.hero-perfil{
+  position:relative;
+  overflow:hidden;
+}
+
+.hero-perfil img{
+  width:100%;
+  height:640px;
+  object-fit:cover;
+  display:block;
+  transition:transform .5s ease;
+}
+
+.hero-perfil:hover img{
+  transform:scale(1.03);
+}
+
+.hero-perfil::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:
+  linear-gradient(
+  180deg,
+  rgba(0,0,0,.15),
+  rgba(0,0,0,.05),
+  rgba(0,0,0,.85)
+  );
+  z-index:1;
+}
+
+.hero-perfil::after{
+  content:"";
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:0;
+  height:180px;
+  background:
+  linear-gradient(
+  180deg,
+  transparent,
+  #240015
+  );
+  z-index:2;
+}
+
+/* BADGES */
+
+.badges{
+  position:absolute;
+  top:20px;
+  left:20px;
+  z-index:5;
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap;
+}
+
+.badges span{
+  backdrop-filter:blur(14px);
+  background:rgba(255,255,255,.15);
+  border:1px solid rgba(255,255,255,.18);
+  color:white;
+  padding:10px 18px;
+  border-radius:999px;
+  font-size:14px;
+  font-weight:bold;
+  box-shadow:
+  0 5px 18px rgba(0,0,0,.25);
+}
+
+.badges .verificada{
+  background:linear-gradient(90deg,#ff2d8d,#ff4fa3);
+  color:white;
+}
+
+.badges .premium{
+  background:linear-gradient(90deg,#7b1fff,#c12dff);
+}
+
+.badges .online{
+  background:linear-gradient(90deg,#00c853,#00e676);
+}
+
+/* INFO HERO */
+
+.info-hero{
+  position:absolute;
+  left:28px;
+  bottom:35px;
+  z-index:5;
+}
+
+.info-hero h1{
+  font-size:48px;
+  margin-bottom:12px;
+  text-shadow:0 5px 15px rgba(0,0,0,.5);
+}
+
+.info-hero p{
+  font-size:24px;
+  font-weight:bold;
+  text-shadow:0 5px 15px rgba(0,0,0,.5);
+}
+
+.estado-online{
+  margin-top:14px;
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  background:rgba(0,0,0,.35);
+  border:1px solid rgba(255,255,255,.12);
+  backdrop-filter:blur(12px);
+  padding:10px 16px;
+  border-radius:999px;
+  font-size:15px;
+  font-weight:bold;
+}
+
+.estado-online::before{
+  content:"";
+  width:10px;
+  height:10px;
+  background:#00ff66;
+  border-radius:50%;
+  box-shadow:
+  0 0 12px #00ff66;
+}
+
+/* BODY */
+
+.perfil-body{
+  padding:24px;
+}
+
+/* INFO GRID */
+
+.info-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:16px;
+  margin-bottom:24px;
+}
+
+.info-item{
+  background:
+  linear-gradient(
+  180deg,
+  rgba(255,255,255,.05),
+  rgba(255,255,255,.03)
+  );
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:24px;
+  padding:20px;
+  backdrop-filter:blur(10px);
+  transition:.25s;
+}
+
+.info-item:hover{
+  transform:translateY(-3px);
+  border-color:rgba(255,0,140,.35);
+  box-shadow:
+  0 10px 30px rgba(255,0,140,.12);
+}
+
+.info-item span{
+  display:block;
+  color:#ff4fa3;
+  font-size:14px;
+  font-weight:bold;
+  margin-bottom:10px;
+}
+
+.info-item b{
+  font-size:30px;
+}
+
+/* DESCRIPCIONES */
+
+.descripcion{
+  background:white;
+  color:#222;
+  border-radius:30px;
+  padding:28px;
+  margin-bottom:22px;
+  box-shadow:
+  0 10px 30px rgba(0,0,0,.18);
+}
+
+.descripcion h2{
+  color:#ff2d8d;
+  margin-bottom:18px;
+  font-size:42px;
+}
+
+.descripcion p{
+  font-size:24px;
+  line-height:1.7;
+}
+
+/* WHATSAPP */
+
+.whatsapp{
+  width:100%;
+  display:block;
+  text-align:center;
+  background:
+  linear-gradient(90deg,#00c853,#25D366);
+  color:white;
+  padding:24px;
+  border-radius:24px;
+  font-size:30px;
+  font-weight:bold;
+  margin-top:22px;
+  box-shadow:
+  0 12px 35px rgba(37,211,102,.35);
+  transition:.25s;
+}
+
+.whatsapp:hover{
+  transform:scale(1.02);
+}
+
+/* GALERIA */
+
+.galeria{
+  margin-top:35px;
+}
+
+.galeria h2{
+  font-size:58px;
+  color:#ff4fa3;
+  margin-bottom:20px;
+}
+
+.galeria-grid{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:20px;
+}
+
+.galeria-grid img{
+  width:100%;
+  border-radius:28px;
+  display:block;
+  transition:.3s;
+  box-shadow:
+  0 12px 35px rgba(0,0,0,.35);
+}
+
+.galeria-grid img:hover{
+  transform:scale(1.01);
+}
+
+/* BOTON FLOTANTE */
+
+.btn-float{
+  position:fixed;
+  right:18px;
+  bottom:18px;
+  width:70px;
+  height:70px;
+  border-radius:50%;
+  background:#25D366;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:white;
+  font-size:34px;
+  z-index:999;
+  box-shadow:
+  0 10px 35px rgba(37,211,102,.45);
+  animation:pulse 2s infinite;
+}
+
+@keyframes pulse{
+
+  0%{
+    transform:scale(1);
+  }
+
+  50%{
+    transform:scale(1.08);
+  }
+
+  100%{
+    transform:scale(1);
+  }
+
+}
+
+/* LOADING */
+
+.loader{
+  width:100%;
+  padding:120px 20px;
+  text-align:center;
+  font-size:26px;
+  color:#ff4fa3;
+}
+
+/* MOBILE */
+
+@media(max-width:700px){
+
+  .hero-perfil img{
+    height:500px;
+  }
+
+  .info-hero{
+    left:22px;
+    bottom:26px;
+  }
+
+  .info-hero h1{
+    font-size:56px;
+  }
+
+  .info-hero p{
+    font-size:19px;
+  }
+
+  .estado-online{
+    font-size:13px;
+  }
+
+  .badges{
+    top:16px;
+    left:16px;
+    gap:8px;
+  }
+
+  .badges span{
+    font-size:13px;
+    padding:9px 15px;
+  }
+
+  .perfil-body{
+    padding:18px;
+  }
+
+  .info-grid{
+    gap:12px;
+  }
+
+  .info-item{
+    padding:16px;
+  }
+
+  .info-item b{
+    font-size:18px;
+  }
+
+  .descripcion{
+    padding:22px;
+  }
+
+  .descripcion h2{
+    font-size:30px;
+  }
+
+  .descripcion p{
+    font-size:18px;
+  }
+
+  .whatsapp{
+    font-size:22px;
+    padding:20px;
+  }
+
+  .galeria h2{
+    font-size:40px;
+  }
+
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="pagina">
+
+  <!-- HERO -->
+  <div class="hero-superior" onclick="abrirAnuncio()">
+
+    <img src="/banner-premium.webp">
+
+  </div>
+
+  <!-- CONTENIDO -->
+  <div id="contenido">
+
+    <div class="loader">
+      🔥 Cargando perfil...
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCp68DynjT63T9wHorCLxwBGkSEo_mYPUI",
+  authDomain: "carihub-app.firebaseapp.com",
+  projectId: "carihub-app",
+  storageBucket: "carihub-app.firebasestorage.app",
+  messagingSenderId: "236894758884",
+  appId: "1:236894758884:web:5713e39a26c71f025a49f1"
+};
+
+firebase.initializeApp(firebaseConfig);
+
+const db = firebase.firestore();
+
+function abrirAnuncio(){
+  window.location.href="registro-banner.html";
+}
+
+function obtenerParametro(nombre){
+
+  const url = new URL(window.location.href);
+
+  return url.searchParams.get(nombre) || "";
+}
+
+function limpiarTelefono(numero){
+
+  return String(numero || "")
+  .replace(/\D/g,"");
+}
+
+async function cargarPerfil(){
+
+  const id = obtenerParametro("id");
+
+  const contenido =
+  document.getElementById("contenido");
+
+  if(!id){
+
+    contenido.innerHTML = `
+      <div class="loader">
+        Perfil no encontrado
+      </div>
+    `;
+
+    return;
+  }
+
+  try{
+
+    const doc =
+    await db.collection("usuarios")
+    .doc(id)
+    .get();
+
+    if(!doc.exists){
+
+      contenido.innerHTML = `
+        <div class="loader">
+          Perfil no existe
+        </div>
+      `;
+
+      return;
+    }
+
+    const u = doc.data();
+
+    let vencido = false;
+
+    if(u.vencido === true){
+      vencido = true;
+    }
+
+    if(u.fechaVencimiento){
+
+      const fechaV =
+      u.fechaVencimiento.toDate
+      ? u.fechaVencimiento.toDate()
+      : new Date(u.fechaVencimiento);
+
+      if(fechaV < new Date()){
+        vencido = true;
+      }
+    }
+
+    if(
+      u.aprobado !== true ||
+      u.activo !== true ||
+      vencido
+    ){
+
+      contenido.innerHTML = `
+        <div class="loader">
+          Perfil no disponible
+        </div>
+      `;
+
+      return;
+    }
+
+    const nombre = u.nombre || "Perfil";
+    const categoria = u.categoria || "";
+    const ciudad = u.ciudad || "";
+    const estado = u.estado || "";
+    const pais = u.pais || "";
+    const descripcion = u.descripcion || "";
+    const descripcionCompleta =
+    u.descripcionCompleta || "";
+    const precio = u.precio || "";
+    const modalidad = u.modalidad || "";
+    const telefono =
+    limpiarTelefono(u.telefono || "");
+    const foto = u.fotoURL || "";
+
+    const msg = encodeURIComponent(
+      "Hola, vi tu perfil en Cariñosas."
+    );
+
+    contenido.innerHTML = `
+
+    <div class="perfil-card">
+
+      <div class="hero-perfil">
+
+        <img src="${foto}">
+
+        <div class="badges">
+
+          <span class="verificada">
+            ✅ Verificada
+          </span>
+
+          <span class="premium">
+            👑 Premium
+          </span>
+
+          <span class="online">
+            🟢 Activa
+          </span>
+
+        </div>
+
+        <div class="info-hero">
+
+          <h1>
+            ${nombre}
+          </h1>
+
+          <p>
+            📍 ${ciudad}, ${estado}
+          </p>
+
+          <div class="estado-online">
+            Activa ahora
+          </div>
+
+        </div>
+
+      </div>
+
+      <div class="perfil-body">
+
+        <div class="info-grid">
+
+          <div class="info-item">
+            <span>CATEGORÍA</span>
+            <b>${categoria}</b>
+          </div>
+
+          <div class="info-item">
+            <span>CIUDAD</span>
+            <b>${ciudad}</b>
+          </div>
+
+          <div class="info-item">
+            <span>PRECIO</span>
+            <b>${precio}</b>
+          </div>
+
+          <div class="info-item">
+            <span>MODALIDAD</span>
+            <b>${modalidad}</b>
+          </div>
+
+          <div class="info-item">
+            <span>ESTADO</span>
+            <b>${estado}</b>
+          </div>
+
+          <div class="info-item">
+            <span>PAÍS</span>
+            <b>${pais}</b>
+          </div>
+
+        </div>
+
+        ${descripcion ? `
+        <div class="descripcion">
+
+          <h2>
+            Descripción
+          </h2>
+
+          <p>
+            ${descripcion}
+          </p>
+
+        </div>
+        ` : ""}
+
+        ${descripcionCompleta ? `
+        <div class="descripcion">
+
+          <h2>
+            Información completa
+          </h2>
+
+          <p>
+            ${descripcionCompleta}
+          </p>
+
+        </div>
+        ` : ""}
+
+        ${telefono ? `
+        <a
+          class="whatsapp"
+          href="https://wa.me/${telefono}?text=${msg}"
+          target="_blank"
+        >
+          💬 Contactar por WhatsApp
+        </a>
+
+        <a
+          class="btn-float"
+          href="https://wa.me/${telefono}?text=${msg}"
+          target="_blank"
+        >
+          💬
+        </a>
+        ` : ""}
+
+        ${u.fotosExtraURL &&
+        u.fotosExtraURL.length > 0 ? `
+
+        <div class="galeria">
+
+          <h2>
+            Fotos públicas
+          </h2>
+
+          <div class="galeria-grid">
+
+            ${u.fotosExtraURL.map(f => `
+              <img src="${f}">
+            `).join("")}
+
+          </div>
+
+        </div>
+
+        ` : ""}
+
+      </div>
+
+    </div>
+
+    `;
+
+  }catch(error){
+
+    contenido.innerHTML = `
+      <div class="loader">
+        ${error.message}
+      </div>
+    `;
+  }
+}
+
+cargarPerfil();
+
+</script>
+
+</body>
+</html>

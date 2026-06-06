@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Registro Banner - Paso 2</title>
+
+<style>
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:linear-gradient(135deg,#ffd1e6,#ff9ccc);
+  color:#5c1432;
+}
+
+.contenedor{
+  width:92%;
+  max-width:1100px;
+  margin:30px auto;
+  padding:26px;
+  border-radius:32px;
+  background:rgba(255,255,255,.62);
+  box-shadow:0 18px 45px rgba(170,0,90,.18);
+}
+
+.hero-img{
+  width:100%;
+  border-radius:28px;
+  display:block;
+  margin-bottom:22px;
+}
+
+.separador-solicitud{
+  font-size:30px;
+  font-weight:900;
+  color:#c2185b;
+  text-align:center;
+  padding:22px;
+  border-radius:24px;
+  background:#fff7fb;
+  border:2px solid #ffb4d2;
+}
+
+.form-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:18px;
+}
+
+.full{grid-column:1/-1}
+
+.card{
+  grid-column:1/-1;
+  padding:22px;
+  border:2px solid #ffb4d2;
+  border-radius:24px;
+  background:#fff7fb;
+}
+
+.card h3{
+  margin:0 0 10px;
+  font-size:26px;
+  color:#c2185b;
+}
+
+.card p{
+  font-size:18px;
+  line-height:1.6;
+  margin:0;
+}
+
+.upload-grid{
+  grid-column:1/-1;
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:18px;
+}
+
+.upload-box{
+  border:2px dashed #ff8fc1;
+  border-radius:22px;
+  background:#fff0f6;
+  padding:18px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+.upload-box span{
+  font-size:20px;
+  font-weight:900;
+  color:#7a003c;
+}
+
+.upload-box small{
+  color:#8a4a62;
+  line-height:1.4;
+}
+
+.input-group{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+
+label{
+  font-weight:900;
+  color:#7a003c;
+  font-size:18px;
+}
+
+input,
+textarea,
+select{
+  width:100%;
+  padding:16px;
+  border-radius:18px;
+  border:2px solid #f5b3cf;
+  background:#fff7fb;
+  font-size:17px;
+  outline:none;
+}
+select{
+  appearance:auto;
+  -webkit-appearance:auto;
+  -moz-appearance:auto;
+  background:#fff7fb;
+  cursor:pointer;
+}
+input[type="checkbox"]{
+  width:auto;
+  accent-color:#ff008c;
+}
+
+textarea{
+  min-height:130px;
+  resize:vertical;
+}
+
+.validacion-grid{
+  grid-column:1/-1;
+  display:grid;
+  gap:12px;
+}
+
+.validacion-grid label,
+.facturacion-opciones label{
+  padding:14px;
+  border:2px solid #ffb4d2;
+  border-radius:18px;
+  background:#fff0f6;
+  display:flex;
+  gap:10px;
+  align-items:center;
+  font-weight:800;
+}
+
+.info-visible-texto{
+  font-size:16px;
+  color:#7a003c;
+  margin-top:10px;
+}
+
+.acciones{
+  grid-column:1/-1;
+  display:flex;
+  justify-content:center;
+  gap:18px;
+  margin-top:20px;
+}
+
+button{
+  border:none;
+  padding:18px 34px;
+  border-radius:20px;
+  font-size:18px;
+  font-weight:900;
+  cursor:pointer;
+}
+
+.btn-secundario{
+  background:white;
+  color:#c2185b;
+  border:2px solid #ff4fc3;
+}
+
+.btn-principal{
+  background:linear-gradient(90deg,#ff008c,#ff4fc3);
+  color:white;
+  box-shadow:0 8px 25px rgba(255,0,140,.28);
+}
+
+@media(max-width:700px){
+  .contenedor{width:94%;padding:16px}
+  .form-grid,.upload-grid{grid-template-columns:1fr}
+  .separador-solicitud{font-size:24px}
+}
+</style>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage-compat.js"></script>
+
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyCp68DynjT63T9wHorCLxwBGkSEo_mYPUI",
+  authDomain: "carihub-app.firebaseapp.com",
+  projectId: "carihub-app",
+  storageBucket: "carihub-app.firebasestorage.app",
+  messagingSenderId: "236894758884",
+  appId: "1:236894758884:web:5713e39a26c71f025a49f1"
+};
+
+if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
+}
+const auth = firebase.auth();
+const storage = firebase.storage();
+
+auth.signInAnonymously()
+  .then(() => {
+    console.log("Sesión anónima iniciada");
+  })
+  .catch((error) => {
+    console.error("Error Auth:", error);
+  });
+</script>
+</head>
+
+<body>
+
+<div class="contenedor">
+
+<div>
+<input type="file" id="debugStorageFile" accept="image/*">
+<button type="button" onclick="probarStorageTemporal()">Probar Storage</button>
+</div>
+
+<img class="hero-img" src="img/pantalla-validacion-anunciante.jpeg" alt="Validación del anunciante">
+
+<div class="form-grid">
+
+<div class="separador-solicitud full">
+Información privada y validación del anunciante
+</div>
+
+<div class="card">
+<h3>Validación privada</h3>
+<p>
+Esta información solo será visible para administración. Sirve para revisar que el anunciante sea real, proteger la plataforma y autorizar campañas antes de habilitar el pago.
+</p>
+</div>
+
+  <div class="card">
+<h3>Responsable de la cuenta publicitaria</h3>
+<p>
+Estos datos son privados y solo los verá administración. Sirven para identificar y contactar a la persona responsable de esta cuenta publicitaria.
+</p>
+</div>
+
+<div class="input-group">
+<label>Nombre completo del responsable</label>
+<input type="text" name="nombreResponsableCuenta" placeholder="Nombre completo del responsable">
+</div>
+
+<div class="input-group">
+<label>WhatsApp privado del responsable</label>
+<input type="text" name="whatsappResponsableCuenta" placeholder="528112345678">
+</div>
+
+<div class="input-group">
+<label>Correo privado del responsable</label>
+<input type="email" name="correoResponsableCuenta" placeholder="correo@email.com">
+</div>
+<div class="input-group full">
+<label>Dirección privada del responsable</label>
+
+<textarea
+name="direccionResponsableCuenta"
+placeholder="Calle, número, colonia, ciudad, estado y referencias">
+</textarea>
+
+</div>
+<div class="input-group">
+<label>Tipo de responsable</label>
+<select name="tipoResponsableCuenta">
+<option value="">Selecciona una opción</option>
+<option value="persona-fisica">Persona física</option>
+<option value="negocio">Negocio</option>
+<option value="empresa">Empresa</option>
+<option value="agencia">Agencia</option>
+<option value="representante-autorizado">Representante autorizado</option>
+<option value="otro">Otro</option>
+</select>
+</div>
+<div class="input-group">
+<label>Relación con la publicidad</label>
+
+<select name="relacionPublicidad">
+<option value="">Selecciona una opción</option>
+<option value="propietario">Soy propietario</option>
+<option value="representante">Soy representante autorizado</option>
+<option value="empleado">Soy empleado</option>
+<option value="agencia">Soy agencia</option>
+<option value="otro">Otro</option>
+</select>
+
+</div>
+
+<div class="input-group">
+<label>Medio preferido de contacto administrativo</label>
+
+<select name="medioContactoAdministrativo">
+<option value="">Selecciona una opción</option>
+<option value="whatsapp">WhatsApp</option>
+<option value="correo">Correo electrónico</option>
+<option value="llamada">Llamada telefónica</option>
+</select>
+
+</div>
+<div class="input-group">
+<label>Horario preferido de contacto</label>
+
+<select name="horarioContactoAdministrativo">
+<option value="">Selecciona una opción</option>
+<option value="manana">Mañana</option>
+<option value="tarde">Tarde</option>
+<option value="noche">Noche</option>
+<option value="cualquier">Cualquier horario</option>
+</select>
+
+</div>
+<h3>Documentos privados</h3>
+<p>
+Los documentos enviados son únicamente para validación interna y nunca se mostrarán públicamente.
+</p>
+</div>
+
+<div class="upload-grid">
+
+<label class="upload-box">
+<span>Identificación oficial frente</span>
+<small>Documento privado para validación interna.</small>
+<input type="file" name="identificacionFrente" accept="image/*,.pdf">
+</label>
+
+<label class="upload-box">
+<span>Identificación oficial reverso</span>
+<small>Documento privado para validación interna.</small>
+<input type="file" name="identificacionReverso" accept="image/*,.pdf">
+</label>
+
+<label class="upload-box">
+<span>Selfie de validación</span>
+<small>Documento privado para validación interna.</small>
+<input type="file" name="selfieValidacion" accept="image/*">
+</label>
+
+<label class="upload-box">
+<span>Comprobante de domicilio</span>
+<small>Documento privado para validación interna.</small>
+<input type="file" name="comprobanteDomicilio" accept="image/*,.pdf">
+</label>
+
+</div>
+
+<div class="card">
+<h3>Datos fiscales</h3>
+
+<div class="facturacion-opciones">
+<label>
+<input type="checkbox" id="necesitaFacturaCfdi" name="necesitaFacturaCfdi" value="si">
+Necesito factura CFDI
+</label>
+</div>
+
+<p class="info-visible-texto">
+La factura únicamente podrá emitirse después de la aprobación y confirmación del pago.
+</p>
+</div>
+<div id="datosFactura" style="display:none;">
+<div class="input-group">
+<label>Nombre fiscal o responsable</label>
+<input type="text" name="nombreFiscal" placeholder="Nombre completo">
+</div>
+
+<div class="input-group">
+<label>Razón social</label>
+<input type="text" name="razonSocialFactura" placeholder="Nombre o razón social">
+</div>
+
+<div class="input-group">
+<label>RFC</label>
+<input type="text" name="rfcFactura" placeholder="RFC para facturación">
+</div>
+
+<div class="input-group">
+<label>Domicilio fiscal</label>
+<input type="text" name="domicilioFiscal" placeholder="Domicilio fiscal">
+</div>
+
+<div class="input-group">
+<label>Código postal fiscal</label>
+<input type="text" name="codigoPostalFiscal" placeholder="Código postal">
+</div>
+
+
+
+<div class="input-group">
+<label>Correo para factura</label>
+<input type="email" name="correoFactura" placeholder="facturacion@email.com">
+</div>
+
+</div>
+
+<div class="card">
+<h3>Validación y moderación</h3>
+<p>
+Antes de publicarse, el administrador revisará la información y los documentos enviados.
+</p>
+</div>
+
+<div class="validacion-grid">
+<label><input type="checkbox" name="validacionDerechosImagenes"> Confirmo que tengo derechos sobre las imágenes enviadas.</label>
+<label><input type="checkbox" name="validacionContenidoLegal"> Confirmo que no subiré contenido ilegal o engañoso.</label>
+<label><input type="checkbox" name="validacionRevisionManual"> Acepto revisión manual antes de publicarse.</label>
+</div>
+
+<div class="input-group full">
+<label>Notas privadas para revisión</label>
+<textarea name="notasRevisionAdmin" placeholder="Información adicional que solamente verá el administrador"></textarea>
+</div>
+
+<div class="card">
+<h3>Flujo de publicación</h3>
+<p>
+La solicitud será revisada por el administrador. Si requiere correcciones, se notificará al anunciante. Una vez aprobada y confirmado el pago, la publicidad podrá activarse conforme a las políticas de la plataforma.
+</p>
+</div>
+
+<div class="acciones">
+<button type="button" class="btn-secundario" onclick="window.location.href='registro-banner.html'">
+← Volver
+</button>
+
+<button type="button" class="btn-principal" onclick="validarPantalla2(event)">
+Enviar a revisión →
+</button>
+
+</div>
+</div>
+<script>
+
+const chkFactura =
+document.getElementById("necesitaFacturaCfdi");
+
+const datosFactura =
+document.getElementById("datosFactura");
+
+datosFactura.style.display = "none";
+
+chkFactura.addEventListener("change", () => {
+
+  datosFactura.style.display =
+    chkFactura.checked
+      ? "block"
+      : "none";
+
+});
+
+</script>
+<script>
+function campoVacio(selector){
+  const campo = document.querySelector(selector);
+  return !campo || !campo.value || campo.value.trim() === "";
+}
+
+function archivoVacio(selector){
+  const campo = document.querySelector(selector);
+  return !campo || !campo.files || campo.files.length === 0;
+}
+
+function checkNoMarcado(selector){
+  const campo = document.querySelector(selector);
+  return !campo || !campo.checked;
+}
+async function asegurarSesionAnonima(){
+  if(firebase.auth().currentUser){
+    return firebase.auth().currentUser;
+  }
+
+  const cred = await firebase.auth().signInAnonymously();
+  return cred.user;
+}
+async function prepararArchivoParaStorage(file){
+  const LIMITE_BYTES = 5 * 1024 * 1024;
+
+  if(file.type === "application/pdf"){
+    if(file.size > LIMITE_BYTES){
+      throw new Error("El PDF " + file.name + " supera 5MB. Sube un PDF más ligero.");
+    }
+
+    return {
+      archivo: file,
+      nombre: file.name,
+      contentType: "application/pdf"
+    };
+  }
+
+  if(!file.type.startsWith("image/")){
+    throw new Error("El archivo " + file.name + " debe ser imagen o PDF.");
+  }
+
+  const imagen = await new Promise((resolve,reject)=>{
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => reject(new Error("No se pudo procesar la imagen " + file.name));
+    img.src = URL.createObjectURL(file);
+  });
+
+  const max = 1600;
+  let width = imagen.width;
+  let height = imagen.height;
+
+  if(width > height && width > max){
+    height = Math.round(height * max / width);
+    width = max;
+  }else if(height > max){
+    width = Math.round(width * max / height);
+    height = max;
+  }
+
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+
+  const ctx = canvas.getContext("2d");
+  ctx.drawImage(imagen,0,0,width,height);
+
+  const blob = await new Promise(resolve=>{
+    canvas.toBlob(resolve,"image/jpeg",0.75);
+  });
+
+  if(!blob){
+    throw new Error("No se pudo comprimir la imagen " + file.name);
+  }
+
+  if(blob.size > LIMITE_BYTES){
+    throw new Error("La imagen " + file.name + " sigue superando 5MB después de comprimir. Sube una imagen más ligera.");
+  }
+
+  const nombreBase = file.name.replace(/\.[^.]+$/,"");
+  const nombreJpg = nombreBase + ".jpg";
+
+  return {
+    archivo: blob,
+    nombre: nombreJpg,
+    contentType: "image/jpeg"
+  };
+}
+async function subirDocumentoPrivado(storage, solicitudId, campo, selector){
+  const file = document.querySelector(selector)?.files[0];
+
+  if(!file){
+    return { nombre: "", url: "" };
+  }
+
+  const preparado = await prepararArchivoParaStorage(file);
+  const nombreSeguro = preparado.nombre.replace(/[^\w.\-]+/g, "_");
+  const ruta = `solicitudes_anuncios/${solicitudId}/documentos_privados/${campo}-${Date.now()}-${nombreSeguro}`;
+  const ref = storage.ref(ruta);
+
+  await ref.put(preparado.archivo, {
+    contentType: preparado.contentType
+  });
+
+  return {
+    nombre: preparado.nombre,
+    url: await ref.getDownloadURL()
+  };
+}
+async function probarStorageTemporal(){
+  const file = document.getElementById("debugStorageFile")?.files[0];
+
+  if(!file){
+    alert("Selecciona una imagen para probar Storage.");
+    return;
+  }
+
+  try{
+    await asegurarSesionAnonima();
+
+    const preparado = await prepararArchivoParaStorage(file);
+    const ref = storage.ref(`solicitudes_anuncios/debug/documentos_privados/test-${Date.now()}.jpg`);
+
+    await ref.put(preparado.archivo, {
+      contentType: preparado.contentType
+    });
+
+    alert("Storage OK");
+  }catch(error){
+    alert(
+      "Código: " + error.code +
+      "\n\nMensaje: " + error.message
+    );
+  }
+}
+async function guardarSolicitudPublicidad(){
+
+  if(!firebase.apps.length){
+    throw new Error("Firebase no está inicializado en esta pantalla.");
+  }
+
+  const db = firebase.firestore();
+  await asegurarSesionAnonima();
+
+const paso1 = JSON.parse(
+  localStorage.getItem("solicitudPublicidadPaso1") || "{}"
+);
+
+  const docRef = db.collection("solicitudes_anuncios").doc();
+  const identificacionFrente = await subirDocumentoPrivado(storage, docRef.id, "identificacionFrente", 'input[name="identificacionFrente"]');
+  const identificacionReverso = await subirDocumentoPrivado(storage, docRef.id, "identificacionReverso", 'input[name="identificacionReverso"]');
+  const selfieValidacion = await subirDocumentoPrivado(storage, docRef.id, "selfieValidacion", 'input[name="selfieValidacion"]');
+  const comprobanteDomicilio = await subirDocumentoPrivado(storage, docRef.id, "comprobanteDomicilio", 'input[name="comprobanteDomicilio"]');
+
+  const solicitud = {
+    tipoSolicitud: "publicidad_banner",
+    estadoSolicitud: "revision_soporte",
+    estadoAdmin: "sin_revisar",
+tipoFlujo: "publicidad",
+    estadoPago: "pendiente",
+    aprobado: false,
+    activo: false,
+    cambiosPendientes: false,
+    autorizadoParaPago: false,
+
+    fechaEnvioRevision: firebase.firestore.FieldValue.serverTimestamp(),
+nombreNegocio: paso1.nombreNegocio || "",
+categoria: paso1.categoria || "",
+pais: paso1.pais || "",
+estado: paso1.estado || "",
+ciudad: paso1.ciudad || "",
+pantalla: paso1.pantalla || "",
+espacio: paso1.espacio || "",
+slotId: paso1.slotId || "",
+imagenPrincipalNombre: paso1.imagenPrincipalNombre || "",
+periodoPublicidad: paso1.periodoPublicidad || "",
+tipoContenidoPublicidad: paso1.tipoContenidoPublicidad || "",
+precioAnuncio: paso1.precioAnuncio || "",
+mensajeContactoPublicidad: paso1.mensajeContactoPublicidad || "",
+    datosPrivados: {
+      nombreResponsableCuenta: document.querySelector('input[name="nombreResponsableCuenta"]')?.value.trim() || "",
+      whatsappResponsableCuenta: document.querySelector('input[name="whatsappResponsableCuenta"]')?.value.trim() || "",
+      correoResponsableCuenta: document.querySelector('input[name="correoResponsableCuenta"]')?.value.trim() || "",
+      direccionResponsableCuenta: document.querySelector('textarea[name="direccionResponsableCuenta"]')?.value.trim() || "",
+      tipoResponsableCuenta: document.querySelector('select[name="tipoResponsableCuenta"]')?.value || "",
+      relacionPublicidad: document.querySelector('select[name="relacionPublicidad"]')?.value || "",
+      medioContactoAdministrativo: document.querySelector('select[name="medioContactoAdministrativo"]')?.value || "",
+      horarioContactoAdministrativo: document.querySelector('select[name="horarioContactoAdministrativo"]')?.value || ""
+    },
+
+    facturacion: {
+      necesitaFacturaCfdi: document.getElementById("necesitaFacturaCfdi")?.checked || false,
+      nombreFiscal: document.querySelector('input[name="nombreFiscal"]')?.value.trim() || "",
+      razonSocialFactura: document.querySelector('input[name="razonSocialFactura"]')?.value.trim() || "",
+      rfcFactura: document.querySelector('input[name="rfcFactura"]')?.value.trim() || "",
+      domicilioFiscal: document.querySelector('input[name="domicilioFiscal"]')?.value.trim() || "",
+      codigoPostalFiscal: document.querySelector('input[name="codigoPostalFiscal"]')?.value.trim() || "",
+      correoFactura: document.querySelector('input[name="correoFactura"]')?.value.trim() || ""
+    },
+
+    validaciones: {
+      derechosImagenes: document.querySelector('input[name="validacionDerechosImagenes"]')?.checked || false,
+      contenidoLegal: document.querySelector('input[name="validacionContenidoLegal"]')?.checked || false,
+      revisionManual: document.querySelector('input[name="validacionRevisionManual"]')?.checked || false
+    },
+
+    notasRevisionAdmin: document.querySelector('textarea[name="notasRevisionAdmin"]')?.value.trim() || "",
+
+    documentos: {
+      identificacionFrente: identificacionFrente.nombre,
+      identificacionFrenteURL: identificacionFrente.url,
+      identificacionReverso: identificacionReverso.nombre,
+      identificacionReversoURL: identificacionReverso.url,
+      selfieValidacion: selfieValidacion.nombre,
+      selfieValidacionURL: selfieValidacion.url,
+      comprobanteDomicilio: comprobanteDomicilio.nombre,
+      comprobanteDomicilioURL: comprobanteDomicilio.url
+    }
+  };
+
+  await docRef.set(solicitud);
+
+  localStorage.setItem("ultimaSolicitudPublicidadId", docRef.id);
+
+  return docRef.id;
+}
+async function validarPantalla2(event){
+  event.preventDefault();
+
+  const faltantes = [];
+if(campoVacio('input[name="nombreResponsableCuenta"]'))
+  faltantes.push("Nombre completo del responsable");
+
+if(campoVacio('input[name="whatsappResponsableCuenta"]'))
+  faltantes.push("WhatsApp privado del responsable");
+
+if(campoVacio('input[name="correoResponsableCuenta"]'))
+  faltantes.push("Correo privado del responsable");
+
+if(campoVacio('select[name="tipoResponsableCuenta"]'))
+  faltantes.push("Tipo de responsable");
+  if(archivoVacio('input[name="identificacionFrente"]')) faltantes.push("Identificación oficial frente");
+  if(archivoVacio('input[name="identificacionReverso"]')) faltantes.push("Identificación oficial reverso");
+  if(archivoVacio('input[name="selfieValidacion"]')) faltantes.push("Selfie de validación");
+  if(archivoVacio('input[name="comprobanteDomicilio"]')) faltantes.push("Comprobante de domicilio");
+
+  if(checkNoMarcado('input[name="validacionDerechosImagenes"]')) faltantes.push("Confirmar derechos sobre las imágenes");
+  if(checkNoMarcado('input[name="validacionContenidoLegal"]')) faltantes.push("Confirmar contenido legal");
+  if(checkNoMarcado('input[name="validacionRevisionManual"]')) faltantes.push("Aceptar revisión manual");
+
+  const necesitaFactura = document.getElementById("necesitaFacturaCfdi")?.checked;
+
+  if(necesitaFactura){
+    if(campoVacio('input[name="nombreFiscal"]')) faltantes.push("Nombre fiscal o responsable");
+    if(campoVacio('input[name="razonSocialFactura"]')) faltantes.push("Razón social");
+    if(campoVacio('input[name="rfcFactura"]')) faltantes.push("RFC");
+    if(campoVacio('input[name="domicilioFiscal"]')) faltantes.push("Domicilio fiscal");
+    if(campoVacio('input[name="codigoPostalFiscal"]')) faltantes.push("Código postal fiscal");
+    if(campoVacio('input[name="correoFactura"]')) faltantes.push("Correo para factura");
+  }
+
+  if(faltantes.length > 0){
+    alert("Antes de enviar a revisión, completa:\n\n• " + faltantes.join("\n• "));
+    return;
+  }
+
+  try{
+  await guardarSolicitudPublicidad();
+  alert("Solicitud guardada correctamente.");
+  window.location.href = "registro-banner-paso3.html";
+  }
+catch(error){
+  console.error("ERROR COMPLETO:", error);
+  console.error("CODE:", error.code);
+  console.error("MESSAGE:", error.message);
+
+  alert(
+    "Código: " + error.code +
+    "\n\nMensaje: " + error.message
+  );
+}
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,4406 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel Admin CariHub</title>
+
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage-compat.js"></script>
+<script src="paises.js"></script>
+<script src="estados.js"></script>
+<script src="ciudades.js"></script>
+<script src="/js/catalogos-carihub.js"></script>
+<script src="/js/precios-publicidad.js"></script>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyCp68DynjT63T9wHorCLxwBGkSEo_mYPUI",
+  authDomain: "carihub-app.firebaseapp.com",
+  projectId: "carihub-app",
+  storageBucket: "carihub-app.firebasestorage.app",
+  messagingSenderId: "236894758884",
+  appId: "1:236894758884:web:5713e39a26c71f025a49f1"
+};
+
+firebase.initializeApp(firebaseConfig);
+
+const auth = firebase.auth();
+const db = firebase.firestore();
+const storage = firebase.storage();
+
+const ADMIN_EMAILS = [
+  "carinosas.anuncios@gmail.com",
+  "angelpebe19@gmail.com"
+];
+const LIMITE_USUARIOS = 150;
+
+let usuariosCache = [];
+let seccionActual = "dashboard";
+let procesando = false;
+let contadoresGlobales = {};
+</script>
+
+<style>
+:root{
+  --rosa:#c2185b;
+  --rosa2:#ec407a;
+  --rosa3:#ff6fa7;
+  --vino:#67153b;
+  --vino2:#3b1027;
+  --rosaSuave:#fff1f7;
+  --fondo:#fff7fb;
+  --texto:#2b2530;
+  --muted:#7b6f78;
+  --borde:#ffd1e4;
+  --card:#ffffff;
+  --verde:#168a3a;
+  --azul:#1565c0;
+  --morado:#6a1b9a;
+  --naranja:#ef8b00;
+  --rojo:#c62828;
+  --sombra:0 12px 30px rgba(194,24,91,.14);
+  --sombra2:0 8px 22px rgba(0,0,0,.09);
+}
+
+*{
+  box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;
+}
+
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:linear-gradient(135deg,#ff2d86,#ff8fbd);
+  color:var(--texto);
+  min-height:100vh;
+}
+
+button,input,select,textarea{
+  font-family:inherit;
+}
+
+button{
+  border:none;
+  cursor:pointer;
+  font-weight:900;
+}
+
+button:disabled{
+  opacity:.55;
+  cursor:not-allowed;
+}
+
+input,select,textarea{
+  width:100%;
+  padding:13px;
+  margin:7px 0;
+  border:1px solid #ead6df;
+  border-radius:13px;
+  font-size:15px;
+  background:white;
+}
+
+.password-toggle-wrap{
+  position:relative;
+  display:block;
+  width:100%;
+}
+
+.password-toggle-wrap input{
+  padding-right:52px !important;
+}
+
+.password-toggle-btn{
+  position:absolute;
+  right:10px;
+  top:50%;
+  transform:translateY(-50%);
+  width:38px;
+  height:38px;
+  border:none;
+  border-radius:50%;
+  background:transparent;
+  box-shadow:none;
+  padding:0;
+  margin:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:22px;
+  line-height:1;
+  cursor:pointer;
+  z-index:2;
+}
+
+.password-toggle-btn:focus{
+  outline:2px solid var(--rosa);
+  outline-offset:2px;
+}
+
+textarea{
+  min-height:110px;
+}
+
+h1,h2,h3,p{
+  margin-top:0;
+}
+
+.login-screen{
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:18px;
+}
+
+.login-card{
+  width:100%;
+  max-width:430px;
+  background:white;
+  border:1px solid var(--borde);
+  border-radius:28px;
+  box-shadow:var(--sombra);
+  padding:28px;
+}
+
+.login-logo{
+  width:74px;
+  height:74px;
+  border-radius:22px;
+  background:linear-gradient(135deg,var(--rosa),var(--rosa3));
+  color:white;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:34px;
+  margin:0 auto 16px;
+}
+
+.login-card h1{
+  color:var(--rosa);
+  text-align:center;
+  margin-bottom:8px;
+}
+
+.login-card p{
+  color:var(--muted);
+  text-align:center;
+  margin-bottom:18px;
+}
+
+.btn-login{
+  width:100%;
+  background:linear-gradient(135deg,var(--rosa),var(--rosa2));
+  color:white;
+  border-radius:16px;
+  padding:15px;
+  font-size:17px;
+  margin-top:8px;
+}
+
+.app{
+  display:none;
+  min-height:100vh;
+  padding:8px;
+}
+
+.admin-shell{
+  display:grid;
+  grid-template-columns:250px 1fr;
+  gap:8px;
+  min-height:calc(100vh - 16px);
+}
+
+.sidebar{
+  background:linear-gradient(180deg,#3a1028,#8c1e4b);
+  border-radius:16px;
+  padding:12px;
+  color:white;
+  box-shadow:0 12px 30px rgba(0,0,0,.25);
+  overflow:auto;
+}
+
+.brand{
+  text-align:center;
+  padding:8px 8px 13px;
+  border-bottom:1px solid rgba(255,255,255,.14);
+  margin-bottom:10px;
+}
+
+.brand h1{
+  margin:0;
+  font-size:30px;
+  color:#ff5ca3;
+}
+
+.brand span{
+  color:white;
+}
+
+.brand p{
+  margin:4px 0 0;
+  font-size:12px;
+  color:#ffe6f0;
+}
+
+.side-btn{
+  width:100%;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  background:rgba(255,255,255,.08);
+  color:white;
+  border-radius:9px;
+  padding:10px;
+  margin:4px 0;
+  text-align:left;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.06);
+}
+
+.side-btn.active,
+.side-btn:hover{
+  background:linear-gradient(90deg,#ff3c8e,#ff6fa7);
+}
+
+.side-ico{
+  width:28px;
+  font-size:20px;
+  text-align:center;
+}
+
+.side-text b{
+  display:block;
+  font-size:13px;
+}
+
+.side-text small{
+  display:block;
+  font-size:11px;
+  color:#ffe6f0;
+  font-weight:700;
+}
+
+.main{
+  background:#fff7fb;
+  border-radius:16px;
+  padding:8px;
+  overflow:auto;
+}
+
+.topbar{
+  height:78px;
+  background:linear-gradient(90deg,#9d1d55,#c02b6b);
+  border-radius:14px;
+  box-shadow:var(--sombra);
+  color:white;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:12px 18px;
+  margin-bottom:10px;
+}
+
+.top-left{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+.crown{
+  width:50px;
+  height:50px;
+  border-radius:14px;
+  background:rgba(255,255,255,.16);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:28px;
+}
+
+.topbar h2{
+  margin:0;
+  font-size:20px;
+}
+
+.topbar p{
+  margin:4px 0 0;
+  font-size:13px;
+  color:#ffe6f0;
+  font-weight:700;
+}
+
+.time-box{
+  background:rgba(255,255,255,.16);
+  border-radius:13px;
+  padding:10px 18px;
+  text-align:right;
+  font-size:13px;
+  font-weight:900;
+}
+
+.vista{
+  display:none;
+}
+
+.vista.active{
+  display:block;
+}
+
+.metrics-row{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:10px;
+  margin-bottom:10px;
+}
+
+.metric-card{
+  background:white;
+  border:1px solid #ffe0ed;
+  border-radius:14px;
+  padding:14px;
+  min-height:125px;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  box-shadow:var(--sombra2);
+  cursor:pointer;
+}
+
+.metric-icon{
+  width:58px;
+  height:58px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:28px;
+  color:white;
+  flex:0 0 auto;
+}
+
+.bg-pink{background:linear-gradient(135deg,#ff2d86,#ff6fa7)}
+.bg-blue{background:linear-gradient(135deg,#1565c0,#4d8df7)}
+.bg-yellow{background:linear-gradient(135deg,#ffb300,#ff8f00)}
+.bg-green{background:linear-gradient(135deg,#11a64a,#28d66f)}
+.bg-purple{background:linear-gradient(135deg,#8e24aa,#d044ff)}
+
+.metric-card h3{
+  margin:0;
+  font-size:12px;
+  color:#1f1a20;
+}
+
+.metric-card .num{
+  font-size:29px;
+  font-weight:900;
+  color:#111;
+  margin:4px 0;
+}
+
+.metric-card p{
+  margin:0;
+  color:#655a63;
+  font-size:12px;
+  font-weight:700;
+}
+
+.panel-card{
+  background:white;
+  border:1px solid #ffd1e4;
+  border-radius:14px;
+  padding:14px;
+  box-shadow:var(--sombra2);
+  margin-bottom:10px;
+}
+
+.panel-card h2{
+  color:#ff2d86;
+  font-size:18px;
+  margin-bottom:12px;
+}
+
+.quick-grid{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:9px;
+}
+
+.quick-btn{
+  background:white;
+  border:1px solid #ffd1e4;
+  border-radius:12px;
+  min-height:72px;
+  padding:10px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  text-align:left;
+}
+
+.quick-ico{
+  width:42px;
+  height:42px;
+  border-radius:50%;
+  background:#fff1f7;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:23px;
+  flex:0 0 auto;
+}
+
+.quick-btn b{
+  display:block;
+  font-size:13px;
+  color:#171217;
+}
+
+.quick-btn small{
+  color:#655a63;
+  font-weight:700;
+  font-size:11px;
+}
+.quick-btn-publicidad{
+  background:linear-gradient(135deg,#e53935,#b71c1c);
+  color:white;
+  border:none;
+  min-height:72px;
+}
+
+.quick-btn-publicidad b,
+.quick-btn-publicidad small{
+  color:white;
+}
+
+.quick-btn-publicidad .quick-ico{
+  background:rgba(255,255,255,.18);
+}
+
+.quick-btn-publicidad b,
+.quick-btn-publicidad small{
+  color:white;
+}
+
+.quick-btn-publicidad .quick-ico{
+  background:rgba(255,255,255,.20);
+}
+
+.quick-btn-precios{
+  position:relative;
+  overflow:hidden;
+  min-height:72px;
+  color:white;
+  border:none;
+  background:
+    linear-gradient(135deg,rgba(194,24,91,.82),rgba(255,45,134,.68)),
+    url("img/imgmockup-banners-movil-vacio.jpg") center/cover;
+}
+
+.quick-btn-precios::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:rgba(194,24,91,.34);
+  pointer-events:none;
+}
+
+.quick-btn-precios .quick-ico,
+.quick-btn-precios span{
+  position:relative;
+  z-index:1;
+}
+
+.quick-btn-precios .quick-ico{
+  background:rgba(255,255,255,.20);
+}
+
+.quick-btn-precios b,
+.quick-btn-precios small{
+  color:white;
+}
+
+.precios-publicidad-wrap{
+  display:grid;
+  gap:16px;
+  overflow-x:auto;
+  padding-bottom:8px;
+}
+
+.precios-mockup{
+  position:relative;
+  width:750px;
+  max-width:none;
+  margin:0;
+  border-radius:22px;
+  overflow:hidden;
+  box-shadow:var(--sombra);
+}
+
+.precios-mockup img{
+  display:block;
+  width:100%;
+  height:auto;
+}
+
+.precio-slot-card{
+  position:absolute;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:3px;
+  padding:7px 8px;
+  border:1px solid rgba(255,255,255,.72);
+  border-radius:12px;
+  background:rgba(255,255,255,.82);
+  box-shadow:0 8px 18px rgba(122,0,60,.16);
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+  color:var(--vino2);
+  font-size:9px;
+  line-height:1.1;
+  text-align:center;
+}
+
+.precio-slot-card h3{
+  color:var(--vino2);
+  font-size:9px;
+  margin:0;
+}
+
+.precio-slot-card p{
+  margin:0;
+  color:var(--rosa);
+  font-size:10px;
+  font-weight:900;
+}
+
+.precio-card-actions{
+  display:flex;
+  justify-content:center;
+  margin-top:1px;
+}
+
+.precio-card-actions button{
+  width:20px;
+  height:20px;
+  padding:0;
+  border-radius:999px;
+  font-size:10px;
+  box-shadow:none;
+}
+
+.precio-edit-btn{background:var(--rosa);color:white}
+.precio-save-btn{background:var(--verde);color:white}
+.precio-cancel-btn{background:#777;color:white}
+
+.precios-edicion-panel{
+  width:min(780px,100%);
+  margin:10px auto 0;
+  background:white;
+  border:1px solid #ffd1e4;
+  border-radius:12px;
+  padding:10px;
+  box-shadow:var(--sombra2);
+}
+
+.precios-edicion-panel h3{
+  color:var(--rosa);
+  font-size:16px;
+  margin-bottom:7px;
+}
+
+.precios-edicion-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+}
+
+.precios-edicion-columna{
+  display:grid;
+  gap:7px;
+  align-content:start;
+}
+
+.precios-edicion-columna h4{
+  color:var(--rosa);
+  font-size:13px;
+  margin:0;
+  letter-spacing:.04em;
+}
+
+.precio-edicion-card{
+  min-height:92px;
+  background:#fff7fb;
+  border:1px solid #ffd1e4;
+  border-radius:9px;
+  padding:7px;
+  color:var(--vino2);
+  font-size:11px;
+  font-weight:800;
+  display:grid;
+  grid-template-rows:auto 1fr auto;
+  gap:4px;
+}
+
+.precio-edicion-card span{
+  display:block;
+  color:var(--rosa);
+  font-size:14px;
+  font-weight:900;
+}
+
+.precio-edicion-card label{
+  display:grid;
+  gap:4px;
+}
+
+.precios-edicion-top{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+.modo-precio-switch{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  border:1px solid #d8eedd;
+  border-radius:999px;
+  padding:7px 12px;
+  background:#eaf8ed;
+  color:#1b7f3a;
+  font-size:12px;
+  font-weight:900;
+}
+
+.modo-precio-switch.manual{
+  border-color:#ddd;
+  background:#f7f7f7;
+  color:#666;
+}
+
+.modo-precio-switch .estado{
+  min-width:34px;
+  border-radius:999px;
+  padding:3px 7px;
+  background:#22a447;
+  color:white;
+  text-align:center;
+}
+
+.modo-precio-switch.manual .estado{
+  background:white;
+  color:#777;
+  border:1px solid #d7d7d7;
+}
+
+.precio-edicion-card small{
+  display:grid;
+  grid-template-columns:1fr auto;
+  align-items:center;
+  gap:6px;
+  margin-top:4px;
+  color:var(--muted);
+  font-size:10px;
+}
+
+.precios-edicion-grid input{
+  width:100%;
+  margin-top:4px;
+  padding:6px 8px;
+  border:1px solid #ffc4dc;
+  border-radius:8px;
+  font-size:13px;
+}
+
+.precio-edicion-card small input{
+  width:64px;
+  margin-top:0;
+  padding:4px 6px;
+  font-size:11px;
+}
+
+.precios-edicion-actions{
+  display:flex;
+  gap:10px;
+  justify-content:flex-end;
+  margin-top:8px;
+}
+
+.precios-edicion-actions button{
+  border-radius:8px;
+  padding:7px 11px;
+  font-size:12px;
+  font-weight:900;
+}
+
+.alcance-precio-box{
+  margin-top:10px;
+  border-top:1px solid #ffd1e4;
+  padding-top:10px;
+}
+
+.alcance-precio-box h4{
+  color:var(--rosa);
+  font-size:13px;
+  margin:0 0 7px;
+}
+
+.alcance-precio-grid{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:7px;
+}
+
+.alcance-precio-grid label{
+  min-width:0;
+  display:grid;
+  gap:4px;
+  color:var(--vino2);
+  font-size:10px;
+  font-weight:900;
+}
+
+.alcance-precio-grid select{
+  width:100%;
+  min-height:34px;
+  border:1px solid #ffc4dc;
+  border-radius:9px;
+  background:#fff7fb;
+  color:var(--vino2);
+  padding:6px 8px;
+  font-size:11px;
+  font-weight:800;
+}
+
+.selector-carihub{
+  width:100%;
+  max-width:100%;
+  min-width:0;
+  box-sizing:border-box;
+  position:relative;
+}
+
+.selector-carihub-btn{
+  width:100%;
+  max-width:100%;
+  min-height:34px;
+  border:1px solid rgba(255,155,197,.9);
+  border-radius:9px;
+  background:rgba(255,247,251,.74);
+  color:var(--vino2);
+  padding:6px 28px 6px 8px;
+  font-size:11px;
+  font-weight:900;
+  text-align:left;
+  box-sizing:border-box;
+  box-shadow:0 8px 18px rgba(233,30,99,.12);
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+  position:relative;
+}
+
+.selector-carihub-btn span{
+  display:block;
+  max-width:100%;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+.selector-carihub-btn::after{
+  content:"";
+  position:absolute;
+  right:10px;
+  top:50%;
+  width:7px;
+  height:7px;
+  border-right:2px solid var(--rosa);
+  border-bottom:2px solid var(--rosa);
+  transform:translateY(-65%) rotate(45deg);
+  transition:transform .22s ease;
+}
+
+.selector-carihub.open .selector-carihub-btn::after{
+  transform:translateY(-35%) rotate(225deg);
+}
+
+.selector-carihub.open .selector-carihub-btn{
+  border-color:rgba(233,30,99,.95);
+  box-shadow:0 10px 24px rgba(233,30,99,.2);
+}
+
+.selector-carihub.disabled .selector-carihub-btn,
+.selector-carihub-btn:disabled{
+  opacity:.58;
+  cursor:not-allowed;
+  box-shadow:none;
+}
+
+#selectorCariHubPortal{
+  position:fixed;
+  left:0;
+  top:0;
+  width:260px;
+  max-height:min(320px,60vh);
+  overflow:auto;
+  display:grid;
+  gap:4px;
+  padding:7px;
+  border:1px solid rgba(255,155,197,.95);
+  border-radius:13px;
+  background:rgba(255,247,251,.86);
+  box-shadow:0 20px 42px rgba(135,0,79,.22), inset 0 1px 0 rgba(255,255,255,.72);
+  backdrop-filter:blur(18px);
+  -webkit-backdrop-filter:blur(18px);
+  z-index:10020;
+  opacity:0;
+  visibility:hidden;
+  pointer-events:none;
+  transform:translateY(-5px) scale(.985);
+  transition:opacity .22s ease, transform .22s ease, visibility .22s ease;
+}
+
+#selectorCariHubPortal.open{
+  opacity:1;
+  visibility:visible;
+  pointer-events:auto;
+  transform:translateY(0) scale(1);
+}
+
+.selector-carihub-option{
+  width:100%;
+  border:0;
+  border-radius:10px;
+  background:rgba(255,255,255,.58);
+  color:var(--vino2);
+  padding:8px 9px;
+  font-size:12px;
+  font-weight:900;
+  text-align:left;
+  box-shadow:none;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.selector-carihub-option:hover,
+.selector-carihub-option:focus{
+  background:rgba(255,223,238,.9);
+  outline:none;
+}
+
+.selector-carihub-option.activa{
+  background:linear-gradient(135deg,#e91e63,#c2185b);
+  color:white;
+}
+
+.selector-carihub-option.vacia{
+  color:#8f5574;
+  font-weight:800;
+}
+
+.selector-carihub-check{
+  width:18px;
+  flex:0 0 18px;
+  color:var(--rosa);
+  font-size:14px;
+  line-height:1;
+  text-align:center;
+}
+
+.selector-carihub-option.activa .selector-carihub-check{
+  color:white;
+}
+
+.selector-carihub-option span:last-child{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.alcances-guardados-box{
+  margin-top:10px;
+  border-top:1px solid #ffd1e4;
+  padding-top:10px;
+}
+
+.alcances-guardados-box h4{
+  color:var(--rosa);
+  font-size:13px;
+  margin:0 0 7px;
+}
+
+.alcances-guardados-lista{
+  display:grid;
+  gap:7px;
+}
+
+.alcance-guardado-item{
+  display:grid;
+  gap:10px;
+  background:linear-gradient(180deg,#fff9fc,#fff1f8);
+  border:1px solid #ff9fc7;
+  border-radius:11px;
+  padding:11px;
+  box-shadow:0 10px 24px rgba(173,0,89,.12);
+}
+
+.alcance-guardado-item p{
+  margin:0;
+  color:var(--vino2);
+  font-size:11px;
+  line-height:1.25;
+}
+
+.alcance-guardado-item small{
+  color:var(--muted);
+  font-weight:800;
+}
+
+.alcance-guardado-head{
+  display:flex;
+  justify-content:space-between;
+  gap:8px;
+  flex-wrap:wrap;
+  color:var(--vino2);
+  font-size:11px;
+  font-weight:900;
+  border-bottom:1px solid #ffd1e4;
+  padding:0 0 7px;
+  background:rgba(255,255,255,.42);
+  border-radius:8px;
+}
+
+.alcance-guardado-meta{
+  display:flex;
+  gap:6px;
+  flex-wrap:wrap;
+  align-items:center;
+}
+
+.alcance-pill{
+  border:1px solid #ffc4dc;
+  border-radius:999px;
+  background:white;
+  color:var(--vino2);
+  padding:3px 7px;
+  font-size:10px;
+  font-weight:900;
+}
+
+.alcance-pill.inactivo{
+  color:#777;
+  border-color:#ddd;
+  background:#f7f7f7;
+}
+
+.alcance-guardado-detalle{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:6px;
+}
+
+.alcance-guardado-detalle p{
+  border:1px solid #ffe1ec;
+  border-radius:8px;
+  background:rgba(255,255,255,.6);
+  padding:6px;
+}
+
+.alcance-precios-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:7px;
+}
+
+.alcance-precios-col{
+  border:1px solid #ffd1e4;
+  border-radius:10px;
+  background:rgba(255,255,255,.66);
+  padding:7px;
+}
+
+.alcance-precios-col h5{
+  color:var(--rosa);
+  font-size:12px;
+  margin:0 0 5px;
+}
+
+.alcance-precio-row{
+  display:flex;
+  justify-content:space-between;
+  gap:8px;
+  border-top:1px solid #ffe1ec;
+  padding:5px 0;
+  color:var(--vino2);
+  font-size:11px;
+  font-weight:800;
+}
+
+.alcance-precio-row:first-of-type{
+  border-top:0;
+}
+
+.alcance-precio-row span:last-child{
+  text-align:right;
+  font-weight:900;
+}
+
+.alcance-guardado-actions{
+  display:flex;
+  gap:5px;
+  flex-wrap:wrap;
+  justify-content:flex-start;
+}
+
+.alcance-guardado-actions button{
+  border-radius:8px;
+  padding:6px 8px;
+  font-size:11px;
+  font-weight:900;
+}
+
+.carihub-toast{
+  position:fixed;
+  right:18px;
+  bottom:18px;
+  z-index:20000;
+  max-width:min(360px,calc(100vw - 36px));
+  border-radius:12px;
+  padding:12px 14px;
+  color:white;
+  font-size:13px;
+  font-weight:900;
+  box-shadow:0 16px 34px rgba(80,0,45,.22);
+  opacity:0;
+  transform:translateY(10px);
+  pointer-events:none;
+  transition:opacity .22s ease, transform .22s ease;
+}
+
+.carihub-toast.visible{
+  opacity:1;
+  transform:translateY(0);
+}
+
+.carihub-toast.exito{
+  background:linear-gradient(135deg,#18a058,#0d7f43);
+}
+
+.carihub-toast.error{
+  background:linear-gradient(135deg,#d92d3b,#9f1239);
+}
+
+.precio-slot-home-izquierda{left:2.0%;top:55.9%;width:14.9%;min-height:12.3%;}
+.precio-slot-home-derecha{left:17.6%;top:55.9%;width:14.9%;min-height:12.3%;}
+.precio-slot-home-inferior{left:2.0%;top:74.0%;width:30.4%;min-height:13.3%;}
+.precio-slot-resultados-izquierda{left:35.6%;top:18.9%;width:8.9%;min-height:9.1%;}
+.precio-slot-resultados-centro{left:44.9%;top:18.9%;width:9.6%;min-height:9.1%;}
+.precio-slot-resultados-derecha{left:54.9%;top:18.9%;width:9.1%;min-height:9.1%;}
+.precio-slot-resultados-inferior{left:35.8%;top:74.0%;width:28.4%;min-height:13.4%;}
+.precio-slot-perfil-izquierda{left:67.9%;top:12.9%;width:9.6%;min-height:8.7%;}
+.precio-slot-perfil-centro{left:77.9%;top:12.9%;width:9.7%;min-height:8.7%;}
+.precio-slot-perfil-derecha{left:88.2%;top:12.9%;width:9.7%;min-height:8.7%;}
+.precio-slot-perfil-inferior{left:68.0%;top:74.0%;width:30.0%;min-height:13.4%;}
+.bottom-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:10px;
+}
+
+.mini-panel{
+  background:white;
+  border:1px solid #ffd1e4;
+  border-radius:14px;
+  padding:14px;
+  box-shadow:var(--sombra2);
+  min-height:245px;
+}
+
+.mini-panel h3{
+  color:#ff2d86;
+  font-size:16px;
+  margin-bottom:10px;
+}
+
+.feed-item{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  border-bottom:1px solid #f0e3e9;
+  padding:8px 0;
+  font-size:12px;
+}
+
+.feed-left{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.avatar{
+  width:34px;
+  height:34px;
+  border-radius:50%;
+  background:#e7f1ff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.feed-item b{
+  display:block;
+}
+
+.feed-item small{
+  display:block;
+  color:#655a63;
+  font-weight:700;
+}
+
+.feed-btn{
+  background:#ff2d86;
+  color:white;
+  border-radius:7px;
+  padding:7px 10px;
+  font-size:12px;
+}
+
+.section-head{
+  background:white;
+  border:1px solid var(--borde);
+  border-radius:14px;
+  box-shadow:var(--sombra2);
+  padding:8px 12px;
+  margin-bottom:6px;
+}
+
+.section-head h2{
+  color:var(--rosa);
+  margin-bottom:3px;
+  line-height:1.08;
+}
+
+.section-head p{
+  color:var(--muted);
+  margin-bottom:0;
+  line-height:1.15;
+}
+
+.section-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-top:6px;
+}
+
+.btn{
+  padding:11px 13px;
+  border-radius:12px;
+  font-size:14px;
+  margin:3px;
+}
+
+.btn-volver{background:#777;color:white}
+.btn-refresh{background:var(--rosa);color:white}
+.btn-aprobar{background:var(--verde);color:white}
+.btn-cambios{background:var(--azul);color:white}
+.btn-pago{background:var(--morado);color:white}
+.btn-quitar{background:var(--naranja);color:white}
+.btn-borrar{background:var(--rojo);color:white}
+.btn-ver{background:var(--rosa);color:white}
+.btn-denuncia{background:#d32f2f;color:white}
+.btn-mensaje{background:#00897b;color:white}
+
+.search-row{
+  display:grid;
+  grid-template-columns:1fr 220px;
+  gap:10px;
+  margin-top:12px;
+}
+
+.list-wrap{
+  background:white;
+  border:1px solid var(--borde);
+  border-radius:14px;
+  box-shadow:var(--sombra2);
+  padding:14px;
+}
+
+.cards-list{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:6px;
+}
+
+#contenidoModulo .item{
+  padding:8px;
+  min-height:0;
+}
+
+#contenidoModulo .item h3{
+  font-size:15px;
+  margin-bottom:4px;
+  line-height:1.05;
+}
+
+#contenidoModulo .item p{
+  font-size:11px;
+  line-height:1.15;
+  margin:4px 0;
+}
+
+#contenidoModulo .badge{
+  font-size:10px;
+  padding:4px 7px;
+  margin:3px 0;
+}
+
+#contenidoModulo .btn{
+  padding:7px 8px;
+  font-size:11px;
+  border-radius:9px;
+}
+
+#contenidoModulo .item{
+  padding:10px;
+  min-height:auto;
+}
+
+#contenidoModulo .item h3{
+  font-size:18px;
+  margin-bottom:6px;
+  line-height:1.15;
+}
+
+#contenidoModulo .item p{
+  font-size:12px;
+  line-height:1.25;
+  margin:5px 0;
+}
+
+#contenidoModulo .badge{
+  font-size:11px;
+  padding:5px 8px;
+  margin-bottom:5px;
+}
+
+#contenidoModulo .btn{
+  padding:8px 10px;
+  font-size:12px;
+  border-radius:10px;
+}
+
+.item{
+  background:#fff;
+  border:1px solid #ffe1ee;
+  border-radius:14px;
+  padding:12px;
+  box-shadow:0 4px 12px rgba(0,0,0,.06);
+}
+
+.item h3{
+  color:var(--rosa);
+  margin-bottom:7px;
+}
+
+.item p{
+  color:#3b333a;
+  margin:6px 0;
+  line-height:1.35;
+  font-size:13px;
+}
+
+.item-profile{
+  cursor:pointer;
+}
+
+.item-profile img{
+  width:100%;
+  height:170px;
+  object-fit:cover;
+  border-radius:12px;
+  margin-bottom:8px;
+  background:#fff1f7;
+}
+
+.badge{
+  display:inline-block;
+  padding:7px 10px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:bold;
+  margin:3px 3px 7px 0;
+}
+
+.badge-rojo{background:#ffe5e5;color:#b00000}
+.badge-verde{background:#e8f8ed;color:#087a2b}
+.badge-azul{background:#e5f0ff;color:#064b9b}
+.badge-rosa{background:#fff1f7;color:#9f174f}
+.badge-naranja{background:#fff0d9;color:#a85b00}
+.badge-morado{background:#f4e8ff;color:#5e1486}
+
+.detalle-box{
+  background:#fff;
+  border:1px solid var(--borde);
+  border-radius:14px;
+  box-shadow:var(--sombra2);
+  padding:14px;
+}
+
+.detalle-box h2{
+  color:var(--rosa);
+}
+
+.detalle-box img{
+  width:100%;
+  max-height:420px;
+  object-fit:cover;
+  border-radius:14px;
+  margin:8px 0 14px;
+}
+
+.aprobado{color:green;font-weight:bold}
+.pendiente{color:orange;font-weight:bold}
+.vencido{color:red;font-weight:bold}
+.revision{color:#c2185b;font-weight:bold}
+
+.verificacion{
+  background:#fff1f7;
+  padding:14px;
+  border-radius:14px;
+  border-left:5px solid var(--rosa);
+  margin-top:14px;
+}
+
+.fotos-extra{
+  background:#f7f7f7;
+  padding:14px;
+  border-radius:14px;
+  border-left:5px solid #777;
+  margin-top:14px;
+}
+
+.dato{
+  margin:7px 0;
+  line-height:1.45;
+}
+
+.aviso{
+  color:var(--muted);
+  font-size:14px;
+}
+
+.actions-row{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:8px;
+  margin-top:12px;
+}
+
+pre{
+  white-space:pre-wrap;
+  background:#f7f7f7;
+  padding:12px;
+  border-radius:14px;
+  overflow:auto;
+  font-size:13px;
+}
+
+.graph-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:10px;
+}
+
+.graph-card{
+  background:#fff;
+  border:1px solid #ffe1ee;
+  border-radius:14px;
+  padding:13px;
+  min-height:150px;
+  box-shadow:0 4px 12px rgba(0,0,0,.06);
+}
+
+.graph-card h3{
+  color:var(--rosa);
+  font-size:15px;
+}
+
+.graph-placeholder{
+  height:78px;
+  border-radius:12px;
+  background:linear-gradient(90deg,#fff1f7,#ffe1ee,#fff1f7);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#9f174f;
+  font-weight:900;
+  font-size:12px;
+}
+
+.footer{
+  color:white;
+  padding:10px 12px;
+  display:flex;
+  justify-content:space-between;
+  font-size:12px;
+  font-weight:700;
+}
+
+.rotate-warning{
+  display:none;
+  background:#fff;
+  border:1px solid #ffd1e4;
+  border-radius:14px;
+  padding:12px;
+  margin-bottom:10px;
+  color:#9f174f;
+  font-weight:900;
+  text-align:center;
+}
+
+@media(max-width:1180px){
+  .admin-shell{grid-template-columns:220px 1fr}
+  .metrics-row{grid-template-columns:repeat(3,1fr)}
+  .quick-grid{grid-template-columns:repeat(3,1fr)}
+  .bottom-grid{grid-template-columns:repeat(2,1fr)}
+ .cards-list{grid-template-columns:repeat(3,1fr)}
+  .graph-grid{grid-template-columns:repeat(2,1fr)}
+}
+
+@media(max-width:760px){
+  .app{padding:6px}
+  .admin-shell{grid-template-columns:1fr}
+  .sidebar{display:none}
+  .rotate-warning{display:block}
+  .topbar{
+    height:auto;
+    display:block;
+  }
+  .time-box{
+    margin-top:10px;
+    text-align:left;
+  }
+  .metrics-row{grid-template-columns:repeat(2,1fr)}
+  .quick-grid{grid-template-columns:repeat(2,1fr)}
+  .bottom-grid{grid-template-columns:1fr}
+  .cards-list{
+  grid-template-columns:repeat(2,1fr);
+  gap:6px;
+}
+  .graph-grid{grid-template-columns:1fr}
+  .actions-row{grid-template-columns:1fr}
+  .search-row{grid-template-columns:1fr}
+}
+</style>
+</head>
+
+<body>
+
+<div class="login-screen" id="loginBox">
+  <div class="login-card">
+    <div class="login-logo">CH</div>
+    <h1>Panel Admin</h1>
+    <p>CariHub · Control privado de perfiles, pagos, denuncias, mensajes y estadísticas.</p>
+    <input id="email" type="email" placeholder="Correo admin">
+    <input id="password" type="password" placeholder="Contraseña">
+    <button class="btn-login" onclick="login()">Entrar</button>
+  </div>
+</div>
+
+<div class="app" id="panelBox">
+  <div class="admin-shell">
+
+    <aside class="sidebar">
+      <div class="brand">
+        <h1>💗 Cari<span>Hub</span></h1>
+        <p>Panel de Administración</p>
+      </div>
+
+      <button class="side-btn active" onclick="mostrarDashboard()"><span class="side-ico">🏠</span><span class="side-text"><b>Inicio / Resumen</b><small>Panel principal</small></span></button>
+      <button class="side-btn" onclick="abrirModulo('usuarios')"><span class="side-ico">👤</span><span class="side-text"><b>Usuarios</b><small>Gestionar usuarios</small></span></button>
+      <button class="side-btn" onclick="abrirModulo('pendientes')"><span class="side-ico">👥</span><span class="side-text"><b>Perfiles</b><small>Aprobar / Rechazar</small></span></button>
+      <button class="side-btn" onclick="abrirModulo('graficas')"><span class="side-ico">📊</span><span class="side-text"><b>Estadísticas</b><small>Datos del sistema</small></span></button>
+      <button class="side-btn" onclick="abrirModulo('mensajes')"><span class="side-ico">✉️</span><span class="side-text"><b>Mensajes</b><small>Buzón de mensajes</small></span></button>
+      <button class="side-btn" onclick="abrirModulo('pagos')"><span class="side-ico">💲</span><span class="side-text"><b>Pagos</b><small>Ver pagos realizados</small></span></button>
+      <button class="side-btn" onclick="abrirModulo('vencidos')"><span class="side-ico">⭐</span><span class="side-text"><b>Renovaciones</b><small>Perfiles por vencer</small></span></button>
+      <button class="side-btn" onclick="abrirModulo('denuncias')"><span class="side-ico">⚠️</span><span class="side-text"><b>Denuncias</b><small>Reportes de usuarios</small></span></button>
+      <button class="side-btn" onclick="abrirModulo('anuncios')"><span class="side-ico">📢</span><span class="side-text"><b>Publicidad</b><small>Banners y anuncios</small></span></button>
+      <button class="side-btn" onclick="abrirModulo('historial')"><span class="side-ico">📜</span><span class="side-text"><b>Historial</b><small>Actividad admin</small></span></button>
+      <button class="side-btn" onclick="abrirModulo('seguridad')"><span class="side-ico">⚙️</span><span class="side-text"><b>Seguridad</b><small>Logs y ajustes</small></span></button>
+      <button class="side-btn" onclick="salir()"><span class="side-ico">⏻</span><span class="side-text"><b>Cerrar Sesión</b><small>Salir del panel</small></span></button>
+    </aside>
+
+    <main class="main">
+      <div class="rotate-warning">📱 Para ver el admin completo, gira el celular horizontal.</div>
+<div class="panel-card" id="accionesRapidasPanel">
+          <h2>Acciones Rápidas</h2>
+          <div class="quick-grid">
+            <button class="quick-btn" onclick="abrirModulo('usuarios')"><span class="quick-ico">👥</span><span><b>Gestionar Usuarios</b><small>Ver y editar usuarios</small></span></button>
+            <button class="quick-btn" onclick="abrirModulo('pendientes')"><span class="quick-ico">✅</span><span><b>Aprobar Perfiles</b><small>Revisar pendientes</small></span></button>
+            <button class="quick-btn" onclick="abrirModulo('mensajes')"><span class="quick-ico">✉️</span><span><b>Ver Mensajes</b><small>Abrir buzón</small></span></button>
+            <button class="quick-btn" onclick="abrirModulo('pagos')"><span class="quick-ico">💲</span><span><b>Ver Pagos</b><small>Pagos realizados</small></span></button>
+            <button class="quick-btn" onclick="abrirModulo('denuncias')"><span class="quick-ico">🚨</span><span><b>Ver Denuncias</b><small>Reportes</small></span></button>
+            <button class="quick-btn" onclick="abrirModulo('vencidos')"><span class="quick-ico">⭐</span><span><b>Perfiles por Vencer</b><small>Renovaciones</small></span></button>
+            <button class="quick-btn" onclick="abrirModulo('graficas')"><span class="quick-ico">📊</span><span><b>Estadísticas</b><small>Reportes del sistema</small></span></button>
+            <button class="quick-btn" onclick="abrirModulo('seguridad')"><span class="quick-ico">⚙️</span><span><b>Seguridad</b><small>Logs y ajustes</small></span></button>
+            <button class="quick-btn quick-btn-publicidad"
+onclick="abrirModulo('anuncios')">
+
+  <span class="quick-ico">📢</span>
+
+  <span>
+    <b>Publicidad</b>
+    <small>Banners y anuncios</small>
+  </span>
+
+</button>
+            <button class="quick-btn quick-btn-precios"
+onclick="abrirModulo('precios_publicidad')">
+
+  <span class="quick-ico">✏️</span>
+
+  <span>
+    <b>Actualización de precios</b>
+    <small>Banners y destacados</small>
+  </span>
+
+</button>
+            <button class="quick-btn" onclick="abrirModulo('historial')"><span class="quick-ico">📋</span><span><b>Historial</b><small>Logs admin</small></span></button>
+          </div>
+        </div>
+      <div class="topbar">
+        <div class="top-left">
+          <div class="crown">👑</div>
+          <div>
+            <h2 id="mainTitle">Bienvenido, Administrador</h2>
+            <p id="mainSub">Aquí puedes gestionar todo el sistema de CariHub</p>
+          </div>
+        </div>
+        <div class="time-box" id="timeBox">Cargando fecha...</div>
+      </div>
+
+      <section id="vistaDashboard" class="vista active">
+
+
+<div class="panel-card" id="accionesRapidasPanel">
+  <h2>Acciones Rápidas</h2>
+  ...
+</div>
+
+
+        <div class="metrics-row">
+          <div class="metric-card" onclick="abrirModulo('usuarios')"><div class="metric-icon bg-pink">👥</div><div><h3>Usuarios Totales</h3><div class="num" id="numUsuarios">0</div><p>Usuarios registrados</p></div></div>
+          <div class="metric-card" onclick="abrirModulo('activos')"><div class="metric-icon bg-blue">✅</div><div><h3>Perfiles Aprobados</h3><div class="num" id="numActivos">0</div><p>Perfiles activos</p></div></div>
+          <div class="metric-card" onclick="abrirModulo('pendientes')"><div class="metric-icon bg-yellow">⏱️</div><div><h3>Pendientes de Aprobación</h3><div class="num" id="numPendientes">0</div><p>Esperando revisión</p></div></div>
+          <div class="metric-card" onclick="abrirModulo('pagos')"><div class="metric-icon bg-green">💲</div><div><h3>Pagos Recibidos</h3><div class="num" id="numPagos">0</div><p>Total pagos</p></div></div>
+          <div class="metric-card" onclick="abrirModulo('denuncias')"><div class="metric-icon bg-purple">⚠️</div><div><h3>Denuncias</h3><div class="num" id="numDenuncias">0</div><p>Reportes recibidos</p></div></div>
+        </div>
+
+        
+
+        <div class="bottom-grid">
+          <div class="mini-panel">
+            <h3>Últimos Perfiles Pendientes</h3>
+            <div id="feedPendientes"></div>
+            <button class="feed-btn" onclick="abrirModulo('pendientes')">Ver todos →</button>
+          </div>
+          <div class="mini-panel">
+            <h3>Últimos Mensajes</h3>
+            <div id="feedMensajes"></div>
+            <button class="feed-btn" onclick="abrirModulo('mensajes')">Ver todos →</button>
+          </div>
+          <div class="mini-panel">
+            <h3>Pagos Recientes</h3>
+            <div id="feedPagos"></div>
+            <button class="feed-btn" onclick="abrirModulo('pagos')">Ver todos →</button>
+          </div>
+          <div class="mini-panel">
+            <h3>Denuncias Recientes</h3>
+            <div id="feedDenuncias"></div>
+            <button class="feed-btn" onclick="abrirModulo('denuncias')">Ver todas →</button>
+          </div>
+        </div>
+
+      </section>
+
+      <section id="vistaModulo" class="vista">
+        <div class="section-head">
+          <h2 id="tituloModulo">Módulo</h2>
+          <p id="descripcionModulo">Cargando...</p>
+          <div class="section-actions">
+            <button class="btn btn-volver" onclick="mostrarDashboard()">← Volver al panel principal</button>
+            <button class="btn btn-refresh" onclick="recargarModulo()">Actualizar</button>
+          </div>
+
+          <div class="search-row" id="buscadorModulo">
+            <input id="buscarTexto" placeholder="Buscar nombre, correo, teléfono, ciudad..." oninput="filtrarCards()">
+            <select id="filtroEstado" onchange="filtrarCards()">
+              <option value="">Todos</option>
+              <option value="activo">Activos</option>
+              <option value="vencido">Vencidos</option>
+              <option value="pendiente">Pendientes</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="list-wrap" id="contenidoModulo">Cargando...</div>
+      </section>
+
+      <div class="footer">
+        <span>♡ CariHub - Panel de Administración</span>
+        <span>Versión 2.1.0</span>
+      </div>
+    </main>
+  </div>
+</div>
+
+<audio id="sonidoAlerta">
+  <source src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" type="audio/ogg">
+</audio>
+
+<script>
+function textoSeguro(texto){
+  return String(texto || "")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
+}
+
+function fechaValida(fecha){
+  if(!fecha) return null;
+  try{
+    return fecha.toDate ? fecha.toDate() : new Date(fecha);
+  }catch(e){
+    return null;
+  }
+}
+
+function formatearFecha(fecha){
+  const d = fechaValida(fecha);
+  if(!d || isNaN(d.getTime())) return "Sin fecha";
+  return d.toLocaleString("es-MX");
+}
+
+let carihubToastTimer=null;
+function mostrarToastCariHub(mensaje,tipo="exito"){
+  let toast=document.getElementById("carihubToast");
+  if(!toast){
+    toast=document.createElement("div");
+    toast.id="carihubToast";
+    toast.className="carihub-toast";
+    document.body.appendChild(toast);
+  }
+
+  toast.textContent=mensaje;
+  toast.className=`carihub-toast ${tipo}`;
+  requestAnimationFrame(()=>toast.classList.add("visible"));
+  clearTimeout(carihubToastTimer);
+  carihubToastTimer=setTimeout(()=>toast.classList.remove("visible"),3600);
+}
+
+function diasRestantes(fecha){
+  const d = fechaValida(fecha);
+  if(!d || isNaN(d.getTime())) return "";
+  const hoy = new Date();
+  return Math.ceil((d - hoy) / (1000 * 60 * 60 * 24));
+}
+
+function estaVencido(u){
+  if(u.vencido === true) return true;
+  const d = fechaValida(u.fechaVencimiento);
+  if(d && d < new Date()) return true;
+  return false;
+}
+
+function bloquearAcciones(valor){
+  procesando = valor;
+  document.querySelectorAll("button").forEach(b => b.disabled = valor);
+}
+
+function actualizarFecha(){
+  const box = document.getElementById("timeBox");
+  const d = new Date();
+  box.innerHTML = "📅 " + d.toLocaleDateString("es-MX",{weekday:"long",year:"numeric",month:"long",day:"numeric"}) + "<br>" + d.toLocaleTimeString("es-MX",{hour:"2-digit",minute:"2-digit"});
+}
+
+setInterval(actualizarFecha,30000);
+
+function inicializarTogglePassword(){
+  document.querySelectorAll('input[type="password"], input[data-password-toggle="1"]').forEach(input=>{
+    if(input.dataset.passwordToggleReady==="1")return;
+
+    const wrapper=document.createElement("span");
+    wrapper.className="password-toggle-wrap";
+    input.parentNode.insertBefore(wrapper,input);
+    wrapper.appendChild(input);
+    input.dataset.passwordToggleReady="1";
+    input.dataset.passwordToggle="1";
+
+    const boton=document.createElement("button");
+    boton.type="button";
+    boton.className="password-toggle-btn";
+    boton.textContent="🙈";
+    boton.title="Mostrar contraseña";
+    boton.setAttribute("aria-label","Mostrar contraseña");
+
+    boton.addEventListener("click",()=>{
+      const visible=input.type==="text";
+      input.type=visible?"password":"text";
+      const texto=visible?"Mostrar contraseña":"Ocultar contraseña";
+      boton.textContent=visible?"🙈":"🐵";
+      boton.title=texto;
+      boton.setAttribute("aria-label",texto);
+    });
+
+    wrapper.appendChild(boton);
+  });
+}
+
+document.addEventListener("DOMContentLoaded",inicializarTogglePassword);
+
+auth.onAuthStateChanged(async (user) => {
+  if (!user) {
+    document.getElementById("loginBox").style.display = "flex";
+    document.getElementById("panelBox").style.display = "none";
+    return;
+  }
+
+  if (!ADMIN_EMAILS.includes(user.email)) {
+    alert("Acceso no autorizado. Solo el administrador puede entrar.");
+    await auth.signOut();
+    window.location.href = "index.html";
+    return;
+  }
+
+  document.getElementById("loginBox").style.display = "none";
+  document.getElementById("panelBox").style.display = "block";
+  actualizarFecha();
+  await cargarDashboard();
+});
+
+async function login() {
+  const email = document.getElementById("email").value.trim().toLowerCase();
+  const password = document.getElementById("password").value;
+
+  if(!email || !password){
+    alert("Escribe correo y contraseña.");
+    return;
+  }
+
+  try {
+    await auth.signInWithEmailAndPassword(email, password);
+  } catch (error) {
+    alert("Error: " + error.message);
+  }
+}
+
+async function cargarDashboard(){
+  await cargarUsuariosCache();
+  await cargarContadoresExtras();
+  pintarResumen();
+  pintarFeedsDashboard();
+}
+
+async function cargarUsuariosCache(){
+  try{
+    const snap = await db.collection("usuarios")
+      .orderBy("fecha", "desc")
+      .limit(LIMITE_USUARIOS)
+      .get();
+
+    usuariosCache = [];
+
+    snap.forEach(doc => {
+      const u = doc.data();
+      u.id = doc.id;
+      usuariosCache.push(u);
+    });
+  }catch(error){
+    alert("Error cargando usuarios: " + error.message);
+  }
+}
+
+async function contarColeccion(nombre,whereCampo,whereValor){
+  try{
+    let ref = db.collection(nombre);
+    if(whereCampo){
+      ref = ref.where(whereCampo,"==",whereValor);
+    }
+    const snap = await ref.limit(500).get();
+    return snap.size;
+  }catch(e){
+    return 0;
+  }
+}
+
+async function cargarContadoresExtras(){
+  contadoresGlobales.denuncias = await contarColeccion("denuncias","estado","pendiente");
+  contadoresGlobales.pagos = await contarColeccion("pagos");
+  contadoresGlobales.historial = await contarColeccion("logsAdmin");
+  contadoresGlobales.seguridad = await contarColeccion("logsSeguridad");
+  contadoresGlobales.anuncios = await contarColeccion("anuncios");
+  contadoresGlobales.mensajes = await contarColeccion("soporte_mensajes");
+  contadoresGlobales.vistas = await contarColeccion("analytics_eventos");
+
+  document.getElementById("numDenuncias").innerText = contadoresGlobales.denuncias;
+  document.getElementById("numPagos").innerText = contadoresGlobales.pagos;
+}
+
+function pintarResumen(){
+  let nuevos = 0;
+  let actualizaciones = 0;
+  let vencidos = 0;
+  let activos = 0;
+
+  usuariosCache.forEach(u => {
+    if(u.estadoRevision === "registro_pendiente") nuevos++;
+    if(u.estadoRevision === "actualizacion_pendiente" || u.actualizacionPendiente === true) actualizaciones++;
+    if(estaVencido(u) || u.activo === false) vencidos++;
+    if(u.aprobado === true && u.activo === true && !estaVencido(u)) activos++;
+  });
+
+  const pendientes = nuevos + actualizaciones;
+
+  document.getElementById("numUsuarios").innerText = usuariosCache.length;
+  document.getElementById("numPendientes").innerText = pendientes;
+  document.getElementById("numActivos").innerText = activos;
+
+  if(pendientes > 0 || (contadoresGlobales.denuncias || 0) > 0){
+    const sonido = document.getElementById("sonidoAlerta");
+    if(sonido) sonido.play().catch(()=>{});
+  }
+}
+
+function pintarFeedsDashboard(){
+  const pendientes = usuariosCache.filter(u => u.estadoRevision === "registro_pendiente" || u.estadoRevision === "actualizacion_pendiente" || u.actualizacionPendiente === true).slice(0,5);
+
+  document.getElementById("feedPendientes").innerHTML = pendientes.length ? pendientes.map(u => `
+    <div class="feed-item">
+      <div class="feed-left"><span class="avatar">👤</span><span><b>${textoSeguro(u.nombre)}</b><small>${formatearFecha(u.fecha)}</small></span></div>
+      <button class="feed-btn" onclick="abrirModulo('pendientes')">Revisar</button>
+    </div>
+  `).join("") : `<p class="aviso">Sin pendientes.</p>`;
+
+  document.getElementById("feedMensajes").innerHTML = `<p class="aviso">Mensajes pendientes de conectar desde Mi perfil.</p>`;
+  document.getElementById("feedPagos").innerHTML = `<p class="aviso">Pagos aparecerán al conectar Stripe/MercadoPago.</p>`;
+  document.getElementById("feedDenuncias").innerHTML = `<p class="aviso">${contadoresGlobales.denuncias || 0} denuncia(s) pendiente(s).</p>`;
+}
+
+function mostrarDashboard(){
+  seccionActual = "dashboard";
+  const acciones = document.getElementById("accionesRapidasPanel");
+if(acciones) acciones.style.display = "block";
+  document.getElementById("vistaDashboard").classList.add("active");
+  document.getElementById("vistaModulo").classList.remove("active");
+  document.getElementById("mainTitle").innerText = "Bienvenido, Administrador";
+  document.getElementById("mainSub").innerText = "Aquí puedes gestionar todo el sistema de CariHub";
+  cargarDashboard();
+}
+
+function abrirModulo(tipo){
+  seccionActual = tipo;
+  const acciones = document.getElementById("accionesRapidasPanel");
+if(acciones) acciones.style.display = "none";
+
+window.scrollTo({top:0, behavior:"smooth"});
+
+  document.getElementById("vistaDashboard").classList.remove("active");
+  document.getElementById("vistaModulo").classList.add("active");
+  document.getElementById("buscarTexto").value = "";
+  document.getElementById("filtroEstado").value = "";
+  cargarModulo(tipo);
+}
+
+function recargarModulo(){
+  if(seccionActual === "dashboard") cargarDashboard();
+  else cargarModulo(seccionActual);
+}
+
+async function cargarModulo(tipo){
+  const titulo = document.getElementById("tituloModulo");
+  const desc = document.getElementById("descripcionModulo");
+  const cont = document.getElementById("contenidoModulo");
+  const buscador = document.getElementById("buscadorModulo");
+
+  cont.innerHTML = "Cargando...";
+  buscador.style.display = "grid";
+
+  document.getElementById("mainTitle").innerText = "Módulo admin";
+  document.getElementById("mainSub").innerText = "Pantalla interna con detalle y botón de volver.";
+
+  if(tipo === "usuarios"){
+    titulo.innerText = "👥 Usuarios registrados";
+    desc.innerText = "Lista resumida: foto principal y nombre. Presiona un perfil para ver toda su información.";
+    pintarListaPerfiles(usuariosCache);
+    return;
+  }
+
+  if(tipo === "activos"){
+    titulo.innerText = "✅ Perfiles activos";
+    desc.innerText = "Perfiles visibles actualmente en CariHub.";
+    pintarListaPerfiles(usuariosCache.filter(u => u.aprobado === true && u.activo === true && !estaVencido(u)));
+    return;
+  }
+
+  if(tipo === "pendientes"){
+    titulo.innerText = "⏳ Pendientes de aprobación";
+    desc.innerText = "Registros nuevos y actualizaciones pendientes.";
+    pintarListaPerfiles(usuariosCache.filter(u => u.estadoRevision === "registro_pendiente" || u.estadoRevision === "actualizacion_pendiente" || u.actualizacionPendiente === true));
+    return;
+  }
+
+  if(tipo === "vencidos"){
+    titulo.innerText = "📴 Perfiles vencidos / inactivos";
+    desc.innerText = "Perfiles que ya no deben aparecer públicamente.";
+    pintarListaPerfiles(usuariosCache.filter(u => estaVencido(u) || u.activo === false));
+    return;
+  }
+
+  buscador.style.display = "none";
+
+  if(tipo === "denuncias"){
+    titulo.innerText = "🚨 Denuncias";
+    desc.innerText = "Lista de denuncias. Presiona una denuncia para ver detalle completo.";
+    await cargarDenuncias();
+    return;
+  }
+
+  if(tipo === "mensajes"){
+    titulo.innerText = "📩 Mensajes de soporte";
+    desc.innerText = "Conversaciones entre usuarios y admin. Pendiente de conectar desde Mi perfil.";
+    await cargarMensajesSoporte();
+    return;
+  }
+
+  if(tipo === "vistas"){
+    titulo.innerText = "👁️ Vistas totales";
+    desc.innerText = "Eventos de visitas del sitio, búsquedas y perfiles.";
+    await cargarColeccionSimple("analytics_eventos");
+    return;
+  }
+
+  if(tipo === "graficas"){
+    titulo.innerText = "📊 Gráficas";
+    desc.innerText = "Resumen visual de tráfico, dispositivos, búsquedas, favoritos y anuncios.";
+    pintarGraficas();
+    return;
+  }
+
+  if(tipo === "pagos"){
+    titulo.innerText = "💳 Pagos recibidos";
+    desc.innerText = "Pagos y renovaciones.";
+    await cargarColeccionSimple("pagos");
+    return;
+  }
+
+  if(tipo === "historial"){
+    titulo.innerText = "📜 Historial admin";
+    desc.innerText = "Acciones realizadas desde el panel.";
+    await cargarColeccionSimple("logsAdmin");
+    return;
+  }
+
+  if(tipo === "seguridad"){
+    titulo.innerText = "🛡️ Seguridad";
+    desc.innerText = "Logs de seguridad, abuso, bots o actividad sospechosa.";
+    await cargarColeccionSimple("logsSeguridad");
+    return;
+  }
+
+  if(tipo === "anuncios"){
+  titulo.innerText = "📢 Anuncios / destacados";
+  desc.innerText = "Publicidad, banners, destacados y conversiones.";
+  await cargarSolicitudesAnuncios();
+  return;
+}
+
+  if(tipo === "precios_publicidad"){
+  titulo.innerText = "Actualización de precios de banners/publicidad y destacados";
+  desc.innerText = "Administra el precio mensual base de imagen; los precios derivados se calculan automáticamente.";
+  buscador.style.display = "none";
+  await cargarPantallaPreciosPublicidad();
+  return;
+}
+}
+
+function pintarListaPerfiles(lista){
+  const cont = document.getElementById("contenidoModulo");
+
+  if(!lista.length){
+    cont.innerHTML = `<div class="item"><h3>Sin resultados</h3><p>No hay elementos en esta sección.</p></div>`;
+    return;
+  }
+
+  cont.innerHTML = `<div class="cards-list"></div>`;
+  const grid = cont.querySelector(".cards-list");
+
+  lista.forEach(u => {
+    const vencido = estaVencido(u);
+    let estado = `<span class="badge badge-naranja">Pendiente</span>`;
+
+    if(u.aprobado && u.activo && !vencido){
+      estado = `<span class="badge badge-verde">Activo</span>`;
+    }
+
+    if(vencido || u.activo === false){
+      estado = `<span class="badge badge-rojo">Vencido/Inactivo</span>`;
+    }
+
+    const textoBusqueda = textoSeguro(`${u.nombre||""} ${u.email||""} ${u.telefono||""} ${u.ciudad||""} ${u.categoria||""}`);
+
+    grid.innerHTML += `
+      <div class="item item-profile item-filtrable"
+        onclick="abrirDetallePerfil('${u.id}')"
+        data-texto="${textoBusqueda}"
+        data-estado="${u.aprobado && u.activo && !vencido ? "activo" : vencido ? "vencido" : "pendiente"}">
+
+        ${u.fotoURL ? `<img loading="lazy" src="${textoSeguro(u.fotoURL)}" alt="Foto principal">` : `<img alt="Sin foto">`}
+        <h3>${textoSeguro(u.nombre || "Sin nombre")}</h3>
+        ${estado}
+        ${u.estadoRevision==="registro_pendiente" ? `<span class="badge badge-rosa">Registro nuevo</span>` : ""}
+        ${(u.estadoRevision==="actualizacion_pendiente" || u.actualizacionPendiente) ? `<span class="badge badge-azul">Actualización pendiente</span>` : ""}
+        <p><b>Categoría:</b> ${textoSeguro(u.categoria)}</p>
+        <p><b>Ciudad:</b> ${textoSeguro(u.ciudad)}</p>
+      </div>
+    `;
+  });
+}
+
+function abrirDetallePerfil(id){
+  const u = usuariosCache.find(x => x.id === id);
+  if(!u){
+    alert("Perfil no encontrado.");
+    return;
+  }
+
+  const cont = document.getElementById("contenidoModulo");
+  const fotoPerfil = u.fotoURL || "";
+  const fotosExtraURL = Array.isArray(u.fotosExtraURL) ? u.fotosExtraURL : [];
+  const verificacion = u.verificacion || {};
+  const ineURL = verificacion.ineURL || "";
+  const ineReversoURL = verificacion.ineReversoURL || "";
+  const selfieURL = verificacion.selfieURL || "";
+  const nombreReal = verificacion.nombreReal || "";
+
+  const dias = diasRestantes(u.fechaVencimiento);
+  const textoDias = dias === "" ? "Sin vencimiento" : (dias >= 0 ? dias + " días restantes" : "Vencido hace " + Math.abs(dias) + " días");
+
+  let estadoHTML = `<span class="pendiente">PENDIENTE</span>`;
+  if(u.aprobado && u.activo && !estaVencido(u)) estadoHTML = `<span class="aprobado">APROBADO / ACTIVO</span>`;
+  if(estaVencido(u) || u.activo === false) estadoHTML = `<span class="vencido">VENCIDO / INACTIVO</span>`;
+
+  cont.innerHTML = `
+    <button class="btn btn-volver" onclick="cargarModulo('${seccionActual}')">← Volver a sección</button>
+
+    <div class="detalle-box">
+      <h2>${textoSeguro(u.nombre || "Sin nombre")}</h2>
+
+      ${fotoPerfil ? `<img loading="lazy" src="${textoSeguro(fotoPerfil)}" alt="Foto perfil">` : "<p class='aviso'>Sin foto de perfil</p>"}
+
+      <p class="dato"><b>ID:</b> ${textoSeguro(id)}</p>
+      <p class="dato"><b>Correo:</b> ${textoSeguro(u.email)}</p>
+      <p class="dato"><b>WhatsApp:</b> ${textoSeguro(u.telefono)}</p>
+      <p class="dato"><b>País:</b> ${textoSeguro(u.pais)}</p>
+      <p class="dato"><b>Estado:</b> ${textoSeguro(u.estado)}</p>
+      <p class="dato"><b>Ciudad:</b> ${textoSeguro(u.ciudad)}</p>
+      <p class="dato"><b>Categoría:</b> ${textoSeguro(u.categoria)}</p>
+      <p class="dato"><b>Descripción corta:</b> ${textoSeguro(u.descripcion)}</p>
+      <p class="dato"><b>Descripción completa:</b> ${textoSeguro(u.descripcionCompleta)}</p>
+      <p class="dato"><b>Precio:</b> ${textoSeguro(u.precio)}</p>
+      <p class="dato"><b>Modalidad:</b> ${textoSeguro(u.modalidad)}</p>
+      <p class="dato"><b>Horario:</b> ${textoSeguro(u.horario)}</p>
+      <p class="dato"><b>Zona:</b> ${textoSeguro(u.zona)}</p>
+      <p class="dato"><b>Servicios:</b> ${textoSeguro(u.servicios)}</p>
+
+      <p class="dato"><b>Estado del perfil:</b> ${estadoHTML}</p>
+      <p class="dato"><b>Estado revisión:</b> <span class="revision">${textoSeguro(u.estadoRevision || "sin_revision")}</span></p>
+      <p class="dato"><b>Actualización pendiente:</b> ${u.actualizacionPendiente ? "Sí" : "No"}</p>
+      <p class="dato"><b>Activo:</b> ${u.activo ? "Sí" : "No"}</p>
+      <p class="dato"><b>Vencido:</b> ${u.vencido ? "Sí" : "No"}</p>
+      <p class="dato"><b>Primer mes gratis:</b> ${u.primerMesGratis ? "Sí" : "No"}</p>
+      <p class="dato"><b>Pago:</b> ${u.pagado ? "PAGADO ✅" : "NO PAGADO / GRATIS o pendiente"}</p>
+      <p class="dato"><b>Estado pago:</b> ${textoSeguro(u.estadoPago || "sin_estado")}</p>
+      <p class="dato"><b>Fecha publicación:</b> ${formatearFecha(u.fechaPublicacion)}</p>
+      <p class="dato"><b>Fecha vencimiento:</b> ${formatearFecha(u.fechaVencimiento)}</p>
+      <p class="dato"><b>Días:</b> ${textoSeguro(textoDias)}</p>
+
+      ${fotosExtraURL.length > 0 ? `
+        <div class="fotos-extra">
+          <h3>Fotos adicionales</h3>
+          ${fotosExtraURL.map((url, i) => `
+            <p><b>Foto extra ${i + 1}:</b></p>
+            <img loading="lazy" src="${textoSeguro(url)}" alt="Foto extra ${i + 1}">
+          `).join("")}
+        </div>
+      ` : "<p class='aviso'>Sin fotos adicionales</p>"}
+
+      <div class="verificacion">
+        <h3>Verificación privada</h3>
+        <p><b>Nombre real:</b> ${textoSeguro(nombreReal)}</p>
+        ${ineURL ? `<p><b>INE frente:</b><br><img loading="lazy" src="${textoSeguro(ineURL)}" alt="INE frente"></p>` : "<p class='aviso'>INE frente no subida</p>"}
+        ${ineReversoURL ? `<p><b>INE reverso:</b><br><img loading="lazy" src="${textoSeguro(ineReversoURL)}" alt="INE reverso"></p>` : "<p class='aviso'>INE reverso no subida</p>"}
+        ${selfieURL ? `<p><b>Selfie:</b><br><img loading="lazy" src="${textoSeguro(selfieURL)}" alt="Selfie"></p>` : "<p class='aviso'>Selfie no subida</p>"}
+        <p class="aviso">Estas imágenes no son públicas. Solo el admin debe revisarlas.</p>
+      </div>
+
+      <div class="actions-row">
+        <button class="btn btn-aprobar" onclick="aprobarGratis('${id}')">🟢 Aprobar + 30 días gratis</button>
+        <button class="btn btn-cambios" onclick="aprobarCambios('${id}')">🔵 Aprobar cambios</button>
+        <button class="btn btn-pago" onclick="activarRenovacionPagada('${id}')">💳 Activar renovación pagada</button>
+        <button class="btn btn-mensaje" onclick="crearMensajeAdmin('${id}')">📩 Mensaje soporte</button>
+        <button class="btn btn-quitar" onclick="quitarAprobacion('${id}')">Quitar aprobación</button>
+        <button class="btn btn-quitar" onclick="marcarVencido('${id}')">Marcar vencido</button>
+        <button class="btn btn-borrar" onclick="borrarUsuario('${id}')">Borrar</button>
+      </div>
+    </div>
+  `;
+}
+
+async function cargarDenuncias(){
+  const cont = document.getElementById("contenidoModulo");
+
+  try{
+    const snap = await db.collection("denuncias").orderBy("fecha","desc").limit(80).get();
+
+    if(snap.empty){
+      cont.innerHTML = `<div class="item"><h3>Sin denuncias</h3><p>No hay denuncias guardadas todavía.</p></div>`;
+      return;
+    }
+
+    cont.innerHTML = `<div class="cards-list"></div>`;
+    const grid = cont.querySelector(".cards-list");
+
+    snap.forEach(doc => {
+      const d = doc.data();
+      grid.innerHTML += `
+        <div class="item" onclick="abrirDetalleDenuncia('${doc.id}')">
+          <h3>🚨 ${textoSeguro(d.perfilNombre || d.perfilId || "Perfil denunciado")}</h3>
+          <span class="badge ${d.estado==="pendiente" ? "badge-rojo" : "badge-verde"}">${textoSeguro(d.estado || "pendiente")}</span>
+          <p><b>Motivo:</b> ${textoSeguro(d.motivo)}</p>
+          <p><b>Fecha:</b> ${formatearFecha(d.fecha)}</p>
+          <button class="btn btn-denuncia">Abrir denuncia</button>
+        </div>
+      `;
+    });
+  }catch(e){
+    cont.innerHTML = `<div class="item"><h3>Denuncias no configuradas</h3><p>Cuando conectemos denuncias en Firebase aparecerán aquí.</p></div>`;
+  }
+}
+
+async function abrirDetalleDenuncia(id){
+  const cont = document.getElementById("contenidoModulo");
+
+  try{
+    const doc = await db.collection("denuncias").doc(id).get();
+
+    if(!doc.exists){
+      alert("Denuncia no encontrada.");
+      return;
+    }
+
+    const d = doc.data();
+
+    cont.innerHTML = `
+      <button class="btn btn-volver" onclick="cargarDenuncias()">← Volver a denuncias</button>
+      <div class="detalle-box">
+        <h2>🚨 Denuncia</h2>
+        <p><b>Perfil denunciado:</b> ${textoSeguro(d.perfilNombre || d.perfilId)}</p>
+        <p><b>Motivo:</b> ${textoSeguro(d.motivo)}</p>
+        <p><b>Mensaje:</b> ${textoSeguro(d.mensaje || d.detalle)}</p>
+        <p><b>Contacto denunciante:</b> ${textoSeguro(d.contactoDenunciante || d.contacto)}</p>
+        <p><b>Fecha:</b> ${formatearFecha(d.fecha)}</p>
+        <p><b>Estado:</b> ${textoSeguro(d.estado || "pendiente")}</p>
+        <button class="btn btn-cambios" onclick="marcarDenunciaRevisada('${id}')">Marcar revisada</button>
+        ${d.perfilId ? `<button class="btn btn-quitar" onclick="marcarVencido('${d.perfilId}')">Ocultar perfil denunciado</button>` : ""}
+      </div>
+    `;
+  }catch(e){
+    alert("Error abriendo denuncia: " + e.message);
+  }
+}
+
+async function marcarDenunciaRevisada(id){
+  if(!confirm("¿Marcar esta denuncia como revisada?")) return;
+
+  await db.collection("denuncias").doc(id).update({
+    estado:"revisada",
+    fechaRevision:new Date(),
+    adminEmail:ADMIN_EMAIL
+  });
+
+  await registrarLogAdmin("denuncia_revisada",id,"Denuncia marcada como revisada");
+  alert("Denuncia marcada como revisada.");
+  cargarDenuncias();
+}
+
+async function cargarMensajesSoporte(){
+  const cont = document.getElementById("contenidoModulo");
+
+  try{
+    const snap = await db.collection("soporte_mensajes").limit(80).get();
+
+    if(snap.empty){
+      cont.innerHTML = `<div class="item"><h3>Sin mensajes</h3><p>Aún no hay conversaciones de soporte. Falta conectar el botón desde Mi perfil.</p></div>`;
+      return;
+    }
+
+    cont.innerHTML = `<div class="cards-list"></div>`;
+    const grid = cont.querySelector(".cards-list");
+
+    snap.forEach(doc => {
+      const m = doc.data();
+      grid.innerHTML += `
+        <div class="item" onclick="abrirDetalleMensaje('${doc.id}')">
+          <h3>📩 ${textoSeguro(m.nombre || m.usuarioNombre || "Conversación")}</h3>
+          <span class="badge ${m.estado==="pendiente" ? "badge-rojo" : "badge-verde"}">${textoSeguro(m.estado || "abierto")}</span>
+          <p><b>Último mensaje:</b> ${textoSeguro(m.ultimoMensaje || m.mensaje || "")}</p>
+          <p><b>Fecha:</b> ${formatearFecha(m.fecha || m.fechaUltimoMensaje)}</p>
+          <button class="btn btn-mensaje">Abrir conversación</button>
+        </div>
+      `;
+    });
+  }catch(e){
+    cont.innerHTML = `<div class="item"><h3>Mensajes no configurados</h3><p>Falta crear colección soporte_mensajes y reglas.</p></div>`;
+  }
+}
+
+async function abrirDetalleMensaje(id){
+  const cont = document.getElementById("contenidoModulo");
+
+  try{
+    const doc = await db.collection("soporte_mensajes").doc(id).get();
+
+    if(!doc.exists){
+      alert("Mensaje no encontrado.");
+      return;
+    }
+
+    const m = doc.data();
+
+    cont.innerHTML = `
+      <button class="btn btn-volver" onclick="cargarMensajesSoporte()">← Volver a mensajes</button>
+      <div class="detalle-box">
+        <h2>📩 Conversación soporte</h2>
+        <p><b>Usuario:</b> ${textoSeguro(m.nombre || m.usuarioNombre)}</p>
+        <p><b>UID:</b> ${textoSeguro(m.uid || m.usuarioId)}</p>
+        <p><b>Estado:</b> ${textoSeguro(m.estado || "abierto")}</p>
+        <p><b>Fecha:</b> ${formatearFecha(m.fecha || m.fechaUltimoMensaje)}</p>
+        <p><b>Mensaje:</b></p>
+        <pre>${textoSeguro(JSON.stringify(m,null,2))}</pre>
+        <textarea id="respuestaAdmin" placeholder="Escribe respuesta del admin..."></textarea>
+        <button class="btn btn-mensaje" onclick="responderMensajeSoporte('${id}')">Enviar respuesta</button>
+      </div>
+    `;
+  }catch(e){
+    alert("Error abriendo mensaje: " + e.message);
+  }
+}
+
+async function responderMensajeSoporte(id){
+  const texto = document.getElementById("respuestaAdmin").value.trim();
+
+  if(!texto){
+    alert("Escribe una respuesta.");
+    return;
+  }
+
+  await db.collection("soporte_mensajes").doc(id).collection("mensajes").add({
+    de:"admin",
+    mensaje:texto,
+    fecha:new Date(),
+    adminEmail:ADMIN_EMAIL
+  });
+
+  await db.collection("soporte_mensajes").doc(id).set({
+    estado:"respondido",
+    ultimoMensaje:texto,
+    fechaUltimoMensaje:new Date(),
+    adminEmail:ADMIN_EMAIL
+  },{merge:true});
+
+  await registrarLogAdmin("respuesta_soporte",id,"Admin respondió mensaje de soporte");
+  alert("Respuesta guardada.");
+  cargarMensajesSoporte();
+}
+
+function pintarGraficas(){
+  const cont = document.getElementById("contenidoModulo");
+
+  cont.innerHTML = `
+    <div class="graph-grid">
+      <div class="graph-card"><h3>📈 Gráficas por día</h3><div class="graph-placeholder">Pendiente de eventos</div></div>
+      <div class="graph-card"><h3>⏰ Tráfico por hora</h3><div class="graph-placeholder">Pendiente de eventos</div></div>
+      <div class="graph-card"><h3>📱 Android vs iPhone</h3><div class="graph-placeholder">Pendiente de eventos</div></div>
+      <div class="graph-card"><h3>🌎 País de visitas</h3><div class="graph-placeholder">Pendiente de eventos</div></div>
+      <div class="graph-card"><h3>🔎 Búsquedas más usadas</h3><div class="graph-placeholder">Pendiente de eventos</div></div>
+      <div class="graph-card"><h3>❤️ Perfiles favoritos</h3><div class="graph-placeholder">Pendiente de eventos</div></div>
+      <div class="graph-card"><h3>💰 Conversión de anuncios</h3><div class="graph-placeholder">Pendiente de eventos</div></div>
+      <div class="graph-card"><h3>👁️ Perfiles más vistos</h3><div class="graph-placeholder">Pendiente de eventos</div></div>
+    </div>
+  `;
+}
+
+async function cargarColeccionSimple(nombre){
+  const cont = document.getElementById("contenidoModulo");
+
+  try{
+    const snap = await db.collection(nombre).limit(80).get();
+
+    if(snap.empty){
+      cont.innerHTML = `<div class="item"><h3>Sin datos</h3><p>La colección ${textoSeguro(nombre)} todavía no tiene documentos.</p></div>`;
+      return;
+    }
+
+    cont.innerHTML = `<div class="cards-list"></div>`;
+    const grid = cont.querySelector(".cards-list");
+
+    snap.forEach(doc => {
+      const data = doc.data();
+
+      grid.innerHTML += `
+        <div class="item">
+          <h3>${textoSeguro(nombre)} / ${textoSeguro(doc.id)}</h3>
+          <pre>${textoSeguro(JSON.stringify(data,null,2))}</pre>
+        </div>
+      `;
+    });
+  }catch(e){
+    cont.innerHTML = `<div class="item"><h3>${textoSeguro(nombre)} no configurado</h3><p>Esta colección aún no existe o falta permiso para leerla.</p></div>`;
+  }
+}
+const CONFIG_PRECIOS_PUBLICIDAD_FALLBACK=PreciosPublicidad.CONFIG_PRECIOS_PUBLICIDAD_FALLBACK;
+
+let configPreciosPublicidadAdmin=null;
+let slotPrecioEditando="";
+let contextoEdicionPrecio={tipo:"global",slotId:"",overrideId:""};
+const alcancePrecioTemporalPorSlot={};
+const overridesPrecioPublicidadPorSlot={};
+
+const CATEGORIAS_PUBLICIDAD_FALLBACK=[
+  "💃 Escort",
+  "🏳️‍🌈 Escort Gay",
+  "👑 Escort VIP",
+  "✨ Edecán",
+  "🔥 Stripper",
+  "📸 Modelos",
+  "🤵 Gigoló",
+  "🌹 Acompañante",
+  "🎀 Petit",
+  "🎬 Contenido",
+  "🍸 Tabledance",
+  "🛍️ Sex Shop",
+  "🧖 Spa",
+  "💆 Masajes",
+  "🍍 Club SW",
+  "🍾 Antro / Restaurant Bar",
+  "🌈 Antro / Restaurant Bar LGBT",
+  "🏩 Hotel / Motel",
+  "🚪 Cabinas / Glory Holes",
+  "⚧️ Trans",
+  "🌸 Femboy",
+  "🍍 Swinger",
+  "🦄 Unicorns",
+  "🔥 Cuckold / Hotwife",
+  "💫 Singles",
+  "🔥 Hotwife",
+  "👩‍❤️‍👩 Lesbians",
+  "🧢 Tom Boy",
+  "💄 Tom Fem",
+  "🍆 Dotados",
+  "🖤 Fetiche",
+  "⛓️ Sado",
+  "🖤 Dominatrix",
+  "🎥 Cine XXX"
+];
+
+const UBICACION_PUBLICIDAD_FALLBACK={
+  "México":{
+    "Nuevo León":["Monterrey","García","Apodaca","Santa Catarina","San Nicolás"]
+  },
+  "Estados Unidos":{}
+};
+
+function preciosManualVacioPublicidad(){
+  return PreciosPublicidad.preciosManualVacioPublicidad();
+}
+
+function obtenerPrecioMensualImagenBaseSlot(slot){
+  return PreciosPublicidad.obtenerPrecioMensualImagenBaseSlot(slot);
+}
+
+function normalizarFactoresAutomaticosPublicidad(fuente){
+  return PreciosPublicidad.normalizarFactoresAutomaticosPublicidad(fuente);
+}
+
+function normalizarSlotPrecioPublicidad(slot,slotId){
+  return PreciosPublicidad.normalizarSlotPrecioPublicidad(slot,slotId);
+}
+
+function normalizarConfigPreciosPublicidad(data){
+  return PreciosPublicidad.normalizarConfigPreciosPublicidad(data);
+}
+
+function normalizarTextoPrecioScope(valor){
+  return PreciosPublicidad.normalizarTextoPrecioScope(valor);
+}
+
+function normalizarListaPrecioScope(valor){
+  if(Array.isArray(valor)){
+    return valor.map(normalizarTextoPrecioScope).filter(Boolean);
+  }
+
+  const normalizado=normalizarTextoPrecioScope(valor);
+  return normalizado?[normalizado]:[];
+}
+
+function listaDisplayPrecioScope(valor){
+  if(Array.isArray(valor)){
+    return valor.map(item=>String(item||"").trim()).filter(Boolean);
+  }
+
+  const texto=String(valor||"").trim();
+  return texto?[texto]:[];
+}
+
+function normalizarScopeDisplayPrecioPublicidad(scope){
+  return PreciosPublicidad.normalizarScopeDisplayPrecioPublicidad(scope);
+}
+
+function alcanceSeleccionadoPrecioPublicidad(slotId){
+  const alcance=alcancePrecioTemporal(slotId);
+  const scopeDisplay={
+    categorias:listaDisplayPrecioScope(alcance.categorias),
+    paises:listaDisplayPrecioScope(alcance.paises),
+    estados:listaDisplayPrecioScope(alcance.estados),
+    ciudades:listaDisplayPrecioScope(alcance.ciudades)
+  };
+  const scope={
+    categorias:normalizarListaPrecioScope(scopeDisplay.categorias),
+    paises:normalizarListaPrecioScope(scopeDisplay.paises),
+    estados:normalizarListaPrecioScope(scopeDisplay.estados),
+    ciudades:normalizarListaPrecioScope(scopeDisplay.ciudades)
+  };
+  const tieneAlcance=Object.values(scope).some(lista=>lista.length>0);
+
+  return {scope,scopeDisplay,tieneAlcance};
+}
+
+function segmentoOverridePrecio(lista){
+  const valores=(Array.isArray(lista)?lista:[])
+    .slice()
+    .sort()
+    .map(valor=>String(valor||"").replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,""))
+    .filter(Boolean);
+
+  return valores.length?valores.join("+"):"todos";
+}
+
+function generarOverrideIdPrecioPublicidad(slotId,scope){
+  return [
+    "override",
+    String(slotId||"").replace(/[^a-z0-9_]+/gi,"_").toLowerCase(),
+    "cat-"+segmentoOverridePrecio(scope.categorias),
+    "pais-"+segmentoOverridePrecio(scope.paises),
+    "estado-"+segmentoOverridePrecio(scope.estados),
+    "ciudad-"+segmentoOverridePrecio(scope.ciudades)
+  ].join("__");
+}
+
+function valoresAlcanceDisplay(override,campoPlural,campoSingular){
+  const display=override?.scopeDisplay||{};
+  const original=override?.scopeOriginal||{};
+
+  if(Array.isArray(display[campoPlural])&&display[campoPlural].length)return display[campoPlural];
+  if(Array.isArray(original[campoPlural])&&original[campoPlural].length)return original[campoPlural];
+  if(original[campoSingular])return [original[campoSingular]];
+  return [];
+}
+
+function opcionesCategoriasAlcancePrecio(){
+  if(window.CariHubCatalogos?.categorias){
+    return window.CariHubCatalogos.categorias().map(categoria=>categoria.label);
+  }
+
+  if(Array.isArray(window.CATEGORIAS_PUBLICIDAD)&&window.CATEGORIAS_PUBLICIDAD.length){
+    return window.CATEGORIAS_PUBLICIDAD;
+  }
+
+  return CATEGORIAS_PUBLICIDAD_FALLBACK;
+}
+
+function catalogoGlobalAlcancePrecio(nombre){
+  try{
+    if(nombre==="TODOS_LOS_PAISES"&&typeof TODOS_LOS_PAISES!=="undefined")return TODOS_LOS_PAISES;
+    if(nombre==="PAISES_PRINCIPALES"&&typeof PAISES_PRINCIPALES!=="undefined")return PAISES_PRINCIPALES;
+    if(nombre==="ESTADOS"&&typeof ESTADOS!=="undefined")return ESTADOS;
+    if(nombre==="CIUDADES"&&typeof CIUDADES!=="undefined")return CIUDADES;
+  }catch(error){}
+
+  return window[nombre];
+}
+
+function claveCatalogoAlcancePrecio(obj,valor){
+  if(!obj||!valor)return "";
+
+  const buscada=normalizarTextoPrecioScope(valor);
+  return Object.keys(obj).find(clave=>normalizarTextoPrecioScope(clave)===buscada)||"";
+}
+
+function fuenteCiudadesAlcancePrecio(){
+  const ciudades=catalogoGlobalAlcancePrecio("CIUDADES");
+  if(ciudades&&typeof ciudades==="object"){
+    return ciudades;
+  }
+
+  return UBICACION_PUBLICIDAD_FALLBACK;
+}
+
+function opcionesPaisesAlcancePrecio(){
+  const todos=catalogoGlobalAlcancePrecio("TODOS_LOS_PAISES");
+  if(Array.isArray(todos)&&todos.length){
+    return todos;
+  }
+
+  const principales=catalogoGlobalAlcancePrecio("PAISES_PRINCIPALES");
+  if(Array.isArray(principales)&&principales.length){
+    return principales;
+  }
+
+  return Object.keys(fuenteCiudadesAlcancePrecio());
+}
+
+function unirOpcionesAlcancePrecio(listas){
+  const mapa=new Map();
+  (listas||[]).flat().forEach(valor=>{
+    const texto=String(valor||"").trim();
+    const clave=normalizarTextoPrecioScope(texto);
+    if(texto&&clave&&!mapa.has(clave))mapa.set(clave,texto);
+  });
+  return Array.from(mapa.values());
+}
+
+function opcionesEstadosAlcancePrecio(paises){
+  const paisesLista=listaDisplayPrecioScope(paises);
+  if(!paisesLista.length)return [];
+
+  const estados=catalogoGlobalAlcancePrecio("ESTADOS");
+  const fuente=fuenteCiudadesAlcancePrecio();
+
+  return unirOpcionesAlcancePrecio(paisesLista.map(pais=>{
+    if(estados&&typeof estados==="object"){
+      const paisClave=claveCatalogoAlcancePrecio(estados,pais);
+      if(paisClave)return estados[paisClave]||[];
+    }
+
+    const paisClave=claveCatalogoAlcancePrecio(fuente,pais);
+    return Object.keys(fuente[paisClave]||{});
+  }));
+}
+
+function opcionesCiudadesAlcancePrecio(paises,estados){
+  const paisesLista=listaDisplayPrecioScope(paises);
+  const estadosLista=listaDisplayPrecioScope(estados);
+  if(!paisesLista.length||!estadosLista.length)return [];
+
+  const fuente=fuenteCiudadesAlcancePrecio();
+
+  return unirOpcionesAlcancePrecio(paisesLista.flatMap(pais=>{
+    const paisClave=claveCatalogoAlcancePrecio(fuente,pais);
+    const estadosPais=paisClave?fuente[paisClave]:null;
+    return estadosLista.map(estado=>{
+      const estadoClave=claveCatalogoAlcancePrecio(estadosPais,estado);
+      return estadoClave?estadosPais[estadoClave]||[]:[];
+    });
+  }));
+}
+
+function opcionesSelectAlcancePrecio(opciones,seleccion,placeholder){
+  return [`<option value="">${placeholder}</option>`]
+    .concat((opciones||[]).map(opcion=>`<option value="${textoSeguro(opcion)}" ${opcion===seleccion?"selected":""}>${textoSeguro(opcion)}</option>`))
+    .join("");
+}
+
+const selectoresCariHubCustom={};
+let selectorCariHubActivoId="";
+
+function resumenValoresSelectorCariHub(valores,singular="elemento",plural="elementos"){
+  const total=(valores||[]).length;
+  if(!total)return "Todas";
+  return total===1?`1 ${singular}`:`${total} ${plural}`;
+}
+
+function pintarSelectorCariHubCustom({id,opciones,seleccion,placeholder,slotId,campo,multiple=false,singular="elemento",plural="elementos",disabled=false}){
+  const lista=(opciones||[]).map(opcion=>({valor:String(opcion||""),texto:String(opcion||"")}));
+  const seleccionNormalizada=Array.isArray(seleccion)?seleccion:[seleccion].filter(Boolean);
+  const textoBoton=multiple
+    ? resumenValoresSelectorCariHub(seleccionNormalizada,singular,plural)
+    : lista.find(opcion=>opcion.valor===seleccion)?.texto||placeholder||"Seleccionar";
+
+  selectoresCariHubCustom[id]={
+    opciones:lista,
+    seleccion:seleccionNormalizada,
+    placeholder:placeholder||"Seleccionar",
+    slotId,
+    campo,
+    multiple,
+    singular,
+    plural,
+    disabled
+  };
+
+  return `
+    <div class="selector-carihub ${disabled?"disabled":""}" id="${textoSeguro(id)}">
+      <button type="button" class="selector-carihub-btn" aria-expanded="false" ${disabled?"disabled":""} onclick="toggleSelectorCariHubCustom('${textoSeguro(id)}')">
+        <span>${textoSeguro(textoBoton)}</span>
+      </button>
+    </div>
+  `;
+}
+
+function portalSelectorCariHubCustom(){
+  let portal=document.getElementById("selectorCariHubPortal");
+  if(!portal){
+    portal=document.createElement("div");
+    portal.id="selectorCariHubPortal";
+    document.body.appendChild(portal);
+  }
+  return portal;
+}
+
+function posicionarPortalSelectorCariHub(id){
+  const contenedor=document.getElementById(id);
+  const boton=contenedor?.querySelector(".selector-carihub-btn");
+  const portal=document.getElementById("selectorCariHubPortal");
+  if(!boton||!portal)return;
+
+  const rect=boton.getBoundingClientRect();
+  const margen=12;
+  const ancho=Math.min(Math.max(rect.width,260),Math.min(360,window.innerWidth-(margen*2)));
+  const left=Math.min(Math.max(rect.left,margen),window.innerWidth-ancho-margen);
+  const top=Math.min(rect.bottom+6,window.innerHeight-80);
+  portal.style.width=`${ancho}px`;
+  portal.style.left=`${left}px`;
+  portal.style.top=`${top}px`;
+}
+
+function cerrarSelectoresCariHubCustom(){
+  const portal=document.getElementById("selectorCariHubPortal");
+  if(portal){
+    portal.classList.remove("open");
+    portal.innerHTML="";
+  }
+
+  if(selectorCariHubActivoId){
+    const activo=document.getElementById(selectorCariHubActivoId);
+    activo?.classList.remove("open");
+    activo?.querySelector(".selector-carihub-btn")?.setAttribute("aria-expanded","false");
+  }
+  selectorCariHubActivoId="";
+}
+
+function valorSeleccionadoSelectorCariHub(datos,valor){
+  const seleccion=datos.multiple?datos.seleccion:[datos.seleccion].filter(Boolean);
+  const normalizado=normalizarTextoPrecioScope(valor);
+  return seleccion.some(item=>normalizarTextoPrecioScope(item)===normalizado);
+}
+
+function pintarOpcionesPortalSelectorCariHub(id){
+  const datos=selectoresCariHubCustom[id];
+  if(!datos)return "";
+
+  const opciones=datos.multiple
+    ? datos.opciones
+    : [{valor:"",texto:datos.placeholder,vacia:true}].concat(datos.opciones);
+
+  return opciones.map(opcion=>{
+    const activa=valorSeleccionadoSelectorCariHub(datos,opcion.valor);
+    return `
+      <button type="button"
+        class="selector-carihub-option ${opcion.vacia?"vacia":""} ${activa?"activa":""}"
+        data-valor="${textoSeguro(opcion.valor)}"
+        onclick="event.stopPropagation();seleccionarSelectorCariHubCustom('${textoSeguro(id)}',this.dataset.valor)">
+        ${datos.multiple?`<span class="selector-carihub-check">${activa?"☑":"☐"}</span>`:""}
+        <span>${textoSeguro(opcion.texto)}</span>
+      </button>
+    `;
+  }).join("");
+}
+
+function actualizarBotonSelectorCariHub(id){
+  const datos=selectoresCariHubCustom[id];
+  const contenedor=document.getElementById(id);
+  const boton=contenedor?.querySelector(".selector-carihub-btn span");
+  if(!datos||!boton)return;
+
+  if(datos.multiple){
+    boton.textContent=resumenValoresSelectorCariHub(datos.seleccion,datos.singular,datos.plural);
+    return;
+  }
+
+  const opcion=datos.opciones.find(item=>item.valor===datos.seleccion);
+  boton.textContent=opcion?.texto||datos.placeholder;
+}
+
+function abrirSelectorCariHubCustom(id){
+  const datos=selectoresCariHubCustom[id];
+  const contenedor=document.getElementById(id);
+  if(!datos||!contenedor||datos.disabled)return;
+
+  cerrarSelectoresCariHubCustom();
+  const portal=portalSelectorCariHubCustom();
+  portal.innerHTML=pintarOpcionesPortalSelectorCariHub(id);
+
+  contenedor.classList.add("open");
+  contenedor.querySelector(".selector-carihub-btn")?.setAttribute("aria-expanded","true");
+  selectorCariHubActivoId=id;
+  posicionarPortalSelectorCariHub(id);
+  portal.classList.add("open");
+}
+
+function toggleSelectorCariHubCustom(id){
+  if(selectorCariHubActivoId===id){
+    cerrarSelectoresCariHubCustom();
+    return;
+  }
+  abrirSelectorCariHubCustom(id);
+}
+
+function valoresAlcancePrecio(slotId,campo){
+  const alcance=alcancePrecioTemporal(slotId);
+  alcance[campo]=Array.isArray(alcance[campo])?alcance[campo]:listaDisplayPrecioScope(alcance[campo]);
+  return alcance[campo];
+}
+
+function alternarValorSelectorCariHub(slotId,campo,valor){
+  const texto=String(valor||"").trim();
+  if(!texto)return;
+
+  const valores=valoresAlcancePrecio(slotId,campo);
+  const normalizada=normalizarTextoPrecioScope(texto);
+  const existe=valores.some(item=>normalizarTextoPrecioScope(item)===normalizada);
+  alcancePrecioTemporal(slotId)[campo]=existe
+    ? valores.filter(item=>normalizarTextoPrecioScope(item)!==normalizada)
+    : valores.concat(texto);
+}
+
+function filtrarValoresValidosAlcance(valores,opciones){
+  const opcionesNormalizadas=new Set((opciones||[]).map(opcion=>normalizarTextoPrecioScope(opcion)));
+  return listaDisplayPrecioScope(valores).filter(valor=>opcionesNormalizadas.has(normalizarTextoPrecioScope(valor)));
+}
+
+function limpiarDependenciasAlcancePrecio(slotId,campo){
+  const alcance=alcancePrecioTemporal(slotId);
+
+  if(campo==="paises"){
+    const estadosValidos=opcionesEstadosAlcancePrecio(alcance.paises);
+    alcance.estados=filtrarValoresValidosAlcance(alcance.estados,estadosValidos);
+    const ciudadesValidas=opcionesCiudadesAlcancePrecio(alcance.paises,alcance.estados);
+    alcance.ciudades=filtrarValoresValidosAlcance(alcance.ciudades,ciudadesValidas);
+  }
+
+  if(campo==="estados"){
+    const ciudadesValidas=opcionesCiudadesAlcancePrecio(alcance.paises,alcance.estados);
+    alcance.ciudades=filtrarValoresValidosAlcance(alcance.ciudades,ciudadesValidas);
+  }
+}
+
+function configSelectoresAlcancePrecio(slotId){
+  const alcance=alcancePrecioTemporal(slotId);
+  const estadosDisponibles=opcionesEstadosAlcancePrecio(alcance.paises);
+  const ciudadesDisponibles=opcionesCiudadesAlcancePrecio(alcance.paises,alcance.estados);
+
+  return {
+    categorias:{
+      id:"alcanceCategoriaPrecioCustom",
+      opciones:opcionesCategoriasAlcancePrecio(),
+      seleccion:alcance.categorias,
+      placeholder:"Seleccionar categoría",
+      singular:"categoría",
+      plural:"categorías",
+      disabled:false
+    },
+    paises:{
+      id:"alcancePaisPrecioCustom",
+      opciones:opcionesPaisesAlcancePrecio(),
+      seleccion:alcance.paises,
+      placeholder:"Seleccionar país",
+      singular:"país",
+      plural:"países",
+      disabled:false
+    },
+    estados:{
+      id:"alcanceEstadoPrecioCustom",
+      opciones:estadosDisponibles,
+      seleccion:alcance.estados,
+      placeholder:"Seleccionar estado",
+      singular:"estado",
+      plural:"estados",
+      disabled:!alcance.paises.length
+    },
+    ciudades:{
+      id:"alcanceCiudadPrecioCustom",
+      opciones:ciudadesDisponibles,
+      seleccion:alcance.ciudades,
+      placeholder:"Seleccionar ciudad",
+      singular:"ciudad",
+      plural:"ciudades",
+      disabled:!alcance.estados.length
+    }
+  };
+}
+
+function actualizarSelectoresAlcancePrecioUI(slotId){
+  const configs=configSelectoresAlcancePrecio(slotId);
+
+  Object.entries(configs).forEach(([campo,config])=>{
+    const datos=selectoresCariHubCustom[config.id];
+    const contenedor=document.getElementById(config.id);
+    if(!datos||!contenedor)return;
+
+    datos.opciones=(config.opciones||[]).map(opcion=>({valor:String(opcion||""),texto:String(opcion||"")}));
+    datos.seleccion=config.seleccion.slice();
+    datos.disabled=config.disabled;
+    contenedor.classList.toggle("disabled",config.disabled);
+    contenedor.querySelector(".selector-carihub-btn")?.toggleAttribute("disabled",config.disabled);
+    actualizarBotonSelectorCariHub(config.id);
+  });
+
+  if(selectorCariHubActivoId){
+    const portal=document.getElementById("selectorCariHubPortal");
+    if(portal)portal.innerHTML=pintarOpcionesPortalSelectorCariHub(selectorCariHubActivoId);
+    posicionarPortalSelectorCariHub(selectorCariHubActivoId);
+  }
+}
+
+function seleccionarSelectorCariHubCustom(id,valor){
+  const datos=selectoresCariHubCustom[id];
+  if(!datos)return;
+
+  if(datos.multiple){
+    alternarValorSelectorCariHub(datos.slotId,datos.campo,valor);
+    limpiarDependenciasAlcancePrecio(datos.slotId,datos.campo);
+    datos.seleccion=valoresAlcancePrecio(datos.slotId,datos.campo).slice();
+    actualizarSelectoresAlcancePrecioUI(datos.slotId);
+    const portal=document.getElementById("selectorCariHubPortal");
+    if(portal)portal.innerHTML=pintarOpcionesPortalSelectorCariHub(id);
+    posicionarPortalSelectorCariHub(id);
+    return;
+  }
+
+  actualizarAlcancePrecioTemporal(datos.slotId,datos.campo,valor||"");
+  datos.seleccion=valor||"";
+  actualizarBotonSelectorCariHub(id);
+  cerrarSelectoresCariHubCustom();
+}
+
+document.addEventListener("click",event=>{
+  if(!selectorCariHubActivoId)return;
+  const portal=document.getElementById("selectorCariHubPortal");
+  const activo=document.getElementById(selectorCariHubActivoId);
+  if(portal?.contains(event.target)||activo?.contains(event.target))return;
+  cerrarSelectoresCariHubCustom();
+});
+
+document.addEventListener("keydown",event=>{
+  if(event.key==="Escape")cerrarSelectoresCariHubCustom();
+});
+
+window.addEventListener("resize",()=>{
+  if(selectorCariHubActivoId)posicionarPortalSelectorCariHub(selectorCariHubActivoId);
+});
+
+window.addEventListener("scroll",event=>{
+  if(!selectorCariHubActivoId)return;
+  const portal=document.getElementById("selectorCariHubPortal");
+  if(portal&&(event.target===portal||portal.contains(event.target)))return;
+  cerrarSelectoresCariHubCustom();
+},true);
+
+function alcancePrecioTemporal(slotId){
+  alcancePrecioTemporalPorSlot[slotId]=alcancePrecioTemporalPorSlot[slotId]||{
+    categorias:[],
+    paises:[],
+    estados:[],
+    ciudades:[]
+  };
+
+  const alcance=alcancePrecioTemporalPorSlot[slotId];
+  alcance.categorias=listaDisplayPrecioScope(alcance.categorias||alcance.categoria);
+  alcance.paises=listaDisplayPrecioScope(alcance.paises||alcance.pais);
+  alcance.estados=listaDisplayPrecioScope(alcance.estados||alcance.estado);
+  alcance.ciudades=listaDisplayPrecioScope(alcance.ciudades||alcance.ciudad);
+  delete alcance.categoria;
+  delete alcance.pais;
+  delete alcance.estado;
+  delete alcance.ciudad;
+
+  return alcancePrecioTemporalPorSlot[slotId];
+}
+
+function categoriasAlcancePrecio(slotId){
+  const alcance=alcancePrecioTemporal(slotId);
+  alcance.categorias=Array.isArray(alcance.categorias)?alcance.categorias:[];
+  return alcance.categorias;
+}
+
+function actualizarAlcancePrecioTemporal(slotId,campo,valor){
+  const alcance=alcancePrecioTemporal(slotId);
+  if(["categorias","paises","estados","ciudades"].includes(campo)){
+    alcance[campo]=listaDisplayPrecioScope(valor);
+    limpiarDependenciasAlcancePrecio(slotId,campo);
+    return;
+  }
+
+  alcance[campo]=valor;
+}
+
+function pintarAlcancePrecioPublicidad(slotId){
+  const selectores=configSelectoresAlcancePrecio(slotId);
+
+  return `
+    <div class="alcance-precio-box">
+      <h4>Alcance del precio</h4>
+      <div class="alcance-precio-grid">
+        <label>Categoría
+          ${pintarSelectorCariHubCustom({
+            ...selectores.categorias,
+            slotId,
+            campo:"categorias",
+            multiple:true
+          })}
+        </label>
+        <label>País
+          ${pintarSelectorCariHubCustom({
+            ...selectores.paises,
+            slotId,
+            campo:"paises",
+            multiple:true
+          })}
+        </label>
+        <label>Estado
+          ${pintarSelectorCariHubCustom({
+            ...selectores.estados,
+            slotId,
+            campo:"estados",
+            multiple:true
+          })}
+        </label>
+        <label>Ciudad
+          ${pintarSelectorCariHubCustom({
+            ...selectores.ciudades,
+            slotId,
+            campo:"ciudades",
+            multiple:true
+          })}
+        </label>
+      </div>
+    </div>
+  `;
+}
+
+async function cargarOverridesPrecioPublicidad(slotId){
+  const snap=await db.collection("configuracion_publicidad")
+    .doc("precios_banners")
+    .collection("overrides")
+    .where("slotId","==",slotId)
+    .get();
+
+  const overrides=[];
+  snap.forEach(doc=>{
+    overrides.push(normalizarOverridePrecioPublicidad(doc.data(),doc.id));
+  });
+
+  overridesPrecioPublicidadPorSlot[slotId]=overrides;
+  return overrides;
+}
+
+function resumenListaAlcancePrecio(lista,todos){
+  return lista?.length?lista.join(", "):todos;
+}
+
+function fechaMovimientoOverridePrecio(override){
+  return formatearFecha(override.actualizadoEn||override.creadoEn);
+}
+
+function porcentajeTextoPrecio(valor){
+  return Number((Number(valor||0)*100).toFixed(2))+"%";
+}
+
+function detallePreciosOverridePublicidad(slotId,override){
+  const config=configEdicionOverridePrecio(slotId,override);
+  const slot=config.slots?.[slotId]||{};
+  const moneda=config.moneda||"MXN";
+  const factores=normalizarFactoresAutomaticosPublicidad(config);
+  const esManual=slot.modoPrecio==="manual";
+  const precio=(tipo,periodo)=>calcularPrecioPublicidadDesdeConfig(config,slotId,tipo,periodo)?.total||0;
+
+  if(esManual){
+    return {
+      imagen:[
+        ["Mensual",formatoMonedaPublicidad(precio("imagen","mensual"),moneda)],
+        ["15 días",formatoMonedaPublicidad(precio("imagen","quincenal"),moneda)],
+        ["Semanal",formatoMonedaPublicidad(precio("imagen","semanal"),moneda)]
+      ],
+      video:[
+        ["Mensual",formatoMonedaPublicidad(precio("video","mensual"),moneda)],
+        ["15 días",formatoMonedaPublicidad(precio("video","quincenal"),moneda)],
+        ["Semanal",formatoMonedaPublicidad(precio("video","semanal"),moneda)]
+      ]
+    };
+  }
+
+  return {
+    imagen:[
+      ["Mensual",formatoMonedaPublicidad(precio("imagen","mensual"),moneda)],
+      ["15 días",`${formatoMonedaPublicidad(precio("imagen","quincenal"),moneda)} · ${porcentajeTextoPrecio(factores.imagenQuincenal)}`],
+      ["Semanal",`${formatoMonedaPublicidad(precio("imagen","semanal"),moneda)} · ${porcentajeTextoPrecio(factores.imagenSemanal)}`]
+    ],
+    video:[
+      ["Mensual",`${formatoMonedaPublicidad(precio("video","mensual"),moneda)} · video ${porcentajeTextoPrecio(factores.video)}`],
+      ["15 días",`${formatoMonedaPublicidad(precio("video","quincenal"),moneda)} · ${porcentajeTextoPrecio(factores.imagenQuincenal)} + video ${porcentajeTextoPrecio(factores.video)}`],
+      ["Semanal",`${formatoMonedaPublicidad(precio("video","semanal"),moneda)} · ${porcentajeTextoPrecio(factores.imagenSemanal)} + video ${porcentajeTextoPrecio(factores.video)}`]
+    ]
+  };
+}
+
+function pintarColumnaPreciosOverride(titulo,filas){
+  return `
+    <div class="alcance-precios-col">
+      <h5>${titulo}</h5>
+      ${filas.map(([label,valor])=>`
+        <div class="alcance-precio-row">
+          <span>${textoSeguro(label)}</span>
+          <span>${textoSeguro(valor)}</span>
+        </div>
+      `).join("")}
+    </div>
+  `;
+}
+
+function pintarAlcancesGuardadosPublicidad(slotId){
+  const overrides=overridesPrecioPublicidadPorSlot[slotId]||[];
+
+  if(!overrides.length){
+    return `
+      <div class="alcances-guardados-box">
+        <h4>Alcances guardados</h4>
+        <div class="alcances-guardados-lista">
+          <div class="alcance-guardado-item">
+            <p>No hay alcances guardados para este banner.</p>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  return `
+    <div class="alcances-guardados-box">
+      <h4>Alcances guardados</h4>
+      <div class="alcances-guardados-lista">
+        ${overrides.map(override=>{
+          const precios=detallePreciosOverridePublicidad(slotId,override);
+          return `
+          <div class="alcance-guardado-item">
+            <div class="alcance-guardado-head">
+              <span>Movimiento: ${textoSeguro(fechaMovimientoOverridePrecio(override))}</span>
+              <div class="alcance-guardado-meta">
+                <span class="alcance-pill">${override.modoPrecio==="manual"?"Manual":"Automático"}</span>
+                <span class="alcance-pill ${override.activo?"":"inactivo"}">${override.activo?"Activo":"Inactivo"}</span>
+              </div>
+            </div>
+            <div class="alcance-guardado-detalle">
+              <p><b>Categorías:</b><br>${textoSeguro(resumenListaAlcancePrecio(override.scopeDisplay?.categorias||override.scope.categorias,"Todas"))}</p>
+              <p><b>Países:</b><br>${textoSeguro(resumenListaAlcancePrecio(override.scopeDisplay?.paises||override.scope.paises,"Todos"))}</p>
+              <p><b>Estados:</b><br>${textoSeguro(resumenListaAlcancePrecio(override.scopeDisplay?.estados||override.scope.estados,"Todos"))}</p>
+              <p><b>Ciudades:</b><br>${textoSeguro(resumenListaAlcancePrecio(override.scopeDisplay?.ciudades||override.scope.ciudades,"Todas"))}</p>
+            </div>
+            <div class="alcance-precios-grid">
+              ${pintarColumnaPreciosOverride("Imagen",precios.imagen)}
+              ${pintarColumnaPreciosOverride("Video",precios.video)}
+            </div>
+            <div class="alcance-guardado-actions">
+              <button class="btn-ver" onclick="editarOverridePrecioPublicidad('${slotId}','${override.id}')">Editar</button>
+              <button class="btn-quitar" onclick="cambiarEstadoOverridePrecioPublicidad('${slotId}','${override.id}',${override.activo?"false":"true"})">${override.activo?"Desactivar":"Activar"}</button>
+              <button class="btn-borrar" onclick="eliminarOverridePrecioPublicidad('${slotId}','${override.id}')">Eliminar</button>
+            </div>
+          </div>
+        `}).join("")}
+      </div>
+    </div>
+  `;
+}
+
+function pintarErrorOverridesPrecioPublicidad(error){
+  return `
+    <div class="alcances-guardados-box">
+      <h4>Alcances guardados</h4>
+      <div class="alcance-guardado-item">
+        <p>No se pudieron cargar los overrides.<br><small>${textoSeguro(error.code||"")} ${textoSeguro(error.message||error)}</small></p>
+      </div>
+    </div>
+  `;
+}
+
+function normalizarScopePrecioPublicidad(scope){
+  return PreciosPublicidad.normalizarScopePrecioPublicidad(scope);
+}
+
+function scopeArraysPrecioPublicidad(scope){
+  const normalizado=normalizarScopePrecioPublicidad(scope);
+
+  return {
+    categorias:normalizado.categorias,
+    paises:normalizado.paises,
+    estados:normalizado.estados,
+    ciudades:normalizado.ciudades
+  };
+}
+
+function normalizarOverridePrecioPublicidad(data,overrideId=""){
+  return PreciosPublicidad.normalizarOverridePrecioPublicidad(data,overrideId);
+}
+
+function calcularEspecificidadOverridePrecio(override,contexto){
+  return PreciosPublicidad.calcularEspecificidadOverridePrecio(override,contexto);
+}
+
+function resolverOverridePrecioPublicidad(configGlobal,overrides,contexto){
+  return PreciosPublicidad.resolverOverridePrecioPublicidad(configGlobal,overrides,contexto);
+}
+
+function redondearPrecioHaciaArriba(valor,multiplo=50){
+  return PreciosPublicidad.redondearPrecioHaciaArriba(valor,multiplo);
+}
+
+function obtenerFactorAutomatico(config,periodo){
+  return PreciosPublicidad.obtenerFactorAutomatico(config,periodo);
+}
+
+function obtenerPrecioManualSlot(slot,tipo,periodo){
+  return PreciosPublicidad.obtenerPrecioManualSlot(slot,tipo,periodo);
+}
+
+function calcularPrecioAutomaticoSlot(config,slot,tipo,periodo,espacios=1){
+  return PreciosPublicidad.calcularPrecioAutomaticoSlot(config,slot,tipo,periodo,espacios);
+}
+
+function calcularPrecioPublicidadDesdeConfig(config,slotId,tipo,periodo,espacios=1){
+  return PreciosPublicidad.calcularPrecioPublicidadDesdeConfig(config,slotId,tipo,periodo,espacios);
+}
+
+function prepararConfigPreciosPublicidadParaFirestore(config){
+  const slots={};
+
+  Object.entries(config.slots||{}).forEach(([slotId,slot])=>{
+    const slotNormalizado=normalizarSlotPrecioPublicidad(slot,slotId);
+    slots[slotId]={
+      nombre:slotNormalizado.nombre||slotId,
+      pantalla:slotNormalizado.pantalla||"",
+      capacidadMaxima:Number(slotNormalizado.capacidadMaxima)||1,
+      precioMensualImagenBase:Number(slotNormalizado.precioMensualImagenBase)||0,
+      modoPrecio:slotNormalizado.modoPrecio,
+      automatico:slotNormalizado.automatico,
+      manual:slotNormalizado.manual,
+      activo:slotNormalizado.activo!==false
+    };
+  });
+
+  return {
+    ivaIncluido:config.ivaIncluido!==false,
+    moneda:config.moneda||"MXN",
+    redondeo:Number(config.redondeo)||50,
+    factoresPeriodo:config.factoresPeriodo||CONFIG_PRECIOS_PUBLICIDAD_FALLBACK.factoresPeriodo,
+    factoresAutomaticos:normalizarFactoresAutomaticosPublicidad(config),
+    slots
+  };
+}
+
+async function cargarConfigPreciosPublicidadAdmin(){
+  const ref=db.collection("configuracion_publicidad").doc("precios_banners");
+  const doc=await ref.get();
+
+  if(doc.exists){
+    configPreciosPublicidadAdmin=normalizarConfigPreciosPublicidad(doc.data());
+    return configPreciosPublicidadAdmin;
+  }
+
+  configPreciosPublicidadAdmin=normalizarConfigPreciosPublicidad(CONFIG_PRECIOS_PUBLICIDAD_FALLBACK);
+  const configFirestore=prepararConfigPreciosPublicidadParaFirestore(configPreciosPublicidadAdmin);
+  await ref.set({
+    ...configFirestore,
+    actualizadoEn:firebase.firestore.FieldValue.serverTimestamp(),
+    actualizadoPor:auth.currentUser?.email||""
+  },{merge:true});
+  return configPreciosPublicidadAdmin;
+}
+
+function formatoMonedaPublicidad(valor,moneda="MXN"){
+  return "$"+Number(valor||0).toLocaleString("es-MX")+" "+moneda;
+}
+
+function sincronizarInputsPrecio(ids,valor){
+  ids.split(",").forEach(id=>{
+    const input=document.getElementById(id.trim());
+    if(input)input.value=valor;
+  });
+}
+
+function nombreCortoBannerPrecio(slotId,slot){
+  const nombres={
+    home_izquierda:"Home izquierda",
+    home_derecha:"Home derecha",
+    home_inferior:"Home inferior",
+    resultados_izquierda:"Resultados izquierda",
+    resultados_centro:"Resultados centro",
+    resultados_derecha:"Resultados derecha",
+    resultados_inferior:"Resultados inferior",
+    perfil_izquierda:"Perfil izquierda",
+    perfil_centro:"Perfil centro",
+    perfil_derecha:"Perfil derecha",
+    perfil_inferior:"Perfil inferior"
+  };
+
+  return nombres[slotId]||slot.nombre||slotId;
+}
+
+function pintarTarjetaPrecioSlot(slotId,slot){
+  const config=configPreciosPublicidadAdmin||CONFIG_PRECIOS_PUBLICIDAD_FALLBACK;
+  const imagenMensual=calcularPrecioPublicidadDesdeConfig(config,slotId,"imagen","mensual")?.total||0;
+  const moneda=config.moneda||"MXN";
+
+  return `
+    <div class="precio-slot-card precio-slot-${slotId.replace(/_/g,"-")}" onclick="editarPrecioBanner('${slotId}')">
+      <h3>${textoSeguro(nombreCortoBannerPrecio(slotId,slot))}</h3>
+      <p>${formatoMonedaPublicidad(imagenMensual,moneda)}</p>
+      <div class="precio-card-actions">
+        <button type="button" class="precio-edit-btn" data-slot-id="${slotId}" onclick="event.stopPropagation(); editarPrecioBanner('${slotId}')">&#9999;&#65039;</button>
+      </div>
+    </div>
+  `;
+}
+
+function configEdicionOverridePrecio(slotId,override){
+  const config=normalizarConfigPreciosPublicidad(configPreciosPublicidadAdmin||CONFIG_PRECIOS_PUBLICIDAD_FALLBACK);
+  if(!override)return config;
+
+  config.slots[slotId]=normalizarSlotPrecioPublicidad({
+    ...(config.slots[slotId]||{}),
+    precioMensualImagenBase:override.precioMensualImagenBase,
+    modoPrecio:override.modoPrecio,
+    automatico:override.automatico,
+    manual:override.manual,
+    factoresAutomaticos:override.factoresAutomaticos,
+    activo:override.activo
+  },slotId);
+
+  return config;
+}
+
+function pintarPantallaEdicionPrecioPublicidad(config,slotId){
+  const slot=config.slots?.[slotId];
+  if(!slot)return `<div class="item"><h3>Banner no encontrado</h3><p>No se pudo cargar el banner seleccionado.</p></div>`;
+
+  const moneda=config.moneda||"MXN";
+  const videoMensual=calcularPrecioPublicidadDesdeConfig(config,slotId,"video","mensual")?.total||0;
+  const imagenSemanal=calcularPrecioPublicidadDesdeConfig(config,slotId,"imagen","semanal")?.total||0;
+  const imagenQuincenal=calcularPrecioPublicidadDesdeConfig(config,slotId,"imagen","quincenal")?.total||0;
+  const videoSemanal=calcularPrecioPublicidadDesdeConfig(config,slotId,"video","semanal")?.total||0;
+  const videoQuincenal=calcularPrecioPublicidadDesdeConfig(config,slotId,"video","quincenal")?.total||0;
+  const factores=normalizarFactoresAutomaticosPublicidad(config);
+  const porcentajeSemanal=Number((factores.imagenSemanal*100).toFixed(2));
+  const porcentajeQuincenal=Number((factores.imagenQuincenal*100).toFixed(2));
+  const porcentajeVideo=Number((factores.video*100).toFixed(2));
+  const esAutomatico=slot.modoPrecio!=="manual";
+  const manual=slot.manual||preciosManualVacioPublicidad();
+  const valorManual=(tipo,periodo,fallback)=>Number(manual?.[tipo]?.[periodo])||fallback||0;
+  const tarjetaPrecio=({titulo,precio,inputId,editable,porcentaje})=>`
+    <div class="precio-edicion-card">
+      <b>${titulo}</b>
+      ${editable
+        ? `<input id="${inputId}" type="number" min="1" step="1" value="${Number(precio)||0}">`
+        : `<span>${formatoMonedaPublicidad(precio,moneda)} automatico</span>`}
+      <small>${porcentaje}</small>
+    </div>
+  `;
+
+  return `
+    <div class="precios-edicion-top">
+      <button class="btn btn-volver" onclick="volverListaPreciosPublicidad()">← Volver a lista de precios</button>
+      <button type="button" id="modoPrecioSwitch" class="modo-precio-switch ${esAutomatico?"":"manual"}" onclick="alternarModoPrecioBanner('${slotId}')">
+        <span class="texto">${esAutomatico?"Automático":"Manual"}</span>
+        <span class="estado">${esAutomatico?"ON":"OFF"}</span>
+      </button>
+    </div>
+    <div class="precios-edicion-panel">
+      <h3>${textoSeguro(slot.nombre||slotId)}</h3>
+      <div class="precios-edicion-grid">
+        <div class="precios-edicion-columna">
+          <h4>IMAGEN</h4>
+          ${tarjetaPrecio({
+            titulo:"Imagen mensual",
+            precio:esAutomatico?Number(slot.precioMensualImagenBase)||0:valorManual("imagen","mensual",Number(slot.precioMensualImagenBase)||0),
+            inputId:"precioEdit_"+slotId,
+            editable:true,
+            porcentaje:esAutomatico?"Porcentaje <input id=\"factorImagenMensual\" type=\"number\" value=\"100\" disabled> %":"Manual"
+          })}
+          ${tarjetaPrecio({
+            titulo:"Imagen 15 dias",
+            precio:esAutomatico?imagenQuincenal:valorManual("imagen","quincenal",imagenQuincenal),
+            inputId:"manualImagenQuincenal",
+            editable:!esAutomatico,
+            porcentaje:esAutomatico?`Porcentaje <input id="factorImagenQuincenal" type="number" min="1" step="0.01" value="${porcentajeQuincenal}" oninput="sincronizarInputsPrecio('factorVideoQuincenal',this.value)"> %`:"Manual"
+          })}
+          ${tarjetaPrecio({
+            titulo:"Imagen semanal",
+            precio:esAutomatico?imagenSemanal:valorManual("imagen","semanal",imagenSemanal),
+            inputId:"manualImagenSemanal",
+            editable:!esAutomatico,
+            porcentaje:esAutomatico?`Porcentaje <input id="factorImagenSemanal" type="number" min="1" step="0.01" value="${porcentajeSemanal}" oninput="sincronizarInputsPrecio('factorVideoSemanal',this.value)"> %`:"Manual"
+          })}
+        </div>
+        <div class="precios-edicion-columna">
+          <h4>VIDEO</h4>
+          ${tarjetaPrecio({
+            titulo:"Video mensual",
+            precio:esAutomatico?videoMensual:valorManual("video","mensual",videoMensual),
+            inputId:"manualVideoMensual",
+            editable:!esAutomatico,
+            porcentaje:esAutomatico?`Porcentaje video <input id="factorVideo" type="number" min="1" step="0.01" value="${porcentajeVideo}" oninput="sincronizarInputsPrecio('factorVideoQuincenalBase,factorVideoSemanalBase',this.value)"> %`:"Manual"
+          })}
+          ${tarjetaPrecio({
+            titulo:"Video 15 dias",
+            precio:esAutomatico?videoQuincenal:valorManual("video","quincenal",videoQuincenal),
+            inputId:"manualVideoQuincenal",
+            editable:!esAutomatico,
+            porcentaje:esAutomatico?`Porcentaje <input id="factorVideoQuincenal" type="number" min="1" step="0.01" value="${porcentajeQuincenal}" oninput="sincronizarInputsPrecio('factorImagenQuincenal',this.value)"> % + video <input id="factorVideoQuincenalBase" type="number" min="1" step="0.01" value="${porcentajeVideo}" oninput="sincronizarInputsPrecio('factorVideo,factorVideoSemanalBase',this.value)"> %`:"Manual"
+          })}
+          ${tarjetaPrecio({
+            titulo:"Video semanal",
+            precio:esAutomatico?videoSemanal:valorManual("video","semanal",videoSemanal),
+            inputId:"manualVideoSemanal",
+            editable:!esAutomatico,
+            porcentaje:esAutomatico?`Porcentaje <input id="factorVideoSemanal" type="number" min="1" step="0.01" value="${porcentajeSemanal}" oninput="sincronizarInputsPrecio('factorImagenSemanal',this.value)"> % + video <input id="factorVideoSemanalBase" type="number" min="1" step="0.01" value="${porcentajeVideo}" oninput="sincronizarInputsPrecio('factorVideo,factorVideoQuincenalBase',this.value)"> %`:"Manual"
+          })}
+        </div>
+      </div>
+      <div class="precios-edicion-actions">
+        <button type="button" class="precio-save-btn" onclick="guardarPrecioBanner('${slotId}')">Guardar</button>
+        <button type="button" class="precio-cancel-btn" onclick="cancelarEdicionPrecioBanner()">Cancelar</button>
+      </div>
+      ${pintarAlcancePrecioPublicidad(slotId)}
+      ${pintarAlcancesGuardadosPublicidad(slotId)}
+    </div>
+  `;
+}
+
+async function cargarPantallaPreciosPublicidad(){
+  const cont=document.getElementById("contenidoModulo");
+  const titulo=document.getElementById("tituloModulo");
+  const desc=document.getElementById("descripcionModulo");
+  const buscador=document.getElementById("buscadorModulo");
+
+  titulo.innerText="Actualización de precios de banners/publicidad y destacados";
+  desc.innerText="Administra el precio mensual base de imagen; los precios derivados se calculan automáticamente.";
+  buscador.style.display="none";
+  cont.innerHTML="Cargando precios de publicidad...";
+
+  try{
+    const config=await cargarConfigPreciosPublicidadAdmin();
+    cont.innerHTML=`
+      <div class="precios-publicidad-wrap">
+        <div class="precios-mockup">
+          <img src="img/imgmockup-banners-movil-vacio.jpg" alt="Mockup de banners CariHub">
+          ${Object.entries(config.slots).map(([slotId,slot])=>pintarTarjetaPrecioSlot(slotId,slot)).join("")}
+        </div>
+      </div>
+    `;
+  }catch(error){
+    cont.innerHTML=`<div class="item"><h3>No se pudieron cargar los precios</h3><p>${textoSeguro(error.message)}</p></div>`;
+  }
+}
+
+function editarPrecioBanner(slotId){
+  slotPrecioEditando=slotId;
+  contextoEdicionPrecio={tipo:"global",slotId,overrideId:""};
+  cargarPantallaEditarPrecioBanner(slotId);
+}
+
+function cancelarEdicionPrecioBanner(){
+  slotPrecioEditando="";
+  cargarPantallaPreciosPublicidad();
+}
+
+function volverListaPreciosPublicidad(){
+  slotPrecioEditando="";
+  contextoEdicionPrecio={tipo:"global",slotId:"",overrideId:""};
+  cargarPantallaPreciosPublicidad();
+}
+
+function editarOverridePrecioPublicidad(slotId,overrideId){
+  const override=(overridesPrecioPublicidadPorSlot[slotId]||[]).find(item=>item.id===overrideId);
+  if(!override){
+    alert("No se encontró el override seleccionado.");
+    return;
+  }
+
+  contextoEdicionPrecio={tipo:"override",slotId,overrideId,override};
+  alcancePrecioTemporalPorSlot[slotId]={
+    categorias:normalizarScopeDisplayPrecioPublicidad(override.scopeDisplay||override.scopeOriginal||override.scope).categorias,
+    paises:valoresAlcanceDisplay(override,"paises","pais"),
+    estados:valoresAlcanceDisplay(override,"estados","estado"),
+    ciudades:valoresAlcanceDisplay(override,"ciudades","ciudad")
+  };
+  const config=configEdicionOverridePrecio(slotId,override);
+  document.getElementById("contenidoModulo").innerHTML=pintarPantallaEdicionPrecioPublicidad(config,slotId);
+}
+
+async function desactivarOverridePrecioPublicidad(slotId,overrideId){
+  return cambiarEstadoOverridePrecioPublicidad(slotId,overrideId,false);
+}
+
+async function cambiarEstadoOverridePrecioPublicidad(slotId,overrideId,activo){
+  try{
+    await db.collection("configuracion_publicidad")
+      .doc("precios_banners")
+      .collection("overrides")
+      .doc(overrideId)
+      .set({
+        activo:!!activo,
+        actualizadoEn:firebase.firestore.FieldValue.serverTimestamp(),
+        actualizadoPor:auth.currentUser?.email||""
+      },{merge:true});
+    await cargarPantallaEditarPrecioBanner(slotId);
+  }catch(error){
+    alert("No se pudo actualizar el estado del override: "+(error.message||error));
+  }
+}
+
+async function eliminarOverridePrecioPublicidad(slotId,overrideId){
+  if(!confirm("¿Eliminar este alcance guardado?"))return;
+
+  try{
+    await db.collection("configuracion_publicidad")
+      .doc("precios_banners")
+      .collection("overrides")
+      .doc(overrideId)
+      .delete();
+    await cargarPantallaEditarPrecioBanner(slotId);
+  }catch(error){
+    alert("No se pudo eliminar el override: "+(error.message||error));
+  }
+}
+
+function alternarModoPrecioBanner(slotId){
+  if(contextoEdicionPrecio.tipo==="override"&&contextoEdicionPrecio.override){
+    const override=contextoEdicionPrecio.override;
+    override.modoPrecio=override.modoPrecio==="manual"?"automatico":"manual";
+    const config=configEdicionOverridePrecio(slotId,override);
+    document.getElementById("contenidoModulo").innerHTML=pintarPantallaEdicionPrecioPublicidad(config,slotId);
+    return;
+  }
+
+  if(!configPreciosPublicidadAdmin?.slots?.[slotId])return;
+
+  const slot=configPreciosPublicidadAdmin.slots[slotId];
+  const nuevoModo=slot.modoPrecio==="manual"?"automatico":"manual";
+  slot.modoPrecio=nuevoModo;
+  document.getElementById("contenidoModulo").innerHTML=pintarPantallaEdicionPrecioPublicidad(configPreciosPublicidadAdmin,slotId);
+  return;
+
+  const btn=document.getElementById("modoPrecioSwitch");
+  if(!btn)return;
+
+  const esAutomatico=nuevoModo!=="manual";
+  btn.classList.toggle("manual",!esAutomatico);
+  btn.querySelector(".texto").textContent=esAutomatico?"Automático":"Manual";
+  btn.querySelector(".estado").textContent=esAutomatico?"ON":"OFF";
+}
+
+async function cargarPantallaEditarPrecioBanner(slotId){
+  const cont=document.getElementById("contenidoModulo");
+  const titulo=document.getElementById("tituloModulo");
+  const desc=document.getElementById("descripcionModulo");
+  const buscador=document.getElementById("buscadorModulo");
+
+  titulo.innerText="Editar precio de banner";
+  desc.innerText="Actualiza el precio mensual base de imagen para el banner seleccionado.";
+  buscador.style.display="none";
+  cont.innerHTML="Cargando banner...";
+
+  try{
+    const config=await cargarConfigPreciosPublicidadAdmin();
+    try{
+      await cargarOverridesPrecioPublicidad(slotId);
+    }catch(errorOverrides){
+      overridesPrecioPublicidadPorSlot[slotId]=[];
+      cont.innerHTML=pintarPantallaEdicionPrecioPublicidad(config,slotId)+pintarErrorOverridesPrecioPublicidad(errorOverrides);
+      return;
+    }
+    cont.innerHTML=pintarPantallaEdicionPrecioPublicidad(config,slotId);
+  }catch(error){
+    cont.innerHTML=`<div class="item"><h3>No se pudo cargar el banner</h3><p>${textoSeguro(error.message)}</p></div>`;
+  }
+}
+
+async function guardarPrecioBanner(slotId){
+  const input=document.getElementById("precioEdit_"+slotId);
+  const valor=Number(input?.value);
+  const porcentajeSemanal=Number(document.getElementById("factorImagenSemanal")?.value);
+  const porcentajeQuincenal=Number(document.getElementById("factorImagenQuincenal")?.value);
+  const porcentajeVideo=Number(document.getElementById("factorVideo")?.value);
+
+  if(!Number.isFinite(valor)||valor<=0){
+    alert("Ingresa un precio mensual de imagen válido.");
+    return;
+  }
+
+  const editandoOverride=contextoEdicionPrecio.tipo==="override"&&contextoEdicionPrecio.overrideId;
+  const config=editandoOverride
+    ? configEdicionOverridePrecio(slotId,contextoEdicionPrecio.override)
+    : normalizarConfigPreciosPublicidad(configPreciosPublicidadAdmin||CONFIG_PRECIOS_PUBLICIDAD_FALLBACK);
+  const alcanceOverride=alcanceSeleccionadoPrecioPublicidad(slotId);
+  const guardarComoOverride=editandoOverride||alcanceOverride.tieneAlcance;
+  const modoPrecio=config.slots[slotId]?.modoPrecio==="manual"?"manual":"automatico";
+  const hayFactores=document.getElementById("factorImagenSemanal")
+    &&document.getElementById("factorImagenQuincenal")
+    &&document.getElementById("factorVideo");
+
+  if(hayFactores){
+    if(!Number.isFinite(porcentajeSemanal)||porcentajeSemanal<=0
+      ||!Number.isFinite(porcentajeQuincenal)||porcentajeQuincenal<=0
+      ||!Number.isFinite(porcentajeVideo)||porcentajeVideo<=0){
+      alert("Ingresa porcentajes automaticos validos.");
+      return;
+    }
+
+    const factorSemanal=porcentajeSemanal/100;
+    const factorQuincenal=porcentajeQuincenal/100;
+    const factorVideo=porcentajeVideo/100;
+
+    config.factoresAutomaticos={
+      ...normalizarFactoresAutomaticosPublicidad(config),
+      imagenSemanal:factorSemanal,
+      imagenQuincenal:factorQuincenal,
+      imagenMensual:1,
+      video:factorVideo
+    };
+    config.factoresPeriodo={
+      ...(config.factoresPeriodo||{}),
+      semanal:factorSemanal,
+      quincenal:factorQuincenal,
+      mensual:1
+    };
+    config.multiplicadoresTipo={
+      ...(config.multiplicadoresTipo||{}),
+      imagen:1,
+      video:factorVideo
+    };
+  }
+
+  let preciosManuales=null;
+  if(modoPrecio==="manual"){
+    preciosManuales={
+      imagen:{
+        mensual:valor,
+        quincenal:Number(document.getElementById("manualImagenQuincenal")?.value),
+        semanal:Number(document.getElementById("manualImagenSemanal")?.value)
+      },
+      video:{
+        mensual:Number(document.getElementById("manualVideoMensual")?.value),
+        quincenal:Number(document.getElementById("manualVideoQuincenal")?.value),
+        semanal:Number(document.getElementById("manualVideoSemanal")?.value)
+      }
+    };
+
+    const preciosValidos=[
+      preciosManuales.imagen.mensual,
+      preciosManuales.imagen.quincenal,
+      preciosManuales.imagen.semanal,
+      preciosManuales.video.mensual,
+      preciosManuales.video.quincenal,
+      preciosManuales.video.semanal
+    ].every(precio=>Number.isFinite(precio)&&precio>0);
+
+    if(!preciosValidos){
+      alert("Ingresa precios manuales validos.");
+      return;
+    }
+  }
+
+  config.slots[slotId]={
+    ...(config.slots[slotId]||{}),
+    precioMensualImagenBase:valor,
+    modoPrecio,
+    automatico:{
+      ...(config.slots[slotId]?.automatico||{}),
+      precioMensualImagenBase:valor
+    },
+    manual:preciosManuales||config.slots[slotId]?.manual||preciosManualVacioPublicidad()
+  };
+
+  if(guardarComoOverride){
+    const overrideExistente=editandoOverride&&contextoEdicionPrecio.overrideId;
+    const overrideId=overrideExistente
+      ? contextoEdicionPrecio.overrideId
+      : generarOverrideIdPrecioPublicidad(slotId,alcanceOverride.scope);
+    const overrideActual=contextoEdicionPrecio.override||{};
+    const slotOverride=normalizarSlotPrecioPublicidad(config.slots[slotId],slotId);
+    const scope=alcanceOverride.scope;
+    const scopeDisplay=alcanceOverride.scopeDisplay;
+    const scopeDuplicado=(overridesPrecioPublicidadPorSlot[slotId]||[]).find(override=>{
+      if(!override||override.id===overrideId)return false;
+      const scopeExistente=scopeArraysPrecioPublicidad(override.scopeOriginal||override.scope);
+      return JSON.stringify(scopeExistente)===JSON.stringify(scope);
+    });
+
+    if(scopeDuplicado){
+      mostrarToastCariHub("❌ No se pudo guardar.","error");
+      return;
+    }
+
+    const datosOverride={
+      activo:true,
+      slotId,
+      scope,
+      scopeDisplay,
+      modoPrecio:slotOverride.modoPrecio,
+      precioMensualImagenBase:slotOverride.precioMensualImagenBase,
+      automatico:slotOverride.automatico,
+      manual:slotOverride.manual,
+      factoresAutomaticos:normalizarFactoresAutomaticosPublicidad(config),
+      actualizadoEn:firebase.firestore.FieldValue.serverTimestamp(),
+      actualizadoPor:auth.currentUser?.email||""
+    };
+
+    try{
+      const overrideRef=db.collection("configuracion_publicidad")
+        .doc("precios_banners")
+        .collection("overrides")
+        .doc(overrideId);
+      const overrideDoc=await overrideRef.get();
+
+      if(!overrideDoc.exists){
+        datosOverride.creadoEn=firebase.firestore.FieldValue.serverTimestamp();
+      }
+
+      await overrideRef.set(datosOverride,{merge:true});
+      mostrarToastCariHub(
+        overrideExistente?"✅ Actualización realizada correctamente.":"✅ Alcance guardado correctamente.",
+        "exito"
+      );
+
+      await cargarOverridesPrecioPublicidad(slotId);
+      const overrideGuardado=(overridesPrecioPublicidadPorSlot[slotId]||[]).find(item=>item.id===overrideId);
+      if(overrideGuardado){
+        contextoEdicionPrecio={tipo:"override",slotId,overrideId,override:overrideGuardado};
+        editarOverridePrecioPublicidad(slotId,overrideId);
+      }else{
+        contextoEdicionPrecio={tipo:"global",slotId,overrideId:""};
+        await cargarPantallaEditarPrecioBanner(slotId);
+      }
+    }catch(error){
+      mostrarToastCariHub("❌ No se pudo guardar.","error");
+    }
+    return;
+  }
+
+  const configFirestore=prepararConfigPreciosPublicidadParaFirestore(config);
+  await db.collection("configuracion_publicidad").doc("precios_banners").set({
+    ...configFirestore,
+    actualizadoEn:firebase.firestore.FieldValue.serverTimestamp(),
+    actualizadoPor:auth.currentUser?.email||""
+  },{merge:true});
+
+  configPreciosPublicidadAdmin=config;
+  slotPrecioEditando="";
+  await cargarPantallaPreciosPublicidad();
+}
+
+const ESTADOS_PUBLICIDAD = [
+  { key:"sin_revisar", titulo:"📁 Sin revisar", desc:"Solicitudes nuevas que aún no has revisado." },
+  { key:"autorizada_pago", titulo:"📁 Autorizadas para pago", desc:"Solicitudes aprobadas para que el anunciante pague." },
+  { key:"pagada_con_cambios", titulo:"📁 Pagadas / con movimientos", desc:"Solicitudes pagadas o con cambios después del pago." },
+  { key:"activa", titulo:"📁 Activas", desc:"Banners actualmente circulando." },
+  { key:"cambios_pendientes", titulo:"📁 Cambios pendientes", desc:"Solicitudes corregidas o modificadas que deben revisarse otra vez." },
+  { key:"correccion_solicitada", titulo:"📁 Corrección solicitada", desc:"Solicitudes revisadas pero con datos/documentos incorrectos o faltantes." },
+  { key:"vencida", titulo:"📁 Vencidas", desc:"Publicidad vencida o finalizada." }
+];
+
+async function cargarSolicitudesAnuncios(){
+  const cont = document.getElementById("contenidoModulo");
+  cont.innerHTML = "Cargando carpetas de publicidad...";
+
+  try{
+    const snap = await db.collection("solicitudes_anuncios")
+      .limit(500)
+      .get();
+
+    const conteos = {};
+    ESTADOS_PUBLICIDAD.forEach(e => conteos[e.key] = 0);
+
+    snap.forEach(doc => {
+      const s = doc.data();
+      const estado = s.estadoAdmin || "sin_revisar";
+      conteos[estado] = (conteos[estado] || 0) + 1;
+    });
+
+    cont.innerHTML = `
+      <div class="cards-list">
+        ${ESTADOS_PUBLICIDAD.map(e => `
+          <div class="item item-profile" onclick="abrirCarpetaPublicidad('${e.key}')">
+            <h3>${e.titulo}</h3>
+            <span class="badge badge-rosa">${conteos[e.key] || 0} solicitud(es)</span>
+            <p>${textoSeguro(e.desc)}</p>
+            <button class="btn btn-ver">Abrir carpeta</button>
+          </div>
+        `).join("")}
+      </div>
+    `;
+
+  }catch(e){
+    cont.innerHTML = `
+      <div class="item">
+        <h3>Error cargando carpetas</h3>
+        <p>${textoSeguro(e.message)}</p>
+      </div>
+    `;
+  }
+}
+
+async function abrirCarpetaPublicidad(estadoAdmin){
+  const cont = document.getElementById("contenidoModulo");
+  const carpeta = ESTADOS_PUBLICIDAD.find(e => e.key === estadoAdmin);
+
+  cont.innerHTML = "Cargando solicitudes...";
+
+  try{
+    const snap = await db.collection("solicitudes_anuncios")
+      .limit(500)
+      .get();
+
+    const docsFiltrados = [];
+
+    snap.forEach(doc => {
+      const s = doc.data();
+      const estado = s.estadoAdmin || "sin_revisar";
+
+      if(estado === estadoAdmin){
+        docsFiltrados.push(doc);
+      }
+    });
+
+    if(docsFiltrados.length === 0){
+      cont.innerHTML = `
+        <button class="btn btn-volver" onclick="cargarSolicitudesAnuncios()">← Volver a carpetas</button>
+        <div class="item">
+          <h3>${carpeta ? textoSeguro(carpeta.titulo) : textoSeguro(estadoAdmin)}</h3>
+          <p>No hay solicitudes en esta carpeta.</p>
+        </div>
+      `;
+      return;
+    }
+
+    cont.innerHTML = `
+      <button class="btn btn-volver" onclick="cargarSolicitudesAnuncios()">← Volver a carpetas</button>
+      <div class="cards-list"></div>
+    `;
+
+    const grid = cont.querySelector(".cards-list");
+
+    docsFiltrados.forEach(doc => {
+      const s = doc.data();
+      const priv = s.datosPrivados || {};
+      const pub = s.datosPublicos || {};
+      const ubic = s.ubicacionPublicidad || {};
+      const docs = s.documentos || {};
+
+      grid.innerHTML += `
+        <div class="item item-profile" onclick="abrirDetalleSolicitudPublicidad('${doc.id}')">
+          <h3>📢 ${textoSeguro(pub.nombreNegocio || pub.nombrePublico || s.nombreNegocio || priv.nombreResponsableCuenta || "Solicitud de publicidad")}</h3>
+
+          <span class="badge badge-naranja">${textoSeguro(s.estadoAdmin || "sin_revisar")}</span>
+
+          <p><b>Pantalla:</b> ${textoSeguro(ubic.pantalla || pub.pantalla || s.pantalla || "Sin pantalla")}</p>
+          <p><b>Espacio:</b> ${textoSeguro(ubic.espacio || pub.espacio || s.espacio || "Sin espacio")}</p>
+          <p><b>Categoría:</b> ${textoSeguro(pub.categoria || s.categoria || "Sin categoría")}</p>
+          <p><b>País:</b> ${textoSeguro(pub.pais || s.pais || "Sin país")}</p>
+          <p><b>Estado:</b> ${textoSeguro(pub.estado || s.estado || "Sin estado")}</p>
+          <p><b>Ciudad:</b> ${textoSeguro(pub.ciudad || s.ciudad || "Sin ciudad")}</p>
+          <p><b>Fecha:</b> ${formatearFecha(s.fechaEnvioRevision)}</p>
+          <p><b>Imagen:</b> ${textoSeguro(docs.bannerPrincipal || docs.imagenPrincipal || docs.imagenBanner || s.imagenPrincipalNombre || "Pendiente")}</p>
+
+          <button class="btn btn-ver">Abrir expediente</button>
+        </div>
+      `;
+    });
+
+  }catch(e){
+    cont.innerHTML = `
+      <button class="btn btn-volver" onclick="cargarSolicitudesAnuncios()">← Volver a carpetas</button>
+      <div class="item">
+        <h3>Error cargando carpeta</h3>
+        <p>${textoSeguro(e.message)}</p>
+      </div>
+    `;
+  }
+}
+
+async function obtenerURLDocumentoPrivado(docs,campo){
+  const path = docs[campo + "Path"];
+  const urlAntigua = docs[campo + "URL"];
+
+  if(path){
+    return await storage.ref(path).getDownloadURL();
+  }
+
+  if(urlAntigua){
+    return urlAntigua;
+  }
+
+  return "";
+}
+
+async function pintarDocumentoPrivado(docs,campo,label){
+  const nombre = docs[campo] || "";
+  const tipo = docs[campo + "Tipo"] || "";
+  const size = docs[campo + "Size"] || "";
+
+  if(!nombre){
+    return `<p class="dato"><b>${label}:</b> Sin archivo</p>`;
+  }
+
+  try{
+    const url = await obtenerURLDocumentoPrivado(docs,campo);
+
+    if(!url){
+      return `<p class="dato"><b>${label}:</b> ${textoSeguro(nombre)} - Archivo anterior sin ruta Storage</p>`;
+    }
+
+    const meta = [
+      tipo ? textoSeguro(tipo) : "",
+      size ? textoSeguro(Math.round(size / 1024) + " KB") : ""
+    ].filter(Boolean).join(" / ");
+
+    if((tipo || "").startsWith("image/") || /\.(jpg|jpeg|png|webp|gif)$/i.test(nombre)){
+      return `
+        <p class="dato"><b>${label}:</b> ${textoSeguro(nombre)}${meta ? " (" + meta + ")" : ""}</p>
+        <a href="${textoSeguro(url)}" target="_blank">
+          <img src="${textoSeguro(url)}" alt="${textoSeguro(label)}" style="max-width:180px;max-height:180px;border-radius:12px;margin:8px 0;display:block;">
+        </a>
+      `;
+    }
+
+    return `<p class="dato"><b>${label}:</b> <a href="${textoSeguro(url)}" target="_blank">${textoSeguro(nombre)}</a>${meta ? " (" + meta + ")" : ""}</p>`;
+  }catch(e){
+    return `<p class="dato"><b>${label}:</b> ${textoSeguro(nombre)} - No se pudo cargar archivo: ${textoSeguro(e.message)}</p>`;
+  }
+}
+
+async function pintarImagenPrincipalPublicidad(s){
+  const nombre = s.imagenPrincipalNombre || "";
+  const path = s.imagenPrincipalPath || "";
+  const tipo = s.imagenPrincipalTipo || "";
+  const size = s.imagenPrincipalSize || "";
+
+  if(!nombre){
+    return `<p class="dato"><b>Imagen principal:</b> Sin archivo</p>`;
+  }
+
+  const meta = [
+    tipo ? textoSeguro(tipo) : "",
+    size ? textoSeguro(Math.round(size / 1024) + " KB") : ""
+  ].filter(Boolean).join(" / ");
+
+  if(!path){
+    return `<p class="dato"><b>Imagen principal:</b> ${textoSeguro(nombre)} - Archivo anterior sin ruta Storage</p>`;
+  }
+
+  try{
+    const url = await storage.ref(path).getDownloadURL();
+
+    return `
+      <p class="dato"><b>Imagen principal:</b> ${textoSeguro(nombre)}${meta ? " (" + meta + ")" : ""}</p>
+      <a href="${textoSeguro(url)}" target="_blank">
+        <img src="${textoSeguro(url)}" alt="Imagen principal" style="max-width:220px;max-height:220px;border-radius:12px;margin:8px 0;display:block;">
+      </a>
+    `;
+  }catch(e){
+    return `<p class="dato"><b>Imagen principal:</b> ${textoSeguro(nombre)} - No se pudo cargar archivo: ${textoSeguro(e.message)}</p>`;
+  }
+}
+
+async function pintarImagenesAdicionalesPublicidad(s){
+  const imagenes = Array.isArray(s.imagenesAdicionales) ? s.imagenesAdicionales : [];
+
+  if(!imagenes.length){
+    return `<p class="dato"><b>Fotos públicas adicionales:</b> Sin archivos</p>`;
+  }
+
+  const partes = await Promise.all(imagenes.map(async (img,index)=>{
+    const nombre = img?.nombre || `Foto adicional ${index + 1}`;
+    const path = img?.path || "";
+    const tipo = img?.tipo || "";
+    const size = img?.size || "";
+    const meta = [
+      tipo ? textoSeguro(tipo) : "",
+      size ? textoSeguro(Math.round(size / 1024) + " KB") : ""
+    ].filter(Boolean).join(" / ");
+
+    if(!path){
+      return `<p class="dato"><b>Foto adicional ${index + 1}:</b> ${textoSeguro(nombre)} - Archivo anterior sin ruta Storage</p>`;
+    }
+
+    try{
+      const url = await storage.ref(path).getDownloadURL();
+
+      return `
+        <p class="dato"><b>Foto adicional ${index + 1}:</b> ${textoSeguro(nombre)}${meta ? " (" + meta + ")" : ""}</p>
+        <a href="${textoSeguro(url)}" target="_blank">
+          <img src="${textoSeguro(url)}" alt="Foto adicional ${index + 1}" style="max-width:220px;max-height:220px;border-radius:12px;margin:8px 0;display:block;">
+        </a>
+      `;
+    }catch(e){
+      return `<p class="dato"><b>Foto adicional ${index + 1}:</b> ${textoSeguro(nombre)} - No se pudo cargar archivo: ${textoSeguro(e.message)}</p>`;
+    }
+  }));
+
+  return `
+    <p class="dato"><b>Fotos públicas adicionales:</b></p>
+    ${partes.join("")}
+  `;
+}
+
+async function abrirDetalleSolicitudPublicidad(id){
+  const cont = document.getElementById("contenidoModulo");
+
+  try{
+    const doc = await db.collection("solicitudes_anuncios").doc(id).get();
+
+    if(!doc.exists){
+      alert("Solicitud no encontrada.");
+      return;
+    }
+
+    const s = doc.data();
+    console.log("ID ABIERTO:", id);
+    console.log("DOCUMENTO COMPLETO:", s);
+    console.log("CONTACTO PUBLICO:", s.contactoPublico);
+    console.log("WHATSAPP ACTIVO:", s.contactoPublico?.whatsappActivo);
+    console.log("INSTAGRAM ACTIVO:", s.contactoPublico?.instagramActivo);
+    console.log("TELEGRAM ACTIVO:", s.contactoPublico?.telegramActivo);
+    const priv = s.datosPrivados || {};
+    const pub = s.datosPublicos || {};
+    const ubic = s.ubicacionPublicidad || {};
+    const docs = s.documentos || {};
+    const val = s.validaciones || {};
+    const fact = s.facturacion || {};
+    const contacto = s.contactoPublico || {};
+    const documentosPrivadosHTML = [
+      await pintarDocumentoPrivado(docs,"identificacionFrente","INE frente"),
+      await pintarDocumentoPrivado(docs,"identificacionReverso","INE reverso"),
+      await pintarDocumentoPrivado(docs,"selfieValidacion","Selfie"),
+      await pintarDocumentoPrivado(docs,"comprobanteDomicilio","Comprobante domicilio")
+    ].join("");
+    const imagenPrincipalHTML = await pintarImagenPrincipalPublicidad(s);
+    const imagenesAdicionalesHTML = await pintarImagenesAdicionalesPublicidad(s);
+
+    cont.innerHTML = `
+      <button class="btn btn-volver" onclick="abrirCarpetaPublicidad('${textoSeguro(s.estadoAdmin || "sin_revisar")}')">← Volver a carpeta</button>
+
+      <div class="detalle-box">
+        <h2>📢 Expediente de publicidad</h2>
+
+        <p class="dato"><b>ID:</b> ${textoSeguro(id)}</p>
+        <p class="dato"><b>Estado admin:</b> ${textoSeguro(s.estadoAdmin || "sin_revisar")}</p>
+        <p class="dato"><b>Estado solicitud:</b> ${textoSeguro(s.estadoSolicitud)}</p>
+        <p class="dato"><b>Estado pago:</b> ${textoSeguro(s.estadoPago)}</p>
+        <p class="dato"><b>Autorizado para pago:</b> ${s.autorizadoParaPago ? "Sí" : "No"}</p>
+        <p class="dato"><b>Fecha envío:</b> ${formatearFecha(s.fechaEnvioRevision)}</p>
+
+        <hr>
+
+        <h3>Datos públicos del anuncio</h3>
+        <p class="dato"><b>Nombre público / negocio:</b> ${textoSeguro(pub.nombreNegocio || pub.nombrePublico || s.nombreNegocio || "")}</p>
+        <p class="dato"><b>Categoría:</b> ${textoSeguro(pub.categoria || s.categoria || "")}</p>
+        <p class="dato"><b>País:</b> ${textoSeguro(pub.pais || s.pais || "")}</p>
+        <p class="dato"><b>Estado:</b> ${textoSeguro(pub.estado || s.estado || "")}</p>
+        <p class="dato"><b>Ciudad:</b> ${textoSeguro(pub.ciudad || s.ciudad || "")}</p>
+        <p class="dato"><b>Pantalla:</b> ${textoSeguro(ubic.pantalla || pub.pantalla || s.pantalla || "")}</p>
+        <p class="dato"><b>Espacio:</b> ${textoSeguro(ubic.espacio || pub.espacio || s.espacio || "")}</p>
+        <p class="dato"><b>Mensaje interno:</b> ${contacto.mensajeInternoActivo ? "Sí" : "No"}</p>
+        <p class="dato"><b>WhatsApp:</b> ${contacto.whatsappActivo ? textoSeguro(contacto.whatsapp) : "No activo"}</p>
+        <p class="dato"><b>Telegram:</b> ${contacto.telegramActivo ? textoSeguro(contacto.telegram) : "No activo"}</p>
+        <p class="dato"><b>Instagram:</b> ${contacto.instagramActivo ? textoSeguro(contacto.instagram) : "No activo"}</p>
+        <p class="dato"><b>X / Twitter:</b> ${contacto.twitterActivo ? textoSeguro(contacto.twitter) : "No activo"}</p>
+        <p class="dato"><b>OnlyFans:</b> ${contacto.onlyFansActivo ? textoSeguro(contacto.onlyFans) : "No activo"}</p>
+        <p class="dato"><b>Sitio web:</b> ${contacto.sitioWebActivo ? textoSeguro(contacto.sitioWeb) : "No activo"}</p>
+        <p class="dato"><b>Google Maps:</b> ${contacto.googleMapsActivo ? textoSeguro(contacto.googleMaps) : "No activo"}</p>
+        <p class="dato"><b>Correo electrónico:</b> ${contacto.correoActivo ? textoSeguro(contacto.correo) : "No activo"}</p>
+        <p class="dato"><b>Mensaje sugerido:</b> ${textoSeguro(s.mensajeContactoPublicidad || "")}</p>
+
+        <hr>
+
+        <h3>Datos privados del responsable</h3>
+        <p class="dato"><b>Responsable:</b> ${textoSeguro(priv.nombreResponsableCuenta)}</p>
+        <p class="dato"><b>Correo:</b> ${textoSeguro(priv.correoResponsableCuenta)}</p>
+        <p class="dato"><b>WhatsApp:</b> ${textoSeguro(priv.whatsappResponsableCuenta)}</p>
+        <p class="dato"><b>Dirección:</b> ${textoSeguro(priv.direccionResponsableCuenta)}</p>
+        <p class="dato"><b>Tipo:</b> ${textoSeguro(priv.tipoResponsableCuenta)}</p>
+        <p class="dato"><b>Relación:</b> ${textoSeguro(priv.relacionPublicidad)}</p>
+        <p class="dato"><b>Medio contacto:</b> ${textoSeguro(priv.medioContactoAdministrativo)}</p>
+        <p class="dato"><b>Horario:</b> ${textoSeguro(priv.horarioContactoAdministrativo)}</p>
+
+        <hr>
+
+        <h3>Documentos</h3>
+        ${documentosPrivadosHTML}
+        ${imagenPrincipalHTML}
+        ${imagenesAdicionalesHTML}
+
+        <hr>
+
+        <h3>Facturación</h3>
+        <p class="dato"><b>Requiere factura:</b> ${fact.necesitaFacturaCfdi ? "Sí" : "No"}</p>
+        <p class="dato"><b>RFC:</b> ${textoSeguro(fact.rfcFactura)}</p>
+        <p class="dato"><b>Nombre fiscal:</b> ${textoSeguro(fact.nombreFiscal)}</p>
+        <p class="dato"><b>Razón social:</b> ${textoSeguro(fact.razonSocialFactura)}</p>
+        <p class="dato"><b>Domicilio fiscal:</b> ${textoSeguro(fact.domicilioFiscal)}</p>
+        <p class="dato"><b>Código postal:</b> ${textoSeguro(fact.codigoPostalFiscal)}</p>
+        <p class="dato"><b>Correo factura:</b> ${textoSeguro(fact.correoFactura)}</p>
+
+        <hr>
+
+        <h3>Validaciones</h3>
+        <p class="dato"><b>Derechos imágenes:</b> ${val.derechosImagenes ? "Sí" : "No"}</p>
+        <p class="dato"><b>Contenido legal:</b> ${val.contenidoLegal ? "Sí" : "No"}</p>
+        <p class="dato"><b>Revisión manual:</b> ${val.revisionManual ? "Sí" : "No"}</p>
+
+        <p class="dato"><b>Notas del anunciante:</b> ${textoSeguro(s.notasRevisionAdmin)}</p>
+        <p class="dato"><b>Observación admin:</b> ${textoSeguro(s.observacionAdmin || "")}</p>
+
+        <div class="actions-row">
+          <button class="btn btn-cambios" onclick="solicitarCorreccionPublicidad('${id}')">Solicitar corrección</button>
+          <button class="btn btn-pago" onclick="autorizarPagoPublicidad('${id}')">Autorizar para pago</button>
+          <button class="btn btn-aprobar" onclick="activarPublicidad('${id}')">Activar publicidad</button>
+          <button class="btn btn-quitar" onclick="marcarPublicidadVencida('${id}')">Marcar vencida</button>
+          <button class="btn btn-borrar" onclick="borrarSolicitudPublicidad('${id}')">Borrar solicitud</button>
+        </div>
+      </div>
+    `;
+
+  }catch(e){
+    alert("Error abriendo solicitud: " + e.message);
+  }
+}
+
+async function solicitarCorreccionPublicidad(id){
+  const observacion = prompt("Escribe qué debe corregir el anunciante:");
+
+  if(!observacion) return;
+
+  await db.collection("solicitudes_anuncios").doc(id).update({
+    estadoAdmin:"correccion_solicitada",
+    observacionAdmin:observacion,
+    fechaObservacionAdmin:new Date()
+  });
+
+  await registrarLogAdmin("publicidad_correccion",id,observacion);
+  alert("Solicitud enviada a corrección.");
+  abrirCarpetaPublicidad("correccion_solicitada");
+}
+
+async function autorizarPagoPublicidad(id){
+  if(!confirm("¿Autorizar esta solicitud para pago?")) return;
+
+  await db.collection("solicitudes_anuncios").doc(id).update({
+    estadoAdmin:"autorizada_pago",
+    autorizadoParaPago:true,
+    estadoPago:"pendiente",
+    fechaAutorizacionPago:new Date()
+  });
+
+  await registrarLogAdmin("publicidad_autorizada_pago",id,"Solicitud autorizada para pago");
+  alert("Solicitud autorizada para pago.");
+  abrirCarpetaPublicidad("autorizada_pago");
+}
+
+async function activarPublicidad(id){
+  if(!confirm("¿Activar esta publicidad?")) return;
+
+  const hoy = new Date();
+  const vencimiento = new Date();
+  vencimiento.setDate(hoy.getDate() + 30);
+
+  await db.collection("solicitudes_anuncios").doc(id).update({
+    estadoAdmin:"activa",
+    activo:true,
+    aprobado:true,
+    estadoPago:"pagado",
+    fechaInicio:hoy,
+    fechaVencimiento:vencimiento
+  });
+
+  await registrarLogAdmin("publicidad_activada",id,"Publicidad activada");
+  alert("Publicidad activada.");
+  abrirCarpetaPublicidad("activa");
+}
+
+async function marcarPublicidadVencida(id){
+  if(!confirm("¿Marcar esta publicidad como vencida?")) return;
+
+  await db.collection("solicitudes_anuncios").doc(id).update({
+    estadoAdmin:"vencida",
+    activo:false,
+    fechaVencida:new Date()
+  });
+
+  await registrarLogAdmin("publicidad_vencida",id,"Publicidad marcada como vencida");
+  alert("Publicidad marcada como vencida.");
+  abrirCarpetaPublicidad("vencida");
+}
+
+async function borrarSolicitudPublicidad(id){
+  if(!confirm("¿Borrar esta solicitud? Esta acción no se puede deshacer.")) return;
+
+  await registrarLogAdmin("publicidad_borrada",id,"Solicitud de publicidad borrada");
+  await db.collection("solicitudes_anuncios").doc(id).delete();
+
+  alert("Solicitud borrada.");
+  cargarSolicitudesAnuncios();
+}
+function filtrarCards(){
+  const texto = document.getElementById("buscarTexto").value.toLowerCase().trim();
+  const estado = document.getElementById("filtroEstado").value;
+
+  document.querySelectorAll(".item-filtrable").forEach(card => {
+    const t = (card.dataset.texto || "").toLowerCase();
+    const e = card.dataset.estado || "";
+    const pasaTexto = !texto || t.includes(texto);
+    const pasaEstado = !estado || e === estado;
+    card.style.display = pasaTexto && pasaEstado ? "block" : "none";
+  });
+}
+
+async function registrarLogAdmin(accion,id,descripcion){
+  try{
+    await db.collection("logsAdmin").add({
+      accion,
+      perfilId:id || "",
+      descripcion:descripcion || "",
+      adminEmail:ADMIN_EMAIL,
+      fecha:new Date()
+    });
+  }catch(e){}
+}
+
+async function aprobarGratis(id) {
+  if(procesando) return;
+  if(!confirm("¿Aprobar este perfil con 30 días gratis?")) return;
+
+  bloquearAcciones(true);
+
+  try{
+    const hoy = new Date();
+    const vencimiento = new Date();
+    vencimiento.setDate(hoy.getDate() + 30);
+
+    await db.collection("usuarios").doc(id).update({
+      aprobado: true,
+      activo: true,
+      vencido: false,
+      primerMesGratis: true,
+      pagado: false,
+      estadoPago: "gratis_30_dias",
+      actualizacionPendiente:false,
+      estadoRevision:"aprobado",
+      fechaPublicacion: hoy,
+      fechaVencimiento: vencimiento
+    });
+
+    await registrarLogAdmin("aprobar_gratis",id,"Perfil aprobado con 30 días gratis");
+
+    alert("Usuario aprobado. Primer mes gratis activado por 30 días.");
+    await cargarUsuariosCache();
+    abrirDetallePerfil(id);
+  }catch(e){
+    alert("Error: " + e.message);
+  }
+
+  bloquearAcciones(false);
+}
+
+async function aprobarCambios(id) {
+  if(procesando) return;
+  if(!confirm("¿Aprobar los cambios de este perfil?")) return;
+
+  bloquearAcciones(true);
+
+  try{
+    await db.collection("usuarios").doc(id).update({
+      aprobado: true,
+      activo: true,
+      vencido: false,
+      actualizacionPendiente:false,
+      estadoRevision:"aprobado"
+    });
+
+    await registrarLogAdmin("aprobar_cambios",id,"Cambios aprobados y perfil visible");
+
+    alert("Cambios aprobados. Perfil visible nuevamente.");
+    await cargarUsuariosCache();
+    abrirDetallePerfil(id);
+  }catch(e){
+    alert("Error: " + e.message);
+  }
+
+  bloquearAcciones(false);
+}
+
+async function activarRenovacionPagada(id) {
+  if(procesando) return;
+  if(!confirm("¿Activar renovación pagada por 30 días?")) return;
+
+  bloquearAcciones(true);
+
+  try{
+    const hoy = new Date();
+    const vencimiento = new Date();
+    vencimiento.setDate(hoy.getDate() + 30);
+
+    await db.collection("usuarios").doc(id).update({
+      aprobado: true,
+      activo: true,
+      vencido: false,
+      pagado: true,
+      estadoPago: "pagado",
+      actualizacionPendiente:false,
+      estadoRevision:"aprobado",
+      fechaPublicacion: hoy,
+      fechaVencimiento: vencimiento
+    });
+
+    await registrarLogAdmin("activar_renovacion_pagada",id,"Renovación pagada activada 30 días");
+
+    alert("Renovación pagada activada por 30 días.");
+    await cargarUsuariosCache();
+    abrirDetallePerfil(id);
+  }catch(e){
+    alert("Error: " + e.message);
+  }
+
+  bloquearAcciones(false);
+}
+
+async function marcarVencido(id) {
+  if(procesando) return;
+  if(!confirm("¿Marcar este perfil como vencido/inactivo?")) return;
+
+  bloquearAcciones(true);
+
+  try{
+    await db.collection("usuarios").doc(id).update({
+      activo: false,
+      vencido: true,
+      estadoRevision:"vencido"
+    });
+
+    await registrarLogAdmin("marcar_vencido",id,"Perfil marcado como vencido");
+
+    alert("Perfil marcado como vencido.");
+    await cargarUsuariosCache();
+    abrirDetallePerfil(id);
+  }catch(e){
+    alert("Error: " + e.message);
+  }
+
+  bloquearAcciones(false);
+}
+
+async function quitarAprobacion(id) {
+  if(procesando) return;
+  if(!confirm("¿Quitar aprobación y ocultar este perfil?")) return;
+
+  bloquearAcciones(true);
+
+  try{
+    await db.collection("usuarios").doc(id).update({
+      aprobado: false,
+      activo: false,
+      estadoRevision:"no_aprobado"
+    });
+
+    await registrarLogAdmin("quitar_aprobacion",id,"Aprobación quitada");
+
+    alert("Aprobación quitada.");
+    await cargarUsuariosCache();
+    abrirDetallePerfil(id);
+  }catch(e){
+    alert("Error: " + e.message);
+  }
+
+  bloquearAcciones(false);
+}
+
+async function borrarUsuario(id) {
+  if(procesando) return;
+  if (!confirm("¿Seguro que quieres borrar este usuario? Esta acción no se puede deshacer.")) return;
+
+  bloquearAcciones(true);
+
+  try{
+    await registrarLogAdmin("borrar_usuario",id,"Usuario borrado");
+    await db.collection("usuarios").doc(id).delete();
+
+    alert("Usuario borrado");
+    await cargarUsuariosCache();
+    cargarModulo(seccionActual);
+  }catch(e){
+    alert("Error: " + e.message);
+  }
+
+  bloquearAcciones(false);
+}
+
+async function crearMensajeAdmin(id){
+  const texto = prompt("Escribe mensaje interno para este usuario:");
+
+  if(!texto) return;
+
+  const u = usuariosCache.find(x => x.id === id) || {};
+
+  await db.collection("soporte_mensajes").add({
+    uid:id,
+    nombre:u.nombre || "",
+    email:u.email || "",
+    estado:"admin_iniciado",
+    ultimoMensaje:texto,
+    fechaUltimoMensaje:new Date(),
+    fecha:new Date(),
+    creadoPor:"admin",
+    adminEmail:ADMIN_EMAIL
+  });
+
+  await registrarLogAdmin("mensaje_admin_creado",id,"Admin creó conversación de soporte");
+  alert("Mensaje/conversación creada.");
+}
+
+async function salir() {
+  await auth.signOut();
+  location.reload();
+}
+</script>
+
+</body>
+</html>
