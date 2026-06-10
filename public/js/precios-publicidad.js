@@ -10,6 +10,12 @@
       home_izquierda:{nombre:"Home izquierda superior",pantalla:"home",espacio:"izquierda",capacidadMaxima:2,precioMensualImagenBase:1300,activo:true},
       home_derecha:{nombre:"Home derecha superior",pantalla:"home",espacio:"derecha",capacidadMaxima:2,precioMensualImagenBase:1300,activo:true},
       home_inferior:{nombre:"Home inferior",pantalla:"home",espacio:"inferior",capacidadMaxima:3,precioMensualImagenBase:850,activo:true},
+      home_categorias:{nombre:"Home - selector de categorías",pantalla:"home",espacio:"categorias",capacidadMaxima:1,precioMensualImagenBase:1000,activo:true},
+      home_hero_1:{nombre:"Home - hero imagen 1",pantalla:"home",espacio:"hero_1",capacidadMaxima:1,precioMensualImagenBase:5000,activo:true},
+      home_hero_2:{nombre:"Home - hero imagen 2",pantalla:"home",espacio:"hero_2",capacidadMaxima:1,precioMensualImagenBase:5000,activo:true},
+      home_hero_3:{nombre:"Home - hero imagen 3",pantalla:"home",espacio:"hero_3",capacidadMaxima:1,precioMensualImagenBase:5000,activo:true},
+      home_hero_4:{nombre:"Home - hero imagen 4",pantalla:"home",espacio:"hero_4",capacidadMaxima:1,precioMensualImagenBase:5000,activo:true},
+      home_hero_5:{nombre:"Home - hero imagen 5",pantalla:"home",espacio:"hero_5",capacidadMaxima:1,precioMensualImagenBase:5000,activo:true},
       resultados_izquierda:{nombre:"Resultados izquierda superior",pantalla:"resultados",espacio:"izquierda",capacidadMaxima:3,precioMensualImagenBase:500,activo:true},
       resultados_centro:{nombre:"Resultados centro superior",pantalla:"resultados",espacio:"centro",capacidadMaxima:2,precioMensualImagenBase:600,activo:true},
       resultados_derecha:{nombre:"Resultados derecha superior",pantalla:"resultados",espacio:"derecha",capacidadMaxima:3,precioMensualImagenBase:500,activo:true},
@@ -235,8 +241,41 @@
     return Math.ceil(numero/paso)*paso;
   }
 
+  function parsePeriodoPublicidad(periodo){
+    const valor=String(periodo||"").trim();
+    const diario=valor.match(/^diario_(\d+)$/);
+    if(diario){
+      const dias=Math.max(1,Math.min(29,parseInt(diario[1],10)||1));
+      return {tipo:"diario",dias,clave:`diario_${dias}`};
+    }
+    if(valor==="semanal")return {tipo:"semanal",dias:7,clave:"semanal"};
+    if(valor==="quincenal")return {tipo:"quincenal",dias:15,clave:"quincenal"};
+    if(valor==="mensual")return {tipo:"mensual",dias:30,clave:"mensual"};
+    return {tipo:"",dias:0,clave:""};
+  }
+
+  function periodoDiarioDesdeDias(dias){
+    const n=Math.max(1,Math.min(29,parseInt(dias,10)||0));
+    return n>0?`diario_${n}`:"";
+  }
+
+  function etiquetaPeriodoPublicidad(periodo){
+    const parsed=parsePeriodoPublicidad(periodo);
+    if(parsed.tipo==="diario"){
+      return parsed.dias===1?"1 día":`${parsed.dias} días`;
+    }
+    if(periodo==="semanal")return "semanal";
+    if(periodo==="quincenal")return "quincenal (15 días)";
+    if(periodo==="mensual")return "mensual recomendado";
+    return String(periodo||"").trim();
+  }
+
   function obtenerFactorAutomatico(config,periodo){
     const factores=normalizarFactoresAutomaticosPublicidad(config||{});
+    const parsed=parsePeriodoPublicidad(periodo);
+    if(parsed.tipo==="diario"){
+      return factores.imagenMensual*(parsed.dias/30);
+    }
     if(periodo==="semanal")return factores.imagenSemanal;
     if(periodo==="quincenal")return factores.imagenQuincenal;
     return factores.imagenMensual;
@@ -300,6 +339,9 @@
     calcularEspecificidadOverridePrecio,
     resolverOverridePrecioPublicidad,
     redondearPrecioHaciaArriba,
+    parsePeriodoPublicidad,
+    periodoDiarioDesdeDias,
+    etiquetaPeriodoPublicidad,
     obtenerFactorAutomatico,
     obtenerPrecioManualSlot,
     calcularPrecioAutomaticoSlot,

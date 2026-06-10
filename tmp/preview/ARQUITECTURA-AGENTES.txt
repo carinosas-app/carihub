@@ -1,0 +1,70 @@
+ARQUITECTURA AGENTES IA POR CONTEXTO (mockup / fases futuras)
+=============================================================
+
+ESTADO ACTUAL
+- Solo convenciones HTML/CSS en tmp/preview/
+- Sin JS, sin chat, sin API, sin montaje visible del FAB
+- public/index.html, registros y dashboards de producción SIN modificar
+
+OBJETIVO
+Cada flujo tendrá un agente adaptado a su contexto. El diseño de páginas
+no debe ser rígido: un único slot reutilizable por vista.
+
+CONTEXTOS PREVISTOS (data-agente-context)
+- home                 → orientar visitantes, búsqueda, categorías
+- registro-perfil      → ayuda al crear perfil público
+- registro-banner      → ayuda a anunciantes / banners
+- dashboard-perfil     → gestión del perfil del usuario
+- dashboard-anunciante → campañas, slots, renovaciones
+- admin-moderador      → revisión, moderación, compliance
+
+ROLES COMPLEMENTARIOS (data-agente-rol, opcional)
+- visitante | perfil | anunciante | admin | moderador | comercial
+
+PATRÓN HTML (una vez por página, fuera del contenido principal)
+---------------------------------------------------------------
+<body data-page="home" class="carihub-page--agente-ready">
+  <main>...</main>
+  <aside
+    id="carihub-agente"
+    class="carihub-agente"
+    data-agente-context="home"
+    data-agente-rol="visitante"
+    hidden
+    aria-hidden="true"
+  >
+    <!-- Fase futura: .carihub-agente__fab + .carihub-agente__panel -->
+  </aside>
+</body>
+
+CSS COMPARTIDO
+- tmp/preview/shared/carihub-agente-shell.css
+- Variables: --agente-z-index, --agente-offset-*, --agente-color-fab,
+  --agente-safe-area-bottom, etc.
+- Hereda --color-principal y sombras del tema activo
+
+INTEGRACIÓN FUTURA (no implementar ahora)
+1. Montar FAB + panel en #carihub-agente según data-agente-context
+2. Cargar prompt/herramientas distintas por contexto
+3. Guardar preferencia de asistente en localStorage (opcional)
+4. Cambios visuales del personaje vía tema + revisión admin si aplica
+5. Moderador IA antes de respuestas sensibles en flujos públicos
+
+PÁGINAS A PREPARAR (cuando existan mockups o se migre a producción)
+- public/index.html              → context home
+- registro de perfiles           → context registro-perfil
+- public/registro-banner.html    → context registro-banner
+- public/dashboard-rentero.html  → context dashboard-perfil (nombre provisional)
+- dashboard anunciante           → context dashboard-anunciante
+- public/admin.html              → context admin-moderador
+
+REGLAS DE DISEÑO
+- No fijar colores del agente en hex sueltos; usar variables de tema + --agente-*
+- Un solo #carihub-agente por página (evitar múltiples widgets)
+- z-index por encima del contenido, por debajo de modales críticos (ajustar en fase UI)
+- padding-bottom opcional vía --agente-safe-area-bottom para no tapar CTAs
+
+MULTIDIOMA (fase futura)
+- Ver tmp/preview/ARQUITECTURA-MULTIDIOMA.txt
+- Agentes responderán en idioma del usuario; traducción automática en chat y soporte
+- No implementar en mockup actual

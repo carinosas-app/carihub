@@ -1,0 +1,66 @@
+# Admin — Imágenes de banners (pendiente de implementar)
+
+## Regla principal
+- En HOME, RESULTADOS y PERFIL el visitante/anunciante NO mueve ni edita banners.
+- Solo el dueño del sitio (admin) gestiona imágenes y encuadre desde el panel admin.
+- Reutilizar lógica base en `js/frame-pan.js` (clic → flechas → arrastrar → clic fijar + lápiz cambiar imagen).
+
+## Entrada en admin
+- Botón / menú: **«Imágenes de banners»**
+- Pantalla con mapa de posiciones por pantalla y vista previa de la imagen actual en cada slot.
+
+---
+
+## HOME (mockup v4 — pantalla actual)
+
+| ID slot           | Posición              | Formato        | Notas actuales mockup                          |
+|-------------------|-----------------------|----------------|------------------------------------------------|
+| home-hero         | Arriba (derecha)      | Diagonal/recorte | Carrusel por categoría, fotos `assets/user/` |
+| home-ad-centro-izq| Centro izquierda      | Cuadrado       | «Más visibilidad»                              |
+| home-ad-centro-der| Centro derecha        | Cuadrado       | «+220%» / crecimiento                          |
+| home-ad-inferior  | Abajo (ancho completo)| Rectángulo largo | Rotación 3 slides, `assets/user/*.jpg`       |
+
+Acciones admin por slot:
+1. Ver imagen actual
+2. Clic en imagen → modo encuadre (flechas ↑↓←→ parpadeando, arrastrar, segundo clic fija)
+3. Icono lápiz → subir / reemplazar imagen
+4. Guardar `panX`, `panY`, `src` en backend (Firestore o config admin)
+
+---
+
+## RESULTADOS y PERFIL (misma plantilla de banners)
+
+Fila superior — 3 banners:
+| ID slot              | Posición | Formato    |
+|----------------------|----------|------------|
+| *-banner-top-izq     | Izquierda| Cuadrado   |
+| *-banner-top-centro  | Centro   | Rectángulo (más ancho, misma altura que laterales) |
+| *-banner-top-der     | Derecha  | Cuadrado   |
+
+Fila inferior — 1 banner:
+| ID slot              | Posición | Formato           |
+|----------------------|----------|-------------------|
+| *-banner-bottom      | Abajo    | Rectángulo grande |
+
+`*` = prefijo de pantalla: `resultados` o `perfil`
+
+---
+
+## Anunciantes con espacio rentado (futuro)
+- El anunciante que renta un slot podrá ajustar SU imagen desde su panel (no desde home público).
+- Misma UI de encuadre que admin, limitada al slot que pagó.
+
+---
+
+## Archivos de referencia
+- Mockup home: `tmp/preview/v3/home-html-real-mockup-v4.html`
+- JS encuadre (para admin): `tmp/preview/v3/js/frame-pan.js`
+- Fotos usuario: `tmp/preview/v3/assets/user/*.jpg`
+- Admin producción (cuando toque): `public/admin.html`
+
+## Orden sugerido de implementación
+1. Terminar y aprobar mockup home (sin edición en pantalla pública)
+2. Pantalla admin «Imágenes de banners» con slots HOME
+3. Conectar guardado → home en producción
+4. Repetir plantilla resultados + perfil
+5. Panel anunciante para slots rentados

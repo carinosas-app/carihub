@@ -1,35 +1,41 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-tema="escort">
 <head>
 <meta charset="UTF-8">
-
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>CariHub</title>
-
+<title>Cariñosas — Acompañantes independientes cerca de ti</title>
+<meta name="description" content="Encuentra acompañantes cariñosas cerca de ti. Perfiles reales, verificados y actualizados.">
+<link href="https://fonts.googleapis.com/css2?family=Allura&family=Great+Vibes&family=Italianno&family=Montserrat:wght@500;600;700;800;900&family=Pinyon+Script&family=Sacramento&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/home.css">
+<link rel="stylesheet" href="css/home-vcards.css">
+<link rel="stylesheet" href="css/home-sector-scroll.css">
+<link rel="stylesheet" href="css/home-modals.css">
+<link rel="stylesheet" href="css/home-adultos-cat-picker.css">
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage-compat.js"></script>
-
 <script src="paises.js"></script>
 <script src="estados.js"></script>
 <script src="ciudades.js"></script>
-
+<script src="js/catalogos-carihub.js"></script>
+<script src="js/categoria-iconos.js"></script>
+<script src="js/sectores-carihub.js"></script>
 <script>
 const firebaseConfig = {
-  apiKey: "AIzaSyBl4LNLtPqbyIxfTfONAqxi4rOG4XF_vkI",
-  authDomain: "carinosas-app.firebaseapp.com",
-  projectId: "carinosas-app",
-  storageBucket: "carinosas-app.firebasestorage.app",
-  messagingSenderId: "267078845023",
-  appId: "1:267078845023:web:a82e626d9f0ca28858d1ea"
+  apiKey: "AIzaSyCp68DynjT63T9wHorCLxwBGkSEo_mYPUI",
+  authDomain: "carihub-app.firebaseapp.com",
+  projectId: "carihub-app",
+  storageBucket: "carihub-app.firebasestorage.app",
+  messagingSenderId: "236894758884",
+  appId: "1:236894758884:web:5713e39a26c71f025a49f1"
 };
 
-firebase.initializeApp(firebaseConfig);
+if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
+}
 
 const db = firebase.firestore();
-
 const auth = firebase.auth();
 const storage = firebase.storage();
 
@@ -49,718 +55,526 @@ const ETIQUETAS_ESTADO_SOLICITUD_PUBLICIDAD = {
 
 let UID_PANEL = null;
 let UID_EDITANDO = null;
-
 let visitasTotales = 0;
 let visitasHoy = 0;
 let usuariosOnline = 0;
-
-let categoriaSeleccionada = "";
+var categoriaSeleccionada = "";
+var sectorSeleccionado = "";
 let paisSeleccionado = "";
 let estadoSeleccionado = "";
 let ciudadSeleccionada = "";
 let selectorActual = "";
 
 const CATEGORIAS_BUSCADOR = [
-  "Escort",
-  "Spa",
-  "Swinger 🍍",
-  "Contenido",
-  "Trans",
-  "Sex shop",
-  "Acompañante",
-  "Gigolo",
-  "Madura",
-  "Dotados",
-  "Petit",
-  "Unicorns 🦄",
-  "Hotwife 🔥",
-  "Singles",
-  "Fetiche",
-  "Sado",
-  "VIP",
-  "Otro"
+  "Escort","Spa","Swinger 🍍","Contenido","Trans","Sex shop","Acompañante","Gigolo",
+  "Madura","Dotados","Petit","Unicorns 🦄","Hotwife 🔥","Singles","Fetiche","Sado","VIP","Otro"
 ];
 </script>
-
-<style>
-:root{
-  --rosa:#ec2d7a;
-  --rosa2:#ff4f9a;
-  --rosa-suave:#fff1f7;
-  --borde:#f3bfd2;
-  --texto:#252432;
-  --sombra:0 10px 28px rgba(236,45,122,.14);
-}
-
-*{box-sizing:border-box}
-
-body{
-  margin:0;
-  font-family:Arial,sans-serif;
-  background:#fff;
-  color:var(--texto);
-}
-
-button,input,textarea,select{
-  font-family:inherit;
-}
-
-a{
-  text-decoration:none;
-}
-
-.contenedor-portada{
-  position:relative;
-  width:100%;
-  max-width:1180px;
-  margin:0 auto;
-  background:#fff1f7;
-  line-height:0;
-  overflow:hidden;
-}
-
-.portada{
-  width:100%;
-  display:block;
-  height:auto;
-}
-
-.hotspot{
-  position:absolute;
-  z-index:20;
-  background:rgba(255,255,255,0);
-  border:0;
-  padding:0;
-  margin:0;
-  cursor:pointer;
-  color:transparent;
-  font-size:0;
-  line-height:0;
-  overflow:hidden;
-}
-
-.texto-select{
-  display:none;
-  position:absolute;
-  z-index:30;
-  background:transparent;
-  color:#111;
-  font-size:12px;
-  font-weight:900;
-  line-height:1;
-  pointer-events:none;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  align-items:center;
-  justify-content:center;
-  height:3.25%;
-  padding:0 3px;
-  border-radius:8px;
-  text-align:center;
-  letter-spacing:.1px;
-}
-
-.texto-select.active{
-  display:flex;
-}
-
-.texto-categoria{
-  top:33.45%;
-  left:6.2%;
-  width:19.4%;
-}
-
-.texto-pais{
-  top:33.45%;
-  left:29.5%;
-  width:19.4%;
-}
-
-.texto-estado{
-  top:33.45%;
-  left:51.3%;
-  width:19.8%;
-}
-
-.texto-ciudad{
-  top:33.45%;
-  left:74.4%;
-  width:19.4%;
-}
-
-@media(max-width:600px){
-  .texto-select{
-    font-size:11px;
-    height:3.25%;
-    border-radius:8px;
-  }
-}
-
-/* ZONAS CLICKEABLES SOBRE portada.PNG - NUEVA PORTADA */
-
-.hs-favoritos{top:2.1%;left:84%;width:6.5%;height:4.5%}
-
-.hs-menu{top:2.1%;left:92%;width:6.5%;height:4.5%}
-
-.hs-categoria{top:31.9%;left:5%;width:22%;height:4.8%}
-.hs-pais{top:31.9%;left:28.5%;width:22%;height:4.8%}
-.hs-estado{top:31.9%;left:52%;width:22%;height:4.8%}
-.hs-ciudad{top:31.9%;left:75.5%;width:21%;height:4.8%}
-.hs-buscar{top:37%;left:5%;width:91%;height:5.6%}
-
-.hs-monterrey{top:48.2%;left:3.5%;width:17.5%;height:4.8%}
-.hs-garcia{top:48.2%;left:22%;width:17.5%;height:4.8%}
-.hs-santacatarina{top:48.2%;left:40.5%;width:19.5%;height:4.8%}
-.hs-apodaca{top:48.2%;left:61.5%;width:17.5%;height:4.8%}
-.hs-sannicolas{top:48.2%;left:80%;width:17.5%;height:4.8%}
-.hs-masciudades{top:54.4%;left:32%;width:36%;height:4.8%}
-
-.hs-cat-escort{top:61.7%;left:3.5%;width:14.5%;height:8.4%}
-.hs-cat-spa{top:61.7%;left:19.4%;width:14.5%;height:8.4%}
-.hs-cat-swinger{top:61.7%;left:35.3%;width:14.5%;height:8.4%}
-.hs-cat-contenido{top:61.7%;left:51.2%;width:14.5%;height:8.4%}
-.hs-cat-trans{top:61.7%;left:67.1%;width:14.5%;height:8.4%}
-.hs-cat-sexshop{top:61.7%;left:83%;width:14.5%;height:8.4%}
-
-.hs-buscar-cerca{top:86.2%;left:31%;width:17%;height:4.3%}
-.hs-registrarse-cta{top:86.2%;left:55%;width:19%;height:4.3%}
-.hs-busqueda-avanzada{top:86.2%;left:75%;width:22%;height:4.3%}
-
-/* MENÚ */
-.menu{
-  position:fixed;
-  top:0;
-  right:-100%;
-  width:86%;
-  max-width:430px;
-  height:100%;
-  background:#fff;
-  z-index:10000;
-  transition:.3s;
-  padding:24px;
-  box-shadow:-10px 0 35px rgba(0,0,0,.25);
-  overflow-y:auto;
-}
-
-.menu.active{
-  right:0;
-}
-
-.cerrar-menu{
-  text-align:right;
-  font-size:32px;
-  color:var(--rosa);
-  cursor:pointer;
-}
-
-.menu-note{
-  background:var(--rosa-suave);
-  border:1px solid #ffd6e5;
-  padding:14px;
-  border-radius:14px;
-  color:#8f1248;
-  margin:14px 0;
-  font-weight:800;
-}
-
-.menu a{
-  display:flex;
-  gap:10px;
-  align-items:center;
-  padding:16px 8px;
-  color:#8f1248;
-  font-size:18px;
-  font-weight:900;
-  border-bottom:1px solid #ffe0eb;
-  text-decoration:none;
-}
-
-.menu .sep{
-  height:12px;
-}
-
-/* MODALES */
-.modal{
-  display:none;
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.60);
-  z-index:20000;
-  overflow-y:auto;
-  padding:16px;
-}
-
-.form-box{
-  background:linear-gradient(180deg,#fff,#fff1f7);
-  margin:18px auto;
-  padding:24px;
-  width:92%;
-  max-width:620px;
-  border-radius:24px;
-  box-shadow:0 10px 35px rgba(0,0,0,.35);
-}
-
-.form-box h2{
-  color:var(--rosa);
-  font-size:30px;
-  margin:0 0 8px;
-}
-
-.subtitulo{
-  color:#555;
-  margin:0 0 18px;
-}
-
-input,textarea,select{
-  width:100%;
-  padding:15px;
-  margin:8px 0;
-  border-radius:14px;
-  border:1px solid #ddd;
-  font-size:16px;
-  background:white;
-}
-
-textarea{
-  min-height:95px;
-}
-
-label{
-  display:block;
-  margin:14px 0;
-  font-size:16px;
-}
-
-.step{
-  display:none;
-}
-
-.step.active{
-  display:block;
-}
-
-.botones{
-  display:flex;
-  gap:10px;
-  margin-top:15px;
-}
-
-.btn{
-  flex:1;
-  padding:15px;
-  border:none;
-  border-radius:14px;
-  font-weight:bold;
-  font-size:16px;
-  cursor:pointer;
-}
-
-.btn-continuar{
-  background:var(--rosa);
-  color:white;
-}
-
-.btn-atras{
-  background:#777;
-  color:white;
-}
-
-.btn-enviar{
-  background:#138a36;
-  color:white;
-}
-
-.aviso{
-  background:#fff;
-  border-left:5px solid var(--rosa);
-  padding:12px;
-  border-radius:10px;
-  color:#333;
-  margin:12px 0;
-}
-
-/* SELECTOR */
-.selector-modal{
-  align-items:flex-start;
-  justify-content:center;
-}
-
-.selector-box{
-  background:rgba(255,245,250,.96);
-  margin:70px auto 0;
-  padding:22px;
-  width:92%;
-  max-width:520px;
-  max-height:75vh;
-  overflow-y:auto;
-  border-radius:30px;
-  border:1px solid rgba(233,30,99,.25);
-  box-shadow:0 18px 45px rgba(183,25,91,.35);
-}
-
-.selector-box h2{
-  text-align:center;
-  color:var(--rosa);
-  font-size:28px;
-  margin:0 0 8px;
-}
-
-.nota-selector{
-  text-align:center;
-  font-size:13px;
-  color:#7a4a5d;
-  margin:0 0 12px;
-}
-
-#selectorLista{
-  max-height:45vh;
-  overflow-y:auto;
-}
-
-.opcion-selector{
-  background:#fff;
-  border:1px solid rgba(233,30,99,.20);
-  border-radius:18px;
-  padding:16px;
-  margin:9px 0;
-  color:#9f174f;
-  font-size:20px;
-  font-weight:bold;
-  cursor:pointer;
-}
-
-.estado-box{
-  background:#fff;
-  border-radius:18px;
-  padding:18px;
-  box-shadow:0 3px 12px rgba(0,0,0,.16);
-  margin-bottom:15px;
-}
-
-.card{
-  position:relative;
-  background:white;
-  border-radius:18px;
-  padding:15px;
-  margin-bottom:18px;
-  box-shadow:0 3px 12px rgba(0,0,0,.18);
-  overflow:hidden;
-}
-
-.card img{
-  width:100%;
-  max-height:360px;
-  object-fit:cover;
-  border-radius:15px;
-}
-
-.card h3{
-  color:var(--rosa);
-  font-size:30px;
-}
-
-.btn-favorito{
-  position:absolute;
-  top:25px;
-  right:25px;
-  width:48px;
-  height:48px;
-  border:none;
-  border-radius:50%;
-  background:white;
-  color:#e91e63;
-  font-size:30px;
-  cursor:pointer;
-  box-shadow:0 4px 14px rgba(0,0,0,.25);
-  z-index:20;
-}
-
-.btn-favorito.activo{
-  background:#e91e63;
-  color:white;
-}
-
-.galeria{
-  display:block;
-  padding:10px 0;
-}
-
-.galeria img{
-  width:100%;
-  height:auto;
-  max-height:none;
-  object-fit:cover;
-  border-radius:15px;
-  margin:0 0 14px;
-  display:block;
-}
-
-.whatsapp{
-  display:block;
-  text-align:center;
-  background:#25D366;
-  color:white;
-  padding:14px;
-  border-radius:12px;
-  text-decoration:none;
-  font-weight:bold;
-  margin-top:12px;
-}
-
-.legal-text{
-  font-size:14px;
-  line-height:1.55;
-  color:#333;
-  max-height:55vh;
-  overflow-y:auto;
-  background:#fff;
-  padding:15px;
-  border-radius:14px;
-  border:1px solid #ffd6e5;
-}
-
-@media(max-width:600px){
-  .contenedor-portada{
-    height:auto;
-    min-height:0;
-  }
-
-  .portada{
-    width:100%;
-    height:auto;
-    object-fit:contain;
-    display:block;
-  }
-
-  .home-ad-premium{
-    margin-top:12px;
-  }
-}
-
-/* PUBLICIDAD PREMIUM HOME */
-.home-ad-premium{
-  max-width:1180px;
-  margin:0 auto;
-  padding:16px 14px 22px;
-  background:var(--rosa-suave);
-  display:grid;
-  gap:12px;
-  grid-template-columns:1fr;
-  line-height:normal;
-}
-
-@media(min-width:520px){
-  .home-ad-premium{
-    grid-template-columns:1fr 1fr;
-    gap:14px;
-    padding:18px 16px 24px;
-  }
-}
-
-.home-ad-card{
-  background:#fff;
-  border:1px solid var(--borde);
-  border-radius:14px;
-  box-shadow:var(--sombra);
-  padding:18px 16px 16px;
-  display:flex;
-  flex-direction:column;
-  gap:8px;
-  cursor:pointer;
-  transition:transform .15s ease, box-shadow .15s ease;
-  position:relative;
-  overflow:hidden;
-  margin:0;
-  width:100%;
-  text-align:left;
-  font-family:inherit;
-  color:inherit;
-  -webkit-tap-highlight-color:transparent;
-}
-
-.home-ad-card:hover,
-.home-ad-card:focus-visible{
-  transform:translateY(-2px);
-  box-shadow:0 14px 32px rgba(236,45,122,.18);
-  outline:2px solid var(--rosa2);
-  outline-offset:2px;
-}
-
-.home-ad-card::before{
-  content:"";
-  position:absolute;
-  top:0;
-  left:0;
-  right:0;
-  height:4px;
-  background:linear-gradient(90deg,var(--rosa),var(--rosa2));
-}
-
-.home-ad-card--left{
-  align-items:flex-start;
-}
-
-.home-ad-card--right{
-  align-items:flex-start;
-}
-
-@media(min-width:520px){
-  .home-ad-card--right{
-    align-items:flex-end;
-    text-align:right;
-  }
-}
-
-.home-ad-card h3{
-  margin:0;
-  font-size:clamp(15px,4vw,18px);
-  font-weight:900;
-  text-transform:uppercase;
-  letter-spacing:.4px;
-  color:var(--rosa);
-  line-height:1.2;
-}
-
-.home-ad-card p{
-  margin:0;
-  font-size:13px;
-  line-height:1.45;
-  color:#5a5568;
-  max-width:28ch;
-}
-
-.home-ad-card--right p{
-  margin-left:auto;
-}
-
-.home-ad-icon{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  width:42px;
-  height:42px;
-  border-radius:12px;
-  background:linear-gradient(135deg,var(--rosa-suave),#ffe8f2);
-  border:1px solid #ffd6e5;
-  font-size:22px;
-  line-height:1;
-  flex-shrink:0;
-}
-
-.home-ad-cta{
-  display:inline-block;
-  margin-top:6px;
-  padding:9px 16px;
-  border-radius:999px;
-  background:linear-gradient(135deg,var(--rosa),var(--rosa2));
-  color:#fff;
-  font-size:11px;
-  font-weight:800;
-  text-transform:uppercase;
-  letter-spacing:.5px;
-  box-shadow:0 6px 16px rgba(236,45,122,.28);
-}
-
-.home-ad-metric{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  width:42px;
-  height:42px;
-  border-radius:12px;
-  background:linear-gradient(135deg,var(--rosa-suave),#ffe8f2);
-  border:1px solid #ffd6e5;
-  font-size:24px;
-  line-height:1;
-  margin-top:4px;
-}
-
-.home-ad-card--right .home-ad-metric{
-  margin-left:auto;
-}
-
-</style>
 </head>
+<body data-page="home">
 
-<body>
+<span id="textoCategoria" class="visually-hidden" aria-hidden="true"></span>
+<span id="textoPais" class="visually-hidden" aria-hidden="true"></span>
+<span id="textoEstado" class="visually-hidden" aria-hidden="true"></span>
+<span id="textoCiudad" class="visually-hidden" aria-hidden="true"></span>
 
-<div class="contenedor-portada">
-  <img src="portada.png" class="portada" alt="CariHub portada">
+<main class="home" id="homeApp" data-tema="escort" id="mockupV4" data-tema="escort" data-agente-context="home">
 
-  <button class="hotspot hs-favoritos" onclick="abrirFavoritos()"></button>
-  <button class="hotspot hs-menu" onclick="abrirMenu()"></button>
+  <section class="home-hero" aria-labelledby="hero-title" id="heroRotativo">
+    <div class="home-hero__frost" aria-hidden="true">
+      <div class="home-hero__sparkles">
+        <span class="home-hero__spark home-hero__spark--flash" style="--x:8%;--y:12%;--dx:42px;--dy:-28px;--d:0s;--dur:3.2s;--sz:5px"></span>
+        <span class="home-hero__spark home-hero__spark--glow" style="--x:22%;--y:28%;--dx:36px;--dy:32px;--d:.8s;--dur:5.4s;--sz:6px"></span>
+        <span class="home-hero__spark home-hero__spark--chrome" style="--x:38%;--y:8%;--dx:-30px;--dy:38px;--d:1.4s;--dur:4.6s;--sz:5px"></span>
+        <span class="home-hero__spark home-hero__spark--star" style="--x:52%;--y:22%;--dx:28px;--dy:-42px;--d:.3s;--dur:4.2s;--sz:8px"></span>
+        <span class="home-hero__spark home-hero__spark--flash" style="--x:68%;--y:14%;--dx:-48px;--dy:22px;--d:2.1s;--dur:3.8s;--sz:4px"></span>
+        <span class="home-hero__spark home-hero__spark--glow" style="--x:14%;--y:48%;--dx:52px;--dy:-18px;--d:1.9s;--dur:5.8s;--sz:7px"></span>
+        <span class="home-hero__spark home-hero__spark--chrome" style="--x:44%;--y:42%;--dx:-22px;--dy:-36px;--d:.6s;--dur:4.9s;--sz:5px"></span>
+        <span class="home-hero__spark home-hero__spark--flash" style="--x:58%;--y:55%;--dx:34px;--dy:28px;--d:2.8s;--dur:3.4s;--sz:5px"></span>
+        <span class="home-hero__spark home-hero__spark--star" style="--x:28%;--y:62%;--dx:-40px;--dy:24px;--d:1.2s;--dur:5.1s;--sz:7px"></span>
+        <span class="home-hero__spark home-hero__spark--glow" style="--x:72%;--y:38%;--dx:-26px;--dy:-44px;--d:3.2s;--dur:6s;--sz:6px"></span>
+        <span class="home-hero__spark home-hero__spark--flash" style="--x:10%;--y:78%;--dx:38px;--dy:-32px;--d:4s;--dur:3.6s;--sz:4px"></span>
+        <span class="home-hero__spark home-hero__spark--chrome" style="--x:36%;--y:72%;--dx:44px;--dy:18px;--d:2.4s;--dur:4.3s;--sz:5px"></span>
+        <span class="home-hero__spark home-hero__spark--star" style="--x:62%;--y:82%;--dx:-34px;--dy:-20px;--d:.9s;--dur:4.7s;--sz:9px"></span>
+        <span class="home-hero__spark home-hero__spark--glow" style="--x:48%;--y:88%;--dx:22px;--dy:-48px;--d:3.6s;--dur:5.5s;--sz:6px"></span>
+        <span class="home-hero__spark home-hero__spark--flash" style="--x:78%;--y:68%;--dx:-52px;--dy:30px;--d:1.6s;--dur:3.1s;--sz:5px"></span>
+        <span class="home-hero__spark home-hero__spark--chrome" style="--x:18%;--y:92%;--dx:30px;--dy:14px;--d:2.9s;--dur:4.8s;--sz:4px"></span>
+      </div>
+    </div>
+    <div class="home-hero__visual" id="heroVisual" aria-hidden="true"></div>
+    <div class="home-hero__overlay">
+      <header class="home-hero__header">
+        <a class="home-header__brand" href="/" aria-label="Cariñosas — Acompañantes independientes y más">
+          <span class="home-header__logo">
+            <img class="home-header__logo-img" src="img/home/logo-carinosas-marca.png" alt="Cariñosas — Acompañantes independientes y más" decoding="async">
+            <span class="home-header__logo-parts">
+              <span class="home-header__logo-sheen" aria-hidden="true"></span>
+              <span class="home-header__logo-sparkles" aria-hidden="true">
+                <span class="home-header__logo-spark home-header__logo-spark--flash" style="--x:14%;--y:22%;--d:0s;--dur:3.1s"></span>
+                <span class="home-header__logo-spark home-header__logo-spark--glow" style="--x:38%;--y:12%;--d:.9s;--dur:4.6s"></span>
+                <span class="home-header__logo-spark home-header__logo-spark--flash" style="--x:62%;--y:34%;--d:1.7s;--dur:3.8s"></span>
+                <span class="home-header__logo-spark home-header__logo-spark--glow" style="--x:82%;--y:18%;--d:.4s;--dur:5.2s"></span>
+                <span class="home-header__logo-spark home-header__logo-spark--flash" style="--x:48%;--y:48%;--d:2.3s;--dur:3.4s"></span>
+              </span>
+              <span class="home-header__silhouette-wrap" id="logoSilhouette" hidden aria-hidden="true">
+                <img class="home-header__silhouette-img" id="logoSilhouetteImg" src="img/home/logo-silueta-mujer.png" alt="" decoding="async">
+              </span>
+              <span class="home-header__wordmark">
+                <img class="home-header__name-img" src="img/home/logo-wordmark-carinosa.png" alt="Cariñosas" decoding="async">
+                <span class="home-header__tagline">Acompañantes independientes y +</span>
+                <img class="home-header__tagline-img" src="img/home/logo-tagline.png" alt="" decoding="async" aria-hidden="true">
+              </span>
+            </span>
+          </span>
+        </a>
+        <nav class="home-header__nav" aria-label="Acciones">
+          <button class="home-header__btn" type="button" aria-label="Favoritos" data-modal="favoritos">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 20.5s-7-4.6-7-9.5a4 4 0 0 1 7-2.2A4 4 0 0 1 19 11c0 4.9-7 9.5-7 9.5z" stroke="currentColor" stroke-width="2"/></svg>
+          </button>
+          <button class="home-header__btn" type="button" aria-label="Menú">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+          </button>
+        </nav>
+      </header>
+      <div class="home-hero__copy" id="heroCopy"></div>
+    </div>
+  </section>
 
-  <button class="hotspot hs-categoria" onclick="abrirSelector('categoria')"></button>
-  <button class="hotspot hs-pais" onclick="abrirSelector('pais')"></button>
-  <button class="hotspot hs-estado" onclick="abrirSelector('estado')"></button>
-  <button class="hotspot hs-ciudad" onclick="abrirSelector('ciudad')"></button>
-  <button class="hotspot hs-buscar" onclick="buscarPerfilesFiltrados()"></button>
+  <div class="home-page-body">
+    <div class="home-page-sheen" aria-hidden="true">
+      <div class="home-page-sheen__frost"></div>
+      <div class="home-page-sheen__sparkles">
+        <span class="home-hero__spark home-hero__spark--flash" style="--x:6%;--y:4%;--dx:48px;--dy:-32px;--d:0s;--dur:3.4s;--sz:5px"></span>
+        <span class="home-hero__spark home-hero__spark--glow" style="--x:18%;--y:9%;--dx:40px;--dy:36px;--d:1.1s;--dur:5.6s;--sz:6px"></span>
+        <span class="home-hero__spark home-hero__spark--chrome" style="--x:32%;--y:3%;--dx:-34px;--dy:40px;--d:2.2s;--dur:4.8s;--sz:5px"></span>
+        <span class="home-hero__spark home-hero__spark--star" style="--x:48%;--y:7%;--dx:30px;--dy:-44px;--d:.5s;--dur:4.4s;--sz:8px"></span>
+        <span class="home-hero__spark home-hero__spark--flash" style="--x:64%;--y:5%;--dx:-50px;--dy:24px;--d:2.6s;--dur:3.7s;--sz:4px"></span>
+        <span class="home-hero__spark home-hero__spark--glow" style="--x:82%;--y:8%;--dx:44px;--dy:-22px;--d:1.8s;--dur:5.9s;--sz:7px"></span>
+        <span class="home-hero__spark home-hero__spark--chrome" style="--x:92%;--y:14%;--dx:-28px;--dy:-38px;--d:3.4s;--dur:4.5s;--sz:5px"></span>
+        <span class="home-hero__spark home-hero__spark--flash" style="--x:10%;--y:22%;--dx:52px;--dy:28px;--d:3.1s;--dur:3.3s;--sz:5px"></span>
+        <span class="home-hero__spark home-hero__spark--star" style="--x:26%;--y:18%;--dx:-42px;--dy:26px;--d:1.4s;--dur:5.2s;--sz:7px"></span>
+        <span class="home-hero__spark home-hero__spark--glow" style="--x:42%;--y:24%;--dx:36px;--dy:-30px;--d:2.9s;--dur:6.1s;--sz:6px"></span>
+        <span class="home-hero__spark home-hero__spark--chrome" style="--x:58%;--y:20%;--dx:-46px;--dy:32px;--d:.7s;--dur:4.7s;--sz:5px"></span>
+        <span class="home-hero__spark home-hero__spark--flash" style="--x:74%;--y:26%;--dx:38px;--dy:-36px;--d:4.2s;--dur:3.5s;--sz:4px"></span>
+        <span class="home-hero__spark home-hero__spark--glow" style="--x:88%;--y:32%;--dx:-32px;--dy:20px;--d:2.1s;--dur:5.4s;--sz:6px"></span>
+        <span class="home-hero__spark home-hero__spark--star" style="--x:14%;--y:38%;--dx:46px;--dy:-40px;--d:3.7s;--dur:4.9s;--sz:9px"></span>
+        <span class="home-hero__spark home-hero__spark--flash" style="--x:36%;--y:42%;--dx:-36px;--dy:34px;--d:1.6s;--dur:3.8s;--sz:5px"></span>
+        <span class="home-hero__spark home-hero__spark--chrome" style="--x:52%;--y:48%;--dx:42px;--dy:-28px;--d:2.5s;--dur:4.6s;--sz:5px"></span>
+        <span class="home-hero__spark home-hero__spark--glow" style="--x:68%;--y:44%;--dx:-44px;--dy:-34px;--d:4.5s;--dur:5.7s;--sz:7px"></span>
+        <span class="home-hero__spark home-hero__spark--flash" style="--x:84%;--y:50%;--dx:30px;--dy:38px;--d:.9s;--dur:3.2s;--sz:4px"></span>
+        <span class="home-hero__spark home-hero__spark--star" style="--x:8%;--y:58%;--dx:-48px;--dy:22px;--d:2.8s;--dur:5s;--sz:8px"></span>
+        <span class="home-hero__spark home-hero__spark--glow" style="--x:24%;--y:62%;--dx:40px;--dy:-26px;--d:3.9s;--dur:6.2s;--sz:6px"></span>
+        <span class="home-hero__spark home-hero__spark--chrome" style="--x:44%;--y:56%;--dx:-30px;--dy:42px;--d:1.2s;--dur:4.4s;--sz:5px"></span>
+        <span class="home-hero__spark home-hero__spark--flash" style="--x:60%;--y:64%;--dx:50px;--dy:-20px;--d:4.8s;--dur:3.6s;--sz:5px"></span>
+        <span class="home-hero__spark home-hero__spark--glow" style="--x:76%;--y:68%;--dx:-38px;--dy:30px;--d:2.4s;--dur:5.5s;--sz:6px"></span>
+        <span class="home-hero__spark home-hero__spark--star" style="--x:90%;--y:72%;--dx:34px;--dy:-44px;--d:3.3s;--dur:4.6s;--sz:7px"></span>
+        <span class="home-hero__spark home-hero__spark--flash" style="--x:16%;--y:78%;--dx:-42px;--dy:-32px;--d:5.1s;--dur:3.4s;--sz:4px"></span>
+        <span class="home-hero__spark home-hero__spark--chrome" style="--x:38%;--y:82%;--dx:44px;--dy:18px;--d:1.9s;--dur:4.9s;--sz:5px"></span>
+        <span class="home-hero__spark home-hero__spark--glow" style="--x:54%;--y:88%;--dx:-28px;--dy:-48px;--d:4.1s;--dur:5.8s;--sz:7px"></span>
+        <span class="home-hero__spark home-hero__spark--flash" style="--x:70%;--y:84%;--dx:36px;--dy:26px;--d:2.7s;--dur:3.7s;--sz:5px"></span>
+        <span class="home-hero__spark home-hero__spark--star" style="--x:86%;--y:92%;--dx:-50px;--dy:16px;--d:3.8s;--dur:5.1s;--sz:9px"></span>
+        <span class="home-hero__spark home-hero__spark--glow" style="--x:50%;--y:96%;--dx:22px;--dy:-36px;--d:1.5s;--dur:6s;--sz:6px"></span>
+      </div>
+    </div>
 
-  <button class="hotspot hs-monterrey" onclick="buscarCiudadRapida('Monterrey')"></button>
-  <button class="hotspot hs-garcia" onclick="buscarCiudadRapida('García')"></button>
-  <button class="hotspot hs-santacatarina" onclick="buscarCiudadRapida('Santa Catarina')"></button>
-  <button class="hotspot hs-apodaca" onclick="buscarCiudadRapida('Apodaca')"></button>
- 
-  <button class="hotspot hs-sannicolas" onclick="buscarCiudadRapida('San Nicolás')"></button>
-  <button class="hotspot hs-masciudades" onclick="abrirSelector('ciudad')"></button>
+    <div class="home-fold-top" id="homeFoldTop">
+  <section class="home-search" aria-labelledby="search-title">
+    <h2 class="home-search__title" id="search-title">¿Dónde quieres buscar?</h2>
+    <div class="home-search__grid">
+      <div class="home-field home-field--categoria home-surface-pastel" id="fieldCategoria" role="button" tabindex="0" aria-haspopup="listbox" aria-expanded="false" aria-label="Elegir categoría" data-cat-picker-trigger>
+        <div class="home-field__display" aria-hidden="true">
+          <div class="home-field__display-bg home-field__display-bg--carinosas home-field__display-bg--cat"></div>
+          <div class="home-field__dropzone">
+            <span class="home-field__drop-text">Elegir categoría</span>
+          </div>
+        </div>
+        <span class="home-field__value home-field__label" id="fieldCategoriaLabel">Categoría</span>
+        <span class="home-field__arrow" aria-hidden="true">▼</span>
+        <span class="home-field__glow" aria-hidden="true"></span>
+      </div>
+      <div class="home-field home-field--pais home-surface-pastel" id="fieldPais" role="button" tabindex="0" aria-label="Elegir país">
+        <div class="home-field__display" aria-hidden="true">
+          <div class="home-field__display-bg home-field__display-bg--carinosas home-field__display-bg--pais"></div>
+          <div class="home-field__dropzone">
+            <span class="home-field__drop-text">Elegir país</span>
+          </div>
+        </div>
+        <span class="home-field__value home-field__label" id="fieldPaisLabel">País</span>
+        <span class="home-field__arrow" aria-hidden="true">▼</span>
+        <span class="home-field__glow" aria-hidden="true"></span>
+      </div>
+      <div class="home-field home-field--estado home-surface-pastel" id="fieldEstado" role="button" tabindex="0" aria-label="Elegir estado">
+        <div class="home-field__display" aria-hidden="true">
+          <div class="home-field__display-bg home-field__display-bg--carinosas home-field__display-bg--estado"></div>
+          <div class="home-field__dropzone">
+            <span class="home-field__drop-text">Elegir estado</span>
+          </div>
+        </div>
+        <span class="home-field__value home-field__label" id="fieldEstadoLabel">Estado</span>
+        <span class="home-field__arrow" aria-hidden="true">▼</span>
+        <span class="home-field__glow" aria-hidden="true"></span>
+      </div>
+      <div class="home-field home-field--ciudad home-surface-pastel" id="fieldCiudad" role="button" tabindex="0" aria-label="Elegir ciudad">
+        <div class="home-field__display" aria-hidden="true">
+          <div class="home-field__display-bg home-field__display-bg--carinosas home-field__display-bg--ciudad"></div>
+          <div class="home-field__dropzone">
+            <span class="home-field__drop-text">Elegir ciudad</span>
+          </div>
+        </div>
+        <span class="home-field__value home-field__label" id="fieldCiudadLabel">Ciudad</span>
+        <span class="home-field__arrow" aria-hidden="true">▼</span>
+        <span class="home-field__glow" aria-hidden="true"></span>
+      </div>
+    </div>
+    <button class="home-btn home-btn--primary home-btn--buscar-ahora" type="button">
+      <svg class="home-btn__icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2.5"/><path d="M20 20l-4-4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+      Buscar ahora
+    </button>
+  </section>
 
-  <button class="hotspot hs-cat-escort" onclick="buscarCategoriaRapida('Escort')"></button>
-  <button class="hotspot hs-cat-spa" onclick="buscarCategoriaRapida('Spa')"></button>
-  <button class="hotspot hs-cat-swinger" onclick="buscarCategoriaRapida('Swinger 🍍')"></button>
-  <button class="hotspot hs-cat-contenido" onclick="buscarCategoriaRapida('Contenido')"></button>
-  <button class="hotspot hs-cat-trans" onclick="buscarCategoriaRapida('Trans')"></button>
-  <button class="hotspot hs-cat-sexshop" onclick="buscarCategoriaRapida('Sex shop')"></button>
+  <section class="home-categorias" aria-labelledby="cat-title">
+    <h2 class="home-section-title home-cat-title" id="cat-title">
+      <span class="home-section-title__line" aria-hidden="true"></span>
+      <svg class="home-section-title__deco home-section-title__heart" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+      Explora <span class="home-cat-title__script">categorías</span>
+      <svg class="home-section-title__deco home-section-title__heart" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+      <span class="home-section-title__line" aria-hidden="true"></span>
+    </h2>
+    <ul class="home-cat-grid" id="catGrid">
+      <li><button type="button" class="home-cat-card home-surface-pastel" data-slot="0" aria-label="Categoría"><span class="home-cat-card__stage"></span></button></li>
+      <li><button type="button" class="home-cat-card home-surface-pastel" data-slot="1" aria-label="Categoría"><span class="home-cat-card__stage"></span></button></li>
+      <li><button type="button" class="home-cat-card home-surface-pastel" data-slot="2" aria-label="Categoría"><span class="home-cat-card__stage"></span></button></li>
+      <li><button type="button" class="home-cat-card home-surface-pastel" data-slot="3" aria-label="Categoría"><span class="home-cat-card__stage"></span></button></li>
+      <li><button type="button" class="home-cat-card home-surface-pastel" data-slot="4" aria-label="Categoría"><span class="home-cat-card__stage"></span></button></li>
+      <li><button type="button" class="home-cat-card home-surface-pastel" data-slot="5" aria-label="Categoría"><span class="home-cat-card__stage"></span></button></li>
+    </ul>
+  </section>
 
-  <button class="hotspot hs-buscar-cerca" onclick="detectarUbicacion()"></button>
-  <button class="hotspot hs-registrarse-cta" onclick="abrirRegistro()"></button>
+  <section class="home-cta" aria-label="Acciones rápidas">
+    <button class="home-cta-card home-cta-card--location home-surface-pastel" type="button" id="btnCerca" aria-label="¿Deseas buscar cerca de ti? Buscar cerca">
+      <span class="home-cta-card__map-bg" aria-hidden="true"></span>
+      <span class="home-cta-card__inner">
+        <svg class="home-cta-card__pin" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 21s-7-5.4-7-11a7 7 0 1 1 14 0c0 5.6-7 11-7 11z" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="10" r="2.5" stroke="currentColor" stroke-width="2"/></svg>
+        <span class="home-cta-card__body">
+          <span class="home-cta-card__title">Cerca de ti</span>
+          <span class="home-cta-card__text">¿Deseas buscar cerca de ti?</span>
+        </span>
+        <span class="home-cta-card__cerca-chip" aria-hidden="true">
+          <svg class="home-btn__icon" viewBox="0 0 24 24" fill="none"><path d="M12 21s-7-5.4-7-11a7 7 0 1 1 14 0c0 5.6-7 11-7 11z" stroke="currentColor" stroke-width="2"/></svg>
+          Buscar cerca
+        </span>
+      </span>
+    </button>
+    <article class="home-cta-card">
+      <h3 class="home-cta-card__title home-accent">¿No encuentras lo que buscas?</h3>
+      <p class="home-cta-card__text">Regístrate y accede a más perfiles increíbles.</p>
+      <div class="home-cta-card__actions">
+        <button class="home-btn home-btn--register" type="button" data-modal="registro">
+          <span aria-hidden="true">✨</span> Registrarse
+        </button>
+        <button class="home-btn home-btn--advanced home-surface-pastel" type="button" data-modal="avanzada">
+          <svg class="home-btn__icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2.5"/><path d="M20 20l-4-4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+          Búsqueda avanzada
+        </button>
+      </div>
+    </article>
+  </section>
 
-<button class="hotspot hs-busqueda-avanzada" onclick="abrirBusquedaAvanzada()"></button>
+  <section class="home-ads" aria-label="Anuncios publicitarios">
+    <a class="home-ad-slot home-ad-slot--visibilidad" href="registro-banner.html" data-ad-slot="0" aria-label="Anuncio publicitario: más visibilidad">
+      <div class="home-ad-slot__stage" data-ad-stage="0">
+        <div class="home-ad-slot__dots" aria-hidden="true">
+          <span class="home-ad-slot__dot is-on" data-ad-dot="0"></span>
+          <span class="home-ad-slot__dot" data-ad-dot="1"></span>
+          <span class="home-ad-slot__dot" data-ad-dot="2"></span>
+        </div>
+        <div class="home-ad-slot__slide is-active" data-ad-slide="0" aria-hidden="false">
+          <img class="home-ad-slot__art" src="img/home/banners/ad-banner-pink-01.png" alt="¡Anúnciate aquí! Impulsa tu negocio y llega a más personas" decoding="async">
+        </div>
+        <div class="home-ad-slot__slide" data-ad-slide="1" aria-hidden="true">
+          <img class="home-ad-slot__art" src="img/home/banners/ad-banner-black-01.png" alt="¡Anúnciate en Cariñosas! Para más clientes" decoding="async">
+        </div>
+        <div class="home-ad-slot__slide" data-ad-slide="2" aria-hidden="true">
+          <img class="home-ad-slot__art" src="img/home/banners/ad-banner-pink-02.png" alt="¡Anúnciate aquí! Más visibilidad, más clientes" decoding="async">
+        </div>
+      </div>
+    </a>
+    <a class="home-ad-slot home-ad-slot--crecimiento" href="registro-banner.html" data-ad-slot="1" aria-label="Anuncio publicitario: impulsa tu negocio">
+      <div class="home-ad-slot__stage" data-ad-stage="1">
+        <div class="home-ad-slot__dots" aria-hidden="true">
+          <span class="home-ad-slot__dot is-on" data-ad-dot="0"></span>
+          <span class="home-ad-slot__dot" data-ad-dot="1"></span>
+          <span class="home-ad-slot__dot" data-ad-dot="2"></span>
+        </div>
+        <div class="home-ad-slot__slide is-active" data-ad-slide="0" aria-hidden="false">
+          <img class="home-ad-slot__art" src="img/home/banners/ad-banner-black-02.png" alt="Haz crecer tu negocio — anuncia aquí" decoding="async">
+        </div>
+        <div class="home-ad-slot__slide" data-ad-slide="1" aria-hidden="true">
+          <img class="home-ad-slot__art" src="img/home/banners/ad-banner-pink-03.png" alt="¡Anúnciate aquí! Más información" decoding="async">
+        </div>
+        <div class="home-ad-slot__slide" data-ad-slide="2" aria-hidden="true">
+          <img class="home-ad-slot__art" src="img/home/banners/ad-banner-black-03.png" alt="Haz crecer tu negocio — anuncia ahora" decoding="async">
+        </div>
+      </div>
+    </a>
+  </section>
 
-<div class="texto-select texto-categoria" id="textoCategoria"></div>
-<div class="texto-select texto-pais" id="textoPais"></div>
-<div class="texto-select texto-estado" id="textoEstado"></div>
-<div class="texto-select texto-ciudad" id="textoCiudad"></div>
+  <section class="home-otros-sectores home-zonas" aria-labelledby="otros-sectores-title">
+    <h2 class="home-section-title home-cat-title" id="otros-sectores-title">
+      <span class="home-section-title__line" aria-hidden="true"></span>
+      <svg class="home-section-title__deco home-section-title__heart" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+      Explora <span class="home-accent">otras</span> categorías
+      <svg class="home-section-title__deco home-section-title__heart" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+      <span class="home-section-title__line" aria-hidden="true"></span>
+    </h2>
+    <ul class="home-sector-grid" id="sectorCardGrid">
+      <li><button type="button" class="home-sector-card home-surface-pastel" data-sector-slot="0" aria-label="Sector"><span class="home-sector-card__stage"></span></button></li>
+      <li><button type="button" class="home-sector-card home-surface-pastel" data-sector-slot="1" aria-label="Sector"><span class="home-sector-card__stage"></span></button></li>
+      <li><button type="button" class="home-sector-card home-surface-pastel" data-sector-slot="2" aria-label="Sector"><span class="home-sector-card__stage"></span></button></li>
+      <li><button type="button" class="home-sector-card home-surface-pastel" data-sector-slot="3" aria-label="Sector"><span class="home-sector-card__stage"></span></button></li>
+      <li><button type="button" class="home-sector-card home-surface-pastel" data-sector-slot="4" aria-label="Sector"><span class="home-sector-card__stage"></span></button></li>
+      <li><button type="button" class="home-sector-card home-surface-pastel" data-sector-slot="5" aria-label="Sector"><span class="home-sector-card__stage"></span></button></li>
+    </ul>
+    <button class="home-zonas__more home-surface-pastel" type="button" id="btnVerOtrosSectores" aria-haspopup="dialog" aria-controls="modal-otros-sectores">
+      <svg class="home-zonas__more-icon home-zonas__more-heart" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+      <span class="home-zonas__more-label">Ver otras categorías</span>
+      <svg class="home-zonas__more-icon home-zonas__more-heart home-zonas__more-heart--r" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+    </button>
+  </section>
 
+  <section class="home-ad-inferior" aria-label="Anuncio publicitario inferior">
+    <a class="home-ad-bottom" href="registro-banner.html" id="bannerInferior" aria-label="¡Anúnciate aquí! Impulsa tu negocio y llega a más personas.">
+      <div class="home-ad-bottom__stage" id="bottomBannerStage">
+        <div class="home-ad-bottom__dots" id="bottomBannerDots" aria-hidden="true">
+          <span class="home-ad-bottom__dot is-on" data-bottom-dot="0"></span>
+          <span class="home-ad-bottom__dot" data-bottom-dot="1"></span>
+          <span class="home-ad-bottom__dot" data-bottom-dot="2"></span>
+          <span class="home-ad-bottom__dot" data-bottom-dot="3"></span>
+          <span class="home-ad-bottom__dot" data-bottom-dot="4"></span>
+          <span class="home-ad-bottom__dot" data-bottom-dot="5"></span>
+        </div>
+        <div class="home-ad-bottom__slide is-active" data-bottom-slide="0" aria-hidden="false">
+          <img class="home-ad-bottom__art" src="img/home/banners/ad-banner-pink-01.png" alt="¡Anúnciate aquí! Impulsa tu negocio y llega a más personas" decoding="async">
+        </div>
+        <div class="home-ad-bottom__slide" data-bottom-slide="1" aria-hidden="true">
+          <img class="home-ad-bottom__art" src="img/home/banners/ad-banner-black-01.png" alt="¡Anúnciate en Cariñosas! Para más clientes" decoding="async">
+        </div>
+        <div class="home-ad-bottom__slide" data-bottom-slide="2" aria-hidden="true">
+          <img class="home-ad-bottom__art" src="img/home/banners/ad-banner-pink-02.png" alt="¡Anúnciate aquí! Más visibilidad, más clientes" decoding="async">
+        </div>
+        <div class="home-ad-bottom__slide" data-bottom-slide="3" aria-hidden="true">
+          <img class="home-ad-bottom__art" src="img/home/banners/ad-banner-black-02.png" alt="Haz crecer tu negocio — anuncia aquí" decoding="async">
+        </div>
+        <div class="home-ad-bottom__slide" data-bottom-slide="4" aria-hidden="true">
+          <img class="home-ad-bottom__art" src="img/home/banners/ad-banner-pink-03.png" alt="¡Anúnciate aquí! Más información" decoding="async">
+        </div>
+        <div class="home-ad-bottom__slide" data-bottom-slide="5" aria-hidden="true">
+          <img class="home-ad-bottom__art" src="img/home/banners/ad-banner-black-03.png" alt="Haz crecer tu negocio — anuncia ahora" decoding="async">
+        </div>
+      </div>
+    </a>
+  </section>
+  </div><!-- /.home-fold-top -->
+
+  <div class="home-below-fold">
+  <section class="home-trust" aria-label="Ventajas de confianza">
+    <button class="home-trust__item" type="button" data-modal="verificados">
+      <svg class="home-trust__icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3l7 3v6c0 5-3.5 8.5-7 9-3.5-.5-7-4-7-9V6l7-3z" stroke="currentColor" stroke-width="2"/><path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <div><h4 class="home-trust__title">Perfiles verificados</h4><p class="home-trust__text">Mayor seguridad para ti</p></div>
+    </button>
+    <button class="home-trust__item" type="button" data-modal="privacidad">
+      <svg class="home-trust__icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2" stroke="currentColor" stroke-width="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3" stroke="currentColor" stroke-width="2"/></svg>
+      <div><h4 class="home-trust__title">Privacidad</h4><p class="home-trust__text">Tu información está protegida</p></div>
+    </button>
+    <button class="home-trust__item" type="button" data-modal="mensajes">
+      <svg class="home-trust__icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 6h16v10H7l-3 3V6z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+      <div><h4 class="home-trust__title">Contacto directo</h4><p class="home-trust__text">Comunícate por mensajes internos</p></div>
+    </button>
+    <button class="home-trust__item" type="button" data-modal="favoritos">
+      <svg class="home-trust__icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 20.5s-7-4.6-7-9.5a4 4 0 0 1 7-2.2A4 4 0 0 1 19 11c0 4.9-7 9.5-7 9.5z" stroke="currentColor" stroke-width="2"/></svg>
+      <div><h4 class="home-trust__title">Favoritos</h4><p class="home-trust__text">Guarda los perfiles que te gustan</p></div>
+    </button>
+  </section>
+  </div><!-- /.home-below-fold -->
+    <div class="home-page-lower-sparkles" aria-hidden="true"></div>
+  </div><!-- /.home-page-body -->
+
+
+
+
+<div class="home-modal" id="modal-verificados" role="dialog" aria-modal="true" aria-labelledby="modal-verificados-title">
+  <div class="home-modal__panel">
+    <button class="home-modal__close" type="button" aria-label="Cerrar">&times;</button>
+    <h3 class="home-modal__title" id="modal-verificados-title">Perfiles verificados</h3>
+    <p class="home-modal__lead">Mayor seguridad para ti en cada búsqueda.</p>
+    <div class="home-modal__body"><p>Revisamos identidad y documentación de perfiles y anunciantes destacados. Los sellos de verificación te ayudan a elegir con más confianza.</p></div>
+  </div>
 </div>
 
-<section class="home-ad-premium" aria-label="Publicidad premium">
-  <article class="home-ad-card home-ad-card--left" role="button" tabindex="0" onclick="location.href='registro-banner.html'" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();location.href='registro-banner.html';}">
-    <span class="home-ad-icon" aria-hidden="true">📣</span>
-    <h3>¡Anúnciate aquí!</h3>
-    <p>Más visibilidad, más clientes, mejores resultados.</p>
-    <span class="home-ad-cta">Más información</span>
-  </article>
-  <article class="home-ad-card home-ad-card--right" role="button" tabindex="0" onclick="location.href='registro-banner.html'" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();location.href='registro-banner.html';}">
-    <h3>Promociona tu negocio</h3>
-    <p>Haz crecer tu marca y llega a más personas.</p>
-    <span class="home-ad-cta">Más información</span>
-    <span class="home-ad-metric" aria-hidden="true">📈</span>
-  </article>
-</section>
+<div class="home-modal" id="modal-privacidad" role="dialog" aria-modal="true" aria-labelledby="modal-privacidad-title">
+  <div class="home-modal__panel">
+    <button class="home-modal__close" type="button" aria-label="Cerrar">&times;</button>
+    <h3 class="home-modal__title" id="modal-privacidad-title">Privacidad</h3>
+    <p class="home-modal__lead">Tu información está protegida.</p>
+    <div class="home-modal__body"><p>Datos personales cifrados y acceso restringido. Solo compartimos información cuando la ley lo exige.</p></div>
+  </div>
+</div>
+
+<div class="home-modal" id="modal-mensajes" role="dialog" aria-modal="true" aria-labelledby="modal-mensajes-title">
+  <div class="home-modal__panel">
+    <button class="home-modal__close" type="button" aria-label="Cerrar">&times;</button>
+    <h3 class="home-modal__title" id="modal-mensajes-title">Comunícate por mensajes internos</h3>
+    <p class="home-modal__lead" id="modalMensajesLead"></p>
+    <div class="home-modal__body" id="modalMensajesBody"></div>
+  </div>
+</div>
+
+<div class="home-modal" id="modal-favoritos" role="dialog" aria-modal="true" aria-labelledby="modal-favoritos-title">
+  <div class="home-modal__panel">
+    <button class="home-modal__close" type="button" aria-label="Cerrar">&times;</button>
+    <h3 class="home-modal__title" id="modal-favoritos-title">❤️ Favoritos</h3>
+    <p class="home-modal__lead">No pierdas de vista lo que más te interesa.</p>
+    <div class="home-modal__body">
+      <p><strong>Como visitante:</strong> Marca con el corazón los perfiles que te gustan y encuéntralos después en un solo lugar.</p>
+      <p><strong>Si publicas tu perfil:</strong> Aquí también verás las personas que te guardaron y el interés que generas.</p>
+    </div>
+    <p class="home-modal__more">Usa el corazón arriba a la derecha para acceder en cualquier momento.</p>
+  </div>
+</div>
+
+<div class="home-modal" id="modal-registro" role="dialog" aria-modal="true" aria-labelledby="modal-registro-title">
+  <div class="home-modal__panel">
+    <button class="home-modal__close" type="button" aria-label="Cerrar">&times;</button>
+    <h3 class="home-modal__title" id="modal-registro-title">Registrarse</h3>
+    <p class="home-modal__lead">¿Qué quieres hacer en Cariñosas?</p>
+    <div class="home-modal__body">
+      <p><strong>Crear perfil</strong> — Publica tu servicio y llega a más personas.</p>
+      <p><strong>Rentar publicidad</strong> — Anúnciate en banners premium de la plataforma.</p>
+    </div>
+  </div>
+</div>
+
+<div class="home-modal" id="modal-avanzada" role="dialog" aria-modal="true" aria-labelledby="modal-avanzada-title">
+  <div class="home-modal__panel">
+    <button class="home-modal__close" type="button" aria-label="Cerrar">&times;</button>
+    <h3 class="home-modal__title" id="modal-avanzada-title">Búsqueda avanzada</h3>
+    <p class="home-modal__lead">Encuentra categorías ocultas o escribe lo que buscas.</p>
+    <div class="home-modal__body"><p>Ejemplo: embarazadas, hotel, fetiches… Algunas opciones requieren registro.</p></div>
+  </div>
+</div>
+
+<div class="home-modal home-modal--sector" id="modal-otros-sectores" role="dialog" aria-modal="true" aria-labelledby="modal-otros-sectores-title">
+  <div class="home-modal__panel home-modal__panel--sector">
+    <button class="home-modal__close" type="button" aria-label="Cerrar">&times;</button>
+    <div class="home-sector-picker__head">
+      <h3 class="home-sector-picker__title" id="modal-otros-sectores-title">Otras categorías</h3>
+      <p class="home-sector-picker__hint" id="otrosSectoresHint">14 sectores · elige uno para ver profesiones</p>
+    </div>
+    <ul class="home-sector-picker__list" id="otrosSectoresList" role="listbox" aria-label="Otras categorías"></ul>
+  </div>
+</div>
+
+<div class="home-modal home-modal--sector" id="modal-sectores" role="dialog" aria-modal="true" aria-labelledby="modal-sectores-title">
+  <div class="home-modal__panel home-modal__panel--sector">
+    <button class="home-modal__close" type="button" aria-label="Cerrar">&times;</button>
+    <div class="home-sector-picker__head">
+      <h3 class="home-sector-picker__title" id="modal-sectores-title">¿En qué sector buscas?</h3>
+      <p class="home-sector-picker__hint" id="sectorPickerHint">15 sectores · elige uno para ver categorías</p>
+    </div>
+    <ul class="home-sector-picker__list" id="sectorPickerList" role="listbox" aria-label="Sectores"></ul>
+  </div>
+</div>
+
+<div class="home-modal home-modal--sector home-modal--categorias" id="modal-categorias" role="dialog" aria-modal="true" aria-labelledby="modal-categorias-title">
+  <div class="home-modal__panel home-modal__panel--sector home-modal__panel--categorias">
+    <button class="home-modal__close" type="button" aria-label="Cerrar categorías">&times;</button>
+
+    <div class="home-cat-picker-classic" id="catPickerClassic">
+      <div class="home-cat-picker__head">
+        <div>
+          <button class="home-cat-picker__back" type="button" id="catPickerBack" hidden>← Sectores</button>
+          <h3 class="home-cat-picker__title" id="modal-categorias-title">Categorías</h3>
+          <p class="home-cat-picker__hint" id="catPickerCount"></p>
+        </div>
+      </div>
+      <ul class="home-cat-picker__list" id="catPickerList" role="listbox" aria-label="Categorías del sector"></ul>
+    </div>
+
+    <div class="home-adultos-picker" id="catPickerAdultos" hidden>
+      <div class="home-adultos-picker__flashes" aria-hidden="true">
+        <span class="ap-bg-flash ap-bg-flash--pink ap-bg-flash--p1"></span>
+        <span class="ap-bg-flash ap-bg-flash--pink ap-bg-flash--p2"></span>
+        <span class="ap-bg-flash ap-bg-flash--pink ap-bg-flash--p3"></span>
+        <span class="ap-bg-flash ap-bg-flash--pink ap-bg-flash--p4"></span>
+        <span class="ap-bg-flash ap-bg-flash--pink ap-bg-flash--p5"></span>
+        <span class="ap-bg-flash ap-bg-flash--white ap-bg-flash--1"></span>
+        <span class="ap-bg-flash ap-bg-flash--white ap-bg-flash--2"></span>
+        <span class="ap-bg-flash ap-bg-flash--white ap-bg-flash--3"></span>
+        <span class="ap-bg-flash ap-bg-flash--white ap-bg-flash--4"></span>
+        <span class="ap-bg-flash ap-bg-flash--white ap-bg-flash--5"></span>
+      </div>
+      <header class="home-adultos-picker__head">
+        <h3 class="home-adultos-picker__title" id="modal-categorias-title-adultos">Adultos y Entretenimiento para Adultos</h3>
+        <p class="home-adultos-picker__hint" id="catPickerCountAdultos"></p>
+      </header>
+      <a class="home-adultos-picker__anuncio" href="registro-banner.html?slot=home_categorias" aria-label="Anúnciate aquí — registro de banner publicitario">
+        <img src="img/adultos-cat/img-04.jpg" alt="" aria-hidden="true" loading="lazy" decoding="async">
+        <span class="home-adultos-picker__anuncio-text" aria-hidden="true">Anúnciate aquí</span>
+      </a>
+      <ul class="home-adultos-picker__grid" id="catPickerListAdultos" role="listbox" aria-label="Categorías Adultos"></ul>
+    </div>
+  </div>
+</div>
+
+
 
 <div class="menu" id="menu">
-  <div class="cerrar-menu" onclick="cerrarMenu()">✕</div>
-  <div class="menu-note">🔞 Sitio para mayores de 18 años. Uso responsable y discreto.</div>
+  <div class="menu__sheen" aria-hidden="true">
+    <div class="menu__frost"></div>
+    <div class="menu__sparkles">
+      <span class="menu__spark menu__spark--flash" style="--x:10%;--y:6%;--dx:36px;--dy:-28px;--d:0s;--dur:3.4s;--sz:5px"></span>
+      <span class="menu__spark menu__spark--glow" style="--x:78%;--y:8%;--dx:-32px;--dy:24px;--d:1.1s;--dur:5.2s;--sz:6px"></span>
+      <span class="menu__spark menu__spark--chrome" style="--x:42%;--y:4%;--dx:28px;--dy:34px;--d:2.2s;--dur:4.6s;--sz:5px"></span>
+      <span class="menu__spark menu__spark--star" style="--x:88%;--y:14%;--dx:-40px;--dy:-30px;--d:.4s;--dur:4.8s;--sz:8px"></span>
+      <span class="menu__spark menu__spark--flash" style="--x:18%;--y:22%;--dx:44px;--dy:22px;--d:2.6s;--dur:3.6s;--sz:4px"></span>
+      <span class="menu__spark menu__spark--glow" style="--x:62%;--y:28%;--dx:-36px;--dy:-26px;--d:1.8s;--dur:5.8s;--sz:7px"></span>
+      <span class="menu__spark menu__spark--chrome" style="--x:30%;--y:38%;--dx:30px;--dy:-38px;--d:.9s;--dur:4.4s;--sz:5px"></span>
+      <span class="menu__spark menu__spark--star" style="--x:72%;--y:42%;--dx:-28px;--dy:32px;--d:3.1s;--dur:5.1s;--sz:7px"></span>
+      <span class="menu__spark menu__spark--flash" style="--x:12%;--y:52%;--dx:38px;--dy:-22px;--d:1.4s;--dur:3.2s;--sz:5px"></span>
+      <span class="menu__spark menu__spark--glow" style="--x:50%;--y:58%;--dx:-42px;--dy:18px;--d:2.9s;--dur:6s;--sz:6px"></span>
+      <span class="menu__spark menu__spark--chrome" style="--x:82%;--y:64%;--dx:26px;--dy:-34px;--d:3.8s;--dur:4.9s;--sz:5px"></span>
+      <span class="menu__spark menu__spark--star" style="--x:24%;--y:72%;--dx:34px;--dy:28px;--d:.6s;--dur:4.5s;--sz:9px"></span>
+      <span class="menu__spark menu__spark--flash" style="--x:68%;--y:78%;--dx:-48px;--dy:-20px;--d:2.1s;--dur:3.7s;--sz:4px"></span>
+      <span class="menu__spark menu__spark--glow" style="--x:40%;--y:86%;--dx:32px;--dy:-40px;--d:4.2s;--dur:5.4s;--sz:6px"></span>
+      <span class="menu__spark menu__spark--chrome" style="--x:90%;--y:90%;--dx:-30px;--dy:24px;--d:1.7s;--dur:4.3s;--sz:5px"></span>
+    </div>
+  </div>
+  <div class="menu__inner">
+    <div class="cerrar-menu" onclick="cerrarMenu()">✕</div>
+    <div class="menu-note">
+      <span class="menu-note__badge" aria-hidden="true">18</span>
+      <p class="menu-note__text">Sitio para mayores de 18 años. Uso responsable y discreto.</p>
+    </div>
 
-  <a href="#" onclick="abrirRegistro()">👤 Registrarse</a>
-  <a href="#" onclick="abrirMiPerfil()">👤 Mi cuenta</a>
-  <a href="#" onclick="abrirFavoritos()">❤️ Mis favoritos</a>
+    <a href="#" onclick="abrirRegistro()"><img class="menu__icon" src="img/menu-icons/registrarse.png" alt="" aria-hidden="true"> Registrarse</a>
+  <a href="#" onclick="abrirMiPerfil()"><img class="menu__icon" src="img/menu-icons/mi-cuenta.png" alt="" aria-hidden="true"> Mi cuenta</a>
+  <a href="#" onclick="abrirFavoritos()"><img class="menu__icon" src="img/menu-icons/mis-favoritos.png" alt="" aria-hidden="true"> Mis favoritos</a>
 
   <div class="sep"></div>
 
-  <a href="#" onclick="abrirAnuncio()">📢 Anúnciate aquí</a>
-  <a href="#" onclick="abrirContacto()">📩 Contacto / Soporte</a>
-  <a href="#" onclick="abrirDenuncia()">⚠️ Denunciar perfil</a>
+  <a href="#" onclick="abrirAnuncio()"><img class="menu__icon" src="img/menu-icons/anunciate.png" alt="" aria-hidden="true"> Anúnciate aquí</a>
+  <a href="#" onclick="abrirContacto()"><img class="menu__icon" src="img/menu-icons/soporte.png" alt="" aria-hidden="true"> Contacto / Soporte</a>
+  <a href="#" onclick="abrirDenuncia()"><img class="menu__icon" src="img/menu-icons/denunciar.png" alt="" aria-hidden="true"> Denunciar perfil</a>
 
   <div class="sep"></div>
 
-  <a href="#" onclick="abrirLegal('terminos')">📜 Términos y condiciones</a>
-  <a href="#" onclick="abrirLegal('privacidad')">🔒 Política de privacidad</a>
-  <a href="#" onclick="abrirLegal('uso')">⚠️ Condiciones de uso</a>
-  <a href="#" onclick="abrirLegal('normas')">🚫 Normas de publicación</a>
-  <a href="#" onclick="abrirLegal('legal')">⚖️ Aviso legal</a>
-  <a href="#" onclick="cerrarMenu()">← Volver</a>
+  <a href="#" onclick="abrirLegal('terminos')"><img class="menu__icon" src="img/menu-icons/terminos.png" alt="" aria-hidden="true"> Términos y condiciones</a>
+  <a href="#" onclick="abrirLegal('privacidad')"><img class="menu__icon" src="img/menu-icons/privacidad.png" alt="" aria-hidden="true"> Política de privacidad</a>
+  <a href="#" onclick="abrirLegal('uso')"><img class="menu__icon" src="img/menu-icons/condiciones.png" alt="" aria-hidden="true"> Condiciones de uso</a>
+  <a href="#" onclick="abrirLegal('normas')"><img class="menu__icon" src="img/menu-icons/normas.png" alt="" aria-hidden="true"> Normas de publicación</a>
+  <a href="#" onclick="abrirLegal('legal')"><img class="menu__icon" src="img/menu-icons/aviso-legal.png" alt="" aria-hidden="true"> Aviso legal</a>
+    <a href="#" onclick="cerrarMenu()"><img class="menu__icon" src="img/menu-icons/volver.png" alt="" aria-hidden="true"> Volver</a>
+  </div>
 </div>
 
 <div class="modal selector-modal" id="modalSelector">
@@ -1047,6 +861,7 @@ label{
     </div>
   </div>
 </div>
+</div>
 
 <script>
 function abrirMenu(){
@@ -1199,6 +1014,11 @@ function abrirBusquedaAvanzada(){
 }
 
 function abrirSelector(tipo){
+  if(tipo==="categoria"&&typeof window.openAdultosCatPicker==="function"){
+    window.openAdultosCatPicker();
+    return;
+  }
+
   selectorActual=tipo;
 
   const modal=document.getElementById("modalSelector");
@@ -1323,6 +1143,7 @@ function seleccionarOpcion(valor){
     categoriaSeleccionada=valor;
     mostrarTextoSeleccionado("textoCategoria", valor);
     cerrarSelector();
+    if(typeof window.setCategoriaHome==="function") window.setCategoriaHome(valor);
 
     setTimeout(function(){
       abrirSelector("pais");
@@ -1373,6 +1194,13 @@ function seleccionarOpcion(valor){
     mostrarTextoSeleccionado("textoCiudad", valor);
 
     cerrarSelector();
+
+    if(window.__autoBuscarTrasCiudad){
+      window.__autoBuscarTrasCiudad=false;
+      setTimeout(function(){
+        buscarPerfilesFiltrados();
+      },250);
+    }
 
     return;
   }
@@ -2367,8 +2195,13 @@ const params = new URLSearchParams(window.location.search);
   }
 
 });
-
 </script>
-
+<script src="js/hero-home.js"></script>
+<script src="js/sector-scroll-data.js"></script>
+<script src="js/home-sector-scroll.js"></script>
+<script src="js/home-vcards.js"></script>
+<script src="js/adultos-cat-picker.js"></script>
+<script src="js/home-ui.js"></script>
+<script src="js/home-bridge.js"></script>
 </body>
 </html>

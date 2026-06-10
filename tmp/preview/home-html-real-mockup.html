@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MOCKUP — Home HTML real (propuesta visual)</title>
+<style>
+  :root{
+    --rosa:#e91e8c;
+    --rosa2:#ff4fa3;
+    --rosa-suave:#fff1f7;
+    --borde:#e8c4d4;
+    --texto:#1a1a1a;
+    --gris:#6b6b6b;
+    --gris-claro:#9a9a9a;
+    --sombra:0 4px 14px rgba(233,30,140,.12);
+    --radio:12px;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family:Arial,Helvetica,sans-serif;
+    background:#f4f4f4;
+    color:var(--texto);
+  }
+  .mockup-banner{
+    position:sticky;top:0;z-index:9999;
+    background:#1e1e1e;color:#fff;
+    padding:10px 14px;font-size:12px;text-align:center;
+    border-bottom:3px solid #ff9800;
+  }
+  .mockup-banner strong{color:#ffb74d}
+  .phone{
+    width:390px;max-width:100%;margin:0 auto;
+    background:#fff;
+    box-shadow:0 0 0 1px #ddd, 0 20px 60px rgba(0,0,0,.15);
+    overflow:hidden;
+  }
+  .home-header{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:10px 14px 8px;background:#fff;
+  }
+  .logo-wrap{display:flex;align-items:center;gap:8px}
+  .logo-icon{
+    width:36px;height:36px;border-radius:50%;
+    background:linear-gradient(135deg,#ff9ccc,#e91e8c);
+    display:flex;align-items:center;justify-content:center;
+    color:#fff;font-size:18px;
+  }
+  .logo-text .brand{
+    font-size:22px;font-weight:700;color:var(--rosa);
+    font-family:Georgia,serif;font-style:italic;line-height:1;
+  }
+  .logo-text .tag{
+    font-size:7px;letter-spacing:.6px;color:var(--gris-claro);
+    text-transform:uppercase;margin-top:2px;
+  }
+  .header-actions{display:flex;gap:12px;align-items:center}
+  .icon-btn{
+    width:34px;height:34px;border:0;background:transparent;
+    color:var(--rosa);font-size:22px;cursor:pointer;padding:0;
+  }
+  .home-hero{
+    position:relative;min-height:200px;
+    background:linear-gradient(90deg,#fff 42%,#ffe8f2 58%,#ffc9e3 100%);
+    padding:16px 14px 20px;overflow:hidden;
+  }
+  .home-hero::after{
+    content:"";position:absolute;right:-20px;top:0;bottom:0;width:58%;
+    background:linear-gradient(135deg,#ffb8d9,#f48fb1);
+    clip-path:polygon(18% 0,100% 0,100% 100%,0 100%);
+  }
+  .hero-photo{
+    position:absolute;right:0;top:0;width:56%;height:100%;
+    background:linear-gradient(180deg,rgba(255,255,255,.1),rgba(0,0,0,.08)),
+      url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="240"><rect fill="%23d48aa8" width="200" height="240"/><text x="50%" y="50%" fill="white" font-size="12" text-anchor="middle" font-family="Arial">FOTO HERO</text></svg>') center/cover no-repeat;
+    clip-path:polygon(20% 0,100% 0,100% 100%,0 100%);
+    z-index:1;
+  }
+  .hero-copy{position:relative;z-index:2;max-width:58%}
+  .hero-copy h1{margin:0;font-size:26px;line-height:1.08;font-weight:900}
+  .hero-copy h1 .pink{color:var(--rosa)}
+  .hero-copy p{margin:8px 0 0;font-size:11px;color:var(--gris);line-height:1.35}
+  .section{padding:14px 14px 6px}
+  .section-title{
+    text-align:center;font-size:13px;font-weight:900;
+    letter-spacing:.3px;margin:0 0 12px;text-transform:uppercase;
+  }
+  .section-title .pink{color:var(--rosa)}
+  .section-title.decor{
+    display:flex;align-items:center;justify-content:center;gap:8px;
+    font-size:11px;
+  }
+  .section-title.decor::before,.section-title.decor::after{
+    content:"";flex:1;height:1px;background:#ddd;max-width:40px;
+  }
+  .search-grid{
+    display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;
+  }
+  .select-mock{
+    display:flex;align-items:center;gap:6px;
+    border:1px solid var(--borde);border-radius:10px;
+    padding:10px 8px;font-size:10px;font-weight:700;color:#444;
+    background:#fff;
+  }
+  .select-mock .ico{color:var(--rosa);font-size:14px;flex-shrink:0}
+  .select-mock .arrow{margin-left:auto;color:var(--rosa);font-size:10px}
+  .btn-buscar{
+    width:100%;border:0;border-radius:999px;padding:13px;
+    background:linear-gradient(180deg,var(--rosa2),var(--rosa));
+    color:#fff;font-weight:900;font-size:12px;letter-spacing:.5px;
+    display:flex;align-items:center;justify-content:center;gap:8px;
+    box-shadow:0 6px 16px rgba(233,30,140,.35);cursor:pointer;
+  }
+  .zonas-scroll{
+    display:flex;gap:8px;overflow-x:auto;padding-bottom:8px;
+    scrollbar-width:none;
+  }
+  .zonas-scroll::-webkit-scrollbar{display:none}
+  .zona-pill{
+    flex:0 0 auto;display:flex;align-items:center;gap:5px;
+    border:1px solid var(--borde);border-radius:999px;
+    padding:8px 12px;font-size:10px;font-weight:700;color:var(--rosa);
+    background:#fff;white-space:nowrap;
+  }
+  .btn-outline{
+    display:block;width:fit-content;margin:8px auto 0;
+    border:1.5px solid var(--rosa);border-radius:999px;
+    padding:9px 16px;font-size:10px;font-weight:800;color:var(--rosa);
+    background:#fff;
+  }
+  .cat-grid{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:10px;
+    padding-bottom:8px;
+  }
+  .cat-card{
+    aspect-ratio:1;border-radius:var(--radio);
+    border:1px solid #f0d4e2;background:#fff;
+    box-shadow:var(--sombra);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:6px;padding:8px;
+  }
+  .cat-card .ico{font-size:28px;color:var(--rosa)}
+  .cat-card span{font-size:10px;font-weight:800;color:var(--rosa);text-align:center}
+  .ads-principal{
+    display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:8px 14px 14px;
+  }
+  .ad-card{
+    border-radius:14px;overflow:hidden;min-height:150px;
+    background:linear-gradient(135deg,#ff9ccc,#e91e8c);
+    color:#fff;padding:10px;position:relative;
+    box-shadow:var(--sombra);
+  }
+  .ad-card h3{margin:0;font-size:11px;font-weight:900;line-height:1.2}
+  .ad-card p{margin:4px 0 0;font-size:8px;line-height:1.3;opacity:.95}
+  .ad-card .cta{
+    display:inline-block;margin-top:8px;padding:5px 10px;
+    border-radius:999px;background:#fff;color:var(--rosa);
+    font-size:7px;font-weight:900;
+  }
+  .ad-visual{
+    position:absolute;right:4px;bottom:4px;width:55%;height:65%;
+    border-radius:8px;background:rgba(255,255,255,.2);
+    display:flex;align-items:center;justify-content:center;
+    font-size:8px;text-align:center;opacity:.9;
+  }
+  .home-cta{
+    display:grid;grid-template-columns:1fr 1fr;gap:10px;
+    padding:6px 14px 14px;
+  }
+  .cta-box{
+    border:1px solid var(--borde);border-radius:var(--radio);
+    padding:12px 10px;background:#fff;
+  }
+  .cta-box h4{margin:0 0 4px;font-size:11px;font-weight:900}
+  .cta-box p{margin:0;font-size:9px;color:var(--gris);line-height:1.35}
+  .cta-box .mini-btn{
+    margin-top:8px;display:inline-block;padding:7px 10px;
+    border-radius:999px;background:var(--rosa);color:#fff;
+    font-size:8px;font-weight:900;
+  }
+  .cta-box .mini-btn.outline{
+    background:#fff;color:var(--rosa);border:1.5px solid var(--rosa);
+    display:block;text-align:center;margin-top:6px;
+  }
+  .trust-grid{
+    display:grid;grid-template-columns:1fr 1fr;gap:12px 10px;
+    padding:8px 14px 16px;
+  }
+  .trust-item{display:flex;gap:8px;align-items:flex-start}
+  .trust-item .ico{
+    width:28px;height:28px;border-radius:8px;flex-shrink:0;
+    background:var(--rosa-suave);color:var(--rosa);
+    display:flex;align-items:center;justify-content:center;font-size:14px;
+  }
+  .trust-item h5{margin:0;font-size:10px;color:var(--rosa);font-weight:900}
+  .trust-item p{margin:2px 0 0;font-size:8px;color:var(--gris);line-height:1.3}
+  .ad-inferior{
+    margin:0 14px 20px;border-radius:18px;overflow:hidden;
+    background:linear-gradient(135deg,#ff7eb8,#e91e8c);
+    color:#fff;padding:14px;position:relative;min-height:200px;
+    box-shadow:0 8px 24px rgba(233,30,140,.3);
+  }
+  .ad-inferior h3{margin:0;font-size:18px;font-weight:900}
+  .ad-inferior .sub{font-size:9px;margin-top:4px;line-height:1.35;max-width:62%}
+  .ad-inferior .cta-black{
+    display:inline-flex;align-items:center;gap:6px;margin-top:10px;
+    background:#111;color:#fff;border-radius:999px;
+    padding:8px 12px;font-size:7px;font-weight:900;
+  }
+  .ad-inferior .growth{
+    position:absolute;right:10px;top:14px;width:42%;
+    background:rgba(255,255,255,.15);border-radius:10px;
+    padding:8px;font-size:8px;text-align:center;
+  }
+  .ad-inferior .growth strong{display:block;font-size:16px}
+  .ad-inferior .man{
+    position:absolute;left:10px;bottom:0;width:45%;height:55%;
+    background:rgba(0,0,0,.12);border-radius:8px 8px 0 0;
+    display:flex;align-items:center;justify-content:center;font-size:9px;
+  }
+  .ad-inferior .fab{
+    position:absolute;right:14px;bottom:14px;
+    width:64px;height:64px;border-radius:50%;
+    background:#fff;color:var(--rosa);border:0;
+    font-size:7px;font-weight:900;padding:6px;
+    box-shadow:0 4px 12px rgba(0,0,0,.2);
+  }
+  .wireframe-note{
+    margin:16px auto;padding:12px 14px;max-width:390px;
+    background:#fff3e0;border:1px dashed #ff9800;border-radius:8px;
+    font-size:11px;line-height:1.5;color:#5d4037;
+  }
+</style>
+</head>
+<body>
+<div class="mockup-banner">
+  <strong>PROPUESTA VISUAL</strong> — No es producción. Mockup HTML en <code>tmp/preview/</code>. <code>index.html</code> sin modificar.
+</div>
+
+<div class="phone" id="mockupPhone">
+  <header class="home-header">
+    <div class="logo-wrap">
+      <div class="logo-icon">♀</div>
+      <div class="logo-text">
+        <div class="brand">Cariñosas</div>
+        <div class="tag">Acompañantes independientes</div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="icon-btn" type="button" title="Favoritos">♡</button>
+      <button class="icon-btn" type="button" title="Menú">☰</button>
+    </div>
+  </header>
+
+  <section class="home-hero">
+    <div class="hero-photo" aria-hidden="true"></div>
+    <div class="hero-copy">
+      <h1>Encuentra <span class="pink">acompañantes cariñosas</span> cerca de ti</h1>
+      <p>Perfiles reales, verificados y actualizados</p>
+    </div>
+  </section>
+
+  <section class="section home-search">
+    <h2 class="section-title"><span class="pink">¿Dónde quieres buscar?</span></h2>
+    <div class="search-grid">
+      <div class="select-mock"><span class="ico">👤</span> Categoría <span class="arrow">▼</span></div>
+      <div class="select-mock"><span class="ico">🌐</span> Elegir país <span class="arrow">▼</span></div>
+      <div class="select-mock"><span class="ico">📍</span> Elegir estado <span class="arrow">▼</span></div>
+      <div class="select-mock"><span class="ico">🏙</span> Elegir ciudad <span class="arrow">▼</span></div>
+    </div>
+    <button class="btn-buscar" type="button">🔍 BUSCAR AHORA</button>
+  </section>
+
+  <section class="section home-zonas">
+    <h2 class="section-title decor">Zonas <span class="pink">cercanas</span> populares</h2>
+    <div class="zonas-scroll">
+      <div class="zona-pill">🏙 Monterrey</div>
+      <div class="zona-pill">⛰ García</div>
+      <div class="zona-pill">⛪ Santa Catarina</div>
+      <div class="zona-pill">🗿 Apodaca</div>
+      <div class="zona-pill">🏛 San Nicolás</div>
+    </div>
+    <div class="btn-outline">📍 VER MÁS ZONAS CERCANAS</div>
+  </section>
+
+  <section class="section home-categorias">
+    <h2 class="section-title decor">Explora <span class="pink">categorías</span></h2>
+    <div class="cat-grid">
+      <div class="cat-card"><span class="ico">👤</span><span>Escort</span></div>
+      <div class="cat-card"><span class="ico">🪷</span><span>Spa</span></div>
+      <div class="cat-card"><span class="ico">🍍</span><span>Swinger</span></div>
+      <div class="cat-card"><span class="ico">▶</span><span>Contenido</span></div>
+      <div class="cat-card"><span class="ico">⚧</span><span>Trans</span></div>
+      <div class="cat-card"><span class="ico">🛍</span><span>Sex shop</span></div>
+    </div>
+  </section>
+
+  <section class="ads-principal" aria-label="Banner publicitario principal">
+    <div class="ad-card">
+      <h3>¡ANÚNCIATE AQUÍ!</h3>
+      <p>Más visibilidad, más clientes, mejores resultados.</p>
+      <span class="cta">MÁS INFORMACIÓN →</span>
+      <div class="ad-visual">Megáfono + móvil<br>(asset final)</div>
+    </div>
+    <div class="ad-card">
+      <h3>¡ANÚNCIATE AQUÍ!</h3>
+      <p>+187% crecimiento</p>
+      <span class="cta">¡QUIERO MÁS INFORMACIÓN!</span>
+      <div class="ad-visual">Mujer + gráfica<br>(asset final)</div>
+    </div>
+  </section>
+
+  <section class="home-cta">
+    <div class="cta-box">
+      <h4>📍 Cerca de ti</h4>
+      <p>Detectando tu ubicación automáticamente...</p>
+      <span class="mini-btn">BUSCAR CERCA &gt;</span>
+    </div>
+    <div class="cta-box">
+      <h4>¿No encuentras lo que buscas?</h4>
+      <p>Registrate y accede a más perfiles increíbles.</p>
+      <span class="mini-btn">👤 REGISTRARSE</span>
+      <span class="mini-btn outline">🔍 BÚSQUEDA AVANZADA</span>
+    </div>
+  </section>
+
+  <section class="trust-grid" aria-label="Confianza">
+    <div class="trust-item"><div class="ico">🛡</div><div><h5>Perfiles verificados</h5><p>Mayor seguridad para ti</p></div></div>
+    <div class="trust-item"><div class="ico">🔒</div><div><h5>Privacidad</h5><p>Tu información está protegida</p></div></div>
+    <div class="trust-item"><div class="ico">💬</div><div><h5>Contacto directo</h5><p>Comunícate por WhatsApp</p></div></div>
+    <div class="trust-item"><div class="ico">❤</div><div><h5>Actualizados</h5><p>Perfiles reales y disponibles</p></div></div>
+  </section>
+
+  <section class="ad-inferior" aria-label="Banner publicitario inferior">
+    <div class="growth">TU NEGOCIO EN CRECIMIENTO<strong>+220%</strong>Más visualizaciones</div>
+    <h3>¡ANÚNCIATE AQUÍ!</h3>
+    <p class="sub">HAZ CRECER TU NEGOCIO Y LLEGA A MÁS PERSONAS</p>
+    <span class="cta-black">🎯 IMPULSA TU NEGOCIO Y AUMENTA TUS RESULTADOS</span>
+    <div class="man">Hombre + móvil<br>(asset final)</div>
+    <button class="fab" type="button">¡QUIERO MÁS INFORMACIÓN! →</button>
+  </section>
+</div>
+
+<div class="wireframe-note">
+  <strong>Notas del mockup:</strong> Iconos y fotos son placeholders (emoji/bloques). La implementación final usará assets recortados de la captura de referencia. Cada control mapea a la función JS existente (abrirSelector, buscarPerfilesFiltrados, registro-banner.html, etc.). Este archivo no modifica <code>public/index.html</code>.
+</div>
+</body>
+</html>
