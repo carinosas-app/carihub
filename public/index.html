@@ -1144,11 +1144,6 @@ function seleccionarOpcion(valor){
     mostrarTextoSeleccionado("textoCategoria", valor);
     cerrarSelector();
     if(typeof window.setCategoriaHome==="function") window.setCategoriaHome(valor);
-
-    setTimeout(function(){
-      abrirSelector("pais");
-    },250);
-
     return;
   }
 
@@ -1163,11 +1158,6 @@ function seleccionarOpcion(valor){
     limpiarTextoSeleccionado("textoCiudad");
 
     cerrarSelector();
-
-    setTimeout(function(){
-      abrirSelector("estado");
-    },250);
-
     return;
   }
 
@@ -1180,11 +1170,6 @@ function seleccionarOpcion(valor){
     limpiarTextoSeleccionado("textoCiudad");
 
     cerrarSelector();
-
-    setTimeout(function(){
-      abrirSelector("ciudad");
-    },250);
-
     return;
   }
 
@@ -1194,14 +1179,6 @@ function seleccionarOpcion(valor){
     mostrarTextoSeleccionado("textoCiudad", valor);
 
     cerrarSelector();
-
-    if(window.__autoBuscarTrasCiudad){
-      window.__autoBuscarTrasCiudad=false;
-      setTimeout(function(){
-        buscarPerfilesFiltrados();
-      },250);
-    }
-
     return;
   }
 }
@@ -1210,8 +1187,6 @@ function buscarCategoriaRapida(cat){
   categoriaSeleccionada=cat;
 
   mostrarTextoSeleccionado("textoCategoria", cat);
-
-  abrirSelector("pais");
 }
 
 function buscarCiudadRapida(ciudad){
@@ -1230,19 +1205,23 @@ function buscarCiudadRapida(ciudad){
 }
 
 function buscarPerfilesFiltrados(){
-  if(!categoriaSeleccionada||!paisSeleccionado||!estadoSeleccionado||!ciudadSeleccionada){
-    alert("Selecciona categoría, país, estado y ciudad.");
+  if(!categoriaSeleccionada){
+    alert("Selecciona una categoría.");
+    return;
+  }
+  if(!paisSeleccionado){
+    alert("Selecciona un país para buscar.");
     return;
   }
 
-  const url =
-    "./resultados.html?categoria=" + encodeURIComponent(categoriaSeleccionada) +
-    "&pais=" + encodeURIComponent(paisSeleccionado) +
-    "&estado=" + encodeURIComponent(estadoSeleccionado) +
-    "&ciudad=" + encodeURIComponent(ciudadSeleccionada) +
-    "&v=" + Date.now();
+  const url = new URL("./resultados.html", window.location.href);
+  url.searchParams.set("categoria", categoriaSeleccionada);
+  url.searchParams.set("pais", paisSeleccionado);
+  if(estadoSeleccionado) url.searchParams.set("estado", estadoSeleccionado);
+  if(ciudadSeleccionada) url.searchParams.set("ciudad", ciudadSeleccionada);
+  url.searchParams.set("v", String(Date.now()));
 
-  window.location.assign(url);
+  window.location.assign(url.toString());
 }
 
 function volverInicio(){

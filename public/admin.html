@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Panel Admin CariHub</title>
 
+<script src="/js/precios-publicidad.js"></script>
+<script src="/js/banner-inventario-rotacion.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
@@ -776,6 +778,13 @@ pre{
   .actions-row{grid-template-columns:1fr}
   .search-row{grid-template-columns:1fr}
 }
+.admin-precios-grid{display:grid;gap:8px;margin-top:12px}
+.admin-precios-row{display:grid;grid-template-columns:2fr 1fr 1fr .8fr;gap:10px;align-items:center;padding:10px 12px;border-radius:10px;background:#fff7fb;border:1px solid #f3d0e2}
+.admin-precios-row--head{font-weight:700;background:#fce4ef}
+.admin-precios-row small{display:block;color:#666;font-size:11px;margin-top:2px}
+.admin-precios-subtitulo{margin:14px 0 6px;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#b03067}
+.admin-precios-input{width:100%;padding:8px 10px;border:1px solid #e5b8cc;border-radius:8px}
+
 </style>
 </head>
 
@@ -810,6 +819,7 @@ pre{
       <button class="side-btn" onclick="abrirModulo('vencidos')"><span class="side-ico">⭐</span><span class="side-text"><b>Renovaciones</b><small>Perfiles por vencer</small></span></button>
       <button class="side-btn" onclick="abrirModulo('denuncias')"><span class="side-ico">⚠️</span><span class="side-text"><b>Denuncias</b><small>Reportes de usuarios</small></span></button>
       <button class="side-btn" onclick="abrirModulo('solicitudes_publicidad')"><span class="side-ico">📋</span><span class="side-text"><b>Solicitudes de publicidad</b><small>Revisar y cambiar estado</small></span></button>
+      <button class="side-btn" onclick="abrirModulo('precios_banners')"><span class="side-ico">💰</span><span class="side-text"><b>Precios banners</b><small>Espacios y tarifas</small></span></button>
       <button class="side-btn" onclick="abrirModulo('anuncios')"><span class="side-ico">📢</span><span class="side-text"><b>Publicidad</b><small>Banners y anuncios</small></span></button>
       <button class="side-btn" onclick="abrirModulo('historial')"><span class="side-ico">📜</span><span class="side-text"><b>Historial</b><small>Actividad admin</small></span></button>
       <button class="side-btn" onclick="abrirModulo('seguridad')"><span class="side-ico">⚙️</span><span class="side-text"><b>Seguridad</b><small>Logs y ajustes</small></span></button>
@@ -1220,6 +1230,14 @@ async function cargarModulo(tipo){
     buscador.style.display = "grid";
     configurarFiltroSolicitudesPublicidad();
     await cargarSolicitudesPublicidad();
+    return;
+  }
+
+  if(tipo === "precios_banners"){
+    titulo.innerText = "💰 Precios de banners";
+    desc.innerText = "Precio mensual y cupos de rotación (0–12) por espacio: banners, Estados y LIBE en todas las pantallas.";
+    buscador.style.display = "none";
+    await cargarPreciosBannersAdmin();
     return;
   }
 
@@ -2013,6 +2031,150 @@ async function crearMensajeAdmin(id){
 async function salir() {
   await auth.signOut();
   location.reload();
+}
+
+let configPreciosBannersAdmin = null;
+
+const GRUPOS_SLOTS_ADMIN = [
+  { id: "sin_resultados", titulo: "Sin resultados (todo el sitio)" },
+  { id: "home", titulo: "Home" },
+  { id: "resultados", titulo: "Resultados ciudad (con perfiles)" },
+  { id: "resultados_pais", titulo: "Resultados por país" },
+  { id: "resultados_estado", titulo: "Resultados por estado" },
+  { id: "perfil", titulo: "Perfil" }
+];
+
+const ORDEN_ESPACIO_ADMIN = {
+  izquierda: 1, centro: 2, derecha: 3, inferior: 4, categorias: 5,
+  hero_1: 6, hero_2: 7, hero_3: 8, hero_4: 9, hero_5: 10,
+  estados: 20, libe: 21
+};
+
+function slotsPorGrupoAdmin(pantalla) {
+  const slots = configPreciosBannersAdmin?.slots
+    || window.PreciosPublicidad?.CONFIG_PRECIOS_PUBLICIDAD_FALLBACK?.slots
+    || {};
+  return Object.keys(slots)
+    .filter(id => (slots[id]?.pantalla || "") === pantalla)
+    .sort((a, b) => {
+      const ea = ORDEN_ESPACIO_ADMIN[slots[a]?.espacio] || 50;
+      const eb = ORDEN_ESPACIO_ADMIN[slots[b]?.espacio] || 50;
+      return ea - eb || a.localeCompare(b, "es");
+    });
+}
+
+function etiquetaTipoEspacioAdmin(espacio) {
+  if (espacio === "estados") return "Lateral Estados y zonas";
+  if (espacio === "libe") return "Lateral LIBE";
+  return "Banners principales";
+}
+
+async function cargarPreciosBannersAdmin() {
+  const cont = document.getElementById("contenidoModulo");
+  cont.innerHTML = "Cargando precios de banners...";
+
+  try {
+    const doc = await db.collection("configuracion_publicidad").doc("precios_banners").get();
+    if (doc.exists && window.PreciosPublicidad?.normalizarConfigPreciosPublicidad) {
+      configPreciosBannersAdmin = PreciosPublicidad.normalizarConfigPreciosPublicidad(doc.data());
+    } else {
+      configPreciosBannersAdmin = PreciosPublicidad.normalizarConfigPreciosPublicidad(
+        PreciosPublicidad.CONFIG_PRECIOS_PUBLICIDAD_FALLBACK
+      );
+    }
+  } catch (e) {
+    configPreciosBannersAdmin = PreciosPublicidad.normalizarConfigPreciosPublicidad(
+      PreciosPublicidad.CONFIG_PRECIOS_PUBLICIDAD_FALLBACK
+    );
+  }
+
+  pintarPreciosBannersAdmin();
+}
+
+function pintarPreciosBannersAdmin() {
+  const cont = document.getElementById("contenidoModulo");
+  const slots = configPreciosBannersAdmin?.slots || {};
+  let html = `
+    <div class="item">
+      <p>Los precios se guardan en <b>configuracion_publicidad/precios_banners</b>. El sitio público usa este documento; si no existe, usa el fallback de <code>precios-publicidad.js</code>.</p>
+      <p><b>Cupos de rotación:</b> en la columna <b>Cuántos anuncios rotan</b> defines cuántas rentas activas caben en ese mismo espacio (Home derecha: 2, 3, 4…; Estados: 5, 6, 7…; LIBE igual). <b>0</b> = cerrado (nadie más puede rentar ahí).</p>
+      <p>Aplica a <b>todos</b> los banners principales, laterales Estados y laterales LIBE de cada pantalla.</p>
+      <button class="btn btn-mensaje" type="button" onclick="guardarPreciosBannersAdmin()">Guardar cambios</button>
+    </div>
+  `;
+
+  GRUPOS_SLOTS_ADMIN.forEach(grupo => {
+    const ids = slotsPorGrupoAdmin(grupo.id);
+    if (!ids.length) return;
+
+    html += `<div class="item"><h3>${textoSeguro(grupo.titulo)}</h3>`;
+    html += `<div class="admin-precios-grid">`;
+    html += `<div class="admin-precios-row admin-precios-row--head"><span>Espacio</span><span>Cuántos anuncios rotan</span><span>Precio imagen / mes (MXN)</span><span>Activo</span></div>`;
+
+    let tipoActual = "";
+    ids.forEach(slotId => {
+      const slot = slots[slotId] || {};
+      const tipo = etiquetaTipoEspacioAdmin(slot.espacio || "");
+      if (tipo !== tipoActual) {
+        tipoActual = tipo;
+        html += `<div class="admin-precios-subtitulo">${textoSeguro(tipo)}</div>`;
+      }
+      const cap = Number(slot.capacidadMaxima) || 1;
+      const precio = Number(slot.precioMensualImagenBase) || 0;
+      const activo = slot.activo !== false;
+      html += `
+        <div class="admin-precios-row" data-slot-row="${textoSeguro(slotId)}">
+          <span><b>${textoSeguro(slot.nombre || slotId)}</b><small>${textoSeguro(slotId)} · ${textoSeguro(slot.espacio || "")}</small></span>
+          <span><input type="number" min="0" max="12" class="admin-precios-input" data-field="capacidad" data-slot="${textoSeguro(slotId)}" value="${cap}" title="Cupos de renta que rotan en este espacio (0 = cerrado)"></span>
+          <span><input type="number" min="0" step="50" class="admin-precios-input" data-field="precio" data-slot="${textoSeguro(slotId)}" value="${precio}"></span>
+          <span><label><input type="checkbox" data-field="activo" data-slot="${textoSeguro(slotId)}" ${activo ? "checked" : ""}> Sí</label></span>
+        </div>
+      `;
+    });
+
+    html += `</div></div>`;
+  });
+
+  cont.innerHTML = html;
+}
+
+function leerPreciosBannersDesdeFormulario() {
+  const cont = document.getElementById("contenidoModulo");
+  const slots = { ...(configPreciosBannersAdmin?.slots || {}) };
+  if (!cont) return configPreciosBannersAdmin;
+  cont.querySelectorAll("[data-slot-row]").forEach(row => {
+    const slotId = row.getAttribute("data-slot-row");
+    if (!slotId || !slots[slotId]) return;
+    const cap = row.querySelector('[data-field="capacidad"][data-slot="' + slotId + '"]');
+    const precio = row.querySelector('[data-field="precio"][data-slot="' + slotId + '"]');
+    const activo = row.querySelector('[data-field="activo"][data-slot="' + slotId + '"]');
+    slots[slotId] = {
+      ...slots[slotId],
+      capacidadMaxima: Math.min(12, Math.max(0, parseInt(cap?.value || "0", 10))),
+      precioMensualImagenBase: Math.max(0, parseInt(precio?.value || "0", 10)),
+      activo: !!activo?.checked
+    };
+  });
+  return PreciosPublicidad.normalizarConfigPreciosPublicidad({
+    ...configPreciosBannersAdmin,
+    slots,
+    actualizadoEn: new Date().toISOString(),
+    origen: "admin-panel"
+  });
+}
+
+async function guardarPreciosBannersAdmin() {
+  const cont = document.getElementById("contenidoModulo");
+  try {
+    const payload = leerPreciosBannersDesdeFormulario();
+    await db.collection("configuracion_publicidad").doc("precios_banners").set(payload, { merge: true });
+    configPreciosBannersAdmin = payload;
+    await registrarLogAdmin("precios_banners_actualizados", "precios_banners", "Admin actualizó tarifas de banners");
+    alert("Precios de banners guardados.");
+    pintarPreciosBannersAdmin();
+  } catch (e) {
+    alert("No se pudo guardar: " + e.message);
+  }
 }
 </script>
 

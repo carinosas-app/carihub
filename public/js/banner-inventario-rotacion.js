@@ -9,6 +9,10 @@
     home_hero_3:1200,
     home_hero_4:1200,
     home_hero_5:1200,
+    sin_resultados_izquierda:280,
+    sin_resultados_centro:340,
+    sin_resultados_derecha:280,
+    sin_resultados_inferior:220,
     resultados_izquierda:280,
     resultados_centro:340,
     resultados_derecha:280,
@@ -29,6 +33,10 @@
     home_hero_3:"Home — hero imagen 3",
     home_hero_4:"Home — hero imagen 4",
     home_hero_5:"Home — hero imagen 5",
+    sin_resultados_izquierda:"Sin resultados — izquierda (todo el sitio)",
+    sin_resultados_centro:"Sin resultados — centro (todo el sitio)",
+    sin_resultados_derecha:"Sin resultados — derecha (todo el sitio)",
+    sin_resultados_inferior:"Sin resultados — inferior (todo el sitio)",
     resultados_izquierda:"Resultados — izquierda superior",
     resultados_centro:"Resultados — centro superior",
     resultados_derecha:"Resultados — derecha superior",
@@ -49,11 +57,20 @@
     if(slotId==="home_categorias"){
       return "Espacio único en toda la plataforma: 1 banner en elegir categoría";
     }
+    if(/^home_(izquierda|derecha|inferior)$/.test(slotId)){
+      return "Espacio único en home: no depende de la categoría de la búsqueda";
+    }
     if(/^home_hero_\d+$/.test(slotId)){
       return "Espacio exclusivo del hero superior: 1 anuncio activo en esta posición";
     }
-    if(/^home_(izquierda|derecha|inferior)$/.test(slotId)){
-      return "Espacio único en home: no depende de la categoría de la búsqueda";
+    if(/^sin_resultados_/.test(slotId)){
+      return "Cobertura global: rotación entre "+cap+" anuncios en todas las pantallas sin resultados";
+    }
+    if(/_estados$/.test(slotId)){
+      return "Lateral Estados y zonas: rotación entre "+cap+" anuncios activos";
+    }
+    if(/_libe$/.test(slotId)){
+      return "Lateral LIBE: rotación entre "+cap+" anuncios activos";
     }
     if(cap===1)return "Espacio exclusivo: 1 anuncio activo a la vez";
     return "Rotación entre "+cap+" espacios activos en esta zona";

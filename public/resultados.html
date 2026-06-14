@@ -3,1954 +3,763 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Resultados - CariHub</title>
-
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
-
-<style>
-:root{
-  --rosa:#ec2d7a;
-  --rosa2:#ff4f9a;
-  --rosa3:#d83b78;
-  --fondo:#fff1f7;
-  --texto:#252432;
-  --gris:#6b6170;
-  --verde:#25D366;
-  --sombra:0 16px 40px rgba(0,0,0,.14);
-}
-
-*{
-  box-sizing:border-box;
-  -webkit-tap-highlight-color:transparent;
-}
-
-html,body{
-  margin:0;
-  padding:0;
-  min-height:100%;
-}
-
-body{
-  font-family:Arial,sans-serif;
-  background:
-    radial-gradient(circle at left 18%, rgba(236,45,122,.17), transparent 28%),
-    radial-gradient(circle at right 38%, rgba(236,45,122,.12), transparent 30%),
-    linear-gradient(180deg,#fff6fb 0%,#f7edf2 55%,#fff7fb 100%);
-  color:var(--texto);
-}
-
-button{
-  font-family:Arial,sans-serif;
-}
-
-.pagina{
-  max-width:930px;
-  margin:0 auto;
-  padding:14px 12px 42px;
-}
-
-/* BANNERS SUPERIORES - COMPATIBLE SAFARI */
-.top-banners{
-  display:-webkit-box;
-  display:-webkit-flex;
-  display:flex;
-  gap:8px;
-  margin-bottom:18px;
-  align-items:flex-start;
-  width:100%;
-}
-
-.banner-slot{
-  display:block;
-  min-width:0;
-  min-height:94px;
-  height:94px;
-  border-radius:24px;
-  cursor:pointer;
-  overflow:hidden;
-  position:relative;
-  user-select:none;
-  -webkit-user-select:none;
-  text-decoration:none;
-  background:#fff6fb;
-  border:2px solid rgba(255,255,255,.92);
-  box-shadow:
-    0 10px 24px rgba(236,45,122,.22),
-    inset 0 0 0 1px rgba(236,45,122,.08);
-}
-
-.banner-slot--side{
-  width:23%;
-  margin-top:14px;
-  height:82px;
-  min-height:82px;
-}
-
-.banner-slot--center{
-  width:54%;
-  height:94px;
-  min-height:94px;
-  background:#0a0a10;
-  border:3px solid var(--rosa);
-  box-shadow:
-    0 12px 30px rgba(236,45,122,.24),
-    0 0 0 5px rgba(255,255,255,.68);
-  position:relative;
-  z-index:2;
-}
-
-.banner-slot__stage{
-  position:relative;
-  width:100%;
-  height:100%;
-}
-
-.banner-slot__slide{
-  position:absolute;
-  inset:0;
-  opacity:0;
-  visibility:hidden;
-  pointer-events:none;
-  transition:opacity .55s ease,visibility .55s ease;
-  z-index:0;
-}
-
-.banner-slot__slide.is-active{
-  opacity:1;
-  visibility:visible;
-  pointer-events:auto;
-  z-index:1;
-}
-
-/* GIF/video rentados: llenan el marco (recorte, sin bandas vacías) */
-.banner-slot__media{
-  width:100%;
-  height:100%;
-  display:block;
-  object-fit:cover;
-  object-position:center;
-}
-
-.banner-slot--center .banner-slot__media{
-  background:#0a0a10;
-}
-
-/* Banners HTML — llenan el recuadro exacto (centro: sin GIF, animación CSS) */
-.res-ad{
-  position:relative;
-  width:100%;
-  height:100%;
-  box-sizing:border-box;
-  overflow:hidden;
-  color:#fff;
-}
-
-.res-ad__bg{
-  position:absolute;
-  inset:0;
-  pointer-events:none;
-}
-
-.res-ad__grid{
-  position:relative;
-  z-index:1;
-  display:grid;
-  grid-template-columns:minmax(0,1.15fr) minmax(0,.75fr) minmax(0,.95fr);
-  width:100%;
-  height:100%;
-  align-items:center;
-  gap:4px;
-  padding:5px 6px;
-  box-sizing:border-box;
-}
-
-.res-ad__col{
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-  min-width:0;
-  gap:2px;
-}
-
-.res-ad__col--grow{min-width:0}
-
-.res-ad__title{
-  margin:0;
-  font-size:clamp(8px,2.1vw,13px);
-  font-weight:900;
-  line-height:1;
-  letter-spacing:.2px;
-  text-transform:uppercase;
-}
-
-.res-ad__title span{
-  display:block;
-  background:linear-gradient(90deg,#39ff14,#00e5ff);
-  -webkit-background-clip:text;
-  background-clip:text;
-  color:transparent;
-  font-style:italic;
-}
-
-.res-ad__title--pink span{
-  background:linear-gradient(90deg,#ff4f9a,#ff8ec4);
-  -webkit-background-clip:text;
-  background-clip:text;
-  color:transparent;
-}
-
-.res-ad__title--glow{
-  font-size:clamp(9px,2.4vw,14px);
-  text-shadow:0 0 8px rgba(255,230,0,.55);
-}
-
-.res-ad__sub{
-  margin:0;
-  font-size:clamp(6px,1.35vw,8px);
-  font-weight:700;
-  line-height:1.15;
-  opacity:.92;
-}
-
-.res-ad__pill{
-  display:inline-flex;
-  align-items:center;
-  gap:3px;
-  padding:2px 5px;
-  border-radius:999px;
-  font-size:clamp(5px,1.1vw,7px);
-  font-weight:800;
-  line-height:1.1;
-  white-space:nowrap;
-}
-
-.res-ad__cta{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  gap:3px;
-  padding:3px 6px;
-  border-radius:999px;
-  font-size:clamp(6px,1.2vw,8px);
-  font-weight:900;
-  line-height:1;
-  white-space:nowrap;
-  text-transform:uppercase;
-}
-
-.res-ad__stat{
-  font-size:clamp(11px,2.8vw,16px);
-  font-weight:900;
-  line-height:1;
-  color:#39ff14;
-  text-shadow:0 0 10px rgba(57,255,20,.45);
-}
-
-.res-ad__stat--pink{
-  color:#ff4f9a;
-  text-shadow:0 0 10px rgba(255,79,154,.5);
-}
-
-.res-ad__icon{
-  flex-shrink:0;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:clamp(18px,4.5vw,28px);
-  line-height:1;
-  filter:drop-shadow(0 0 6px rgba(255,79,154,.45));
-}
-
-.res-ad__bars{
-  display:flex;
-  align-items:flex-end;
-  gap:2px;
-  height:22px;
-}
-
-.res-ad__bars i{
-  display:block;
-  width:4px;
-  border-radius:2px 2px 0 0;
-  background:linear-gradient(180deg,#39ff14,#00e5ff);
-  box-shadow:0 0 6px rgba(57,255,20,.35);
-}
-
-.res-ad--rocket .res-ad__bg{
-  background:
-    radial-gradient(circle at 72% 38%,rgba(57,255,20,.18),transparent 42%),
-    radial-gradient(circle at 28% 62%,rgba(0,229,255,.14),transparent 38%),
-    linear-gradient(135deg,#040408,#0a1220 55%,#050508);
-}
-
-.res-ad--rocket .res-ad__bg::after{
-  content:"";
-  position:absolute;
-  inset:0;
-  background:repeating-linear-gradient(90deg,rgba(57,255,20,.03) 0 2px,transparent 2px 8px);
-  opacity:.6;
-}
-
-.res-ad--rocket .res-ad__pill{
-  border:1px solid rgba(57,255,20,.45);
-  background:rgba(0,0,0,.35);
-}
-
-.res-ad--rocket .res-ad__cta{
-  background:linear-gradient(90deg,#7b2ff7,#ff4f9a 70%,#ff8a00);
-  box-shadow:0 0 10px rgba(255,79,154,.35);
-  animation:resAdPulse 2.4s ease-in-out infinite;
-}
-
-.res-ad--rocket .res-ad__icon{
-  animation:resAdFloat 2.8s ease-in-out infinite;
-}
-
-.res-ad--rocket .res-ad__stat{
-  animation:resAdGlowGreen 2.2s ease-in-out infinite;
-}
-
-.res-ad--neon .res-ad__bg{
-  background:
-    radial-gradient(circle at 50% 50%,rgba(255,0,128,.2),transparent 55%),
-    radial-gradient(ellipse at 80% 20%,rgba(255,79,154,.15),transparent 50%),
-    linear-gradient(135deg,#080008,#120010 50%,#080008);
-}
-
-.res-ad--neon .res-ad__bg::after{
-  content:"";
-  position:absolute;
-  inset:0;
-  background:radial-gradient(circle at 45% 50%,rgba(255,0,127,.12),transparent 55%);
-}
-
-.res-ad--neon .res-ad__pill{
-  border:1px solid rgba(255,79,154,.5);
-  background:rgba(255,79,154,.12);
-}
-
-.res-ad--neon .res-ad__tag{
-  display:inline-block;
-  background:#fff;
-  color:#111;
-  padding:2px 5px;
-  border-radius:3px;
-  font-size:clamp(6px,1.2vw,8px);
-  font-weight:900;
-  transform:skewX(-8deg);
-}
-
-.res-ad--neon .res-ad__cta{
-  background:linear-gradient(90deg,#ff007f,#ff4f9a);
-  box-shadow:0 0 12px rgba(255,0,127,.45);
-  animation:resAdPulse 2.4s ease-in-out infinite;
-}
-
-.res-ad--neon .res-ad__icon{
-  animation:resAdFloat 2.6s ease-in-out infinite;
-}
-
-.res-ad--neon .res-ad__stat{
-  animation:resAdGlowPink 2s ease-in-out infinite;
-}
-
-.res-ad--purple .res-ad__bg{
-  background:
-    radial-gradient(circle at 78% 30%,rgba(255,79,154,.28),transparent 45%),
-    radial-gradient(circle at 15% 80%,rgba(192,38,211,.15),transparent 40%),
-    linear-gradient(135deg,#1a0530,#3d0f55 55%,#1a0530);
-}
-
-.res-ad--purple .res-ad__bg::after{
-  content:"";
-  position:absolute;
-  inset:0;
-  background:linear-gradient(90deg,rgba(255,79,154,.06),transparent 40%,rgba(255,79,154,.08));
-}
-
-.res-ad--purple .res-ad__pill{
-  border:1px solid rgba(255,143,200,.45);
-  background:rgba(0,0,0,.28);
-}
-
-.res-ad--purple .res-ad__cta{
-  background:linear-gradient(90deg,#ff4f9a,#c026d3);
-  box-shadow:0 0 10px rgba(255,79,154,.4);
-  animation:resAdPulse 2.4s ease-in-out infinite;
-}
-
-.res-ad--purple .res-ad__chart i{
-  animation:resAdBarGrow 2.5s ease-in-out infinite;
-}
-
-.res-ad--purple .res-ad__stat{
-  animation:resAdGlowPink 2.1s ease-in-out infinite;
-}
-
-@keyframes resAdPulse{
-  0%,100%{transform:scale(1);filter:brightness(1)}
-  50%{transform:scale(1.03);filter:brightness(1.08)}
-}
-
-@keyframes resAdFloat{
-  0%,100%{transform:translateY(0)}
-  50%{transform:translateY(-2px)}
-}
-
-@keyframes resAdGlowGreen{
-  0%,100%{text-shadow:0 0 10px rgba(57,255,20,.45)}
-  50%{text-shadow:0 0 16px rgba(57,255,20,.75)}
-}
-
-@keyframes resAdGlowPink{
-  0%,100%{text-shadow:0 0 10px rgba(255,79,154,.5)}
-  50%{text-shadow:0 0 18px rgba(255,79,154,.85)}
-}
-
-@keyframes resAdBarGrow{
-  0%,100%{opacity:.85}
-  50%{opacity:1;transform:scaleY(1.06);transform-origin:bottom}
-}
-
-.res-ad--purple .res-ad__chart{
-  display:flex;
-  align-items:flex-end;
-  gap:2px;
-  height:20px;
-  padding:2px 4px;
-  border:1px solid rgba(255,143,200,.35);
-  border-radius:6px;
-  background:rgba(0,0,0,.25);
-}
-
-.res-ad--purple .res-ad__chart i{
-  display:block;
-  width:3px;
-  border-radius:2px 2px 0 0;
-  background:linear-gradient(180deg,#ff8ec4,#ff4f9a);
-}
-
-.res-ad--side{
-  flex-direction:column;
-  justify-content:center;
-  align-items:center;
-  text-align:center;
-  gap:3px;
-  padding:6px 4px;
-  background:linear-gradient(180deg,#ff5ca3,#ec2d7a);
-  box-shadow:inset 0 0 18px rgba(255,255,255,.18);
-}
-
-.res-ad--side-alt{
-  background:linear-gradient(180deg,#ffffff,#ffe8f3);
-  color:#d53378;
-}
-
-.res-ad--side-dark{
-  background:linear-gradient(180deg,#1a0530,#3d0f55);
-  color:#fff;
-}
-
-.res-ad--side .res-ad__ico{
-  font-size:clamp(14px,3.5vw,20px);
-  line-height:1;
-}
-
-.res-ad--side h3{
-  margin:0;
-  font-size:clamp(7px,1.6vw,10px);
-  font-weight:900;
-  letter-spacing:.4px;
-  line-height:1;
-}
-
-.res-ad--side p{
-  margin:0;
-  font-size:clamp(5px,1.1vw,7px);
-  font-weight:700;
-  line-height:1.15;
-  opacity:.92;
-}
-
-/* Banners laterales — pseudo-video HTML/CSS 3D */
-.side-ad{
-  position:relative;
-  width:100%;
-  height:100%;
-  overflow:hidden;
-  color:#fff;
-  perspective:320px;
-}
-
-.side-ad__bg{
-  position:absolute;
-  inset:0;
-  background:linear-gradient(135deg,#1a0530 0%,#ec2d7a 45%,#ff8ec4 100%);
-  background-size:200% 200%;
-  animation:sideAdBgShift 5s ease-in-out infinite;
-}
-
-.side-ad__bg--alt{
-  background:linear-gradient(135deg,#0a1628 0%,#3d0f55 40%,#ec2d7a 100%);
-  background-size:200% 200%;
-}
-
-.side-ad__flash{
-  position:absolute;
-  inset:-40%;
-  background:linear-gradient(105deg,transparent 38%,rgba(255,255,255,.55) 50%,transparent 62%);
-  transform:translateX(-120%) rotate(12deg);
-  animation:sideAdFlash 2.8s ease-in-out infinite;
-  pointer-events:none;
-  z-index:3;
-}
-
-.side-ad__photo{
-  position:absolute;
-  right:-4px;
-  bottom:0;
-  width:46%;
-  height:100%;
-  object-fit:cover;
-  object-position:center top;
-  mask-image:linear-gradient(90deg,transparent 0%,#000 28%);
-  -webkit-mask-image:linear-gradient(90deg,transparent 0%,#000 28%);
-  transform:rotateY(-8deg) scale(1.04);
-  transform-origin:right center;
-  animation:sideAdPhoto3d 4s ease-in-out infinite;
-  z-index:1;
-}
-
-.side-ad__panel{
-  position:relative;
-  z-index:2;
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-  gap:2px;
-  height:100%;
-  padding:5px 6px;
-  box-sizing:border-box;
-  max-width:58%;
-}
-
-.side-ad__tag{
-  display:inline-block;
-  align-self:flex-start;
-  padding:1px 5px;
-  border-radius:999px;
-  font-size:clamp(4px,1vw,6px);
-  font-weight:800;
-  letter-spacing:.3px;
-  background:rgba(255,255,255,.18);
-  border:1px solid rgba(255,255,255,.35);
-  text-transform:uppercase;
-}
-
-.side-ad__phrase{
-  margin:0;
-  font-size:clamp(6px,1.5vw,9px);
-  font-weight:900;
-  line-height:1.1;
-  text-transform:uppercase;
-  letter-spacing:.2px;
-  text-shadow:0 0 10px rgba(255,143,200,.6);
-}
-
-.side-ad__phrase span{
-  display:block;
-  color:#ffe0f0;
-  font-size:.92em;
-}
-
-.side-ad__pct{
-  font-size:clamp(11px,2.8vw,16px);
-  font-weight:900;
-  line-height:1;
-  color:#fff;
-  text-shadow:0 0 14px rgba(255,79,154,.9);
-  animation:sideAdPctPulse 1.6s ease-in-out infinite;
-}
-
-.side-ad__pct small{
-  font-size:.55em;
-  opacity:.85;
-}
-
-.side-ad__bars{
-  display:flex;
-  align-items:flex-end;
-  gap:2px;
-  height:14px;
-  margin-top:2px;
-}
-
-.side-ad__bars i{
-  display:block;
-  width:3px;
-  border-radius:2px 2px 0 0;
-  background:linear-gradient(180deg,#ff8ec4,#fff);
-  animation:sideAdBarBounce 1.4s ease-in-out infinite;
-}
-
-.side-ad__bars i:nth-child(1){height:35%;animation-delay:0s}
-.side-ad__bars i:nth-child(2){height:55%;animation-delay:.15s}
-.side-ad__bars i:nth-child(3){height:75%;animation-delay:.3s}
-.side-ad__bars i:nth-child(4){height:100%;animation-delay:.45s}
-
-.side-ad__rotor{
-  position:relative;
-  height:10px;
-  overflow:hidden;
-}
-
-.side-ad__rotor p{
-  position:absolute;
-  inset:0;
-  margin:0;
-  font-size:clamp(4.5px,1.1vw,6.5px);
-  font-weight:700;
-  opacity:0;
-  transform:translateY(6px);
-  animation:sideAdRotor 8s ease-in-out infinite;
-}
-
-.side-ad__rotor p:nth-child(1){animation-delay:0s}
-.side-ad__rotor p:nth-child(2){animation-delay:2.6s}
-.side-ad__rotor p:nth-child(3){animation-delay:5.2s}
-
-.side-ad--cinema-b .side-ad__photo{
-  right:auto;
-  left:-4px;
-  mask-image:linear-gradient(270deg,transparent 0%,#000 28%);
-  -webkit-mask-image:linear-gradient(270deg,transparent 0%,#000 28%);
-  transform:rotateY(8deg) scale(1.04);
-  transform-origin:left center;
-}
-
-.side-ad--cinema-b .side-ad__panel{
-  margin-left:auto;
-  align-items:flex-end;
-  text-align:right;
-  max-width:58%;
-}
-
-/* Imagen lateral con overlay */
-.side-ad--img .side-ad__img{
-  width:100%;
-  height:100%;
-  object-fit:cover;
-  object-position:center;
-  display:block;
-}
-
-.side-ad__img-overlay{
-  position:absolute;
-  inset:0;
-  display:flex;
-  flex-direction:column;
-  justify-content:flex-end;
-  padding:5px 6px;
-  background:linear-gradient(180deg,transparent 20%,rgba(26,5,48,.82) 100%);
-  box-sizing:border-box;
-}
-
-.side-ad__img-overlay span{
-  font-size:clamp(6px,1.4vw,8px);
-  font-weight:900;
-  letter-spacing:.3px;
-  text-transform:uppercase;
-  color:#fff;
-  text-shadow:0 0 8px rgba(236,45,122,.8);
-}
-
-.side-ad__img-overlay em{
-  font-style:normal;
-  font-size:clamp(4.5px,1vw,6px);
-  font-weight:700;
-  color:#ff8ec4;
-  margin-top:1px;
-}
-
-/* Video largo — 2 espacios marcados (derecha) */
-.side-ad--duo .side-ad__bg{
-  background:linear-gradient(180deg,#0d0d18,#1a0530 50%,#3d0f55);
-  animation:none;
-}
-
-.side-ad__duo-grid{
-  position:relative;
-  z-index:2;
-  display:grid;
-  grid-template-rows:1fr 1fr;
-  gap:3px;
-  height:100%;
-  padding:4px 5px;
-  box-sizing:border-box;
-}
-
-.side-ad__slot{
-  position:relative;
-  border-radius:8px;
-  overflow:hidden;
-  border:1.5px dashed rgba(255,143,200,.65);
-  background:rgba(0,0,0,.35);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  animation:sideAdSlotGlow 2.2s ease-in-out infinite;
-}
-
-.side-ad__slot--a{animation-delay:0s}
-.side-ad__slot--b{animation-delay:1.1s}
-
-.side-ad__slot-inner{
-  position:absolute;
-  inset:0;
-  background:linear-gradient(120deg,rgba(236,45,122,.25),rgba(255,143,200,.12));
-  animation:sideAdSlotScan 3s linear infinite;
-}
-
-.side-ad__slot-label{
-  position:relative;
-  z-index:1;
-  font-size:clamp(4.5px,1.1vw,6.5px);
-  font-weight:900;
-  letter-spacing:.4px;
-  text-transform:uppercase;
-  padding:1px 5px;
-  border-radius:4px;
-  background:rgba(236,45,122,.75);
-  box-shadow:0 0 10px rgba(236,45,122,.5);
-}
-
-.side-ad__duo-title{
-  position:absolute;
-  top:50%;
-  left:50%;
-  transform:translate(-50%,-50%);
-  z-index:4;
-  margin:0;
-  padding:2px 6px;
-  border-radius:999px;
-  font-size:clamp(4px,1vw,5.5px);
-  font-weight:900;
-  letter-spacing:.3px;
-  text-transform:uppercase;
-  background:rgba(10,10,16,.88);
-  border:1px solid var(--rosa);
-  color:#ff8ec4;
-  white-space:nowrap;
-  box-shadow:0 0 12px rgba(236,45,122,.45);
-}
-
-@keyframes sideAdBgShift{
-  0%,100%{background-position:0% 50%}
-  50%{background-position:100% 50%}
-}
-
-@keyframes sideAdFlash{
-  0%,55%,100%{transform:translateX(-120%) rotate(12deg);opacity:0}
-  65%{opacity:1}
-  85%{transform:translateX(120%) rotate(12deg);opacity:0}
-}
-
-@keyframes sideAdPhoto3d{
-  0%,100%{transform:rotateY(-8deg) scale(1.04)}
-  50%{transform:rotateY(-2deg) scale(1.07)}
-}
-
-@keyframes sideAdPctPulse{
-  0%,100%{transform:scale(1)}
-  50%{transform:scale(1.08)}
-}
-
-@keyframes sideAdBarBounce{
-  0%,100%{opacity:.8;transform:scaleY(.92)}
-  50%{opacity:1;transform:scaleY(1.05)}
-}
-
-@keyframes sideAdRotor{
-  0%,8%,30%,100%{opacity:0;transform:translateY(6px)}
-  12%,26%{opacity:1;transform:translateY(0)}
-}
-
-@keyframes sideAdSlotGlow{
-  0%,100%{border-color:rgba(255,143,200,.45);box-shadow:inset 0 0 6px rgba(236,45,122,.15)}
-  50%{border-color:rgba(255,143,200,.95);box-shadow:inset 0 0 14px rgba(236,45,122,.45)}
-}
-
-@keyframes sideAdSlotScan{
-  0%{transform:translateX(-100%)}
-  100%{transform:translateX(100%)}
-}
-
-.banner-slot__dots{
-  position:absolute;
-  left:0;
-  right:0;
-  bottom:5px;
-  z-index:3;
-  display:flex;
-  justify-content:center;
-  gap:4px;
-  pointer-events:none;
-}
-
-.banner-slot__dot{
-  width:4px;
-  height:4px;
-  border-radius:50%;
-  background:rgba(255,255,255,.45);
-  box-shadow:0 0 0 1px rgba(0,0,0,.22);
-  transition:transform .25s ease,background .25s ease;
-}
-
-.banner-slot__dot.is-on{
-  background:var(--rosa);
-  transform:scale(1.35);
-}
-
-/* RESUMEN */
-.resumen-busqueda{
-  background:rgba(255,255,255,.92);
-  backdrop-filter:blur(10px);
-  -webkit-backdrop-filter:blur(10px);
-  padding:7px 8px 6px;
-  border-radius:18px;
-  margin-bottom:14px;
-  box-shadow:0 6px 18px rgba(236,45,122,.10);
-  border:2px solid rgba(255,182,212,.55);
-  overflow:visible;
-}
-
-.resumen-busqueda h1{
-  margin:0 0 2px;
-  color:var(--rosa);
-  font-size:clamp(14px,3.6vw,20px);
-  line-height:1.08;
-  font-weight:900;
-  text-align:center;
-}
-
-.resumen-busqueda__sub{
-  margin:0 0 3px;
-  color:#8a3d62;
-  font-size:clamp(8px,2vw,11px);
-  line-height:1.15;
-  font-weight:700;
-  text-align:center;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-}
-
-.resumen-busqueda p{
-  margin:0 0 5px;
-  color:var(--gris);
-  font-size:clamp(9px,2.2vw,12px);
-  line-height:1.15;
-  font-weight:700;
-  text-align:center;
-}
-
-.chips-busqueda{
-  display:flex;
-  flex-wrap:nowrap;
-  gap:4px;
-  width:100%;
-}
-
-.chip{
-  flex:1 1 0;
-  min-width:0;
-  background:linear-gradient(180deg,#fff,#fff7fb);
-  color:#9f174f;
-  border:1.5px solid #ffb8d4;
-  padding:5px 3px;
-  border-radius:10px;
-  font-size:clamp(7px,1.85vw,10px);
-  font-weight:900;
-  text-align:center;
-  line-height:1.1;
-  box-shadow:0 1px 5px rgba(236,45,122,.07);
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-}
-
-/* CAJAS */
-.estado-box{
-  background:white;
-  padding:18px;
-  border-radius:24px;
-  margin-bottom:18px;
-  box-shadow:
-    0 8px 24px rgba(0,0,0,.10),
-    -8px 0 22px rgba(236,45,122,.06),
-    8px 0 22px rgba(236,45,122,.06);
-}
-
-.estado-box h2,
-.estado-box h3{
-  color:var(--rosa);
-  margin:0 0 8px;
-}
-
-.estado-box p{
-  margin:8px 0 0;
-  color:var(--gris);
-  font-size:16px;
-  line-height:1.35;
-}
-
-/* LOADER */
-.loader-card{
-  background:white;
-  padding:18px;
-  border-radius:28px;
-  box-shadow:var(--sombra);
-  overflow:hidden;
-}
-
-.loader-line,
-.loader-img{
-  background:linear-gradient(90deg,#f3dbe6,#fff,#f3dbe6);
-  background-size:220% 100%;
-  animation:skeleton 1.4s infinite;
-  border-radius:16px;
-}
-
-.loader-img{
-  height:270px;
-  margin-bottom:16px;
-}
-
-.loader-line{
-  height:18px;
-  margin:10px 0;
-}
-
-.loader-line.corta{width:55%;}
-.loader-line.media{width:78%;}
-
-@keyframes skeleton{
-  0%{background-position:200% 0;}
-  100%{background-position:-200% 0;}
-}
-
-/* CARDS */
-.card{
-  position:relative;
-  background:white;
-  border-radius:34px;
-  padding:0;
-  margin-bottom:30px;
-  box-shadow:
-    0 18px 44px rgba(0,0,0,.16),
-    -12px 0 28px rgba(236,45,122,.08),
-    12px 0 28px rgba(236,45,122,.08);
-  overflow:hidden;
-}
-
-.card-layout{
-  display:flex;
-  align-items:stretch;
-  min-height:300px;
-}
-
-.card-foto-wrap{
-  position:relative;
-  flex:0 0 44%;
-  width:44%;
-  min-width:0;
-  background:#ffe4ef;
-}
-
-.card img.foto-principal{
-  width:100%;
-  height:100%;
-  min-height:300px;
-  object-fit:cover;
-  display:block;
-}
-
-.card-content{
-  flex:1;
-  min-width:0;
-  display:flex;
-  flex-direction:column;
-  justify-content:flex-start;
-  padding:10px 16px 12px;
-  gap:10px;
-}
-
-.card-head{
-  display:flex;
-  flex-direction:column;
-  gap:4px;
-  min-width:0;
-  width:100%;
-}
-
-.card-title-row{
-  display:flex;
-  align-items:center;
-  flex-wrap:wrap;
-  gap:5px 6px;
-  min-width:0;
-  line-height:1;
-}
-
-.card-nombre{
-  margin:0;
-  font-size:clamp(18px,4.5vw,28px);
-  line-height:1;
-  font-weight:900;
-  color:#b51558;
-  flex:0 1 auto;
-  min-width:0;
-}
-
-.card-edad{
-  font-size:clamp(13px,3.2vw,18px);
-  font-weight:900;
-  color:#4a3f48;
-  flex:0 0 auto;
-}
-
-.card-verificada-badge{
-  display:inline-flex;
-  align-items:center;
-  flex:0 0 auto;
-  padding:3px 7px;
-  border-radius:999px;
-  font-size:clamp(8px,2vw,10px);
-  font-weight:900;
-  letter-spacing:.2px;
-  color:#fff;
-  background:linear-gradient(90deg,#ec2d7a,#ff4f9a);
-  box-shadow:0 2px 8px rgba(236,45,122,.28);
-  white-space:nowrap;
-}
-
-.card-seo{
-  margin:0;
-  font-size:clamp(9px,2.2vw,12px);
-  font-weight:800;
-  line-height:1.25;
-  color:#6b6170;
-}
-
-.card-info-list{
-  display:flex;
-  flex-direction:column;
-  gap:8px;
-}
-
-.info-item{
-  background:#fff3f8;
-  border:1px solid #ffd3e4;
-  padding:10px 12px;
-  border-radius:16px;
-}
-
-.info-item--precio{
-  background:linear-gradient(90deg,#fff0f7,#ffe8f3);
-  border-color:#f5a8c8;
-}
-
-.card-foot{
-  padding:0 14px 14px;
-}
-
-.card-foot .descripcion-card{
-  margin:0 0 10px;
-}
-
-.card-foot .card-actions{
-  justify-content:flex-end;
-  margin-top:0;
-  padding-top:0;
-}
-
-.info-item span{
-  display:block;
-  color:#9f174f;
-  font-size:11px;
-  font-weight:900;
-  margin-bottom:4px;
-  text-transform:uppercase;
-}
-
-.info-item b{
-  display:block;
-  color:#231c25;
-  font-size:15px;
-  line-height:1.2;
-}
-
-.descripcion-card{
-  background:#fff;
-  border-left:5px solid var(--rosa);
-  padding:10px 12px;
-  border-radius:14px;
-  color:#4a3f48;
-  font-size:14px;
-  line-height:1.35;
-  flex:1;
-}
-
-.card-actions{
-  display:flex;
-  justify-content:flex-end;
-  margin-top:auto;
-  padding-top:4px;
-}
-
-.btn-ver{
-  display:inline-block;
-  width:auto;
-  background:linear-gradient(90deg,#d94481,#ec2d7a);
-  color:white;
-  text-align:center;
-  padding:12px 22px;
-  border-radius:20px;
-  text-decoration:none;
-  font-size:16px;
-  font-weight:900;
-  box-shadow:0 8px 20px rgba(217,68,129,.27);
-  border:none;
-  cursor:pointer;
-  white-space:nowrap;
-}
-
-.btn-ver:active{
-  transform:scale(.985);
-}
-
-.acciones-finales{
-  background:white;
-  border-radius:24px;
-  padding:16px;
-  box-shadow:0 10px 26px rgba(0,0,0,.12);
-  margin-top:28px;
-  display:flex;
-  gap:12px;
-}
-
-.acciones-finales button{
-  flex:1;
-  border:none;
-  padding:17px;
-  border-radius:16px;
-  font-size:18px;
-  font-weight:900;
-  cursor:pointer;
-}
-
-.btn-atras{
-  background:#777;
-  color:white;
-}
-
-.btn-registro{
-  background:var(--rosa);
-  color:white;
-}
-
-/* MODAL */
-.modal-anuncio{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.58);
-  display:none;
-  align-items:center;
-  justify-content:center;
-  z-index:99999;
-  padding:18px;
-}
-
-.modal-anuncio.activo{
-  display:flex;
-}
-
-.modal-card{
-  width:100%;
-  max-width:460px;
-  background:white;
-  border-radius:28px;
-  overflow:hidden;
-  box-shadow:0 18px 45px rgba(0,0,0,.35);
-}
-
-.modal-header{
-  background:linear-gradient(90deg,#ec2d7a,#ff4f9a);
-  color:white;
-  padding:18px;
-  text-align:center;
-}
-
-.modal-header h2{
-  margin:0;
-  font-size:25px;
-}
-
-.modal-body{
-  padding:18px;
-}
-
-.modal-body p{
-  margin:10px 0;
-  font-size:16px;
-  line-height:1.35;
-}
-
-.modal-botones{
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-  padding:0 18px 18px;
-}
-
-.modal-botones a,
-.modal-botones button{
-  display:block;
-  width:100%;
-  border:none;
-  border-radius:16px;
-  padding:15px;
-  text-align:center;
-  font-weight:900;
-  font-size:16px;
-  text-decoration:none;
-  cursor:pointer;
-}
-
-.btn-wa{
-  background:#25D366;
-  color:white;
-}
-
-.btn-cerrar{
-  background:#777;
-  color:white;
-}
-
-@media(max-width:600px){
-  .pagina{
-    padding:10px 10px 32px;
-  }
-
-  .top-banners{
-    gap:6px;
-    margin-bottom:16px;
-  }
-
-  .banner-slot{
-    border-radius:19px;
-  }
-
-  .banner-slot--side{
-    margin-top:10px;
-    min-height:74px;
-    height:74px;
-  }
-
-  .banner-slot--center{
-    min-height:84px;
-    height:84px;
-  }
-
-  .res-ad{padding:4px 5px;gap:4px}
-  .res-ad__bars{height:18px}
-  .res-ad--purple .res-ad__chart{height:16px}
-
-  .resumen-busqueda{
-    padding:6px 6px 5px;
-  }
-
-  .resumen-busqueda h1{
-    font-size:13px;
-    margin-bottom:2px;
-  }
-
-  .resumen-busqueda__sub{
-    font-size:7.5px;
-    margin-bottom:2px;
-  }
-
-  .resumen-busqueda p{
-    font-size:9px;
-    margin-bottom:4px;
-  }
-
-  .chips-busqueda{
-    flex-wrap:nowrap;
-    gap:3px;
-  }
-
-  .chip{
-    flex:1 1 0;
-    min-width:0;
-    font-size:6.5px;
-    padding:3px 1px;
-    border-radius:7px;
-    letter-spacing:-0.2px;
-  }
-
-  .card{
-    border-radius:30px;
-    margin-bottom:26px;
-  }
-
-  .card-layout{
-    flex-direction:row;
-    align-items:stretch;
-    min-height:228px;
-    max-height:248px;
-  }
-
-  .card-foto-wrap{
-    flex:0 0 50%;
-    width:50%;
-    min-height:228px;
-    max-height:248px;
-  }
-
-  .card img.foto-principal{
-    min-height:228px;
-    height:100%;
-    max-height:248px;
-    object-position:center left;
-  }
-
-  .card-content{
-    flex:0 0 50%;
-    width:50%;
-    padding:0 6px 8px 4px;
-    gap:5px;
-    justify-content:flex-start;
-    align-items:flex-start;
-  }
-
-  .card-head{
-    gap:3px;
-    padding-top:0;
-  }
-
-  .card-title-row{
-    gap:4px 5px;
-  }
-
-  .card-nombre{
-    font-size:clamp(14px,3.8vw,18px);
-  }
-
-  .card-edad{
-    font-size:clamp(12px,3.2vw,15px);
-  }
-
-  .card-verificada-badge{
-    font-size:7px;
-    padding:2px 6px;
-  }
-
-  .card-seo{
-    font-size:clamp(6.5px,1.75vw,8px);
-    line-height:1.2;
-  }
-
-  .card-info-list{
-    gap:4px;
-  }
-
-  .info-item{
-    padding:5px 7px;
-    border-radius:10px;
-  }
-
-  .info-item span{
-    font-size:7px;
-    margin-bottom:2px;
-  }
-
-  .info-item b{
-    font-size:11px;
-  }
-
-  .card-foot{
-    padding:0 10px 12px;
-  }
-
-  .descripcion-card{
-    font-size:12px;
-    padding:8px 10px;
-  }
-
-  .btn-ver{
-    font-size:12px;
-    padding:9px 14px;
-    border-radius:16px;
-  }
-
-  .acciones-finales{
-    flex-direction:column;
-  }
-}
-</style>
+<title>Resultados - Cariñosas</title>
+<link rel="stylesheet" href="fonts/fonts.css">
+<link rel="stylesheet" href="css/carihub-premium-theme.css">
+<link rel="stylesheet" href="css/carihub-pink-sheen.css">
+<link rel="stylesheet" href="css/carihub-nav-quick.css">
+<link rel="stylesheet" href="css/resultados.css">
 </head>
+<body data-tema="adult">
 
-<body>
-
-<div class="pagina">
-
-  <div id="bannersSuperioresCariHub" class="top-banners">
-
-    <a class="banner-slot banner-slot--side" href="registro-banner.html" aria-label="Destacado del estado">
-      <div class="banner-slot__stage" data-res-ad-stage="0">
-        <div class="banner-slot__dots" aria-hidden="true">
-          <span class="banner-slot__dot is-on" data-res-ad-dot="0"></span>
-          <span class="banner-slot__dot" data-res-ad-dot="1"></span>
-          <span class="banner-slot__dot" data-res-ad-dot="2"></span>
-        </div>
-        <div class="banner-slot__slide is-active" data-res-ad-slide="0" data-res-ad-type="video" aria-hidden="false">
-          <div class="side-ad side-ad--cinema">
-            <div class="side-ad__bg" aria-hidden="true"></div>
-            <div class="side-ad__flash" aria-hidden="true"></div>
-            <img class="side-ad__photo" src="img/home/promo-perfil.jpg" alt="">
-            <div class="side-ad__panel">
-              <span class="side-ad__tag">Publicidad</span>
-              <p class="side-ad__phrase">Haz crecer<span>tu negocio</span></p>
-              <span class="side-ad__pct">+210<small>%</small></span>
-              <div class="side-ad__bars" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
-            </div>
-          </div>
-        </div>
-        <div class="banner-slot__slide" data-res-ad-slide="1" data-res-ad-type="video" aria-hidden="true">
-          <div class="side-ad side-ad--cinema side-ad--cinema-b">
-            <div class="side-ad__bg side-ad__bg--alt" aria-hidden="true"></div>
-            <div class="side-ad__flash" aria-hidden="true"></div>
-            <img class="side-ad__photo" src="img/home/motel-spa-model.jpg" alt="">
-            <div class="side-ad__panel">
-              <span class="side-ad__tag">Diagnóstico</span>
-              <p class="side-ad__phrase">Anúnciate<span>aquí</span></p>
-              <span class="side-ad__pct">+340<small>%</small></span>
-              <div class="side-ad__rotor" aria-hidden="true">
-                <p>Más clientes cada día</p>
-                <p>Visibilidad en tu zona</p>
-                <p>Resultados medibles</p>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="banner-slot__slide" data-res-ad-slide="2" data-res-ad-type="image" aria-hidden="true">
-          <div class="side-ad side-ad--img">
-            <img class="side-ad__img" src="img/home/promo-destaca.jpg" alt="Destaca tu perfil">
-            <div class="side-ad__img-overlay">
-              <span>Anúnciate aquí</span>
-              <em>Haz crecer tu negocio</em>
-            </div>
-          </div>
-        </div>
-      </div>
-    </a>
-
-    <a class="banner-slot banner-slot--center" href="registro-banner.html" aria-label="Publicidad CariHub">
-      <div class="banner-slot__stage" data-res-ad-stage="1">
-        <div class="banner-slot__dots" aria-hidden="true">
-          <span class="banner-slot__dot is-on" data-res-ad-dot="0"></span>
-          <span class="banner-slot__dot" data-res-ad-dot="1"></span>
-          <span class="banner-slot__dot" data-res-ad-dot="2"></span>
-        </div>
-        <div class="banner-slot__slide is-active" data-res-ad-slide="0" aria-hidden="false">
-          <div class="res-ad res-ad--rocket">
-            <div class="res-ad__bg" aria-hidden="true"></div>
-            <div class="res-ad__grid">
-              <div class="res-ad__col res-ad__col--grow">
-                <p class="res-ad__title">HAZ CRECER <span>TU NEGOCIO</span></p>
-                <p class="res-ad__sub res-ad__title--glow">&gt;&gt;&gt; ANUNCIA AQUÍ</p>
-                <span class="res-ad__pill">📢 Más clientes y ventas</span>
-              </div>
-              <div class="res-ad__col" style="align-items:center">
-                <div class="res-ad__icon">🚀</div>
-                <div class="res-ad__bars" aria-hidden="true"><i style="height:35%"></i><i style="height:55%"></i><i style="height:75%"></i><i style="height:100%"></i></div>
-              </div>
-              <div class="res-ad__col">
-                <p class="res-ad__stat">+210%</p>
-                <p class="res-ad__sub">Más visualizaciones</p>
-                <span class="res-ad__cta">¡Anuncia ahora!</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="banner-slot__slide" data-res-ad-slide="1" aria-hidden="true">
-          <div class="res-ad res-ad--neon">
-            <div class="res-ad__bg" aria-hidden="true"></div>
-            <div class="res-ad__grid">
-              <div class="res-ad__col res-ad__col--grow">
-                <p class="res-ad__title res-ad__title--pink">HAZ CRECER <span>TU NEGOCIO</span></p>
-                <span class="res-ad__tag">&gt;&gt;&gt; ANUNCIA AQUÍ</span>
-                <p class="res-ad__sub" style="color:#ff8ec4;font-style:italic">Más visibilidad, más clientes, más ventas.</p>
-              </div>
-              <div class="res-ad__col" style="align-items:center">
-                <div class="res-ad__icon">📣</div>
-                <span class="res-ad__pill">🎯 Crecimiento real</span>
-              </div>
-              <div class="res-ad__col">
-                <p class="res-ad__stat res-ad__stat--pink">+210%</p>
-                <p class="res-ad__sub">Más visualizaciones</p>
-                <span class="res-ad__cta">¡Anuncia ahora!</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="banner-slot__slide" data-res-ad-slide="2" aria-hidden="true">
-          <div class="res-ad res-ad--purple">
-            <div class="res-ad__bg" aria-hidden="true"></div>
-            <div class="res-ad__grid">
-              <div class="res-ad__col res-ad__col--grow">
-                <p class="res-ad__title res-ad__title--glow">¡ANÚNCIATE AQUÍ!</p>
-                <span class="res-ad__pill">📢 Más visibilidad, mejores resultados</span>
-                <p class="res-ad__sub">Miles de personas ven tu marca cada día</p>
-              </div>
-              <div class="res-ad__col" style="align-items:center">
-                <div class="res-ad__chart" aria-hidden="true"><i style="height:30%"></i><i style="height:50%"></i><i style="height:70%"></i><i style="height:100%"></i></div>
-              </div>
-              <div class="res-ad__col">
-                <p class="res-ad__stat res-ad__stat--pink">+210%</p>
-                <p class="res-ad__sub">En crecimiento</p>
-                <span class="res-ad__cta">¡Más información!</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </a>
-
-    <a class="banner-slot banner-slot--side" href="registro-banner.html" aria-label="Más visibilidad estatal">
-      <div class="banner-slot__stage" data-res-ad-stage="2">
-        <div class="banner-slot__dots" aria-hidden="true">
-          <span class="banner-slot__dot is-on" data-res-ad-dot="0"></span>
-          <span class="banner-slot__dot" data-res-ad-dot="1"></span>
-          <span class="banner-slot__dot" data-res-ad-dot="2"></span>
-        </div>
-        <div class="banner-slot__slide is-active" data-res-ad-slide="0" data-res-ad-type="image" aria-hidden="false">
-          <div class="side-ad side-ad--img">
-            <img class="side-ad__img" src="img/home/spa-entrada.jpg" alt="Publicidad local">
-            <div class="side-ad__img-overlay">
-              <span>Destaca tu marca</span>
-              <em>Más visibilidad local</em>
-            </div>
-          </div>
-        </div>
-        <div class="banner-slot__slide" data-res-ad-slide="1" data-res-ad-type="video" aria-hidden="true">
-          <div class="side-ad side-ad--duo">
-            <div class="side-ad__bg" aria-hidden="true"></div>
-            <div class="side-ad__flash" aria-hidden="true"></div>
-            <p class="side-ad__duo-title">Video · 2 espacios</p>
-            <div class="side-ad__duo-grid">
-              <div class="side-ad__slot side-ad__slot--a">
-                <div class="side-ad__slot-inner" aria-hidden="true"></div>
-                <span class="side-ad__slot-label">Espacio 1</span>
-              </div>
-              <div class="side-ad__slot side-ad__slot--b">
-                <div class="side-ad__slot-inner" aria-hidden="true"></div>
-                <span class="side-ad__slot-label">Espacio 2</span>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="banner-slot__slide" data-res-ad-slide="2" data-res-ad-type="image" aria-hidden="true">
-          <div class="side-ad side-ad--img">
-            <img class="side-ad__img" src="img/home/negocios-grid.jpg" alt="Impulsa tu negocio">
-            <div class="side-ad__img-overlay">
-              <span>Impulsa tu negocio</span>
-              <em>Anúnciate en CariHub</em>
-            </div>
-          </div>
-        </div>
-      </div>
-    </a>
-
-  </div>
-
-  <div class="resumen-busqueda">
-    <h1 id="tituloResumenBusqueda">Resultados de búsqueda en Cariñosas</h1>
-    <p class="resumen-busqueda__sub" id="subtituloResumenBusqueda">Cargando ubicación...</p>
-    <p id="textoResumenBusqueda">Buscando resultados...</p>
-    <div class="chips-busqueda" id="chipsBusqueda"></div>
-  </div>
-
-  <div id="lista">
-    <div class="loader-card">
-      <div class="loader-img"></div>
-      <div class="loader-line corta"></div>
-      <div class="loader-line media"></div>
-      <div class="loader-line"></div>
-    </div>
-  </div>
-
+<div class="res-preview-switcher" id="resPreviewSwitcher" aria-label="Vista previa resultados">
+  <b>Vista previa</b>
+  <button type="button" id="resVistaCon" data-vista="con-resultados">Con resultados (3 perfiles)</button>
+  <button type="button" id="resVistaSin" data-vista="sin-resultados">Sin resultados (vacío)</button>
+  <span class="res-preview-switcher__hint">Compara banners y layout entre ambas pantallas</span>
 </div>
 
-<div class="modal-anuncio" id="modalAnuncio">
-  <div class="modal-card">
-    <div class="modal-header">
-      <h2 id="modalTitulo">Publicidad</h2>
-    </div>
+<div id="fitOuter"><div id="fitSpacer"><div id="fitRoot">
+<div class="wrap resultados-wrap">
 
-    <div class="modal-body" id="modalContenido"></div>
+  <div class="res-shell">
 
-    <div class="modal-botones">
-      <a class="btn-wa" id="modalWhatsApp" href="#" target="_blank">Contactar por WhatsApp</a>
-      <button class="btn-cerrar" onclick="cerrarInfoAnuncio()">Cerrar</button>
-    </div>
+  <div class="res-shell__top">
+
+  <!-- 1) BANNERS rotativos (rosa izq/der · negro centro) -->
+  <div class="pb" aria-label="Espacios publicitarios">
+    <a class="pb-slot" href="registro-banner.html?slot=resultados-izq" aria-label="¿Eres nueva? Regístrate ahora">
+      <div class="pb-slot__stage" data-pb-stage>
+        <div class="pb-slot__slide is-active" aria-hidden="false">
+          <img src="banners/resultados/resultados-es-nueva-izq.png" alt="¿ERES NUEVA? Empieza hoy y gana desde tu primer cliente — REGÍSTRATE AHORA" width="380" height="158" decoding="async">
+        </div>
+        <div class="pb-slot__slide" aria-hidden="true">
+          <img src="banners/resultados/resultados1.webp" alt="¿ERES NUEVA? Empieza hoy y gana desde tu primer cliente — REGÍSTRATE AHORA" width="380" height="158" decoding="async">
+        </div>
+        <div class="pb-slot__slide" aria-hidden="true">
+          <img src="banners/resultados/resultados3.webp" alt="Anuncia tu perfil en Cariñosas" width="380" height="158" decoding="async">
+        </div>
+        <div class="pb-slot__dots" aria-hidden="true"><span class="pb-slot__dot is-on"></span><span class="pb-slot__dot"></span><span class="pb-slot__dot"></span></div>
+      </div>
+    </a>
+    <a class="pb-slot pb--center" href="registro-banner.html?slot=resultados-centro" aria-label="Haz crecer tu negocio">
+      <div class="pb-slot__stage" data-pb-stage>
+        <div class="pb-slot__slide is-active" aria-hidden="false">
+          <img src="banners/resultados/resultados-crecer-centro.png" alt="HAZ CRECER TU NEGOCIO — +210% más clientes — ANUNCIA AQUÍ" width="620" height="158" decoding="async">
+        </div>
+        <div class="pb-slot__slide" aria-hidden="true">
+          <img src="banners/resultados/resultados-centro-1.png" alt="HAZ CRECER TU NEGOCIO — +210% más clientes — ANUNCIA AQUÍ" width="620" height="158" decoding="async">
+        </div>
+        <div class="pb-slot__slide" aria-hidden="true">
+          <img src="banners/resultados/resultados-centro-2.png" alt="Anuncia aquí — más clientes y ventas" width="620" height="158" decoding="async">
+        </div>
+        <div class="pb-slot__slide" aria-hidden="true">
+          <img src="banners/resultados/resultados-centro-3.png" alt="¡Anúnciate aquí! Mejores resultados" width="620" height="158" decoding="async">
+        </div>
+        <div class="pb-slot__dots" aria-hidden="true"><span class="pb-slot__dot is-on"></span><span class="pb-slot__dot"></span><span class="pb-slot__dot"></span><span class="pb-slot__dot"></span></div>
+      </div>
+    </a>
+    <a class="pb-slot" href="registro-banner.html?slot=resultados-der" aria-label="¿Eres nueva? Regístrate ahora">
+      <div class="pb-slot__stage" data-pb-stage>
+        <div class="pb-slot__slide is-active" aria-hidden="false">
+          <img src="banners/resultados/resultados-es-nueva-der.png" alt="¿ERES NUEVA? Empieza hoy y gana desde tu primer cliente — REGÍSTRATE AHORA" width="380" height="158" decoding="async">
+        </div>
+        <div class="pb-slot__slide" aria-hidden="true">
+          <img src="banners/resultados/resultados2.webp" alt="Perfiles verificados para tu seguridad — Información real y protegida" width="380" height="158" decoding="async">
+        </div>
+        <div class="pb-slot__slide" aria-hidden="true">
+          <img src="banners/resultados/resultados1.webp" alt="Anuncia tu perfil en Cariñosas" width="380" height="158" decoding="async">
+        </div>
+        <div class="pb-slot__dots" aria-hidden="true"><span class="pb-slot__dot is-on"></span><span class="pb-slot__dot"></span><span class="pb-slot__dot"></span></div>
+      </div>
+    </a>
   </div>
-</div>
 
+  <!-- 2) HEADER (patrón .pbrand + .pnav + .pbtn) -->
+  <header class="pbrand pbrand--resultados brandbar" id="brandbar">
+    <div class="pbrand__logo">
+      <div class="pbrand__wordmark">
+        <div class="pbrand__name">Cariñosas</div>
+        <div class="pbrand__tag">Encuentra tu compañía ideal</div>
+      </div>
+    </div>
+    <nav class="pnav" aria-label="Principal">
+      <a class="on" href="resultados.html">
+        <span class="pnav__ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span>
+        <span class="pnav__label">Resultados</span>
+      </a>
+      <a href="#">
+        <span class="pnav__ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20.2l-.9-.8C6.8 15.2 4.5 12.6 4.5 9.8 4.5 7 6.6 5 9.4 5c1.6 0 3.1.8 4 2.1.9-1.3 2.4-2.1 4-2.1 2.8 0 4.9 2 4.9 4.8 0 2.8-2.3 5.4-6.6 9.4l-.9.9z"/></svg></span>
+        <span class="pnav__label">Favoritas</span>
+      </a>
+      <a href="#">
+        <span class="pnav__ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7.5A2.5 2.5 0 015.5 5H13A2.5 2.5 0 0115.5 7.5v3A2.5 2.5 0 0113 13H8l-3.5 2.6V13H5.5A2.5 2.5 0 013 10.5z"/></svg></span>
+        <span class="pnav__label">Mensajes</span>
+        <span class="bdg">3</span>
+      </a>
+      <a href="#">
+        <span class="pnav__ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9a6 6 0 1112 0c0 5 2 6 2 6H4s2-1 2-6z"/><path d="M10 19a2 2 0 004 0"/></svg></span>
+        <span class="pnav__label">Notificaciones</span>
+        <span class="bdg">2</span>
+      </a>
+    </nav>
+    <button class="pbtn" type="button" onclick="location.href='index.html?abrir=registro'">＋ Publicar anuncio</button>
+  </header>
+
+  <!-- Zona fija entre banners y perfiles: Estados · toolbar · En vivo -->
+  <div class="res-midband" aria-label="Estados, filtros y en vivo">
+    <div class="res-midband__slot res-midband__slot--estados" id="resMidEstados" data-slot="resultados_estados"></div>
+    <div class="res-midband__center">
+      <div class="res-midband__headline">
+        <h1 class="res-midband__title">Resultados de búsqueda</h1>
+        <p class="res-midband__seo" id="resSeoLine"></p>
+      </div>
+      <div class="res-midband__actions">
+        <button class="res-midband__btn res-midband__btn--verde" type="button" id="resBtnVerificada">Verificada</button>
+        <a class="res-midband__btn res-midband__btn--fuchsia" id="resBtnRegistro" href="index.html?abrir=registro">Registrarse</a>
+        <button class="res-midband__btn res-midband__btn--fuchsia" type="button" id="resBtnCerca">Cerca de mí</button>
+      </div>
+    </div>
+    <div class="res-midband__slot res-midband__slot--libe" id="resMidLibe" data-slot="resultados_libe"></div>
+  </div>
+
+  </div>
+
+  <!-- 7) TARJETAS (única zona con scroll) -->
+  <section class="resultados-container profiles-list res-lista" id="profilesList"></section>
+
+  <div class="res-shell__bottom">
+
+  <!-- 8) CAMBIAR BÚSQUEDA (único selector interactivo) -->
+  <div class="res-search-dock">
+  <p class="res-search-dock__hint">Cambiar búsqueda</p>
+  <section class="res-search-bar" aria-label="Cambiar búsqueda">
+    <label class="res-sbar-btn">
+      <span class="res-sbar-btn__sparkles" aria-hidden="true"></span>
+      <select id="resSbarCat" class="res-sbar-btn__select" aria-label="Categoría"></select>
+    </label>
+    <label class="res-sbar-btn">
+      <span class="res-sbar-btn__sparkles" aria-hidden="true"></span>
+      <select id="resSbarPais" class="res-sbar-btn__select" aria-label="País"></select>
+    </label>
+    <label class="res-sbar-btn">
+      <span class="res-sbar-btn__sparkles" aria-hidden="true"></span>
+      <select id="resSbarEstado" class="res-sbar-btn__select" aria-label="Estado"></select>
+    </label>
+    <label class="res-sbar-btn">
+      <span class="res-sbar-btn__sparkles" aria-hidden="true"></span>
+      <select id="resSbarCiudad" class="res-sbar-btn__select" aria-label="Ciudad"></select>
+    </label>
+    <button type="button" class="res-sbar-btn res-sbar-btn--buscar" id="resSbarBuscar" aria-label="Buscar">
+      <span class="res-sbar-btn__sparkles" aria-hidden="true"></span>
+      <span class="res-sbar-btn__txt">Buscar</span>
+    </button>
+  </section>
+  </div>
+
+  <!-- 9) BANNER INFERIOR (patrón .pb-slot--bottom) -->
+  <a class="pb-slot pb-slot--bottom res-bottom" href="registro-banner.html?slot=resultados-inferior" aria-label="Anuncia tu perfil en Cariñosas">
+    <span class="res-bottom__glow" aria-hidden="true"></span>
+    <span class="res-bottom__photo"><img src="preview/img/violeta-2.png" alt="" width="92" height="92" decoding="async"></span>
+    <span class="res-bottom__chart" aria-hidden="true">
+      <svg viewBox="0 0 48 48" fill="none"><g stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M8 34V22M18 34V16M28 34V26M38 34V10"/><path d="M6 38h36"/></g><path d="M36 10l4-4v8h-8l4-4z" fill="currentColor"/></svg>
+    </span>
+    <div class="res-bottom__main">
+      <h3 class="res-bottom__h">¿QUIERES MÁS CLIENTES?</h3>
+      <p class="res-bottom__p">Anuncia tu perfil en Cariñosas y aumenta tus ganancias</p>
+      <div class="res-bottom__feats">
+        <span class="res-bottom__feat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>Más visibilidad</span>
+        <span class="res-bottom__sep" aria-hidden="true"></span>
+        <span class="res-bottom__feat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>+ más clientes</span>
+        <span class="res-bottom__sep" aria-hidden="true"></span>
+        <span class="res-bottom__feat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="6.5" width="18" height="11" rx="2"/><circle cx="12" cy="12" r="2.2"/></svg>+ más ganancias</span>
+      </div>
+    </div>
+    <span class="res-bottom__btn">ANUNCIA AHORA <span class="res-bottom__btn-go" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 6l6 6-6 6"/></svg></span></span>
+  </a>
+
+  </div><!-- /.res-shell__bottom -->
+  </div><!-- /.res-shell -->
+
+</div>
+</div></div></div>
+
+<script src="paises.js"></script>
+<script src="estados.js"></script>
+<script src="ciudades.js"></script>
+<script src="js/banner-sin-resultados.js"></script>
+<script src="js/banner-resultados-laterales.js"></script>
+<script src="js/resultados-banners.js"></script>
+<script src="js/resultados-demo.js"></script>
+<script src="js/ch-ui.js"></script>
+<script src="js/carihub-pink-sheen.js"></script>
+<script src="js/carihub-nav-quick.js"></script>
+<script src="js/catalogos-carihub.js"></script>
 <script>
-const firebaseConfig = {
-  apiKey: "AIzaSyCp68DynjT63T9wHorCLxwBGkSEo_mYPUI",
-  authDomain: "carihub-app.firebaseapp.com",
-  projectId: "carihub-app",
-  storageBucket: "carihub-app.firebasestorage.app",
-  messagingSenderId: "236894758884",
-  appId: "1:236894758884:web:5713e39a26c71f025a49f1"
-};
+(function () {
+  'use strict';
 
-if (!firebase.apps.length) {
-  firebase.initializeApp(firebaseConfig);
-}
-const db = firebase.firestore();
+  var FILTRO = 'todos';
+  var TODOS = [];
+  var Q = { categoria: 'Escort', pais: 'México', estado: '', ciudad: '' };
 
-function obtenerParametro(nombre){
-  const url = new URL(window.location.href);
-  return url.searchParams.get(nombre) || "";
-}
-
-function normalizarTexto(t){
-  return String(t || "")
-    .trim()
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g,"");
-}
-
-function textoSeguro(t){
-  return String(t || "")
-    .replace(/&/g,"&amp;")
-    .replace(/</g,"&lt;")
-    .replace(/>/g,"&gt;")
-    .replace(/"/g,"&quot;")
-    .replace(/'/g,"&#039;");
-}
-
-const categoria = obtenerParametro("categoria");
-const pais = obtenerParametro("pais");
-const estado = obtenerParametro("estado");
-const ciudad = obtenerParametro("ciudad");
-
-function textoResultadosEncontrados(total){
-  if(total === 0) return "Ningún resultado encontrado en tu búsqueda.";
-  if(total === 1) return "Un resultado encontrado en tu búsqueda.";
-  return total + " resultados encontrados en tu búsqueda.";
-}
-
-function pintarResumenBusqueda(total){
-  const titulo = document.getElementById("tituloResumenBusqueda");
-  const subtitulo = document.getElementById("subtituloResumenBusqueda");
-  const resumen = document.getElementById("textoResumenBusqueda");
-  const chips = document.getElementById("chipsBusqueda");
-
-  if(titulo){
-    titulo.innerText = "Resultados de búsqueda en Cariñosas";
-  }
-
-  const partesUbicacion = [categoria, pais, estado, ciudad].filter(Boolean);
-  if(subtitulo){
-    subtitulo.innerText = partesUbicacion.length
-      ? partesUbicacion.join(" · ")
-      : "Búsqueda sin filtros";
-  }
-
-  if(resumen){
-    resumen.innerText = typeof total === "number"
-      ? textoResultadosEncontrados(total)
-      : "Buscando resultados...";
-  }
-
-  const datos = [
-    categoria || "Categoría",
-    pais || "País",
-    estado || "Estado",
-    ciudad || "Ciudad"
+  /** Fallback embebido — funciona aunque falle resultados-demo.js */
+  var perfilesFallback = [
+    {
+      __id: 'demo-violeta',
+      nombre: 'Violeta',
+      edad: 24,
+      categoria: 'Escort',
+      ciudad: 'Monterrey',
+      estado: 'Nuevo León',
+      zona: 'San Pedro',
+      ubicacion: 'San Pedro, Monterrey',
+      precio: '2,000',
+      tagline: 'Complaciente y cariñosa, trato de novia.',
+      observaciones: ['Complaciente', 'Cariñosa', 'Trato de novia'],
+      modalidades: ['recibe', 'hotel', 'domicilio'],
+      verificada: true,
+      nueva: true,
+      disponibilidad: 'Disponible ahora',
+      respuestaRapida: true,
+      fotoURL: 'preview/img/violeta-1.png',
+      fotosCount: 15
+    },
+    {
+      __id: 'demo-mariana',
+      nombre: 'Mariana',
+      edad: 23,
+      categoria: 'Escort',
+      ciudad: 'Monterrey',
+      estado: 'Nuevo León',
+      zona: 'Monterrey Centro',
+      ubicacion: 'Monterrey Centro',
+      precio: '1,800',
+      tagline: 'Acompañante elegante, discreta y muy atenta.',
+      observaciones: ['Acompañante', 'Elegante', 'Discreta', 'Atenta'],
+      modalidades: ['recibe', 'hotel'],
+      verificada: true,
+      nueva: false,
+      disponibilidad: 'Disponible ahora',
+      respuestaRapida: true,
+      fotoURL: 'preview/img/violeta-2.png',
+      fotosCount: 12
+    },
+    {
+      __id: 'demo-sofia',
+      nombre: 'Sofía',
+      edad: 22,
+      categoria: 'Escort',
+      ciudad: 'Apodaca',
+      estado: 'Nuevo León',
+      zona: 'Apodaca',
+      ubicacion: 'Apodaca, Nuevo León',
+      precio: '1,500',
+      tagline: 'Linda, divertida y muy complaciente.',
+      observaciones: ['Linda', 'Divertida', 'Complaciente'],
+      modalidades: ['recibe', 'hotel', 'domicilio'],
+      verificada: true,
+      nueva: false,
+      disponibilidad: 'Ocupada',
+      respuestaRapida: true,
+      fotoURL: 'preview/img/violeta-3.png',
+      fotosCount: 18
+    }
   ];
 
-  chips.innerHTML = datos.map(x => `<span class="chip">${textoSeguro(x)}</span>`).join("");
-}
-
-function abrirPerfil(id){
-  if(!id){
-    alert("No se encontró el ID del perfil.");
-    return;
+  function refreshQ() {
+    if (window.CariHubResultadosDemo && CariHubResultadosDemo.queryFromLocation) {
+      Q = CariHubResultadosDemo.queryFromLocation();
+    }
   }
 
-  const url = "./perfil.html?id=" + encodeURIComponent(id) + "&v=" + Date.now();
-  window.location.assign(url);
-}
+  function safeTxt(t) {
+    if (window.CHUI && CHUI.chSafe) return CHUI.chSafe(t);
+    return String(t == null ? '' : t)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+  }
 
-function abrirInfoAnuncio(tipo){
-  const modal = document.getElementById("modalAnuncio");
-  const titulo = document.getElementById("modalTitulo");
-  const contenido = document.getElementById("modalContenido");
-  const wa = document.getElementById("modalWhatsApp");
+  var RES_META = null;
 
-  let datos = {
-    titulo:"Publicidad disponible",
-    nombre:"Espacio disponible para anunciante",
-    categoria:"Publicidad / negocio / perfil",
-    ubicacion:"Disponible por estado o ciudad",
-    horario:"Atención por panel interno próximamente",
-    promocion:"Pregunta por precios, duración y destacado",
-    descripcion:"Este espacio puede mostrar tu negocio, marca, servicio o perfil destacado.",
-    telefono:"528112304664"
+  function perfilesBase() {
+    if (window.CariHubResultadosDemo && CariHubResultadosDemo.componerListaResultados) {
+      var comp = CariHubResultadosDemo.componerListaResultados(Q);
+      RES_META = comp.meta || null;
+      return comp.perfiles || [];
+    }
+    return [];
+  }
+
+  function setShellVacío(esVacio) {
+    var shell = document.querySelector('.res-shell');
+    if (shell) shell.classList.toggle('res-shell--vacío', !!esVacio);
+  }
+
+  function renderProfilesLocal(list, perfiles) {
+    if (!list) return;
+    if (!perfiles || !perfiles.length) {
+      setShellVacío(true);
+      if (window.CariHubResultadosDemo && CariHubResultadosDemo.vacioResultadosHTML) {
+        list.innerHTML = CariHubResultadosDemo.vacioResultadosHTML(Q);
+      }
+      if (window.CariHubBannerSinResultados && CariHubBannerSinResultados.syncResultadosPage) {
+        CariHubBannerSinResultados.syncResultadosPage(true);
+      }
+      return;
+    }
+    setShellVacío(false);
+    if (window.CariHubBannerSinResultados && CariHubBannerSinResultados.syncResultadosPage) {
+      CariHubBannerSinResultados.syncResultadosPage(false);
+    }
+    list.innerHTML = perfiles.map(function (u) {
+      try {
+        if (window.CariHubResultadosDemo && CariHubResultadosDemo.cardHTML) {
+          return CariHubResultadosDemo.cardHTML(u, Q);
+        }
+      } catch (e) { /* fallback mínimo */ }
+      return '<article class="pcard res-card"><div class="res-card__body"><h2 class="res-card__name">' + safeTxt(u.nombre) + '</h2></div></article>';
+    }).join('');
+  }
+
+  function renderProfiles(list, perfiles) {
+    if (!list) return;
+    var items = perfiles || [];
+    try {
+      if (window.CariHubResultadosDemo && CariHubResultadosDemo.renderProfiles) {
+        CariHubResultadosDemo.renderProfiles(list, items, { filtro: FILTRO, Q: Q });
+        return;
+      }
+    } catch (e) {
+      console.warn('renderProfiles demo:', e);
+    }
+    renderProfilesLocal(list, items);
+  }
+
+  function bootResultadosDemo() {
+    var list = document.getElementById('profilesList');
+    if (!list) return;
+    refreshQ();
+    var perfiles = perfilesBase();
+    TODOS = perfiles || [];
+    renderProfiles(list, TODOS);
+    if (typeof scheduleFit === 'function') scheduleFit();
+  }
+
+  function aplicarVista() {
+    var list = document.getElementById('profilesList');
+    if (!list) return;
+    refreshQ();
+    TODOS = perfilesBase() || [];
+    renderProfiles(list, TODOS);
+    if (typeof scheduleFit === 'function') scheduleFit();
+  }
+
+  window.resBuscarCerca = function () {
+    if (!navigator.geolocation) {
+      alert('Tu navegador no permite detectar ubicación.');
+      location.href = 'index.html';
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      function () { location.href = 'index.html?buscar=cerca'; },
+      function () {
+        alert('No se pudo detectar ubicación. Puedes seleccionar ciudad manualmente.');
+        location.href = 'index.html';
+      }
+    );
   };
 
-  if(tipo.includes("destacado")){
-    datos.titulo = "Perfil destacado del estado";
-    datos.nombre = "Espacio destacado disponible";
-    datos.categoria = "Destacado estatal";
-    datos.ubicacion = estado || "Estado seleccionado";
-    datos.promocion = "Aparece arriba en resultados del estado.";
-    datos.descripcion = "Ideal para perfiles que quieren más visibilidad dentro del estado.";
+  window.resVolverInicio = function () {
+    location.href = 'index.html';
+  };
+
+  function paisesLista() {
+    if (typeof TODOS_LOS_PAISES !== 'undefined' && TODOS_LOS_PAISES.length) {
+      return TODOS_LOS_PAISES.slice();
+    }
+    if (typeof PAISES_PRINCIPALES !== 'undefined' && PAISES_PRINCIPALES.length) {
+      return PAISES_PRINCIPALES.slice();
+    }
+    return ['México'];
   }
 
-  titulo.textContent = datos.titulo;
-
-  contenido.innerHTML = `
-    <p><b>Nombre:</b> ${textoSeguro(datos.nombre)}</p>
-    <p><b>Categoría:</b> ${textoSeguro(datos.categoria)}</p>
-    <p><b>Ubicación:</b> ${textoSeguro(datos.ubicacion)}</p>
-    <p><b>Horario:</b> ${textoSeguro(datos.horario)}</p>
-    <p><b>Promoción:</b> ${textoSeguro(datos.promocion)}</p>
-    <p><b>Descripción:</b> ${textoSeguro(datos.descripcion)}</p>
-  `;
-
-  const msg = encodeURIComponent("Hola, quiero información para anunciarme o destacar mi perfil en CariHub.");
-  wa.href = "https://wa.me/" + datos.telefono + "?text=" + msg;
-
-  modal.classList.add("activo");
-}
-
-function cerrarInfoAnuncio(){
-  document.getElementById("modalAnuncio").classList.remove("activo");
-}
-
-function botonesFinales(){
-  return `
-    <div class="acciones-finales">
-      <button class="btn-atras" onclick="window.location.href='index.html'">← Atrás</button>
-      <button class="btn-registro" onclick="window.location.href='index.html?abrir=registro'">Registrarse</button>
-    </div>
-  `;
-}
-
-function cardPerfil(id,u){
-  const nombre = u.nombre || "Perfil";
-  const foto = u.fotoURL || "";
-  const ciudadPerfil = u.ciudad || "";
-  const estadoPerfil = u.estado || "";
-  const categoriaPerfil = u.categoria || "";
-  const paisPerfil = u.pais || pais || "";
-  const precio = u.precio || "Consultar";
-  const modalidad = u.modalidad || "Consultar";
-  const descripcion = u.descripcion || u.descripcionCompleta || "";
-  const edadPerfil = u.edad != null && String(u.edad).trim() !== "" ? String(u.edad).trim() : "";
-  const seoLinea = [categoriaPerfil, paisPerfil, estadoPerfil, ciudadPerfil].filter(Boolean).join(" · ");
-
-  return `
-    <div class="card">
-      <div class="card-layout">
-        <div class="card-foto-wrap">
-          ${foto ? `<img class="foto-principal" src="${textoSeguro(foto)}" alt="Foto de ${textoSeguro(nombre)}" loading="eager">` : ""}
-        </div>
-
-        <div class="card-content">
-          <div class="card-head">
-            <div class="card-title-row">
-              <h3 class="card-nombre">${textoSeguro(nombre)}</h3>
-              ${edadPerfil ? `<span class="card-edad">${textoSeguro(edadPerfil)}</span>` : ""}
-              <span class="card-verificada-badge">Verificada</span>
-            </div>
-            ${seoLinea ? `<p class="card-seo">${textoSeguro(seoLinea)}</p>` : ""}
-          </div>
-
-          <div class="card-info-list">
-            <div class="info-item info-item--precio">
-              <span>Precio</span>
-              <b>${textoSeguro(precio)}</b>
-            </div>
-
-            <div class="info-item">
-              <span>Lugares de encuentro</span>
-              <b>${textoSeguro(modalidad)}</b>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="card-foot">
-        ${descripcion ? `<div class="descripcion-card">${textoSeguro(descripcion)}</div>` : ""}
-        <div class="card-actions">
-          <button class="btn-ver" type="button" onclick="abrirPerfil('${id}')">
-            Ver perfil completo
-          </button>
-        </div>
-      </div>
-    </div>
-  `;
-}
-
-async function cargarPerfilesPublicos(){
-  const snap = await db.collection("usuarios")
-    .where("aprobado","==",true)
-    .where("activo","==",true)
-    .where("vencido","==",false)
-    .get();
-
-  return snap.docs;
-}
-
-async function cargarResultados(){
-  pintarResumenBusqueda();
-
-  const lista = document.getElementById("lista");
-
-  lista.innerHTML = `
-    <div class="loader-card">
-      <div class="loader-img"></div>
-      <div class="loader-line corta"></div>
-      <div class="loader-line media"></div>
-      <div class="loader-line"></div>
-    </div>
-  `;
-
-  try{
-    const docs = await cargarPerfilesPublicos();
-
-    lista.innerHTML = "";
-
-    let encontrados = 0;
-
-    for(const doc of docs){
-      const u = doc.data();
-
-      let vencido = false;
-
-      if(u.vencido === true){
-        vencido = true;
-      }
-
-      if(u.fechaVencimiento){
-        const fechaV = u.fechaVencimiento.toDate
-          ? u.fechaVencimiento.toDate()
-          : new Date(u.fechaVencimiento);
-
-        if(fechaV < new Date()){
-          vencido = true;
-        }
-      }
-
-      if(vencido) continue;
-      if(u.activo !== true) continue;
-
-      const exacto =
-        normalizarTexto(u.categoria) === normalizarTexto(categoria) &&
-        normalizarTexto(u.pais) === normalizarTexto(pais) &&
-        normalizarTexto(u.estado) === normalizarTexto(estado) &&
-        normalizarTexto(u.ciudad) === normalizarTexto(ciudad);
-
-      if(!exacto) continue;
-
-      encontrados++;
-
-      lista.innerHTML += cardPerfil(doc.id,u);
+  function estadosDePais(pais) {
+    if (typeof ESTADOS !== 'undefined' && ESTADOS[pais]) {
+      return ESTADOS[pais].slice();
     }
-
-    pintarResumenBusqueda(encontrados);
-
-    if(encontrados === 0){
-      lista.innerHTML = `
-        <div class="estado-box">
-          <h3>No encontramos perfiles</h3>
-          <p>No hay perfiles activos en esta búsqueda todavía.</p>
-        </div>
-      `;
-    }
-
-    lista.innerHTML += botonesFinales();
-
-  }catch(error){
-    lista.innerHTML = `
-      <div class="estado-box">
-        <h3>Error</h3>
-        <p>${textoSeguro(error.message)}</p>
-      </div>
-      ${botonesFinales()}
-    `;
+    return [];
   }
-}
 
-function goResAdSlide(stage, nextIdx){
-  if(!stage) return 0;
-  const slides = stage.querySelectorAll(".banner-slot__slide");
-  const dots = stage.querySelectorAll(".banner-slot__dot");
-  if(!slides.length) return 0;
-  const idx = ((nextIdx % slides.length) + slides.length) % slides.length;
-  slides.forEach((slide, i) => {
-    const on = i === idx;
-    slide.classList.toggle("is-active", on);
-    slide.setAttribute("aria-hidden", on ? "false" : "true");
-  });
-  dots.forEach((dot, i) => {
-    dot.classList.toggle("is-on", i === idx);
-  });
-  return idx;
-}
-
-function getResAdSlideDuration(slide, slot){
-  const custom = parseInt(slide.getAttribute("data-res-ad-duration"), 10);
-  if(custom > 0) return custom;
-  const type = slide.getAttribute("data-res-ad-type");
-  if(type === "video") return 9000;
-  if(type === "image") return 5000;
-  return slot === 1 ? 7000 : 5500;
-}
-
-function startResAdRotation(){
-  const ROT_DELAY = [600, 400, 1800];
-  document.querySelectorAll("[data-res-ad-stage]").forEach((stage, slot) => {
-    const slides = stage.querySelectorAll(".banner-slot__slide");
-    if(slides.length < 2) return;
-    const state = { idx: 0, timer: null };
-    function scheduleNext(){
-      clearTimeout(state.timer);
-      const slide = slides[state.idx];
-      const dur = getResAdSlideDuration(slide, slot);
-      state.timer = setTimeout(() => {
-        state.idx = goResAdSlide(stage, state.idx + 1);
-        scheduleNext();
-      }, dur);
+  function ciudadesDe(pais, estado) {
+    if (typeof CIUDADES !== 'undefined' && CIUDADES[pais] && CIUDADES[pais][estado]) {
+      return CIUDADES[pais][estado].slice();
     }
-    const wait = ROT_DELAY[slot] || 0;
-    setTimeout(scheduleNext, wait);
-  });
-}
+    return [];
+  }
 
-startResAdRotation();
-cargarResultados();
+  function fillSelect(el, items, selected) {
+    if (!el) return;
+    var list = (items && items.length) ? items : ['—'];
+    var sel = selected && list.indexOf(selected) >= 0 ? selected : list[0];
+    el.innerHTML = list.map(function (v) {
+      var isSel = (v === sel) ? ' selected' : '';
+      return '<option value="' + safeTxt(v) + '"' + isSel + '>' + safeTxt(v) + '</option>';
+    }).join('');
+    el.value = sel;
+  }
+
+  function fillSelectOpcional(el, items, selected, placeholder) {
+    if (!el) return;
+    var ph = placeholder || 'Todos';
+    var opts = [{ v: '', t: ph }];
+    (items || []).forEach(function (v) { opts.push({ v: v, t: v }); });
+    var sel = (selected != null) ? selected : '';
+    el.innerHTML = opts.map(function (o) {
+      var isSel = (o.v === sel) ? ' selected' : '';
+      return '<option value="' + safeTxt(o.v) + '"' + isSel + '>' + safeTxt(o.t) + '</option>';
+    }).join('');
+    el.value = sel;
+  }
+
+  function refreshSbarOpciones(clearUbic) {
+    var pais = document.getElementById('resSbarPais');
+    var estado = document.getElementById('resSbarEstado');
+    var ciudad = document.getElementById('resSbarCiudad');
+    if (!pais || !estado || !ciudad) return;
+    if (clearUbic) {
+      estado.value = '';
+      ciudad.value = '';
+    }
+    var estSel = estado.value || '';
+    var estados = estadosDePais(pais.value);
+    if (estSel && estados.indexOf(estSel) < 0) estSel = '';
+    fillSelectOpcional(estado, estados, estSel, 'Todos los estados');
+    var est = estado.value || '';
+    var ciudades = est ? ciudadesDe(pais.value, est) : [];
+    var ciuSel = ciudad.value || '';
+    if (ciuSel && ciudades.indexOf(ciuSel) < 0) ciuSel = '';
+    fillSelectOpcional(ciudad, ciudades, ciuSel, 'Todas las ciudades');
+  }
+
+  function syncSbarEstados() {
+    refreshSbarOpciones(false);
+  }
+
+  function syncQFromSbar() {
+    var cat = document.getElementById('resSbarCat');
+    var pais = document.getElementById('resSbarPais');
+    var estado = document.getElementById('resSbarEstado');
+    var ciudad = document.getElementById('resSbarCiudad');
+    if (cat) Q.categoria = cat.value || Q.categoria;
+    if (pais) Q.pais = pais.value || Q.pais;
+    if (estado) Q.estado = estado.value || '';
+    if (ciudad) Q.ciudad = ciudad.value || '';
+  }
+
+  function pintarSbar() {
+    var cat = document.getElementById('resSbarCat');
+    var pais = document.getElementById('resSbarPais');
+    if (!cat || !pais) return;
+    if (window.CariHubCatalogos && CariHubCatalogos.categorias) {
+      var cats = CariHubCatalogos.categorias().map(function (c) { return c.label; });
+      var selLabel = CariHubCatalogos.labelCategoria(Q.categoria);
+      fillSelect(cat, cats, selLabel);
+    } else {
+      fillSelect(cat, ['Escort', 'Masajes', 'Stripper'], Q.categoria);
+    }
+    fillSelect(pais, paisesLista(), Q.pais);
+    var estado = document.getElementById('resSbarEstado');
+    var ciudad = document.getElementById('resSbarCiudad');
+    if (estado) fillSelectOpcional(estado, estadosDePais(Q.pais), Q.estado || '', 'Todos los estados');
+    if (ciudad) {
+      var ciudades = Q.estado ? ciudadesDe(Q.pais, Q.estado) : [];
+      fillSelectOpcional(ciudad, ciudades, Q.ciudad || '', 'Todas las ciudades');
+    }
+  }
+
+  function buscarDesdeSbar() {
+    syncQFromSbar();
+    if (!Q.categoria) {
+      alert('Selecciona una categoría.');
+      return;
+    }
+    if (!Q.pais || Q.pais === '—' || Q.pais === 'Todos los países') {
+      alert('Selecciona un país para buscar.');
+      var paisEl = document.getElementById('resSbarPais');
+      if (paisEl) paisEl.focus();
+      return;
+    }
+    var p = new URLSearchParams();
+    if (Q.categoria) p.set('categoria', Q.categoria);
+    if (Q.pais) p.set('pais', Q.pais);
+    if (Q.estado) p.set('estado', Q.estado);
+    if (Q.ciudad) p.set('ciudad', Q.ciudad);
+    var qs = p.toString();
+    try {
+      history.replaceState(null, '', 'resultados.html' + (qs ? '?' + qs : ''));
+    } catch (e) { /* file:// */ }
+    try {
+      if (window.CHUI && CHUI.aplicarTema) CHUI.aplicarTema(Q.categoria);
+    } catch (e) { /* opcional */ }
+    pintarSubline();
+    aplicarVista();
+  }
+
+  function initSearchBar() {
+    pintarSbar();
+    var pais = document.getElementById('resSbarPais');
+    var estado = document.getElementById('resSbarEstado');
+    var buscar = document.getElementById('resSbarBuscar');
+    if (pais) pais.addEventListener('change', function () { refreshSbarOpciones(true); });
+    if (estado) estado.addEventListener('change', function () { refreshSbarOpciones(false); });
+    if (buscar) buscar.addEventListener('click', buscarDesdeSbar);
+  }
+
+  function irFiltros() {
+    var p = new URLSearchParams();
+    if (Q.categoria) p.set('categoria', Q.categoria);
+    if (Q.pais) p.set('pais', Q.pais);
+    if (Q.estado) p.set('estado', Q.estado);
+    if (Q.ciudad) p.set('ciudad', Q.ciudad);
+    var qs = p.toString();
+    location.href = 'index.html' + (qs ? '?' + qs : '');
+  }
+
+  window.toggleFav = function (btn, ev) {
+    ev.stopPropagation();
+    btn.classList.toggle('is-on');
+    btn.textContent = btn.classList.contains('is-on') ? '♥' : '♡';
+  };
+
+  window.abrirPerfil = function (id) {
+    if (!id) return;
+    var u = TODOS.find(function (p) { return p.__id === id; }) || {};
+    var url = (window.CariHubResultadosDemo && CariHubResultadosDemo.urlPerfilDemo)
+      ? CariHubResultadosDemo.urlPerfilDemo(u, Q)
+      : './preview/perfil-vista-previa.html';
+    window.location.assign(url);
+  };
+
+  window.aplicarVista = aplicarVista;
+  window.irFiltros = irFiltros;
+
+  function asegurarPaisEnBusqueda() {
+    refreshQ();
+    var explicit = {};
+    try {
+      if (window.CariHubResultadosDemo && CariHubResultadosDemo.queryExplicitFromLocation) {
+        explicit = CariHubResultadosDemo.queryExplicitFromLocation();
+      } else {
+        var p = new URL(location.href).searchParams;
+        explicit = {
+          categoria: p.get('categoria') || '',
+          pais: p.get('pais') || '',
+          estado: p.get('estado') || '',
+          ciudad: p.get('ciudad') || ''
+        };
+      }
+    } catch (e) { /* opcional */ }
+
+    var esPreview = vistaPreviaActiva() === 'con-resultados' || vistaPreviaActiva() === 'sin-resultados';
+    if (!explicit.pais && !Q.pais && !esPreview) {
+      alert('Selecciona categoría y país para ver resultados.');
+      location.href = 'index.html';
+      return false;
+    }
+
+    if (!explicit.pais && Q.pais) {
+      try {
+        var params = new URLSearchParams(location.search);
+        params.set('pais', Q.pais);
+        if (!explicit.categoria && Q.categoria) params.set('categoria', Q.categoria);
+        history.replaceState(null, '', location.pathname + '?' + params.toString());
+      } catch (e) { /* file:// */ }
+    }
+    return true;
+  }
+
+  function urlRegistroDesdeQ() {
+    var p = new URLSearchParams();
+    p.set('abrir', 'registro');
+    if (Q.categoria) p.set('categoria', Q.categoria);
+    if (Q.pais) p.set('pais', Q.pais);
+    if (Q.estado) p.set('estado', Q.estado);
+    if (Q.ciudad) p.set('ciudad', Q.ciudad);
+    return 'index.html?' + p.toString();
+  }
+
+  function initMidbandActions() {
+    var btnVer = document.getElementById('resBtnVerificada');
+    var btnCerca = document.getElementById('resBtnCerca');
+    var linkReg = document.getElementById('resBtnRegistro');
+    if (linkReg) linkReg.href = urlRegistroDesdeQ();
+    if (btnVer) {
+      btnVer.classList.toggle('is-on', FILTRO === 'verificadas');
+      btnVer.addEventListener('click', function () {
+        FILTRO = FILTRO === 'verificadas' ? 'todos' : 'verificadas';
+        btnVer.classList.toggle('is-on', FILTRO === 'verificadas');
+        aplicarVista();
+      });
+    }
+    if (btnCerca) {
+      btnCerca.addEventListener('click', function () {
+        if (typeof resBuscarCerca === 'function') resBuscarCerca();
+      });
+    }
+  }
+
+  function pintarSubline() {
+    var el = document.getElementById('resSeoLine');
+    if (!el) return;
+    var seo = '';
+    if (window.CariHubResultadosDemo && CariHubResultadosDemo.textoSeoResultados) {
+      seo = CariHubResultadosDemo.textoSeoResultados(Q);
+    } else {
+      var parts = [];
+      if (Q.categoria) parts.push(Q.categoria);
+      if (Q.pais) parts.push(Q.pais);
+      if (Q.estado) parts.push(Q.estado);
+      if (Q.ciudad) parts.push(Q.ciudad);
+      seo = parts.join(' · ');
+    }
+    el.textContent = seo;
+    document.title = seo
+      ? 'Resultados de ' + seo.replace(/ · /g, ' ')
+      : 'Resultados de búsqueda';
+    var linkReg = document.getElementById('resBtnRegistro');
+    if (linkReg) linkReg.href = urlRegistroDesdeQ();
+    var btnVer = document.getElementById('resBtnVerificada');
+    if (btnVer) btnVer.classList.toggle('is-on', FILTRO === 'verificadas');
+  }
+
+  function mountCloseBtn() {
+    if (!window.CariHubNavQuick) return;
+    var bar = document.getElementById('brandbar');
+    if (!bar || bar.querySelector('.ch-nav-close')) return;
+    bar.classList.add('pbrand--with-close', 'brandbar--with-close');
+    bar.insertAdjacentHTML('afterbegin', CariHubNavQuick.closeButtonHTML('resultados'));
+  }
+
+  function vistaPreviaActiva() {
+    if (window.CariHubResultadosDemo && CariHubResultadosDemo.vistaPreviaModo) {
+      return CariHubResultadosDemo.vistaPreviaModo();
+    }
+    try {
+      var p = new URL(location.href).searchParams.get('vista');
+      if (p === 'con-resultados' || p === 'con') return 'con-resultados';
+      if (p === 'sin-resultados' || p === 'sin' || p === 'vacio') return 'sin-resultados';
+    } catch (e) { /* opcional */ }
+    return null;
+  }
+
+  function setVistaResultados(modo) {
+    var p = new URLSearchParams(location.search);
+    if (modo) p.set('vista', modo);
+    else p.delete('vista');
+    var qs = p.toString();
+    location.href = location.pathname + (qs ? '?' + qs : '');
+  }
+
+  function initPreviewSwitcher() {
+    var bar = document.getElementById('resPreviewSwitcher');
+    if (!bar) return;
+    var modo = vistaPreviaActiva() || 'sin-resultados';
+    var btnCon = document.getElementById('resVistaCon');
+    var btnSin = document.getElementById('resVistaSin');
+    if (btnCon) btnCon.classList.toggle('is-on', modo === 'con-resultados');
+    if (btnSin) btnSin.classList.toggle('is-on', modo !== 'con-resultados');
+    bar.querySelectorAll('button[data-vista]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        setVistaResultados(btn.getAttribute('data-vista'));
+      });
+    });
+  }
+
+  function bootPage() {
+    if (!asegurarPaisEnBusqueda()) return;
+    refreshQ();
+    try {
+      if (window.CariHubPinkSheen) CariHubPinkSheen.mountPage(document.body);
+    } catch (e) { /* opcional */ }
+    try { mountCloseBtn(); } catch (e) { /* opcional */ }
+    try {
+      if (window.CHUI && CHUI.aplicarTema) CHUI.aplicarTema(Q.categoria);
+    } catch (e) { /* opcional */ }
+    try { pintarSubline(); } catch (e) { /* opcional */ }
+    try { initSearchBar(); } catch (e) { /* opcional */ }
+    try { initMidbandActions(); } catch (e) { /* opcional */ }
+    try { initPreviewSwitcher(); } catch (e) { /* opcional */ }
+  }
+
+  try {
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', bootResultadosDemo);
+    } else {
+      bootResultadosDemo();
+    }
+  } catch (err) {
+    console.warn('Fallback resultados demo:', err);
+    var listErr = document.getElementById('profilesList');
+    if (listErr) renderProfilesLocal(listErr, []);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bootPage);
+  } else {
+    bootPage();
+  }
+
+  window.addEventListener('load', bootResultadosDemo);
+
+  /* Vista completa en panel estrecho del IDE (mismo patrón que perfil-vista-previa) */
+  var FIT_DESIGN_W = 1280;
+  function scheduleFit() {
+    requestAnimationFrame(function () {
+      requestAnimationFrame(applyFit);
+    });
+  }
+  function applyFit() {
+    var outer = document.getElementById('fitOuter');
+    var spacer = document.getElementById('fitSpacer');
+    var root = document.getElementById('fitRoot');
+    var shell = document.querySelector('.res-shell');
+    if (!outer || !spacer || !root) return;
+    if (!document.body.classList.contains('fit')) {
+      document.documentElement.classList.remove('fit');
+      root.style.cssText = '';
+      spacer.style.cssText = '';
+      if (shell) shell.style.height = '';
+      return;
+    }
+    document.documentElement.classList.add('fit');
+    root.style.transform = 'none';
+    root.style.width = FIT_DESIGN_W + 'px';
+    var availH = Math.max(420, outer.clientHeight || window.innerHeight || 720);
+    var availW = Math.max(280, outer.clientWidth || outer.getBoundingClientRect().width || window.innerWidth);
+    var scale = Math.min(1, (availW - 4) / FIT_DESIGN_W);
+    scale = Math.max(0.32, scale);
+    var designH = Math.ceil(availH / scale);
+    if (shell) shell.style.height = designH + 'px';
+    spacer.style.width = '100%';
+    spacer.style.height = Math.ceil(availH) + 'px';
+    root.style.height = designH + 'px';
+    root.style.transformOrigin = 'top left';
+    root.style.transform = 'scale(' + scale + ')';
+  }
+  document.body.classList.add('fit');
+  document.documentElement.classList.add('fit');
+  window.addEventListener('resize', scheduleFit);
+  window.addEventListener('load', scheduleFit);
+  if (window.ResizeObserver) {
+    var fitRo = new ResizeObserver(scheduleFit);
+    fitRo.observe(document.getElementById('fitOuter'));
+    var lista = document.getElementById('profilesList');
+    if (lista) fitRo.observe(lista);
+  }
+  setTimeout(scheduleFit, 80);
+  setTimeout(scheduleFit, 400);
+})();
 </script>
-
 </body>
 </html>

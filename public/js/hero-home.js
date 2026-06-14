@@ -85,6 +85,8 @@
 
   window.CARIHUB_HERO_BANNER_RENTALS = {};
 
+  window.CARIHUB_HOME_SLOT_RENTALS = {};
+
   /* Imagen temática por categoría — solo fotos del usuario */
   window.CARIHUB_HERO_PREVIEW_IMAGES = {
     escort: U.promo,

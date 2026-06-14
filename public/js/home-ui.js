@@ -752,12 +752,6 @@
     closeSectorModal();
     closeCatPickerModal(document.getElementById('modal-categorias'));
     if (typeof window.setCategoriaHome === 'function') window.setCategoriaHome(displayName);
-    if (fromOtrosSectores && typeof abrirSelector === 'function') {
-      window.__autoBuscarTrasCiudad = true;
-      setTimeout(function () {
-        abrirSelector('pais');
-      }, 250);
-    }
   }
 
   function selectCategoria(id) {
@@ -951,10 +945,6 @@
       window.setCategoriaHome(catName);
     } else if (catName) {
       window.categoriaSeleccionada = catName;
-    }
-    window.__autoBuscarTrasCiudad = true;
-    if (typeof abrirSelector === 'function') {
-      abrirSelector('pais');
     }
   }
 

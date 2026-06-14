@@ -1,0 +1,712 @@
+/**
+ * Motor DEMO canónico — 3 perfiles fijos (ref. mockup desktop resultados)
+ */
+(function (global) {
+  'use strict';
+
+  var FOTOS = [
+    'preview/img/violeta-1.png',
+    'preview/img/violeta-2.png',
+    'preview/img/violeta-3.png',
+    'preview/img/violeta-4.png'
+  ];
+
+  var ZONAS = ['San Pedro', 'Centro', 'Valle Oriente', 'Cumbres', 'Mitras', 'Del Valle'];
+
+  var VISTA_POR_CATEGORIA = {
+    escort: 'adult',
+    'escort gay': 'escortGay',
+    'escort vip': 'escortVip',
+    edecan: 'adult',
+    stripper: 'stripper',
+    modelos: 'adult',
+    gigolo: 'escortGay',
+    acompanante: 'adult',
+    petit: 'adult',
+    contenido: 'creador',
+    tabledance: 'tableDance',
+    'sex shop': 'sexShop',
+    spa: 'negocio',
+    masajes: 'masajeIndep',
+    'club sw': 'clubSw',
+    'antro restaurant bar': 'antro',
+    'antro restaurant bar lgbt': 'antroLgbt',
+    'hotel motel': 'negocio',
+    'cabinas glory holes': 'cabinas',
+    trans: 'trans',
+    femboy: 'trans',
+    swinger: 'clubSw',
+    unicorns: 'unicorn',
+    'cuckold hotwife': 'pareja',
+    singles: 'pareja',
+    hotwife: 'pareja',
+    lesbians: 'pareja',
+    'tom boy': 'adult',
+    'tom fem': 'adult',
+    dotados: 'adult',
+    fetiche: 'adult',
+    sado: 'dominatrix',
+    dominatrix: 'dominatrix',
+    'cine xxx': 'cineXxx'
+  };
+
+  /** Perfiles exactos del mockup desktop (siempre visibles) */
+  var PERFILES_CANON = [
+    {
+      __id: 'demo-violeta',
+      __demo: true,
+      __vista: 'adult',
+      nombre: 'Violeta',
+      edad: 24,
+      ubicacion: 'San Pedro, Monterrey',
+      zona: 'San Pedro',
+      ciudad: 'Monterrey',
+      precio: '2,000',
+      tagline: 'Complaciente y cariñosa, trato de novia.',
+      observaciones: ['Complaciente', 'Cariñosa', 'Trato de novia'],
+      modalidades: ['recibe', 'hotel', 'domicilio'],
+      verificada: true,
+      nueva: true,
+      disponibilidad: 'Disponible ahora',
+      respuestaRapida: true,
+      fotoURL: FOTOS[0],
+      fotosCount: 15
+    },
+    {
+      __id: 'demo-mariana',
+      __demo: true,
+      __vista: 'adult',
+      nombre: 'Mariana',
+      edad: 23,
+      ubicacion: 'Monterrey Centro',
+      zona: 'Monterrey Centro',
+      ciudad: 'Monterrey',
+      precio: '1,800',
+      tagline: 'Acompañante elegante, discreta y muy atenta.',
+      observaciones: ['Acompañante', 'Elegante', 'Discreta', 'Atenta'],
+      modalidades: ['recibe', 'hotel'],
+      verificada: true,
+      nueva: false,
+      disponibilidad: 'Disponible ahora',
+      respuestaRapida: true,
+      fotoURL: FOTOS[1],
+      fotosCount: 12
+    },
+    {
+      __id: 'demo-sofia',
+      __demo: true,
+      __vista: 'adult',
+      nombre: 'Sofía',
+      edad: 22,
+      ubicacion: 'Apodaca, Nuevo León',
+      zona: 'Apodaca',
+      ciudad: 'Apodaca',
+      estado: 'Nuevo León',
+      precio: '1,500',
+      tagline: 'Linda, divertida y muy complaciente.',
+      observaciones: ['Linda', 'Divertida', 'Complaciente'],
+      modalidades: ['recibe', 'hotel', 'domicilio'],
+      verificada: true,
+      nueva: false,
+      disponibilidad: 'Ocupada',
+      respuestaRapida: true,
+      fotoURL: FOTOS[2],
+      fotosCount: 18
+    }
+  ];
+
+  var PLANTILLAS = {
+    escort: {
+      personas: [
+        { nombre: 'Mariana', edad: 23, precio: '1,800', tagline: 'Acompañante elegante, discreta y muy atenta.', modalidades: ['recibe', 'hotel'], nueva: false, verificada: true },
+        { nombre: 'Violeta', edad: 24, precio: '2,000', tagline: 'Complaciente y cariñosa, trato de novia.', modalidades: ['recibe', 'hotel', 'domicilio'], nueva: true },
+        { nombre: 'Valentina', edad: 30, precio: '2,000', tagline: 'Elegante, discreta y siempre puntual.', modalidades: ['recibe', 'hotel', 'domicilio'], disponibilidad: 'Ocupada' },
+        { nombre: 'Camila', edad: 26, precio: '1,800', tagline: 'Trato de novia y conversación agradable.', modalidades: ['hotel', 'domicilio'] },
+        { nombre: 'Isabella', edad: 28, precio: '2,500', tagline: 'Experiencia premium con total discreción.', modalidades: ['recibe', 'hotel'], verificada: true }
+      ]
+    },
+    dominatrix: {
+      personas: [
+        { nombre: 'Mistress Alexa', edad: 29, precio: '2,500', tagline: 'Femdom elegante, protocolo claro y límites respetados.', modalidades: ['recibe', 'hotel'] },
+        { nombre: 'Lady Raven', edad: 31, precio: '3,000', tagline: 'Dungeon privado y sesiones BDSM profesionales.', modalidades: ['recibe'] }
+      ]
+    },
+    masajes: {
+      negocios: [
+        { nombreComercial: 'Zen Touch Masajes', precio: '650', tagline: 'Masajes relajantes, terapéuticos y en pareja. Ambiente discreto.', tipoPerfil: 'negocio', categoriaPublica: 'Centro de Masajes' }
+      ],
+      personas: [
+        { nombre: 'Sofía M.', edad: 27, precio: '900', tagline: 'Masajes relajantes y sensoriales a domicilio o espacio privado.', modalidades: ['domicilio', 'recibe'] },
+        { nombre: 'Luna R.', edad: 25, precio: '850', tagline: 'Terapia sueca, aromaterapia y sesiones en pareja.', modalidades: ['recibe', 'domicilio'] }
+      ]
+    }
+  };
+
+  var FALLBACK_PERSONAS = [
+    { nombre: 'Perfil demo', edad: 25, precio: '1,500', tagline: 'Anuncio de demostración para esta categoría.', modalidades: ['recibe', 'hotel'] },
+    { nombre: 'Anuncio local', edad: 27, precio: '1,800', tagline: 'Disponible en tu zona con reservación previa.', modalidades: ['domicilio'] }
+  ];
+
+  function norm(t) {
+    if (global.CHUI && CHUI.chNorm) return CHUI.chNorm(t);
+    return String(t || '')
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  function idCategoria(valor) {
+    if (global.CariHubCatalogos) return CariHubCatalogos.idCategoria(valor);
+    return norm(valor);
+  }
+
+  function labelCategoria(valor) {
+    if (global.CariHubCatalogos) return CariHubCatalogos.labelCategoria(valor);
+    return String(valor || '').trim() || 'Escort';
+  }
+
+  function vistaDeCategoria(valor) {
+    var id = idCategoria(valor);
+    return VISTA_POR_CATEGORIA[id] || 'adult';
+  }
+
+  function slug(s) {
+    return norm(s).replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') || 'perfil';
+  }
+
+  function foto(i) {
+    return FOTOS[i % FOTOS.length];
+  }
+
+  function zonaNombre(i) {
+    return ZONAS[i % ZONAS.length];
+  }
+
+  function clonarPerfil(base, Q) {
+    var u = {};
+    var k;
+    for (k in base) {
+      if (Object.prototype.hasOwnProperty.call(base, k)) u[k] = base[k];
+    }
+    u.categoria = base.categoria || Q.categoria || 'Escort';
+    u.categoriaPublica = base.categoriaPublica || u.categoria;
+    u.pais = Q.pais || 'México';
+    u.estado = u.estado || Q.estado || 'Nuevo León';
+    u.ciudad = u.ciudad || Q.ciudad || 'Monterrey';
+    if (u.fotosCount) {
+      u.fotosExtraURL = new Array(Math.max(0, u.fotosCount - 1)).fill('demo');
+    }
+    return u;
+  }
+
+  function perfilesCanonicos(Q) {
+    Q = Q || {};
+    return PERFILES_CANON.map(function (p) { return clonarPerfil(p, Q); });
+  }
+
+  function armarPerfil(base, idx, Q, catLabel, catId, vistaDef) {
+    var esNeg = !!(base.tipoPerfil === 'negocio' || base.tipoPerfil === 'lugar' || base.nombreComercial);
+    var nombre = esNeg ? base.nombreComercial : base.nombre;
+    var vista = base.vista || vistaDef;
+    var id = 'demo-' + catId + '-' + slug(nombre) + '-' + idx;
+
+    var u = {
+      __id: id,
+      __demo: true,
+      __vista: vista,
+      categoria: base.categoria || catLabel,
+      categoriaPublica: base.categoriaPublica || catLabel,
+      pais: Q.pais,
+      estado: Q.estado,
+      ciudad: Q.ciudad,
+      zona: zonaNombre(idx),
+      precio: base.precio || 'Consultar',
+      tagline: base.tagline || '',
+      verificada: base.verificada !== false,
+      verificado: base.verificada !== false,
+      disponibilidad: base.disponibilidad || 'Disponible ahora',
+      respuestaRapida: base.respuestaRapida !== false,
+      nueva: !!base.nueva,
+      fotoURL: foto(idx),
+      fotosExtraURL: ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n']
+    };
+
+    if (esNeg) {
+      u.tipoPerfil = base.tipoPerfil || 'negocio';
+      u.tipoCuenta = 'negocio';
+      u.nombreComercial = nombre;
+      u.nombre = nombre;
+      if (base.tipoNegocio) u.tipoNegocio = base.tipoNegocio;
+    } else {
+      u.nombre = nombre;
+      u.alias = nombre;
+      if (base.edad != null) u.edad = base.edad;
+      u.modalidades = base.modalidades || ['recibe', 'hotel'];
+    }
+
+    return u;
+  }
+
+  function plantillaDe(catId) {
+    if (PLANTILLAS[catId]) return PLANTILLAS[catId];
+    var clave = Object.keys(PLANTILLAS).find(function (k) {
+      return catId.indexOf(k) !== -1 || k.indexOf(catId) !== -1;
+    });
+    if (clave) return PLANTILLAS[clave];
+    return { personas: FALLBACK_PERSONAS };
+  }
+
+  function generarPerfiles(Q) {
+    return componerListaResultados(Q).perfiles;
+  }
+
+  function perfilesFallback(Q) {
+    return [];
+  }
+
+  function campoCoincide(valorPerfil, valorBusqueda, opts) {
+    opts = opts || {};
+    var b = norm(valorBusqueda);
+    if (!b) return true;
+    var p = norm(valorPerfil);
+    if (!p) return !!opts.opcional;
+    if (p === b) return true;
+    if (opts.parcial) return p.indexOf(b) !== -1 || b.indexOf(p) !== -1;
+    return false;
+  }
+
+  function coincideBusqueda(u, Q) {
+    if (!u || !Q) return false;
+    var catId = idCategoria(u.categoria || u.categoriaPublica);
+    var qId = idCategoria(Q.categoria);
+    if (catId !== qId && !campoCoincide(u.categoria || u.categoriaPublica, Q.categoria, { parcial: true })) return false;
+    return campoCoincide(u.pais, Q.pais, { opcional: !Q.pais }) &&
+      campoCoincide(u.estado, Q.estado, { parcial: true, opcional: !Q.estado }) &&
+      campoCoincide([u.ciudad, u.zona].filter(Boolean).join(' '), Q.ciudad, { parcial: true, opcional: !Q.ciudad });
+  }
+
+  function coincideDemo(u, Q) {
+    if (!u || !u.__demo) return false;
+    return coincideBusqueda(u, Q);
+  }
+
+  /** Perfiles reales guardados en el sitio (Firebase u otro motor). Vacío en demo. */
+  function perfilesRegistrados(Q) {
+    Q = Q || {};
+    if (global.CariHubResultadosRegistrados && typeof CariHubResultadosRegistrados.listar === 'function') {
+      var todos = CariHubResultadosRegistrados.listar(Q) || [];
+      return todos.filter(function (u) {
+        return u && !u.__demo && coincideBusqueda(u, Q);
+      });
+    }
+    return [];
+  }
+
+  /** Vista previa en IDE: ?vista=con-resultados | ?vista=sin-resultados */
+  function vistaPreviaModo() {
+    try {
+      var p = new URL(global.location.href).searchParams.get('vista');
+      if (p === 'con-resultados' || p === 'con') return 'con-resultados';
+      if (p === 'sin-resultados' || p === 'sin' || p === 'vacio') return 'sin-resultados';
+    } catch (e) { /* opcional */ }
+    return null;
+  }
+
+  /** Lista final: reales en producción; canónicos demo solo con ?vista=con-resultados */
+  function componerListaResultados(Q) {
+    Q = Q || {};
+    if (vistaPreviaModo() === 'con-resultados') {
+      var demo = perfilesCanonicos(Q);
+      return {
+        perfiles: demo.slice(),
+        meta: {
+          vacio: false,
+          totalRegistrados: 0,
+          preview: true,
+          modoVista: 'con-resultados'
+        }
+      };
+    }
+    var registrados = perfilesRegistrados(Q);
+    return {
+      perfiles: registrados.slice(),
+      meta: {
+        vacio: registrados.length === 0,
+        totalRegistrados: registrados.length,
+        modoVista: vistaPreviaModo() || 'produccion'
+      }
+    };
+  }
+
+  function queryFromLocation(href) {
+    try {
+      var p = new URL(href || global.location.href).searchParams;
+      return {
+        categoria: p.get('categoria') || 'Escort',
+        pais: p.get('pais') || 'México',
+        estado: p.get('estado') || '',
+        ciudad: p.get('ciudad') || ''
+      };
+    } catch (e) {
+      return { categoria: 'Escort', pais: 'México', estado: '', ciudad: '' };
+    }
+  }
+
+  /** Solo lo que viene en la URL (sin defaults) — para la línea bajo el nombre del perfil */
+  function queryExplicitFromLocation(href) {
+    try {
+      var p = new URL(href || global.location.href).searchParams;
+      return {
+        categoria: p.get('categoria') || '',
+        pais: p.get('pais') || '',
+        estado: p.get('estado') || '',
+        ciudad: p.get('ciudad') || ''
+      };
+    } catch (e) {
+      return { categoria: '', pais: '', estado: '', ciudad: '' };
+    }
+  }
+
+  function nivelBusqueda(Q) {
+    Q = Q || {};
+    if (Q.ciudad) return 'ciudad';
+    if (Q.estado) return 'estado';
+    if (Q.pais) return 'pais';
+    return 'categoria';
+  }
+
+  var TITULO_SIN_RESULTADOS = 'No se encontraron resultados para lo que buscaste';
+  var SUB_SIN_RESULTADOS = 'Prueba ampliar tu búsqueda, cambiar categoría o explorar otra zona.';
+
+  function tituloVacio() {
+    return TITULO_SIN_RESULTADOS;
+  }
+
+  function bannerLateralHTML(lado) {
+    if (global.CariHubBannerSinResultados && CariHubBannerSinResultados.renderLateralHTML) {
+      return CariHubBannerSinResultados.renderLateralHTML(lado);
+    }
+    var slot = lado === 'izq' ? 'sin_resultados_estados' : 'sin_resultados_libe';
+    var label = lado === 'izq' ? 'Estados y zonas' : 'LIBE';
+    var img = lado === 'izq'
+      ? 'img/home/banners/ad-banner-pink-02.png'
+      : 'img/home/banners/ad-banner-black-02.png';
+    return '' +
+      '<a class="res-vacio-side__banner" href="registro-banner.html?slot=' + slot + '" aria-label="Anuncio ' + label + '">' +
+        '<span class="res-vacio-side__label">' + safeTxt(label) + '</span>' +
+        '<img src="' + img + '" alt="Espacio publicitario ' + label + '" width="160" height="320" decoding="async">' +
+      '</a>';
+  }
+
+  function vacioResultadosHTML(Q) {
+    Q = Q || {};
+    var cat = labelCategoria(Q.categoria);
+    var pais = String(Q.pais || '').trim();
+    var estado = String(Q.estado || '').trim();
+    var ciudad = String(Q.ciudad || '').trim();
+    var regQs = new URLSearchParams();
+    regQs.set('abrir', 'registro');
+    if (Q.categoria) regQs.set('categoria', Q.categoria);
+    if (pais) regQs.set('pais', pais);
+    if (estado) regQs.set('estado', estado);
+    if (ciudad) regQs.set('ciudad', ciudad);
+
+    function chip(label, valor) {
+      if (!valor) return '';
+      return '<span class="res-vacio__chip"><span class="res-vacio__chip-label">' +
+        safeTxt(label) + '</span><span class="res-vacio__chip-val">' + safeTxt(valor) + '</span></span>';
+    }
+
+    return '' +
+      '<div class="res-vacio-zone" role="status" aria-live="polite">' +
+        '<aside class="res-vacio-side res-vacio-side--izq" aria-label="Publicidad estados">' +
+          bannerLateralHTML('izq') +
+        '</aside>' +
+        '<div class="res-vacio">' +
+          '<span class="res-vacio__sparkles" aria-hidden="true"></span>' +
+          '<div class="res-vacio__inner">' +
+            '<div class="res-vacio__brand">Cariñosas</div>' +
+            '<p class="res-vacio__tag">Encuentra tu compañía ideal</p>' +
+            '<h2 class="res-vacio__title">' + safeTxt(tituloVacio()) + '</h2>' +
+            '<p class="res-vacio__sub">' + safeTxt(SUB_SIN_RESULTADOS) + '</p>' +
+            '<div class="res-vacio__chips">' +
+              chip('Categoría', cat) +
+              chip('País', pais) +
+              chip('Estado', estado) +
+              chip('Ciudad', ciudad) +
+            '</div>' +
+            '<div class="res-vacio__actions">' +
+              '<a class="res-vacio__btn res-vacio__btn--primary" href="index.html?' + regQs.toString() + '">Registrarse en esta categoría</a>' +
+              '<button class="res-vacio__btn res-vacio__btn--cerca" type="button" onclick="resBuscarCerca()">Buscar cerca</button>' +
+              '<button class="res-vacio__btn res-vacio__btn--volver" type="button" onclick="resVolverInicio()">Volver</button>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+        '<aside class="res-vacio-side res-vacio-side--der" aria-label="Publicidad LIBE">' +
+          bannerLateralHTML('der') +
+        '</aside>' +
+      '</div>';
+  }
+
+  function urlPerfilDemo(u, Q) {
+    Q = Q || {};
+    var vista = (u && u.__vista) || vistaDeCategoria(Q.categoria || u.categoria);
+    var p = new URLSearchParams();
+    p.set('vista', vista);
+    if (Q.categoria || u.categoria) p.set('categoria', Q.categoria || u.categoria);
+    if (Q.pais) p.set('pais', Q.pais);
+    if (Q.estado) p.set('estado', Q.estado);
+    if (Q.ciudad) p.set('ciudad', Q.ciudad);
+    p.set('from', 'resultados');
+    return './preview/perfil-vista-previa.html?' + p.toString();
+  }
+
+  function safeTxt(t) {
+    return String(t == null ? '' : t)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+  }
+
+  function normTxt(t) {
+    return String(t || '').trim().toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  }
+
+  function svgIco(name, cls) {
+    cls = cls || 'mc-ic';
+    var p = {
+      pin: '<path d="M12 21c4.5-5 7-8.3 7-11a7 7 0 1 0-14 0c0 2.7 2.5 6 7 11z"/><circle cx="12" cy="10" r="2.5"/>',
+      money: '<rect x="3" y="6.5" width="18" height="11" rx="2"/><circle cx="12" cy="12" r="2.2"/>',
+      home: '<path d="M4 11.5 12 5l8 6.5"/><path d="M6 10.5V19h12v-8.5"/>',
+      hotel: '<path d="M8 6v12M16 6v12M6 10h12M6 14h12"/>',
+      car: '<path d="M5 11l1.4-4.2A2 2 0 0 1 8.3 5.4h7.4a2 2 0 0 1 1.9 1.4L19 11"/><rect x="3.2" y="11" width="17.6" height="6" rx="2"/><circle cx="7.5" cy="17.5" r="1.4"/><circle cx="16.5" cy="17.5" r="1.4"/>',
+      heart: '<path d="M12 20.2l-.9-.8C6.8 15.2 4.5 12.6 4.5 9.8 4.5 7 6.6 5 9.4 5c1.6 0 3.1.8 4 2.1.9-1.3 2.4-2.1 4-2.1 2.8 0 4.9 2 4.9 4.8 0 2.8-2.3 5.4-6.6 9.4l-.9.9z" fill="currentColor" stroke="none"/>',
+      camera: '<path d="M4 8.5h3l1.6-2.2h6.8L17 8.5h3a2 2 0 012 2v7a2 2 0 01-2 2H4a2 2 0 01-2-2v-7a2 2 0 012-2z"/><circle cx="12" cy="13" r="3.2"/>'
+    };
+    return '<span class="' + cls + '" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + (p[name] || '') + '</svg></span>';
+  }
+
+  function verificadoBadgeHTML() {
+    return '<span class="verok"><span class="verok__ic" aria-hidden="true">' +
+      '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">' +
+      '<circle cx="10" cy="10" r="8.25"/><path d="M6.4 10.1 8.7 12.4 13.7 7.6"/>' +
+      '</svg></span><span class="verok__txt">Verificada</span></span>';
+  }
+
+  function modalidadesSet(u) {
+    var set = {};
+    if (Array.isArray(u.modalidades)) {
+      u.modalidades.forEach(function (m) {
+        var n = normTxt(String(m));
+        if (n === 'recibe' || n.indexOf('recib') !== -1 || n.indexOf('lugar') !== -1) set.recibe = true;
+        else if (n === 'hotel' || n.indexOf('hotel') !== -1) set.hotel = true;
+        else if (n === 'domicilio' || n.indexOf('domicil') !== -1) set.domicilio = true;
+      });
+    }
+    return set;
+  }
+
+  function chipModalidadHTML(set) {
+    var items = [];
+    if (set.recibe) items.push('<span class="modchip mc-pink">' + svgIco('home') + 'Recibe</span>');
+    if (set.hotel) items.push('<span class="modchip mc-purple">' + svgIco('hotel') + 'Hotel</span>');
+    if (set.domicilio) items.push('<span class="modchip mc-orange">' + svgIco('car') + 'Domicilio</span>');
+    return items.join('');
+  }
+
+  function precioTexto(u) {
+    var p = u.precio;
+    if (p == null || String(p).trim() === '') return 'Consultar';
+    var s = String(p).trim();
+    return /^\$|mxn|usd|consult/i.test(s) ? s : '$' + s;
+  }
+
+  function numFotos(u) {
+    if (u.fotosCount != null) return u.fotosCount;
+    return u.fotoURL ? 1 : 0;
+  }
+
+  function disponibilidadDe(u) {
+    var d = normTxt(u.disponibilidad || u.estatus || '');
+    if (d.indexOf('ocup') !== -1) return { clase: 'busy', txt: 'Ocupada', busy: true };
+    return { clase: 'on', txt: u.disponibilidad || 'Disponible ahora', busy: false };
+  }
+
+  /** Línea SEO: categoría + país obligatorio + estado/ciudad si aplican */
+  function segmentosBusquedaSeo(Q) {
+    Q = Q || {};
+    var explicit = queryExplicitFromLocation();
+    var parts = [];
+    var cat = labelCategoria(explicit.categoria || Q.categoria || '');
+    if (cat) parts.push(cat);
+    var pais = String(explicit.pais || Q.pais || '').trim();
+    if (pais && pais !== '—') parts.push(pais);
+    var estado = String(explicit.estado || Q.estado || '').trim();
+    var ciudad = String(explicit.ciudad || Q.ciudad || '').trim();
+    if (estado) parts.push(estado);
+    if (ciudad) parts.push(ciudad);
+    return parts;
+  }
+
+  function textoSeoResultados(Q) {
+    return segmentosBusquedaSeo(Q).join(' · ');
+  }
+
+  /** Debajo del nombre del perfil — mismos segmentos que la cabecera SEO */
+
+  function lineaUbicacionPerfil(u, Q) {
+    return segmentosBusquedaSeo(Q).join(' · ');
+  }
+
+  function observacionesLista(u) {
+    if (Array.isArray(u.observaciones) && u.observaciones.length) {
+      return u.observaciones.map(function (t) { return String(t || '').trim(); }).filter(Boolean);
+    }
+    if (u.observaciones) {
+      return String(u.observaciones).split(/[,·|]/).map(function (t) { return t.trim(); }).filter(Boolean);
+    }
+    if (u.tagline) {
+      return String(u.tagline).split(/[,.]/).map(function (t) { return t.trim(); }).filter(Boolean).slice(0, 4);
+    }
+    return [];
+  }
+
+  function observacionesHTML(u) {
+    var items = observacionesLista(u);
+    if (!items.length) return '';
+    return '<div class="res-obs">' +
+      '<span class="res-obs__label">Observaciones</span>' +
+      '<p class="res-obs__txt">' +
+      items.map(function (t, i) {
+        return (i ? '<span class="res-obs__sep" aria-hidden="true"> · </span>' : '') + safeTxt(t);
+      }).join('') +
+      '</p></div>';
+  }
+
+  function descripcionHTML(u) {
+    var txt = u.descripcion || u.tagline || '';
+    if (!txt) return '';
+    return '<div class="res-desc">' +
+      '<span class="res-desc__label">Descripción</span>' +
+      '<p class="res-desc__txt">' + svgIco('heart') + '<span>' + safeTxt(txt) + '</span></p>' +
+      '</div>';
+  }
+
+  function cardHTML(u, Q) {
+    Q = Q || {};
+    var nombre = u.nombre || u.alias || 'Perfil';
+    var edad = u.edad != null ? String(u.edad).trim() + ' años' : '';
+    var loc = lineaUbicacionPerfil(u, Q);
+    var catLabel = labelCategoria(u.categoriaPublica || u.categoria || '');
+    var set = modalidadesSet(u);
+    var fotos = numFotos(u);
+    var disp = disponibilidadDe(u);
+    var verificada = u.verificada === true || u.verificado === true;
+    var respRapida = u.respuestaRapida !== false;
+    var perfilId = u.__id || '';
+    var mods = chipModalidadHTML(set);
+
+    return '' +
+      '<article class="pcard res-card">' +
+        '<div class="res-card__media">' +
+          (u.nueva ? '<span class="res-nueva">NUEVA</span>' : '') +
+          '<img src="' + safeTxt(u.fotoURL) + '" alt="Foto de ' + safeTxt(nombre) + ', ' + safeTxt(loc) + '" width="430" height="300" loading="eager" decoding="async">' +
+          (fotos > 0 ? '<span class="gal__count">' + svgIco('camera', 'res-fotos-ic') + fotos + ' fotos</span>' : '') +
+        '</div>' +
+        '<div class="res-card__body">' +
+          '<div class="res-card__col res-card__col--main">' +
+            '<div class="idhead res-card__head">' +
+              '<h2 class="res-card__name">' + safeTxt(nombre) + '</h2>' +
+              (verificada ? verificadoBadgeHTML() : '') +
+              (edad ? '<span class="age">' + safeTxt(edad) + '</span>' : '') +
+            '</div>' +
+            '<div class="idloc li-pin">' + svgIco('pin', 'idloc__ic') + '<span>' + safeTxt(loc) + '</span></div>' +
+            (mods ? '<div class="modchips">' + mods + '</div>' : '') +
+            observacionesHTML(u) +
+            descripcionHTML(u) +
+            '<div class="feat-line res-status">' +
+              '<span class="idloc av res-avail res-avail--' + disp.clase + '"><span class="idloc__ic"><span class="res-dot res-dot--' + disp.clase + '"></span></span><span>' + safeTxt(disp.txt) + '</span></span>' +
+              (respRapida ? '<span>⚡ Respuesta rápida</span>' : '') +
+            '</div>' +
+          '</div>' +
+          '<div class="res-card__col res-card__col--side">' +
+            '<button class="res-fav" type="button" aria-label="Favorito" onclick="toggleFav(this,event)">♡</button>' +
+            '<div class="precio-block res-precio res-precio--side">' +
+              '<div class="precio-desde">Desde</div>' +
+              '<div class="precio-big">' + safeTxt(precioTexto(u)) + '</div>' +
+            '</div>' +
+            '<button class="pbtn res-ver" type="button" onclick="abrirPerfil(\'' + safeTxt(perfilId) + '\')">' +
+              '<span class="res-ver__sparkles" aria-hidden="true"></span>' +
+              '<span class="res-ver__txt">Ver perfil ›</span>' +
+            '</button>' +
+          '</div>' +
+        '</div>' +
+      '</article>';
+  }
+
+  function pasaFiltro(u, filtro) {
+    if (filtro === 'todos' || filtro === 'cerca') return true;
+    var set = modalidadesSet(u);
+    if (filtro === 'nuevas') return u.nueva === true;
+    if (filtro === 'verificadas') return u.verificada === true || u.verificado === true;
+    if (filtro === 'lugar') return !!set.recibe;
+    if (filtro === 'hotel') return !!set.hotel;
+    if (filtro === 'domicilio') return !!set.domicilio;
+    return true;
+  }
+
+  function renderProfiles(listEl, perfiles, opts) {
+    if (!listEl || !Array.isArray(perfiles)) return;
+    opts = opts || {};
+    var filtro = opts.filtro || 'todos';
+    var Q = opts.Q || {};
+    var porPagina = opts.porPagina;
+    var filtrados = perfiles.filter(function (u) { return pasaFiltro(u, filtro); });
+    if (!filtrados.length && perfiles.length) filtrados = perfiles;
+    var visibles = (porPagina != null && porPagina > 0) ? filtrados.slice(0, porPagina) : filtrados;
+
+    if (!visibles.length) {
+      listEl.innerHTML = vacioResultadosHTML(Q);
+      if (global.CariHubBannerSinResultados && CariHubBannerSinResultados.syncResultadosPage) {
+        global.CariHubBannerSinResultados.syncResultadosPage(true);
+      }
+      var shell = document.querySelector('.res-shell');
+      if (shell) shell.classList.add('res-shell--vacío');
+      return;
+    }
+
+    if (global.CariHubBannerSinResultados && CariHubBannerSinResultados.syncResultadosPage) {
+      global.CariHubBannerSinResultados.syncResultadosPage(false);
+    }
+    var shellOn = document.querySelector('.res-shell');
+    if (shellOn) shellOn.classList.remove('res-shell--vacío');
+    listEl.innerHTML = visibles.map(function (u) { return cardHTML(u, Q); }).join('');
+  }
+
+  global.CariHubResultadosDemo = {
+    PERFILES_CANON: PERFILES_CANON,
+    perfilesFallback: perfilesFallback,
+    perfilesCanonicos: perfilesCanonicos,
+    perfilesRegistrados: perfilesRegistrados,
+    vistaPreviaModo: vistaPreviaModo,
+    componerListaResultados: componerListaResultados,
+    vacioResultadosHTML: vacioResultadosHTML,
+    generarPerfiles: generarPerfiles,
+    renderProfiles: renderProfiles,
+    cardHTML: cardHTML,
+    queryFromLocation: queryFromLocation,
+    queryExplicitFromLocation: queryExplicitFromLocation,
+    vistaDeCategoria: vistaDeCategoria,
+    labelCategoria: labelCategoria,
+    idCategoria: idCategoria,
+    nivelBusqueda: nivelBusqueda,
+    textoSeoResultados: textoSeoResultados,
+    segmentosBusquedaSeo: segmentosBusquedaSeo,
+    lineaUbicacionPerfil: lineaUbicacionPerfil,
+    coincideBusqueda: coincideBusqueda,
+    coincideDemo: coincideDemo,
+    urlPerfilDemo: urlPerfilDemo
+  };
+})(typeof window !== 'undefined' ? window : globalThis);
