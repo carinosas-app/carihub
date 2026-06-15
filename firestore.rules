@@ -191,7 +191,7 @@ service cloud.firestore {
     // Precios publicitarios: lectura pública del documento y overrides activos.
     // Escritura solo admin. El funnel usa fallback local si falla la lectura.
     match /configuracion_publicidad/{docId} {
-      allow read: if docId == 'precios_banners';
+      allow read: if docId == 'precios_banners' || docId == 'banners_activos';
       allow create, update, delete: if isAdmin();
 
       match /overrides/{overrideId} {

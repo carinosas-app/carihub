@@ -5,10 +5,10 @@
   'use strict';
 
   var FOTOS = [
-    'preview/img/violeta-1.png',
-    'preview/img/violeta-2.png',
-    'preview/img/violeta-3.png',
-    'preview/img/violeta-4.png'
+    'img/resultados-demo/violeta-1.png',
+    'img/resultados-demo/violeta-2.png',
+    'img/resultados-demo/violeta-3.png',
+    'img/resultados-demo/violeta-4.png'
   ];
 
   var ZONAS = ['San Pedro', 'Centro', 'Valle Oriente', 'Cumbres', 'Mitras', 'Del Valle'];
@@ -65,6 +65,7 @@
       tagline: 'Complaciente y cariñosa, trato de novia.',
       observaciones: ['Complaciente', 'Cariñosa', 'Trato de novia'],
       modalidades: ['recibe', 'hotel', 'domicilio'],
+      categoriaPublica: 'Escort VIP',
       verificada: true,
       nueva: true,
       disponibilidad: 'Disponible ahora',
@@ -85,6 +86,7 @@
       tagline: 'Acompañante elegante, discreta y muy atenta.',
       observaciones: ['Acompañante', 'Elegante', 'Discreta', 'Atenta'],
       modalidades: ['recibe', 'hotel'],
+      categoriaPublica: 'Acompañante',
       verificada: true,
       nueva: false,
       disponibilidad: 'Disponible ahora',
@@ -106,6 +108,7 @@
       tagline: 'Linda, divertida y muy complaciente.',
       observaciones: ['Linda', 'Divertida', 'Complaciente'],
       modalidades: ['recibe', 'hotel', 'domicilio'],
+      categoriaPublica: 'Escort',
       verificada: true,
       nueva: false,
       disponibilidad: 'Ocupada',
@@ -114,6 +117,52 @@
       fotosCount: 18
     }
   ];
+
+  /** Cuarto perfil demo — vista ?vista=con-resultados-4 */
+  var PERFIL_CANON_CUARTO = {
+    __id: 'demo-valentina',
+    __demo: true,
+    __vista: 'adult',
+    nombre: 'Valentina',
+    edad: 30,
+    ubicacion: 'Valle Oriente, Monterrey',
+    zona: 'Valle Oriente',
+    ciudad: 'Monterrey',
+    precio: '2,000',
+    tagline: 'Elegante, discreta y siempre puntual.',
+    observaciones: ['Elegante', 'Discreta', 'Puntual'],
+    modalidades: ['recibe', 'hotel', 'domicilio'],
+    categoriaPublica: 'Escort VIP',
+    verificada: true,
+    nueva: false,
+    disponibilidad: 'Ocupada',
+    respuestaRapida: true,
+    fotoURL: FOTOS[3],
+    fotosCount: 14
+  };
+
+  /** Quinto perfil demo — vista ?vista=con-resultados-4 (peek 4,5 tarjetas) */
+  var PERFIL_CANON_QUINTO = {
+    __id: 'demo-camila',
+    __demo: true,
+    __vista: 'adult',
+    nombre: 'Camila',
+    edad: 26,
+    ubicacion: 'Cumbres, Monterrey',
+    zona: 'Cumbres',
+    ciudad: 'Monterrey',
+    precio: '1,800',
+    tagline: 'Trato de novia y conversación agradable.',
+    observaciones: ['Trato de novia', 'Conversación', 'Agradable'],
+    modalidades: ['hotel', 'domicilio'],
+    categoriaPublica: 'Escort',
+    verificada: false,
+    nueva: true,
+    disponibilidad: 'Disponible ahora',
+    respuestaRapida: true,
+    fotoURL: FOTOS[1],
+    fotosCount: 10
+  };
 
   var PLANTILLAS = {
     escort: {
@@ -204,6 +253,20 @@
   function perfilesCanonicos(Q) {
     Q = Q || {};
     return PERFILES_CANON.map(function (p) { return clonarPerfil(p, Q); });
+  }
+
+  function perfilesCanonicosCuatro(Q) {
+    Q = Q || {};
+    return PERFILES_CANON.concat([PERFIL_CANON_CUARTO]).map(function (p) {
+      return clonarPerfil(p, Q);
+    });
+  }
+
+  function perfilesCanonicosCinco(Q) {
+    Q = Q || {};
+    return PERFILES_CANON.concat([PERFIL_CANON_CUARTO, PERFIL_CANON_QUINTO]).map(function (p) {
+      return clonarPerfil(p, Q);
+    });
   }
 
   function armarPerfil(base, idx, Q, catLabel, catId, vistaDef) {
@@ -304,23 +367,35 @@
     return [];
   }
 
-  /** Vista previa en IDE: ?vista=con-resultados | ?vista=sin-resultados */
+  /** Vista previa en IDE: ?vista=con-resultados | con-resultados-4 | sin-resultados */
   function vistaPreviaModo() {
     try {
       var p = new URL(global.location.href).searchParams.get('vista');
       if (p === 'con-resultados' || p === 'con') return 'con-resultados';
+      if (p === 'con-resultados-4' || p === 'con-4' || p === 'cuatro') return 'con-resultados-4';
       if (p === 'sin-resultados' || p === 'sin' || p === 'vacio') return 'sin-resultados';
     } catch (e) { /* opcional */ }
     return null;
   }
 
-  /** Lista final: reales en producción; canónicos demo solo con ?vista=con-resultados */
+  /** Lista final: reales en producción; canónicos demo solo con ?vista=con-resultados* */
   function componerListaResultados(Q) {
     Q = Q || {};
-    if (vistaPreviaModo() === 'con-resultados') {
-      var demo = perfilesCanonicos(Q);
+    var modo = vistaPreviaModo();
+    if (modo === 'con-resultados-4') {
       return {
-        perfiles: demo.slice(),
+        perfiles: perfilesCanonicosCinco(Q).slice(),
+        meta: {
+          vacio: false,
+          totalRegistrados: 0,
+          preview: true,
+          modoVista: 'con-resultados-4'
+        }
+      };
+    }
+    if (modo === 'con-resultados') {
+      return {
+        perfiles: perfilesCanonicosCinco(Q).slice(),
         meta: {
           vacio: false,
           totalRegistrados: 0,
@@ -329,12 +404,26 @@
         }
       };
     }
+    if (modo === 'sin-resultados') {
+      return {
+        perfiles: [],
+        meta: {
+          vacio: true,
+          totalRegistrados: 0,
+          preview: true,
+          modoVista: 'sin-resultados'
+        }
+      };
+    }
     var registrados = perfilesRegistrados(Q);
+    var totalEnSitio = (global.CariHubResultadosRegistrados && typeof CariHubResultadosRegistrados.totalPublicos === 'function')
+      ? CariHubResultadosRegistrados.totalPublicos()
+      : registrados.length;
     return {
       perfiles: registrados.slice(),
       meta: {
         vacio: registrados.length === 0,
-        totalRegistrados: registrados.length,
+        totalRegistrados: totalEnSitio,
         modoVista: vistaPreviaModo() || 'produccion'
       }
     };
@@ -402,52 +491,26 @@
 
   function vacioResultadosHTML(Q) {
     Q = Q || {};
-    var cat = labelCategoria(Q.categoria);
-    var pais = String(Q.pais || '').trim();
-    var estado = String(Q.estado || '').trim();
-    var ciudad = String(Q.ciudad || '').trim();
-    var regQs = new URLSearchParams();
-    regQs.set('abrir', 'registro');
-    if (Q.categoria) regQs.set('categoria', Q.categoria);
-    if (pais) regQs.set('pais', pais);
-    if (estado) regQs.set('estado', estado);
-    if (ciudad) regQs.set('ciudad', ciudad);
-
-    function chip(label, valor) {
-      if (!valor) return '';
-      return '<span class="res-vacio__chip"><span class="res-vacio__chip-label">' +
-        safeTxt(label) + '</span><span class="res-vacio__chip-val">' + safeTxt(valor) + '</span></span>';
-    }
-
     return '' +
-      '<div class="res-vacio-zone" role="status" aria-live="polite">' +
-        '<aside class="res-vacio-side res-vacio-side--izq" aria-label="Publicidad estados">' +
-          bannerLateralHTML('izq') +
-        '</aside>' +
-        '<div class="res-vacio">' +
-          '<span class="res-vacio__sparkles" aria-hidden="true"></span>' +
-          '<div class="res-vacio__inner">' +
-            '<div class="res-vacio__brand">Cariñosas</div>' +
-            '<p class="res-vacio__tag">Encuentra tu compañía ideal</p>' +
-            '<h2 class="res-vacio__title">' + safeTxt(tituloVacio()) + '</h2>' +
-            '<p class="res-vacio__sub">' + safeTxt(SUB_SIN_RESULTADOS) + '</p>' +
-            '<div class="res-vacio__chips">' +
-              chip('Categoría', cat) +
-              chip('País', pais) +
-              chip('Estado', estado) +
-              chip('Ciudad', ciudad) +
-            '</div>' +
-            '<div class="res-vacio__actions">' +
-              '<a class="res-vacio__btn res-vacio__btn--primary" href="index.html?' + regQs.toString() + '">Registrarse en esta categoría</a>' +
-              '<button class="res-vacio__btn res-vacio__btn--cerca" type="button" onclick="resBuscarCerca()">Buscar cerca</button>' +
-              '<button class="res-vacio__btn res-vacio__btn--volver" type="button" onclick="resVolverInicio()">Volver</button>' +
-            '</div>' +
-          '</div>' +
+      '<div class="res-vacio res-vacio--inline" role="status" aria-live="polite">' +
+        '<span class="res-vacio__sparkles" aria-hidden="true"></span>' +
+        '<div class="res-vacio__inner">' +
+          '<div class="res-vacio__brand">Cariñosas</div>' +
+          '<p class="res-vacio__tag">Encuentra tu compañía ideal</p>' +
+          '<h2 class="res-vacio__title">' + safeTxt(tituloVacio()) + '</h2>' +
+          '<p class="res-vacio__sub">' + safeTxt(SUB_SIN_RESULTADOS) + '</p>' +
         '</div>' +
-        '<aside class="res-vacio-side res-vacio-side--der" aria-label="Publicidad LIBE">' +
-          bannerLateralHTML('der') +
-        '</aside>' +
       '</div>';
+  }
+
+  function urlPerfil(u, Q) {
+    if (u && (u.__registrado || u.__demo === false) && u.__id) {
+      if (global.CariHubResultadosRegistrados && CariHubResultadosRegistrados.urlPerfil) {
+        return CariHubResultadosRegistrados.urlPerfil(u.__id);
+      }
+      return 'perfil.html?id=' + encodeURIComponent(String(u.__id));
+    }
+    return urlPerfilDemo(u, Q);
   }
 
   function urlPerfilDemo(u, Q) {
@@ -508,6 +571,41 @@
     return set;
   }
 
+  function ubicacionCorta(u) {
+    if (u.ubicacion) return String(u.ubicacion).trim();
+    var z = String(u.zona || '').trim();
+    var c = String(u.ciudad || '').trim();
+    if (z && c && z !== c) return z + ', ' + c;
+    return z || c || '';
+  }
+
+  function verificadoIconHTML() {
+    return '<span class="res-card__vcheck" aria-label="Verificada">' +
+      '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">' +
+      '<circle cx="10" cy="10" r="8.25"/><path d="M6.4 10.1 8.7 12.4 13.7 7.6"/>' +
+      '</svg></span>';
+  }
+
+  function esPerfilVip(u, catLabel) {
+    if (u.vip === true || u.esVip === true) return true;
+    return /vip/i.test(String(catLabel || ''));
+  }
+
+  function badgesCompactHTML(u, opts) {
+    opts = opts || {};
+    var items = [];
+    if (opts.vip) {
+      items.push('<span class="res-badge res-badge--vip">👑 VIP</span>');
+    }
+    if (opts.respRapida) {
+      items.push('<span class="res-badge res-badge--fast">⚡ Respuesta rápida</span>');
+    } else if (u.nueva) {
+      items.push('<span class="res-badge res-badge--new">★ Nueva</span>');
+    }
+    if (!items.length) return '';
+    return items.join('');
+  }
+
   function chipModalidadHTML(set) {
     var items = [];
     if (set.recibe) items.push('<span class="modchip mc-pink">' + svgIco('home') + 'Recibe</span>');
@@ -531,22 +629,28 @@
   function disponibilidadDe(u) {
     var d = normTxt(u.disponibilidad || u.estatus || '');
     if (d.indexOf('ocup') !== -1) return { clase: 'busy', txt: 'Ocupada', busy: true };
-    return { clase: 'on', txt: u.disponibilidad || 'Disponible ahora', busy: false };
+    if (d.indexOf('dispon') !== -1) return { clase: 'on', txt: 'Disponible', busy: false };
+    return { clase: 'on', txt: 'Disponible', busy: false };
   }
 
-  /** Línea SEO: categoría + país obligatorio + estado/ciudad si aplican */
-  function segmentosBusquedaSeo(Q) {
-    Q = Q || {};
+  function esSegmentoBusquedaExplicito(val, vacios) {
+    var s = String(val || '').trim();
+    if (!s || s === '—') return false;
+    vacios = vacios || [];
+    return vacios.indexOf(s) === -1;
+  }
+
+  /** Línea SEO: solo parámetros presentes en la URL (sin defaults de Q) */
+  function segmentosBusquedaSeo() {
     var explicit = queryExplicitFromLocation();
     var parts = [];
-    var cat = labelCategoria(explicit.categoria || Q.categoria || '');
-    if (cat) parts.push(cat);
-    var pais = String(explicit.pais || Q.pais || '').trim();
-    if (pais && pais !== '—') parts.push(pais);
-    var estado = String(explicit.estado || Q.estado || '').trim();
-    var ciudad = String(explicit.ciudad || Q.ciudad || '').trim();
-    if (estado) parts.push(estado);
-    if (ciudad) parts.push(ciudad);
+    if (explicit.categoria) {
+      var cat = labelCategoria(explicit.categoria);
+      if (cat) parts.push(cat);
+    }
+    if (esSegmentoBusquedaExplicito(explicit.pais)) parts.push(explicit.pais.trim());
+    if (esSegmentoBusquedaExplicito(explicit.estado, ['Todos los estados'])) parts.push(explicit.estado.trim());
+    if (esSegmentoBusquedaExplicito(explicit.ciudad, ['Todas las ciudades'])) parts.push(explicit.ciudad.trim());
     return parts;
   }
 
@@ -594,54 +698,98 @@
       '</div>';
   }
 
+  function observacionesCompactHTML(u) {
+    var items = observacionesLista(u);
+    if (!items.length) return '';
+    return '<div class="res-card__obs">' +
+      '<span class="res-card__obs-label">Observaciones</span>' +
+      '<span class="res-card__obs-txt">' +
+      items.map(function (t) { return safeTxt(t); }).join(' · ') +
+      '</span></div>';
+  }
+
+  function descripcionCompactHTML(u) {
+    var txt = String(u.descripcion || u.tagline || u.descripcionPublica || '').trim();
+    if (!txt) return '';
+    return '<p class="res-card__desc">' +
+      '<span class="res-card__desc-label">Descripción</span>' +
+      '<span class="res-card__desc-txt">' + safeTxt(txt) + '</span>' +
+      '</p>';
+  }
+
   function cardHTML(u, Q) {
     Q = Q || {};
     var nombre = u.nombre || u.alias || 'Perfil';
     var edad = u.edad != null ? String(u.edad).trim() + ' años' : '';
-    var loc = lineaUbicacionPerfil(u, Q);
-    var catLabel = labelCategoria(u.categoriaPublica || u.categoria || '');
+    var loc = ubicacionCorta(u);
+    var catLabel = labelCategoria(u.categoriaPublica || u.categoria || Q.categoria || '');
     var set = modalidadesSet(u);
     var fotos = numFotos(u);
     var disp = disponibilidadDe(u);
     var verificada = u.verificada === true || u.verificado === true;
     var respRapida = u.respuestaRapida !== false;
     var perfilId = u.__id || '';
+    var favBtn = (u.__registrado && perfilId)
+      ? '<button type="button" class="res-fav" data-fav-perfil="' + safeTxt(perfilId) + '" aria-label="Guardar en favoritos" aria-pressed="false" onclick="toggleFav(this, event)">♡</button>'
+      : '';
     var mods = chipModalidadHTML(set);
+    var vip = esPerfilVip(u, catLabel);
+    var badges = badgesCompactHTML(u, { vip: vip, respRapida: respRapida });
+    var descBlock = descripcionCompactHTML(u);
+    var obsBlock = observacionesCompactHTML(u);
+    var priceBlock =
+      '<div class="res-card__price">' +
+        '<span class="res-card__price-ic" aria-hidden="true">' + svgIco('money', 'res-card__price-ic') + '</span>' +
+        '<span class="res-card__price-desde">Desde</span>' +
+        '<span class="res-card__price-val">' + safeTxt(precioTexto(u)) + '</span>' +
+      '</div>';
+
+    var metaRow = '';
+    var footer = '';
+    if (loc || mods) {
+      metaRow = '<div class="res-card__row res-card__row--meta">' +
+        (loc ? '<div class="res-card__loc">' + svgIco('pin', 'res-card__loc-ic') + '<span>' + safeTxt(loc) + '</span></div>' : '<span class="res-card__loc-spacer" aria-hidden="true"></span>') +
+        (mods ? '<div class="modchips res-card__mods">' + mods + '</div>' : '') +
+      '</div>';
+    }
+
+    if (catLabel || badges) {
+      footer = '<div class="res-card__row res-card__row--foot">' +
+        (catLabel ? '<div class="res-card__cat">' + svgIco('heart', 'res-card__cat-ic') + '<span>' + safeTxt(catLabel) + '</span></div>' : '<span class="res-card__cat-spacer" aria-hidden="true"></span>') +
+        (badges ? '<div class="res-card__badges">' + badges + '</div>' : '') +
+        '</div>';
+    }
 
     return '' +
-      '<article class="pcard res-card">' +
+      '<article class="pcard res-card res-card--compact">' +
         '<div class="res-card__media">' +
           (u.nueva ? '<span class="res-nueva">NUEVA</span>' : '') +
-          '<img src="' + safeTxt(u.fotoURL) + '" alt="Foto de ' + safeTxt(nombre) + ', ' + safeTxt(loc) + '" width="430" height="300" loading="eager" decoding="async">' +
-          (fotos > 0 ? '<span class="gal__count">' + svgIco('camera', 'res-fotos-ic') + fotos + ' fotos</span>' : '') +
+          '<img src="' + safeTxt(u.fotoURL) + '" alt="Foto de ' + safeTxt(nombre) + '" width="360" height="210" loading="lazy" decoding="async">' +
+          (fotos > 0 ? '<span class="gal__count">' + svgIco('camera', 'res-fotos-ic') + fotos + '</span>' : '') +
         '</div>' +
         '<div class="res-card__body">' +
-          '<div class="res-card__col res-card__col--main">' +
-            '<div class="idhead res-card__head">' +
-              '<h2 class="res-card__name">' + safeTxt(nombre) + '</h2>' +
-              (verificada ? verificadoBadgeHTML() : '') +
-              (edad ? '<span class="age">' + safeTxt(edad) + '</span>' : '') +
+          '<div class="res-card__main">' +
+            '<div class="res-card__row res-card__row--head">' +
+              '<div class="res-card__head">' +
+                '<h2 class="res-card__name">' + safeTxt(nombre) + '</h2>' +
+                (verificada ? verificadoIconHTML() : '') +
+                (edad ? '<span class="age">' + safeTxt(edad) + '</span>' : '') +
+              '</div>' +
+              favBtn +
+              '<span class="res-card__avail res-card__avail--' + disp.clase + '">' +
+                '<span class="res-dot res-dot--' + disp.clase + '" aria-hidden="true"></span>' +
+                safeTxt(disp.txt) +
+              '</span>' +
+              priceBlock +
             '</div>' +
-            '<div class="idloc li-pin">' + svgIco('pin', 'idloc__ic') + '<span>' + safeTxt(loc) + '</span></div>' +
-            (mods ? '<div class="modchips">' + mods + '</div>' : '') +
-            observacionesHTML(u) +
-            descripcionHTML(u) +
-            '<div class="feat-line res-status">' +
-              '<span class="idloc av res-avail res-avail--' + disp.clase + '"><span class="idloc__ic"><span class="res-dot res-dot--' + disp.clase + '"></span></span><span>' + safeTxt(disp.txt) + '</span></span>' +
-              (respRapida ? '<span>⚡ Respuesta rápida</span>' : '') +
-            '</div>' +
+            descBlock +
+            obsBlock +
+            metaRow +
+            footer +
           '</div>' +
-          '<div class="res-card__col res-card__col--side">' +
-            '<button class="res-fav" type="button" aria-label="Favorito" onclick="toggleFav(this,event)">♡</button>' +
-            '<div class="precio-block res-precio res-precio--side">' +
-              '<div class="precio-desde">Desde</div>' +
-              '<div class="precio-big">' + safeTxt(precioTexto(u)) + '</div>' +
-            '</div>' +
-            '<button class="pbtn res-ver" type="button" onclick="abrirPerfil(\'' + safeTxt(perfilId) + '\')">' +
-              '<span class="res-ver__sparkles" aria-hidden="true"></span>' +
-              '<span class="res-ver__txt">Ver perfil ›</span>' +
-            '</button>' +
-          '</div>' +
+          '<button class="res-card__ver-btn" type="button" aria-label="Ver perfil de ' + safeTxt(nombre) + '" onclick="abrirPerfil(\'' + safeTxt(perfilId) + '\')">' +
+            '<span class="res-card__ver-btn-txt">Ver perfil ›</span>' +
+          '</button>' +
         '</div>' +
       '</article>';
   }
@@ -669,19 +817,11 @@
 
     if (!visibles.length) {
       listEl.innerHTML = vacioResultadosHTML(Q);
-      if (global.CariHubBannerSinResultados && CariHubBannerSinResultados.syncResultadosPage) {
-        global.CariHubBannerSinResultados.syncResultadosPage(true);
-      }
-      var shell = document.querySelector('.res-shell');
-      if (shell) shell.classList.add('res-shell--vacío');
+      listEl.classList.add('res-lista--vacio');
       return;
     }
 
-    if (global.CariHubBannerSinResultados && CariHubBannerSinResultados.syncResultadosPage) {
-      global.CariHubBannerSinResultados.syncResultadosPage(false);
-    }
-    var shellOn = document.querySelector('.res-shell');
-    if (shellOn) shellOn.classList.remove('res-shell--vacío');
+    listEl.classList.remove('res-lista--vacio');
     listEl.innerHTML = visibles.map(function (u) { return cardHTML(u, Q); }).join('');
   }
 
@@ -707,6 +847,7 @@
     lineaUbicacionPerfil: lineaUbicacionPerfil,
     coincideBusqueda: coincideBusqueda,
     coincideDemo: coincideDemo,
+    urlPerfil: urlPerfil,
     urlPerfilDemo: urlPerfilDemo
   };
 })(typeof window !== 'undefined' ? window : globalThis);

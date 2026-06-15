@@ -14,9 +14,10 @@
 
 <div class="res-preview-switcher" id="resPreviewSwitcher" aria-label="Vista previa resultados">
   <b>Vista previa</b>
-  <button type="button" id="resVistaCon" data-vista="con-resultados">Con resultados (3 perfiles)</button>
+  <button type="button" id="resVistaCon" data-vista="con-resultados">Con resultados (scroll)</button>
+  <button type="button" id="resVistaCuatro" data-vista="con-resultados-4">Con resultados (4 fijas)</button>
   <button type="button" id="resVistaSin" data-vista="sin-resultados">Sin resultados (vacío)</button>
-  <span class="res-preview-switcher__hint">Compara banners y layout entre ambas pantallas</span>
+  <span class="res-preview-switcher__hint">Compara las tres pantallas · URL: <code>?vista=sin-resultados</code></span>
 </div>
 
 <div id="fitOuter"><div id="fitSpacer"><div id="fitRoot">
@@ -88,11 +89,11 @@
         <span class="pnav__ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span>
         <span class="pnav__label">Resultados</span>
       </a>
-      <a href="#">
+      <a href="index.html?abrir=favoritos">
         <span class="pnav__ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20.2l-.9-.8C6.8 15.2 4.5 12.6 4.5 9.8 4.5 7 6.6 5 9.4 5c1.6 0 3.1.8 4 2.1.9-1.3 2.4-2.1 4-2.1 2.8 0 4.9 2 4.9 4.8 0 2.8-2.3 5.4-6.6 9.4l-.9.9z"/></svg></span>
         <span class="pnav__label">Favoritas</span>
       </a>
-      <a href="#">
+      <a href="index.html">
         <span class="pnav__ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7.5A2.5 2.5 0 015.5 5H13A2.5 2.5 0 0115.5 7.5v3A2.5 2.5 0 0113 13H8l-3.5 2.6V13H5.5A2.5 2.5 0 013 10.5z"/></svg></span>
         <span class="pnav__label">Mensajes</span>
         <span class="bdg">3</span>
@@ -103,7 +104,10 @@
         <span class="bdg">2</span>
       </a>
     </nav>
-    <button class="pbtn" type="button" onclick="location.href='index.html?abrir=registro'">＋ Publicar anuncio</button>
+    <button class="pbtn pbtn--publicar-res" type="button" onclick="location.href='index.html?abrir=registro'">
+      <span class="pbtn--publicar-res__sparkles" aria-hidden="true"></span>
+      <span class="pbtn--publicar-res__txt">＋ Publicar anuncio</span>
+    </button>
   </header>
 
   <!-- Zona fija entre banners y perfiles: Estados · toolbar · En vivo -->
@@ -115,9 +119,9 @@
         <p class="res-midband__seo" id="resSeoLine"></p>
       </div>
       <div class="res-midband__actions">
-        <button class="res-midband__btn res-midband__btn--verde" type="button" id="resBtnVerificada">Verificada</button>
+        <button class="res-midband__btn res-midband__btn--volver" type="button" id="resBtnVolver">Volver</button>
         <a class="res-midband__btn res-midband__btn--fuchsia" id="resBtnRegistro" href="index.html?abrir=registro">Registrarse</a>
-        <button class="res-midband__btn res-midband__btn--fuchsia" type="button" id="resBtnCerca">Cerca de mí</button>
+        <button class="res-midband__btn res-midband__btn--fuchsia" type="button" id="resBtnCerca"><span class="res-midband__btn-ic" aria-hidden="true">📍</span>Cerca de mí</button>
       </div>
     </div>
     <div class="res-midband__slot res-midband__slot--libe" id="resMidLibe" data-slot="resultados_libe"></div>
@@ -131,24 +135,28 @@
   <div class="res-shell__bottom">
 
   <!-- 8) CAMBIAR BÚSQUEDA (único selector interactivo) -->
-  <div class="res-search-dock">
+  <div class="res-search-dock" id="resSearchDock">
   <p class="res-search-dock__hint">Cambiar búsqueda</p>
   <section class="res-search-bar" aria-label="Cambiar búsqueda">
-    <label class="res-sbar-btn">
+    <label class="res-sbar-btn" data-sbar-field="cat">
       <span class="res-sbar-btn__sparkles" aria-hidden="true"></span>
-      <select id="resSbarCat" class="res-sbar-btn__select" aria-label="Categoría"></select>
+      <span class="res-sbar-btn__value" id="resSbarCatLabel">Escort</span>
+      <select id="resSbarCat" class="res-sbar-btn__select" aria-label="Categoría" tabindex="-1"></select>
     </label>
-    <label class="res-sbar-btn">
+    <label class="res-sbar-btn" data-sbar-field="pais">
       <span class="res-sbar-btn__sparkles" aria-hidden="true"></span>
-      <select id="resSbarPais" class="res-sbar-btn__select" aria-label="País"></select>
+      <span class="res-sbar-btn__value" id="resSbarPaisLabel">México</span>
+      <select id="resSbarPais" class="res-sbar-btn__select" aria-label="País" tabindex="-1"></select>
     </label>
-    <label class="res-sbar-btn">
+    <label class="res-sbar-btn" data-sbar-field="estado">
       <span class="res-sbar-btn__sparkles" aria-hidden="true"></span>
-      <select id="resSbarEstado" class="res-sbar-btn__select" aria-label="Estado"></select>
+      <span class="res-sbar-btn__value" id="resSbarEstadoLabel">Estado</span>
+      <select id="resSbarEstado" class="res-sbar-btn__select" aria-label="Estado" tabindex="-1"></select>
     </label>
-    <label class="res-sbar-btn">
+    <label class="res-sbar-btn" data-sbar-field="ciudad">
       <span class="res-sbar-btn__sparkles" aria-hidden="true"></span>
-      <select id="resSbarCiudad" class="res-sbar-btn__select" aria-label="Ciudad"></select>
+      <span class="res-sbar-btn__value" id="resSbarCiudadLabel">Ciudad</span>
+      <select id="resSbarCiudad" class="res-sbar-btn__select" aria-label="Ciudad" tabindex="-1"></select>
     </label>
     <button type="button" class="res-sbar-btn res-sbar-btn--buscar" id="resSbarBuscar" aria-label="Buscar">
       <span class="res-sbar-btn__sparkles" aria-hidden="true"></span>
@@ -160,7 +168,7 @@
   <!-- 9) BANNER INFERIOR (patrón .pb-slot--bottom) -->
   <a class="pb-slot pb-slot--bottom res-bottom" href="registro-banner.html?slot=resultados-inferior" aria-label="Anuncia tu perfil en Cariñosas">
     <span class="res-bottom__glow" aria-hidden="true"></span>
-    <span class="res-bottom__photo"><img src="preview/img/violeta-2.png" alt="" width="92" height="92" decoding="async"></span>
+    <span class="res-bottom__photo"><img src="img/resultados-demo/violeta-2.png" alt="" width="92" height="92" decoding="async"></span>
     <span class="res-bottom__chart" aria-hidden="true">
       <svg viewBox="0 0 48 48" fill="none"><g stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M8 34V22M18 34V16M28 34V26M38 34V10"/><path d="M6 38h36"/></g><path d="M36 10l4-4v8h-8l4-4z" fill="currentColor"/></svg>
     </span>
@@ -184,15 +192,83 @@
 </div>
 </div></div></div>
 
+<div class="res-sbar-picker" id="resSbarPicker" hidden aria-hidden="true">
+  <div class="res-sbar-picker__backdrop" data-sbar-picker-close tabindex="-1" aria-hidden="true"></div>
+  <div class="res-sbar-picker__panel carihub-pink-sheen" role="dialog" aria-modal="true" aria-labelledby="resSbarPickerTitle">
+    <div class="res-sbar-picker__head">
+      <h3 class="res-sbar-picker__title" id="resSbarPickerTitle">Elegir</h3>
+      <button type="button" class="res-sbar-picker__close" data-sbar-picker-close aria-label="Cerrar">×</button>
+    </div>
+    <ul class="res-sbar-picker__list" id="resSbarPickerList" role="listbox"></ul>
+    <div class="res-sbar-picker__sheen" id="resSbarPickerSheen" aria-hidden="true"></div>
+  </div>
+</div>
+
+<script>
+(function () {
+  /* Demo del IDE: solo localhost / ?preview=1 — producción usa perfiles reales de Firestore */
+  var p = new URLSearchParams(location.search);
+  if (p.has('vista')) return;
+  var host = location.hostname;
+  var esDev = host === 'localhost' || host === '127.0.0.1' || location.protocol === 'file:' || p.get('preview') === '1';
+  if (!esDev) return;
+  p.set('vista', 'con-resultados');
+  if (!p.has('categoria')) p.set('categoria', 'Escort');
+  if (!p.has('pais')) p.set('pais', 'México');
+  if (!p.has('estado')) p.set('estado', 'Nuevo León');
+  if (!p.has('ciudad')) p.set('ciudad', 'Monterrey');
+  location.replace(location.pathname + '?' + p.toString());
+})();
+</script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+<script>
+(function () {
+  var firebaseConfig = {
+    apiKey: 'AIzaSyCp68DynjT63T9wHorCLxwBGkSEo_mYPUI',
+    authDomain: 'carihub-app.firebaseapp.com',
+    projectId: 'carihub-app',
+    storageBucket: 'carihub-app.firebasestorage.app',
+    messagingSenderId: '236894758884',
+    appId: '1:236894758884:web:5713e39a26c71f025a49f1'
+  };
+  if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+  window.CariHubDB = firebase.firestore();
+  window.CariHubAuth = firebase.auth();
+})();
+</script>
 <script src="paises.js"></script>
 <script src="estados.js"></script>
 <script src="ciudades.js"></script>
 <script src="js/banner-sin-resultados.js"></script>
 <script src="js/banner-resultados-laterales.js"></script>
 <script src="js/resultados-banners.js"></script>
+<script src="js/resultados-registrados.js"></script>
 <script src="js/resultados-demo.js"></script>
+<script src="js/carihub-favoritos.js"></script>
+<script src="js/publicidad-activa.js"></script>
 <script src="js/ch-ui.js"></script>
 <script src="js/carihub-pink-sheen.js"></script>
+<script>
+(function () {
+  function mountResSbarPickerDestellos() {
+    var host = document.getElementById('resSbarPickerSheen');
+    if (!host || host.dataset.mounted === '1' || !window.CariHubPinkSheen) return;
+    var capa = document.createElement('div');
+    capa.className = 'res-sbar-picker__destellos carihub-pink-sheen__destellos';
+    capa.setAttribute('aria-hidden', 'true');
+    capa.innerHTML = CariHubPinkSheen.htmlDestellosRosaCarihub();
+    host.appendChild(capa);
+    host.dataset.mounted = '1';
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', mountResSbarPickerDestellos);
+  } else {
+    mountResSbarPickerDestellos();
+  }
+})();
+</script>
 <script src="js/carihub-nav-quick.js"></script>
 <script src="js/catalogos-carihub.js"></script>
 <script>
@@ -222,7 +298,7 @@
       nueva: true,
       disponibilidad: 'Disponible ahora',
       respuestaRapida: true,
-      fotoURL: 'preview/img/violeta-1.png',
+      fotoURL: 'img/resultados-demo/violeta-1.png',
       fotosCount: 15
     },
     {
@@ -242,7 +318,7 @@
       nueva: false,
       disponibilidad: 'Disponible ahora',
       respuestaRapida: true,
-      fotoURL: 'preview/img/violeta-2.png',
+      fotoURL: 'img/resultados-demo/violeta-2.png',
       fotosCount: 12
     },
     {
@@ -262,7 +338,7 @@
       nueva: false,
       disponibilidad: 'Ocupada',
       respuestaRapida: true,
-      fotoURL: 'preview/img/violeta-3.png',
+      fotoURL: 'img/resultados-demo/violeta-3.png',
       fotosCount: 18
     }
   ];
@@ -291,27 +367,21 @@
     return [];
   }
 
-  function setShellVacío(esVacio) {
-    var shell = document.querySelector('.res-shell');
-    if (shell) shell.classList.toggle('res-shell--vacío', !!esVacio);
+  function setListaVacia(list, esVacio) {
+    if (!list) return;
+    list.classList.toggle('res-lista--vacio', !!esVacio);
   }
 
   function renderProfilesLocal(list, perfiles) {
     if (!list) return;
     if (!perfiles || !perfiles.length) {
-      setShellVacío(true);
+      setListaVacia(list, true);
       if (window.CariHubResultadosDemo && CariHubResultadosDemo.vacioResultadosHTML) {
         list.innerHTML = CariHubResultadosDemo.vacioResultadosHTML(Q);
       }
-      if (window.CariHubBannerSinResultados && CariHubBannerSinResultados.syncResultadosPage) {
-        CariHubBannerSinResultados.syncResultadosPage(true);
-      }
       return;
     }
-    setShellVacío(false);
-    if (window.CariHubBannerSinResultados && CariHubBannerSinResultados.syncResultadosPage) {
-      CariHubBannerSinResultados.syncResultadosPage(false);
-    }
+    setListaVacia(list, false);
     list.innerHTML = perfiles.map(function (u) {
       try {
         if (window.CariHubResultadosDemo && CariHubResultadosDemo.cardHTML) {
@@ -340,19 +410,56 @@
     var list = document.getElementById('profilesList');
     if (!list) return;
     refreshQ();
-    var perfiles = perfilesBase();
-    TODOS = perfiles || [];
-    renderProfiles(list, TODOS);
-    if (typeof scheduleFit === 'function') scheduleFit();
+
+    function pintar() {
+      var perfiles = perfilesBase();
+      TODOS = perfiles || [];
+      renderProfiles(list, TODOS);
+      if (window.CariHubFavoritos && CariHubFavoritos.prepararUsuario) {
+        CariHubFavoritos.prepararUsuario()
+          .then(function () { return CariHubFavoritos.sincronizarBotones(list); })
+          .catch(function () { /* opcional */ });
+      }
+      if (typeof scheduleFit === 'function') scheduleFit();
+      else if (typeof syncResListaSlots === 'function') syncResListaSlots();
+    }
+
+    var preview = vistaPreviaActiva();
+    if (!preview && window.CariHubResultadosRegistrados && typeof CariHubResultadosRegistrados.cargar === 'function') {
+      list.setAttribute('aria-busy', 'true');
+      CariHubResultadosRegistrados.cargar().then(pintar).catch(function () {
+        pintar();
+      }).finally(function () {
+        list.removeAttribute('aria-busy');
+      });
+      return;
+    }
+    pintar();
   }
 
   function aplicarVista() {
     var list = document.getElementById('profilesList');
     if (!list) return;
     refreshQ();
-    TODOS = perfilesBase() || [];
-    renderProfiles(list, TODOS);
-    if (typeof scheduleFit === 'function') scheduleFit();
+
+    function pintar() {
+      TODOS = perfilesBase() || [];
+      renderProfiles(list, TODOS);
+      if (window.CariHubFavoritos && CariHubFavoritos.prepararUsuario) {
+        CariHubFavoritos.prepararUsuario()
+          .then(function () { return CariHubFavoritos.sincronizarBotones(list); })
+          .catch(function () { /* opcional */ });
+      }
+      if (typeof scheduleFit === 'function') scheduleFit();
+      else if (typeof syncResListaSlots === 'function') syncResListaSlots();
+    }
+
+    var preview = vistaPreviaActiva();
+    if (!preview && window.CariHubResultadosRegistrados && typeof CariHubResultadosRegistrados.cargar === 'function') {
+      CariHubResultadosRegistrados.cargar().then(pintar).catch(pintar);
+      return;
+    }
+    pintar();
   }
 
   window.resBuscarCerca = function () {
@@ -372,6 +479,16 @@
 
   window.resVolverInicio = function () {
     location.href = 'index.html';
+  };
+
+  window.resVolverAnterior = function () {
+    try {
+      if (window.history.length > 1 && document.referrer) {
+        history.back();
+        return;
+      }
+    } catch (e) { /* noop */ }
+    resVolverInicio();
   };
 
   function paisesLista() {
@@ -440,6 +557,7 @@
     var ciuSel = ciudad.value || '';
     if (ciuSel && ciudades.indexOf(ciuSel) < 0) ciuSel = '';
     fillSelectOpcional(ciudad, ciudades, ciuSel, 'Todas las ciudades');
+    syncSbarLabels();
   }
 
   function syncSbarEstados() {
@@ -455,6 +573,230 @@
     if (pais) Q.pais = pais.value || Q.pais;
     if (estado) Q.estado = estado.value || '';
     if (ciudad) Q.ciudad = ciudad.value || '';
+  }
+
+  function syncSbarLabels() {
+    var map = [
+      { sel: 'resSbarCat', lbl: 'resSbarCatLabel', empty: 'Categoría' },
+      { sel: 'resSbarPais', lbl: 'resSbarPaisLabel', empty: 'País' },
+      { sel: 'resSbarEstado', lbl: 'resSbarEstadoLabel', empty: 'Todos los estados' },
+      { sel: 'resSbarCiudad', lbl: 'resSbarCiudadLabel', empty: 'Todas las ciudades' }
+    ];
+    map.forEach(function (m) {
+      var el = document.getElementById(m.sel);
+      var lbl = document.getElementById(m.lbl);
+      if (!el || !lbl) return;
+      var opt = el.options[el.selectedIndex];
+      var txt = (opt && opt.textContent) ? opt.textContent.trim() : '';
+      lbl.textContent = txt || m.empty;
+    });
+  }
+
+  function sbarSelectEl(field) {
+    var ids = { cat: 'resSbarCat', pais: 'resSbarPais', estado: 'resSbarEstado', ciudad: 'resSbarCiudad' };
+    return document.getElementById(ids[field] || '');
+  }
+
+  function sbarPickerEntries(field) {
+    var entries = [];
+    if (field === 'cat') {
+      if (window.CariHubCatalogos && CariHubCatalogos.categorias) {
+        CariHubCatalogos.categorias().forEach(function (c) {
+          entries.push({ value: c.label, label: c.label });
+        });
+      } else {
+        ['Escort', 'Masajes', 'Stripper'].forEach(function (v) {
+          entries.push({ value: v, label: v });
+        });
+      }
+      return entries;
+    }
+    if (field === 'pais') {
+      paisesLista().forEach(function (v) {
+        entries.push({ value: v, label: v });
+      });
+      return entries;
+    }
+    if (field === 'estado') {
+      entries.push({ value: '', label: 'Todos los estados' });
+      var pais = sbarSelectEl('pais');
+      estadosDePais(pais ? pais.value : Q.pais).forEach(function (v) {
+        entries.push({ value: v, label: v });
+      });
+      return entries;
+    }
+    if (field === 'ciudad') {
+      entries.push({ value: '', label: 'Todas las ciudades' });
+      var paisEl = sbarSelectEl('pais');
+      var estadoEl = sbarSelectEl('estado');
+      var paisVal = paisEl ? paisEl.value : Q.pais;
+      var estVal = estadoEl ? estadoEl.value : Q.estado;
+      if (estVal) {
+        ciudadesDe(paisVal, estVal).forEach(function (v) {
+          entries.push({ value: v, label: v });
+        });
+      }
+      return entries;
+    }
+    return entries;
+  }
+
+  var sbarPickerOpenField = null;
+
+  function mountSbarPickerSheen() {
+    var host = document.getElementById('resSbarPickerSheen');
+    if (!host || host.dataset.mounted === '1') return;
+    if (window.CariHubPinkSheen && CariHubPinkSheen.htmlDestellosRosaCarihub) {
+      var capa = document.createElement('div');
+      capa.className = 'res-sbar-picker__destellos carihub-pink-sheen__destellos';
+      capa.setAttribute('aria-hidden', 'true');
+      capa.innerHTML = CariHubPinkSheen.htmlDestellosRosaCarihub();
+      host.appendChild(capa);
+    }
+    host.dataset.mounted = '1';
+  }
+
+  function bootSbarPickerSheenLater() {
+    if (document.getElementById('resSbarPickerSheen') &&
+        document.getElementById('resSbarPickerSheen').dataset.mounted !== '1') {
+      mountSbarPickerSheen();
+    }
+  }
+
+  function closeSbarPicker() {
+    var picker = document.getElementById('resSbarPicker');
+    if (!picker) return;
+    picker.hidden = true;
+    picker.setAttribute('aria-hidden', 'true');
+    sbarPickerOpenField = null;
+    document.querySelectorAll('.res-sbar-btn[data-sbar-field]').forEach(function (btn) {
+      btn.classList.remove('is-picker-open');
+    });
+  }
+
+  var SBAR_PICKER_W = 268;
+  var SBAR_PICKER_H = 236;
+
+  function positionSbarPicker(anchor, panel) {
+    if (!anchor || !panel) return;
+    var rect = anchor.getBoundingClientRect();
+    var panelW = SBAR_PICKER_W;
+    var panelH = SBAR_PICKER_H;
+    var gap = 10;
+    var left = rect.left + (rect.width - panelW) / 2;
+    var top = rect.top - panelH - gap;
+    if (top < 8) top = rect.bottom + gap;
+    left = Math.max(8, Math.min(left, window.innerWidth - panelW - 8));
+    top = Math.max(8, Math.min(top, window.innerHeight - panelH - 8));
+    panel.style.left = Math.round(left) + 'px';
+    panel.style.top = Math.round(top) + 'px';
+  }
+
+  function openSbarPicker(field, anchor) {
+    var picker = document.getElementById('resSbarPicker');
+    var list = document.getElementById('resSbarPickerList');
+    var title = document.getElementById('resSbarPickerTitle');
+    var select = sbarSelectEl(field);
+    if (!picker || !list || !select || !anchor) return;
+
+    mountSbarPickerSheen();
+
+    var titles = {
+      cat: 'Categoría',
+      pais: 'País',
+      estado: 'Estado',
+      ciudad: 'Ciudad / Municipio'
+    };
+    if (title) title.textContent = titles[field] || 'Elegir';
+
+    var entries = sbarPickerEntries(field);
+    var current = select.value;
+    list.innerHTML = '';
+
+    if (field === 'ciudad') {
+      var estadoPick = sbarSelectEl('estado');
+      if (!estadoPick || !estadoPick.value) {
+        list.innerHTML = '<li class="res-sbar-picker__empty">Selecciona un estado para ver municipios.</li>';
+        entries = null;
+      }
+    }
+
+    if (entries && !entries.length) {
+      list.innerHTML = '<li class="res-sbar-picker__empty">No hay opciones disponibles.</li>';
+    } else if (entries) {
+      entries.forEach(function (entry) {
+        var li = document.createElement('li');
+        li.setAttribute('role', 'presentation');
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'res-sbar-picker__item' + (entry.value === current ? ' is-selected' : '');
+        btn.setAttribute('role', 'option');
+        btn.setAttribute('aria-selected', entry.value === current ? 'true' : 'false');
+        btn.textContent = entry.label;
+        btn.dataset.value = entry.value;
+        btn.addEventListener('click', function () {
+          select.value = entry.value;
+          try {
+            select.dispatchEvent(new Event('change', { bubbles: true }));
+          } catch (e) {
+            var ev = document.createEvent('Event');
+            ev.initEvent('change', true, true);
+            select.dispatchEvent(ev);
+          }
+          syncSbarLabels();
+          closeSbarPicker();
+        });
+        li.appendChild(btn);
+        list.appendChild(li);
+      });
+    }
+
+    document.querySelectorAll('.res-sbar-btn[data-sbar-field]').forEach(function (btn) {
+      btn.classList.toggle('is-picker-open', btn === anchor);
+    });
+
+    sbarPickerOpenField = field;
+    picker.hidden = false;
+    picker.setAttribute('aria-hidden', 'false');
+    var panel = picker.querySelector('.res-sbar-picker__panel');
+    requestAnimationFrame(function () {
+      positionSbarPicker(anchor, panel);
+    });
+
+    var selectedBtn = list.querySelector('.res-sbar-picker__item.is-selected');
+    if (selectedBtn && typeof selectedBtn.scrollIntoView === 'function') {
+      selectedBtn.scrollIntoView({ block: 'nearest' });
+    }
+  }
+
+  function initSbarPicker() {
+    bootSbarPickerSheenLater();
+    document.querySelectorAll('.res-sbar-btn[data-sbar-field]').forEach(function (btn) {
+      btn.addEventListener('click', function (e) {
+        e.preventDefault();
+        var field = btn.getAttribute('data-sbar-field');
+        if (!field) return;
+        var picker = document.getElementById('resSbarPicker');
+        if (sbarPickerOpenField === field && picker && !picker.hidden) {
+          closeSbarPicker();
+          return;
+        }
+        openSbarPicker(field, btn);
+      });
+    });
+    document.querySelectorAll('[data-sbar-picker-close]').forEach(function (el) {
+      el.addEventListener('click', closeSbarPicker);
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') closeSbarPicker();
+    });
+    window.addEventListener('resize', function () {
+      if (sbarPickerOpenField) {
+        var anchor = document.querySelector('.res-sbar-btn[data-sbar-field="' + sbarPickerOpenField + '"]');
+        var panel = document.querySelector('.res-sbar-picker__panel');
+        if (anchor && panel) positionSbarPicker(anchor, panel);
+      }
+    });
   }
 
   function pintarSbar() {
@@ -476,6 +818,7 @@
       var ciudades = Q.estado ? ciudadesDe(Q.pais, Q.estado) : [];
       fillSelectOpcional(ciudad, ciudades, Q.ciudad || '', 'Todas las ciudades');
     }
+    syncSbarLabels();
   }
 
   function buscarDesdeSbar() {
@@ -508,11 +851,12 @@
 
   function initSearchBar() {
     pintarSbar();
+    initSbarPicker();
     var pais = document.getElementById('resSbarPais');
     var estado = document.getElementById('resSbarEstado');
     var buscar = document.getElementById('resSbarBuscar');
-    if (pais) pais.addEventListener('change', function () { refreshSbarOpciones(true); });
-    if (estado) estado.addEventListener('change', function () { refreshSbarOpciones(false); });
+    if (pais) pais.addEventListener('change', function () { refreshSbarOpciones(true); syncSbarLabels(); });
+    if (estado) estado.addEventListener('change', function () { refreshSbarOpciones(false); syncSbarLabels(); });
     if (buscar) buscar.addEventListener('click', buscarDesdeSbar);
   }
 
@@ -527,7 +871,14 @@
   }
 
   window.toggleFav = function (btn, ev) {
-    ev.stopPropagation();
+    if (ev) ev.stopPropagation();
+    if (!btn) return;
+    var id = btn.getAttribute('data-fav-perfil');
+    if (!id) return;
+    if (window.CariHubFavoritos && CariHubFavoritos.toggleFavorito) {
+      CariHubFavoritos.toggleFavorito(id, btn);
+      return;
+    }
     btn.classList.toggle('is-on');
     btn.textContent = btn.classList.contains('is-on') ? '♥' : '♡';
   };
@@ -535,9 +886,14 @@
   window.abrirPerfil = function (id) {
     if (!id) return;
     var u = TODOS.find(function (p) { return p.__id === id; }) || {};
-    var url = (window.CariHubResultadosDemo && CariHubResultadosDemo.urlPerfilDemo)
-      ? CariHubResultadosDemo.urlPerfilDemo(u, Q)
-      : './preview/perfil-vista-previa.html';
+    var url;
+    if (window.CariHubResultadosDemo && CariHubResultadosDemo.urlPerfil) {
+      url = CariHubResultadosDemo.urlPerfil(u, Q);
+    } else if (u.__registrado || u.__demo === false) {
+      url = 'perfil.html?id=' + encodeURIComponent(String(id));
+    } else {
+      url = './preview/perfil-vista-previa.html';
+    }
     window.location.assign(url);
   };
 
@@ -561,7 +917,7 @@
       }
     } catch (e) { /* opcional */ }
 
-    var esPreview = vistaPreviaActiva() === 'con-resultados' || vistaPreviaActiva() === 'sin-resultados';
+    var esPreview = vistaPreviaActiva() === 'con-resultados' || vistaPreviaActiva() === 'con-resultados-4' || vistaPreviaActiva() === 'sin-resultados';
     if (!explicit.pais && !Q.pais && !esPreview) {
       alert('Selecciona categoría y país para ver resultados.');
       location.href = 'index.html';
@@ -590,16 +946,14 @@
   }
 
   function initMidbandActions() {
-    var btnVer = document.getElementById('resBtnVerificada');
+    var btnVolver = document.getElementById('resBtnVolver');
     var btnCerca = document.getElementById('resBtnCerca');
     var linkReg = document.getElementById('resBtnRegistro');
     if (linkReg) linkReg.href = urlRegistroDesdeQ();
-    if (btnVer) {
-      btnVer.classList.toggle('is-on', FILTRO === 'verificadas');
-      btnVer.addEventListener('click', function () {
-        FILTRO = FILTRO === 'verificadas' ? 'todos' : 'verificadas';
-        btnVer.classList.toggle('is-on', FILTRO === 'verificadas');
-        aplicarVista();
+    if (btnVolver) {
+      btnVolver.addEventListener('click', function () {
+        if (typeof resVolverAnterior === 'function') resVolverAnterior();
+        else location.href = 'index.html';
       });
     }
     if (btnCerca) {
@@ -616,12 +970,19 @@
     if (window.CariHubResultadosDemo && CariHubResultadosDemo.textoSeoResultados) {
       seo = CariHubResultadosDemo.textoSeoResultados(Q);
     } else {
-      var parts = [];
-      if (Q.categoria) parts.push(Q.categoria);
-      if (Q.pais) parts.push(Q.pais);
-      if (Q.estado) parts.push(Q.estado);
-      if (Q.ciudad) parts.push(Q.ciudad);
-      seo = parts.join(' · ');
+      try {
+        var p = new URL(location.href).searchParams;
+        var parts = [];
+        if (p.get('categoria')) parts.push(p.get('categoria'));
+        if (p.get('pais')) parts.push(p.get('pais'));
+        var est = p.get('estado');
+        if (est && est !== 'Todos los estados') parts.push(est);
+        var ciu = p.get('ciudad');
+        if (ciu && ciu !== 'Todas las ciudades') parts.push(ciu);
+        seo = parts.join(' · ');
+      } catch (e) {
+        seo = '';
+      }
     }
     el.textContent = seo;
     document.title = seo
@@ -629,8 +990,6 @@
       : 'Resultados de búsqueda';
     var linkReg = document.getElementById('resBtnRegistro');
     if (linkReg) linkReg.href = urlRegistroDesdeQ();
-    var btnVer = document.getElementById('resBtnVerificada');
-    if (btnVer) btnVer.classList.toggle('is-on', FILTRO === 'verificadas');
   }
 
   function mountCloseBtn() {
@@ -648,6 +1007,7 @@
     try {
       var p = new URL(location.href).searchParams.get('vista');
       if (p === 'con-resultados' || p === 'con') return 'con-resultados';
+      if (p === 'con-resultados-4' || p === 'con-4' || p === 'cuatro') return 'con-resultados-4';
       if (p === 'sin-resultados' || p === 'sin' || p === 'vacio') return 'sin-resultados';
     } catch (e) { /* opcional */ }
     return null;
@@ -664,11 +1024,14 @@
   function initPreviewSwitcher() {
     var bar = document.getElementById('resPreviewSwitcher');
     if (!bar) return;
-    var modo = vistaPreviaActiva() || 'sin-resultados';
+    syncResPreviewBar();
+    var modo = vistaPreviaActiva() || 'con-resultados';
     var btnCon = document.getElementById('resVistaCon');
+    var btnCuatro = document.getElementById('resVistaCuatro');
     var btnSin = document.getElementById('resVistaSin');
     if (btnCon) btnCon.classList.toggle('is-on', modo === 'con-resultados');
-    if (btnSin) btnSin.classList.toggle('is-on', modo !== 'con-resultados');
+    if (btnCuatro) btnCuatro.classList.toggle('is-on', modo === 'con-resultados-4');
+    if (btnSin) btnSin.classList.toggle('is-on', modo === 'sin-resultados');
     bar.querySelectorAll('button[data-vista]').forEach(function (btn) {
       btn.addEventListener('click', function () {
         setVistaResultados(btn.getAttribute('data-vista'));
@@ -713,7 +1076,125 @@
   window.addEventListener('load', bootResultadosDemo);
 
   /* Vista completa en panel estrecho del IDE (mismo patrón que perfil-vista-previa) */
-  var FIT_DESIGN_W = 1280;
+  /* Lienzo resultados: escala uniforme, sin recortar (ver --res-design-w en CSS) */
+  var FIT_DESIGN_W = 1120;
+  function readFitDesignW() {
+    try {
+      var v = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--res-design-w'));
+      if (v > 0) return v;
+    } catch (e) { /* noop */ }
+    return FIT_DESIGN_W;
+  }
+
+  function resCardsVisiblesObjetivo() {
+    var modo = vistaPreviaActiva();
+    if (modo === 'con-resultados-4' || modo === 'con-resultados') return 4;
+    return 0;
+  }
+
+  function resListaGapCount(slots) {
+    if (slots % 1 !== 0) return Math.floor(slots);
+    return Math.max(0, slots - 1);
+  }
+
+  function syncResListaSlots() {
+    var list = document.getElementById('profilesList');
+    var shell = document.querySelector('.res-shell');
+    var docRoot = document.documentElement;
+    if (!list || !shell) return;
+
+    if (list.classList.contains('res-lista--vacio')) {
+      document.body.classList.remove('res-cards-fit');
+      docRoot.style.removeProperty('--res-card-h');
+      return;
+    }
+
+    var objetivo = resCardsVisiblesObjetivo();
+    if (!objetivo) {
+      document.body.classList.remove('res-cards-fit');
+      docRoot.style.removeProperty('--res-card-h');
+      return;
+    }
+
+    document.body.classList.add('res-cards-fit');
+
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
+        runResListaSlotMeasure(list, docRoot, objetivo);
+        requestAnimationFrame(function () {
+          runResListaSlotMeasure(list, docRoot, objetivo);
+        });
+      });
+    });
+  }
+
+  function runResListaSlotMeasure(list, docRoot, slots) {
+    if (!list || !slots) return;
+    var cards = list.querySelectorAll('.pcard.res-card');
+    if (!cards.length) {
+      docRoot.style.removeProperty('--res-card-h');
+      return;
+    }
+    var h = list.clientHeight;
+    if (h < 48) {
+      setTimeout(syncResListaSlots, 50);
+      return;
+    }
+    var gap = parseFloat(getComputedStyle(list).rowGap || getComputedStyle(list).gap) || 12;
+    var gapCount = resListaGapCount(slots);
+    var cardH = Math.floor((h - gap * gapCount) / slots);
+    if (cardH < 72) return;
+    docRoot.style.setProperty('--res-card-h', cardH + 'px');
+    list.scrollTop = 0;
+  }
+
+  var RES_MOBILE_MQ = window.matchMedia('(max-width: 720px)');
+
+  function isResMobileViewport() {
+    return RES_MOBILE_MQ.matches;
+  }
+
+  function shouldHidePreviewBar() {
+    try {
+      if (new URL(location.href).searchParams.get('preview') === '1') return false;
+    } catch (e) { /* opcional */ }
+    if (isResMobileViewport()) return true;
+    var host = location.hostname;
+    if (host === 'localhost' || host === '127.0.0.1') return false;
+    return true;
+  }
+
+  function syncResPreviewBar() {
+    var bar = document.getElementById('resPreviewSwitcher');
+    if (!bar) return;
+    var hide = shouldHidePreviewBar();
+    bar.hidden = hide;
+    bar.classList.toggle('res-preview-switcher--hidden', hide);
+    bar.setAttribute('aria-hidden', hide ? 'true' : 'false');
+  }
+
+  function readFitAvailSize(outer) {
+    var rectH = 0;
+    var rectW = 0;
+    if (outer) {
+      var rect = outer.getBoundingClientRect();
+      rectH = rect.height || 0;
+      rectW = rect.width || 0;
+      if (rectH < 1) rectH = outer.clientHeight || 0;
+      if (rectW < 1) rectW = outer.clientWidth || 0;
+    }
+    if (isResMobileViewport() && window.visualViewport) {
+      if (rectH < 1) rectH = window.visualViewport.height;
+      if (rectW < 1) rectW = window.visualViewport.width;
+    }
+    if (rectH < 1) rectH = window.innerHeight || 720;
+    if (rectW < 1) rectW = window.innerWidth || 360;
+    return {
+      w: Math.max(280, rectW),
+      h: Math.max(420, rectH)
+    };
+  }
+
   function scheduleFit() {
     requestAnimationFrame(function () {
       requestAnimationFrame(applyFit);
@@ -725,32 +1206,49 @@
     var root = document.getElementById('fitRoot');
     var shell = document.querySelector('.res-shell');
     if (!outer || !spacer || !root) return;
-    if (!document.body.classList.contains('fit')) {
-      document.documentElement.classList.remove('fit');
-      root.style.cssText = '';
-      spacer.style.cssText = '';
-      if (shell) shell.style.height = '';
-      return;
-    }
+
+    syncResPreviewBar();
+    var mobile = isResMobileViewport();
+    document.body.classList.toggle('res-mobile', mobile);
+    document.documentElement.classList.toggle('res-mobile', mobile);
+
+    document.body.classList.add('fit');
     document.documentElement.classList.add('fit');
     root.style.transform = 'none';
-    root.style.width = FIT_DESIGN_W + 'px';
-    var availH = Math.max(420, outer.clientHeight || window.innerHeight || 720);
-    var availW = Math.max(280, outer.clientWidth || outer.getBoundingClientRect().width || window.innerWidth);
-    var scale = Math.min(1, (availW - 4) / FIT_DESIGN_W);
+    var designW = readFitDesignW();
+    root.style.width = designW + 'px';
+    root.style.left = '50%';
+    /* Tras ocultar barra preview, medir altura real del contenedor (no visualViewport entero) */
+    var size = readFitAvailSize(outer);
+    var availH = size.h;
+    var availW = size.w;
+    var scale = Math.min(1, (availW - 4) / designW);
     scale = Math.max(0.32, scale);
     var designH = Math.ceil(availH / scale);
     if (shell) shell.style.height = designH + 'px';
     spacer.style.width = '100%';
     spacer.style.height = Math.ceil(availH) + 'px';
     root.style.height = designH + 'px';
-    root.style.transformOrigin = 'top left';
-    root.style.transform = 'scale(' + scale + ')';
+    root.style.transformOrigin = 'top center';
+    root.style.transform = 'translateX(-50%) scale(' + scale + ')';
+    syncResListaSlots();
+    setTimeout(syncResListaSlots, 120);
   }
   document.body.classList.add('fit');
   document.documentElement.classList.add('fit');
+  if (typeof RES_MOBILE_MQ.addEventListener === 'function') {
+    RES_MOBILE_MQ.addEventListener('change', scheduleFit);
+  } else if (typeof RES_MOBILE_MQ.addListener === 'function') {
+    RES_MOBILE_MQ.addListener(scheduleFit);
+  }
   window.addEventListener('resize', scheduleFit);
-  window.addEventListener('load', scheduleFit);
+  window.addEventListener('load', function () {
+    syncResPreviewBar();
+    scheduleFit();
+  });
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', scheduleFit);
+  }
   if (window.ResizeObserver) {
     var fitRo = new ResizeObserver(scheduleFit);
     fitRo.observe(document.getElementById('fitOuter'));

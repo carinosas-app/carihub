@@ -857,6 +857,23 @@
     </main>
   </div>
 
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCp68DynjT63T9wHorCLxwBGkSEo_mYPUI",
+      authDomain: "carihub-app.firebaseapp.com",
+      projectId: "carihub-app",
+      storageBucket: "carihub-app.firebasestorage.app",
+      messagingSenderId: "236894758884",
+      appId: "1:236894758884:web:5713e39a26c71f025a49f1"
+    };
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const auth = firebase.auth();
+  </script>
+
   <script>
     const documentosMockDashboard=[
       {
@@ -1050,7 +1067,7 @@
     }
 
     function normalizarMediaPublicidad(s){
-      const principal=s.imagenPrincipalURL||s.imagen||s.mediaPrincipal?.url||"";
+      const principal=s.imagenURL||s.imagenPrincipalURL||s.imagen||s.mediaPrincipal?.url||"";
       return {
         mediaPrincipal:{
           url:principal,
@@ -1066,7 +1083,17 @@
 
     function normalizarEstadoPublicacion(data){
       const estadosVisuales=["Activo","Pendiente","Corrección solicitada","Vencido","Inactivo"];
-      const estadoVisual=estadosVisuales.includes(data.estado)?data.estado:"";
+      const estadoCampo=String(data.estado||data.estadoSolicitud||"").trim();
+      const mapaEstado={
+        activo:"Activo",
+        pendiente:"Pendiente",
+        en_revision:"Pendiente",
+        requiere_correccion:"Corrección solicitada",
+        autorizado_pago:"Pendiente",
+        rechazado:"Inactivo",
+        vencido:"Vencido"
+      };
+      const estadoVisual=estadosVisuales.includes(data.estado)?data.estado:(mapaEstado[estadoCampo]||"");
       const revision=data.estadoRevision||data.estadoAdmin||data.revision||estadoVisual||"sin_estado";
       const pago=data.estadoPago||"";
       const activo=data.activo===true||estadoVisual==="Activo";
@@ -1221,7 +1248,51 @@
     }
 
     const publicacionesMock=documentosMockDashboard.map(normalizarDocumentoDashboard);
-    let publicacionActual=publicacionesMock[0];
+    let publicacionesReales=[];
+    let publicacionActual=null;
+
+    function listaPublicaciones(){
+      return publicacionesReales.length ? publicacionesReales : publicacionesMock;
+    }
+
+    async function cargarPublicacionesDesdeFirebase(user){
+      const pubs=[];
+      const perfil=await db.collection("usuarios").doc(user.uid).get();
+      if(perfil.exists){
+        pubs.push(normalizarPerfilUsuario({ id: perfil.id, ...perfil.data() }));
+      }
+      let snap;
+      try{
+        snap=await db.collection("solicitudes_anuncios").where("uidAnunciante","==",user.uid).orderBy("fechaEnvioRevision","desc").limit(20).get();
+      }catch(e){
+        snap=await db.collection("solicitudes_anuncios").where("uidAnunciante","==",user.uid).limit(20).get();
+      }
+      snap.forEach(doc=>{
+        pubs.push(normalizarSolicitudAnuncio({ id: doc.id, ...doc.data() }));
+      });
+      return pubs;
+    }
+
+    async function initDashboard(){
+      const lista=document.getElementById("publicationList");
+      const user=auth.currentUser;
+      if(!user){
+        if(lista) lista.innerHTML='<p style="padding:12px;">Inicia sesión en <a href="index.html">Cariñosas</a> con la cuenta de tu registro para ver tu dashboard.</p>';
+        return;
+      }
+      publicacionesReales=await cargarPublicacionesDesdeFirebase(user);
+      if(!publicacionesReales.length){
+        const preview=new URLSearchParams(location.search).get("preview")==="1";
+        if(preview){
+          publicacionesReales=publicacionesMock.slice();
+        }else if(lista){
+          lista.innerHTML='<p style="padding:12px;">Aún no tienes perfil ni anuncios. <a href="index.html?abrir=registro">Registra tu perfil</a> o <a href="registro-banner.html">renta un banner</a>.</p>';
+          return;
+        }
+      }
+      publicacionActual=publicacionesReales[0] || publicacionesMock[0];
+      renderDashboard();
+    }
 
     function textoSeguro(valor){
       return String(valor||"")
@@ -1234,9 +1305,10 @@
 
     function pintarPublicaciones(){
       const lista=document.getElementById("publicationList");
-      lista.innerHTML=publicacionesMock.map(pub=>`
+      const pubs=listaPublicaciones();
+      lista.innerHTML=pubs.map(pub=>`
         <button type="button" class="publication-card ${pub.id===publicacionActual.id?"active":""}" data-id="${pub.id}">
-          <img src="${pub.mediaPrincipal.url}" alt="${textoSeguro(pub.nombrePublico)}">
+          <img src="${pub.mediaPrincipal.url||"img/home/banners/ad-banner-pink-02.png"}" alt="${textoSeguro(pub.nombrePublico)}">
           <span>
             <h3>${textoSeguro(pub.nombrePublico)}</h3>
             <p>${textoSeguro(pub.tipo)} · ${textoSeguro(ubicacionPublicacion(pub))}</p>
@@ -1247,7 +1319,7 @@
 
       lista.querySelectorAll(".publication-card").forEach(card=>{
         card.addEventListener("click",()=>{
-          const seleccion=publicacionesMock.find(pub=>pub.id===card.dataset.id);
+          const seleccion=pubs.find(pub=>pub.id===card.dataset.id);
           if(seleccion){
             publicacionActual=seleccion;
             renderDashboard();
@@ -1339,7 +1411,9 @@
     }
 
     document.addEventListener("DOMContentLoaded",()=>{
-      renderDashboard();
+      auth.onAuthStateChanged(function(){
+        initDashboard();
+      });
       inicializarTemas();
     });
   </script>

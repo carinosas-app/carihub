@@ -10,6 +10,7 @@
 <link rel="stylesheet" href="css/home-vcards.css">
 <link rel="stylesheet" href="css/home-sector-scroll.css">
 <link rel="stylesheet" href="css/home-modals.css">
+<link rel="stylesheet" href="css/banner-registro.css">
 <link rel="stylesheet" href="css/home-adultos-cat-picker.css">
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
@@ -19,6 +20,7 @@
 <script src="estados.js"></script>
 <script src="ciudades.js"></script>
 <script src="js/catalogos-carihub.js"></script>
+<script src="js/carihub-favoritos.js"></script>
 <script src="js/categoria-iconos.js"></script>
 <script src="js/sectores-carihub.js"></script>
 <script>
@@ -38,6 +40,8 @@ if (!firebase.apps.length) {
 const db = firebase.firestore();
 const auth = firebase.auth();
 const storage = firebase.storage();
+window.CariHubDB = db;
+window.CariHubAuth = auth;
 
 const WHATSAPP_ADMIN = "528112304664";
 const LINK_STRIPE = "https://buy.stripe.com/eVq8wR5Wr9GccXUbmbcAo00";
@@ -700,6 +704,7 @@ const CATEGORIAS_BUSCADOR = [
 
 <div class="modal" id="modalMiPerfil">
   <div class="form-box">
+    <div class="registro-banner-top registro-banner-top--modal" data-registro-banner-slot="registro_superior"></div>
     <h2>Mi cuenta</h2>
 
     <div id="vistaCuentaEntrar">
@@ -760,6 +765,7 @@ const CATEGORIAS_BUSCADOR = [
 
 <div class="modal" id="modalRegistro">
   <div class="form-box">
+    <div class="registro-banner-top registro-banner-top--modal" data-registro-banner-slot="registro_superior"></div>
     <div class="step active" id="step1">
       <h2>Datos básicos</h2>
 
@@ -1391,12 +1397,18 @@ function abrirLegal(tipo){
 }
 
 async function prepararUsuarioFavoritos(){
+  if(window.CariHubFavoritos && CariHubFavoritos.prepararUsuario){
+    return CariHubFavoritos.prepararUsuario();
+  }
   if(!auth.currentUser){
     await auth.signInAnonymously();
   }
 }
 
 async function toggleFavorito(perfilId,boton){
+  if(window.CariHubFavoritos && CariHubFavoritos.toggleFavorito){
+    return CariHubFavoritos.toggleFavorito(perfilId, boton);
+  }
   try{
     let user=auth.currentUser;
 
@@ -1442,6 +1454,9 @@ async function toggleFavorito(perfilId,boton){
 }
 
 async function esFavorito(perfilId){
+  if(window.CariHubFavoritos && CariHubFavoritos.esFavorito){
+    return CariHubFavoritos.esFavorito(perfilId);
+  }
   try{
     const user=auth.currentUser;
 
@@ -2173,6 +2188,12 @@ const params = new URLSearchParams(window.location.search);
     },700);
   }
 
+  if(abrir === "favoritos"){
+    setTimeout(function(){
+      abrirFavoritos();
+    },700);
+  }
+
 });
 </script>
 <script src="js/hero-home.js"></script>
@@ -2182,5 +2203,6 @@ const params = new URLSearchParams(window.location.search);
 <script src="js/adultos-cat-picker.js"></script>
 <script src="js/home-ui.js"></script>
 <script src="js/home-bridge.js"></script>
+<script src="js/banner-registro.js"></script>
 </body>
 </html>

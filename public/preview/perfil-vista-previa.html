@@ -2145,6 +2145,14 @@ function foto(seed, tipo){
 /* ============ Lluvia de monedas doradas (donaciones en vivo) ============
    Cae en TODA la pantalla: la ve quien transmite y quien lo está viendo.
    Poca = simple · Lluvia = fuerte · Diluvio = casi llena la pantalla. */
+var LIVE_EN_VIVO_IMG="img/live-en-vivo-libe.png";
+var ESTADO_PUBLICADO_IMG="img/estado-publicado-libe.png";
+function livePreviewImgHTML(alt){
+  return '<img src="'+LIVE_EN_VIVO_IMG+'" alt="'+safe(alt||"Transmisión en vivo")+'" decoding="async">';
+}
+function estadoPreviewImgHTML(alt){
+  return '<img src="'+ESTADO_PUBLICADO_IMG+'" alt="'+safe(alt||"Estado publicado")+'" decoding="async">';
+}
 function coinMini(diamante){
   var id="rc"+(++_fid);
   var sello = diamante
@@ -3499,7 +3507,7 @@ function panelActividad(u, esEmpresa){
         ? "Actualizó su disponibilidad y subió nuevas fotos a su galería."
         : "Trabajo finalizado en San Pedro Garza García. Reparación completa de fuga y cambio de tubería."));
   return '<div class="pcard"><div class="pcard__h">🟢 Actividad reciente <a class="lnk" href="#">Ver todas</a></div>'+
-    '<div class="feed"><div class="thumb">'+fotoOImg(u,tipoDe(u,esEmpresa),2,u.nombre+"-act")+
+    '<div class="feed"><div class="thumb">'+estadoPreviewImgHTML("Mi estado")+
       '<span class="coinfly">'+S.chCoin({size:"sm"})+'</span></div>'+
     '<div class="meta"><span class="when">Hoy, 10:30 AM</span><br>'+safe(txt)+
       '<div class="donrow">'+S.chCoin({size:"sm"})+'<span><b>+5 monedas</b> en donaciones hoy</span></div>'+
@@ -3510,7 +3518,7 @@ function panelLive(u, esEmpresa){
     ? "Transmisión en vivo · presentación y preguntas"
     : "Cómo prevenir fugas de agua y ahorrar en tu consumo.");
   return '<div class="pcard"><div class="pcard__h">📡 En vivo / Transmisión <a class="lnk" href="#">Ver todas</a></div>'+
-    '<div class="feed"><div class="thumb">'+fotoOImg(u,tipoDe(u,esEmpresa),3,u.nombre+"-live")+'<span class="live">● LIVE</span>'+
+    '<div class="feed"><div class="thumb">'+livePreviewImgHTML(u.nombre+" en vivo")+'<span class="live">● LIVE</span>'+
       liverainHTML()+'</div>'+
     '<div class="livebox"><b>PRÓXIMO LIVE</b><br>📅 Sábado 25 de mayo · 🕕 6:00 PM<br>'+safe(titulo)+'<br><span class="lbtn">🔔 Activar recordatorio</span>'+
       '<div class="donrow">'+S.chCoin({size:"sm"})+'<span>Donaciones en vivo: <b>128 monedas</b></span></div>'+
@@ -3607,10 +3615,7 @@ function panelActividadCompact(u, esEmpresa){
     : "Actualizó su disponibilidad y subió nuevas fotos a su galería.");
   var cuando = u.actividadWhen || "Hoy, 10:30 AM";
   var donHoy = u.donacionesHoy != null ? u.donacionesHoy : 5;
-  var thumbSrc = (u.galeria && u.galeria[0]) ? u.galeria[0] : null;
-  var thumbHtml = thumbSrc
-    ? '<img src="'+thumbSrc+'" alt="" decoding="async">'
-    : fotoOImg(u,tipoDe(u,esEmpresa),2,u.nombre+"-act");
+  var thumbHtml = estadoPreviewImgHTML("Mi estado");
   return '<div class="pcard act-card playout__estado">'+
     '<div class="act-card__head"><span class="act-card__dot" aria-hidden="true"></span><span>ACTIVIDAD RECIENTE</span></div>'+
     '<div class="act-card__main">'+
@@ -3632,10 +3637,7 @@ function panelLiveCompact(u){
   var titulo = u.liveTitulo || "Transmisión en vivo: presentación y preguntas";
   var fecha = u.liveFecha || "Sábado 25 de mayo";
   var hora = u.liveHora || "6:00 PM";
-  var thumbSrc = (u.galeria && u.galeria[1]) ? u.galeria[1] : null;
-  var thumbHtml = thumbSrc
-    ? '<img src="'+thumbSrc+'" alt="" decoding="async">'
-    : fotoOImg(u,"adult",3,u.nombre+"-live");
+  var thumbHtml = livePreviewImgHTML(titulo);
   return '<div class="pcard live-card playout__live">'+
     '<div class="live-card__head">'+liveBroadcastIcon()+'<span>EN VIVO / TRANSMISIÓN</span></div>'+
     '<div class="live-card__inner">'+
@@ -3664,10 +3666,7 @@ function panelLiveNegocio(u,solo){
     '</div>';
   }
   var viewers=u.liveEspectadores||12;
-  var thumbSrc=u.liveImg||(u.galeria&&u.galeria[2])||(u.galeria&&u.galeria[1])||null;
-  var thumbHtml=thumbSrc
-    ?'<img src="'+safe(thumbSrc)+'" alt="" decoding="async">'
-    :fotoOImg(u,"adult",3,u.nombre+"-live");
+  var thumbHtml=livePreviewImgHTML(desc);
   return '<div class="pcard live-neg playout__live">'+
     '<div class="live-neg__head">'+
       '<div class="live-neg__head-left">'+liveBroadcastIcon()+'<span>En vivo / Transmisión</span></div>'+
@@ -4227,7 +4226,7 @@ const HOTEL_IMGS={
   principal:"img/motel-principal.png",
   extra1:"img/motel-extra-1.png",
   extra2:"img/motel-extra-2.png",
-  live:"img/motel-live.png",
+  live:LIVE_EN_VIVO_IMG,
   ubicacion:"img/motel-ubicacion.png"
 };
 function applyNegocioPack(packKey){

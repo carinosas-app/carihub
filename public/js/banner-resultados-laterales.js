@@ -33,18 +33,7 @@
   function buildEstadoMockSlide() {
     return (
       '<div class="pb-slot__slide is-active res-midband__mock res-midband__mock--estado" aria-hidden="false">' +
-        '<div class="res-midband__mock-estado-card">' +
-          '<div class="res-midband__mock-estado-avatar">' +
-            '<img src="preview/img/violeta-1.png" alt="Violeta" width="72" height="72" decoding="async">' +
-            '<span class="res-midband__mock-estado-ring" aria-hidden="true"></span>' +
-          '</div>' +
-          '<div class="res-midband__mock-estado-text">' +
-            '<strong>Violeta publicó un estado</strong>' +
-            '<span class="res-midband__mock-estado-when">Hoy, 10:30 AM</span>' +
-            '<p>Actualizó su disponibilidad y subió nuevas fotos.</p>' +
-            '<img class="res-midband__mock-estado-thumb" src="preview/img/violeta-3.png" alt="" width="56" height="40" decoding="async">' +
-          '</div>' +
-        '</div>' +
+        '<img class="res-midband__mock-estado-photo" src="img/resultados-demo/estado-publicado-libe.png" alt="Estado publicado — Mi estado" width="380" height="188" decoding="async">' +
         '<span class="res-sr-vacant-msg">Anúnciate aquí</span>' +
       '</div>'
     );
@@ -53,10 +42,7 @@
   function buildLiveMockSlide() {
     return (
       '<div class="pb-slot__slide is-active res-midband__mock res-midband__mock--live" aria-hidden="false">' +
-        '<img class="res-midband__mock-live-photo" src="preview/img/violeta-2.png" alt="Mariana en vivo" width="380" height="188" decoding="async">' +
-        '<span class="res-midband__mock-live-pill" aria-hidden="true"><i></i> EN VIVO</span>' +
-        '<span class="res-midband__mock-live-viewers">128 viendo</span>' +
-        '<span class="res-midband__mock-live-caption">Mariana · transmitiendo ahora</span>' +
+        '<img class="res-midband__mock-live-photo" src="img/resultados-demo/live-en-vivo-libe.png" alt="Transmisión en vivo — valeria.music" width="380" height="188" decoding="async">' +
         '<span class="res-sr-vacant-msg">Anúnciate aquí</span>' +
       '</div>'
     );

@@ -47,7 +47,8 @@
       perfil_derecha:{nombre:"Perfil derecha superior",pantalla:"perfil",espacio:"derecha",capacidadMaxima:3,precioMensualImagenBase:500,activo:true},
       perfil_inferior:{nombre:"Perfil inferior",pantalla:"perfil",espacio:"inferior",capacidadMaxima:3,precioMensualImagenBase:350,activo:true},
       perfil_estados:{nombre:"Perfil — lateral Estados y zonas",pantalla:"perfil",espacio:"estados",capacidadMaxima:5,precioMensualImagenBase:500,activo:true},
-      perfil_libe:{nombre:"Perfil — lateral LIBE",pantalla:"perfil",espacio:"libe",capacidadMaxima:3,precioMensualImagenBase:500,activo:true}
+      perfil_libe:{nombre:"Perfil — lateral LIBE",pantalla:"perfil",espacio:"libe",capacidadMaxima:3,precioMensualImagenBase:500,activo:true},
+      registro_superior:{nombre:"Registro — banner superior (todas las pantallas)",pantalla:"registro",espacio:"superior",capacidadMaxima:3,precioMensualImagenBase:500,activo:true,incluyeTodosLosRegistros:true}
     }
   };
 

@@ -20,7 +20,8 @@
     perfil_izquierda:260,
     perfil_centro:320,
     perfil_derecha:260,
-    perfil_inferior:210
+    perfil_inferior:210,
+    registro_superior:280
   };
 
   const NOMBRES_ZONA={
@@ -44,7 +45,8 @@
     perfil_izquierda:"Perfil — izquierda superior",
     perfil_centro:"Perfil — centro superior",
     perfil_derecha:"Perfil — derecha superior",
-    perfil_inferior:"Perfil — inferior"
+    perfil_inferior:"Perfil — inferior",
+    registro_superior:"Registro — banner superior (todas las pantallas)"
   };
 
   function formatearApariciones(valor){
@@ -65,6 +67,9 @@
     }
     if(/^sin_resultados_/.test(slotId)){
       return "Cobertura global: rotación entre "+cap+" anuncios en todas las pantallas sin resultados";
+    }
+    if(slotId==="registro_superior"){
+      return "Cobertura global: rotación entre "+cap+" anuncios en perfil, cuenta y funnel de registro";
     }
     if(/_estados$/.test(slotId)){
       return "Lateral Estados y zonas: rotación entre "+cap+" anuncios activos";

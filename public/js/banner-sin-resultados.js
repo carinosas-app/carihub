@@ -136,18 +136,52 @@
     );
   }
 
+  function buildEstadoLateralMock() {
+    return (
+      '<img src="img/resultados-demo/estado-publicado-libe.png" alt="Estado publicado — Mi estado" width="160" height="320" decoding="async">' +
+      '<span class="res-sr-vacant-msg res-sr-vacant-msg--lateral">Anúnciate aquí</span>'
+    );
+  }
+
+  function buildLiveLateralMock() {
+    return (
+      '<img src="img/resultados-demo/live-en-vivo-libe.png" alt="Transmisión en vivo — valeria.music" width="160" height="320" decoding="async">' +
+      '<span class="res-sr-vacant-msg res-sr-vacant-msg--lateral">Anúnciate aquí</span>'
+    );
+  }
+
   function renderLateralHTML(lado) {
     var slotId = lado === 'izq' ? 'sin_resultados_estados' : 'sin_resultados_libe';
     var label = lado === 'izq' ? 'Estados y zonas' : 'LIBE';
     var rental = obtenerRenta(slotId);
     var href = rental && rental.url ? rental.url : linkRegistro(slotId);
     var vacantClass = rental && rental.imagen ? '' : ' res-vacio-side__banner--vacant';
+    var isLibe = slotId === 'sin_resultados_libe';
+    var isEstados = slotId === 'sin_resultados_estados';
 
     if (rental && rental.imagen) {
       return (
         '<a class="res-vacio-side__banner" href="' + esc(href) + '" data-sin-resultados-slot="' + esc(slotId) + '" aria-label="Anuncio ' + esc(label) + '">' +
           '<span class="res-vacio-side__label">' + esc(label) + '</span>' +
           '<img src="' + esc(rental.imagen) + '" alt="' + esc(rental.titulo || label) + '" width="160" height="320" decoding="async">' +
+        '</a>'
+      );
+    }
+
+    if (isEstados) {
+      return (
+        '<a class="res-vacio-side__banner res-vacio-side__banner--vacant" href="' + esc(href) + '" data-sin-resultados-slot="' + esc(slotId) + '" aria-label="Anúnciate aquí — ' + esc(label) + '">' +
+          '<span class="res-vacio-side__label">' + esc(label) + '</span>' +
+          buildEstadoLateralMock() +
+        '</a>'
+      );
+    }
+
+    if (isLibe) {
+      return (
+        '<a class="res-vacio-side__banner res-vacio-side__banner--vacant" href="' + esc(href) + '" data-sin-resultados-slot="' + esc(slotId) + '" aria-label="Anúnciate aquí — ' + esc(label) + '">' +
+          '<span class="res-vacio-side__label">' + esc(label) + '</span>' +
+          buildLiveLateralMock() +
         '</a>'
       );
     }

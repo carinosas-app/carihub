@@ -1635,6 +1635,56 @@ async function abrirDetalleSolicitudPublicidad(id){
   }
 }
 
+function imagenPublicaSolicitud(s){
+  const u = String(s.imagenURL || s.imagenPrincipalURL || "").trim();
+  if(/^https?:\/\//i.test(u)) return u;
+  return "";
+}
+
+function urlPublicaSolicitud(s){
+  const link = String(s.link || "").trim();
+  if(/^https?:\/\//i.test(link)) return link;
+  const cp = s.contactoPublico || {};
+  const web = String(cp.sitioWeb || cp.url || "").trim();
+  if(/^https?:\/\//i.test(web)) return web;
+  const wa = String(cp.whatsapp || s.whatsapp || s.whatsappResponsableCuenta || "").replace(/\D/g,"");
+  if(wa) return "https://wa.me/" + wa;
+  return "";
+}
+
+async function sincronizarBannerActivoPublico(solicitudId, solicitud){
+  const slotId = String(solicitud.slotId || "").trim();
+  if(!slotId) return;
+
+  const ref = db.collection("configuracion_publicidad").doc("banners_activos");
+  const doc = await ref.get();
+  const slots = doc.exists ? { ...(doc.data().slots || {}) } : {};
+  const estado = solicitud.estado || solicitud.estadoSolicitud || "";
+
+  if(estado === "activo"){
+    const imagen = imagenPublicaSolicitud(solicitud);
+    if(!imagen){
+      console.warn("Banner activo sin URL pública de imagen:", solicitudId, slotId);
+      return;
+    }
+    slots[slotId] = {
+      imagen,
+      url: urlPublicaSolicitud(solicitud),
+      titulo: solicitud.nombreNegocio || solicitud.nombre || "",
+      solicitudId,
+      actualizadoEn: new Date()
+    };
+  } else if(slots[slotId] && slots[slotId].solicitudId === solicitudId){
+    delete slots[slotId];
+  }
+
+  await ref.set({
+    slots,
+    actualizadoEn: new Date(),
+    actualizadoPor: ADMIN_EMAIL
+  }, { merge: true });
+}
+
 async function guardarEstadoSolicitudPublicidad(id){
   if(procesando) return;
 
@@ -1663,10 +1713,19 @@ async function guardarEstadoSolicitudPublicidad(id){
     bloquearAcciones(true);
     await db.collection("solicitudes_anuncios").doc(id).update(payload);
     await registrarLogAdmin("solicitud_publicidad_estado", id, "Estado cambiado a " + nuevoEstado);
-    alert("Estado actualizado correctamente.");
 
     const idx = solicitudesPublicidadCache.findIndex(x => x.id === id);
-    if(idx >= 0) solicitudesPublicidadCache[idx] = { ...solicitudesPublicidadCache[idx], ...payload };
+    let sActualizada = null;
+    if(idx >= 0){
+      sActualizada = { ...solicitudesPublicidadCache[idx], ...payload };
+      solicitudesPublicidadCache[idx] = sActualizada;
+    } else {
+      const fresh = await db.collection("solicitudes_anuncios").doc(id).get();
+      if(fresh.exists) sActualizada = { id, ...fresh.data(), ...payload };
+    }
+    if(sActualizada) await sincronizarBannerActivoPublico(id, sActualizada);
+
+    alert("Estado actualizado correctamente.");
 
     await abrirDetalleSolicitudPublicidad(id);
   }catch(e){
@@ -2037,6 +2096,7 @@ let configPreciosBannersAdmin = null;
 
 const GRUPOS_SLOTS_ADMIN = [
   { id: "sin_resultados", titulo: "Sin resultados (todo el sitio)" },
+  { id: "registro", titulo: "Registro (perfil, cuenta y funnel — banner superior)" },
   { id: "home", titulo: "Home" },
   { id: "resultados", titulo: "Resultados ciudad (con perfiles)" },
   { id: "resultados_pais", titulo: "Resultados por país" },
@@ -2045,6 +2105,7 @@ const GRUPOS_SLOTS_ADMIN = [
 ];
 
 const ORDEN_ESPACIO_ADMIN = {
+  superior: 0,
   izquierda: 1, centro: 2, derecha: 3, inferior: 4, categorias: 5,
   hero_1: 6, hero_2: 7, hero_3: 8, hero_4: 9, hero_5: 10,
   estados: 20, libe: 21
@@ -2064,6 +2125,7 @@ function slotsPorGrupoAdmin(pantalla) {
 }
 
 function etiquetaTipoEspacioAdmin(espacio) {
+  if (espacio === "superior") return "Banner superior (registro)";
   if (espacio === "estados") return "Lateral Estados y zonas";
   if (espacio === "libe") return "Lateral LIBE";
   return "Banners principales";
