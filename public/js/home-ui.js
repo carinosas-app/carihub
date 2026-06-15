@@ -891,7 +891,10 @@
   function openModal(id) {
     var modal = document.getElementById('modal-' + id);
     if (!modal) return;
-    if (id === 'mensajes') updateMensajesModal();
+    if (id === 'mensajes') {
+      updateMensajesModal();
+      return;
+    }
     modal.classList.add('is-open');
     document.body.style.overflow = 'hidden';
   }
@@ -904,6 +907,10 @@
   }
 
   function updateMensajesModal() {
+    if (window.CariHubHomeMensajes && CariHubHomeMensajes.abrir) {
+      CariHubHomeMensajes.abrir({});
+      return;
+    }
     var registrado = document.body.getAttribute('data-mock-usuario') === 'registrado';
     var lead = document.getElementById('modalMensajesLead');
     var body = document.getElementById('modalMensajesBody');
