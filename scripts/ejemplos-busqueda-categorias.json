@@ -1,0 +1,117 @@
+{
+  "$schema": "./config-busqueda-categorias-schema.json",
+  "version": "2026-06-10",
+  "descripcion": "Ejemplos de resolución de búsqueda — diseño de referencia, no índice completo",
+  "ejemplos": [
+    {
+      "consulta": "clima",
+      "geo": { "pais": "México", "estado": "Jalisco", "ciudad": "Guadalajara" },
+      "resultadosEsperados": [
+        {
+          "subcategoriaId": "tecnicos-en-clima-hvac",
+          "subcategoria": "Técnicos en clima / HVAC",
+          "sectorId": "hogar",
+          "matchTipo": "keyword",
+          "scoreBase": 90
+        }
+      ],
+      "expansionSemantica": ["aire acondicionado", "minisplit", "HVAC", "refrigeración", "A/C"],
+      "busqueda": {
+        "keywords": ["clima", "aire acondicionado", "minisplit", "hvac", "refrigeración"],
+        "aliases": ["HVAC", "A/C"],
+        "sinonimos": ["técnico en climatización", "instalador de minisplit"],
+        "palabrasRelacionadas": ["calefacción", "ventilación"],
+        "erroresComunes": ["minisplir", "haac", "hvca"]
+      }
+    },
+    {
+      "consulta": "dentista",
+      "geo": { "pais": "México", "estado": "CDMX", "ciudad": "Ciudad de México" },
+      "resultadosEsperados": [
+        {
+          "subcategoriaId": "dentistas-y-clinicas-dentales",
+          "subcategoria": "Dentistas y Clínicas Dentales",
+          "sectorId": "salud",
+          "formularioId": "profesionista_cedula",
+          "matchTipo": "sinonimo_parcial",
+          "scoreBase": 85
+        },
+        {
+          "subcategoriaId": "especialistas-medicos",
+          "subcategoria": "Especialistas Médicos",
+          "sectorId": "salud",
+          "matchTipo": "palabrasRelacionadas",
+          "nota": "ortodoncia vía keywords futuras",
+          "scoreBase": 55
+        }
+      ],
+      "expansionSemantica": ["dentista general", "ortodoncia", "clínica dental", "odontólogo"],
+      "busqueda": {
+        "keywords": ["dentista", "dental", "odontología", "ortodoncia", "clínica dental"],
+        "aliases": ["odontólogo", "odontologo"],
+        "sinonimos": ["dentista general", "cirujano dentista"],
+        "erroresComunes": ["dentista", "dentista", "dentista"]
+      }
+    },
+    {
+      "consulta": "casa",
+      "geo": { "pais": "México", "estado": "Nuevo León", "ciudad": "Monterrey" },
+      "resultadosEsperados": [
+        {
+          "subcategoriaId": "venta-de-casas",
+          "sectorId": "bienes-raices",
+          "matchTipo": "palabrasRelacionadas",
+          "scoreBase": 80
+        },
+        {
+          "subcategoriaId": "renta-de-casas",
+          "sectorId": "bienes-raices",
+          "matchTipo": "palabrasRelacionadas",
+          "scoreBase": 80
+        },
+        {
+          "subcategoriaId": "inmobiliaria",
+          "sectorId": "bienes-raices",
+          "matchTipo": "sector_keyword",
+          "nota": "cuando exista en catálogo expandido",
+          "scoreBase": 70
+        }
+      ],
+      "expansionSemantica": ["venta de casas", "renta de casas", "bienes raíces", "inmobiliarias", "vivienda"],
+      "sectorBusqueda": {
+        "sectorId": "bienes-raices",
+        "keywords": ["casa", "vivienda", "inmueble", "bienes raíces"],
+        "palabrasRelacionadas": ["departamento", "terreno", "hipoteca"]
+      }
+    },
+    {
+      "consulta": "mecánico",
+      "geo": { "pais": "México", "estado": "Puebla", "ciudad": "Puebla" },
+      "resultadosEsperados": [
+        {
+          "subcategoriaId": "talleres-mecanicos",
+          "subcategoria": "Talleres Mecánicos",
+          "sectorId": "automotriz",
+          "formularioId": "negocio_empresa",
+          "matchTipo": "sinonimo",
+          "scoreBase": 88
+        },
+        {
+          "subcategoriaId": "mecanicos-a-domicilio",
+          "sectorId": "automotriz",
+          "formularioId": "persona_independiente",
+          "matchTipo": "keyword",
+          "scoreBase": 92
+        }
+      ],
+      "expansionSemantica": ["taller mecánico", "mecánico automotriz", "mecánico a domicilio", "reparación de autos"],
+      "busqueda": {
+        "keywords": ["mecánico", "mecanico", "taller", "automotriz", "auto"],
+        "aliases": ["taller mecánico"],
+        "sinonimos": ["mecánico automotriz", "reparación de autos"],
+        "erroresComunes": ["mecanico", "mecaniko", "mecanico a domicilio"]
+      }
+    }
+  ],
+  "notaImplementacion": "En runtime, AvailabilityEngine reordena según perfiles en Guadalajara/Monterrey/etc. después del score de catálogo."
+}

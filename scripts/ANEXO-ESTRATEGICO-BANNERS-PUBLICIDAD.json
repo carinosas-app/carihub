@@ -1,0 +1,201 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "tipo": "ANEXO_ESTRATEGICO",
+  "modulo": "BANNERS_PUBLICIDAD",
+  "titulo": "Anexo Estratégico Banners/Publicidad CariHub",
+  "fecha": "2026-06-10",
+  "version": "1.0.0",
+  "estado": "ANEXO_DISENO_DOCUMENTAL",
+  "modo": "Solo análisis y documentación — sin runtime/carpetas/mover/Firestore/deploy/commit; no crea actas; no modifica el plan ni capas existentes",
+  "complementaA": "scripts/PLAN-MAESTRO-BANNERS-PUBLICIDAD.json (v1.0.0) — lo complementa, NO lo modifica",
+  "objetivo": "Auditoría complementaria enfocada en la VISIÓN FUTURA de monetización publicitaria (no solo assets actuales): inventario geo/categoría, métricas avanzadas, escalabilidad nacional/internacional, riesgos y recomendaciones por fase.",
+  "baseConocida": {
+    "slotsActuales": 17,
+    "fuentePrecios": "seed-configuracion-publicidad.json + precios-publicidad.js (video x2, semanal 0.35/quincenal 0.65/mensual 1, redondeo 50, IVA incluido)",
+    "metricasActuales": "estimadas (apariciones), sin tracking real",
+    "aprobacion": "manual via solicitudes_anuncios (admin.html)"
+  },
+
+  "inventarioFuturo": {
+    "landingsSEO": {
+      "concepto": "Cada landing SEO (geo y/o categoría) hereda los slots base y los multiplica por contexto, sin HTML nuevo (pintado por RenderEngine).",
+      "ejemplosSuperficie": ["landing país", "landing estado", "landing ciudad", "landing categoría", "landing subcategoría", "landing geo+categoría"],
+      "slotsHeredables": ["resultados_izquierda", "resultados_centro", "resultados_derecha", "resultados_inferior", "home_categorias(adaptado)"]
+    },
+    "porGeografia": {
+      "pais": "slotId × paisKey",
+      "estado": "slotId × estadoKey",
+      "ciudad": "slotId × ciudadKey",
+      "regla": "geo-primero: un slot ciudad es producto independiente del mismo slot a nivel país"
+    },
+    "porCategoria": {
+      "categoria": "slotId × sectorId",
+      "subcategoria": "slotId × subcategoriaId",
+      "regla": "patrocinio contextual: aparece solo en resultados/landing de esa categoría"
+    },
+    "modeloSlotGeoContextual": {
+      "clave": "{slotId}__{geoKey}__{categoriaKey}",
+      "geoKey": "global|pais:MX|estado:MX-JAL|ciudad:MX-JAL-GDL",
+      "categoriaKey": "global|sector:salud|sub:fisioterapia",
+      "capacidadPorClave": "hereda capacidadMaxima del slotId base (ajustable por Admin)",
+      "beneficio": "multiplica inventario monetizable sin crear páginas ni componentes nuevos"
+    }
+  },
+
+  "campanasFuturas": {
+    "geografica": { "targeting": "país/estado/ciudad", "precio": "suma de slots por geoKey", "inventario": "slots geo-contextuales" },
+    "nacional": { "targeting": "todas las ciudades de un país", "precio": "paquete con descuento por volumen", "inventario": "slot × todas las geoKey del país" },
+    "internacional": { "targeting": "multi-país (futuro)", "precio": "moneda/IVA por país", "inventario": "namespacing por país", "estado": "futuro" },
+    "porCategoria": { "targeting": "sectorId", "precio": "premium contextual", "inventario": "slot × categoriaKey" },
+    "porSubcategoria": { "targeting": "subcategoriaId", "precio": "ultra-contextual", "inventario": "slot × sub" },
+    "porPerfilRelacionado": { "targeting": "anuncio en perfiles de categoría/geo afín", "precio": "CPM/peso contextual", "nota": "respeta privacidad; sin competir con el dueño del perfil" },
+    "porNegocioRelacionado": { "targeting": "anuncio en perfiles/landings de negocios afines", "precio": "paquete B2B" },
+    "contextual": { "targeting": "coincidencia keyword/categoría de la búsqueda", "precio": "premium por relevancia" },
+    "premium": { "targeting": "hero + destacado multi-pantalla", "precio": "tarifa alta exclusividad parcial" },
+    "exclusiva": { "targeting": "slot exclusivo (cap=1) sin rotación por periodo", "precio": "máximo; bloquea inventario", "ejemplo": "hero exclusivo de ciudad" }
+  },
+
+  "metricasFuturas": {
+    "lista": ["impresiones", "clics", "CTR", "conversiones", "contactos", "whatsapp", "telegram", "instagram", "visitasPerfil", "favoritos", "leads"],
+    "realVsEstimada": {
+      "real": ["impresiones(server-side)", "clics(validados)", "CTR", "contactos(evento)", "leads(atribuidos)"],
+      "estimada": ["apariciones(proyección INVENTARIO_DIARIO_BASE)"],
+      "politica": "Etiquetar SIEMPRE el origen; nunca presentar estimada como real"
+    },
+    "coleccionesPropuestas": {
+      "eventos": "eventos_banner/{eventoId} — { tipo: impresion|click|contacto_wa|contacto_tg|contacto_ig|lead, slotKey, contratoId, ts, sesionHash, geoKey, antifraude }",
+      "agregados": "estadisticas_banner/{slotKey}_{periodo} — { impresiones, clics, ctr, contactos, leads }"
+    },
+    "atribucion": {
+      "contactos": "click en CTA WhatsApp/Telegram/Instagram = evento contacto (deep-link con tag de campaña)",
+      "leads": "contacto + acción posterior (mensaje enviado / formulario) → lead atribuido al contratoId",
+      "ventana": "atribución por sesión + ventana temporal configurable"
+    },
+    "privacidad": "Sin PII del visitante; hashes de sesión; cumplir con políticas de RenderEngine PrivacyGuard"
+  },
+
+  "expansionInventario": {
+    "masAllaDe17": "Los 17 slots son superficies base; el inventario futuro se multiplica por geoKey × categoriaKey, no por más HTML.",
+    "capacidadMaximaTeorica": {
+      "formula": "Σ(slot) [ capacidadMaxima(slot) × #geoKeys aplicables × #categoriaKeys aplicables ]",
+      "ejemploIlustrativo": "4 slots de resultados × 100 ciudades × 50 categorías × cap≈2-3 → decenas de miles de unidades vendibles teóricas",
+      "advertencia": "Capacidad TEÓRICA ≠ demanda real; vender bajo demanda para evitar inventario fantasma y saturación"
+    },
+    "crecerSinSaturar": ["límite de slots visibles por pantalla", "densidad publicitaria máxima por vista", "priorizar relevancia contextual sobre cantidad"]
+  },
+
+  "integracionFutura": {
+    "messenger": "CTA de banner → abre Messenger/contacto; eventos de contacto/lead alimentan métricas (sin cobrar dentro del chat)",
+    "dashboards": "Anunciante ve métricas reales por campaña/geo/categoría; Admin ve ocupación/ingresos/anomalías",
+    "agentesIA": "iaComercial recomienda precio/ocupación/relleno; iaModeración pre-filtra creativos; SOLO lectura/recomendación, nunca auto-publica",
+    "seo": "Banners NUNCA indexables ni inyectan contenido SEO; landings SEO contienen slots pero el creativo no afecta el contenido canónico",
+    "renderEngine": "Pinta slots geo-contextuales desde snapshot; lazy/optimización; respeta PrivacyGuard",
+    "themeEngine": "Estiliza el contenedor del slot por tema; no altera el creativo del anunciante",
+    "pagos": "Precios contextuales/paquetes resueltos; cobro y congelado",
+    "contratos": "contratos_banners por slotKey geo-contextual; precio/promoción congelados; campaña = N contratos"
+  },
+
+  "evaluacion": {
+    "escalabilidadNacional": "Alta vía geoKey; requiere catálogo geo completo + índices + relleno por demanda; descuentos por paquete nacional",
+    "escalabilidadInternacional": "Requiere namespacing por país (moneda, IVA, idioma, cumplimiento); marcar como fase futura",
+    "riesgos": [
+      { "id": "AE-R01", "tipo": "sobreventa", "nivel": "alto", "riesgo": "Vender más que capacidad por slotKey", "mitigacion": "InventoryManager con bloqueo por capacidadMaxima por clave + override con aprobación superior" },
+      { "id": "AE-R02", "tipo": "saturacion_visual", "nivel": "alto", "riesgo": "Demasiados banners degradan UX/conversión", "mitigacion": "densidad máxima por vista + límite de slots activos por pantalla" },
+      { "id": "AE-R03", "tipo": "seo", "nivel": "medio", "riesgo": "Banners afectan contenido/indexación de landings", "mitigacion": "creativos no indexables, fuera del contenido canónico, sin CLS" },
+      { "id": "AE-R04", "tipo": "rendimiento", "nivel": "alto", "riesgo": "Hero/video dañan CWV (LCP/CLS)", "mitigacion": "lazy load, peso máximo, dimensiones reservadas, snapshot RenderEngine" },
+      { "id": "AE-R05", "tipo": "fraude", "nivel": "alto", "riesgo": "Click/impression fraud infla métricas y cobros futuros (CPC/CPM)", "mitigacion": "anti-bot, dedup por sesión, validación server-side, detección de anomalías IA" },
+      { "id": "AE-R06", "tipo": "metricas_falsas", "nivel": "critico", "riesgo": "Presentar estimadas como reales = riesgo legal/reputacional", "mitigacion": "tracking real server-side + etiqueta de origen + auditoría de métricas" },
+      { "id": "AE-R07", "tipo": "inventario_fantasma", "nivel": "medio", "riesgo": "Capacidad teórica enorme sin demanda real", "mitigacion": "vender bajo demanda; no exponer slots sin interés" },
+      { "id": "AE-R08", "tipo": "competencia_perfil", "nivel": "medio", "riesgo": "Anuncio compite con el dueño del perfil donde aparece", "mitigacion": "reglas de no-competencia/relevancia en campañas por perfil/negocio relacionado" }
+    ]
+  },
+
+  "oportunidadesMonetizacion": [
+    "Patrocinio de categoría/ciudad (exclusividad por periodo)",
+    "Hero exclusivo por ciudad (subasta/tarifa premium)",
+    "Paquete geográfico (nacional con descuento por volumen)",
+    "Banner lead-gen con CTA directo a WhatsApp/Telegram/Instagram (cobro por contacto/lead futuro)",
+    "Destacado contextual en resultados (relevancia por keyword/categoría)",
+    "Retargeting interno (re-impactar visitantes dentro del sitio, respetando privacidad)",
+    "Bundles perfil+banner (cross-sell con membresías)",
+    "Modelos CPC/CPM/CPL futuros (cuando haya tracking real confiable)"
+  ],
+  "nuevosProductosPublicitarios": [
+    { "id": "patrocinio_categoria", "fase": "nacional" },
+    { "id": "hero_exclusivo_ciudad", "fase": "nacional" },
+    { "id": "paquete_geo_nacional", "fase": "nacional" },
+    { "id": "lead_gen_cta_messaging", "fase": "nacional", "depende": "tracking de contactos/leads" },
+    { "id": "destacado_contextual", "fase": "MVP+" },
+    { "id": "retargeting_interno", "fase": "internacional" },
+    { "id": "bundle_perfil_banner", "fase": "MVP+" },
+    { "id": "cpc_cpm_cpl", "fase": "internacional", "depende": "antifraude maduro" }
+  ],
+
+  "recomendacionInventarioPorFase": {
+    "MVP": {
+      "slots": "17 actuales (Home/Resultados/Perfil) por ciudad principal",
+      "campañas": ["simple", "geografica(ciudad)"],
+      "metricas": ["impresiones reales", "clics", "CTR", "contactos"],
+      "precio": "tarifa plana por periodo (actual)",
+      "objetivo": "Probar tracking real + gate de publicación + conciliación"
+    },
+    "escalaNacional": {
+      "slots": "17 × geoKey(ciudades) + slots en landings SEO + categoría/subcategoría",
+      "campañas": ["geografica", "nacional", "porCategoria", "contextual", "premium", "exclusiva", "lead_gen"],
+      "metricas": ["+ conversiones", "+ leads atribuidos", "+ contactos por canal (WA/TG/IG)"],
+      "precio": "contextual + paquetes + descuentos por volumen (editable Admin)",
+      "objetivo": "Multiplicar inventario por geo/categoría bajo demanda"
+    },
+    "escalaInternacional": {
+      "slots": "namespacing por país (moneda/IVA/idioma) + retargeting interno",
+      "campañas": ["internacional", "porNegocioRelacionado", "cpc_cpm_cpl"],
+      "metricas": ["modelos de cobro por rendimiento con antifraude maduro"],
+      "precio": "por país; cumplimiento fiscal local",
+      "objetivo": "Operar multi-país con métricas y antifraude robustos"
+    }
+  },
+
+  "matrices": {
+    "geoCategoriaCapacidadTeorica": {
+      "formula": "unidades = capacidadMaxima(slot) × #geoKeys × #categoriaKeys",
+      "ejemplos": {
+        "resultados_centro(cap2) × 1 ciudad × 1 categoria": 2,
+        "resultados_centro(cap2) × 100 ciudades × 50 categorias": 10000,
+        "hero(cap1) × 100 ciudades × global": 100
+      }
+    },
+    "campanaTargetingMetrica": {
+      "geografica": { "targeting": "geoKey", "metricaClave": "impresiones/CTR por ciudad" },
+      "porCategoria": { "targeting": "categoriaKey", "metricaClave": "CTR contextual" },
+      "lead_gen": { "targeting": "geo+categoria", "metricaClave": "contactos/leads" },
+      "premium/exclusiva": { "targeting": "hero/multi-pantalla", "metricaClave": "impresiones/alcance" },
+      "porPerfil/negocioRelacionado": { "targeting": "afinidad", "metricaClave": "contactos/leads" }
+    },
+    "productoFuturoFase": {
+      "MVP": ["simple", "geografica_ciudad", "destacado_contextual", "bundle_perfil_banner"],
+      "nacional": ["patrocinio_categoria", "hero_exclusivo_ciudad", "paquete_geo_nacional", "lead_gen_cta_messaging", "premium", "exclusiva"],
+      "internacional": ["retargeting_interno", "cpc_cpm_cpl", "porNegocioRelacionado", "internacional"]
+    }
+  },
+
+  "dependencias": {
+    "congeladas": ["Shared/Core 1.0.0", "RenderEngine 1.0.0", "ValidationEngine 1.1.0", "FieldEngine 1.0.1", "Dashboards 1.0.0"],
+    "planes": ["PLAN-MAESTRO-BANNERS-PUBLICIDAD 1.0.0", "PLAN-MAESTRO-PAGOS-CONTRATOS 1.0.0", "PLAN-MAESTRO-ADMIN 1.0.0"],
+    "precondicionesClave": ["catálogo geo completo + índices", "AdImpressionTracker real", "RenderEngine pintando slots geo-contextuales", "antifraude"]
+  },
+  "recomendacionesEstrategicas": [
+    "No vender CPC/CPM hasta tener tracking real + antifraude (hoy métricas estimadas)",
+    "Multiplicar inventario por contexto (geo×categoría), no por más HTML",
+    "Priorizar relevancia contextual sobre densidad para proteger UX/SEO/CWV",
+    "Vender bajo demanda para evitar inventario fantasma",
+    "Etiquetar siempre métrica real vs estimada (riesgo legal/reputacional crítico)",
+    "Introducir lead-gen (CTA WhatsApp/Telegram/Instagram) como puente al modelo por rendimiento"
+  ],
+  "noModifica": [
+    "PLAN-MAESTRO-BANNERS-PUBLICIDAD.* y demás archivos existentes",
+    "Capas congeladas, producción, Firestore, deploy, commit"
+  ],
+  "changelog": [
+    { "version": "1.0.0", "fecha": "2026-06-10", "nota": "Anexo estratégico: inventario futuro geo/categoría, campañas avanzadas, métricas reales (impresiones/clics/CTR/conversiones/contactos/leads), capacidad teórica, integraciones futuras, riesgos y recomendaciones por fase (MVP/nacional/internacional)" }
+  ]
+}

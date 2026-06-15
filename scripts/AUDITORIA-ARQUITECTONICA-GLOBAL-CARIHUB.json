@@ -1,0 +1,361 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "tipo": "AUDITORIA_ARQUITECTONICA_GLOBAL",
+  "titulo": "Auditoría arquitectónica global de CariHub",
+  "fecha": "2026-06-09",
+  "version": "1.0.0",
+  "alcance": "Todo el repositorio — producción real + corpus de diseño congelado",
+  "restricciones": {
+    "runtime": false, "crearCarpetas": false, "moverArchivos": false,
+    "modificarFirestore": false, "modificarProduccion": false, "deploy": false,
+    "commit": false, "diffs": false, "modificarCodigo": false,
+    "soloDocumentacion": true
+  },
+  "basadoEn": [
+    "scripts/OBSERVACION-ARQUITECTONICA-MODULARIZACION-APLICACIONES.json",
+    "7 ACTAS de congelamiento",
+    "SPEC-MESSENGER 1.0.0, SPEC-DASHBOARDS 1.0.0, SPEC-FIELDENGINE 1.0.1, SPEC-VALIDATIONENGINE 1.1.0",
+    "ValidationEngine 1.1.0 (MINOR Messenger aplicado documental)",
+    "Messenger 1.0.0 congelado",
+    "Estado actual del repositorio (public/, firestore.rules, firebase.json)"
+  ],
+  "metodologia": "Lectura directa de archivos reales. No se asume ni infiere sin evidencia. Dependencias cruzadas verificadas por grep de db.collection/doc/storage.ref y referencias <script>/<link>.",
+
+  "parte1_inventarioSistemaActual": {
+    "paginasHTML": [
+      {
+        "ruta": "public/index.html", "funcionActual": "Home + buscador + wizard registro + panel cuenta + favoritos + solicitud anuncio + puerta 18+",
+        "moduloHoy": "APP_PUBLICA (monolito)", "moduloDestino": "APP_PUBLICA (solo home) + REGISTRO + DASHBOARD + BANNERS + INTERACCIONES",
+        "dependencias": ["firebase app/auth/firestore/storage", "home.css x5", "home-*.js x6", "catalogos/sectores/geo"],
+        "dependenciasCruzadas": ["usuarios", "usuarios/{uid}/favoritos", "solicitudes_anuncios", "estadisticas_visitas", "resultados.html", "registro-banner.html"],
+        "ubicadoCorrectamente": false, "permanecer": "parcial", "mover": "secciones registro/cuenta/pagos/favoritos/anuncio",
+        "dividir": true, "eliminar": "CATEGORIAS_BUSCADOR duplicado, CSS proto-mockup muerto", "sharedCore": "firebaseConfig, catálogos, geo",
+        "afectaHome": "ES Home", "afectaResultados": "origen búsqueda", "afectaPerfil": "indirecto", "afectaSEO": "alto",
+        "afectaRendimiento": "alto (firebase+fonts+inline 1330 líneas)", "afectaSeguridad": "alto (INE en bundle público)", "afectaEscalabilidad": "alto (no separable)"
+      },
+      {
+        "ruta": "public/resultados.html", "funcionActual": "Lista de perfiles filtrada por categoría/ubicación + banners laterales",
+        "moduloHoy": "APP_PUBLICA", "moduloDestino": "APP_PUBLICA (Resultados)",
+        "dependencias": ["firebase app/firestore", "CSS inline propio (Arial)", "banners inline"],
+        "dependenciasCruzadas": ["usuarios (lee TODOS aprobado/activo/!vencido y filtra en cliente)", "registro-banner.html"],
+        "ubicadoCorrectamente": true, "permanecer": true, "mover": false, "dividir": false, "eliminar": false,
+        "sharedCore": "debería usar RenderEngine + tokens compartidos",
+        "afectaHome": "destino búsqueda", "afectaResultados": "ES Resultados", "afectaPerfil": "enlaza", "afectaSEO": "alto potencial",
+        "afectaRendimiento": "ALTO RIESGO: descarga todo el universo de perfiles y filtra client-side", "afectaSeguridad": "medio", "afectaEscalabilidad": "CRÍTICO — no escala nacional/internacional"
+      },
+      {
+        "ruta": "public/perfil.html", "funcionActual": "Vista perfil público individual + banners",
+        "moduloHoy": "APP_PUBLICA", "moduloDestino": "APP_PUBLICA (Perfil público)",
+        "dependencias": ["firebase app/firestore", "css/banners-publicidad.css", "js/modal-carihub.js", "CSS inline"],
+        "dependenciasCruzadas": ["usuarios/{id}", "registro-banner.html"],
+        "ubicadoCorrectamente": true, "permanecer": true, "mover": false, "dividir": false, "eliminar": false,
+        "sharedCore": "modal-carihub (ya compartido), RenderEngine futuro",
+        "afectaHome": "no", "afectaResultados": "destino", "afectaPerfil": "ES Perfil", "afectaSEO": "ALTO (página canónica indexable)",
+        "afectaRendimiento": "medio", "afectaSeguridad": "medio (expone datos perfil)", "afectaEscalabilidad": "ok"
+      },
+      {
+        "ruta": "public/admin.html", "funcionActual": "Panel admin: usuarios, denuncias, solicitudes_anuncios, soporte, logs",
+        "moduloHoy": "APP_ADMIN (parcial real)", "moduloDestino": "APP_ADMIN",
+        "dependencias": ["firebase app/auth/firestore/storage", "CSS inline propio", "LIMITE_USUARIOS=150"],
+        "dependenciasCruzadas": ["usuarios", "denuncias", "solicitudes_anuncios", "soporte_mensajes", "logsAdmin"],
+        "ubicadoCorrectamente": true, "permanecer": true, "mover": false, "dividir": "por módulo admin (8 módulos diseño)", "eliminar": false,
+        "sharedCore": "RBAC, firebaseConfig",
+        "afectaHome": "no", "afectaResultados": "no", "afectaPerfil": "modera", "afectaSEO": "no (privado)",
+        "afectaRendimiento": "interno", "afectaSeguridad": "ALTO (RBAC email único hardcoded)", "afectaEscalabilidad": "LIMITE_USUARIOS=150 cap explícito"
+      },
+      {
+        "ruta": "public/registro-banner.html", "funcionActual": "Funnel publicidad premium: selección slots, precios, creativo, pago",
+        "moduloHoy": "APP_BANNERS (parcial real)", "moduloDestino": "APP_BANNERS + APP_PAGOS",
+        "dependencias": ["modal-carihub.js/css", "catalogos", "precios-publicidad.js", "banner-inventario-rotacion.js", "firebase x4", "geo"],
+        "dependenciasCruzadas": ["solicitudes_anuncios", "configuracion_publicidad/precios_banners", "Stripe/MP links"],
+        "ubicadoCorrectamente": true, "permanecer": true, "mover": false, "dividir": "separar pago de creativo", "eliminar": false,
+        "sharedCore": "precios, inventario, modal-carihub",
+        "afectaHome": "enlazado desde slots", "afectaResultados": "banners", "afectaPerfil": "banners", "afectaSEO": "bajo",
+        "afectaRendimiento": "página pesada ~7000 líneas", "afectaSeguridad": "medio", "afectaEscalabilidad": "medio"
+      },
+      {
+        "ruta": "public/registro-banner2.html", "funcionActual": "Variante/iteración funnel banner", "moduloHoy": "APP_BANNERS",
+        "moduloDestino": "APP_BANNERS", "ubicadoCorrectamente": false, "permanecer": "revisar", "mover": false, "dividir": false,
+        "eliminar": "candidato si es duplicado obsoleto", "revisarManual": true, "afectaEscalabilidad": "deuda — duplicación funnel"
+      },
+      {
+        "ruta": "public/registro-banner-paso3.html", "funcionActual": "Paso aislado funnel banner", "moduloHoy": "APP_BANNERS",
+        "moduloDestino": "APP_BANNERS", "permanecer": "revisar", "eliminar": "candidato si fragmento huérfano", "revisarManual": true
+      },
+      {
+        "ruta": "public/dashboard-rentero.html", "funcionActual": "Prototipo dashboard rentero con 12 temas visuales (tema-*)",
+        "moduloHoy": "APP_DASHBOARD (prototipo) + ThemeEngine embrión", "moduloDestino": "APP_DASHBOARD + APP_THEMEENGINE",
+        "dependencias": ["CSS inline con 12 variantes tema body.tema-*"],
+        "dependenciasCruzadas": ["no integrado en navegación; sin Firebase wired"],
+        "ubicadoCorrectamente": false, "permanecer": "como referencia diseño", "mover": false, "dividir": true,
+        "eliminar": false, "sharedCore": "tokens tema → ThemeEngine",
+        "afectaHome": "no", "afectaSEO": "no", "afectaRendimiento": "no (no en prod activa)", "afectaEscalabilidad": "fuente tokens ThemeEngine"
+      },
+      {
+        "ruta": "public/index-legacy.html", "funcionActual": "Backup pre-migrate-home", "moduloHoy": "legacy",
+        "moduloDestino": "ELIMINAR/ARCHIVAR", "ubicadoCorrectamente": false, "permanecer": false, "eliminar": true,
+        "nota": "Ya excluido de hosting en firebase.json ignore"
+      },
+      {
+        "ruta": "public/404.html", "funcionActual": "Página error", "moduloHoy": "APP_PUBLICA", "moduloDestino": "SHARED",
+        "ubicadoCorrectamente": true, "permanecer": true
+      },
+      {
+        "ruta": "public/preview/adultos-categorias-premium.html", "funcionActual": "Preview diseño picker adultos",
+        "moduloHoy": "preview", "moduloDestino": "ARCHIVAR", "eliminar": "candidato", "nota": "preview/ ya en hosting ignore"
+      }
+    ],
+    "javascript": [
+      { "ruta": "public/js/hero-home.js", "funcion": "Datos slides hero", "moduloHoy": "Home", "destino": "APP_PUBLICA/home", "ubicado": true, "accion": "mantener" },
+      { "ruta": "public/js/home-ui.js", "funcion": "Carousel, slots, sectores, ads rotation", "moduloHoy": "Home", "destino": "APP_PUBLICA/home", "ubicado": true, "accion": "mantener" },
+      { "ruta": "public/js/home-vcards.js", "funcion": "Plantillas visuales tarjetas (6 templates)", "moduloHoy": "Home", "destino": "SHARED/RenderEngine futuro", "ubicado": "parcial", "accion": "refactorizar" },
+      { "ruta": "public/js/home-sector-scroll.js", "funcion": "Animación scroll sectores", "moduloHoy": "Home", "destino": "APP_PUBLICA/home", "ubicado": true, "accion": "mantener" },
+      { "ruta": "public/js/home-bridge.js", "funcion": "Puente UI nueva ↔ funciones inline index", "moduloHoy": "Home", "destino": "APP_PUBLICA/home (temporal)", "ubicado": "parche", "accion": "dejar legacy temporal" },
+      { "ruta": "public/js/adultos-cat-picker.js", "funcion": "Modal categorías adultos", "moduloHoy": "Home", "destino": "APP_PUBLICA/home", "ubicado": true, "accion": "mantener" },
+      { "ruta": "public/js/catalogos-carihub.js", "funcion": "~34 categorías", "moduloHoy": "compartido", "destino": "SHARED/Catálogo", "ubicado": "parcial", "accion": "convertir en Shared/Core", "nota": "desalineado con 462 subcategorías diseño" },
+      { "ruta": "public/js/sectores-carihub.js", "funcion": "15 sectores", "moduloHoy": "compartido", "destino": "SHARED/Catálogo", "ubicado": true, "accion": "convertir en Shared/Core" },
+      { "ruta": "public/js/sector-scroll-data.js", "funcion": "Items por sector", "moduloHoy": "Home", "destino": "APP_PUBLICA/home", "ubicado": true, "accion": "mantener" },
+      { "ruta": "public/js/categoria-iconos.js", "funcion": "Iconos categoría", "moduloHoy": "compartido", "destino": "SHARED", "ubicado": true, "accion": "convertir en Shared/Core" },
+      { "ruta": "public/js/modal-carihub.js", "funcion": "Modal/diálogo reutilizable (perfil, registro-banner)", "moduloHoy": "compartido real", "destino": "SHARED/Core", "ubicado": true, "accion": "convertir en Shared/Core", "nota": "NO usado por index.html (home usa alert nativo)" },
+      { "ruta": "public/js/precios-publicidad.js", "funcion": "Cálculo precios publicidad", "moduloHoy": "Banners", "destino": "APP_BANNERS", "ubicado": true, "accion": "mantener" },
+      { "ruta": "public/js/banner-inventario-rotacion.js", "funcion": "Inventario y rotación banners", "moduloHoy": "Banners", "destino": "APP_BANNERS", "ubicado": true, "accion": "mantener" },
+      { "ruta": "public/paises.js / estados.js / ciudades.js", "funcion": "Geo", "moduloHoy": "compartido", "destino": "SHARED/Core geo", "ubicado": true, "accion": "convertir en Shared/Core" },
+      { "ruta": "INLINE en index.html (~1330 líneas)", "funcion": "auth, registro, panel, favoritos, anuncios, visitas", "moduloHoy": "Home monolito", "destino": "REGISTRO/DASHBOARD/BANNERS/INTERACCIONES", "ubicado": false, "accion": "dividir + mover" },
+      { "ruta": "INLINE en resultados/perfil/admin", "funcion": "lógica de cada página", "moduloHoy": "respectivo", "destino": "extraer a módulos", "ubicado": "parcial", "accion": "refactorizar" }
+    ],
+    "css": [
+      { "ruta": "public/css/home.css (~3483 líneas)", "moduloHoy": "Home", "destino": "APP_PUBLICA/home", "accion": "refactorizar", "nota": "incluye reglas proto-laptop/tablet/iphone del mockup (muertas)" },
+      { "ruta": "public/css/home-vcards.css", "moduloHoy": "Home", "destino": "SHARED/RenderEngine", "accion": "refactorizar" },
+      { "ruta": "public/css/home-sector-scroll.css", "moduloHoy": "Home", "destino": "APP_PUBLICA/home", "accion": "mantener" },
+      { "ruta": "public/css/home-modals.css", "moduloHoy": "Home", "destino": "mover con modales legacy", "accion": "dividir", "riesgo": "usa var(--rosa)/(--rosa2)/(--rosa-suave) NO definidas en home.css (Bugbot)" },
+      { "ruta": "public/css/home-adultos-cat-picker.css", "moduloHoy": "Home", "destino": "APP_PUBLICA/home", "accion": "mantener" },
+      { "ruta": "public/css/modal-carihub.css", "moduloHoy": "compartido", "destino": "SHARED/Core", "accion": "convertir en Shared/Core" },
+      { "ruta": "public/css/banners-publicidad.css", "moduloHoy": "Banners/compartido (perfil, registro-banner)", "destino": "SHARED o APP_BANNERS", "accion": "convertir en Shared/Core" }
+    ],
+    "configGlobalYReglas": [
+      { "ruta": "firebase.json", "funcion": "Hosting + functions + rules. Ignore: index-legacy, preview, backups", "destino": "SHARED/Core", "accion": "mantener" },
+      { "ruta": "firestore.rules", "funcion": "Reglas seguridad — RBAC email único; colecciones definidas", "destino": "SHARED/Core", "accion": "mantener", "nota": "NO contiene colecciones Messenger (conversaciones, reportes_mensajeria, etc.) — confirma runtime no implementado" },
+      { "ruta": "firestore.indexes.json", "funcion": "Índices", "destino": "SHARED/Core", "accion": "revisar (resultados filtra en cliente)" },
+      { "ruta": "functions/", "funcion": "Cloud Functions (predeploy vacío)", "destino": "SHARED/Core backend", "accion": "revisar manual" },
+      { "ruta": "firebaseConfig DUPLICADO en index/resultados/perfil/admin/registro-banner", "funcion": "Init Firebase por página", "destino": "SHARED/Core", "accion": "convertir en Shared/Core", "riesgo": "5 copias del config (mantenibilidad)" }
+    ],
+    "assets": {
+      "imagenes": [
+        { "ruta": "public/img/home/", "archivos": 60, "uso": "logos, hero, sectores, banners promo", "modulo": "Home + Banners" },
+        { "ruta": "public/img/adultos-cat/", "archivos": 63, "uso": "picker adultos", "modulo": "Home" },
+        { "ruta": "public/img/menu-icons/", "archivos": 12, "uso": "menú", "modulo": "Home" }
+      ],
+      "videos": { "encontrados": 0, "nota": "resultados.html marca data-res-ad-type=video pero usa <img> — no hay archivos de video reales" },
+      "fuentes": ["Home: 7 familias Google Fonts", "registro-banner/dashboard: Inter"]
+    },
+    "corpusDiseño": {
+      "actasCongelamiento": 7, "actaMigracion": 1, "specs": 4, "observaciones": 4,
+      "fixturesGolden": ["fieldengine 11", "messenger 30", "validationengine 24"],
+      "validadores": ["registro 462/462", "fieldengine 19/19", "validationengine 25/25 (script 1.1.0)", "messenger 21/21"],
+      "configSchemas": 18, "registries": 2,
+      "referencia": "ver subagente scripts corpus + REPORTE-CONGELAMIENTOS-CONSOLIDADO.json"
+    }
+  },
+
+  "parte2_mapaActualEcosistema": {
+    "APP_PUBLICA": { "estado": "parcial+mezclada", "real": "index/resultados/perfil existen; index mezcla 5 módulos", "deuda": "monolito index.html" },
+    "APP_REGISTRO": { "estado": "mezclada", "real": "wizard 3 pasos embebido en index.html; schemas FieldEngine en diseño (5 schemas)", "deuda": "INE/verificación en bundle público" },
+    "APP_DASHBOARD": { "estado": "parcial+mezclada", "real": "panel cuenta embebido en index.html; dashboard-rentero prototipo; SPEC-DASHBOARDS congelado", "deuda": "panel en home; sin shell real" },
+    "APP_ADMIN": { "estado": "parcial real", "real": "admin.html funcional (usuarios/denuncias/solicitudes/soporte/logs)", "deuda": "RBAC email único, LIMITE_USUARIOS=150" },
+    "APP_MESSENGER": { "estado": "congelada (solo diseño)", "real": "SPEC 1.0.0 + fixtures 30; SIN runtime; colecciones no en rules", "deuda": "0 implementación" },
+    "APP_PAGOS": { "estado": "pendiente+mezclada", "real": "links Stripe/MP hardcoded en index; config-contratos schema diseño", "deuda": "pagos en home; sin contratos runtime" },
+    "APP_BANNERS": { "estado": "parcial real", "real": "registro-banner funnel + precios + inventario + slots home/resultados/perfil", "deuda": "registro-banner2/paso3 duplicados; rentals hero vacíos" },
+    "APP_INTERACCIONES": { "estado": "observacion+mezclada", "real": "favoritos CRUD en index.html; OBSERVACION 1.2.1", "deuda": "favoritos+anonymous auth en home" },
+    "APP_SEO": { "estado": "observacion", "real": "OBSERVACION 1.0.0; sin landings; perfil indexable parcial", "deuda": "sin canonical/OG/schema/sitemap; marca dual" },
+    "APP_THEMEENGINE": { "estado": "observacion", "real": "OBSERVACION 1.3.0; tokens en dashboard-rentero (12 temas) y vcards", "deuda": "tokens dispersos, sin motor" },
+    "APP_AGENTES": { "estado": "futura", "real": "data-agente-context=home hook; IA en SPEC-DASHBOARDS/VE (orquestador diseño)", "deuda": "sin runtime, sin LLM autorizado" },
+    "SHARED_CORE": { "estado": "parcial+disperso", "real": "modal-carihub, catalogos, sectores, geo, banners-publicidad.css existen pero firebaseConfig duplicado x5", "deuda": "no hay capa core formal" },
+    "partesMezcladas": [
+      "index.html = Home + Registro + Dashboard + Pagos + Banners + Interacciones",
+      "firebaseConfig duplicado en 5 páginas",
+      "home-vcards (presentación) acoplado a Home en vez de RenderEngine",
+      "tokens visuales dispersos (dashboard-rentero, vcards, --rosa roto)"
+    ],
+    "dependenciasEntreApps": [
+      "PUBLICA → usuarios (resultados/perfil/home favoritos)",
+      "BANNERS ← enlazada desde PUBLICA (slots) y converge en ADMIN (solicitudes_anuncios)",
+      "ADMIN modera usuarios/denuncias/solicitudes/soporte",
+      "MESSENGER (diseño) depende de ValidationEngine + Dashboards notificaciones + perfiles migrados",
+      "DASHBOARD depende de Cuentas + VE + ANEXO Messenger",
+      "THEMEENGINE depende de RenderEngine (sin SPEC) + perfiles migrados"
+    ],
+    "deudaTecnicaPrincipal": [
+      "Monolito index.html no separable",
+      "resultados.html descarga universo de perfiles y filtra en cliente (no escala)",
+      "RBAC admin por email hardcoded en rules y páginas",
+      "5 copias firebaseConfig",
+      "Catálogo producción (34) ≠ diseño (462)",
+      "Migración usuarios→perfiles pendiente bloquea Messenger/Dashboards/Theme"
+    ]
+  },
+
+  "parte4_evaluacionPorModulo": [
+    { "modulo": "APP_PUBLICA/Home", "prioridad": "P0", "complejidad": "media", "riesgo": "alto", "sensibilidadDatos": "baja (si se saca registro)", "auth": "opcional", "admin": false, "separarFisicamente": true, "lazy": "núcleo no, resto sí", "cargarEnHome": "solo núcleo", "rendimiento": "alto impacto", "seo": "alto", "escalabilidad": "alta", "depVE": "indirecta", "depMessenger": "no", "depRender": "alta", "depTheme": "media" },
+    { "modulo": "APP_PUBLICA/Resultados", "prioridad": "P1", "complejidad": "media", "riesgo": "alto (query client-side)", "sensibilidadDatos": "baja", "auth": "no", "admin": false, "separarFisicamente": false, "lazy": "no", "cargarEnHome": "no", "rendimiento": "CRÍTICO", "seo": "alto", "escalabilidad": "CRÍTICA — requiere query server-side/índices", "depVE": "no", "depMessenger": "no", "depRender": "alta", "depTheme": "media" },
+    { "modulo": "APP_PUBLICA/Perfil", "prioridad": "P1", "complejidad": "media", "riesgo": "medio", "sensibilidadDatos": "media", "auth": "no", "admin": false, "separarFisicamente": false, "lazy": "no", "cargarEnHome": "no", "rendimiento": "medio", "seo": "ALTO (canónica)", "escalabilidad": "ok", "depVE": "no", "depMessenger": "futura (botón contactar)", "depRender": "alta", "depTheme": "alta" },
+    { "modulo": "APP_REGISTRO/Wizard", "prioridad": "P1", "complejidad": "alta", "riesgo": "alto", "sensibilidadDatos": "ALTA (INE/selfie)", "auth": "sí/anónimo", "admin": false, "separarFisicamente": true, "lazy": "sí", "cargarEnHome": "no", "rendimiento": "medio", "seo": "no", "escalabilidad": "media", "depVE": "ALTA", "depMessenger": "no", "depRender": "media (FieldEngine UI)", "depTheme": "baja" },
+    { "modulo": "APP_DASHBOARD", "prioridad": "P1", "complejidad": "alta", "riesgo": "medio", "sensibilidadDatos": "alta", "auth": "sí", "admin": false, "separarFisicamente": true, "lazy": "sí", "cargarEnHome": "no", "rendimiento": "medio", "seo": "no", "escalabilidad": "alta", "depVE": "alta", "depMessenger": "alta (notificaciones)", "depRender": "media", "depTheme": "media" },
+    { "modulo": "APP_ADMIN", "prioridad": "P1", "complejidad": "alta", "riesgo": "ALTO", "sensibilidadDatos": "ALTA", "auth": "sí", "admin": true, "separarFisicamente": true, "lazy": "sí", "cargarEnHome": "NUNCA", "rendimiento": "interno", "seo": "no", "escalabilidad": "baja (cap 150, RBAC único)", "depVE": "alta", "depMessenger": "alta (cola reportes)", "depRender": "baja", "depTheme": "baja" },
+    { "modulo": "APP_MESSENGER", "prioridad": "P2", "complejidad": "muy alta", "riesgo": "alto", "sensibilidadDatos": "ALTA", "auth": "sí", "admin": "parcial", "separarFisicamente": true, "lazy": "sí", "cargarEnHome": "no", "rendimiento": "realtime", "seo": "no", "escalabilidad": "alta", "depVE": "CRÍTICA", "depMessenger": "ES Messenger", "depRender": "baja", "depTheme": "baja" },
+    { "modulo": "APP_PAGOS", "prioridad": "P2", "complejidad": "alta", "riesgo": "ALTO (dinero)", "sensibilidadDatos": "ALTA", "auth": "sí", "admin": "parcial", "separarFisicamente": true, "lazy": "sí", "cargarEnHome": "NUNCA", "rendimiento": "bajo", "seo": "no", "escalabilidad": "media", "depVE": "media", "depMessenger": "no", "depRender": "baja", "depTheme": "baja" },
+    { "modulo": "APP_BANNERS", "prioridad": "P2", "complejidad": "alta", "riesgo": "medio", "sensibilidadDatos": "baja", "auth": "anunciante", "admin": "parcial", "separarFisicamente": true, "lazy": "sí", "cargarEnHome": "solo slot render", "rendimiento": "medio", "seo": "bajo", "escalabilidad": "media", "depVE": "media", "depMessenger": "no", "depRender": "media", "depTheme": "media" },
+    { "modulo": "APP_INTERACCIONES", "prioridad": "P3", "complejidad": "alta", "riesgo": "medio", "sensibilidadDatos": "media", "auth": "sí", "admin": "parcial", "separarFisicamente": true, "lazy": "sí", "cargarEnHome": "no", "rendimiento": "alto (realtime/media)", "seo": "medio", "escalabilidad": "alta", "depVE": "alta", "depMessenger": "alta", "depRender": "media", "depTheme": "media" },
+    { "modulo": "APP_THEMEENGINE", "prioridad": "P4", "complejidad": "muy alta", "riesgo": "medio", "sensibilidadDatos": "baja", "auth": "sí", "admin": "parcial", "separarFisicamente": true, "lazy": "sí", "cargarEnHome": "no", "rendimiento": "medio", "seo": "bajo", "escalabilidad": "media", "depVE": "media", "depMessenger": "no", "depRender": "CRÍTICA (precondición)", "depTheme": "ES Theme" },
+    { "modulo": "APP_SEO", "prioridad": "P2", "complejidad": "media", "riesgo": "bajo", "sensibilidadDatos": "ninguna", "auth": "no", "admin": false, "separarFisicamente": "islas/SSG", "lazy": "no", "cargarEnHome": "ligero", "rendimiento": "positivo", "seo": "ES SEO", "escalabilidad": "ALTA (motor crecimiento)", "depVE": "no", "depMessenger": "no", "depRender": "alta", "depTheme": "baja" },
+    { "modulo": "APP_AGENTES", "prioridad": "P5", "complejidad": "muy alta", "riesgo": "alto", "sensibilidadDatos": "alta", "auth": "sí", "admin": "parcial", "separarFisicamente": "transversal", "lazy": "sí", "cargarEnHome": "no", "rendimiento": "alto (LLM)", "seo": "indirecto", "escalabilidad": "media", "depVE": "alta (confirmaciones)", "depMessenger": "alta", "depRender": "baja", "depTheme": "baja" },
+    { "modulo": "SHARED_CORE", "prioridad": "P0", "complejidad": "media", "riesgo": "alto si no se hace", "sensibilidadDatos": "n/a", "auth": "n/a", "admin": false, "separarFisicamente": true, "lazy": "núcleo", "cargarEnHome": "sí (mínimo)", "rendimiento": "clave", "seo": "indirecto", "escalabilidad": "habilitador", "depVE": "contiene VE", "depMessenger": "n/a", "depRender": "contiene Render", "depTheme": "contiene tokens" }
+  ],
+
+  "parte6_analisisHome": {
+    "debeQuedarse": ["Hero + branding", "Buscador geo (categoría/país/estado/ciudad)", "CTA Buscar ahora→resultados", "Grid categorías y sectores", "Trust pills (copy)", "Slots publicitarios (solo render)", "Menú legal + 18+", "Puerta 18+ (mejorada)"],
+    "debeSalir": ["Wizard registro 3 pasos + INE", "Login/panel cuenta/editar perfil", "Pagos Stripe/MP", "Favoritos CRUD", "Formulario solicitud anuncio", "estadisticas_visitas write"],
+    "nuncaCargarEnHome": ["Firebase Storage", "Verificación INE/selfie", "Lógica admin", "LLM/agentes", "Editor ThemeEngine"],
+    "lazyLoad": ["Registro", "Cuenta", "Anuncios", "Favoritos", "Firebase Auth/Firestore (on-demand)"],
+    "microcomponente": ["ResultCard/Vcard (→RenderEngine)", "Selector geo", "Trust pill", "Ad slot", "Modal (→modal-carihub)"],
+    "migrarAOtrasApps": ["modalRegistro→/registro", "modalMiPerfil/Panel/Editar→/cuenta", "modalAnuncio→/anuncios", "modalFavoritos→/cuenta/favoritos", "modalLegal→/legal/*"],
+    "simplificar": ["Un solo sistema de modales", "Menú sin duplicados", "Reducir fuentes a 2", "Catálogo único (no CATEGORIAS_BUSCADOR hardcoded)"],
+    "optimizar": ["Defer Firebase", "Preload solo logo + 1er hero", "Lazy imágenes bajo fold", "Eliminar CSS proto-mockup muerto"],
+    "agregar": ["Teaser perfiles verificados (social proof)", "Enlaces SEO ciudad/sector", "OG + canonical + JSON-LD", "Footer mapa del sitio", "Geolocalización que pre-llene ciudad"],
+    "eliminar": ["index-legacy del deploy (ya ignore)", "Auth anónima automática en load", "plantillaCardPerfil si muerto", "Doble modal favoritos"]
+  },
+
+  "parte7_detalleFuncionalPorModulo": [
+    {
+      "app": "APP_PUBLICA", "preparacion": "parcial",
+      "pantallas": ["Home", "Resultados", "Perfil público"],
+      "rutas": ["/", "/resultados", "/perfil/:perfilId"],
+      "componentes": ["Hero", "Buscador geo", "Grid categorías/sectores", "ResultCard", "Banner slot", "Modal"],
+      "colecciones": ["usuarios (lectura pública)", "perfiles/{id} (futuro)"],
+      "accionesUsuario": ["buscar", "explorar categorías", "ver perfil", "marcar favorito"],
+      "accionesAdmin": ["n/a"], "eventos": ["busqueda_realizada", "perfil_visto"], "validaciones": ["filtros geo"],
+      "notificaciones": ["n/a"], "metricas": ["visitas", "búsquedas", "CTR perfil"], "ia": ["búsqueda natural futura"],
+      "dependencias": ["Catálogo", "RenderEngine", "SEO"], "riesgos": ["query client-side no escala"], "pendientes": ["separar de monolito", "RenderEngine"], "faltaParaConstruir": ["query server-side", "RenderEngine", "SEO head"]
+    },
+    {
+      "app": "APP_REGISTRO", "preparacion": "parcial (diseño maduro)",
+      "pantallas": ["Registro perfil", "Registro negocio", "Registro anunciante", "Wizard", "Verificaciones"],
+      "rutas": ["/registro", "/registro/:formularioId", "/upgrade-perfil"],
+      "componentes": ["FieldEngine resolver", "Stepper", "Uploader INE/selfie", "ValidationEngine gates"],
+      "colecciones": ["usuarios/perfiles", "verificaciones (storage)"],
+      "accionesUsuario": ["registrar", "subir documentos", "aceptar consentimientos"],
+      "accionesAdmin": ["revisar", "aprobar/rechazar"], "eventos": ["registro_enviado", "verificacion_subida"],
+      "validaciones": ["ValidationEngine 1.1.0 (gates, anti-bot, rate limit)"], "notificaciones": ["estado revisión"],
+      "metricas": ["conversión registro", "tasa aprobación"], "ia": ["pre-moderación documentos futura"],
+      "dependencias": ["FieldEngine 1.0.1", "VE 1.1.0", "Cuentas", "Seguridad MVP", "5 config schemas"], "riesgos": ["datos sensibles"], "pendientes": ["runtime FieldEngine", "migración perfiles"], "faltaParaConstruir": ["app separada", "runtime VE/FieldEngine"]
+    },
+    {
+      "app": "APP_DASHBOARD", "preparacion": "parcial (SPEC congelado)",
+      "pantallas": ["Perfil", "Negocio", "Anunciante", "Empresa", "Operador"],
+      "rutas": ["/cuenta", "/cuenta/:modulo"],
+      "componentes": ["Shell modular", "Notificaciones", "Historial actividad", "IA orquestador ligero", "Centro actividad"],
+      "colecciones": ["usuarios/{uid}/notificaciones", "historial_actividad", "conversaciones_meta", "perfiles/historial_estados", "ia_recomendaciones", "pagos", "solicitudes_anuncios"],
+      "accionesUsuario": ["gestionar perfil", "ver notificaciones", "renovar", "ver solicitudes"],
+      "accionesAdmin": ["n/a (admin separado)"], "eventos": ["notificacion_creada", "actividad_registrada"],
+      "validaciones": ["VE eventBus"], "notificaciones": ["unificadas"], "metricas": ["engagement cuenta"],
+      "ia": ["recomendaciones orquestador"], "dependencias": ["Cuentas", "VE 1.1.0", "ANEXO Messenger", "migración perfiles"], "riesgos": ["acoplar admin"], "pendientes": ["shell real", "PATCH 1.1.0 mensajería"], "faltaParaConstruir": ["router shell", "runtime"]
+    },
+    {
+      "app": "APP_MESSENGER", "preparacion": "futura (diseño congelado, 0 runtime)",
+      "pantallas": ["Conversaciones", "Chat", "Solicitudes", "Reportes", "Config/automatizaciones"],
+      "rutas": ["/messenger", "/messenger/chat/:id", "/messenger/solicitudes", "/messenger/configuracion", "/admin/mensajeria"],
+      "componentes": ["Bandeja", "Chat", "fanOut", "Bloqueos", "Moderación", "Traducción futura"],
+      "colecciones": ["conversaciones/{id}", "conversaciones/{id}/mensajes", "usuarios/{uid}/conversaciones_meta", "bloqueos", "reportes_mensajeria", "messenger_automatizaciones", "messenger_plantillas", "messenger_operadores"],
+      "accionesUsuario": ["enviar mensaje", "bloquear", "reportar", "aceptar solicitud"],
+      "accionesAdmin": ["revisar reportes", "controles globales"], "eventos": ["24 acciones mensajería en VE"],
+      "validaciones": ["ValidationEngine 1.1.0 — 60 acciones registry, gates fanOut"], "notificaciones": ["→Dashboards (ANEXO OB-MSG-7)"],
+      "metricas": ["spamScore", "telefonoVerificado", "reportes"], "ia": ["4 asistentes IA/seguridad"],
+      "dependencias": ["VE 1.1.0 CRÍTICA", "Dashboards", "perfiles migrados", "Seguridad MVP"], "riesgos": ["colecciones no en rules", "realtime cost"], "pendientes": ["TODO runtime", "rules"], "faltaParaConstruir": ["app completa, rules, runtime, migración"]
+    },
+    {
+      "app": "APP_ADMIN", "preparacion": "parcial real (admin.html)",
+      "pantallas": ["Moderación", "Seguridad", "Pagos", "Revisiones", "IA Admin"],
+      "rutas": ["/admin", "/admin/:modulo", "/admin/mensajeria"],
+      "componentes": ["Cola perfiles", "Cola denuncias", "Solicitudes publicidad", "Soporte", "Logs", "8 módulos (config-admin schema)"],
+      "colecciones": ["usuarios", "denuncias", "solicitudes_anuncios", "soporte_mensajes", "logsAdmin", "logsSeguridad", "pagos", "anuncios", "analytics_eventos"],
+      "accionesUsuario": ["n/a"], "accionesAdmin": ["aprobar/rechazar", "moderar", "gestionar pagos", "responder soporte"],
+      "eventos": ["logsAdmin"], "validaciones": ["VE estados revisión"], "notificaciones": ["a usuarios"],
+      "metricas": ["contadoresGlobales"], "ia": ["IA admin (diseño)"],
+      "dependencias": ["Dashboards admin_separado", "VE", "Seguridad", "Messenger admin"], "riesgos": ["RBAC email único", "cap 150 usuarios"], "pendientes": ["RBAC fase 2", "8 módulos"], "faltaParaConstruir": ["RBAC real", "escalar lista", "separar por módulo"]
+    },
+    {
+      "app": "APP_PAGOS", "preparacion": "inmaduro (schema diseño)",
+      "pantallas": ["Contratos", "Renovaciones", "Facturación", "Cobros"],
+      "rutas": ["/cuenta/contratos", "/pagos", "/checkout"],
+      "componentes": ["Contratos perfiles/banners", "Renovaciones", "Pasarela"],
+      "colecciones": ["pagos", "contratos_perfiles (diseño)", "contratos_banners (diseño)", "solicitudes_anuncios"],
+      "accionesUsuario": ["pagar", "renovar"], "accionesAdmin": ["validar pago", "autorizar"], "eventos": ["pago_registrado"],
+      "validaciones": ["VE estados pago"], "notificaciones": ["confirmación"], "metricas": ["ingresos", "renovaciones"],
+      "ia": ["n/a"], "dependencias": ["config-contratos schema", "Cuentas", "VE", "pasarela NO autorizada live"], "riesgos": ["dinero", "no reembolso"], "pendientes": ["pasarela real", "facturación"], "faltaParaConstruir": ["integración Stripe/MP server", "contratos runtime"]
+    },
+    {
+      "app": "APP_BANNERS", "preparacion": "parcial real",
+      "pantallas": ["Espacios", "Campañas", "Creativos", "Estadísticas"],
+      "rutas": ["/anuncios", "/cuenta/anuncios", "registro-banner.html"],
+      "componentes": ["Selector slots", "Precios", "Inventario rotación", "Creativo upload"],
+      "colecciones": ["solicitudes_anuncios", "configuracion_publicidad/precios_banners", "anuncios", "contratos_banners (diseño)"],
+      "accionesUsuario": ["seleccionar slot", "subir creativo", "pagar"], "accionesAdmin": ["aprobar anuncio", "gestionar inventario"],
+      "eventos": ["solicitud_anuncio"], "validaciones": ["estados publicidad"], "notificaciones": ["estado solicitud"],
+      "metricas": ["impresiones/CTR (estadísticas)"], "ia": ["n/a"], "dependencias": ["precios-publicidad.js", "inventario", "Pagos"], "riesgos": ["registro-banner2/paso3 duplicados", "rentals hero vacíos"], "pendientes": ["inventory dinámico", "estadísticas reales"], "faltaParaConstruir": ["consolidar funnel", "métricas"]
+    },
+    {
+      "app": "APP_INTERACCIONES", "preparacion": "futura (observación)",
+      "pantallas": ["Stories", "Lives", "Seguidores", "Comentarios", "Reacciones"],
+      "rutas": ["/interacciones", "/stories", "/live/:id", "/seguidores"],
+      "componentes": ["Stories", "Live", "Grafo seguidores", "Comentarios", "Reacciones"],
+      "colecciones": ["(diseño futuro)", "usuarios/{uid}/favoritos (origen)"],
+      "accionesUsuario": ["publicar story", "seguir", "comentar", "reaccionar"], "accionesAdmin": ["moderar"],
+      "eventos": ["futuros"], "validaciones": ["VE social futuro"], "notificaciones": ["a seguidores"], "metricas": ["engagement"],
+      "ia": ["IA social futura"], "dependencias": ["OBSERVACION 1.2.1", "Messenger", "perfiles"], "riesgos": ["alcance amplio"], "pendientes": ["SPEC Interacciones"], "faltaParaConstruir": ["SPEC + runtime Messenger"]
+    },
+    {
+      "app": "APP_THEMEENGINE", "preparacion": "inmaduro (observación amplia)",
+      "pantallas": ["Temas", "Widgets", "Plantillas", "Editor visual"],
+      "rutas": ["/cuenta/apariencia", "/editor-tema"],
+      "componentes": ["Tokens tema", "Editor tipo Canva", "Plantillas", "Vista previa"],
+      "colecciones": ["(themeSnapshot diseño futuro)"],
+      "accionesUsuario": ["personalizar", "previsualizar", "publicar tema"], "accionesAdmin": ["aprobar tema"],
+      "eventos": ["publicar_tema (VE futuro)"], "validaciones": ["VE publicar_tema futuro"], "notificaciones": ["n/a"],
+      "metricas": ["uso editor"], "ia": ["IA diseño asistido"], "dependencias": ["RenderEngine SPEC (precondición)", "OBSERVACION 1.3.0", "Dashboards", "perfiles"], "riesgos": ["anticiparse a RenderEngine"], "pendientes": ["RenderEngine SPEC", "workshop"], "faltaParaConstruir": ["RenderEngine", "SPEC ThemeEngine"]
+    },
+    {
+      "app": "APP_SEO", "preparacion": "inmaduro (observación)",
+      "pantallas": ["Landing país", "Landing estado", "Landing ciudad", "Landing categoría"],
+      "rutas": ["/s/:slug", "/ciudad/:ciudad", "/explorar/:sector", "/sitemap.xml"],
+      "componentes": ["Landings SSG", "Metadatos", "JSON-LD", "Enlazado interno"],
+      "colecciones": ["usuarios/perfiles (lectura)", "Catálogo"],
+      "accionesUsuario": ["llegar por buscador", "navegar a resultados"], "accionesAdmin": ["n/a"],
+      "eventos": ["n/a"], "validaciones": ["n/a"], "notificaciones": ["n/a"], "metricas": ["tráfico orgánico", "ranking"],
+      "ia": ["generación contenido SEO futura"], "dependencias": ["OBSERVACION SEO 1.0.0", "Catálogo", "Render landings", "perfilId canónico"], "riesgos": ["marca dual Cariñosas/CariHub"], "pendientes": ["canonical/OG/schema/sitemap"], "faltaParaConstruir": ["motor landings", "head SEO"]
+    },
+    {
+      "app": "APP_AGENTES", "preparacion": "futura",
+      "pantallas": ["(embebidas) Asistente cuenta", "IA Admin", "Asistente messenger"],
+      "rutas": ["/cuenta/asistente", "/admin/ia", "/messenger/asistente"],
+      "componentes": ["Orquestador", "Auditoría", "Soporte", "Moderación", "Seguridad", "Traducción", "SEO", "Diseño"],
+      "colecciones": ["ia_recomendaciones", "ia_arquitecto_informes"],
+      "accionesUsuario": ["consultar asistente"], "accionesAdmin": ["revisar informes IA", "confirmar acciones"],
+      "eventos": ["ia_* en VE"], "validaciones": ["VE confirmación humana"], "notificaciones": ["recomendaciones"],
+      "metricas": ["uso IA"], "ia": ["ES IA"], "dependencias": ["Dashboards orquestador", "VE ia_*", "Messenger iaSeguridad", "LLM NO autorizado"], "riesgos": ["LLM runtime", "datos sensibles"], "pendientes": ["autorización LLM"], "faltaParaConstruir": ["core apps estables", "SDK orquestador"]
+    },
+    {
+      "app": "SHARED_CORE", "preparacion": "parcial disperso",
+      "componentes": ["Firebase init", "Firestore helpers", "ValidationEngine", "FieldEngine", "Catálogos", "Geo", "modal-carihub", "tokens visuales", "config global"],
+      "colecciones": ["transversal"],
+      "dependencias": ["consumido por todas las apps"], "riesgos": ["firebaseConfig duplicado x5", "tokens dispersos"], "pendientes": ["capa core formal"], "faltaParaConstruir": ["módulo core único, config único, design tokens"]
+    }
+  ],
+
+  "entregablesRelacionados": [
+    "scripts/AUDITORIA-ARQUITECTONICA-GLOBAL-CARIHUB.md",
+    "scripts/MAPA-MAESTRO-CARIHUB.json",
+    "scripts/MAPA-MAESTRO-CARIHUB.md",
+    "scripts/MATRIZ-MODULARIZACION-CARIHUB.json",
+    "scripts/MATRIZ-MODULARIZACION-CARIHUB.md",
+    "scripts/VEREDICTO-ARQUITECTONICO-FINAL.md"
+  ]
+}

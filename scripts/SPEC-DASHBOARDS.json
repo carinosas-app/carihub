@@ -1,0 +1,410 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "$id": "https://carihub.app/schemas/spec-dashboards.json",
+  "tipo": "SPEC_TECNICA",
+  "nombre": "Dashboards CariHub — Especificación técnica",
+  "versionSpec": "1.0.0",
+  "fecha": "2026-06-09",
+  "estado": "CONGELADO",
+  "implementacionAutorizada": false,
+  "actaCongelamiento": "scripts/ACTA-CONGELAMIENTO-DASHBOARDS.json",
+  "autorizacion": {
+    "auditoriaAprobada": "scripts/AUDITORIA-DASHBOARDS.json",
+    "auditoriaIA": "scripts/AUDITORIA-DASHBOARDS-IA.md",
+    "autorizadoPor": "product owner / usuario CariHub",
+    "alcance": "Diseño dashboards, IA, notificaciones, historial — sin runtime"
+  },
+  "dependenciasCongeladas": {
+    "catalogo": "catalogo-2026-06-10@1.0.0",
+    "cuentas": "cuentas-2026-06-10@1.0.0",
+    "seguridad": "seguridad-2026-06-10@1.0.0",
+    "fieldEngine": "fieldengine-2026-06-10@1.0.1"
+  },
+  "dependenciasPendientes": {
+    "validationEngine": "SPEC siguiente — gates y validación valores",
+    "renderEngine": "No autorizado — snapshot lectura",
+    "messenger": "No autorizado — conversaciones P2P",
+    "pagos": "Stripe/MercadoPago — diseño contratos existe"
+  },
+  "proposito": "Definir arquitectura, módulos, seguridad, asistentes IA, notificaciones unificadas y centro de actividad para los cuatro dashboards CariHub. No implementa UI ni Firestore.",
+  "artefactosRelacionados": [
+    "scripts/AUDITORIA-DASHBOARDS.json",
+    "scripts/AUDITORIA-DASHBOARDS.md",
+    "scripts/AUDITORIA-DASHBOARDS-IA.md",
+    "scripts/config-admin-arquitectura-completa-schema.json",
+    "scripts/config-cuentas-usuario-schema.json",
+    "scripts/config-seguridad-mvp-schema.json",
+    "scripts/SPEC-FIELDENGINE.json"
+  ],
+  "arquitectura": {
+    "decision": "hibrido",
+    "componentes": {
+      "admin": {
+        "ruta": "/admin",
+        "archivoActual": "public/admin.html",
+        "aislado": true,
+        "motivo": "RBAC, datos privados, logs admin"
+      },
+      "shellUsuario": {
+        "ruta": "/cuenta",
+        "archivoBaseUI": "public/dashboard-rentero.html",
+        "archivoActualParcial": "public/index.html",
+        "modularPorRoles": true,
+        "motivo": "visitante + perfil + banners en un shell según tipoCuenta y rolesCuenta[]"
+      }
+    },
+    "router": {
+      "reglas": [
+        "rolesCuenta[] incluye admin → redirect /admin (futuro RBAC)",
+        "tipoCuentaPrincipal=visitante → módulos cuenta, favoritos, upgrade",
+        "tienePerfilPublico → módulo perfil",
+        "rolesCuenta[] incluye anunciante → módulo banners"
+      ]
+    }
+  },
+  "dashboards": {
+    "admin": {
+      "id": "dashboard_admin",
+      "modulosSpec": [
+        "resumen", "usuarios_cuentas", "perfiles_revision", "catalogo", "formularios_schemas",
+        "comercial_contratos", "publicidad_banners", "pagos_renovaciones", "denuncias_soporte",
+        "seguridad", "busqueda", "ia_arquitecto", "ia_moderador", "ia_comercial", "ia_seguridad",
+        "notificaciones_admin", "centro_actividad_admin"
+      ],
+      "estadoProduccion": "parcial_40pct"
+    },
+    "perfil_publico": {
+      "id": "dashboard_perfil",
+      "modulosSpec": [
+        "wizard_perfil", "edicion_campos", "fotos", "verificacion", "estado_publicacion",
+        "renovacion", "estadisticas", "mensajes", "ia_asistente_perfil", "notificaciones", "historial_perfil"
+      ],
+      "estadoProduccion": "parcial_embebido_index"
+    },
+    "publicidad_banners": {
+      "id": "dashboard_banners",
+      "modulosSpec": [
+        "funnel_contratacion", "solicitudes", "campanas_activas", "creativos", "renovaciones",
+        "pagos_banner", "estadisticas_anuncio", "ia_asistente_publicidad", "notificaciones", "historial_banners"
+      ],
+      "estadoProduccion": "parcial_funnel_sin_panel"
+    },
+    "usuario_visitante": {
+      "id": "dashboard_cuenta",
+      "modulosSpec": [
+        "cuenta", "favoritos", "mensajes", "preferencias", "seguridad_cuenta", "upgrade_perfil",
+        "categorias_sugeridas", "denuncias_realizadas", "ia_asistente_cuenta", "notificaciones", "historial_cuenta"
+      ],
+      "estadoProduccion": "parcial_modales_home"
+    }
+  },
+  "modulosTransversales": {
+    "notificaciones": "seccion 14",
+    "centroActividad": "seccion 15",
+    "asistentesIA": "seccion 13",
+    "authShell": "Firebase Auth + rolesCuenta lectura",
+    "securityGates": "Seguridad MVP + FieldEngine evaluateSecurityGates"
+  },
+  "asistentesIA": {
+    "orquestacion": {
+      "componente": "IAOrchestrator",
+      "patron": "orquestador_ligero_con_especialistas",
+      "rechazado": "asistente_unico_global"
+    },
+    "politicaSeguridadGlobal": {
+      "reglasObligatorias": [
+        "sin_write_sin_confirmacion_humana",
+        "sin_auto_aprobacion_perfiles",
+        "sin_auto_aprobacion_banners",
+        "sin_auto_cambio_precios",
+        "sin_auto_cambio_categorias",
+        "sin_INE_selfie_salvo_admin_autorizado_con_log",
+        "sin_privados_terceros_a_usuarios",
+        "respetar_roles_estadoSeguridad_estadoMensajeria",
+        "salida_ejecutable_solo_ia_recomendaciones",
+        "ia_arquitecto_solo_lectura"
+      ],
+      "coleccionRecomendaciones": "ia_recomendaciones/{id}",
+      "estadosRecomendacion": ["sugerida", "aceptada_humano", "rechazada_humano", "expirada"]
+    },
+    "asistentes": [
+      { "id": "ia_asistente_cuenta", "dashboard": "usuario_visitante", "confirmacionHumana": true },
+      { "id": "ia_asistente_perfil", "dashboard": "perfil_publico", "confirmacionHumana": true, "usaFieldEngine": "dry-run" },
+      { "id": "ia_asistente_publicidad", "dashboard": "publicidad_banners", "confirmacionHumana": true },
+      { "id": "ia_arquitecto", "dashboard": "admin", "soloLectura": true, "referencia": "config-admin-arquitectura-completa-schema.json" },
+      { "id": "ia_moderador", "dashboard": "admin", "confirmacionHumana": true },
+      { "id": "ia_comercial", "dashboard": "admin", "confirmacionHumana": true },
+      { "id": "ia_seguridad", "dashboard": "admin", "confirmacionHumana": true }
+    ]
+  },
+  "sistemaNotificacionesUnificado": {
+    "id": "notificaciones_unificadas",
+    "descripcion": "Capa transversal: un bus de eventos → notificaciones in-app (+ push futuro) por usuarioId",
+    "coleccion": "usuarios/{usuarioId}/notificaciones/{notificacionId}",
+    "indiceAgregado": "usuarios/{usuarioId}.preferencias.notificaciones + contadorNoLeidas",
+    "ui": {
+      "campanaGlobal": "Shell usuario y admin (badge)",
+      "centroNotificaciones": "Panel filtrable por dominio",
+      "preferencias": "usuarios.preferencias.notificaciones por dominio"
+    },
+    "dominios": {
+      "mensajes": {
+        "eventos": ["mensaje_nuevo", "mensaje_leido", "conversacion_archivada"],
+        "origen": "conversaciones/{id}/mensajes",
+        "destinatario": "receptorId",
+        "prioridad": "alta",
+        "requiereEstadoMensajeria": "habilitada|restringida para recibir"
+      },
+      "favoritos": {
+        "eventos": ["perfil_favorito_nuevo", "perfil_favorito_quito"],
+        "origen": "usuarios/{uid}/favoritos",
+        "destinatario": "perfil.usuarioId dueño perfil",
+        "prioridad": "baja",
+        "nota": "Solo notifica al dueño del perfil si opt-in; visitante no notifica identidad"
+      },
+      "renovaciones": {
+        "eventos": ["renovacion_proxima_7d", "renovacion_proxima_1d", "renovacion_vencida", "renovacion_completada"],
+        "origen": ["contratos_perfiles", "contratos_banners"],
+        "destinatario": "usuarioId contrato",
+        "prioridad": "alta"
+      },
+      "contratos": {
+        "eventos": ["contrato_activado", "contrato_pausado", "contrato_vencido", "contrato_renovado"],
+        "origen": ["contratos_perfiles", "contratos_banners"],
+        "destinatario": "usuarioId",
+        "prioridad": "media"
+      },
+      "pagos": {
+        "eventos": ["pago_pendiente", "pago_completado", "pago_fallido", "reembolso"],
+        "origen": "pagos/{id}",
+        "destinatario": "usuarioId",
+        "prioridad": "alta"
+      },
+      "verificaciones": {
+        "eventos": ["verificacion_recibida", "verificacion_aprobada", "verificacion_rechazada", "verificacion_vencida"],
+        "origen": "perfiles.verificacion | usuarios.verificacion",
+        "destinatario": "usuarioId",
+        "prioridad": "alta"
+      },
+      "denuncias": {
+        "eventos": ["denuncia_recibida_admin", "denuncia_resuelta_reportante", "denuncia_sobre_tu_perfil"],
+        "origen": "denuncias/{id}",
+        "destinatario": "reportanteId | usuarioId perfil | admin",
+        "prioridad": "media",
+        "privacidad": "No exponer identidad denunciante al reportado"
+      },
+      "banners": {
+        "eventos": ["solicitud_recibida", "solicitud_aprobada", "solicitud_rechazada", "requiere_correccion", "banner_activo", "banner_vencido"],
+        "origen": "solicitudes_anuncios | anuncios | contratos_banners",
+        "destinatario": "uidAnunciante",
+        "prioridad": "alta"
+      },
+      "seguridad": {
+        "eventos": ["email_verificar_recordatorio", "estado_seguridad_cambio", "login_nuevo_dispositivo", "cuenta_restringida", "mensajeria_suspendida"],
+        "origen": "usuarios.seguridad | logsSeguridad",
+        "destinatario": "usuarioId",
+        "prioridad": "critica"
+      },
+      "recomendaciones_ia": {
+        "eventos": ["ia_sugerencia_nueva", "ia_sugerencia_expirada", "ia_informe_listo_admin"],
+        "origen": "ia_recomendaciones | ia_arquitecto_informes",
+        "destinatario": "usuarioId | adminId",
+        "prioridad": "baja",
+        "nota": "Nunca auto-ejecutar; CTA confirmar o descartar"
+      }
+    },
+    "modeloNotificacion": {
+      "campos": [
+        "notificacionId", "usuarioId", "dominio", "tipoEvento", "titulo", "cuerpo",
+        "entidadTipo", "entidadId", "accionUrl", "leida", "createdAt", "expiraAt",
+        "metadata", "prioridad", "canal"
+      ],
+      "canales": ["in_app", "email_futuro", "push_futuro"],
+      "deduplicacion": "hash(usuarioId+dominio+tipoEvento+entidadId+ventana24h)"
+    },
+    "productorEventos": {
+      "patron": "Cloud Function o motor eventos post-commit — diseño; no implementado",
+      "fuentes": ["Firestore triggers", "ValidationEngine post-validación", "Admin acciones"]
+    }
+  },
+  "centroActividadHistorial": {
+    "id": "centro_actividad",
+    "descripcion": "Vista unificada cronológica + filtros por dominio; distinto de notificaciones (eventos atómicos) — historial es línea de tiempo auditable del usuario",
+    "ui": {
+      "ubicacion": "Shell usuario módulo Actividad; Admin módulo Historial global",
+      "vistas": ["timeline_unificada", "filtros_por_dominio", "export_csv_admin"]
+    },
+    "dominios": {
+      "historial_perfil": {
+        "eventos": ["registro_iniciado", "borrador_guardado", "enviado_revision", "aprobado", "rechazado", "actualizacion_pendiente", "publicado", "despublicado", "vencido"],
+        "coleccion": "perfiles/{perfilId}/historial_estados/{id}",
+        "lectura": "owner + admin"
+      },
+      "historial_banners": {
+        "eventos": ["solicitud_creada", "estado_cambiado", "correccion_enviada", "activado", "pausado", "vencido"],
+        "coleccion": "solicitudes_anuncios/{id}/historial/{id} | contratos_banners/{id}/historial",
+        "lectura": "anunciante owner + admin"
+      },
+      "historial_pagos": {
+        "eventos": ["intento", "completado", "fallido", "reembolso"],
+        "coleccion": "pagos/{id} + usuarios/{id}/historial_actividad",
+        "lectura": "owner + admin comercial"
+      },
+      "historial_renovaciones": {
+        "eventos": ["recordatorio", "iniciada", "completada", "fallida"],
+        "coleccion": "contratos_*/{id}/renovaciones/{id}",
+        "lectura": "owner + admin"
+      },
+      "historial_verificaciones": {
+        "eventos": ["documentos_enviados", "en_revision", "aprobada", "rechazada", "vencida"],
+        "coleccion": "perfiles/{id}/historial_verificacion/{id}",
+        "lectura": "owner + admin moderador",
+        "privacidad": "No incluir URLs INE en timeline usuario — solo estados"
+      },
+      "historial_seguridad": {
+        "eventos": ["login", "logout", "cambio_password", "estado_seguridad", "bloqueo_aplicado", "verificacion_email"],
+        "coleccion": "usuarios/{id}/historial_seguridad/{id}",
+        "lectura": "owner (resumido) + admin seguridad (completo)",
+        "referenciaLogs": "logsSeguridad"
+      },
+      "historial_mensajes": {
+        "eventos": ["conversacion_iniciada", "mensaje_enviado", "mensaje_recibido", "bloqueo", "reporte"],
+        "coleccion": "usuarios/{id}/conversaciones_meta/{convId} + agregados",
+        "lectura": "participantes",
+        "nota": "Contenido mensaje en conversaciones; historial solo metadatos"
+      },
+      "historial_acciones_ia": {
+        "eventos": ["consulta", "sugerencia_generada", "sugerencia_aceptada", "sugerencia_rechazada", "informe_admin"],
+        "coleccion": "ia_recomendaciones/{id} + ia_arquitecto_informes/{id}",
+        "lectura": "owner + admin",
+        "retencionDias": 365
+      },
+      "historial_actividad_cuenta": {
+        "eventos": ["cuenta_creada", "upgrade_visitante", "rol_anadido", "preferencias_cambiadas", "favorito_anadido", "denuncia_enviada", "categoria_sugerida_enviada"],
+        "coleccion": "usuarios/{usuarioId}/historial_actividad/{id}",
+        "lectura": "owner + admin"
+      }
+    },
+    "modeloEventoActividad": {
+      "campos": [
+        "eventoId", "usuarioId", "dominio", "tipo", "titulo", "descripcion",
+        "entidadTipo", "entidadId", "actorId", "actorTipo", "createdAt", "metadata"
+      ],
+      "actorTipo": ["usuario", "admin", "sistema", "ia_recomendacion"]
+    },
+    "relacionNotificaciones": "Notificación = alerta accionable; Historial = registro permanente. Un evento puede generar ambos."
+  },
+  "seguridadDashboards": {
+    "auth": "Firebase Auth obligatorio salvo lectura pública perfil.html",
+    "admin": { "fase1": "email_unico", "fase2": "RBAC custom claims + admins/{uid}" },
+    "gates": "FieldEngine securityGates + Seguridad MVP Turnstile/rate limits vía ValidationEngine",
+    "logs": ["logsAdmin", "logsSeguridad", "logs_acceso_privado", "alertas_seguridad"]
+  },
+  "modeloDatos": {
+    "produccionActual": "usuarios/{uid} monolito",
+    "objetivo": "usuarios hub + perfiles/{perfilId} + colecciones diseño Cuentas 1.0.0",
+    "migracion": "Fase posterior — acta migración separada"
+  },
+  "dependenciasOcultas": [
+    { "id": "DO1", "descripcion": "Notificaciones favoritos requieren perfiles/{perfilId} separado para resolver dueño", "bloquea": "dominio favoritos notificaciones" },
+    { "id": "DO2", "descripcion": "Historial perfil requiere perfiles/historial_estados — no existe en monolito", "bloquea": "centro actividad perfil" },
+    { "id": "DO3", "descripcion": "Mensajes notificaciones dependen Messenger spec no congelada", "bloquea": "dominio mensajes" },
+    { "id": "DO4", "descripcion": "Pagos/renovaciones dependen contratos_perfiles y contratos_banners no en producción", "bloquea": "dominios pagos, renovaciones, contratos" },
+    { "id": "DO5", "descripcion": "IA asistente perfil depende ValidationEngine para ejecutar sugerencias", "bloquea": "acciones ejecutables IA perfil" },
+    { "id": "DO6", "descripcion": "Productor eventos notificaciones requiere Cloud Functions — no diseñada", "bloquea": "runtime notificaciones" },
+    { "id": "DO7", "descripcion": "denuncias create=false en rules actuales", "bloquea": "notificaciones denuncias usuario" },
+    { "id": "DO8", "descripcion": "index.html modales acoplados a home — shell /cuenta requiere refactor routing", "bloquea": "dashboard shell" },
+    { "id": "DO9", "descripcion": "RenderEngine snapshot afecta qué cambios perfil disparan notificación revisión", "bloquea": "notificaciones verificacion post-publicacion" },
+    { "id": "DO10", "descripcion": "estadisticas_visitas en producción no conectada a notificaciones ni historial", "bloquea": "stats en centro actividad" }
+  ],
+  "modulosFaltantes": [
+    "DashboardShell /cuenta modular",
+    "ValidationEngine runtime",
+    "Messenger P2P",
+    "contratos_perfiles / contratos_banners runtime",
+    "Productor eventos notificaciones",
+    "RBAC admin",
+    "Admin catálogo/schemas UI",
+    "Wizard FieldEngine perfil",
+    "Panel anunciante post-solicitud",
+    "Productor historial_actividad unificado"
+  ],
+  "riesgosArquitectura": [
+    { "id": "A1", "nivel": "alto", "descripcion": "Monolito usuarios/{uid}" },
+    { "id": "A2", "nivel": "alto", "descripcion": "Dos sistemas paralelos notificaciones (modales home vs spec unificada)" },
+    { "id": "A3", "nivel": "medio", "descripcion": "Duplicar eventos en notificaciones e historial sin contrato único EventBus" },
+    { "id": "A4", "nivel": "medio", "descripcion": "Centro actividad con PII si historial_verificacion incluye URLs" },
+    { "id": "A5", "nivel": "medio", "descripcion": "IA5 — volumen notificaciones ia_recomendaciones spam UX" }
+  ],
+  "riesgosSeguridad": [
+    { "id": "S1", "nivel": "critico", "descripcion": "Admin email único" },
+    { "id": "S2", "nivel": "alto", "descripcion": "Notificación denuncia filtrar identidad denunciante" },
+    { "id": "S3", "nivel": "alto", "descripcion": "Historial seguridad usuario no debe exponer ipHash completo" },
+    { "id": "S4", "nivel": "medio", "descripcion": "Push futuro requiere consentimiento GDPR-style" }
+  ],
+  "compatibilidad": {
+    "catalogo_1_0_0": {
+      "estado": "compatible",
+      "uso": "subcategoriaId, formularioId, arquetipo en módulo perfil y notificaciones categoría sugerida",
+      "reserva": "Admin catálogo UI no en spec runtime"
+    },
+    "cuentas_1_0_0": {
+      "estado": "compatible_con_migracion",
+      "uso": "usuarios hub, perfiles, subcolecciones notificaciones/favoritos/historial",
+      "reserva": "Producción legacy monolito hasta migración"
+    },
+    "seguridad_mvp_1_0_0": {
+      "estado": "compatible",
+      "uso": "estadoSeguridad, estadoMensajeria, emailVerificado, logs, gates notificaciones seguridad",
+      "reserva": "Turnstile/rate limits en ValidationEngine no en dashboards directo"
+    },
+    "fieldEngine_1_0_1": {
+      "estado": "compatible",
+      "uso": "wizard perfil, gates guardar_borrador/enviar_revision, ia_asistente_perfil dry-run",
+      "reserva": "ValidationEngine consume schema; dashboards no llaman FieldEngine en persistencia"
+    }
+  },
+  "recomendaciones": [
+    "Congelar SPEC-DASHBOARDS v1.0.0 tras aprobación explícita de este documento",
+    "Generar ACTA-CONGELAMIENTO-DASHBOARDS inmediatamente después",
+    "Definir EventBus diseño (evento canónico → notificación + historial) en ValidationEngine spec",
+    "Migración usuarios→perfiles antes de runtime notificaciones favoritos",
+    "MVP notificaciones: seguridad + verificaciones + banners + renovaciones",
+    "MVP historial: actividad_cuenta + historial_perfil + historial_banners",
+    "PrivacyGuard en dominios denuncias, verificaciones, seguridad",
+    "Unificar badge campana en shell usuario"
+  ],
+  "criteriosAceptacionSpec": [
+    "Cuatro dashboards definidos con módulos",
+    "Arquitectura híbrida documentada",
+    "Siete asistentes IA con política seguridad",
+    "Sistema notificaciones 10 dominios",
+    "Centro actividad 9 dominios historial",
+    "Compatibilidad cuatro capas congeladas",
+    "Dependencias ocultas documentadas",
+    "implementacionAutorizada=false"
+  ],
+  "veredictoCongelamiento": {
+    "puedeCongelarse": true,
+    "versionObjetivo": "1.0.0",
+    "estado": "CONGELADO",
+    "fechaCongelamiento": "2026-06-09",
+    "acta": "scripts/ACTA-CONGELAMIENTO-DASHBOARDS.json",
+    "nota": "Congelamiento es diseño; no autoriza runtime ni cambios Firestore"
+  },
+  "fueraDeAlcance": [
+    "Implementación HTML/JS dashboards",
+    "Cloud Functions productor eventos",
+    "Firestore rules cambios",
+    "Deploy",
+    "LLM runtime asistentes IA",
+    "Stripe/MercadoPago integración",
+    "Migración legacy monolito"
+  ],
+  "entregables": {
+    "specMarkdown": "scripts/SPEC-DASHBOARDS.md",
+    "specJson": "scripts/SPEC-DASHBOARDS.json",
+    "auditoria": "scripts/AUDITORIA-DASHBOARDS.json",
+    "actaPendiente": ["scripts/ACTA-CONGELAMIENTO-DASHBOARDS.md", "scripts/ACTA-CONGELAMIENTO-DASHBOARDS.json"]
+  }
+}

@@ -1,0 +1,705 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "$id": "https://carihub.app/schemas/spec-validationengine.json",
+  "tipo": "SPEC_TECNICA",
+  "nombre": "ValidationEngine — Especificación técnica",
+  "versionSpec": "1.1.0",
+  "fecha": "2026-06-09",
+  "fechaActualizacion": "2026-06-09",
+  "actaMinor": "scripts/ACTA-MINOR-VALIDATIONENGINE-1.1.0-MESSENGER.json",
+  "changelog": [
+    { "id": "OB-VE1", "nota": "Pipeline unificado JSON+MD; validateAuth paso 3 explícito" },
+    { "id": "OB-VE2", "nota": "contratoMultiDestino fanOutPlan; enviar_revision sin filas duplicadas" },
+    { "id": "OB-VE3", "nota": "registry-validationengine-eventos.json — 39 acciones" },
+    { "id": "OB-VE4", "nota": "enviar_revision notif admin verificaciones.verificacion_recibida → cola_revision" },
+    { "id": "OB-VE5", "nota": "guiaErrores gates vs estados; ESTADO_CUENTA_INVALIDO" },
+    { "id": "MINOR-VE-1.1.0", "nota": "Integración Messenger 1.0.0 — registry 60 acciones; gates OB-MSG-8; fixtures V19-V24" }
+  ],
+  "estado": "CONGELADO",
+  "actaCongelamiento": "scripts/ACTA-CONGELAMIENTO-VALIDATIONENGINE.json",
+  "fechaCongelamiento": "2026-06-09",
+  "implementacionAutorizada": false,
+  "proposito": "Validar acciones de usuario y admin antes de persistencia: Turnstile, rate limits, valores de campos, estados, gates de seguridad, acciones dashboard; emitir EventBus canónico hacia notificaciones e historial; auditar confirmaciones IA.",
+  "dependenciasCongeladas": {
+    "catalogo": "catalogo-2026-06-10@1.0.0",
+    "cuentas": "cuentas-2026-06-10@1.0.0",
+    "seguridad": "seguridad-2026-06-10@1.0.0",
+    "fieldEngine": "fieldengine-2026-06-10@1.0.1",
+    "dashboards": "dashboards-2026-06-10@1.0.0"
+  },
+  "dependenciasFuturasNoDisenadas": {
+    "interaccionesComunicacion": {
+      "archivo": "scripts/OBSERVACION-ARQUITECTONICA-INTERACCIONES.json",
+      "version": "1.2.1",
+      "estado": "OBSERVACION_COMPLETA_ETAPA",
+      "ampliacionCongelada": true,
+      "specInteracciones": "NO_INICIAR",
+      "fase": "FASE_7_POST_VALIDATIONENGINE_Y_MESSENGER",
+      "posterioresA": ["ValidationEngine", "Messenger"],
+      "relacionadaCon": ["Dashboards", "Seguridad MVP", "RenderEngine", "Notificaciones", "EventBus"]
+    },
+    "messengerRuntime": "SPEC Messenger pendiente — posterior a ValidationEngine"
+  },
+  "fuentesLectura": [
+    "scripts/SPEC-FIELDENGINE.json",
+    "scripts/SPEC-DASHBOARDS.json",
+    "scripts/config-seguridad-mvp-schema.json",
+    "scripts/config-cuentas-usuario-schema.json",
+    "scripts/config-contratos-carihub-schema.json",
+    "scripts/config-categorias-sugeridas-schema.json",
+    "scripts/config-registro-schema.meta.json"
+  ],
+  "principios": [
+    "FieldEngine resuelve schema; ValidationEngine valida valores y autoriza acción",
+    "Turnstile y rate limits solo en ValidationEngine — nunca solo cliente",
+    "Gates estado: FieldEngine evaluateSecurityGates + reglas ValidationEngine dashboard",
+    "Toda acción exitosa construye fanOutPlan desde registry-validationengine-eventos.json",
+    "IA nunca persiste sin validateIAConfirmation",
+    "No escribe catálogo ni precios; admin humano confirma acciones IA"
+  ],
+  "api": {
+    "validateAction": {
+      "entrada": "ValidationContext",
+      "salida": "ValidationResult | ValidationError",
+      "descripcion": "Pipeline principal — ver algoritmoValidacion"
+    },
+    "verifyTurnstile": {
+      "entrada": "{ token, action, remoteIp? }",
+      "salida": "TurnstileResult",
+      "implementacion": "Cloud Function server-side — diseño"
+    },
+    "checkRateLimits": {
+      "entrada": "{ accion, dimensiones: RateLimitBucket[] }",
+      "salida": "RateLimitResult"
+    },
+    "validateFieldValues": {
+      "entrada": "{ schema: ResolvedRegistrationSchema, values: Record<string, unknown> }",
+      "salida": "FieldValidationResult"
+    },
+    "validateStates": {
+      "entrada": "{ cuenta, seguridad, mensajeria?, perfil?, accion }",
+      "salida": "StateValidationResult"
+    },
+    "validateFormulario": {
+      "entrada": "{ modo, formularioId, flujoVisitante?, subcategoriaId? }",
+      "salida": "FormularioValidationResult",
+      "nota": "Pre-check antes de resolve FieldEngine"
+    },
+    "evaluateDashboardAction": {
+      "entrada": "{ dashboardContext, accion, usuarioId, roles, entidad? }",
+      "salida": "DashboardAuthResult"
+    },
+    "emitEventoCanonico": {
+      "entrada": "EventoCanonico",
+      "salida": "EventBusResult",
+      "efecto": "Fan-out notificaciones + historial_actividad — diseño persistencia futura"
+    },
+    "validateIARecommendation": {
+      "entrada": "{ recomendacionId, confirmacionHumana, actorId }",
+      "salida": "IAValidationResult"
+    },
+    "validateMedia": {
+      "entrada": "MediaValidationContext",
+      "salida": "MediaValidationResult | ValidationError",
+      "descripcion": "Validar upload antes de Storage write — MIME, tamaño, extensión, path, peligrosos"
+    },
+    "validateAuth": {
+      "entrada": "{ idToken, accion, emailVerificadoRequerido? }",
+      "salida": "AuthValidationResult",
+      "descripcion": "Verificar Firebase Auth token server-side; mirror emailVerificado"
+    }
+  },
+  "tipos": {
+    "ValidationContext": {
+      "accion": "ValidationAction",
+      "usuarioId": "string",
+      "turnstileToken": "string|null",
+      "ipHash": "string",
+      "deviceIdHash": "string|null",
+      "fieldEngineContext": "FieldEngineContext|null",
+      "values": "Record<string, unknown>|null",
+      "resolvedSchema": "ResolvedRegistrationSchema|null — pre-resuelto o interno",
+      "cuenta": "CuentaContext",
+      "seguridad": "SecurityContext",
+      "mensajeria": "MensajeriaContext|null",
+      "perfil": "PerfilContext|null",
+      "dashboardContext": "admin|shell_cuenta|shell_perfil|shell_banners|null",
+      "metadata": "Record<string, unknown>"
+    },
+    "ValidationResult": {
+      "ok": true,
+      "accion": "string",
+      "validationId": "uuid",
+      "gates": "SecurityGateResult[]",
+      "fieldErrors": "FieldError[]",
+      "fanOutPlan": "FanOutPlanItem[] — ver registry y contratoMultiDestino",
+      "eventoCanonico": "EventoCanonico|null — legacy; preferir fanOutPlan",
+      "persistenciaAutorizada": "boolean — diseño; ejecutor futuro",
+      "meta": { "validatedAt": "ISO8601", "schemaVersion": "string" }
+    },
+    "ValidationError": {
+      "ok": false,
+      "codigo": "string",
+      "http": "number",
+      "motivo": "string",
+      "detalles": "unknown",
+      "retry": "boolean"
+    }
+  },
+  "acciones": {
+    "auth": ["login", "registro_auth", "recuperacion_password", "reenvio_email_verificacion"],
+    "perfil": ["guardar_borrador", "enviar_revision", "editar_perfil", "actualizar_perfil_publicado", "renovar_contrato", "subir_foto_perfil", "subir_video_perfil", "subir_verificacion_ine_frente", "subir_verificacion_ine_reverso", "subir_selfie_verificacion", "solicitar_verificacion"],
+    "visitante": ["registro_visitante", "upgrade_perfil_publico", "guardar_preferencias"],
+    "banner": ["crear_solicitud_banner", "editar_banner", "actualizar_solicitud_pre_pago", "enviar_correccion_banner", "subir_banner_imagen", "subir_banner_video"],
+    "catalogo": ["categoria_sugerida"],
+    "social": ["denuncia", "contacto_publico", "favorito_add", "favorito_remove"],
+    "mensajeria": [
+      "mensaje_enviar",
+      "conversacion_iniciar_directa",
+      "conversacion_iniciar_solicitud",
+      "solicitud_conversacion_aceptar",
+      "solicitud_conversacion_rechazar",
+      "bloqueo_usuario",
+      "bloqueo_usuario_remover",
+      "reportar_conversacion",
+      "reportar_mensaje",
+      "reportar_usuario_mensajeria",
+      "mensaje_eliminar_para_todos",
+      "conversacion_archivar",
+      "conversacion_silenciar",
+      "conversacion_fijar",
+      "conversacion_ocultar",
+      "automatizacion_enviar",
+      "automatizacion_activar",
+      "automatizacion_desactivar",
+      "admin_automatizaciones_suspendir",
+      "admin_messenger_suspender",
+      "admin_messenger_suspension_levantar",
+      "admin_messenger_deshabilitar_ambito",
+      "admin_messenger_habilitar_ambito",
+      "admin_conversacion_cerrar"
+    ],
+    "ia": ["ia_consulta", "ia_aceptar_recomendacion", "ia_rechazar_recomendacion"],
+    "admin": ["admin_aprobar_perfil", "admin_rechazar_perfil", "admin_cambio_estado_seguridad", "admin_actualizar_solicitud_banner"],
+    "routingAcciones": {
+      "conversacion_iniciar": {
+        "metadata": "modoInicio",
+        "directa": "conversacion_iniciar_directa",
+        "solicitud": "conversacion_iniciar_solicitud",
+        "nota": "Acción cliente Messenger; normalizar antes de fanOutPlan paso 12"
+      }
+    },
+    "nota": "VE 1.1.0 MINOR Messenger — 24 acciones registry; routing conversacion_iniciar"
+  },
+  "gatesMensajeriaValidateStates": {
+    "pasoPipeline": 6,
+    "actaMinor": "scripts/ACTA-MINOR-VALIDATIONENGINE-1.1.0-MESSENGER.json",
+    "ordenEvaluacion": ["messengerHabilitadoAmbito", "estadoMensajeria", "estadoSeguridad", "telefonoVerificado", "spamScore"],
+    "messengerHabilitadoAmbito": {
+      "campo": "messengerHabilitadoAmbito",
+      "denegarSi": false,
+      "error": "MESSENGER_DESHABILITADO_AMBITO",
+      "excepciones": ["admin_messenger_habilitar_ambito", "admin_messenger_deshabilitar_ambito"]
+    },
+    "telefonoVerificado": {
+      "campo": "usuarios.seguridad.telefonoVerificado",
+      "requerido": true,
+      "acciones": ["mensaje_enviar", "conversacion_iniciar_directa", "conversacion_iniciar_solicitud"],
+      "error": "TELEFONO_NO_VERIFICADO"
+    },
+    "spamScore": {
+      "campo": "usuarios.mensajeria.spamScore",
+      "umbral": 60,
+      "denegarSi": "spamScore >= 60",
+      "error": "SPAM_SCORE_UMBRAL",
+      "acciones": ["mensaje_enviar", "conversacion_iniciar_directa", "conversacion_iniciar_solicitud", "automatizacion_enviar"],
+      "nota": "validateAction no muta spamScore"
+    },
+    "estadoMensajeriaRestringida": {
+      "regla": "estadoMensajeria restringida: solo mensaje_enviar en conversaciones activa|reportada — no conversacion_iniciar directa",
+      "fuente": "SPEC-MESSENGER.json integracionValidationEngine.gatesMessengerValidateStates"
+    }
+  },
+  "algoritmoValidacion": {
+    "orden": [
+      "1. validateFormulario — modo y contexto coherente",
+      "2. evaluateDashboardAction — permisos shell/admin si aplica",
+      "3. validateAuth — idToken Firebase si acción autenticada (ver reglasAuthTurnstile)",
+      "4. verifyTurnstile — si acción anónima/pública lo requiere (config-seguridad-mvp)",
+      "5. checkRateLimits — dimensiones ip/usuario/email/dispositivo/perfil",
+      "6. validateStates — estadoCuenta, estadoVerificacion, estadoSeguridad, estadoMensajeria, estadoPublicacion, estadoRevision",
+      "7. FieldEngine.resolveRegistrationSchema — si accion perfil/visitante y schema no provisto",
+      "8. evaluateSecurityGates — delegar reglas FieldEngine 1.0.1",
+      "9. validateFieldValues — tipos, obligatorios, coherencia, fotos min/max",
+      "10. validateMedia — si acción incluye upload",
+      "11. Reglas específicas acción (banner, denuncia, IA, renovar)",
+      "12. Construir fanOutPlan desde registry-validationengine-eventos.json[accion]",
+      "13. emitEventoCanonico — ejecutar cada ítem fanOutPlan (multi-destino)",
+      "14. Retornar ValidationResult con fanOutPlan y validationId"
+    ],
+    "falloTemprano": "Cualquier paso falla → ValidationError sin emitir evento ni fanOutPlan",
+    "reglasAuthTurnstile": {
+      "descripcion": "OB-VE1 — Auth antes de Turnstile en acciones autenticadas",
+      "accionesSoloAnonimasSinAuth": ["login", "registro_auth", "registro_visitante", "recuperacion_password", "denuncia", "contacto_publico", "categoria_sugerida"],
+      "accionesAutenticadasRequierenAuth": "Todas las demás en acciones.* incluyendo guardar_borrador, enviar_revision, admin_*, subir_*",
+      "turnstileEnAutenticadas": "crear_solicitud_banner — Turnstile además de Auth si política anti-bot banner",
+      "ordenExcepcion": "registro_auth y registro_visitante: Turnstile paso 4 sin Auth previo; validateAuth aplica post-creación cuenta en persistencia futura"
+    }
+  },
+  "turnstile": {
+    "proveedor": "cloudflare_turnstile",
+    "referencia": "config-seguridad-mvp-schema.json → antiBots.decision",
+    "verificacion": "server-side Cloud Function — secret no en cliente",
+    "accionesRequierenTurnstile": {
+      "login": true,
+      "registro_auth": true,
+      "recuperacion_password": true,
+      "reenvio_email_verificacion": true,
+      "registro_visitante": true,
+      "enviar_revision": false,
+      "guardar_borrador": false,
+      "crear_solicitud_banner": true,
+      "categoria_sugerida": true,
+      "denuncia": true,
+      "contacto_publico": true,
+      "nota": "enviar_revision: usuario autenticado; gates por estado + rate limit edición"
+    },
+    "errores": ["TURNSTILE_TOKEN_FALTANTE", "TURNSTILE_VERIFICACION_FALLIDA", "TURNSTILE_ACTION_MISMATCH"]
+  },
+  "rateLimits": {
+    "referencia": "config-seguridad-mvp-schema.json → antiSpam.limitesPorAccion",
+    "almacenamiento": "rate_limits/{bucketId} — diseño Firestore TTL",
+    "dimensiones": ["ip", "usuario", "email", "dispositivo", "perfil", "perfilObjetivo"],
+    "accionesMapeadas": {
+      "registro_auth": "registro_cuenta",
+      "login": "login_fallido",
+      "recuperacion_password": "recuperacion_password",
+      "denuncia": "denuncia",
+      "categoria_sugerida": "categoria_sugerida",
+      "mensaje_enviar": "mensaje_futuro",
+      "enviar_revision": "publicacion_edicion",
+      "guardar_borrador": "publicacion_edicion",
+      "ia_consulta": { "ventana": "1h", "max": 30, "usuario": true }
+    },
+    "errores": ["RATE_LIMIT_EXCEDIDO"],
+    "log": "logsSeguridad tipo rate_limit"
+  },
+  "validacionCampos": {
+    "entradaSchema": "ResolvedRegistrationSchema de FieldEngine",
+    "reglas": [
+      "obligatorios presentes incluyendo anidados geo.ciudad",
+      "tipos fieldRegistry: email, text, number, boolean, geo, file, checklist",
+      "coherencia[] — evaluar si/entonces del schema",
+      "fotos: count entre min y max",
+      "camposPrivados no en payload público resultados",
+      "sanitización HTML en textos públicos",
+      "longitudes maxLength del registry"
+    ],
+    "errores": ["CAMPO_OBLIGATORIO_FALTANTE", "TIPO_INVALIDO", "COHERENCIA_VIOLADA", "FOTOS_MIN_NO_ALCANZADO", "FOTOS_MAX_EXCEDIDO"]
+  },
+    "validacionEstados": {
+      "erroresCatalogados": ["ESTADO_CUENTA_INVALIDO", "ESTADO_SEGURIDAD_DENEGADO", "ESTADO_MENSAJERIA_DENEGADO", "EMAIL_NO_VERIFICADO"],
+      "campos": {
+      "estadoCuenta": ["activa", "suspendida", "eliminada", "pendiente_activacion"],
+      "estadoVerificacion": ["sin_enviar", "enviada", "en_revision", "aprobada", "rechazada", "vencida"],
+      "estadoSeguridad": ["normal", "observacion", "restringido", "suspendido", "bloqueado"],
+      "estadoMensajeria": ["habilitada", "restringida", "suspendida", "solo_lectura"],
+      "estadoPublicacion": ["borrador", "publicado", "activo", "despublicado", "vencido"],
+      "estadoRevision": ["registro_pendiente", "actualizacion_pendiente", "aprobada", "rechazada", "sin_estado"]
+    },
+    "matrizAccionEstado": {
+      "guardar_borrador": { "estadoCuenta": ["activa"], "estadoSeguridad": ["normal", "observacion", "restringido"] },
+      "enviar_revision": { "emailVerificado": true, "estadoSeguridad": ["normal", "observacion"], "estadoCuenta": ["activa"] },
+      "mensaje_enviar": { "estadoMensajeria": ["habilitada"], "estadoSeguridad": ["normal", "observacion"] },
+      "crear_solicitud_banner": { "emailVerificado": true, "estadoSeguridad": ["normal", "observacion"] }
+    },
+    "alineacionFieldEngine": "evaluateSecurityGates — no duplicar lógica; ValidationEngine invoca o comparte módulo",
+    "errores": ["ESTADO_CUENTA_INVALIDO", "ESTADO_SEGURIDAD_DENEGADO", "ESTADO_MENSAJERIA_DENEGADO", "EMAIL_NO_VERIFICADO"]
+  },
+  "validacionFormularios": {
+    "modos": {
+      "default": { "requiereSubcategoriaId": true, "fieldEngineModo": "default" },
+      "alternativo": { "requiereSubcategoriaId": true, "fieldEngineModo": "alternativo" },
+      "temporal_categoria_sugerida": { "turnstile": true, "rateLimit": "categoria_sugerida", "fieldEngineModo": "temporal_categoria_sugerida" },
+      "usuario_visitante": {
+        "registro_inicial": { "subcategoriaId": false, "formularioId": "usuario_visitante" },
+        "upgrade_perfil_publico": { "subcategoriaId": true, "contratoVigente": true }
+      },
+      "publicidad_banner": { "formularioId": null, "schema": "solicitudes_anuncios payload", "turnstile": true }
+    },
+    "errores": ["MODO_FORMULARIO_INVALIDO", "SUBCATEGORIA_REQUERIDA_UPGRADE_VISITANTE", "CONTRATO_NO_VIGENTE"]
+  },
+  "validacionAuth": {
+    "proveedor": "firebase_auth",
+    "verificacion": "server-side Admin SDK o Callable — diseño",
+    "reglas": [
+      "idToken presente y no expirado para acciones autenticadas",
+      "usuarioId del token debe coincidir con ValidationContext.usuarioId",
+      "emailVerificado mirror usuarios.seguridad.emailVerificado — gate enviar_revision, banner, upgrade",
+      "cuenta deshabilitada Auth → ESTADO_CUENTA_INVALIDO",
+      "admin fase1: email allowlist; fase2: custom claims RBAC"
+    ],
+    "errores": ["AUTH_TOKEN_FALTANTE", "AUTH_TOKEN_INVALIDO", "AUTH_USUARIO_MISMATCH", "EMAIL_NO_VERIFICADO"]
+  },
+  "validacionMedia": {
+    "referencia": "config-seguridad-mvp-schema.json → storageRules diseño",
+    "principios": [
+      "Validar antes de cualquier write Storage",
+      "Path debe coincidir con perfilId/bannerId del owner autenticado",
+      "Rechazar ejecutables, scripts, doble extensión, MIME spoofing",
+      "Magic bytes opcional post-MVP; MVP confía MIME declarado + extensión + size"
+    ],
+    "tipos": {
+      "foto_perfil": {
+        "mimePermitidos": ["image/jpeg", "image/png", "image/webp"],
+        "extensiones": [".jpg", ".jpeg", ".png", ".webp"],
+        "maxBytes": 5242880,
+        "storagePathPattern": "^perfiles/\\{perfilId\\}/fotos/[a-zA-Z0-9_-]+\\.(jpg|jpeg|png|webp)$",
+        "privado": false,
+        "accion": "subir_foto_perfil"
+      },
+      "video_perfil": {
+        "mimePermitidos": ["video/mp4", "video/webm"],
+        "extensiones": [".mp4", ".webm"],
+        "maxBytes": 52428800,
+        "maxDuracionSegundos": 120,
+        "storagePathPattern": "^perfiles/\\{perfilId\\}/videos/[a-zA-Z0-9_-]+\\.(mp4|webm)$",
+        "privado": false,
+        "accion": "subir_video_perfil"
+      },
+      "banner_imagen": {
+        "mimePermitidos": ["image/jpeg", "image/png", "image/webp", "image/gif"],
+        "extensiones": [".jpg", ".jpeg", ".png", ".webp", ".gif"],
+        "maxBytes": 8388608,
+        "storagePathPattern": "^solicitudes_anuncios/\\{solicitudId\\}/creativos/[a-zA-Z0-9_-]+\\.(jpg|jpeg|png|webp|gif)$",
+        "accion": "subir_banner_imagen"
+      },
+      "banner_video": {
+        "mimePermitidos": ["video/mp4", "video/webm"],
+        "extensiones": [".mp4", ".webm"],
+        "maxBytes": 104857600,
+        "maxDuracionSegundos": 30,
+        "storagePathPattern": "^solicitudes_anuncios/\\{solicitudId\\}/creativos/[a-zA-Z0-9_-]+\\.(mp4|webm)$",
+        "accion": "subir_banner_video"
+      },
+      "ine_frente": {
+        "mimePermitidos": ["image/jpeg", "image/png"],
+        "extensiones": [".jpg", ".jpeg", ".png"],
+        "maxBytes": 10485760,
+        "storagePathPattern": "^perfiles/\\{perfilId\\}/verificacion/ine_frente/[a-zA-Z0-9_-]+\\.(jpg|jpeg|png)$",
+        "privado": true,
+        "soloOwnerYAdmin": true,
+        "accion": "subir_verificacion_ine_frente"
+      },
+      "ine_reverso": {
+        "mimePermitidos": ["image/jpeg", "image/png"],
+        "extensiones": [".jpg", ".jpeg", ".png"],
+        "maxBytes": 10485760,
+        "storagePathPattern": "^perfiles/\\{perfilId\\}/verificacion/ine_reverso/[a-zA-Z0-9_-]+\\.(jpg|jpeg|png)$",
+        "privado": true,
+        "soloOwnerYAdmin": true,
+        "accion": "subir_verificacion_ine_reverso"
+      },
+      "selfie_verificacion": {
+        "mimePermitidos": ["image/jpeg", "image/png"],
+        "extensiones": [".jpg", ".jpeg", ".png"],
+        "maxBytes": 8388608,
+        "storagePathPattern": "^perfiles/\\{perfilId\\}/verificacion/selfie/[a-zA-Z0-9_-]+\\.(jpg|jpeg|png)$",
+        "privado": true,
+        "soloOwnerYAdmin": true,
+        "accion": "subir_selfie_verificacion"
+      },
+      "comprobante_pago": {
+        "mimePermitidos": ["image/jpeg", "image/png", "application/pdf"],
+        "extensiones": [".jpg", ".jpeg", ".png", ".pdf"],
+        "maxBytes": 10485760,
+        "storagePathPattern": "^(pagos|contratos_perfiles)/\\{entidadId\\}/comprobantes/[a-zA-Z0-9_-]+\\.(jpg|jpeg|png|pdf)$",
+        "privado": true,
+        "accion": "subir_comprobante"
+      }
+    },
+    "rechazoArchivosPeligrosos": {
+      "mimeBloqueados": ["application/x-msdownload", "application/javascript", "text/html", "application/x-sh", "application/x-php"],
+      "extensionesBloqueadas": [".exe", ".bat", ".cmd", ".sh", ".php", ".js", ".html", ".svg"],
+      "reglas": ["doble_extension", "path_traversal", "null_byte", "mime_extension_mismatch"],
+      "errores": ["MEDIA_TIPO_NO_PERMITIDO", "MEDIA_TAMANO_EXCEDIDO", "STORAGE_PATH_INVALIDO", "MEDIA_ARCHIVO_PELIGROSO", "MEDIA_EXTENSION_NO_PERMITIDA"]
+    },
+    "futuroFueraAlcance": {
+      "stories_media": "scripts/OBSERVACION-ARQUITECTONICA-INTERACCIONES.json v1.2.1",
+      "live_stream_chunks": "SPEC Interacciones futura"
+    }
+  },
+  "validacionAcciones": {
+    "guardar_borrador": { "turnstile": false, "ownerCheck": true, "fieldValues": true, "gates": "guardar_borrador", "historial": "historial_perfil.borrador_guardado" },
+    "enviar_revision": { "turnstile": false, "emailVerificado": true, "fieldValues": true, "gates": "enviar_revision", "historial": "historial_perfil.enviado_revision", "notificacionAdmin": "verificaciones" },
+    "editar_perfil": { "alias": "guardar_borrador", "nota": "Mismo pipeline que borrador si estadoRevision pendiente" },
+    "actualizar_perfil_publicado": { "requiere": ["estadoPublicacion=publicado|activo", "cambios_limitados_campos_publicos"], "historial": "historial_perfil.actualizacion" },
+    "renovar_contrato": { "emailVerificado": true, "estadoSeguridad": ["normal", "observacion"], "contratoVigenteOExpirado": true, "historial": "historial_renovaciones" },
+    "crear_solicitud_banner": { "turnstile": true, "rolAnunciante": true, "gates": "solicitud_banner" },
+    "editar_banner": { "ownerSolicitud": true, "estadoSolicitud": ["borrador", "correccion_solicitada"] },
+    "categoria_sugerida": { "turnstile": true, "modo": "temporal_categoria_sugerida", "rateLimit": "categoria_sugerida" },
+    "ia_aceptar_recomendacion": { "confirmacionHumana": true, "revalidarAccionSugerida": true },
+    "admin_aprobar_perfil": { "dashboard": "admin", "reauthOpcional": false, "logAdmin": true }
+  },
+  "seguridadDashboards": {
+    "referencia": "SPEC-DASHBOARDS.json",
+    "reglas": {
+      "shell_usuario": "owner entidad o usuarioId; módulo visible según router",
+      "admin": "isAdmin fase1 email; fase2 RBAC custom claims",
+      "accionesCriticasAdmin": ["admin_delete_usuario", "admin_cambio_precio", "admin_cambio_catalogo"],
+      "reauthRequerida": ["admin_delete_usuario", "admin_cambio_precio", "admin_export_masivo"],
+      "ownerChecks": ["guardar_borrador", "enviar_revision", "editar_banner", "actualizar_solicitud_pre_pago", "favorito_add", "subir_*_perfil", "subir_verificacion_*"],
+      "gatesFieldEngine": "Todas las acciones perfil/banner mapeadas a securityGates FieldEngine 1.0.1"
+    },
+    "errores": ["DASHBOARD_PERMISO_DENEGADO", "OWNER_MISMATCH", "REAUTH_REQUERIDA"]
+  },
+  "eventBusCanonico": {
+    "descripcion": "Post-validación exitosa — fanOutPlan multi-destino (OB-VE2)",
+    "contratoMultiDestino": {
+      "version": "1.0.0",
+      "regla": "Un validateAction exitoso produce fanOutPlan[]; emitEventoCanonico ejecuta cada ítem",
+      "estructuraFanOutPlanItem": {
+        "fanOutId": "uuid",
+        "destino": "historial | notificacion | logsSeguridad | iaRecomendaciones | logsAdmin",
+        "dominio": "dominio Dashboards §14 o §15",
+        "tipoEvento": "string — alineado SPEC-DASHBOARDS dominios.*.eventos",
+        "destinatario": "usuarioId | perfil.usuarioId | uidAnunciante | { tipo: admin, modulo, cola }",
+        "prioridad": "baja|media|alta|critica",
+        "metadata": "Record<string, unknown> — validationId, entidadId, sin PII INE",
+        "emitir": true
+      },
+      "enviar_revision_ejemplo": "3 ítems: historial_perfil + historial_actividad_cuenta + notif admin verificaciones.verificacion_recibida (OB-VE4)",
+      "deduplicacion": "SPEC-DASHBOARDS sistemaNotificacionesUnificado.deduplicacion por ítem"
+    },
+    "registryAccionEventos": {
+      "archivo": "scripts/registry-validationengine-eventos.json",
+      "version": "1.0.0",
+      "totalAcciones": 39,
+      "nota": "Toda acción en acciones.* tiene entrada explícita; emitir:false documentado"
+    },
+    "tipoEventoCanonico": {
+      "campos": ["eventoId", "validationId", "accionOrigen", "actorId", "actorTipo", "createdAt", "fanOutPlan"]
+    },
+    "fanOut": {
+      "notificacion": "usuarios/{destinatario}/notificaciones/{id} — dominio/tipoEvento SPEC-DASHBOARDS §14",
+      "historial": "colección dominio §15 + usuarios/{id}/historial_actividad agregado",
+      "logsSeguridad": "logsSeguridad/{id}",
+      "iaRecomendaciones": "ia_recomendaciones/{id} estadoNuevo",
+      "logsAdmin": "logsAdmin módulo admin"
+    }
+  },
+  "notificaciones": {
+    "referencia": "SPEC-DASHBOARDS.json → sistemaNotificacionesUnificado",
+    "productor": "ValidationEngine.emitEventoCanonico",
+    "regla": "Solo tras ValidationResult.ok=true",
+    "dominios": ["mensajes", "favoritos", "renovaciones", "contratos", "pagos", "verificaciones", "denuncias", "banners", "seguridad", "recomendaciones_ia"]
+  },
+  "historialActividad": {
+    "referencia": "SPEC-DASHBOARDS.json → centroActividadHistorial",
+    "productor": "ValidationEngine.emitEventoCanonico",
+    "regla": "Según registry-validationengine-eventos.json — historial.emitir explícito por acción",
+    "privacidad": "Sin URLs INE en historial usuario; sin ipHash completo en vista owner"
+  },
+  "validacionAuditoriaIA": {
+    "coleccion": "ia_recomendaciones/{id}",
+    "estados": ["sugerida", "aceptada_humano", "rechazada_humano", "expirada"],
+    "validateIARecommendation": {
+      "precondiciones": [
+        "recomendacion existe y estado=sugerida",
+        "actorId = usuarioId dueño o admin con permiso",
+        "confirmacionHumana explicita UI",
+        "asistenteId allowlist para accionSugerida",
+        "no auto-aprobacion perfiles/banners/precios/categorias"
+      ],
+      "postAceptacion": [
+        "ejecutar validateAction de la accionSugerida con values del payload",
+        "si ok → persistencia futura + EventoCanonico historial_acciones_ia",
+        "actualizar ia_recomendaciones estado=aceptada_humano",
+        "logsAdmin modulo ia_*"
+      ],
+      "postRechazo": ["estado=rechazada_humano", "historial_acciones_ia", "sin persistencia"]
+    },
+    "ia_arquitecto": { "soloLectura": true, "validateIARecommendation": "no aplica write catálogo" },
+    "rateLimit": "ia_consulta 30/hora por usuario",
+    "errores": ["IA_RECOMENDACION_NO_ENCONTRADA", "IA_ACCION_NO_PERMITIDA", "IA_CONFIRMACION_REQUERIDA", "IA_RECOMENDACION_EXPIRADA"],
+    "trazabilidad": ["historial_acciones_ia", "logsAdmin", "validationId en metadata"]
+  },
+  "guiaErrores": {
+    "descripcion": "OB-VE5 — diferencia gates FieldEngine vs validación estados ValidationEngine",
+    "gatesVsEstados": {
+      "GATE_SEGURIDAD_DENEGADO": {
+        "origen": "FieldEngine.evaluateSecurityGates",
+        "cuando": "Acción no permitida por política schema/securityGates (ej. enviar_revision en restringido)",
+        "pasoPipeline": 8,
+        "http": 403
+      },
+      "ESTADO_SEGURIDAD_DENEGADO": {
+        "origen": "ValidationEngine.validateStates",
+        "cuando": "estadoSeguridad fuera de matrizAccionEstado para la acción (ej. bloqueado)",
+        "pasoPipeline": 6,
+        "http": 403
+      },
+      "ESTADO_CUENTA_INVALIDO": {
+        "origen": "ValidationEngine.validateStates | validateAuth",
+        "cuando": "estadoCuenta suspendida/eliminada/pendiente cuando acción exige activa; o Auth disabled",
+        "pasoPipeline": "3 o 6",
+        "http": 403
+      },
+      "ESTADO_MENSAJERIA_DENEGADO": {
+        "origen": "validateStates",
+        "cuando": "estadoMensajeria no habilitada para acciones mensajeria",
+        "http": 403
+      },
+      "TELEFONO_NO_VERIFICADO": {
+        "origen": "validateStates",
+        "cuando": "usuarios.seguridad.telefonoVerificado !== true en envío/inicio conversación",
+        "pasoPipeline": 6,
+        "http": 403
+      },
+      "MESSENGER_DESHABILITADO_AMBITO": {
+        "origen": "validateStates",
+        "cuando": "messengerHabilitadoAmbito === false por control admin ámbito",
+        "pasoPipeline": 6,
+        "http": 403
+      },
+      "SPAM_SCORE_UMBRAL": {
+        "origen": "validateStates",
+        "cuando": "usuarios.mensajeria.spamScore >= 60",
+        "pasoPipeline": 6,
+        "http": 403
+      },
+      "EMAIL_NO_VERIFICADO": {
+        "origen": "validateStates | validateAuth",
+        "cuando": "Seguridad MVP restriccionesSinVerificar.bloqueado",
+        "http": 403
+      },
+      "OWNER_MISMATCH": {
+        "origen": "evaluateDashboardAction",
+        "cuando": "perfil.usuarioId ≠ context.usuarioId o anuncianteId mismatch",
+        "http": 403
+      }
+    },
+    "ordenEvaluacion": "Dashboard → Auth → Turnstile → RateLimit → States → FieldEngine Gates → Campos"
+  },
+  "errores": {
+    "TURNSTILE_TOKEN_FALTANTE": { "http": 400, "retry": true, "origen": "verifyTurnstile" },
+    "TURNSTILE_VERIFICACION_FALLIDA": { "http": 403, "retry": true },
+    "RATE_LIMIT_EXCEDIDO": { "http": 429, "retry": true },
+    "GATE_SEGURIDAD_DENEGADO": { "http": 403, "retry": false, "origen": "FieldEngine.evaluateSecurityGates", "verGuia": "guiaErrores.gatesVsEstados" },
+    "CAMPO_OBLIGATORIO_FALTANTE": { "http": 400, "retry": false },
+    "COHERENCIA_VIOLADA": { "http": 400, "retry": false },
+    "ESTADO_SEGURIDAD_DENEGADO": { "http": 403, "retry": false, "origen": "validateStates", "verGuia": "guiaErrores.gatesVsEstados" },
+    "ESTADO_CUENTA_INVALIDO": { "http": 403, "retry": false, "origen": "validateStates|validateAuth", "verGuia": "guiaErrores.gatesVsEstados" },
+    "ESTADO_CUENTA_INVALIDO_SUSPENDIDA": { "http": 403, "retry": false, "origen": "validateStates", "aliasDe": "ESTADO_CUENTA_INVALIDO" },
+    "EMAIL_NO_VERIFICADO": { "http": 403, "retry": false, "origen": "validateStates|validateAuth" },
+    "DASHBOARD_PERMISO_DENEGADO": { "http": 403, "retry": false },
+    "IA_CONFIRMACION_REQUERIDA": { "http": 400, "retry": false },
+    "IA_RECOMENDACION_NO_ENCONTRADA": { "http": 404, "retry": false },
+    "IA_RECOMENDACION_EXPIRADA": { "http": 410, "retry": false },
+    "AUTH_TOKEN_FALTANTE": { "http": 401, "retry": true },
+    "AUTH_TOKEN_INVALIDO": { "http": 401, "retry": true },
+    "AUTH_USUARIO_MISMATCH": { "http": 403, "retry": false },
+    "MEDIA_TIPO_NO_PERMITIDO": { "http": 400, "retry": false },
+    "MEDIA_TAMANO_EXCEDIDO": { "http": 413, "retry": false },
+    "STORAGE_PATH_INVALIDO": { "http": 403, "retry": false },
+    "MEDIA_ARCHIVO_PELIGROSO": { "http": 400, "retry": false },
+    "MEDIA_EXTENSION_NO_PERMITIDA": { "http": 400, "retry": false },
+    "OWNER_MISMATCH": { "http": 403, "retry": false },
+    "REAUTH_REQUERIDA": { "http": 403, "retry": true },
+    "MODO_FORMULARIO_INVALIDO": { "http": 400, "retry": false },
+    "SUBCATEGORIA_REQUERIDA_UPGRADE_VISITANTE": { "http": 400, "retry": false },
+    "ESTADO_MENSAJERIA_DENEGADO": { "http": 403, "retry": false },
+    "TELEFONO_NO_VERIFICADO": { "http": 403, "retry": false, "origen": "validateStates", "verGuia": "guiaErrores.gatesVsEstados" },
+    "MESSENGER_DESHABILITADO_AMBITO": { "http": 403, "retry": false, "origen": "validateStates", "verGuia": "guiaErrores.gatesVsEstados" },
+    "SPAM_SCORE_UMBRAL": { "http": 403, "retry": false, "origen": "validateStates", "verGuia": "guiaErrores.gatesVsEstados" },
+    "VALIDACION_INTERNA": { "http": 500, "retry": false }
+  },
+  "compatibilidad": {
+    "catalogo_1_0_0": { "estado": "compatible", "uso": "subcategoriaId en validateFormulario; coherencia catálogo en campos" },
+    "cuentas_1_0_0": { "estado": "compatible", "uso": "CuentaContext, estados, owner checks, upgrade visitante" },
+    "seguridad_mvp_1_0_0": { "estado": "compatible", "uso": "Turnstile, rate limits, logsSeguridad, estados seguridad" },
+    "fieldEngine_1_0_1": { "estado": "compatible", "uso": "resolve + securityGates; AM1 restringido borrador" },
+    "dashboards_1_0_0": { "estado": "compatible", "uso": "EventBus, notificaciones 10 dominios, historial 9 dominios, IA" },
+    "messenger_1_0_0": {
+      "estado": "compatible",
+      "uso": "23 acciones catálogo; fanOutPlan registry VE 1.1.0; gates OB-MSG-8",
+      "acta": "scripts/ACTA-CONGELAMIENTO-MESSENGER.json",
+      "actaMinorVE": "scripts/ACTA-MINOR-VALIDATIONENGINE-1.1.0-MESSENGER.json"
+    }
+  },
+  "observacionArquitectonicaFutura": {
+    "interacciones": "scripts/OBSERVACION-ARQUITECTONICA-INTERACCIONES.json",
+    "storiesPreferencia": "scripts/OBSERVACION-ARQUITECTONICA-INTERACCIONES.json v1.2.1 — fuera de alcance ValidationEngine v1.0.0",
+    "nota": "Stories/comentarios fuera de alcance; mensajeria integrada VE 1.1.0 MINOR"
+  },
+  "fixtures": {
+    "archivo": "scripts/fixtures-validationengine-golden.json",
+    "casos": 24,
+    "ids": ["V01", "V02", "V03", "V04", "V05", "V06", "V07", "V08", "V09", "V10", "V11", "V12", "V13", "V14", "V15", "V16", "V17", "V18", "V19", "V20", "V21", "V22", "V23", "V24"]
+  },
+  "riesgosYDependencias": {
+    "riesgos": [
+      { "id": "R1", "nivel": "alto", "descripcion": "Implementar persistencia sin ValidationEngine — bypass gates" },
+      { "id": "R2", "nivel": "alto", "descripcion": "EventBus duplicado sin EventoCanonico único" },
+      { "id": "R3", "nivel": "medio", "descripcion": "MIME spoofing sin magic bytes en MVP" },
+      { "id": "R4", "nivel": "medio", "descripcion": "Gap legacy usuarios monolito vs perfiles/{perfilId} en owner checks" },
+      { "id": "R5", "nivel": "medio", "descripcion": "Admin fase1 email-only hasta RBAC fase2" },
+      { "id": "R6", "nivel": "bajo", "descripcion": "Hooks mensajeria_futura sin SPEC Messenger", "estado": "CERRADO_MINOR_1.1.0" }
+    ],
+    "dependencias": {
+      "consumidoresFuturos": ["wizard HTML", "dashboard shell", "admin panel", "Cloud Functions", "Storage upload pipeline"],
+      "productoresEventos": ["ValidationEngine.emitEventoCanonico"],
+      "delegaA": ["FieldEngine.resolveRegistrationSchema", "FieldEngine.evaluateSecurityGates"]
+    }
+  },
+  "criteriosAceptacionSpec": [
+    "API pública documentada (MD + JSON)",
+    "Pipeline validateAction 13 pasos",
+    "Turnstile + Auth + rate limits server-side diseño",
+    "Validación campos ResolvedRegistrationSchema",
+    "Formularios: perfil, visitante, upgrade, categoría sugerida, banner, dashboard",
+    "Estados: cuenta, verificación, seguridad, mensajería, publicación, revisión",
+    "Validación media 8 tipos + peligrosos",
+    "Acciones: borrador, revisión, editar, renovar, banner, IA",
+    "EventBus: notificación + historial + logs seguridad + ia_recomendaciones",
+    "18 golden fixtures",
+    "Auditoría consistencia",
+    "Compatibilidad 5 capas congeladas",
+    "Interacciones v1.2.1 fuera de alcance",
+    "implementacionAutorizada=false"
+  ],
+  "fueraDeAlcance": [
+    "Runtime Cloud Functions / Callable",
+    "Firestore rules o colecciones nuevas",
+    "Persistencia post-validación (ejecutor futuro)",
+    "Stories, comentarios, reacciones, en vivo — OBSERVACION Interacciones v1.2.1",
+    "Messenger runtime y conversaciones",
+    "RenderEngine implementación",
+    "Turnstile secret en repositorio",
+    "Magic bytes file sniffing (post-MVP)",
+    "Migración datos usuarios→perfiles"
+  ],
+  "veredictoCongelamiento": {
+    "ajustesObligatoriosOB_VE": { "estado": "CERRADOS", "ids": ["OB-VE1", "OB-VE2", "OB-VE3", "OB-VE4", "OB-VE5"] },
+    "recomendacion": "CONGELADO_APROBADO_PO",
+    "congelado": true,
+    "fechaAprobacionPO": "2026-06-09",
+    "acta": "scripts/ACTA-CONGELAMIENTO-VALIDATIONENGINE.json — CONGELADO",
+    "versionObjetivo": "1.0.0",
+    "auditoriaFinal": "scripts/AUDITORIA-FINAL-SPEC-VALIDATIONENGINE.json — APROBADO_PO_2026-06-09",
+    "ajustesRecomendadosPendientes": ["AM-VE2 bridge migración — acta diseño", "AM-VE5 logs_acceso_privado"],
+    "ajustesCerradosMinor110": ["AM-VE1 fixtures V19-V24"]
+  },
+  "entregables": {
+    "specMarkdown": "scripts/SPEC-VALIDATIONENGINE.md",
+    "specJson": "scripts/SPEC-VALIDATIONENGINE.json",
+    "registryEventos": "scripts/registry-validationengine-eventos.json",
+    "fixtures": "scripts/fixtures-validationengine-golden.json",
+    "auditoriaJson": "scripts/AUDITORIA-SPEC-VALIDATIONENGINE.json",
+    "auditoriaMd": "scripts/AUDITORIA-SPEC-VALIDATIONENGINE.md",
+    "actaJson": "scripts/ACTA-CONGELAMIENTO-VALIDATIONENGINE.json",
+    "actaMd": "scripts/ACTA-CONGELAMIENTO-VALIDATIONENGINE.md",
+    "validador": "scripts/validar-spec-validationengine.mjs",
+    "observacionInteracciones": "scripts/OBSERVACION-ARQUITECTONICA-INTERACCIONES.json v1.2.1"
+  }
+}

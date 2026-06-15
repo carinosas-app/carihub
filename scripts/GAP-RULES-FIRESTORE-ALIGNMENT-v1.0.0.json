@@ -1,0 +1,397 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "$id": "https://carihub.app/schemas/gap-rules-firestore-alignment-v1.0.0.json",
+  "tipo": "ALINEACION_FIRESTORE_RULES",
+  "nombre": "GAP-RULES Firestore Alignment",
+  "version": "1.0.0",
+  "fecha": "2026-06-11",
+  "estado": "ALINEACION_DOCUMENTAL",
+  "modo": "Solo documentación — NO modifica firestore.rules ni índices reales; sin runtime/Firebase/deploy/commit/migraciones",
+  "veredictoGlobal": "PASS_CIERRE_DOCUMENTAL_PARCIAL",
+  "proposito": "Cerrar documentalmente GAP-RULES alineando roles, permisos, rutas, estados, ownership, privacidad, dashboards, auditoría y runtime contra las Firestore Rules reales (legacy) y el diseño canónico MATRIZ/SPEC.",
+  "cierraGap": "GAP-RULES",
+  "principioRector": "Default-deny; owner escribe lo suyo bajo gates; admin/moderador concilian con auditoría; datos sensibles/financieros nunca públicos; rules server-side son la última frontera de ValidationEngine.",
+
+  "basesObligatorias": [
+    "AUDITORIA-MAESTRA-COMPLETA-CARIHUB v2.1.0",
+    "MATRIZ-RUTAS-NAV-CANONICA v1.0.0",
+    "ACTA-CONGELAMIENTO-REGISTRO-CUENTA v1.0.0",
+    "ACTA-CONGELAMIENTO-PAGOS-CONTRATOS v1.0.0",
+    "ACTA-CONGELAMIENTO-PANEL-DASHBOARD v1.1.0",
+    "SPEC-DASHBOARDS-OPERATIVOS (SPEC-PANEL-DASHBOARD-MINIMO v1.0.1)",
+    "firestore.rules (real, legacy_produccion — no modificado)",
+    "firestore.indexes.json (real — no modificado)",
+    "config-seguridad-mvp-schema.json",
+    "BLK-05"
+  ],
+
+  "noModifica": [
+    "firestore.rules",
+    "firestore.indexes.json",
+    "firebase.json",
+    "Todas las ACTA-CONGELAMIENTO-* y SPEC-* congeladas",
+    "Producción, Firestore, deploy, commit, migraciones"
+  ],
+
+  "archivosNuevos": [
+    "scripts/GAP-RULES-FIRESTORE-ALIGNMENT-v1.0.0.json",
+    "scripts/GAP-RULES-FIRESTORE-ALIGNMENT-v1.0.0.md"
+  ],
+
+  "seccion1_inventarioColecciones": {
+    "leyendaEstado": {
+      "CUBIERTA_REAL": "Tiene match explícito en firestore.rules actual",
+      "DEFAULT_DENY": "Sin match — cae en match /{document=**} allow read,write: if false",
+      "PROYECTADA": "Definida en diseño canónico; aún no existe match"
+    },
+    "modeloActual": "Monolito usuarios/{uid} (perfilId = uid bridge BLK-01); isAdmin() = email único carinosas.anuncios@gmail.com",
+    "modeloCanonico": "perfiles/{perfilId} desacoplado de usuarios/{uid}; RBAC multi-rol vía custom claims",
+    "colecciones": [
+      { "id": "usuarios", "estado": "CUBIERTA_REAL", "ruta": "/usuarios/{userId}", "canonico": "usuarios/{uid} hub + perfiles/{perfilId} (BLK-01)", "nota": "Hoy mezcla cuenta+perfil público; isPublicProfile() lee aprobado/activo/vencido" },
+      { "id": "usuarios.favoritos", "estado": "CUBIERTA_REAL", "ruta": "/usuarios/{userId}/favoritos/{perfilId}", "canonico": "igual o /favoritos top-level", "nota": "Owner CRUD" },
+      { "id": "perfiles", "estado": "PROYECTADA", "ruta": "/perfiles/{perfilId}", "canonico": "Perfil público canónico desacoplado", "nota": "Hoy default-deny; requiere BLK-01" },
+      { "id": "solicitudes_anuncios", "estado": "CUBIERTA_REAL", "ruta": "/solicitudes_anuncios/{solicitudId}", "canonico": "Funnel /registro/banner", "nota": "Owner lee propias; admin update; create validado" },
+      { "id": "denuncias", "estado": "CUBIERTA_REAL", "ruta": "/denuncias/{denunciaId}", "canonico": "Moderación admin", "nota": "create:false (server-side); read/update admin" },
+      { "id": "soporte_mensajes", "estado": "CUBIERTA_REAL", "ruta": "/soporte_mensajes/{conversacionId}/mensajes/{mensajeId}", "canonico": "Soporte admin", "nota": "Solo admin hoy" },
+      { "id": "estadisticas_visitas", "estado": "CUBIERTA_REAL", "ruta": "/estadisticas_visitas/{visitaId}", "canonico": "DP-06 estadísticas", "nota": "create público validado; read admin" },
+      { "id": "logsAdmin", "estado": "CUBIERTA_REAL", "ruta": "/logsAdmin/{logId}", "canonico": "ADM-04 auditoría", "nota": "admin create/read; no update/delete" },
+      { "id": "logsSeguridad", "estado": "CUBIERTA_REAL", "ruta": "/logsSeguridad/{docId}", "canonico": "CX-SEG admin", "nota": "create:false (server); read admin" },
+      { "id": "pagos", "estado": "CUBIERTA_REAL", "ruta": "/pagos/{pagoId}", "canonico": "DP-08/DA-05/ADM pagos", "nota": "read admin; create/update/delete:false (server-side ledger)" },
+      { "id": "anuncios", "estado": "CUBIERTA_REAL", "ruta": "/anuncios/{anuncioId}", "canonico": "banners servidos", "nota": "read admin; escritura server" },
+      { "id": "analytics_eventos", "estado": "CUBIERTA_REAL", "ruta": "/analytics_eventos/{eventoId}", "canonico": "CX-INT métricas", "nota": "read admin; escritura server" },
+      { "id": "configuracion_publicidad", "estado": "CUBIERTA_REAL", "ruta": "/configuracion_publicidad/{docId}/overrides/{overrideId}", "canonico": "precios banners", "nota": "read público solo precios_banners; escritura admin" },
+      { "id": "contratos", "estado": "PROYECTADA", "ruta": "/contratos/{contratoId} (o contratos_perfiles)", "canonico": "DP-08 lectura owner; admin concilia", "nota": "Default-deny hoy" },
+      { "id": "contratos_banners", "estado": "PROYECTADA", "ruta": "/contratos_banners/{contratoId}", "canonico": "DA-04; PC-R05 separación", "nota": "Default-deny; ⟂ contratos_perfiles" },
+      { "id": "banners", "estado": "PROYECTADA", "ruta": "/banners/{bannerId}", "canonico": "DA-02 gestión", "nota": "Default-deny; relación anuncios" },
+      { "id": "notificaciones", "estado": "PROYECTADA", "ruta": "/usuarios/{uid}/notificaciones/{id}", "canonico": "DP-09 7 dominios", "nota": "Default-deny; owner read; server create" },
+      { "id": "mensajes", "estado": "PROYECTADA", "ruta": "/conversaciones/{id}/mensajes/{msgId}", "canonico": "DP-05 Post-MVP", "nota": "Default-deny; Messenger Post-MVP V1.1" },
+      { "id": "verificaciones", "estado": "PROYECTADA", "ruta": "/usuarios/{uid}/verificaciones/{id}", "canonico": "DP-04; INE/selfie sensible", "nota": "Default-deny; owner+admin; Storage rules separadas" },
+      { "id": "expedientes", "estado": "PROYECTADA_UI", "ruta": "(no URL física)", "canonico": "ADM-02 agrupación menú — NO colección física", "nota": "C-R03: expedientes = vista sobre perfiles/banners/pagos/contratos" },
+      { "id": "configuraciones", "estado": "PROYECTADA", "ruta": "/usuarios/{uid}/config/{docId}", "canonico": "CX-CFG", "nota": "Default-deny; owner CRUD parcial" },
+      { "id": "rate_limits", "estado": "PROYECTADA", "ruta": "/rate_limits/{bucketId}", "canonico": "config-seguridad-mvp antiSpam", "nota": "Default-deny; solo server/Cloud Function" },
+      { "id": "alertas_seguridad", "estado": "PROYECTADA", "ruta": "/alertas_seguridad/{id}", "canonico": "CX-SEG admin", "nota": "Default-deny; read admin; create server" },
+      { "id": "logs_acceso_privado", "estado": "PROYECTADA", "ruta": "/logs_acceso_privado/{id}", "canonico": "Auditoría acceso datos sensibles", "nota": "Default-deny; read auditor/admin; create server" },
+      { "id": "solicitudes_categorias", "estado": "PROYECTADA", "ruta": "/solicitudes_categorias/{id}", "canonico": "Catálogo sugerencias", "nota": "Default-deny; create usuario validado; update admin" }
+    ],
+    "resumen": { "cubiertasReales": 13, "proyectadas": 10, "proyectadaUI": 1, "total": 24 }
+  },
+
+  "seccion2_matrizColeccionRol": {
+    "leyenda": { "R": "lectura", "C": "creación", "U": "actualización", "D": "eliminación", "Ap": "aprobación", "Rx": "rechazo", "Sx": "suspensión", "Rs": "restauración", "-": "prohibido" },
+    "roles": ["visitante", "usuario", "prestador", "negocio", "anunciante", "admin", "moderador", "soporte", "auditor", "agente_ia", "sistema"],
+    "notaRBAC": "Hoy solo 'admin' (email único) + owner existen en rules; moderador/soporte/auditor/sistema son CANÓNICOS vía custom claims (postMVP). Columnas no-owner para esos roles = objetivo de diseño.",
+    "filas": [
+      { "coleccion": "usuarios/perfiles", "visitante": "R(público)", "prestador": "R/U(propio gated)", "negocio": "R/U(propio gated)", "anunciante": "R(propio)", "admin": "R/U/Ap/Rx/Sx/Rs", "moderador": "R/Sx", "soporte": "R", "auditor": "R", "agente_ia": "R", "sistema": "U(estados)" },
+      { "coleccion": "favoritos", "usuario": "R/C/U/D(propio)", "prestador": "R/C/U/D(propio)", "admin": "-", "moderador": "-", "auditor": "R", "sistema": "-" },
+      { "coleccion": "solicitudes_anuncios", "anunciante": "R/C(propia)", "admin": "R/U/Ap/Rx", "moderador": "R", "soporte": "R", "auditor": "R", "sistema": "-" },
+      { "coleccion": "denuncias", "visitante": "C(server+turnstile)", "usuario": "C(server)", "admin": "R/U/Ap/Rx", "moderador": "R/U/Ap/Rx", "auditor": "R", "sistema": "C" },
+      { "coleccion": "soporte_mensajes", "usuario": "-", "admin": "R/C/U", "soporte": "R/C/U", "auditor": "R", "sistema": "-" },
+      { "coleccion": "estadisticas_visitas", "visitante": "C(validado)", "prestador": "R(propio agregado)", "admin": "R", "auditor": "R", "sistema": "C" },
+      { "coleccion": "pagos", "prestador": "R(propio)", "anunciante": "R(propio)", "admin": "R/Ap/Rx", "auditor": "R", "sistema": "C/U(ledger server)" },
+      { "coleccion": "contratos / contratos_banners", "prestador": "R(propio)", "anunciante": "R(propio)", "admin": "R/U/Sx/Rs", "auditor": "R", "sistema": "C/U" },
+      { "coleccion": "banners / anuncios", "anunciante": "R(propio)", "admin": "R/U/Ap/Rx/Sx", "moderador": "R/Sx", "auditor": "R", "sistema": "U(servir)" },
+      { "coleccion": "notificaciones", "usuario": "R/U(leído propio)", "admin": "-", "auditor": "R", "sistema": "C" },
+      { "coleccion": "verificaciones", "prestador": "R/C(propio)", "admin": "R/Ap/Rx", "moderador": "R/Ap/Rx", "auditor": "R(con log_acceso_privado)", "sistema": "U" },
+      { "coleccion": "logsAdmin / logsSeguridad", "admin": "R/C", "auditor": "R", "moderador": "R(propio scope)", "sistema": "C", "otros": "-" },
+      { "coleccion": "logs_acceso_privado", "admin": "R", "auditor": "R", "sistema": "C", "otros": "-" },
+      { "coleccion": "rate_limits / alertas_seguridad", "admin": "R(alertas)", "auditor": "R", "sistema": "C/U", "otros": "-" },
+      { "coleccion": "configuracion_publicidad", "visitante": "R(precios_banners)", "anunciante": "R(precios)", "admin": "R/C/U/D", "otros": "-" },
+      { "coleccion": "configuraciones(usuario)", "usuario": "R/U(propio)", "prestador": "R/U(propio)", "admin": "R", "auditor": "R", "sistema": "-" }
+    ]
+  },
+
+  "seccion3_matrizRutaPermiso": {
+    "fuenteRutas": "MATRIZ-RUTAS-NAV-CANONICA matrizPermisosPorRuta + SPEC-DASHBOARDS-OPERATIVOS sidebars",
+    "filas": [
+      { "ruta": "/perfil/{perfilId}/{slug}", "dashboard": "público", "rol": "anonimo", "permisoFirestore": "read usuarios/perfiles if isPublicProfile()", "reglaActual": "isPublicProfile() PASS" },
+      { "ruta": "/resultados", "dashboard": "público", "rol": "anonimo", "permisoFirestore": "read agregada server-side (BLK-04)", "reglaActual": "client-side hoy — RIESGO RSK-01" },
+      { "ruta": "/cuenta/perfil", "dashboard": "DP-01", "rol": "prestador", "permisoFirestore": "read/update usuarios/{uid} owner gated", "reglaActual": "isOwner + usuarioUpdateDuenoValido()" },
+      { "ruta": "/registro/editar/{perfilId}", "dashboard": "edición canon", "rol": "prestador", "permisoFirestore": "update campos editables owner; bloquea verificacion/estadoPago", "reglaActual": "usuarioUpdateDuenoValido() bloquea claves sensibles PASS" },
+      { "ruta": "/cuenta/perfil/verificacion", "dashboard": "DP-04", "rol": "prestador", "permisoFirestore": "read verificaciones owner; create owner; Storage owner+admin", "reglaActual": "PROYECTADA default-deny" },
+      { "ruta": "/cuenta/favoritos", "dashboard": "DP-07", "rol": "usuario", "permisoFirestore": "CRUD favoritos owner", "reglaActual": "isOwner PASS" },
+      { "ruta": "/cuenta/pagos", "dashboard": "DP-08", "rol": "prestador", "permisoFirestore": "read pagos owner", "reglaActual": "read admin-only hoy — GAP owner read" },
+      { "ruta": "/cuenta/banners", "dashboard": "DA-01", "rol": "anunciante", "permisoFirestore": "read contratos_banners/banners owner", "reglaActual": "PROYECTADA default-deny" },
+      { "ruta": "/registro/banner", "dashboard": "ANU-FUN", "rol": "anunciante", "permisoFirestore": "create solicitudes_anuncios validado", "reglaActual": "solicitudCreateValida() PASS" },
+      { "ruta": "/admin/revision", "dashboard": "ADM-02", "rol": "admin/moderador", "permisoFirestore": "read/update usuarios + denuncias", "reglaActual": "isAdmin() solo; moderador GAP custom claim" },
+      { "ruta": "/admin/pagos", "dashboard": "ADM pagos", "rol": "admin", "permisoFirestore": "read pagos; update estado server", "reglaActual": "read admin PASS; update server-side" },
+      { "ruta": "/admin/auditoria", "dashboard": "ADM-04", "rol": "admin/auditor", "permisoFirestore": "read logsAdmin/logsSeguridad", "reglaActual": "read admin PASS; auditor GAP custom claim" },
+      { "ruta": "/cuenta/centro/actualizaciones", "dashboard": "CX-ACT", "rol": "usuario", "permisoFirestore": "read configuraciones/sistema público", "reglaActual": "PROYECTADA" },
+      { "ruta": "/cuenta/centro/inteligencia", "dashboard": "CX-INT", "rol": "prestador/anunciante", "permisoFirestore": "read analytics agregada owner", "reglaActual": "PROYECTADA; analytics_eventos admin-only hoy" },
+      { "ruta": "/admin/ia", "dashboard": "CX-IA", "rol": "admin", "permisoFirestore": "read logs/metricas; agente_ia read-only", "reglaActual": "PROYECTADA Post-MVP" }
+    ]
+  },
+
+  "seccion4_matrizOwnership": {
+    "filas": [
+      { "entidad": "usuarios/perfiles", "dueno": "uid propietario", "lecturaPublica": "si (isPublicProfile)", "lecturaPrivada": "owner", "lecturaAdmin": "si", "lecturaModerador": "si(scope)", "lecturaAuditor": "si", "lecturaSistema": "si", "escribe": "owner gated + admin + sistema(estados)" },
+      { "entidad": "favoritos", "dueno": "uid", "lecturaPublica": "no", "lecturaPrivada": "owner", "lecturaAdmin": "no", "lecturaModerador": "no", "lecturaAuditor": "si", "lecturaSistema": "no", "escribe": "owner" },
+      { "entidad": "solicitudes_anuncios", "dueno": "uidAnunciante", "lecturaPublica": "no", "lecturaPrivada": "owner", "lecturaAdmin": "si", "lecturaModerador": "si", "lecturaAuditor": "si", "lecturaSistema": "no", "escribe": "owner(create) + admin(update)" },
+      { "entidad": "pagos", "dueno": "uid pagador", "lecturaPublica": "no", "lecturaPrivada": "owner(canónico)", "lecturaAdmin": "si", "lecturaModerador": "no", "lecturaAuditor": "si", "lecturaSistema": "si", "escribe": "sistema(ledger) + admin(estado)" },
+      { "entidad": "contratos/contratos_banners", "dueno": "uid titular", "lecturaPublica": "no", "lecturaPrivada": "owner", "lecturaAdmin": "si", "lecturaModerador": "no", "lecturaAuditor": "si", "lecturaSistema": "si", "escribe": "sistema + admin" },
+      { "entidad": "verificaciones", "dueno": "uid", "lecturaPublica": "no", "lecturaPrivada": "owner", "lecturaAdmin": "si(con log)", "lecturaModerador": "si(con log)", "lecturaAuditor": "si(con log)", "lecturaSistema": "si", "escribe": "owner(create) + admin(estado)" },
+      { "entidad": "denuncias", "dueno": "sistema/anónimo", "lecturaPublica": "no", "lecturaPrivada": "no", "lecturaAdmin": "si", "lecturaModerador": "si", "lecturaAuditor": "si", "lecturaSistema": "si", "escribe": "sistema(create) + admin/moderador(resolución)" },
+      { "entidad": "logsAdmin/logsSeguridad/logs_acceso_privado", "dueno": "sistema", "lecturaPublica": "no", "lecturaPrivada": "no", "lecturaAdmin": "si", "lecturaModerador": "scope", "lecturaAuditor": "si", "lecturaSistema": "si", "escribe": "sistema/admin append-only" },
+      { "entidad": "notificaciones", "dueno": "uid destinatario", "lecturaPublica": "no", "lecturaPrivada": "owner", "lecturaAdmin": "no", "lecturaModerador": "no", "lecturaAuditor": "si", "lecturaSistema": "si", "escribe": "sistema(create) + owner(marcar leído)" },
+      { "entidad": "configuracion_publicidad", "dueno": "plataforma", "lecturaPublica": "si(precios_banners)", "lecturaPrivada": "n/a", "lecturaAdmin": "si", "lecturaModerador": "no", "lecturaAuditor": "si", "lecturaSistema": "si", "escribe": "admin" }
+    ]
+  },
+
+  "seccion5_matrizPrivacidad": {
+    "clases": ["publico", "privado", "sensible", "financiero", "administrativo", "auditoria"],
+    "filas": [
+      { "entidad": "perfil público (nombre, fotos, categoría, ciudad, contacto)", "clase": "publico", "exposicion": "indexable /perfil/{id}/{slug}", "regla": "isPublicProfile()" },
+      { "entidad": "favoritos, notificaciones, config usuario", "clase": "privado", "exposicion": "solo owner", "regla": "isOwner" },
+      { "entidad": "INE, selfie, edad, verificaciones, telefonoE164", "clase": "sensible", "exposicion": "owner + admin con log_acceso_privado", "regla": "owner|admin + auditoría obligatoria; Storage rules" },
+      { "entidad": "pagos, contratos, RFC, comprobantes, montos", "clase": "financiero", "exposicion": "owner(read) + admin + sistema", "regla": "nunca público; PrivacyGuard PAY" },
+      { "entidad": "estadoSeguridad, riesgoScore, flags, observacionesAdmin", "clase": "administrativo", "exposicion": "admin/moderador; no owner directo", "regla": "no en widgets usuario" },
+      { "entidad": "logsAdmin, logsSeguridad, logs_acceso_privado, alertas", "clase": "auditoria", "exposicion": "admin/auditor; append-only", "regla": "no update/delete; PII solo hash" }
+    ],
+    "reglaTransversal": "RFC completo, comprobante Storage URL, datos fiscales raw, contenido mensajes P2P sin auditoría = nunca_panel / nunca_público (SPEC matrizPrivacidad)"
+  },
+
+  "seccion6_matrizRBAC": {
+    "modeloActual": { "roles": ["owner", "admin(email único)"], "mecanismo": "request.auth.uid + request.auth.token.email", "limitacion": "Sin moderador/soporte/auditor/sistema; single point admin" },
+    "modeloCanonico": { "mecanismo": "Firebase custom claims (role + scope)", "roles": ["visitante", "usuario", "prestador", "negocio", "anunciante", "super_admin", "admin", "moderador", "soporte", "auditor", "comercial_admin", "operador", "agente_ia(escritura=false)", "sistema"] },
+    "permisosHeredados": [
+      "super_admin ⊇ admin ⊇ moderador (moderación) ",
+      "admin ⊇ comercial_admin (pagos/contratos)",
+      "prestador ⊇ usuario (favoritos/config)",
+      "negocio ≈ prestador (tipoPerfil=negocio)"
+    ],
+    "permisosExclusivos": [
+      "super_admin: cambio_RBAC, asignar_claims",
+      "comercial_admin: confirmar_pago, conciliación",
+      "auditor: export logs, read sensible con log",
+      "moderador: suspender_perfil, resolver_denuncia",
+      "agente_ia: solo lectura + recomendación (escritura=false)"
+    ],
+    "permisosCriticos": ["asignar_claims", "confirmar_pago", "suspender_perfil", "delete usuarios", "leer_verificaciones", "export_datos"],
+    "escalacionProhibida": [
+      "usuario→admin vía update propio (bloqueado: campos rol/claims no editables por owner)",
+      "anunciante→prestador sin perfil verificado",
+      "moderador→super_admin (sin asignar_claims)",
+      "agente_ia→escritura (escritura=false absoluto)",
+      "owner no puede modificar estadoPago/verificacion/vencido (usuarioUpdateDuenoValido bloquea)"
+    ]
+  },
+
+  "seccion7_matrizEstadosReglas": {
+    "filas": [
+      { "entidad": "perfiles", "estados": "borrador→pendiente→correccion_solicitada→aprobado→activo→suspendido→vencido→eliminado", "reglaTransicion": "owner: borrador→pendiente (gated email+turnstile); admin: pendiente→aprobado/rechazado; sistema: activo→vencido", "fuente": "config-estados-revision-publicacion" },
+      { "entidad": "pagos", "estados": "pendiente→en_revision→confirmado→rechazado→reembolsado", "reglaTransicion": "sistema(ledger) + admin(confirmar/rechazar dobleConfirmacion reembolso)", "fuente": "SPEC-PAY" },
+      { "entidad": "contratos", "estados": "pendiente→activo→suspendido→vencido→cancelado", "reglaTransicion": "sistema(activar tras pago) + admin(suspender/cancelar)", "fuente": "SPEC-PAY" },
+      { "entidad": "banners", "estados": "pendiente→pago_pendiente→en_revision→aprobado→activo→suspendido→vencido", "reglaTransicion": "admin aprueba; sistema activa/vence", "fuente": "SPEC-PAY ContratoBanner" },
+      { "entidad": "denuncias", "estados": "pendiente→en_revision→resuelta→rechazada", "reglaTransicion": "sistema(create) + admin/moderador(resolución)", "fuente": "moderación" },
+      { "entidad": "verificaciones", "estados": "pendiente→aprobada→rechazada→correccion", "reglaTransicion": "owner(subir) + admin/moderador(aprobar/rechazar)", "fuente": "DP-04" },
+      { "entidad": "expedientes", "estados": "(vista derivada — sin estado propio)", "reglaTransicion": "n/a — agrega estados de perfiles/banners/pagos/contratos", "fuente": "ADM-02 UI" },
+      { "entidad": "notificaciones", "estados": "no_leida→leida→archivada", "reglaTransicion": "sistema(create) + owner(marcar leído)", "fuente": "DP-09" }
+    ]
+  },
+
+  "seccion8_matrizColeccionEstados": {
+    "filas": [
+      { "coleccion": "usuarios/perfiles", "estadosValidos": ["registro_pendiente", "borrador", "enviado_revision", "correccion_solicitada", "publicado", "activo", "suspendido", "vencido", "rechazado"], "estadosProhibidos": ["activo sin pago_confirmado", "publicado sin verificacion"], "transicionesPermitidas": "owner: borrador→enviado_revision; admin: →publicado/rechazado", "transicionesProhibidas": "owner→publicado directo; owner cambia estadoPago", "ownerTransicion": "owner(limitado) + admin + sistema" },
+      { "coleccion": "pagos", "estadosValidos": ["pendiente", "en_revision", "confirmado", "rechazado", "reembolsado"], "estadosProhibidos": ["confirmado por owner"], "transicionesPermitidas": "sistema + admin", "transicionesProhibidas": "owner cualquier escritura", "ownerTransicion": "sistema/admin" },
+      { "coleccion": "contratos_banners", "estadosValidos": ["pendiente", "activo", "suspendido", "vencido", "cancelado"], "estadosProhibidos": ["mezcla con contratos_perfiles (PC-R05)"], "transicionesPermitidas": "sistema(pago) + admin", "transicionesProhibidas": "anunciante activa sin pago", "ownerTransicion": "sistema/admin" },
+      { "coleccion": "verificaciones", "estadosValidos": ["pendiente", "aprobada", "rechazada", "correccion"], "estadosProhibidos": ["auto-aprobación owner"], "transicionesPermitidas": "owner(subir) + admin(resolver)", "transicionesProhibidas": "owner→aprobada", "ownerTransicion": "owner(create) + admin" },
+      { "coleccion": "denuncias", "estadosValidos": ["pendiente", "en_revision", "resuelta", "rechazada"], "estadosProhibidos": ["denunciante lee otras"], "transicionesPermitidas": "admin/moderador", "transicionesProhibidas": "owner edita resolución", "ownerTransicion": "admin/moderador" }
+    ]
+  },
+
+  "seccion9_matrizColeccionDashboard": {
+    "filas": [
+      { "coleccion": "usuarios/perfiles", "dashboards": ["Perfil(DP-01/02)", "Admin(ADM-02)"], "centros": [] },
+      { "coleccion": "verificaciones", "dashboards": ["Perfil(DP-04)", "Admin(ADM-02)"], "centros": [] },
+      { "coleccion": "estadisticas_visitas", "dashboards": ["Perfil(DP-06)", "Admin(ADM-05)"], "centros": ["CX-INT"] },
+      { "coleccion": "favoritos", "dashboards": ["Perfil(DP-07)"], "centros": [] },
+      { "coleccion": "pagos", "dashboards": ["Perfil(DP-08)", "Anunciante(DA-05)", "Admin(ADM-02)"], "centros": [] },
+      { "coleccion": "contratos/contratos_banners", "dashboards": ["Perfil(DP-08)", "Anunciante(DA-04)", "Admin(ADM-02)"], "centros": [] },
+      { "coleccion": "banners/anuncios/solicitudes_anuncios", "dashboards": ["Anunciante(DA-02)", "Admin(ADM-02)"], "centros": [] },
+      { "coleccion": "notificaciones", "dashboards": ["Perfil(DP-09)", "Anunciante(DA-07)"], "centros": ["CX-ACT"] },
+      { "coleccion": "denuncias", "dashboards": ["Admin(ADM-03)"], "centros": [] },
+      { "coleccion": "logsAdmin/logsSeguridad/logs_acceso_privado", "dashboards": ["Admin(ADM-04)"], "centros": ["CX-SEG", "CX-IA"] },
+      { "coleccion": "analytics_eventos", "dashboards": ["Admin(ADM-05)"], "centros": ["CX-INT", "CX-IA"] },
+      { "coleccion": "configuraciones(usuario)", "dashboards": [], "centros": ["CX-CFG", "CX-SEG"] }
+    ]
+  },
+
+  "seccion10_matrizColeccionRuta": {
+    "filas": [
+      { "coleccion": "usuarios/perfiles", "ruta": "/cuenta/perfil, /perfil/{id}/{slug}", "rol": "prestador/anonimo", "permiso": "owner R/U gated; público R", "reglaRequerida": "isPublicProfile()|isOwner+usuarioUpdateDuenoValido()" },
+      { "coleccion": "favoritos", "ruta": "/cuenta/favoritos", "rol": "usuario", "permiso": "CRUD owner", "reglaRequerida": "isOwner" },
+      { "coleccion": "solicitudes_anuncios", "ruta": "/registro/banner", "rol": "anunciante", "permiso": "C owner; R owner", "reglaRequerida": "solicitudCreateValida()" },
+      { "coleccion": "contratos_banners/banners", "ruta": "/cuenta/banners/*", "rol": "anunciante", "permiso": "R owner", "reglaRequerida": "PROYECTADA: read if owner==auth.uid" },
+      { "coleccion": "pagos", "ruta": "/cuenta/pagos, /admin/pagos", "rol": "prestador/admin", "permiso": "R owner; R/U admin", "reglaRequerida": "PROYECTADA owner read; admin PASS" },
+      { "coleccion": "verificaciones", "ruta": "/cuenta/perfil/verificacion", "rol": "prestador", "permiso": "R/C owner", "reglaRequerida": "PROYECTADA owner+admin" },
+      { "coleccion": "denuncias", "ruta": "/denunciar, /admin/denuncias", "rol": "anonimo/admin", "permiso": "C server; R/U admin/moderador", "reglaRequerida": "create:false(server) + isAdmin()" },
+      { "coleccion": "logsAdmin", "ruta": "/admin/auditoria", "rol": "admin/auditor", "permiso": "R/C admin", "reglaRequerida": "isAdmin(); auditor GAP claim" },
+      { "coleccion": "configuracion_publicidad", "ruta": "/registro/banner (precios)", "rol": "anonimo", "permiso": "R precios_banners", "reglaRequerida": "docId=='precios_banners'" }
+    ]
+  },
+
+  "seccion11_matrizReglaRiesgo": {
+    "filas": [
+      { "regla": "isPublicProfile()", "riesgoMitigado": "Exposición perfiles no aprobados/vencidos", "riesgoResidual": "Campos sensibles si no se proyectan en perfiles/", "severidad": "media", "impacto": "Privacidad" },
+      { "regla": "usuarioUpdateDuenoValido()", "riesgoMitigado": "Owner auto-aprueba/cambia estadoPago/verificacion", "riesgoResidual": "Bridge usuarios/{uid} mezcla cuenta+perfil", "severidad": "alta", "impacto": "Integridad estados" },
+      { "regla": "usuarioCreateValido()", "riesgoMitigado": "Registro con estados elevados", "riesgoResidual": "—", "severidad": "baja", "impacto": "Onboarding" },
+      { "regla": "solicitudCreateValida()", "riesgoMitigado": "Spoof anunciante/campos admin", "riesgoResidual": "Sin rate-limit en rules (server)", "severidad": "media", "impacto": "Anti-spam" },
+      { "regla": "visitaCreateValida()", "riesgoMitigado": "Inyección datos estadísticas", "riesgoResidual": "Volumen sin rate-limit rules", "severidad": "baja", "impacto": "Integridad métricas" },
+      { "regla": "pagos create/update:false", "riesgoMitigado": "Manipulación financiera cliente", "riesgoResidual": "Owner no lee sus pagos (GAP UX)", "severidad": "alta", "impacto": "Financiero" },
+      { "regla": "denuncias create:false", "riesgoMitigado": "Flood denuncias cliente", "riesgoResidual": "Requiere Cloud Function denuncia", "severidad": "media", "impacto": "Moderación" },
+      { "regla": "isAdmin() email único", "riesgoMitigado": "Acceso admin no autenticado", "riesgoResidual": "SPOF admin; sin moderador/auditor; sin 2FA", "severidad": "alta", "impacto": "RBAC/escalabilidad operativa" },
+      { "regla": "default-deny /{document=**}", "riesgoMitigado": "Acceso a colecciones no declaradas", "riesgoResidual": "10 colecciones canónicas inaccesibles (panel runtime bloqueado)", "severidad": "alta", "impacto": "Runtime panel" }
+    ]
+  },
+
+  "seccion12_matrizReglaBLK": {
+    "filas": [
+      { "regla": "perfiles/{perfilId} desacople", "blk": "BLK-01", "relacion": "Requiere migración usuarios→perfiles para read/write canónico", "estado": "bloqueado" },
+      { "regla": "Todas las rules canónicas owner/RBAC", "blk": "BLK-05", "relacion": "Este documento es prerequisito de BLK-05 (rules deploy)", "estado": "documental_listo" },
+      { "regla": "Modularización validación server-side", "blk": "BLK-08", "relacion": "Shared/Core extraído provee helpers validación reutilizables", "estado": "parcial" }
+    ]
+  },
+
+  "seccion13_matrizReglaCapa": {
+    "filas": [
+      { "capa": "Shared/Core", "reglaRelacionada": "Helpers isOwner/isAdmin/validadores reutilizables", "alineacion": "PASS diseño" },
+      { "capa": "FieldEngine", "reglaRelacionada": "Campos editables owner = bloqueo claves sensibles en update", "alineacion": "PASS" },
+      { "capa": "ValidationEngine", "reglaRelacionada": "Rules = última frontera gates (estados, turnstile token server)", "alineacion": "PASS — no duplicar; complementar" },
+      { "capa": "RenderEngine", "reglaRelacionada": "isPublicProfile() habilita snapshot público", "alineacion": "PASS" },
+      { "capa": "Registro-Cuenta", "reglaRelacionada": "usuarioCreateValido/usuarioUpdateDuenoValido", "alineacion": "PASS" },
+      { "capa": "Pagos-Contratos", "reglaRelacionada": "pagos/contratos server-side; owner read canónico", "alineacion": "PARCIAL — owner read pendiente" },
+      { "capa": "Dashboard", "reglaRelacionada": "Lectura owner por colección; default-deny bloquea panel runtime", "alineacion": "PARCIAL — 10 colecciones proyectadas" },
+      { "capa": "Admin", "reglaRelacionada": "isAdmin() → RBAC custom claims canónico", "alineacion": "GAP — moderador/soporte/auditor" },
+      { "capa": "Seguridad", "reglaRelacionada": "logsSeguridad/rate_limits/alertas append-only server", "alineacion": "PARCIAL — colecciones proyectadas" }
+    ]
+  },
+
+  "seccion14_matrizReglaAuditoria": {
+    "eventosAuditables": ["perfil_aprobar", "perfil_rechazar", "cuenta_suspendir", "categoria_aprobar", "precio_cambiar", "confirmar_pago", "rechazar_pago", "reembolso"],
+    "accesosAuditables": ["admin_vio_ine", "admin_vio_telefono", "admin_exporto_datos", "auditor_leyo_verificaciones"],
+    "cambiosAuditables": ["cambio_estado_perfil", "cambio_estadoSeguridad", "cambio_permiso/claim", "cambio_RBAC"],
+    "accionesCriticas": ["asignar_claims", "confirmar_pago", "suspender_perfil", "delete usuarios", "export_datos"],
+    "colecciones": { "logsAdmin": "acciones admin (retención 365d)", "logsSeguridad": "eventos seguridad (180d, PII hash)", "logs_acceso_privado": "acceso datos sensibles (730d)", "alertas_seguridad": "umbrales críticos" },
+    "reglaAppendOnly": "logs: create admin/sistema; update:false; delete:false (inmutabilidad auditoría)"
+  },
+
+  "seccion15_matrizRiesgos": [
+    { "id": "RGR-01", "riesgo": "Escalación de privilegios", "vector": "owner edita campos rol/claims/estadoPago", "mitigacion": "usuarioUpdateDuenoValido() bloquea claves; claims solo super_admin server", "residual": "bajo", "severidad": "alta" },
+    { "id": "RGR-02", "riesgo": "Acceso indebido", "vector": "lectura cross-owner", "mitigacion": "isOwner por colección; default-deny", "residual": "bajo", "severidad": "alta" },
+    { "id": "RGR-03", "riesgo": "Exposición de datos sensibles", "vector": "INE/selfie/pagos públicos", "mitigacion": "clase sensible/financiero nunca público; Storage rules; log_acceso_privado", "residual": "medio (Storage rules pendientes)", "severidad": "critica" },
+    { "id": "RGR-04", "riesgo": "Edición cruzada", "vector": "usuario A edita doc de B", "mitigacion": "isOwner(uid) en todas las escrituras", "residual": "bajo", "severidad": "alta" },
+    { "id": "RGR-05", "riesgo": "Fuga de información", "vector": "resultados client-side filtran no-aprobados", "mitigacion": "BLK-04 server-side + isPublicProfile()", "residual": "alto (BLK-04 abierto)", "severidad": "critica" },
+    { "id": "RGR-06", "riesgo": "Bypass de estados", "vector": "owner→publicado/activo sin gates", "mitigacion": "estados sensibles solo admin/sistema; create estados base", "residual": "bajo", "severidad": "alta" },
+    { "id": "RGR-07", "riesgo": "Bypass de ownership", "vector": "escritura sin auth", "mitigacion": "default-deny + isSignedIn", "residual": "bajo", "severidad": "alta" },
+    { "id": "RGR-08", "riesgo": "Acceso administrativo indebido", "vector": "single email admin comprometido; sin 2FA/RBAC", "mitigacion": "RBAC custom claims + 2FA (postMVP)", "residual": "alto", "severidad": "alta" }
+  ],
+
+  "seccion16_matrizBLK05": {
+    "id": "BLK-05",
+    "nombre": "Firestore rules no alineadas al diseño canónico",
+    "estadoActual": { "diseno": 55, "runtime": 10 },
+    "estadoPostDocumento": { "diseno": 85, "runtime": 10 },
+    "dependencias": ["ACTA-SEGURIDAD", "ACTA-RC", "ACTA-PAY", "ACTA-PANEL v1.1", "MATRIZ-RUTAS-NAV-CANONICA"],
+    "prerequisitos": ["GAP-RULES documento (este)", "BLK-01 migración perfilId (para reglas perfiles/)", "RBAC custom claims diseño", "Storage rules diseño"],
+    "impacto": "Desbloquea runtime /cuenta/* (panel), VE server-side, beta pública segura",
+    "riesgos": ["Sin rules canónicas, panel runtime usa default-deny", "Single-email admin SPOF"],
+    "readiness": { "documental": 85, "deployable": "NO — requiere BLK-01 + autorización runtime" }
+  },
+
+  "seccion17_roadmap": {
+    "fase1_diseno": {
+      "estado": "COMPLETADA (este documento)",
+      "entregables": ["Inventario 24 colecciones", "14 matrices", "RBAC canónico", "matriz riesgos", "alineación BLK-05"]
+    },
+    "fase2_implementacionFutura": {
+      "estado": "PENDIENTE — requiere autorización runtime",
+      "tareas": [
+        "Borrador firestore.rules canónico (perfiles/, contratos/, banners/, notificaciones/, verificaciones/, rate_limits/, alertas/, logs_acceso_privado/)",
+        "Custom claims RBAC (admin/moderador/soporte/auditor/comercial_admin/operador/sistema)",
+        "Storage rules INE/selfie/fotos owner+admin",
+        "Cloud Functions: denuncia create, pagos ledger, rate_limits",
+        "Índices Firestore adicionales (contratos, banners, notificaciones)"
+      ],
+      "bloqueadoPor": ["BLK-01", "autorización PO"]
+    },
+    "fase3_validacionEndurecimiento": {
+      "estado": "PENDIENTE",
+      "tareas": [
+        "Suite emuladora rules (allow/deny por rol)",
+        "Pruebas escalación de privilegios",
+        "Pruebas ownership cross-user",
+        "Auditoría append-only logs",
+        "Penetration test reglas pre-beta",
+        "2FA admin + alertas rules_bypass_intento"
+      ]
+    }
+  },
+
+  "seccion18_readiness": {
+    "antesDespues": {
+      "seguridad": { "antes": 54, "despues": 60 },
+      "runtime": { "antes": 11, "despues": 11 },
+      "produccion": { "antes": 29, "despues": 30 },
+      "dashboard": { "antes": 96, "despues": 96, "nota": "diseño ya ratificado; rules desbloquean runtime futuro" },
+      "registro": { "antes": 90, "despues": 92 },
+      "pagos": { "antes": 88, "despues": 89 },
+      "admin": { "antes": 62, "despues": 66 }
+    }
+  },
+
+  "seccion19_dependenciasDesbloqueadas": {
+    "filas": [
+      { "dependencia": "BLK-05 Firestore rules", "antes": 55, "despues": 85, "tipo": "documental", "nota": "Diseño completo; deploy pendiente BLK-01" },
+      { "dependencia": "Runtime Perfil /cuenta/perfil", "antes": 0, "despues": 0, "tipo": "runtime", "nota": "Diseño rules listo; ejecución bloqueada autorización" },
+      { "dependencia": "Runtime Dashboard /cuenta/*", "antes": 0, "despues": 0, "tipo": "runtime", "nota": "Reglas owner por colección especificadas" },
+      { "dependencia": "Runtime Admin /admin/*", "antes": 20, "despues": 22, "tipo": "runtime", "nota": "RBAC custom claims diseñado; admin.html legacy" },
+      { "dependencia": "Runtime Pagos", "antes": 0, "despues": 0, "tipo": "runtime", "nota": "Ledger server-side + owner read especificado" }
+    ],
+    "impactoCuantificado": "BLK-05 documental +30pp; habilita ruta crítica P0 hacia runtime panel sin desbloquear runtime per se"
+  },
+
+  "seccion20_certificacionGapRules": {
+    "gapRulesCerrado": "PARCIALMENTE",
+    "porcentajeAntes": 55,
+    "porcentajeDespues": 85,
+    "queFaltaParaCierre100Documental": [
+      "Borrador formal firestore.rules canónico (fase 2 diseño detallado)",
+      "Diseño Storage rules detallado",
+      "Diseño custom claims + asignación"
+    ],
+    "queFaltaParaRuntime": [
+      "BLK-01 migración perfilId",
+      "Autorización runtime product owner",
+      "Implementación rules + Cloud Functions",
+      "Suite pruebas emulador"
+    ],
+    "queFaltaParaProduccion": [
+      "Deploy rules + índices",
+      "2FA admin + RBAC claims activos",
+      "Penetration test",
+      "BLK-04 resultados server-side",
+      "BLK-10 Turnstile deploy"
+    ]
+  },
+
+  "reporteFinal": {
+    "veredicto": "PASS",
+    "gapRulesAntes": 55,
+    "gapRulesDespues": 85,
+    "impactoSeguridad": "+6pp (54→60)",
+    "impactoConstruccionP0": "+1pp (89→90) — desbloquea ruta crítica rules",
+    "impactoRuntime": "0pp directo (11%) — habilita pero no ejecuta",
+    "impactoProduccion": "+1pp (29→30)",
+    "dependenciasDesbloqueadas": ["BLK-05 documental 55→85", "ruta crítica runtime panel especificada"],
+    "riesgosResiduales": [
+      "RGR-08 single-email admin sin RBAC/2FA (alto)",
+      "RGR-05 resultados client-side BLK-04 (crítico)",
+      "RGR-03 Storage rules sensibles pendientes (medio-alto)",
+      "BLK-01 perfiles/ desacople requerido para rules canónicas"
+    ],
+    "proximaCapaRecomendada": "Plan adopción física Shared/Core (BLK-08) o ADR-PASARELA-PAGO; en paralelo: borrador firestore.rules canónico (fase 2) tras autorización runtime"
+  },
+
+  "changelog": [
+    { "version": "1.0.0", "fecha": "2026-06-11", "nota": "Cierre documental parcial GAP-RULES (55→85%): inventario 24 colecciones, 14 matrices, RBAC canónico, riesgos, BLK-05, roadmap 3 fases; sin modificar firestore.rules" }
+  ]
+}

@@ -1,0 +1,209 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "tipo": "PLAN_MAESTRO",
+  "modulo": "AGENTES_IA",
+  "titulo": "Plan Maestro Agentes IA CariHub",
+  "fecha": "2026-06-10",
+  "version": "1.0.0",
+  "estado": "PLAN_DISENO_DOCUMENTAL",
+  "modo": "Solo análisis y documentación — sin runtime/carpetas/mover/Firestore/deploy/commit; no modifica capas existentes",
+  "autorizadoPor": "product owner / usuario CariHub",
+  "basadoEn": [
+    "PLAN-MAESTRO-APP-PUBLICA.json", "PLAN-MAESTRO-REGISTRO-CUENTA.json", "PLAN-MAESTRO-DASHBOARDS.json",
+    "PLAN-MAESTRO-ADMIN.json", "PLAN-MAESTRO-PAGOS-CONTRATOS.json", "PLAN-MAESTRO-BANNERS-PUBLICIDAD.json",
+    "PLAN-MAESTRO-INTERACCIONES.json", "ACTA-CONGELAMIENTO-SHARED-CORE.json", "ACTA-CONGELAMIENTO-RENDERENGINE.json",
+    "config-admin-arquitectura-completa-schema.json (ia_arquitecto read-only)", "config-seguridad-mvp-schema.json",
+    "Messenger 1.0.0", "ValidationEngine 1.1.0", "FieldEngine 1.0.1"
+  ],
+  "objetivo": "Definir la arquitectura funcional, operativa, administrativa, comercial, de soporte, auditoría y seguridad del ecosistema de Agentes IA, con controles que impidan que los agentes acumulen más poder del debido.",
+  "principioRector": "La IA RECOMIENDA, REDACTA y ALERTA; el HUMANO DECIDE; los MOTORES EJECUTAN. Ningún agente ejecuta acciones críticas sin aprobación humana. Toda acción de agente se registra en AuditTrail con origen=agente. Por defecto: solo lectura (deny-write).",
+
+  "reglasTransversalesObligatorias": [
+    "RT-01: Ningún agente ejecuta acciones críticas sin aprobación humana",
+    "RT-02: Toda acción de agente se registra en AuditTrail (origen=agente, modelo, prompt-hash, entrada, salida, decisión humana)",
+    "RT-03: Distinguir SIEMPRE 4 tipos de salida: recomendacion | borrador | alerta | ejecucion(solo motor autorizado)",
+    "RT-04: Registrar origen de actividad: humano | sistema | agente (consistente con PLAN-MAESTRO-INTERACCIONES)",
+    "RT-05: Acceso a datos sensibles restringido por rol Y propósito (need-to-know); PrivacyGuard en prompts",
+    "RT-06: Prohibidas decisiones automáticas irreversibles",
+    "RT-07: Prohibida moderación final sin Admin humano",
+    "RT-08: Prohibidos pagos, reembolsos, suspensiones o eliminaciones sin doble confirmación humana",
+    "RT-09: Separar agentes VISIBLES al usuario de agentes INTERNOS",
+    "RT-10: Documentar explícitamente qué agentes pueden ESCRIBIR (borrador/staging) y cuáles solo LEER",
+    "RT-11: Rate-limit y presupuesto de tokens por agente; circuit-breaker ante anomalías",
+    "RT-12: Explicabilidad: cada salida cita fuentes/datos usados; sin alucinación sobre entidades inexistentes (anclar a índices)"
+  ],
+
+  "fichaEstandarAgente": {
+    "campos": ["id", "nombre", "grupo", "visibilidad(usuario|interno)", "objetivo", "responsabilidades", "limites", "permisos", "accionesPermitidas", "accionesProhibidas", "datosAccesibles", "datosRestringidos", "contexto", "herramientas", "eventosEscucha", "eventosGenera", "relacionOtrosAgentes", "nivelAutonomia(L0..L3)", "aprobacionHumana", "modoEscritura(lectura|borrador|ninguna)", "riesgoOperativo", "riesgoLegal", "riesgoPrivacidad"],
+    "nivelesAutonomia": {
+      "L0": "solo lectura/respuesta informativa",
+      "L1": "recomienda (no escribe)",
+      "L2": "redacta borrador en staging (requiere aprobación humana para publicar)",
+      "L3": "dispara ejecución vía motor SOLO con aprobación humana previa y AuditTrail"
+    }
+  },
+
+  "inventarioAgentes": {
+    "publicos": [
+      { "id": "ia_home", "nombre": "Agente Home", "visibilidad": "usuario", "objetivo": "Guiar búsqueda geo→categoría y orientar al visitante", "modoEscritura": "ninguna", "nivelAutonomia": "L0", "aprobacionHumana": "no(solo informa)", "datosAccesibles": ["catálogo público", "geo"], "datosRestringidos": ["datos privados de perfiles", "pagos", "INE"], "accionesProhibidas": ["publicar", "modificar catálogo", "crear cuenta sin usuario"], "riesgoPrivacidad": "bajo" },
+      { "id": "ia_resultados", "nombre": "Agente Resultados", "visibilidad": "usuario", "objetivo": "Refinar filtros y sugerir categorías/ciudades", "modoEscritura": "ninguna", "nivelAutonomia": "L0", "datosAccesibles": ["resultados públicos"], "datosRestringidos": ["ranking interno crudo"], "riesgoPrivacidad": "bajo" },
+      { "id": "ia_perfil_publico", "nombre": "Agente Perfil Público", "visibilidad": "usuario", "objetivo": "Responder dudas sobre el perfil público (datos públicos)", "modoEscritura": "ninguna", "nivelAutonomia": "L0", "datosRestringidos": ["contacto privado", "documentos"], "riesgoPrivacidad": "medio", "limites": "nunca expone datos no publicados (PrivacyGuard)" },
+      { "id": "ia_seo", "nombre": "Agente SEO", "visibilidad": "interno", "objetivo": "Recomendar metadatos/landings/keywords", "modoEscritura": "borrador", "nivelAutonomia": "L2", "aprobacionHumana": "si(catalogo_admin)", "accionesProhibidas": ["publicar landing", "editar robots/sitemap en prod"], "riesgoOperativo": "medio" },
+      { "id": "ia_landing", "nombre": "Agente Landing", "visibilidad": "interno", "objetivo": "Proponer contenido de landings geo/categoría (snapshot-first)", "modoEscritura": "borrador", "nivelAutonomia": "L2", "aprobacionHumana": "si", "accionesProhibidas": ["publicar sin revisión", "inyectar contenido no canónico"] }
+    ],
+    "registro": [
+      { "id": "ia_registro_perfil", "nombre": "Agente Registro Perfil", "visibilidad": "usuario", "objetivo": "Asistir el wizard de perfil (sugerir, no publicar)", "modoEscritura": "borrador", "nivelAutonomia": "L2", "aprobacionHumana": "si(usuario confirma; Admin aprueba publicación)", "datosRestringidos": ["INE/selfie de terceros"], "accionesProhibidas": ["publicar perfil", "auto-aprobar verificación"] },
+      { "id": "ia_registro_negocio", "nombre": "Agente Registro Negocio", "visibilidad": "usuario", "modoEscritura": "borrador", "nivelAutonomia": "L2", "aprobacionHumana": "si" },
+      { "id": "ia_registro_anunciante", "nombre": "Agente Registro Anunciante", "visibilidad": "usuario", "modoEscritura": "borrador", "nivelAutonomia": "L2", "aprobacionHumana": "si" },
+      { "id": "ia_wizard", "nombre": "Agente Wizard", "visibilidad": "usuario", "objetivo": "Resolver dudas de campos (FieldEngine)", "modoEscritura": "ninguna", "nivelAutonomia": "L1" },
+      { "id": "ia_verificacion", "nombre": "Agente Verificación", "visibilidad": "interno", "objetivo": "Pre-clasificar documentos/INE/selfie y RECOMENDAR a moderador", "modoEscritura": "borrador", "nivelAutonomia": "L2", "aprobacionHumana": "si(moderador decide)", "accionesProhibidas": ["aprobar/rechazar verificación final"], "riesgoPrivacidad": "alto", "datosRestringidos": ["INE/selfie — acceso con PrivacyGuard + log"] }
+    ],
+    "dashboard": [
+      { "id": "ia_dash_perfil", "nombre": "Agente Dashboard Perfil", "visibilidad": "usuario", "objetivo": "Explicar métricas propias y sugerir mejoras", "modoEscritura": "ninguna", "nivelAutonomia": "L1", "datosAccesibles": ["métricas reales del dueño"], "datosRestringidos": ["datos de otros perfiles"] },
+      { "id": "ia_dash_negocio", "nombre": "Agente Dashboard Negocio", "visibilidad": "usuario", "nivelAutonomia": "L1", "modoEscritura": "ninguna" },
+      { "id": "ia_dash_anunciante", "nombre": "Agente Dashboard Anunciante", "visibilidad": "usuario", "objetivo": "Explicar rendimiento de banners (real vs estimado)", "nivelAutonomia": "L1", "modoEscritura": "ninguna" },
+      { "id": "ia_dash_empresa", "nombre": "Agente Dashboard Empresa (futuro)", "visibilidad": "usuario", "nivelAutonomia": "L1", "estado": "futuro" },
+      { "id": "ia_dash_operador", "nombre": "Agente Dashboard Operador (futuro)", "visibilidad": "interno", "objetivo": "Asistir operador dentro de su scope", "nivelAutonomia": "L1", "aprobacionHumana": "si", "estado": "futuro" }
+    ],
+    "admin": [
+      { "id": "ia_admin_general", "nombre": "Agente Admin General (Arquitecto/Supervisor)", "visibilidad": "interno", "objetivo": "Lectura total + recomendaciones de catálogo/schemas/estado", "modoEscritura": "ninguna", "nivelAutonomia": "L1", "alineado": "config-admin-arquitectura-completa-schema.json ia_arquitecto (deny-write)", "accionesProhibidas": ["crear categoría", "cambiar precio", "aprobar perfil"] },
+      { "id": "ia_moderacion", "nombre": "Agente Moderación", "visibilidad": "interno", "objetivo": "Pre-filtrar perfiles/comentarios/stories/denuncias y priorizar cola", "modoEscritura": "borrador", "nivelAutonomia": "L2", "aprobacionHumana": "si(RT-07: moderación final humana)", "riesgoLegal": "alto" },
+      { "id": "ia_seguridad", "nombre": "Agente Seguridad", "visibilidad": "interno", "objetivo": "Detectar anomalías/accesos sospechosos y ALERTAR", "modoEscritura": "ninguna", "nivelAutonomia": "L1", "eventosGenera": ["alerta_seguridad"], "accionesProhibidas": ["revocar sesión", "cambiar rules"] },
+      { "id": "ia_auditoria", "nombre": "Agente Auditoría", "visibilidad": "interno", "objetivo": "Analizar logsAdmin/logsSeguridad y generar informes", "modoEscritura": "borrador(informes)", "nivelAutonomia": "L1", "datosAccesibles": ["logs (lectura)"], "accionesProhibidas": ["modificar logs"] },
+      { "id": "ia_cumplimiento", "nombre": "Agente Cumplimiento", "visibilidad": "interno", "objetivo": "Verificar edad/categoría/legal y RECOMENDAR", "modoEscritura": "ninguna", "nivelAutonomia": "L1", "riesgoLegal": "alto" },
+      { "id": "ia_pagos", "nombre": "Agente Pagos", "visibilidad": "interno", "objetivo": "Conciliación asistida, detectar duplicados/anomalías", "modoEscritura": "borrador", "nivelAutonomia": "L2", "aprobacionHumana": "si(RT-08)", "accionesProhibidas": ["confirmar/reembolsar pago"], "riesgoLegal": "alto" },
+      { "id": "ia_contratos", "nombre": "Agente Contratos", "visibilidad": "interno", "objetivo": "Auditar contratos congelados, vencimientos, precio desactualizado en renovación", "modoEscritura": "ninguna", "nivelAutonomia": "L1", "accionesProhibidas": ["modificar contrato activo"] },
+      { "id": "ia_banners", "nombre": "Agente Banners", "visibilidad": "interno", "objetivo": "Recomendar precio/ocupación/relleno y pre-filtrar creativos", "modoEscritura": "borrador", "nivelAutonomia": "L2", "aprobacionHumana": "si", "accionesProhibidas": ["auto-publicar banner", "override de inventario"] },
+      { "id": "ia_admin_seo", "nombre": "Agente SEO Admin", "visibilidad": "interno", "objetivo": "Recomendar políticas SEO/landings", "modoEscritura": "borrador", "nivelAutonomia": "L2", "aprobacionHumana": "si" },
+      { "id": "ia_messenger", "nombre": "Agente Messenger (control)", "visibilidad": "interno", "objetivo": "Detectar spam/abuso en mensajería y RECOMENDAR; NO lee contenido salvo denuncia con auditoría", "modoEscritura": "ninguna", "nivelAutonomia": "L1", "riesgoPrivacidad": "alto", "accionesProhibidas": ["leer conversaciones sin denuncia/auditoría", "suspender sin Admin"] }
+    ],
+    "soporte": [
+      { "id": "ia_soporte_usuario", "nombre": "Agente Soporte Usuario", "visibilidad": "usuario", "objetivo": "Responder FAQ y crear tickets", "modoEscritura": "borrador(ticket)", "nivelAutonomia": "L2", "aprobacionHumana": "escalado a soporte humano", "accionesProhibidas": ["cambiar estado de cuenta", "acceder a pagos sin propósito"] },
+      { "id": "ia_soporte_anunciante", "nombre": "Agente Soporte Anunciante", "visibilidad": "usuario", "nivelAutonomia": "L2", "modoEscritura": "borrador" },
+      { "id": "ia_soporte_negocio", "nombre": "Agente Soporte Negocio", "visibilidad": "usuario", "nivelAutonomia": "L2", "modoEscritura": "borrador" },
+      { "id": "ia_recuperacion_cuenta", "nombre": "Agente Recuperación de Cuenta", "visibilidad": "usuario", "objetivo": "Guiar recuperación; NO ejecuta reset sin verificación", "modoEscritura": "ninguna", "nivelAutonomia": "L1", "riesgoPrivacidad": "alto", "accionesProhibidas": ["resetear credenciales", "cambiar email sin verificación"] },
+      { "id": "ia_facturacion", "nombre": "Agente Facturación", "visibilidad": "usuario", "objetivo": "Guiar datos fiscales/CFDI; recomendar", "modoEscritura": "borrador", "nivelAutonomia": "L2", "aprobacionHumana": "si", "riesgoPrivacidad": "alto(RFC/datos fiscales)" }
+    ],
+    "futuros": [
+      { "id": "ia_traduccion", "nombre": "Agente Traducción", "visibilidad": "usuario", "nivelAutonomia": "L1", "estado": "futuro" },
+      { "id": "ia_recomendaciones", "nombre": "Agente Recomendaciones", "visibilidad": "usuario", "objetivo": "Feed/ranking sugerido (no genera interacciones reales)", "nivelAutonomia": "L1", "estado": "futuro", "alineado": "PLAN-MAESTRO-INTERACCIONES IX-R09" },
+      { "id": "ia_marketing", "nombre": "Agente Marketing", "visibilidad": "interno", "nivelAutonomia": "L2", "aprobacionHumana": "si", "estado": "futuro" },
+      { "id": "ia_analitica", "nombre": "Agente Analítica", "visibilidad": "interno", "nivelAutonomia": "L1", "estado": "futuro" },
+      { "id": "ia_antifraude", "nombre": "Agente Antifraude", "visibilidad": "interno", "objetivo": "Detectar fraude publicitario/social y alertar", "nivelAutonomia": "L1", "estado": "futuro" },
+      { "id": "ia_optimizacion_seo", "nombre": "Agente Optimización SEO", "visibilidad": "interno", "nivelAutonomia": "L2", "aprobacionHumana": "si", "estado": "futuro" },
+      { "id": "ia_themeengine", "nombre": "Agente ThemeEngine", "visibilidad": "interno", "objetivo": "Sugerir temas/plantillas (no aplica sin aprobación)", "nivelAutonomia": "L2", "aprobacionHumana": "si", "estado": "futuro" }
+    ]
+  },
+
+  "matrices": {
+    "agenteResponsabilidades": "Ver inventarioAgentes[].objetivo/responsabilidades por agente",
+    "agentePermisos": {
+      "soloLectura(L0/L1)": ["ia_home", "ia_resultados", "ia_perfil_publico", "ia_wizard", "ia_dash_*", "ia_admin_general", "ia_seguridad", "ia_cumplimiento", "ia_contratos", "ia_messenger", "ia_recuperacion_cuenta", "ia_analitica", "ia_antifraude", "ia_recomendaciones"],
+      "borradorStaging(L2)": ["ia_seo", "ia_landing", "ia_registro_*", "ia_verificacion", "ia_moderacion", "ia_pagos", "ia_banners", "ia_admin_seo", "ia_soporte_*", "ia_facturacion", "ia_marketing", "ia_optimizacion_seo", "ia_themeengine"],
+      "ejecucion(L3)": "NINGUNO por defecto — solo vía motor autorizado con aprobación humana puntual y AuditTrail"
+    },
+    "agenteModulosAccesibles": {
+      "ia_home/resultados/perfil_publico": ["AppPublica(lectura)", "Catálogo público", "RenderEngine(salida)"],
+      "ia_registro_*/wizard/verificacion": ["Registro/Cuenta", "FieldEngine", "ValidationEngine"],
+      "ia_dash_*": ["Dashboards(lectura del dueño)"],
+      "ia_admin_*/moderacion/seguridad/auditoria/cumplimiento": ["Admin(lectura + borrador)", "logs"],
+      "ia_pagos/contratos/facturacion": ["Pagos/Contratos(lectura + borrador conciliación)"],
+      "ia_banners/seo/landing": ["Banners/SEO(lectura + borrador)", "RenderEngine"],
+      "ia_messenger": ["Messenger(metadatos; contenido solo con denuncia+auditoría)"]
+    },
+    "agenteDatosAccesibles": {
+      "publicos": ["catálogo", "geo", "perfiles publicados", "métricas públicas"],
+      "porDuenio": ["ia_dash_* → métricas del dueño"],
+      "sensiblesConPrivacyGuard": ["ia_verificacion → INE/selfie", "ia_facturacion → RFC", "ia_messenger → conversación solo en denuncia"],
+      "prohibidos": ["cualquier agente → datos de terceros sin propósito", "logs inmutables (escritura)", "credenciales"]
+    },
+    "agenteAprobacionHumana": {
+      "noRequiere(soloInforma)": ["ia_home", "ia_resultados", "ia_perfil_publico", "ia_wizard", "ia_dash_*(lectura)"],
+      "requiereAprobacion(publicar/aplicar)": ["ia_seo", "ia_landing", "ia_registro_*", "ia_verificacion", "ia_moderacion", "ia_pagos", "ia_banners", "ia_admin_seo", "ia_soporte_*", "ia_facturacion", "ia_themeengine"],
+      "dobleConfirmacion(RT-08)": ["ia_pagos(reembolso/confirmación)", "ia_moderacion(suspender/eliminar)", "ia_recuperacion_cuenta(reset)"]
+    },
+    "agenteRiesgo": {
+      "alto": ["ia_verificacion(privacidad INE)", "ia_pagos(financiero/legal)", "ia_moderacion(legal)", "ia_messenger(privacidad)", "ia_cumplimiento(legal)", "ia_facturacion(fiscal)", "ia_recuperacion_cuenta(seguridad)"],
+      "medio": ["ia_seo", "ia_landing", "ia_banners", "ia_seguridad", "ia_auditoria"],
+      "bajo": ["ia_home", "ia_resultados", "ia_wizard", "ia_dash_*", "ia_traduccion"]
+    }
+  },
+
+  "cicloVidaAgente": "diseño → registro en AgentRegistry(permisos/scope/nivel) → pruebas en sandbox(golden) → habilitación por Admin(feature flag) → operación(L0..L2 con AuditTrail) → monitoreo(rate-limit/anomalías) → revisión periódica → deprecación/rollback",
+  "cicloVidaInteraccionIA": "trigger(evento/usuario) → cargar contexto(need-to-know + PrivacyGuard) → razonamiento → salida tipada(recomendacion|borrador|alerta) → AuditTrail(origen=agente) → si requiere acción: a cola de aprobación humana → humano decide → motor ejecuta → log resultado → feedback/explicabilidad",
+
+  "politicas": {
+    "seguridad": ["deny-write por defecto", "scope por rol+propósito", "service accounts restringidas", "circuit-breaker", "sin acceso a credenciales/logs inmutables", "Turnstile/reputación (Seguridad MVP) condiciona agentes públicos"],
+    "privacidad": ["PrivacyGuard en prompts y salidas", "need-to-know", "no PII en logs en claro (hashes)", "acceso a sensibles (INE/RFC/conversaciones) con propósito + log obligatorio", "no entrenar con datos privados sin base legal"],
+    "auditoria": ["toda acción de agente en AuditTrail(origen=agente, modelo, prompt-hash, entrada, salida, decisión humana)", "logs append-only", "informes de IA marcados recomendacion_no_accion"],
+    "trazabilidad": ["correlación evento→agente→salida→decisión→ejecución", "origen humano|sistema|agente en cada evento", "versionado de prompts/modelos"],
+    "explicabilidad": ["citar fuentes/datos usados", "anclar a índices (no alucinar entidades)", "exponer confianza/limitaciones", "lenguaje claro para usuario; detalle técnico para Admin/auditor"]
+  },
+
+  "integraciones": {
+    "sharedCore": "config/helpers/clientes; AgentRegistry como cliente, no motor",
+    "renderEngine": "agentes públicos producen contenido vía snapshot; PrivacyGuard obligatorio",
+    "validationEngine": "valida borradores/transiciones generados por agentes",
+    "fieldEngine": "agentes de registro/wizard resuelven campos",
+    "registroCuenta": "identidad/edad/estado condiciona agentes",
+    "dashboards": "agentes de dashboard solo leen lo del dueño",
+    "admin": "AgentRegistry, feature flags, cola de aprobación, RBAC (PLAN-MAESTRO-ADMIN)",
+    "messenger": "metadatos/antispam; contenido solo en denuncia con auditoría",
+    "pagos": "conciliación asistida; nunca confirma/reembolsa",
+    "contratos": "auditoría de congelados/vencimientos; no modifica activos",
+    "banners": "recomendación de precio/ocupación; nunca auto-publica",
+    "interacciones": "recomendación/feed; nunca genera interacciones reales (IX-R09)",
+    "seo": "borradores de metadatos/landings; aprobación humana",
+    "themeEngine": "sugiere temas; no aplica sin aprobación",
+    "seguridadMvp": "gates/reputación condicionan ejecución de agentes"
+  },
+
+  "riesgos": [
+    { "id": "AI-R01", "nivel": "critico", "riesgo": "Agente con permisos de escritura ejecuta acción irreversible", "mitigacion": "RT-01/RT-06/RT-08 + deny-write por defecto + L3 inexistente por defecto" },
+    { "id": "AI-R02", "nivel": "critico", "riesgo": "Fuga de datos sensibles (INE/RFC/conversaciones) en prompts/salidas", "mitigacion": "PrivacyGuard + need-to-know + log de acceso (RT-05)" },
+    { "id": "AI-R03", "nivel": "alto", "riesgo": "Moderación/decisión automática sin humano", "mitigacion": "RT-07 + cola de aprobación + Admin decide" },
+    { "id": "AI-R04", "nivel": "alto", "riesgo": "Alucinación sobre categorías/entidades inexistentes", "mitigacion": "anclar a índices + explicabilidad (RT-12)" },
+    { "id": "AI-R05", "nivel": "alto", "riesgo": "Agente infla métricas o genera interacciones falsas", "mitigacion": "IA solo recomienda; origen=agente nunca cuenta (Interacciones RT-04)" },
+    { "id": "AI-R06", "nivel": "medio", "riesgo": "Costos/abuso (loops, prompt injection)", "mitigacion": "rate-limit, presupuesto, circuit-breaker, sanitización (RT-11)" },
+    { "id": "AI-R07", "nivel": "medio", "riesgo": "Confusión entre recomendación y ejecución", "mitigacion": "salida tipada (RT-03) + UI clara" },
+    { "id": "AI-R08", "nivel": "medio", "riesgo": "Agente visible al usuario expone info interna", "mitigacion": "separación visible/interno (RT-09) + PrivacyGuard" },
+    { "id": "AI-R09", "nivel": "medio", "riesgo": "Falta de trazabilidad de decisiones IA", "mitigacion": "AuditTrail completo + versionado de prompts/modelos (RT-02)" },
+    { "id": "AI-R10", "nivel": "bajo", "riesgo": "Dependencia de proveedor de modelo", "mitigacion": "abstracción de proveedor + fallback" }
+  ],
+  "dependencias": {
+    "congeladas": ["Shared/Core 1.0.0", "RenderEngine 1.0.0", "ValidationEngine 1.1.0", "FieldEngine 1.0.1", "Messenger 1.0.0", "Seguridad MVP 1.0.0", "Dashboards 1.0.0"],
+    "planes": ["ADMIN", "REGISTRO-CUENTA", "PAGOS-CONTRATOS", "BANNERS", "INTERACCIONES", "APP-PUBLICA"],
+    "precondiciones": ["AgentRegistry + RBAC de agentes", "AuditTrail operativo", "PrivacyGuard", "cola de aprobación humana", "sandbox + golden fixtures por agente"]
+  },
+  "estructuraIdealFutura": {
+    "nota": "Lógica; sin crear carpetas",
+    "capaIA": "AgentRegistry + AgentRuntime(orquestador) + ToolRegistry(con permisos) + ApprovalQueue + AuditTrail + PolicyGuard(privacidad/seguridad)",
+    "separacion": "Agentes visibles (usuario) ⟂ agentes internos (admin); IA recomienda ⟂ motores ejecutan ⟂ humano aprueba"
+  },
+  "rutasSugeridas": {
+    "usuario": ["widget IA en Home/Resultados/Perfil", "asistente en /cuenta (wizard/soporte)"],
+    "admin": ["/admin/ia (registry, flags, aprobaciones)", "/admin/ia/auditoria", "/admin/ia/informes"]
+  },
+  "ordenRecomendadoImplementacion": [
+    { "paso": 1, "accion": "AgentRegistry + AuditTrail + PolicyGuard (deny-write, RBAC, PrivacyGuard)", "prioridad": "P0", "cierra": "AI-R01/AI-R02/AI-R09" },
+    { "paso": 2, "accion": "Agentes públicos L0 (Home/Resultados/Perfil) + ia_admin_general L1", "prioridad": "P1" },
+    { "paso": 3, "accion": "Agentes de registro/wizard/soporte L2 (borrador) + ApprovalQueue", "prioridad": "P1", "cierra": "AI-R07" },
+    { "paso": 4, "accion": "ia_moderacion/ia_verificacion L2 con aprobación humana", "prioridad": "P1", "cierra": "AI-R03" },
+    { "paso": 5, "accion": "ia_pagos/ia_banners/ia_seo L2 (conciliación/recomendación) + doble confirmación", "prioridad": "P2" },
+    { "paso": 6, "accion": "ia_seguridad/ia_auditoria/ia_antifraude (alertas)", "prioridad": "P2", "cierra": "AI-R05" },
+    { "paso": 7, "accion": "Agentes futuros (traducción/recomendaciones/marketing/themeengine)", "prioridad": "P3" }
+  ],
+
+  "procedenciaPlanMaestro": {
+    "crearMd": true, "crearJson": true,
+    "justificacion": "El ecosistema IA es transversal y de alto riesgo; requiere gobernanza explícita (permisos, autonomía, aprobación humana, auditoría, privacidad) antes de cualquier implementación, para que los agentes no acumulen poder indebido.",
+    "siguientesPasos": ["ADR-GOBERNANZA-IA (niveles de autonomía y aprobación)", "SPEC-AGENT-REGISTRY", "Anexo legal de uso de IA y datos"]
+  },
+  "noModifica": [
+    "Capas congeladas y planes existentes (se referencian, no se alteran)",
+    "Producción, Firestore, deploy, commit"
+  ],
+  "changelog": [
+    { "version": "1.0.0", "fecha": "2026-06-10", "nota": "Plan maestro Agentes IA: inventario completo (públicos/registro/dashboard/admin/soporte/futuros), reglas transversales de control, ficha estándar, niveles de autonomía L0-L3, matrices (responsabilidades/permisos/módulos/datos/aprobación/riesgo), ciclos de vida, políticas (seguridad/privacidad/auditoría/trazabilidad/explicabilidad), riesgos y orden de implementación" }
+  ]
+}

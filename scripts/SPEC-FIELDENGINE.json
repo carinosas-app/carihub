@@ -1,0 +1,223 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "$id": "https://carihub.app/schemas/spec-fieldengine.json",
+  "tipo": "SPEC_TECNICA",
+  "nombre": "FieldEngine — Especificación técnica",
+  "versionSpec": "1.0.1",
+  "fecha": "2026-06-09",
+  "fechaActualizacion": "2026-06-09",
+  "estado": "DISENO_COMPLETO_AM1_AM3",
+  "changelog": {
+    "1.0.1": ["AM1 guardar_borrador en restringido", "AM2 subcategoriaId opcional visitante + upgrade", "AM3 fuentes categorías sugeridas, renderizado, contratos, snapshot"]
+  },
+  "implementacionAutorizada": false,
+  "dependenciasCongeladas": {
+    "catalogo": "catalogo-2026-06-10@1.0.0",
+    "cuentas": "cuentas-2026-06-10@1.0.0",
+    "seguridad": "seguridad-2026-06-10@1.0.0"
+  },
+  "proposito": "Resolver definición de campos de registro por subcategoriaId para wizard y borradores en perfiles/{perfilId}. No persiste datos. No valida valores (ValidationEngine). No renderiza (RenderEngine).",
+  "fuentesLectura": [
+    "scripts/mapa-registro-categorias.json",
+    "scripts/config-registro-adultos-schema.json",
+    "scripts/config-registro-independiente-schema.json",
+    "scripts/config-registro-profesionista-schema.json",
+    "scripts/config-registro-negocio-schema.json",
+    "scripts/config-registro-visitante-schema.json",
+    "scripts/config-registro-schema.meta.json",
+    "scripts/config-registro-componentes-ui-schema.json",
+    "scripts/config-cuentas-usuario-schema.json",
+    "scripts/config-seguridad-mvp-schema.json",
+    "scripts/config-categorias-sugeridas-schema.json",
+    "scripts/config-renderizado-dinamico-schema.json",
+    "scripts/config-contratos-carihub-schema.json"
+  ],
+  "api": {
+    "resolveRegistrationSchema": {
+      "entrada": "FieldEngineContext",
+      "salida": "ResolvedRegistrationSchema | FieldEngineError",
+      "descripcion": "Resolución principal"
+    },
+    "resolveFormularioId": {
+      "entrada": "subcategoriaId",
+      "salida": "formularioId"
+    },
+    "resolveMapaRow": {
+      "entrada": "subcategoriaId",
+      "salida": "MapaRow"
+    },
+    "canonicalId": {
+      "entrada": "string",
+      "salida": "string",
+      "nota": "Misma lógica que validar-schemas-registro.mjs"
+    },
+    "evaluateSecurityGates": {
+      "entrada": "SecurityContext + accion",
+      "salida": "SecurityGateResult"
+    }
+  },
+  "tipos": {
+    "FieldEngineContext": {
+      "subcategoriaId": {
+        "tipo": "string",
+        "obligatorio": "condicional",
+        "regla": "Obligatorio salvo formularioId=usuario_visitante en registro inicial. Obligatorio en upgrade visitante→perfil público (WizardCrearPerfilDesdeVisitante)."
+      },
+      "formularioId": { "tipo": "string", "obligatorio": false },
+      "flujoVisitante": {
+        "tipo": "enum",
+        "valores": ["registro_inicial", "upgrade_perfil_publico"],
+        "nota": "registro_inicial: sin subcategoriaId; upgrade_perfil_publico: subcategoriaId obligatorio"
+      },
+      "modo": { "tipo": "enum", "valores": ["default", "alternativo", "temporal_categoria_sugerida"], "default": "default" },
+      "schemaVersion": { "tipo": "string", "default": "2026-06-10" },
+      "cuenta": { "tipo": "CuentaContext", "obligatorio": false },
+      "seguridad": { "tipo": "SecurityContext", "obligatorio": false }
+    },
+    "CuentaContext": {
+      "usuarioId": "string",
+      "tipoCuentaPrincipal": "visitante|adulto|independiente|profesionista|empresa",
+      "estadoCuenta": "activa|suspendida|eliminada|pendiente_activacion",
+      "estadoVerificacion": "sin_enviar|enviada|en_revision|aprobada|rechazada|vencida",
+      "tienePerfilPublico": "boolean"
+    },
+    "SecurityContext": {
+      "estadoSeguridad": "normal|observacion|restringido|suspendido|bloqueado",
+      "emailVerificado": "boolean",
+      "riesgoScore": "number 0-100",
+      "reputacionCuenta": "number 0-100",
+      "nivelConfianza": "number 0-100",
+      "flags": "string[]"
+    },
+    "ResolvedRegistrationSchema": {
+      "identidad": "ResolvedIdentity",
+      "campos": "ResolvedField[]",
+      "camposPublicosResultados": "string[]",
+      "camposPublicosPerfil": "string[]",
+      "camposPrivados": "string[]",
+      "obligatorios": "string[]",
+      "opcionales": "string[]",
+      "validaciones": "ValidationRule[]",
+      "coherencia": "CoherenceRule[]",
+      "fotos": { "min": "number", "max": "number" },
+      "componentes": { "resultados": "string", "perfil": "string" },
+      "textosAyuda": "Record<string,string>",
+      "verificacion": "VerificacionResuelta",
+      "facturacion": "FacturacionResuelta",
+      "securityGates": "SecurityGateResult[]",
+      "meta": { "schemaVersion": "string", "resolveHash": "string", "generadoAt": "ISO8601" }
+    }
+  },
+  "algoritmoResolucion": {
+    "ramaVisitante": [
+      "Si formularioId=usuario_visitante y flujoVisitante=registro_inicial (o sin subcategoriaId): resolver solo config-registro-visitante-schema.json meta.base",
+      "Si flujoVisitante=upgrade_perfil_publico: subcategoriaId obligatorio → rama estándar merge"
+    ],
+    "ramaTemporal": [
+      "Si modo=temporal_categoria_sugerida: leer formularioTemporal de mapa o config-categorias-sugeridas-schema.json",
+      "Resolver camposMinimos del temporal + formularioIdBase como referencia de plantillas"
+    ]
+  },
+  "algoritmoMerge": [
+    "0. Si usuario_visitante registro inicial → meta.base visitante; fin",
+    "1. canonicalId(subcategoriaId) — obligatorio excepto visitante inicial",
+    "2. Cargar fila mapa → formularioId, arquetipo, tipoPerfil, componentes",
+    "3. Si context.formularioId y mapa difieren → error FORMULARIO_MAPA_MISMATCH",
+    "4. Cargar schema registro por formularioId",
+    "5. Buscar subcategorias[] por canonicalId",
+    "6. Si modo=alternativo y delta.modoRegistroAlternativo → sustituir arquetipo efectivo",
+    "7. Cargar plantillasArquetipo[arquetipo]",
+    "8. merge(base, plantilla, delta) — ver reglasMerge",
+    "9. Resolver fieldRegistry para cada campo listado",
+    "10. Aplicar coherenciaGlobal + coherenciaExtra",
+    "11. evaluateSecurityGates para acciones: borrador, enviar_revision, contratar",
+    "12. Emitir ResolvedRegistrationSchema + resolveHash"
+  ],
+  "reglasMerge": {
+    "arrays": "union sin duplicados preservando orden base → plantilla → delta",
+    "obligatorios": "merge arrays; delta puede añadir obligatoriosExtra",
+    "fotosMin": "max(base, plantilla, delta)",
+    "fotosMax": "min si definido en delta; sino plantilla",
+    "labels": "delta.labels override por campo",
+    "camposAnidados": "geo.pais expandible a obligatorio individual"
+  },
+  "politicaSchemaVersion": {
+    "catalogoVigente": "2026-06-10",
+    "perfilPublicado": "conserva schemaVersion al publicar",
+    "borradorNuevo": "usa catalogoVigente",
+    "borradorExistente": "conserva schemaVersion del borrador hasta migración explícita",
+    "migracion": "fase posterior — no FieldEngine MVP"
+  },
+  "securityGates": {
+    "acciones": ["abrir_wizard", "guardar_borrador", "enviar_revision", "contratar_plan", "solicitud_banner", "categoria_sugerida"],
+    "reglas": [
+      { "accion": "abrir_wizard", "requiere": ["estadoCuenta=activa", "estadoSeguridad!=bloqueado"] },
+      { "accion": "guardar_borrador", "requiere": ["estadoCuenta=activa", "estadoSeguridad in normal,observacion,restringido"], "nota": "restringido=solo borrador; alineado Seguridad MVP 1.0.0 y fixture F10" },
+      { "accion": "enviar_revision", "requiere": ["emailVerificado=true", "estadoSeguridad in normal,observacion", "estadoCuenta=activa"] },
+      { "accion": "contratar_plan", "requiere": ["emailVerificado=true", "estadoSeguridad=normal"] },
+      { "accion": "solicitud_banner", "requiere": ["emailVerificado=true", "estadoSeguridad in normal,observacion"] },
+      { "accion": "categoria_sugerida", "requiere": ["emailVerificado=true", "estadoSeguridad!=bloqueado,suspendido"] }
+    ],
+    "nota": "Turnstile y rate limits los aplica ValidationEngine; FieldEngine solo expone gates de estado"
+  },
+  "errores": {
+    "SUBCATEGORIA_NO_ENCONTRADA": { "http": 404, "retry": false },
+    "FORMULARIO_MAPA_MISMATCH": { "http": 409, "retry": false },
+    "ARQUETIPO_PLANTILLA_FALTANTE": { "http": 500, "retry": false },
+    "SCHEMA_VERSION_NO_SOPORTADA": { "http": 400, "retry": false },
+    "MODO_ALTERNATIVO_NO_DEFINIDO": { "http": 400, "retry": false },
+    "GATE_SEGURIDAD_DENEGADO": { "http": 403, "retry": false },
+    "SUBCATEGORIA_REQUERIDA_UPGRADE_VISITANTE": { "http": 400, "nota": "upgrade visitante→perfil público sin subcategoriaId" },
+    "SUBCATEGORIA_NO_PERMITIDA_VISITANTE_INICIAL": { "http": 400, "nota": "registro visitante inicial no debe enviar subcategoriaId" }
+  },
+  "snapshotAlPublicar": {
+    "descripcion": "Subconjunto de ResolvedRegistrationSchema persistido en perfiles/{perfilId} al publicar — contrato con RenderEngine",
+    "referencia": "config-renderizado-dinamico-schema.json → snapshotAlPublicar",
+    "mapeoDesdeResolved": {
+      "subcategoriaOficialIdFinal": "identidad.subcategoriaId",
+      "formularioIdFinal": "identidad.formularioId",
+      "arquetipoFinal": "identidad.arquetipo",
+      "tipoPerfilFinal": "identidad.tipoPerfil",
+      "componenteResultados": "componentes.resultados",
+      "componentePerfil": "componentes.perfil",
+      "schemaVersion": "meta.schemaVersion",
+      "camposPublicosResultados": "camposPublicosResultados",
+      "camposPublicosPerfil": "camposPublicosPerfil"
+    },
+    "contratos": "config-contratos-carihub-schema.json — gate contratar_plan independiente; snapshot no incluye precio congelado"
+  },
+  "casosEspeciales": {
+    "usuario_visitante": {
+      "registroInicial": "sin subcategoriaId; meta.base visitante; fotos 0; sin enviar_revision",
+      "upgradePerfilPublico": "subcategoriaId obligatorio; resolve rama merge estándar; condicion contrato vigente (config-registro-visitante-schema.json)"
+    },
+    "temporal_categoria_sugerida": {
+      "fuente": "config-categorias-sugeridas-schema.json → formulariosTemporales",
+      "algoritmo": "formularioTemporal del mapa → camposMinimos temporal + formularioIdBase para plantillas referencia",
+      "flags": ["TEMPORAL", "usaCategoriaSugerida"]
+    },
+    "modo_alternativo_masajes": "arquetipo efectivo persona_acompanante según delta adultos"
+  },
+  "fueraDeAlcance": [
+    "Persistencia Firestore",
+    "ValidationEngine valores",
+    "RenderEngine",
+    "Turnstile verify server-side",
+    "Rate limit enforcement",
+    "Wizard HTML",
+    "Migración legacy usuarios monolito"
+  ],
+  "entregables": {
+    "specMarkdown": "scripts/SPEC-FIELDENGINE.md",
+    "specJson": "scripts/SPEC-FIELDENGINE.json",
+    "fixtures": "scripts/fixtures-fieldengine-golden.json"
+  },
+  "criteriosAceptacionSpec": [
+    "API y tipos sin ambigüedad",
+    "Algoritmo merge reproducible",
+    "11 golden fixtures documentados",
+    "securityGates alineados Seguridad MVP 1.0.0",
+    "Sin dependencia RenderEngine",
+    "Aprobación product owner antes de implementar"
+  ]
+}

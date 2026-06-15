@@ -1,0 +1,148 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "$id": "https://carihub.app/schemas/acta-congelamiento-shared-core.json",
+  "tipo": "ACTA_CONGELAMIENTO_SHARED_CORE",
+  "titulo": "Acta formal de congelamiento — Shared/Core CariHub",
+  "versionActa": "1.0.0",
+  "fechaCongelamiento": "2026-06-10",
+  "fechaActualizacion": "2026-06-10",
+  "fechaAprobacionSpec": "2026-06-10",
+  "estadoActa": "CONGELADO",
+  "veredictoFinal": "PASS",
+  "modo": "Solo validación y documentación — sin runtime/carpetas/mover/Firestore/deploy/commit; no modifica capas existentes",
+  "autorizacion": {
+    "estado": "APROBADA",
+    "autorizadoPor": "product owner / usuario CariHub",
+    "alcance": "Baseline de diseño Shared/Core v1.0.0 — especificación técnica sin implementación runtime; SC-AO-01..06 cerrados",
+    "artefactosAprobados": [
+      "scripts/SPEC-SHARED-CORE.md",
+      "scripts/SPEC-SHARED-CORE.json",
+      "scripts/fixtures-shared-core-golden.json"
+    ],
+    "auditoria": "scripts/AUDITORIA-SPEC-SHARED-CORE.json",
+    "auditoriaPreCongelamiento": "scripts/AUDITORIA-SHARED-CORE.json",
+    "planMaestro": "scripts/PLAN-MAESTRO-SHARED-CORE.json"
+  },
+  "versionSharedCore": {
+    "id": "shared-core-2026-06-10",
+    "semver": "1.0.0",
+    "specVersion": "1.0.0",
+    "versionAnterior": null
+  },
+  "dependenciasCongeladas": {
+    "validationengine": { "version": "validationengine-2026-06-10", "semver": "1.1.0" },
+    "fieldengine": { "version": "fieldengine-2026-06-10", "semver": "1.0.1" },
+    "catalogo": { "version": "catalogo-2026-06-10", "semver": "1.0.0" },
+    "cuentas": { "version": "cuentas-2026-06-10", "semver": "1.0.0" },
+    "seguridad": { "version": "seguridad-2026-06-10", "semver": "1.0.0" }
+  },
+  "dependenciasEnDiseno": {
+    "renderengine": "SPEC-RENDERENGINE 1.0.0 (no congelado; habilitado tras esta acta)",
+    "adrRenderStrategy": "ADR-RENDER-STRATEGY 1.0.0",
+    "adrUrlCanonica": "ADR-URL-CANONICA-PERFILES 1.0.0"
+  },
+  "objetoCongelamiento": {
+    "superficiePublica": "core.config | core.data | core.helpers | core.ui | core.engines",
+    "apiPrincipal": "initFirebase(); catalog.getSubcategoria/compatProduccion; geo.listPaises/loadEstados/loadCiudades; helpers.text/phone/date/format; ui.tokens/componentRegistry/modal; engines.validationClient/fieldClient/renderClient",
+    "decisionCatalogo": "462 canónico + compatProduccion() subconjunto ≈34 (flag activoProduccion)",
+    "tokensCanonicos": "prefijo --ch-; --ch-rosa=#ec2d7a, --ch-rosa-2=#d81b60, --ch-rosa-suave=#fce4ec, --ch-rosa-admin=#c2185b",
+    "geo": "índice liviano + lazy estados/ciudades",
+    "fronteraClientesMotores": "clientes delgados; Core no reimplementa VE/FE/RenderEngine",
+    "grafoAciclico": "apps → Core; Core → app PROHIBIDO",
+    "semver": "1.0.0; PATCH/MINOR/MAJOR definidos",
+    "fixtures": "fixtures-shared-core-golden.json — 20 casos"
+  },
+  "validacionCongelamiento": {
+    "consistenciaSpec": "PASS",
+    "consistenciaFixtures": "PASS",
+    "consistenciaAuditoria": "PASS",
+    "compatibilidadValidationEngine": "PASS — validationClient delega a VE 1.1.0, sin reimplementar",
+    "compatibilidadFieldEngine": "PASS — fieldClient delega a FE 1.0.1",
+    "compatibilidadRenderEngine": "PASS — renderClient expone resolveComponent/resolveUrl/componentRegistry (contrato SPEC 1.0.0 + ADRs)",
+    "compatibilidadAppPublica": "PASS — consumidor puro",
+    "compatibilidadMessenger": "PASS — config/helpers/validationClient",
+    "compatibilidadDashboards": "PASS — config/helpers/validationClient",
+    "compatibilidadAdmin": "PASS — config.rbac fuente única; etiquetas de dominio fuera de Core",
+    "compatibilidadBanners": "PASS — catalog/geo/modal/helpers; creativos/precios fuera",
+    "compatibilidadThemeEngine": "PASS — extiende tokens base --ch-",
+    "compatibilidadSEO": "PASS — renderClient head/canonical + data",
+    "cumplimientoSC_AO": {
+      "SC-AO-01": "PASS",
+      "SC-AO-02": "PASS",
+      "SC-AO-03": "PASS",
+      "SC-AO-04": "PASS",
+      "SC-AO-05": "PASS",
+      "SC-AO-06": "PASS"
+    },
+    "ausenciaDependenciasCirculares": "PASS — grafo acíclico; CORE_IMPORT_CICLICO build-time (fixture C18)",
+    "reglasAntiGodModule": "PASS — admisión 2+ apps; superficie pública explícita; fixture C19 rechaza dominio",
+    "estabilidadApiPublica": "PASS — exports por sub-capa documentados y versionados",
+    "cumplimientoSemver_1_0_0": "PASS — política PATCH/MINOR/MAJOR definida"
+  },
+  "matrizPassFail": {
+    "totalVerificaciones": 23,
+    "pass": 23,
+    "fail": 0,
+    "observaciones": 0
+  },
+  "bloqueantesRestantes": [],
+  "riesgosAbiertos": [
+    { "id": "SCS-R01", "nivel": "medio", "descripcion": "Adopción parcial: páginas con firebaseConfig propio durante transición", "estado": "ABIERTO_IMPLEMENTACION", "nota": "No bloquea diseño; se resuelve en plan de adopción runtime" },
+    { "id": "SCS-R02", "nivel": "medio", "descripcion": "compatProduccion desincronizado del catálogo real hasta migración", "estado": "ABIERTO_MIGRACION" },
+    { "id": "SCS-R03", "nivel": "bajo", "descripcion": "Convivencia --ch-* con --rosa legacy hasta corregir CSS", "estado": "ABIERTO_IMPLEMENTACION" },
+    { "id": "SCS-R04", "nivel": "bajo", "descripcion": "MAJOR de Core impacta múltiples apps", "estado": "MITIGADO_SEMVER" },
+    { "id": "URL-R02", "nivel": "alto", "descripcion": "Decisión perfilId opaco vs uid (Seguridad)", "estado": "ABIERTO_SEGURIDAD", "nota": "Fuera de alcance Core; afecta helpers.format.slugify/resolveUrl en runtime" }
+  ],
+  "implementacion": {
+    "runtimeAutorizado": false,
+    "firestoreAutorizado": false,
+    "deployAutorizado": false,
+    "nota": "v1.0.0 congelada como diseño; implementación requiere autorización explícita posterior"
+  },
+  "motoresRelacionados": {
+    "validationEngine": "CONGELADO 1.1.0 — Core expone cliente, no modifica VE",
+    "fieldEngine": "CONGELADO 1.0.1 — Core expone cliente",
+    "renderEngine": "SPEC 1.0.0 — habilitado para congelamiento tras esta acta (RE-AU-01 cerrado)",
+    "themeEngine": "Observación 1.3.0 — extiende tokens base",
+    "messenger": "CONGELADO 1.0.0 — consume cliente VE/helpers"
+  },
+  "impactoRenderEngine": {
+    "RE-AU-01": "CERRADO — Shared/Core congelado",
+    "RE-AU-02": "CERRADO previamente — ADR-RENDER-STRATEGY",
+    "RE-AU-03": "CERRADO previamente — ADR-URL-CANONICA-PERFILES",
+    "renderEngineHabilitadoParaCongelamiento": true,
+    "siguientePasoSugerido": "Auditar/actualizar AUDITORIA-SPEC-RENDERENGINE con los 3 hallazgos cerrados → ACTA-CONGELAMIENTO-RENDERENGINE (requiere autorización)"
+  },
+  "archivosBaseline": [
+    "scripts/SPEC-SHARED-CORE.md",
+    "scripts/SPEC-SHARED-CORE.json",
+    "scripts/fixtures-shared-core-golden.json",
+    "scripts/AUDITORIA-SPEC-SHARED-CORE.md",
+    "scripts/AUDITORIA-SPEC-SHARED-CORE.json",
+    "scripts/AUDITORIA-SHARED-CORE.md",
+    "scripts/AUDITORIA-SHARED-CORE.json",
+    "scripts/PLAN-MAESTRO-SHARED-CORE.md",
+    "scripts/PLAN-MAESTRO-SHARED-CORE.json",
+    "scripts/ACTA-CONGELAMIENTO-SHARED-CORE.json",
+    "scripts/ACTA-CONGELAMIENTO-SHARED-CORE.md"
+  ],
+  "procedimientoVersionado": {
+    "PATCH": "Correcciones, helpers no-breaking, fixtures, documentación",
+    "MINOR": "Nuevos exports retrocompatibles, nuevos tokens/datos catálogo/geo",
+    "MAJOR": "Cambio de firma API pública, eliminación de export, cambio de contrato de cliente o tokens canónicos",
+    "historialVersiones": [
+      { "semver": "1.0.0", "fecha": "2026-06-10", "evento": "CONGELAMIENTO_INICIAL", "notas": "SPEC formal desde PLAN-MAESTRO; SC-AO-01..06 cerrados; 23/23 PASS; cierra RE-AU-01" }
+    ]
+  },
+  "ajustesRecomendadosPostActa": [
+    "validar-spec-shared-core.mjs",
+    "SPEC-SHARED-CORE-ALCANCE.md",
+    "Plan de adopción por página (firebaseConfig→Core)",
+    "Decisión perfilId opaco con Seguridad (URL-R02)"
+  ],
+  "noModifica": [
+    "Capas congeladas existentes (VE 1.1.0, FieldEngine 1.0.1, Messenger 1.0.0, Dashboards 1.0.0, Catálogo/Cuentas/Seguridad)",
+    "Producción, Firestore, deploy, commit"
+  ],
+  "estado": "CONGELADO"
+}

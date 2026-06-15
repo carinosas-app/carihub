@@ -1,0 +1,259 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "tipo": "PLAN_MAESTRO",
+  "modulo": "SHARED_CORE",
+  "titulo": "Plan Maestro Shared/Core CariHub",
+  "fecha": "2026-06-09",
+  "version": "1.0.0",
+  "estado": "PLAN_DISENO_DOCUMENTAL",
+  "modo": "Solo análisis y documentación — sin runtime/carpetas/mover/Firestore/deploy/commit",
+  "autorizadoPor": "product owner / usuario CariHub",
+  "basadoEn": [
+    "scripts/AUDITORIA-ARQUITECTONICA-GLOBAL-CARIHUB.json",
+    "scripts/MAPA-MAESTRO-CARIHUB.json",
+    "scripts/MATRIZ-MODULARIZACION-CARIHUB.json",
+    "scripts/OBSERVACION-ARQUITECTONICA-MODULARIZACION-APLICACIONES.json"
+  ],
+  "objetivo": "Definir la capa Shared/Core como base común para eliminar duplicación y habilitar la separación modular futura, sin implementar runtime.",
+  "principioRector": "Shared/Core contiene SOLO lo verdaderamente transversal y estable. Si un elemento pertenece a un dominio, vive en su app; si lo usan 2+ apps y es estable, es candidato a Core.",
+
+  "inventarioElementosCompartidosActuales": {
+    "configuracionFirebase": {
+      "descripcion": "Inicialización Firebase (app/auth/firestore/storage) + objeto firebaseConfig",
+      "ubicacionActual": "Inline en cada página HTML",
+      "evidenciaDuplicado": ["index.html", "resultados.html", "perfil.html", "admin.html", "registro-banner.html", "registro-banner2.html", "(index-legacy.html obsoleto)"],
+      "copiasActivas": 6,
+      "riesgo": "apiKey/projectId repetidos; cambio de proyecto exige editar 6 archivos",
+      "candidatoCore": true
+    },
+    "catalogo": {
+      "descripcion": "Categorías y sectores del directorio",
+      "archivos": ["public/js/catalogos-carihub.js (~34 categorías)", "public/js/sectores-carihub.js (15 sectores)", "public/js/categoria-iconos.js"],
+      "consumidores": ["index.html (home)", "registro-banner.html", "hero-home.js", "home-bridge.js"],
+      "duplicadoLogico": "CATEGORIAS_BUSCADOR hardcoded en index.html duplica catalogos-carihub.js",
+      "desalineacion": "Producción ~34 categorías vs diseño 462 subcategorías (mapa-registro-categorias.json)",
+      "candidatoCore": true
+    },
+    "geo": {
+      "descripcion": "Listas país/estado/ciudad",
+      "archivos": ["public/paises.js (PAISES_PRINCIPALES + TODOS_LOS_PAISES)", "public/estados.js", "public/ciudades.js"],
+      "consumidores": ["index.html", "registro-banner.html", "(resultados via query params)"],
+      "candidatoCore": true,
+      "nota": "Datos estáticos grandes — candidatos a lazy/segmentado por país"
+    },
+    "tokensVisuales": {
+      "descripcion": "Variables CSS de color/tema y plantillas visuales",
+      "fuentesDispersas": [
+        "home.css (:root + [data-tema=escort], 3 bloques :root)",
+        "home-modals.css (usa --rosa/--rosa2/--rosa-suave NO definidas → roto)",
+        "dashboard-rentero.html (12 variantes body.tema-*)",
+        "home-vcards.js (6 templates classic/neon/sunset/bloom/noir/pulse)",
+        "admin.html (:root propio --rosa #c2185b)",
+        "resultados.html / perfil.html (:root inline --rosa #ec2d7a)"
+      ],
+      "inconsistencia": "--rosa difiere entre páginas (#ec2d7a vs #c2185b); roto en home-modals.css",
+      "candidatoCore": "tokens base sí; ThemeEngine es app aparte que consume tokens",
+      "relacionThemeEngine": "Core define tokens base estáticos; ThemeEngine los hace dinámicos (futuro)"
+    },
+    "helpersCompartidos": {
+      "descripcion": "Funciones utilitarias repetidas",
+      "detectados": [
+        { "fn": "textoSeguro (escape HTML)", "copiasActivas": 5, "archivos": ["index.html", "admin.html", "resultados.html", "perfil.html", "dashboard-rentero.html"] },
+        { "fn": "limpiarTelefono", "copiasActivas": 2, "archivos": ["index.html", "perfil.html"] },
+        { "fn": "normalizarTexto", "copiasActivas": "≥1", "archivos": ["index.html"] },
+        { "fn": "formatearFechaPerfil / fechaPerfilValida / diasRestantesPerfil", "archivos": ["index.html"], "nota": "lógica de estado perfil — candidato Core o Dashboard" }
+      ],
+      "candidatoCore": true
+    },
+    "validacionesComunes": {
+      "descripcion": "Validación inline en cliente (formato, imagen, campos)",
+      "detectados": ["validarImagen (tipo/tamaño 5MB) en index", "validarPaso1/2 wizard", "checks edad/bot"],
+      "relacionValidationEngine": "ValidationEngine 1.1.0 es el motor canónico (diseño). Core NO debe duplicar VE; debe exponer helpers de formato ligeros y delegar reglas a VE.",
+      "candidatoCore": "helpers de formato sí; reglas de negocio NO (van a VE)"
+    },
+    "constantesGlobales": {
+      "detectados": [
+        { "const": "WHATSAPP_ADMIN (528112304664)", "archivos": ["index.html"] },
+        { "const": "LINK_STRIPE / LINK_MERCADO_PAGO", "archivos": ["index.html"], "nota": "destino real APP_PAGOS, no Core" },
+        { "const": "ETIQUETAS_ESTADO_SOLICITUD_PUBLICIDAD", "copiasActivas": 2, "archivos": ["index.html", "admin.html"], "nota": "destino real APP_BANNERS/Admin compartido" },
+        { "const": "ADMIN_EMAIL (admin.html) + isAdmin (firestore.rules)", "nota": "RBAC — Core config, sensible" },
+        { "const": "LIMITE_USUARIOS=150 (admin.html)", "nota": "config admin" }
+      ],
+      "candidatoCore": "config app-id/whatsapp/rbac sí; etiquetas de dominio van a su app"
+    },
+    "assetsCompartidos": {
+      "descripcion": "Imágenes usadas por más de una página",
+      "detectados": ["img/home/promo-*.jpg y motel-spa-model.jpg usados por resultados banners", "logos marca"],
+      "candidatoCore": "marca/branding base sí; creativos de banner → APP_BANNERS"
+    },
+    "scriptsComunes": {
+      "descripcion": "JS cargado por múltiples páginas",
+      "detectados": ["modal-carihub.js (perfil + registro-banner)", "catalogos-carihub.js (home + banner)", "paises/estados/ciudades.js (home + banner)"],
+      "candidatoCore": true
+    },
+    "estilosBase": {
+      "descripcion": "CSS reutilizable",
+      "detectados": ["modal-carihub.css (perfil + banner)", "banners-publicidad.css (perfil + banner)", "resets *{box-sizing} repetidos inline en cada página"],
+      "candidatoCore": "modal-carihub.css y reset/tokens sí; banners-publicidad.css → APP_BANNERS o Core-UI"
+    },
+    "componentesReutilizables": {
+      "detectados": [
+        { "comp": "modal-carihub (crearModalCariHub)", "usado": ["perfil.html", "registro-banner.html", "registro-banner2.html"], "noUsado": ["index.html usa alert() nativo"], "candidatoCore": true },
+        { "comp": "ResultCard / Vcard (home-vcards.js)", "candidatoCore": "→ RenderEngine (Core-UI)" },
+        { "comp": "Selector geo (abrirSelector)", "candidatoCore": true },
+        { "comp": "Banner slot/rotación", "candidatoCore": "→ APP_BANNERS" },
+        { "comp": "config-registro-componentes-ui-schema.json (ComponentRegistry diseño)", "candidatoCore": "contrato Core-UI futuro" }
+      ]
+    }
+  },
+
+  "matrizDuplicados": [
+    { "elemento": "firebaseConfig / init", "copiasActivas": 6, "paginas": ["index", "resultados", "perfil", "admin", "registro-banner", "registro-banner2"], "tipo": "config", "severidad": "alta", "accion": "convertir_shared_core (firebase init único)" },
+    { "elemento": "textoSeguro()", "copiasActivas": 5, "paginas": ["index", "admin", "resultados", "perfil", "dashboard-rentero"], "tipo": "helper", "severidad": "media", "accion": "convertir_shared_core" },
+    { "elemento": "reset CSS *{box-sizing}", "copiasActivas": "≥5 inline", "tipo": "estilo", "severidad": "baja", "accion": "convertir_shared_core (base.css)" },
+    { "elemento": ":root tokens --rosa", "copiasActivas": "≥4 divergentes", "paginas": ["home.css", "admin", "resultados", "perfil"], "tipo": "tokens", "severidad": "media", "accion": "convertir_shared_core (tokens.css) + corregir home-modals" },
+    { "elemento": "ETIQUETAS_ESTADO_SOLICITUD_PUBLICIDAD", "copiasActivas": 2, "paginas": ["index", "admin"], "tipo": "constante dominio", "severidad": "media", "accion": "mover a APP_BANNERS/Admin compartido (no Core)" },
+    { "elemento": "limpiarTelefono()", "copiasActivas": 2, "paginas": ["index", "perfil"], "tipo": "helper", "severidad": "baja", "accion": "convertir_shared_core" },
+    { "elemento": "CATEGORIAS_BUSCADOR vs catalogos-carihub", "copiasActivas": 2, "tipo": "datos", "severidad": "media", "accion": "eliminar duplicado → Core/Catálogo" },
+    { "elemento": "catalogos/sectores/geo (scripts)", "copiasActivas": "1 archivo, multi-consumidor", "tipo": "datos", "severidad": "baja", "accion": "convertir_shared_core" },
+    { "elemento": "modal-carihub.js/css", "copiasActivas": "1 archivo, multi-consumidor", "tipo": "componente", "severidad": "baja", "accion": "convertir_shared_core (formalizar)" }
+  ],
+
+  "queDebeEntrarEnSharedCore": {
+    "core_config": ["firebase init único (config + getApp/auth/db/storage)", "appConfig (projectId, whatsappAdmin, adminEmail/RBAC, flags)", "rutas/endpoints constantes"],
+    "core_data": ["Catálogo (categorías/sectores/iconos) alineado a 462", "Geo país/estado/ciudad", "mapa-registro-categorias (contrato)"],
+    "core_helpers": ["textoSeguro", "limpiarTelefono", "normalizarTexto", "formato fecha", "validación formato ligera (NO reglas de negocio)"],
+    "core_ui": ["modal-carihub (js+css)", "tokens visuales base (tokens.css)", "reset/base.css", "ComponentRegistry contrato (config-registro-componentes-ui-schema)"],
+    "core_engines_contratos": ["ValidationEngine (contrato/cliente)", "FieldEngine (contrato/cliente)", "RenderEngine (contrato futuro)"]
+  },
+  "queNoDebeEntrarEnSharedCore": [
+    "Reglas de negocio de validación (pertenecen a ValidationEngine)",
+    "Links de pago Stripe/MP (APP_PAGOS)",
+    "ETIQUETAS_ESTADO_SOLICITUD_PUBLICIDAD y lógica de anuncios (APP_BANNERS/Admin)",
+    "Wizard, INE, panel cuenta (REGISTRO/DASHBOARD)",
+    "Lógica admin (moderación, colas) (APP_ADMIN)",
+    "Editor de temas y skins dinámicos (APP_THEMEENGINE)",
+    "Creativos de banners (APP_BANNERS)",
+    "LLM / prompts de agentes (APP_AGENTES)",
+    "home-vcards específico de Home (su parte genérica va a RenderEngine, no Core directo)"
+  ],
+  "queSeQuedaLocalEnCadaApp": {
+    "APP_PUBLICA": ["hero-home.js", "home-ui.js", "home-sector-scroll.js", "adultos-cat-picker.js", "home.css", "estilos hero"],
+    "APP_REGISTRO": ["wizard UI", "uploaders INE/selfie", "schemas registro consumidos vía FieldEngine"],
+    "APP_DASHBOARD": ["shell modular", "estado perfil panel", "notificaciones UI"],
+    "APP_ADMIN": ["colas moderación", "ETIQUETAS estado", "LIMITE_USUARIOS"],
+    "APP_MESSENGER": ["UI chat", "realtime listeners"],
+    "APP_PAGOS": ["links pago", "checkout"],
+    "APP_BANNERS": ["precios-publicidad.js", "banner-inventario-rotacion.js", "creativos", "banners-publicidad.css (o Core-UI)"],
+    "APP_SEO": ["plantillas landing", "head meta"],
+    "APP_THEMEENGINE": ["editor", "skins dinámicos"]
+  },
+
+  "modulosConsumidores": {
+    "core_config": ["TODAS"],
+    "core_data_catalogo": ["PUBLICA", "REGISTRO", "BANNERS", "SEO", "ADMIN"],
+    "core_data_geo": ["PUBLICA", "REGISTRO", "BANNERS", "SEO"],
+    "core_helpers": ["TODAS"],
+    "core_ui_modal": ["PUBLICA", "REGISTRO", "DASHBOARD", "BANNERS", "ADMIN"],
+    "core_ui_tokens": ["TODAS (base) + THEMEENGINE (extiende)"],
+    "core_engines_VE": ["REGISTRO", "DASHBOARD", "MESSENGER", "ADMIN", "BANNERS", "PAGOS"],
+    "core_engines_FieldEngine": ["REGISTRO"],
+    "core_engines_RenderEngine": ["PUBLICA (Resultados/Perfil)", "SEO", "THEMEENGINE"]
+  },
+
+  "relacionesConModulos": {
+    "ValidationEngine": "Core expone CLIENTE/contrato de VE; NO reimplementa reglas. VE 1.1.0 congelado es la fuente.",
+    "FieldEngine": "Core expone resolver de schemas registro; FieldEngine 1.0.1 congelado es la fuente. Consumido por REGISTRO.",
+    "RenderEngine": "Sin SPEC aún. Core-UI debe reservar el contrato (ResultCard, snapshot) sin anticipar implementación.",
+    "AppPublica": "Consume config, catálogo, geo, helpers, tokens, RenderEngine (futuro).",
+    "Registro": "Consume FieldEngine, VE, catálogo, geo, helpers, modal.",
+    "Dashboards": "Consume config, VE, helpers, notificaciones; estado perfil parcialmente desde Core helpers.",
+    "Messenger": "Consume config, VE (60 acciones), helpers; UI propia.",
+    "Admin": "Consume config (RBAC), VE, helpers; lógica propia.",
+    "Banners": "Consume catálogo, geo, modal, helpers; precios/inventario propios.",
+    "SEO": "Consume catálogo, geo, RenderEngine; head propio.",
+    "ThemeEngine": "Extiende tokens base de Core; editor propio.",
+    "AgentesIA": "Consume config y contratos VE; prompts/LLM propios (no Core)."
+  },
+
+  "mapaDependencias": {
+    "nota": "Core no depende de ninguna app; todas las apps dependen de Core. Dirección única para evitar ciclos.",
+    "capas": [
+      "Core-Config → base de todo",
+      "Core-Data (catálogo/geo) → PUBLICA/REGISTRO/BANNERS/SEO/ADMIN",
+      "Core-Helpers → todas",
+      "Core-UI (modal/tokens/base) → todas las apps con UI",
+      "Core-Engines-Contratos (VE/FieldEngine/RenderEngine) → apps de dominio"
+    ],
+    "antipatron": "App → App (evitar). Toda compartición pasa por Core."
+  },
+
+  "riesgos": [
+    { "id": "SC-R01", "nivel": "alto", "riesgo": "Acoplar lógica de dominio en Core (god-module)", "mitigacion": "Regla 2+ apps & estable; dominio se queda local" },
+    { "id": "SC-R02", "nivel": "alto", "riesgo": "Romper páginas en producción al centralizar firebaseConfig sin pruebas", "mitigacion": "Documental ahora; extracción futura con verificación por página" },
+    { "id": "SC-R03", "nivel": "medio", "riesgo": "Tokens divergentes (--rosa) generan regresiones visuales al unificar", "mitigacion": "Mapear cada valor por página antes de unificar" },
+    { "id": "SC-R04", "nivel": "medio", "riesgo": "Catálogo Core alineado a 462 rompe home (espera 34)", "mitigacion": "Capa de compatibilidad / migración gradual" },
+    { "id": "SC-R05", "nivel": "medio", "riesgo": "Geo grande en bundle Core inicial", "mitigacion": "Segmentar/lazy por país" },
+    { "id": "SC-R06", "nivel": "bajo", "riesgo": "Duplicar reglas de VE en Core", "mitigacion": "Core solo contrato/cliente VE" }
+  ],
+  "riesgosSiSeExtraeMal": [
+    "Core se vuelve monolito de utilidades (lo mismo que index.html pero global)",
+    "Dependencias circulares App↔Core↔App",
+    "Cambios en Core obligan re-test de TODAS las apps (radio de impacto alto)",
+    "Versionado de Core sin disciplina rompe apps congeladas",
+    "Mezclar config sensible (RBAC, apiKey) sin control de acceso"
+  ],
+  "recomendaciones": [
+    "Definir Core por sub-capas (config, data, helpers, ui, engines) con límites claros",
+    "Regla de admisión: 2+ apps consumidoras Y estabilidad demostrada",
+    "Core sin dependencias hacia apps (grafo acíclico)",
+    "Versionar Core con semver propio y changelog",
+    "firebaseConfig único como primer extracto (mayor duplicación, bajo riesgo de lógica)",
+    "Tokens visuales: mapear divergencias antes de unificar; corregir home-modals.css",
+    "No anticipar RenderEngine: solo reservar contrato",
+    "Mantener VE/FieldEngine como fuentes; Core expone clientes"
+  ],
+
+  "estructuraIdealFutura": {
+    "nota": "Estructura lógica (no crear carpetas ahora). Organización conceptual de Shared/Core.",
+    "core": {
+      "config": ["firebase.init", "appConfig", "rbac", "flags", "endpoints"],
+      "data": ["catalogo (462)", "sectores", "iconos", "geo (paises/estados/ciudades)", "mapa-registro-categorias"],
+      "helpers": ["text (textoSeguro, normalizarTexto)", "phone (limpiarTelefono)", "date (formato/vencimiento)", "format-validation (ligera)"],
+      "ui": ["base.css (reset)", "tokens.css (variables tema base)", "modal-carihub", "component-registry (contrato)"],
+      "engines": ["validation-engine (cliente/contrato VE 1.1.0)", "field-engine (cliente FieldEngine 1.0.1)", "render-engine (contrato futuro)"]
+    }
+  },
+  "ordenRecomendadoExtraccionFutura": [
+    { "paso": 1, "elemento": "Core-Config: firebaseConfig único", "prioridad": "P0", "riesgo": "bajo", "impacto": "alto" },
+    { "paso": 2, "elemento": "Core-Helpers: textoSeguro/limpiarTelefono/normalizarTexto/fecha", "prioridad": "P0", "riesgo": "bajo", "impacto": "medio" },
+    { "paso": 3, "elemento": "Core-UI base: reset + tokens.css (corregir --rosa)", "prioridad": "P1", "riesgo": "medio", "impacto": "medio" },
+    { "paso": 4, "elemento": "Core-UI: modal-carihub formalizado", "prioridad": "P1", "riesgo": "bajo", "impacto": "medio" },
+    { "paso": 5, "elemento": "Core-Data: catálogo+geo (alinear 462, segmentar geo)", "prioridad": "P1", "riesgo": "medio", "impacto": "alto" },
+    { "paso": 6, "elemento": "Core-Engines: clientes VE/FieldEngine", "prioridad": "P1", "riesgo": "medio", "impacto": "alto" },
+    { "paso": 7, "elemento": "Core-UI: ComponentRegistry/RenderEngine contrato", "prioridad": "P2", "riesgo": "medio", "impacto": "alto" }
+  ],
+  "prioridadPorElemento": {
+    "P0": ["firebaseConfig único", "helpers (textoSeguro/limpiarTelefono/normalizarTexto/fecha)"],
+    "P1": ["tokens.css + base.css", "modal-carihub", "catálogo+geo", "clientes VE/FieldEngine"],
+    "P2": ["ComponentRegistry / RenderEngine contrato"],
+    "P3": ["assets/branding base consolidados"]
+  },
+
+  "procedenciaPlanMaestro": {
+    "crearMd": true,
+    "crearJson": true,
+    "justificacion": "Shared/Core es precondición P0 transversal sin la cual ninguna separación modular es segura; amerita plan maestro propio.",
+    "siguientesPlanesSugeridos": ["SPEC-RENDERENGINE (P1)", "PLAN-MAESTRO-APP-PUBLICA (P0/P1)"]
+  },
+  "noModifica": [
+    "Capas congeladas (7 actas)",
+    "ValidationEngine 1.1.0",
+    "FieldEngine 1.0.1",
+    "Messenger 1.0.0",
+    "Producción, Firestore, deploy"
+  ],
+  "changelog": [
+    { "version": "1.0.0", "fecha": "2026-06-09", "nota": "Plan maestro inicial Shared/Core — análisis y documentación" }
+  ]
+}

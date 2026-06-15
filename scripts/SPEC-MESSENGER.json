@@ -1,0 +1,702 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "$id": "https://carihub.app/schemas/spec-messenger.json",
+  "tipo": "SPEC_TECNICA",
+  "nombre": "CariHub Messenger — Especificación técnica",
+  "versionSpec": "1.0.0",
+  "fecha": "2026-06-09",
+  "fechaActualizacion": "2026-06-09",
+  "changelog": [
+    { "id": "OB-MSG-1", "nota": "Estados globales normalizados; aceptar→activa; archivada solo meta" },
+    { "id": "OB-MSG-2", "nota": "conversaciones_meta canónica para preferencias locales" },
+    { "id": "OB-MSG-3", "nota": "conversacion_iniciar bifurcado directa|solicitud + fanOut" },
+    { "id": "OB-MSG-4", "nota": "fanOut completo 21 acciones registry propuesta" },
+    { "id": "OB-MSG-5", "nota": "admin_automatizaciones_suspendir en catálogo VE" },
+    { "id": "OB-MSG-6", "nota": "algoritmo conversacionId + política duplicados" },
+    { "id": "OB-MSG-7", "nota": "ANEXO integración Dashboards sin modificar acta" },
+    { "id": "OB-MSG-8", "nota": "telefonoVerificado gate + spamScore canónico + VE MINOR" }
+  ],
+  "estado": "CONGELADO",
+  "implementacionAutorizada": false,
+  "alcanceOrigen": [
+    "scripts/SPEC-MESSENGER-ALCANCE.json v0.1.0",
+    "scripts/ANALISIS-MESSENGER-IA-SEGURIDAD.json v0.1.0"
+  ],
+  "dependenciasCongeladas": {
+    "catalogo": "catalogo-2026-06-10@1.0.0",
+    "cuentas": "cuentas-2026-06-10@1.0.0",
+    "seguridad": "seguridad-2026-06-10@1.0.0",
+    "fieldEngine": "fieldengine-2026-06-10@1.0.1",
+    "dashboards": "dashboards-2026-06-10@1.0.0",
+    "validationEngine": "validationengine-2026-06-10@1.0.0"
+  },
+  "dependenciasFuturas": {
+    "interacciones": {
+      "archivo": "scripts/OBSERVACION-ARQUITECTONICA-INTERACCIONES.json",
+      "version": "1.2.1",
+      "fase": "FASE_7_POST_MESSENGER",
+      "nota": "Messenger base; conversaciones desde estados no expiran con estado"
+    }
+  },
+  "proposito": "Especificar CariHub Messenger como módulo/aplicación independiente: conversaciones internas, seguridad, moderación, automatizaciones, control admin granular e integración con capas congeladas vía ValidationEngine.",
+  "principios": [
+    "Messenger es app separada — no embebida en index/resultados/perfil",
+    "Toda persistencia pasa validateAction — ValidationEngine 1.0.0",
+    "Visitante sin cuenta no envía mensajes",
+    "Email y teléfono verificados obligatorios para enviar",
+    "No exponer teléfono privado en UI Messenger",
+    "IA y automatizaciones nunca envían sin autorización explícita del dueño",
+    "Sanciones finales: reglas sistema + moderación admin",
+    "No modificar capas congeladas — cambios VE solo vía acta MINOR documentada"
+  ],
+  "arquitectura": {
+    "modelo": "aplicacion_modulo_independiente",
+    "plataforma": "CariHub",
+    "componente": "CariHub Messenger",
+    "puntoEntrada": "Botón «Mensaje interno» en perfil público → /messenger",
+    "separacion": "Firestore colecciones messenger propias; reglas seguridad propias (diseño); panel admin módulo mensajería",
+    "moduloCentral": true,
+    "nivelPlataforma": ["usuarios", "perfiles", "banners", "administracion", "pagos", "messenger"],
+    "diagrama": "perfil.html → validateAction(conversacion_iniciar|mensaje_enviar) → Messenger UI → EventBus → notificaciones/historial"
+  },
+  "rutas": {
+    "base": "/messenger",
+    "rutas": [
+      { "path": "/messenger", "vista": "bandeja_conversaciones", "auth": "requerida" },
+      { "path": "/messenger/chat/:conversacionId", "vista": "chat", "auth": "requerida" },
+      { "path": "/messenger/configuracion", "vista": "config_usuario_automatizaciones", "auth": "requerida" },
+      { "path": "/messenger/reportes", "vista": "mis_reportes", "auth": "requerida" },
+      { "path": "/messenger/solicitudes", "vista": "solicitudes_pendientes", "auth": "requerida" }
+    ],
+    "admin": [
+      { "path": "/admin/mensajeria", "vista": "cola_reportes_y_controles", "rol": "admin" },
+      { "path": "/admin/mensajeria/conversacion/:id", "vista": "revision_denunciada", "rol": "admin" },
+      { "path": "/admin/mensajeria/controles", "vista": "control_granular_global", "rol": "admin" }
+    ],
+    "legacyHtml": ["messenger.html", "chat.html"]
+  },
+  "requisitosAcceso": {
+    "enviarMensaje": {
+      "cuentaRegistrada": true,
+      "sesionActiva": true,
+      "emailVerificado": true,
+      "telefonoVerificado": true,
+      "estadoCuenta": "activa",
+      "estadoMensajeriaPermiteEnvio": true,
+      "estadoSeguridadPermite": true,
+      "nivelConfianzaMinimo": 40,
+      "messengerHabilitadoAmbito": true,
+      "sinBloqueoBidireccional": true
+    },
+    "recibirMensaje": {
+      "cuentaRegistrada": true,
+      "perfilRecibeMensajes": true,
+      "estadoMensajeriaPermiteRecepcion": true,
+      "messengerHabilitadoAmbito": true
+    },
+    "visitante": { "enviar": false, "leer": false }
+  },
+  "modeloDatos": {
+    "colecciones": {
+      "conversaciones": "conversaciones/{conversacionId}",
+      "mensajes": "conversaciones/{conversacionId}/mensajes/{mensajeId}",
+      "conversacionesMeta": "usuarios/{usuarioId}/conversaciones_meta/{conversacionId}",
+      "bloqueos": "usuarios/{usuarioId}/bloqueos/{usuarioBloqueadoId}",
+      "reportes": "reportes_mensajeria/{reporteId}",
+      "automatizaciones": "usuarios/{usuarioId}/messenger_automatizaciones/{reglaId}",
+      "plantillas": "usuarios/{usuarioId}/messenger_plantillas/{plantillaId}",
+      "controlesAdmin": "config_messenger/controles_admin",
+      "senalesRiesgo": "senales_mensajeria/{senalId}",
+      "operadoresEmpresa": "usuarios/{usuarioId}/messenger_operadores/{operadorId}"
+    },
+    "conversacionId": {
+      "algoritmo": "sha256_base64url(participanteMenorId|participanteMayorId|perfilContextoId|v1)",
+      "participanteMenorId": "min(usuarioIdA, usuarioIdB) lexicográfico",
+      "participanteMayorId": "max(usuarioIdA, usuarioIdB)",
+      "politicaDuplicados": {
+        "regla": "Una conversación canónica por trío (usuarioA, usuarioB, perfilContextoId)",
+        "mismoParDistintoPerfil": "conversacionId distinto — bandejas separadas por contexto perfil",
+        "mismoParMismoPerfil": "reutilizar conversacionId existente si estado ≠ cerrada_admin",
+        "reaperturaTrasRechazo": "nueva solicitud reutiliza mismo conversacionId si solicitud_rechazada; cooldown 24h AM recomendado"
+      },
+      "nota": "OB-MSG-6 — ids determinísticos evitan duplicados Firestore"
+    },
+    "conversacionesMeta": {
+      "ruta": "usuarios/{usuarioId}/conversaciones_meta/{conversacionId}",
+      "fuenteCanonicaPreferenciasLocales": true,
+      "campos": {
+        "conversacionId": "string",
+        "archivada": "boolean",
+        "silenciada": "boolean",
+        "fijada": "boolean",
+        "oculta": "boolean",
+        "ultimaLecturaAt": "timestamp",
+        "mensajesNoLeidos": "number",
+        "ordenFijada": "number|null — 1..5"
+      },
+      "nota": "OB-MSG-2 — única fuente para archivar|silenciar|fijar|ocultar; conversación global no almacena estas flags"
+    },
+    "conversacion": {
+      "campos": {
+        "conversacionId": "string — ver algoritmo conversacionId",
+        "participante1Id": "usuarioId — menor lexicográfico",
+        "participante2Id": "usuarioId — mayor lexicográfico",
+        "participantesSnapshot": "ParticipanteSnapshot[] — solo alias/foto/tipo; sin configLocal",
+        "perfilContextoId": "perfilId — perfil desde el que se inició",
+        "sectorId": "string|null",
+        "subcategoriaId": "string|null",
+        "fechaCreacion": "timestamp",
+        "ultimoMensaje": "string preview sanitizado",
+        "fechaUltimoMensaje": "timestamp",
+        "estadoConversacion": "EstadoConversacion",
+        "solicitudPendiente": "boolean",
+        "solicitudDeUsuarioId": "usuarioId|null",
+        "bloqueada": "boolean",
+        "bloqueadaPor": "usuarioId|admin|null",
+        "reportada": "boolean",
+        "enInvestigacion": "boolean",
+        "investigacionDesde": "timestamp|null",
+        "cerradaAdmin": "boolean",
+        "motivoCierreAdmin": "string|null",
+        "etiquetas": "string[]",
+        "metadataInteracciones": "object|null — liveId, estadoId futuro Fase 7"
+      }
+    },
+    "participanteSnapshot": {
+      "usuarioId": "string",
+      "perfilId": "string|null",
+      "aliasVisible": "string",
+      "fotoPerfilUrl": "string|null",
+      "tipoCuenta": "string",
+      "rolesCuenta": "string[]",
+      "nota": "Denormalizado; refresh en lectura bandeja; preferencias en conversaciones_meta"
+    },
+    "mensaje": {
+      "campos": {
+        "mensajeId": "string",
+        "conversacionId": "string",
+        "emisorId": "usuarioId",
+        "receptorId": "usuarioId",
+        "texto": "string",
+        "textoSanitizado": "string",
+        "mensajeOriginal": "string|null — traducción",
+        "mensajeTraducido": "string|null",
+        "idiomaOrigen": "string|null",
+        "idiomaDestino": "string|null",
+        "createdAt": "timestamp",
+        "estadoEntrega": "enviado|entregado|visto",
+        "tipo": "texto|imagen|audio|archivo|ubicacion|sistema|automatizado|asistente_ia",
+        "adjunto": "AdjuntoRef|null",
+        "origenMensaje": "humano|automatizacion|asistente_ia",
+        "reglaAutomatizacionId": "string|null",
+        "asistenteId": "string|null",
+        "marcadoAutomatizado": "boolean — obligatorio si origen ≠ humano",
+        "senalRiesgoId": "string|null",
+        "eliminadoParaTodos": "boolean",
+        "eliminadoAt": "timestamp|null",
+        "eliminadoPor": "usuarioId|null",
+        "preservadoInvestigacion": "boolean",
+        "editadoAt": "timestamp|null"
+      }
+    },
+    "adjunto": {
+      "fases": {
+        "fase1": ["texto"],
+        "fase2": ["imagen"],
+        "fase3": ["audio"],
+        "fase4": ["archivo", "ubicacion"]
+      },
+      "AdjuntoRef": {
+        "storagePath": "string",
+        "mimeType": "string",
+        "sizeBytes": "number",
+        "duracionSegundos": "number|null",
+        "thumbnailPath": "string|null",
+        "estadoAdjunto": "activo|eliminado_logico|retenido_investigacion",
+        "eliminadoAt": "timestamp|null"
+      }
+    }
+  },
+  "estadosConversacion": {
+    "alcance": "solo documento conversaciones/{id} — no incluye preferencias locales",
+    "valores": [
+      "activa",
+      "solicitud_enviada",
+      "solicitud_rechazada",
+      "bloqueada",
+      "reportada",
+      "en_investigacion",
+      "cerrada_admin"
+    ],
+    "excluidosEstadoGlobal": {
+      "solicitud_aceptada": "evento transitorio — resultado estable es activa (OB-MSG-1)",
+      "archivada": "solo conversaciones_meta.archivada por usuario (OB-MSG-1)"
+    },
+    "transiciones": {
+      "solicitud_enviada": ["activa", "solicitud_rechazada", "bloqueada"],
+      "activa": ["bloqueada", "reportada", "en_investigacion", "cerrada_admin"],
+      "solicitud_rechazada": ["solicitud_enviada", "bloqueada"],
+      "reportada": ["en_investigacion", "cerrada_admin", "activa"],
+      "en_investigacion": ["activa", "cerrada_admin"],
+      "bloqueada": ["activa"],
+      "cerrada_admin": []
+    },
+    "aceptarSolicitud": "solicitud_conversacion_aceptar: solicitud_enviada → activa (no existe estado solicitud_aceptada persistente)"
+  },
+  "estadosMensaje": {
+    "entrega": ["enviado", "entregado", "visto"],
+    "vida": ["activo", "eliminado_para_todos", "eliminado_local", "retenido_investigacion", "oculto_moderacion"],
+    "origen": ["humano", "automatizacion", "asistente_ia", "sistema"]
+  },
+  "conversacionIniciar": {
+    "accionVE": "conversacion_iniciar",
+    "parametro": "modoInicio",
+    "bifurcacion": {
+      "directa": {
+        "cuando": "subcategoria sin solicitud obligatoria Y perfil.soloConSolicitud=false Y owner no exige solicitud",
+        "estadoResultante": "activa",
+        "solicitudPendiente": false,
+        "fanOutRegistry": "conversacion_iniciar_directa",
+        "notificacion": "opcional mensajes.conversacion_iniciada — receptor puede no estar suscrito"
+      },
+      "solicitud": {
+        "cuando": "formularioId adultos | perfil.soloConSolicitud=true | política subcategoría",
+        "estadoResultante": "solicitud_enviada",
+        "solicitudPendiente": true,
+        "fanOutRegistry": "conversacion_iniciar_solicitud",
+        "notificacion": "mensajes.solicitud_conversacion obligatoria"
+      }
+    },
+    "accionesVE": ["conversacion_iniciar", "solicitud_conversacion_aceptar", "solicitud_conversacion_rechazar"]
+  },
+  "solicitudConversacion": {
+    "obligatoria": {
+      "subcategorias": ["adultos y equivalentes alto contacto"],
+      "regla": "formularioId adultos o flag perfil.soloConSolicitud"
+    },
+    "flujo": {
+      "iniciar": "conversacion_iniciar modoInicio=solicitud → solicitud_enviada",
+      "iniciarDirecto": "conversacion_iniciar modoInicio=directa → activa",
+      "aceptar": "solicitud_conversacion_aceptar → activa",
+      "rechazar": "solicitud_conversacion_rechazar → solicitud_rechazada"
+    }
+  },
+  "accionesUsuario": {
+    "archivar": { "coleccion": "conversaciones_meta", "accionVE": "conversacion_archivar", "efecto": "archivada=true; oculta bandeja principal", "enInvestigacion": "permitido — admin conserva acceso" },
+    "silenciar": { "coleccion": "conversaciones_meta", "accionVE": "conversacion_silenciar", "efecto": "silenciada=true; sin notificaciones" },
+    "fijar": { "coleccion": "conversaciones_meta", "accionVE": "conversacion_fijar", "max": 5, "campo": "ordenFijada" },
+    "ocultarLocal": { "coleccion": "conversaciones_meta", "accionVE": "conversacion_ocultar", "efecto": "oculta=true", "nota": "no borra mensajes servidor" }
+  },
+  "politicasEliminacionCierre": {
+    "eliminarParaTodos": {
+      "habilitado": true,
+      "ventanaMinutos": 15,
+      "soloEmisor": true,
+      "condiciones": [
+        "mensaje no en investigación",
+        "conversacion no en_investigacion",
+        "dentro ventana desde createdAt",
+        "tipo texto únicamente en fase1 MVP"
+      ],
+      "fueraVentana": "solo eliminación local (ocultar en UI propia)",
+      "accionVE": "mensaje_eliminar_para_todos"
+    },
+    "impactoReportesAuditoria": {
+      "mensajeReportado": "eliminación para todos bloqueada si reporte pendiente o en_investigacion",
+      "auditoria": "registro en historial_mensajes mensaje_eliminado_para_todos con preview hash — no borrar logs",
+      "moderacion": "admin conserva copia retenida_investigacion en Storage y documento mensaje con flag preservadoInvestigacion",
+      "reportes": "reporte mantiene referencia mensajeId aunque UI muestre [mensaje eliminado]"
+    },
+    "adjuntosEliminados": {
+      "dentroVentana": "storage delete lógico → estadoAdjunto eliminado_logico",
+      "enInvestigacion": "estadoAdjunto retenido_investigacion — no delete físico hasta cierre admin",
+      "fueraInvestigacion": "purge programado según retención diseño (90d post eliminación)"
+    },
+    "conversacionInvestigacion": {
+      "estado": "en_investigacion",
+      "efectos": [
+        "no eliminar para todos",
+        "archivar local permitido — admin siempre ve conversación completa",
+        "envío puede restringirse a solo_lectura emisor",
+        "admin acceso lectura completa",
+        "preservar mensajes y adjuntos"
+      ],
+      "cierre": "admin resuelve → activa | cerrada_admin"
+    },
+    "cierreAdmin": {
+      "accionVE": "admin_conversacion_cerrar",
+      "efecto": "cerrada_admin — sin nuevos mensajes; lectura según política",
+      "auditoria": "obligatoria adminId motivo fecha"
+    }
+  },
+  "permisosTipoCuenta": {
+    "visitante": { "enviar": false, "recibir": false },
+    "adulto": { "enviar": true, "recibir": true, "solicitudConversacion": true, "bloquear": true, "limitarQuienEscribe": true },
+    "independiente": { "enviar": true, "recibir": true, "bloquear": true },
+    "profesionista": { "enviar": true, "recibir": true, "cotizaciones": true },
+    "empresa": { "enviar": true, "recibir": true, "multioperador": true },
+    "anunciante": { "enviar": true, "recibir": true, "rolComercial": true },
+    "admin": { "moderar": true, "controlesGlobales": true }
+  },
+  "permisosRolesCuenta": {
+    "nota": "rolesCuenta[] modula capacidades además de tipoCuentaPrincipal",
+    "anunciante": "puede recibir consultas banners vía perfilContextoId banner",
+    "admin": "acceso módulo admin mensajería",
+    "operador_empresa": "envía en nombre empresa con auditoría operadorId"
+  },
+  "perfilesPublicos": {
+    "botonMensajeInterno": true,
+    "condicionesMostrar": [
+      "perfil tienePerfilPublico",
+      "owner estadoMensajeria permite recepción",
+      "messenger habilitado en ámbito subcategoria/geo",
+      "visitante autenticado para ver botón activo"
+    ],
+    "noMostrar": ["telefono", "email privado", "whatsapp externo como sustituto"],
+    "perfilOwnerConfig": {
+      "permitirMensajes": "boolean default true",
+      "soloConSolicitud": "boolean — adultos default true",
+      "listaBlancaUsuarios": "usuarioId[] opcional futuro"
+    }
+  },
+  "bloqueos": {
+    "ruta": "usuarios/{usuarioId}/bloqueos/{usuarioBloqueadoId}",
+    "efecto": "sin mensajes bidireccionales; conversación estado bloqueada",
+    "accionVE": "bloqueo_usuario",
+    "desbloqueo": "bloqueo_usuario_remover"
+  },
+  "reportes": {
+    "tipos": ["reportar_usuario", "reportar_conversacion", "reportar_mensaje"],
+    "coleccion": "reportes_mensajeria/{reporteId}",
+    "campos": ["reportanteId", "reportadoId", "conversacionId", "mensajeId", "motivo", "detalle", "estado", "senalIAId", "adminAsignadoId", "createdAt", "resueltoAt"],
+    "estados": ["pendiente", "en_revision", "resuelto", "rechazado"],
+    "umbralRevisionAdmin": 3,
+    "accionesVE": ["reportar_conversacion", "reportar_mensaje", "reportar_usuario_mensajeria"],
+    "efecto": "incrementa reportesCount spamScore riesgoScore según validez"
+  },
+  "moderacionAdmin": {
+    "funciones": [
+      "ver_reportes",
+      "asignar_reporte",
+      "revisar_conversacion_denunciada",
+      "marcar_en_investigacion",
+      "suspender_mensajeria_usuario",
+      "cerrar_conversacion",
+      "ver_historial_acciones",
+      "cola_moderacion_ia",
+      "suspender_automatizaciones_usuario"
+    ],
+    "accesoConversacionDenunciada": "lectura completa mensajes y adjuntos retenidos",
+    "reauthAccionesCriticas": true
+  },
+  "antiSpam": {
+    "spamScore": {
+      "campoCanonico": "usuarios.mensajeria.spamScore",
+      "notaOB_MSG_8": "Único campo de escritura; Seguridad MVP mensajeriaFutura y Cuentas mensajeria referencian este path; no duplicar en usuarios.seguridad.spamScore para mensajería",
+      "rango": "0-100",
+      "umbrales": { "restringir": 60, "suspender": 80 },
+      "efectoUmbral": "post-detección sistema actualiza estadoMensajeria vía validateAction admin o regla automática — no en mismo request de mensaje rechazado",
+      "ref": "config-seguridad-mvp-schema.json → mensajeriaFutura.spamScore"
+    },
+    "limites": {
+      "usuarioNuevo": { "conversacionesNuevasDia": 5, "mensajesHora": 20, "condicion": "nivelConfianza < 40" },
+      "estandar": { "mensajesHora": 60, "burstMinuto": 10 },
+      "ref": "config-seguridad-mvp-schema.json → rateLimits.mensaje_futuro"
+    },
+    "detecciones": "scripts/ANALISIS-MESSENGER-IA-SEGURIDAD.json → 8 detecciones"
+  },
+  "integracionValidationEngine": {
+    "patron": "Toda acción Messenger invoca validateAction antes de persistencia",
+    "accionesCatalogo": [
+      "mensaje_enviar",
+      "conversacion_iniciar",
+      "solicitud_conversacion_aceptar",
+      "solicitud_conversacion_rechazar",
+      "bloqueo_usuario",
+      "bloqueo_usuario_remover",
+      "reportar_conversacion",
+      "reportar_mensaje",
+      "reportar_usuario_mensajeria",
+      "mensaje_eliminar_para_todos",
+      "conversacion_archivar",
+      "conversacion_silenciar",
+      "conversacion_fijar",
+      "conversacion_ocultar",
+      "automatizacion_enviar",
+      "automatizacion_activar",
+      "automatizacion_desactivar",
+      "admin_automatizaciones_suspendir",
+      "admin_messenger_suspender",
+      "admin_messenger_suspension_levantar",
+      "admin_messenger_deshabilitar_ambito",
+      "admin_messenger_habilitar_ambito",
+      "admin_conversacion_cerrar"
+    ],
+    "gatesMessengerValidateStates": {
+      "nota": "OB-MSG-8 — extensión documentada paso 6 VE; implementación vía acta MINOR VE 1.1.0",
+      "camposAdicionales": ["telefonoVerificado", "messengerHabilitadoAmbito", "spamScoreUmbral"],
+      "telefonoVerificado": {
+        "campo": "usuarios.seguridad.telefonoVerificado",
+        "requeridoEnviar": true,
+        "error": "TELEFONO_NO_VERIFICADO"
+      },
+      "estadoMensajeria_restringida": "solo mensaje_enviar en conversaciones existentes activa|reportada — no conversacion_iniciar modo directa"
+    },
+    "pipelineSeguridadMensaje": "scripts/ANALISIS-MESSENGER-IA-SEGURIDAD.json → pipelineAnalisisMensaje",
+    "fanOutPlanPropuesta": "scripts/registry-messenger-fanout-propuesta.json",
+    "cambioRequeridoVECongelado": "scripts/PROPUESTA-ACTA-MINOR-VALIDATIONENGINE-MESSENGER.json"
+  },
+  "integracionDashboards": {
+    "anexo": "scripts/ANEXO-MESSENGER-INTEGRACION-DASHBOARDS.json",
+    "nota": "OB-MSG-7 — extensión documental sin modificar ACTA-CONGELAMIENTO-DASHBOARDS",
+    "notificacionesDominio": "mensajes",
+    "tiposNotificacion": [
+      "mensaje_nuevo",
+      "mensaje_leido",
+      "mensaje_respondido",
+      "solicitud_conversacion",
+      "solicitud_aceptada",
+      "solicitud_rechazada",
+      "mensajeria_restringida",
+      "reporte_resuelto"
+    ],
+    "notificacionesAdmin": [
+      "mensajeria.reporte_recibido",
+      "mensajeria.alerta_seguridad",
+      "mensajeria.cola_moderacion",
+      "mensajeria.control_admin_aplicado"
+    ],
+    "historialDominio": "historial_mensajes",
+    "shellModulo": "mensajes en dashboard usuario — enlace a /messenger",
+    "adminModulo": "Admin → Mensajería"
+  },
+  "integracionSeguridadMVP": {
+    "turnstile": "acciones críticas: conversacion_iniciar alto volumen, reportar repetido",
+    "rateLimits": "mensaje_futuro",
+    "estadoSeguridad": "gates envío recepción",
+    "estadoMensajeria": "gates envío recepción",
+    "nivelConfianza": "límites dinámicos",
+    "logsSeguridad": "spam phishing bloqueo automatizacion_abuso"
+  },
+  "integracionInteraccionesFutura": {
+    "version": "1.2.1",
+    "conversacionesDesdeEstado": {
+      "expiranConEstado": false,
+      "metadataObligatoria": ["estadoId", "perfilId", "bannerId", "fechaOrigen"],
+      "ctas": ["enviar_mensaje", "contactar", "preguntar_disponibilidad"]
+    },
+    "liveTransmisiones": "metadata liveId en conversación — Fase 7"
+  },
+  "iaSeguridadMessenger": {
+    "referencia": "scripts/ANALISIS-MESSENGER-IA-SEGURIDAD.json",
+    "asistentes": [
+      "ia_seguridad_messenger",
+      "ia_moderacion_messenger",
+      "ia_traduccion_messenger",
+      "ia_asistente_conversacional"
+    ],
+    "reglas": "R-MSG-IA-01 a R-MSG-IA-08 en análisis"
+  },
+  "automatizacionesMensajeria": {
+    "estado": "DISENO_INCLUIDO_NO_RUNTIME",
+    "activacion": "solo dueño cuenta — opt-in explícito por regla",
+    "tipos": {
+      "respuesta_bienvenida": { "trigger": "primera_conversacion_nueva", "fase": 1 },
+      "respuesta_rapida": { "trigger": "atajo_usuario", "fase": 1 },
+      "fuera_horario": { "trigger": "mensaje_recibido_fuera_horario", "fase": 1 },
+      "faq": { "trigger": "keyword_match | ia_intencion", "fase": 2 },
+      "respuestas_guardadas": { "trigger": "manual_seleccion", "fase": 1 },
+      "etiquetas_conversacion": { "trigger": "manual | ia_sugerir", "fase": 2 },
+      "programacion_mensaje": { "trigger": "cron", "fase": 3 },
+      "recordatorio": { "trigger": "cron | evento", "fase": 3 },
+      "seguimiento_automatico": { "trigger": "sin_respuesta_N_horas", "fase": 3, "limite": "max 1 por conversación por semana" },
+      "mensaje_ausencia": { "trigger": "estado_ausente", "fase": 1 },
+      "mensaje_disponibilidad": { "trigger": "estado_en_linea", "fase": 2 },
+      "plantilla_tipo_perfil": { "trigger": "por tipoCuenta", "fase": 2 },
+      "plantilla_negocio_profesionista": { "trigger": "por formularioId", "fase": 2 }
+    },
+    "reglasEvaluacion": [
+      "horario — timezone usuario owner",
+      "estado perfil publicado/pausado",
+      "estadoMensajeria habilitada",
+      "contrato activo vigente — empresa/profesionista destacado",
+      "verificación aprobada — opcional por plantilla",
+      "sin bloqueo ni reporte pendiente en conversación",
+      "rate limits y anti-spam aplican a automatizaciones",
+      "max automatizaciones/hora por cuenta — 10 default"
+    ],
+    "marcadoMensaje": {
+      "origenMensaje": "automatizacion",
+      "marcadoAutomatizado": true,
+      "reglaAutomatizacionId": "obligatorio",
+      "visibleUI": "etiqueta «Automatizado» o «Enviado por asistente»"
+    },
+    "iaAsistenteAutomatizacion": {
+      "sugerir_respuesta": "borrador — usuario confirma envío",
+      "mejorar_redaccion": "borrador",
+      "traducir": "ia_traduccion_messenger",
+      "resumir_conversacion": "solo owner — no persiste como mensaje",
+      "detectar_intencion": "señal para reglas FAQ",
+      "clasificar_conversacion": "sugerir etiquetas",
+      "sugerir_etiquetas": "ia_recomendaciones",
+      "sugerir_seguimiento": "notif owner — no auto-envío"
+    },
+    "reglasSeguridadAutomatizacion": [
+      "Activadas solo por dueño",
+      "IA no envía sin autorización explícita",
+      "Desactivables individualmente y globalmente",
+      "Respetan bloqueos reportes estadoMensajeria",
+      "Respetan Seguridad MVP rate limits anti-spam",
+      "Todo mensaje automático marcado automatizado",
+      "Historial reglaAutomatizacionId o asistenteId",
+      "Admin puede suspender automatizaciones por abuso",
+      "Prohibido envío masivo mismo contenido N destinos — anti DET-MSG-02"
+    ],
+    "accionesVE": ["automatizacion_activar", "automatizacion_desactivar", "automatizacion_enviar", "admin_automatizaciones_suspendir"],
+    "alineacionCatalogoVE": "admin_automatizaciones_suspendir incluido en integracionValidationEngine.accionesCatalogo (OB-MSG-5)"
+  },
+  "controlAdministrativo": {
+    "objetivo": "Control granular sin desactivar Messenger completo",
+    "ambitos": [
+      { "id": "global", "descripcion": "Todo CariHub" },
+      { "id": "tipo_cuenta", "valores": ["adulto", "independiente", "profesionista", "empresa", "visitante"] },
+      { "id": "categoria", "ref": "sectorId catálogo" },
+      { "id": "subcategoria", "ref": "subcategoriaId catálogo" },
+      { "id": "pais", "ref": "geo.pais" },
+      { "id": "estado_provincia", "ref": "geo.estado" },
+      { "id": "ciudad", "ref": "geo.ciudad" },
+      { "id": "perfil", "ref": "perfilId" },
+      { "id": "usuario", "ref": "usuarioId" },
+      { "id": "empresa", "ref": "usuarioId tipo empresa" },
+      { "id": "anunciante", "ref": "anuncianteId" }
+    ],
+    "modos": {
+      "habilitado": "normal según cuenta",
+      "deshabilitado": "sin messenger en ámbito",
+      "suspension_temporal": { "hasta": "timestamp", "motivo": "string" },
+      "suspension_permanente": { "motivo": "string" },
+      "solo_lectura": "recibir y leer; no enviar",
+      "solo_recepcion": "recibir; envío bloqueado",
+      "solo_envio": "enviar; recepción bloqueada — raro admin",
+      "restringido_por_estadoSeguridad": "ref Seguridad MVP",
+      "restringido_por_estadoMensajeria": "ref Cuentas",
+      "restringido_por_reportes": "si reportesCount > umbral",
+      "restringido_por_spamScore": "si ≥ 60",
+      "restringido_por_nivelConfianza": "si < 40"
+    },
+    "precedencia": "más específico gana: usuario > perfil > subcategoria > ciudad > estado > pais > tipo_cuenta > global",
+    "documento": "config_messenger/controles_admin/{controlId}",
+    "camposControl": {
+      "ambito": "object",
+      "modo": "string",
+      "motivo": "string",
+      "adminId": "string",
+      "createdAt": "timestamp",
+      "vigenteHasta": "timestamp|null",
+      "activo": "boolean"
+    },
+    "accionesVE": [
+      "admin_messenger_deshabilitar_ambito",
+      "admin_messenger_habilitar_ambito",
+      "admin_messenger_suspender",
+      "admin_messenger_suspension_levantar"
+    ],
+    "auditoriaObligatoria": {
+      "historial": true,
+      "eventoCanonico": true,
+      "logsAdmin": true,
+      "campos": ["adminId", "motivo", "ambito", "modo", "fecha", "conversacionId|null", "usuarioId|null"]
+    }
+  },
+  "multiusuarioEmpresa": {
+    "fase": "diseño base fase 1; runtime operadores fase 2",
+    "modelo": {
+      "empresaUsuarioId": "cuenta principal",
+      "operadores": "usuarios/{empresaId}/messenger_operadores/{operadorId}",
+      "camposOperador": ["operadorUsuarioId", "nombre", "permisos", "activo", "createdAt"],
+      "permisosOperador": ["leer", "responder", "etiquetar", "archivar", "no_admin"]
+    },
+    "envio": {
+      "emisorId": "empresaUsuarioId",
+      "operadorId": "quien escribió — auditoría",
+      "accionVE": "mensaje_enviar con contexto operador"
+    }
+  },
+  "eventBus": {
+    "productor": "ValidationEngine.emitEventoCanonico",
+    "contrato": "fanOutPlan[] — ValidationEngine 1.0.0",
+    "registryPropuesta": "scripts/registry-messenger-fanout-propuesta.json",
+    "eventoCanonicoMinimo": ["eventoId", "usuarioId", "dominio", "tipo", "entidadTipo", "entidadId", "actorTipo", "metadata", "createdAt"]
+  },
+  "errores": {
+    "MESSENGER_DESHABILITADO_AMBITO": { "http": 403, "cuando": "control admin ámbito" },
+    "EMAIL_NO_VERIFICADO": { "http": 403 },
+    "TELEFONO_NO_VERIFICADO": { "http": 403 },
+    "ESTADO_MENSAJERIA_DENEGADO": { "http": 403 },
+    "ESTADO_SEGURIDAD_DENEGADO": { "http": 403 },
+    "BLOQUEO_ACTIVO": { "http": 403 },
+    "SOLICITUD_PENDIENTE": { "http": 403, "cuando": "mensaje antes de aceptar" },
+    "RATE_LIMIT_EXCEDIDO": { "http": 429 },
+    "SPAM_SCORE_UMBRAL": { "http": 403 },
+    "MENSAJE_ELIMINAR_VENTANA_EXPIRADA": { "http": 400 },
+    "MENSAJE_REPORTADO_NO_ELIMINABLE": { "http": 403, "cuando": "reporte pendiente o en_investigacion" },
+    "CONVERSACION_EN_INVESTIGACION": { "http": 403 },
+    "AUTOMATIZACION_NO_AUTORIZADA": { "http": 403 },
+    "AUTOMATIZACION_MASIVA_PROHIBIDA": { "http": 403 },
+    "ADJUNTO_FASE_NO_DISPONIBLE": { "http": 400 }
+  },
+  "riesgos": [
+    { "id": "R-MSG-01", "nivel": "alto", "descripcion": "Gap producción usuarios monolito vs perfiles", "mitigacion": "acta migración pre-runtime" },
+    { "id": "R-MSG-02", "nivel": "alto", "descripcion": "Registry VE placeholders sin fanOutPlan aplicado", "mitigacion": "PROPUESTA acta MINOR VE" },
+    { "id": "R-MSG-03", "nivel": "alto", "descripcion": "Eliminar para todos vs evidencia reportes", "mitigacion": "políticas eliminación + investigación" },
+    { "id": "R-MSG-04", "nivel": "medio", "descripcion": "Automatizaciones usadas como spam", "mitigacion": "límites + admin suspend + DET-MSG-02" },
+    { "id": "R-MSG-05", "nivel": "medio", "descripcion": "Controles admin ámbito conflicto precedencia", "mitigacion": "matriz precedencia documentada" },
+    { "id": "R-MSG-06", "nivel": "medio", "descripcion": "IA asistente suplanta usuario", "mitigacion": "borrador only R-MSG-IA-01" },
+    { "id": "R-MSG-07", "nivel": "bajo", "descripcion": "Multioperador empresa auditoría incompleta", "mitigacion": "operadorId obligatorio en mensaje" }
+  ],
+  "dependencias": {
+    "congeladas": ["catalogo", "cuentas", "seguridad", "fieldEngine", "dashboards", "validationEngine"],
+    "pendientesPreRuntime": ["acta migración usuarios→perfiles", "acta MINOR VE messenger fanOut"],
+    "posteriores": ["interacciones Fase 7", "RenderEngine", "runtime LLM"]
+  },
+  "fueraDeAlcance": [
+    "Implementación runtime / Firestore rules / deploy",
+    "Modificación capas congeladas",
+    "Stories comentarios reacciones live — Interacciones v1.2.1",
+    "Videollamadas",
+    "Push email WhatsApp — diseño preparado notificaciones dominio mensajes",
+    "Magic bytes adjuntos — post-MVP",
+    "Grupos N participantes — futuro"
+  ],
+  "entregables": {
+    "specMarkdown": "scripts/SPEC-MESSENGER.md",
+    "specJson": "scripts/SPEC-MESSENGER.json",
+    "fixtures": "scripts/fixtures-messenger-golden.json",
+    "auditoria": "scripts/AUDITORIA-SPEC-MESSENGER.json",
+    "validador": "scripts/validar-spec-messenger.mjs",
+    "fanOutPropuesta": "scripts/registry-messenger-fanout-propuesta.json",
+    "propuestaVEMinor": "scripts/PROPUESTA-ACTA-MINOR-VALIDATIONENGINE-MESSENGER.json",
+    "actaPendiente": "scripts/ACTA-CONGELAMIENTO-MESSENGER.json"
+  },
+  "ajustesObligatoriosCerrados": {
+    "OB-MSG-1": "CERRADO",
+    "OB-MSG-2": "CERRADO",
+    "OB-MSG-3": "CERRADO",
+    "OB-MSG-4": "CERRADO",
+    "OB-MSG-5": "CERRADO",
+    "OB-MSG-6": "CERRADO",
+    "OB-MSG-7": "CERRADO",
+    "OB-MSG-8": "CERRADO"
+  },
+  "veredictoCongelamiento": {
+    "recomendacion": "CONGELADO",
+    "fechaCongelamiento": "2026-06-09",
+    "acta": "scripts/ACTA-CONGELAMIENTO-MESSENGER.json",
+    "auditoriaFinal": "scripts/AUDITORIA-FINAL-SPEC-MESSENGER.json — revalidar post OB-MSG",
+    "obMSG": "CERRADOS",
+    "puedeCongelarseSinCambios": false,
+    "puedeCongelarseTrasOB_MSG": true,
+    "aprobarAhora": false,
+    "acta": "scripts/ACTA-CONGELAMIENTO-MESSENGER.json — PENDIENTE_APROBACION_PRODUCT_OWNER"
+  }
+}

@@ -1,0 +1,186 @@
+{
+  "version": "1.0.1",
+  "catalogoVersion": "catalogo-2026-06-10",
+  "specVersion": "1.0.1",
+  "descripcion": "Golden fixtures diseño FieldEngine v1.0.1 — salidas esperadas resumidas (no runtime). AM1: F10 guardar_borrador en restringido. AM2: F08 registro inicial, F11 upgrade.",
+  "fixtures": [
+    {
+      "id": "F01_escort_adultos",
+      "entrada": {
+        "subcategoriaId": "escort",
+        "modo": "default",
+        "seguridad": { "estadoSeguridad": "normal", "emailVerificado": true, "riesgoScore": 10 }
+      },
+      "salidaEsperada": {
+        "identidad": {
+          "subcategoriaId": "escort",
+          "formularioId": "adultos",
+          "arquetipo": "persona_acompanante",
+          "tipoPerfil": "persona",
+          "sectorId": "adultos"
+        },
+        "fotos": { "min": 3, "max": null },
+        "verificacionTipo": "persona_estandar",
+        "obligatoriosIncluyen": ["alias", "geo.ciudad", "precioDesde", "modalidades", "ineFrente", "selfieVerificacion"],
+        "coherenciaIncluye": "ESCORT_MODALIDAD",
+        "componentes": { "resultados": "ResultCardAdultos", "perfil": "ProfileLayoutAdultos" },
+        "securityGates": { "enviar_revision": "permitido" }
+      }
+    },
+    {
+      "id": "F02_contadores_profesionista",
+      "entrada": {
+        "subcategoriaId": "contadores",
+        "modo": "default"
+      },
+      "salidaEsperada": {
+        "identidad": {
+          "formularioId": "profesionista_cedula",
+          "arquetipo": "profesional_tecnico_legal",
+          "sectorId": "profesionales"
+        },
+        "verificacionTipo": "profesionista_cedula",
+        "obligatoriosIncluyen": ["cedulaProfesional", "ineFrente"],
+        "componentes": { "resultados": "ResultCardProfesional", "perfil": "ProfileLayoutProfesional" }
+      }
+    },
+    {
+      "id": "F03_contador_publico_industria",
+      "entrada": {
+        "subcategoriaId": "contador-publico",
+        "modo": "default"
+      },
+      "salidaEsperada": {
+        "identidad": {
+          "formularioId": "profesionista_cedula",
+          "arquetipo": "profesional_tecnico_legal",
+          "sectorId": "industria",
+          "nota": "Distinto de contadores/profesionales — mismo arquetipo, distinto sector"
+        }
+      }
+    },
+    {
+      "id": "F04_sex_shop_adultos",
+      "entrada": {
+        "subcategoriaId": "sex shop",
+        "modo": "default"
+      },
+      "salidaEsperada": {
+        "identidad": {
+          "subcategoriaIdCanonico": "sex_shop",
+          "formularioId": "adultos",
+          "arquetipo": "negocio_retail",
+          "tipoPerfil": "negocio"
+        },
+        "coherenciaIncluye": "RETAIL_UBICACION",
+        "obligatoriosIncluyen": ["nombreComercial", "direccion", "categoriasProducto"]
+      }
+    },
+    {
+      "id": "F05_masajes_modo_alternativo",
+      "entrada": {
+        "subcategoriaId": "masajes",
+        "modo": "alternativo"
+      },
+      "salidaEsperada": {
+        "identidadDefault": { "arquetipo": "negocio_bienestar", "tipoPerfil": "negocio" },
+        "identidadAlternativa": { "arquetipo": "persona_acompanante", "tipoPerfil": "persona" },
+        "nota": "delta.modoRegistroAlternativo en schema adultos"
+      }
+    },
+    {
+      "id": "F06_restaurante_negocio",
+      "entrada": {
+        "subcategoriaId": "restaurante",
+        "modo": "default"
+      },
+      "salidaEsperada": {
+        "identidad": {
+          "formularioId": "negocio_empresa",
+          "arquetipo": "negocio_alimentos",
+          "sectorId": "restaurantes"
+        },
+        "obligatoriosIncluyen": ["nombreComercial", "direccion", "horarioDetalle"],
+        "verificacionTipo": "negocio_estandar"
+      }
+    },
+    {
+      "id": "F07_agente_inmobiliario_independiente",
+      "entrada": {
+        "subcategoriaId": "agente-inmobiliario-independiente",
+        "modo": "default"
+      },
+      "salidaEsperada": {
+        "identidad": {
+          "formularioId": "persona_independiente",
+          "arquetipo": "persona_servicio_profesional",
+          "sectorId": "bienes-raices"
+        },
+        "componentes": { "resultados": "ResultCardServicio", "perfil": "ProfileLayoutServicio" }
+      }
+    },
+    {
+      "id": "F08_visitante_sin_subcategoria",
+      "entrada": {
+        "formularioId": "usuario_visitante",
+        "flujoVisitante": "registro_inicial",
+        "modo": "default",
+        "cuenta": { "tipoCuentaPrincipal": "visitante", "estadoCuenta": "activa" },
+        "seguridad": { "emailVerificado": false, "estadoSeguridad": "normal" }
+      },
+      "salidaEsperada": {
+        "identidad": { "formularioId": "usuario_visitante", "sinSubcategoriaId": true },
+        "fotos": { "min": 0, "max": 0 },
+        "camposPublicosPerfil": [],
+        "securityGates": {
+          "guardar_borrador": "permitido",
+          "enviar_revision": "no_aplica",
+          "upgrade_perfil": "requiere_contrato_vigente"
+        },
+        "nota": "AM2 — visitante registra sin subcategoriaId"
+      }
+    },
+    {
+      "id": "F09_email_no_verificado_bloqueado",
+      "entrada": {
+        "subcategoriaId": "escort",
+        "seguridad": { "emailVerificado": false, "estadoSeguridad": "normal" }
+      },
+      "salidaEsperada": {
+        "securityGates": {
+          "guardar_borrador": "permitido",
+          "enviar_revision": "denegado",
+          "motivo": "EMAIL_NO_VERIFICADO"
+        }
+      }
+    },
+    {
+      "id": "F10_estado_restringido",
+      "entrada": {
+        "subcategoriaId": "escort",
+        "seguridad": { "estadoSeguridad": "restringido", "emailVerificado": true }
+      },
+      "salidaEsperada": {
+        "securityGates": {
+          "guardar_borrador": "permitido",
+          "enviar_revision": "denegado",
+          "motivoEnviarRevision": "ESTADO_SEGURIDAD_RESTRINGIDO"
+        },
+        "nota": "AM1 — alineado Seguridad MVP: restringido=solo borrador"
+      }
+    },
+    {
+      "id": "F11_visitante_upgrade_sin_subcategoria",
+      "entrada": {
+        "formularioId": "usuario_visitante",
+        "flujoVisitante": "upgrade_perfil_publico",
+        "cuenta": { "tipoCuentaPrincipal": "visitante", "estadoCuenta": "activa", "tienePerfilPublico": false },
+        "seguridad": { "emailVerificado": true, "estadoSeguridad": "normal" }
+      },
+      "salidaEsperada": {
+        "error": "SUBCATEGORIA_REQUERIDA_UPGRADE_VISITANTE",
+        "nota": "AM2 — upgrade exige elegir categoría/subcategoría antes de resolve merge"
+      }
+    }
+  ]
+}

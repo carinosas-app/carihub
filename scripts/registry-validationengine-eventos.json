@@ -1,0 +1,602 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "tipo": "REGISTRY_EVENTBUS_VALIDATIONENGINE",
+  "version": "1.1.0",
+  "fecha": "2026-06-09",
+  "descripcion": "Registry canónico acción → fan-out (OB-VE3). VE 1.1.0 MINOR Messenger — 60 acciones.",
+  "actaMinor": "scripts/ACTA-MINOR-VALIDATIONENGINE-1.1.0-MESSENGER.json",
+  "mapeoConversacionIniciar": {
+    "accionVE": "conversacion_iniciar",
+    "variantes": {
+      "modoInicio=directa": "conversacion_iniciar_directa",
+      "modoInicio=solicitud": "conversacion_iniciar_solicitud"
+    }
+  },
+  "referenciaDashboards": "scripts/SPEC-DASHBOARDS.json §14 notificaciones, §15 historial",
+  "plantillaEntrada": {
+    "historial": { "emitir": "boolean", "dominio": "string|null", "tipoEvento": "string|null" },
+    "notificacion": { "emitir": "boolean", "items": "NotificacionFanOutItem[]" },
+    "logsSeguridad": { "emitir": "boolean", "tipo": "string|null" },
+    "iaRecomendaciones": { "emitir": "boolean", "estadoNuevo": "string|null" },
+    "logsAdmin": { "emitir": "boolean", "modulo": "string|null" }
+  },
+  "acciones": {
+    "login": {
+      "historial": { "emitir": true, "dominio": "historial_seguridad", "tipoEvento": "login" },
+      "notificacion": { "emitir": "condicional", "items": [{ "dominio": "seguridad", "tipoEvento": "login_nuevo_dispositivo", "destinatario": "usuarioId", "condicion": "dispositivo_nuevo" }] },
+      "logsSeguridad": { "emitir": true, "tipo": "login" },
+      "iaRecomendaciones": { "emitir": false, "estadoNuevo": null },
+      "logsAdmin": { "emitir": false, "modulo": null }
+    },
+    "registro_auth": {
+      "historial": { "emitir": true, "dominio": "historial_actividad_cuenta", "tipoEvento": "cuenta_registrada" },
+      "notificacion": { "emitir": false, "items": [] },
+      "logsSeguridad": { "emitir": true, "tipo": "registro_cuenta" },
+      "iaRecomendaciones": { "emitir": false, "estadoNuevo": null },
+      "logsAdmin": { "emitir": false, "modulo": null }
+    },
+    "recuperacion_password": {
+      "historial": { "emitir": false, "dominio": null, "tipoEvento": null },
+      "notificacion": { "emitir": false, "items": [] },
+      "logsSeguridad": { "emitir": true, "tipo": "recuperacion_password" },
+      "iaRecomendaciones": { "emitir": false, "estadoNuevo": null },
+      "logsAdmin": { "emitir": false, "modulo": null }
+    },
+    "reenvio_email_verificacion": {
+      "historial": { "emitir": true, "dominio": "historial_seguridad", "tipoEvento": "reenvio_email_solicitado" },
+      "notificacion": { "emitir": false, "items": [] },
+      "logsSeguridad": { "emitir": true, "tipo": "reenvio_email" },
+      "iaRecomendaciones": { "emitir": false, "estadoNuevo": null },
+      "logsAdmin": { "emitir": false, "modulo": null }
+    },
+    "guardar_borrador": {
+      "historial": { "emitir": true, "dominio": "historial_perfil", "tipoEvento": "borrador_guardado" },
+      "notificacion": { "emitir": false, "items": [] },
+      "logsSeguridad": { "emitir": false, "tipo": null },
+      "iaRecomendaciones": { "emitir": false, "estadoNuevo": null },
+      "logsAdmin": { "emitir": false, "modulo": null }
+    },
+    "enviar_revision": {
+      "nota": "OB-VE2/OB-VE4 — fanOutPlan multi-destino; una validación, N ítems",
+      "fanOutPlan": [
+        { "destino": "historial", "dominio": "historial_perfil", "tipoEvento": "enviado_revision", "destinatario": "usuarioId" },
+        { "destino": "historial", "dominio": "historial_actividad_cuenta", "tipoEvento": "perfil_enviado_revision", "destinatario": "usuarioId" },
+        {
+          "destino": "notificacion",
+          "dominio": "verificaciones",
+          "tipoEvento": "verificacion_recibida",
+          "destinatario": { "tipo": "admin", "modulo": "notificaciones_admin", "cola": "cola_revision" },
+          "referencia": "SPEC-DASHBOARDS §14 — admin perfiles_revision; NO es notificación al usuario"
+        }
+      ],
+      "historial": { "emitir": true, "dominio": "historial_perfil", "tipoEvento": "enviado_revision" },
+      "notificacion": {
+        "emitir": true,
+        "items": [
+          {
+            "dominio": "verificaciones",
+            "tipoEvento": "verificacion_recibida",
+            "destinatario": { "tipo": "admin", "modulo": "notificaciones_admin", "cola": "cola_revision" },
+            "prioridad": "alta"
+          }
+        ],
+        "notificacionUsuario": false
+      },
+      "logsSeguridad": { "emitir": false, "tipo": null },
+      "iaRecomendaciones": { "emitir": false, "estadoNuevo": null },
+      "logsAdmin": { "emitir": false, "modulo": null }
+    },
+    "editar_perfil": {
+      "historial": { "emitir": true, "dominio": "historial_perfil", "tipoEvento": "borrador_guardado" },
+      "notificacion": { "emitir": false, "items": [] },
+      "logsSeguridad": { "emitir": false, "tipo": null },
+      "iaRecomendaciones": { "emitir": false, "estadoNuevo": null },
+      "logsAdmin": { "emitir": false, "modulo": null }
+    },
+    "actualizar_perfil_publicado": {
+      "historial": { "emitir": true, "dominio": "historial_perfil", "tipoEvento": "actualizacion_publicada" },
+      "notificacion": { "emitir": false, "items": [] },
+      "logsSeguridad": { "emitir": false, "tipo": null },
+      "iaRecomendaciones": { "emitir": false, "estadoNuevo": null },
+      "logsAdmin": { "emitir": false, "modulo": null }
+    },
+    "renovar_contrato": {
+      "historial": { "emitir": true, "dominio": "historial_renovaciones", "tipoEvento": "intento_solicitud" },
+      "notificacion": { "emitir": false, "items": [], "nota": "renovacion_completada solo tras pago — dominio renovaciones" },
+      "logsSeguridad": { "emitir": false, "tipo": null },
+      "iaRecomendaciones": { "emitir": false, "estadoNuevo": null },
+      "logsAdmin": { "emitir": false, "modulo": null }
+    },
+    "subir_foto_perfil": {
+      "historial": { "emitir": true, "dominio": "historial_perfil", "tipoEvento": "foto_subida" },
+      "notificacion": { "emitir": false, "items": [] },
+      "logsSeguridad": { "emitir": false, "tipo": null },
+      "iaRecomendaciones": { "emitir": false, "estadoNuevo": null },
+      "logsAdmin": { "emitir": false, "modulo": null }
+    },
+    "subir_video_perfil": {
+      "historial": { "emitir": true, "dominio": "historial_perfil", "tipoEvento": "video_subido" },
+      "notificacion": { "emitir": false, "items": [] },
+      "logsSeguridad": { "emitir": false, "tipo": null },
+      "iaRecomendaciones": { "emitir": false, "estadoNuevo": null },
+      "logsAdmin": { "emitir": false, "modulo": null }
+    },
+    "subir_verificacion_ine_frente": {
+      "historial": { "emitir": true, "dominio": "historial_verificaciones", "tipoEvento": "documento_subido", "privacidad": "sin_url_ine_en_vista_usuario" },
+      "notificacion": { "emitir": false, "items": [] },
+      "logsSeguridad": { "emitir": false, "tipo": null },
+      "iaRecomendaciones": { "emitir": false, "estadoNuevo": null },
+      "logsAdmin": { "emitir": false, "modulo": null }
+    },
+    "subir_verificacion_ine_reverso": {
+      "historial": { "emitir": true, "dominio": "historial_verificaciones", "tipoEvento": "documento_subido", "privacidad": "sin_url_ine_en_vista_usuario" },
+      "notificacion": { "emitir": false, "items": [] },
+      "logsSeguridad": { "emitir": false, "tipo": null },
+      "iaRecomendaciones": { "emitir": false, "estadoNuevo": null },
+      "logsAdmin": { "emitir": false, "modulo": null }
+    },
+    "subir_selfie_verificacion": {
+      "historial": { "emitir": true, "dominio": "historial_verificaciones", "tipoEvento": "selfie_subida", "privacidad": "sin_url_en_vista_usuario" },
+      "notificacion": { "emitir": false, "items": [] },
+      "logsSeguridad": { "emitir": false, "tipo": null },
+      "iaRecomendaciones": { "emitir": false, "estadoNuevo": null },
+      "logsAdmin": { "emitir": false, "modulo": null }
+    },
+    "solicitar_verificacion": {
+      "historial": { "emitir": true, "dominio": "historial_verificaciones", "tipoEvento": "solicitud_iniciada" },
+      "notificacion": { "emitir": false, "items": [] },
+      "logsSeguridad": { "emitir": false, "tipo": null },
+      "iaRecomendaciones": { "emitir": false, "estadoNuevo": null },
+      "logsAdmin": { "emitir": false, "modulo": null }
+    },
+    "registro_visitante": {
+      "historial": { "emitir": true, "dominio": "historial_actividad_cuenta", "tipoEvento": "registro_visitante" },
+      "notificacion": { "emitir": false, "items": [] },
+      "logsSeguridad": { "emitir": true, "tipo": "registro_visitante" },
+      "iaRecomendaciones": { "emitir": false, "estadoNuevo": null },
+      "logsAdmin": { "emitir": false, "modulo": null }
+    },
+    "upgrade_perfil_publico": {
+      "historial": { "emitir": true, "dominio": "historial_actividad_cuenta", "tipoEvento": "upgrade_perfil_iniciado" },
+      "notificacion": { "emitir": false, "items": [] },
+      "logsSeguridad": { "emitir": false, "tipo": null },
+      "iaRecomendaciones": { "emitir": false, "estadoNuevo": null },
+      "logsAdmin": { "emitir": false, "modulo": null }
+    },
+    "guardar_preferencias": {
+      "historial": { "emitir": true, "dominio": "historial_actividad_cuenta", "tipoEvento": "preferencias_actualizadas" },
+      "notificacion": { "emitir": false, "items": [] },
+      "logsSeguridad": { "emitir": false, "tipo": null },
+      "iaRecomendaciones": { "emitir": false, "estadoNuevo": null },
+      "logsAdmin": { "emitir": false, "modulo": null }
+    },
+    "crear_solicitud_banner": {
+      "historial": { "emitir": true, "dominio": "historial_banners", "tipoEvento": "solicitud_creada" },
+      "notificacion": {
+        "emitir": true,
+        "items": [
+          { "dominio": "banners", "tipoEvento": "solicitud_recibida", "destinatario": "uidAnunciante", "prioridad": "alta" }
+        ]
+      },
+      "logsSeguridad": { "emitir": false, "tipo": null },
+      "iaRecomendaciones": { "emitir": false, "estadoNuevo": null },
+      "logsAdmin": { "emitir": false, "modulo": null }
+    },
+    "editar_banner": {
+      "historial": { "emitir": true, "dominio": "historial_banners", "tipoEvento": "solicitud_editada" },
+      "notificacion": { "emitir": false, "items": [] },
+      "logsSeguridad": { "emitir": false, "tipo": null },
+      "iaRecomendaciones": { "emitir": false, "estadoNuevo": null },
+      "logsAdmin": { "emitir": false, "modulo": null }
+    },
+    "actualizar_solicitud_pre_pago": {
+      "historial": { "emitir": true, "dominio": "historial_banners", "tipoEvento": "solicitud_pre_pago_actualizada" },
+      "notificacion": { "emitir": false, "items": [] },
+      "logsSeguridad": { "emitir": false, "tipo": null },
+      "iaRecomendaciones": { "emitir": false, "estadoNuevo": null },
+      "logsAdmin": { "emitir": false, "modulo": null }
+    },
+    "enviar_correccion_banner": {
+      "historial": { "emitir": true, "dominio": "historial_banners", "tipoEvento": "correccion_enviada" },
+      "notificacion": { "emitir": false, "items": [] },
+      "logsSeguridad": { "emitir": false, "tipo": null },
+      "iaRecomendaciones": { "emitir": false, "estadoNuevo": null },
+      "logsAdmin": { "emitir": false, "modulo": null }
+    },
+    "subir_banner_imagen": {
+      "historial": { "emitir": true, "dominio": "historial_banners", "tipoEvento": "creativo_imagen_subido" },
+      "notificacion": { "emitir": false, "items": [] },
+      "logsSeguridad": { "emitir": false, "tipo": null },
+      "iaRecomendaciones": { "emitir": false, "estadoNuevo": null },
+      "logsAdmin": { "emitir": false, "modulo": null }
+    },
+    "subir_banner_video": {
+      "historial": { "emitir": true, "dominio": "historial_banners", "tipoEvento": "creativo_video_subido" },
+      "notificacion": { "emitir": false, "items": [] },
+      "logsSeguridad": { "emitir": false, "tipo": null },
+      "iaRecomendaciones": { "emitir": false, "estadoNuevo": null },
+      "logsAdmin": { "emitir": false, "modulo": null }
+    },
+    "categoria_sugerida": {
+      "historial": { "emitir": true, "dominio": "historial_actividad_cuenta", "tipoEvento": "categoria_sugerida_enviada" },
+      "notificacion": { "emitir": false, "items": [] },
+      "logsSeguridad": { "emitir": false, "tipo": null },
+      "iaRecomendaciones": { "emitir": false, "estadoNuevo": null },
+      "logsAdmin": { "emitir": false, "modulo": null }
+    },
+    "denuncia": {
+      "historial": { "emitir": true, "dominio": "historial_actividad_cuenta", "tipoEvento": "denuncia_registrada" },
+      "notificacion": {
+        "emitir": true,
+        "items": [{ "dominio": "denuncias", "tipoEvento": "denuncia_recibida_admin", "destinatario": { "tipo": "admin" }, "prioridad": "media" }]
+      },
+      "logsSeguridad": { "emitir": true, "tipo": "denuncia" },
+      "iaRecomendaciones": { "emitir": false, "estadoNuevo": null },
+      "logsAdmin": { "emitir": false, "modulo": null }
+    },
+    "contacto_publico": {
+      "historial": { "emitir": false, "dominio": null, "tipoEvento": null },
+      "notificacion": { "emitir": false, "items": [] },
+      "logsSeguridad": { "emitir": true, "tipo": "contacto_publico" },
+      "iaRecomendaciones": { "emitir": false, "estadoNuevo": null },
+      "logsAdmin": { "emitir": false, "modulo": null }
+    },
+    "favorito_add": {
+      "historial": { "emitir": true, "dominio": "historial_actividad_cuenta", "tipoEvento": "favorito_agregado" },
+      "notificacion": {
+        "emitir": "condicional",
+        "items": [{ "dominio": "favoritos", "tipoEvento": "perfil_favorito_nuevo", "destinatario": "perfil.usuarioId", "condicion": "opt_in_dueno" }]
+      },
+      "logsSeguridad": { "emitir": false, "tipo": null },
+      "iaRecomendaciones": { "emitir": false, "estadoNuevo": null },
+      "logsAdmin": { "emitir": false, "modulo": null }
+    },
+    "favorito_remove": {
+      "historial": { "emitir": true, "dominio": "historial_actividad_cuenta", "tipoEvento": "favorito_eliminado" },
+      "notificacion": { "emitir": false, "items": [] },
+      "logsSeguridad": { "emitir": false, "tipo": null },
+      "iaRecomendaciones": { "emitir": false, "estadoNuevo": null },
+      "logsAdmin": { "emitir": false, "modulo": null }
+    },
+    "mensaje_enviar": {
+      "nota": "VE 1.1.0 MINOR Messenger — fanOutPlan OB-VE2",
+      "fanOutPlan": [
+        { "destino": "historial", "dominio": "historial_mensajes", "tipoEvento": "mensaje_enviado", "destinatario": "usuarioId" },
+        { "destino": "notificacion", "dominio": "mensajes", "tipoEvento": "mensaje_nuevo", "destinatario": "dinamico_contexto" }
+      ],
+      "historial": { "emitir": true, "dominio": "historial_mensajes", "tipoEvento": "mensaje_enviado" },
+      "notificacion": { "emitir": true, "items": [{ "dominio": "mensajes", "tipoEvento": "mensaje_nuevo" }] },
+      "logsSeguridad": { "emitir": "condicional_spam", "tipo": "mensaje_enviado" },
+      "iaRecomendaciones": { "emitir": "condicional_senal_riesgo", "estadoNuevo": "sugerida" },
+      "logsAdmin": { "emitir": false }
+    },
+    "conversacion_iniciar_directa": {
+      "nota": "VE 1.1.0 MINOR Messenger — fanOutPlan OB-VE2",
+      "fanOutPlan": [
+        { "destino": "historial", "dominio": "historial_mensajes", "tipoEvento": "conversacion_iniciada", "destinatario": "usuarioId" },
+        { "destino": "notificacion", "dominio": "mensajes", "tipoEvento": "conversacion_iniciada", "destinatario": "dinamico_contexto" }
+      ],
+      "historial": { "emitir": true, "dominio": "historial_mensajes", "tipoEvento": "conversacion_iniciada" },
+      "notificacion": { "emitir": true, "items": [{ "dominio": "mensajes", "tipoEvento": "conversacion_iniciada" }] },
+      "logsSeguridad": { "emitir": false },
+      "iaRecomendaciones": { "emitir": false },
+      "logsAdmin": { "emitir": false }
+    },
+    "conversacion_iniciar_solicitud": {
+      "nota": "VE 1.1.0 MINOR Messenger — fanOutPlan OB-VE2",
+      "fanOutPlan": [
+        { "destino": "historial", "dominio": "historial_mensajes", "tipoEvento": "solicitud_conversacion_enviada", "destinatario": "usuarioId" },
+        { "destino": "notificacion", "dominio": "mensajes", "tipoEvento": "solicitud_conversacion", "destinatario": "dinamico_contexto" }
+      ],
+      "historial": { "emitir": true, "dominio": "historial_mensajes", "tipoEvento": "solicitud_conversacion_enviada" },
+      "notificacion": { "emitir": true, "items": [{ "dominio": "mensajes", "tipoEvento": "solicitud_conversacion" }] },
+      "logsSeguridad": { "emitir": false },
+      "iaRecomendaciones": { "emitir": false },
+      "logsAdmin": { "emitir": false }
+    },
+    "solicitud_conversacion_aceptar": {
+      "nota": "VE 1.1.0 MINOR Messenger — fanOutPlan OB-VE2",
+      "fanOutPlan": [
+        { "destino": "historial", "dominio": "historial_mensajes", "tipoEvento": "solicitud_aceptada", "destinatario": "usuarioId" },
+        { "destino": "notificacion", "dominio": "mensajes", "tipoEvento": "solicitud_aceptada", "destinatario": "dinamico_contexto" }
+      ],
+      "historial": { "emitir": true, "dominio": "historial_mensajes", "tipoEvento": "solicitud_aceptada" },
+      "notificacion": { "emitir": true, "items": [{ "dominio": "mensajes", "tipoEvento": "solicitud_aceptada" }] },
+      "logsSeguridad": { "emitir": false },
+      "iaRecomendaciones": { "emitir": false },
+      "logsAdmin": { "emitir": false }
+    },
+    "solicitud_conversacion_rechazar": {
+      "nota": "VE 1.1.0 MINOR Messenger — fanOutPlan OB-VE2",
+      "fanOutPlan": [
+        { "destino": "historial", "dominio": "historial_mensajes", "tipoEvento": "solicitud_rechazada", "destinatario": "usuarioId" },
+        { "destino": "notificacion", "dominio": "mensajes", "tipoEvento": "solicitud_rechazada", "destinatario": "dinamico_contexto" }
+      ],
+      "historial": { "emitir": true, "dominio": "historial_mensajes", "tipoEvento": "solicitud_rechazada" },
+      "notificacion": { "emitir": true, "items": [{ "dominio": "mensajes", "tipoEvento": "solicitud_rechazada" }] },
+      "logsSeguridad": { "emitir": false },
+      "iaRecomendaciones": { "emitir": false },
+      "logsAdmin": { "emitir": false }
+    },
+    "bloqueo_usuario": {
+      "nota": "VE 1.1.0 MINOR Messenger — fanOutPlan OB-VE2",
+      "fanOutPlan": [
+        { "destino": "historial", "dominio": "historial_actividad_cuenta", "tipoEvento": "usuario_bloqueado", "destinatario": "usuarioId" }
+      ],
+      "historial": { "emitir": true, "dominio": "historial_actividad_cuenta", "tipoEvento": "usuario_bloqueado" },
+      "notificacion": { "emitir": false },
+      "logsSeguridad": { "emitir": true, "tipo": "bloqueo_usuario" },
+      "iaRecomendaciones": { "emitir": false },
+      "logsAdmin": { "emitir": false }
+    },
+    "bloqueo_usuario_remover": {
+      "nota": "VE 1.1.0 MINOR Messenger — fanOutPlan OB-VE2",
+      "fanOutPlan": [
+        { "destino": "historial", "dominio": "historial_actividad_cuenta", "tipoEvento": "usuario_desbloqueado", "destinatario": "usuarioId" }
+      ],
+      "historial": { "emitir": true, "dominio": "historial_actividad_cuenta", "tipoEvento": "usuario_desbloqueado" },
+      "notificacion": { "emitir": false },
+      "logsSeguridad": { "emitir": true, "tipo": "bloqueo_usuario_removido" },
+      "iaRecomendaciones": { "emitir": false },
+      "logsAdmin": { "emitir": false }
+    },
+    "reportar_conversacion": {
+      "nota": "VE 1.1.0 MINOR Messenger — fanOutPlan OB-VE2",
+      "fanOutPlan": [
+        { "destino": "historial", "dominio": "historial_actividad_cuenta", "tipoEvento": "conversacion_reportada", "destinatario": "usuarioId" },
+        { "destino": "notificacion", "dominio": "mensajeria", "tipoEvento": "reporte_recibido", "destinatario": "admin" }
+      ],
+      "historial": { "emitir": true, "dominio": "historial_actividad_cuenta", "tipoEvento": "conversacion_reportada" },
+      "notificacion": { "emitir": true, "items": [{ "dominio": "mensajeria", "tipoEvento": "reporte_recibido", "destinatario": "admin" }] },
+      "logsSeguridad": { "emitir": true, "tipo": "reporte_mensajeria" },
+      "iaRecomendaciones": { "emitir": "condicional", "estadoNuevo": "sugerida" },
+      "logsAdmin": { "emitir": true, "modulo": "mensajeria_reportes" }
+    },
+    "reportar_mensaje": {
+      "nota": "VE 1.1.0 MINOR Messenger — fanOutPlan OB-VE2",
+      "fanOutPlan": [
+        { "destino": "historial", "dominio": "historial_actividad_cuenta", "tipoEvento": "mensaje_reportado", "destinatario": "usuarioId" },
+        { "destino": "notificacion", "dominio": "mensajeria", "tipoEvento": "reporte_recibido", "destinatario": "admin" }
+      ],
+      "historial": { "emitir": true, "dominio": "historial_actividad_cuenta", "tipoEvento": "mensaje_reportado" },
+      "notificacion": { "emitir": true, "items": [{ "dominio": "mensajeria", "tipoEvento": "reporte_recibido", "destinatario": "admin" }] },
+      "logsSeguridad": { "emitir": true, "tipo": "reporte_mensaje" },
+      "iaRecomendaciones": { "emitir": "condicional", "estadoNuevo": "sugerida" },
+      "logsAdmin": { "emitir": true, "modulo": "mensajeria_reportes" }
+    },
+    "reportar_usuario_mensajeria": {
+      "nota": "VE 1.1.0 MINOR Messenger — fanOutPlan OB-VE2",
+      "fanOutPlan": [
+        { "destino": "historial", "dominio": "historial_actividad_cuenta", "tipoEvento": "usuario_reportado_mensajeria", "destinatario": "usuarioId" },
+        { "destino": "notificacion", "dominio": "mensajeria", "tipoEvento": "reporte_recibido", "destinatario": "admin" }
+      ],
+      "historial": { "emitir": true, "dominio": "historial_actividad_cuenta", "tipoEvento": "usuario_reportado_mensajeria" },
+      "notificacion": { "emitir": true, "items": [{ "dominio": "mensajeria", "tipoEvento": "reporte_recibido", "destinatario": "admin" }] },
+      "logsSeguridad": { "emitir": true, "tipo": "reporte_usuario" },
+      "iaRecomendaciones": { "emitir": false },
+      "logsAdmin": { "emitir": true, "modulo": "mensajeria_reportes" }
+    },
+    "mensaje_eliminar_para_todos": {
+      "nota": "VE 1.1.0 MINOR Messenger — fanOutPlan OB-VE2",
+      "fanOutPlan": [
+        { "destino": "historial", "dominio": "historial_mensajes", "tipoEvento": "mensaje_eliminado_para_todos", "destinatario": "usuarioId" }
+      ],
+      "historial": { "emitir": true, "dominio": "historial_mensajes", "tipoEvento": "mensaje_eliminado_para_todos" },
+      "notificacion": { "emitir": false },
+      "logsSeguridad": { "emitir": true, "tipo": "mensaje_eliminado" },
+      "iaRecomendaciones": { "emitir": false },
+      "logsAdmin": { "emitir": "condicional_investigacion" }
+    },
+    "conversacion_archivar": {
+      "nota": "VE 1.1.0 MINOR Messenger — fanOutPlan OB-VE2",
+      "fanOutPlan": [
+        { "destino": "historial", "dominio": "historial_mensajes", "tipoEvento": "conversacion_archivada", "destinatario": "usuarioId" }
+      ],
+      "historial": { "emitir": true, "dominio": "historial_mensajes", "tipoEvento": "conversacion_archivada" },
+      "notificacion": { "emitir": false },
+      "logsSeguridad": { "emitir": false },
+      "iaRecomendaciones": { "emitir": false },
+      "logsAdmin": { "emitir": false }
+    },
+    "conversacion_silenciar": {
+      "nota": "VE 1.1.0 MINOR Messenger — fanOutPlan OB-VE2",
+      "fanOutPlan": [
+        { "destino": "historial", "dominio": "historial_mensajes", "tipoEvento": "conversacion_silenciada", "destinatario": "usuarioId" }
+      ],
+      "historial": { "emitir": true, "dominio": "historial_mensajes", "tipoEvento": "conversacion_silenciada" },
+      "notificacion": { "emitir": false },
+      "logsSeguridad": { "emitir": false },
+      "iaRecomendaciones": { "emitir": false },
+      "logsAdmin": { "emitir": false }
+    },
+    "conversacion_fijar": {
+      "nota": "VE 1.1.0 MINOR Messenger — fanOutPlan OB-VE2",
+      "fanOutPlan": [
+        { "destino": "historial", "dominio": "historial_mensajes", "tipoEvento": "conversacion_fijada", "destinatario": "usuarioId" }
+      ],
+      "historial": { "emitir": true, "dominio": "historial_mensajes", "tipoEvento": "conversacion_fijada" },
+      "notificacion": { "emitir": false },
+      "logsSeguridad": { "emitir": false },
+      "iaRecomendaciones": { "emitir": false },
+      "logsAdmin": { "emitir": false }
+    },
+    "conversacion_ocultar": {
+      "nota": "VE 1.1.0 MINOR Messenger — fanOutPlan OB-VE2",
+      "fanOutPlan": [
+        { "destino": "historial", "dominio": "historial_mensajes", "tipoEvento": "conversacion_oculta_local", "destinatario": "usuarioId" }
+      ],
+      "historial": { "emitir": true, "dominio": "historial_mensajes", "tipoEvento": "conversacion_oculta_local" },
+      "notificacion": { "emitir": false },
+      "logsSeguridad": { "emitir": false },
+      "iaRecomendaciones": { "emitir": false },
+      "logsAdmin": { "emitir": false }
+    },
+    "automatizacion_enviar": {
+      "nota": "VE 1.1.0 MINOR Messenger — fanOutPlan OB-VE2",
+      "fanOutPlan": [
+        { "destino": "historial", "dominio": "historial_mensajes", "tipoEvento": "mensaje_automatizado_enviado", "destinatario": "usuarioId" },
+        { "destino": "notificacion", "dominio": "mensajes", "tipoEvento": "mensaje_nuevo", "destinatario": "dinamico_contexto", "metadata": { "automatizado": true } }
+      ],
+      "historial": { "emitir": true, "dominio": "historial_mensajes", "tipoEvento": "mensaje_automatizado_enviado" },
+      "notificacion": { "emitir": true, "items": [{ "dominio": "mensajes", "tipoEvento": "mensaje_nuevo", "metadata": { "automatizado": true } }] },
+      "logsSeguridad": { "emitir": true, "tipo": "automatizacion_mensajeria" },
+      "iaRecomendaciones": { "emitir": false },
+      "logsAdmin": { "emitir": "condicional_abuso" }
+    },
+    "automatizacion_activar": {
+      "nota": "VE 1.1.0 MINOR Messenger — fanOutPlan OB-VE2",
+      "fanOutPlan": [
+        { "destino": "historial", "dominio": "historial_actividad_cuenta", "tipoEvento": "automatizacion_activada", "destinatario": "usuarioId" }
+      ],
+      "historial": { "emitir": true, "dominio": "historial_actividad_cuenta", "tipoEvento": "automatizacion_activada" },
+      "notificacion": { "emitir": false },
+      "logsSeguridad": { "emitir": false },
+      "iaRecomendaciones": { "emitir": false },
+      "logsAdmin": { "emitir": false }
+    },
+    "automatizacion_desactivar": {
+      "nota": "VE 1.1.0 MINOR Messenger — fanOutPlan OB-VE2",
+      "fanOutPlan": [
+        { "destino": "historial", "dominio": "historial_actividad_cuenta", "tipoEvento": "automatizacion_desactivada", "destinatario": "usuarioId" }
+      ],
+      "historial": { "emitir": true, "dominio": "historial_actividad_cuenta", "tipoEvento": "automatizacion_desactivada" },
+      "notificacion": { "emitir": false },
+      "logsSeguridad": { "emitir": false },
+      "iaRecomendaciones": { "emitir": false },
+      "logsAdmin": { "emitir": false }
+    },
+    "admin_automatizaciones_suspendir": {
+      "nota": "VE 1.1.0 MINOR Messenger — fanOutPlan OB-VE2",
+      "fanOutPlan": [
+        { "destino": "historial", "dominio": "historial_actividad_cuenta", "tipoEvento": "automatizaciones_suspendidas_admin", "destinatario": "usuarioId" },
+        { "destino": "notificacion", "dominio": "mensajes", "tipoEvento": "automatizaciones_suspendidas", "destinatario": "dinamico_contexto" }
+      ],
+      "historial": { "emitir": true, "dominio": "historial_actividad_cuenta", "tipoEvento": "automatizaciones_suspendidas_admin" },
+      "notificacion": { "emitir": true, "items": [{ "dominio": "mensajes", "tipoEvento": "automatizaciones_suspendidas" }] },
+      "logsSeguridad": { "emitir": true, "tipo": "admin_automatizaciones_suspendidas" },
+      "iaRecomendaciones": { "emitir": false },
+      "logsAdmin": { "emitir": true, "modulo": "mensajeria_admin" }
+    },
+    "admin_messenger_suspender": {
+      "nota": "VE 1.1.0 MINOR Messenger — fanOutPlan OB-VE2",
+      "fanOutPlan": [
+        { "destino": "historial", "dominio": "historial_actividad_cuenta", "tipoEvento": "mensajeria_suspendida_admin", "destinatario": "usuarioId" },
+        { "destino": "notificacion", "dominio": "mensajes", "tipoEvento": "mensajeria_restringida", "destinatario": "dinamico_contexto" },
+        { "destino": "notificacion", "dominio": "mensajeria", "tipoEvento": "control_admin_aplicado", "destinatario": "admin" }
+      ],
+      "historial": { "emitir": true, "dominio": "historial_actividad_cuenta", "tipoEvento": "mensajeria_suspendida_admin" },
+      "notificacion": { "emitir": true, "items": [{ "dominio": "mensajes", "tipoEvento": "mensajeria_restringida" }, { "dominio": "mensajeria", "tipoEvento": "control_admin_aplicado", "destinatario": "admin" }] },
+      "logsSeguridad": { "emitir": true, "tipo": "admin_messenger_control" },
+      "iaRecomendaciones": { "emitir": false },
+      "logsAdmin": { "emitir": true, "modulo": "mensajeria_admin" }
+    },
+    "admin_messenger_suspension_levantar": {
+      "nota": "VE 1.1.0 MINOR Messenger — fanOutPlan OB-VE2",
+      "fanOutPlan": [
+        { "destino": "historial", "dominio": "historial_actividad_cuenta", "tipoEvento": "mensajeria_suspension_levantada", "destinatario": "usuarioId" },
+        { "destino": "notificacion", "dominio": "mensajes", "tipoEvento": "mensajeria_restaurada", "destinatario": "dinamico_contexto" }
+      ],
+      "historial": { "emitir": true, "dominio": "historial_actividad_cuenta", "tipoEvento": "mensajeria_suspension_levantada" },
+      "notificacion": { "emitir": true, "items": [{ "dominio": "mensajes", "tipoEvento": "mensajeria_restaurada" }] },
+      "logsSeguridad": { "emitir": true, "tipo": "admin_messenger_control" },
+      "iaRecomendaciones": { "emitir": false },
+      "logsAdmin": { "emitir": true, "modulo": "mensajeria_admin" }
+    },
+    "admin_messenger_deshabilitar_ambito": {
+      "nota": "VE 1.1.0 MINOR Messenger — fanOutPlan OB-VE2",
+      "fanOutPlan": [
+        { "destino": "historial", "dominio": "historial_admin", "tipoEvento": "messenger_deshabilitado_ambito", "destinatario": "usuarioId" }
+      ],
+      "historial": { "emitir": true, "dominio": "historial_admin", "tipoEvento": "messenger_deshabilitado_ambito" },
+      "notificacion": { "emitir": false },
+      "logsSeguridad": { "emitir": true, "tipo": "admin_messenger_global" },
+      "iaRecomendaciones": { "emitir": false },
+      "logsAdmin": { "emitir": true, "modulo": "mensajeria_admin" }
+    },
+    "admin_messenger_habilitar_ambito": {
+      "nota": "VE 1.1.0 MINOR Messenger — fanOutPlan OB-VE2",
+      "fanOutPlan": [
+        { "destino": "historial", "dominio": "historial_admin", "tipoEvento": "messenger_habilitado_ambito", "destinatario": "usuarioId" }
+      ],
+      "historial": { "emitir": true, "dominio": "historial_admin", "tipoEvento": "messenger_habilitado_ambito" },
+      "notificacion": { "emitir": false },
+      "logsSeguridad": { "emitir": true, "tipo": "admin_messenger_global" },
+      "iaRecomendaciones": { "emitir": false },
+      "logsAdmin": { "emitir": true, "modulo": "mensajeria_admin" }
+    },
+    "admin_conversacion_cerrar": {
+      "nota": "VE 1.1.0 MINOR Messenger — fanOutPlan OB-VE2",
+      "fanOutPlan": [
+        { "destino": "historial", "dominio": "historial_mensajes", "tipoEvento": "conversacion_cerrada_admin", "destinatario": "usuarioId" },
+        { "destino": "notificacion", "dominio": "mensajes", "tipoEvento": "conversacion_cerrada", "destinatario": "dinamico_contexto" },
+        { "destino": "notificacion", "dominio": "mensajeria", "tipoEvento": "conversacion_cerrada_admin", "destinatario": "admin" }
+      ],
+      "historial": { "emitir": true, "dominio": "historial_mensajes", "tipoEvento": "conversacion_cerrada_admin" },
+      "notificacion": { "emitir": true, "items": [{ "dominio": "mensajes", "tipoEvento": "conversacion_cerrada" }, { "dominio": "mensajeria", "tipoEvento": "conversacion_cerrada_admin", "destinatario": "admin" }] },
+      "logsSeguridad": { "emitir": true, "tipo": "admin_conversacion_cerrada" },
+      "iaRecomendaciones": { "emitir": false },
+      "logsAdmin": { "emitir": true, "modulo": "mensajeria_admin" }
+    },
+    "ia_consulta": {
+      "historial": { "emitir": false, "dominio": null, "tipoEvento": null },
+      "notificacion": { "emitir": false, "items": [] },
+      "logsSeguridad": { "emitir": false, "tipo": null },
+      "iaRecomendaciones": { "emitir": false, "estadoNuevo": null },
+      "logsAdmin": { "emitir": true, "modulo": "ia_consulta" }
+    },
+    "ia_aceptar_recomendacion": {
+      "historial": { "emitir": true, "dominio": "historial_acciones_ia", "tipoEvento": "recomendacion_aceptada" },
+      "notificacion": { "emitir": false, "items": [] },
+      "logsSeguridad": { "emitir": false, "tipo": null },
+      "iaRecomendaciones": { "emitir": true, "estadoNuevo": "aceptada_humano" },
+      "logsAdmin": { "emitir": true, "modulo": "ia_recomendacion" }
+    },
+    "ia_rechazar_recomendacion": {
+      "historial": { "emitir": true, "dominio": "historial_acciones_ia", "tipoEvento": "recomendacion_rechazada" },
+      "notificacion": { "emitir": false, "items": [] },
+      "logsSeguridad": { "emitir": false, "tipo": null },
+      "iaRecomendaciones": { "emitir": true, "estadoNuevo": "rechazada_humano" },
+      "logsAdmin": { "emitir": true, "modulo": "ia_recomendacion" }
+    },
+    "admin_aprobar_perfil": {
+      "historial": { "emitir": true, "dominio": "historial_perfil", "tipoEvento": "aprobado_admin" },
+      "notificacion": {
+        "emitir": true,
+        "items": [{ "dominio": "verificaciones", "tipoEvento": "verificacion_aprobada", "destinatario": "perfil.usuarioId", "prioridad": "alta" }]
+      },
+      "logsSeguridad": { "emitir": false, "tipo": null },
+      "iaRecomendaciones": { "emitir": false, "estadoNuevo": null },
+      "logsAdmin": { "emitir": true, "modulo": "perfiles_revision" }
+    },
+    "admin_rechazar_perfil": {
+      "historial": { "emitir": true, "dominio": "historial_perfil", "tipoEvento": "rechazado_admin" },
+      "notificacion": {
+        "emitir": true,
+        "items": [{ "dominio": "verificaciones", "tipoEvento": "verificacion_rechazada", "destinatario": "perfil.usuarioId", "prioridad": "alta" }]
+      },
+      "logsSeguridad": { "emitir": false, "tipo": null },
+      "iaRecomendaciones": { "emitir": false, "estadoNuevo": null },
+      "logsAdmin": { "emitir": true, "modulo": "perfiles_revision" }
+    },
+    "admin_cambio_estado_seguridad": {
+      "historial": { "emitir": true, "dominio": "historial_seguridad", "tipoEvento": "estado_seguridad_cambiado_admin" },
+      "notificacion": {
+        "emitir": true,
+        "items": [{ "dominio": "seguridad", "tipoEvento": "estado_seguridad_cambio", "destinatario": "usuarioId", "prioridad": "critica" }]
+      },
+      "logsSeguridad": { "emitir": true, "tipo": "admin_cambio_estado_seguridad" },
+      "iaRecomendaciones": { "emitir": false, "estadoNuevo": null },
+      "logsAdmin": { "emitir": true, "modulo": "seguridad" }
+    },
+    "admin_actualizar_solicitud_banner": {
+      "historial": { "emitir": true, "dominio": "historial_banners", "tipoEvento": "solicitud_actualizada_admin" },
+      "notificacion": {
+        "emitir": true,
+        "items": [{ "dominio": "banners", "tipoEvento": "solicitud_aprobada", "destinatario": "uidAnunciante", "condicion": "si_aprobada", "prioridad": "alta" }]
+      },
+      "logsSeguridad": { "emitir": false, "tipo": null },
+      "iaRecomendaciones": { "emitir": false, "estadoNuevo": null },
+      "logsAdmin": { "emitir": true, "modulo": "publicidad_banners" }
+    }
+  }
+}

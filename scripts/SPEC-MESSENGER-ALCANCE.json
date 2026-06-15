@@ -1,0 +1,231 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "$id": "https://carihub.app/schemas/spec-messenger-alcance.json",
+  "tipo": "SPEC_ALCANCE",
+  "nombre": "Propuesta de alcance — CariHub Messenger",
+  "versionAlcance": "0.1.0",
+  "fecha": "2026-06-09",
+  "estado": "ANALISIS_ALCANCE",
+  "implementacionAutorizada": false,
+  "nota": "Solo análisis y documentación. No runtime. No modificar capas congeladas.",
+  "dependenciasCongeladasSoloLectura": {
+    "catalogo": "catalogo-2026-06-10@1.0.0",
+    "cuentas": "cuentas-2026-06-10@1.0.0",
+    "seguridad": "seguridad-2026-06-10@1.0.0",
+    "fieldEngine": "fieldengine-2026-06-10@1.0.1",
+    "dashboards": "dashboards-2026-06-10@1.0.0",
+    "validationEngine": "validationengine-2026-06-10@1.0.0"
+  },
+  "visionArquitectonica": {
+    "modelo": "aplicacion_separada",
+    "plataformaPrincipal": "CariHub — index, resultados, perfil, registro, admin",
+    "messenger": "CariHub Messenger — módulo/aplicación independiente",
+    "rutasPropuestas": [
+      "/messenger",
+      "/messenger/chat",
+      "/messenger/configuracion",
+      "/messenger/reportes"
+    ],
+    "archivosHtmlLegacy": ["messenger.html", "chat.html"],
+    "puntoEntradaPerfil": "Botón «Mensaje interno» en perfil — no abre WhatsApp ni teléfono privado",
+    "moduloCentral": true,
+    "nivelPlataforma": ["usuarios", "perfiles", "banners", "administracion", "pagos", "messenger"]
+  },
+  "fasesFuncionalidad": {
+    "fase1_mvp_diseno": {
+      "texto": true,
+      "reportes": true,
+      "bloqueos": true,
+      "solicitud_conversacion": true,
+      "rate_limits": true,
+      "notificaciones_internas": true,
+      "panel_admin_reportes": true
+    },
+    "fase2": { "imagenes": true, "palabras_prohibidas": true },
+    "fase3": { "audios": true },
+    "fase4": { "traduccion_automatica": true, "asistente_ia_traduccion": true },
+    "futuro": ["archivos", "ubicacion", "videollamadas", "push", "email", "whatsapp", "multioperador_empresa"]
+  },
+  "requisitosAcceso": {
+    "visitanteSinCuenta": "NO puede enviar mensajes",
+    "cuentaRegistrada": true,
+    "sesionIniciada": true,
+    "emailVerificado": true,
+    "telefonoVerificado": true,
+    "estadoMensajeria": "habilitada|restringida|solo_lectura|suspendida — ref. cuentas congeladas",
+    "estadoSeguridad": "gates Seguridad MVP — ref. config-seguridad-mvp-schema.json",
+    "nivelConfianzaMinimo": 40,
+    "referencia": "config-seguridad-mvp-schema.json → mensajeriaFutura"
+  },
+  "modeloDatosPropuesto": {
+    "coleccionPrincipal": "conversaciones/{conversacionId}",
+    "subcoleccionMensajes": "conversaciones/{conversacionId}/mensajes/{mensajeId}",
+    "metaUsuario": "usuarios/{usuarioId}/conversaciones_meta/{conversacionId}",
+    "bloqueos": "usuarios/{usuarioId}/bloqueos/{usuarioBloqueadoId}",
+    "reportes": "reportes_mensajeria/{reporteId}",
+    "conversacion": {
+      "campos": [
+        "conversacionId",
+        "participante1Id",
+        "participante2Id",
+        "perfilContextoId",
+        "fechaCreacion",
+        "ultimoMensaje",
+        "fechaUltimoMensaje",
+        "estado",
+        "solicitudPendiente",
+        "bloqueada",
+        "reportada",
+        "archivadaPor",
+        "fijadaPor"
+      ],
+      "estados": ["activa", "solicitud_enviada", "solicitud_aceptada", "solicitud_rechazada", "bloqueada", "reportada", "archivada", "cerrada_admin"]
+    },
+    "mensaje": {
+      "campos": [
+        "mensajeId",
+        "emisorId",
+        "receptorId",
+        "texto",
+        "mensajeOriginal",
+        "mensajeTraducido",
+        "idiomaOrigen",
+        "idiomaDestino",
+        "fecha",
+        "estadoEntrega",
+        "tipo",
+        "adjuntoRef",
+        "senalRiesgoId"
+      ],
+      "estadosEntrega": ["enviado", "entregado", "visto"],
+      "tipos": ["texto", "imagen", "audio", "archivo", "ubicacion", "sistema"]
+    },
+    "configuracionUsuario": {
+      "permitirMensajes": "boolean",
+      "bloquearMensajes": "boolean",
+      "silenciarConversacion": "boolean",
+      "archivarConversacion": "boolean",
+      "eliminarConversacionLocal": "boolean — solo para el usuario",
+      "idiomaPreferido": "string"
+    },
+    "presencia": {
+      "estado": ["en_linea", "ausente", "desconectado"],
+      "ultimaConexion": "timestamp",
+      "mensajesNoLeidos": "number"
+    }
+  },
+  "limitesAntiSpam": {
+    "usuarioNuevo": {
+      "conversacionesNuevasDia": 5,
+      "mensajesHora": 20,
+      "condicion": "nivelConfianza < 40"
+    },
+    "usuarioVerificado": {
+      "mensajesHora": 60,
+      "burstMinuto": 10,
+      "conversacionesNuevasDia": "sin límite estricto si nivelConfianza ≥ 70"
+    },
+    "referenciaCongelada": "config-seguridad-mvp-schema.json → rateLimits.mensaje_futuro"
+  },
+  "solicitudConversacion": {
+    "obligatoriaCategorias": ["adultos"],
+    "opcionalOtras": true,
+    "flujo": "Carlos quiere enviarte un mensaje → [Aceptar] [Rechazar]",
+    "motivo": "Evitar spam masivo en perfiles de alto contacto"
+  },
+  "permisosPorTipoCuenta": {
+    "adultos": { "recibir": true, "bloquear": true, "limitarQuienEscribe": true, "solicitudConversacion": true },
+    "independiente": { "recibir": true, "bloquear": true },
+    "profesionista": { "recibir": true, "cotizaciones": true },
+    "empresa": { "recibir": true, "multioperador_futuro": true },
+    "admin": { "revisarReportes": true, "suspenderMensajeria": true, "cerrarConversacion": true }
+  },
+  "seguridadMensajeria": {
+    "capaAnalisis": "scripts/ANALISIS-MESSENGER-IA-SEGURIDAD.json",
+    "detecciones": [
+      "spam",
+      "mensajes_masivos",
+      "fraude",
+      "enlaces_peligrosos",
+      "phishing",
+      "acoso",
+      "extorsion",
+      "contenido_prohibido_politicas_carihub"
+    ],
+    "integraciones": [
+      "estadoMensajeria",
+      "estadoSeguridad",
+      "reportes",
+      "bloqueos",
+      "rate_limits",
+      "spamScore",
+      "EventBus",
+      "notificaciones_admin"
+    ]
+  },
+  "asistentesIAFuturos": [
+    { "id": "ia_seguridad_messenger", "obligatorio": true, "alcance": "señales de riesgo, spam, enlaces, fraude" },
+    { "id": "ia_moderacion_messenger", "obligatorio": true, "alcance": "acoso, extorsión, contenido prohibido, cola admin" },
+    { "id": "ia_traduccion_messenger", "obligatorio": false, "fase": 4, "alcance": "mensajeOriginal/mensajeTraducido" },
+    { "id": "ia_asistente_conversacional", "obligatorio": false, "controlUsuario": true, "alcance": "FAQs por tipo cuenta — nunca envía sin autorización" }
+  ],
+  "reglasIAGlobales": [
+    "La IA no envía mensajes en nombre del usuario sin autorización explícita",
+    "La IA no accede a conversaciones privadas fuera de permisos definidos",
+    "Toda acción automática queda auditada",
+    "La IA genera alertas, recomendaciones o señales de riesgo — no sanciones finales",
+    "Bloqueo y sanción: reglas sistema + moderación administrativa"
+  ],
+  "integracionCapasCongeladas": {
+    "validationEngine": {
+      "acciones": ["mensaje_enviar", "conversacion_iniciar", "bloqueo_usuario", "reportar_conversacion"],
+      "registry": "scripts/registry-validationengine-eventos.json",
+      "nota": "fanOutPlan a completar en SPEC Messenger — registry VE tiene placeholders"
+    },
+    "seguridadMVP": {
+      "rateLimits": "mensaje_futuro",
+      "spamScore": "usuarios.mensajeria.spamScore",
+      "estadoSeguridad": "gates envío"
+    },
+    "cuentas": {
+      "estadoMensajeria": "usuarios.mensajeria",
+      "bloqueos": "subcolección bloqueos"
+    },
+    "dashboards": {
+      "notificaciones": "dominio mensajes",
+      "historial": "historial_mensajes",
+      "ia_recomendaciones": "señales IA Messenger",
+      "adminModulo": "reportes_mensajeria"
+    }
+  },
+  "administracion": {
+    "funciones": [
+      "ver_reportes",
+      "suspender_mensajeria",
+      "cerrar_conversacion",
+      "revisar_conversaciones_denunciadas",
+      "bitacora_acciones",
+      "cola_moderacion_ia"
+    ],
+    "notificacionesAdmin": [
+      "mensajeria.reporte_recibido",
+      "mensajeria.spam_umbral",
+      "mensajeria.acoso_detectado",
+      "mensajeria.phishing_detectado",
+      "mensajeria.conversacion_cerrada"
+    ]
+  },
+  "artefactosRelacionados": [
+    "scripts/SPEC-MESSENGER-ALCANCE.md",
+    "scripts/SPEC-MESSENGER-ALCANCE.json",
+    "scripts/ANALISIS-MESSENGER-IA-SEGURIDAD.md",
+    "scripts/ANALISIS-MESSENGER-IA-SEGURIDAD.json"
+  ],
+  "siguienteEntregable": "SPEC-MESSENGER.md + SPEC-MESSENGER.json v1.0.0 (diseño formal)",
+  "fueraDeAlcance": [
+    "Runtime / Firestore rules / deploy",
+    "Modificación de capas congeladas",
+    "Stories / transmisiones en vivo — OBSERVACION Interacciones Fase 7",
+    "Implementación LLM"
+  ]
+}

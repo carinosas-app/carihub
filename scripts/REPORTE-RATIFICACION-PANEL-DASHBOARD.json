@@ -1,0 +1,106 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "tipo": "REPORTE_RATIFICACION",
+  "nombre": "Reporte de ratificación — Panel Dashboard Operativo",
+  "version": "1.0.0",
+  "fecha": "2026-06-11",
+  "veredictoGlobal": "PASS_RATIFICACION_DISENO",
+  "veredictoRuntime": "FAIL_RUNTIME_NO_AUTORIZADO",
+
+  "artefactosEvaluados": {
+    "spec": { "archivo": "SPEC-PANEL-DASHBOARD-MINIMO.json", "version": "1.0.1", "nombreCanon": "SPEC-DASHBOARDS-OPERATIVOS" },
+    "patch": { "archivo": "PATCH-SPEC-PANEL-DASHBOARD-v1.0.1.json", "estado": "APLICADO" },
+    "auditoria": { "archivo": "AUDITORIA-SPEC-PANEL-DASHBOARD-MINIMO.json", "version": "2.0.0", "veredicto": "PASS" },
+    "fixtures": { "archivo": "fixtures-panel-dashboard-minimo-golden.json", "version": "2.0.0", "total": 10 },
+    "matriz": { "archivo": "MATRIZ-RUTAS-NAV-CANONICA.json", "version": "1.0.0" },
+    "actaActual": { "archivo": "ACTA-CONGELAMIENTO-PANEL-DASHBOARD.json", "version": "1.0.0", "estado": "SUPERSEDED_PENDIENTE_v1.1" }
+  },
+
+  "respuestasRatificacion": {
+    "dashboardRatificado": "SI_DISENO",
+    "dashboardRatificadoRuntime": "NO",
+    "congelamientoParcial": "SI",
+    "fuenteOficialVerdadDocumental": "SI_CONDICIONAL",
+    "actaV1_0_0Valida": "NO",
+    "actaV1_1_0Requerida": "SI",
+    "alineacionFinalPorcentaje": 96
+  },
+
+  "condicionesFuenteOficial": [
+    "SPEC v1.0.1 alineada MATRIZ — CUMPLIDO",
+    "AUDITORIA v2.0.0 PASS — CUMPLIDO",
+    "Fixtures PDM-01..10 — CUMPLIDO",
+    "ACTA v1.1.0 emitida y firmada — PENDIENTE",
+    "AUDITORIA-MAESTRA v2.1 GAP-PANEL-DASH — PENDIENTE"
+  ],
+
+  "decisionNombreFinal": {
+    "recomendacion": "SPEC-DASHBOARDS-OPERATIVOS",
+    "opcionA": {
+      "nombre": "SPEC-PANEL-DASHBOARD-MINIMO",
+      "veredicto": "RECHAZADO como nombre final",
+      "motivo": "Confunde con panel 1 página; nombre interno ya decía Operativo"
+    },
+    "opcionB": {
+      "nombre": "SPEC-DASHBOARDS-OPERATIVOS",
+      "veredicto": "RECOMENDADO P0",
+      "motivo": "Coherencia shell/operativo, navegación, escalabilidad, consistencia documental"
+    },
+    "implementacionInmediata": "nombreCanon en metadata v1.0.1 — filename legacy hasta ACTA v1.1 rename autorizado",
+    "riesgoConfusion": { "opcionA": "alto", "opcionB": "bajo" }
+  },
+
+  "metricasImpacto": {
+    "alineacionDashboard": { "antes": 78, "despues": 96, "delta": 18 },
+    "documentacionGlobal": { "antes": 89, "despues": 91, "delta": 2 },
+    "arquitecturaGlobal": { "antes": 90, "despues": 92, "delta": 2 },
+    "construccionP0": { "antes": 84, "despues": 89, "delta": 5 },
+    "mvpOperar": { "antes": 74, "despues": 87, "delta": 13 },
+    "mvpCobrar": { "antes": 72, "despues": 76, "delta": 4 },
+    "navegacionCanon": { "antes": 78, "despues": 96, "delta": 18 },
+    "readinessRuntime": { "antes": 0, "despues": 0 },
+    "readinessProduccion": { "antes": 18, "despues": 18 },
+    "gapPanelDash": { "antes": 35, "despues": 96, "delta": 61 }
+  },
+
+  "impactoAuditoriaMaestra": {
+    "v2_0_0Desactualizada": true,
+    "requiereV2_1": true,
+    "gapsCerrados": ["GAP-PANEL-DASH"],
+    "gapsPermanecen": ["GAP-SPEC-ADMIN", "GAP-RULES", "BLK-01", "BLK-02", "runtime cuenta shell"],
+    "metricasActualizar": [
+      "CAP-10 Dashboards 53% → 92%",
+      "CAP-10b Panel operativo pendiente_ratificacion → ratificado_diseno",
+      "rank 5 GAP-PANEL-DASH — eliminar de críticos",
+      "construccionP0 84% → 89%",
+      "documentacionGlobal 83% → 91%"
+    ]
+  },
+
+  "riesgoResidual": {
+    "nivel": "medio-bajo_documental",
+    "items": [
+      { "id": "RR-01", "riesgo": "Runtime /cuenta/* sin implementar", "severidad": "alto_runtime", "mitigacion": "Diseño ratificado; autorización runtime separada" },
+      { "id": "RR-02", "riesgo": "ACTA v1.0.0 no refleja MATRIZ", "severidad": "medio", "mitigacion": "Emitir ACTA v1.1.0" },
+      { "id": "RR-03", "riesgo": "Filename legacy MINIMO", "severidad": "bajo", "mitigacion": "nombreCanon metadata" },
+      { "id": "RR-04", "riesgo": "PLAN-DASH rutas /cuenta/anunciante", "severidad": "bajo", "mitigacion": "MATRIZ prevalece" },
+      { "id": "RR-05", "riesgo": "AUDITORIA-MAESTRA desactualizada", "severidad": "medio", "mitigacion": "v2.1" }
+    ]
+  },
+
+  "siguienteCapaPriorizada": {
+    "orden": 1,
+    "capa": "ACTA-CONGELAMIENTO-PANEL-DASHBOARD v1.1.0",
+    "secuencia": [
+      "ACTA v1.1.0 ratificación diseño",
+      "AUDITORIA-MAESTRA-COMPLETA v2.1",
+      "Rename físico SPEC-DASHBOARDS-OPERATIVOS (opcional)",
+      "Autorización runtime P0 /cuenta/perfil",
+      "SPEC-ADMIN formal"
+    ]
+  },
+
+  "changelog": [
+    { "version": "1.0.0", "fecha": "2026-06-11", "nota": "Ratificación diseño PASS 96%; ACTA v1.1 requerida; fuente oficial condicional" }
+  ]
+}

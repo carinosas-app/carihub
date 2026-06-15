@@ -1,0 +1,140 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "tipo": "MATRIZ_MADUREZ",
+  "titulo": "Matriz de Madurez Global CariHub/Cariñosas",
+  "fecha": "2026-06-11",
+  "version": "1.0.0",
+  "modo": "Solo documentación — sintetiza corpus scripts/ al 2026-06-11",
+  "escalaMadurez": ["inexistente", "conceptual", "documentado", "especificado", "auditado", "congelado", "listoImplementacion", "implementado"],
+  "definiciones": {
+    "congelado": "ACTA-CONGELAMIENTO-* CONGELADO (diseño; runtime=false salvo evidencia producción)",
+    "listoImplementacion": "congelado + dependencias congeladas + 0 bloqueantes",
+    "implementado": "evidencia runtime producción alineada al diseño"
+  },
+  "resumen": {
+    "totalModulos": 92,
+    "porNivel": {
+      "inexistente": 18,
+      "conceptual": 8,
+      "documentado": 22,
+      "especificado": 3,
+      "auditado": 2,
+      "congelado": 14,
+      "listoImplementacion": 0,
+      "implementado": 25
+    },
+    "notaImplementado": "25 entradas 'implementado' = funcionalidad parcial en monolito producción (public/), NO alineada al diseño congelado"
+  },
+  "dominios": {
+    "arquitecturaBase": [
+      { "id": "AB-01", "nombre": "Shared/Core", "version": "1.0.0", "madurez": "congelado", "planMaestro": "PLAN-MAESTRO-SHARED-CORE", "spec": "SPEC-SHARED-CORE", "acta": "ACTA-CONGELAMIENTO-SHARED-CORE", "auditorias": ["AUDITORIA-SPEC-SHARED-CORE", "AUDITORIA-SHARED-CORE"], "fixtures": "fixtures-shared-core-golden.json", "runtime": "parcial_disperso" },
+      { "id": "AB-02", "nombre": "RenderEngine", "version": "1.0.0", "madurez": "congelado", "planMaestro": null, "spec": "SPEC-RENDERENGINE", "adrs": ["ADR-RENDER-STRATEGY", "ADR-URL-CANONICA-PERFILES"], "acta": "ACTA-CONGELAMIENTO-RENDERENGINE", "auditorias": ["AUDITORIA-SPEC-RENDERENGINE"], "fixtures": "fixtures-renderengine-golden.json", "runtime": false },
+      { "id": "AB-03", "nombre": "ValidationEngine", "version": "1.1.0", "madurez": "congelado", "spec": "SPEC-VALIDATIONENGINE", "acta": "ACTA-CONGELAMIENTO-VALIDATIONENGINE", "auditorias": ["AUDITORIA-SPEC-VALIDATIONENGINE", "AUDITORIA-FINAL-SPEC-VALIDATIONENGINE"], "fixtures": "fixtures-validationengine-golden.json", "runtime": "parcial_inline" },
+      { "id": "AB-04", "nombre": "FieldEngine", "version": "1.0.1", "madurez": "congelado", "spec": "SPEC-FIELDENGINE", "acta": "ACTA-CONGELAMIENTO-FIELDENGINE", "auditorias": ["AUDITORIA-SPEC-FIELDENGINE"], "fixtures": "fixtures-fieldengine-golden.json", "runtime": "parcial_wizard" },
+      { "id": "AB-05", "nombre": "Seguridad MVP", "version": "1.0.0", "madurez": "congelado", "spec": "config-seguridad-mvp-schema.json", "acta": "ACTA-CONGELAMIENTO-SEGURIDAD", "auditorias": ["REPORTE-SEGURIDAD-MVP"], "runtime": false },
+      { "id": "AB-06", "nombre": "Catálogo", "version": "1.0.0", "madurez": "congelado", "acta": "ACTA-CONGELAMIENTO-CATALOGO", "runtime": "parcial_catalogos-carihub.js" },
+      { "id": "AB-07", "nombre": "Cuentas", "version": "1.0.0", "madurez": "congelado", "spec": "config-cuentas-usuario-schema.json", "acta": "ACTA-CONGELAMIENTO-CUENTAS", "runtime": "legacy_usuarios_uid" },
+      { "id": "AB-08", "nombre": "PrivacyGuard", "version": "1.0.0", "madurez": "congelado", "spec": "SPEC-RENDERENGINE (applyPrivacyGuard)", "acta": "ACTA-CONGELAMIENTO-RENDERENGINE", "runtime": false },
+      { "id": "AB-09", "nombre": "AuditTrail", "version": null, "madurez": "documentado", "planMaestro": "PLAN-MAESTRO-ADMIN", "spec": "config-admin-arquitectura-completa-schema", "runtime": "parcial_logsAdmin" }
+    ],
+    "aplicacionPublica": [
+      { "id": "AP-01", "nombre": "Home", "madurez": "implementado", "planMaestro": "PLAN-MAESTRO-APP-PUBLICA", "runtime": "public/index.html", "nota": "monolito mezclado; no alineado diseño" },
+      { "id": "AP-02", "nombre": "Resultados", "madurez": "implementado", "planMaestro": "PLAN-MAESTRO-APP-PUBLICA", "runtime": "public/resultados.html", "riesgo": "client-side filter crítico" },
+      { "id": "AP-03", "nombre": "Perfil Público", "madurez": "implementado", "planMaestro": "PLAN-MAESTRO-APP-PUBLICA", "adrs": ["ADR-URL-CANONICA-PERFILES"], "runtime": "public/perfil.html?id=" },
+      { "id": "AP-04", "nombre": "Landing Pages", "madurez": "especificado", "planMaestro": "PLAN-MAESTRO-SEO-LANDINGS", "spec": "SPEC-SEO-LANDINGS", "acta": "ACTA-CONGELAMIENTO-SEO-LANDINGS", "runtime": false },
+      { "id": "AP-05", "nombre": "SEO", "version": "1.0.0", "madurez": "congelado", "planMaestro": "PLAN-MAESTRO-SEO-LANDINGS", "spec": "SPEC-SEO-LANDINGS", "adrs": ["ADR-INDEXACION-ADULTOS", "ADR-URL-CANONICA", "ADR-RENDER-STRATEGY"], "acta": "ACTA-CONGELAMIENTO-SEO-LANDINGS", "fixtures": "fixtures-seo-landings-golden.json", "runtime": false },
+      { "id": "AP-06", "nombre": "URLs/Slugs", "madurez": "congelado", "adrs": ["ADR-URL-CANONICA-PERFILES"], "acta": "ACTA-CONGELAMIENTO-SEO-LANDINGS", "runtime": "legacy_query_param" },
+      { "id": "AP-07", "nombre": "Navegación", "madurez": "implementado", "runtime": "public/*.html links", "nota": "sin router formal" }
+    ],
+    "registroCuenta": [
+      { "id": "RC-01", "nombre": "Registro Usuario", "madurez": "implementado", "planMaestro": "PLAN-MAESTRO-REGISTRO-CUENTA", "runtime": "index.html inline auth" },
+      { "id": "RC-02", "nombre": "Registro Perfil", "madurez": "documentado", "planMaestro": "PLAN-MAESTRO-REGISTRO-CUENTA", "spec": "config-registro-adultos-schema", "runtime": "parcial_wizard" },
+      { "id": "RC-03", "nombre": "Registro Negocio", "madurez": "documentado", "spec": "config-registro-negocio-schema", "runtime": false },
+      { "id": "RC-04", "nombre": "Registro Anunciante", "madurez": "documentado", "spec": "config-registro-schema", "runtime": "parcial_solicitudes_anuncios" },
+      { "id": "RC-05", "nombre": "Registro Profesional", "madurez": "documentado", "spec": "config-registro-profesionista-schema", "runtime": false },
+      { "id": "RC-06", "nombre": "Verificación", "madurez": "documentado", "planMaestro": "PLAN-MAESTRO-REGISTRO-CUENTA", "spec": "config-seguridad-mvp-schema", "runtime": "parcial_email" },
+      { "id": "RC-07", "nombre": "Recuperación Cuenta", "madurez": "implementado", "runtime": "Firebase Auth reset", "spec": "config-seguridad-mvp-schema" },
+      { "id": "RC-08", "nombre": "Migración Usuarios→Perfiles", "madurez": "auditado", "acta": "ACTA-MIGRACION-USUARIOS-PERFILES", "auditorias": ["AUDITORIA-ACTA-MIGRACION-USUARIOS-PERFILES"], "runtime": false }
+    ],
+    "dashboards": [
+      { "id": "DB-01", "nombre": "Dashboards (capa)", "version": "1.0.0", "madurez": "congelado", "planMaestro": "PLAN-MAESTRO-DASHBOARDS", "spec": "SPEC-DASHBOARDS", "acta": "ACTA-CONGELAMIENTO-DASHBOARDS", "auditorias": ["AUDITORIA-DASHBOARDS"], "runtime": false },
+      { "id": "DB-02", "nombre": "Dashboard Usuario/Perfil", "madurez": "implementado", "runtime": "index.html panel + dashboard-rentero.html parcial" },
+      { "id": "DB-03", "nombre": "Dashboard Negocio", "madurez": "documentado", "planMaestro": "PLAN-MAESTRO-DASHBOARDS", "runtime": false },
+      { "id": "DB-04", "nombre": "Dashboard Profesional", "madurez": "documentado", "runtime": false },
+      { "id": "DB-05", "nombre": "Dashboard Anunciante", "madurez": "documentado", "runtime": false },
+      { "id": "DB-06", "nombre": "Dashboard Empresa", "madurez": "conceptual", "planMaestro": "PLAN-MAESTRO-DASHBOARDS", "runtime": false },
+      { "id": "DB-07", "nombre": "Dashboard Operador", "madurez": "conceptual", "anexo": "ANEXO-MESSENGER-INTEGRACION-DASHBOARDS", "runtime": false }
+    ],
+    "administracion": [
+      { "id": "AD-01", "nombre": "Admin General", "madurez": "implementado", "planMaestro": "PLAN-MAESTRO-ADMIN", "runtime": "public/admin.html" },
+      { "id": "AD-02", "nombre": "Moderación", "madurez": "implementado", "runtime": "admin.html denuncias" },
+      { "id": "AD-03", "nombre": "Seguridad Admin", "madurez": "documentado", "planMaestro": "PLAN-MAESTRO-ADMIN", "runtime": false },
+      { "id": "AD-04", "nombre": "Auditoría Admin", "madurez": "implementado", "runtime": "logsAdmin parcial" },
+      { "id": "AD-05", "nombre": "Cumplimiento", "madurez": "conceptual", "runtime": false },
+      { "id": "AD-06", "nombre": "Facturación Admin", "madurez": "inexistente", "runtime": false },
+      { "id": "AD-07", "nombre": "Banners Admin", "madurez": "implementado", "runtime": "admin solicitudes_anuncios" },
+      { "id": "AD-08", "nombre": "SEO Admin", "madurez": "congelado", "spec": "SPEC-SEO-LANDINGS", "runtime": false },
+      { "id": "AD-09", "nombre": "Messenger Admin", "madurez": "congelado", "spec": "SPEC-MESSENGER", "runtime": false }
+    ],
+    "monetizacion": [
+      { "id": "MO-01", "nombre": "Pagos", "madurez": "documentado", "planMaestro": "PLAN-MAESTRO-PAGOS-CONTRATOS", "runtime": "links Stripe/MP sin pasarela integrada" },
+      { "id": "MO-02", "nombre": "Contratos", "madurez": "documentado", "spec": "config-contratos-carihub-schema", "runtime": false },
+      { "id": "MO-03", "nombre": "Economía Social", "madurez": "documentado", "planMaestro": "PLAN-MAESTRO-ECONOMIA-SOCIAL", "runtime": false },
+      { "id": "MO-04", "nombre": "Propinas", "madurez": "documentado", "anexo": "ANEXO-AUTOPROPINAS-CUENTAS-RELACIONADAS", "runtime": false },
+      { "id": "MO-05", "nombre": "Premium/Contenido exclusivo", "madurez": "documentado", "planMaestro": "PLAN-MAESTRO-ECONOMIA-SOCIAL", "runtime": false },
+      { "id": "MO-06", "nombre": "Criptomonedas", "madurez": "documentado", "anexo": "ANEXO-CRIPTOMONEDAS-PAGOS-CONTRATOS", "runtime": false },
+      { "id": "MO-07", "nombre": "Comisiones", "madurez": "documentado", "planMaestro": "PLAN-MAESTRO-PAGOS-CONTRATOS", "runtime": false },
+      { "id": "MO-08", "nombre": "Wallets", "madurez": "inexistente", "runtime": false },
+      { "id": "MO-09", "nombre": "Planes perfiles", "madurez": "documentado", "spec": "config-precios-planes-perfiles-schema", "runtime": "parcial_precios" }
+    ],
+    "interacciones": [
+      { "id": "IN-01", "nombre": "Interacciones (capa)", "madurez": "documentado", "planMaestro": "PLAN-MAESTRO-INTERACCIONES", "observacion": "OBSERVACION-ARQUITECTONICA-INTERACCIONES", "runtime": false },
+      { "id": "IN-02", "nombre": "Favoritos", "madurez": "implementado", "runtime": "index.html gated anonymous" },
+      { "id": "IN-03", "nombre": "Seguidores", "madurez": "inexistente", "planMaestro": "PLAN-MAESTRO-INTERACCIONES", "runtime": false },
+      { "id": "IN-04", "nombre": "Conexiones/Red Contactos", "madurez": "documentado", "anexo": "ANEXO-RED-CONTACTOS-CONEXIONES-NEGOCIO", "runtime": false },
+      { "id": "IN-05", "nombre": "Estados", "madurez": "inexistente", "runtime": false },
+      { "id": "IN-06", "nombre": "Lives", "madurez": "inexistente", "runtime": false },
+      { "id": "IN-07", "nombre": "Publicaciones", "madurez": "inexistente", "runtime": false },
+      { "id": "IN-08", "nombre": "Notificaciones", "madurez": "conceptual", "planMaestro": "PLAN-MAESTRO-DASHBOARDS", "runtime": false }
+    ],
+    "publicidad": [
+      { "id": "PU-01", "nombre": "Banners/Publicidad (capa)", "madurez": "documentado", "planMaestro": "PLAN-MAESTRO-BANNERS-PUBLICIDAD", "anexo": "ANEXO-ESTRATEGICO-BANNERS-PUBLICIDAD", "runtime": "parcial" },
+      { "id": "PU-02", "nombre": "Inventario banners", "madurez": "implementado", "runtime": "banner-inventario-rotacion.js" },
+      { "id": "PU-03", "nombre": "Campañas", "madurez": "implementado", "runtime": "registro-banner.html" },
+      { "id": "PU-04", "nombre": "Estadísticas publicidad", "madurez": "conceptual", "runtime": false },
+      { "id": "PU-05", "nombre": "Contratos publicitarios", "madurez": "documentado", "spec": "config-promociones-banners-schema", "runtime": false }
+    ],
+    "inteligenciaArtificial": [
+      { "id": "IA-01", "nombre": "Agentes IA (capa)", "madurez": "documentado", "planMaestro": "PLAN-MAESTRO-AGENTES-IA", "analisis": "ANALISIS-MESSENGER-IA-SEGURIDAD", "runtime": false },
+      { "id": "IA-02", "nombre": "Agentes Públicos", "madurez": "conceptual", "runtime": false },
+      { "id": "IA-03", "nombre": "Agentes Dashboard", "madurez": "conceptual", "runtime": false },
+      { "id": "IA-04", "nombre": "Agentes Admin", "madurez": "conceptual", "runtime": false },
+      { "id": "IA-05", "nombre": "Agentes SEO", "madurez": "congelado", "spec": "SPEC-SEO-LANDINGS (SeoIAAdvisor)", "runtime": false },
+      { "id": "IA-06", "nombre": "Agentes Messenger", "madurez": "congelado", "spec": "SPEC-MESSENGER", "runtime": false },
+      { "id": "IA-07", "nombre": "Agentes Soporte", "madurez": "inexistente", "runtime": false }
+    ],
+    "diseno": [
+      { "id": "DI-01", "nombre": "ThemeEngine", "madurez": "documentado", "planMaestro": "PLAN-MAESTRO-THEMEENGINE", "observacion": "OBSERVACION-ARQUITECTONICA-THEMEENGINE", "runtime": "parcial_dashboard-rentero" },
+      { "id": "DI-02", "nombre": "Componentes UI", "madurez": "congelado", "spec": "config-registro-componentes-ui-schema + SPEC-RENDERENGINE", "runtime": "parcial" },
+      { "id": "DI-03", "nombre": "Tokens", "madurez": "congelado", "spec": "SPEC-SHARED-CORE", "acta": "ACTA-CONGELAMIENTO-SHARED-CORE", "runtime": "parcial_css" },
+      { "id": "DI-04", "nombre": "Plantillas", "madurez": "congelado", "spec": "config-renderizado-dinamico-schema", "runtime": false },
+      { "id": "DI-05", "nombre": "Temas", "madurez": "implementado", "runtime": "dashboard-rentero body.tema-*" }
+    ],
+    "internacionalizacion": [
+      { "id": "INT-01", "nombre": "Multi-moneda", "madurez": "documentado", "anexo": "ANEXO-CRIPTOMONEDAS-PAGOS-CONTRATOS", "nota": "MXN congelado; crypto futuro" },
+      { "id": "INT-02", "nombre": "Multi-país", "madurez": "conceptual", "spec": "SPEC-SEO-LANDINGS (futuro)", "runtime": "parcial_geo_MX" },
+      { "id": "INT-03", "nombre": "Multi-idioma", "madurez": "inexistente", "runtime": false },
+      { "id": "INT-04", "nombre": "Hreflang", "madurez": "documentado", "spec": "SPEC-SEO-LANDINGS (futuro)", "runtime": false },
+      { "id": "INT-05", "nombre": "Stablecoins", "madurez": "documentado", "anexo": "ANEXO-CRIPTOMONEDAS-PAGOS-CONTRATOS", "runtime": false },
+      { "id": "INT-06", "nombre": "Pasarelas futuras", "madurez": "documentado", "planMaestro": "PLAN-MAESTRO-PAGOS-CONTRATOS", "runtime": false }
+    ],
+    "mensajeria": [
+      { "id": "MS-01", "nombre": "Messenger (capa)", "version": "1.0.0", "madurez": "congelado", "spec": "SPEC-MESSENGER", "acta": "ACTA-CONGELAMIENTO-MESSENGER", "auditorias": ["AUDITORIA-SPEC-MESSENGER", "AUDITORIA-FINAL-SPEC-MESSENGER"], "fixtures": "fixtures-messenger-golden.json", "runtime": false },
+      { "id": "MS-02", "nombre": "Contactos Messenger", "madurez": "congelado", "spec": "SPEC-MESSENGER", "runtime": false },
+      { "id": "MS-03", "nombre": "Solicitudes conversación", "madurez": "congelado", "spec": "SPEC-MESSENGER", "runtime": false },
+      { "id": "MS-04", "nombre": "Conversaciones", "madurez": "congelado", "spec": "SPEC-MESSENGER", "runtime": false },
+      { "id": "MS-05", "nombre": "Adjuntos", "madurez": "conceptual", "spec": "SPEC-MESSENGER (fase post-MVP)", "runtime": false },
+      { "id": "MS-06", "nombre": "Moderación Messenger", "madurez": "congelado", "spec": "SPEC-MESSENGER", "runtime": false }
+    ]
+  }
+}

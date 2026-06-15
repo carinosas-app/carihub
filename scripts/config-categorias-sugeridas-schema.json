@@ -1,0 +1,351 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "versionSchema": "2026-06-10",
+  "version": "2026-06-10",
+  "schemaId": "categorias_sugeridas",
+  "nombre": "Categorías y subcategorías sugeridas por usuarios",
+  "descripcion": "El usuario propone categoría inexistente y continúa con formulario temporal. La categoría NO entra al catálogo oficial hasta decisión Admin.",
+  "aplicaA": [
+    "adultos",
+    "persona_independiente",
+    "profesionista_cedula",
+    "negocio_empresa",
+    "usuario_visitante",
+    "banners",
+    "cualquier_sector_futuro"
+  ],
+  "principioRector": {
+    "usuarioPuede": [
+      "sugerir nueva categoría principal",
+      "sugerir nueva subcategoría",
+      "sugerir nuevo alias/sinónimo",
+      "sugerir nueva profesión o giro",
+      "continuar registro con formulario temporal"
+    ],
+    "usuarioNoPuede": [
+      "publicar en catálogo oficial",
+      "decidir si es categoría o subcategoría",
+      "elegir formularioId final",
+      "elegir arquetipo final",
+      "elegir tipoPerfil final"
+    ],
+    "adminDecide": "Todo lo anterior + fusión, alias, rechazo, arquetipo adulto"
+  },
+  "preguntaClave": {
+    "pregunta": "¿Qué registro llena el usuario si su categoría/subcategoría no existe?",
+    "respuesta": "El formulario TEMPORAL que mejor describa su actividad según tipo de registro inferido o elegido por el usuario en el wizard. NO un formulario del catálogo inexistente."
+  },
+  "seleccionFormularioTemporal": {
+    "algoritmo": [
+      "1. Usuario indica que no encuentra su categoría/subcategoría",
+      "2. Sistema muestra guía: ¿qué tipo de actividad describe mejor?",
+      "3. Asignar formularioTemporalUsado según tabla formulariosTemporales",
+      "4. IA Registro puede sugerir temporal; usuario confirma; Admin valida",
+      "5. Crear solicitudes_categorias + marcar registro con usaCategoriaSugerida"
+    ],
+    "reglasRapidas": [
+      { "si": "sectorId === adultos OR usuario en flujo adultos", "temporal": "temporal_adultos" },
+      { "si": "actividad requiere cédula/licencia/título", "temporal": "temporal_profesionista_cedula" },
+      { "si": "local, tienda, empresa, agencia, institución, marca", "temporal": "temporal_negocio_empresa" },
+      { "si": "oficio, servicio personal, trabajo independiente", "temporal": "temporal_persona_independiente" },
+      { "si": "visitante que luego crea perfil", "temporal": "según actividad del perfil a crear" },
+      { "si": "banner/anunciante", "temporal": "flujo_banners_existente + campos sugerencia comercial" }
+    ]
+  },
+  "formulariosTemporales": {
+    "temporal_adultos": {
+      "id": "temporal_adultos",
+      "nombre": "Formulario Temporal Adultos",
+      "formularioIdBase": "adultos",
+      "cuandoUsar": "Categorías para Adultos — subcategoría no encontrada",
+      "camposMinimos": {
+        "publicos": [
+          "alias",
+          "categoriaSugerida",
+          "subcategoriaSugerida",
+          "descripcionActividad",
+          "geo.ciudad",
+          "geo.zona",
+          "modalidad",
+          "precioDesde",
+          "serviciosOTipoActividad",
+          "fotosMin"
+        ],
+        "privados": [
+          "contactoPrivado",
+          "ine",
+          "selfie",
+          "verificacionMayoriaEdad",
+          "aceptaTerminos",
+          "aceptaConsentimiento"
+        ],
+        "opcionales": ["facturacion"]
+      },
+      "fotosMin": 3,
+      "fotosMax": 10,
+      "verificacion": "persona + mayoría_edad",
+      "adminDecideDespues": [
+        "validez subcategoría adulta",
+        "duplicado con otro nombre",
+        "fusión",
+        "convertir en alias",
+        "rechazo",
+        "arquetipo adulto final"
+      ]
+    },
+    "temporal_persona_independiente": {
+      "id": "temporal_persona_independiente",
+      "nombre": "Formulario Temporal Persona Independiente",
+      "formularioIdBase": "persona_independiente",
+      "cuandoUsar": "Oficio, servicio personal o trabajo independiente",
+      "camposMinimos": {
+        "publicos": [
+          "aliasONombreComercial",
+          "categoriaSugerida",
+          "subcategoriaSugerida",
+          "servicioUOficio",
+          "descripcionActividad",
+          "experiencia",
+          "geo.ciudad",
+          "geo.zona",
+          "tarifaDesde",
+          "fotosTrabajos"
+        ],
+        "privados": ["telefonoPrivado", "ine", "selfie"],
+        "opcionales": ["facturacion"]
+      },
+      "fotosMin": 2,
+      "fotosMax": 8,
+      "verificacion": "persona (INE)"
+    },
+    "temporal_profesionista_cedula": {
+      "id": "temporal_profesionista_cedula",
+      "nombre": "Formulario Temporal Profesionista con Cédula",
+      "formularioIdBase": "profesionista_cedula",
+      "cuandoUsar": "Actividad con título, cédula o licencia profesional",
+      "camposMinimos": {
+        "publicos": [
+          "nombreProfesional",
+          "categoriaSugerida",
+          "subcategoriaSugerida",
+          "especialidadSugerida",
+          "geo.ciudad",
+          "geo.zona",
+          "precioConsultaOServicio"
+        ],
+        "privados": [
+          "numeroCedula",
+          "institucion",
+          "anio",
+          "comprobanteCedula",
+          "ine",
+          "selfie"
+        ],
+        "opcionales": ["facturacion"]
+      },
+      "fotosMin": 1,
+      "fotosMax": 6,
+      "verificacion": "cedula + INE"
+    },
+    "temporal_negocio_empresa": {
+      "id": "temporal_negocio_empresa",
+      "nombre": "Formulario Temporal Negocio o Empresa",
+      "formularioIdBase": "negocio_empresa",
+      "cuandoUsar": "Local, tienda, empresa, agencia, institución o marca",
+      "camposMinimos": {
+        "publicos": [
+          "nombreComercial",
+          "categoriaSugerida",
+          "subcategoriaSugerida",
+          "giroSugerido",
+          "descripcionNegocio",
+          "direccionOUbicacionPublica",
+          "horario",
+          "serviciosOProductos",
+          "fotosLocalOProductos"
+        ],
+        "privados": ["responsable", "telefonoPrivado", "rfcSiFactura"],
+        "opcionales": ["facturacion"]
+      },
+      "fotosMin": 3,
+      "fotosMax": 12,
+      "verificacion": "RFC + licencia si aplica",
+      "mapa": true
+    },
+    "temporal_banner": {
+      "id": "temporal_banner",
+      "nombre": "Flujo Banner existente + sugerencia comercial",
+      "nota": "No reemplaza registro-banner*.html; extiende solicitudes_anuncios",
+      "camposAdicionales": [
+        "categoriaComercialSugerida",
+        "subcategoriaComercialSugerida",
+        "descripcionNegocio",
+        "categoriaParecidaId"
+      ],
+      "adminDecide": ["agregar categoría comercial", "fusionar", "convertir en alias"]
+    }
+  },
+  "estadosSolicitudCategoria": {
+    "sugerida_usuario": { "orden": 1, "descripcion": "Usuario envió propuesta" },
+    "en_revision_admin": { "orden": 2, "descripcion": "En cola Admin / IA Arquitecto sugiere" },
+    "aprobada": { "orden": 3, "descripcion": "Admin aprobó — pendiente ingestión catálogo" },
+    "fusionada": { "orden": 4, "descripcion": "Reasignada a categoría existente" },
+    "convertida_en_alias": { "orden": 5, "descripcion": "No nueva entrada; alias/sinónimo en catálogo" },
+    "rechazada": { "orden": 6, "descripcion": "Propuesta de categoría rechazada" }
+  },
+  "estadosRegistroConCategoriaSugerida": {
+    "nota": "Extienden config-estados-revision-publicacion-schema.json",
+    "adicionales": {
+      "requiere_revision_categoria": {
+        "orden": 2.5,
+        "publico": false,
+        "descripcion": "Registro enviado pero categoría aún no existe en catálogo"
+      },
+      "categoria_autorizada": {
+        "orden": 2.6,
+        "publico": false,
+        "descripcion": "Admin aprobó categoría; registro puede continuar flujo normal"
+      },
+      "categoria_rechazada": {
+        "orden": 2.7,
+        "publico": false,
+        "descripcion": "Solo categoría rechazada; registro puede corregir o cancelar"
+      },
+      "autorizado_gratis": {
+        "orden": 4.5,
+        "publico": false,
+        "descripcion": "Promo primer mes gratis tras aprobar categoría + registro"
+      }
+    },
+    "secuenciaTipica": [
+      "borrador → enviado_revision + requiere_revision_categoria",
+      "requiere_revision_categoria → categoria_autorizada | categoria_rechazada | fusionada (reasignación)",
+      "categoria_autorizada → correccion_solicitada | autorizado_para_pago | autorizado_gratis | publicado",
+      "categoria_rechazada → correccion_solicitada | rechazado",
+      "… resto igual a flujo comercial estándar …"
+    ],
+    "reglaPublicacion": "NUNCA publicado/activo hasta categoria_autorizada Y revisión registro estándar"
+  },
+  "coleccionSolicitudes": {
+    "ruta": "solicitudes_categorias/{solicitudCategoriaId}",
+    "camposObligatorios": {
+      "usuarioId": "uid",
+      "registroId": "id perfil/solicitud vinculada",
+      "tipoRegistro": "adultos|persona_independiente|profesionista_cedula|negocio_empresa|banner|visitante",
+      "pais": "string",
+      "estado": "string",
+      "ciudad": "string",
+      "categoriaSugerida": "string — texto usuario",
+      "subcategoriaSugerida": "string — texto usuario",
+      "descripcionActividad": "string",
+      "categoriaParecidaId": "sectorId|subcategoriaId|null — sugerencia sistema",
+      "formularioTemporalUsado": "temporal_adultos|temporal_persona_independiente|…",
+      "formularioIdSugerido": "inferido por sistema; Admin confirma",
+      "arquetipoSugerido": "inferido; Admin confirma",
+      "tipoPerfilSugerido": "inferido; Admin confirma",
+      "estadoSolicitudCategoria": "estadosSolicitudCategoria",
+      "decisionAdmin": "aprobada|fusionada|convertida_en_alias|rechazada|null",
+      "categoriaOficialIdFinal": "sectorId|null",
+      "subcategoriaOficialIdFinal": "subcategoriaId|null",
+      "motivoRechazo": "string|null",
+      "revisadoPor": "admin uid",
+      "createdAt": "timestamp",
+      "updatedAt": "timestamp"
+    },
+    "indices": [
+      ["estadoSolicitudCategoria", "createdAt"],
+      ["usuarioId"],
+      ["subcategoriaSugerida"],
+      ["pais", "estado", "ciudad"]
+    ]
+  },
+  "camposEnRegistro": {
+    "coleccion": "perfiles | solicitudes_registro",
+    "campos": {
+      "usaCategoriaSugerida": "boolean",
+      "solicitudCategoriaId": "ref solicitudes_categorias",
+      "categoriaSugerida": "string — copia display",
+      "subcategoriaSugerida": "string",
+      "formularioTemporalUsado": "string",
+      "formularioIdFinal": "null hasta decisión Admin",
+      "arquetipoFinal": "null hasta decisión Admin",
+      "tipoPerfilFinal": "null hasta decisión Admin",
+      "categoriaOficialIdFinal": "sectorId|null",
+      "subcategoriaOficialIdFinal": "subcategoriaId|null",
+      "requiereRevisionCategoria": "boolean — true mientras no categoria_autorizada",
+      "decisionAdminCategoria": "objeto snapshot decisión"
+    },
+    "mientrasPendiente": {
+      "subcategoriaId": "null o placeholder interno _sugerida_{solicitudId}",
+      "sectorId": "sector más cercano o null",
+      "visiblePublico": false
+    }
+  },
+  "flujoAdminAprobacion": {
+    "acciones": {
+      "aprobar_nueva": [
+        "Crear entrada en sectores-carihub.js (si sector nuevo) o subcategoría",
+        "Agregar fila mapa-registro-categorias.json",
+        "Asignar formularioId, arquetipo, tipoPerfil oficiales",
+        "Asignar componenteResultados + componentePerfil (ver config-renderizado-dinamico-schema.json)",
+        "Definir camposPublicosResultados, camposPublicosPerfil, camposPrivados",
+        "Asignar schemaVersion inicial en catalogo_subcategorias",
+        "Poblar busqueda.keywords, aliases, sinonimos",
+        "Actualizar config-registro-*-schema si aplica",
+        "Regenerar índice búsqueda",
+        "Actualizar registro: snapshot render (componentes + schemaVersion)",
+        "estadoSolicitudCategoria → aprobada",
+        "registro → categoria_autorizada → continuar flujo pago/publicación",
+        "NO crear HTML nuevo en resultados.html ni perfil.html"
+      ],
+      "fusionar": [
+        "subcategoriaOficialIdFinal = existente",
+        "Guardar categoriaSugerida/subcategoriaSugerida como alias en busqueda",
+        "estadoSolicitudCategoria → fusionada",
+        "Reasignar registro sin nueva fila catálogo"
+      ],
+      "convertir_alias": [
+        "Sin nueva subcategoría",
+        "Agregar alias/sinonimo a subcategoria existente",
+        "estadoSolicitudCategoria → convertida_en_alias"
+      ],
+      "rechazar_categoria": [
+        "estadoSolicitudCategoria → rechazada",
+        "registro → categoria_rechazada",
+        "Opciones: correccion_solicitada | rechazado completo"
+      ]
+    },
+    "iaArquitecto": {
+      "puedeSugerir": ["formularioId", "arquetipo", "duplicados", "fusion candidata"],
+      "noPuede": ["aprobar", "publicar catálogo", "auto-ingestar"]
+    }
+  },
+  "integracionBusqueda": {
+    "referencia": "config-busqueda-sin-resultado-schema.json",
+    "opcionesUI": [
+      "no_encuentro_mi_categoria",
+      "solicitar_nueva_subcategoria",
+      "registrarme_proponiendo_categoria",
+      "avisarme_cuando_exista"
+    ],
+    "vinculo": {
+      "desdeBusquedaSinResultado": "crear solicitudes_categorias prellenada con palabraBuscada → subcategoriaSugerida",
+      "incrementarAgregado": "busquedas_sin_resultado + flag propusoCategoria: true",
+      "adminVistaUnificada": "Top búsquedas sin resultado + solicitudes_categorias pendientes"
+    }
+  },
+  "renderizadoDinamico": {
+    "referencia": "config-renderizado-dinamico-schema.json",
+    "coleccion": "catalogo_subcategorias/{subcategoriaId}",
+    "alPublicarPerfil": "Congelar componenteResultados, componentePerfil, schemaVersion, listas campos públicos",
+    "fallback": "ResultCardGenerico + ProfileLayoutGenerico"
+  },
+  "validacionesFuturas": [
+    "usaCategoriaSugerida implica solicitudCategoriaId válida",
+    "requiereRevisionCategoria bloquea publicado/activo",
+    "formularioTemporalUsado ∈ formulariosTemporales",
+    "subcategoriaOficialIdFinal obligatorio antes de publicar",
+    "Nunca indexar _sugerida_* en indice_busqueda público",
+    "Compatibilidad estados comerciales (pago, promo, post-pago)"
+  ]
+}

@@ -1,0 +1,268 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "tipo": "PLAN_MAESTRO",
+  "modulo": "INTERACCIONES",
+  "titulo": "Plan Maestro Interacciones CariHub",
+  "fecha": "2026-06-10",
+  "version": "1.0.0",
+  "estado": "PLAN_DISENO_DOCUMENTAL",
+  "modo": "Solo análisis y documentación — sin runtime/carpetas/mover/Firestore/deploy/commit; no modifica capas existentes",
+  "autorizadoPor": "product owner / usuario CariHub",
+  "basadoEn": [
+    "public/index.html (favoritos, visitas, denuncia)",
+    "public/admin.html (denuncias)",
+    "PLAN-MAESTRO-REGISTRO-CUENTA.json",
+    "PLAN-MAESTRO-DASHBOARDS.json",
+    "PLAN-MAESTRO-ADMIN.json",
+    "PLAN-MAESTRO-PAGOS-CONTRATOS.json",
+    "PLAN-MAESTRO-BANNERS-PUBLICIDAD.json",
+    "ANEXO-ESTRATEGICO-BANNERS-PUBLICIDAD.json",
+    "ACTA-CONGELAMIENTO-SHARED-CORE.json",
+    "ACTA-CONGELAMIENTO-RENDERENGINE.json",
+    "Messenger 1.0.0", "ValidationEngine 1.1.0", "FieldEngine 1.0.1",
+    "config-seguridad-mvp-schema.json"
+  ],
+  "objetivo": "Definir la arquitectura funcional, social, operativa, estadística, legal y de privacidad del ecosistema de Interacciones, separándolo de Messenger, Dashboards, Admin, Perfil Público y Agentes IA.",
+  "principioRector": "Interacciones gobierna SEÑALES SOCIALES (favoritos, visitas, seguir, likes, comentarios, reportes/bloqueos, stories/lives futuros) con TRANSPARENCIA DE ORIGEN (humano/sistema/indexador/agente). No es mensajería (Messenger), no es panel (Dashboards), no decide moderación (Admin ejecuta), no pinta público (RenderEngine). Métrica real ≠ estimada ≠ automática y siempre etiquetada.",
+
+  "inventarioActual": {
+    "favoritos": {
+      "estado": "PARCIAL", "almacenamiento": "usuarios/{uid}/favoritos/{perfilId}",
+      "evidencia": "index.html toggleFavorito (~L1420), prepararUsuarioFavoritos (~L1414)",
+      "limitacion": "gated en Firebase Anonymous: 'Favoritos se activará cuando habilitemos Firebase Anonymous' (~L1461)"
+    },
+    "visitas": { "estado": "CONTADOR", "evidencia": "index.html visitasTotales/visitasHoy (L58-59)", "limitacion": "sin colección de eventos ni origen" },
+    "denuncias": {
+      "estado": "DUAL_INCONSISTENTE",
+      "home": "enviarDenuncia → WhatsApp (no Firestore) (index.html ~L1368)",
+      "admin": "colección denuncias en admin.html (read/update)"
+    },
+    "noExisten": ["seguidores/seguidos", "likes/reacciones", "comentarios/respuestas", "menciones", "stories", "lives", "reputación", "ranking", "feed de actividad real", "bloqueos sociales"]
+  },
+
+  "frontera": {
+    "perteneceAInteracciones": ["favoritos/guardar", "compartir(evento)", "seguir/seguidos", "likes/reacciones", "comentarios/respuestas", "menciones", "visitas de perfil (eventos)", "feed de actividad", "reportes sociales", "bloqueos sociales", "engagement/métricas sociales", "stories/lives (futuro)", "reputación/ranking (futuro)", "boost legítimo de visibilidad"],
+    "noPertenece": ["mensajería P2P (Messenger)", "render público (RenderEngine)", "cobro/contratos (Pagos)", "inventario publicitario (Banners)", "decisión de moderación (Admin)"],
+    "quedaEnMessenger": ["conversaciones privadas", "contacto directo", "notificaciones de mensajes"],
+    "quedaEnDashboards": ["visualización de métricas propias", "panel de actividad del dueño"],
+    "quedaEnAdmin": ["cola de reportes sociales", "decisión aprobar/eliminar/suspender", "auditoría de moderación"],
+    "quedaEnPerfilPublico": ["render del contador público (si permitido)", "botones favorito/compartir/seguir"],
+    "quedaEnAgentesIA": ["recomendación/feed ranking (solo lectura)", "detección de spam/fraude (recomienda)", "nunca genera likes/comentarios reales"]
+  },
+
+  "modulosInternos": [
+    "InteractionLedger (eventos sociales append-only con origen)",
+    "VisitTracker (visitas con origen humano/sistema/indexador/agente)",
+    "FavoritesStore (favoritos por usuario)",
+    "FollowGraph (seguidores/seguidos)",
+    "EngagementMetrics (agregados real/estimado/automático)",
+    "ActivityFeed (actividad reciente)",
+    "CommentsEngine (comentarios/respuestas/menciones — futuro)",
+    "StoriesLivesEngine (stories/lives — futuro)",
+    "ReputationEngine (reputación/ranking — futuro)",
+    "SocialModerationQueue (reportes sociales)",
+    "BlockEngine (bloqueos sociales)",
+    "BoostEngine (impulso legítimo)",
+    "AntiFraudAntiSpam (dedup, rate-limit, patrones)",
+    "NotificationsBridge (bus → notificaciones)"
+  ],
+
+  "ciclosDeVida": {
+    "interaccion": "evento → validación(VE) → registro(origen, antifraude) → agregación métrica → (visible|interno) → caducidad/recalculo",
+    "visita": "request → clasificar origen (humano|sistema|indexador|agente) → dedup por sesión → contar solo humano en métrica pública → agregados",
+    "favorito": "toggle on → favoritos/{perfilId} → notif opcional al dueño → toggle off → historial",
+    "seguimiento": "follow → FollowGraph(seguidor→seguido) → notif → feed del seguido → unfollow → recalcular contadores",
+    "comentario": "crear → ValidationEngine + filtro spam/lenguaje → publicado|en_revision → respuestas/menciones → reporte → moderación → oculto/eliminado",
+    "storyLiveFuturo": "crear → revisión edad/categoría → activo(temporal) → interacciones → expira/cierra → archivado | moderado",
+    "reporteSocial": "usuario reporta → SocialModerationQueue → Admin revisa (PrivacyGuard) → acción(advertencia/ocultar/suspender/eliminar) → notif → log",
+    "bloqueoSocial": "usuario A bloquea B → BlockEngine → B no ve/interactúa con A → desbloqueo → restaurar"
+  },
+
+  "origenActividad": {
+    "tipos": ["humano", "sistema", "indexador", "agente_ia"],
+    "regla": "Toda interacción/visita lleva campo origen; SOLO 'humano' cuenta en métricas públicas; sistema/indexador/agente NUNCA inflan contadores públicos",
+    "transparencia": "UI distingue métrica real (humana), estimada (proyección) y automática (sistema); auditable",
+    "ejemplos": { "humano": "visita de usuario", "sistema": "revisión automática/health check", "indexador": "bot SEO/crawler", "agente_ia": "recomendador/moderador IA" }
+  },
+
+  "metricas": {
+    "sociales": ["favoritos", "seguidores", "likes", "comentarios", "compartidos", "visitas humanas", "engagement", "leads(via Banners)"],
+    "real": "eventos humanos validados server-side",
+    "estimada": "proyecciones (nunca presentadas como reales)",
+    "automatica": "actividad del sistema/indexador/agente — separada y etiquetada, no pública",
+    "politicaTransparencia": "Etiquetar origen; no inflar; separar humano vs no-humano; visitas del sistema/indexador excluidas del contador público"
+  },
+
+  "boostLegitimo": {
+    "definicion": "Impulso de visibilidad SIN inflar métricas (no crea likes/visitas falsas)",
+    "casos": [
+      { "id": "perfil_nuevo", "condicion": "perfil recién aprobado", "visibilidad": "boost temporal en resultados", "limite": "ventana corta" },
+      { "id": "story_live_activo", "condicion": "story/live en curso", "visibilidad": "badge + prioridad temporal", "limite": "mientras activo" },
+      { "id": "perfil_pagado", "condicion": "plan destacado/premium/vip (Pagos)", "visibilidad": "prioridad por plan", "nota": "ya en precios-perfiles" }
+    ],
+    "regla": "Boost afecta ORDEN/visibilidad, nunca los contadores de engagement"
+  },
+
+  "privacidadLegal": {
+    "noindex": "Contenido sensible/adulto y feeds sociales privados → noindex (RenderEngine PrivacyGuard)",
+    "contenidoAdulto": "límites por edad (mayoría de edad verificada) + límites por categoría (sector adultos)",
+    "limitesCategoria": "comentarios/stories pueden deshabilitarse por categoría sensible",
+    "visibilidad": {
+      "publico": ["favoritos count (si permitido)", "seguidores count (si permitido)", "comentarios públicos aprobados"],
+      "dueño": ["quién lo visitó (agregado/anónimo según política)", "sus seguidores", "sus métricas reales"],
+      "admin": ["todo + origen + reportes + trail de moderación"],
+      "soloInterno": ["actividad de sistema/indexador/agente", "métricas estimadas crudas", "señales antifraude"]
+    },
+    "terminosAviso": [
+      "Consentimiento de registro de interacciones/visitas y su uso",
+      "Política de métricas (real vs estimada vs automática)",
+      "Normas de comentarios/stories/lives (prohibido ilegal/odio/spam)",
+      "Política de reportes y bloqueos",
+      "Derecho a moderar/eliminar contenido",
+      "Tratamiento de datos de actividad (privacidad) y noindex de sensibles",
+      "Restricción de edad para contenido adulto"
+    ]
+  },
+
+  "antifraudeAntispam": {
+    "tecnicas": ["dedup por sesión/dispositivo", "rate-limit por usuario/acción", "validación server-side", "detección de patrones (IA recomienda)", "exclusión de bots/indexadores del conteo", "umbral de velocidad de likes/follows"],
+    "regla": "Ninguna métrica pública se incrementa sin validación de origen humano"
+  },
+
+  "relaciones": {
+    "sharedCore": "helpers/tokens/config (Shared/Core 1.0.0)",
+    "renderEngine": "pinta contadores/botones públicos desde snapshot; PrivacyGuard oculta sensibles (RenderEngine 1.0.0)",
+    "validationEngine": "valida comentarios/transiciones/reportes (VE 1.1.0)",
+    "fieldEngine": "campos sociales del perfil resueltos (FieldEngine 1.0.1)",
+    "registroCuenta": "identidad/edad/estado de cuenta condiciona interacciones",
+    "dashboards": "visualiza métricas reales del dueño (Dashboards 1.0.0)",
+    "admin": "cola de reportes + decisiones de moderación (PLAN-MAESTRO-ADMIN)",
+    "messenger": "contacto/notificaciones; Interacciones NO duplica mensajería (Messenger 1.0.0)",
+    "pagos": "boost por plan (no cobra en Interacciones)",
+    "contratos": "vigencia de plan condiciona boost",
+    "banners": "contactos/leads/visitas alimentan métricas de campañas (ANEXO Banners)",
+    "seo": "feeds sociales/sensibles noindex; comentarios públicos pueden aportar contenido (con moderación)",
+    "themeEngine": "estilo de widgets sociales por tema",
+    "agentesIA": "recomendación/feed ranking y antifraude — SOLO lectura/recomendación; nunca genera interacciones reales",
+    "seguridadMvp": "reputación/Turnstile/gates condicionan acciones sociales",
+    "avisoLegal": "cláusulas de interacciones/métricas/moderación/privacidad"
+  },
+
+  "matrices": {
+    "permisos": {
+      "favorito/seguir/like": ["usuario registrado(humano)"],
+      "comentar": ["usuario registrado verificado"],
+      "reportar": ["usuario registrado"],
+      "bloquear": ["usuario registrado(dueño de su grafo)"],
+      "moderar_comentarios": ["super_admin", "moderador", "operador(scope)"],
+      "ver_metricas_propias": ["dueño del perfil"],
+      "ver_origen_actividad": ["super_admin", "auditor"]
+    },
+    "visibilidad": {
+      "publico": ["counts permitidos", "comentarios aprobados"],
+      "dueño": ["sus métricas reales", "sus seguidores", "visitas agregadas"],
+      "admin": ["todo + origen + trail"],
+      "interno": ["actividad no-humana", "señales antifraude", "estimadas crudas"]
+    },
+    "notificaciones": {
+      "favorito_recibido": "dueño (opcional)",
+      "nuevo_seguidor": "dueño",
+      "comentario": "dueño + mencionados",
+      "reporte": "admin",
+      "bloqueo": "silencioso (sin notificar al bloqueado)",
+      "story_live": "seguidores (futuro)"
+    },
+    "origenVisibilidadUso": {
+      "humano": { "visibilidad": "pública/dueño", "uso": "métrica real, ranking, boost" },
+      "sistema": { "visibilidad": "interno", "uso": "health/checks, nunca contador público" },
+      "indexador": { "visibilidad": "interno", "uso": "excluido de métricas; SEO" },
+      "agente_ia": { "visibilidad": "interno/admin", "uso": "recomendación; nunca interacción real" }
+    },
+    "interaccionMetricaOrigenAntifraude": {
+      "favorito": { "metrica": "favoritos", "origen": "humano", "antifraude": "dedup por usuario" },
+      "visita": { "metrica": "visitas humanas", "origen": "clasificado", "antifraude": "excluir bots, dedup sesión" },
+      "like": { "metrica": "likes", "origen": "humano", "antifraude": "rate-limit + patrón" },
+      "follow": { "metrica": "seguidores", "origen": "humano", "antifraude": "umbral velocidad" },
+      "comentario": { "metrica": "comentarios", "origen": "humano verificado", "antifraude": "spam/lenguaje + rate-limit" }
+    },
+    "interaccionModeracionAccionAdmin": {
+      "comentario_reportado": ["revisar", "aprobar", "ocultar", "eliminar", "suspender_autor"],
+      "perfil_reportado": ["revisar(PrivacyGuard)", "advertir", "suspender", "restaurar"],
+      "story_live_reportado": ["revisar", "cortar_live", "eliminar_story", "suspender"],
+      "spam_detectado": ["limitar", "bloquear_accion", "escalar"]
+    },
+    "boostCondicionVisibilidad": {
+      "perfil_nuevo": { "condicion": "recién aprobado", "visibilidad": "boost temporal" },
+      "story_live_activo": { "condicion": "en curso", "visibilidad": "badge + prioridad" },
+      "plan_premium_vip": { "condicion": "contrato activo", "visibilidad": "prioridad por plan" }
+    }
+  },
+
+  "riesgos": [
+    { "id": "IX-R01", "nivel": "critico", "riesgo": "Métricas infladas por bots/sistema/agentes = engaño", "mitigacion": "campo origen + solo humano cuenta + antifraude server-side" },
+    { "id": "IX-R02", "nivel": "alto", "riesgo": "Visitas del indexador/sistema contadas como humanas", "mitigacion": "VisitTracker clasifica origen y excluye no-humano" },
+    { "id": "IX-R03", "nivel": "alto", "riesgo": "Comentarios/stories con contenido ilegal/abuso", "mitigacion": "ValidationEngine + moderación + reportes + límites por edad/categoría" },
+    { "id": "IX-R04", "nivel": "alto", "riesgo": "Denuncias hoy por WhatsApp (no trazable) vs colección admin", "mitigacion": "unificar en SocialModerationQueue/denuncias con trail" },
+    { "id": "IX-R05", "nivel": "alto", "riesgo": "Exposición de quién visita (privacidad/acoso)", "mitigacion": "agregados/anonimato según política + consentimiento" },
+    { "id": "IX-R06", "nivel": "medio", "riesgo": "Contenido sensible/adulto indexado", "mitigacion": "noindex + PrivacyGuard + límites de edad" },
+    { "id": "IX-R07", "nivel": "medio", "riesgo": "Spam de follows/likes", "mitigacion": "rate-limit + detección de patrones + umbrales" },
+    { "id": "IX-R08", "nivel": "medio", "riesgo": "Boost confundido con métrica (manipulación)", "mitigacion": "boost afecta orden, nunca contadores" },
+    { "id": "IX-R09", "nivel": "medio", "riesgo": "Agente IA generando interacciones falsas", "mitigacion": "IA solo recomienda/modera; deny-write a interacciones reales" },
+    { "id": "IX-R10", "nivel": "bajo", "riesgo": "Favoritos no operativos (Anonymous deshabilitado)", "mitigacion": "definir auth/estado en Registro/Cuenta" }
+  ],
+  "dependencias": {
+    "congeladas": ["Shared/Core 1.0.0", "RenderEngine 1.0.0", "ValidationEngine 1.1.0", "FieldEngine 1.0.1", "Dashboards 1.0.0", "Messenger 1.0.0", "Seguridad MVP 1.0.0"],
+    "planes": ["PLAN-MAESTRO-ADMIN (moderación)", "PLAN-MAESTRO-REGISTRO-CUENTA (identidad/edad)", "PLAN-MAESTRO-PAGOS-CONTRATOS (boost por plan)", "PLAN-MAESTRO-BANNERS (contactos/leads)"],
+    "precondiciones": ["auth/estado de cuenta resuelto", "InteractionLedger + origen", "rules para colecciones sociales", "antifraude server-side", "cláusulas legales actualizadas"]
+  },
+  "estructuraIdealFutura": {
+    "nota": "Lógica; sin crear carpetas",
+    "appInteracciones": "widgets sociales en Perfil Público/Resultados + feed en /cuenta + cola en /admin",
+    "core": ["InteractionLedger", "VisitTracker", "FollowGraph", "EngagementMetrics", "SocialModerationQueue", "BlockEngine", "BoostEngine", "AntiFraudAntiSpam"],
+    "separacion": "Interacciones (señales) ⟂ Messenger (mensajes) ⟂ Dashboards (visualización) ⟂ Admin (decisión) ⟂ RenderEngine (pintado)"
+  },
+  "rutasSugeridas": {
+    "publico": ["botones en /perfil/:slug (favorito/seguir/compartir/reportar)"],
+    "usuario": ["/cuenta/actividad", "/cuenta/favoritos", "/cuenta/seguidos", "/cuenta/notificaciones"],
+    "admin": ["/admin/reportes-sociales", "/admin/moderacion-comentarios", "/admin/moderacion-stories"]
+  },
+  "ordenRecomendadoImplementacion": [
+    { "paso": 1, "accion": "InteractionLedger + VisitTracker con campo origen (humano/sistema/indexador/agente) + antifraude base", "prioridad": "P0", "cierra": "IX-R01/IX-R02" },
+    { "paso": 2, "accion": "Unificar denuncias en SocialModerationQueue + integración Admin (trail)", "prioridad": "P0", "cierra": "IX-R04" },
+    { "paso": 3, "accion": "FavoritesStore + FollowGraph operativos (resolver auth) + notificaciones", "prioridad": "P1", "cierra": "IX-R10" },
+    { "paso": 4, "accion": "CommentsEngine con ValidationEngine + moderación + límites edad/categoría", "prioridad": "P1", "cierra": "IX-R03" },
+    { "paso": 5, "accion": "EngagementMetrics + transparencia real/estimada/automática + privacidad de visitas", "prioridad": "P1", "cierra": "IX-R05" },
+    { "paso": 6, "accion": "BoostEngine (orden, no métricas) + BlockEngine + cláusulas legales", "prioridad": "P2", "cierra": "IX-R08" },
+    { "paso": 7, "accion": "StoriesLivesEngine + ReputationEngine/ranking (futuro)", "prioridad": "P3", "cierra": "IX-R06" }
+  ],
+  "politicasRecomendadas": {
+    "metricasAutomaticasYActividadSistema": [
+      "Campo origen obligatorio en todo evento",
+      "Solo origen=humano incrementa métricas públicas",
+      "Sistema/indexador/agente → colecciones internas, etiquetadas, no públicas",
+      "Auditoría de métricas y separación real/estimada/automática",
+      "Excluir crawlers conocidos del conteo de visitas"
+    ],
+    "reportesBloqueosModeracionSocial": [
+      "Reporte siempre va a SocialModerationQueue (no WhatsApp)",
+      "Bloqueo es bidireccional y silencioso para el bloqueado",
+      "Moderación de comentarios/stories/lives con ValidationEngine + humano (Admin)",
+      "Acceso a contenido reportado con PrivacyGuard + log obligatorio",
+      "Límites por edad/categoría aplicados antes de publicar",
+      "Doble confirmación para suspender/eliminar autor (ver PLAN-MAESTRO-ADMIN)"
+    ]
+  },
+
+  "procedenciaPlanMaestro": {
+    "crearMd": true, "crearJson": true,
+    "justificacion": "Las interacciones existen de forma mínima y dispersa (favoritos gated, visitas como contador, denuncia por WhatsApp) y la visión social (seguir/likes/comentarios/stories/lives/reputación) requiere un plan propio con transparencia de métricas, privacidad y moderación antes de implementar.",
+    "siguientesPasos": ["PLAN-MAESTRO-AGENTES-IA", "ADR-METRICAS-SOCIALES (real vs automática)", "Anexo legal de interacciones/normas de publicación"]
+  },
+  "noModifica": [
+    "Capas congeladas y planes existentes (se referencian, no se alteran)",
+    "Producción, Firestore, deploy, commit"
+  ],
+  "changelog": [
+    { "version": "1.0.0", "fecha": "2026-06-10", "nota": "Plan maestro Interacciones: inventario, frontera, módulos, ciclos de vida, origen de actividad, métricas (real/estimada/automática), boost legítimo, privacidad/legal, antifraude, relaciones, matrices, riesgos, políticas y orden de implementación" }
+  ]
+}

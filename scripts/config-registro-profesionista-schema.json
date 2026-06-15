@@ -1,0 +1,927 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "versionSchema": "2026-06-10",
+  "version": "2026-06-10",
+  "formularioId": "profesionista_cedula",
+  "nombre": "Registro Profesionista con Cédula",
+  "descripcion": "Schema registry para profesionistas regulados con cédula profesional. Validación manual admin obligatoria.",
+  "alineacionAdultos": {
+    "comparteFieldRegistry": [
+      "geo",
+      "fotoPrincipal",
+      "galeria",
+      "tagline",
+      "sobreMi",
+      "metodosPago",
+      "contactoPublico",
+      "ineFrente",
+      "ineReverso",
+      "selfieVerificacion"
+    ],
+    "diferenciasClave": [
+      "cedulaProfesional obligatoria",
+      "sin galeria trabajos como foco principal",
+      "nivelRevisionAdmin alta"
+    ]
+  },
+  "meta": {
+    "fieldRegistry": {
+      "nombreProfesional": {
+        "id": "nombreProfesional",
+        "label": "Nombre profesional público",
+        "tipo": "text",
+        "maxLength": 80
+      },
+      "tagline": {
+        "id": "tagline",
+        "label": "Frase corta",
+        "tipo": "textarea",
+        "maxLength": 100,
+        "iaCopy": true
+      },
+      "profesion": {
+        "id": "profesion",
+        "label": "Profesión",
+        "tipo": "text",
+        "maxLength": 80
+      },
+      "especialidad": {
+        "id": "especialidad",
+        "label": "Especialidad",
+        "tipo": "text",
+        "maxLength": 120,
+        "iaCopy": false
+      },
+      "subespecialidad": {
+        "id": "subespecialidad",
+        "label": "Subespecialidad",
+        "tipo": "text",
+        "maxLength": 120
+      },
+      "geo": {
+        "id": "geo",
+        "label": "Ubicación de consulta",
+        "tipo": "geo",
+        "campos": [
+          "pais",
+          "estado",
+          "ciudad",
+          "zona"
+        ]
+      },
+      "consultorioDireccion": {
+        "id": "consultorioDireccion",
+        "label": "Dirección consultorio (opcional pública)",
+        "tipo": "address",
+        "mapa": false
+      },
+      "precioConsulta": {
+        "id": "precioConsulta",
+        "label": "Precio consulta desde (MXN)",
+        "tipo": "currency"
+      },
+      "unidadConsulta": {
+        "id": "unidadConsulta",
+        "label": "Unidad",
+        "tipo": "enum",
+        "opciones": [
+          "por_consulta",
+          "por_hora",
+          "por_sesion",
+          "por_visita_domicilio"
+        ]
+      },
+      "consultaEnLinea": {
+        "id": "consultaEnLinea",
+        "label": "Consulta en línea",
+        "tipo": "boolean"
+      },
+      "horarioAtencion": {
+        "id": "horarioAtencion",
+        "label": "Horario de atención",
+        "tipo": "schedule"
+      },
+      "idiomas": {
+        "id": "idiomas",
+        "label": "Idiomas",
+        "tipo": "tags"
+      },
+      "segurosAceptados": {
+        "id": "segurosAceptados",
+        "label": "Seguros aceptados",
+        "tipo": "tags"
+      },
+      "fotoPrincipal": {
+        "id": "fotoPrincipal",
+        "label": "Foto profesional",
+        "tipo": "image"
+      },
+      "galeria": {
+        "id": "galeria",
+        "label": "Galería consultorio / credenciales visibles",
+        "tipo": "image[]"
+      },
+      "sobreMi": {
+        "id": "sobreMi",
+        "label": "Presentación profesional",
+        "tipo": "richtext",
+        "iaCopy": true
+      },
+      "serviciosProfesionales": {
+        "id": "serviciosProfesionales",
+        "label": "Servicios que ofrece",
+        "tipo": "checklist",
+        "iaCopy": true
+      },
+      "metodosPago": {
+        "id": "metodosPago",
+        "label": "Métodos de pago",
+        "tipo": "checkboxGroup",
+        "opciones": [
+          "efectivo",
+          "transferencia",
+          "tarjeta",
+          "seguro"
+        ]
+      },
+      "contactoPublico": {
+        "id": "contactoPublico",
+        "label": "Contacto visible",
+        "tipo": "group",
+        "campos": [
+          "whatsapp",
+          "mensajeInterno",
+          "llamada",
+          "sitioWeb"
+        ]
+      },
+      "cedulaNumero": {
+        "id": "cedulaNumero",
+        "label": "Número de cédula profesional",
+        "tipo": "text",
+        "privado": true,
+        "maxLength": 30
+      },
+      "cedulaProfesion": {
+        "id": "cedulaProfesion",
+        "label": "Profesión según cédula",
+        "tipo": "text",
+        "privado": true
+      },
+      "cedulaEspecialidad": {
+        "id": "cedulaEspecialidad",
+        "label": "Especialidad según cédula",
+        "tipo": "text",
+        "privado": true
+      },
+      "cedulaInstitucion": {
+        "id": "cedulaInstitucion",
+        "label": "Institución que expide",
+        "tipo": "text",
+        "privado": true
+      },
+      "cedulaAnio": {
+        "id": "cedulaAnio",
+        "label": "Año de titulación",
+        "tipo": "number",
+        "privado": true,
+        "min": 1950,
+        "max": 2030
+      },
+      "cedulaComprobante": {
+        "id": "cedulaComprobante",
+        "label": "Comprobante / captura cédula",
+        "tipo": "file",
+        "privado": true
+      },
+      "cedulaEstado": {
+        "id": "cedulaEstado",
+        "label": "Estado de la república (cédula)",
+        "tipo": "text",
+        "privado": true
+      },
+      "telefonoPrivado": {
+        "id": "telefonoPrivado",
+        "label": "Teléfono privado",
+        "tipo": "phone",
+        "privado": true
+      },
+      "ineFrente": {
+        "id": "ineFrente",
+        "label": "INE frente",
+        "tipo": "file",
+        "privado": true
+      },
+      "ineReverso": {
+        "id": "ineReverso",
+        "label": "INE reverso",
+        "tipo": "file",
+        "privado": true
+      },
+      "selfieVerificacion": {
+        "id": "selfieVerificacion",
+        "label": "Selfie verificación",
+        "tipo": "file",
+        "privado": true
+      },
+      "deseoFacturar": {
+        "id": "deseoFacturar",
+        "label": "Deseo facturar",
+        "tipo": "boolean",
+        "privado": true
+      },
+      "rfc": {
+        "id": "rfc",
+        "label": "RFC",
+        "tipo": "rfc",
+        "privado": true
+      },
+      "razonSocial": {
+        "id": "razonSocial",
+        "label": "Razón social",
+        "tipo": "text",
+        "privado": true
+      },
+      "codigoPostalFiscal": {
+        "id": "codigoPostalFiscal",
+        "label": "C.P. fiscal",
+        "tipo": "text",
+        "privado": true
+      },
+      "emailFacturacion": {
+        "id": "emailFacturacion",
+        "label": "Email facturación",
+        "tipo": "email",
+        "privado": true
+      },
+      "regimenFiscal": {
+        "id": "regimenFiscal",
+        "label": "Régimen fiscal",
+        "tipo": "select",
+        "privado": true
+      },
+      "usoCFDI": {
+        "id": "usoCFDI",
+        "label": "Uso CFDI",
+        "tipo": "select",
+        "privado": true
+      },
+      "terminosAceptados": {
+        "id": "terminosAceptados",
+        "label": "Términos aceptados",
+        "tipo": "boolean",
+        "privado": true
+      }
+    },
+    "base": {
+      "camposPublicosResultados": [
+        "subcategoriaId",
+        "nombreProfesional",
+        "profesion",
+        "especialidad",
+        "tagline",
+        "geo",
+        "precioConsulta",
+        "fotoPrincipal"
+      ],
+      "camposPublicosPerfil": [
+        "subcategoriaId",
+        "nombreProfesional",
+        "profesion",
+        "especialidad",
+        "subespecialidad",
+        "tagline",
+        "geo",
+        "consultorioDireccion",
+        "precioConsulta",
+        "unidadConsulta",
+        "consultaEnLinea",
+        "horarioAtencion",
+        "idiomas",
+        "segurosAceptados",
+        "fotoPrincipal",
+        "galeria",
+        "sobreMi",
+        "serviciosProfesionales",
+        "metodosPago",
+        "contactoPublico"
+      ],
+      "camposPrivados": [
+        "cedulaNumero",
+        "cedulaProfesion",
+        "cedulaEspecialidad",
+        "cedulaInstitucion",
+        "cedulaAnio",
+        "cedulaComprobante",
+        "cedulaEstado",
+        "telefonoPrivado",
+        "ineFrente",
+        "ineReverso",
+        "selfieVerificacion",
+        "deseoFacturar",
+        "terminosAceptados"
+      ],
+      "obligatorios": [
+        "nombreProfesional",
+        "profesion",
+        "especialidad",
+        "geo.pais",
+        "geo.estado",
+        "geo.ciudad",
+        "geo.zona",
+        "precioConsulta",
+        "fotoPrincipal",
+        "tagline",
+        "cedulaNumero",
+        "cedulaProfesion",
+        "cedulaInstitucion",
+        "cedulaAnio",
+        "cedulaComprobante",
+        "ineFrente",
+        "ineReverso",
+        "selfieVerificacion",
+        "telefonoPrivado",
+        "terminosAceptados"
+      ],
+      "opcionales": [
+        "subespecialidad",
+        "consultorioDireccion",
+        "consultaEnLinea",
+        "segurosAceptados",
+        "galeria",
+        "idiomas"
+      ],
+      "fotosMin": 2,
+      "fotosMax": 8,
+      "fotosMaxPorPlan": {
+        "basico": 2,
+        "destacado": 4,
+        "premium": 6,
+        "vip": 8
+      },
+      "noPublicos": [
+        "cedulaNumero",
+        "cedulaProfesion",
+        "cedulaEspecialidad",
+        "cedulaInstitucion",
+        "cedulaAnio",
+        "cedulaComprobante",
+        "cedulaEstado",
+        "telefonoPrivado",
+        "ineFrente",
+        "ineReverso",
+        "selfieVerificacion",
+        "rfc",
+        "razonSocial",
+        "facturacion"
+      ],
+      "verificacionTipo": "profesionista_cedula",
+      "facturacionTipo": "cfdi_opcional",
+      "nivelRevisionAdmin": "alta",
+      "validacionCedula": {
+        "modo": "manual_admin",
+        "futuroApiColegio": "opcional_fase_2",
+        "camposCotejo": [
+          "cedulaNumero",
+          "cedulaProfesion",
+          "cedulaEspecialidad",
+          "cedulaInstitucion",
+          "cedulaAnio",
+          "nombreProfesional"
+        ]
+      }
+    },
+    "verificacionTipos": {
+      "profesionista_cedula": {
+        "campos": [
+          "cedulaNumero",
+          "cedulaComprobante",
+          "ineFrente",
+          "ineReverso",
+          "selfieVerificacion"
+        ],
+        "obligatorios": [
+          "cedulaNumero",
+          "cedulaComprobante",
+          "ineFrente",
+          "ineReverso",
+          "selfieVerificacion"
+        ],
+        "validacionAdmin": "manual_obligatoria",
+        "pasosAdmin": [
+          "cotejar número cédula",
+          "verificar profesión y especialidad",
+          "validar comprobante",
+          "cotejar INE con selfie",
+          "aprobar o rechazar con nota"
+        ],
+        "notas": "La cédula nunca se muestra públicamente. Badge 'Verificado' solo tras aprobación admin."
+      }
+    },
+    "facturacionTipos": {
+      "cfdi_opcional": {
+        "cuando": "deseoFacturar === true",
+        "camposRequeridos": [
+          "rfc",
+          "razonSocial",
+          "codigoPostalFiscal",
+          "emailFacturacion",
+          "regimenFiscal",
+          "usoCFDI"
+        ],
+        "notas": "Común en consultorios y despachos."
+      }
+    },
+    "coherenciaGlobal": [
+      {
+        "id": "CEDULA_COMPLETA",
+        "si": "true",
+        "requiere": [
+          "cedulaNumero",
+          "cedulaProfesion",
+          "cedulaInstitucion",
+          "cedulaAnio",
+          "cedulaComprobante"
+        ],
+        "severidad": "error"
+      },
+      {
+        "id": "ESPECIALIDAD_COHERENTE",
+        "si": "especialidad != cedulaEspecialidad && cedulaEspecialidad",
+        "severidad": "advertencia",
+        "mensaje": "La especialidad pública difiere de la cédula; admin revisará."
+      },
+      {
+        "id": "PRECIO_CONSULTA",
+        "si": "precioConsulta <= 0",
+        "severidad": "error"
+      },
+      {
+        "id": "FOTOS_MIN",
+        "si": "true",
+        "requiere": [
+          "fotoPrincipal"
+        ],
+        "severidad": "error"
+      },
+      {
+        "id": "CONSULTA_ONLINE",
+        "si": "consultaEnLinea == true",
+        "requiere": [
+          "contactoPublico.sitioWeb || contactoPublico.mensajeInterno"
+        ],
+        "severidad": "advertencia"
+      },
+      {
+        "id": "FACTURACION_COMPLETA",
+        "si": "deseoFacturar == true",
+        "requiere": [
+          "rfc",
+          "razonSocial"
+        ],
+        "severidad": "error"
+      }
+    ],
+    "componentesUI": {
+      "ResultCardProfesional": "Tarjeta: foto + nombre + especialidad + precio consulta + badge verificado",
+      "ProfileLayoutProfesional": "Perfil: credenciales resumen + horario + servicios + contacto (sin cédula)"
+    },
+    "firestoreRecomendado": {
+      "colecciones": {
+        "config_registro_profesionista": "Schema por subcategoriaId",
+        "solicitudes_verificacion": "Cola prioritaria admin",
+        "perfiles": "verificacion.cedulaEstado: pendiente|aprobada|rechazada"
+      },
+      "documentoPerfil": {
+        "raiz": [
+          "usuarioId",
+          "formularioId",
+          "subcategoriaId",
+          "sectorId",
+          "arquetipo",
+          "planId"
+        ],
+        "verificacion": {
+          "cedulaEstado": "pendiente",
+          "cedulaRevisadaPor": null,
+          "cedulaNotaAdmin": null
+        }
+      }
+    }
+  },
+  "plantillasArquetipo": {
+    "profesional_salud": {
+      "tipoPerfil": "persona",
+      "componentes": {
+        "resultados": "ResultCardProfesional",
+        "perfil": "ProfileLayoutProfesional"
+      },
+      "camposPublicosPerfil": [
+        "segurosAceptados",
+        "consultaEnLinea"
+      ],
+      "obligatoriosExtra": [
+        "serviciosProfesionales",
+        "horarioAtencion"
+      ],
+      "fotosMin": 2,
+      "fotosMax": 6,
+      "keywordsIA": [
+        "médico",
+        "dentista",
+        "especialista",
+        "consulta",
+        "clínica",
+        "salud"
+      ]
+    },
+    "profesional_salud_mental": {
+      "heredaDe": "profesional_salud",
+      "obligatoriosExtra": [
+        "consultaEnLinea"
+      ],
+      "keywordsIA": [
+        "psicólogo",
+        "psiquiatra",
+        "terapia",
+        "salud mental"
+      ],
+      "textosAyuda": {
+        "sobreMi": "Tono profesional y empático. No incluyas diagnósticos."
+      }
+    },
+    "profesional_tecnico_legal": {
+      "tipoPerfil": "persona",
+      "componentes": {
+        "resultados": "ResultCardProfesional",
+        "perfil": "ProfileLayoutProfesional"
+      },
+      "obligatoriosExtra": [
+        "serviciosProfesionales"
+      ],
+      "opcionalesExtra": [
+        "consultorioDireccion"
+      ],
+      "fotosMin": 1,
+      "fotosMax": 4,
+      "keywordsIA": [
+        "abogado",
+        "contador",
+        "arquitecto",
+        "ingeniero",
+        "notario",
+        "despacho"
+      ]
+    },
+    "profesional_veterinario": {
+      "tipoPerfil": "persona",
+      "componentes": {
+        "resultados": "ResultCardProfesional",
+        "perfil": "ProfileLayoutProfesional"
+      },
+      "obligatoriosExtra": [
+        "serviciosProfesionales",
+        "horarioAtencion"
+      ],
+      "fotosMin": 2,
+      "fotosMax": 6,
+      "keywordsIA": [
+        "veterinario",
+        "mascotas",
+        "consulta animal",
+        "clínica veterinaria"
+      ]
+    }
+  },
+  "subcategorias": [
+    {
+      "subcategoriaId": "medicos-generales",
+      "nombre": "Médicos Generales",
+      "sectorId": "salud",
+      "arquetipo": "profesional_salud",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.profesional_salud",
+      "delta": {},
+      "keywordsIA": [
+        "médicos generales",
+        "salud"
+      ]
+    },
+    {
+      "subcategoriaId": "especialistas-medicos",
+      "nombre": "Especialistas Médicos",
+      "sectorId": "salud",
+      "arquetipo": "profesional_salud",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.profesional_salud",
+      "delta": {},
+      "keywordsIA": [
+        "especialistas médicos",
+        "salud"
+      ]
+    },
+    {
+      "subcategoriaId": "psicologos",
+      "nombre": "Psicólogos",
+      "sectorId": "salud",
+      "arquetipo": "profesional_salud",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.profesional_salud",
+      "delta": {},
+      "keywordsIA": [
+        "psicólogos",
+        "salud"
+      ]
+    },
+    {
+      "subcategoriaId": "ambulancias-y-traslado-medico",
+      "nombre": "Ambulancias y Traslado Médico",
+      "sectorId": "salud",
+      "arquetipo": "profesional_salud",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.profesional_salud",
+      "delta": {},
+      "keywordsIA": [
+        "ambulancias y traslado médico",
+        "salud"
+      ]
+    },
+    {
+      "subcategoriaId": "equipo-medico",
+      "nombre": "Equipo Médico",
+      "sectorId": "salud",
+      "arquetipo": "profesional_salud",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.profesional_salud",
+      "delta": {},
+      "keywordsIA": [
+        "equipo médico",
+        "salud"
+      ]
+    },
+    {
+      "subcategoriaId": "examenes-medicos-para-empresas",
+      "nombre": "Exámenes Médicos para Empresas",
+      "sectorId": "salud",
+      "arquetipo": "profesional_salud",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.profesional_salud",
+      "delta": {},
+      "keywordsIA": [
+        "exámenes médicos para empresas",
+        "salud"
+      ]
+    },
+    {
+      "subcategoriaId": "servicios-medicos-empresariales",
+      "nombre": "Servicios Médicos Empresariales",
+      "sectorId": "salud",
+      "arquetipo": "profesional_salud",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.profesional_salud",
+      "delta": {},
+      "keywordsIA": [
+        "servicios médicos empresariales",
+        "salud"
+      ]
+    },
+    {
+      "subcategoriaId": "seguros-medicos",
+      "nombre": "Seguros Médicos",
+      "sectorId": "salud",
+      "arquetipo": "profesional_salud",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.profesional_salud",
+      "delta": {},
+      "keywordsIA": [
+        "seguros médicos",
+        "salud"
+      ]
+    },
+    {
+      "subcategoriaId": "gastos-medicos-mayores",
+      "nombre": "Gastos Médicos Mayores",
+      "sectorId": "salud",
+      "arquetipo": "profesional_salud",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.profesional_salud",
+      "delta": {},
+      "keywordsIA": [
+        "gastos médicos mayores",
+        "salud"
+      ]
+    },
+    {
+      "subcategoriaId": "abogados",
+      "nombre": "Abogados",
+      "sectorId": "profesionales",
+      "arquetipo": "profesional_tecnico_legal",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.profesional_tecnico_legal",
+      "delta": {},
+      "keywordsIA": [
+        "abogados",
+        "profesionales"
+      ]
+    },
+    {
+      "subcategoriaId": "contadores",
+      "nombre": "Contadores",
+      "sectorId": "profesionales",
+      "arquetipo": "profesional_tecnico_legal",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.profesional_tecnico_legal",
+      "delta": {},
+      "keywordsIA": [
+        "contadores",
+        "profesionales"
+      ]
+    },
+    {
+      "subcategoriaId": "ingenieros",
+      "nombre": "Ingenieros",
+      "sectorId": "profesionales",
+      "arquetipo": "profesional_tecnico_legal",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.profesional_tecnico_legal",
+      "delta": {},
+      "keywordsIA": [
+        "ingenieros",
+        "profesionales"
+      ]
+    },
+    {
+      "subcategoriaId": "psicopedagogo",
+      "nombre": "Psicopedagogo",
+      "sectorId": "educacion",
+      "arquetipo": "profesional_salud",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.profesional_salud",
+      "delta": {},
+      "keywordsIA": [
+        "psicopedagogo",
+        "educacion"
+      ]
+    },
+    {
+      "subcategoriaId": "pedagogo",
+      "nombre": "Pedagogo",
+      "sectorId": "educacion",
+      "arquetipo": "profesional_salud",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.profesional_salud",
+      "delta": {},
+      "keywordsIA": [
+        "pedagogo",
+        "educacion"
+      ]
+    },
+    {
+      "subcategoriaId": "docente-certificado",
+      "nombre": "Docente Certificado",
+      "sectorId": "educacion",
+      "arquetipo": "profesional_salud",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.profesional_salud",
+      "delta": {},
+      "keywordsIA": [
+        "docente certificado",
+        "educacion"
+      ]
+    },
+    {
+      "subcategoriaId": "especialista-en-educacion-especial",
+      "nombre": "Especialista en Educación Especial",
+      "sectorId": "educacion",
+      "arquetipo": "profesional_salud",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.profesional_salud",
+      "delta": {},
+      "keywordsIA": [
+        "especialista en educación especial",
+        "educacion"
+      ]
+    },
+    {
+      "subcategoriaId": "medico-veterinario",
+      "nombre": "Médico Veterinario",
+      "sectorId": "mascotas",
+      "arquetipo": "profesional_veterinario",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.profesional_veterinario",
+      "delta": {},
+      "keywordsIA": [
+        "médico veterinario",
+        "mascotas"
+      ]
+    },
+    {
+      "subcategoriaId": "veterinario-especialista",
+      "nombre": "Veterinario Especialista",
+      "sectorId": "mascotas",
+      "arquetipo": "profesional_veterinario",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.profesional_veterinario",
+      "delta": {},
+      "keywordsIA": [
+        "veterinario especialista",
+        "mascotas"
+      ]
+    },
+    {
+      "subcategoriaId": "cirujano-veterinario",
+      "nombre": "Cirujano Veterinario",
+      "sectorId": "mascotas",
+      "arquetipo": "profesional_veterinario",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.profesional_veterinario",
+      "delta": {
+        "obligatoriosExtra": [
+          "galeria"
+        ]
+      },
+      "keywordsIA": [
+        "cirujano veterinario",
+        "mascotas"
+      ]
+    },
+    {
+      "subcategoriaId": "farmacia-veterinaria",
+      "nombre": "Farmacia Veterinaria",
+      "sectorId": "mascotas",
+      "arquetipo": "profesional_veterinario",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.profesional_veterinario",
+      "delta": {},
+      "keywordsIA": [
+        "farmacia veterinaria",
+        "mascotas"
+      ]
+    },
+    {
+      "subcategoriaId": "contador-publico",
+      "nombre": "Contador Público",
+      "sectorId": "industria",
+      "arquetipo": "profesional_tecnico_legal",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.profesional_tecnico_legal",
+      "delta": {},
+      "keywordsIA": [
+        "contador público",
+        "industria"
+      ]
+    },
+    {
+      "subcategoriaId": "administrador-de-empresas",
+      "nombre": "Administrador de Empresas",
+      "sectorId": "industria",
+      "arquetipo": "profesional_salud",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.profesional_salud",
+      "delta": {},
+      "keywordsIA": [
+        "administrador de empresas",
+        "industria"
+      ]
+    },
+    {
+      "subcategoriaId": "ingeniero-industrial",
+      "nombre": "Ingeniero Industrial",
+      "sectorId": "industria",
+      "arquetipo": "profesional_tecnico_legal",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.profesional_tecnico_legal",
+      "delta": {},
+      "keywordsIA": [
+        "ingeniero industrial",
+        "industria"
+      ]
+    },
+    {
+      "subcategoriaId": "ingeniero-en-procesos",
+      "nombre": "Ingeniero en Procesos",
+      "sectorId": "industria",
+      "arquetipo": "profesional_tecnico_legal",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.profesional_tecnico_legal",
+      "delta": {},
+      "keywordsIA": [
+        "ingeniero en procesos",
+        "industria"
+      ]
+    },
+    {
+      "subcategoriaId": "especialista-en-seguridad-industrial",
+      "nombre": "Especialista en Seguridad Industrial",
+      "sectorId": "industria",
+      "arquetipo": "profesional_salud",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.profesional_salud",
+      "delta": {},
+      "keywordsIA": [
+        "especialista en seguridad industrial",
+        "industria"
+      ]
+    }
+  ]
+}

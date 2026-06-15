@@ -1,0 +1,336 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "$id": "https://carihub.app/schemas/acta-congelamiento-cuentas.json",
+  "tipo": "ACTA_CONGELAMIENTO_CUENTAS",
+  "titulo": "Acta formal de congelamiento del diseño de cuentas e identidadUsuario CariHub",
+  "versionActa": "1.0.0",
+  "fechaCongelamiento": "2026-06-09",
+  "fechaBaselineValidacion": "2026-06-10T13:40:30.165Z",
+  "autorizacion": {
+    "estado": "APROBADA",
+    "autorizadoPor": "product owner / usuario CariHub",
+    "fechaAutorizacion": "2026-06-09",
+    "alcance": "Congelamiento formal del diseño identidadUsuario, hub usuarios, perfiles separados, tipos y roles de cuenta, estados, relaciones FK y upgrade visitante. Sin runtime, sin Firestore, sin producción."
+  },
+  "versionCuentas": {
+    "id": "cuentas-2026-06-10",
+    "semver": "1.0.0",
+    "versionSchema": "2026-06-10",
+    "versionMetaIdentidadUsuario": "2026-06-10",
+    "nota": "Alineado con config-cuentas-usuario-schema.json versionSchema. Incrementar semver según procedimientoVersionado al autorizar cambios futuros."
+  },
+  "dependenciasCongeladas": {
+    "catalogo": {
+      "estado": "CONGELADO",
+      "referencia": "scripts/ACTA-CONGELAMIENTO-CATALOGO.json",
+      "version": "catalogo-2026-06-10",
+      "semver": "1.0.0"
+    },
+    "produccionActual": {
+      "estado": "LEGACY_NO_MODIFICADO",
+      "modelo": "usuarios/{uid} monolito cuenta+perfil",
+      "nota": "Este acta congela diseño objetivo; no autoriza migración ni cambios en Firestore."
+    }
+  },
+  "metricasFinales": {
+    "validacionIdentidadUsuario": {
+      "estado": "PASS",
+      "checksDocumentados": 16,
+      "checksPass": 16,
+      "checksFail": 0,
+      "comando": "node scripts/validar-schemas-registro.mjs",
+      "funcion": "validateIdentidadUsuario()",
+      "reporte": "scripts/validacion-schemas-report.json"
+    },
+    "coleccionesDiseñadas": {
+      "hub": "usuarios/{usuarioId}",
+      "perfiles": "perfiles/{perfilId}",
+      "anunciantes": "anunciantes/{anuncianteId} (opcional MVP)",
+      "contratos_perfiles": "contratos_perfiles/{contratoId}",
+      "contratos_banners": "contratos_banners/{contratoId}",
+      "solicitudes_categorias": "solicitudes_categorias/{id}",
+      "solicitudes_anuncios": "solicitudes_anuncios/{id}",
+      "denuncias": "denuncias/{id}",
+      "pagos": "pagos/{id}",
+      "mensajeriaFutura": "conversaciones/{id}/mensajes/{id}"
+    },
+    "subcoleccionesUsuario": [
+      "usuarios/{usuarioId}/favoritos/{perfilId}",
+      "usuarios/{usuarioId}/notificaciones/{id}",
+      "usuarios/{usuarioId}/bloqueos/{usuarioBloqueadoId}",
+      "usuarios/{usuarioId}/conversaciones_meta/{conversacionId}",
+      "usuarios/{usuarioId}/dispositivos/{deviceId}"
+    ]
+  },
+  "identidadUsuario": {
+    "definicion": "Capa única de identidad: usuarioId = Firebase Auth uid. Separa cuenta (hub) de perfil público, anunciante, contratos y mensajería.",
+    "schemaDetalle": "scripts/config-cuentas-usuario-schema.json",
+    "metaSeccion": "scripts/config-registro-schema.meta.json → identidadUsuario",
+    "principiosCongelados": [
+      "usuarioId nunca cambia — es Firebase Auth uid",
+      "visitante → perfil público = upgrade de cuenta, no nuevo usuario Auth",
+      "perfil público vive en perfiles/{perfilId}; usuario guarda punteros y cache",
+      "contratos, pagos y promociones referencian usuarioId siempre",
+      "banners usan anuncianteId (MVP = usuarioId) + usuarioId",
+      "mensajes, favoritos, denuncias y bloqueos referencian usuarioId",
+      "admin es rol en roles[], nunca tipoCuentaPrincipal de perfil público",
+      "anunciante es rol; puede coexistir con visitante sin perfil público"
+    ]
+  },
+  "usuariosComoHub": {
+    "ruta": "usuarios/{usuarioId}",
+    "documentId": "usuarioId = Auth uid",
+    "proposito": "Identidad, estados de cuenta/verificación/mensajería, punteros comerciales, cache denormalizado — NO datos extensos del perfil público",
+    "camposRaizObligatorios": ["usuarioId", "email", "tipoCuentaPrincipal", "estadoCuenta", "createdAt", "updatedAt"],
+    "subobjetos": ["cuenta", "perfil", "anunciante", "verificacion", "mensajeria", "comercial", "seguridad", "preferencias"],
+    "notaLegacy": "Producción actual mezcla cuenta y perfil en el mismo documento; diseño objetivo los separa sin migrar hasta fase autorizada."
+  },
+  "perfilesSeparados": {
+    "ruta": "perfiles/{perfilId}",
+    "regla": "Ningún perfil público sin usuarioId obligatorio",
+    "perfilId": "string — puede = usuarioId en migración legacy o UUID nuevo",
+    "camposObligatorios": [
+      "usuarioId",
+      "perfilId",
+      "formularioId",
+      "sectorId",
+      "subcategoriaId",
+      "arquetipo",
+      "tipoPerfil",
+      "estadoRevision",
+      "tienePerfilPublico",
+      "schemaVersion",
+      "componenteResultados",
+      "componentePerfil",
+      "createdAt",
+      "updatedAt"
+    ],
+    "subcolecciones": ["borradores/{borradorId}", "historial_estados/{id}"],
+    "punterosEnUsuario": {
+      "perfilPrincipalId": "perfil público activo principal",
+      "perfilIds": "array de todos los perfiles del usuario (escalabilidad 1..N)"
+    }
+  },
+  "tipoCuentaPrincipal": {
+    "campoSchema": "usuarios.tipoCuenta (alias documentado: tipoCuentaPrincipal)",
+    "descripcion": "Tipo comercial/registro primario de la cuenta. Distinto de roles[] que pueden añadir capacidades sin cambiar el tipo principal del perfil.",
+    "valores": ["visitante", "adulto", "independiente", "profesionista", "empresa"],
+    "mapeoFormularioId": {
+      "visitante": "usuario_visitante",
+      "adulto": "adultos",
+      "independiente": "persona_independiente",
+      "profesionista": "profesionista_cedula",
+      "empresa": "negocio_empresa"
+    },
+    "excluidosDeTipoCuentaPrincipal": {
+      "anunciante": "Es rol en roles[] — capacidad comercial banners, no formulario de registro de perfil",
+      "admin": "Es rol en roles[] — capacidad sistema, nunca tipoCuenta de perfil público",
+      "moderador": "Rol futuro en roles[]",
+      "auditor": "Rol futuro en roles[]"
+    }
+  },
+  "rolesCuenta": {
+    "campo": "usuarios.roles[]",
+    "valores": ["anunciante", "admin", "moderador", "auditor"],
+    "multirol": true,
+    "ejemplos": [
+      "visitante + roles:['anunciante'] — puede contratar banners sin perfil público",
+      "adulto + roles:['anunciante'] — perfil público + banners",
+      "cualquiera + roles:['admin'] — acceso panel sin ser tipoCuenta admin"
+    ],
+    "reglaAdmin": "admin ∈ roles[]; prohibido tipoCuentaPrincipal = admin"
+  },
+  "visitanteUpgrade": {
+    "regla": "Mismo usuarioId; actualizar tipoCuentaPrincipal + crear perfiles/{perfilId}; conservar subcolecciones y referencias",
+    "sinNuevoAuthUser": true,
+    "schemaWizard": "config-registro-visitante-schema.json → WizardCrearPerfilDesdeVisitante",
+    "condicionContratoVigente": "Visitante con contrato vigente → upgrade sin recargo registro (config-registro-visitante-schema.json)",
+    "transiciones": [
+      { "de": "visitante", "a": "adulto", "accion": "crear perfil + tipoCuentaPrincipal=adulto + formularioId=adultos" },
+      { "de": "visitante", "a": "independiente", "accion": "crear perfil + tipoCuentaPrincipal=independiente" },
+      { "de": "visitante", "a": "profesionista", "accion": "crear perfil + tipoCuentaPrincipal=profesionista" },
+      { "de": "visitante", "a": "empresa", "accion": "crear perfil + tipoCuentaPrincipal=empresa" },
+      { "de": "visitante", "a": "anunciante", "accion": "roles+=anunciante; puede sin perfil público" },
+      { "de": "cualquiera", "a": "anunciante", "accion": "roles+=anunciante sin cambiar tipoCuentaPrincipal" }
+    ],
+    "conservarEnUpgrade": [
+      "usuarioId",
+      "usuarios/{id}/favoritos",
+      "usuarios/{id}/notificaciones",
+      "contratos_perfiles donde usuarioId",
+      "pagos donde usuarioId",
+      "solicitudes_categorias donde usuarioId",
+      "solicitudes_anuncios donde uidAnunciante/usuarioId",
+      "denuncias donde reportanteId",
+      "preferencias",
+      "estadísticas agregadas por usuarioId",
+      "mensajes futuros"
+    ]
+  },
+  "estadosCuenta": {
+    "campo": "usuarios.estadoCuenta | usuarios.cuenta.estadoCuenta",
+    "valores": ["activa", "suspendida", "eliminada", "pendiente_activacion"],
+    "uso": "Control de acceso global a registro, publicación y operaciones comerciales"
+  },
+  "estadosVerificacion": {
+    "campo": "usuarios.verificacion.estadoVerificacion",
+    "valores": ["sin_enviar", "enviada", "en_revision", "aprobada", "rechazada", "vencida"],
+    "niveles": ["cuenta_basica", "persona_estandar", "profesional_cedula", "negocio"],
+    "uso": "INE, cédula profesional, RFC negocio — según formularioId y arquetipo"
+  },
+  "estadosMensajeria": {
+    "campo": "usuarios.mensajeria.estadoMensajeria",
+    "valores": ["habilitada", "restringida", "suspendida", "solo_lectura"],
+    "camposRelacionados": ["puedeEnviar", "puedeRecibir", "bloqueosCount", "reportesCount"],
+    "reglaEnvio": "Mensaje permitido solo si estadoMensajeria lo autoriza y no hay bloqueo activo",
+    "implementacion": "Futura — Messenger no autorizado; diseño congelado para no migrar después"
+  },
+  "relacionesPermitidas": {
+    "modelo": "hibrido_punteros_simples_con_subcolecciones",
+    "grafo": {
+      "usuarioId": {
+        "referenciadoPor": [
+          "perfiles.usuarioId",
+          "contratos_perfiles.usuarioId",
+          "contratos_banners.usuarioId",
+          "pagos.usuarioId",
+          "solicitudes_categorias.usuarioId",
+          "solicitudes_anuncios.usuarioId",
+          "denuncias.reportanteId",
+          "denuncias.reportadoId",
+          "mensajes.emisorId",
+          "mensajes.receptorId",
+          "favoritos (path)",
+          "bloqueos (path)"
+        ]
+      },
+      "perfilId": {
+        "referenciadoPor": [
+          "favoritos.perfilId",
+          "denuncias.perfilId",
+          "contratos_perfiles.perfilId (opcional)",
+          "mensajes.perfilContextoId"
+        ]
+      },
+      "anuncianteId": {
+        "mvp": "anuncianteId = usuarioId por defecto",
+        "referenciadoPor": [
+          "contratos_banners.anuncianteId",
+          "solicitudes_anuncios",
+          "anuncios"
+        ]
+      },
+      "contratoId": {
+        "referenciadoPor": ["pagos.contratoId", "renovaciones", "usuarios.comercial.contratoActivoId"]
+      }
+    },
+    "reglasFKCongeladas": {
+      "perfiles.usuarioId": { "obligatorio": true, "ref": "usuarios/{usuarioId}" },
+      "perfilPublicado.sinUsuarioId": { "prohibido": true },
+      "contratos_perfiles.usuarioId": { "obligatorio": true },
+      "contratos_banners.usuarioId": { "obligatorio": true },
+      "contratos_banners.anuncianteId": { "obligatorio": true, "mvp": "usuarioId" },
+      "pagos.usuarioId": { "obligatorio": true },
+      "pagos.contratoId": { "obligatorio": "si_aplica_contrato" },
+      "solicitudes_categorias.usuarioId": { "obligatorio": true },
+      "solicitudes_anuncios.usuarioId": { "obligatorio": true, "alternativa": "uidAnunciante" },
+      "denuncias.perfilId": { "obligatorio": true },
+      "denuncias.reportanteId": { "opcional": false, "documentado": true },
+      "mensajes.emisorId": { "obligatorio": true, "cuando": "messenger_implementado" },
+      "mensajes.receptorId": { "obligatorio": true, "cuando": "messenger_implementado" }
+    },
+    "queriesPreferidasSobreArrays": {
+      "solicitudesCategoria": "query solicitudes_categorias where usuarioId — no array en raíz usuarios",
+      "banners": "query solicitudes_anuncios + anuncios por anuncianteId — no bannerIds en raíz",
+      "conversaciones": "subcolección usuarios/{id}/conversaciones_meta — no array en raíz"
+    }
+  },
+  "archivosBaseline": {
+    "identidadYCuentas": [
+      "scripts/config-cuentas-usuario-schema.json",
+      "scripts/config-registro-schema.meta.json"
+    ],
+    "registroVisitante": [
+      "scripts/config-registro-visitante-schema.json"
+    ],
+    "comercialRelacionado": [
+      "scripts/config-contratos-carihub-schema.json",
+      "scripts/config-promociones-banners-schema.json",
+      "scripts/config-estados-revision-publicacion-schema.json"
+    ],
+    "validacion": [
+      "scripts/validar-schemas-registro.mjs",
+      "scripts/validacion-schemas-report.json"
+    ],
+    "actaLegible": "scripts/ACTA-CONGELAMIENTO-CUENTAS.md"
+  },
+  "reglasModificacionFutura": [
+    {
+      "id": "C1_AUTORIZACION_EXPLICITA",
+      "regla": "Ningún cambio al diseño de cuentas sin autorización explícita del product owner."
+    },
+    {
+      "id": "C2_VALIDACION_IDENTIDAD",
+      "regla": "Tras cambio autorizado, validar-schemas-registro.mjs debe mantener validateIdentidadUsuario() PASS (16/16 o documentado)."
+    },
+    {
+      "id": "C3_VERSION_INCREMENTO",
+      "regla": "Incrementar versionCuentas.semver y versionSchema en schemas afectados."
+    },
+    {
+      "id": "C4_USUARIOID_INMUTABLE",
+      "regla": "Prohibido diseño que requiera cambiar usuarioId o crear nuevo Auth user en upgrade visitante."
+    },
+    {
+      "id": "C5_PERFILES_SEPARADOS",
+      "regla": "Prohibido re-monolitizar perfil público en usuarios/{uid} sin acta MAJOR y plan de migración."
+    },
+    {
+      "id": "C6_ADMIN_ROL",
+      "regla": "admin permanece en roles[]; nunca tipoCuentaPrincipal."
+    },
+    {
+      "id": "C7_SIN_FIRESTORE_SILENCIOSO",
+      "regla": "Este acta no autoriza cambios en firestore.rules ni colecciones de producción."
+    },
+    {
+      "id": "C8_CATALOGO_INDEPENDIENTE",
+      "regla": "Cambios de cuentas no reabren catálogo congelado salvo autorización explícita cruzada."
+    }
+  ],
+  "procedimientoVersionado": {
+    "semver": {
+      "MAJOR": "Cambio incompatible en modelo hub/perfiles, eliminación de estado, cambio FK obligatoria, nuevo tipoCuentaPrincipal",
+      "MINOR": "Nuevo rol, nuevo subobjeto en usuarios, nueva subcolección documentada",
+      "PATCH": "Documentación, clarificación reglas FK, sin cambio semántico"
+    },
+    "historialVersiones": [
+      {
+        "semver": "1.0.0",
+        "versionCuentas": "cuentas-2026-06-10",
+        "fecha": "2026-06-09",
+        "evento": "CONGELAMIENTO_INICIAL",
+        "validacion": "identidadUsuario 16/16 PASS",
+        "notas": "Diseño pre-runtime; producción legacy sin migrar."
+      }
+    ]
+  },
+  "impactoMotoresCongelado": {
+    "FieldEngine": "Resuelve campos de perfiles/{perfilId} según catálogo; valida estadoCuenta antes de wizard — diseño pendiente",
+    "ValidationEngine": "FK usuarioId + estados cuenta/verificación/mensajería",
+    "RenderEngine": "Snapshot en perfiles; usuarioId no expuesto en render público — NO AUTORIZADO",
+    "Messenger": "estadoMensajeria + emisorId/receptorId + bloqueos — NO AUTORIZADO"
+  },
+  "restriccionesVigentes": {
+    "runtime": false,
+    "firestore": false,
+    "produccion": false,
+    "deploy": false,
+    "migracionDatos": false,
+    "fieldEngine": false,
+    "validationEngine": false,
+    "renderEngine": false,
+    "messenger": false
+  },
+  "estado": "CONGELADO"
+}

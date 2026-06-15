@@ -1,0 +1,232 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "tipo": "PLAN_MAESTRO",
+  "modulo": "ADMIN",
+  "titulo": "Plan Maestro Admin CariHub",
+  "fecha": "2026-06-10",
+  "version": "1.0.0",
+  "estado": "PLAN_DISENO_DOCUMENTAL",
+  "modo": "Solo análisis y documentación — sin runtime/carpetas/mover/Firestore/deploy/commit; no modifica capas existentes",
+  "autorizadoPor": "product owner / usuario CariHub",
+  "basadoEn": [
+    "scripts/config-admin-arquitectura-completa-schema.json (8 módulos + RBAC fase1/2)",
+    "scripts/SPEC-DASHBOARDS.json (CONGELADO 1.0.0)",
+    "scripts/PLAN-MAESTRO-DASHBOARDS.json",
+    "scripts/PLAN-MAESTRO-REGISTRO-CUENTA.json",
+    "scripts/ACTA-CONGELAMIENTO-SHARED-CORE.json",
+    "scripts/ACTA-CONGELAMIENTO-RENDERENGINE.json",
+    "scripts/config-seguridad-mvp-schema.json",
+    "scripts/AUDITORIA-ARQUITECTONICA-GLOBAL-CARIHUB.json",
+    "public/admin.html",
+    "firestore.rules"
+  ],
+  "objetivo": "Definir la arquitectura funcional del módulo Admin, separándolo de Dashboards, Cuenta, Messenger, Banners y Pagos, y formalizar RBAC granular, ámbitos, colas de revisión, flujos y auditoría.",
+  "principioRector": "Admin DECIDE; los motores EJECUTAN; la IA solo LEE y RECOMIENDA. Admin es superficie privada aislada (/admin), con RBAC por rol + ámbito, auditoría obligatoria y doble confirmación en acciones críticas. No hace onboarding (Cuenta), no es la gestión diaria del usuario (Dashboards).",
+  "alineacionConSchemaExistente": "Extiende config-admin-arquitectura-completa-schema.json (no lo modifica): conserva sus 8 módulos y roles fase2, y añade roles soporte/operador y permisos por ÁMBITO (geo/categoría/usuario/perfil) como propuesta. La adopción granular requeriría versionar ese schema (no se aplica aquí).",
+
+  "fronteraDefinitiva": {
+    "admin": "Moderación global, aprobaciones, RBAC, catálogo/schemas, precios, seguridad/auditoría, control transversal de módulos.",
+    "dashboards": "Gestión diaria del usuario sobre lo propio (no modera ni aprueba). Operador = Admin con scope reducido.",
+    "cuenta": "Onboarding/credenciales/verificación (produce solicitudes que Admin revisa).",
+    "messenger": "P2P de usuarios; Admin controla políticas/suspensión, no lee contenido salvo soporte/denuncia con auditoría.",
+    "banners": "Inventario/creativos; Admin aprueba/activa.",
+    "pagos": "Cobro; Admin confirma/vincula contrato, no procesa tarjeta."
+  },
+
+  "inventarioActual": {
+    "archivo": "public/admin.html (monolítico)",
+    "rbacActual": "email único: ADMIN_EMAIL='carinosas.anuncios@gmail.com' (línea 31) + firestore.rules isAdmin()",
+    "limites": "LIMITE_USUARIOS=150 (línea 32) — tope hardcoded no escalable",
+    "coleccionesOperadas": ["usuarios (update/delete directos)", "denuncias (read/update)", "solicitudes_anuncios (read/update)", "soporte_mensajes (read/add)", "logsAdmin (parcial)"],
+    "auditoria": "logsAdmin con adminEmail; sin trail granular (antes/después) ni acceso a privados auditado",
+    "schemaDiseno": "config-admin-arquitectura-completa-schema.json define 8 módulos: catalogo_subcategorias, formularios_schemas, comercial, renderizado_dinamico, busqueda_inteligente, revision_moderacion, seguridad, ia_arquitecto",
+    "gaps": ["RBAC granular", "ámbitos geo/categoría", "soporte/operador roles", "doble confirmación", "auditoría completa", "2FA", "rules para colecciones de diseño"]
+  },
+
+  "objetivosResponsabilidadesLimites": {
+    "objetivos": ["Garantizar calidad/seguridad del catálogo, perfiles, banners y pagos", "Moderar contenido y resolver denuncias/soporte", "Controlar RBAC y auditoría", "Supervisar automatizaciones e IA"],
+    "responsabilidades": ["Aprobar/rechazar/suspender/restaurar", "Gestionar catálogo/schemas/precios", "Auditar accesos a datos privados", "Definir políticas y flags del sistema"],
+    "limites": ["IA nunca auto-ejecuta", "Acciones críticas con doble confirmación + auditoría", "Operador acotado por ámbito", "No procesa pagos (Pagos) ni renderiza público (RenderEngine)"]
+  },
+
+  "pantallasPrincipales": ["Resumen/Operación", "Revisión y Moderación (cola)", "Usuarios y Cuentas", "Perfiles", "Catálogo y Subcategorías", "Formularios y Schemas", "Comercial (precios/contratos)", "Publicidad/Banners", "Pagos y Renovaciones", "Denuncias y Soporte", "Seguridad y RBAC", "Auditoría y Logs", "Búsqueda Inteligente", "IA Arquitecto/Moderador/Comercial/Seguridad", "Configuración del Sistema"],
+  "rutasSugeridas": {
+    "base": "/admin (aislado, privado, noindex)",
+    "operador": "/operador (scope acotado; subconjunto de /admin)",
+    "rutas": ["/admin/resumen", "/admin/revision", "/admin/usuarios", "/admin/perfiles", "/admin/catalogo", "/admin/schemas", "/admin/comercial", "/admin/banners", "/admin/pagos", "/admin/denuncias", "/admin/soporte", "/admin/seguridad", "/admin/auditoria", "/admin/busqueda", "/admin/ia", "/admin/config"]
+  },
+
+  "rolesAdmin": [
+    { "id": "super_admin", "descripcion": "Control total; único que gestiona RBAC y rules", "ambitoDefault": "global" },
+    { "id": "admin", "descripcion": "Operación amplia salvo RBAC/rules críticos y borrados masivos", "ambitoDefault": "global|asignado" },
+    { "id": "moderador", "descripcion": "Revisión de perfiles/negocios/anunciantes/categorías/denuncias", "ambitoDefault": "asignado" },
+    { "id": "soporte", "descripcion": "Atención soporte_mensajes y guía a usuarios; sin moderación de catálogo", "ambitoDefault": "asignado" },
+    { "id": "auditor", "descripcion": "Solo lectura total + logs + export; sin escritura", "ambitoDefault": "global_lectura" },
+    { "id": "operador", "descripcion": "Staff con permisos delegados granulares por ámbito (combina moderación/soporte/revisión acotada)", "ambitoDefault": "estricto_asignado" },
+    { "id": "comercial_admin", "descripcion": "Precios/promociones/contratos/renovaciones (del schema existente)", "ambitoDefault": "global" },
+    { "id": "catalogo_admin", "descripcion": "Catálogo/búsqueda/render asignación (del schema existente)", "ambitoDefault": "global" },
+    { "id": "ia_bot", "descripcion": "IA Arquitecto/Moderador/Comercial/Seguridad — solo lectura/recomendación", "escritura": false }
+  ],
+  "ambitos": {
+    "modelo": "admins/{uid}.scopes[] = { tipo, valores[] }; toda consulta/acción se intersecta con el scope",
+    "tipos": ["global", "pais", "estado", "ciudad", "sector", "categoria", "subcategoria", "usuario", "perfil"],
+    "regla": "Sin scope coincidente → acción denegada + log. super_admin = global implícito."
+  },
+
+  "matrices": {
+    "rolPermisos": {
+      "super_admin": ["todo", "rbac", "rules", "borrado", "rollback", "config_sistema"],
+      "admin": ["revision", "usuarios(no borrado masivo)", "perfiles", "comercial(lectura/edición sin rollback)", "banners", "pagos_confirmar", "denuncias", "soporte", "busqueda(lectura)"],
+      "moderador": ["revision_perfiles", "revision_categorias", "denuncias", "suspender_perfil(ambito)", "ver_privados_con_auditoria"],
+      "soporte": ["soporte_mensajes", "lectura_usuario(ambito)", "crear_ticket", "escalar"],
+      "auditor": ["lectura_total", "logs", "export", "ia_arquitecto(lectura)"],
+      "operador": ["subconjunto_moderador/soporte por scope estricto", "editar_items_asignados"],
+      "comercial_admin": ["precios", "promociones", "contratos", "renovaciones", "pago_confirmar"],
+      "catalogo_admin": ["catalogo", "busqueda", "render_asignar", "schemas(lectura)"],
+      "ia_bot": ["lectura", "generar_informe(recomendacion)"]
+    },
+    "ambitoAlcance": {
+      "global": "todo el sistema",
+      "pais": "perfiles/banners/denuncias del país asignado",
+      "estado": "subconjunto estatal",
+      "ciudad": "subconjunto municipal",
+      "sector/categoria/subcategoria": "items del sector/categoría asignados",
+      "usuario": "un usuario y sus perfiles/contratos",
+      "perfil": "un perfil específico"
+    },
+    "adminModulosControlados": {
+      "usuarios_cuentas": ["super_admin", "admin", "moderador(lectura)", "soporte(lectura ambito)", "auditor"],
+      "perfiles": ["super_admin", "admin", "moderador", "operador(scope)"],
+      "catalogo_schemas": ["super_admin", "catalogo_admin"],
+      "comercial_pagos_contratos": ["super_admin", "comercial_admin", "admin(confirmar)"],
+      "banners": ["super_admin", "admin", "comercial_admin", "moderador(revision)"],
+      "denuncias_soporte": ["super_admin", "admin", "moderador", "soporte", "operador(scope)"],
+      "messenger_control": ["super_admin", "admin", "moderador(politicas/suspension)", "soporte(con auditoria)"],
+      "automatizaciones_ia": ["super_admin", "admin(supervisa)", "ia_bot(lectura)"],
+      "seo": ["super_admin", "catalogo_admin(meta/landings politicas)"],
+      "themeEngine": ["super_admin", "admin(plantillas autorizadas)"],
+      "seguridad_rbac_auditoria": ["super_admin", "auditor(lectura)"]
+    },
+    "accionesRevisionAprobacionSuspension": {
+      "revision": ["perfil_enviado_revision", "negocio_revision", "anunciante_revision", "banner_revision", "documentos_INE_selfie", "categoria_sugerida"],
+      "aprobacion": ["perfil_aprobar", "negocio_aprobar", "banner_activar", "categoria_aprobar", "pago_confirmar", "publicar"],
+      "rechazo": ["perfil_rechazar(motivo)", "banner_rechazar", "categoria_rechazar", "correccion_solicitada"],
+      "suspension": ["perfil_suspender", "cuenta_suspender", "banner_pausar", "mensajeria_suspender"],
+      "restauracion": ["perfil_restaurar", "cuenta_reactivar", "banner_reactivar", "mensajeria_habilitar"]
+    },
+    "accionesControlReforzado": {
+      "dobleConfirmacion": ["suspender/eliminar usuario", "eliminar perfil", "fusionar categoría", "rollback catálogo/precios", "cambios masivos", "deploy rules", "migración render masiva"],
+      "auditoriaObligatoria": ["acceso INE/selfie/datos privados", "cambio de rol/RBAC", "cambio de precio", "aprobación/rechazo/suspensión", "lectura de conversación por soporte/denuncia", "export de datos"],
+      "aprobacionSuperior": ["cambio de RBAC (solo super_admin)", "rollback de precios", "eliminación de datos", "migración masiva", "cambio de reglas de seguridad", "override de scope de operador"]
+    }
+  },
+
+  "modulosInternos": [
+    "AdminRouter (RBAC + scope)",
+    "ColaRevisionUnificada (máquina de estados config-estados-revision-publicacion)",
+    "RBACEngine (admins/{uid} + custom claims + scopes[])",
+    "AuditTrail (logsAdmin append-only: antes/después/motivo/ipHash)",
+    "PrivacyAccessGuard (acceso a INE/selfie con log obligatorio)",
+    "DoubleConfirmGuard (acciones críticas)",
+    "IAOrchestrator-admin (ia_arquitecto/moderador/comercial/seguridad, solo recomendación)",
+    "NotificacionesAdmin (bus → admin)",
+    "ConfigSistema (feature flags, mantenimiento)"
+  ],
+
+  "estadosAdministrables": {
+    "perfil": ["borrador", "enviado_revision", "aprobado", "rechazado", "actualizacion_pendiente", "publicado", "suspendido", "vencido", "restaurado"],
+    "cuenta": ["activa", "suspendida", "restringida", "bloqueada", "eliminada"],
+    "banner": ["solicitud", "en_revision", "aprobado", "activo", "pausado", "rechazado", "vencido"],
+    "categoria": ["borrador", "en_revision", "aprobada", "activa", "fusionada", "alias", "rechazada", "suspendida"],
+    "fuente": "config-estados-revision-publicacion-schema.json + Cuentas/Seguridad MVP"
+  },
+  "colasRevision": ["perfiles_enviado_revision", "categorias_sugeridas", "banners_solicitud", "correcciones", "post_pago", "denuncias", "soporte"],
+  "flujos": {
+    "aprobacion": "cola → revisar (PrivacyGuard si privados) → aprobar → snapshot/publicar → notificar → log",
+    "rechazo": "revisar → rechazar(motivo obligatorio) → notificar → log",
+    "suspension": "detectar/denuncia → doble confirmación → suspender → notificar → log + alerta seguridad",
+    "restauracion": "solicitud/revisión → aprobación superior si aplica → restaurar → notificar → log"
+  },
+  "notificacionesAdmin": ["denuncia_recibida", "solicitud_pendiente", "pago_pendiente", "alerta_seguridad", "cambio_masivo", "ia_informe_listo"],
+  "historialBitacoras": {
+    "logsAdmin": "append-only: adminId, emailAdmin, modulo, accion, entidadTipo, entidadId, antes, despues, motivo, impacto, resultadoValidacion, fecha, ipHash, userAgentHash",
+    "logsSeguridad": "RBAC, accesos privados, deploy rules, alertas",
+    "logs_acceso_privado": "INE/selfie/teléfono — quién, cuándo, motivo",
+    "retencion": "política por dominio; auditoría inmutable"
+  },
+
+  "relacionesConModulos": {
+    "dashboards": "Admin aprueba/modera lo que Dashboards muestra; Operador = Admin con scope (definido en PLAN-MAESTRO-DASHBOARDS)",
+    "registroCuenta": "Cuenta produce solicitudes (registro/verificación) que Admin revisa",
+    "messenger": "Admin define políticas y suspende mensajería; lee contenido solo por soporte/denuncia con auditoría (no vigilancia masiva)",
+    "banners": "Admin aprueba/activa/pausa banners; inventario/creativos en Banners",
+    "pagos": "Admin confirma pago y vincula contrato; no procesa tarjeta",
+    "interacciones": "Admin modera favoritos abusivos/denuncias; datos en Interacciones",
+    "themeEngine": "Admin autoriza plantillas/skins; no edita estilos de usuario",
+    "seo": "Admin define políticas de indexación/landings/robots; contenido vía RenderEngine",
+    "agentesIA": "Admin supervisa; IA solo recomienda (sin write); ia_arquitecto solo lectura",
+    "seguridadMvp": "Estados de seguridad, gates, Turnstile, reputación — base de decisiones admin",
+    "validationEngine": "Valida acciones/transiciones; Admin no reimplementa reglas"
+  },
+
+  "controlDeModulos": {
+    "messenger": ["habilitar/suspender mensajería por usuario", "políticas de reporte", "lectura auditada en denuncia"],
+    "automatizaciones": ["activar/pausar jobs (vencimiento, índices)", "revisar resultados IA", "feature flags"],
+    "usuarios": ["estados de cuenta", "roles", "suspensión/restauración"],
+    "perfiles": ["revisión/publicación/suspensión", "acceso privados auditado"],
+    "pagos": ["confirmar/vincular", "reembolso(aprobación superior)"],
+    "contratos": ["activar/renovar/vencer (snapshot congelado)"],
+    "banners": ["aprobar/activar/pausar/vencer"],
+    "seo": ["sitemap/robots/políticas thin-content/noindex"],
+    "themeEngine": ["aprobar plantillas/skins", "revocar tema abusivo"],
+    "agentesIA": ["habilitar asistentes", "revisar recomendaciones", "límites anti-spam"]
+  },
+
+  "riesgos": [
+    { "id": "ADM-R01", "nivel": "critico", "riesgo": "RBAC por email único (single point of failure)", "mitigacion": "RBAC fase2: admins/{uid} + custom claims + scopes[]" },
+    { "id": "ADM-R02", "nivel": "alto", "riesgo": "Acceso a INE/selfie sin trail granular", "mitigacion": "PrivacyAccessGuard + logs_acceso_privado obligatorio" },
+    { "id": "ADM-R03", "nivel": "alto", "riesgo": "Acciones destructivas sin doble confirmación", "mitigacion": "DoubleConfirmGuard + aprobación superior" },
+    { "id": "ADM-R04", "nivel": "alto", "riesgo": "Operador sin límites de ámbito = sobre-permisos", "mitigacion": "scopes[] estrictos + denegación por defecto" },
+    { "id": "ADM-R05", "nivel": "medio", "riesgo": "LIMITE_USUARIOS=150 y queries no escalables en admin.html", "mitigacion": "paginación server-side + índices" },
+    { "id": "ADM-R06", "nivel": "medio", "riesgo": "Doble modelo usuarios vs perfiles en moderación", "mitigacion": "unificar estadoRevision + migración" },
+    { "id": "ADM-R07", "nivel": "medio", "riesgo": "IA con write accidental", "mitigacion": "rules deny-all-write a ia_bot; solo informes" },
+    { "id": "ADM-R08", "nivel": "medio", "riesgo": "rules no cubren colecciones de diseño (catalogo_*, config_*)", "mitigacion": "rules por colección antes de runtime" },
+    { "id": "ADM-R09", "nivel": "bajo", "riesgo": "Soporte leyendo mensajería = privacidad", "mitigacion": "solo con denuncia/ticket + auditoría + consentimiento de política" }
+  ],
+  "dependencias": {
+    "congeladas": ["Dashboards 1.0.0", "Shared/Core 1.0.0", "RenderEngine 1.0.0", "ValidationEngine 1.1.0", "FieldEngine 1.0.1", "Messenger 1.0.0", "Cuentas/Catálogo/Seguridad 1.0.0"],
+    "schemaDisenoBase": "config-admin-arquitectura-completa-schema.json (no congelado; extendible)",
+    "precondiciones": ["RBAC custom claims + admins/{uid}", "migración usuarios→perfiles", "rules para colecciones de diseño", "productor de eventos (notificaciones/auditoría)"]
+  },
+  "estructuraIdealFutura": {
+    "nota": "Lógica; sin crear carpetas.",
+    "appAdmin": "/admin (aislado) — router por rol+scope → 8+ módulos (config-admin-arquitectura-completa)",
+    "operador": "/operador — Admin con scope reducido",
+    "transversales": ["RBACEngine", "AuditTrail", "PrivacyAccessGuard", "DoubleConfirmGuard", "NotificacionesAdmin", "IAOrchestrator-admin"],
+    "consumeDe": ["Shared/Core", "clientes VE/FieldEngine/RenderEngine", "Seguridad MVP"]
+  },
+  "ordenRecomendadoImplementacion": [
+    { "paso": 1, "accion": "RBAC fase2 (admins/{uid} + custom claims + scopes[]) y rules base", "prioridad": "P0", "cierra": "ADM-R01" },
+    { "paso": 2, "accion": "Revisión/Moderación unificada (estadoRevision) + AuditTrail + PrivacyAccessGuard", "prioridad": "P0", "nota": "módulo crítico de lanzamiento" },
+    { "paso": 3, "accion": "Roles soporte/moderador/operador con scopes; DoubleConfirmGuard", "prioridad": "P1" },
+    { "paso": 4, "accion": "Usuarios/Perfiles con paginación server-side (quitar LIMITE_USUARIOS)", "prioridad": "P1", "cierra": "ADM-R05" },
+    { "paso": 5, "accion": "Catálogo/Schemas/Comercial (módulos del schema)", "prioridad": "P1/P2", "depende": "catálogo congelado + motores" },
+    { "paso": 6, "accion": "Control Messenger/SEO/ThemeEngine/Banners/Pagos + Configuración Sistema", "prioridad": "P2" },
+    { "paso": 7, "accion": "IA Arquitecto/Moderador/Comercial/Seguridad (solo recomendación)", "prioridad": "P2" }
+  ],
+
+  "procedenciaPlanMaestro": {
+    "crearMd": true,
+    "crearJson": true,
+    "justificacion": "Admin es la superficie de control más sensible; necesita plan propio que formalice RBAC granular, ámbitos, auditoría y fronteras, apoyado en el schema de arquitectura ya existente.",
+    "siguientesPasos": ["PLAN-MAESTRO-PAGOS-CONTRATOS", "PLAN-MAESTRO-BANNERS", "PROPUESTA-ACTA-MINOR-DASHBOARDS (Operador/Empresa)", "Anexo operacional de migración"]
+  },
+  "noModifica": [
+    "Capas congeladas (Dashboards 1.0.0, Shared/Core 1.0.0, RenderEngine 1.0.0, VE 1.1.0, FieldEngine 1.0.1, Messenger 1.0.0, Cuentas/Catálogo/Seguridad)",
+    "config-admin-arquitectura-completa-schema.json (se referencia/extiende, no se altera)",
+    "Producción, Firestore, deploy, commit"
+  ],
+  "changelog": [
+    { "version": "1.0.0", "fecha": "2026-06-10", "nota": "Plan maestro Admin: RBAC granular (roles+ámbitos), 8+ módulos, colas/flujos, matrices, control transversal, auditoría y orden de implementación" }
+  ]
+}

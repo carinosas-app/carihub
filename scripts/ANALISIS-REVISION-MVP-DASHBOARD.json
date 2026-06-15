@@ -1,0 +1,412 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "tipo": "ANALISIS_REVISION_MVP",
+  "titulo": "Revisión MVP — Dashboard mínimo operativo y camino más corto al cobro",
+  "fecha": "2026-06-11",
+  "version": "1.0.0",
+  "modo": "Solo análisis y documentación — no modifica artefactos existentes; sin runtime",
+  "disparador": "Confirmación product owner: MVP social fuera; reevaluación dashboard básico del perfil",
+  "referencias": [
+    "scripts/MATRIZ-MVP-CARIHUB.json",
+    "scripts/AUDITORIA-MAESTRA-CARIHUB.json",
+    "scripts/PLAN-MAESTRO-DASHBOARDS.json",
+    "scripts/PLAN-MAESTRO-REGISTRO-CUENTA.json",
+    "scripts/SPEC-DASHBOARDS.json",
+    "scripts/ACTA-CONGELAMIENTO-DASHBOARDS.json"
+  ],
+  "conclusionPrincipal": {
+    "acuerdoProductOwner": "Validar negocio principal: registro, verificación, publicación, cobro, visualización, contacto WhatsApp/teléfono, admin perfiles/pagos/publicidad",
+    "fueraMvpInicial": ["Economía Social", "Propinas", "Criptomonedas", "Lives", "Stories", "Red de contactos", "IA avanzada", "Internacionalización", "Marketplace"],
+    "hallazgoRevision": "La clasificación previa (F-030 Dashboard perfil = MVP_recomendado V1.1) confundió el SHELL completo SPEC-DASHBOARDS con el PANEL MÍNIMO operativo. El panel mínimo debe reclasificarse: obligatorio para operar y cobrar en producción; recomendado acotado en beta privada."
+  },
+  "distincionCritica": {
+    "dashboardShellCompleto": {
+      "descripcion": "Shell /cuenta modular, router por roles, 11 módulos SPEC, notificaciones EventBus, historial subcolecciones, IA asistente, ThemeEngine",
+      "clasificacion": "Post-MVP V1.1-V1.2",
+      "noConfundirCon": "Panel mínimo operativo"
+    },
+    "panelMinimoOperativo": {
+      "descripcion": "Una superficie post-login (/cuenta/perfil o equivalente) con widgets de lectura + CTAs a Cuenta/wizard y pagos",
+      "clasificacionRevisada": "MVP_obligatorio para producción y cobro sostenido; MVP_recomendado acotado en beta privada",
+      "implementacionMinima": "1 página, sin EventBus, sin historial subcolecciones, sin IA, sin ThemeEngine multi-tema"
+    },
+    "moduloCuentaEdicion": {
+      "descripcion": "Wizard FieldEngine en /registro/editar/{perfilId} — frontera Registro/Cuenta, NO widget dashboard",
+      "clasificacion": "MVP_obligatorio",
+      "nota": "PLAN-MAESTRO-DASHBOARDS: dashboard delega edición al wizard de Cuenta"
+    }
+  },
+  "componentesDashboardMinimo": [
+    {
+      "id": "DM-01",
+      "nombre": "Editar información",
+      "capacidad": "CTA → wizard Cuenta /registro/editar/{perfilId}",
+      "clasificacion": "MVP_obligatorio",
+      "implementadoEn": "Registro/Cuenta (no dashboard)",
+      "betaPrivada": true,
+      "betaPublica": true,
+      "cobrar": true,
+      "produccion": true,
+      "justificacion": {
+        "ux": "Sin edición autónoma el usuario depende de soporte para cada corrección",
+        "cargaAdmin": "Admin no debe editar campos por el usuario",
+        "operacionDiaria": "Perfiles cambian teléfono, horarios, descripción con frecuencia",
+        "retencion": "Alta — frustración si no puede actualizar",
+        "soporte": "Reduce tickets 'cómo cambio mi...'",
+        "renovaciones": "Indirecta — perfil desactualizado reduce conversión",
+        "escalabilidad": "FieldEngine ya congelado; ruta dedicada evita rehacer Home"
+      },
+      "puedeEsperar": false
+    },
+    {
+      "id": "DM-02",
+      "nombre": "Editar fotografías",
+      "capacidad": "CTA → wizard Cuenta sección fotos FieldEngine",
+      "clasificacion": "MVP_obligatorio",
+      "implementadoEn": "Registro/Cuenta (no dashboard)",
+      "betaPrivada": true,
+      "betaPublica": true,
+      "cobrar": true,
+      "produccion": true,
+      "justificacion": {
+        "ux": "Fotos son el activo principal de conversión en Cariñosas",
+        "cargaAdmin": "Admin no debe subir fotos por usuarios",
+        "operacionDiaria": "Rotación de galería es operación recurrente",
+        "retencion": "Crítica — perfil sin fotos actualizadas pierde contactos",
+        "soporte": "Alto volumen potencial sin self-service",
+        "renovaciones": "Perfil activo con fotos justifica renovar plan",
+        "escalabilidad": "Storage perfiles/{perfilId}/ ya diseñado post-migración"
+      },
+      "puedeEsperar": false
+    },
+    {
+      "id": "DM-03",
+      "nombre": "Ver estado de aprobación",
+      "capacidad": "Widget lectura: borrador | en_revision | aprobado | rechazado | activo | vencido",
+      "clasificacion": "MVP_obligatorio",
+      "implementadoEn": "Dashboard panel mínimo",
+      "justificacion": {
+        "ux": "Usuario debe saber por qué no aparece público",
+        "cargaAdmin": "Elimina consultas '¿ya me aprobaron?'",
+        "operacionDiaria": "Estado cambia tras enviar revisión",
+        "retencion": "Transparencia reduce abandono en revisión",
+        "soporte": "Impacto alto — pregunta #1 post-registro",
+        "renovaciones": "Perfil rechazado no renueva hasta resolver",
+        "escalabilidad": "Lee config-estados-revision-publicacion (congelado)"
+      },
+      "puedeEsperar": false
+    },
+    {
+      "id": "DM-04",
+      "nombre": "Ver vigencia del plan",
+      "capacidad": "Widget lectura: plan actual, fechaFin, días restantes, badge",
+      "clasificacion": "MVP_obligatorio",
+      "implementadoEn": "Dashboard panel mínimo",
+      "justificacion": {
+        "ux": "Usuario entiende por qué dejó de aparecer (vencido)",
+        "cargaAdmin": "Reduce consultas de vencimiento",
+        "operacionDiaria": "Vigencia es ciclo de vida del producto cobrable",
+        "retencion": "Anticipación de vencimiento evita churn sorpresa",
+        "soporte": "Alta — '¿cuándo vence?'",
+        "renovaciones": "Directa — prerequisito para renovar a tiempo",
+        "escalabilidad": "contratos_perfiles diseñado en Pagos"
+      },
+      "puedeEsperar": false
+    },
+    {
+      "id": "DM-05",
+      "nombre": "Ver pagos realizados",
+      "capacidad": "Lista lectura: fecha, monto, plan, estado confirmado",
+      "clasificacion": "MVP_obligatorio",
+      "implementadoEn": "Dashboard panel mínimo",
+      "justificacion": {
+        "ux": "Confianza — usuario ve que pagó",
+        "cargaAdmin": "Reduce disputas 'no vi mi pago'",
+        "operacionDiaria": "Conciliación usuario-admin",
+        "retencion": "Transparencia financiera",
+        "soporte": "Alta en lanzamiento cobro",
+        "renovaciones": "Historial motiva renovación",
+        "escalabilidad": "pagos/{pagoId} colección ya esbozada"
+      },
+      "puedeEsperar": false
+    },
+    {
+      "id": "DM-06",
+      "nombre": "Ver renovación (CTA pagar/renovar)",
+      "capacidad": "Botón checkout pasarela cuando vencido o próximo a vencer",
+      "clasificacion": "MVP_obligatorio",
+      "implementadoEn": "Dashboard panel mínimo + Pagos",
+      "justificacion": {
+        "ux": "Sin CTA renovación el usuario no sabe cómo pagar de nuevo",
+        "cargaAdmin": "Evita que admin genere links manuales uno a uno",
+        "operacionDiaria": "Renovación es ingreso recurrente principal",
+        "retencion": "Crítica — sin CTA churn >50% estimado",
+        "soporte": "Medio — '¿cómo renuevo?'",
+        "renovaciones": "Directa — es la función de renovación",
+        "escalabilidad": "Webhook pasarela reutilizable"
+      },
+      "puedeEsperar": false
+    },
+    {
+      "id": "DM-07",
+      "nombre": "Ver estadísticas básicas",
+      "capacidad": "Widget lectura: vistas perfil (estadisticas_visitas), opcional favoritos",
+      "clasificacion": "MVP_recomendado",
+      "implementadoEn": "Dashboard panel mínimo",
+      "justificacion": {
+        "ux": "Motiva al proveedor — 'mi perfil funciona'",
+        "cargaAdmin": "Baja — no genera tickets críticos",
+        "operacionDiaria": "Consulta ocasional",
+        "retencion": "Media — prueba de valor",
+        "soporte": "Baja",
+        "renovaciones": "Induce renovación si hay vistas",
+        "escalabilidad": "estadisticas_visitas existe parcial en monolito"
+      },
+      "puedeEsperar": true,
+      "versionSiPosterga": "V1.1",
+      "nota": "Beta privada puede omitir; producción recomendado fuerte"
+    },
+    {
+      "id": "DM-08",
+      "nombre": "Ver estatus de verificación",
+      "capacidad": "Widget lectura: email, INE/selfie pendiente/aprobado/rechazado",
+      "clasificacion": "MVP_obligatorio",
+      "implementadoEn": "Dashboard panel mínimo",
+      "justificacion": {
+        "ux": "Usuario sabe qué documento falta o fue rechazado",
+        "cargaAdmin": "Reduce '¿por qué no verifican?'",
+        "operacionDiaria": "Ciclo verificación es gate de publicación",
+        "retencion": "Evita abandono por opacidad",
+        "soporte": "Alta",
+        "renovaciones": "Sin verificación no publica ni paga plan completo",
+        "escalabilidad": "Estados ya en config-seguridad-mvp + FieldEngine gates"
+      },
+      "puedeEsperar": false
+    },
+    {
+      "id": "DM-09",
+      "nombre": "Ver métodos de contacto activos",
+      "capacidad": "Widget lectura: WhatsApp/teléfono/email público visibles en perfil",
+      "clasificacion": "MVP_obligatorio",
+      "implementadoEn": "Dashboard panel mínimo",
+      "justificacion": {
+        "ux": "Usuario confirma qué ven los visitantes — núcleo del negocio (contacto)",
+        "cargaAdmin": "Evita errores 'no me llegan contactos'",
+        "operacionDiaria": "Verificación de configuración contacto",
+        "retencion": "Alta — contacto es KPI principal Cariñosas",
+        "soporte": "Media",
+        "renovaciones": "Perfil sin contacto visible no genera ROI del plan",
+        "escalabilidad": "Campos FieldEngine ya definidos"
+      },
+      "puedeEsperar": false
+    },
+    {
+      "id": "DM-10",
+      "nombre": "Ver observaciones del administrador",
+      "capacidad": "Widget lectura: motivo rechazo, correcciones solicitadas, notas moderación",
+      "clasificacion": "MVP_obligatorio",
+      "implementadoEn": "Dashboard panel mínimo",
+      "justificacion": {
+        "ux": "Sin feedback el usuario reenvía a ciegas",
+        "cargaAdmin": "Crítica — reduce ciclos rechazo-revisión mal informados",
+        "operacionDiaria": "Moderación genera observaciones en cada rechazo",
+        "retencion": "Usuario corrige y reintenta vs abandona",
+        "soporte": "Muy alta sin este widget",
+        "renovaciones": "Perfil corregido → publica → renueva",
+        "escalabilidad": "Campo observacionesAdmin en flujo revisión (extensión mínima schema)"
+      },
+      "puedeEsperar": false
+    }
+  ],
+  "resumenClasificacionDashboard": {
+    "panelMinimoConjunto": {
+      "clasificacionGlobal": "MVP_obligatorio",
+      "condicion": "Para producción nacional y cobro sostenido sin dependencia de soporte manual",
+      "excepcionBetaPrivada": "MVP_recomendado — admin puede informar estado por email/WhatsApp a cohort <100",
+      "componentesObligatorios": 9,
+      "componentesRecomendados": 1,
+      "componentesPostMVP": 0,
+      "notaEdicion": "DM-01 y DM-02 son obligatorios pero viven en Registro/Cuenta, no en shell dashboard"
+    },
+    "shellSpecCompleto": {
+      "clasificacionGlobal": "Post-MVP V1.1",
+      "motivo": "Router modular, notificaciones, historial, IA, mensajes — no necesarios para validar negocio"
+    }
+  },
+  "reevaluacionCaminoMasCorto": {
+    "veredicto": "El MVP propuesto es el camino correcto en dirección, pero incompleto sin panel mínimo para cobro/operación sostenida",
+    "funcionalidadesQueSiguenSobrando": [
+      { "item": "Shell SPEC-DASHBOARDS completo (11 módulos)", "ahorroSemanas": "4-6", "motivo": "Panel 1 página suficiente MVP" },
+      { "item": "Notificaciones in-app / EventBus", "ahorroSemanas": "2-3", "motivo": "Email + panel lectura suficiente" },
+      { "item": "Historial subcolecciones (historial_perfil, actividad_cuenta)", "ahorroSemanas": "1-2", "motivo": "Post-MVP" },
+      { "item": "IA asistente perfil (ia_asistente_perfil)", "ahorroSemanas": "2-4", "motivo": "Fuera MVP acordado" },
+      { "item": "Widget mensajes / Messenger en dashboard", "ahorroSemanas": "6-10", "motivo": "Contacto externo WhatsApp" },
+      { "item": "ThemeEngine 12 temas en dashboard-rentero", "ahorroSemanas": "1-2", "motivo": "Tema único plataforma MVP" },
+      { "item": "dashboard_banners shell separado", "ahorroSemanas": "2-3", "motivo": "Anunciante usa registro-banner.html + admin" },
+      { "item": "Centro actividad / feed actividad red", "ahorroSemanas": "2-3", "motivo": "Red contactos fuera MVP" },
+      { "item": "Landings SEO dinámicas", "ahorroSemanas": "3-4", "motivo": "Home+resultados suficiente lanzamiento" },
+      { "item": "Verificación teléfono OTP", "ahorroSemanas": "1-2", "motivo": "V1.1; email+INE suficiente beta" }
+    ],
+    "funcionalidadesQueFaltaban": [
+      { "item": "Panel /cuenta/perfil mínimo (9 widgets lectura + CTAs)", "impacto": "Crítico — reclasificado a MVP_obligatorio producción", "semanasAdicionales": "2-3" },
+      { "item": "Ruta /registro/editar/{perfilId} extraída de Home", "impacto": "Crítico — edición sin monolito", "semanasAdicionales": "1-2 (paralelo FieldEngine)" },
+      { "item": "Widget observaciones admin visibles al usuario", "impacto": "Alto — reduce ciclos moderación", "semanasAdicionales": "0.5" },
+      { "item": "CTA renovación/checkout en panel usuario", "impacto": "Crítico para cobro recurrente", "semanasAdicionales": "1 (integrado Pagos)" },
+      { "item": "Email transaccional básico (aprobado/rechazado/vencimiento)", "impacto": "Recomendado — complementa panel si usuario no entra", "semanasAdicionales": "1" }
+    ],
+    "impactoTiempoImplementacion": {
+      "mvpMinAnteriorSemanas": "16-22",
+      "mvpMinRevisadoSemanas": "18-24",
+      "delta": "+2 semanas por panel mínimo (neto +0-1 vs omitir dashboard y pagar costo soporte)",
+      "mvpCobrarSoloSemanas": "14-17",
+      "mvpOperarSemanas": "18-24",
+      "mvpCrecerSemanas": "22-28"
+    }
+  },
+  "riesgos": {
+    "lanzarSinDashboard": [
+      { "id": "R-SD-01", "riesgo": "Soporte manual insostenible", "severidad": "alta", "detalle": "Cada consulta estado/verificación/vencimiento va a admin" },
+      { "id": "R-SD-02", "riesgo": "Churn renovación", "severidad": "critica", "detalle": "Sin CTA renovación usuarios vencidos no pagan de nuevo" },
+      { "id": "R-SD-03", "riesgo": "Ciclos moderación ineficientes", "severidad": "alta", "detalle": "Sin observaciones admin visibles, reenvíos incorrectos" },
+      { "id": "R-SD-04", "riesgo": "Percepción producto incompleto", "severidad": "media", "detalle": "Usuario paga pero no ve confirmación ni plan" },
+      { "id": "R-SD-05", "riesgo": "Dependencia Home monolito", "severidad": "alta", "detalle": "modalPanel en index.html no escala; deuda técnica inmediata" },
+      { "id": "R-SD-06", "riesgo": "Edición vía soporte/admin", "severidad": "media", "detalle": "Sin ruta editar, admin edita Firestore manualmente" }
+    ],
+    "incluirDemasiadoDashboard": [
+      { "id": "R-ID-01", "riesgo": "Retraso lanzamiento 4-8 semanas", "severidad": "alta", "detalle": "Shell SPEC completo + EventBus + historial" },
+      { "id": "R-ID-02", "riesgo": "Scope creep social", "severidad": "media", "detalle": "Módulos mensajes/notificaciones invitan Messenger" },
+      { "id": "R-ID-03", "riesgo": "Sobre-ingeniería UI", "severidad": "media", "detalle": "dashboard-rentero 12 temas antes de validar negocio" },
+      { "id": "R-ID-04", "riesgo": "Implementar diseño congelado al 100% antes de tracción", "severidad": "media", "detalle": "SPEC-DASHBOARDS 1.0.0 es target arquitectónico, no sprint 1" }
+    ]
+  },
+  "tresMvpsExplicitos": {
+    "1_mvpMasPequenoParaCobrar": {
+      "nombre": "MVP-COBRAR",
+      "duracionSemanas": "14-17",
+      "descripcion": "El mínimo para recibir pagos de membresía y activar publicación",
+      "incluye": [
+        "Pasarela Stripe o MercadoPago",
+        "4 planes MXN + contratos_perfiles",
+        "Webhook pago → activar perfil",
+        "Admin conciliación pagos",
+        "Registro + verificación + publicación (9 capacidades núcleo excepto self-service renovación)",
+        "Checkout: página /cuenta/plan o link pasarela (puede ser sin panel completo)"
+      ],
+      "puedeOmitir": [
+        "Panel dashboard completo (admin envía link pago por email en beta privada)",
+        "Estadísticas visitas",
+        "robots/sitemap (beta privada cerrada)",
+        "Slug canónico (id funciona)"
+      ],
+      "limitacion": "Cobro funciona pero renovación recurrente depende de admin o email manual — viable solo beta privada <100 usuarios",
+      "noDependeFuturo": true
+    },
+    "2_mvpMasPequenoParaOperar": {
+      "nombre": "MVP-OPERAR",
+      "duracionSemanas": "18-24",
+      "descripcion": "El mínimo para operación nacional diaria sin soporte manual masivo",
+      "incluye": [
+        "Todo MVP-COBRAR",
+        "Panel /cuenta/perfil mínimo (DM-03 a DM-10 obligatorios + DM-07 recomendado)",
+        "Rutas /registro/editar/{perfilId} (DM-01, DM-02)",
+        "CTA renovación en panel",
+        "Email transaccional básico",
+        "Beta pública: resultados server-side, SEO robots/sitemap, RBAC admin básico"
+      ],
+      "puedeOmitir": [
+        "Shell SPEC modular completo",
+        "Notificaciones in-app",
+        "Historial",
+        "IA asistente",
+        "Messenger",
+        "Estadísticas avanzadas"
+      ],
+      "validacionNegocio": "Completa las 9 capacidades núcleo acordadas con self-service",
+      "noDependeFuturo": true
+    },
+    "3_mvpMasPequenoParaCrecerSinRehacer": {
+      "nombre": "MVP-CRECER",
+      "duracionSemanas": "22-28",
+      "descripcion": "El mínimo que establece arquitectura extensible sin reescribir al añadir V1.1+",
+      "incluye": [
+        "Todo MVP-OPERAR",
+        "Shell /cuenta con router rolesCuenta[] (SPEC-DASHBOARDS arquitectura híbrida — sin todos los módulos)",
+        "perfiles/{perfilId} + bridge uid (ACTA-MIGRACION)",
+        "RenderEngine head público + vistas privadas dashboard",
+        "ValidationEngine server-side",
+        "Shared/Core extraído módulo",
+        "URL canónica /perfil/{slug}",
+        "Extensión points: slot notificaciones, slot historial (vacíos, no implementados)"
+      ],
+      "puedeOmitir": [
+        "Poblar slots notificaciones/historial",
+        "dashboard_banners shell (registro-banner basta)",
+        "ThemeEngine",
+        "Interacciones/Messenger"
+      ],
+      "beneficioArquitectura": "Añadir V1.1 Messenger o V1.2 propinas = módulo nuevo en shell existente, no migración monolito",
+      "noDependeFuturo": true
+    }
+  },
+  "respuestasExplicitas": {
+    "1_mvpMasPequenoParaCobrar": "MVP-COBRAR: pasarela + contratos + webhook + admin pagos + flujo registro-verificar-publicar. Panel usuario opcional en beta privada (link checkout por email). 14-17 semanas.",
+    "2_mvpMasPequenoParaOperar": "MVP-OPERAR: MVP-COBRAR + panel /cuenta/perfil mínimo (9 widgets obligatorios) + edición vía Cuenta + CTA renovación + emails básicos. 18-24 semanas.",
+    "3_mvpMasPequenoParaCrecerSinRehacer": "MVP-CRECER: MVP-OPERAR + shell /cuenta router SPEC + perfilId + RenderEngine + VE server + SC módulo + slug canónico + extension points vacíos. 22-28 semanas.",
+    "4_componentesDashboard": {
+      "obligatorios": [
+        "DM-01 Editar información (Cuenta)",
+        "DM-02 Editar fotografías (Cuenta)",
+        "DM-03 Estado aprobación",
+        "DM-04 Vigencia plan",
+        "DM-05 Pagos realizados",
+        "DM-06 CTA renovación",
+        "DM-08 Estatus verificación",
+        "DM-09 Contacto activo",
+        "DM-10 Observaciones admin"
+      ],
+      "recomendados": ["DM-07 Estadísticas básicas (vistas)"],
+      "puedenEsperar_V1_1": [
+        "Notificaciones in-app",
+        "Historial actividad",
+        "Shell router multi-módulo completo",
+        "Verificación teléfono OTP en panel"
+      ],
+      "puedenEsperar_V1_2_plus": [
+        "IA asistente perfil",
+        "Widget mensajes",
+        "dashboard_banners shell",
+        "Centro actividad red",
+        "Estadísticas avanzadas (CTR, conversaciones)",
+        "ThemeEngine temas"
+      ]
+    }
+  },
+  "validacionCaminoMasCorto": {
+    "pregunta": "¿El MVP propuesto es realmente el camino más corto para lanzar y empezar a cobrar?",
+    "respuesta": "SÍ para cobrar en beta privada (MVP-COBRAR). NO suficiente para cobrar en escala nacional sin panel mínimo (MVP-OPERAR).",
+    "recomendacionProductOwner": "Fase 1: MVP-COBRAR beta privada (validar willingness to pay). Fase 2: MVP-OPERAR antes de beta pública nacional (panel mínimo obligatorio). Fase 3: MVP-CRECER antes de V1.1 social.",
+    "ajusteVsMatrizMvpAnterior": "Reclasificar 'Dashboard perfil MVP' de MVP_recomendado V1.1 → Panel mínimo MVP_obligatorio en MVP-OPERAR; mantener shell SPEC completo en Post-MVP V1.1"
+  },
+  "metricasImpactoDashboard": {
+    "sinPanelMinimo": {
+      "ticketsSoporteEstimadosMes100Usuarios": "80-150",
+      "churnRenovacionEstimado": "40-60%",
+      "cargaAdminHorasSemana": "15-25"
+    },
+    "conPanelMinimo": {
+      "ticketsSoporteEstimadosMes100Usuarios": "15-30",
+      "churnRenovacionEstimado": "15-25%",
+      "cargaAdminHorasSemana": "5-10"
+    },
+    "costoImplementacionPanelMinimo": "2-3 semanas",
+    "roiDocumental": "Panel mínimo se amortiza antes de usuario #50 en operación nacional"
+  },
+  "veredicto": {
+    "dashboardMinimoOperativo": "MVP_obligatorio (MVP-OPERAR y producción)",
+    "dashboardShellCompleto": "Post-MVP V1.1",
+    "caminoMasCortoCobrar": "MVP-COBRAR 14-17 sem",
+    "caminoMasCortoOperar": "MVP-OPERAR 18-24 sem",
+    "caminoCrecerSinRehacer": "MVP-CRECER 22-28 sem",
+    "confirmacionEnfoqueNegocio": "Correcto — social fuera; panel mínimo NO es social, es operación del negocio principal"
+  }
+}

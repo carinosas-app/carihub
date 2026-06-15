@@ -1,0 +1,686 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "versionSchema": "2026-06-10",
+  "version": "2026-06-10",
+  "formularioId": "adultos",
+  "descripcion": "Schema registry para registro dinámico Categorías Adultos. FieldEngine: merge(base, plantillaArquetipo, deltaSubcategoria). ValidationEngine: obligatorios + validaciones + coherencia.",
+  "meta": {
+    "fieldRegistry": {
+      "alias": { "id": "alias", "label": "Alias / nombre visible", "tipo": "text", "maxLength": 40, "tonoPublico": "profesional" },
+      "nombreComercial": { "id": "nombreComercial", "label": "Nombre comercial", "tipo": "text", "maxLength": 80 },
+      "tagline": { "id": "tagline", "label": "Frase corta", "tipo": "textarea", "maxLength": 80, "iaCopy": true },
+      "edad": { "id": "edad", "label": "Edad", "tipo": "number", "min": 18, "max": 99 },
+      "geo": { "id": "geo", "label": "Ubicación", "tipo": "geo", "campos": ["pais", "estado", "ciudad", "zona"] },
+      "direccion": { "id": "direccion", "label": "Dirección", "tipo": "address", "mapa": true },
+      "fotoPrincipal": { "id": "fotoPrincipal", "label": "Foto principal", "tipo": "image" },
+      "galeria": { "id": "galeria", "label": "Galería", "tipo": "image[]" },
+      "precioDesde": { "id": "precioDesde", "label": "Precio desde (MXN)", "tipo": "currency" },
+      "modalidades": { "id": "modalidades", "label": "Modalidades", "tipo": "checkboxGroup", "opciones": ["recibe", "hotel", "domicilio"] },
+      "disponibilidad": { "id": "disponibilidad", "label": "Disponibilidad", "tipo": "enum", "opciones": ["disponible", "ocupada", "con_cita"] },
+      "sobreMi": { "id": "sobreMi", "label": "Sobre mí", "tipo": "richtext", "iaCopy": true, "tonoPublico": "discreto" },
+      "serviciosIncluidos": { "id": "serviciosIncluidos", "label": "Servicios incluidos", "tipo": "checklist", "iaCopy": true },
+      "serviciosNoRealizo": { "id": "serviciosNoRealizo", "label": "No realizo", "tipo": "checklist", "iaCopy": true },
+      "nivelServicio": { "id": "nivelServicio", "label": "Servicios (nivel)", "tipo": "select", "opciones": ["básico", "completo", "premium"], "notaPublica": "Se muestra como 'Servicios: ...' en la ficha del perfil. Resumen del alcance, no reemplaza serviciosIncluidos." },
+      "fisico": { "id": "fisico", "label": "Datos físicos", "tipo": "group", "campos": ["estatura", "peso", "complexion", "cabello", "ojos", "tatuajes", "piercings"] },
+      "idiomas": { "id": "idiomas", "label": "Idiomas", "tipo": "tags" },
+      "orientacion": { "id": "orientacion", "label": "Orientación", "tipo": "select" },
+      "horarioMinimo": { "id": "horarioMinimo", "label": "Tiempo mínimo", "tipo": "duration" },
+      "horarioDetalle": { "id": "horarioDetalle", "label": "Horario", "tipo": "schedule" },
+      "metodosPago": { "id": "metodosPago", "label": "Métodos de pago", "tipo": "checkboxGroup", "opciones": ["efectivo", "transferencia", "tarjeta"] },
+      "contactoPublico": { "id": "contactoPublico", "label": "Contacto visible", "tipo": "group", "campos": ["whatsapp", "telegram", "instagram", "onlyfans", "x", "mensajeInterno", "llamada"] },
+      "plataformas": { "id": "plataformas", "label": "Plataformas", "tipo": "platformList" },
+      "precioSuscripcion": { "id": "precioSuscripcion", "label": "Precio suscripción", "tipo": "currency" },
+      "tiposContenido": { "id": "tiposContenido", "label": "Tipos de contenido", "tipo": "tags", "iaCopy": true },
+      "redesSociales": { "id": "redesSociales", "label": "Redes sociales", "tipo": "urlList" },
+      "categoriasProducto": { "id": "categoriasProducto", "label": "Categorías de productos", "tipo": "tags" },
+      "envioDomicilio": { "id": "envioDomicilio", "label": "Envío a domicilio", "tipo": "boolean" },
+      "tiendaOnline": { "id": "tiendaOnline", "label": "Tienda en línea", "tipo": "boolean" },
+      "menuServicios": { "id": "menuServicios", "label": "Menú de servicios", "tipo": "serviceMenu" },
+      "amenidades": { "id": "amenidades", "label": "Amenidades", "tipo": "tags" },
+      "tiposHabitacion": { "id": "tiposHabitacion", "label": "Tipos de habitación", "tipo": "roomList" },
+      "tarifaHora": { "id": "tarifaHora", "label": "Tarifa por hora", "tipo": "currency" },
+      "tarifaNoche": { "id": "tarifaNoche", "label": "Tarifa por noche", "tipo": "currency" },
+      "precioEntrada": { "id": "precioEntrada", "label": "Precio de entrada / cover", "tipo": "currency" },
+      "reglasAcceso": { "id": "reglasAcceso", "label": "Reglas de acceso", "tipo": "richtext", "iaCopy": true },
+      "dressCode": { "id": "dressCode", "label": "Dress code", "tipo": "text", "iaCopy": true },
+      "politicaParejasSingles": { "id": "politicaParejasSingles", "label": "Política parejas / singles", "tipo": "richtext", "iaCopy": true },
+      "areasVenue": { "id": "areasVenue", "label": "Áreas del local", "tipo": "tags" },
+      "cartelera": { "id": "cartelera", "label": "Cartelera / eventos", "tipo": "eventList" },
+      "reservaciones": { "id": "reservaciones", "label": "Acepta reservaciones", "tipo": "boolean" },
+      "estiloDominacion": { "id": "estiloDominacion", "label": "Estilo (pro/dom)", "tipo": "select" },
+      "equipamiento": { "id": "equipamiento", "label": "Equipamiento", "tipo": "tags", "iaCopy": true },
+      "limitesSesion": { "id": "limitesSesion", "label": "Límites y reglas", "tipo": "richtext", "iaCopy": true },
+      "listaFetiches": { "id": "listaFetiches", "label": "Fetiches ofrecidos", "tipo": "tags" },
+      "aliasPareja": { "id": "aliasPareja", "label": "Alias de pareja / grupo", "tipo": "text" },
+      "dinamica": { "id": "dinamica", "label": "Dinámica", "tipo": "select" },
+      "buscan": { "id": "buscan", "label": "Qué buscan", "tipo": "tags", "iaCopy": true },
+      "miembros": { "id": "miembros", "label": "Perfiles vinculados", "tipo": "memberList" },
+      "tipoShow": { "id": "tipoShow", "label": "Tipo de show", "tipo": "tags" },
+      "venueFijo": { "id": "venueFijo", "label": "Venue fijo", "tipo": "text" },
+      "precioShow": { "id": "precioShow", "label": "Precio show / mínimo consumo", "tipo": "currency" },
+      "estatura": { "id": "estatura", "label": "Estatura (m)", "tipo": "decimal" },
+      "identidadGenero": { "id": "identidadGenero", "label": "Identidad / presentación", "tipo": "text" },
+      "nivelPremium": { "id": "nivelPremium", "label": "Nivel premium", "tipo": "badge" },
+      "eventosDisponibles": { "id": "eventosDisponibles", "label": "Disponible para eventos", "tipo": "boolean" },
+      "portfolioURL": { "id": "portfolioURL", "label": "Portafolio", "tipo": "url" },
+      "telefonoContacto": { "id": "telefonoContacto", "label": "Teléfono contacto", "tipo": "phone", "privado": true },
+      "whatsappPrivado": { "id": "whatsappPrivado", "label": "WhatsApp real", "tipo": "phone", "privado": true },
+      "ineFrente": { "id": "ineFrente", "label": "INE frente", "tipo": "file", "privado": true },
+      "ineReverso": { "id": "ineReverso", "label": "INE reverso", "tipo": "file", "privado": true },
+      "selfieVerificacion": { "id": "selfieVerificacion", "label": "Selfie CariHub + fecha", "tipo": "file", "privado": true },
+      "rfc": { "id": "rfc", "label": "RFC", "tipo": "rfc", "privado": true },
+      "razonSocial": { "id": "razonSocial", "label": "Razón social", "tipo": "text", "privado": true },
+      "licenciaOperacion": { "id": "licenciaOperacion", "label": "Licencia / permiso", "tipo": "file", "privado": true },
+      "consentimientoDual": { "id": "consentimientoDual", "label": "Consentimiento de ambos miembros", "tipo": "boolean", "privado": true },
+      "terminosAceptados": { "id": "terminosAceptados", "label": "Términos aceptados", "tipo": "boolean", "privado": true },
+      "mayorEdadConfirmado": { "id": "mayorEdadConfirmado", "label": "Mayor de edad confirmado", "tipo": "boolean", "privado": true }
+    },
+    "base": {
+      "camposPublicosResultados": ["subcategoriaId", "alias", "tagline", "geo", "fotoPrincipal", "galeria"],
+      "camposPublicosPerfil": ["subcategoriaId", "alias", "tagline", "geo", "fotoPrincipal", "galeria", "sobreMi", "contactoPublico", "metodosPago"],
+      "camposPrivados": ["telefonoContacto", "terminosAceptados", "mayorEdadConfirmado"],
+      "obligatorios": ["alias", "geo.pais", "geo.estado", "geo.ciudad", "geo.zona", "fotoPrincipal", "tagline", "galeria", "telefonoContacto", "terminosAceptados", "mayorEdadConfirmado"],
+      "opcionales": ["disponibilidad"],
+      "fotosMin": 3,
+      "noPublicos": ["telefonoContacto", "whatsappPrivado", "ineFrente", "ineReverso", "selfieVerificacion", "rfc", "razonSocial", "licenciaOperacion", "consentimientoDual", "facturacion"],
+      "verificacionTipo": "persona_estandar",
+      "facturacionTipo": "cfdi_estandar"
+    },
+    "metricasSistema": {
+      "descripcion": "Datos que NO se capturan en el registro: los genera/calcula el sistema y se muestran en el perfil público.",
+      "campos": {
+        "respuestaPromedio": "Texto tipo 'Responde en menos de 30 min'. Derivado de tiempos de respuesta en mensajería.",
+        "nivelActividad": "Ej. 'Muy activa esta semana'. Derivado de la actividad reciente del perfil.",
+        "miembroDesde": "Mes y año de alta (a partir de fechaRegistro).",
+        "estadoVerificacion": "Controla el badge 'Verificada'. Resultado del flujo de verificación admin.",
+        "disponibleAhora": "Indicador en vivo (verde) derivado de disponibilidad + última conexión."
+      },
+      "nota": "Estos campos no se piden al usuario; se exponen como solo lectura en el perfil."
+    },
+    "verificacionTipos": {
+      "persona_estandar": {
+        "campos": ["ineFrente", "ineReverso", "selfieVerificacion"],
+        "obligatorios": ["ineFrente", "ineReverso", "selfieVerificacion"],
+        "notas": "No se publican. Solo admin."
+      },
+      "negocio_estandar": {
+        "campos": ["rfc", "razonSocial", "licenciaOperacion", "ineFrente"],
+        "obligatorios": ["rfc", "razonSocial", "licenciaOperacion"],
+        "notas": "Representante legal + permiso operación."
+      },
+      "pareja_dual": {
+        "campos": ["ineFrente", "ineReverso", "selfieVerificacion", "consentimientoDual"],
+        "obligatorios": ["consentimientoDual", "ineFrente", "selfieVerificacion"],
+        "notas": "Verificación de ambos miembros en revisión admin."
+      },
+      "creador_plataformas": {
+        "campos": ["ineFrente", "selfieVerificacion"],
+        "obligatorios": ["ineFrente", "selfieVerificacion", "plataformas"],
+        "notas": "Validar propiedad de cuentas en plataformas."
+      }
+    },
+    "facturacionTipos": {
+      "cfdi_estandar": {
+        "cuando": "deseoFacturar === true",
+        "camposRequeridos": ["rfc", "razonSocial", "codigoPostalFiscal", "emailFacturacion", "regimenFiscal", "usoCFDI"],
+        "camposOpcionales": ["nombreComercialFiscal"],
+        "notas": "Solo si usuario activa Deseo facturar."
+      }
+    },
+    "coherenciaGlobal": [
+      { "id": "GEO_CIUDAD_REQUERIDA", "si": "tipoPerfil in ['persona','negocio','lugar']", "requiere": ["geo.ciudad", "geo.zona"], "severidad": "error" },
+      { "id": "NEGOCIO_DIRECCION", "si": "tipoPerfil in ['negocio','lugar']", "requiere": ["direccion"], "severidad": "error" },
+      { "id": "CONTENIDO_PLATAFORMAS", "si": "arquetipo == 'persona_creador'", "requiere": ["plataformas"], "severidad": "error" },
+      { "id": "FOTOS_MIN", "si": "true", "requiere": ["galeria.count >= fotosMin"], "severidad": "error" },
+      { "id": "FACTURACION_COMPLETA", "si": "deseoFacturar == true", "requiere": ["facturacion.rfc", "facturacion.codigoPostalFiscal"], "severidad": "error" },
+      { "id": "TAGLINE_LONGITUD", "si": "tagline.length > 80", "severidad": "advertencia", "mensaje": "Acorta la frase para resultados." }
+    ],
+    "componentesUI": {
+      "ResultCardPersona": "Tarjeta vertical foto + alias + edad + modalidades",
+      "ResultCardNegocio": "Tarjeta fachada + horario + precio desde/entrada",
+      "ResultCardPareja": "Tarjeta duo + dinámica + qué buscan",
+      "ResultCardCreador": "Tarjeta preview + badges plataformas",
+      "ResultCardEspectaculo": "Tarjeta show + venue + horario",
+      "ProfileLayoutPersona": "Hero slider + servicios + físico + contacto",
+      "ProfileLayoutNegocio": "Galería local + mapa + menú/catálogo",
+      "ProfileLayoutPareja": "Perfiles vinculados + reglas encuentro",
+      "ProfileLayoutCreador": "Plataformas + tipos contenido + redes",
+      "ProfileLayoutVenue": "Reglas acceso + áreas + cartelera",
+      "ProfileLayoutEspectaculo": "Shows + calendario + condiciones"
+    },
+    "firestoreRecomendado": {
+      "colecciones": {
+        "config_registro_adultos": "Un doc por subcategoriaId (este schema)",
+        "perfiles": "Documento publicado/borrador por perfilId",
+        "perfiles/{id}/borradores": "Autosave wizard",
+        "ia_logs": "Sugerencias IA auditables",
+        "solicitudes_verificacion": "Cola admin"
+      },
+      "documentoPerfil": {
+        "raiz": ["usuarioId", "subcategoriaId", "arquetipo", "tipoPerfil", "estadoPublicacion", "estadoVerificacion"],
+        "publico": "Campos visibles en web",
+        "privado": "Nunca en lectura pública",
+        "verificacion": "Documentos y estado revisión",
+        "facturacion": "null o objeto si deseoFacturar",
+        "meta": ["versionSchema", "iaUltimaRevision", "borradorCompletoPct"]
+      }
+    }
+  },
+  "plantillasArquetipo": {
+    "persona_acompanante": {
+      "tipoPerfil": "persona",
+      "componentes": { "resultados": "ResultCardPersona", "perfil": "ProfileLayoutPersona" },
+      "camposPublicosResultados": ["edad", "precioDesde", "modalidades", "disponibilidad"],
+      "camposPublicosPerfil": ["edad", "precioDesde", "modalidades", "disponibilidad", "serviciosIncluidos", "serviciosNoRealizo", "nivelServicio", "fisico", "idiomas", "orientacion", "horarioMinimo", "horarioDetalle"],
+      "camposPrivados": ["whatsappPrivado", "ineFrente", "ineReverso", "selfieVerificacion"],
+      "obligatoriosExtra": ["edad", "precioDesde", "modalidades", "serviciosIncluidos", "serviciosNoRealizo", "fisico.estatura", "fisico.peso", "horarioMinimo", "ineFrente", "ineReverso", "selfieVerificacion"],
+      "opcionalesExtra": ["orientacion", "horarioDetalle", "disponibilidad", "nivelServicio"],
+      "fotosMin": 3,
+      "verificacionTipo": "persona_estandar",
+      "textosAyuda": {
+        "tagline": "Una frase corta y discreta. Ej: 'Trato amable y discreto en zona segura'.",
+        "sobreMi": "Describe tu estilo y experiencia sin lenguaje explícito.",
+        "modalidades": "Indica dónde atiendes: tu espacio, hotel o domicilio del cliente."
+      },
+      "keywordsIA": ["escort", "acompañante", "citas", "compañía", "atención personal"]
+    },
+    "persona_creador": {
+      "tipoPerfil": "creador",
+      "componentes": { "resultados": "ResultCardCreador", "perfil": "ProfileLayoutCreador" },
+      "camposPublicosResultados": ["plataformas", "precioSuscripcion", "redesSociales"],
+      "camposPublicosPerfil": ["plataformas", "precioSuscripcion", "tiposContenido", "redesSociales", "horarioDetalle"],
+      "camposPrivados": ["ineFrente", "selfieVerificacion"],
+      "obligatoriosExtra": ["plataformas", "tiposContenido", "redesSociales", "ineFrente", "selfieVerificacion"],
+      "opcionalesExtra": ["precioSuscripcion"],
+      "fotosMin": 4,
+      "verificacionTipo": "creador_plataformas",
+      "textosAyuda": {
+        "plataformas": "Agrega OnlyFans, Fansly, Telegram VIP u otras plataformas verificables.",
+        "tiposContenido": "Describe el tipo de contenido sin lenguaje explícito gráfico."
+      },
+      "keywordsIA": ["onlyfans", "contenido", "creador", "suscripción", "telegram vip", "fansly"]
+    },
+    "persona_espectaculo": {
+      "tipoPerfil": "espectaculo",
+      "componentes": { "resultados": "ResultCardEspectaculo", "perfil": "ProfileLayoutEspectaculo" },
+      "camposPublicosResultados": ["tipoShow", "venueFijo", "precioShow", "horarioDetalle", "geo"],
+      "camposPublicosPerfil": ["tipoShow", "venueFijo", "precioShow", "horarioDetalle", "sobreMi"],
+      "camposPrivados": ["telefonoContacto", "ineFrente", "selfieVerificacion"],
+      "obligatoriosExtra": ["tipoShow", "precioShow", "horarioDetalle"],
+      "opcionalesExtra": ["venueFijo"],
+      "fotosMin": 4,
+      "verificacionTipo": "persona_estandar",
+      "keywordsIA": ["stripper", "table dance", "show", "baile", "espectáculo"]
+    },
+    "persona_dominatrix": {
+      "tipoPerfil": "persona",
+      "componentes": { "resultados": "ResultCardPersona", "perfil": "ProfileLayoutPersona" },
+      "camposPublicosResultados": ["edad", "estiloDominacion", "precioDesde", "equipamiento", "disponibilidad"],
+      "camposPublicosPerfil": ["edad", "estiloDominacion", "precioDesde", "equipamiento", "limitesSesion", "serviciosIncluidos", "serviciosNoRealizo", "horarioMinimo"],
+      "camposPrivados": ["whatsappPrivado", "ineFrente", "ineReverso", "selfieVerificacion"],
+      "obligatoriosExtra": ["estiloDominacion", "precioDesde", "limitesSesion", "equipamiento", "serviciosIncluidos", "serviciosNoRealizo"],
+      "opcionalesExtra": ["listaFetiches"],
+      "fotosMin": 3,
+      "verificacionTipo": "persona_estandar",
+      "keywordsIA": ["dominatrix", "dominación", "bdsm", "fetiche", "sado", "sumiso"]
+    },
+    "pareja_grupo": {
+      "tipoPerfil": "pareja_grupo",
+      "componentes": { "resultados": "ResultCardPareja", "perfil": "ProfileLayoutPareja" },
+      "camposPublicosResultados": ["aliasPareja", "dinamica", "buscan", "geo", "disponibilidad"],
+      "camposPublicosPerfil": ["aliasPareja", "dinamica", "buscan", "miembros", "sobreMi", "reglasAcceso"],
+      "camposPrivados": ["consentimientoDual", "ineFrente", "selfieVerificacion", "whatsappPrivado"],
+      "obligatoriosExtra": ["aliasPareja", "dinamica", "buscan", "miembros", "consentimientoDual"],
+      "opcionalesExtra": ["reglasAcceso"],
+      "fotosMin": 4,
+      "verificacionTipo": "pareja_dual",
+      "keywordsIA": ["pareja", "swinger", "cuckold", "hotwife", "unicorn", "bull", "trío"]
+    },
+    "negocio_retail": {
+      "tipoPerfil": "negocio",
+      "componentes": { "resultados": "ResultCardNegocio", "perfil": "ProfileLayoutNegocio" },
+      "camposPublicosResultados": ["nombreComercial", "direccion", "geo", "horarioDetalle", "categoriasProducto"],
+      "camposPublicosPerfil": ["nombreComercial", "direccion", "categoriasProducto", "envioDomicilio", "tiendaOnline", "metodosPago", "horarioDetalle"],
+      "camposPrivados": ["rfc", "razonSocial", "licenciaOperacion", "telefonoContacto"],
+      "obligatoriosExtra": ["nombreComercial", "direccion", "categoriasProducto", "horarioDetalle", "rfc", "razonSocial"],
+      "opcionalesExtra": ["envioDomicilio", "tiendaOnline"],
+      "fotosMin": 5,
+      "verificacionTipo": "negocio_estandar",
+      "keywordsIA": ["sex shop", "tienda", "productos", "lencería", "juguetes"]
+    },
+    "negocio_bienestar": {
+      "tipoPerfil": "negocio",
+      "componentes": { "resultados": "ResultCardNegocio", "perfil": "ProfileLayoutNegocio" },
+      "camposPublicosResultados": ["nombreComercial", "menuServicios", "precioDesde", "amenidades", "horarioDetalle", "geo"],
+      "camposPublicosPerfil": ["nombreComercial", "menuServicios", "amenidades", "direccion", "metodosPago", "sobreMi"],
+      "camposPrivados": ["rfc", "razonSocial", "licenciaOperacion", "telefonoContacto"],
+      "obligatoriosExtra": ["nombreComercial", "menuServicios", "precioDesde", "direccion", "horarioDetalle"],
+      "opcionalesExtra": ["amenidades"],
+      "fotosMin": 5,
+      "verificacionTipo": "negocio_estandar",
+      "keywordsIA": ["spa", "masajes", "relajación", "terapia", "salón"]
+    },
+    "negocio_hospedaje": {
+      "tipoPerfil": "lugar",
+      "componentes": { "resultados": "ResultCardNegocio", "perfil": "ProfileLayoutNegocio" },
+      "camposPublicosResultados": ["nombreComercial", "tiposHabitacion", "tarifaHora", "tarifaNoche", "amenidades", "horarioDetalle", "geo"],
+      "camposPublicosPerfil": ["nombreComercial", "tiposHabitacion", "tarifaHora", "tarifaNoche", "amenidades", "direccion", "metodosPago"],
+      "camposPrivados": ["rfc", "razonSocial", "licenciaOperacion", "telefonoContacto"],
+      "obligatoriosExtra": ["nombreComercial", "tiposHabitacion", "tarifaHora", "direccion", "horarioDetalle"],
+      "opcionalesExtra": ["tarifaNoche"],
+      "fotosMin": 6,
+      "verificacionTipo": "negocio_estandar",
+      "keywordsIA": ["hotel", "motel", "habitación", "jacuzzi", "por horas", "suite"]
+    },
+    "negocio_venue": {
+      "tipoPerfil": "lugar",
+      "componentes": { "resultados": "ResultCardNegocio", "perfil": "ProfileLayoutVenue" },
+      "camposPublicosResultados": ["nombreComercial", "precioEntrada", "horarioDetalle", "reglasAcceso", "dressCode", "geo"],
+      "camposPublicosPerfil": ["nombreComercial", "precioEntrada", "reglasAcceso", "dressCode", "politicaParejasSingles", "areasVenue", "cartelera", "direccion", "reservaciones"],
+      "camposPrivados": ["rfc", "razonSocial", "licenciaOperacion", "telefonoContacto"],
+      "obligatoriosExtra": ["nombreComercial", "precioEntrada", "horarioDetalle", "reglasAcceso", "direccion"],
+      "opcionalesExtra": ["cartelera", "reservaciones", "dressCode"],
+      "fotosMin": 6,
+      "verificacionTipo": "negocio_estandar",
+      "keywordsIA": ["club", "antro", "bar", "cabina", "cine", "swinger", "local", "entrada"]
+    }
+  },
+  "subcategorias": [
+    {
+      "subcategoriaId": "escort",
+      "nombre": "Escort",
+      "arquetipo": "persona_acompanante",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_acompanante",
+      "delta": {},
+      "coherenciaExtra": [{ "id": "ESCORT_MODALIDAD", "requiere": ["modalidades", "precioDesde"], "severidad": "error" }]
+    },
+    {
+      "subcategoriaId": "escort_gay",
+      "nombre": "Escort Gay",
+      "arquetipo": "persona_acompanante",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_acompanante",
+      "delta": {
+        "camposPublicosPerfil": ["orientacion"],
+        "obligatoriosExtra": ["orientacion"],
+        "badges": ["lgbt"]
+      },
+      "keywordsIA": ["escort gay", "hombre", "lgbt", "gay"],
+      "textosAyuda": { "orientacion": "Indica orientación y tipo de clientela." }
+    },
+    {
+      "subcategoriaId": "escort_vip",
+      "nombre": "Escort VIP",
+      "arquetipo": "persona_acompanante",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_acompanante",
+      "delta": {
+        "camposPublicosResultados": ["nivelPremium"],
+        "obligatoriosExtra": ["nivelPremium"],
+        "fotosMin": 5,
+        "badges": ["vip"]
+      },
+      "keywordsIA": ["vip", "premium", "exclusivo", "alto nivel"]
+    },
+    {
+      "subcategoriaId": "edecan",
+      "nombre": "Edecán",
+      "arquetipo": "persona_acompanante",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_acompanante",
+      "delta": {
+        "camposPublicosPerfil": ["eventosDisponibles"],
+        "obligatoriosExtra": ["eventosDisponibles"]
+      },
+      "keywordsIA": ["edecán", "eventos", "expos", "congresos", "modelo evento"]
+    },
+    {
+      "subcategoriaId": "stripper",
+      "nombre": "Stripper",
+      "arquetipo": "persona_espectaculo",
+      "tipoPerfil": "espectaculo",
+      "heredaDe": "plantillasArquetipo.persona_espectaculo",
+      "delta": {
+        "camposPublicosPerfil": ["modalidades"],
+        "obligatoriosExtra": ["modalidades"],
+        "coherenciaExtra": [{ "id": "STRIPPER_SHOW", "requiere": ["tipoShow", "precioShow"], "severidad": "error" }]
+      },
+      "keywordsIA": ["stripper", "baile", "show privado", "despedida"]
+    },
+    {
+      "subcategoriaId": "modelos",
+      "nombre": "Modelos",
+      "arquetipo": "persona_acompanante",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_acompanante",
+      "delta": {
+        "camposPublicosPerfil": ["portfolioURL"],
+        "obligatoriosExtra": ["portfolioURL"],
+        "fotosMin": 6
+      },
+      "keywordsIA": ["modelo", "sesión fotos", "portafolio", "book"]
+    },
+    {
+      "subcategoriaId": "gigolo",
+      "nombre": "Gigoló",
+      "arquetipo": "persona_acompanante",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_acompanante",
+      "delta": { "labels": { "alias": "Alias masculino" } },
+      "keywordsIA": ["gigoló", "hombre", "acompañante masculino"]
+    },
+    {
+      "subcategoriaId": "acompanante",
+      "nombre": "Acompañante",
+      "arquetipo": "persona_acompanante",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_acompanante",
+      "delta": {}
+    },
+    {
+      "subcategoriaId": "petit",
+      "nombre": "Petit",
+      "arquetipo": "persona_acompanante",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_acompanante",
+      "delta": {
+        "camposPublicosPerfil": ["estatura"],
+        "obligatoriosExtra": ["estatura"],
+        "validaciones": [{ "campo": "estatura", "max": 1.58, "mensaje": "Petit: estatura máxima 1.58 m" }]
+      },
+      "keywordsIA": ["petit", "baja estatura", "pequeña"]
+    },
+    {
+      "subcategoriaId": "contenido",
+      "nombre": "Creador(a) de Contenido",
+      "arquetipo": "persona_creador",
+      "tipoPerfil": "creador",
+      "heredaDe": "plantillasArquetipo.persona_creador",
+      "delta": {},
+      "coherenciaExtra": [{ "id": "CREADOR_REDES", "requiere": ["plataformas", "redesSociales"], "severidad": "error" }]
+    },
+    {
+      "subcategoriaId": "table_dance",
+      "nombre": "Table Dance",
+      "arquetipo": "persona_espectaculo",
+      "tipoPerfil": "espectaculo",
+      "heredaDe": "plantillasArquetipo.persona_espectaculo",
+      "delta": {
+        "obligatoriosExtra": ["venueFijo"],
+        "textosAyuda": { "venueFijo": "Indica el antro o venue donde trabajas." }
+      },
+      "keywordsIA": ["table dance", "antro", "bar", "bailar en barra"]
+    },
+    {
+      "subcategoriaId": "sex_shop",
+      "nombre": "Sex Shop",
+      "arquetipo": "negocio_retail",
+      "tipoPerfil": "negocio",
+      "heredaDe": "plantillasArquetipo.negocio_retail",
+      "delta": {},
+      "coherenciaExtra": [{ "id": "RETAIL_UBICACION", "requiere": ["direccion", "categoriasProducto"], "severidad": "error" }]
+    },
+    {
+      "subcategoriaId": "spa",
+      "nombre": "Spa",
+      "arquetipo": "negocio_bienestar",
+      "tipoPerfil": "negocio",
+      "heredaDe": "plantillasArquetipo.negocio_bienestar",
+      "delta": {
+        "obligatoriosExtra": ["amenidades"],
+        "keywordsIA": ["spa", "jacuzzi", "sauna", "relax"]
+      }
+    },
+    {
+      "subcategoriaId": "masajes",
+      "nombre": "Masajes",
+      "arquetipo": "negocio_bienestar",
+      "tipoPerfil": "negocio",
+      "heredaDe": "plantillasArquetipo.negocio_bienestar",
+      "delta": {
+        "modoRegistroAlternativo": "persona_acompanante",
+        "nota": "Si es terapeuta independiente sin local, puede usar persona_acompanante con IA."
+      },
+      "keywordsIA": ["masajes", "terapeuta", "relajante", "tantra"]
+    },
+    {
+      "subcategoriaId": "club_sw",
+      "nombre": "Club Swinger",
+      "arquetipo": "negocio_venue",
+      "tipoPerfil": "lugar",
+      "heredaDe": "plantillasArquetipo.negocio_venue",
+      "delta": {
+        "obligatoriosExtra": ["politicaParejasSingles", "areasVenue"],
+        "badges": ["swinger"]
+      },
+      "keywordsIA": ["club swinger", "parejas", "lifestyle", "intercambio"]
+    },
+    {
+      "subcategoriaId": "antro",
+      "nombre": "Antro / Restaurant Bar",
+      "arquetipo": "negocio_venue",
+      "tipoPerfil": "lugar",
+      "heredaDe": "plantillasArquetipo.negocio_venue",
+      "delta": { "obligatoriosExtra": ["cartelera"] },
+      "keywordsIA": ["antro", "bar", "restaurant", "vida nocturna", "discoteca"]
+    },
+    {
+      "subcategoriaId": "antro_lgbt",
+      "nombre": "Antro / Restaurant Bar LGBT",
+      "arquetipo": "negocio_venue",
+      "tipoPerfil": "lugar",
+      "heredaDe": "plantillasArquetipo.negocio_venue",
+      "delta": {
+        "obligatoriosExtra": ["cartelera"],
+        "badges": ["lgbt"]
+      },
+      "keywordsIA": ["antro lgbt", "gay bar", "lgbt", "pride"]
+    },
+    {
+      "subcategoriaId": "hotel_motel",
+      "nombre": "Hotel / Motel",
+      "arquetipo": "negocio_hospedaje",
+      "tipoPerfil": "lugar",
+      "heredaDe": "plantillasArquetipo.negocio_hospedaje",
+      "delta": {
+        "coherenciaExtra": [{ "id": "HOTEL_TARIFA", "requiere": ["tarifaHora", "tiposHabitacion"], "severidad": "error" }]
+      },
+      "keywordsIA": ["hotel", "motel", "habitación", "por horas", "suite", "jacuzzi"]
+    },
+    {
+      "subcategoriaId": "cabinas",
+      "nombre": "Cabinas / Glory Holes",
+      "arquetipo": "negocio_venue",
+      "tipoPerfil": "lugar",
+      "heredaDe": "plantillasArquetipo.negocio_venue",
+      "delta": {
+        "camposPublicosPerfil": ["areasVenue"],
+        "obligatoriosExtra": ["areasVenue"],
+        "textosAyuda": { "areasVenue": "Describe tipos de cabinas y privacidad sin lenguaje explícito." }
+      },
+      "keywordsIA": ["cabinas", "glory hole", "privado", "booth"]
+    },
+    {
+      "subcategoriaId": "trans",
+      "nombre": "Trans",
+      "arquetipo": "persona_acompanante",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_acompanante",
+      "delta": {
+        "camposPublicosPerfil": ["identidadGenero"],
+        "obligatoriosExtra": ["identidadGenero"]
+      },
+      "keywordsIA": ["trans", "transgénero", "tg"]
+    },
+    {
+      "subcategoriaId": "femboy",
+      "nombre": "Femboy",
+      "arquetipo": "persona_acompanante",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_acompanante",
+      "delta": { "camposPublicosPerfil": ["identidadGenero"], "obligatoriosExtra": ["identidadGenero"] },
+      "keywordsIA": ["femboy", "fem"]
+    },
+    {
+      "subcategoriaId": "swinger",
+      "nombre": "Swinger",
+      "arquetipo": "pareja_grupo",
+      "tipoPerfil": "pareja_grupo",
+      "heredaDe": "plantillasArquetipo.pareja_grupo",
+      "delta": { "dinamicaOpciones": ["pareja_swinger", "single_swinger"] },
+      "keywordsIA": ["swinger", "pareja", "lifestyle", "intercambio"]
+    },
+    {
+      "subcategoriaId": "unicorns",
+      "nombre": "Unicorns",
+      "arquetipo": "pareja_grupo",
+      "tipoPerfil": "pareja_grupo",
+      "heredaDe": "plantillasArquetipo.pareja_grupo",
+      "delta": {
+        "obligatoriosExtra": ["buscan"],
+        "textosAyuda": { "buscan": "Indica si buscan pareja, unicorn o dinámica específica." }
+      },
+      "keywordsIA": ["unicorn", "unicornio", "trío", "pareja busca"]
+    },
+    {
+      "subcategoriaId": "cuckold_hotwife",
+      "nombre": "Cuckold / Hotwife",
+      "arquetipo": "pareja_grupo",
+      "tipoPerfil": "pareja_grupo",
+      "heredaDe": "plantillasArquetipo.pareja_grupo",
+      "delta": {
+        "dinamicaOpciones": ["cuckold", "hotwife", "ambos"],
+        "obligatoriosExtra": ["dinamica", "miembros"]
+      },
+      "keywordsIA": ["cuckold", "hotwife", "bull", "pareja"]
+    },
+    {
+      "subcategoriaId": "singles",
+      "nombre": "Singles",
+      "arquetipo": "persona_acompanante",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_acompanante",
+      "delta": {
+        "camposPublicosPerfil": ["buscan"],
+        "textosAyuda": { "buscan": "Indica si participas en escena swinger o eventos." }
+      },
+      "keywordsIA": ["single", "swinger single", "soltero lifestyle"]
+    },
+    {
+      "subcategoriaId": "hotwife",
+      "nombre": "Hotwife",
+      "arquetipo": "persona_acompanante",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_acompanante",
+      "delta": {
+        "camposPublicosPerfil": ["buscan"],
+        "badges": ["hotwife"]
+      },
+      "keywordsIA": ["hotwife", "esposa hotwife", "pareja"]
+    },
+    {
+      "subcategoriaId": "lesbians",
+      "nombre": "Lesbians",
+      "arquetipo": "persona_acompanante",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_acompanante",
+      "delta": { "obligatoriosExtra": ["orientacion"], "badges": ["lgbt"] },
+      "keywordsIA": ["lesbiana", "mujer", "lgbt"]
+    },
+    {
+      "subcategoriaId": "tom_boy",
+      "nombre": "Tom Boy",
+      "arquetipo": "persona_acompanante",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_acompanante",
+      "delta": { "camposPublicosPerfil": ["identidadGenero"] },
+      "keywordsIA": ["tomboy", "andro"]
+    },
+    {
+      "subcategoriaId": "tom_fem",
+      "nombre": "Tom Fem",
+      "arquetipo": "persona_acompanante",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_acompanante",
+      "delta": { "camposPublicosPerfil": ["identidadGenero"] },
+      "keywordsIA": ["tom fem", "fem"]
+    },
+    {
+      "subcategoriaId": "dotados",
+      "nombre": "Dotados",
+      "arquetipo": "persona_acompanante",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_acompanante",
+      "delta": {
+        "camposPublicosResultados": [],
+        "nota": "Atributo físico solo en perfil detallado, tono discreto, nunca vulgar en tagline.",
+        "textosAyuda": { "tagline": "Usa lenguaje discreto y profesional." }
+      },
+      "keywordsIA": ["dotado", "atributo"]
+    },
+    {
+      "subcategoriaId": "fetiche",
+      "nombre": "Fetiche",
+      "arquetipo": "persona_dominatrix",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_dominatrix",
+      "delta": {
+        "obligatoriosExtra": ["listaFetiches"],
+        "camposPublicosPerfil": ["listaFetiches"]
+      },
+      "keywordsIA": ["fetiche", "pies", "latex", "roleplay", "bdsm"]
+    },
+    {
+      "subcategoriaId": "sado",
+      "nombre": "Sado",
+      "arquetipo": "persona_dominatrix",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_dominatrix",
+      "delta": {
+        "obligatoriosExtra": ["limitesSesion", "listaFetiches"],
+        "camposPublicosPerfil": ["listaFetiches", "limitesSesion"]
+      },
+      "keywordsIA": ["sado", "bdsm", "sadomasoquismo", "dominación"],
+      "textosAyuda": { "limitesSesion": "Define límites y reglas de sesión con claridad." }
+    },
+    {
+      "subcategoriaId": "dominatrix",
+      "nombre": "Dominatrix",
+      "arquetipo": "persona_dominatrix",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_dominatrix",
+      "delta": {},
+      "coherenciaExtra": [{ "id": "DOM_LIMITES", "requiere": ["limitesSesion", "estiloDominacion"], "severidad": "error" }]
+    },
+    {
+      "subcategoriaId": "cine_xxx",
+      "nombre": "Cine para Adultos",
+      "arquetipo": "negocio_venue",
+      "tipoPerfil": "lugar",
+      "heredaDe": "plantillasArquetipo.negocio_venue",
+      "delta": {
+        "camposPublicosPerfil": ["cartelera"],
+        "obligatoriosExtra": ["cartelera", "areasVenue"],
+        "textosAyuda": { "cartelera": "Horarios de funciones y tipos de sala." }
+      },
+      "keywordsIA": ["cine adulto", "sala xxx", "funciones", "butacas"]
+    }
+  ],
+  "resolucionFieldEngine": {
+    "algoritmo": [
+      "1. Cargar meta.base",
+      "2. Cargar plantillasArquetipo[sub.arquetipo]",
+      "3. Aplicar subcategorias[].delta (merge arrays, override fotosMin)",
+      "4. Resolver fieldRegistry para metadata de cada campo",
+      "5. Exponer: camposPublicosResultados, camposPublicosPerfil, camposPrivados, obligatorios, opcionales, validaciones, coherencia (global + extra)"
+    ],
+    "ejemploEscort": {
+      "camposPublicosResultados": ["subcategoriaId", "alias", "tagline", "geo", "fotoPrincipal", "galeria", "edad", "precioDesde", "modalidades", "disponibilidad"],
+      "camposPrivados": ["telefonoContacto", "terminosAceptados", "mayorEdadConfirmado", "whatsappPrivado", "ineFrente", "ineReverso", "selfieVerificacion"],
+      "fotosMin": 3,
+      "verificacion": "persona_estandar",
+      "facturacionSiActiva": ["rfc", "razonSocial", "codigoPostalFiscal", "emailFacturacion", "regimenFiscal", "usoCFDI"]
+    }
+  }
+}

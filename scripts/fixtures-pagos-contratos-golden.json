@@ -1,0 +1,184 @@
+{
+  "version": "1.0.0",
+  "specVersion": "1.0.0",
+  "descripcion": "Golden fixtures Pagos-Contratos v1.0.0 — salidas esperadas documentales (no runtime). Cubren cotización, contrato congelado, pago manual, renovación, negocio, banner, comprobante rechazado, duplicado, visitante, promo gratis.",
+  "fixtures": [
+    {
+      "id": "PAY-01",
+      "nombre": "Cotización precio resuelto adultos básico mensual",
+      "entrada": {
+        "accion": "cotizarPrecio",
+        "formularioId": "adultos",
+        "planId": "basico",
+        "periodo": "mensual",
+        "subcategoriaId": "acompanantes-gdl",
+        "pais": "MX", "estado": "Jalisco", "ciudad": "Guadalajara"
+      },
+      "salidaEsperada": {
+        "precioResuelto": { "montoFinal": 499, "moneda": "MXN", "ivaIncluido": true, "redondeo": 50 },
+        "versionPrecio": "string snapshot config",
+        "gatesVE": { "cotizarPrecio": "permitido" }
+      }
+    },
+    {
+      "id": "PAY-02",
+      "nombre": "Contrato perfil con precio/promo congelados",
+      "entrada": {
+        "accion": "crearContrato",
+        "usuarioId": "uid_001",
+        "perfilId": "uid_001",
+        "precioContratado": 499,
+        "versionPrecio": "2026-06-10-v1",
+        "promocionAplicada": null,
+        "planContratado": "basico",
+        "periodoContratado": "mensual"
+      },
+      "salidaEsperada": {
+        "estadoContrato": "pendiente_aceptacion",
+        "snapshotPrecioCongelado": { "precioContratado": 499, "inmutable": true },
+        "politicaPrecioCongelado": "activa hasta fechaVencimiento",
+        "coleccion": "contratos_perfiles/{contratoId}"
+      }
+    },
+    {
+      "id": "PAY-03",
+      "nombre": "Pago manual pendiente → admin confirma → activación perfil",
+      "entrada": {
+        "accion": "confirmarPagoAdmin",
+        "pagoId": "pay_001",
+        "estadoAnterior": "en_revision",
+        "contratoId": "ctr_001",
+        "monto": 499,
+        "perfilEstadoAnterior": "pago_pendiente"
+      },
+      "salidaEsperada": {
+        "estadoPago": "pagado",
+        "estadoContrato": "activo",
+        "estadoPerfil": "pago_confirmado",
+        "activacionServicio": "publicado|activo tras revision OK",
+        "eventos": ["pago_confirmado", "notificacion_usuario", "trigger_activacion"]
+      }
+    },
+    {
+      "id": "PAY-04",
+      "nombre": "Renovación post-vencimiento con precio vigente",
+      "entrada": {
+        "accion": "renovarContrato",
+        "contratoAnteriorId": "ctr_vencido_001",
+        "estadoAnterior": "vencido",
+        "precioAnteriorCongelado": 499,
+        "precioVigenteActual": 549,
+        "emailVerificado": true
+      },
+      "salidaEsperada": {
+        "nuevoContrato": { "precioContratado": 549, "versionPrecio": "nueva version" },
+        "noHeredaCongelado": true,
+        "gatesVE": { "renovar_contrato": "permitido" },
+        "renovacion": { "contratoAnteriorId": "ctr_vencido_001", "contratoNuevoId": "ctr_nuevo_001" }
+      }
+    },
+    {
+      "id": "PAY-05",
+      "nombre": "Negocio autorizado_para_pago → pago_confirmado → publicado",
+      "entrada": {
+        "accion": "flujo_negocio",
+        "formularioId": "negocio_empresa",
+        "estadoAnterior": "autorizado_para_pago",
+        "pagoConfirmado": true
+      },
+      "salidaEsperada": {
+        "transiciones": ["autorizado_para_pago", "pago_pendiente", "pago_confirmado", "publicado"],
+        "estadoFinal": "publicado",
+        "activacionServicio": true,
+        "requierePago": true
+      }
+    },
+    {
+      "id": "PAY-06",
+      "nombre": "Contrato banner + pago confirmado → espacio activo",
+      "entrada": {
+        "accion": "confirmarPagoAdmin",
+        "tipoContrato": "contratos_banners",
+        "anuncianteId": "uid_anunc_001",
+        "espacioId": "banner_home",
+        "diasTotales": 30
+      },
+      "salidaEsperada": {
+        "estadoContrato": "activo",
+        "estadoPago": "pagado",
+        "activacionBanner": "espacio publicado",
+        "separacionPerfiles": "NO usa contratos_perfiles",
+        "coleccion": "contratos_banners/{contratoId}"
+      }
+    },
+    {
+      "id": "PAY-07",
+      "nombre": "Comprobante rechazado → pago rechazado → servicio no activa",
+      "entrada": {
+        "accion": "admin_rechaza_comprobante",
+        "comprobanteId": "comp_001",
+        "pagoId": "pay_002",
+        "motivoRechazo": "Comprobante ilegible"
+      },
+      "salidaEsperada": {
+        "comprobanteEstado": "rechazado",
+        "estadoPago": "rechazado",
+        "activacionServicio": false,
+        "codigoError": "PAY-E02",
+        "accionSugerida": "resubir comprobante"
+      }
+    },
+    {
+      "id": "PAY-08",
+      "nombre": "Pago duplicado detectado",
+      "entrada": {
+        "accion": "registrarPago",
+        "referencia": "SPEI-12345",
+        "monto": 499,
+        "pagoExistenteId": "pay_dup_ref"
+      },
+      "salidaEsperada": {
+        "estadoPago": "duplicado",
+        "duplicadoDe": "pay_dup_ref",
+        "activacionServicio": false,
+        "codigoError": "PAY-E03",
+        "requiere": "conciliacion admin"
+      }
+    },
+    {
+      "id": "PAY-09",
+      "nombre": "Visitante contrato vigente sin perfil público",
+      "entrada": {
+        "accion": "crearContrato",
+        "tipoCuenta": "visitante",
+        "formularioId": "usuario_visitante",
+        "tienePerfilPublico": false,
+        "estadoContrato": "activo",
+        "pagoConfirmado": true
+      },
+      "salidaEsperada": {
+        "puedeCrearPerfilGratis": true,
+        "perfilId": null,
+        "publico": false,
+        "upgrade": "crear perfil sin nuevo cobro registro"
+      }
+    },
+    {
+      "id": "PAY-10",
+      "nombre": "Promoción primer mes gratis",
+      "entrada": {
+        "accion": "crearContrato",
+        "promocionId": "primer_mes_gratis",
+        "precioLista": 499,
+        "promocionAplicada": "primer_mes_gratis"
+      },
+      "salidaEsperada": {
+        "precioContratado": 0,
+        "promocionAplicada": "primer_mes_gratis",
+        "versionPromocion": "string snapshot",
+        "snapshotPrecioCongelado": { "precioContratado": 0, "inmutable": true },
+        "activacionServicio": "posible sin pago monetario; revision admin aplica"
+      }
+    }
+  ]
+}

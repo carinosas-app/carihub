@@ -1,0 +1,119 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "tipo": "AUDITORIA_PRE_CONGELAMIENTO",
+  "objeto": "SHARED_CORE",
+  "titulo": "Auditoría final pre-congelamiento — Shared/Core CariHub",
+  "fecha": "2026-06-10",
+  "version": "1.0.0",
+  "estado": "AUDITORIA_COMPLETADA — congelamiento NO aprobado",
+  "modo": "Solo auditoría y validación de diseño — sin runtime/carpetas/mover/Firestore/deploy/commit",
+  "autorizadoPor": "product owner / usuario CariHub",
+  "resuelveBloqueante": "RE-AU-01 (Shared/Core no congelado) — evaluación, no cierre",
+  "veredictoGlobal": "NO_CONGELABLE_AUN — PLAN-MAESTRO insuficiente; requiere SPEC-SHARED-CORE + 6 ajustes obligatorios",
+  "basadoEn": [
+    "scripts/PLAN-MAESTRO-SHARED-CORE.json",
+    "scripts/SPEC-RENDERENGINE.json",
+    "scripts/ADR-RENDER-STRATEGY.json",
+    "scripts/ADR-URL-CANONICA-PERFILES.json",
+    "scripts/config-renderizado-dinamico-schema.json",
+    "scripts/config-registro-componentes-ui-schema.json"
+  ],
+  "criterioCongelable": "Una capa es congelable cuando tiene SPEC formal (API/tipos/contratos sin ambigüedad), fixtures golden, auditoría sin hallazgos bloqueantes y aprobación del product owner — patrón usado en FieldEngine 1.0.1 y ValidationEngine.",
+  "matrizDefinicionPorElemento": [
+    { "elemento": "firebaseConfig único", "definicion": "SUFICIENTE", "nota": "Duplicado real evidenciado (6 páginas); destino y forma claros. Falta formalizar API de init (getApp/auth/db/storage) y manejo de config sensible." },
+    { "elemento": "Catálogo compartido", "definicion": "INSUFICIENTE", "nota": "Desalineación 34 (producción) vs 462 (diseño) sin resolver. Core debe declarar qué versión expone + capa compatibilidad. BLOQUEANTE." },
+    { "elemento": "Geo país/estado/ciudad", "definicion": "PARCIAL", "nota": "Fuente clara (paises/estados/ciudades.js) pero falta política de segmentación/lazy (bundle grande). BLOQUEANTE menor." },
+    { "elemento": "Tokens visuales", "definicion": "INSUFICIENTE", "nota": "--rosa divergente (#ec2d7a vs #c2185b) y home-modals.css roto. Falta contrato tokens.css. BLOQUEANTE." },
+    { "elemento": "Helpers compartidos", "definicion": "SUFICIENTE", "nota": "textoSeguro/limpiarTelefono/normalizarTexto/fecha; duplicación evidenciada. Falta firmar API (firmas/contrato)." },
+    { "elemento": "Validaciones comunes", "definicion": "PARCIAL", "nota": "Frontera con ValidationEngine debe quedar explícita: Core solo formato ligero; reglas a VE." },
+    { "elemento": "Constantes globales", "definicion": "PARCIAL", "nota": "Separar config Core (whatsapp/rbac/flags) de constantes de dominio (ETIQUETAS, LINK_STRIPE) que NO van a Core." },
+    { "elemento": "Assets compartidos", "definicion": "PARCIAL", "nota": "Branding base sí; creativos de banner no. Falta inventario mínimo de branding Core." },
+    { "elemento": "Scripts comunes", "definicion": "SUFICIENTE", "nota": "modal-carihub multi-consumidor; formalizar como módulo Core-UI." },
+    { "elemento": "Estilos base", "definicion": "PARCIAL", "nota": "reset + tokens base candidatos; banners-publicidad.css NO es Core. Falta base.css contrato." },
+    { "elemento": "Componentes reutilizables", "definicion": "SUFICIENTE_CON_CONTRATO_EXISTENTE", "nota": "ComponentRegistry ya definido en config-registro-componentes-ui-schema.json y config-renderizado-dinamico-schema.json. Core debe referenciar, no redefinir." },
+    { "elemento": "Cliente/contrato ValidationEngine", "definicion": "INSUFICIENTE", "nota": "Solo conceptual en PLAN. Falta contrato de cliente (qué expone Core sin reimplementar VE 1.1.0)." },
+    { "elemento": "Cliente/contrato FieldEngine", "definicion": "INSUFICIENTE", "nota": "Solo conceptual. Falta contrato de resolver/cliente (FE 1.0.1)." },
+    { "elemento": "Cliente/contrato RenderEngine", "definicion": "INSUFICIENTE", "nota": "RenderEngine aún en diseño (no congelado); Core debe exponer ComponentRegistry/resolveUrl como contrato, alineado a SPEC-RENDERENGINE." }
+  ],
+  "fortalezas": [
+    "Inventario de compartidos completo y con evidencia real de duplicados (firebaseConfig×6, textoSeguro×5, --rosa×4)",
+    "Regla de admisión clara (2+ apps y estable) — mitiga god-module",
+    "Dirección de dependencias definida (Core no depende de apps; grafo acíclico)",
+    "Consumidores por sub-capa mapeados",
+    "Orden de extracción y prioridad por elemento definidos",
+    "Alineación con contratos existentes (config-renderizado-dinamico, ComponentRegistry)",
+    "Frontera Core vs motores enunciada (Core expone clientes, no reimplementa VE/FE)"
+  ],
+  "debilidades": [
+    "Es un PLAN-MAESTRO (inventario/recomendación), no una SPEC formal con API/tipos/contratos",
+    "Catálogo 34 vs 462 sin decisión vinculante",
+    "Contrato de tokens visuales inexistente; --rosa roto en home-modals.css",
+    "Política de carga/segmentación de geo no definida",
+    "Clientes VE/FE/RenderEngine solo conceptuales (sin firmas/contrato)",
+    "Sin fixtures golden ni validador para Core",
+    "Sin contrato de versionado semver propio de Core formalizado (changelog inicial existe pero no la política de superficie pública)"
+  ],
+  "riesgos": [
+    { "id": "SC-AU-R01", "nivel": "alto", "riesgo": "Congelar sin SPEC → ambigüedad de API y re-trabajo al implementar", "mitigacion": "Redactar SPEC-SHARED-CORE antes del acta" },
+    { "id": "SC-AU-R02", "nivel": "alto", "riesgo": "Catálogo ambiguo (34 vs 462) propaga inconsistencia a todos los consumidores", "mitigacion": "Decidir versión Core + capa compatibilidad" },
+    { "id": "SC-AU-R03", "nivel": "medio", "riesgo": "God-module si no se fija superficie pública y regla de admisión vinculante", "mitigacion": "Sub-capas con exports explícitos + revisión" },
+    { "id": "SC-AU-R04", "nivel": "medio", "riesgo": "Dependencias circulares App↔Core si Core importa lógica de dominio", "mitigacion": "Grafo acíclico verificable; prohibido import Core→app" },
+    { "id": "SC-AU-R05", "nivel": "medio", "riesgo": "Tokens divergentes generan regresión visual al unificar", "mitigacion": "Contrato tokens + mapeo previo de valores" },
+    { "id": "SC-AU-R06", "nivel": "medio", "riesgo": "Geo pesado en bundle Core inicial", "mitigacion": "Segmentación/lazy por país" },
+    { "id": "SC-AU-R07", "nivel": "bajo", "riesgo": "Duplicar reglas VE/FE en Core", "mitigacion": "Core solo clientes/contratos" }
+  ],
+  "dependencias": {
+    "congeladas": ["ValidationEngine 1.1.0", "FieldEngine 1.0.1", "Catálogo 1.0.0", "Cuentas 1.0.0", "Seguridad 1.0.0", "Dashboards 1.0.0", "Messenger 1.0.0"],
+    "enDiseno": ["RenderEngine 1.0.0 (SPEC, no congelado)", "App Pública (plan)", "SEO (observación)", "ThemeEngine (observación 1.3.0)"],
+    "relacion": "Shared/Core es base de todas; su congelamiento desbloquea RE-AU-01 y habilita ACTA-RENDERENGINE",
+    "decisionesPrevias": ["ADR-RENDER-STRATEGY (modoRender por superficie)", "ADR-URL-CANONICA-PERFILES (resolveUrl/canónico) — impacta helpers de URL en Core"]
+  },
+  "compatibilidadPorModulo": {
+    "appPublica": "PASS — consumidor puro (config, data, helpers, ui, RenderEngine)",
+    "registro": "PASS — consume FieldEngine cliente + catálogo + geo + modal; requiere contrato cliente FE",
+    "dashboards": "PASS — config, helpers, notificaciones; sin lógica privada en Core",
+    "messenger": "PASS — config, helpers, cliente VE; UI propia",
+    "admin": "OBSERVACION — RBAC en Core config; etiquetas de dominio NO van a Core",
+    "banners": "PASS — catálogo, geo, modal; creativos/precios fuera de Core",
+    "themeEngine": "OBSERVACION — depende de contrato tokens.css (SC-AO-03)",
+    "seo": "PASS — consume RenderEngine head; sin acoplamiento directo a Core salvo data",
+    "agentesIA": "PASS — consumen config y contratos VE; prompts/LLM fuera de Core"
+  },
+  "ajustesObligatoriosCongelamiento": [
+    { "id": "SC-AO-01", "tema": "SPEC-SHARED-CORE formal", "detalle": "Redactar SPEC con API pública, tipos, contratos de clientes (VE/FE/RenderEngine), superficie de exports y política semver. Sin esto no es congelable.", "bloqueante": true },
+    { "id": "SC-AO-02", "tema": "Versión de catálogo expuesta", "detalle": "Decidir si Core expone 34 (producción) o 462 (diseño) + capa de compatibilidad/migración.", "bloqueante": true },
+    { "id": "SC-AO-03", "tema": "Contrato de tokens visuales", "detalle": "Definir tokens.css base, resolver divergencia --rosa y documentar corrección de home-modals.css (definición, no implementación).", "bloqueante": true },
+    { "id": "SC-AO-04", "tema": "Política de carga de geo", "detalle": "Definir segmentación/lazy por país para no inflar el bundle Core.", "bloqueante": true },
+    { "id": "SC-AO-05", "tema": "Frontera clientes vs motores", "detalle": "Especificar exactamente qué expone Core de VE/FE/RenderEngine sin reimplementar reglas.", "bloqueante": true },
+    { "id": "SC-AO-06", "tema": "Superficie pública + regla anti god-module", "detalle": "Lista de exports por sub-capa y verificación de grafo acíclico (prohibido import Core→app).", "bloqueante": true }
+  ],
+  "ajustesRecomendados": [
+    { "id": "SC-AR-01", "tema": "fixtures-shared-core-golden", "detalle": "Casos para resolveComponent, canonicalId, textoSeguro, resolveUrl, token lookup." },
+    { "id": "SC-AR-02", "tema": "Validador", "detalle": "validar-spec-shared-core.mjs análogo a validadores existentes." },
+    { "id": "SC-AR-03", "tema": "Decisión perfilId opaco", "detalle": "Coordinar con Seguridad (URL-R02) por impacto en helpers de URL/slug de Core." },
+    { "id": "SC-AR-04", "tema": "Inventario branding Core", "detalle": "Listar logos/assets base que entran a Core vs creativos de Banners." },
+    { "id": "SC-AR-05", "tema": "ALCANCE.md", "detalle": "SPEC-SHARED-CORE-ALCANCE.md como en FieldEngine." }
+  ],
+  "respuestasDirectas": {
+    "planMaestroBastaParaCongelar": "NO — el PLAN-MAESTRO es inventario/recomendación; falta SPEC formal con API/contratos.",
+    "primeroDebeRedactarseSpecSharedCore": "SÍ — SPEC-SHARED-CORE.md/json es precondición (SC-AO-01).",
+    "puedeCongelarseSinCambios": "NO — existen 6 ajustes obligatorios bloqueantes.",
+    "procedeGenerarActaAhora": "NO — no se genera ACTA-CONGELAMIENTO-SHARED-CORE; congelamiento no aprobado por el usuario y faltan ajustes."
+  },
+  "rutaHaciaCongelamiento": [
+    "1. Redactar SPEC-SHARED-CORE.md/json (SC-AO-01) con API/tipos/contratos clientes + semver",
+    "2. Cerrar SC-AO-02 (catálogo), SC-AO-03 (tokens), SC-AO-04 (geo), SC-AO-05 (frontera), SC-AO-06 (exports/acíclico)",
+    "3. (Recomendado) fixtures-shared-core-golden + validador",
+    "4. Auditoría de la SPEC sin hallazgos bloqueantes",
+    "5. Aprobación product owner → ACTA-CONGELAMIENTO-SHARED-CORE",
+    "6. Con Core congelado → cerrar RE-AU-01 → ACTA-CONGELAMIENTO-RENDERENGINE"
+  ],
+  "impactoEnRenderEngine": {
+    "bloqueanteRE-AU-01": "PERMANECE ABIERTO — Core aún no congelable",
+    "nota": "RE-AU-02 (estrategia render) y RE-AU-03 (URL canónica) ya resueltos por ADRs; RE-AU-01 es el único restante y este audit confirma que requiere SPEC-SHARED-CORE primero."
+  },
+  "noModifica": ["Capas congeladas", "Producción, Firestore, deploy, commit", "PLAN-MAESTRO-SHARED-CORE (no se altera; se evalúa)"],
+  "changelog": [
+    { "version": "1.0.0", "fecha": "2026-06-10", "nota": "Auditoría final pre-congelamiento Shared/Core: veredicto NO congelable aún; 6 ajustes obligatorios; requiere SPEC-SHARED-CORE" }
+  ]
+}

@@ -1,0 +1,316 @@
+{
+  "version": "1.1.0",
+  "specVersion": "1.1.0",
+  "validationEngineVersion": "validationengine-2026-06-10@1.1.0",
+  "actaMinor": "scripts/ACTA-MINOR-VALIDATIONENGINE-1.1.0-MESSENGER.json",
+  "descripcion": "Golden fixtures diseño ValidationEngine v1.1.0 — entradas/salidas esperadas sin runtime",
+  "dependencias": {
+    "fieldEngine": "1.0.1",
+    "seguridad": "1.0.0",
+    "dashboards": "1.0.0"
+  },
+  "fixtures": [
+    {
+      "id": "V01_guardar_borrador_restringido_ok",
+      "accion": "guardar_borrador",
+      "entrada": {
+        "usuarioId": "u1",
+        "seguridad": { "estadoSeguridad": "restringido", "emailVerificado": true },
+        "cuenta": { "estadoCuenta": "activa", "perfilPrincipalId": "p1" },
+        "perfil": { "perfilId": "p1", "usuarioId": "u1" },
+        "fieldEngineContext": { "subcategoriaId": "escort", "modo": "default" }
+      },
+      "salidaEsperada": { "ok": true, "gate": "FieldEngine AM1 restringido permite borrador", "emitirEvento": "historial_perfil.borrador_guardado" }
+    },
+    {
+      "id": "V02_enviar_revision_ok",
+      "accion": "enviar_revision",
+      "entrada": {
+        "usuarioId": "u1",
+        "seguridad": { "estadoSeguridad": "normal", "emailVerificado": true },
+        "cuenta": { "estadoCuenta": "activa" },
+        "perfil": { "perfilId": "p1", "usuarioId": "u1", "estadoRevision": "registro_pendiente" },
+        "values": { "alias": "Test", "geo": { "ciudad": "CDMX" } }
+      },
+      "salidaEsperada": {
+        "ok": true,
+        "fanOutPlan": [
+          { "destino": "historial", "dominio": "historial_perfil", "tipoEvento": "enviado_revision" },
+          { "destino": "historial", "dominio": "historial_actividad_cuenta", "tipoEvento": "perfil_enviado_revision" },
+          { "destino": "notificacion", "dominio": "verificaciones", "tipoEvento": "verificacion_recibida", "destinatario": "admin_cola_revision" }
+        ],
+        "notificacionUsuario": false
+      }
+    },
+    {
+      "id": "V03_enviar_revision_email_no_verificado",
+      "accion": "enviar_revision",
+      "entrada": {
+        "usuarioId": "u1",
+        "seguridad": { "estadoSeguridad": "normal", "emailVerificado": false },
+        "cuenta": { "estadoCuenta": "activa" }
+      },
+      "salidaEsperada": { "ok": false, "codigo": "EMAIL_NO_VERIFICADO", "http": 403 }
+    },
+    {
+      "id": "V04_estado_seguridad_bloqueado_denegado",
+      "accion": "guardar_borrador",
+      "entrada": {
+        "usuarioId": "u1",
+        "seguridad": { "estadoSeguridad": "bloqueado", "emailVerificado": true },
+        "cuenta": { "estadoCuenta": "activa" }
+      },
+      "salidaEsperada": { "ok": false, "codigo": "ESTADO_SEGURIDAD_DENEGADO", "http": 403 }
+    },
+    {
+      "id": "V05_turnstile_faltante_registro",
+      "accion": "registro_auth",
+      "entrada": { "turnstileToken": null, "ipHash": "ip1" },
+      "salidaEsperada": { "ok": false, "codigo": "TURNSTILE_TOKEN_FALTANTE", "http": 400, "retry": true }
+    },
+    {
+      "id": "V06_rate_limit_registro",
+      "accion": "registro_auth",
+      "entrada": { "turnstileToken": "valid", "ipHash": "ip_spam", "rateLimitState": "excedido_registro_cuenta_ip" },
+      "salidaEsperada": { "ok": false, "codigo": "RATE_LIMIT_EXCEDIDO", "http": 429, "logSeguridad": "rate_limit" }
+    },
+    {
+      "id": "V07_visitante_registro_inicial_ok",
+      "accion": "registro_visitante",
+      "entrada": {
+        "turnstileToken": "valid",
+        "fieldEngineContext": { "formularioId": "usuario_visitante", "flujoVisitante": "registro_inicial" },
+        "values": { "nombre": "Ana", "email": "ana@example.com" }
+      },
+      "salidaEsperada": { "ok": true, "validateFormulario": "sin subcategoriaId", "fieldEngine": "F08" }
+    },
+    {
+      "id": "V08_upgrade_visitante_sin_subcategoria",
+      "accion": "upgrade_perfil_publico",
+      "entrada": {
+        "usuarioId": "u_vis",
+        "fieldEngineContext": { "formularioId": "usuario_visitante", "flujoVisitante": "upgrade_perfil_publico" },
+        "seguridad": { "emailVerificado": true, "estadoSeguridad": "normal" }
+      },
+      "salidaEsperada": { "ok": false, "codigo": "SUBCATEGORIA_REQUERIDA_UPGRADE_VISITANTE", "http": 400 }
+    },
+    {
+      "id": "V09_categoria_sugerida_turnstile_ok",
+      "accion": "categoria_sugerida",
+      "entrada": {
+        "usuarioId": "u1",
+        "turnstileToken": "valid",
+        "seguridad": { "emailVerificado": true, "estadoSeguridad": "normal" },
+        "fieldEngineContext": { "modo": "temporal_categoria_sugerida", "subcategoriaId": "nueva_cat" },
+        "values": { "nombreCategoria": "Ejemplo" }
+      },
+      "salidaEsperada": { "ok": true, "rateLimit": "categoria_sugerida", "emitirHistorial": "historial_actividad_cuenta" }
+    },
+    {
+      "id": "V10_crear_solicitud_banner_ok",
+      "accion": "crear_solicitud_banner",
+      "entrada": {
+        "usuarioId": "u1",
+        "turnstileToken": "valid",
+        "seguridad": { "emailVerificado": true, "estadoSeguridad": "normal" },
+        "cuenta": { "rolesCuenta": ["anunciante"], "estadoCuenta": "activa" },
+        "values": { "tipoBanner": "imagen", "sectorId": "adultos" }
+      },
+      "salidaEsperada": {
+        "ok": true,
+        "fanOutPlan": [
+          { "destino": "historial", "dominio": "historial_banners", "tipoEvento": "solicitud_creada" },
+          { "destino": "notificacion", "dominio": "banners", "tipoEvento": "solicitud_recibida", "destinatario": "uidAnunciante" }
+        ]
+      }
+    },
+    {
+      "id": "V11_owner_mismatch_editar_perfil",
+      "accion": "guardar_borrador",
+      "entrada": {
+        "usuarioId": "u_attacker",
+        "perfil": { "perfilId": "p1", "usuarioId": "u_owner" }
+      },
+      "salidaEsperada": { "ok": false, "codigo": "OWNER_MISMATCH", "http": 403 }
+    },
+    {
+      "id": "V12_media_ine_path_invalido",
+      "accion": "subir_verificacion_ine_frente",
+      "entrada": {
+        "usuarioId": "u1",
+        "perfil": { "perfilId": "p1", "usuarioId": "u1" },
+        "media": {
+          "tipo": "ine_frente",
+          "mime": "image/jpeg",
+          "bytes": 2000000,
+          "storagePath": "perfiles/otro_perfil/verificacion/ine_frente/x.jpg",
+          "extension": ".jpg"
+        }
+      },
+      "salidaEsperada": { "ok": false, "codigo": "STORAGE_PATH_INVALIDO", "http": 403 }
+    },
+    {
+      "id": "V13_media_mime_peligroso",
+      "accion": "subir_foto_perfil",
+      "entrada": {
+        "usuarioId": "u1",
+        "perfil": { "perfilId": "p1", "usuarioId": "u1" },
+        "media": {
+          "tipo": "foto_perfil",
+          "mime": "application/x-msdownload",
+          "bytes": 1000,
+          "storagePath": "perfiles/p1/fotos/x.exe",
+          "extension": ".exe"
+        }
+      },
+      "salidaEsperada": { "ok": false, "codigo": "MEDIA_TIPO_NO_PERMITIDO", "http": 400 }
+    },
+    {
+      "id": "V14_ia_aceptar_sin_confirmacion",
+      "accion": "ia_aceptar_recomendacion",
+      "entrada": {
+        "usuarioId": "u1",
+        "recomendacionId": "rec1",
+        "confirmacionHumana": false
+      },
+      "salidaEsperada": { "ok": false, "codigo": "IA_CONFIRMACION_REQUERIDA", "http": 400 }
+    },
+    {
+      "id": "V15_admin_accion_sin_permiso",
+      "accion": "admin_cambio_estado_seguridad",
+      "entrada": {
+        "usuarioId": "u_user",
+        "dashboardContext": "admin",
+        "isAdmin": false
+      },
+      "salidaEsperada": { "ok": false, "codigo": "DASHBOARD_PERMISO_DENEGADO", "http": 403 }
+    },
+    {
+      "id": "V16_renovar_contrato_ok",
+      "accion": "renovar_contrato",
+      "entrada": {
+        "usuarioId": "u1",
+        "cuenta": { "estadoCuenta": "activa" },
+        "seguridad": { "estadoSeguridad": "normal", "emailVerificado": true },
+        "perfil": { "perfilId": "p1", "usuarioId": "u1", "estadoPublicacion": "activo" },
+        "metadata": { "contratoId": "c1", "tipo": "perfil" }
+      },
+      "salidaEsperada": {
+        "ok": true,
+        "fanOutPlan": [
+          { "destino": "historial", "dominio": "historial_renovaciones", "tipoEvento": "intento_solicitud" }
+        ],
+        "notificacion": false
+      }
+    },
+    {
+      "id": "V17_coherencia_campo_violada",
+      "accion": "guardar_borrador",
+      "entrada": {
+        "usuarioId": "u1",
+        "seguridad": { "estadoSeguridad": "normal", "emailVerificado": true },
+        "perfil": { "perfilId": "p1", "usuarioId": "u1" },
+        "fieldEngineContext": { "subcategoriaId": "escort" },
+        "values": { "alias": "X", "modalidades": [] }
+      },
+      "salidaEsperada": { "ok": false, "codigo": "COHERENCIA_VIOLADA", "fieldErrors": ["modalidades"] }
+    },
+    {
+      "id": "V18_mensajeria_futura_estado_suspendido",
+      "accion": "mensaje_enviar",
+      "entrada": {
+        "usuarioId": "u1",
+        "mensajeria": { "estadoMensajeria": "suspendida" },
+        "seguridad": { "estadoSeguridad": "normal", "emailVerificado": true }
+      },
+      "salidaEsperada": { "ok": false, "codigo": "ESTADO_MENSAJERIA_DENEGADO", "http": 403, "nota": "Gate mensajeria validateStates" }
+    },
+    {
+      "id": "V19_mensaje_enviar_ok",
+      "accion": "mensaje_enviar",
+      "entrada": {
+        "usuarioId": "u1",
+        "seguridad": { "estadoSeguridad": "normal", "emailVerificado": true, "telefonoVerificado": true },
+        "mensajeria": { "estadoMensajeria": "habilitada", "spamScore": 10 },
+        "messengerHabilitadoAmbito": true,
+        "metadata": { "receptorId": "u2", "conversacionId": "conv1" }
+      },
+      "salidaEsperada": {
+        "ok": true,
+        "fanOutPlan": [
+          { "destino": "historial", "dominio": "historial_mensajes", "tipoEvento": "mensaje_enviado" },
+          { "destino": "notificacion", "dominio": "mensajes", "tipoEvento": "mensaje_nuevo" }
+        ]
+      }
+    },
+    {
+      "id": "V20_mensaje_enviar_telefono_no_verificado",
+      "accion": "mensaje_enviar",
+      "entrada": {
+        "usuarioId": "u1",
+        "seguridad": { "estadoSeguridad": "normal", "emailVerificado": true, "telefonoVerificado": false },
+        "mensajeria": { "estadoMensajeria": "habilitada", "spamScore": 10 },
+        "messengerHabilitadoAmbito": true
+      },
+      "salidaEsperada": { "ok": false, "codigo": "TELEFONO_NO_VERIFICADO", "http": 403 }
+    },
+    {
+      "id": "V21_mensaje_enviar_spam_score_umbral",
+      "accion": "mensaje_enviar",
+      "entrada": {
+        "usuarioId": "u1",
+        "seguridad": { "estadoSeguridad": "normal", "emailVerificado": true, "telefonoVerificado": true },
+        "mensajeria": { "estadoMensajeria": "habilitada", "spamScore": 65 },
+        "messengerHabilitadoAmbito": true
+      },
+      "salidaEsperada": { "ok": false, "codigo": "SPAM_SCORE_UMBRAL", "http": 403 }
+    },
+    {
+      "id": "V22_conversacion_iniciar_directa_ok",
+      "accion": "conversacion_iniciar_directa",
+      "entrada": {
+        "usuarioId": "u1",
+        "seguridad": { "estadoSeguridad": "normal", "emailVerificado": true, "telefonoVerificado": true },
+        "mensajeria": { "estadoMensajeria": "habilitada", "spamScore": 10 },
+        "messengerHabilitadoAmbito": true,
+        "metadata": { "modoInicio": "directa", "receptorId": "u2" }
+      },
+      "salidaEsperada": {
+        "ok": true,
+        "fanOutPlan": [
+          { "destino": "historial", "dominio": "historial_mensajes", "tipoEvento": "conversacion_iniciada" },
+          { "destino": "notificacion", "dominio": "mensajes", "tipoEvento": "conversacion_iniciada" }
+        ]
+      }
+    },
+    {
+      "id": "V23_conversacion_iniciar_solicitud_ok",
+      "accion": "conversacion_iniciar_solicitud",
+      "entrada": {
+        "usuarioId": "u1",
+        "seguridad": { "estadoSeguridad": "normal", "emailVerificado": true, "telefonoVerificado": true },
+        "mensajeria": { "estadoMensajeria": "habilitada", "spamScore": 10 },
+        "messengerHabilitadoAmbito": true,
+        "metadata": { "modoInicio": "solicitud", "receptorId": "u2" }
+      },
+      "salidaEsperada": {
+        "ok": true,
+        "fanOutPlan": [
+          { "destino": "historial", "dominio": "historial_mensajes", "tipoEvento": "solicitud_conversacion_enviada" },
+          { "destino": "notificacion", "dominio": "mensajes", "tipoEvento": "solicitud_conversacion" }
+        ]
+      }
+    },
+    {
+      "id": "V24_messenger_deshabilitado_ambito",
+      "accion": "mensaje_enviar",
+      "entrada": {
+        "usuarioId": "u1",
+        "seguridad": { "estadoSeguridad": "normal", "emailVerificado": true, "telefonoVerificado": true },
+        "mensajeria": { "estadoMensajeria": "habilitada", "spamScore": 10 },
+        "messengerHabilitadoAmbito": false
+      },
+      "salidaEsperada": { "ok": false, "codigo": "MESSENGER_DESHABILITADO_AMBITO", "http": 403 }
+    }
+  ]
+}

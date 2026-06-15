@@ -1,0 +1,287 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "$id": "https://carihub.app/schemas/analisis-messenger-ia-seguridad.json",
+  "tipo": "ANALISIS_ARQUITECTONICO",
+  "nombre": "Análisis — Capa IA y Seguridad de Mensajería (SPEC Messenger)",
+  "version": "0.1.0",
+  "fecha": "2026-06-09",
+  "estado": "ANALISIS_DOCUMENTADO",
+  "implementacionAutorizada": false,
+  "alcance": "Diseño y análisis únicamente — prerequisito SPEC Messenger v1.0.0",
+  "capasCongeladasReferenciadas": {
+    "validationEngine": "validationengine-2026-06-10@1.0.0",
+    "seguridad": "seguridad-2026-06-10@1.0.0",
+    "cuentas": "cuentas-2026-06-10@1.0.0",
+    "dashboards": "dashboards-2026-06-10@1.0.0"
+  },
+  "objetivoCapa": "Pipeline de análisis de riesgo en tiempo de envío/recepción de mensajes que combina reglas determinísticas, heurísticas, listas y señales IA — sin sustituir moderación humana ni gates congelados",
+  "pipelineAnalisisMensaje": {
+    "orden": [
+      "1. validateAction — ValidationEngine (auth, rate limits, estadoMensajeria, estadoSeguridad, bloqueos)",
+      "2. reglasDeterministicas — palabras prohibidas, URLs, patrones masivos",
+      "3. heuristicaSpam — duplicados, burst, spamScore acumulado",
+      "4. analisisEnlaces — dominio, reputación, phishing conocido",
+      "5. senalesIA — ia_seguridad_messenger + ia_moderacion_messenger (async o pre-envío según severidad)",
+      "6. decisionSistema — permitir | retrasar | cola_revision | rechazar | elevar_admin",
+      "7. emitEventoCanonico — fanOutPlan según resultado",
+      "8. auditoria — logsSeguridad, ia_recomendaciones, logsAdmin"
+    ],
+    "principio": "Reglas sistema tienen prioridad sobre IA; IA nunca ejecuta bloqueo permanente sin cola admin"
+  },
+  "detecciones": {
+    "spam": {
+      "id": "DET-MSG-01",
+      "descripcion": "Mensajes repetitivos, contenido idéntico, patrones bot",
+      "tecnicas": ["hash_texto_ventana", "similitud_fuzzy", "rate_limit_burst", "spamScore_incremento"],
+      "umbralesRef": "config-seguridad-mvp-schema.json → mensajeriaFutura.spamScore",
+      "accionSistema": ["incrementar_spamScore", "estadoMensajeria_restringida_si_umbral_60", "suspendida_si_umbral_80"],
+      "senalIA": "ia_seguridad_messenger — clasificación complementaria",
+      "eventBus": "mensajeria.spam_detectado"
+    },
+    "mensajes_masivos": {
+      "id": "DET-MSG-02",
+      "descripcion": "Mismo contenido a múltiples destinatarios en ventana corta",
+      "tecnicas": ["conteo_destinos_unicos_1h", "hash_contenido_multi_receptor", "conversaciones_nuevas_dia"],
+      "limitesRef": "SPEC-MESSENGER-ALCANCE → usuarioNuevo.conversacionesNuevasDia: 5",
+      "accionSistema": ["bloquear_nuevas_conversaciones", "cola_admin", "incrementar_riesgoScore"],
+      "senalIA": "ia_seguridad_messenger — campaña detectada",
+      "eventBus": "mensajeria.envio_masivo_sospechoso"
+    },
+    "fraude": {
+      "id": "DET-MSG-03",
+      "descripcion": "Solicitudes de pago externo, estafas, suplantación comercial",
+      "tecnicas": ["patrones_pago", "keywords_fraude", "enlaces_acortadores", "perfil_nuevo_alto_volumen"],
+      "accionSistema": ["marcar_conversacion", "notif_admin", "estadoSeguridad_observacion"],
+      "senalIA": "ia_seguridad_messenger + ia_moderacion_messenger",
+      "eventBus": "mensajeria.fraude_sospechoso"
+    },
+    "enlaces_peligrosos": {
+      "id": "DET-MSG-04",
+      "descripcion": "URLs maliciosas, malware, dominios en lista negra",
+      "tecnicas": ["parse_url", "lista_negra_dominios", "heuristica_tld_sospechoso", "api_reputacion_futura"],
+      "faseMvp": "lista_negra + regex + bloqueo adjunto_link_no_permitido",
+      "accionSistema": ["rechazar_mensaje", "incrementar_spamScore", "log_seguridad"],
+      "senalIA": "ia_seguridad_messenger — clasificación URL",
+      "eventBus": "mensajeria.enlace_peligroso"
+    },
+    "phishing": {
+      "id": "DET-MSG-05",
+      "descripcion": "Suplantación CariHub, credenciales, bancos, verificación falsa",
+      "tecnicas": ["dominios_homografos", "keywords_phishing", "suplantacion_marca_carihub"],
+      "accionSistema": ["rechazar_mensaje", "alerta_admin_critica", "estadoSeguridad_restringido_revisión"],
+      "senalIA": "ia_seguridad_messenger",
+      "eventBus": "mensajeria.phishing_detectado"
+    },
+    "acoso": {
+      "id": "DET-MSG-06",
+      "descripcion": "Hostigamiento repetido, amenazas, lenguaje degradante",
+      "tecnicas": ["reportes_acumulados", "frecuencia_mismo_par", "palabras_acoso", "bloqueo_previo_rechazado"],
+      "accionSistema": ["sugerir_bloqueo_ui", "cola_moderacion", "notif_receptor_opciones"],
+      "senalIA": "ia_moderacion_messenger — severidad y categoría",
+      "eventBus": "mensajeria.acoso_detectado",
+      "nota": "Categorías adultos — obligatorio desde día 1"
+    },
+    "extorsion": {
+      "id": "DET-MSG-07",
+      "descripcion": "Amenazas con filtración, chantaje, coerción",
+      "tecnicas": ["patrones_extorsion", "combinacion_amenaza_pago", "ia_moderacion_alta_prioridad"],
+      "accionSistema": ["retener_mensaje", "alerta_admin_critica", "preservar_evidencia"],
+      "senalIA": "ia_moderacion_messenger — prioridad crítica",
+      "eventBus": "mensajeria.extorsion_detectada"
+    },
+    "contenido_prohibido": {
+      "id": "DET-MSG-08",
+      "descripcion": "Violación políticas CariHub — ilegal, menores, violencia explícita no permitida, etc.",
+      "tecnicas": ["lista_politicas_carihub", "keywords_prohibidas", "ia_moderacion_clasificacion"],
+      "politicasRef": "normas CariHub + categoría adultos con límites legales",
+      "accionSistema": ["rechazar", "reporte_automatico_admin", "suspender_mensajeria_emisor"],
+      "senalIA": "ia_moderacion_messenger",
+      "eventBus": "mensajeria.contenido_prohibido"
+    }
+  },
+  "integracionEstados": {
+    "estadoMensajeria": {
+      "campo": "usuarios.mensajeria.estadoMensajeria",
+      "valores": ["habilitada", "restringida", "suspendida", "solo_lectura"],
+      "efectoPipeline": {
+        "habilitada": "envío y recepción si demás gates OK",
+        "restringida": "solo respuesta conversaciones existentes — no iniciar nuevas",
+        "suspendida": "sin envío; lectura opcional",
+        "solo_lectura": "recibir y leer; no enviar"
+      },
+      "modificacion": "Solo ValidationEngine acciones admin o reglas automáticas documentadas — no IA directa",
+      "refCongelada": "config-cuentas-usuario-schema.json"
+    },
+    "estadoSeguridad": {
+      "campo": "usuarios.seguridad.estadoSeguridad",
+      "valores": ["normal", "observacion", "restringido", "suspendido", "bloqueado"],
+      "efectoMessenger": {
+        "normal": "mensajería según estadoMensajeria",
+        "observacion": "límites reducidos 50%",
+        "restringido": "solo_lectura o restringida",
+        "suspendido": "mensajería suspendida",
+        "bloqueado": "sin mensajería"
+      },
+      "refCongelada": "config-seguridad-mvp-schema.json"
+    }
+  },
+  "integracionReportesBloqueos": {
+    "reportes": {
+      "coleccion": "reportes_mensajeria/{reporteId}",
+      "tipos": ["reportar_usuario", "reportar_conversacion", "reportar_mensaje"],
+      "campos": ["reportanteId", "reportadoId", "conversacionId", "mensajeId", "motivo", "estado", "senalIAId", "createdAt"],
+      "estados": ["pendiente", "en_revision", "resuelto", "rechazado"],
+      "efecto": "incrementa mensajeria.reportesCount, riesgoScore, spamScore según validez",
+      "umbralRevisionAdmin": 3,
+      "validationEngineAccion": "reportar_conversacion"
+    },
+    "bloqueos": {
+      "ruta": "usuarios/{usuarioId}/bloqueos/{usuarioBloqueadoId}",
+      "efecto": "sin mensajes bidireccionales; conversación estado bloqueada",
+      "iniciadoPor": "usuario | admin | regla_sistema_temporal",
+      "validationEngineAccion": "bloqueo_usuario",
+      "nota": "Bloqueo usuario ≠ sanción admin permanente"
+    }
+  },
+  "integracionRateLimitsSpamScore": {
+    "rateLimits": {
+      "ref": "config-seguridad-mvp-schema.json → rateLimits.mensaje_futuro",
+      "dimensiones": ["usuario", "usuario_nuevo", "conversacion", "ip_futura"],
+      "validationEngine": "paso rate limits pipeline — acciones mensajeria_futura"
+    },
+    "spamScore": {
+      "campo": "usuarios.mensajeria.spamScore",
+      "rango": "0-100",
+      "incrementos": ["mensajes_identicos", "urls_masivas", "reportes_usuarios", "rate_limit_mensajes", "senal_ia_alta"],
+      "umbrales": { "restringir": 60, "suspender": 80 },
+      "decremento": "comportamiento_sano_30d_sin_incidentes",
+      "refCongelada": "config-seguridad-mvp-schema.json → mensajeriaFutura.spamScore"
+    },
+    "nivelConfianza": {
+      "campo": "usuarios.seguridad.nivelConfianza",
+      "uso": "límites dinámicos conversaciones nuevas y mensajes/hora",
+      "formulaRef": "config-seguridad-mvp-schema.json → riesgoReputacion.nivelConfianza"
+    }
+  },
+  "integracionEventBus": {
+    "productor": "ValidationEngine.validateAction — acciones Messenger",
+    "contrato": "fanOutPlan[] — ref. ValidationEngine v1.0.0 congelado",
+    "destinos": {
+      "notificaciones_usuario": "mensajes.mensaje_nuevo, mensajes.solicitud_conversacion, mensajes.cuenta_restringida",
+      "notificaciones_admin": "mensajeria.reporte_recibido, mensajeria.alerta_seguridad, mensajeria.cola_moderacion",
+      "historial_actividad": "historial_mensajes, historial_actividad_cuenta",
+      "logsSeguridad": "spam, phishing, bloqueo, rate_limit_excedido",
+      "ia_recomendaciones": "señales IA estado sugerida — confirmación admin o usuario según tipo"
+    },
+    "eventosNuevosPropuestos": [
+      { "tipo": "mensajeria.spam_detectado", "severidad": "media", "admin": true },
+      { "tipo": "mensajeria.phishing_detectado", "severidad": "critica", "admin": true },
+      { "tipo": "mensajeria.acoso_detectado", "severidad": "alta", "admin": true },
+      { "tipo": "mensajeria.extorsion_detectada", "severidad": "critica", "admin": true },
+      { "tipo": "mensajeria.enlace_peligroso", "severidad": "alta", "admin": false },
+      { "tipo": "mensajeria.contenido_prohibido", "severidad": "critica", "admin": true },
+      { "tipo": "mensajeria.envio_masivo_sospechoso", "severidad": "alta", "admin": true },
+      { "tipo": "mensajeria.fraude_sospechoso", "severidad": "alta", "admin": true },
+      { "tipo": "mensajeria.reporte_recibido", "severidad": "media", "admin": true },
+      { "tipo": "mensajeria.umbral_spamScore", "severidad": "media", "admin": true }
+    ],
+    "notaRegistry": "Completar fanOutPlan en registry-validationengine-eventos.json solo vía acta nueva VE o SPEC Messenger referencia — no modificar capa congelada ahora"
+  },
+  "asistentesIA": {
+    "ia_seguridad_messenger": {
+      "id": "ia_seguridad_messenger",
+      "nombreUI": "IA Seguridad Messenger",
+      "ubicacion": "Pipeline mensajería + panel admin alertas",
+      "objetivo": "Detectar spam, fraude, enlaces peligrosos, phishing, envíos masivos",
+      "entrada": ["texto_mensaje", "metadata_emisor", "historial_reciente_agregado", "urls_extraidas"],
+      "salida": {
+        "tipo": "senal_riesgo",
+        "coleccion": "ia_recomendaciones/{id} | senales_mensajeria/{id}",
+        "campos": ["nivelRiesgo", "categoria", "confianza", "explicacion", "accionSugerida"]
+      },
+      "prohibido": ["enviar_mensaje", "bloquear_permanente", "leer_conversaciones_ajenas", "modificar_estadoSinValidacionEngine"],
+      "confirmacionHumana": "acciones_sanción — admin; avisos_usuario — informativos",
+      "auditoria": ["logsAdmin modulo ia_seguridad_messenger", "historial_acciones_ia"]
+    },
+    "ia_moderacion_messenger": {
+      "id": "ia_moderacion_messenger",
+      "nombreUI": "IA Moderación Messenger",
+      "ubicacion": "Cola moderación admin + análisis pre-envío alto riesgo",
+      "objetivo": "Acoso, extorsión, contenido prohibido, priorización cola reportes",
+      "entrada": ["texto_mensaje", "contexto_reporte", "historial_par_sanitizado", "politicas_carihub"],
+      "salida": {
+        "tipo": "recomendacion_moderacion",
+        "estados": ["sugerida", "aceptada_humano", "rechazada_humano", "expirada"],
+        "accionesSugeridas": ["ninguna", "ocultar_mensaje", "suspender_mensajeria", "escalar_legal"]
+      },
+      "prohibido": ["aprobar_auto", "eliminar_cuenta", "contactar_usuario_como_admin"],
+      "relacionDashboards": "Extiende ia_moderador admin — dominio mensajería",
+      "categoriasAdultos": "obligatorio — reportes día 1"
+    },
+    "ia_traduccion_messenger": {
+      "id": "ia_traduccion_messenger",
+      "nombreUI": "IA Traducción Messenger",
+      "ubicacion": "UI chat — fase 4",
+      "objetivo": "Traducir mensajes entre idiomas participantes",
+      "entrada": ["mensajeOriginal", "idiomaOrigen", "idiomaDestino"],
+      "salida": {
+        "persistencia": "mensajeOriginal + mensajeTraducido en documento mensaje",
+        "noModifica": "mensajeOriginal"
+      },
+      "prohibido": ["enviar_mensaje", "acceso_historial_completo_sin_chat_activo"],
+      "controlUsuario": "activar/desactivar traducción por conversación",
+      "auditoria": "log traducción — sin contenido sensible en logs admin agregados"
+    },
+    "ia_asistente_conversacional": {
+      "id": "ia_asistente_conversacional",
+      "nombreUI": "IA Asistente Conversacional",
+      "opcional": true,
+      "controlUsuario": "siempre — opt-in explícito por conversación o perfil",
+      "variantesPorTipoCuenta": {
+        "adultos": "FAQs perfil, disponibilidad, límites — no suplantar persona",
+        "empresa": "asistente comercial — horarios, servicios",
+        "profesionista": "cotizaciones orientativas — sin compromiso contractual"
+      },
+      "reglasCriticas": [
+        "NUNCA envía mensaje al interlocutor sin confirmación explícita del dueño",
+        "Borrador sugerido → usuario revisa → usuario envía vía validateAction",
+        "Identidad clara: mensaje de IA asistida vs humano",
+        "Desactivable en cualquier momento"
+      ],
+      "salida": "borrador_sugerido en UI — no persistencia como mensaje enviado",
+      "auditoria": "historial_acciones_ia + flag mensaje asistido_si_usuario_envia"
+    }
+  },
+  "reglasIABinding": {
+    "R-MSG-IA-01": "La IA no envía mensajes en nombre del usuario sin autorización explícita",
+    "R-MSG-IA-02": "La IA no accede a conversaciones privadas fuera de permisos definidos por rol y conversación activa",
+    "R-MSG-IA-03": "Toda acción automática del pipeline (no IA) y toda señal IA queda auditada",
+    "R-MSG-IA-04": "La IA genera alertas, recomendaciones o señales de riesgo — no ejecuta sanciones finales",
+    "R-MSG-IA-05": "Bloqueo permanente y sanción: reglas sistema + moderación administrativa",
+    "R-MSG-IA-06": "Alineado SPEC-Dashboards: salida ejecutable sensible solo vía ia_recomendaciones + confirmación",
+    "R-MSG-IA-07": "Alineado ValidationEngine: toda acción persistida pasa validateAction",
+    "R-MSG-IA-08": "PrivacyGuard: no exponer mensajes a asistentes dashboard usuario sobre terceros"
+  },
+  "matrizDecision": [
+    { "senal": "spam leve", "sistema": "incrementar spamScore", "ia": "informativo", "admin": "solo si umbral", "usuario": "sin notif" },
+    { "senal": "spam alto", "sistema": "restringir estadoMensajeria", "ia": "confirma", "admin": "notif cola", "usuario": "banner límites" },
+    { "senal": "phishing", "sistema": "rechazar mensaje", "ia": "clasifica", "admin": "alerta crítica", "usuario": "advertencia seguridad" },
+    { "senal": "acoso", "sistema": "permitir + reporte fácil", "ia": "severidad", "admin": "prioridad cola", "usuario": "sugerir bloqueo" },
+    { "senal": "extorsión", "sistema": "retener + preservar", "ia": "crítico", "admin": "inmediato", "usuario": "recursos ayuda" },
+    { "senal": "contenido prohibido", "sistema": "rechazar + suspender envío", "ia": "categoría", "admin": "revisión obligatoria", "usuario": "políticas" }
+  ],
+  "coleccionesNuevasPropuestas": {
+    "senales_mensajeria": "senales_mensajeria/{id} — señales pipeline e IA por mensaje/conversación",
+    "reportes_mensajeria": "reportes_mensajeria/{id}",
+    "listas_negras_dominios": "config_mensajeria/listas_negras — diseño admin",
+    "politicas_contenido": "config_mensajeria/politicas — ref. normas CariHub"
+  },
+  "riesgosAnalisis": [
+    { "id": "A-MSG-01", "nivel": "alto", "descripcion": "IA con acceso amplio a conversaciones — fuga privacidad", "mitigacion": "R-MSG-IA-02 + scopes por conversación" },
+    { "id": "A-MSG-02", "nivel": "alto", "descripcion": "Auto-moderación sin humano en adultos — falsos positivos", "mitigacion": "cola admin + apelación" },
+    { "id": "A-MSG-03", "nivel": "medio", "descripcion": "spamScore sin recalibración — usuarios legítimos bloqueados", "mitigacion": "decrementos + nivelConfianza" },
+    { "id": "A-MSG-04", "nivel": "medio", "descripcion": "Asistente conversacional suplanta al usuario", "mitigacion": "R-MSG-IA-01 + borrador only" },
+    { "id": "A-MSG-05", "nivel": "medio", "descripcion": "Registry VE placeholders sin fanOutPlan Messenger", "mitigacion": "SPEC Messenger define eventos; acta VE MINOR futura si necesario" }
+  ],
+  "siguientePaso": "Incorporar este análisis en SPEC-MESSENGER v1.0.0 formal + fixtures golden mensajería seguridad"
+}

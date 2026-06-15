@@ -1,0 +1,208 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "tipo": "PLAN_MAESTRO",
+  "modulo": "REGISTRO_CUENTA",
+  "titulo": "Plan Maestro Registro / Cuenta CariHub",
+  "fecha": "2026-06-10",
+  "version": "1.0.0",
+  "estado": "PLAN_DISENO_DOCUMENTAL",
+  "modo": "Solo análisis y documentación — sin runtime/carpetas/mover/Firestore/deploy/commit",
+  "autorizadoPor": "product owner / usuario CariHub",
+  "basadoEn": [
+    "scripts/ACTA-CONGELAMIENTO-SHARED-CORE.json",
+    "scripts/ACTA-CONGELAMIENTO-RENDERENGINE.json",
+    "scripts/PLAN-MAESTRO-APP-PUBLICA.json",
+    "scripts/AUDITORIA-ARQUITECTONICA-GLOBAL-CARIHUB.json",
+    "scripts/ACTA-CONGELAMIENTO-FIELDENGINE.json",
+    "scripts/ACTA-CONGELAMIENTO-VALIDATIONENGINE.json",
+    "scripts/config-cuentas-usuario-schema.json",
+    "scripts/config-seguridad-mvp-schema.json"
+  ],
+  "objetivo": "Definir el módulo separado de Registro/Cuenta para extraer de Home toda la lógica de registro, wizard, verificación, perfil privado, edición y acceso a cuenta.",
+  "principioRector": "Registro/Cuenta es la capa de IDENTIDAD y ONBOARDING: alta de cuenta, autenticación, verificación, creación/edición de perfil vía FieldEngine y gestión de credenciales. Lo público (descubrimiento) es App Pública; la gestión diaria post-login es Dashboards. Registro/Cuenta consume Shared/Core, FieldEngine y ValidationEngine; no renderiza superficies públicas.",
+  "fronteras": {
+    "registroCuenta": "Auth, alta, verificación (correo/teléfono/INE/selfie), wizard de creación/edición de perfil, recuperación y cambio de credenciales, estados de cuenta",
+    "dashboards": "Superficie post-login de gestión diaria (panel, métricas, renovaciones, notificaciones) — consume el resultado de Registro/Cuenta",
+    "appPublica": "Home/Resultados/Perfil público — solo CTA hacia Registro/Cuenta",
+    "interacciones": "Favoritos/visitas/denuncias — datos en Interacciones; Cuenta solo aporta contexto de sesión"
+  },
+
+  "inventarioActual": {
+    "ubicacion": "Todo embebido en public/index.html (monolito), con apoyo de Firebase Auth/Firestore/Storage",
+    "modales": [
+      { "id": "modal-registro", "linea": 445, "rol": "Punto de entrada registro" },
+      { "id": "modalAntiBot", "linea": 590, "rol": "Anti-bot + (probable) mayoría de edad/voluntariedad" },
+      { "id": "modalMiPerfil", "linea": 701, "rol": "Login / alta cuenta mínima" },
+      { "id": "modalPanel", "linea": 725, "rol": "Panel de cuenta (solapa con Dashboards)" },
+      { "id": "modalEditar", "linea": 733, "rol": "Edición de perfil" }
+    ],
+    "funciones": [
+      { "fn": "abrirRegistro", "linea": 875 },
+      { "fn": "abrirMiPerfil", "linea": 885 },
+      { "fn": "crearCuentaMinima", "linea": 904, "nota": "auth.createUserWithEmailAndPassword" },
+      { "fn": "signInWithEmailAndPassword", "linea": 1546, "nota": "login" },
+      { "fn": "validarImagen", "linea": 1903, "nota": "tipo/tamaño 5MB" },
+      { "fn": "validarPaso1", "linea": 1922 },
+      { "fn": "validarPaso2", "linea": 1952 },
+      { "fn": "subirImagen", "nota": "Storage verificaciones/{uid}/selfie-*.jpg, INE" }
+    ],
+    "campos/estados": [
+      "actualizacionPendiente (línea 1584/1861/2062)",
+      "estadoRevision = actualizacion_pendiente",
+      "selfieURL / ineFrente (Storage)",
+      "escritura perfil completo en usuarios/{uid} (monolito)"
+    ],
+    "verificacionesPresentes": ["correo (implícito por Auth)", "INE frente", "selfie validación", "anti-bot"],
+    "verificacionesAusentes": ["verificación de teléfono (no existe sendPhone/OTP)", "recuperación de cuenta (no sendPasswordResetEmail)", "cambio de contraseña (no updatePassword)"],
+    "schemasFieldEngine": [
+      "scripts/config-registro-visitante-schema.json",
+      "scripts/config-registro-adultos-schema.json",
+      "scripts/config-registro-independiente-schema.json",
+      "scripts/config-registro-profesionista-schema.json",
+      "scripts/config-registro-negocio-schema.json",
+      "scripts/config-registro-componentes-ui-schema.json"
+    ],
+    "colecciones": ["usuarios/{uid} (monolito; futuro hub usuarios + perfiles/{perfilId})", "Storage verificaciones/{uid}/"]
+  },
+
+  "mezcladoEnHome": [
+    "Wizard de registro completo (pasos 1/2, validaciones)",
+    "Alta de cuenta mínima y login (modalMiPerfil)",
+    "Subida de INE y selfie a Storage",
+    "Anti-bot / mayoría de edad / voluntariedad",
+    "Panel de cuenta (modalPanel) — pertenece a Dashboards",
+    "Edición de perfil (modalEditar)",
+    "Lógica de actualizacionPendiente / estadoRevision",
+    "4 SDK Firebase (incluye auth/storage) cargados en Home"
+  ],
+
+  "debeMoverseARegistroCuenta": [
+    { "elemento": "abrirRegistro + modal-registro + wizard (pasos)", "nota": "Wizard FieldEngine-driven" },
+    { "elemento": "crearCuentaMinima / login (modalMiPerfil)", "nota": "Auth alta + acceso" },
+    { "elemento": "modalAntiBot (mayoría edad, voluntariedad, anti-bot)", "nota": "Gates de Seguridad MVP + ValidationEngine" },
+    { "elemento": "validarPaso1/2, validarImagen, subirImagen", "nota": "Validación formato + Storage verificaciones" },
+    { "elemento": "modalEditar (edición de perfil)", "nota": "Re-entra al wizard; dispara actualizacionPendiente" },
+    { "elemento": "Estados de cuenta y de perfil + actualizacionPendiente", "nota": "Coordinado con config-estados-revision-publicacion" },
+    { "elemento": "INE/selfie/documentos (verificación)", "nota": "Storage perfiles/{perfilId}/ (post-migración)" }
+  ],
+  "debeQuedarFueraDeRegistroCuenta": [
+    { "elemento": "Panel diario, métricas, renovaciones, notificaciones", "destino": "DASHBOARDS" },
+    { "elemento": "Favoritos / visitas / denuncias", "destino": "INTERACCIONES" },
+    { "elemento": "Render de perfil público y resultados", "destino": "APP_PUBLICA / RenderEngine" },
+    { "elemento": "Reglas de validación de valores", "destino": "ValidationEngine" },
+    { "elemento": "Resolución de schema de campos", "destino": "FieldEngine" },
+    { "elemento": "Contratos/cobros", "destino": "PAGOS / CONTRATOS" },
+    { "elemento": "Solicitud de banners/anuncios", "destino": "BANNERS" },
+    { "elemento": "Moderación/aprobación", "destino": "ADMIN" }
+  ],
+
+  "pantallasSugeridas": [
+    { "pantalla": "Acceso (login)", "ruta": "/cuenta/acceso", "publica": false },
+    { "pantalla": "Crear cuenta", "ruta": "/cuenta/crear", "publica": false },
+    { "pantalla": "Recuperar cuenta", "ruta": "/cuenta/recuperar", "publica": false },
+    { "pantalla": "Cambiar contraseña", "ruta": "/cuenta/seguridad", "privada": true },
+    { "pantalla": "Wizard de registro de perfil", "ruta": "/registro/wizard", "privada": true, "nota": "FieldEngine por subcategoriaId" },
+    { "pantalla": "Verificación (correo/teléfono/INE/selfie)", "ruta": "/registro/verificacion", "privada": true },
+    { "pantalla": "Edición de perfil", "ruta": "/registro/editar/{perfilId}", "privada": true },
+    { "pantalla": "Estado de revisión", "ruta": "/cuenta/estado", "privada": true }
+  ],
+  "rutasSugeridas": {
+    "base": "/cuenta y /registro (app privada separada de Home)",
+    "auth": ["/cuenta/acceso", "/cuenta/crear", "/cuenta/recuperar", "/cuenta/seguridad"],
+    "registro": ["/registro/wizard", "/registro/verificacion", "/registro/editar/{perfilId}", "/cuenta/estado"],
+    "nota": "URLs privadas noindex (coherente con RenderEngine: no renderiza superficies privadas)"
+  },
+
+  "flujosPrincipales": [
+    { "flujo": "Registro de perfil (persona/independiente/profesionista/adultos)", "pasos": ["crear cuenta", "anti-bot+edad+voluntariedad", "wizard FieldEngine por subcategoriaId", "subir INE/selfie", "enviar a revisión"] },
+    { "flujo": "Registro de negocio", "pasos": ["crear cuenta", "wizard formulario negocio", "documentos negocio", "enviar a revisión"] },
+    { "flujo": "Registro de anunciante", "pasos": ["cuenta (anuncianteId=usuarioId MVP)", "datos anunciante", "→ deriva a Banners para solicitud"], "nota": "Anunciante puede no tener perfil público" },
+    { "flujo": "Verificación de correo", "pasos": ["sendEmailVerification", "gate emailVerificado para enviar_revision (FieldEngine securityGates)"] },
+    { "flujo": "Verificación de teléfono (NUEVO)", "pasos": ["OTP SMS", "guardar telefonoVerificado"], "estado": "faltante en producción" },
+    { "flujo": "Verificación INE/selfie", "pasos": ["validarImagen", "subir Storage", "revisión admin"] },
+    { "flujo": "Edición de perfil", "pasos": ["abrir wizard en modo edición", "si cambia campos → actualizacionPendiente/estadoRevision", "re-revisión"] },
+    { "flujo": "Acceso a cuenta", "pasos": ["login email/password", "estadoCuenta gates"] },
+    { "flujo": "Recuperación de cuenta (NUEVO)", "pasos": ["sendPasswordResetEmail"], "estado": "faltante" },
+    { "flujo": "Cambio de contraseña (NUEVO)", "pasos": ["reauth", "updatePassword"], "estado": "faltante" }
+  ],
+
+  "validacionesNecesarias": {
+    "formatoLigero_core": ["email válido", "password fuerte", "imagen tipo/tamaño (validarImagen)", "teléfono formato (limpiarTelefono)"],
+    "reglas_validationEngine": ["gates anti-bot/Turnstile", "rate limits", "mayoría de edad", "voluntariedad adultos", "coherencia de campos"],
+    "resolucion_fieldEngine": ["campos obligatorios/opcionales por subcategoriaId", "fotos min/max", "verificación requerida por arquetipo"],
+    "gatesSeguridad": ["enviar_revision requiere emailVerificado + estadoSeguridad normal/observacion", "guardar_borrador permitido en restringido"]
+  },
+  "documentosNecesarios": {
+    "persona/adultos": ["INE frente", "selfie de validación", "(consentimiento voluntariedad)"],
+    "profesionista": ["cédula profesional", "INE"],
+    "negocio": ["comprobante/razón social según schema negocio"],
+    "almacenamiento": "Storage perfiles/{perfilId}/... (post-migración; hoy verificaciones/{uid}/)",
+    "privacidad": "Documentos NUNCA públicos (PrivacyGuard de RenderEngine los excluye)"
+  },
+
+  "relacionesConModulos": {
+    "fieldEngine": "Fuente del wizard: resolveRegistrationSchema(subcategoriaId) → campos/validaciones/fotos/componentes. Registro consume FieldEngine 1.0.1.",
+    "validationEngine": "Valida valores, gates de seguridad, anti-bot, rate limits (VE 1.1.0). Registro NO reimplementa reglas.",
+    "sharedCore": "initFirebase, helpers (textoSeguro/limpiarTelefono), catálogo, geo, modal, fieldClient/validationClient (Core 1.0.0).",
+    "renderEngine": "Registro NO usa RenderEngine (superficie privada). Al publicar, genera snapshotAlPublicar que RenderEngine consume.",
+    "seguridadMvp": "Estados de seguridad, gates por acción, Turnstile, reputación (seguridad-2026-06-10@1.0.0).",
+    "dashboards": "Tras login, Dashboards es la superficie de gestión; Registro entrega cuenta/perfil/estado. Frontera clara.",
+    "messenger": "Sin dependencia directa; Messenger requiere cuenta activa (contexto de sesión).",
+    "banners": "Anunciante deriva a Banners para solicitudes; Registro solo crea la cuenta/anuncianteId.",
+    "pagos": "Contratar plan es gate aparte (contratar_plan); Registro no cobra — deriva a Pagos.",
+    "admin": "Admin modera verificaciones/INE y aprueba revisión; Registro produce las solicitudes."
+  },
+
+  "riesgos": [
+    { "id": "RC-R01", "nivel": "alto", "riesgo": "Datos sensibles (INE/selfie) en cliente o rutas indexables", "mitigacion": "Rutas privadas noindex + Storage protegido + PrivacyGuard nunca los expone" },
+    { "id": "RC-R02", "nivel": "alto", "riesgo": "Wizard escribe perfil en monolito usuarios/{uid} (no en perfiles/{perfilId})", "mitigacion": "Alinear con migración + bridge perfilId=usuarioId" },
+    { "id": "RC-R03", "nivel": "alto", "riesgo": "auth/storage SDK cargados en Home por el registro embebido", "mitigacion": "Mover a app Registro; Home sin auth salvo necesidad" },
+    { "id": "RC-R04", "nivel": "medio", "riesgo": "Faltan verificación de teléfono, recuperación y cambio de contraseña", "mitigacion": "Incluir en diseño del módulo (flujos NUEVO)" },
+    { "id": "RC-R05", "nivel": "medio", "riesgo": "Solapamiento Registro vs Dashboards (panel/edición)", "mitigacion": "Frontera definida: onboarding/identidad vs gestión diaria" },
+    { "id": "RC-R06", "nivel": "medio", "riesgo": "Reimplementar reglas que ya son de VE/FieldEngine", "mitigacion": "Consumir clientes; no duplicar" },
+    { "id": "RC-R07", "nivel": "bajo", "riesgo": "Estados de cuenta/perfil inconsistentes en cutover", "mitigacion": "config-estados-revision-publicacion + lectura dual migración" }
+  ],
+  "dependencias": {
+    "congeladas": ["Shared/Core 1.0.0", "FieldEngine 1.0.1", "ValidationEngine 1.1.0", "Cuentas 1.0.0", "Seguridad 1.0.0", "Catálogo 1.0.0", "RenderEngine 1.0.0 (snapshot al publicar)"],
+    "precondiciones": ["Migración usuarios→perfiles (ejecución) para escribir en perfiles/{perfilId}", "Decisión perfilId opaco (URL-R02)"],
+    "consumidores": ["Dashboards (recibe cuenta/perfil)", "App Pública (CTA de entrada)", "Banners/Pagos (derivaciones)"]
+  },
+
+  "estructuraIdealFutura": {
+    "nota": "Estructura lógica, sin crear carpetas ahora.",
+    "appRegistroCuenta": {
+      "auth": ["acceso", "crear", "recuperar", "seguridad (cambio contraseña)"],
+      "registro": ["wizard (FieldEngine)", "verificacion (correo/teléfono/INE/selfie)", "editar/{perfilId}", "estado revisión"],
+      "consumeDe": ["Shared/Core (fieldClient, validationClient, helpers, modal)", "FieldEngine", "ValidationEngine", "Seguridad MVP"],
+      "entregaA": ["Dashboards (cuenta/perfil/estado)", "RenderEngine (snapshotAlPublicar al publicar)"]
+    }
+  },
+  "ordenRecomendadoExtraccionFutura": [
+    { "paso": 1, "accion": "Extraer Auth (login/crear/recuperar/contraseña) de Home a /cuenta", "prioridad": "P0", "depende": "Shared/Core" },
+    { "paso": 2, "accion": "Extraer wizard de registro a /registro/wizard usando fieldClient", "prioridad": "P0", "depende": "FieldEngine + Core" },
+    { "paso": 3, "accion": "Extraer verificación (INE/selfie/correo) + añadir teléfono", "prioridad": "P1", "depende": "ValidationEngine + Seguridad" },
+    { "paso": 4, "accion": "Extraer edición de perfil + actualizacionPendiente", "prioridad": "P1", "depende": "FieldEngine + estados" },
+    { "paso": 5, "accion": "Escribir en perfiles/{perfilId} (post-migración) + snapshotAlPublicar", "prioridad": "P1", "depende": "Migración + RenderEngine" },
+    { "paso": 6, "accion": "Mover panel/gestión a Dashboards; quitar modalPanel de Home", "prioridad": "P2", "depende": "PLAN Dashboards" },
+    { "paso": 7, "accion": "Limpieza Home: quitar auth/storage SDK y modales de registro/cuenta", "prioridad": "P2" }
+  ],
+  "prioridad": {
+    "P0": ["Auth fuera de Home", "Wizard con FieldEngine"],
+    "P1": ["Verificación completa (+teléfono)", "Edición de perfil", "Escritura perfiles/{perfilId}+snapshot"],
+    "P2": ["Panel→Dashboards", "Limpieza Home"]
+  },
+
+  "procedenciaPlanMaestro": {
+    "crearMd": true,
+    "crearJson": true,
+    "justificacion": "Registro/Cuenta es el módulo que más descarga al monolito Home y habilita el runtime del wizard; amerita plan maestro propio.",
+    "siguientesPasosSugeridos": ["PLAN-MAESTRO-DASHBOARDS (frontera post-login)", "Anexo operacional de migración (precondición runtime)"]
+  },
+  "noModifica": [
+    "Capas congeladas (Shared/Core 1.0.0, RenderEngine 1.0.0, VE 1.1.0, FieldEngine 1.0.1, Messenger 1.0.0, Dashboards 1.0.0, Cuentas/Catálogo/Seguridad)",
+    "Producción, Firestore, deploy, commit"
+  ],
+  "changelog": [
+    { "version": "1.0.0", "fecha": "2026-06-10", "nota": "Plan maestro inicial Registro/Cuenta — análisis y documentación" }
+  ]
+}

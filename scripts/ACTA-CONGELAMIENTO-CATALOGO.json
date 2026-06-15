@@ -1,0 +1,220 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "$id": "https://carihub.app/schemas/acta-congelamiento-catalogo.json",
+  "tipo": "ACTA_CONGELAMIENTO_CATALOGO",
+  "titulo": "Acta formal de congelamiento del catálogo CariHub",
+  "versionActa": "1.0.0",
+  "fechaCongelamiento": "2026-06-09",
+  "fechaBaselineValidacion": "2026-06-10T13:40:30.165Z",
+  "autorizacion": {
+    "estado": "APROBADA",
+    "autorizadoPor": "product owner / usuario CariHub",
+    "fechaAutorizacion": "2026-06-09",
+    "alcance": "Congelamiento formal del diseño de catálogo (sectores, subcategorías, mapa registro, schemas de registro, búsqueda enriquecida, arquetipos). Sin runtime, sin Firestore, sin producción."
+  },
+  "versionCatalogo": {
+    "id": "catalogo-2026-06-10",
+    "semver": "1.0.0",
+    "versionMeta": "2026-06-10",
+    "versionSchemaRegistro": "2026-06-10",
+    "versionBusquedaEnriquecimiento": "2026-06-10",
+    "nota": "Todas las versiones de schema de registro y meta alineadas en 2026-06-10. Incrementar semver según procedimientoVersionado al autorizar cambios futuros."
+  },
+  "dependenciasCongeladas": {
+    "identidadUsuario": {
+      "estado": "CONGELADA_PREVIAMENTE",
+      "referencia": "scripts/config-registro-schema.meta.json → identidadUsuario",
+      "schemaDetalle": "scripts/config-cuentas-usuario-schema.json",
+      "nota": "Esta acta no modifica ni reabre el diseño de cuentas."
+    },
+    "renderEngine": {
+      "estado": "NO_AUTORIZADO",
+      "nota": "RenderEngine permanece bloqueado hasta autorización explícita independiente de este acta."
+    }
+  },
+  "metricasFinales": {
+    "sectores": 15,
+    "subcategorias": 462,
+    "filasMapa": 462,
+    "subcategoriasCubiertasSchemas": 462,
+    "duplicadosCrossSectorSubcategoriaId": 0,
+    "validacion": {
+      "estado": "PASS",
+      "totalErrores": 0,
+      "totalAdvertencias": 0,
+      "comando": "node scripts/validar-schemas-registro.mjs",
+      "reporte": "scripts/validacion-schemas-report.json"
+    },
+    "arquitecturaComercial": {
+      "checksDocumentados": 16,
+      "checksPass": 16,
+      "checksFail": 0
+    },
+    "identidadUsuario": {
+      "checksDocumentados": 16,
+      "checksPass": 16,
+      "checksFail": 0
+    },
+    "alineacion": {
+      "arquetiposMapaVsSchema": true,
+      "tipoPerfilMapaVsSchema": true,
+      "aliasesConflictosCriticosResueltos": true
+    },
+    "distribucionFormularios": {
+      "adultos": 34,
+      "persona_independiente": 297,
+      "profesionista_cedula": 25,
+      "negocio_empresa": 106
+    }
+  },
+  "sectoresBaseline": [
+    "adultos",
+    "bienestar",
+    "salud",
+    "profesionales",
+    "automotriz",
+    "hogar",
+    "comercio",
+    "bienes-raices",
+    "eventos",
+    "transporte",
+    "educacion",
+    "tecnologia",
+    "restaurantes",
+    "mascotas",
+    "industria"
+  ],
+  "archivosBaseline": {
+    "catalogoCliente": [
+      "public/js/sectores-carihub.js",
+      "public/js/catalogos-carihub.js"
+    ],
+    "mapaYClasificacion": [
+      "scripts/mapa-registro-categorias.json",
+      "scripts/arquetipos-catalogo.mjs",
+      "scripts/integrar-catalogo-expandido.mjs",
+      "scripts/generar-schemas-registro.mjs",
+      "scripts/clasificar-registro-categorias.mjs",
+      "scripts/catalogo-expandido-datos.json"
+    ],
+    "metaYSchemasRegistro": [
+      "scripts/config-registro-schema.meta.json",
+      "scripts/config-registro-adultos-schema.json",
+      "scripts/config-registro-independiente-schema.json",
+      "scripts/config-registro-profesionista-schema.json",
+      "scripts/config-registro-negocio-schema.json",
+      "scripts/config-registro-visitante-schema.json",
+      "scripts/config-registro-componentes-ui-schema.json",
+      "scripts/config-registro-adultos-ejemplos-resueltos.json"
+    ],
+    "busqueda": [
+      "scripts/busqueda-enriquecimiento.json"
+    ],
+    "comercialRelacionado": [
+      "scripts/config-precios-planes-perfiles-schema.json",
+      "scripts/config-promociones-perfiles-schema.json",
+      "scripts/config-promociones-banners-schema.json",
+      "scripts/config-contratos-carihub-schema.json",
+      "scripts/config-estados-revision-publicacion-schema.json",
+      "scripts/config-categorias-sugeridas-schema.json"
+    ],
+    "renderizadoDiseño": [
+      "scripts/config-renderizado-dinamico-schema.json"
+    ],
+    "validacionYReportes": [
+      "scripts/validar-schemas-registro.mjs",
+      "scripts/validacion-schemas-report.json",
+      "scripts/validacion-schemas-report-antes.json",
+      "scripts/reporte-catalogo-limpieza-antes-despues.json",
+      "scripts/reporte-catalogo-expansion-final.json",
+      "scripts/auditoria-catalogo-expansion.json"
+    ]
+  },
+  "reglasModificacionFutura": [
+    {
+      "id": "R1_AUTORIZACION_EXPLICITA",
+      "regla": "Ningún cambio al catálogo congelado sin autorización explícita del product owner. El congelamiento aplica a diseño (JSON/JS de catálogo y schemas), no impide trabajo en motores runtime si no alteran el baseline sin nueva versión."
+    },
+    {
+      "id": "R2_VALIDACION_OBLIGATORIA",
+      "regla": "Tras cualquier cambio autorizado, ejecutar: integrar (si aplica) → generar-schemas (si aplica) → validar-schemas-registro.mjs. Resultado mínimo: PASS o PASS CON ADVERTENCIAS documentadas y aceptadas por el product owner."
+    },
+    {
+      "id": "R3_VERSION_INCREMENTO",
+      "regla": "Todo cambio autorizado debe incrementar versionCatalogo.semver y actualizar versionMeta/versionSchema en schemas afectados. Publicar entrada en historialVersiones de esta acta o archivo derivado."
+    },
+    {
+      "id": "R4_ARQUETIPOS_CANONICOS",
+      "regla": "Prohibido reintroducir nombres legacy en mapa (adulto_persona, negocio_local, profesional_certificado, etc.) sin actualizar arquetiposEquivalencia en meta y sin autorización."
+    },
+    {
+      "id": "R5_MAPA_FUENTE_VERDAD",
+      "regla": "mapa-registro-categorias.json es la fuente de verdad para arquetipo y tipoPerfil por subcategoriaId. generar-schemas-registro.mjs lee del mapa; no recalcular arquetipos en generación sin autorización."
+    },
+    {
+      "id": "R6_SIN_PRODUCCION_SILENCIOSA",
+      "regla": "Cambios de catálogo no se despliegan a producción ni Firestore como parte del procedimiento de diseño. Migración runtime es fase separada con acta propia."
+    },
+    {
+      "id": "R7_IDENTIDAD_INTACTA",
+      "regla": "Modificaciones de catálogo no deben alterar identidadUsuario ni config-cuentas-usuario-schema.json salvo autorización explícita que reabra el congelamiento de cuentas."
+    },
+    {
+      "id": "R8_RENDER_ENGINE",
+      "regla": "Implementación de RenderEngine no autoriza cambios al catálogo congelado. RenderEngine consume el catálogo; no lo redefine."
+    },
+    {
+      "id": "R9_CATEGORIAS_SUGERIDAS",
+      "regla": "Nuevas subcategorías propuestas por usuarios siguen flujo solicitudes_categorias y formularios temporales hasta aprobación admin; su incorporación al catálogo oficial requiere versión MINOR o MAJOR según procedimientoVersionado."
+    },
+    {
+      "id": "R10_ALIASES_BUSQUEDA",
+      "regla": "Cambios en busqueda-enriquecimiento.json que resuelvan ambigüedad entre subcategorías son PATCH si no alteran IDs ni arquetipos; requieren re-validación PASS."
+    }
+  ],
+  "procedimientoVersionado": {
+    "semver": {
+      "MAJOR": "Cambio incompatible: eliminación o fusión de subcategoriaId, cambio de formularioId, cambio de arquetipo o tipoPerfil en subcategoría existente, renombre de sectorId.",
+      "MINOR": "Adición compatible: nuevas subcategorías, nuevos sectores, nuevos arquetipos de plantilla, expansión de busqueda sin colisión de IDs.",
+      "PATCH": "Corrección compatible: aliases, sinónimos, palabrasRelacionadas, erroresComunes, documentación, typos en nombres display sin cambio de subcategoriaId."
+    },
+    "pasosCambioAutorizado": [
+      "1. Registrar solicitud de cambio (motivo, tipo semver, archivos esperados).",
+      "2. Obtener autorización explícita del product owner.",
+      "3. Aplicar cambios solo en archivos baseline listados o derivados documentados.",
+      "4. Ejecutar pipeline: node scripts/integrar-catalogo-expandido.mjs (si catálogo JS cambió) → node scripts/generar-schemas-registro.mjs → node scripts/validar-schemas-registro.mjs.",
+      "5. Incrementar versionCatalogo.semver y fechas en schemas (versionSchema / versionMeta).",
+      "6. Generar reporte de validación y, si MAJOR, acta de migración para runtime futuro.",
+      "7. Actualizar historialVersiones en esta acta o scripts/historial-versiones-catalogo.json.",
+      "8. Commit git recomendado en fase posterior (fuera de alcance de diseño congelado)."
+    ],
+    "historialVersiones": [
+      {
+        "semver": "1.0.0",
+        "versionCatalogo": "catalogo-2026-06-10",
+        "fecha": "2026-06-09",
+        "evento": "CONGELAMIENTO_INICIAL",
+        "validacion": "PASS — 0 errores, 0 advertencias",
+        "notas": "Baseline post-limpieza arquetipos; 15 sectores, 462 subcategorías; identidadUsuario previamente congelada."
+      }
+    ]
+  },
+  "artefactosEvidencia": {
+    "actaLimpiezaPrevia": "scripts/reporte-catalogo-limpieza-antes-despues.json",
+    "validacionAntes": "scripts/validacion-schemas-report-antes.json",
+    "validacionCongelamiento": "scripts/validacion-schemas-report.json",
+    "actaLegible": "scripts/ACTA-CONGELAMIENTO-CATALOGO.md"
+  },
+  "restriccionesVigentes": {
+    "runtime": false,
+    "firestore": false,
+    "produccion": false,
+    "deploy": false,
+    "fieldEngine": false,
+    "validationEngine": false,
+    "renderEngine": false,
+    "messenger": false,
+    "wizardHtml": false
+  },
+  "estado": "CONGELADO"
+}

@@ -1,0 +1,307 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "tipo": "AUDITORIA_PROPUESTA_ACTA_MINOR",
+  "nombre": "Auditoría final — propuesta VE MINOR 1.1.0 (Messenger)",
+  "fecha": "2026-06-09",
+  "propuestaAuditada": "scripts/PROPUESTA-ACTA-MINOR-VALIDATIONENGINE-MESSENGER.json",
+  "estadoPropuesta": "PROPUESTA_NO_APLICADA",
+  "validationEngineBase": "validationengine-2026-06-10@1.0.0 CONGELADO",
+  "messengerBase": "messenger-2026-06-10@1.0.0 CONGELADO",
+  "actaMigracionDiseno": "scripts/ACTA-MIGRACION-USUARIOS-PERFILES.json v1.0.0",
+  "veredictoGeneral": "SUFICIENTE_CON_CAMBIOS_REQUERIDOS",
+  "procedeRedactarActaMinor": true,
+  "condicion": "Incorporar cambios requeridos AUD-VE-MINOR-REQ-01..08 en acta formal; no aplicar 1.1.0 hasta aprobación PO",
+  "autorizaRuntime": false,
+  "modificoCapasCongeladas": false,
+  "analisisPorItem": {
+    "VE-MINOR-01": {
+      "titulo": "Actualizar fanOutPlan mensaje_enviar, conversacion_iniciar, bloqueo_usuario",
+      "archivo": "scripts/registry-validationengine-eventos.json",
+      "fuente": "scripts/registry-messenger-fanout-propuesta.json v1.0.1",
+      "compatibilidadVE100": "COMPATIBLE_MINOR",
+      "compatibilidadMessenger100": "COMPATIBLE",
+      "suficiencia": "PARCIAL",
+      "hallazgos": [
+        "Fuente fan-out completa para mensaje_enviar y bloqueo_usuario",
+        "conversacion_iniciar en registry 1.0.0 no tiene equivalente directo en fanout — fanout usa conversacion_iniciar_directa y conversacion_iniciar_solicitud (OB-MSG-3)",
+        "Propuesta no especifica eliminación de conversacion_iniciar ni regla de enrutamiento por metadata.modoInicio",
+        "Entradas fanout usan plantilla historial/notificacion; OB-VE2 exige fanOutPlan[] canónico — requiere transformación explícita en acta"
+      ],
+      "impactoFanOutPlan": "ALTO — sustituye placeholders emitir:false por fan-out real historial_mensajes + notificaciones dominio mensajes",
+      "veredicto": "REQUIERE_PRECISIÓN_ACTA"
+    },
+    "VE-MINOR-02": {
+      "titulo": "Añadir 23 acciones Messenger + variantes conversacion_iniciar",
+      "archivo": "scripts/registry-validationengine-eventos.json",
+      "compatibilidadVE100": "COMPATIBLE_MINOR",
+      "compatibilidadMessenger100": "COMPATIBLE",
+      "suficiencia": "ALTA",
+      "metricas": {
+        "accionesCatalogoSPEC": 23,
+        "entradasFanoutPropuesta": 24,
+        "registryVE100Messenger": 3,
+        "registryVE110MessengerEsperado": 24,
+        "registryVE100Total": 39,
+        "registryVE110TotalEsperado": 60
+      },
+      "accionesNuevas": [
+        "conversacion_iniciar_directa", "conversacion_iniciar_solicitud",
+        "solicitud_conversacion_aceptar", "solicitud_conversacion_rechazar",
+        "bloqueo_usuario_remover", "reportar_conversacion", "reportar_mensaje",
+        "reportar_usuario_mensajeria", "mensaje_eliminar_para_todos",
+        "conversacion_archivar", "conversacion_silenciar", "conversacion_fijar",
+        "conversacion_ocultar", "automatizacion_enviar", "automatizacion_activar",
+        "automatizacion_desactivar", "admin_automatizaciones_suspendir",
+        "admin_messenger_suspender", "admin_messenger_suspension_levantar",
+        "admin_messenger_deshabilitar_ambito", "admin_messenger_habilitar_ambito",
+        "admin_conversacion_cerrar"
+      ],
+      "accionesActualizar": ["mensaje_enviar", "bloqueo_usuario"],
+      "accionesEliminar": ["conversacion_iniciar"],
+      "excluidasFanOut": ["ia_asistente_sugerir_respuesta — documentado en fanout accionesSinFanOutPersistencia"],
+      "veredicto": "PROCEDE_CON_LISTA_EXPLÍCITA_EN_ACTA"
+    },
+    "VE-MINOR-03": {
+      "titulo": "mensajeria_futura → mensajeria en SPEC; ampliar lista acciones",
+      "archivo": "scripts/SPEC-VALIDATIONENGINE.json",
+      "compatibilidadVE100": "COMPATIBLE_MINOR",
+      "compatibilidadMessenger100": "COMPATIBLE",
+      "suficiencia": "PARCIAL",
+      "hallazgos": [
+        "Alineado con procedimientoVersionado.MINOR del acta VE 1.0.0",
+        "Pipeline 14 pasos sin cambio — correcto",
+        "Falta lista canónica completa de acciones mensajeria en propuesta (solo referencia genérica 23 acciones)",
+        "ValidationAction union type debe documentarse en acta con variantes conversacion_iniciar_*"
+      ],
+      "veredicto": "REQUIERE_ANEXO_LISTA_ACCIONES"
+    },
+    "VE-MINOR-04": {
+      "titulo": "Fixtures V20+ cruce Messenger",
+      "archivo": "scripts/fixtures-validationengine-golden.json",
+      "compatibilidadVE100": "COMPATIBLE_MINOR",
+      "compatibilidadMessenger100": "COMPATIBLE",
+      "suficiencia": "INSUFICIENTE_SI_OPCIONAL",
+      "estadoActual": {
+        "fixturesExistentes": 18,
+        "ids": "V01..V18",
+        "mensajeriaExistente": "V18_mensajeria_futura_estado_suspendido → ESTADO_MENSAJERIA_DENEGADO"
+      },
+      "fixturesRecomendados": [
+        { "id": "V19", "caso": "mensaje_enviar_ok con fanOutPlan historial_mensajes + mensaje_nuevo" },
+        { "id": "V20", "caso": "mensaje_enviar TELEFONO_NO_VERIFICADO" },
+        { "id": "V21", "caso": "mensaje_enviar SPAM_SCORE_UMBRAL (spamScore >= 60)" },
+        { "id": "V22", "caso": "conversacion_iniciar_directa_ok fanOut" },
+        { "id": "V23", "caso": "conversacion_iniciar_solicitud_ok fanOut" },
+        { "id": "V24", "caso": "MESSENGER_DESHABILITADO_AMBITO" }
+      ],
+      "referenciaAM-VE1": "Recomendado V19-V24 — propuesta marca opcional; acta formal debe exigir mínimo V19-V21",
+      "impactoFixturesExistentes": "V18 permanece válido; no requiere modificación retroactiva",
+      "veredicto": "RECOMENDADO_OBLIGATORIO_MINIMO_V19_V21_EN_ACTA"
+    },
+    "VE-MINOR-05": {
+      "titulo": "telefonoVerificado en validateStates",
+      "obMSG": "OB-MSG-8",
+      "archivo": "scripts/SPEC-VALIDATIONENGINE.json",
+      "compatibilidadVE100": "COMPATIBLE_MINOR",
+      "compatibilidadMessenger100": "COMPATIBLE",
+      "suficiencia": "PARCIAL",
+      "hallazgos": [
+        "SPEC Messenger gatesMessengerValidateStates documenta telefonoVerificado, messengerHabilitadoAmbito, spamScoreUmbral",
+        "Propuesta solo formaliza telefonoVerificado explícitamente",
+        "Falta gate messengerHabilitadoAmbito → MESSENGER_DESHABILITADO_AMBITO en validateStates paso 6",
+        "Falta regla estadoMensajeria restringida: solo mensaje_enviar en conversaciones activa|reportada, no conversacion_iniciar directa (SPEC Messenger integracionValidationEngine)"
+      ],
+      "impactoTelefonoVerificado": {
+        "campo": "usuarios.seguridad.telefonoVerificado",
+        "acciones": ["mensaje_enviar", "conversacion_iniciar", "conversacion_iniciar_directa", "conversacion_iniciar_solicitud"],
+        "error": "TELEFONO_NO_VERIFICADO",
+        "pasoPipeline": 6
+      },
+      "veredicto": "REQUIERE_AMPLIAR_GATES_EN_ACTA"
+    },
+    "VE-MINOR-06": {
+      "titulo": "spamScore canónico usuarios.mensajeria.spamScore",
+      "obMSG": "OB-MSG-8",
+      "archivo": "scripts/SPEC-VALIDATIONENGINE.json",
+      "compatibilidadVE100": "COMPATIBLE_MINOR",
+      "compatibilidadMessenger100": "COMPATIBLE",
+      "suficiencia": "PARCIAL",
+      "hallazgos": [
+        "Path canónico ya documentado en SPEC Messenger antiSpam.spamScore — alineado",
+        "Propuesta gatesMessenger redacta 'pre-check envío si spamScore < 60' — ambiguo; SPEC Messenger dice restringido si >= 60",
+        "Falta umbral explícito 60 y acciones afectadas en propuesta",
+        "Side-effect restringir vía admin — correcto; no mutar spamScore en validateAction"
+      ],
+      "impactoSpamScore": {
+        "campoCanonico": "usuarios.mensajeria.spamScore",
+        "umbral": 60,
+        "denegarSi": "spamScore >= 60",
+        "error": "SPAM_SCORE_UMBRAL",
+        "accionesPreCheck": ["mensaje_enviar", "conversacion_iniciar_directa", "automatizacion_enviar"]
+      },
+      "veredicto": "REQUIERE_CORRECCIÓN_REDACCIÓN_UMBRAL"
+    },
+    "VE-MINOR-07": {
+      "titulo": "Errores canónicos TELEFONO_NO_VERIFICADO, MESSENGER_DESHABILITADO_AMBITO, SPAM_SCORE_UMBRAL",
+      "obMSG": "OB-MSG-8",
+      "archivo": "guiaErrores + errores en SPEC-VALIDATIONENGINE.json",
+      "compatibilidadVE100": "COMPATIBLE_MINOR",
+      "compatibilidadMessenger100": "COMPATIBLE",
+      "suficiencia": "PARCIAL",
+      "hallazgos": [
+        "SPEC Messenger errores ya lista los 3 códigos + solapados con VE (EMAIL_NO_VERIFICADO, ESTADO_MENSAJERIA_DENEGADO)",
+        "Propuesta archivo ambiguo: 'guiaErrores VE o SPEC Messenger cross-ref'",
+        "Acta debe añadir a SPEC-VALIDATIONENGINE.errores y guiaErrores.gatesVsEstados con origen validateStates paso 6",
+        "Errores Messenger-only (BLOQUEO_ACTIVO, SOLICITUD_PENDIENTE) fuera alcance MINOR — validación capa Messenger runtime, no VE validateStates"
+      ],
+      "impactoErroresCanonicos": {
+        "nuevosEnVE": ["TELEFONO_NO_VERIFICADO", "MESSENGER_DESHABILITADO_AMBITO", "SPAM_SCORE_UMBRAL"],
+        "existentesReutilizados": ["ESTADO_MENSAJERIA_DENEGADO", "EMAIL_NO_VERIFICADO", "ESTADO_SEGURIDAD_DENEGADO", "RATE_LIMIT_EXCEDIDO"],
+        "soloMessengerRuntime": ["BLOQUEO_ACTIVO", "SOLICITUD_PENDIENTE", "CONVERSACION_EN_INVESTIGACION"]
+      },
+      "veredicto": "PROCEDE_CON_DESTINO_EXPLÍCITO_SPEC_VE"
+    }
+  },
+  "verificacionTransversal": {
+    "compatibilidadValidationEngine100": {
+      "pipeline14Pasos": "SIN_CAMBIO — MINOR válido",
+      "ValidationContext": "SIN_CAMBIO — MINOR válido",
+      "contratoMultiDestinoOB-VE2": "REQUIERE fanOutPlan[] explícito al fusionar fanout propuesta",
+      "registry39Acciones": "Pasa a ~60 — requiere actualizar check VE09 validador",
+      "guiaErroresOB-VE5": "Extensión gatesVsEstados — compatible MINOR"
+    },
+    "compatibilidadMessenger100": {
+      "accionesCatalogo23": "CUBIERTO por fanout propuesta 24 entradas",
+      "integracionValidationEngine": "PROPUESTA referenciada en SPEC congelado — coherente",
+      "OB-MSG-8": "VE-MINOR-05/06/07 cierran diseño documental pendiente",
+      "eventBusFanOut": "Alineado registry-messenger-fanout-propuesta.json",
+      "noModificaSPEC": true
+    },
+    "impactoFanOutPlan": {
+      "antes": "mensaje_enviar, conversacion_iniciar, bloqueo_usuario con emitir:false o parcial",
+      "despues": "24 acciones con historial_mensajes y/o notificaciones dominio mensajes",
+      "dominiosNuevosEventBus": ["historial_mensajes"],
+      "dominiosNotificacion": ["mensajes", "mensajeria"],
+      "condicionales": ["condicional_spam", "condicional_senal_riesgo", "condicional_abuso", "condicional_investigacion"]
+    },
+    "impactoFixtures": {
+      "existentes18": "Sin modificación obligatoria",
+      "nuevosRecomendados": "6 (V19-V24)",
+      "validador": "VE13 fixtures_count debe actualizarse en acta MINOR"
+    },
+    "dependenciaActaMigracion": {
+      "estado": "SATISFECHO_DISENO",
+      "nota": "AM-VE2 bridge perfilId=uid — no bloquea acta MINOR; bloquea runtime conjunto"
+    }
+  },
+  "cambiosRequeridos": [
+    {
+      "id": "AUD-VE-MINOR-REQ-01",
+      "prioridad": "alta",
+      "descripcion": "Especificar transformación plantilla fanout → fanOutPlan[] por acción (OB-VE2)"
+    },
+    {
+      "id": "AUD-VE-MINOR-REQ-02",
+      "prioridad": "alta",
+      "descripcion": "Documentar eliminación conversacion_iniciar y enrutamiento modoInicio → conversacion_iniciar_directa|solicitud"
+    },
+    {
+      "id": "AUD-VE-MINOR-REQ-03",
+      "prioridad": "alta",
+      "descripcion": "Incluir gate messengerHabilitadoAmbito en validateStates (VE-MINOR-05 ampliado)"
+    },
+    {
+      "id": "AUD-VE-MINOR-REQ-04",
+      "prioridad": "alta",
+      "descripcion": "Corregir redacción umbral spamScore: denegar si >= 60, error SPAM_SCORE_UMBRAL"
+    },
+    {
+      "id": "AUD-VE-MINOR-REQ-05",
+      "prioridad": "alta",
+      "descripcion": "Destino explícito errores: SPEC-VALIDATIONENGINE.errores + guiaErrores.gatesVsEstados (no solo cross-ref Messenger)"
+    },
+    {
+      "id": "AUD-VE-MINOR-REQ-06",
+      "prioridad": "media",
+      "descripcion": "Anexo lista canónica 24 claves registry + regla conversacion_iniciar routing"
+    },
+    {
+      "id": "AUD-VE-MINOR-REQ-07",
+      "prioridad": "media",
+      "descripcion": "Actualización validar-spec-validationengine.mjs: VE09 conteo ~60, checks fanOut messenger, errores nuevos"
+    },
+    {
+      "id": "AUD-VE-MINOR-REQ-08",
+      "prioridad": "media",
+      "descripcion": "Procedimiento MINOR formal: historialVersiones acta VE, semver registry 1.1.0, compatibilidad.messenger 1.0.0"
+    }
+  ],
+  "cambiosRecomendados": [
+    {
+      "id": "AUD-VE-MINOR-REC-01",
+      "descripcion": "Fixtures V19-V24 obligatorios en acta (no opcional VE-MINOR-04)"
+    },
+    {
+      "id": "AUD-VE-MINOR-REC-02",
+      "descripcion": "Regla estadoMensajeria restringida para conversacion_iniciar vs mensaje_enviar (SPEC Messenger)"
+    },
+    {
+      "id": "AUD-VE-MINOR-REC-03",
+      "descripcion": "Documentar matriz acción → pasos pipeline que aplican (validateMedia no aplica mensajería)"
+    },
+    {
+      "id": "AUD-VE-MINOR-REC-04",
+      "descripcion": "Fusionar registry-messenger-fanout-propuesta en registry principal; archivar propuesta como fuente histórica"
+    },
+    {
+      "id": "AUD-VE-MINOR-REC-05",
+      "descripcion": "Actualizar REPORTE-CONGELAMIENTOS-CONSOLIDADO al aprobar acta MINOR"
+    },
+    {
+      "id": "AUD-VE-MINOR-REC-06",
+      "descripcion": "Fixture V19 fanOutPlan mensaje_enviar con destinatario dinámico conversacionId"
+    }
+  ],
+  "riesgos": {
+    "eliminadosAlAprobarActa": [
+      { "id": "R-VE-01", "descripcion": "Runtime Messenger sin registry VE completo" },
+      { "id": "R6", "descripcion": "Hooks mensajeria_futura sin SPEC Messenger — ya congelado" }
+    ],
+    "remanentes": [
+      { "id": "R-VE-MINOR-01", "nivel": "alto", "descripcion": "Desalineación fanOutPlan si se copia plantilla sin transformar OB-VE2" },
+      { "id": "R-VE-MINOR-02", "nivel": "alto", "descripcion": "Validador VE09 falla si conteo registry no actualiza con acta" },
+      { "id": "R-VE-MINOR-03", "nivel": "medio", "descripcion": "conversacion_iniciar legacy en código futuro si routing no documentado" },
+      { "id": "R-VE-MINOR-04", "nivel": "medio", "descripcion": "Sin fixtures V19+ regresión gates telefono/spam no detectable en diseño" },
+      { "id": "R-MSG-02", "nivel": "medio", "descripcion": "Índices/realtime Messenger — fuera alcance MINOR" },
+      { "id": "R-PROD-EXEC", "nivel": "alto", "descripcion": "Migración perfiles no ejecutada — owner checks runtime" }
+    ]
+  },
+  "veredictoFinal": {
+    "procedeRedactarActaMinor": true,
+    "tituloSugerido": "ACTA-MINOR-VALIDATIONENGINE-1.1.0-MESSENGER",
+    "semver": "1.1.0",
+    "tipoVersion": "MINOR",
+    "autorizaAplicarCambios": false,
+    "autorizaRuntime": false,
+    "confianza": "alta_con_8_requeridos",
+    "resumen": "La propuesta contiene material suficiente y fuente fan-out completa (24 entradas). No basta como acta formal sin 8 precisiones requeridas: fanOutPlan OB-VE2, routing conversacion_iniciar, gates messengerHabilitadoAmbito, umbral spamScore, destino errores VE, lista registry, validador y procedimiento MINOR.",
+    "bloqueantesPreRuntime": [
+      "Aprobación PO acta MINOR",
+      "Aplicación documental cambios (no autorizada por esta auditoría)",
+      "Fixtures V19-V21 mínimo",
+      "Acta migración ejecutada (operacional) para perfiles"
+    ]
+  },
+  "artefactos": {
+    "propuesta": "scripts/PROPUESTA-ACTA-MINOR-VALIDATIONENGINE-MESSENGER.json",
+    "fanoutFuente": "scripts/registry-messenger-fanout-propuesta.json",
+    "auditoriaLegible": "scripts/AUDITORIA-PROPUESTA-VE-MINOR-1.1.0.md"
+  },
+  "changelog": [
+    {
+      "version": "1.0.0",
+      "fecha": "2026-06-09",
+      "nota": "Auditoría final propuesta VE MINOR 1.1.0 — sin aplicar cambios"
+    }
+  ]
+}

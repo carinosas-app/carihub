@@ -1,0 +1,100 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "versionSchema": "2026-06-10",
+  "version": "2026-06-10",
+  "schemaId": "promociones_banners",
+  "nombre": "Promociones de banners (separadas de precios base)",
+  "descripcion": "Promociones publicitarias independientes de configuracion_publicidad/precios_banners. Pago adelantado obligatorio.",
+  "separacionObligatoria": {
+    "preciosBase": "configuracion_publicidad/precios_banners",
+    "promociones": "promociones_banners",
+    "nuncaMezclar": true
+  },
+  "versionadoPromociones": {
+    "campoContrato": "versionPromocion",
+    "campoCongelado": "promocionAplicada",
+    "historialColeccion": "promociones_banners_historial/{id}"
+  },
+  "politicaPromocionCongelada": {
+    "regla": "Precio y promoción congelados desde contratación hasta fin de diasTotales.",
+    "ejemplo": {
+      "contrato": { "precioContratado": 1300, "diasPagados": 30, "diasBonificados": 30, "diasTotales": 60 },
+      "cambioAdminPosterior": { "nuevoPrecio": 1800, "promocionDesactivada": true },
+      "clienteConserva": "precioContratado + promocionAplicada originales"
+    }
+  },
+  "tipoPromocionLanzamiento": {
+    "id": "banner_tiempo_igual_gratis",
+    "nombre": "Contrata X tiempo, recibe X tiempo gratis",
+    "tipo": "duplicar_tiempo",
+    "pagoAdelantadoObligatorio": true,
+    "tabla": [
+      { "diasContratados": 7, "diasPagados": 7, "diasBonificados": 7, "diasTotales": 14 },
+      { "diasContratados": 15, "diasPagados": 15, "diasBonificados": 15, "diasTotales": 30 },
+      { "diasContratados": 30, "diasPagados": 30, "diasBonificados": 30, "diasTotales": 60 },
+      { "diasContratados": 90, "diasPagados": 90, "diasBonificados": 90, "diasTotales": 180 }
+    ],
+    "activo": true,
+    "version": "2026-06-10-lanzamiento-1"
+  },
+  "flujoBanner": [
+    "1. Anunciante llena registro banner (datos públicos)",
+    "2. Datos privados / KYC",
+    "3. enviado_revision",
+    "4. Admin revisa",
+    "5. autorizado_para_pago → notificación al usuario",
+    "6. pago_pendiente → usuario transfiere/deposita",
+    "7. Admin confirma → pago_confirmado",
+    "8. Si NO modificó datos post-pago → publicado",
+    "9. Si modificó datos importantes post-pago → revision_post_pago",
+    "10. Admin aprueba revisión post-pago → publicado"
+  ],
+  "contratoBanner": {
+    "coleccion": "contratos_banners/{contratoId}",
+    "camposObligatorios": [
+      "usuarioId",
+      "anuncianteId",
+      "precioPagado",
+      "precioContratado",
+      "versionPrecio",
+      "promocionAplicada",
+      "versionPromocion",
+      "diasPagados",
+      "diasBonificados",
+      "diasTotales",
+      "fechaContratacion",
+      "fechaInicio",
+      "fechaVencimiento",
+      "slotId",
+      "pantalla",
+      "espacio",
+      "pais",
+      "estado",
+      "ciudad",
+      "overrideAplicado",
+      "estadoContrato",
+      "requiereRevisionPostPago",
+      "datosModificadosDespuesDePago"
+    ]
+  },
+  "documentoFirestore": {
+    "coleccion": "promociones_banners",
+    "escritura": "admin solamente"
+  },
+  "revisionPostPago": {
+    "camposImportantes": [
+      "imagenPrincipal",
+      "imagenesAdicionales",
+      "mensajeContactoPublicidad",
+      "slotId",
+      "categoria",
+      "ciudad",
+      "documentos"
+    ],
+    "accionSiCambio": "estado → revision_post_pago, bloquear publicación hasta admin"
+  },
+  "iaArquitecto": {
+    "puedeRecomendar": true,
+    "puedeModificar": false
+  }
+}

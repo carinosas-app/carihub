@@ -1,0 +1,171 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "tipo": "ANEXO_ANALISIS",
+  "id": "ANEXO-CRIPTOMONEDAS-PAGOS-CONTRATOS",
+  "titulo": "Anexo complementario: soporte futuro de criptomonedas en Pagos y Contratos",
+  "fecha": "2026-06-10",
+  "version": "1.0.0",
+  "estado": "ANALISIS — anexo complementario; no activa cripto, no modifica el plan host",
+  "modo": "Solo análisis y documentación — sin activar cripto/runtime/carpetas/mover/Firestore/deploy/commit/actas/SPEC; NO modifica PLAN-MAESTRO-PAGOS-CONTRATOS ni ningún documento existente",
+  "autorizadoPor": "product owner / usuario CariHub",
+  "anexoDe": "PLAN-MAESTRO-PAGOS-CONTRATOS v1.0.0 (lo referencia y complementa; NO lo modifica)",
+  "basadoEn": [
+    "scripts/PLAN-MAESTRO-PAGOS-CONTRATOS.json",
+    "scripts/PLAN-MAESTRO-ADMIN.json",
+    "scripts/PLAN-MAESTRO-AGENTES-IA.json",
+    "scripts/PLAN-MAESTRO-BANNERS-PUBLICIDAD.json",
+    "scripts/PLAN-MAESTRO-DASHBOARDS.json",
+    "scripts/config-seguridad-mvp-schema.json"
+  ],
+  "objetivo": "Evaluar y documentar el soporte FUTURO de criptomonedas dentro del ecosistema de Pagos y Contratos, sin activarlo, definiendo arquitectura recomendada, compatibilidades, riesgos y recomendaciones por fase.",
+
+  "principioRector": "La unidad de cuenta y el PRECIO CONGELADO del contrato permanecen en MXN (politicaPrecioCongelado del plan host). Cripto entra (futuro) como MÉTODO DE PAGO con conversión a MXN en el momento del pago vía proveedor; preferentemente STABLECOINS y NON-CUSTODIAL (CariHub no custodia fondos), para minimizar volatilidad, custodia y carga regulatoria. Admin concilia; ninguna IA aprueba pagos ni mueve fondos.",
+  "porQueStablecoinsFirst": "Stablecoins (USDC/USDT) eliminan el riesgo de volatilidad entre cotización y liquidación; BTC/ETH/SOL volátiles requieren conversión inmediata y exponen a riesgo cambiario y fiscal mayor.",
+
+  "estadoActual": "Sin pasarela conectada (admin.html: 'Pagos aparecerán al conectar Stripe/MercadoPago'). Cripto es estrictamente futuro; este anexo no cambia el estado.",
+
+  "activosAnalizados": {
+    "BTC": { "tipo": "volátil", "red": "Bitcoin L1", "velocidad": "~10 min/bloque, 1-6 confirmaciones", "costo": "variable, puede ser alto", "volatilidad": "alta", "adopcion": "máxima", "rol": "reserva/valor; poco práctico para pagos pequeños en L1", "veredicto": "Solo vía Lightning para pagos; L1 para montos altos con conversión inmediata" },
+    "Lightning": { "tipo": "L2 de BTC", "velocidad": "instantáneo", "costo": "mínimo", "volatilidad": "hereda BTC (mitigable con conversión inmediata)", "adopcion": "creciente", "rol": "micropagos/propinas/internacional rápido", "veredicto": "Buena para micropagos y propinas futuras; requiere proveedor" },
+    "USDT": { "tipo": "stablecoin", "redes": "Ethereum/Tron/Solana", "volatilidad": "baja (peg USD)", "adopcion": "máxima en stablecoins", "riesgo": "emisor centralizado (Tether), opacidad de reservas", "veredicto": "Útil internacional; preferir red de bajo costo (Tron/Solana)" },
+    "USDC": { "tipo": "stablecoin", "redes": "Ethereum/Solana/Base", "volatilidad": "baja (peg USD)", "adopcion": "alta", "riesgo": "emisor centralizado (Circle), más transparente/regulado", "veredicto": "PREFERIDA por transparencia/regulación; primera opción stablecoin" },
+    "stablecoinsFuturas": { "tipo": "stablecoin", "ejemplos": "MXN-pegged futuras, EURC", "rol": "stablecoin local MXN eliminaría conversión", "veredicto": "Monitorear stablecoin MXN; ideal si surge una regulada" },
+    "ETH_liquidacion": { "tipo": "red de liquidación", "rol": "settlement de USDC/USDT ERC-20", "costo": "gas alto en L1; usar L2 (Base/Arbitrum)", "veredicto": "Como red, no como activo de pago; preferir L2" },
+    "Solana_liquidacion": { "tipo": "red de liquidación", "rol": "settlement rápido y barato de USDC/USDT", "costo": "muy bajo", "veredicto": "Buena red para stablecoins por costo/velocidad" }
+  },
+
+  "casosUsoFuturos": {
+    "pagosInternacionales": { "aplica": "sí (futuro)", "fase": "internacional", "nota": "principal justificación de cripto: anunciantes/perfiles fuera de MX sin tarjeta MXN" },
+    "p2pEntreUsuarios": { "aplica": "no recomendado", "fase": "futuro lejano", "nota": "P2P agrava AML/KYC y custodia; evitar salvo marco legal claro" },
+    "propinas": { "aplica": "posible", "fase": "futuro", "nota": "Lightning/USDC micropagos; requiere reglas fiscales y antifraude" },
+    "comprasInternas": { "aplica": "posible", "fase": "futuro", "nota": "créditos internos; mantener contabilidad en MXN" },
+    "campanasPublicitarias": { "aplica": "sí (futuro)", "fase": "internacional", "nota": "anunciantes internacionales pagan banners/campañas en USDC" },
+    "suscripciones": { "aplica": "limitado", "fase": "futuro", "nota": "cripto no soporta cargos recurrentes automáticos nativamente; requiere autorizaciones/recordatorios o pull vía proveedor" }
+  },
+
+  "conversionMoneda": {
+    "regla": "Factura/CFDI y precio del contrato SIEMPRE en MXN; cripto se cotiza a MXN al momento del pago con tasa del proveedor y ventana de validez corta",
+    "multiMoneda": "El sistema puede MOSTRAR equivalencias (USD/cripto) pero la fuente de verdad contable es MXN",
+    "multiPais": "Conversión a moneda local solo para visualización; settlement a fiat MXN o stablecoin según fase",
+    "multiIdioma": "Presentación localizada; no afecta unidad de cuenta",
+    "ivaCfdi": "IVA y CFDI se calculan en MXN; cripto no cambia la obligación fiscal (sigue siendo venta en MXN)"
+  },
+
+  "custodia": {
+    "custodialVsNonCustodial": {
+      "custodial": { "definicion": "CariHub mantiene wallets/fondos", "pros": "control de flujo", "contras": "licencia/regulación de custodia, riesgo de hackeo, AML/KYC pesado, responsabilidad fiduciaria", "veredicto": "EVITAR" },
+      "nonCustodial": { "definicion": "proveedor/PSP procesa y liquida; CariHub no custodia", "pros": "menor carga regulatoria, sin riesgo de custodia, settlement a fiat", "contras": "dependencia de proveedor, comisiones", "veredicto": "RECOMENDADO" }
+    },
+    "walletPropiaVsProveedor": {
+      "walletPropia": "máxima complejidad (seguridad de claves, on-chain monitoring, AML) → no recomendado en MVP/nacional",
+      "proveedorExterno": "PSP cripto (ej. tipo Bitso Business/Coinbase Commerce/MoonPay/Strike) con settlement a MXN → RECOMENDADO; abstrae redes y conversión"
+    }
+  },
+
+  "arquitecturaRecomendada": {
+    "multiMoneda": {
+      "principio": "montoMXN (congelado, fuente de verdad) + bloque cripto informativo",
+      "camposSugeridosNoActivados": ["montoMXN", "monedaContrato='MXN'", "metodoPago='cripto'", "criptoActivo (BTC/USDC/USDT/...)", "redLiquidacion (lightning/solana/base/tron)", "montoCripto", "tasaConversionMXN", "ventanaTasaExpira", "proveedorCripto", "idTxOnChain", "confirmacionesRequeridas", "confirmacionesActuales", "estadoOnChain"],
+      "nota": "Campos SUGERIDOS para diseño futuro; NO se activan ni se agregan a Firestore ahora; compatibles con pagos.campos existentes (moneda, pasarela, idTransaccionPasarela, duplicadoDe)"
+    },
+    "conciliacion": {
+      "flujo": "pago iniciado → proveedor detecta tx → confirmaciones on-chain alcanzan umbral → proveedor liquida (MXN/stablecoin) → webhook → pago='confirmado' → contrato activa servicio",
+      "regla": "La activación sigue el principio host: pago confirmado + contrato → motor activa; cripto no salta revisión",
+      "admin": "Conciliación y excepciones (subpago/sobrepago/late) en Admin (PLAN-MAESTRO-ADMIN); IA no aprueba"
+    },
+    "trazabilidad": {
+      "registro": "hash de tx, red, confirmaciones, proveedor, tasa aplicada, timestamp; todo en AuditTrail",
+      "inmutabilidad": "on-chain es auditable públicamente; almacenar referencia, nunca claves privadas",
+      "privacidad": "no exponer wallet del usuario en superficies públicas (PrivacyGuard)"
+    },
+    "reembolsosDisputas": {
+      "irreversibilidad": "las tx on-chain son irreversibles → NO hay chargeback",
+      "politica": "reembolso como CRÉDITO interno en MXN o transferencia fiat saliente con aprobación superior (alineado a 'siReembolso' del host); disputas resueltas por Admin con evidencia on-chain",
+      "antifraude": "subpago/sobrepago/doble envío → conciliación; ventana de tasa para evitar arbitraje"
+    },
+    "comprobantes": "comprobante incluye montoMXN + equivalente cripto + hash tx; factura CFDI en MXN (facturacion del host sin cambios)",
+    "contratosMultiMoneda": "El contrato permanece en MXN con precio congelado; se registra método=cripto y referencia de liquidación, sin cambiar la unidad de cuenta ni romper politicaPrecioCongelado"
+  },
+
+  "compatibilidad": {
+    "pagos": "cripto = nuevo valor del enum metodos (hoy 'futuros'); reutiliza pagos.campos + bloque cripto sugerido",
+    "contratos": "sin cambios de unidad de cuenta; precio congelado MXN intacto",
+    "dashboards": "muestran montoMXN + equivalente y estado on-chain (solo visualización; sin acciones)",
+    "admin": "concilia, gestiona excepciones/reembolsos cripto con auditoría (PrivacyAccessGuard para datos sensibles)",
+    "facturacion": "CFDI en MXN; cripto no altera RFC/usoCFDI/regimenFiscal",
+    "internacionalizacion": "habilitador clave para clientes sin medios de pago MXN; activar por mercado legal",
+    "agentesIA": "IA puede explicar/estimar tasas o detectar anomalías (recomendación/alerta), NUNCA aprobar pagos/reembolsos ni mover fondos (RT-08 de AGENTES-IA)",
+    "marketplaceFuturo": "si surge marketplace de plantillas/servicios, cripto como método internacional opcional con mismas reglas",
+    "banners": "anunciantes internacionales pagan campañas en stablecoin; activación sigue ciclo banner del host",
+    "campanasInternacionales": "principal caso de negocio internacional; USDC preferida"
+  },
+
+  "riesgos": {
+    "fiscales": "Tratamiento fiscal de cripto en MX (ISR/IVA) y obligación de facturar en MXN; registro contable de conversión",
+    "legales": "Marco regulatorio cripto variable por país; Ley Fintech MX y restricciones de activos virtuales para entidades reguladas",
+    "amlKyc": "Prevención de lavado: KYC reforzado, límites, screening de wallets/listas; mayor en P2P (por eso se desaconseja)",
+    "fraude": "Subpago/sobrepago, doble gasto en 0-conf, manipulación de tasa; mitigar con confirmaciones y ventana de tasa",
+    "operativos": "Dependencia de proveedor, caídas de red, reorgs, soporte 24/7",
+    "custodia": "Riesgo de hackeo/pérdida de claves si custodial → se evita con non-custodial",
+    "regulatoriosPorPais": "Algunos países prohíben/limitan cripto; activar solo donde sea legal",
+    "volatilidad": "BTC/ETH/SOL fluctúan entre cotización y liquidación → conversión inmediata o stablecoins",
+    "stablecoinsVsVolatiles": "Stablecoins minimizan volatilidad pero añaden riesgo de emisor/depeg; volátiles añaden riesgo cambiario"
+  },
+
+  "matrices": {
+    "criptomonedaVentajasRiesgos": {
+      "BTC": { "ventajas": "adopción, reserva de valor", "riesgos": "volatilidad, fees L1, lento", "recomendacion": "solo montos altos con conversión o vía Lightning" },
+      "Lightning": { "ventajas": "instantáneo, barato, micropagos", "riesgos": "liquidez de canales, hereda volatilidad BTC", "recomendacion": "micropagos/propinas internacionales (futuro)" },
+      "USDT": { "ventajas": "estable, líquido, multired", "riesgos": "emisor opaco, depeg", "recomendacion": "internacional, red barata (Solana/Tron)" },
+      "USDC": { "ventajas": "estable, transparente, regulado", "riesgos": "emisor centralizado, depeg menor", "recomendacion": "PREFERIDA stablecoin" },
+      "ETH_red": { "ventajas": "ecosistema", "riesgos": "gas alto L1", "recomendacion": "usar L2 (Base/Arbitrum)" },
+      "Solana_red": { "ventajas": "rápida, barata", "riesgos": "estabilidad histórica de red", "recomendacion": "buena red para stablecoins" }
+    },
+    "metodoComplejidadUtilidad": {
+      "PSP_noncustodial_stablecoin": { "complejidad": "media", "utilidad": "alta", "veredicto": "RECOMENDADO nacional/internacional" },
+      "PSP_lightning": { "complejidad": "media", "utilidad": "media (micropagos)", "veredicto": "futuro propinas" },
+      "wallet_propia_custodial": { "complejidad": "muy alta", "utilidad": "alta", "veredicto": "EVITAR (regulación/custodia)" },
+      "onchain_directo_sin_proveedor": { "complejidad": "alta", "utilidad": "media", "veredicto": "no recomendado (conciliación/AML manual)" },
+      "p2p_directo": { "complejidad": "alta", "utilidad": "baja", "veredicto": "desaconsejado (AML)" }
+    }
+  },
+
+  "recomendaciones": {
+    "mvp": "NINGUNA criptomoneda activa. Mantener MXN vía pasarela fiat (Stripe/Mercado Pago) cuando se conecte. Cripto permanece como 'futuros'.",
+    "nacional": "Opcional: habilitar STABLECOINS (USDC) vía PSP NON-CUSTODIAL con settlement a MXN, solo si hay demanda real; conciliación en Admin; factura en MXN.",
+    "internacional": "USDC/USDT vía PSP non-custodial para anunciantes/campañas internacionales; Lightning para micropagos/propinas; activar por mercado legal con KYC/AML.",
+    "futuro": "Monitorear stablecoin MXN regulada (eliminaría conversión); P2P/propinas solo con marco AML maduro."
+  },
+
+  "riesgosAbiertos": [
+    "Selección de PSP cripto con settlement MXN y cobertura legal en MX",
+    "Política fiscal/contable de conversión cripto→MXN",
+    "Umbral de confirmaciones por red y ventana de validez de tasa",
+    "Cobertura KYC/AML y screening de wallets",
+    "Mapeo regulatorio por país antes de internacionalizar"
+  ],
+  "dependencias": {
+    "host": "PLAN-MAESTRO-PAGOS-CONTRATOS 1.0.0 (precio congelado MXN, ciclo pago→contrato→activación)",
+    "admin": "PLAN-MAESTRO-ADMIN (conciliación, reembolsos, PrivacyAccessGuard)",
+    "agentesIA": "PLAN-MAESTRO-AGENTES-IA (RT-08: sin pagos/reembolsos sin doble confirmación humana)",
+    "banners": "PLAN-MAESTRO-BANNERS-PUBLICIDAD (campañas internacionales)",
+    "seguridadMvp": "config-seguridad-mvp-schema (rate-limit, antifraude)",
+    "precondiciones": ["pasarela fiat operativa primero", "PSP cripto seleccionado", "revisión legal/fiscal", "KYC/AML", "Admin conciliación cripto"]
+  },
+  "posiblesImpactosPagosContratos": {
+    "enumMetodos": "cripto sería un nuevo valor del enum 'metodos' (hoy 'futuros') — NO se activa aquí",
+    "camposPago": "el bloque cripto sugerido es compatible con pagos.campos (moneda, pasarela, idTransaccionPasarela, duplicadoDe) — NO se agrega ahora",
+    "principioPrecioCongelado": "intacto: contrato sigue en MXN; cripto solo es vía de liquidación",
+    "facturacion": "intacta: CFDI en MXN",
+    "nota": "Todos los impactos son de DISEÑO FUTURO; este anexo no modifica el plan ni Firestore"
+  },
+  "queNoCambia": [
+    "PLAN-MAESTRO-PAGOS-CONTRATOS v1.0.0 (no se modifica)",
+    "Unidad de cuenta MXN y precio congelado",
+    "Facturación CFDI en MXN",
+    "Capas/planes/actas existentes, producción, Firestore, deploy, commit"
+  ],
+  "changelog": [
+    { "version": "1.0.0", "fecha": "2026-06-10", "nota": "Anexo de análisis de criptomonedas para Pagos/Contratos: stablecoins-first non-custodial; 7 activos analizados, 6 casos de uso, arquitectura multi-moneda/conciliación/trazabilidad/reembolsos, compatibilidades con 10 módulos, 9 familias de riesgo, 2 matrices y recomendaciones por fase (MVP=ninguna)" }
+  ]
+}

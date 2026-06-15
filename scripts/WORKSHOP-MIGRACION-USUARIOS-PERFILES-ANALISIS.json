@@ -1,0 +1,394 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "tipo": "WORKSHOP_ANALISIS_MIGRACION",
+  "nombre": "Workshop documental — ACTA-MIGRACION-USUARIOS-PERFILES v1.0.0",
+  "fecha": "2026-06-09",
+  "estado": "ACTA_REDACTADA_v1.0.0",
+  "autorizacion": {
+    "alcance": "Solo workshop y análisis documental",
+    "actaFinal": "scripts/ACTA-MIGRACION-USUARIOS-PERFILES.json v1.0.0",
+    "runtime": false,
+    "firestore": false,
+    "produccion": false,
+    "modificarCapasCongeladas": false
+  },
+  "objetivoWorkshop": "Determinar si existe información suficiente para redactar acta formal de migración usuarios monolito → hub + perfiles",
+  "veredicto": {
+    "procedeRedactarActa": true,
+    "condicion": "Acta v1.0.0 como diseño de migración con anexos TBD pre-runtime; no autoriza ejecución",
+    "confianza": "alta_diseno_baja_operacional",
+    "nota": "Modelo objetivo exhaustivamente congelado; inventario producción y estrategia cutover requieren anexo operacional separado antes de runtime"
+  },
+  "estadoActualProduccion": {
+    "modelo": "monolito_usuarios",
+    "coleccionPrincipal": "usuarios/{uid}",
+    "auth": "Firebase Auth uid = document id",
+    "problema": "Cuenta + perfil público + verificación + estados comerciales en un solo documento",
+    "camposLegacyRelevantes": [
+      "uid", "email", "aprobado", "activo", "vencido", "estadoRevision", "estadoPago",
+      "actualizacionPendiente", "fechaPublicacion", "fechaVencimiento", "verificacion",
+      "datos perfil mezclados (nombre, geo, formulario, etc.)"
+    ],
+    "coleccionesRaizProduccion": {
+      "usuarios": "activa — monolito",
+      "usuarios_favoritos": "subcolección — perfilId como doc id",
+      "solicitudes_anuncios": "activa — uidAnunciante",
+      "denuncias": "activa — create false usuario",
+      "pagos": "activa — admin only",
+      "anuncios": "activa — admin only",
+      "configuracion_publicidad": "activa",
+      "estadisticas_visitas": "activa",
+      "logsAdmin": "activa",
+      "logsSeguridad": "activa",
+      "soporte_mensajes": "activa — distinto de Messenger diseño"
+    },
+    "coleccionesDiseñoNoEnProduccion": [
+      "perfiles/{perfilId}",
+      "contratos_perfiles",
+      "contratos_banners",
+      "solicitudes_categorias",
+      "conversaciones",
+      "usuarios/notificaciones",
+      "usuarios/bloqueos",
+      "usuarios/conversaciones_meta",
+      "usuarios/dispositivos"
+    ],
+    "firestoreRules": {
+      "archivo": "firestore.rules",
+      "nota": "Rules reflejan monolito; perfiles/ no declarado — catch-all deniega",
+      "isPublicProfile": "aprobado && activo && !vencido en usuarios/{uid}"
+    },
+    "fuentesDocumentales": [
+      "scripts/config-cuentas-usuario-schema.json → estadoActualProduccion",
+      "scripts/ACTA-CONGELAMIENTO-CUENTAS.json → produccionActual LEGACY",
+      "firestore.rules"
+    ]
+  },
+  "modeloObjetivoCongelado": {
+    "acta": "scripts/ACTA-CONGELAMIENTO-CUENTAS.json",
+    "schema": "scripts/config-cuentas-usuario-schema.json",
+    "version": "cuentas-2026-06-10@1.0.0",
+    "hub": {
+      "ruta": "usuarios/{usuarioId}",
+      "proposito": "Identidad, estados cuenta/verificación/mensajería, punteros, subcolecciones — NO datos extensos perfil público"
+    },
+    "perfiles": {
+      "ruta": "perfiles/{perfilId}",
+      "proposito": "Datos registro/publicación, borradores, historial_estados, snapshot RenderEngine futuro"
+    },
+    "principios": [
+      "usuarioId = Auth uid inmutable",
+      "perfil público siempre en perfiles con usuarioId FK",
+      "contratos/pagos referencian usuarioId",
+      "banners: anuncianteId (MVP = usuarioId) + usuarioId",
+      "mensajería/favoritos/bloqueos/notificaciones en hub usuario"
+    ]
+  },
+  "bridgeTransitorio": {
+    "regla": "perfilId = usuarioId para cuentas migradas desde monolito (fase 1)",
+    "fuentes": ["AM-VE2", "config-registro-schema.meta.json notaLegacy", "AUDITORIA-FINAL-SPEC-VALIDATIONENGINE"],
+    "implicaciones": {
+      "favoritos": "usuarios/{uid}/favoritos/{perfilId} — si perfilId=uid legacy, coherente post-migración",
+      "urls": "perfil.html?perfilId=uid mantiene compatibilidad",
+      "storage": "perfiles/{perfilId}/... con perfilId=uid en fase bridge",
+      "veOwnerChecks": "ValidationEngine 1.0.0 asume perfiles/{perfilId} — bridge habilita sin reescribir paths inmediato"
+    },
+    "salidaBridge": {
+      "cuando": "Multi-perfil por usuario o nuevo perfilId UUID",
+      "accion": "perfilPrincipalId + perfilIds[] en hub; redirecciones 301 URLs"
+    },
+    "estrategiaTransitoriaPropuesta": {
+      "fase1_extraccion": "Crear perfiles/{uid} copiando campos públicos desde usuarios/{uid}; hub conserva estados",
+      "fase2_punteros": "usuarios.perfil.perfilPrincipalId=uid; perfilIds=[uid]; tienePerfilPublico=true",
+      "fase3_lectura_dual": "Runtime lee perfil desde perfiles con fallback usuarios — TBD acta operacional",
+      "fase4_deprecacion": "Vaciar campos perfil duplicados en usuarios — MAJOR cuentas semver",
+      "fase5_multiperfil": "Nuevos perfiles UUID; bridge solo legacy"
+    }
+  },
+  "alcanceMigracion": {
+    "enAlcanceDiseno": [
+      "Definición modelo hub + perfiles post-migración",
+      "Reglas bridge perfilId=usuarioId",
+      "Mapeo campos monolito → hub vs perfiles",
+      "Colecciones afectadas y FK",
+      "Impacto capas congeladas (lectura diseño)",
+      "Criterios éxito diseño y precondiciones runtime",
+      "Riesgos y mitigaciones documentales"
+    ],
+    "fueraAlcanceActaDiseno": [
+      "Scripts ETL / Cloud Functions migración",
+      "Ventana mantenimiento producción",
+      "Rollback ejecutado en Firestore",
+      "Modificación firestore.rules en runtime",
+      "Inventario volumétrico producción (conteo documentos)"
+    ],
+    "coleccionesAfectadas": [
+      {
+        "coleccion": "usuarios/{usuarioId}",
+        "accion": "REFACTOR — separar hub; eliminar duplicados perfil en fase final",
+        "prioridad": "critica"
+      },
+      {
+        "coleccion": "perfiles/{perfilId}",
+        "accion": "CREAR — extracción desde monolito",
+        "prioridad": "critica"
+      },
+      {
+        "coleccion": "usuarios/{id}/favoritos/{perfilId}",
+        "accion": "VALIDAR refs apuntan a perfiles existentes",
+        "prioridad": "alta",
+        "nota": "Ya existe en producción"
+      },
+      {
+        "coleccion": "solicitudes_anuncios",
+        "accion": "NORMALIZAR uidAnunciante → usuarioId en diseño",
+        "prioridad": "media"
+      },
+      {
+        "coleccion": "contratos_perfiles",
+        "accion": "CREAR al activar runtime contratos — diseño congelado",
+        "prioridad": "alta_pre_contratos"
+      },
+      {
+        "coleccion": "contratos_banners",
+        "accion": "CREAR — diseño congelado",
+        "prioridad": "media"
+      },
+      {
+        "coleccion": "pagos",
+        "accion": "VINCULAR usuarioId explícito si falta",
+        "prioridad": "media"
+      },
+      {
+        "coleccion": "denuncias",
+        "accion": "Añadir perfilId donde reportado sea perfil",
+        "prioridad": "media"
+      },
+      {
+        "coleccion": "usuarios/notificaciones",
+        "accion": "CREAR subcolección — diseño Dashboards",
+        "prioridad": "alta_pre_notificaciones"
+      },
+      {
+        "coleccion": "usuarios/bloqueos",
+        "accion": "CREAR — Messenger diseño",
+        "prioridad": "alta_pre_messenger"
+      },
+      {
+        "coleccion": "usuarios/conversaciones_meta",
+        "accion": "CREAR — Messenger diseño",
+        "prioridad": "alta_pre_messenger"
+      },
+      {
+        "coleccion": "conversaciones",
+        "accion": "CREAR — Messenger runtime",
+        "prioridad": "messenger_runtime"
+      },
+      {
+        "coleccion": "solicitudes_categorias",
+        "accion": "CREAR — diseño",
+        "prioridad": "baja"
+      }
+    ]
+  },
+  "impactoPorCapa": {
+    "contratos": {
+      "diseno": "contratos_perfiles, contratos_banners — usuarioId obligatorio",
+      "produccion": "Solo schema; no colección activa en rules",
+      "migracion": "Crear al habilitar runtime; visitante upgrade con contrato vigente",
+      "riesgo": "alto_pre_renovaciones"
+    },
+    "banners": {
+      "diseno": "anuncianteId MVP=usuarioId; solicitudes_anuncios + anuncios",
+      "produccion": "solicitudes_anuncios activa; uidAnunciante",
+      "migracion": "Normalizar campo usuarioId; conservar uidAnunciante como alias transitorio",
+      "riesgo": "medio"
+    },
+    "favoritos": {
+      "diseno": "usuarios/{id}/favoritos/{perfilId} → perfiles/{perfilId}",
+      "produccion": "Subcolección existe; perfiles puede no existir aún",
+      "migracion": "Crear perfiles antes de validar favoritos; bridge perfilId=uid",
+      "riesgo": "medio"
+    },
+    "notificaciones": {
+      "diseno": "SPEC-DASHBOARDS §14 — usuarios/{id}/notificaciones",
+      "produccion": "Modales home legacy; no subcolección",
+      "migracion": "Nueva subcolección; no migrar modales — cutover UI",
+      "riesgo": "alto_DO6_productor"
+    },
+    "messenger": {
+      "diseno": "SPEC-MESSENGER 1.0.0 — conversacionId trío usuario-par-perfil",
+      "produccion": "No implementado",
+      "migracion": "Hub mensajeria estados en usuarios; conversaciones_meta subcolección; perfilContextoId requiere perfiles",
+      "riesgo": "alto_R_MSG_01",
+      "dependencia": "Bridge + perfiles antes de runtime Messenger"
+    },
+    "dashboards": {
+      "diseno": "SPEC-DASHBOARDS 1.0.0 — shell modular por roles",
+      "produccion": "index.html modales parciales",
+      "migracion": "evaluateDashboardAction asume hub; router perfiles separados",
+      "riesgo": "medio_dashboard_shell"
+    },
+    "validationEngine": {
+      "diseno": "SPEC-VALIDATIONENGINE 1.0.0 — Storage perfiles/{perfilId}, owner checks",
+      "produccion": "No runtime",
+      "migracion": "AM-VE2 bridge en acta migración referenciada obligatoria pre-runtime VE",
+      "riesgo": "critico_RI_owner_storage",
+      "nota": "No modificar VE congelado — acta migración referencia bridge"
+    },
+    "interacciones": {
+      "diseno": "OBSERVACION v1.2.1 — perfiles publicadores, seguidores futuro",
+      "produccion": "N/A",
+      "migracion": "Requiere perfiles/{perfilId} y usuarioId; no bloquea SPEC Interacciones documental",
+      "riesgo": "medio_futuro"
+    },
+    "renderEngine": {
+      "diseno": "config-renderizado-dinamico-schema — perfil.html lee perfiles snapshot",
+      "produccion": "HTML legacy mezclado",
+      "migracion": "Fuente lectura pasa a perfiles/{perfilId}; bridge uid",
+      "riesgo": "alto_pre_render"
+    },
+    "themeEngine": {
+      "diseno": "OBSERVACION v1.3.0 — temas por perfil y dashboard",
+      "migracion": "DEP-TE-02 acta migración bloqueante runtime ThemeEngine",
+      "riesgo": "medio_futuro"
+    },
+    "seo": {
+      "diseno": "OBSERVACION v1.0.0 — URLs canónicas por perfilId",
+      "migracion": "Bridge mantiene URLs; 301 al salir bridge",
+      "riesgo": "medio_R_SEO_urls"
+    }
+  },
+  "dependencias": {
+    "congeladasRequeridas": [
+      { "capa": "Cuentas", "version": "1.0.0", "uso": "Modelo hub/perfiles" },
+      { "capa": "Catálogo", "version": "1.0.0", "uso": "formularioId, subcategoriaId en perfiles" },
+      { "capa": "FieldEngine", "version": "1.0.1", "uso": "Wizard perfiles/{perfilId}" },
+      { "capa": "Seguridad", "version": "1.0.0", "uso": "estadoSeguridad en hub" }
+    ],
+    "pendientesRelacionados": [
+      { "item": "VE MINOR 1.1.0", "relacion": "Paralelo — no bloquea acta migración" },
+      { "item": "Dashboards 1.1.0", "relacion": "Post-migración notificaciones" },
+      { "item": "SPEC RenderEngine", "relacion": "Consume perfiles post-migración" }
+    ],
+    "bloqueaRuntimeDe": ["Messenger", "ValidationEngine", "Dashboards unificado", "FieldEngine wizard", "RenderEngine", "Contratos", "ThemeEngine", "SEO landings perfiles"]
+  },
+  "criteriosExito": {
+    "diseno": [
+      "Acta migración v1.0.0 aprobada PO",
+      "Mapeo campos monolito→hub/perfiles documentado",
+      "Bridge perfilId=usuarioId formalizado con fecha salida",
+      "Todas las FK diseño congelado satisfechas o excepciones listadas",
+      "Capas congeladas referencian acta sin modificar actas existentes"
+    ],
+    "preRuntime": [
+      "Colección perfiles/{perfilId} poblada para usuarios con perfil público",
+      "Hub usuarios sin campos perfil duplicados críticos o lectura dual definida",
+      "favoritos referencian perfiles existentes",
+      "isPublicProfile equivalente en nuevo modelo",
+      "Storage paths perfiles/{perfilId} operativos"
+    ],
+    "postRuntime": [
+      "Cero regresión URLs públicas perfil",
+      "ValidationEngine owner checks PASS en fixtures con bridge",
+      "Messenger perfilContextoId resuelve perfiles",
+      "Dashboards notificaciones en subcolección hub"
+    ]
+  },
+  "riesgosQueElimina": [
+    { "id": "R-PROD-01", "descripcion": "Gap monolito vs hub+perfiles" },
+    { "id": "R-MIG-01", "descripcion": "Bridge perfilId=uid informal" },
+    { "id": "R-MSG-01", "descripcion": "conversacionId y contexto perfil Messenger" },
+    { "id": "RI-VE-owner", "descripcion": "Owner checks asumen perfiles/{perfilId}" },
+    { "id": "DO1", "descripcion": "Favoritos/notificaciones dueño perfil" },
+    { "id": "R-TE-02", "descripcion": "ThemeEngine temas por perfilId" },
+    { "id": "R-SEO-urls", "descripcion": "URLs canónicas estables (con bridge)" }
+  ],
+  "riesgosQuePermanecen": [
+    { "id": "R-MIG-EXEC", "nivel": "alto", "descripcion": "Ejecución ETL no diseñada en esta acta" },
+    { "id": "R-MIG-DUAL", "nivel": "alto", "descripcion": "Período lectura dual monolito+perfiles" },
+    { "id": "R-MIG-STORAGE", "nivel": "alto", "descripcion": "Migración archivos Storage a paths perfiles/{perfilId}" },
+    { "id": "R-MIG-RULES", "nivel": "alto", "descripcion": "firestore.rules reescritura — fuera acta diseño" },
+    { "id": "R-MIG-UI", "nivel": "medio", "descripcion": "index.html/admin.html legacy vs shell Dashboards" },
+    { "id": "R-MIG-NOTIF", "nivel": "medio", "descripcion": "Dos sistemas notificaciones hasta cutover" },
+    { "id": "R-MIG-MULTI", "nivel": "medio", "descripcion": "Multi-perfil post-bridge redirecciones" },
+    { "id": "R-VE-01", "nivel": "alto", "descripcion": "VE MINOR 1.1.0 sigue pendiente" },
+    { "id": "R-MSG-02", "nivel": "medio", "descripcion": "Índices/realtime Messenger" }
+  ],
+  "vaciosInformacion": [
+    {
+      "id": "VAC-01",
+      "tema": "Inventario producción",
+      "descripcion": "Conteo usuarios activos, campos poblados, favoritos huérfanos",
+      "bloqueaActaDiseno": false,
+      "bloqueaActaOperacional": true
+    },
+    {
+      "id": "VAC-02",
+      "tema": "Mapeo campo a campo",
+      "descripcion": "Tabla exhaustiva cada campo usuarios/{uid} → hub vs perfiles",
+      "bloqueaActaDiseno": false,
+      "bloqueaActaOperacional": true,
+      "nota": "Parcial en schema cuentas; falta anexo CSV/JSON mapeo"
+    },
+    {
+      "id": "VAC-03",
+      "tema": "Storage Firebase",
+      "descripcion": "Paths actuales fotos/verificación vs perfiles/{perfilId}/...",
+      "bloqueaActaDiseno": false,
+      "bloqueaRuntime": true
+    },
+    {
+      "id": "VAC-04",
+      "tema": "Estrategia cutover",
+      "descripcion": "Big-bang vs incremental; ventana; rollback Firestore",
+      "bloqueaActaDiseno": false,
+      "bloqueaRuntime": true
+    },
+    {
+      "id": "VAC-05",
+      "tema": "Lectura dual",
+      "descripcion": "Qué código lee usuarios vs perfiles durante transición",
+      "bloqueaActaDiseno": false,
+      "bloqueaRuntime": true
+    },
+    {
+      "id": "VAC-06",
+      "tema": "isPublicProfile",
+      "descripcion": "Equivalencia aprobado/activo/vencido monolito → estadoRevision perfiles + hub",
+      "bloqueaActaDiseno": false,
+      "bloqueaActaOperacional": true
+    },
+    {
+      "id": "VAC-07",
+      "tema": "Visitantes sin perfil",
+      "descripcion": "Cuentas solo anunciante o solo favoritos sin perfil público",
+      "bloqueaActaDiseno": false,
+      "bloqueaActaOperacional": true
+    },
+    {
+      "id": "VAC-08",
+      "tema": "soporte_mensajes vs Messenger",
+      "descripcion": "Coexistencia colección admin soporte con Messenger diseño",
+      "bloqueaActaDiseno": false,
+      "bloqueaRuntime": true
+    }
+  ],
+  "artefactosWorkshop": [
+    "scripts/WORKSHOP-MIGRACION-USUARIOS-PERFILES-ANALISIS.json",
+    "scripts/WORKSHOP-MIGRACION-USUARIOS-PERFILES-ANALISIS.md"
+  ],
+  "siguientePasoRecomendado": {
+    "accion": "Redactar ACTA-MIGRACION-USUARIOS-PERFILES v1.0.0 (diseño)",
+    "incluir": ["alcance", "bridge", "colecciones", "criterios éxito", "vacíos TBD", "referencias actas congeladas"],
+    "excluir": ["scripts migración", "cambios rules", "fechas producción"],
+    "noAutoriza": ["runtime", "firestore", "deploy"]
+  },
+  "changelog": [
+    {
+      "version": "1.0.0",
+      "fecha": "2026-06-09",
+      "nota": "Workshop documental inicial — análisis suficiencia acta migración"
+    }
+  ]
+}

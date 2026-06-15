@@ -1,0 +1,497 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "$id": "https://carihub.app/schemas/auditoria-maestra-completa-carihub-v2.1.json",
+  "tipo": "AUDITORIA_MAESTRA_COMPLETA",
+  "titulo": "Auditoría Maestra Completa CariHub/Cariñosas",
+  "version": "2.1.0",
+  "fecha": "2026-06-11",
+  "baselineReferenciada": "scripts/AUDITORIA-MAESTRA-COMPLETA-CARIHUB.json v2.0.0",
+  "novedadesDesdeV2_0": [
+    "ACTA-CONGELAMIENTO-PANEL-DASHBOARD v1.1.0 — CAP-10b ratificado diseño 96%",
+    "SPEC-DASHBOARDS-OPERATIVOS v1.0.1 (SPEC-PANEL-DASHBOARD-MINIMO) alineado MATRIZ",
+    "MATRIZ-RUTAS-NAV-CANONICA v1.0.0 — canon navegación",
+    "AUDITORIA-SPEC-PANEL-DASHBOARD v2.0.0 — 40 verificaciones PASS",
+    "PATCH-SPEC-PANEL-DASHBOARD v1.0.1 — 6 INC P0 cerrados",
+    "Fixtures PDM-01..10 golden v2.0.0",
+    "GAP-PANEL-DASH CERRADO documentalmente (35% → 96%)",
+    "13 actas congelamiento/certificación (panel v1.1)",
+    "11 SPECs formales operativos (panel v1.0.1)",
+    "9 fixtures golden"
+  ],
+  "modo": "Solo documentación — sintetiza corpus scripts/ sin modificar artefactos congelados",
+  "restricciones": {
+    "runtime": false,
+    "modificarDocumentosCongelados": false,
+    "commit": false,
+    "deploy": false,
+    "firestore": false,
+    "migraciones": false
+  },
+
+  "basesObligatorias": [
+    "AUDITORIA-MAESTRA-COMPLETA-CARIHUB v2.0.0",
+    "MATRIZ-RUTAS-NAV-CANONICA v1.0.0",
+    "ACTA-CONGELAMIENTO-PANEL-DASHBOARD v1.1.0",
+    "AUDITORIA-SPEC-PANEL-DASHBOARD v2.0.0",
+    "PATCH-SPEC-PANEL-DASHBOARD v1.0.1",
+    "ACTA-CONGELAMIENTO-REGISTRO-CUENTA v1.0.0",
+    "ACTA-CONGELAMIENTO-PAGOS-CONTRATOS v1.0.0"
+  ],
+
+  "documentosFuente": {
+    "planesMaestros": 12,
+    "specs": 11,
+    "matricesCanon": 1,
+    "actasCongelamiento": 13,
+    "actasMigracionMinor": 2,
+    "adrs": 3,
+    "anexos": 5,
+    "auditoriasSpec": 11,
+    "fixturesGolden": 9,
+    "validadoresScript": 3,
+    "validadoresPendientes": 8,
+    "gapsCerrados": 3,
+    "gapsAbiertosCriticos": 6
+  },
+
+  "metodologiaCalculo": {
+    "principio": "Porcentajes derivados de actas/SPECs/fixtures verificables; delta v2.1 refleja cierre CAP-10b",
+    "formulas": {
+      "documentalGlobal": "Promedio ponderado capas: engines 22% + monetización 14% + registro 10% + dashboards 12% + SEO 9% + seguridad 9% + admin 8% + app 8% + migración 8%",
+      "arquitectonicoGlobal": "Promedio ponderado madurez 23 capas funcionales (incl. CAP-10 shell + CAP-10b operativo)",
+      "construccionP0": "0.38×88 engines + 0.28×89 depsP0 + 0.22×87 mvpOperarDoc + 0.12×70 migración",
+      "mvpOperar": "Doc: MATRIZ-MVP + ACTA-RC + ACTA-PANEL; Runtime: monolito + /cuenta/* pendiente",
+      "mvpCobrar": "ACTA-PAY 76% doc; pasarela BLK-02 runtime 38%",
+      "readinessRuntime": "Base 11% + progreso parcial admin.html (~2%)",
+      "readinessProduccion": "0.35×runtime + 0.35×seguridadRuntime + 0.30×mvpOperarRuntime",
+      "globalPonderado": "0.58×documentalGlobal + 0.42×readinessRuntime"
+    }
+  },
+
+  "seccion1_estadoGlobal": {
+    "metricasGlobales": {
+      "porcentajeDocumentalGlobal": 91,
+      "porcentajeArquitectonicoGlobal": 92,
+      "porcentajeConstruccionP0": 89,
+      "porcentajeMvpOperar": { "documental": 87, "runtime": 22, "ponderado": 51 },
+      "porcentajeMvpCobrar": { "documental": 76, "runtime": 38, "ponderado": 57 },
+      "porcentajeReadinessRuntime": 11,
+      "porcentajeReadinessProduccion": 29,
+      "porcentajeReadinessEscalabilidad": 26,
+      "porcentajeReadinessSeguridad": 54,
+      "porcentajeReadinessAuditoria": { "documental": 74, "ciAutomatizado": 30, "ponderado": 61 },
+      "porcentajeReadinessAdministracion": 62,
+      "porcentajeReadinessMonetizacion": { "documental": 78, "runtime": 38, "ponderado": 64 },
+      "porcentajeDashboardOperativo": 96,
+      "porcentajeGlobalPonderado": 57,
+      "notaGlobal": "Doc maduro P0; runtime sigue siendo limitante principal (11%)"
+    },
+    "deltaDesdeV2_0": {
+      "documentalGlobal": { "v2": 83, "v2_1": 91, "delta": 8 },
+      "arquitectonicoGlobal": { "v2": 55, "v2_1": 92, "delta": 37, "nota": "v2 usaba ratio actas/dominios; v2.1 usa madurez ponderada capas incl. CAP-10b" },
+      "construccionP0": { "v2": 84, "v2_1": 89, "delta": 5 },
+      "mvpOperarDoc": { "v2": 74, "v2_1": 87, "delta": 13 },
+      "mvpCobrarDoc": { "v2": 72, "v2_1": 76, "delta": 4 },
+      "readinessRuntime": { "v2": 11, "v2_1": 11, "delta": 0 },
+      "readinessProduccion": { "v2": 28, "v2_1": 29, "delta": 1 },
+      "gapPanelDash": { "v2": 35, "v2_1": 96, "delta": 61, "estado": "CERRADO" },
+      "actasCertificadas": { "v2": 12, "v2_1": 13, "delta": 1 },
+      "fixturesGolden": { "v2": 8, "v2_1": 9, "delta": 1 }
+    },
+    "porcentajeRealProyectoHoy": 57,
+    "porcentajeFaltanteDocumental": 9,
+    "porcentajeFaltanteRuntime": 89
+  },
+
+  "seccion2_inventarioCapas": {
+    "capas": [
+      {
+        "id": "CAP-01", "nombre": "Shared/Core", "estado": "CONGELADO_DISENO", "porcentaje": 88,
+        "spec": "SPEC-SHARED-CORE.json", "acta": "ACTA-CONGELAMIENTO-SHARED-CORE.json",
+        "riesgos": ["BLK-08 extracción", "SCS-R01 adopción parcial monolito"],
+        "dependencias": ["P0 Runtime Foundation"],
+        "listaConstruccion": "PARCIAL — requiere plan adopción física",
+        "listaRuntime": "NO"
+      },
+      {
+        "id": "CAP-03", "nombre": "FieldEngine", "estado": "CONGELADO_DISENO", "porcentaje": 86,
+        "spec": "SPEC-FIELDENGINE.json", "acta": "ACTA-CONGELAMIENTO-FIELDENGINE.json",
+        "riesgos": ["SPOF-02 snapshotAlPublicar runtime"],
+        "dependencias": ["Catálogo", "Registro-Cuenta"],
+        "listaConstruccion": "SI",
+        "listaRuntime": "PARCIAL — post BLK-05"
+      },
+      {
+        "id": "CAP-04", "nombre": "ValidationEngine", "estado": "CONGELADO_DISENO", "porcentaje": 88,
+        "spec": "SPEC-VALIDATIONENGINE.json", "acta": "ACTA-CONGELAMIENTO-VALIDATIONENGINE.json",
+        "riesgos": ["BLK-05 rules server-side"],
+        "dependencias": ["Seguridad MVP", "Shared/Core"],
+        "listaConstruccion": "SI — primer candidato runtime P0",
+        "listaRuntime": "PARCIAL — post BLK-05"
+      },
+      {
+        "id": "CAP-02", "nombre": "RenderEngine", "estado": "CONGELADO_DISENO", "porcentaje": 84,
+        "spec": "SPEC-RENDERENGINE.json", "acta": "ACTA-CONGELAMIENTO-RENDERENGINE.json",
+        "riesgos": ["BLK-01", "BLK-03"],
+        "dependencias": ["Migración", "SEO-Landings"],
+        "listaConstruccion": "SI — post BLK-01 slug",
+        "listaRuntime": "NO"
+      },
+      {
+        "id": "CAP-07", "nombre": "Catálogo", "estado": "CONGELADO_DISENO", "porcentaje": 85,
+        "spec": null, "acta": "ACTA-CONGELAMIENTO-CATALOGO.json",
+        "riesgos": ["SPOF-01 versionado runtime"],
+        "dependencias": ["Admin /admin/catalogo"],
+        "listaConstruccion": "SI — cache read-only",
+        "listaRuntime": "PARCIAL"
+      },
+      {
+        "id": "CAP-06", "nombre": "SEO-Landings", "estado": "CONGELADO_DISENO", "porcentaje": 90,
+        "spec": "SPEC-SEO-LANDINGS.json", "acta": "ACTA-CONGELAMIENTO-SEO-LANDINGS.json",
+        "riesgos": ["BLK-06", "BLK-04", "BLK-09"],
+        "dependencias": ["RenderEngine", "App Pública"],
+        "listaConstruccion": "PARCIAL",
+        "listaRuntime": "NO"
+      },
+      {
+        "id": "CAP-16", "nombre": "Messenger", "estado": "CONGELADO_FUERA_P0", "porcentaje": 75,
+        "spec": "SPEC-MESSENGER.json", "acta": "ACTA-CONGELAMIENTO-MESSENGER.json",
+        "riesgos": ["RSK-07 IA guardrails"],
+        "dependencias": ["Dashboard Operativo DP-05 Post-MVP"],
+        "listaConstruccion": "NO — excluido MVP",
+        "listaRuntime": "NO"
+      },
+      {
+        "id": "CAP-11", "nombre": "Registro-Cuenta", "estado": "CONGELADO_DISENO", "porcentaje": 90,
+        "spec": "SPEC-REGISTRO-CUENTA.json", "acta": "ACTA-CONGELAMIENTO-REGISTRO-CUENTA v1.0.0",
+        "riesgos": ["BLK-01", "BLK-05", "RC-RO03 password prod"],
+        "dependencias": ["FieldEngine", "ValidationEngine", "Cuentas"],
+        "listaConstruccion": "PARCIAL — diseño listo",
+        "listaRuntime": "NO"
+      },
+      {
+        "id": "CAP-12", "nombre": "Pagos-Contratos", "estado": "CONGELADO_DISENO", "porcentaje": 88,
+        "spec": "SPEC-PAGOS-CONTRATOS.json", "acta": "ACTA-CONGELAMIENTO-PAGOS-CONTRATOS v1.0.0",
+        "riesgos": ["BLK-02", "PC-R01 cobro manual", "PAY-RO05 rules"],
+        "dependencias": ["ValidationEngine", "Admin", "Dashboard Operativo DP-08"],
+        "listaConstruccion": "PARCIAL — manual MVP viable",
+        "listaRuntime": "NO"
+      },
+      {
+        "id": "CAP-10", "nombre": "Dashboards Shell", "estado": "CONGELADO_SHELL", "porcentaje": 53,
+        "spec": "SPEC-DASHBOARDS.json", "acta": "ACTA-CONGELAMIENTO-DASHBOARDS.json",
+        "riesgos": ["Shell 11 módulos V1.1 Post-MVP"],
+        "dependencias": ["Dashboard Operativo especializa sin expandir"],
+        "listaConstruccion": "NO — shell congelado",
+        "listaRuntime": "NO"
+      },
+      {
+        "id": "CAP-10b", "nombre": "Dashboards Operativos", "estado": "CONGELADO_PARCIAL_DISENO", "porcentaje": 96,
+        "spec": "SPEC-PANEL-DASHBOARD-MINIMO.json v1.0.1 (SPEC-DASHBOARDS-OPERATIVOS)",
+        "acta": "ACTA-CONGELAMIENTO-PANEL-DASHBOARD v1.1.0",
+        "matriz": "MATRIZ-RUTAS-NAV-CANONICA v1.0.0",
+        "riesgos": ["Runtime /cuenta/*", "admin.html legacy", "BLK-01 bridge"],
+        "dependencias": ["ACTA-RC", "ACTA-PAY", "ACTA-DASH shell", "MATRIZ"],
+        "listaConstruccion": "SI — diseño ratificado",
+        "listaRuntime": "NO"
+      },
+      {
+        "id": "CAP-05", "nombre": "Seguridad MVP", "estado": "PARCIAL", "porcentaje": 53,
+        "spec": null, "acta": "ACTA-CONGELAMIENTO-SEGURIDAD.json",
+        "riesgos": ["BLK-05", "BLK-10", "GAP-RULES"],
+        "dependencias": ["ValidationEngine", "Cuentas", "Registro"],
+        "listaConstruccion": "PARCIAL",
+        "listaRuntime": "NO"
+      },
+      {
+        "id": "CAP-08", "nombre": "Cuentas", "estado": "PARCIAL", "porcentaje": 70,
+        "spec": null, "acta": "ACTA-CONGELAMIENTO-CUENTAS.json",
+        "riesgos": ["BLK-01", "RSK-02 uid vs perfilId"],
+        "dependencias": ["Migración", "Shared/Core"],
+        "listaConstruccion": "NO — prerequisito BLK-01",
+        "listaRuntime": "NO"
+      },
+      {
+        "id": "CAP-09", "nombre": "Migración", "estado": "PARCIAL", "porcentaje": 70,
+        "spec": null, "acta": "ACTA-MIGRACION-USUARIOS-PERFILES.json",
+        "riesgos": ["BLK-01", "GAP-MIGRACION ejecución"],
+        "dependencias": ["Cuentas", "Registro"],
+        "listaConstruccion": "NO",
+        "listaRuntime": "NO"
+      },
+      {
+        "id": "CAP-14", "nombre": "Admin", "estado": "PARCIAL", "porcentaje": 62,
+        "spec": null, "acta": null, "plan": "PLAN-MAESTRO-ADMIN.json",
+        "riesgos": ["GAP-SPEC-ADMIN", "BLK-07 RBAC"],
+        "dependencias": ["Seguridad", "Pagos", "Dashboard Admin ADM-*"],
+        "listaConstruccion": "PARCIAL — rutas canon en panel; SPEC formal falta",
+        "listaRuntime": "PARCIAL — admin.html ~40%"
+      },
+      {
+        "id": "CAP-13", "nombre": "Banners", "estado": "PARCIAL", "porcentaje": 58,
+        "spec": null, "plan": "PLAN-MAESTRO-BANNERS-PUBLICIDAD.json",
+        "riesgos": ["Sin SPEC-BANNERS", "BLK-02 parcial"],
+        "dependencias": ["Pagos contratos_banners", "Dashboard Anunciante", "MATRIZ ANU-01..08"],
+        "listaConstruccion": "PARCIAL — funnel /registro/banner documentado",
+        "listaRuntime": "PARCIAL — registro-banner.html legacy"
+      },
+      {
+        "id": "CAP-15", "nombre": "App Pública", "estado": "ABIERTA", "porcentaje": 42,
+        "spec": null, "plan": "PLAN-MAESTRO-APP-PUBLICA.json",
+        "riesgos": ["BLK-04", "SPOF-05 monolito", "RSK-01 privacidad"],
+        "dependencias": ["RenderEngine", "SEO", "MATRIZ index modales"],
+        "listaConstruccion": "NO",
+        "listaRuntime": "PARCIAL — index.html"
+      },
+      {
+        "id": "CAP-22", "nombre": "P0 Runtime Foundation", "estado": "EVALUACION", "porcentaje": 84,
+        "acta": "ACTA-CONGELAMIENTO-P0-RUNTIME-FOUNDATION.json",
+        "riesgos": ["Autorización runtime PO"],
+        "dependencias": ["Todas capas P0"],
+        "listaConstruccion": "PARCIAL — doc listo",
+        "listaRuntime": "NO"
+      },
+      {
+        "id": "CAP-19", "nombre": "Agentes IA", "estado": "ABIERTA", "porcentaje": 58,
+        "plan": "PLAN-MAESTRO-AGENTES-IA.json",
+        "riesgos": ["Post-MVP LLM", "CX-IA dashboard"],
+        "dependencias": ["Dashboard centros CX-IA"],
+        "listaConstruccion": "NO",
+        "listaRuntime": "NO"
+      },
+      {
+        "id": "CAP-20", "nombre": "ThemeEngine", "estado": "ABIERTA", "porcentaje": 38,
+        "plan": "PLAN-MAESTRO-THEMEENGINE.json",
+        "riesgos": ["Post-MVP /cuenta/config/apariencia"],
+        "dependencias": ["Dashboard CX-CFG"],
+        "listaConstruccion": "NO",
+        "listaRuntime": "NO"
+      },
+      {
+        "id": "CAP-17", "nombre": "Interacciones", "estado": "ABIERTA", "porcentaje": 35,
+        "plan": "PLAN-MAESTRO-INTERACCIONES.json",
+        "riesgos": ["GAP-03 Post-MVP"],
+        "dependencias": ["/cuenta/favoritos"],
+        "listaConstruccion": "NO",
+        "listaRuntime": "NO"
+      },
+      {
+        "id": "CAP-18", "nombre": "Economía Social", "estado": "ABIERTA", "porcentaje": 40,
+        "plan": "PLAN-MAESTRO-ECONOMIA-SOCIAL.json",
+        "riesgos": ["GAP-06 Post-MVP V1.2"],
+        "dependencias": ["Pagos"],
+        "listaConstruccion": "NO",
+        "listaRuntime": "NO"
+      },
+      {
+        "id": "CAP-21", "nombre": "Internacionalización", "estado": "ABIERTA", "porcentaje": 15,
+        "riesgos": ["GAP-08 es_only MVP"],
+        "dependencias": ["Dashboard CX-CFG idioma"],
+        "listaConstruccion": "NO",
+        "listaRuntime": "NO"
+      }
+    ],
+    "resumen": {
+      "congeladasDiseno": 10,
+      "parciales": 7,
+      "abiertas": 5,
+      "total": 23
+    }
+  },
+
+  "seccion3_gaps": {
+    "cerrados": [
+      { "id": "GAP-SPEC-REG", "estado": "CERRADO", "porcentaje": 100, "evidencia": "ACTA-RC v1.0.0" },
+      { "id": "GAP-SPEC-PAY", "estado": "CERRADO", "porcentaje": 100, "evidencia": "ACTA-PAY v1.0.0" },
+      { "id": "GAP-PANEL-DASH", "estado": "CERRADO", "porcentaje": 96, "evidencia": "ACTA-PANEL v1.1.0 + SPEC v1.0.1 + AUDITORIA v2 + MATRIZ + PDM-01..10", "clasificacion": "cerrado" }
+    ],
+    "parciales": [
+      { "id": "GAP-MIGRACION", "porcentaje": 70, "falta": "Plan ejecución runtime BLK-01", "clasificacion": "parcial", "prioridad": "critico" },
+      { "id": "GAP-RULES", "porcentaje": 55, "falta": "Documento alineación + deploy BLK-05", "clasificacion": "parcial", "prioridad": "critico" },
+      { "id": "GAP-PASARELA", "porcentaje": 45, "falta": "ADR-PASARELA + BLK-02", "clasificacion": "parcial", "prioridad": "critico" },
+      { "id": "GAP-AUDITORIA", "porcentaje": 72, "falta": "8 validadores script pendientes", "clasificacion": "parcial", "prioridad": "medio" },
+      { "id": "GAP-SPEC-ADMIN", "porcentaje": 62, "falta": "SPEC-ADMIN formal", "clasificacion": "parcial", "prioridad": "alto" },
+      { "id": "GAP-SPEC-APP-PUBLICA", "porcentaje": 42, "falta": "SPEC-APP-PUBLICA desacople", "clasificacion": "parcial", "prioridad": "alto" }
+    ],
+    "abiertos": [
+      { "id": "GAP-RUNTIME", "porcentaje": 11, "falta": "RD-01..10 + autorización PO", "clasificacion": "abierto", "prioridad": "critico" },
+      { "id": "GAP-09", "porcentaje": 0, "falta": "BLK-08 implementación", "clasificacion": "abierto", "prioridad": "critico" },
+      { "id": "GAP-03", "area": "Interacciones", "porcentaje": 35, "clasificacion": "abierto", "prioridad": "bajo" },
+      { "id": "GAP-04", "area": "ThemeEngine", "porcentaje": 38, "clasificacion": "abierto", "prioridad": "bajo" },
+      { "id": "GAP-05", "area": "Agentes IA", "porcentaje": 58, "clasificacion": "abierto", "prioridad": "bajo" },
+      { "id": "GAP-06", "area": "Economía Social", "porcentaje": 40, "clasificacion": "abierto", "prioridad": "bajo" },
+      { "id": "GAP-08", "area": "i18n", "porcentaje": 15, "clasificacion": "abierto", "prioridad": "bajo" },
+      { "id": "GAP-10", "area": "Validadores CI", "porcentaje": 27, "clasificacion": "abierto", "prioridad": "medio" },
+      { "id": "GAP-BANNERS-SPEC", "area": "SPEC-BANNERS", "porcentaje": 50, "clasificacion": "abierto", "prioridad": "medio", "nota": "Funnel documentado en panel; SPEC formal falta" }
+    ],
+    "criticosActivos": ["GAP-RUNTIME", "GAP-MIGRACION", "GAP-RULES", "GAP-PASARELA", "GAP-09 BLK-08", "GAP-SPEC-APP-PUBLICA privacidad"]
+  },
+
+  "seccion4_bloqueadoresRuntime": [
+    { "id": "BLK-01", "estado": "ABIERTO", "diseno": 70, "runtime": 0, "riesgo": "critico", "prioridad": "P0 #1", "impacto": "Cuentas, RE slug, SEO, PAY, Panel bridge perfilId", "dependencias": ["ACTA-MIGRACION", "CAP-08", "CAP-10b"] },
+    { "id": "BLK-02", "estado": "ABIERTO", "diseno": 78, "runtime": 0, "riesgo": "alto", "prioridad": "P0 #5", "impacto": "MVP-COBRAR escala; DA-05 DP-08 delegación", "dependencias": ["ACTA-PAY", "GAP-PASARELA"] },
+    { "id": "BLK-03", "estado": "ABIERTO", "diseno": 84, "runtime": 5, "riesgo": "alto", "prioridad": "P0 #3", "impacto": "SEO snapshots /perfil/{id}/{slug}", "dependencias": ["RE", "BLK-01"] },
+    { "id": "BLK-04", "estado": "ABIERTO", "diseno": 78, "runtime": 0, "riesgo": "critico", "prioridad": "P0 #4", "impacto": "Privacidad RSK-01 resultados client-side", "dependencias": ["GAP-SPEC-APP-PUBLICA", "SEO"] },
+    { "id": "BLK-05", "estado": "ABIERTO", "diseno": 55, "runtime": 10, "riesgo": "alto", "prioridad": "P0 #2", "impacto": "/cuenta/* owner rules; VE server", "dependencias": ["GAP-RULES", "SEC", "CAP-10b"] },
+    { "id": "BLK-06", "estado": "ABIERTO", "diseno": 90, "runtime": 15, "riesgo": "medio", "prioridad": "P0 #7", "impacto": "robots/sitemap", "dependencias": ["ACTA-SEO"] },
+    { "id": "BLK-07", "estado": "ABIERTO", "diseno": 62, "runtime": 20, "riesgo": "alto", "prioridad": "P1", "impacto": "Admin RBAC; rutas /admin/* panel", "dependencias": ["GAP-SPEC-ADMIN"] },
+    { "id": "BLK-08", "estado": "ABIERTO", "diseno": 88, "runtime": 0, "riesgo": "alto", "prioridad": "P0 #6", "impacto": "Modularización; desacople monolito", "dependencias": ["Plan adopción SC"] },
+    { "id": "BLK-09", "estado": "ABIERTO", "diseno": 40, "runtime": 0, "riesgo": "medio", "prioridad": "P2", "impacto": "ThinContentGuard adultos", "dependencias": ["SEO"] },
+    { "id": "BLK-10", "estado": "ABIERTO", "diseno": 80, "runtime": 25, "riesgo": "alto", "prioridad": "P0 #8", "impacto": "Turnstile /cuenta/acceso", "dependencias": ["ACTA-SEC"] }
+  ],
+
+  "seccion5_topPendientes": {
+    "top10": [
+      { "rank": 1, "severidad": "critico", "nombre": "BLK-01 Migración bridge perfilId runtime", "tipo": "runtime", "avance": 70 },
+      { "rank": 2, "severidad": "critico", "nombre": "Autorización runtime explícita product owner", "tipo": "operacional", "avance": 0 },
+      { "rank": 3, "severidad": "critico", "nombre": "GAP-RULES — Documento alineación Firestore rules", "tipo": "documental", "avance": 55 },
+      { "rank": 4, "severidad": "critico", "nombre": "BLK-05 Firestore rules deploy", "tipo": "runtime", "avance": 10 },
+      { "rank": 5, "severidad": "critico", "nombre": "BLK-04 Resultados server-side + noindex", "tipo": "runtime", "avance": 25 },
+      { "rank": 6, "severidad": "critico", "nombre": "Plan adopción física Shared/Core BLK-08", "tipo": "documental", "avance": 40 },
+      { "rank": 7, "severidad": "critico", "nombre": "GAP-PASARELA — ADR-PASARELA-PAGO + BLK-02", "tipo": "documental+runtime", "avance": 45 },
+      { "rank": 8, "severidad": "alto", "nombre": "GAP-SPEC-APP-PUBLICA desacople monolito", "tipo": "documental", "avance": 42 },
+      { "rank": 9, "severidad": "alto", "nombre": "GAP-SPEC-ADMIN formal RBAC/conciliación", "tipo": "documental", "avance": 62 },
+      { "rank": 10, "severidad": "alto", "nombre": "Runtime /cuenta/perfil + panel dashboard", "tipo": "runtime", "avance": 0, "nota": "Diseño CAP-10b listo; implementación pendiente" }
+    ],
+    "top20": "Ranks 11-20: BLK-08 extracción, RD-06 VE server, RD-02 RE head, BLK-10 Turnstile, ACTA-MIG ejecución, validar-spec-registro-cuenta.mjs, validar-spec-pagos-contratos.mjs, validar-spec-panel-dashboard.mjs, PaymentLedger admin, RD-10 slug canónico, BLK-07 RBAC, validar-spec-seo-landings.mjs",
+    "top50": "Ranks 21-50 heredados v2.0.0 con GAP-PANEL-DASH eliminado de críticos; añadido validar-spec-panel; SPEC-BANNERS; ACTA-P0 refresh"
+  },
+
+  "seccion6_roadmap": {
+    "caminoA90Documental": {
+      "objetivo": 90,
+      "estadoActual": 91,
+      "veredicto": "ALCANZADO",
+      "tareasCompletadas": ["GAP-PANEL-DASH", "MATRIZ-RUTAS-NAV-CANONICA", "ACTA-PANEL v1.1.0"],
+      "tareasRestantesParaConsolidar90": [
+        "Documento alineación Firestore rules GAP-RULES",
+        "Plan adopción física Shared/Core",
+        "validar-spec-registro-cuenta.mjs + validar-spec-pagos-contratos.mjs + validar-spec-panel-dashboard.mjs"
+      ]
+    },
+    "caminoA95Documental": {
+      "objetivo": 95,
+      "deltaDesdeActual": 4,
+      "semanasEstimadas": "6-8",
+      "tareas": [
+        "1. Documento alineación Firestore rules (GAP-RULES)",
+        "2. Plan adopción física Shared/Core (pre-BLK-08)",
+        "3. ADR-PASARELA-PAGO",
+        "4. SPEC-ADMIN formal — conciliación + RBAC",
+        "5. SPEC-APP-PUBLICA desacople (pre-BLK-04)",
+        "6. Validadores RC/PAY/PANEL/SEO/SC scripts (5)",
+        "7. ACTA-P0 v1.1 refresh cross-actas",
+        "8. SPEC-BANNERS-PUBLICIDAD"
+      ]
+    },
+    "caminoA100ProduccionMvp": {
+      "objetivo": 100,
+      "semanasEstimadas": "18-24 runtime adicionales",
+      "tareas": [
+        "Incluye camino 95%",
+        "9. Autorización runtime PO",
+        "10. BLK-01 migración bridge perfilId",
+        "11. BLK-05 rules + BLK-10 Turnstile",
+        "12. BLK-08 Shared/Core extracción",
+        "13. RD-06 VE + FE wizard runtime",
+        "14. RD-02 RE head + RD-10 slug",
+        "15. BLK-04 server-side + BLK-06 robots",
+        "16. Runtime /cuenta/perfil + /cuenta/banners panel",
+        "17. admin.html → /admin/* modular",
+        "18. PaymentLedger manual + BLK-02 pasarela",
+        "19. MVP-OPERAR beta privada",
+        "20. MVP-COBRAR pasarela operativa"
+      ]
+    }
+  },
+
+  "seccion7_cuellosDeBotella": {
+    "documental": {
+      "principal": "GAP-RULES — Documento alineación Firestore rules",
+      "impacto": "Pre-BLK-05; +3% seguridad; +2% P0",
+      "secundario": "GAP-SPEC-ADMIN — RBAC profundo"
+    },
+    "arquitectonico": {
+      "principal": "Monolito index.html + ausencia módulo Shared/Core (BLK-08)",
+      "impacto": "SPOF-05; bloquea desacople App Pública"
+    },
+    "runtime": {
+      "principal": "BLK-01 — Migración perfilId sin runtime",
+      "impacto": "Cascada CU, RE, SEO, PAY, Panel bridge"
+    },
+    "produccion": {
+      "principal": "Cadena BLK-01 → BLK-05 → BLK-04 + autorización PO",
+      "impacto": "Beta pública bloqueada"
+    }
+  },
+
+  "seccion8_proximaCapaDocumental": {
+    "recomendacion": "Documento alineación Firestore rules (GAP-RULES)",
+    "alternativasEvaluadas": [
+      { "capa": "GAP-RULES", "impactoCuantitativo": "+3% seguridad, +2% P0, desbloquea BLK-05", "prioridad": 1, "veredicto": "RECOMENDADO" },
+      { "capa": "Plan adopción física Shared/Core BLK-08", "impactoCuantitativo": "+4% arquitectura, desacople monolito", "prioridad": 2, "veredicto": "Segunda opción" },
+      { "capa": "SPEC-APP-PUBLICA", "impactoCuantitativo": "+5% MVP-OPERAR runtime path, BLK-04", "prioridad": 3, "veredicto": "Paralelo recomendado" },
+      { "capa": "SPEC-ADMIN", "impactoCuantitativo": "+4% administración, BLK-07", "prioridad": 4, "veredicto": "P1 doc" }
+    ],
+    "justificacion": "Tras cierre GAP-PANEL-DASH, el cuello documental crítico pasa a seguridad runtime: rules desalineadas bloquean /cuenta/* panel, VE server y beta pública. GAP-RULES es prerequisito BLK-05 con menor esfuerzo que BLK-08 y mayor impacto inmediato en cadena P0."
+  },
+
+  "seccion9_certificacionDashboard": {
+    "congelado": "PARCIAL_DISENO",
+    "fuenteOficialDocumental": true,
+    "nombreOficial": "SPEC-DASHBOARDS-OPERATIVOS",
+    "listoConstruccion": true,
+    "listoRuntime": false,
+    "listoProduccion": false,
+    "acta": "ACTA-CONGELAMIENTO-PANEL-DASHBOARD v1.1.0",
+    "alineacionMatriz": 96
+  },
+
+  "seccion10_veredictoFinal": {
+    "veredictoAuditoria": "PASS",
+    "veredictoRuntimeProduccion": "FAIL_PARCIAL",
+    "riesgoResidualGlobal": "MEDIO-ALTO",
+    "desgloseRiesgo": {
+      "documental": "BAJO — gaps P0 doc reducidos a RULES/ADMIN/APP",
+      "arquitectonico": "MEDIO — monolito + BLK-08",
+      "runtime": "ALTO — BLK-01 cascada 89% pendiente",
+      "legalOperacional": "MEDIO — pasarela manual MVP viable"
+    },
+    "dependenciasPendientesCriticas": [
+      "GAP-RULES documento",
+      "BLK-01 migración runtime",
+      "Autorización runtime PO",
+      "BLK-05 rules deploy",
+      "Plan adopción BLK-08"
+    ],
+    "queNoHacerTodavia": [
+      "Messenger runtime", "Economía Social", "Shell 11 módulos", "Landings dinámicas V1.1",
+      "Pasarela sin ADR", "Firestore commit sin rules v2", "IA LLM producción"
+    ]
+  },
+
+  "auditoriaConsistencia": {
+    "veredictoGlobal": "PASS",
+    "matrices": [
+      { "nombre": "ACTA-PANEL v1.1 vs MATRIZ canon", "resultado": "PASS" },
+      { "nombre": "ACTA-PANEL vs ACTA-RC/PAY/DASH", "resultado": "PASS" },
+      { "nombre": "AUDITORIA-PANEL v2 vs SPEC v1.0.1", "resultado": "PASS" },
+      { "nombre": "Fixtures PDM-01..10 vs SPEC", "resultado": "PASS" },
+      { "nombre": "MATRIZ vs PLAN-DASH legacy rutas", "resultado": "PASS_PARCIAL", "nota": "MATRIZ prevalece" },
+      { "nombre": "GAP-PANEL-DASH cerrado coherente AM v2.0", "resultado": "PASS" }
+    ],
+    "conflictosDetectados": []
+  },
+
+  "noModifica": [
+    "AUDITORIA-MAESTRA-COMPLETA-CARIHUB v2.0.0",
+    "Todas ACTA-CONGELAMIENTO-* congeladas excepto nueva ACTA-PANEL v1.1.0 ya emitida",
+    "SPEC/ACTA RC/PAY/DASH shell",
+    "Producción, Firestore, deploy, commit"
+  ],
+
+  "veredicto": "PASS",
+  "changelog": [
+    { "version": "2.1.0", "fecha": "2026-06-11", "nota": "Post ACTA-PANEL v1.1: 91% doc, 92% arq, 89% P0; GAP-PANEL-DASH cerrado; 3 GAPs cerrados; cuello doc → GAP-RULES; runtime 11%" }
+  ]
+}

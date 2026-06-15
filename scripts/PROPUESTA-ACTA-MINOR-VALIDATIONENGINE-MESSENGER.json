@@ -1,0 +1,60 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "tipo": "PROPUESTA_ACTA_MINOR",
+  "nombre": "Propuesta acta MINOR ValidationEngine — integración Messenger v1.0.0",
+  "fecha": "2026-06-09",
+  "fechaActualizacion": "2026-06-09",
+  "estado": "SUPERSEDIDA_POR_ACTA_MINOR_APLICADA",
+  "validationEngineActual": "validationengine-2026-06-10@1.0.0 CONGELADO",
+  "nota": "NO modificar SPEC-VALIDATIONENGINE.json ni registry-validationengine-eventos.json hasta aprobación PO de esta acta MINOR.",
+  "semverPropuesto": "1.1.0",
+  "motivo": "Completar fanOutPlan, acciones mensajeria y gates telefonoVerificado documentados en SPEC Messenger v1.0.0 OB-MSG",
+  "cambiosPropuestos": [
+    {
+      "id": "VE-MINOR-01",
+      "archivo": "scripts/registry-validationengine-eventos.json",
+      "cambio": "Actualizar mensaje_enviar, conversacion_iniciar, bloqueo_usuario con fanOutPlan según registry-messenger-fanout-propuesta.json v1.0.1"
+    },
+    {
+      "id": "VE-MINOR-02",
+      "archivo": "scripts/registry-validationengine-eventos.json",
+      "cambio": "Añadir 23 acciones Messenger + variantes conversacion_iniciar_directa|solicitud"
+    },
+    {
+      "id": "VE-MINOR-03",
+      "archivo": "scripts/SPEC-VALIDATIONENGINE.json",
+      "cambio": "Ampliar mensajeria_futura → mensajeria con lista acciones; sin cambiar pipeline 14 pasos"
+    },
+    {
+      "id": "VE-MINOR-04",
+      "archivo": "scripts/fixtures-validationengine-golden.json",
+      "cambio": "Fixtures V20+ cruce Messenger — opcional"
+    },
+    {
+      "id": "VE-MINOR-05",
+      "obMSG": "OB-MSG-8",
+      "archivo": "scripts/SPEC-VALIDATIONENGINE.json",
+      "cambio": "validateStates: incluir telefonoVerificado en gates mensajeria_futura; error TELEFONO_NO_VERIFICADO"
+    },
+    {
+      "id": "VE-MINOR-06",
+      "obMSG": "OB-MSG-8",
+      "archivo": "scripts/SPEC-VALIDATIONENGINE.json",
+      "cambio": "Documentar lectura spamScore desde usuarios.mensajeria.spamScore únicamente"
+    },
+    {
+      "id": "VE-MINOR-07",
+      "obMSG": "OB-MSG-8",
+      "archivo": "scripts/guiaErrores VE o SPEC Messenger cross-ref",
+      "cambio": "Añadir TELEFONO_NO_VERIFICADO, MESSENGER_DESHABILITADO_AMBITO, SPAM_SCORE_UMBRAL a catálogo errores VE"
+    }
+  ],
+  "fuenteDiseno": "scripts/registry-messenger-fanout-propuesta.json v1.0.1",
+  "gatesMessenger": {
+    "telefonoVerificado": "usuarios.seguridad.telefonoVerificado === true para mensaje_enviar y conversacion_iniciar",
+    "spamScore": "pre-check envío si spamScore < 60; side-effect restringir vía acción admin separada"
+  },
+  "bloqueanteRuntime": true,
+  "bloqueanteCongelamientoMessenger": false,
+  "notaCongelamiento": "SPEC Messenger puede congelarse con OB-MSG cerrados; runtime requiere VE 1.1.0"
+}

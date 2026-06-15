@@ -1,0 +1,183 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "tipo": "ANALISIS_REEVALUACION",
+  "id": "ANALISIS-REEVALUACION-INDEXACION-PERFILES-ADULTOS",
+  "titulo": "Reevaluación: indexación de perfiles individuales adultos (revisión de ADR-INDEXACION-ADULTOS v1.0.0)",
+  "fecha": "2026-06-10",
+  "version": "1.0.0",
+  "estado": "ANALISIS — no modifica decisiones; insumo para product owner",
+  "modo": "Solo análisis y documentación — sin runtime/carpetas/mover/Firestore/deploy/commit; NO modifica el ADR ni ningún documento existente",
+  "autorizadoPor": "product owner / usuario CariHub",
+  "naturaleza": "Documento de análisis (no ADR, no SPEC). No cambia la decisión vigente; entrega veredicto sobre mantener o evolucionar el ADR. La decisión final queda al product owner.",
+  "decisionVigenteReevaluada": "ADR-INDEXACION-ADULTOS v1.0.0 — decision.mvp.noindex incluye 'perfiles adultos individuales (todos en MVP)'; futuro habilitable: verificados no explícitos por mercado legal",
+  "basadoEn": [
+    "scripts/ADR-INDEXACION-ADULTOS.json",
+    "scripts/PLAN-MAESTRO-SEO-LANDINGS.json",
+    "scripts/PLAN-MAESTRO-APP-PUBLICA.json",
+    "scripts/ADR-URL-CANONICA-PERFILES.json",
+    "scripts/ADR-RENDER-STRATEGY.json",
+    "scripts/SPEC-RENDERENGINE.json",
+    "scripts/ACTA-CONGELAMIENTO-RENDERENGINE.json",
+    "scripts/PLAN-MAESTRO-BANNERS-PUBLICIDAD.json",
+    "scripts/PLAN-MAESTRO-PAGOS-CONTRATOS.json",
+    "scripts/PLAN-MAESTRO-INTERACCIONES.json",
+    "scripts/PLAN-MAESTRO-AGENTES-IA.json",
+    "scripts/config-registro-adultos-schema.json"
+  ],
+
+  "contexto": {
+    "porQueSeReevalua": "La regla 'noindex de todos los perfiles individuales adultos en MVP' es la más restrictiva del ADR y la que más limita el descubrimiento orgánico long-tail; se reevalúa su costo de oportunidad vs su protección de riesgo",
+    "tension": "Long-tail de perfiles = mayor volumen de páginas indexables y tráfico potencial, pero también el mayor foco de riesgo legal/privacidad/reputacional/scraping",
+    "queNoCambia": "URL canónica (ADR-URL-CANONICA), estrategia de render (ADR-RENDER-STRATEGY), PrivacyGuard — se consumen"
+  },
+
+  "ventajasNoIndexarPerfiles": [
+    "Minimiza riesgo legal por jurisdicción (servicios adultos en SERP)",
+    "Protege privacidad/identidad de personas reales (PII, cara, ubicación)",
+    "Reduce riesgo reputacional del dominio (marca no asociada a explícito en SERP)",
+    "Menor superficie de scraping y clonación de perfiles desde resultados de búsqueda",
+    "Evita thin content masivo y duplicados de perfiles de baja calidad",
+    "Reduce probabilidad de penalización SafeSearch/adult por contenido no controlado"
+  ],
+  "desventajasNoIndexarPerfiles": [
+    "Pérdida del tráfico orgánico long-tail (nombre/alias + ciudad + servicio)",
+    "Menor descubrimiento directo de la oferta real (lo más buscado por el usuario final)",
+    "Dependencia total de landings geo/categoría para captar tráfico",
+    "Menor cantidad de páginas indexables = menor footprint y autoridad temprana",
+    "Anunciantes/perfiles perciben menos valor SEO directo (impacto comercial)",
+    "Competidores que sí indexan pueden capturar la demanda de marca/alias"
+  ],
+
+  "impactoPorDimension": {
+    "seo": "noindex perfiles reduce drásticamente el número de URLs indexables; el grueso del long-tail se pierde; se compensa parcialmente con landings geo/categoría (menor volumen, mayor calidad)",
+    "comercial": "Menor argumento de venta 'apareces en Google' para perfiles/anunciantes; el valor se traslada a posición interna + landings",
+    "financiero": "Menor tráfico orgánico directo a perfiles → menor conversión a leads/contratos atribuible a SEO de perfil; mitigable con landings que canalizan a perfiles internamente",
+    "traficoOrganico": "Caída del long-tail; crecimiento más lento pero más seguro vía hubs",
+    "adquisicionUsuarios": "Visitantes llegan por landing geo/categoría, no por perfil directo; más navegación interna requerida",
+    "adquisicionAnunciantes": "El pitch SEO se debilita para anunciantes individuales; se fortalece el de 'tráfico cualificado a hubs'",
+    "banners": "Impresiones dependen de tráfico a landings/resultados; menos páginas de perfil indexadas = menos inventario de impresión orgánica en perfil",
+    "pagos": "Menor presión de demanda SEO sobre planes de perfil; los planes premium futuros pueden ligar indexación como beneficio",
+    "contratos": "Indexación puede volverse una cláusula/beneficio de plan (verificado/premium) en fase futura",
+    "crecimientoNacional": "Sostenible vía landings; más lento en captura de marca/alias",
+    "crecimientoInternacional": "noindex perfiles reduce exposición legal al internacionalizar (ventaja); reactivable por mercado",
+    "safeSearch": "Menor riesgo de clasificación adult mal gestionada; perfiles fuera del índice no contaminan SERP general",
+    "reputacionDominio": "Protegida: el dominio no se asocia a explícito en SERP en fase temprana (clave para confianza y AdSense/pasarelas futuras)",
+    "autoridadSeo": "Crece más lento (menos páginas/enlaces), pero más limpia (sin thin/penalización)",
+    "indexacionFutura": "Mantener noindex ahora preserva opción de abrir luego con verificación; abrir y cerrar después es peor (volatilidad de índice)",
+    "motoresIA": {
+      "general": "noindex + robots IA reduce que LLMs citen perfiles individuales; protege PII",
+      "chatgpt": "GPTBot bloqueado → menor probabilidad de aparición en respuestas/citas",
+      "gemini": "Google-Extended bloqueado → fuera de grounding de Gemini",
+      "perplexity": "PerplexityBot bloqueado → menos citas; Perplexity es agresivo citando, mayor beneficio de bloqueo",
+      "claude": "ClaudeBot/anthropic-ai bloqueado → fuera de respuestas",
+      "nota": "El cumplimiento depende del motor; defensa en profundidad (robots + sin datos en origen)"
+    },
+    "descubrimientoOrganico": "Se concentra en hubs; el descubrimiento de perfil individual queda para navegación interna y marca"
+  },
+
+  "analisisPorTipoPerfil": {
+    "verificado": "Menor riesgo (identidad/edad validada); mejor candidato a indexación futura controlada",
+    "noVerificado": "Máximo riesgo (sin garantía de edad/consentimiento) → noindex SIEMPRE, en cualquier fase",
+    "independiente": "Caso de mayor sensibilidad (persona física) → noindex MVP; futuro solo verificado+no explícito",
+    "negocio": "Menor sensibilidad PII (entidad, no persona); candidato más temprano a indexación (LocalBusiness) si no explícito",
+    "anunciante": "No es entidad de URL pública de perfil (alias→301); indexación vía landing/banner, no perfil",
+    "explicito": "noindex SIEMPRE (legal/reputacional/SafeSearch), sin importar verificación",
+    "noExplicito": "Candidato a indexación futura si además está verificado",
+    "premiumFuturo": "Indexación como beneficio de plan (con verificación + no explícito); alინea con Pagos/Contratos",
+    "destacadoFuturo": "Mayor prioridad de crawl/posición si cumple verificación+no explícito; nunca si explícito"
+  },
+
+  "opcionesComparadas": {
+    "A_no_indexar_ninguno": { "beneficio": "máxima protección legal/privacidad/reputación", "desventaja": "cero tráfico orgánico de perfil; crecimiento lento", "seo": "bajo", "riesgo": "mínimo", "veredicto": "Segura; equivale al MVP actual del ADR" },
+    "B_solo_verificados_no_explicitos": { "beneficio": "tráfico de perfil con riesgo acotado", "desventaja": "requiere verificación robusta + moderación", "seo": "medio-alto", "riesgo": "medio", "veredicto": "MEJOR evolución futura (fase nacional madura)" },
+    "C_solo_premium_verificados": { "beneficio": "monetiza indexación; volumen pequeño y controlado", "desventaja": "tráfico limitado; indexación como privilegio de pago puede percibirse mal", "seo": "medio", "riesgo": "medio-bajo", "veredicto": "Complementaria a B; ligar a planes" },
+    "D_todos_los_publicos": { "beneficio": "máximo tráfico potencial", "desventaja": "máximo riesgo legal/privacidad/reputación/scraping", "seo": "alto (frágil)", "riesgo": "muy alto", "veredicto": "RECHAZADA" },
+    "E_hibrida_por_riesgo": { "beneficio": "modula por explicitud/categoría", "desventaja": "clasificación de riesgo compleja", "seo": "alto", "riesgo": "controlado", "veredicto": "Válida pero más compleja de operar que F" },
+    "F_hibrida_por_verificacion": { "beneficio": "criterio objetivo y auditable (verificado + no explícito)", "desventaja": "depende de cobertura de verificación", "seo": "alto", "riesgo": "controlado", "veredicto": "RECOMENDADA para evolución (clara, auditable, alineada a confianza)" }
+  },
+
+  "riesgos": {
+    "legales": "Indexar perfiles adultos puede infringir normativa por jurisdicción; agravado con no verificados o explícito",
+    "privacidad": "Exposición de PII/identidad en SERP, snippets, OG e IA; difícil de revertir (caché)",
+    "reputacionales": "Asociación de marca a explícito en SERP; afecta confianza, pasarelas de pago y partners",
+    "scraping": "Perfiles indexados = blanco fácil de scraping masivo y reventa de datos",
+    "clonacionPerfiles": "Contenido público indexado facilita clonación/suplantación en otros sitios",
+    "contenidoDuplicado": "Perfiles similares o multi-landing del mismo perfil → duplicados",
+    "thinContent": "Perfiles con poca info → thin content → penalización del dominio",
+    "safeSearch": "Clasificación adult mal gestionada degrada visibilidad del dominio entero",
+    "paraSeoLandings": "Abrir perfiles sin ThinContentGuard contamina el índice y diluye autoridad de landings",
+    "paraRenderEngine": "Exige meta robots/X-Robots-Tag/data-nosnippet por perfil y PrivacyGuard estricto; complejidad de runtime"
+  },
+
+  "matrices": {
+    "opcionBeneficioRiesgo": {
+      "A": { "beneficio": "protección máxima", "riesgo": "mínimo", "trafico": "nulo perfil" },
+      "B": { "beneficio": "tráfico acotado", "riesgo": "medio", "trafico": "medio-alto" },
+      "C": { "beneficio": "monetización", "riesgo": "medio-bajo", "trafico": "bajo-medio" },
+      "D": { "beneficio": "tráfico máximo", "riesgo": "muy alto", "trafico": "alto frágil" },
+      "E": { "beneficio": "modulación por riesgo", "riesgo": "controlado", "trafico": "alto" },
+      "F": { "beneficio": "criterio auditable", "riesgo": "controlado", "trafico": "alto" }
+    },
+    "tipoPerfilIndexacionPorFase": {
+      "verificado_no_explicito": { "mvp": "noindex", "nacional": "index (recomendado)", "internacional": "index si legal por mercado" },
+      "no_verificado": { "mvp": "noindex", "nacional": "noindex", "internacional": "noindex" },
+      "independiente_no_explicito_verificado": { "mvp": "noindex", "nacional": "index condicional", "internacional": "index si legal" },
+      "negocio_no_explicito": { "mvp": "noindex", "nacional": "index (más temprano)", "internacional": "index si legal" },
+      "anunciante": { "mvp": "n/a (alias→301)", "nacional": "vía landing/banner", "internacional": "vía landing" },
+      "explicito": { "mvp": "noindex", "nacional": "noindex", "internacional": "noindex" },
+      "premium_verificado_no_explicito": { "mvp": "noindex", "nacional": "index (beneficio de plan)", "internacional": "index si legal" },
+      "destacado_verificado_no_explicito": { "mvp": "noindex", "nacional": "index prioridad", "internacional": "index si legal" }
+    }
+  },
+
+  "sintesisImpacto": {
+    "seo": "Mantener noindex retrasa el long-tail pero protege autoridad; abrir por verificación recupera tráfico con riesgo acotado",
+    "negocio": "Indexación se convierte en palanca de valor (plan verificado/premium) en fase futura",
+    "crecimiento": "Nacional sostenible vía hubs; perfiles aceleran cuando hay masa de verificados",
+    "internacionalizacion": "noindex protege en mercados de marco legal incierto; abrir por mercado tras revisión legal"
+  },
+
+  "recomendaciones": {
+    "mvp": "MANTENER ADR v1.0.0 sin cambios: noindex de todos los perfiles individuales adultos. El riesgo legal/privacidad/reputacional supera el beneficio temprano; el crecimiento se captura con landings geo/categoría.",
+    "faseNacional": "EVOLUCIONAR a opción F (híbrida por verificación): indexar perfiles VERIFICADOS y NO explícitos, con ThinContentGuard, moderación OG y max-image-preview controlado. Negocios no explícitos pueden entrar antes.",
+    "faseInternacional": "Activar por mercado solo tras revisión legal por jurisdicción; control hreflang/país; mantener noindex donde el marco sea incierto.",
+    "largoPlazo": "Opción F + C combinadas: indexación como beneficio de planes premium/destacados (siempre verificado + no explícito); explícito y no verificado permanecen noindex SIEMPRE."
+  },
+
+  "gatillosEvolucion": [
+    "Masa crítica de perfiles verificados no explícitos (umbral a definir con datos)",
+    "Autoridad de dominio consolidada por landings (sin penalizaciones)",
+    "RenderEngine runtime con meta robots/X-Robots-Tag/data-nosnippet + PrivacyGuard operativos",
+    "SeoModerationQueue activa para previews OG",
+    "Revisión legal por jurisdicción aprobada",
+    "ThinContentGuard con umbral calibrado"
+  ],
+
+  "riesgosAbiertos": [
+    "Definir umbral numérico de verificación/contenido para indexar perfil",
+    "Cobertura real de verificación (si es baja, opción F rinde poco)",
+    "Cumplimiento variable de robots por motores IA",
+    "Marco legal por país aún no mapeado"
+  ],
+  "dependencias": {
+    "consume": ["ADR-INDEXACION-ADULTOS 1.0.0", "ADR-URL-CANONICA-PERFILES 1.0.0", "ADR-RENDER-STRATEGY 1.0.0", "SPEC-RENDERENGINE 1.0.0"],
+    "alinea": ["PLAN-MAESTRO-SEO-LANDINGS", "PLAN-MAESTRO-BANNERS-PUBLICIDAD", "PLAN-MAESTRO-PAGOS-CONTRATOS", "PLAN-MAESTRO-AGENTES-IA"],
+    "precondicionesEvolucion": ["RenderEngine runtime", "flag verificación + flag explícito por perfil", "SeoModerationQueue", "revisión legal", "umbral ThinContentGuard"]
+  },
+
+  "veredicto": {
+    "mantenerAdrSinCambios": "SÍ para MVP — la decisión v1.0.0 es correcta y debe mantenerse sin cambios en la fase actual",
+    "debeEvolucionar": "SÍ a futuro — se recomienda que ADR-INDEXACION-ADULTOS evolucione a una política híbrida por verificación (opción F) en fase nacional madura, vía un futuro ADR-INDEXACION-ADULTOS v1.1.0 (no creado aquí)",
+    "comoEvolucionar": "Nuevo ADR v1.1.0 cuando se cumplan los gatillos; este análisis es el insumo. No se modifica el ADR v1.0.0 actual.",
+    "queNoCambiaNunca": ["explícito = noindex siempre", "no verificado = noindex siempre", "PII nunca en snippets/OG/IA"]
+  },
+
+  "noModifica": [
+    "ADR-INDEXACION-ADULTOS v1.0.0 (se reevalúa pero NO se altera)",
+    "PLAN-MAESTRO-SEO-LANDINGS, observación SEO, ADRs, actas, planes y capas congeladas",
+    "Producción, Firestore, deploy, commit"
+  ],
+  "changelog": [
+    { "version": "1.0.0", "fecha": "2026-06-10", "nota": "Reevaluación de noindex de perfiles adultos: ventajas/desventajas, impacto en 19 dimensiones, análisis por 9 tipos de perfil, 6 opciones comparadas, 10 riesgos, 2 matrices, recomendaciones por fase, gatillos de evolución y veredicto (mantener v1.0.0 en MVP; evolucionar a opción F en fase nacional vía futuro v1.1.0)" }
+  ]
+}

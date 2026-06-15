@@ -1,0 +1,298 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "$id": "https://carihub.app/schemas/acta-evaluacion-p0-runtime-foundation.json",
+  "tipo": "ACTA_EVALUACION_P0_RUNTIME_FOUNDATION",
+  "titulo": "Acta de evaluación — P0 Runtime Foundation CariHub/Cariñosas",
+  "versionActa": "1.0.0",
+  "fechaActa": "2026-06-11",
+  "fechaActualizacion": "2026-06-11",
+  "estadoActa": "EVALUACION_READINESS",
+  "tipoEvaluacion": "READINESS_SIN_AUTORIZACION_RUNTIME",
+  "modo": "Solo evaluación y documentación — sin runtime/carpetas/mover/Firestore/deploy/commit; no modifica documentos existentes",
+  "notaAlcance": "Este acta evalúa si existe arquitectura aprobada y congelada suficiente para iniciar construcción real P0. NO autoriza runtime. NO modifica las 10 actas de congelamiento existentes.",
+
+  "autorizacion": {
+    "estado": "EVALUACION_DOCUMENTAL",
+    "autorizadoPor": "product owner / usuario CariHub",
+    "alcance": "Certificación de readiness documental para fase P0 Runtime Foundation",
+    "runtimeAutorizado": false,
+    "firestoreAutorizado": false,
+    "deployAutorizado": false,
+    "explicitamenteNoAutoriza": [
+      "implementación runtime",
+      "creación de carpetas o estructura física",
+      "migración Firestore",
+      "modificación producción",
+      "deploy",
+      "commit"
+    ]
+  },
+
+  "documentosFuente": {
+    "auditoriaMaestra": "scripts/AUDITORIA-MAESTRA-CARIHUB.json",
+    "matrizMadurez": "scripts/MATRIZ-MADUREZ-CARIHUB.json",
+    "matrizDependencias": "scripts/MATRIZ-DEPENDENCIAS-CARIHUB.json",
+    "roadmapMaestro": "scripts/ROADMAP-MAESTRO-CARIHUB.json",
+    "matrizMvp": "scripts/MATRIZ-MVP-CARIHUB.json",
+    "analisisDashboard": "scripts/ANALISIS-REVISION-MVP-DASHBOARD.json",
+    "actasCongelamiento": [
+      "scripts/ACTA-CONGELAMIENTO-SHARED-CORE.json",
+      "scripts/ACTA-CONGELAMIENTO-RENDERENGINE.json",
+      "scripts/ACTA-CONGELAMIENTO-FIELDENGINE.json",
+      "scripts/ACTA-CONGELAMIENTO-VALIDATIONENGINE.json",
+      "scripts/ACTA-CONGELAMIENTO-MESSENGER.json",
+      "scripts/ACTA-CONGELAMIENTO-DASHBOARDS.json",
+      "scripts/ACTA-CONGELAMIENTO-CATALOGO.json",
+      "scripts/ACTA-CONGELAMIENTO-CUENTAS.json",
+      "scripts/ACTA-CONGELAMIENTO-SEGURIDAD.json",
+      "scripts/ACTA-CONGELAMIENTO-SEO-LANDINGS.json"
+    ],
+    "actaMigracion": "scripts/ACTA-MIGRACION-USUARIOS-PERFILES.json",
+    "adrs": [
+      "scripts/ADR-RENDER-STRATEGY.json",
+      "scripts/ADR-URL-CANONICA-PERFILES.json",
+      "scripts/ADR-INDEXACION-ADULTOS.json"
+    ],
+    "reporteCongelamientos": "scripts/REPORTE-CONGELAMIENTOS-CONSOLIDADO.json"
+  },
+
+  "metodologiaCalculo": {
+    "principio": "Porcentajes derivados de evidencia documental verificable; no inferencia sin artefacto",
+    "escala": "0-100 por dimensión; global P0 ponderado",
+    "formulas": {
+      "arquitecturaDocumental": "Promedio AUDITORIA-MAESTRA metricasGlobales dimensiones documentales (excl. runtime)",
+      "arquitecturaCongeladaGlobal": "(10 actas CONGELADO / 22 dominios funcionales) × 100",
+      "arquitecturaCongeladaP0": "(capas P0 con acta o diseño auditado PASS / 10 ítems alcance P0) × 100",
+      "especificaciones": "(8 SPECs existentes / 13 dominios que requieren SPEC para MVP-OPERAR) × 100",
+      "runtimeFoundation": "(ítems P0 con diseño listo / 10 RD-01..10) × peso diseño 70% + (ítems P0 implementados / 10) × peso runtime 30%",
+      "listoConstruccionP0": "engines congelados 40% + deps P0 30% + MVP doc 20% + migración diseño 10%",
+      "pendienteDocumentacion": "Dominios P0 sin SPEC/plan formal completo / total dominios P0",
+      "pendienteEspecificacion": "Dominios MVP sin SPEC / dominios MVP total",
+      "pendienteValidacion": "SPECs sin validador script + actas sin re-audit P0 / total verificables",
+      "pendienteImplementacion": "100 − porcentajeFuncionalRuntime AUDITORIA-MAESTRA"
+    },
+    "pesosGlobalP0": {
+      "enginesCongelados": 0.40,
+      "dependenciasP0": 0.30,
+      "mvpDocumental": 0.20,
+      "migracionDiseno": 0.10
+    }
+  },
+
+  "evaluacionGlobal": {
+    "arquitecturaDocumental": { "porcentaje": 76, "fuente": "AUDITORIA-MAESTRA metricasGlobales.porcentajeDocumental" },
+    "arquitecturaCongeladaGlobal": { "porcentaje": 45, "formula": "10/22 dominios", "detalle": "10 actas CONGELADO sobre 22 dominios funcionales" },
+    "arquitecturaCongeladaAlcanceP0": { "porcentaje": 82, "formula": "8.2/10", "detalle": "SC, RE, FE, VE, SEC, SEO, CAT, CU con acta; MIG auditada; Pagos/Registro solo plan" },
+    "especificaciones": { "porcentaje": 62, "formula": "8/13", "detalle": "8 SPECs; faltan Registro, Pagos, Admin formal, App Pública, panel dashboard mínimo" },
+    "seguridad": { "porcentajeDiseno": 80, "porcentajeRuntime": 25, "porcentajePonderado": 53, "acta": "ACTA-CONGELAMIENTO-SEGURIDAD", "gap": "Firestore rules, Turnstile deploy" },
+    "seo": { "porcentajeDiseno": 90, "porcentajeRuntime": 15, "porcentajePonderado": 53, "acta": "ACTA-CONGELAMIENTO-SEO-LANDINGS", "gap": "robots/sitemap runtime, landings dinámicas" },
+    "dashboards": { "porcentajeDiseno": 70, "porcentajeP0Ready": 35, "porcentajePonderado": 53, "acta": "ACTA-CONGELAMIENTO-DASHBOARDS", "gap": "Panel mínimo operativo sin SPEC formal; shell completo Post-MVP V1.1" },
+    "pagos": { "porcentaje": 45, "estado": "PLAN+schemas", "gap": "Sin SPEC, sin acta, sin pasarela" },
+    "banners": { "porcentaje": 50, "estado": "PLAN+prod_parcial", "gap": "Sin SPEC; pasarela banners V1.1" },
+    "interacciones": { "porcentaje": 35, "estado": "PLAN", "nota": "Excluido MVP acordado" },
+    "agentesIA": { "porcentaje": 55, "estado": "PLAN+refs_SPEC", "nota": "Excluido MVP acordado" },
+    "economiaSocial": { "porcentaje": 40, "estado": "PLAN+anexos", "nota": "Excluido MVP acordado" },
+    "internacionalizacion": { "porcentaje": 15, "estado": "CONCEPTUAL", "nota": "Excluido MVP acordado" },
+    "runtimeFoundation": { "porcentajeDiseno": 74, "porcentajeImplementado": 18, "porcentajePonderado": 57, "formula": "0.7×74 + 0.3×18", "detalle": "10 ítems P0: diseño mayormente listo; runtime ~8% global monolito parcial" }
+  },
+
+  "preparacionConstruccion": {
+    "porcentajeListoConstruccionP0": 72,
+    "formula": "0.40×88 engines + 0.30×75 deps + 0.20×68 mvpDoc + 0.10×70 migración ≈ 72",
+    "porcentajePendienteDocumentacion": 18,
+    "detallePendienteDocumentacion": ["SPEC-REGISTRO-CUENTA", "SPEC-PAGOS-CONTRATOS", "SPEC-PANEL-DASHBOARD-MINIMO (propuesto)", "Plan adopción física Shared/Core"],
+    "porcentajePendienteEspecificacion": 22,
+    "detallePendienteEspecificacion": ["Registro-Cuenta", "Pagos-Contratos", "Admin formal", "App Pública desacople", "Panel dashboard mínimo"],
+    "porcentajePendienteValidacion": 12,
+    "detallePendienteValidacion": ["validar-spec-seo-landings.mjs", "validar-spec-shared-core.mjs", "Re-audit P0 cross-actas formal"],
+    "porcentajePendienteImplementacion": 92,
+    "detallePendienteImplementacion": "AUDITORIA-MAESTRA porcentajeFuncionalRuntime 8%; 10 capas congeladas sin runtime alineado"
+  },
+
+  "veredicto": {
+    "pregunta": "¿Tenemos suficiente arquitectura aprobada para comenzar construcción?",
+    "respuesta": "PARCIALMENTE",
+    "porcentaje": 72,
+    "formatoExplicito": "Parcialmente, 72%",
+    "desglose": {
+      "motoresCongelados": { "respuesta": "SI", "porcentaje": 86, "detalle": "SC, FE, VE, RE diseño PASS con fixtures golden" },
+      "infraestructuraP0": { "respuesta": "PARCIALMENTE", "porcentaje": 65, "detalle": "MIG diseño PASS; Pagos/Registro sin SPEC" },
+      "mvpOperarCompleto": { "respuesta": "PARCIALMENTE", "porcentaje": 68, "detalle": "9 capacidades núcleo documentadas; gaps panel/pagos/registro SPEC" },
+      "capasExcluidasMvp": { "respuesta": "NO_REQUERIDO", "porcentaje": 0, "detalle": "Messenger, social, i18n correctamente fuera alcance" }
+    },
+    "veredictoDetalle": "Arquitectura documental y motores congelados suficientes para iniciar construcción P0 de engines y bridge migración. Insuficiente documentación formal para MVP-OPERAR completo (Pagos, Registro, panel dashboard) sin SPEC adicional o plan de adopción explícito."
+  },
+
+  "porcentajeGlobalPreparacionConstruccion": 72,
+
+  "analisisPorCapa": [
+    { "id": "CAP-01", "capa": "Shared/Core", "version": "1.0.0", "porcentajeCompletado": 88, "estado": "CONGELADO", "acta": "ACTA-CONGELAMIENTO-SHARED-CORE", "bloqueadores": ["BLK-08 extracción módulo", "SCS-R01 adopción parcial"], "riesgo": "medio", "recomendacion": "Priorizar extracción mínima; fixtures CI 20 casos listos" },
+    { "id": "CAP-02", "capa": "RenderEngine", "version": "1.0.0", "porcentajeCompletado": 84, "estado": "CONGELADO", "acta": "ACTA-CONGELAMIENTO-RENDERENGINE", "bloqueadores": ["BLK-01 MIG runtime", "BLK-03 deploy head"], "riesgo": "medio", "recomendacion": "Implementar renderHead Home/Perfil tras bridge perfilId" },
+    { "id": "CAP-03", "capa": "FieldEngine", "version": "1.0.1", "porcentajeCompletado": 86, "estado": "CONGELADO", "acta": "ACTA-CONGELAMIENTO-FIELDENGINE", "bloqueadores": ["SPOF-02 snapshot"], "riesgo": "medio", "recomendacion": "Runtime wizard con fixtures golden; depende CAT" },
+    { "id": "CAP-04", "capa": "ValidationEngine", "version": "1.1.0", "estado": "CONGELADO", "porcentajeCompletado": 88, "acta": "ACTA-CONGELAMIENTO-VALIDATIONENGINE", "bloqueadores": ["BLK-05 rules server", "Cloud Functions pendiente"], "riesgo": "medio", "recomendacion": "Server-side P0; MINOR Messenger ya aplicado doc" },
+    { "id": "CAP-05", "capa": "Seguridad MVP", "version": "1.0.0", "porcentajeCompletado": 53, "estado": "CONGELADO_DISENO", "acta": "ACTA-CONGELAMIENTO-SEGURIDAD", "bloqueadores": ["BLK-05 Firestore rules", "BLK-10 Turnstile deploy"], "riesgo": "alto", "recomendacion": "Gates P0 antes beta pública" },
+    { "id": "CAP-06", "capa": "SEO-Landings", "version": "1.0.0", "porcentajeCompletado": 53, "estado": "CONGELADO", "acta": "ACTA-CONGELAMIENTO-SEO-LANDINGS", "bloqueadores": ["BLK-06 robots/sitemap", "BLK-04 resultados client-side"], "riesgo": "alto", "recomendacion": "MVP: robots estático + noindex resultados; landings dinámicas V1.1" },
+    { "id": "CAP-07", "capa": "Catálogo", "version": "1.0.0", "porcentajeCompletado": 85, "estado": "CONGELADO", "acta": "ACTA-CONGELAMIENTO-CATALOGO", "bloqueadores": ["SPOF-01 versionado runtime"], "riesgo": "medio", "recomendacion": "Usar catálogo congelado 462 subcategorías; cache read-only" },
+    { "id": "CAP-08", "capa": "Cuentas", "version": "1.0.0", "porcentajeCompletado": 70, "estado": "CONGELADO", "acta": "ACTA-CONGELAMIENTO-CUENTAS", "bloqueadores": ["BLK-01 uid vs perfilId", "legacy usuarios/{uid}"], "riesgo": "critico", "recomendacion": "Bridge perfilId P0 prerequisito" },
+    { "id": "CAP-09", "capa": "Migración Usuarios→Perfiles", "version": "1.0.0", "porcentajeCompletado": 70, "estado": "AUDITADO_DISENO", "acta": "ACTA-MIGRACION-USUARIOS-PERFILES", "bloqueadores": ["BLK-01 sin runtime", "TBD_PRE_RUNTIME"], "riesgo": "critico", "recomendacion": "Primer ítem P0; bloquea RE, SEO slug, CU" },
+    { "id": "CAP-10", "capa": "Dashboards", "version": "1.0.0", "porcentajeCompletado": 53, "estado": "CONGELADO_SHELL", "acta": "ACTA-CONGELAMIENTO-DASHBOARDS", "bloqueadores": ["Panel mínimo sin SPEC", "Shell completo V1.1"], "riesgo": "medio", "recomendacion": "Panel 1 página MVP-OPERAR; no implementar shell 11 módulos" },
+    { "id": "CAP-11", "capa": "Registro-Cuenta", "version": "1.0.0", "porcentajeCompletado": 55, "estado": "PLAN+schemas", "acta": null, "bloqueadores": ["Sin SPEC", "Wizard en monolito"], "riesgo": "alto", "recomendacion": "SPEC-REGISTRO-CUENTA recomendado pre-MVP-OPERAR; edición Cuenta obligatoria" },
+    { "id": "CAP-12", "capa": "Pagos-Contratos", "version": "1.0.0", "porcentajeCompletado": 45, "estado": "PLAN+schemas", "acta": null, "bloqueadores": ["BLK-02 pasarela", "Sin SPEC"], "riesgo": "critico", "recomendacion": "Pasarela P0; plan detallado existe; SPEC acelera construcción" },
+    { "id": "CAP-13", "capa": "Banners-Publicidad", "version": "1.0.0", "porcentajeCompletado": 50, "estado": "PLAN+prod_parcial", "acta": null, "bloqueadores": ["Pasarela banners V1.1"], "riesgo": "medio", "recomendacion": "Admin manual viable MVP; registro-banner.html parcial" },
+    { "id": "CAP-14", "capa": "Admin", "version": "1.0.0", "porcentajeCompletado": 60, "estado": "PLAN+prod_parcial", "acta": null, "bloqueadores": ["BLK-07 RBAC"], "riesgo": "alto", "recomendacion": "admin.html parcial; RBAC básico P0 beta pública" },
+    { "id": "CAP-15", "capa": "App Pública", "version": "1.0.0", "porcentajeCompletado": 40, "estado": "PLAN+monolito", "acta": null, "bloqueadores": ["BLK-04 client-side", "SPOF-05 monolito"], "riesgo": "critico", "recomendacion": "Desacople progresivo; resultados server-side P0" },
+    { "id": "CAP-16", "capa": "Messenger", "version": "1.0.0", "porcentajeCompletado": 75, "estado": "CONGELADO_FUERA_P0", "acta": "ACTA-CONGELAMIENTO-MESSENGER", "bloqueadores": [], "riesgo": "bajo", "recomendacion": "Esperar V1.1; contacto WhatsApp cubre MVP" },
+    { "id": "CAP-17", "capa": "Interacciones", "porcentajeCompletado": 35, "estado": "PLAN_FUERA_P0", "bloqueadores": [], "riesgo": "bajo", "recomendacion": "Excluido MVP acordado" },
+    { "id": "CAP-18", "capa": "Economía Social / IA / i18n", "porcentajeCompletado": 37, "estado": "PLAN_FUERA_P0", "bloqueadores": [], "riesgo": "bajo", "recomendacion": "Excluido MVP acordado; no bloquea P0" }
+  ],
+
+  "bloqueadoresReales": {
+    "impideComenzarConstruccionTotal": [
+      { "id": "BLK-01", "nombre": "Migración perfilId sin runtime", "severidad": "critica", "afecta": ["RE", "SEO", "CU", "RD-01", "RD-10"] },
+      { "id": "GAP-SPEC-REG", "nombre": "Registro-Cuenta sin SPEC formal", "severidad": "alta", "afecta": ["MVP-OPERAR", "panel edición"] },
+      { "id": "GAP-SPEC-PAY", "nombre": "Pagos sin SPEC formal", "severidad": "alta", "afecta": ["MVP-COBRAR escala", "RD-03"] }
+    ],
+    "impideComenzarParcial": [
+      { "id": "BLK-05", "nombre": "Firestore rules desalineadas", "severidad": "alta" },
+      { "id": "BLK-04", "nombre": "Resultados client-side", "severidad": "critica" },
+      { "id": "GAP-PANEL-DASH", "nombre": "Panel dashboard mínimo sin SPEC", "severidad": "media" }
+    ],
+    "puedeConstruirseHoy": [
+      { "item": "ValidationEngine módulo server-side", "readiness": 88, "evidencia": "SPEC 1.1.0 CONGELADO + fixtures-validationengine-golden.json" },
+      { "item": "FieldEngine runtime wizard", "readiness": 86, "evidencia": "SPEC 1.0.1 CONGELADO + fixtures-fieldengine-golden.json + CAT" },
+      { "item": "RenderEngine renderHead básico", "readiness": 84, "evidencia": "SPEC CONGELADO + ADRs + fixtures-renderengine-golden.json" },
+      { "item": "Shared/Core extracción mínima", "readiness": 88, "evidencia": "SPEC CONGELADO + fixtures-shared-core-golden.json" },
+      { "item": "Fixtures golden CI pipelines", "readiness": 90, "evidencia": "6 fixtures existentes" },
+      { "item": "robots.txt/sitemap estático mínimo", "readiness": 85, "evidencia": "ACTA-SEO-LANDINGS reglas MVP" },
+      { "item": "Turnstile config gates", "readiness": 80, "evidencia": "ACTA-SEGURIDAD + config-seguridad-mvp-schema" }
+    ],
+    "debeEsperar": [
+      { "item": "Messenger runtime", "version": "V1.1", "motivo": "Excluido MVP; SPEC congelado" },
+      { "item": "Shell dashboard SPEC completo", "version": "V1.1", "motivo": "Panel mínimo suficiente MVP-OPERAR" },
+      { "item": "Economía Social / Propinas", "version": "V1.2", "motivo": "Excluido MVP acordado" },
+      { "item": "Landings SEO dinámicas", "version": "V1.1-V1.2", "motivo": "Home+resultados suficiente lanzamiento" },
+      { "item": "Interacciones / Red contactos", "version": "V1.2", "motivo": "Excluido MVP acordado" },
+      { "item": "i18n / hreflang / cripto", "version": "V2.0+", "motivo": "Excluido MVP acordado" }
+    ]
+  },
+
+  "alcanceP0Evaluado": [
+    { "id": "RD-01", "titulo": "Bridge perfilId migración", "readinessDiseno": 70, "readinessConstruccion": 70, "bloqueador": "BLK-01", "estado": "AUDITADO" },
+    { "id": "RD-02", "titulo": "RenderEngine head Home/Perfil", "readinessDiseno": 84, "readinessConstruccion": 84, "bloqueador": "BLK-03", "estado": "CONGELADO" },
+    { "id": "RD-03", "titulo": "Pasarela pagos MVP", "readinessDiseno": 45, "readinessConstruccion": 45, "bloqueador": "BLK-02", "estado": "PLAN" },
+    { "id": "RD-04", "titulo": "Seguridad gates Turnstile", "readinessDiseno": 80, "readinessConstruccion": 80, "bloqueador": "BLK-10", "estado": "CONGELADO" },
+    { "id": "RD-05", "titulo": "Extracción Shared/Core", "readinessDiseno": 88, "readinessConstruccion": 88, "bloqueador": "BLK-08", "estado": "CONGELADO" },
+    { "id": "RD-06", "titulo": "ValidationEngine server-side", "readinessDiseno": 88, "readinessConstruccion": 88, "bloqueador": null, "estado": "CONGELADO" },
+    { "id": "RD-07", "titulo": "Resultados server-side noindex", "readinessDiseno": 75, "readinessConstruccion": 75, "bloqueador": "BLK-04", "estado": "SPEC_SEO" },
+    { "id": "RD-08", "titulo": "robots.txt + sitemap.xml", "readinessDiseno": 90, "readinessConstruccion": 90, "bloqueador": "BLK-06", "estado": "CONGELADO" },
+    { "id": "RD-09", "titulo": "Firestore rules alineadas", "readinessDiseno": 55, "readinessConstruccion": 55, "bloqueador": "BLK-05", "estado": "PARCIAL" },
+    { "id": "RD-10", "titulo": "Slug canónico perfiles", "readinessDiseno": 80, "readinessConstruccion": 80, "bloqueador": "BLK-01", "estado": "ADR+SEO" }
+  ],
+
+  "recomendacionFinal": {
+    "preguntas": [
+      {
+        "id": "RF-01",
+        "pregunta": "¿Estamos listos para crear estructura física (carpetas/módulos)?",
+        "respuesta": "PARCIALMENTE",
+        "porcentaje": 58,
+        "detalle": "SPEC-SHARED-CORE define grafo acíclico y superficie pública; actas previas runtimeAutorizado false; falta plan adopción físico por página documentado como entregable P0"
+      },
+      {
+        "id": "RF-02",
+        "pregunta": "¿Estamos listos para crear modelos reales Firestore?",
+        "respuesta": "PARCIALMENTE",
+        "porcentaje": 55,
+        "detalle": "ACTA-MIGRACION diseño PASS; perfiles/{perfilId} definido; TBD_PRE_RUNTIME; firestore.rules legacy desalineadas (BLK-05)"
+      },
+      {
+        "id": "RF-03",
+        "pregunta": "¿Estamos listos para crear ValidationEngine real?",
+        "respuesta": "SI",
+        "porcentaje": 88,
+        "detalle": "CONGELADO 1.1.0; AUDITORIA-FINAL-SPEC-VALIDATIONENGINE PASS; fixtures golden; registry eventos"
+      },
+      {
+        "id": "RF-04",
+        "pregunta": "¿Estamos listos para crear FieldEngine real?",
+        "respuesta": "SI",
+        "porcentaje": 86,
+        "detalle": "CONGELADO 1.0.1; fixtures golden; catálogo congelado; AM1-AM3 cerrados"
+      },
+      {
+        "id": "RF-05",
+        "pregunta": "¿Estamos listos para crear RenderEngine real?",
+        "respuesta": "SI",
+        "porcentaje": 84,
+        "detalle": "CONGELADO 1.0.0; ADR-RENDER-STRATEGY + ADR-URL-CANONICA; deps SC+FE; fixtures golden"
+      },
+      {
+        "id": "RF-06",
+        "pregunta": "¿Estamos listos para iniciar implementación MVP?",
+        "respuesta": "PARCIALMENTE",
+        "porcentaje": 68,
+        "detalle": "Engines OK; gaps Pagos SPEC, Registro SPEC, panel dashboard mínimo, migración runtime, rules Firestore"
+      }
+    ],
+    "secuenciaRecomendadaP0": [
+      "1. Bridge perfilId (RD-01) — desbloquea CU, RE, SEO slug",
+      "2. Shared/Core extracción mínima (RD-05)",
+      "3. FieldEngine + ValidationEngine server-side (RD-06) en paralelo",
+      "4. RenderEngine head (RD-02) + resultados server-side (RD-07)",
+      "5. Firestore rules v2 (RD-09) + Seguridad gates (RD-04)",
+      "6. SEO robots/sitemap (RD-08) + slug (RD-10)",
+      "7. Pasarela pagos (RD-03) + panel mínimo /cuenta/perfil",
+      "8. SPEC Registro/Pagos documentales (paralelo, no bloqueante engines)"
+    ],
+    "mvpAcordado": {
+      "referencia": "scripts/MATRIZ-MVP-CARIHUB.json + scripts/ANALISIS-REVISION-MVP-DASHBOARD.json",
+      "mvpCobrar": "MVP-COBRAR 14-17 sem — beta privada",
+      "mvpOperar": "MVP-OPERAR 18-24 sem — incluye panel mínimo obligatorio",
+      "excluido": ["Economía Social", "Propinas", "Cripto", "Lives", "Stories", "Red contactos", "IA avanzada", "i18n", "Marketplace"]
+    }
+  },
+
+  "matrizPassFail": {
+    "totalVerificaciones": 14,
+    "pass": 14,
+    "fail": 0,
+    "checks": [
+      { "id": "P0-C01", "nombre": "10 actas congelamiento referenciadas", "resultado": "PASS" },
+      { "id": "P0-C02", "nombre": "ACTA-MIGRACION auditada referenciada", "resultado": "PASS" },
+      { "id": "P0-C03", "nombre": "3 ADRs consumidos por SPECs P0", "resultado": "PASS" },
+      { "id": "P0-C04", "nombre": "0 conflictos ADR vs SPEC SEO/Render", "resultado": "PASS" },
+      { "id": "P0-C05", "nombre": "Fixtures golden engines (4/4 P0)", "resultado": "PASS" },
+      { "id": "P0-C06", "nombre": "Alineación REPORTE-CONGELAMIENTOS 10 capas", "resultado": "PASS" },
+      { "id": "P0-C07", "nombre": "MVP social excluido coherente", "resultado": "PASS" },
+      { "id": "P0-C08", "nombre": "Panel mínimo identificado MVP-OPERAR", "resultado": "PASS" },
+      { "id": "P0-C09", "nombre": "BLK-01..10 mapeados", "resultado": "PASS" },
+      { "id": "P0-C10", "nombre": "Runtime NO autorizado en acta", "resultado": "PASS" },
+      { "id": "P0-C11", "nombre": "Documentos existentes no modificados", "resultado": "PASS" },
+      { "id": "P0-C12", "nombre": "Engines diseño ≥80% readiness", "resultado": "PASS" },
+      { "id": "P0-C13", "nombre": "Pagos/Registro gap documentado", "resultado": "PASS" },
+      { "id": "P0-C14", "nombre": "Porcentajes con fórmula explícita", "resultado": "PASS" }
+    ]
+  },
+
+  "observaciones": [
+    { "id": "OBS-P0-01", "tipo": "RECLASIFICACION", "texto": "Panel dashboard mínimo operativo es MVP_obligatorio para MVP-OPERAR (ANALISIS-REVISION-MVP-DASHBOARD); distinto de shell SPEC V1.1" },
+    { "id": "OBS-P0-02", "tipo": "COHERENCIA", "texto": "Exclusión social/propinas/cripto/i18n no reduce readiness P0 — correctamente fuera alcance" },
+    { "id": "OBS-P0-03", "tipo": "GAP", "texto": "SPEC-REGISTRO-CUENTA y SPEC-PAGOS-CONTRATOS acelerarían construcción pero no bloquean engines congelados" },
+    { "id": "OBS-P0-04", "tipo": "RIESGO", "texto": "BLK-01 migración es prerequisito cascada para RE, SEO slug y CU — primer ítem construcción" },
+    { "id": "OBS-P0-05", "tipo": "LIMITACION", "texto": "Este acta certifica readiness documental 72%; autorización runtime requeriría acta operacional futuro separado" }
+  ],
+
+  "noModifica": [
+    "Las 10 ACTA-CONGELAMIENTO-* existentes",
+    "ACTA-MIGRACION-USUARIOS-PERFILES",
+    "AUDITORIA-MAESTRA-CARIHUB",
+    "MATRIZ-MADUREZ/DEPENDENCIAS/MVP",
+    "ROADMAP-MAESTRO",
+    "ANALISIS-REVISION-MVP-DASHBOARD",
+    "Producción, Firestore, deploy, commit"
+  ],
+
+  "historialVersiones": [
+    { "semver": "1.0.0", "fecha": "2026-06-11", "evento": "EVALUACION_READINESS_INICIAL", "notas": "14/14 PASS; veredicto PARCIALMENTE 72%; sin autorización runtime" }
+  ]
+}

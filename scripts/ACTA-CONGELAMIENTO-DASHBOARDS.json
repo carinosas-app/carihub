@@ -1,0 +1,120 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "$id": "https://carihub.app/schemas/acta-congelamiento-dashboards.json",
+  "tipo": "ACTA_CONGELAMIENTO_DASHBOARDS",
+  "titulo": "Acta formal de congelamiento — Dashboards CariHub",
+  "versionActa": "1.0.0",
+  "fechaCongelamiento": "2026-06-09",
+  "fechaAprobacionSpec": "2026-06-09",
+  "estadoActa": "CONGELADO",
+  "autorizacion": {
+    "estado": "APROBADA",
+    "autorizadoPor": "product owner / usuario CariHub",
+    "alcance": "Baseline de diseño Dashboards v1.0.0 — arquitectura híbrida, IA, notificaciones, historial — sin implementación runtime",
+    "artefactosAprobados": [
+      "scripts/SPEC-DASHBOARDS.md",
+      "scripts/SPEC-DASHBOARDS.json"
+    ],
+    "auditorias": [
+      "scripts/AUDITORIA-DASHBOARDS.json",
+      "scripts/AUDITORIA-DASHBOARDS.md",
+      "scripts/AUDITORIA-DASHBOARDS-IA.md"
+    ]
+  },
+  "versionDashboards": {
+    "id": "dashboards-2026-06-10",
+    "semver": "1.0.0",
+    "specVersion": "1.0.0"
+  },
+  "dependenciasCongeladas": {
+    "catalogo": { "version": "catalogo-2026-06-10", "semver": "1.0.0", "acta": "scripts/ACTA-CONGELAMIENTO-CATALOGO.json" },
+    "cuentas": { "version": "cuentas-2026-06-10", "semver": "1.0.0", "acta": "scripts/ACTA-CONGELAMIENTO-CUENTAS.json" },
+    "seguridad": { "version": "seguridad-2026-06-10", "semver": "1.0.0", "acta": "scripts/ACTA-CONGELAMIENTO-SEGURIDAD.json" },
+    "fieldEngine": { "version": "fieldengine-2026-06-10", "semver": "1.0.1", "acta": "scripts/ACTA-CONGELAMIENTO-FIELDENGINE.json" }
+  },
+  "decisionesArquitecturaAprobadas": {
+    "adminSeparado": true,
+    "shellUsuarioModular": true,
+    "sinDashboardsIndependientesVisitantePerfilBannersMensajes": true,
+    "modulosPorTipoCuentaRolesEstadosPermisos": true,
+    "asistentesIAOrquestadorLigero": true,
+    "notificacionesUnificadas": true,
+    "centroActividadHistorial": true,
+    "sinAccionesIAPersistentesSinConfirmacionHumana": true
+  },
+  "objetoCongelamiento": {
+    "arquitectura": "hibrido — admin aislado + shell usuario /cuenta modular",
+    "dashboardsLogicos": [
+      { "id": "dashboard_admin", "ruta": "/admin", "archivoActual": "public/admin.html" },
+      { "id": "dashboard_shell_usuario", "ruta": "/cuenta", "archivoBaseUI": "public/dashboard-rentero.html", "parcial": "public/index.html" }
+    ],
+    "modulosShellUsuario": [
+      "cuenta_visitante", "perfil_publico", "publicidad_banners", "mensajes", "favoritos",
+      "notificaciones", "centro_actividad", "seguridad_cuenta", "upgrade_perfil"
+    ],
+    "modulosAdmin": [
+      "resumen", "usuarios", "revision_perfiles", "catalogo", "comercial", "banners",
+      "pagos", "denuncias", "seguridad", "ia_arquitecto", "ia_moderador", "ia_comercial", "ia_seguridad"
+    ],
+    "asistentesIA": [
+      "ia_asistente_cuenta", "ia_asistente_perfil", "ia_asistente_publicidad",
+      "ia_arquitecto", "ia_moderador", "ia_comercial", "ia_seguridad"
+    ],
+    "notificacionesDominios": [
+      "mensajes", "favoritos", "renovaciones", "contratos", "pagos", "verificaciones",
+      "denuncias", "banners", "seguridad", "recomendaciones_ia"
+    ],
+    "historialDominios": [
+      "historial_perfil", "historial_banners", "historial_pagos", "historial_renovaciones",
+      "historial_verificaciones", "historial_seguridad", "historial_mensajes",
+      "historial_acciones_ia", "historial_actividad_cuenta"
+    ],
+    "coleccionNotificaciones": "usuarios/{usuarioId}/notificaciones/{notificacionId}",
+    "coleccionRecomendacionesIA": "ia_recomendaciones/{id}",
+    "router": "tipoCuentaPrincipal + rolesCuenta[] + estados + permisos"
+  },
+  "produccionActual": {
+    "estado": "LEGACY_PARCIAL",
+    "nota": "admin.html ~40%; index.html modales; registro-banner funnel; monolito usuarios/{uid}. Diseño objetivo no implementado.",
+    "sinMigracionAutorizada": true
+  },
+  "implementacion": {
+    "runtimeAutorizado": false,
+    "firestoreAutorizado": false,
+    "deployAutorizado": false,
+    "llmRuntimeAutorizado": false,
+    "nota": "v1.0.0 congelada como diseño; runtime requiere autorización explícita y ValidationEngine spec"
+  },
+  "motoresRelacionados": {
+    "validationEngine": "SPEC siguiente obligatorio — Turnstile, rate limits, EventBus, IA trazabilidad",
+    "fieldEngine": "Wizard perfil y gates — consumido por dashboards",
+    "renderEngine": "No autorizado",
+    "messenger": "No autorizado — módulo mensajes en shell",
+    "eventBus": "Diseño en ValidationEngine spec — notificaciones + historial"
+  },
+  "archivosBaseline": [
+    "scripts/SPEC-DASHBOARDS.md",
+    "scripts/SPEC-DASHBOARDS.json",
+    "scripts/AUDITORIA-DASHBOARDS.json",
+    "scripts/AUDITORIA-DASHBOARDS.md",
+    "scripts/AUDITORIA-DASHBOARDS-IA.md",
+    "scripts/ACTA-CONGELAMIENTO-DASHBOARDS.json",
+    "scripts/ACTA-CONGELAMIENTO-DASHBOARDS.md",
+    "scripts/REPORTE-CONGELAMIENTOS-CONSOLIDADO.json",
+    "scripts/REPORTE-CONGELAMIENTOS-CONSOLIDADO.md"
+  ],
+  "procedimientoVersionado": {
+    "PATCH": "Clarificaciones módulos, dominios notificación/historial, fixtures diseño",
+    "MINOR": "Nuevos módulos shell, dominios notificación, asistente IA adicional",
+    "MAJOR": "Cambio arquitectura híbrida o separación dashboards",
+    "historialVersiones": [
+      {
+        "semver": "1.0.0",
+        "fecha": "2026-06-09",
+        "evento": "CONGELAMIENTO_INICIAL",
+        "notas": "Spec aprobada; auditoría + IA; notificaciones + centro actividad"
+      }
+    ]
+  },
+  "estado": "CONGELADO"
+}

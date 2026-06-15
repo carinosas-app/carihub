@@ -1,0 +1,371 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "tipo": "OBSERVACION_ARQUITECTONICA",
+  "titulo": "Modularización General de Aplicaciones CariHub",
+  "fecha": "2026-06-09",
+  "versionObservacion": "1.0.0",
+  "estado": "OBSERVACION_PLANO_MODULAR",
+  "autorizadoDiseno": true,
+  "autorizadoDisenoSpecCompleta": false,
+  "autorizadoRuntime": false,
+  "autorizadoCrearCarpetas": false,
+  "autorizadoMoverArchivos": false,
+  "registradoPor": "product owner / usuario CariHub",
+  "nota": "Plano futuro de separación modular. No forma parte de capas congeladas. No sustituye SPECs. No diseña Firestore, APIs ni runtime.",
+  "proposito": "Definir el plano de separación del ecosistema en aplicaciones/subaplicaciones antes de crear nuevas apps, manteniendo la app pública principal liviana (Home, Resultados, Perfil público).",
+  "nucleoPublicoPrincipal": {
+    "nombre": "App pública CariHub",
+    "alcance": ["Home", "Resultados", "Perfil público"],
+    "principio": "Solo descubrimiento, búsqueda y visualización pública de perfiles — sin wizard, dashboards, messenger, admin, pagos ni IA pesada en el bundle inicial",
+    "rutasSugeridas": {
+      "home": "/",
+      "resultados": "/resultados",
+      "perfilPublico": "/perfil/:perfilId"
+    },
+    "visibilidad": "publico",
+    "autenticacion": "opcional_sesion_ligera",
+    "permisosAdmin": false,
+    "datosSensibles": false,
+    "pesadoNoCargarEnHome": false,
+    "estadoActual": "parcial",
+    "notaProduccion": "public/index.html mezcla home + modales legacy (cuenta, favoritos, denuncias)",
+    "dependenciasPrincipales": ["catalogo", "renderEngine_futuro", "seo_futuro", "cuentas_perfiles_migracion"],
+    "prioridadFuturaImplementacion": "P0_delimitar_nucleo"
+  },
+  "modulosSeparados": [
+    {
+      "id": "MOD-REGISTRO-WIZARD",
+      "nombre": "Registro / Wizard",
+      "rutaSugerida": "/registro",
+      "rutasAlternativas": ["/wizard", "/registro/:formularioId", "/upgrade-perfil"],
+      "visibilidad": "privado_semi_publico",
+      "autenticacion": "requerida_o_registro_anonimo_turnstile",
+      "permisosAdmin": false,
+      "datosSensibles": true,
+      "sensibleDetalle": "INE, selfies, cédula, datos registro, borradores",
+      "pesadoNoCargarEnHome": true,
+      "dependenciasPrincipales": ["FieldEngine 1.0.1", "ValidationEngine 1.1.0", "Cuentas 1.0.0", "Catálogo 1.0.0", "Seguridad MVP 1.0.0", "ACTA-MIGRACION perfiles"],
+      "estadoActual": "congelado_diseno",
+      "artefactos": ["SPEC-FIELDENGINE.json", "ACTA-CONGELAMIENTO-FIELDENGINE.json"],
+      "prioridadFuturaImplementacion": "P1_post_migracion_perfiles",
+      "prioridadNumerica": 2
+    },
+    {
+      "id": "MOD-DASHBOARDS",
+      "nombre": "Dashboards (shell usuario)",
+      "rutaSugerida": "/cuenta",
+      "rutasAlternativas": ["/cuenta/:modulo", "/dashboard", "/mi-cuenta"],
+      "visibilidad": "privado",
+      "autenticacion": "requerida",
+      "permisosAdmin": false,
+      "datosSensibles": true,
+      "sensibleDetalle": "estados cuenta, verificación, contratos, notificaciones, historial",
+      "pesadoNoCargarEnHome": true,
+      "dependenciasPrincipales": ["Dashboards 1.0.0", "Cuentas 1.0.0", "ValidationEngine 1.1.0", "ACTA-MIGRACION hub", "ANEXO Messenger-Dashboards pendiente"],
+      "estadoActual": "congelado",
+      "artefactos": ["SPEC-DASHBOARDS.json", "ACTA-CONGELAMIENTO-DASHBOARDS.json"],
+      "prioridadFuturaImplementacion": "P1_post_shell_delimitado",
+      "prioridadNumerica": 3
+    },
+    {
+      "id": "MOD-MESSENGER",
+      "nombre": "Messenger",
+      "rutaSugerida": "/messenger",
+      "rutasAlternativas": ["/messenger/chat/:conversacionId", "/messenger/configuracion", "/messenger/solicitudes"],
+      "visibilidad": "privado",
+      "autenticacion": "requerida",
+      "permisosAdmin": false,
+      "adminRutasSeparadas": ["/admin/mensajeria"],
+      "datosSensibles": true,
+      "sensibleDetalle": "mensajes, bloqueos, reportes, telefonoVerificado, spamScore",
+      "pesadoNoCargarEnHome": true,
+      "dependenciasPrincipales": ["Messenger 1.0.0", "ValidationEngine 1.1.0", "Dashboards notificaciones", "Cuentas perfiles", "Seguridad MVP"],
+      "estadoActual": "congelado",
+      "artefactos": ["SPEC-MESSENGER.json", "ACTA-CONGELAMIENTO-MESSENGER.json"],
+      "prioridadFuturaImplementacion": "P2_post_dashboards_migracion",
+      "prioridadNumerica": 5
+    },
+    {
+      "id": "MOD-ADMIN",
+      "nombre": "Admin",
+      "rutaSugerida": "/admin",
+      "rutasAlternativas": ["/admin/perfiles", "/admin/seguridad", "/admin/publicidad", "/admin/mensajeria"],
+      "visibilidad": "privado",
+      "autenticacion": "requerida",
+      "permisosAdmin": true,
+      "datosSensibles": true,
+      "sensibleDetalle": "revisión perfiles, denuncias, logs, controles messenger, RBAC fase1 email-only",
+      "pesadoNoCargarEnHome": true,
+      "dependenciasPrincipales": ["Dashboards 1.0.0 admin_separado", "ValidationEngine 1.1.0", "Seguridad MVP", "Messenger admin", "RBAC fase2 futuro"],
+      "estadoActual": "parcial",
+      "notaProduccion": "admin.html parcial en producción",
+      "artefactos": ["SPEC-DASHBOARDS.json", "ACTA-CONGELAMIENTO-DASHBOARDS.json"],
+      "prioridadFuturaImplementacion": "P1_app_admin_separada",
+      "prioridadNumerica": 4
+    },
+    {
+      "id": "MOD-PAGOS-CONTRATOS",
+      "nombre": "Pagos / Contratos",
+      "rutaSugerida": "/cuenta/contratos",
+      "rutasAlternativas": ["/pagos", "/cuenta/renovaciones", "/checkout"],
+      "visibilidad": "privado",
+      "autenticacion": "requerida",
+      "permisosAdmin": false,
+      "adminRutasSeparadas": ["/admin/contratos", "/admin/pagos"],
+      "datosSensibles": true,
+      "sensibleDetalle": "pagos, contratos_perfiles, contratos_banners, datos fiscales futuros",
+      "pesadoNoCargarEnHome": true,
+      "dependenciasPrincipales": ["config-contratos-carihub-schema", "Cuentas 1.0.0", "ValidationEngine", "ACTA-MIGRACION hub", "pasarela NO_AUTORIZADA live"],
+      "estadoActual": "pendiente",
+      "nota": "Schema documental; pagos live no autorizado",
+      "prioridadFuturaImplementacion": "P2_subapp_o_modulo_cuenta",
+      "prioridadNumerica": 6
+    },
+    {
+      "id": "MOD-BANNERS-PUBLICIDAD",
+      "nombre": "Banners / Publicidad",
+      "rutaSugerida": "/anuncios",
+      "rutasAlternativas": ["/cuenta/anuncios", "/publicidad", "/banners/solicitud"],
+      "visibilidad": "privado",
+      "autenticacion": "requerida_rol_anunciante",
+      "permisosAdmin": false,
+      "adminRutasSeparadas": ["/admin/publicidad", "/admin/banners"],
+      "datosSensibles": false,
+      "pesadoNoCargarEnHome": true,
+      "dependenciasPrincipales": ["config-promociones-banners-schema", "Dashboards módulo banners", "ValidationEngine", "configuracion_publicidad producción"],
+      "estadoActual": "parcial",
+      "notaProduccion": "solicitudes_anuncios activa; diseño contratos_banners pendiente runtime",
+      "prioridadFuturaImplementacion": "P2_modulo_cuenta_o_subapp",
+      "prioridadNumerica": 7
+    },
+    {
+      "id": "MOD-INTERACCIONES",
+      "nombre": "Interacciones",
+      "rutaSugerida": "/interacciones",
+      "rutasAlternativas": ["/stories", "/live/:liveId", "/seguidores"],
+      "visibilidad": "mixto",
+      "autenticacion": "requerida_para_publicar",
+      "permisosAdmin": false,
+      "adminRutasSeparadas": ["/admin/moderacion-social"],
+      "datosSensibles": true,
+      "sensibleDetalle": "stories, comentarios, seguidores, privacidad",
+      "pesadoNoCargarEnHome": true,
+      "dependenciasPrincipales": ["OBSERVACION-INTERACCIONES v1.2.1", "Messenger 1.0.0", "ValidationEngine", "Dashboards", "perfiles migrados"],
+      "estadoActual": "observacion",
+      "artefactos": ["OBSERVACION-ARQUITECTONICA-INTERACCIONES.json"],
+      "prioridadFuturaImplementacion": "P3_post_messenger_spec",
+      "prioridadNumerica": 8
+    },
+    {
+      "id": "MOD-RENDER-LANDINGS",
+      "nombre": "Render público / Landings",
+      "rutaSugerida": "/p/:slug",
+      "rutasAlternativas": ["/landings/:slug", "/sector/:sectorId", "/categoria/:subcategoriaId"],
+      "visibilidad": "publico",
+      "autenticacion": "no",
+      "permisosAdmin": false,
+      "datosSensibles": false,
+      "pesadoNoCargarEnHome": "parcial_ssr_islas",
+      "notaPeso": "Motor render en perfil/resultados — cargar como isla o sub-bundle, no en home shell",
+      "dependenciasPrincipales": ["config-renderizado-dinamico-schema", "Catálogo 1.0.0", "perfiles snapshot", "ThemeEngine futuro", "SEO"],
+      "estadoActual": "pendiente",
+      "prioridadFuturaImplementacion": "P1_pre_runtime_publico",
+      "prioridadNumerica": 2
+    },
+    {
+      "id": "MOD-THEMEENGINE",
+      "nombre": "ThemeEngine",
+      "rutaSugerida": "/cuenta/apariencia",
+      "rutasAlternativas": ["/editor-tema", "/cuenta/personalizar"],
+      "visibilidad": "privado",
+      "autenticacion": "requerida",
+      "permisosAdmin": false,
+      "adminRutasSeparadas": ["/admin/temas"],
+      "datosSensibles": false,
+      "pesadoNoCargarEnHome": true,
+      "dependenciasPrincipales": ["OBSERVACION-THEMEENGINE v1.3.0", "RenderEngine SPEC", "Dashboards shell", "ACTA-MIGRACION perfiles"],
+      "estadoActual": "observacion",
+      "artefactos": ["OBSERVACION-ARQUITECTONICA-THEMEENGINE.json"],
+      "prioridadFuturaImplementacion": "P4_post_render_interacciones",
+      "prioridadNumerica": 10
+    },
+    {
+      "id": "MOD-SEO-LANDINGS",
+      "nombre": "SEO / Landings",
+      "rutaSugerida": "/s/:subcategoriaSlug",
+      "rutasAlternativas": ["/ciudad/:ciudad", "/explorar/:sector", "/sitemap.xml"],
+      "visibilidad": "publico",
+      "autenticacion": "no",
+      "permisosAdmin": false,
+      "datosSensibles": false,
+      "pesadoNoCargarEnHome": false,
+      "notaPeso": "Metadatos y landings estáticas/SSG — no bundle pesado; enlazan a resultados",
+      "dependenciasPrincipales": ["OBSERVACION-SEO v1.0.0", "Catálogo 1.0.0", "Render landings", "perfilId canónico"],
+      "estadoActual": "observacion",
+      "artefactos": ["OBSERVACION-ARQUITECTONICA-SEO.json"],
+      "prioridadFuturaImplementacion": "P2_paralelo_render",
+      "prioridadNumerica": 3
+    },
+    {
+      "id": "MOD-AGENTES-IA",
+      "nombre": "Agentes del Sistema / IA transversal",
+      "rutaSugerida": null,
+      "notaRuta": "Sin app dedicada — orquestador transversal; UI embebida en Dashboards, Messenger, Admin",
+      "rutasUI": ["/cuenta/asistente", "/admin/ia", "/messenger/asistente"],
+      "visibilidad": "privado",
+      "autenticacion": "requerida",
+      "permisosAdmin": "parcial_admin",
+      "datosSensibles": true,
+      "sensibleDetalle": "recomendaciones, moderación IA, logs, confirmación humana VE",
+      "pesadoNoCargarEnHome": true,
+      "dependenciasPrincipales": ["Dashboards ia_orquestador_ligero", "ValidationEngine ia_*", "Messenger iaSeguridad", "llmRuntime NO_AUTORIZADO"],
+      "estadoActual": "futuro",
+      "prioridadFuturaImplementacion": "P5_transversal_post_core",
+      "prioridadNumerica": 11
+    }
+  ],
+  "mapaModularGeneral": {
+    "capasTransversalesDocumentales": [
+      "Catálogo 1.0.0",
+      "Cuentas 1.0.0",
+      "Seguridad MVP 1.0.0",
+      "ValidationEngine 1.1.0",
+      "FieldEngine 1.0.1"
+    ],
+    "appsFuturas": [
+      { "id": "APP-PUBLICA", "nombre": "CariHub Público", "modulos": ["Home", "Resultados", "Perfil público"], "bundle": "liviano" },
+      { "id": "APP-CUENTA", "nombre": "CariHub Cuenta", "modulos": ["Dashboards", "Registro/Wizard embebido o lazy", "Pagos", "Banners", "ThemeEngine"], "bundle": "medio" },
+      { "id": "APP-MESSENGER", "nombre": "CariHub Messenger", "modulos": ["Messenger"], "bundle": "medio_realtime" },
+      { "id": "APP-ADMIN", "nombre": "CariHub Admin", "modulos": ["Admin", "moderación", "mensajería admin"], "bundle": "pesado_interno" },
+      { "id": "APP-INTERACCIONES", "nombre": "CariHub Social", "modulos": ["Interacciones", "stories", "live"], "bundle": "pesado_futuro" }
+    ],
+    "islasPublicas": [
+      { "modulo": "Render público", "carga": "lazy_en_perfil_resultados" },
+      { "modulo": "SEO landings", "carga": "SSG_o_rutas_livianas" }
+    ],
+    "flujoUsuarioTipico": [
+      "Home/SEO landing → Resultados → Perfil público",
+      "Registro/Wizard → Dashboard cuenta",
+      "Dashboard → Messenger / Banners / Contratos",
+      "Admin separado — sin mezclar bundle público"
+    ]
+  },
+  "ordenSeparacionFutura": {
+    "descripcion": "Secuencia recomendada para separar apps sin romper diseño congelado",
+    "fases": [
+      {
+        "fase": 1,
+        "nombre": "Delimitar núcleo público",
+        "modulos": ["Home", "Resultados", "Perfil público"],
+        "prioridad": "P0",
+        "precondiciones": ["Inventario bundle index.html", "ACTA migración diseño"],
+        "entregable": "Contrato qué JS/CSS carga la app pública"
+      },
+      {
+        "fase": 2,
+        "nombre": "Render + SEO público",
+        "modulos": ["Render público / Landings", "SEO / Landings"],
+        "prioridad": "P1",
+        "precondiciones": ["SPEC RenderEngine o contrato mínimo", "perfiles diseño migración"],
+        "entregable": "Islas render en perfil/resultados sin wizard"
+      },
+      {
+        "fase": 3,
+        "nombre": "Cuenta y registro",
+        "modulos": ["Registro / Wizard", "Dashboards shell"],
+        "prioridad": "P1",
+        "precondiciones": ["Migración perfiles ejecutada TBD", "FieldEngine + VE runtime autorizado"],
+        "entregable": "Subapp /cuenta lazy-loaded"
+      },
+      {
+        "fase": 4,
+        "nombre": "Admin separado",
+        "modulos": ["Admin"],
+        "prioridad": "P1",
+        "precondiciones": ["Dashboards diseño admin_separado", "RBAC documental"],
+        "entregable": "App /admin dominio o subpath aislado"
+      },
+      {
+        "fase": 5,
+        "nombre": "Messenger",
+        "modulos": ["Messenger"],
+        "prioridad": "P2",
+        "precondiciones": ["VE 1.1.0 diseño aplicado", "Dashboards notificaciones", "perfiles"],
+        "entregable": "App /messenger code-split"
+      },
+      {
+        "fase": 6,
+        "nombre": "Comercial",
+        "modulos": ["Pagos / Contratos", "Banners / Publicidad"],
+        "prioridad": "P2",
+        "precondiciones": ["Contratos runtime", "pasarela autorizada"],
+        "entregable": "Módulos /cuenta/contratos y /anuncios"
+      },
+      {
+        "fase": 7,
+        "nombre": "Social",
+        "modulos": ["Interacciones"],
+        "prioridad": "P3",
+        "precondiciones": ["SPEC Interacciones", "Messenger runtime"],
+        "entregable": "Subapp social lazy"
+      },
+      {
+        "fase": 8,
+        "nombre": "Personalización",
+        "modulos": ["ThemeEngine"],
+        "prioridad": "P4",
+        "precondiciones": ["RenderEngine", "workshop ThemeEngine"],
+        "entregable": "Editor en /cuenta/apariencia"
+      },
+      {
+        "fase": 9,
+        "nombre": "IA transversal",
+        "modulos": ["Agentes del Sistema / IA"],
+        "prioridad": "P5",
+        "precondiciones": ["Core apps estables", "autorización LLM runtime"],
+        "entregable": "SDK orquestador embebido"
+      }
+    ]
+  },
+  "principiosModularizacion": [
+    "La app pública no importa wizard, messenger, admin ni pagos en el bundle inicial",
+    "Autenticación Firebase compartida; apps lazy cargan tras login",
+    "ValidationEngine como gate transversal — no duplicar validación por app",
+    "Dashboards shell es hub de cuenta; no reemplaza apps pesadas (Messenger, Admin)",
+    "Admin siempre app o subapp separada — decisión congelada Dashboards 1.0.0",
+    "Datos sensibles solo en apps privadas con VE + Seguridad MVP",
+    "Catálogo y Cuentas son dependencias de diseño, no apps separadas",
+    "No crear carpetas ni mover archivos hasta acta o SPEC de implementación por app"
+  ],
+  "relacionCapasCongeladas": {
+    "noModifica": [
+      "ACTA-CONGELAMIENTO-CATALOGO.json",
+      "ACTA-CONGELAMIENTO-CUENTAS.json",
+      "ACTA-CONGELAMIENTO-SEGURIDAD.json",
+      "ACTA-CONGELAMIENTO-FIELDENGINE.json",
+      "ACTA-CONGELAMIENTO-DASHBOARDS.json",
+      "ACTA-CONGELAMIENTO-VALIDATIONENGINE.json",
+      "ACTA-CONGELAMIENTO-MESSENGER.json"
+    ],
+    "referencia": "Plano modular consume diseños congelados sin alterarlos"
+  },
+  "produccionVsPlano": {
+    "hoy": "Monolito public/index.html + admin.html parcial + usuarios monolito Firestore",
+    "objetivo": "App pública liviana + subapps lazy por dominio funcional",
+    "runtime": "NO_AUTORIZADO"
+  },
+  "artefactosRelacionados": [
+    "scripts/REPORTE-CONGELAMIENTOS-CONSOLIDADO.json",
+    "scripts/ACTA-MIGRACION-USUARIOS-PERFILES.json",
+    "scripts/OBSERVACION-ARQUITECTONICA-INTERACCIONES.json",
+    "scripts/OBSERVACION-ARQUITECTONICA-THEMEENGINE.json",
+    "scripts/OBSERVACION-ARQUITECTONICA-SEO.json"
+  ],
+  "changelog": [
+    {
+      "version": "1.0.0",
+      "fecha": "2026-06-09",
+      "nota": "Observación inicial — plano modular general aplicaciones CariHub"
+    }
+  ]
+}

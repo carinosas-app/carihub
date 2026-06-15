@@ -1,0 +1,202 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "tipo": "PLAN_MAESTRO",
+  "modulo": "APP_PUBLICA",
+  "titulo": "Plan Maestro App Pública CariHub",
+  "fecha": "2026-06-10",
+  "version": "1.0.0",
+  "estado": "PLAN_DISENO_DOCUMENTAL",
+  "modo": "Solo análisis y documentación — sin runtime/carpetas/mover/Firestore/deploy/commit",
+  "autorizadoPor": "product owner / usuario CariHub",
+  "basadoEn": [
+    "scripts/AUDITORIA-ARQUITECTONICA-GLOBAL-CARIHUB.json",
+    "scripts/ANALISIS-HOME-ECOSISTEMA.json",
+    "scripts/PLAN-MAESTRO-SHARED-CORE.json",
+    "scripts/MAPA-MAESTRO-CARIHUB.json"
+  ],
+  "objetivo": "Definir la App Pública liviana de CariHub, compuesta únicamente por Home, Resultados y Perfil público, separando todo lo que hoy está mezclado en index.html.",
+  "principioRector": "La App Pública es la capa de ADQUISICIÓN y DESCUBRIMIENTO: rápida, indexable, sin lógica privada. Todo lo que requiera sesión, escritura de dominio o panel se delega a otra app. La App Pública consume Shared/Core y RenderEngine; no implementa nada transversal.",
+  "alcance": ["Home (index.html)", "Resultados (resultados.html)", "Perfil público (perfil.html)"],
+
+  "inventarioFuncionalActual": {
+    "home_index": {
+      "archivo": "public/index.html",
+      "css": ["home.css", "home-vcards.css", "home-sector-scroll.css", "home-modals.css", "home-adultos-cat-picker.css"],
+      "jsExterno": ["paises.js", "estados.js", "ciudades.js", "catalogos-carihub.js", "categoria-iconos.js", "sectores-carihub.js", "hero-home.js", "sector-scroll-data.js", "home-sector-scroll.js", "home-vcards.js", "adultos-cat-picker.js", "home-ui.js", "home-bridge.js"],
+      "firebaseSDK": ["app-compat", "auth-compat", "firestore-compat", "storage-compat"],
+      "jsInline": "~1330 líneas",
+      "referenciasCruzadas": "~38 (registro, favoritos, pagos, mensajes, denuncias, soporte, panel)",
+      "funcionesPropiasHome": ["hero/carrusel", "grid sectores", "grid categorías", "buscador", "picker adultos", "rotación banners home", "vcards destacados"],
+      "funcionesMezcladas": [
+        "abrirRegistro() — wizard 3 pasos (→ REGISTRO)",
+        "abrirMiPerfil()/crearCuentaMinima() — login/alta cuenta (→ REGISTRO/CUENTA)",
+        "modalPanel/modalEditar/modalMiPerfil — panel usuario (→ DASHBOARD)",
+        "toggleFavorito()/prepararUsuarioFavoritos() — favoritos (→ INTERACCIONES)",
+        "enviarSolicitudAnuncio() + LINK_STRIPE/LINK_MERCADO_PAGO — pagos/anuncios (→ BANNERS/PAGOS)",
+        "modal-mensajes — soporte/mensajería (→ MESSENGER/SOPORTE)",
+        "modalDenuncia — denuncias (→ INTERACCIONES/ADMIN)",
+        "registrarVisita() — escritura estadisticas_visitas (→ INTERACCIONES)",
+        "signInAnonymously automático (→ solo si favoritos lo exige; revisar)"
+      ],
+      "modalesPresentes": ["modal-registro", "modal-avanzada", "modal-sectores", "modal-categorias", "modal-otros-sectores", "modalAntiBot", "modalAnuncio", "modalContacto", "modalDenuncia", "modalLegal", "modalMiPerfil", "modalPanel", "modalEditar", "modal-mensajes", "modal-favoritos", "modal-verificados", "modal-privacidad"]
+    },
+    "resultados": {
+      "archivo": "public/resultados.html",
+      "css": "inline (no usa home CSS)",
+      "jsExterno": ["firebase-app-compat", "firebase-firestore-compat"],
+      "consultaActual": "usuarios where(aprobado==true, activo==true, vencido==false).get() + FILTRADO EN CLIENTE",
+      "riesgoCritico": "lee TODA la colección pública y filtra en cliente — no escalable",
+      "funcionesPropias": ["render tarjetas resultado", "construcción SEO línea (categoria·pais·estado·ciudad)", "link a perfil.html?id", "banner-slots → registro-banner.html"],
+      "dependenciasCruzadas": ["banner-slot → registro-banner.html (BANNERS)"]
+    },
+    "perfil": {
+      "archivo": "public/perfil.html",
+      "css": ["banners-publicidad.css", "inline :root"],
+      "jsExterno": ["firebase-app-compat", "firebase-firestore-compat", "modal-carihub.js"],
+      "consultaActual": "usuarios.doc(id).get()",
+      "funcionesPropias": ["render perfil público", "galería", "contacto WhatsApp/tel", "modal-carihub"],
+      "funcionesMezcladas": ["favorito (→ INTERACCIONES)", "denunciar (→ INTERACCIONES/ADMIN)", "banners-publicidad.css (→ Core-UI/BANNERS)", "registrarVisita (→ INTERACCIONES)"]
+    }
+  },
+
+  "queSeQuedaEnCadaPantalla": {
+    "home": [
+      "Hero/carrusel promocional",
+      "Buscador (texto + categoría + geo)",
+      "Grid de sectores y categorías",
+      "Picker de categorías adultos",
+      "Vcards de destacados (vía RenderEngine futuro)",
+      "Slots de banner (render only, datos desde BANNERS)",
+      "Navegación pública y CTAs (enlaces salientes a otras apps)",
+      "Footer legal (enlace, no modal pesado)"
+    ],
+    "resultados": [
+      "Listado/paginación de perfiles públicos (server-side)",
+      "Filtros por categoría/sector/geo (vía query, no cliente)",
+      "Tarjetas de resultado (RenderEngine)",
+      "SEO de listado (meta + línea categoria·geo)",
+      "Slots de banner (render only)",
+      "Link a perfil público"
+    ],
+    "perfilPublico": [
+      "Render de perfil aprobado/activo/no-vencido",
+      "Galería pública",
+      "Datos de contacto público (WhatsApp/tel render)",
+      "SEO de perfil (meta/OG/JSON-LD vía SEO)",
+      "Slots de banner (render only)"
+    ]
+  },
+
+  "queDebeSalirDeAppPublica": [
+    { "elemento": "Wizard de registro (abrirRegistro, 3 pasos, INE/selfie)", "destino": "REGISTRO" },
+    { "elemento": "Login / alta de cuenta (abrirMiPerfil, crearCuentaMinima, modalMiPerfil)", "destino": "REGISTRO/CUENTA" },
+    { "elemento": "Panel usuario / edición perfil (modalPanel, modalEditar)", "destino": "DASHBOARD" },
+    { "elemento": "Favoritos (toggleFavorito, modal-favoritos, prepararUsuarioFavoritos)", "destino": "INTERACCIONES" },
+    { "elemento": "Solicitud de anuncio + links de pago (enviarSolicitudAnuncio, LINK_STRIPE, LINK_MERCADO_PAGO, modalAnuncio)", "destino": "BANNERS + PAGOS" },
+    { "elemento": "Mensajería / soporte (modal-mensajes, modalContacto)", "destino": "MESSENGER / SOPORTE" },
+    { "elemento": "Denuncias (modalDenuncia)", "destino": "INTERACCIONES/ADMIN" },
+    { "elemento": "registrarVisita() (escritura estadisticas_visitas)", "destino": "INTERACCIONES (servicio)" },
+    { "elemento": "firebaseConfig/init, helpers (textoSeguro, limpiarTelefono), catálogo, geo, modal-carihub, tokens", "destino": "SHARED/CORE" }
+  ],
+
+  "destinoPorModulo": {
+    "REGISTRO_WIZARD": ["modal-registro", "modal-avanzada (campos)", "modalAntiBot", "abrirRegistro", "validarPaso1/2", "uploaders INE/selfie", "crearCuentaMinima", "modalMiPerfil (alta)"],
+    "DASHBOARDS": ["modalPanel", "modalEditar", "gestión estado perfil del dueño", "renovación/vencimiento (panel)"],
+    "MESSENGER": ["modal-mensajes (si es P2P)", "listeners chat"],
+    "SOPORTE": ["modalContacto (si es soporte)", "soporte_mensajes"],
+    "ADMIN": ["recepción de denuncias", "moderación"],
+    "BANNERS": ["modalAnuncio", "enviarSolicitudAnuncio (form)", "slots → registro-banner.html (datos)", "banners-publicidad.css"],
+    "PAGOS_CONTRATOS": ["LINK_STRIPE", "LINK_MERCADO_PAGO", "checkout anuncio/perfil"],
+    "INTERACCIONES": ["toggleFavorito", "modal-favoritos", "registrarVisita", "modalDenuncia (emisión)"],
+    "SHARED_CORE": ["firebaseConfig/init", "textoSeguro", "limpiarTelefono", "normalizarTexto", "catálogo", "geo", "modal-carihub", "tokens.css", "base.css"]
+  },
+
+  "dependencias": {
+    "firebase": "Hoy: 4 SDK en Home (app/auth/firestore/storage), 2 en Resultados/Perfil. Futuro App Pública: solo firestore (lectura) vía Core; auth/storage salen con sus apps.",
+    "catalogo": "Consumido por Home y Resultados → vía Shared/Core",
+    "geo": "Consumido por Home (y filtros Resultados) → vía Shared/Core",
+    "sharedCore": "App Pública es CONSUMIDOR puro de Core (config, data, helpers, ui, RenderEngine)",
+    "renderEngine": "Tarjetas (vcards, ResultCard), perfil render → contrato RenderEngine (sin SPEC aún)",
+    "seo": "Resultados y Perfil requieren meta/OG/JSON-LD server-side → módulo SEO",
+    "themeEngine": "App Pública usa tokens base de Core; ThemeEngine extiende (no obligatorio en v1)",
+    "banners": "App Pública SOLO renderiza slots; datos/inventario/precios viven en BANNERS",
+    "registro": "App Pública enlaza (CTA) a REGISTRO; no contiene wizard",
+    "messenger": "App Pública NO contiene chat; perfil enlaza a contacto (WhatsApp/tel públicos)"
+  },
+
+  "riesgosActuales": [
+    { "id": "AP-R01", "nivel": "critico", "riesgo": "resultados.html lee toda la colección y filtra en cliente", "impacto": "no escala, costo lectura, lentitud", "mitigacion": "consultas server-side con índices + paginación" },
+    { "id": "AP-R02", "nivel": "alto", "riesgo": "index.html monolito ~1330 líneas inline mezclando 8+ dominios", "impacto": "mantenibilidad, performance, acoplamiento", "mitigacion": "extraer dominios a sus apps + Core" },
+    { "id": "AP-R03", "nivel": "alto", "riesgo": "4 SDK Firebase + signInAnonymously en Home", "impacto": "peso inicial/LCP, auth innecesaria para visitante", "mitigacion": "cargar solo firestore lectura; auth diferida" },
+    { "id": "AP-R04", "nivel": "medio", "riesgo": "17 modales en Home (varios de otras apps)", "impacto": "DOM pesado, TBT", "mitigacion": "mover modales a sus apps; lazy" },
+    { "id": "AP-R05", "nivel": "medio", "riesgo": "Tokens --rosa divergentes / home-modals.css roto", "impacto": "regresión visual", "mitigacion": "tokens Core" },
+    { "id": "AP-R06", "nivel": "medio", "riesgo": "SEO débil en Resultados/Perfil (render cliente)", "impacto": "indexación pobre", "mitigacion": "SSR/prerender + meta dinámico" }
+  ],
+  "deudaTecnicaActual": [
+    "JS inline masivo en index.html (~1330 líneas)",
+    "firebaseConfig duplicado (6 páginas)",
+    "Filtrado client-side en Resultados",
+    "Reglas proto-* muertas en home.css",
+    "CSS variables indefinidas (--rosa) en home-modals.css",
+    "home-bridge.js como parche entre UI nueva y funciones legacy inline",
+    "Mezcla de responsabilidades (favoritos, pagos, registro, soporte en Home)",
+    "index-legacy.html obsoleto aún en repo"
+  ],
+  "recomendacionesLimpieza": [
+    "Extraer firebaseConfig/helpers/catálogo/geo a Shared/Core (P0 del plan Core)",
+    "Convertir Resultados a consultas server-side + paginación (P0)",
+    "Sacar wizard/cuenta/panel/favoritos/pagos/soporte de Home a sus apps",
+    "Reducir Home a hero+buscador+grids+vcards+slots+CTAs",
+    "Eliminar proto-* muertos y corregir --rosa",
+    "Eliminar index-legacy.html (verificando hosting ignore)",
+    "Diferir auth: visitante no necesita signInAnonymously salvo favoritos",
+    "Reemplazar home-bridge.js por integración limpia post-extracción"
+  ],
+
+  "limitesResponsabilidad": {
+    "home": "Descubrir y dirigir: presentar oferta, buscar, enrutar. NO gestionar sesión ni escribir dominio.",
+    "resultados": "Listar y filtrar perfiles públicos server-side. NO lógica de cuenta ni escritura.",
+    "perfilPublico": "Mostrar un perfil público e impulsar contacto. NO panel del dueño (eso es Dashboard)."
+  },
+
+  "estructuraIdealFutura": {
+    "nota": "Estructura lógica, sin crear carpetas ahora.",
+    "app_publica": {
+      "home": ["index.html (liviano)", "css/home.css", "js/home-* (presentación)", "consume Core+RenderEngine"],
+      "resultados": ["resultados.html", "consultas server-side", "RenderEngine ResultCard", "SEO listado"],
+      "perfil": ["perfil.html", "RenderEngine perfil", "SEO perfil"],
+      "consumeDe": ["Shared/Core (config, data, helpers, ui)", "RenderEngine", "SEO", "Banners (solo render slots)"]
+    }
+  },
+  "ordenRecomendadoExtraccionFutura": [
+    { "paso": 1, "accion": "Adoptar Shared/Core (firebaseConfig, helpers, catálogo, geo) en las 3 páginas", "prioridad": "P0", "depende": "PLAN-MAESTRO-SHARED-CORE" },
+    { "paso": 2, "accion": "Resultados server-side + paginación + índices", "prioridad": "P0", "riesgo": "alto si no" },
+    { "paso": 3, "accion": "Extraer Registro/Cuenta (wizard, login) fuera de Home", "prioridad": "P1" },
+    { "paso": 4, "accion": "Extraer Favoritos/Visitas/Denuncias → Interacciones", "prioridad": "P1" },
+    { "paso": 5, "accion": "Extraer Pagos/Anuncios (links, solicitud) → Banners/Pagos", "prioridad": "P1" },
+    { "paso": 6, "accion": "Extraer Panel/Edición → Dashboard", "prioridad": "P1" },
+    { "paso": 7, "accion": "RenderEngine para vcards/ResultCard/perfil", "prioridad": "P2", "depende": "SPEC-RENDERENGINE" },
+    { "paso": 8, "accion": "SEO server-side (meta/OG/JSON-LD) Resultados/Perfil", "prioridad": "P2" },
+    { "paso": 9, "accion": "Limpieza final: proto-*, --rosa, index-legacy, home-bridge", "prioridad": "P2" }
+  ],
+  "prioridad": {
+    "P0": ["Adoptar Shared/Core", "Resultados server-side"],
+    "P1": ["Sacar Registro/Cuenta", "Sacar Interacciones", "Sacar Pagos/Banners", "Sacar Dashboard"],
+    "P2": ["RenderEngine", "SEO server-side", "limpieza técnica"]
+  },
+
+  "procedenciaPlanMaestro": {
+    "crearMd": true,
+    "crearJson": true,
+    "justificacion": "La App Pública es el núcleo de adquisición; necesita plan propio que delimite responsabilidades y guíe la extracción del monolito index.html.",
+    "depende": ["PLAN-MAESTRO-SHARED-CORE (P0)", "SPEC-RENDERENGINE (P1, pendiente)"]
+  },
+  "noModifica": [
+    "Capas congeladas (VE 1.1.0, FieldEngine 1.0.1, Messenger 1.0.0)",
+    "Producción, Firestore, deploy, commit",
+    "Código de las 3 páginas (solo documenta)"
+  ],
+  "changelog": [
+    { "version": "1.0.0", "fecha": "2026-06-10", "nota": "Plan maestro inicial App Pública — análisis y documentación" }
+  ]
+}

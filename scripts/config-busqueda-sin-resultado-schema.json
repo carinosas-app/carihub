@@ -1,0 +1,119 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "versionSchema": "2026-06-10",
+  "version": "2026-06-10",
+  "schemaId": "busquedas_sin_resultado",
+  "nombre": "Búsquedas sin resultado — inteligencia de producto",
+  "descripcion": "Registrar qué busca la gente aunque no existan perfiles, para nuevas categorías o captación de anunciantes.",
+  "privacidad": {
+    "guardar": ["palabraBuscada normalizada", "geo", "sugerencias catálogo", "fecha", "contador agregado"],
+    "noGuardar": ["IP en texto plano opcional — preferir hash", "datos de cuenta salvo uid opt-in para avisos"],
+    "retencionSugerida": "24 meses agregado; detalle crudo 90 días"
+  },
+  "colecciones": {
+    "eventos": {
+      "ruta": "busquedas_sin_resultado_eventos/{eventoId}",
+      "descripcion": "Evento individual (opcional en alta escala; puede muestrearse)",
+      "campos": {
+        "palabraBuscada": "string — texto original usuario",
+        "palabraNormalizada": "string",
+        "pais": "string",
+        "estado": "string",
+        "ciudad": "string",
+        "sectorIdSugerido": "string|null",
+        "subcategoriaIdSugerida": "string|null",
+        "categoriaPrincipalSugerida": "string|null",
+        "scoreSugerencia": "number|null",
+        "disponibilidadNivel": "sin_resultados|perfiles_estado|perfiles_pais",
+        "fecha": "timestamp",
+        "fuente": "home|resultados|registro|ia_buscador|ia_descubrimiento",
+        "sessionIdHash": "string opcional",
+        "propusoCategoria": "boolean — usuario eligió 'no encuentro mi categoría'",
+        "solicitudCategoriaId": "string|null — ref solicitudes_categorias si creó propuesta"
+      }
+    },
+    "agregados": {
+      "ruta": "busquedas_sin_resultado/{docId}",
+      "descripcion": "Contador agregado por palabra+geo — principal para Admin/IA Arquitecto",
+      "docId": "{pais}_{estado}_{ciudad}_{palabraNormalizada} — o solo geo estado si ciudad muy granular",
+      "campos": {
+        "palabraBuscada": "string — forma display más frecuente",
+        "palabraNormalizada": "string",
+        "pais": "string",
+        "estado": "string",
+        "ciudad": "string",
+        "sectorIdSugerido": "string|null",
+        "subcategoriaIdSugerida": "string|null",
+        "subcategoriaNombre": "string|null",
+        "contador": "number — incremento atómico",
+        "primeraVez": "timestamp",
+        "ultimaVez": "timestamp",
+        "fuentes": "map fuente → count",
+        "propuestasCategoria": "number — cuántas veces derivó a solicitudes_categorias"
+      },
+      "indices": [
+        ["contador", "desc"],
+        ["ultimaVez", "desc"],
+        ["pais", "estado", "contador"]
+      ]
+    },
+    "solicitudesAviso": {
+      "ruta": "solicitudes_aviso_categoria/{id}",
+      "campos": {
+        "uid": "string|null",
+        "email": "string|null",
+        "pais": "string",
+        "estado": "string",
+        "ciudad": "string",
+        "subcategoriaId": "string",
+        "sectorId": "string",
+        "creadoEn": "timestamp",
+        "notificado": "boolean"
+      }
+    }
+  },
+  "flujo": [
+    "1. Usuario completa geo (país, estado, ciudad)",
+    "2. Busca palabraClave → CatalogSearchEngine devuelve sugerencias catálogo",
+    "3. AvailabilityEngine: cero perfiles en ciudad (y opcionalmente estado)",
+    "4. UI muestra alternativas (cercanas, estatal, nacional, registrarse, aviso)",
+    "5. ZeroResultsLogger incrementa agregado + opcional evento",
+    "6. Admin/IA Arquitecto revisa top contadores para nuevas categorías o campañas captación"
+  ],
+  "integracionCategoriasSugeridas": {
+    "referencia": "config-categorias-sugeridas-schema.json",
+    "opcionesUI": [
+      "no_encuentro_mi_categoria",
+      "solicitar_nueva_subcategoria",
+      "registrarme_proponiendo_categoria",
+      "avisarme_cuando_exista"
+    ],
+    "flujo": "palabra sin match → busquedas_sin_resultado ++ → usuario opcionalmente crea solicitudes_categorias → formulario temporal"
+  },
+  "adminFuturo": {
+    "vistas": [
+      "Top búsquedas sin resultado por ciudad",
+      "Solicitudes categorías pendientes (solicitudes_categorias)",
+      "Cruce: búsquedas frecuentes sin catálogo vs propuestas usuario",
+      "Top búsquedas sin resultado por estado",
+      "Palabras sin match en catálogo (gap real)",
+      "Palabras con match catálogo pero sin perfiles (gap oferta)",
+      "Exportar para IA Arquitecto"
+    ],
+    "acciones": [
+      "crear_subcategoria_desde_gap",
+      "agregar_keywords_a_subcategoria_existente",
+      "campaña_captacion_anunciantes"
+    ]
+  },
+  "iaArquitecto": {
+    "tools": [
+      "listar_busquedas_sin_resultado_top",
+      "detectar_gaps_catalogo",
+      "proponer_fusion_categorias",
+      "auditar_keywords_faltantes"
+    ],
+    "puedeModificar": false,
+    "puedeRecomendar": true
+  }
+}

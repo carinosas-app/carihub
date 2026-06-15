@@ -1,0 +1,325 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "tipo": "AUDITORIA_FINAL_SPEC",
+  "nombre": "Auditoría técnica final — ValidationEngine v1.0.0 (pre-congelamiento)",
+  "fecha": "2026-06-09",
+  "versionSpecAuditada": "1.0.0",
+  "estadoAprobacionCongelamiento": "APROBADO_PO_2026-06-09",
+  "actaCongelamiento": "scripts/ACTA-CONGELAMIENTO-VALIDATIONENGINE.json",
+  "estadoActa": "CONGELADO",
+  "fechaRevalidacionPostOBVE": "2026-06-09",
+  "obVE": { "estado": "CERRADOS", "ids": ["OB-VE1", "OB-VE2", "OB-VE3", "OB-VE4", "OB-VE5"] },
+  "veredictoGeneral": "DISENO_CONSISTENTE_LISTO_REVISION_CONGELAMIENTO",
+  "puedeCongelarseSinCambios": true,
+  "puedeCongelarseTrasAjustesObligatorios": true,
+  "aprobarActaCongeladoAhora": true,
+  "actualizarActaAntesCongelamiento": false,
+  "fechaCongelamiento": "2026-06-09",
+  "1_compatibilidadCapasCongeladas": {
+    "catalogo_1_0_0": {
+      "estado": "COMPATIBLE",
+      "fortalezas": [
+        "validateFormulario alinea subcategoriaId con FieldEngine AM2",
+        "categoria_sugerida usa modo temporal_categoria_sugerida",
+        "coherencia campos delegada a ResolvedRegistrationSchema"
+      ],
+      "debilidades": [
+        "actualizar_perfil_publicado no define whitelist de campos vs snapshot RenderEngine",
+        "categoria_sugerida sin mapeo EventBus explícito hacia admin/catálogo"
+      ]
+    },
+    "cuentas_1_0_0": {
+      "estado": "COMPATIBLE_CON_RESERVA_MIGRACION",
+      "fortalezas": [
+        "CuentaContext estados alineados acta cuentas",
+        "upgrade visitante exige subcategoriaId + contratoVigente en formularios",
+        "rolesCuenta anunciante en crear_solicitud_banner"
+      ],
+      "debilidades": [
+        "anuncianteId vs usuarioId en owner banner no explicitado en owner checks",
+        "tipoCuentaPrincipal visitante→upgrade no tiene matriz estado completa",
+        "perfilPrincipalId no usado en owner check cuando usuario tiene múltiples perfiles (futuro)"
+      ]
+    },
+    "seguridad_mvp_1_0_0": {
+      "estado": "COMPATIBLE_CON_GAPS",
+      "fortalezas": [
+        "Turnstile acciones alineadas antiBots.decision salvo enviar_revision/guardar_borrador coherente",
+        "rate limits mapeados a limitesPorAccion",
+        "estadoSeguridad valores y efectos respetados en matriz parcial",
+        "restriccionesSinVerificar coherente: borrador sí, enviar_revision no sin email"
+      ],
+      "debilidades": [
+        "validateAuth ausente en algoritmoValidacion.orden JSON (sí en MD) — contradicción interna",
+        "login exitoso sin entrada rate limit success; solo login_fallido",
+        "logs_acceso_privado (admin INE) no en fan-out VE — dependencia oculta Dashboards",
+        "App Check complementario no referenciado",
+        "ESTADO_CUENTA_INVALIDO citado en validacionAuth pero ausente en catálogo errores"
+      ]
+    },
+    "fieldEngine_1_0_1": {
+      "estado": "COMPATIBLE",
+      "fortalezas": [
+        "Delegación evaluateSecurityGates — no duplica AM1 borrador restringido",
+        "Orden pipeline: resolve antes de validateFieldValues",
+        "Fixture V01 alineado F10 FieldEngine"
+      ],
+      "debilidades": [
+        "Doble fuente verdad: matrizAccionEstado VE vs securityGates FE — riesgo drift si no se documenta FE como autoritativo para gates",
+        "enviar_revision en restringido: ambos deniegan — OK pero sin fixture"
+      ]
+    },
+    "dashboards_1_0_0": {
+      "estado": "PARCIALMENTE_ALINEADO",
+      "fortalezas": [
+        "10 dominios notificación referenciados",
+        "9 dominios historial referenciados",
+        "IA confirmación humana alineada Dashboards",
+        "deduplicacion notificaciones citada"
+      ],
+      "debilidades": [
+        "mapeoAccionEvento cubre ~8 de 40+ acciones — brecha crítica EventBus",
+        "tipoEvento Dashboards (verificacion_recibida) vs fixture notificacion_admin.* inconsistente",
+        "verificacion_recibida en Dashboards destinatario usuarioId — admin queue no modelada en VE",
+        "principio emitirHistorial=true vs mapeo parcial contradictorio"
+      ]
+    }
+  },
+  "2_dependenciasOcultas": [
+    { "id": "DO-VE1", "dependencia": "config-contratos-carihub-schema.json", "uso": "upgrade visitante contratoVigente; renovar_contrato", "enSpec": "parcial" },
+    { "id": "DO-VE2", "dependencia": "config-renderizado-dinamico-schema.json", "uso": "campos editables post-publicación", "enSpec": "no" },
+    { "id": "DO-VE3", "dependencia": "logs_acceso_privado", "uso": "admin ver INE post-upload", "enSpec": "no" },
+    { "id": "DO-VE4", "dependencia": "Firebase Storage rules", "uso": "debe coincidir storagePathPattern", "enSpec": "diseño referenciado" },
+    { "id": "DO-VE5", "dependencia": "App Check", "uso": "complemento SDK vs Turnstile HTML", "enSpec": "no" },
+    { "id": "DO-VE6", "dependencia": "Cloud Functions ejecutor persistencia", "uso": "post ValidationResult.persistenciaAutorizada", "enSpec": "fuera alcance explícito" },
+    { "id": "DO-VE7", "dependencia": "SPEC Messenger futura", "uso": "mensajeria_futura hooks V18", "enSpec": "sí marcado" },
+    { "id": "DO-VE8", "dependencia": "pagos Stripe/MercadoPago", "uso": "subir_comprobante, renovar", "enSpec": "parcial" }
+  ],
+  "3_contradiccionesInternas": [
+    {
+      "id": "CI-01",
+      "severidad": "alta",
+      "area": "pipeline",
+      "descripcion": "SPEC-VALIDATIONENGINE.md orden: validateAuth paso 3; JSON algoritmoValidacion.orden omite validateAuth y pone Turnstile en paso 3"
+    },
+    {
+      "id": "CI-02",
+      "severidad": "alta",
+      "area": "EventBus",
+      "descripcion": "enviar_revision tiene dos filas mapeoAccionEvento con historial distinto (perfil vs actividad_cuenta) sin contrato multi-destino"
+    },
+    {
+      "id": "CI-03",
+      "severidad": "alta",
+      "area": "EventBus / notificaciones",
+      "descripcion": "Principio 'toda acción exitosa puede emitir EventoCanonico' + historial 'casi toda emitirHistorial=true' vs mapeoAccionEvento incompleto"
+    },
+    {
+      "id": "CI-04",
+      "severidad": "media",
+      "area": "notificaciones",
+      "descripcion": "Fixture V02 notificacion_admin.verificacion_recibida vs Dashboards dominio verificaciones.tipoEvento verificacion_recibida destinatario usuarioId"
+    },
+    {
+      "id": "CI-05",
+      "severidad": "media",
+      "area": "acciones",
+      "descripcion": "ownerChecks lista actualizar_solicitud; acciones reales actualizar_solicitud_pre_pago, editar_banner"
+    },
+    {
+      "id": "CI-06",
+      "severidad": "media",
+      "area": "estados",
+      "descripcion": "matrizAccionEstado incompleta: sin filas admin_*, subir_*, renovar_*, upgrade_perfil_publico, favorito_*"
+    },
+    {
+      "id": "CI-07",
+      "severidad": "media",
+      "area": "errores",
+      "descripcion": "GATE_SEGURIDAD_DENEGADO (FieldEngine) vs ESTADO_SEGURIDAD_DENEGADO (VE) — semántica solapada sin guía"
+    },
+    {
+      "id": "CI-08",
+      "severidad": "baja",
+      "area": "media",
+      "descripcion": "maxDuracionSegundos video sin campo en MediaValidationContext ni algoritmo"
+    }
+  ],
+  "4_casosLimiteNoContemplados": [
+    "enviar_revision con estadoRevision=en_revision (doble envío)",
+    "guardar_borrador sin email verificado (permitido Seguridad) — sin fixture",
+    "estadoCuenta pendiente_activacion",
+    "estadoVerificacion vencida al renovar",
+    "observacion + enviar_revision (permitido) — cola prioritaria admin no en evento",
+    "upload INE durante estadoRevision=rechazada",
+    "banner solicitud en estado pago_pendiente + editar",
+    "ia_aceptar que re-dispara validateAction fallida (rollback ia_recomendaciones?)",
+    "rate limit en guardar_borrador autosave alto volumen wizard",
+    "favorito_add sin perfil público destino (perfilId inexistente)",
+    "admin_aprobar_perfil sin logs_acceso_privado si abre INE",
+    "renovar_contrato banner vs perfil (metadata.tipo)",
+    "múltiples perfiles mismo usuarioId — owner check perfilId equivocado",
+    "categoria_sugerida anónima vs autenticada"
+  ],
+  "5_riesgosImplementacionFutura": [
+    { "id": "RI-1", "nivel": "critico", "descripcion": "Runtime sin tabla mapeo acción→eventos → notificaciones/historial inconsistentes" },
+    { "id": "RI-2", "nivel": "alto", "descripcion": "Ejecutor persistencia separado de emitEventoCanonico → acciones validadas sin side effects" },
+    { "id": "RI-3", "nivel": "alto", "descripcion": "MIME spoofing en MVP media validation" },
+    { "id": "RI-4", "nivel": "alto", "descripcion": "Admin email allowlist único punto falla RBAC" },
+    { "id": "RI-5", "nivel": "medio", "descripcion": "Doble validación cliente+servidor si wizard no delega 100% a VE" },
+    { "id": "RI-6", "nivel": "medio", "descripcion": "ia_aceptar_recomendacion re-entrada validateAction recursiva sin límite profundidad" },
+    { "id": "RI-7", "nivel": "medio", "descripcion": "Video duración no validable server-side sin procesamiento media" }
+  ],
+  "6_riesgosMigracion": {
+    "usuarios_uid_monolito": {
+      "nivel": "critico",
+      "descripcion": "Owner checks y historial_perfil asumen perfiles/{perfilId}; producción usa usuarios/{uid}",
+      "mitigacionDiseño": "Fase bridge perfilId=uid documentada en acta migración — NO en VE spec"
+    },
+    "perfiles_perfilId": {
+      "nivel": "alto",
+      "descripcion": "Storage paths perfiles/{perfilId} inoperantes hasta migración",
+      "mitigacion": "ValidationEngine runtime post-migración o adapter temporal"
+    },
+    "contratos": {
+      "nivel": "alto",
+      "descripcion": "renovar_contrato y upgrade contratoVigente dependen contratos_perfiles no en producción"
+    },
+    "banners": {
+      "nivel": "medio",
+      "descripcion": "solicitudes_anuncios paths y anuncianteId en producción parcial funnel"
+    },
+    "dashboard_shell": {
+      "nivel": "medio",
+      "descripcion": "evaluateDashboardAction asume shell /cuenta modular; index.html modales no enrutan contexto"
+    }
+  },
+  "7_riesgosPorArea": {
+    "turnstile": ["Orden vs Auth: token anónimo registro antes de idToken", "TURNSTILE_ACTION_MISMATCH sin catálogo acciones Cloudflare", "reenvio_email sin fixture"],
+    "rateLimits": ["Autosave borrador 30/h puede bloquear wizard legítimo", "ia_consulta 30/h inline no en limitesPorAccion Seguridad", "login éxito no decrementa riesgoScore en VE diseño"],
+    "ownerChecks": ["anuncianteId≠usuarioId", "multi-perfil", "legacy uid como perfilId"],
+    "rbacAdmin": ["Fase1 email total", "admin_aprobar sin reauth vs accionesCriticasAdmin otras", "sin logs_acceso_privado en spec"],
+    "eventBus": ["Un EventoCanonico vs múltiples destinos no tipado", "Sin idempotencia validationId en fan-out", "Falta registry acciones"],
+    "ia_recomendaciones": ["Doble validateAction", "expirada sin TTL diseño en VE", "ia_arquitecto solo lectura pero sin gate explícito en acciones"]
+  },
+  "8_revisionFixtures": {
+    "cobertura": "18 casos — adecuada para gates críticos, insuficiente para EventBus y flujos felices completos",
+    "porFixture": [
+      { "id": "V01", "ok": true, "nota": "AM1 restringido borrador" },
+      { "id": "V02", "ok": true, "gap": "emitirEvento naming vs mapeoAccionEvento y Dashboards" },
+      { "id": "V03", "ok": true },
+      { "id": "V04", "ok": true },
+      { "id": "V05", "ok": true },
+      { "id": "V06", "ok": true, "nota": "logSeguridad rate_limit — no en mapeo explícito" },
+      { "id": "V07", "ok": true, "gap": "sin emitirHistorial esperado registro visitante" },
+      { "id": "V08", "ok": true, "gap": "solo caso fallo; falta V08b upgrade éxito" },
+      { "id": "V09", "ok": true },
+      { "id": "V10", "ok": true },
+      { "id": "V11", "ok": true },
+      { "id": "V12", "ok": true },
+      { "id": "V13", "ok": true, "gap": "podría ser MEDIA_ARCHIVO_PELIGROSO vs TIPO" },
+      { "id": "V14", "ok": true },
+      { "id": "V15", "ok": true },
+      { "id": "V16", "ok": false, "gap": "renovar_contrato sin entrada en mapeoAccionEvento; evento intento no en Dashboards renovaciones" },
+      { "id": "V17", "ok": true, "gap": "sin resolvedSchema en entrada — asume implícito" },
+      { "id": "V18", "ok": true, "nota": "hook futuro OK" }
+    ],
+    "fixturesFaltantesRecomendados": [
+      "V19_upgrade_visitante_ok",
+      "V20_enviar_revision_restringido_denegado",
+      "V21_admin_aprobar_perfil_ok",
+      "V22_subir_selfie_ok_historial_verificacion_sin_url",
+      "V23_favorito_add_ok",
+      "V24_ia_aceptar_ok_doble_validate"
+    ]
+  },
+  "9_cambiosCostososPostRuntime": [
+    "Rediseñar EventoCanonico si se implementa fan-out ad-hoc sin registry",
+    "Cambiar orden pipeline (Auth/Turnstile) tras desplegar Callables",
+    "Añadir magic bytes media requiere refactor upload pipeline",
+    "Migrar de email-admin a RBAC claims invalida evaluateDashboardAction",
+    "Unificar perfilId bridge uid→perfil si paths Storage ya escritos",
+    "Expandir matriz estados tras producción datos inconsistentes"
+  ],
+  "10_coberturaEventBusPorAccion": {
+    "metodo": "Inventario acciones en spec vs mapeoAccionEvento + validacionAcciones.historial",
+    "conMapeoExplicito": ["enviar_revision", "guardar_borrador", "crear_solicitud_banner", "categoria_sugerida", "denuncia", "ia_aceptar_recomendacion", "login"],
+    "conHistorialEnValidacionAcciones": ["guardar_borrador", "enviar_revision", "actualizar_perfil_publicado", "renovar_contrato"],
+    "sinMapeoDocumentado": [
+      "registro_auth", "registro_visitante", "upgrade_perfil_publico", "recuperacion_password",
+      "subir_foto_perfil", "subir_video_perfil", "subir_verificacion_*", "subir_banner_*",
+      "editar_banner", "enviar_correccion_banner", "renovar_contrato", "favorito_add/remove",
+      "contacto_publico", "admin_aprobar_perfil", "admin_rechazar_perfil", "ia_rechazar_recomendacion",
+      "mensaje_enviar", "solicitar_verificacion"
+    ],
+    "veredicto": "COMPLETO — registry-validationengine-eventos.json 39 acciones (post OB-VE3)"
+  },
+  "fortalezas": [
+    "Rol claro puente entre 5 capas congeladas y runtime",
+    "Pipeline fallo temprano sin emitir eventos en error",
+    "Delegación FieldEngine securityGates evita duplicar AM1",
+    "Turnstile/rate limits centralizados server-side",
+    "Validación media con paths Storage y tipos peligrosos",
+    "IA con confirmación humana y re-validación acción",
+    "18 fixtures cubren gates de seguridad principales",
+    "Interacciones v1.2.1 correctamente fuera de alcance"
+  ],
+  "debilidadesPostOBVE": [
+    "matrizAccionEstado aún parcial (no bloquea — gates FE autoritativos)",
+    "Dependencias ocultas RenderEngine, logs_acceso_privado, acta migración",
+    "Fixtures AM-VE1 V19-V24 pendientes",
+    "Gap producción usuarios monolito vs perfiles"
+  ],
+  "ajustesObligatoriosPreCongelamiento": {
+    "estado": "CERRADOS",
+    "items": [
+    {
+      "id": "OB-VE1",
+      "prioridad": "obligatorio",
+      "descripcion": "Unificar algoritmoValidacion.orden JSON y MD — incluir validateAuth explícito antes de Turnstile en acciones autenticadas; documentar excepciones anónimas",
+      "cerrado": true
+    },
+    {
+      "id": "OB-VE2",
+      "prioridad": "obligatorio",
+      "descripcion": "Definir contrato EventBus multi-destino: un validateAction puede emitir N eventos canónicos o 1 evento con fanOutTargets[] — resolver duplicado enviar_revision",
+      "cerrado": true
+    },
+    {
+      "id": "OB-VE3",
+      "prioridad": "obligatorio",
+      "descripcion": "Completar registry accion→{historial, notificacion, logsSeguridad, ia} para TODAS las acciones listadas en acciones.* — mínimo tabla con emitir:false explícito",
+      "cerrado": true
+    },
+    {
+      "id": "OB-VE4",
+      "prioridad": "obligatorio",
+      "descripcion": "Alinear notificación enviar_revision: admin queue (notificaciones_admin o dominio verificaciones con destinatario adminId) vs Dashboards verificacion_recibida",
+      "cerrado": true
+    },
+    {
+      "id": "OB-VE5",
+      "prioridad": "obligatorio",
+      "descripcion": "Añadir ESTADO_CUENTA_INVALIDO y guía GATE_SEGURIDAD_DENEGADO vs ESTADO_SEGURIDAD_DENEGADO al catálogo errores",
+      "cerrado": true
+    }
+    ]
+  },
+  "ajustesRecomendados": [
+    { "id": "AM-VE1", "descripcion": "Fixtures V16 alineado o mapeo renovar_contrato; añadir V19–V24" },
+    { "id": "AM-VE2", "descripcion": "Documentar bridge migración perfilId=uid en VE o acta migración referenciada obligatoria pre-runtime" },
+    { "id": "AM-VE3", "descripcion": "ownerChecks: anuncianteId, actualizar_solicitud_pre_pago, editar_banner" },
+    { "id": "AM-VE4", "descripcion": "MediaValidationContext: duracionSegundos opcional; post-MVP magic bytes" },
+    { "id": "AM-VE5", "descripcion": "logs_acceso_privado en fan-out admin_aprobar + subir INE view" },
+    { "id": "AM-VE6", "descripcion": "Matriz estadoRevision para enviar_revision y editar post-rechazo" },
+    { "id": "AM-VE7", "descripcion": "Rate limit autosave borrador — ventana separada publicacion_edicion_autosave" }
+  ],
+  "recomendacionCongelamiento": {
+    "aprobarAhora": true,
+    "congelado": true,
+    "fechaAprobacionPO": "2026-06-09",
+    "razon": "OB-VE1–5 cerrados; validador 19/19 OK; acta CONGELADO aprobada por product owner",
+    "acta": "scripts/ACTA-CONGELAMIENTO-VALIDATIONENGINE.json",
+    "ajustesRecomendadosNoBloqueantes": ["AM-VE1", "AM-VE2", "AM-VE5"]
+  }
+}

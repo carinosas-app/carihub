@@ -1,0 +1,271 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "$id": "https://carihub.app/schemas/spec-renderengine.json",
+  "tipo": "SPEC_TECNICA",
+  "nombre": "RenderEngine — Especificación técnica",
+  "versionSpec": "1.0.0",
+  "fecha": "2026-06-10",
+  "fechaActualizacion": "2026-06-10",
+  "estado": "DISENO_INICIAL",
+  "implementacionAutorizada": false,
+  "changelog": {
+    "1.0.0": ["SPEC inicial: render Home/Resultados/Perfil/Tarjetas/Banners/Landings SEO/Geo/Snapshots; PrivacyGuard; head dinámico Schema.org/OG; CWV/Mobile-first; compatibilidad Core/FieldEngine/VE/SEO/ThemeEngine"]
+  },
+  "proposito": "Motor único de renderizado de superficies PÚBLICAS de CariHub. Convierte datos publicados (snapshot perfil + catálogo + geo) en HTML/DOM + metadatos, usando componentes registrados y tokens visuales. No persiste, no valida valores (ValidationEngine), no resuelve schemas de registro (FieldEngine), no renderiza superficies privadas.",
+  "principioRector": "Solo superficies públicas indexables. Datos por snapshot congelado, nunca lectura viva de campos privados. Cero hardcode por subcategoría. Siempre fallback, nunca throw que rompa la página. PrivacyGuard es obligatorio antes de pintar.",
+  "baseContrato": "Extiende scripts/config-renderizado-dinamico-schema.json (componentes, fallback, snapshotAlPublicar, PrivacyGuard) a Home, Landings SEO, Banners, rutas geo y head dinámico.",
+  "dependenciasCongeladas": {
+    "catalogo": "catalogo-2026-06-10@1.0.0",
+    "fieldengine": "fieldengine-2026-06-10@1.0.1",
+    "validationengine": "validationengine-2026-06-10@1.1.0",
+    "seguridad": "seguridad-2026-06-10@1.0.0",
+    "dashboards": "dashboards-2026-06-10@1.0.0"
+  },
+  "dependenciasNoCongeladas": {
+    "sharedCore": "PLAN-MAESTRO-SHARED-CORE v1.0.0 (config, data, helpers, ui, tokens) — precondición",
+    "appPublica": "PLAN-MAESTRO-APP-PUBLICA v1.0.0 — consumidor",
+    "seo": "OBSERVACION-ARQUITECTONICA-SEO v1.0.0 — consumidor de head/JSON-LD",
+    "themeEngine": "OBSERVACION-ARQUITECTONICA-THEMEENGINE v1.3.0 — provee tokens/temas",
+    "interacciones": "OBSERVACION v1.2.x — futuro (efímeros noindex)",
+    "banners": "futuro — datos de slots"
+  },
+  "fuentesLectura": [
+    "scripts/config-renderizado-dinamico-schema.json",
+    "scripts/config-registro-componentes-ui-schema.json",
+    "scripts/mapa-registro-categorias.json",
+    "scripts/config-registro-schema.meta.json",
+    "scripts/config-seguridad-mvp-schema.json",
+    "public/js/catalogos-carihub.js (vía Shared/Core)",
+    "public/js/sectores-carihub.js (vía Shared/Core)",
+    "public/paises.js / estados.js / ciudades.js (vía Shared/Core)"
+  ],
+  "superficies": {
+    "indexablesPublicas": ["home", "resultados", "perfil_publico_publicado", "landing_pais", "landing_estado", "landing_ciudad", "landing_categoria", "landing_categoria_geo", "banner_publico"],
+    "noRenderiza": ["dashboards", "admin", "messenger", "wizard_registro", "borradores_perfil", "perfil_no_publicado", "stories_live_expirados", "contenido_login", "previews_borrador_tema"]
+  },
+  "api": {
+    "renderHome": { "entrada": "HomeContext", "salida": "RenderOutput", "descripcion": "Hero + grids sectores/categorías + buscador + vcards destacados + slots banner" },
+    "renderResults": { "entrada": "ResultsContext", "salida": "RenderOutput", "descripcion": "Lista paginada server-side de perfiles públicos + slots banner + head listado" },
+    "renderProfile": { "entrada": "ProfileContext", "salida": "RenderOutput", "descripcion": "Perfil público desde snapshot + galería + contacto público + head perfil" },
+    "renderResultCard": { "entrada": "ProfileSnapshot + RenderContext", "salida": "ComponentHtml", "nota": "Resuelve ComponentRegistry; ya definido en config-renderizado-dinamico-schema.json" },
+    "renderProfileLayout": { "entrada": "ProfileSnapshot + RenderContext", "salida": "ComponentHtml" },
+    "renderLanding": { "entrada": "LandingContext", "salida": "RenderOutput", "descripcion": "Hub geo/categoría: país/estado/ciudad/subcategoria con listado + contenido editorial" },
+    "renderBannerSlot": { "entrada": "BannerSlotContext", "salida": "ComponentHtml", "nota": "Solo render; datos/inventario de Banners" },
+    "renderHead": { "entrada": "HeadContext", "salida": "HeadMeta", "descripcion": "title/description/canonical/OG/Twitter/JSON-LD por superficie" },
+    "resolveComponent": { "entrada": "ProfileSnapshot + tipo(resultados|perfil)", "salida": "componentId", "nota": "Algoritmo de config-renderizado-dinamico-schema.json" },
+    "resolveUrl": { "entrada": "UrlContext", "salida": "{ canonical, slug, breadcrumb }", "descripcion": "Construye URL pública estable y breadcrumb" },
+    "applyPrivacyGuard": { "entrada": "ProfileSnapshot + camposPermitidos", "salida": "SafeProfileView", "nota": "Lista negra obligatoria antes de render" }
+  },
+  "tipos": {
+    "RenderContext": {
+      "superficie": "enum: home|resultados|perfil|landing|banner",
+      "dispositivo": "enum: movil|tablet|desktop (default movil)",
+      "locale": "string (default es-MX)",
+      "tema": "TokenSet | null (Core base si null; ThemeEngine si aplica)",
+      "modoRender": "enum: ssr|prerender|cliente (default prerender)",
+      "indexable": "boolean (derivado: false si superficie noRenderiza o adultos restringido)"
+    },
+    "ProfileSnapshot": {
+      "perfilId": "string",
+      "estadoPublicacion": "enum: publicado|activo (solo estos renderizan)",
+      "categoriaOficialIdFinal": "sectorId",
+      "subcategoriaOficialIdFinal": "subcategoriaId",
+      "formularioIdFinal": "string",
+      "arquetipoFinal": "string",
+      "tipoPerfilFinal": "string",
+      "componenteResultados": "string",
+      "componentePerfil": "string",
+      "schemaVersion": "string (congelada al publicar)",
+      "camposPublicosResultados": "string[]",
+      "camposPublicosPerfil": "string[]",
+      "publico": "Record<string,any> (solo datos públicos)",
+      "geo": "{ pais, estado, ciudad }",
+      "slug": "string | null",
+      "etiquetaUI": "categoria_nueva|categoria_revisada|null",
+      "nota": "Origen: snapshotAlPublicar de FieldEngine → config-renderizado-dinamico-schema.json"
+    },
+    "RenderOutput": {
+      "html": "string (markup superficie)",
+      "head": "HeadMeta",
+      "componentesUsados": "string[]",
+      "assetsDiferidos": "string[] (lazy)",
+      "indexable": "boolean",
+      "fallbacksAplicados": "string[]",
+      "renderHash": "string (reproducibilidad)",
+      "generadoAt": "ISO8601"
+    },
+    "HeadMeta": {
+      "title": "string",
+      "description": "string",
+      "canonical": "URL",
+      "robots": "enum: index,follow | noindex,follow | noindex,nofollow",
+      "openGraph": "{ ogTitle, ogDescription, ogImage, ogUrl, ogType }",
+      "twitter": "{ card, title, description, image }",
+      "jsonLd": "JsonLdNode[] (Schema.org)",
+      "hreflang": "Record<locale,URL> | null",
+      "nota": "SEO consume HeadMeta; no genera HTML paralelo"
+    },
+    "JsonLdNode": {
+      "tipo": "Person|LocalBusiness|ProfessionalService|Organization|BreadcrumbList|WebSite|SearchAction|ItemList",
+      "regla": "Solo desde datos públicos verificables; nunca schema falso de verificaciones"
+    },
+    "LandingContext": {
+      "nivel": "enum: pais|estado|ciudad|categoria|categoria_geo",
+      "geo": "{ pais, estado?, ciudad? }",
+      "subcategoriaId": "string | null",
+      "page": "number (paginación)",
+      "perfiles": "ProfileSnapshot[]"
+    },
+    "BannerSlotContext": {
+      "slotId": "string",
+      "posicion": "enum: home_hero|home_grid|resultados_side|resultados_center|perfil_side",
+      "creativo": "{ imagen, alt, href } (datos de Banners)",
+      "nota": "RenderEngine no decide inventario ni rotación; solo pinta el creativo recibido"
+    },
+    "TokenSet": {
+      "origen": "Shared/Core tokens.css base | ThemeEngine override",
+      "variables": "Record<string,string> (--color-*, --space-*, --font-*)",
+      "nota": "RenderEngine aplica tokens; no define el editor (ThemeEngine)"
+    }
+  },
+  "datosMinimosNecesarios": {
+    "resultCard": ["fotoPrincipal", "alias|nombreComercial|nombreProfesional", "geo.ciudad", "subcategoria (label)", "componenteResultados"],
+    "perfil": ["snapshot completo público", "camposPublicosPerfil", "componentePerfil", "schemaVersion"],
+    "landing": ["geo válido", "lista perfiles públicos", "subcategoriaId opcional", "contenido editorial hub opcional"],
+    "head": ["title fuente", "canonical", "ogImage fallback por tipoPerfil"],
+    "reglaMinimos": "Si faltan mínimos → tarjeta/perfil mínimo seguro (foto, nombre, ciudad, etiqueta) — nunca página rota"
+  },
+  "algoritmoResolucionComponente": [
+    "1. Leer snapshot.componenteResultados | snapshot.componentePerfil",
+    "2. Si existe en ComponentRegistry (config-registro-componentes-ui-schema) → usar",
+    "3. Si no, fallbackPorArquetipo(arquetipoFinal)",
+    "4. Si no, fallbackPorTipoPerfil(tipoPerfilFinal)",
+    "5. Si desconocido o error carga → ResultCardGenerico | ProfileLayoutGenerico",
+    "6. NUNCA throw que rompa la página — fallback + log interno"
+  ],
+  "algoritmoRender": [
+    "0. Validar superficie indexable; si noRenderiza → abortar con RENDER_SUPERFICIE_PRIVADA",
+    "1. Cargar snapshot(s) — solo estadoPublicacion publicado|activo",
+    "2. applyPrivacyGuard(snapshot, camposPublicos*) — eliminar lista negra",
+    "3. resolveComponent → cargar plantilla del ComponentRegistry",
+    "4. FieldEngine (vía snapshot.schemaVersion) aporta labels/orden — no re-resolver schema vivo",
+    "5. Aplicar TokenSet (Core base o ThemeEngine)",
+    "6. renderHead → meta/OG/JSON-LD desde datos públicos",
+    "7. Marcar assets diferidos (lazy) y dimensiones de imagen",
+    "8. Emitir RenderOutput + renderHash"
+  ],
+  "urlsYslugs": {
+    "perfil": "/perfil/{perfilId}[/{slug}] — perfilId estable es canónico; slug opcional descriptivo sin PII",
+    "landingPais": "/{pais}",
+    "landingEstado": "/{pais}/{estado}",
+    "landingCiudad": "/{pais}/{estado}/{ciudad}",
+    "landingCategoria": "/c/{subcategoriaId}",
+    "landingCategoriaGeo": "/{pais}/{estado}/{ciudad}/{subcategoriaId}",
+    "resultados": "/resultados?categoria=&pais=&estado=&ciudad= (canonical normalizado)",
+    "reglas": ["slug estable; cambio → 301 (capa SEO)", "sin PII en slug", "normalización unicode", "canonical único por contenido para evitar duplicados faceted"]
+  },
+  "metadatosDinamicos": {
+    "fuente": "camposPublicosPerfil + catálogo (label subcategoría) + geo",
+    "schemaOrg": {
+      "persona": "Person",
+      "negocio": "LocalBusiness",
+      "profesionista": "ProfessionalService",
+      "listado": "ItemList",
+      "navegacion": "BreadcrumbList",
+      "sitio": "WebSite + SearchAction"
+    },
+    "openGraph": "ogImage = fotoPrincipal pública o fallback por tipoPerfil (mín 1200px)",
+    "regla": "Adultos: noindex donde aplique; OG moderado; no exponer datos sensibles en meta"
+  },
+  "rendimiento": {
+    "mobileFirst": "Render base móvil; paridad de contenido desktop/móvil (indexación móvil)",
+    "coreWebVitals": { "LCP": "imagen hero/fotoPrincipal optimizada + dimensiones", "INP": "JS mínimo en superficie pública", "CLS": "reservar espacio de imagen/banner" },
+    "lazyLoading": ["imágenes fuera de viewport", "componentes de banner", "galería perfil (después de fold)"],
+    "cacheFutura": { "estrategia": "snapshot inmutable por (perfilId, schemaVersion) cacheable en CDN/edge; invalidación al republicar", "nota": "diseño; no implementar" },
+    "presupuesto": "Render público sin auth ni storage SDK; solo lectura firestore vía Core"
+  },
+  "seguridad": {
+    "privacyGuard": {
+      "obligatorio": true,
+      "nuncaMostrar": ["INE", "ine", "selfie", "telefonoPrivado", "telefono", "rfc", "razonSocial", "datosFiscales", "facturacion", "verificacion", "cedula", "numeroCedula", "comprobanteCedula", "notasAdmin", "documentosPrivados", "comprobantePago", "estadoRevision", "decisionAdminCategoria", "solicitudCategoriaId"],
+      "regla": "Elimina campos prohibidos aunque vengan mal guardados en snapshot; intento de render privado → log seguridad, no mostrar"
+    },
+    "noRenderizaPrivado": ["dashboards", "messenger", "admin", "wizard"],
+    "noRenderizaBorradores": "Solo estadoPublicacion publicado|activo; borrador/oculto/no publicado → noindex y no render público",
+    "datosSensibles": "Adultos: políticas indexación restringidas (coherente con SEO + Seguridad MVP)"
+  },
+  "compatibilidad": {
+    "sharedCore": "Consume firebase init, helpers, catálogo, geo, tokens y ComponentRegistry de Core. RenderEngine NO duplica utilidades.",
+    "fieldEngine": "FieldEngine resuelve schema en registro; al publicar genera snapshot. RenderEngine consume snapshot, NO llama FieldEngine vivo.",
+    "validationEngine": "VE valida antes de publicar; no afecta render de campos ya aprobados. RenderEngine no valida valores.",
+    "seo": "RenderEngine produce HeadMeta/JSON-LD; SEO define políticas (sitemap, robots, hreflang) y consume el output. Sin HTML legacy paralelo.",
+    "themeEngine": "ThemeEngine provee TokenSet/plantillas autorizadas; RenderEngine las aplica. ThemeEngine no inyecta HTML/JS crudo.",
+    "interaccionesFuturo": "Stories/live efímeros → noindex/noarchive; no duplican landings. Sin dependencia en v1.0.0.",
+    "bannersFuturo": "RenderEngine pinta creativo recibido; inventario/rotación/precios viven en Banners.",
+    "migracionUsuariosPerfiles": "RenderEngine renderiza perfiles/{perfilId} con snapshot. Migración usuarios→perfiles debe conservar perfilId/URL canónica estable (evitar pérdida ranking). Ver ACTA-MIGRACION-USUARIOS-PERFILES."
+  },
+  "errores": {
+    "RENDER_SUPERFICIE_PRIVADA": { "http": 403, "retry": false, "nota": "Intento render dashboards/messenger/admin/borrador" },
+    "SNAPSHOT_NO_PUBLICADO": { "http": 404, "retry": false, "nota": "estadoPublicacion no publicado|activo" },
+    "COMPONENTE_DESCONOCIDO": { "http": 200, "retry": false, "nota": "Fallback genérico — no rompe página" },
+    "CAMPO_PRIVADO_BLOQUEADO": { "http": 200, "retry": false, "nota": "PrivacyGuard elimina + log; no rompe" },
+    "GEO_INVALIDO_LANDING": { "http": 404, "retry": false },
+    "SLUG_NO_CANONICO": { "http": 301, "retry": false, "nota": "Redirección a canónico (capa SEO)" }
+  },
+  "fallbackObligatorio": {
+    "siComponenteInexistente": "ResultCardGenerico | ProfileLayoutGenerico",
+    "siErrorRender": "Tarjeta mínima: foto, nombre/alias, ciudad, etiqueta",
+    "camposMinimosSeguros": ["alias", "nombreComercial", "nombreProfesional", "tagline", "geo.ciudad", "fotoPrincipal", "precioDesde", "tarifaDesde"]
+  },
+  "antiPatrones": [
+    "if (subcategoriaId === 'x') en render",
+    "Crear resultados-{categoria}.html o perfil-{tipo}.html",
+    "Leer FieldEngine vivo en render público",
+    "Leer campos privados del documento perfil en cliente público",
+    "Indexar borradores/dashboards/messenger",
+    "Generar HTML SEO paralelo fuera de RenderEngine",
+    "ThemeEngine inyectando HTML/JS crudo del usuario",
+    "Omitir PrivacyGuard o fallback genérico"
+  ],
+  "fueraDeAlcance": [
+    "Persistencia Firestore y escritura",
+    "ValidationEngine (validación de valores)",
+    "FieldEngine (resolución de schema de registro)",
+    "Wizard/registro HTML",
+    "Dashboards, Admin, Messenger (superficies privadas)",
+    "Inventario/rotación/precios de Banners",
+    "Editor visual ThemeEngine",
+    "Sitemap/robots/hreflang runtime (políticas: capa SEO)",
+    "Migración de datos usuarios→perfiles (solo consume snapshot)",
+    "Implementación runtime / SSR real / CDN"
+  ],
+  "entregables": {
+    "specMarkdown": "scripts/SPEC-RENDERENGINE.md",
+    "specJson": "scripts/SPEC-RENDERENGINE.json",
+    "fixtures": "scripts/fixtures-renderengine-golden.json",
+    "auditoriaJson": "scripts/AUDITORIA-SPEC-RENDERENGINE.json",
+    "auditoriaMarkdown": "scripts/AUDITORIA-SPEC-RENDERENGINE.md"
+  },
+  "criteriosAceptacionSpec": [
+    "API y tipos sin ambigüedad para 9 superficies públicas",
+    "Algoritmo de render y de resolución de componente reproducible",
+    "PrivacyGuard obligatorio con lista negra alineada a config-renderizado-dinamico-schema.json",
+    "Golden fixtures cubren home, resultados, perfil, landing geo/categoría, banner, privacidad y fallback",
+    "Sin dependencia viva de FieldEngine/ValidationEngine (solo snapshot)",
+    "Compatibilidad documentada con Core, SEO, ThemeEngine y migración perfiles",
+    "Aprobación product owner antes de implementar y antes de congelar (ACTA)"
+  ],
+  "recomendacionActaCongelamiento": {
+    "procede": false,
+    "motivo": "RenderEngine depende de Shared/Core (no congelado) y de definición SSR/prerender + URL canónica de migración. Congelar ahora arriesgaría re-trabajo.",
+    "condicionesParaCongelar": [
+      "Shared/Core v1.0.0 aprobado/congelado",
+      "Decisión SSR vs prerender vs snapshot estático",
+      "URL canónica estable confirmada en migración usuarios→perfiles",
+      "Auditoría de consistencia sin hallazgos bloqueantes (AUDITORIA-SPEC-RENDERENGINE)",
+      "Aprobación explícita del product owner"
+    ],
+    "siguientePaso": "Revisar AUDITORIA-SPEC-RENDERENGINE; cerrar ajustes; luego autorizar ACTA-CONGELAMIENTO-RENDERENGINE"
+  },
+  "noModifica": ["Capas congeladas (VE 1.1.0, FieldEngine 1.0.1, Messenger 1.0.0, Dashboards 1.0.0)", "Producción, Firestore, deploy, commit"]
+}

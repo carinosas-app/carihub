@@ -1,0 +1,187 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "tipo": "ADR",
+  "id": "ADR-INDEXACION-ADULTOS",
+  "titulo": "Política oficial de indexación, noindex y descubrimiento SEO de contenido adulto",
+  "fecha": "2026-06-10",
+  "version": "1.0.0",
+  "estado": "PROPUESTA — decisión documental, sin implementar",
+  "modo": "Solo análisis y documentación — sin runtime/carpetas/mover/Firestore/deploy/commit; no modifica capas/planes/observaciones/ADRs/actas existentes",
+  "autorizadoPor": "product owner / usuario CariHub",
+  "resuelve": "Detalla y oficializa la política de adultos esbozada en PLAN-MAESTRO-SEO-LANDINGS (estrategiaContenidoAdulto, SEO-R07, matriz contenidoAdultoIndex); desbloquea la política de adultos para SPEC-SEO-LANDINGS",
+  "basadoEn": [
+    "scripts/PLAN-MAESTRO-SEO-LANDINGS.json",
+    "scripts/PLAN-MAESTRO-APP-PUBLICA.json",
+    "scripts/ACTA-CONGELAMIENTO-RENDERENGINE.json",
+    "scripts/ADR-URL-CANONICA-PERFILES.json",
+    "scripts/ADR-RENDER-STRATEGY.json",
+    "scripts/SPEC-RENDERENGINE.json",
+    "scripts/PLAN-MAESTRO-BANNERS-PUBLICIDAD.json",
+    "scripts/PLAN-MAESTRO-INTERACCIONES.json",
+    "scripts/PLAN-MAESTRO-AGENTES-IA.json",
+    "scripts/OBSERVACION-ARQUITECTONICA-SEO.json",
+    "scripts/config-registro-adultos-schema.json",
+    "scripts/config-seguridad-mvp-schema.json"
+  ],
+  "objetivo": "Definir la política oficial de indexación, noindex, descubrimiento, visibilidad y tratamiento SEO/social/IA de contenido adulto dentro de CariHub, protegiendo privacidad, mayoría de edad, reputación y cumplimiento legal sin sacrificar crecimiento orgánico legítimo de superficies genéricas.",
+
+  "contexto": {
+    "verticalAdulto": "config-registro-adultos-schema.json define arquetipos: acompañantes, hotel, spa, sexshop, fetiche/dominación, parejas/singles, shows",
+    "camposPublicos": ["alias", "tagline", "geo", "fotoPrincipal", "galeria", "sobreMi", "contactoPublico", "metodosPago"],
+    "camposPrivados": ["telefonoContacto", "whatsappPrivado", "ineFrente", "ineReverso", "selfieVerificacion", "rfc", "razonSocial", "mayorEdadConfirmado", "terminosAceptados"],
+    "estadoSeo": "Sin canonical/OG/JSON-LD/robots/sitemap actualmente; render cliente; URLs query-param (perfil.html?id=)",
+    "tension": "Contenido adulto legal pero de alto riesgo: indexar agresivamente = riesgo legal/reputacional/privacidad; noindex total = pérdida de descubrimiento y crecimiento",
+    "riesgos": ["legal (jurisdicción/menores/consentimiento)", "reputacional (marca asociada a explícito)", "SEO (penalización adult/thin/duplicados)", "privacidad (PII en snippets/OG/IA)"]
+  },
+
+  "definiciones": {
+    "contenidoExplicito": "Desnudez explícita, actos sexuales, material gráfico sexual",
+    "contenidoSugerente": "Insinuante/erótico no explícito (lencería, poses sugerentes), sin desnudez explícita",
+    "contenidoSensible": "Datos o contexto sensibles aunque no sean explícitos (servicios adultos, ubicación precisa, identidad)",
+    "perfilVerificado": "INE + selfie + mayorEdadConfirmado validados por Admin/Verificación",
+    "perfilNoVerificado": "Sin verificación completa — máxima restricción",
+    "categoriaSensible": "sector/subcategoriaId marcado como adulto en el Catálogo",
+    "thinContent": "Landing/página sin contenido único suficiente (umbral ThinContentGuard del SEO plan)"
+  },
+
+  "opcionesEvaluadas": {
+    "O1_indexar_todo_publico": { "seo": "alta (corto plazo)", "riesgoLegal": "muy alto", "riesgoReputacional": "muy alto", "privacidad": "muy bajo", "crecimiento": "rápido pero frágil", "veredicto": "RECHAZADA — riesgo inaceptable" },
+    "O2_noindex_todo_adulto": { "seo": "nula", "riesgoLegal": "mínimo", "riesgoReputacional": "mínimo", "privacidad": "máximo", "crecimiento": "nulo orgánico", "veredicto": "Segura pero anula descubrimiento; base de fallback" },
+    "O3_solo_landings_genericas": { "seo": "media-alta", "riesgoLegal": "bajo", "riesgoReputacional": "bajo", "privacidad": "alto", "crecimiento": "sostenible", "veredicto": "FUERTE para MVP — indexa hubs geo/categoría sin exponer individuos" },
+    "O4_perfiles_verificados_sin_explicito": { "seo": "alta", "riesgoLegal": "medio", "riesgoReputacional": "medio", "privacidad": "medio", "crecimiento": "alto", "veredicto": "FUTURO — requiere verificación + legalidad por mercado + moderación" },
+    "O5_landings_geo_categoria_con_contenido": { "seo": "alta", "riesgoLegal": "bajo", "riesgoReputacional": "bajo", "privacidad": "alto", "crecimiento": "alto", "veredicto": "FUERTE — combina con O3; exige ThinContentGuard" },
+    "O6_noindex_perfiles_sensibles": { "seo": "n/a (regla protectora)", "riesgoLegal": "bajo", "veredicto": "ADOPTADA como regla transversal" },
+    "O7_noindex_resultados_dinamicos": { "seo": "protege crawl budget", "riesgoLegal": "bajo", "veredicto": "ADOPTADA — resultados/facetas adultas noindex" },
+    "O8_hibrida_por_riesgo": { "seo": "alta y sostenible", "riesgoLegal": "controlado", "riesgoReputacional": "controlado", "privacidad": "alto", "crecimiento": "escalable nacional/internacional", "veredicto": "RECOMENDADA — combina O3+O5+O6+O7 en MVP y habilita O4 en futuro" }
+  },
+
+  "decision": {
+    "elegida": "O8 — Política híbrida por riesgo",
+    "principio": "noindex conservador por defecto para individuos/explícito; index selectivo de superficies genéricas con contenido suficiente; habilitación futura de perfiles verificados no explícitos por mercado legal",
+    "mvp": {
+      "index": ["landings geo adultas genéricas con contenido suficiente (sin media explícita, texto/agregados)", "landings categoría/geo+categoría adultas con ThinContentGuard superado", "páginas legales/informativas +18"],
+      "noindex": ["perfiles adultos individuales (todos en MVP)", "resultados de búsqueda dinámicos adultos", "facetas/parámetros", "perfiles no verificados", "media explícita", "stories/lives"],
+      "gate": "puerta +18 (age gate) en superficies adultas; SafeSearch rating adult",
+      "og": "solo en landings genéricas con imagen moderada/segura; nunca foto de perfil explícita"
+    },
+    "futuro": {
+      "habilitable": "indexación de perfiles adultos VERIFICADOS y SIN contenido explícito",
+      "condiciones": ["verificación completa (INE+selfie+mayorEdad)", "contenido no explícito (sugerente máximo)", "legalidad confirmada por país/mercado", "OG moderado", "snippets limitados", "control hreflang por país"],
+      "controles": ["max-image-preview:none o standard", "nosnippet en campos sensibles", "moderación previa de previews (SeoModerationQueue)"]
+    }
+  },
+
+  "recomendaciones": {
+    "principal": "Adoptar política híbrida por riesgo (O8): proteger individuos y explícito con noindex; crecer vía landings genéricas geo/categoría con contenido suficiente.",
+    "mvp": "noindex de todos los perfiles adultos y resultados dinámicos; index solo de hubs genéricos +18 con contenido; OG moderado; excluir adultos de sitemaps de perfiles.",
+    "futura": "Habilitar perfiles verificados no explícitos por mercado legal, con snippets/imagen limitados y moderación previa; revisar por jurisdicción antes de internacionalizar."
+  },
+
+  "queSePuedeIndexar": ["landings geo adultas genéricas con contenido suficiente", "landings categoría/geo+categoría con ThinContentGuard superado", "páginas legales/informativas/+18", "(futuro) perfiles verificados no explícitos por mercado legal"],
+  "quePermaneceNoindex": ["perfiles adultos individuales (MVP)", "perfiles no verificados (siempre)", "contenido explícito (siempre)", "resultados/facetas dinámicos", "borradores/no publicados", "stories/lives", "dashboards/messenger/admin/cuenta", "media explícita"],
+
+  "politicaSnippets": {
+    "permitido": ["título y descripción de landing genérica", "texto agregado no sensible (conteos, geo, categoría)"],
+    "prohibido": ["PII (teléfono, contacto directo, dirección exacta)", "texto explícito de servicios", "descripción sexual explícita"],
+    "mecanismos": ["meta robots nosnippet en perfiles sensibles", "max-snippet:0 o limitado", "data-nosnippet en campos sensibles del HTML (RenderEngine)", "max-image-preview:none en adultos"]
+  },
+  "politicaOpenGraph": {
+    "permitido": ["OG de landings genéricas con imagen segura/moderada", "og:title/description no explícitos"],
+    "prohibido": ["foto de perfil explícita como og:image", "OG de perfiles no verificados", "previews sin moderar en categorías adultas"],
+    "moderacion": "SeoModerationQueue aprueba previews adultos antes de exponerse (cierra SEO-R07)"
+  },
+  "politicaRichResults": {
+    "permitido": ["BreadcrumbList y WebSite en hubs genéricos"],
+    "prohibido": ["Person/LocalBusiness con datos sensibles en SERP", "AggregateRating inventado", "schema que exponga PII o explícito"]
+  },
+  "politicaMotoresIA": {
+    "principio": "Exponer solo superficies genéricas no sensibles a motores IA; bloquear perfiles sensibles, media y PII",
+    "exponer": ["landings genéricas geo/categoría no explícitas", "páginas informativas/legales"],
+    "ocultar": ["perfiles individuales adultos", "media explícita", "campos privados", "resultados dinámicos"],
+    "mecanismos": ["robots.txt con reglas para user-agents de IA (GPTBot, Google-Extended, PerplexityBot, ClaudeBot/anthropic-ai, CCBot, etc.)", "meta noai/noimageai donde el motor lo respete", "X-Robots-Tag a nivel respuesta para adultos", "nunca servir datos privados en HTML público"],
+    "nota": "El cumplimiento depende del motor; combinar robots + meta + exclusión de datos en origen (defensa en profundidad). robots no es garantía: lo privado va detrás de auth + PrivacyGuard"
+  },
+  "politicaSafeSearch": {
+    "etiquetado": "rating: adult / RTA (Restricted To Adults) meta en superficies adultas",
+    "ageGate": "puerta +18 antes de mostrar contenido adulto (cookie/consentimiento); el gate no debe ocultar contenido al crawler de forma que sea cloaking — usar etiquetado y paridad",
+    "imagen": "max-image-preview:none en adultos por defecto; standard solo en futuro para verificados no explícitos",
+    "objetivo": "ser correctamente clasificado como adult por buscadores (evitar penalización por contenido adulto no etiquetado en SERP general)"
+  },
+
+  "matrices": {
+    "tipoPaginaIndex": {
+      "landing_geo_adulta_generica_con_contenido": "index (+18, SafeSearch adult)",
+      "landing_categoria_geo_adulta_con_contenido": "index condicional (ThinContentGuard)",
+      "landing_sin_contenido_suficiente": "noindex",
+      "perfil_adulto_individual_mvp": "noindex",
+      "perfil_adulto_verificado_no_explicito_futuro": "index condicional (legal por mercado)",
+      "perfil_no_verificado": "noindex",
+      "resultados_dinamicos_adultos": "noindex, nofollow facetas",
+      "stories_lives_adultos": "noindex, noarchive",
+      "paginas_legales_18": "index"
+    },
+    "contenidoMetadatosPermitidos": {
+      "explicito": "noindex; sin OG; sin snippet; sin schema persona",
+      "sugerente_verificado": "(futuro) index limitado; OG moderado; snippet limitado; max-image-preview:none/standard",
+      "sensible_no_explicito": "landing genérica index; perfil noindex; OG solo de landing",
+      "generico_hub": "index; OG seguro; BreadcrumbList/WebSite"
+    },
+    "categoriaPoliticaSeo": {
+      "adulto_explicito": "noindex perfiles; index solo hubs genéricos sin media; OG moderado",
+      "adulto_sugerente": "noindex perfiles MVP; futuro index verificados; hubs index",
+      "adulto_servicios_sensibles": "noindex individuos; index hubs geo con contenido",
+      "no_adulto": "política SEO estándar (SEO-LANDINGS)"
+    },
+    "contenidoSafeSearch": {
+      "explicito": "rating adult + RTA + max-image-preview:none + noindex",
+      "sugerente": "rating adult + max-image-preview:none",
+      "sensible": "rating adult en superficies con contexto adulto",
+      "generico": "sin rating adult salvo contexto"
+    },
+    "contenidoMotoresIA": {
+      "perfil_individual": "ocultar (robots IA + sin datos en origen)",
+      "media_explicita": "ocultar (noimageai + exclusión)",
+      "landing_generica": "exponer (no sensible)",
+      "campos_privados": "nunca exponer (PrivacyGuard)"
+    }
+  },
+
+  "riesgos": [
+    { "id": "AD-R01", "nivel": "critico", "riesgo": "Exponer PII o identidad en snippets/OG/IA de perfiles adultos", "mitigacion": "noindex perfiles MVP + nosnippet/data-nosnippet + PrivacyGuard + sin datos privados en HTML público" },
+    { "id": "AD-R02", "nivel": "critico", "riesgo": "Indexar menores o perfiles no verificados", "mitigacion": "noindex de no verificados (siempre); mayorEdadConfirmado obligatorio; verificación previa a cualquier index futuro" },
+    { "id": "AD-R03", "nivel": "alto", "riesgo": "Penalización SEO por contenido adulto no etiquetado o thin", "mitigacion": "rating adult/RTA + ThinContentGuard + canonical + hubs con contenido único" },
+    { "id": "AD-R04", "nivel": "alto", "riesgo": "Daño reputacional de marca por SERP explícito", "mitigacion": "OG moderado, sin media explícita indexable, hubs genéricos" },
+    { "id": "AD-R05", "nivel": "alto", "riesgo": "Riesgo legal por jurisdicción al internacionalizar", "mitigacion": "habilitación futura solo por mercado legal + control hreflang/país; revisión legal previa" },
+    { "id": "AD-R06", "nivel": "medio", "riesgo": "Motores IA ignoran robots y exponen contenido", "mitigacion": "defensa en profundidad: robots IA + meta noai + exclusión de datos en origen" },
+    { "id": "AD-R07", "nivel": "medio", "riesgo": "Cloaking accidental por age gate (contenido distinto a crawler)", "mitigacion": "paridad de contenido + etiquetado adult en vez de ocultar; no servir HTML distinto al bot" },
+    { "id": "AD-R08", "nivel": "medio", "riesgo": "OG de adultos sin moderar (SEO-R07)", "mitigacion": "SeoModerationQueue aprueba previews antes de exponer" }
+  ],
+  "dependencias": {
+    "consume": ["ADR-URL-CANONICA-PERFILES 1.0.0", "ADR-RENDER-STRATEGY 1.0.0", "SPEC-RENDERENGINE 1.0.0"],
+    "alinea": ["PLAN-MAESTRO-SEO-LANDINGS 1.0.0", "PLAN-MAESTRO-APP-PUBLICA 1.0.0", "PLAN-MAESTRO-INTERACCIONES 1.0.0", "PLAN-MAESTRO-BANNERS-PUBLICIDAD 1.0.0", "PLAN-MAESTRO-AGENTES-IA 1.0.0"],
+    "congeladas": ["RenderEngine 1.0.0", "FieldEngine 1.0.1", "Seguridad MVP 1.0.0", "Catálogo 1.0.0"],
+    "precondiciones": ["RenderEngine runtime (meta robots/X-Robots-Tag/JSON-LD)", "flag verificación en perfil", "marca de categoría adulta en Catálogo", "umbral ThinContentGuard", "SeoModerationQueue"]
+  },
+
+  "impactoSeoLandings": {
+    "estrategiaContenidoAdulto": "Esta ADR detalla y oficializa la sección esbozada; SEO-LANDINGS la referenciará como fuente de la política adultos",
+    "matrizContenidoAdultoIndex": "Se amplía con las 5 matrices de esta ADR (tipoPagina, metadatos, categoría, SafeSearch, motores IA)",
+    "SEO-R07": "Cerrado a nivel política (moderación OG + previews); implementación en SPEC",
+    "sitemaps": "sitemap-perfiles excluye adultos; hubs genéricos adultos pueden ir en sitemap-landings con etiqueta"
+  },
+  "impactoRenderEngine": {
+    "head": "RenderEngine debe inyectar meta robots (noindex/nosnippet/max-image-preview), rating adult/RTA y X-Robots-Tag según IndexationController + esta política",
+    "privacyGuard": "Refuerza que campos privados nunca lleguen al HTML público ni a OG/JSON-LD",
+    "noModifica": "No cambia el SPEC congelado; documenta requisitos que el runtime futuro deberá cumplir"
+  },
+  "desbloqueaSpecSeoLandings": "Cierra la decisión de política de adultos (qué indexar/noindex, snippets, OG, SafeSearch, IA), permitiendo que SPEC-SEO-LANDINGS especifique reglas técnicas sin ambigüedad legal/reputacional",
+
+  "noModifica": [
+    "PLAN-MAESTRO-SEO-LANDINGS, observación SEO, ADRs y actas (se referencian/consumen)",
+    "Capas congeladas y planes existentes",
+    "Producción, Firestore, deploy, commit"
+  ],
+  "changelog": [
+    { "version": "1.0.0", "fecha": "2026-06-10", "nota": "ADR inicial de indexación de adultos: política híbrida por riesgo (MVP conservador + futuro verificados no explícitos por mercado legal); 8 opciones comparadas, 5 matrices, políticas de snippets/OG/SafeSearch/motores IA, 8 riesgos, impactos sobre SEO-LANDINGS y RenderEngine" }
+  ]
+}

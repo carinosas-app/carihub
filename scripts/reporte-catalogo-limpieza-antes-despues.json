@@ -1,0 +1,90 @@
+{
+  "generado": "2026-06-10T13:45:00.000Z",
+  "titulo": "Limpieza catálogo — reporte antes/después",
+  "restriccionesRespetadas": {
+    "runtime": false,
+    "firestore": false,
+    "produccion": false,
+    "deploy": false,
+    "commit": false,
+    "disenoCuentasCongelado": true,
+    "fieldEngineValidationEngineRenderEngine": false
+  },
+  "antes": {
+    "fecha": "2026-06-10T13:01:52.653Z",
+    "estado": "PASS CON ADVERTENCIAS",
+    "totalErrores": 0,
+    "totalAdvertencias": 366,
+    "advertenciasPorCodigo": {
+      "ARQUETIPO_MAPA_SCHEMA_DIFF": 357,
+      "TIPO_PERFIL_MAPA_SCHEMA_DIFF": 8,
+      "PRECIOS_PERIODO_ANUAL": 1
+    },
+    "archivo": "scripts/validacion-schemas-report-antes.json"
+  },
+  "despues": {
+    "fecha": "2026-06-10T13:40:30.165Z",
+    "estado": "PASS",
+    "totalErrores": 0,
+    "totalAdvertencias": 0,
+    "advertenciasRealesRestantes": 0,
+    "archivo": "scripts/validacion-schemas-report.json"
+  },
+  "estrategia": {
+    "tipo": "ambas",
+    "tablaEquivalencia": "config-registro-schema.meta.json → convenciones.arquetiposEquivalencia",
+    "unificacionNombres": "Mapa escribe arquetipos canónicos; módulo scripts/arquetipos-catalogo.mjs; generar-schemas lee arquetipo/tipoPerfil del mapa",
+    "normalizacionIdsAdultos": "canonicalId (espacios → _) para sex_shop y hotel_motel en arquetipoAdultos()"
+  },
+  "arquetiposAlineados": {
+    "mapaVsSchema": true,
+    "filasMapa": 462,
+    "filasCubiertas": 462,
+    "legacyEliminadosDelMapa": ["adulto_persona", "adulto_negocio", "creador_contenido", "negocio_local", "persona_servicio", "profesional_certificado"],
+    "canonicosEnUso": ["persona_acompanante", "persona_creador", "persona_espectaculo", "persona_dominatrix", "pareja_grupo", "negocio_retail", "negocio_bienestar", "negocio_venue", "negocio_hospedaje", "negocio_servicios_local", "profesional_tecnico_legal", "profesional_salud", "persona_servicio_general", "persona_servicio_oficio", "persona_servicio_profesional", "persona_servicio_movil", "persona_bienestar_individual", "persona_servicio_salud_auxiliar", "negocio_institucion", "negocio_alimentos", "negocio_comercio", "negocio_inmobiliario", "profesional_veterinario", "profesional_salud_mental", "empresa_servicios"]
+  },
+  "conflictosResueltos": [
+    {
+      "id": "contador-publico vs contadores",
+      "resolucion": "contador-publico (industria, CPA cédula) vs contadores (profesionales, despacho contable); override profesional_tecnico_legal en ambos; aliases cruzados y erroresComunes en busqueda-enriquecimiento.json"
+    },
+    {
+      "id": "sex shop / hotel motel (ids con espacio)",
+      "resolucion": "normalización canonKey en arquetipoAdultos() alinea mapa con schema adultos (negocio_retail, negocio_hospedaje)"
+    },
+    {
+      "id": "arquetipos legacy mapa",
+      "resolucion": "357 diffs ARQUETIPO eliminados unificando nombres canónicos en integrar + generar-schemas desde mapa"
+    }
+  ],
+  "conflictosPendientes": [],
+  "aliasesSinonimosAgregados": [
+    "contadores: aliases, sinonimos, palabrasRelacionadas, erroresComunes (excluye CPA)",
+    "contador-publico: aliases CPA, erroresComunes (excluye despacho contable)",
+    "edecan (adultos): nota separación de edecan-para-eventos"
+  ],
+  "decisionPeriodoAnual": {
+    "accion": "anual movido de factoresPeriodo a periodosComercialesFuturos.anual (activo: false)",
+    "motivo": "periodosComerciales MVP solo permite semanal|quincenal|mensual",
+    "archivos": ["config-precios-planes-perfiles-schema.json", "config-registro-schema.meta.json", "generar-schemas-registro.mjs"]
+  },
+  "archivosModificados": [
+    "scripts/arquetipos-catalogo.mjs",
+    "scripts/integrar-catalogo-expandido.mjs",
+    "scripts/generar-schemas-registro.mjs",
+    "scripts/config-registro-schema.meta.json",
+    "scripts/config-precios-planes-perfiles-schema.json",
+    "scripts/busqueda-enriquecimiento.json",
+    "scripts/mapa-registro-categorias.json",
+    "scripts/config-registro-independiente-schema.json",
+    "scripts/config-registro-profesionista-schema.json",
+    "scripts/config-registro-negocio-schema.json",
+    "scripts/validacion-schemas-report.json",
+    "scripts/validacion-schemas-report-antes.json",
+    "scripts/reporte-catalogo-expansion-final.json",
+    "scripts/auditoria-catalogo-expansion.json"
+  ],
+  "estadoFinal": "PASS",
+  "recomendacionFinal": "catalogo listo para congelar",
+  "notaCongelamientoCuentas": "identidadUsuario y diseño de cuentas NO modificados (congelado aprobado por usuario)"
+}

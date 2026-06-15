@@ -1,0 +1,151 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "tipo": "ANEXO_ANALISIS",
+  "modulo": "ECONOMIA-SOCIAL",
+  "complementoDe": "scripts/PLAN-MAESTRO-ECONOMIA-SOCIAL.json",
+  "titulo": "Anexo — Autopropinas y Cuentas Relacionadas (cómputo de propinas para ingreso/comisión/ranking/reputación)",
+  "fecha": "2026-06-11",
+  "version": "1.0.0",
+  "estado": "ANEXO_ANALISIS_DOCUMENTAL",
+  "modo": "Solo análisis y documentación — sin runtime/carpetas/mover/Firestore/deploy/commit; NO modifica PLAN-MAESTRO-ECONOMIA-SOCIAL ni capas/actas/ADRs (solo referencia)",
+  "resolucionInstruccion": "El usuario pidió 'agregar al análisis de PLAN-MAESTRO-ECONOMIA-SOCIAL' y a la vez 'no modificar documentos existentes'. Igual que el precedente del ANEXO-CRIPTOMONEDAS (que no modificó PLAN-MAESTRO-PAGOS-CONTRATOS), se resuelve creando este anexo complementario nuevo, referenciado desde fuera, sin tocar el plan maestro.",
+  "basadoEn": [
+    "scripts/PLAN-MAESTRO-ECONOMIA-SOCIAL.json (propinas: emisor→receptor, comisión, MXN, SocialMonetizationLedger, ES-R02 AML, ES-R05 fraude, 'IA no aprueba pagos')",
+    "scripts/config-seguridad-mvp-schema.json (deteccionFraude.multicuentas, duplicadoPotencial, reputacionCuenta, nivelConfianza, riesgoScore, flags) — CONGELADO",
+    "scripts/PLAN-MAESTRO-INTERACCIONES.json (señales sociales: favoritos/visitas/seguir; origen humano/sistema/agente)",
+    "scripts/PLAN-MAESTRO-PAGOS-CONTRATOS.json (MXN, politicaPrecioCongelado, 'IA no aprueba pagos')",
+    "scripts/PLAN-MAESTRO-ADMIN.json (conciliación, apelaciones, moderación)",
+    "scripts/PLAN-MAESTRO-AGENTES-IA.json (RT-08: IA no mueve/aprueba fondos)",
+    "scripts/ADR-INDEXACION-ADULTOS.json"
+  ],
+  "objetivo": "Analizar autopropinas y cuentas relacionadas; definir qué propinas cuentan para ingreso, comisión, ranking, reputación, creador destacado y métricas públicas; y evaluar la política preliminar del usuario.",
+
+  "principioRector": "Separar DOS planos independientes: (1) PLANO FINANCIERO — toda propina VÁLIDA genera ingreso para el receptor y comisión para CariHub, sin importar si es autopropina o entre cuentas relacionadas; (2) PLANO REPUTACIONAL/SOCIAL — ranking, reputación, engagement, 'creador destacado' y métricas públicas SOLO cuentan cuando la propina es ORGÁNICA (emisor independiente del receptor). El dinero se cobra; la señal social se gana. Ninguna IA aprueba pagos (RT-08). Precio de planes/contratos sigue congelado en MXN.",
+
+  "definiciones": {
+    "autopropina": "Propina cuyo emisor y receptor son la MISMA persona/propietario (misma identidad verificada, o misma cuenta operando ambos lados directa o indirectamente).",
+    "cuentaRelacionada": "Emisor y receptor son cuentas distintas pero vinculadas por señales fuertes (mismo dispositivo, IP, método de pago, identidad, o grafo de relación) que sugieren control común o coordinación.",
+    "multiCuenta": "Un mismo propietario opera varias cuentas (proveedor + 'clientes' títere) para autodirigirse propinas o engagement.",
+    "mismoDispositivo": "Emisor y receptor comparten deviceId/fingerprint (mismoDeviceIdHash en config-seguridad-mvp).",
+    "mismaIP": "Emisor y receptor comparten IP/hash en ventana corta (mismoIPHash_24h).",
+    "mismoMetodoPago": "La propina se paga con un instrumento (tarjeta/cuenta/wallet) ya asociado al receptor o a sus cuentas relacionadas.",
+    "mismaIdentidadVerificada": "INE/identidad verificada del emisor coincide (ineHash_duplicado) con la del receptor: autopropina confirmada.",
+    "nota": "Las señales NO se inventan: se consumen de config-seguridad-mvp-schema.json (CONGELADO). Todas las señales se manejan hasheadas; PII prohibida en claro (logsSeguridad)."
+  },
+
+  "senalesDeteccion": {
+    "fuenteCongelada": "scripts/config-seguridad-mvp-schema.json",
+    "mapeo": [
+      { "senal": "mismoDeviceIdHash", "origen": "deteccionFraude.multicuentas.senales", "indica": "mismo dispositivo emisor/receptor" },
+      { "senal": "mismoIPHash_24h", "origen": "deteccionFraude.multicuentas.senales", "indica": "misma IP en ventana corta" },
+      { "senal": "ineHash_duplicado", "origen": "duplicadoPotencial.senales", "indica": "misma identidad verificada → autopropina" },
+      { "senal": "patronEmailDesechable / email_similar / telefono_similar", "origen": "duplicadoPotencial.senales", "indica": "cuentas títere" },
+      { "senal": "duplicadoPotencial=true / flag DUPLICADO_SOSPECHOSO", "origen": "riesgoReputacion.flags", "indica": "relación sospechosa preexistente" },
+      { "senal": "mismoMetodoPagoHash", "origen": "FUTURO (datos de Pagos) — propuesto por este anexo", "indica": "mismo instrumento de pago entre emisor y receptor" },
+      { "senal": "grafoRelacionCuentas", "origen": "FUTURO (derivado de señales anteriores) — propuesto", "indica": "componente conexo de cuentas vinculadas" },
+      { "senal": "patronTemporal (ráfagas, montos idénticos, reciprocidad)", "origen": "FUTURO (analítica diferida) — propuesto", "indica": "coordinación no orgánica" }
+    ],
+    "scoresExistentes": ["riesgoScore (0-100)", "reputacionCuenta (0-100)", "nivelConfianza (0-100)"],
+    "nota": "Las señales 'FUTURO' son propuestas de diseño del anexo; no existen aún y no modifican el schema congelado. Requieren datos de Pagos operativo."
+  },
+
+  "tipologiaFraude": {
+    "fraudeEngagement": "Inflar interacciones (propinas, favoritos, visitas) para simular popularidad. La autopropina/cuenta relacionada finge demanda inexistente.",
+    "fraudeRanking": "Usar propinas autodirigidas para escalar en resultados/orden y ganar visibilidad sin mérito real, desplazando proveedores legítimos.",
+    "fraudeReputacion": "Construir reputación/score/badges artificiales con dinero propio reciclado, engañando a clientes reales sobre confiabilidad.",
+    "relacionConDinero": "En los tres casos el dinero puede ser real (y genera comisión), pero la SEÑAL es falsa; por eso se cobra la transacción pero NO se concede beneficio reputacional/visibilidad."
+  },
+
+  "clasificacionPropinas": [
+    { "clase": "A", "nombre": "Legítima / orgánica", "criterio": "Sin señales de relación entre emisor y receptor; riesgoScore bajo", "tratamiento": "cuenta para todo" },
+    { "clase": "B", "nombre": "Autopropina", "criterio": "Misma identidad verificada (ineHash_duplicado) o mismo propietario confirmado", "tratamiento": "financiero sí; reputacional no" },
+    { "clase": "C", "nombre": "Cuenta relacionada", "criterio": "Cuentas distintas con señales fuertes (dispositivo/IP/método de pago/grafo)", "tratamiento": "financiero sí; reputacional no" },
+    { "clase": "D", "nombre": "Sospechosa / en revisión", "criterio": "Señales parciales o ambiguas; requiere revisión", "tratamiento": "cuarentena: financiero EN ESPERA; reputacional no hasta resolver" }
+  ],
+
+  "matrizComputo": {
+    "leyenda": "SI=cuenta; NO=excluida; ESPERA=retenido hasta resolución (cuarentena)",
+    "columnas": ["ingresoReceptor", "comisionPlataforma", "ranking", "reputacion", "creadorDestacado", "metricasPublicas"],
+    "filas": {
+      "A_legitima":        { "ingresoReceptor": "SI",     "comisionPlataforma": "SI",     "ranking": "SI", "reputacion": "SI", "creadorDestacado": "SI", "metricasPublicas": "SI" },
+      "B_autopropina":     { "ingresoReceptor": "SI",     "comisionPlataforma": "SI",     "ranking": "NO", "reputacion": "NO", "creadorDestacado": "NO", "metricasPublicas": "NO" },
+      "C_relacionada":     { "ingresoReceptor": "SI",     "comisionPlataforma": "SI",     "ranking": "NO", "reputacion": "NO", "creadorDestacado": "NO", "metricasPublicas": "NO" },
+      "D_sospechosa":      { "ingresoReceptor": "ESPERA", "comisionPlataforma": "ESPERA", "ranking": "NO", "reputacion": "NO", "creadorDestacado": "NO", "metricasPublicas": "NO" }
+    }
+  },
+
+  "definicionesComputo": {
+    "queCuentaParaIngresos": "Toda propina VÁLIDA (clases A, B, C) genera ingreso para el receptor. La clase D queda en espera hasta resolverse; si se confirma válida, se libera.",
+    "queCuentaParaComision": "CariHub cobra comisión sobre TODA transacción válida procesada (A, B, C), incluyendo autopropinas y cuentas relacionadas. D en espera.",
+    "queCuentaParaRanking": "SOLO clase A. Autopropinas y cuentas relacionadas (B, C) NO afectan ranking/orden de resultados.",
+    "queCuentaParaReputacion": "SOLO clase A. B y C NO suben reputacionCuenta ni generan badges/score social.",
+    "queCuentaParaCreadorDestacado": "SOLO clase A. El estatus 'destacado'/'destacadoHome' por mérito social NO se gana con B/C (el destacado COMPRADO por plan es aparte y legítimo: es pago por plan, no señal orgánica).",
+    "queSeExcluyeDeMetricasPublicas": "B, C y D se excluyen de contadores públicos (número de propinas, 'top propinas', popularidad). Internamente se registran en SocialMonetizationLedger marcados, para conciliación y auditoría (Admin), pero no se muestran como señal social pública."
+  },
+
+  "evaluacionPoliticaUsuario": {
+    "politicaEvaluada": "Todas las propinas válidas generan comisión e ingreso para el receptor, pero las autopropinas o propinas de cuentas relacionadas no generan reputación, ranking ni métricas de engagement.",
+    "veredicto": "RECOMENDADA",
+    "justificacion": "Es coherente con separar plano financiero (cobrar siempre) del plano reputacional (premiar solo lo orgánico); evita incentivar fraude de ranking/reputación sin renunciar a ingresos legítimos; reutiliza señales ya congeladas en Seguridad MVP.",
+    "refinamientosRecomendados": [
+      { "id": "R1", "refinamiento": "Añadir clase D (sospechosa): cuando las señales son parciales, la propina entra en CUARENTENA (ingreso/comisión en espera) hasta resolución, en vez de contar de inmediato.", "razon": "Evita pagar/conceder sobre fraude no confirmado y reduce reversiones." },
+      { "id": "R2", "refinamiento": "Toda exclusión reputacional debe quedar AUDITADA y ser APELABLE (Admin), con tolerancia explícita a falsos positivos (familias/parejas en mismo dispositivo/IP pueden ser legítimas).", "razon": "Proteger usuarios legítimos mal clasificados." },
+      { "id": "R3", "refinamiento": "La política debe excluir también 'creador destacado/destacadoHome por mérito' y TODA métrica pública, no solo engagement; el destacado comprado por plan permanece válido (es pago, no señal).", "razon": "Cerrar la puerta a inflar visibilidad por mérito con dinero propio." },
+      { "id": "R4", "refinamiento": "Definir reciprocidad/lavado: ráfagas, montos idénticos y patrones recíprocos elevan riesgoScore y mueven a clase D aunque no haya señal dura.", "razon": "Cubrir mulas/colusión sin identidad compartida." }
+    ]
+  },
+
+  "reglasOperativas": {
+    "tiempoReal": "Clasificación inicial (A/B/C/D) al momento de la propina usando señales duras disponibles (dispositivo/IP/identidad/método de pago).",
+    "diferido": "Reevaluación batch (grafo de relación, patrones temporales/reciprocidad) puede reclasificar a B/C/D y RETIRAR beneficios reputacionales ya concedidos (el dinero/comisión NO se revierte salvo fraude probado por Admin).",
+    "noDobleConteo": "SocialMonetizationLedger registra cada propina una sola vez, con su clase y flags; ranking/reputación leen solo entradas clase A.",
+    "falsosPositivos": "Mismo dispositivo/IP NO implica autopropina por sí solo (familias, oficinas, NAT). Se requiere combinación de señales + umbral; siempre apelable.",
+    "transparencia": "El receptor ve sus propinas y su clase (orgánica vs no computable para reputación); coherente con transparencia de origen de Interacciones.",
+    "iaSinDinero": "IA puede DETECTAR/sugerir clasificación y alertar (capa AGENTES-IA), pero NO aprueba pagos, NO libera cuarentenas, NO revierte fondos (RT-08); humano (Admin) decide."
+  },
+
+  "riesgos": [
+    { "id": "AP-R01", "nivel": "critico", "riesgo": "Lavado/estructuración vía autopropinas (reciclar dinero propio con apariencia de ingreso)", "mitigacion": "comisión + registro auditado; límites; KYC/identidad; conciliación Admin; reportes AML (ES-R02)" },
+    { "id": "AP-R02", "nivel": "alto", "riesgo": "Inflado de ranking/visibilidad con dinero propio", "mitigacion": "ranking solo clase A; B/C excluidas; reevaluación diferida retira beneficios" },
+    { "id": "AP-R03", "nivel": "alto", "riesgo": "Reputación/badges artificiales que engañan a clientes", "mitigacion": "reputación solo clase A; métricas públicas excluyen B/C/D" },
+    { "id": "AP-R04", "nivel": "alto", "riesgo": "Evasión vía 'mulas' sin identidad/dispositivo compartido", "mitigacion": "señales blandas (reciprocidad, montos, ráfagas) → clase D; analítica diferida; ML post-MVP" },
+    { "id": "AP-R05", "nivel": "medio", "riesgo": "Falsos positivos penalizan a usuarios legítimos (familia/oficina/NAT)", "mitigacion": "umbral multi-señal; apelación Admin; no revertir dinero por sospecha; tolerancia documentada" },
+    { "id": "AP-R06", "nivel": "medio", "riesgo": "Fiscal: ingresos por autopropina inflan base gravable del receptor", "mitigacion": "reglas fiscales/CFDI sobre transacciones reales; marcar clase en comprobante interno" },
+    { "id": "AP-R07", "nivel": "medio", "riesgo": "Contracargos/reversas en cuentas relacionadas", "mitigacion": "política de disputas (Admin); irreversibilidad controlada; cuarentena clase D" }
+  ],
+
+  "dependencias": {
+    "congeladas": ["Seguridad MVP 1.0.0 (señales multicuenta/duplicado/scores)", "Pagos backbone (cuando opere)", "Catálogo 1.0.0"],
+    "planes": ["ECONOMIA-SOCIAL (propinas, SocialMonetizationLedger, comisión)", "INTERACCIONES (señales sociales/ranking/origen)", "PAGOS-CONTRATOS (cobro/comisión/MXN)", "ADMIN (conciliación/apelaciones)", "AGENTES-IA (detección, RT-08)"],
+    "precondiciones": ["Pagos con método de pago identificable (hash)", "verificación de identidad para señal fuerte", "ranking/reputación definidos en Interacciones", "moderación/apelación Admin activa"]
+  },
+  "impactos": {
+    "pagos": "Propone marcar clase (A/B/C/D) y método de pago hash en la transacción; comisión se cobra igual — sin modificar Pagos ni precio congelado",
+    "interacciones": "Ranking/reputación deben leer solo propinas clase A; el anexo NO modifica Interacciones, solo define el contrato de consumo",
+    "dashboards": "El receptor ve propinas y su clase; métricas públicas excluyen B/C/D — diseño futuro",
+    "admin": "Cola de apelaciones, conciliación de cuarentena (D), resolución humana — sin cambios en Admin aún",
+    "agentesIA": "IA detecta/alerta clasificación; nunca mueve fondos ni libera cuarentena (RT-08)",
+    "nota": "Todos los impactos son de diseño futuro; este anexo no modifica documentos existentes ni Firestore"
+  },
+  "ordenRecomendadoImplementacion": [
+    { "paso": 1, "accion": "Definir clases A/B/C/D y matriz de cómputo en SPEC-ECONOMIA-SOCIAL (consumiendo señales Seguridad MVP)", "prioridad": "P0 (diseño)" },
+    { "paso": 2, "accion": "Clasificación en tiempo real por señales duras (identidad/dispositivo/IP/método de pago) al procesar propina", "prioridad": "P1 (con Pagos operativo)" },
+    { "paso": 3, "accion": "Exclusión de B/C de ranking/reputación/métricas públicas + cuarentena de D", "prioridad": "P1" },
+    { "paso": 4, "accion": "Reevaluación diferida (grafo + patrones temporales) y retiro de beneficios reputacionales", "prioridad": "P2" },
+    { "paso": 5, "accion": "Apelaciones/conciliación Admin + detección IA (alertas) + ML antifraude", "prioridad": "P3 (futuro)" }
+  ],
+
+  "procedencia": {
+    "crearMd": true, "crearJson": true,
+    "justificacion": "La política de autopropinas/cuentas relacionadas define cómo se separan dinero y reputación; requiere documento propio que reutilice señales congeladas y fije la matriz de cómputo sin tocar el plan maestro.",
+    "siguientesPasos": ["Incorporar la matriz en SPEC-ECONOMIA-SOCIAL", "ADR-PROPINAS-AML-FISCAL (umbrales/lavado/fiscal con datos reales)", "Definir señal mismoMetodoPagoHash y grafoRelacionCuentas con Pagos operativo"]
+  },
+  "noModifica": [
+    "PLAN-MAESTRO-ECONOMIA-SOCIAL (se referencia, no se altera)",
+    "config-seguridad-mvp-schema.json y demás capas/actas/ADRs (solo consumo de señales)",
+    "Producción, Firestore, deploy, commit"
+  ],
+  "changelog": [
+    { "version": "1.0.0", "fecha": "2026-06-11", "nota": "Anexo autopropinas/cuentas relacionadas: principio de doble plano (financiero vs reputacional), definiciones, señales mapeadas a Seguridad MVP, tipología de fraude (engagement/ranking/reputación), 4 clases (A/B/C/D), matriz de cómputo (ingreso/comisión/ranking/reputación/destacado/métricas públicas), veredicto RECOMENDADA con 4 refinamientos, reglas operativas, 7 riesgos AP-Rxx y orden P0-P3" }
+  ]
+}

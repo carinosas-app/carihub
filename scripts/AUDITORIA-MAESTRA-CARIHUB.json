@@ -1,0 +1,312 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "tipo": "AUDITORIA_MAESTRA",
+  "titulo": "Auditoría Maestra CariHub/Cariñosas",
+  "fecha": "2026-06-11",
+  "version": "1.0.0",
+  "modo": "Solo documentación — sintetiza corpus scripts/ sin modificar artefactos existentes",
+  "restricciones": {
+    "runtime": false,
+    "modificarDocumentosExistentes": false,
+    "commit": false,
+    "deploy": false
+  },
+  "artefactosSatelite": [
+    "scripts/MATRIZ-MADUREZ-CARIHUB.json",
+    "scripts/MATRIZ-DEPENDENCIAS-CARIHUB.json",
+    "scripts/ROADMAP-MAESTRO-CARIHUB.json",
+    "scripts/MATRIZ-MVP-CARIHUB.json"
+  ],
+  "documentosFuente": {
+    "planesMaestros": 13,
+    "specs": 8,
+    "actasCongelamiento": 10,
+    "actasMigracionMinor": 2,
+    "adrs": 3,
+    "anexos": 5,
+    "auditorias": 18,
+    "observaciones": 4,
+    "analisis": 3,
+    "fixturesGolden": 6,
+    "reportes": 6,
+    "mapasMatrices": 3,
+    "configSchemas": 18,
+    "totalReferencias": 89
+  },
+  "metadata": {
+    "autor": "Auditoría Maestra v1.0.0",
+    "baseline": ["scripts/AUDITORIA-ARQUITECTONICA-GLOBAL-CARIHUB.json", "scripts/MAPA-MAESTRO-CARIHUB.json", "scripts/REPORTE-CONGELAMIENTOS-CONSOLIDADO.json"],
+    "fechaBaseline": "2026-06-09",
+    "fechaActualizacion": "2026-06-11",
+    "novedadesDesdeBaseline": [
+      "SPEC-SEO-LANDINGS v1.0.0 + fixtures-seo-landings-golden.json",
+      "AUDITORIA-SPEC-SEO-LANDINGS PASS 19/19",
+      "ACTA-CONGELAMIENTO-SEO-LANDINGS v1.0.0 (10ª capa congelada)",
+      "PLAN-MAESTRO-ECONOMIA-SOCIAL v1.0.0",
+      "ANEXO-AUTOPROPINAS-CUENTAS-RELACIONADAS v1.0.0",
+      "ANEXO-RED-CONTACTOS-CONEXIONES-NEGOCIO v1.0.0",
+      "ANEXO-CRIPTOMONEDAS-PAGOS-CONTRATOS v1.0.0",
+      "ANALISIS-REEVALUACION-INDEXACION-PERFILES-ADULTOS"
+    ]
+  },
+  "inventarioMaestroGlobal": [
+    {
+      "dominio": "Arquitectura Base",
+      "modulos": [
+        { "nombre": "Shared/Core", "version": "1.0.0", "estado": "CONGELADO", "planMaestro": "PLAN-MAESTRO-SHARED-CORE", "spec": "SPEC-SHARED-CORE", "acta": "ACTA-CONGELAMIENTO-SHARED-CORE", "auditorias": ["AUDITORIA-SPEC-SHARED-CORE", "AUDITORIA-SHARED-CORE"], "fixtures": "fixtures-shared-core-golden.json", "dependencias": [], "madurez": "congelado", "runtimeAutorizado": false },
+        { "nombre": "RenderEngine", "version": "1.0.0", "estado": "CONGELADO", "spec": "SPEC-RENDERENGINE", "adrs": ["ADR-RENDER-STRATEGY", "ADR-URL-CANONICA-PERFILES"], "acta": "ACTA-CONGELAMIENTO-RENDERENGINE", "auditorias": ["AUDITORIA-SPEC-RENDERENGINE"], "fixtures": "fixtures-renderengine-golden.json", "dependencias": ["Shared/Core", "ADR-RENDER-STRATEGY"], "madurez": "congelado", "runtimeAutorizado": false },
+        { "nombre": "FieldEngine", "version": "1.0.1", "estado": "CONGELADO", "spec": "SPEC-FIELDENGINE", "acta": "ACTA-CONGELAMIENTO-FIELDENGINE", "auditorias": ["AUDITORIA-SPEC-FIELDENGINE"], "fixtures": "fixtures-fieldengine-golden.json", "dependencias": ["Shared/Core", "Catálogo"], "madurez": "congelado", "runtimeAutorizado": false },
+        { "nombre": "ValidationEngine", "version": "1.1.0", "estado": "CONGELADO", "spec": "SPEC-VALIDATIONENGINE", "acta": "ACTA-CONGELAMIENTO-VALIDATIONENGINE", "actaMinor": "ACTA-MINOR-VALIDATIONENGINE-1.1.0-MESSENGER", "auditorias": ["AUDITORIA-SPEC-VALIDATIONENGINE", "AUDITORIA-FINAL-SPEC-VALIDATIONENGINE"], "fixtures": "fixtures-validationengine-golden.json", "dependencias": ["Shared/Core", "FieldEngine"], "madurez": "congelado", "runtimeAutorizado": false },
+        { "nombre": "Seguridad MVP", "version": "1.0.0", "estado": "CONGELADO", "spec": "config-seguridad-mvp-schema.json", "acta": "ACTA-CONGELAMIENTO-SEGURIDAD", "auditorias": ["REPORTE-SEGURIDAD-MVP"], "dependencias": ["ValidationEngine"], "madurez": "congelado", "runtimeAutorizado": false },
+        { "nombre": "Catálogo", "version": "1.0.0", "estado": "CONGELADO", "acta": "ACTA-CONGELAMIENTO-CATALOGO", "dependencias": [], "madurez": "congelado", "runtimeAutorizado": false, "produccion": "parcial_catalogos-carihub.js" },
+        { "nombre": "Cuentas", "version": "1.0.0", "estado": "CONGELADO", "spec": "config-cuentas-usuario-schema.json", "acta": "ACTA-CONGELAMIENTO-CUENTAS", "dependencias": [], "madurez": "congelado", "runtimeAutorizado": false, "produccion": "legacy_usuarios_uid" }
+      ]
+    },
+    {
+      "dominio": "App Pública",
+      "modulos": [
+        { "nombre": "App Pública (plan)", "version": "1.0.0", "estado": "DOCUMENTADO", "planMaestro": "PLAN-MAESTRO-APP-PUBLICA", "spec": null, "acta": null, "dependencias": ["RenderEngine", "SEO-Landings", "Catálogo"], "madurez": "documentado", "runtimeAutorizado": false, "produccion": "monolito public/index.html" },
+        { "nombre": "SEO-Landings", "version": "1.0.0", "estado": "CONGELADO", "planMaestro": "PLAN-MAESTRO-SEO-LANDINGS", "spec": "SPEC-SEO-LANDINGS", "adrs": ["ADR-INDEXACION-ADULTOS", "ADR-URL-CANONICA-PERFILES", "ADR-RENDER-STRATEGY"], "acta": "ACTA-CONGELAMIENTO-SEO-LANDINGS", "auditorias": ["AUDITORIA-SPEC-SEO-LANDINGS"], "fixtures": "fixtures-seo-landings-golden.json", "dependencias": ["RenderEngine", "FieldEngine"], "madurez": "congelado", "runtimeAutorizado": false }
+      ]
+    },
+    {
+      "dominio": "Registro",
+      "modulos": [
+        { "nombre": "Registro-Cuenta", "version": "1.0.0", "estado": "DOCUMENTADO", "planMaestro": "PLAN-MAESTRO-REGISTRO-CUENTA", "spec": null, "acta": null, "schemas": ["config-registro-adultos-schema", "config-registro-negocio-schema", "config-registro-profesionista-schema", "config-registro-visitante-schema", "config-registro-independiente-schema"], "dependencias": ["FieldEngine", "ValidationEngine", "Seguridad MVP", "Cuentas"], "madurez": "documentado", "runtimeAutorizado": false, "produccion": "parcial_wizard_index.html" },
+        { "nombre": "Migración Usuarios→Perfiles", "version": "1.0.0", "estado": "AUDITADO", "acta": "ACTA-MIGRACION-USUARIOS-PERFILES", "auditorias": ["AUDITORIA-ACTA-MIGRACION-USUARIOS-PERFILES", "WORKSHOP-MIGRACION-USUARIOS-PERFILES-ANALISIS"], "adrs": ["ADR-URL-CANONICA-PERFILES"], "dependencias": ["Cuentas"], "madurez": "auditado", "runtimeAutorizado": false }
+      ]
+    },
+    {
+      "dominio": "Dashboards",
+      "modulos": [
+        { "nombre": "Dashboards", "version": "1.0.0", "estado": "CONGELADO", "planMaestro": "PLAN-MAESTRO-DASHBOARDS", "spec": "SPEC-DASHBOARDS", "acta": "ACTA-CONGELAMIENTO-DASHBOARDS", "auditorias": ["AUDITORIA-DASHBOARDS"], "anexo": "ANEXO-MESSENGER-INTEGRACION-DASHBOARDS", "dependencias": ["RenderEngine", "ValidationEngine", "Messenger"], "madurez": "congelado", "runtimeAutorizado": false }
+      ]
+    },
+    {
+      "dominio": "Admin",
+      "modulos": [
+        { "nombre": "Admin", "version": "1.0.0", "estado": "DOCUMENTADO", "planMaestro": "PLAN-MAESTRO-ADMIN", "spec": "config-admin-arquitectura-completa-schema", "acta": null, "dependencias": ["Seguridad MVP", "ValidationEngine"], "madurez": "documentado", "runtimeAutorizado": false, "produccion": "public/admin.html parcial" }
+      ]
+    },
+    {
+      "dominio": "Monetización",
+      "modulos": [
+        { "nombre": "Pagos-Contratos", "version": "1.0.0", "estado": "DOCUMENTADO", "planMaestro": "PLAN-MAESTRO-PAGOS-CONTRATOS", "spec": "config-contratos-carihub-schema", "acta": null, "anexo": "ANEXO-CRIPTOMONEDAS-PAGOS-CONTRATOS", "dependencias": ["ValidationEngine", "Cuentas"], "madurez": "documentado", "runtimeAutorizado": false },
+        { "nombre": "Economía Social", "version": "1.0.0", "estado": "DOCUMENTADO", "planMaestro": "PLAN-MAESTRO-ECONOMIA-SOCIAL", "spec": null, "acta": null, "anexos": ["ANEXO-AUTOPROPINAS-CUENTAS-RELACIONADAS"], "dependencias": ["Pagos-Contratos", "Interacciones", "Seguridad MVP"], "madurez": "documentado", "runtimeAutorizado": false }
+      ]
+    },
+    {
+      "dominio": "Interacciones",
+      "modulos": [
+        { "nombre": "Interacciones", "version": "1.0.0", "estado": "DOCUMENTADO", "planMaestro": "PLAN-MAESTRO-INTERACCIONES", "observacion": "OBSERVACION-ARQUITECTONICA-INTERACCIONES", "anexo": "ANEXO-RED-CONTACTOS-CONEXIONES-NEGOCIO", "dependencias": ["Dashboards", "Messenger"], "madurez": "documentado", "runtimeAutorizado": false, "produccion": "favoritos parcial index.html" }
+      ]
+    },
+    {
+      "dominio": "Publicidad",
+      "modulos": [
+        { "nombre": "Banners-Publicidad", "version": "1.0.0", "estado": "DOCUMENTADO", "planMaestro": "PLAN-MAESTRO-BANNERS-PUBLICIDAD", "anexo": "ANEXO-ESTRATEGICO-BANNERS-PUBLICIDAD", "schemas": ["config-promociones-banners-schema", "config-promociones-perfiles-schema"], "dependencias": ["Pagos-Contratos"], "madurez": "documentado", "runtimeAutorizado": false, "produccion": "registro-banner.html parcial" }
+      ]
+    },
+    {
+      "dominio": "IA",
+      "modulos": [
+        { "nombre": "Agentes-IA", "version": "1.0.0", "estado": "DOCUMENTADO", "planMaestro": "PLAN-MAESTRO-AGENTES-IA", "analisis": "ANALISIS-MESSENGER-IA-SEGURIDAD", "dependencias": ["Messenger", "Dashboards", "SEO-Landings"], "madurez": "documentado", "runtimeAutorizado": false }
+      ]
+    },
+    {
+      "dominio": "Diseño",
+      "modulos": [
+        { "nombre": "ThemeEngine", "version": "1.0.0", "estado": "DOCUMENTADO", "planMaestro": "PLAN-MAESTRO-THEMEENGINE", "observacion": "OBSERVACION-ARQUITECTONICA-THEMEENGINE", "dependencias": ["Shared/Core", "RenderEngine"], "madurez": "documentado", "runtimeAutorizado": false, "produccion": "dashboard-rentero.html prototipo" }
+      ]
+    },
+    {
+      "dominio": "i18n",
+      "modulos": [
+        { "nombre": "Internacionalización", "version": null, "estado": "CONCEPTUAL", "referencias": ["SPEC-SEO-LANDINGS (hreflang futuro)", "ANEXO-CRIPTOMONEDAS", "PLAN-MAESTRO-PAGOS-CONTRATOS"], "dependencias": ["Shared/Core", "RenderEngine", "Pagos-Contratos"], "madurez": "conceptual", "runtimeAutorizado": false, "produccion": "parcial_geo_MX" }
+      ]
+    },
+    {
+      "dominio": "Messenger",
+      "modulos": [
+        { "nombre": "Messenger", "version": "1.0.0", "estado": "CONGELADO", "spec": "SPEC-MESSENGER", "acta": "ACTA-CONGELAMIENTO-MESSENGER", "auditorias": ["AUDITORIA-SPEC-MESSENGER", "AUDITORIA-FINAL-SPEC-MESSENGER"], "fixtures": "fixtures-messenger-golden.json", "dependencias": ["ValidationEngine", "Seguridad MVP"], "madurez": "congelado", "runtimeAutorizado": false }
+      ]
+    }
+  ],
+  "matrizMadurezResumen": {
+    "fuente": "scripts/MATRIZ-MADUREZ-CARIHUB.json",
+    "totalModulos": 92,
+    "conteoPorNivel": {
+      "inexistente": 18,
+      "conceptual": 8,
+      "documentado": 22,
+      "especificado": 3,
+      "auditado": 2,
+      "congelado": 14,
+      "listoImplementacion": 0,
+      "implementado": 25
+    },
+    "notaImplementado": "25 entradas 'implementado' = funcionalidad parcial monolito NO alineada diseño congelado"
+  },
+  "auditoriaConsistencia": {
+    "veredictoGlobal": "PASS",
+    "matrices": [
+      { "nombre": "Planes vs SPECs", "resultado": "PASS", "detalle": "8 SPECs cubren capas congeladas; 9 planes sin SPEC son capas pendientes documentadas (no contradicción)" },
+      { "nombre": "SPECs vs Actas", "resultado": "PASS", "detalle": "8 SPECs con acta congelada correspondiente (incl. SEO-Landings 2026-06-11); 0 SPECs huérfanos" },
+      { "nombre": "ADRs vs SPECs", "resultado": "PASS", "detalle": "3 ADRs consumidos por RenderEngine, SEO-Landings y Migración; sin conflictos" },
+      { "nombre": "Anexos vs Planes", "resultado": "PASS", "detalle": "5 anexos complementan sin modificar planes base; coherencia Economía Social + Autopropinas + Red Contactos" },
+      { "nombre": "Congelamientos vs Reporte Consolidado", "resultado": "PASS", "detalle": "10 capas congeladas (7 baseline + Shared/Core + RenderEngine + SEO-Landings); alineado REPORTE-CONGELAMIENTOS-CONSOLIDADO + 3 nuevas" },
+      { "nombre": "Migración vs URL Canónica", "resultado": "PASS", "detalle": "ACTA-MIGRACION y ADR-URL-CANONICA coherentes; perfilId bridge documentado" },
+      { "nombre": "SEO Adultos vs ADR Indexación", "resultado": "PASS", "detalle": "SPEC-SEO-LANDINGS O8 consume ADR-INDEXACION-ADULTOS; MVP noindex adultos alineado" },
+      { "nombre": "ValidationEngine 1.1.0 vs Messenger", "resultado": "PASS", "detalle": "MINOR Messenger aplicado; AUDITORIA-ACTA-MINOR PASS" }
+    ],
+    "conflictosDetectados": [],
+    "observacionesNoBloqueantes": [
+      "Economía Social propinas futuro coherente con Interacciones (no contradicción)",
+      "ThemeEngine prototipo dashboard-rentero no alineado SPEC (esperado — solo plan)",
+      "Producción monolito no refleja diseño congelado (gap documentado, no inconsistencia documental)"
+    ]
+  },
+  "auditoriaCobertura": {
+    "veredictoGlobal": "PASS_PARCIAL",
+    "gapsFuncionales": [
+      { "id": "GAP-01", "area": "Registro runtime formal", "tienePlan": true, "tieneSpec": false, "tieneActa": false, "severidad": "alta" },
+      { "id": "GAP-02", "area": "Pagos pasarela integrada", "tienePlan": true, "tieneSpec": false, "tieneActa": false, "severidad": "critica" },
+      { "id": "GAP-03", "area": "Interacciones runtime", "tienePlan": true, "tieneSpec": false, "tieneActa": false, "severidad": "media" },
+      { "id": "GAP-04", "area": "ThemeEngine SPEC", "tienePlan": true, "tieneSpec": false, "tieneActa": false, "severidad": "baja" },
+      { "id": "GAP-05", "area": "Agentes IA SPEC", "tienePlan": true, "tieneSpec": false, "tieneActa": false, "severidad": "baja" },
+      { "id": "GAP-06", "area": "Economía Social SPEC", "tienePlan": true, "tieneSpec": false, "tieneActa": false, "severidad": "media" },
+      { "id": "GAP-07", "area": "Admin SPEC formal", "tienePlan": true, "tieneSchema": true, "tieneSpec": false, "severidad": "media" },
+      { "id": "GAP-08", "area": "i18n plan dedicado", "tienePlan": false, "severidad": "baja" },
+      { "id": "GAP-09", "area": "Runtime Shared/Core extraído", "tieneActa": true, "runtime": false, "severidad": "critica" },
+      { "id": "GAP-10", "area": "Validadores automáticos SEO/Planes nuevos", "tieneAuditoriaManual": true, "validadorScript": false, "severidad": "baja" }
+    ],
+    "coberturaPorTipo": {
+      "planesMaestros": { "total": 13, "conSpec": 8, "conActa": 10, "porcentajeSpec": 62 },
+      "capasFuncionales": { "total": 22, "congeladas": 10, "porcentajeCongelado": 45 },
+      "dominiosConPlan": { "total": 13, "sinPlan": 1, "dominioSinPlan": "i18n" }
+    }
+  },
+  "auditoriaRiesgo": {
+    "veredictoGlobal": "ATENCION",
+    "riesgos": [
+      { "id": "RSK-01", "categoria": "privacidad", "titulo": "Filtrado client-side resultados", "nivel": "critico", "origen": "AUDITORIA-ARQUITECTONICA-GLOBAL", "mitigacionDoc": "SPEC-SEO-LANDINGS noindex + server-side filter P0" },
+      { "id": "RSK-02", "categoria": "arquitectura", "titulo": "Gap usuarios uid vs perfilId", "nivel": "critico", "origen": "ACTA-MIGRACION", "mitigacionDoc": "Bridge perfilId P0" },
+      { "id": "RSK-03", "categoria": "legal/SEO", "titulo": "Indexación contenido adulto", "nivel": "alto", "origen": "ADR-INDEXACION-ADULTOS", "mitigacionDoc": "MVP noindex; ThinContentGuard futuro" },
+      { "id": "RSK-04", "categoria": "fraude", "titulo": "Autopropinas cuentas relacionadas", "nivel": "alto", "origen": "ANEXO-AUTOPROPINAS", "mitigacionDoc": "Clases A/B/C/D + señales Seguridad MVP" },
+      { "id": "RSK-05", "categoria": "fiscal", "titulo": "Pagos sin KYC/facturación", "nivel": "alto", "origen": "PLAN-MAESTRO-PAGOS-CONTRATOS", "mitigacionDoc": "Contratos + pasarela formal" },
+      { "id": "RSK-06", "categoria": "operacional", "titulo": "Monolito SPOF", "nivel": "alto", "origen": "AUDITORIA-GLOBAL", "mitigacionDoc": "Extracción Shared/Core" },
+      { "id": "RSK-07", "categoria": "IA", "titulo": "Agentes IA sin guardrails runtime", "nivel": "medio", "origen": "ANALISIS-MESSENGER-IA-SEGURIDAD", "mitigacionDoc": "ValidationEngine + Seguridad MVP" },
+      { "id": "RSK-08", "categoria": "adulto", "titulo": "Contenido adulto cumplimiento", "nivel": "alto", "origen": "config-seguridad-mvp-schema", "mitigacionDoc": "Puerta 18+ + PrivacyGuard" },
+      { "id": "RSK-09", "categoria": "pagos", "titulo": "Cripto regulación", "nivel": "medio", "origen": "ANEXO-CRIPTOMONEDAS", "mitigacionDoc": "Fase P3 post-nacional" },
+      { "id": "RSK-10", "categoria": "i18n", "titulo": "Sin multi-idioma", "nivel": "medio", "origen": "corpus", "mitigacionDoc": "P3 internacional" }
+    ],
+    "conteoPorNivel": { "critico": 2, "alto": 5, "medio": 3, "bajo": 0 }
+  },
+  "auditoriaImplementacion": {
+    "veredictoGlobal": "FAIL_PARCIAL",
+    "puedeImplementarHoy": [
+      { "item": "Deploy gates Seguridad MVP (Turnstile config)", "requiere": ["ACTA-CONGELAMIENTO-SEGURIDAD"], "bloqueante": false },
+      { "item": "robots.txt/sitemap estático mínimo", "requiere": ["ACTA-CONGELAMIENTO-SEO-LANDINGS"], "bloqueante": false },
+      { "item": "Fixtures golden CI para engines congelados", "requiere": ["6 fixtures existentes"], "bloqueante": false }
+    ],
+    "requiereSpec": ["Registro-Cuenta runtime", "Pagos-Contratos", "Interacciones", "Economía Social", "ThemeEngine", "Agentes-IA", "Admin formal"],
+    "requiereActa": ["Todas las capas congeladas ya tienen acta — runtime pendiente autorización explícita post-P0"],
+    "requiereADR": ["Migración perfilId (ADR-URL-CANONICA ya aceptado)", "Render híbrido (ADR-RENDER-STRATEGY ya aceptado)"],
+    "requiereLegal": ["Pagos fiscal MX", "Contenido adulto indexación futura", "Criptomonedas P3", "Propinas fraude"],
+    "gapProduccionVsDiseno": {
+      "monolitoIndexHtml": "Mezcla Home+Registro+Dashboard+Favoritos+Anuncios",
+      "resultadosClientSide": "CRÍTICO — no alineado SEO/privacidad",
+      "perfilQueryParam": "No alineado ADR-URL-CANONICA slug",
+      "sinRenderEngineHead": "No alineado SPEC-RENDERENGINE",
+      "sinValidationEngineServer": "No alineado SPEC-VALIDATIONENGINE",
+      "enginesCongeladosSinRuntime": 10
+    }
+  },
+  "metricasGlobales": {
+    "porcentajeDocumental": 76,
+    "porcentajeArquitecturaCongelada": 45,
+    "porcentajeFuncionalRuntime": 8,
+    "porcentajeGobernanza": 85,
+    "porcentajeMonetizacionDoc": 45,
+    "porcentajeSEODoc": 90,
+    "porcentajeIADoc": 55,
+    "porcentajeSeguridadDoc": 80,
+    "porcentajeI18nDoc": 15,
+    "porcentajeGlobalPonderado": 75,
+    "formulaGlobal": "Promedio ponderado dimensiones documentales (peso diseño 60%, runtime 40%)",
+    "modulosCerrados": 13,
+    "modulosAbiertos": 9,
+    "detalleModulosCerrados": "10 actas congeladas + 3 ADRs aceptados",
+    "detalleModulosAbiertos": "Pagos, Registro runtime, Interacciones, Economía Social, ThemeEngine, i18n, Admin SPEC, Agentes IA SPEC, App Pública desacople"
+  },
+  "veredictoFinal": {
+    "auditoriaMaestraDocumental": "PASS",
+    "listoImplementacionMVP": "FAIL_PARCIAL",
+    "preguntas": {
+      "arquitecturaDisenoCerrada": { "respuesta": "~45%", "detalle": "10/22 dominios funcionales con acta CONGELADO" },
+      "listoParaImplementacion": { "respuesta": "~12%", "detalle": "0 capas listoImplementacion (congeladas sin runtime ni deps runtime satisfechas)" },
+      "mvpOperativo": { "respuesta": "~18%", "detalle": "Monolito parcial producción; gaps críticos SEO/pagos/migración" },
+      "operacionNacional": { "respuestaDoc": "~25%", "respuestaRuntime": "~5%", "detalle": "Doc sólido MX; runtime insuficiente" },
+      "operacionInternacional": { "respuestaDoc": "~10%", "respuestaRuntime": "0%", "detalle": "i18n inexistente; cripto documentado P3" }
+    }
+  },
+  "veredicto": "PASS",
+  "veredictoDetalle": "PASS auditoría documental maestra — corpus coherente, completo para fase diseño. FAIL parcial en dimensiones runtime/MVP/implementación.",
+  "recomendacionSiguienteFase": {
+    "nombre": "Fase P0 Runtime Foundation",
+    "prioridad": "P0",
+    "items": [
+      "Migración usuarios→perfiles runtime (bridge perfilId)",
+      "RenderEngine snapshot deploy (head Home/Perfil)",
+      "Pagos pasarela MVP (Stripe/MP)",
+      "Seguridad MVP gates (Turnstile deploy)",
+      "Extracción Shared/Core módulo",
+      "ValidationEngine server-side",
+      "Resultados server-side + noindex",
+      "robots.txt + sitemap.xml runtime",
+      "Firestore rules alineadas diseño",
+      "URL canónica slug /perfil/{slug}"
+    ],
+    "referenciaRoadmap": "scripts/ROADMAP-MAESTRO-CARIHUB.json",
+    "referenciaMvp": "scripts/MATRIZ-MVP-CARIHUB.json",
+    "duracionEstimada": "Q3-Q4 2026"
+  },
+  "delimitacionMVP": {
+    "fuente": "scripts/MATRIZ-MVP-CARIHUB.json",
+    "mvpMinimo": "MVP-MIN Cariñosas Nacional",
+    "respuestaExplicita": "El MVP más pequeño que satisface registrar, verificar, publicar, cobrar, mostrar, recibir contactos, administrar perfiles, pagos y anuncios SIN Messenger, Economía Social, Propinas, Cripto, Lives, Stories, Red Contactos, IA avanzada, i18n ni Marketplace",
+    "recibirContactosVia": "Contacto externo WhatsApp/teléfono (FieldEngine) — NO requiere Messenger runtime",
+    "umbrales": {
+      "betaPrivada": { "funcionesObligatorias": 10, "puedeOmitir": ["Pasarela auto", "Messenger", "RBAC granular", "robots completo"] },
+      "betaPublica": { "funcionesObligatorias": 20, "puedeOmitir": ["Messenger", "Propinas", "Economía social", "Landings dinámicas"] },
+      "cobrar": { "funcionesObligatorias": 8, "requiere": "Pasarela + contratos_perfiles + webhook activación" },
+      "produccion": { "funcionesObligatorias": 30, "puedeOmitir": ["Messenger", "Economía social", "Red contactos", "Lives/Stories", "IA avanzada", "i18n"] }
+    },
+    "postergadas": {
+      "V1_1": ["Dashboard shell", "Pasarela banners", "Teléfono OTP", "Favoritos", "Messenger MVP", "Renovaciones auto", "Landings estáticas"],
+      "V1_2": ["Seguir", "Red Contactos", "Propinas clase A", "Compartir perfil", "Notificaciones", "IA SEO advisor", "Videos perfil"],
+      "V2_0": ["Stories", "Lives", "Premium/exclusivo", "Propinas stories/lives", "ThemeEngine", "Estados/publicaciones", "IA Messenger/Admin"],
+      "Futuro": ["i18n", "Hreflang", "Multimoneda", "Cripto", "Marketplace", "Indexación adultos selectiva", "Empresa multi-perfil"]
+    },
+    "analisisEspecificoResumen": {
+      "economiaSocial": "Post-MVP V1.2 — sin impacto en 9 capacidades núcleo",
+      "propinas": "Post-MVP V1.2 — membresía cubre monetización MVP",
+      "criptomonedas": "Futuro V2.0+ — MXN suficiente nacional",
+      "lives": "Futuro V2.0 — riesgo moderación alto",
+      "stories": "Futuro V2.0 — engine inexistente",
+      "redDeContactos": "Post-MVP V1.2 — WhatsApp cubre MVP",
+      "iaAvanzada": "Post-MVP V1.2-V2.0 — operación manual viable",
+      "internacionalizacion": "Futuro — mercado MX primero",
+      "multimoneda": "Futuro — politicaPrecioCongelado MXN",
+      "hreflang": "Futuro — requiere i18n",
+      "seoInternacional": "Futuro — landings MX suficientes",
+      "marketplaceFuturo": "Experimental — cambio modelo negocio"
+    },
+    "metricasReduccion": {
+      "reduccionComplejidadModulos": "70% (92→28)",
+      "reduccionTiempoEstimado": "78% (80-120→16-22 semanas)",
+      "reduccionRiesgoLanzamiento": "62% (índice 100→38)",
+      "funcionesClasificadas": { "MVP_obligatorio": 29, "MVP_recomendado": 7, "Post-MVP": 14, "Futuro": 9, "Experimental": 1 }
+    }
+  }
+}

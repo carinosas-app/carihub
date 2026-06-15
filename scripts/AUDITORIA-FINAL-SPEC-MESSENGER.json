@@ -1,0 +1,52 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "tipo": "AUDITORIA_FINAL_SPEC",
+  "nombre": "Auditoría técnica final — Messenger v1.0.0 (post OB-MSG)",
+  "fecha": "2026-06-09",
+  "fechaRevalidacionPostOBMSG": "2026-06-09",
+  "versionSpecAuditada": "1.0.0",
+  "estadoAprobacionCongelamiento": "APROBADO_PO_2026-06-09",
+  "aprobarActaCongeladoAhora": true,
+  "fechaCongelamiento": "2026-06-09",
+  "acta": "scripts/ACTA-CONGELAMIENTO-MESSENGER.json",
+  "actualizarActaAntesCongelamiento": true,
+  "obMSG": { "estado": "CERRADOS", "ids": ["OB-MSG-1", "OB-MSG-2", "OB-MSG-3", "OB-MSG-4", "OB-MSG-5", "OB-MSG-6", "OB-MSG-7", "OB-MSG-8"] },
+  "puedeCongelarseSinCambios": false,
+  "puedeCongelarseTrasAjustesObligatorios": true,
+  "veredictoGeneral": "DISENO_CONSISTENTE_LISTO_REVISION_CONGELAMIENTO_PO",
+  "validadorDiseno": {
+    "script": "scripts/validar-spec-messenger.mjs",
+    "resultado": "PASS",
+    "checks": "21/21 post OB-MSG"
+  },
+  "resolucionOB_MSG": {
+    "OB-MSG-1": { "estado": "CERRADO", "cambio": "Estados globales sin solicitud_aceptada ni archivada; aceptar→activa" },
+    "OB-MSG-2": { "estado": "CERRADO", "cambio": "conversaciones_meta canónica; participanteSnapshot sin configLocal" },
+    "OB-MSG-3": { "estado": "CERRADO", "cambio": "conversacionIniciar bifurcado directa|solicitud + fanOut variantes" },
+    "OB-MSG-4": { "estado": "CERRADO", "cambio": "registry v1.0.1 — 24 entradas fanOut" },
+    "OB-MSG-5": { "estado": "CERRADO", "cambio": "admin_automatizaciones_suspendir en accionesCatalogo" },
+    "OB-MSG-6": { "estado": "CERRADO", "cambio": "algoritmo conversacionId sha256 + política trío par+perfil" },
+    "OB-MSG-7": { "estado": "CERRADO", "cambio": "ANEXO-MESSENGER-INTEGRACION-DASHBOARDS.json" },
+    "OB-MSG-8": { "estado": "CERRADO", "cambio": "gatesMessenger telefono; spamScore canónico; VE-MINOR-05/06/07" }
+  },
+  "riesgosRestantes": [
+    { "id": "R-MSG-01", "nivel": "alto", "descripcion": "Migración usuarios monolito vs perfiles" },
+    { "id": "R-MSG-02", "nivel": "alto", "descripcion": "Runtime requiere VE 1.1.0 — registry congelado placeholders" },
+    { "id": "R-MSG-04", "nivel": "medio", "descripcion": "Automatizaciones superficie abuso" },
+    { "id": "R-MSG-05", "nivel": "medio", "descripcion": "Evaluación controles admin por mensaje — costo" }
+  ],
+  "advertenciasRestantes": [
+    "PATCH Dashboards 1.1.0 recomendado pre-runtime completo — anexo cubre MVP con metadata",
+    "Cooldown 24h re-solicitud tras rechazo — AM no cerrado",
+    "ia_asistente_sugerir_respuesta fuera catálogo VE — documentado en accionesSinFanOut",
+    "Límite 5 conversaciones/día no en rateLimits Seguridad congelado — documentado en SPEC antiSpam"
+  ],
+  "veredictoCongelamiento": {
+    "estado": "CONGELADO",
+    "fecha": "2026-06-09",
+    "listoParaRevisionPO": true,
+    "aprobarCongeladoAhora": true,
+    "actaEstado": "CONGELADO",
+    "razon": "Aprobación formal PO; OB-MSG cerrados; validación 21/21 PASS"
+  }
+}

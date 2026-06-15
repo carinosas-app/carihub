@@ -1,0 +1,301 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "versionSchema": "2026-06-10",
+  "version": "2026-06-10",
+  "formularioId": "config_precios_planes_perfiles",
+  "nombre": "Configuración de precios y planes de perfiles",
+  "descripcion": "Schema de precios publicación/visibilidad de perfiles CariHub. Administrado en config_precios_perfiles. Separado de configuracion_publicidad/precios_banners y de promociones_perfiles. Nunca auto-aplica cambios.",
+  "coleccionFirestore": "config_precios_perfiles",
+  "separacionObligatoria": {
+    "banners": "configuracion_publicidad/precios_banners",
+    "promociones": "promociones_perfiles",
+    "contratos": "contratos_perfiles",
+    "prohibido": "Mezclar precios de perfiles con banners o promociones en el mismo documento"
+  },
+  "dimensionesPrecio": {
+    "ejes": ["tipoRegistro", "sectorId", "subcategoriaId", "pais", "estado", "ciudad", "planId", "periodo"]
+  },
+  "politicaPrecioCongelado": {
+    "regla": "precioContratado + versionPrecio fijos hasta fechaVencimiento",
+    "cambioAdminNoAfectaActivos": true,
+    "referenciaContratos": "config-contratos-carihub-schema.json"
+  },
+  "versionadoPrecios": {
+    "campoVersion": "versionPrecio",
+    "campoContrato": "precioContratado"
+  },
+  "usuarioVisitante": {
+    "cobraRegistroInicial": true,
+    "publicaPerfilAlInicio": false
+  },
+  "moneda": "MXN",
+  "ivaIncluido": true,
+  "redondeo": 50,
+  "planes": {
+    "basico": {
+      "id": "basico",
+      "nombre": "Básico",
+      "orden": 1,
+      "descripcion": "Presencia estándar en resultados",
+      "visibilidad": {
+        "prioridadResultados": 1,
+        "badge": null,
+        "destacadoHome": false
+      },
+      "limites": {
+        "fotosMax": 3,
+        "galeriaMax": 3,
+        "actualizacionesMes": 2
+      },
+      "activo": true
+    },
+    "destacado": {
+      "id": "destacado",
+      "nombre": "Destacado",
+      "orden": 2,
+      "descripcion": "Mayor visibilidad en resultados y badge",
+      "visibilidad": {
+        "prioridadResultados": 2,
+        "badge": "destacado",
+        "destacadoHome": false
+      },
+      "limites": {
+        "fotosMax": 6,
+        "galeriaMax": 6,
+        "actualizacionesMes": 4
+      },
+      "activo": true
+    },
+    "premium": {
+      "id": "premium",
+      "nombre": "Premium",
+      "orden": 3,
+      "descripcion": "Alta visibilidad + badge premium",
+      "visibilidad": {
+        "prioridadResultados": 3,
+        "badge": "premium",
+        "destacadoHome": true
+      },
+      "limites": {
+        "fotosMax": 10,
+        "galeriaMax": 10,
+        "actualizacionesMes": 8
+      },
+      "activo": true
+    },
+    "vip": {
+      "id": "vip",
+      "nombre": "VIP",
+      "orden": 4,
+      "descripcion": "Máxima visibilidad y soporte prioritario",
+      "visibilidad": {
+        "prioridadResultados": 4,
+        "badge": "vip",
+        "destacadoHome": true,
+        "soportePrioritario": true
+      },
+      "limites": {
+        "fotosMax": 15,
+        "galeriaMax": 15,
+        "actualizacionesMes": 999
+      },
+      "activo": true
+    }
+  },
+  "factoresPeriodo": {
+    "semanal": 0.35,
+    "quincenal": 0.65,
+    "mensual": 1
+  },
+  "periodosComercialesFuturos": {
+    "anual": {
+      "factor": 10,
+      "activo": false,
+      "nota": "Reservado; no forma parte de periodosComerciales MVP (semanal|quincenal|mensual)"
+    }
+  },
+  "preciosBase": {
+    "global": {
+      "basico": 299,
+      "destacado": 599,
+      "premium": 999,
+      "vip": 1499
+    },
+    "porFormulario": {
+      "adultos": {
+        "basico": 499,
+        "destacado": 899,
+        "premium": 1299,
+        "vip": 1999
+      },
+      "persona_independiente": {
+        "basico": 249,
+        "destacado": 499,
+        "premium": 799,
+        "vip": 1199
+      },
+      "profesionista_cedula": {
+        "basico": 399,
+        "destacado": 699,
+        "premium": 1099,
+        "vip": 1599
+      },
+      "negocio_empresa": {
+        "basico": 599,
+        "destacado": 999,
+        "premium": 1499,
+        "vip": 2499
+      },
+      "usuario_visitante": {
+        "basico": 99,
+        "destacado": 149,
+        "premium": 199,
+        "vip": 299
+      }
+    }
+  },
+  "adminFuturo": {
+    "acciones": ["cambiar_precios_base", "ver_contratos_activos"],
+    "referenciaEstados": "config-estados-revision-publicacion-schema.json"
+  },
+  "resolucionPrecio": {
+    "algoritmo": [
+      "1. Iniciar con preciosBase.global[plan]",
+      "2. Si existe preciosBase.porFormulario[formularioId][plan] → usar",
+      "3. Aplicar override más específico: subcategoriaId > sectorId > formularioId > estado > pais > global",
+      "4. Si override.modoPrecio === 'manual' → usar override.precioMensualBase",
+      "5. Si override.modoPrecio === 'automatico' → base × override.factores",
+      "6. Aplicar factorPeriodo (semanal/quincenal/mensual/anual)",
+      "7. Redondear según redondeo (50 MXN)",
+      "8. IVA ya incluido si ivaIncluido === true"
+    ],
+    "especificidadOverride": [
+      "subcategoriaId",
+      "sectorId",
+      "formularioId",
+      "ciudad",
+      "estado",
+      "pais",
+      "global"
+    ]
+  },
+  "overrides": {
+    "descripcion": "Subcolección Firestore config_precios_perfiles/overrides/{overrideId}",
+    "campos": {
+      "activo": "boolean",
+      "planId": "basico|destacado|premium|vip",
+      "scope": {
+        "formularioId": "opcional",
+        "sectorId": "opcional",
+        "subcategoriaId": "opcional",
+        "pais": "opcional",
+        "estado": "opcional",
+        "ciudad": "opcional"
+      },
+      "modoPrecio": "automatico|manual",
+      "precioMensualBase": "number",
+      "factoresAutomaticos": {
+        "semanal": 0.35,
+        "quincenal": 0.65,
+        "mensual": 1
+      },
+      "manual": {
+        "semanal": 0,
+        "quincenal": 0,
+        "mensual": 0,
+        "anual": 0
+      },
+      "notaAdmin": "string",
+      "actualizadoPor": "admin uid",
+      "actualizadoEn": "timestamp"
+    },
+    "ejemplos": [
+      {
+        "id": "adultos-cdmx-premium",
+        "activo": true,
+        "planId": "premium",
+        "scope": {
+          "formularioId": "adultos",
+          "ciudad": "Ciudad de México"
+        },
+        "modoPrecio": "manual",
+        "precioMensualBase": 1599
+      },
+      {
+        "id": "salud-global-destacado",
+        "activo": true,
+        "planId": "destacado",
+        "scope": {
+          "sectorId": "salud"
+        },
+        "modoPrecio": "automatico",
+        "precioMensualBase": 799,
+        "factoresAutomaticos": {
+          "semanal": 0.35,
+          "quincenal": 0.65,
+          "mensual": 1
+        }
+      }
+    ]
+  },
+  "historialCambios": {
+    "coleccion": "config_precios_perfiles_historial/{id}",
+    "campos": [
+      "tipo",
+      "antes",
+      "despues",
+      "autor",
+      "timestamp",
+      "motivo"
+    ],
+    "notas": "Escrito solo por admin humano o CI; IA Arquitecto solo lee."
+  },
+  "firestoreRecomendado": {
+    "documento": "config_precios_perfiles/planes_perfiles",
+    "subcolecciones": [
+      "overrides",
+      "historial"
+    ],
+    "lecturaPublica": "solo precio final cotizado en wizard (no overrides internos)",
+    "escritura": "admin solamente"
+  },
+  "coherenciaPrecios": [
+    {
+      "id": "PLAN_INACTIVO",
+      "si": "plan.activo === false",
+      "severidad": "error",
+      "mensaje": "No ofrecer plan inactivo en wizard."
+    },
+    {
+      "id": "PRECIO_CERO",
+      "si": "precioMensualBase <= 0",
+      "severidad": "error"
+    },
+    {
+      "id": "OVERRIDE_HUERFANO",
+      "si": "override.scope.subcategoriaId not in catalogo",
+      "severidad": "advertencia"
+    },
+    {
+      "id": "BASICO_MAYOR_PREMIUM",
+      "si": "precio.basico >= precio.premium",
+      "severidad": "error",
+      "mensaje": "Jerarquía de planes inconsistente."
+    }
+  ],
+  "alineacionBanners": {
+    "mismaMoneda": true,
+    "mismoRedondeo": 50,
+    "mismosFactoresPeriodo": true,
+    "coleccionParalela": "configuracion_publicidad vs config_precios_perfiles"
+  },
+  "iaArquitecto": {
+    "puedeRecomendar": true,
+    "puedeModificar": false,
+    "tools": [
+      "audit_precios_perfiles",
+      "comparar_override_jerarquia",
+      "detectar_precios_inconsistentes"
+    ]
+  }
+}

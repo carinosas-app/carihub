@@ -1,0 +1,186 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "tipo": "REPORTE_CIERRE_SPEC",
+  "titulo": "Reporte cierre AM1–AM3 — FieldEngine v1.0.1",
+  "fecha": "2026-06-09",
+  "specVersion": "1.0.1",
+  "specVersionAnterior": "1.0.0",
+  "autorizacion": "Usuario autorizó aplicar AM1–AM3 sin runtime, Firestore, producción, deploy ni commit",
+  "validacion": {
+    "script": "scripts/validar-spec-fieldengine.mjs",
+    "reporte": "scripts/validacion-spec-fieldengine-report.json",
+    "resultado": "PASS",
+    "checks": "19/19"
+  },
+  "archivosModificados": [
+    {
+      "archivo": "scripts/SPEC-FIELDENGINE.json",
+      "tipo": "actualizado",
+      "cambios": [
+        "versionSpec 1.0.0 → 1.0.1",
+        "AM1: guardar_borrador incluye restringido",
+        "AM2: subcategoriaId condicional + flujoVisitante",
+        "AM3: fuentes lectura + algoritmoResolucion + snapshotAlPublicar",
+        "Errores renombrados visitante"
+      ]
+    },
+    {
+      "archivo": "scripts/SPEC-FIELDENGINE.md",
+      "tipo": "actualizado",
+      "cambios": [
+        "Versión 1.0.1",
+        "Tabla subcategoriaId condicional",
+        "Ramas visitante/temporal/merge",
+        "Security gates AM1",
+        "Snapshot y fuentes AM3",
+        "11 fixtures"
+      ]
+    },
+    {
+      "archivo": "scripts/fixtures-fieldengine-golden.json",
+      "tipo": "actualizado",
+      "cambios": [
+        "version 1.0.1",
+        "F08: flujoVisitante registro_inicial",
+        "F10: nota AM1 + motivoEnviarRevision",
+        "F11: visitante upgrade sin subcategoriaId → error"
+      ]
+    },
+    {
+      "archivo": "scripts/ACTA-CONGELAMIENTO-FIELDENGINE.json",
+      "tipo": "actualizado",
+      "cambios": ["versionActa 1.0.1", "ajustesObligatoriosCerrados AM1–AM3", "historial PATCH_AM1_AM3"]
+    },
+    {
+      "archivo": "scripts/ACTA-CONGELAMIENTO-FIELDENGINE.md",
+      "tipo": "actualizado",
+      "cambios": ["FieldEngine 1.0.1", "tabla AM cerrados"]
+    },
+    {
+      "archivo": "scripts/AUDITORIA-SPEC-FIELDENGINE.json",
+      "tipo": "actualizado",
+      "cambios": ["resolucionV101", "AM1–AM3 estado cerrado_v1.0.1"]
+    }
+  ],
+  "archivosCreados": [
+    {
+      "archivo": "scripts/validar-spec-fieldengine.mjs",
+      "tipo": "nuevo",
+      "proposito": "Auditoría consistencia SPEC (diseño)"
+    },
+    {
+      "archivo": "scripts/validacion-spec-fieldengine-report.json",
+      "tipo": "generado",
+      "proposito": "Salida validación 19/19 PASS"
+    },
+    {
+      "archivo": "scripts/REPORTE-SPEC-FIELDENGINE-v1.0.1.json",
+      "tipo": "nuevo"
+    },
+    {
+      "archivo": "scripts/REPORTE-SPEC-FIELDENGINE-v1.0.1.md",
+      "tipo": "nuevo"
+    }
+  ],
+  "cambiosAplicados": {
+    "AM1": {
+      "descripcion": "guardar_borrador permitido en estadoSeguridad=restringido",
+      "specJson": "securityGates.reglas guardar_borrador → normal,observacion,restringido",
+      "specMd": "Tabla §5 actualizada",
+      "alineacion": "config-seguridad-mvp-schema.json efectos.restringido.publicaciones = solo borrador",
+      "fixture": "F10 — guardar_borrador permitido, enviar_revision denegado"
+    },
+    "AM2": {
+      "descripcion": "subcategoriaId opcional visitante registro; obligatorio en upgrade",
+      "specJson": "FieldEngineContext.subcategoriaId obligatorio=condicional; flujoVisitante enum",
+      "specMd": "Tabla flujos visitante §3.1 y §7",
+      "errores": [
+        "SUBCATEGORIA_REQUERIDA_UPGRADE_VISITANTE",
+        "SUBCATEGORIA_NO_PERMITIDA_VISITANTE_INICIAL"
+      ],
+      "fixtures": {
+        "F08": "registro_inicial sin subcategoriaId",
+        "F11": "upgrade_perfil_publico sin subcategoriaId → error"
+      }
+    },
+    "AM3": {
+      "descripcion": "Fuentes obligatorias y contratos snapshot",
+      "fuentesAnadidas": [
+        "config-categorias-sugeridas-schema.json",
+        "config-renderizado-dinamico-schema.json",
+        "config-contratos-carihub-schema.json"
+      ],
+      "seccionesNuevas": [
+        "algoritmoResolucion.ramaTemporal",
+        "snapshotAlPublicar con mapeoDesdeResolved",
+        "casosEspeciales.temporal_categoria_sugerida con fuente"
+      ]
+    }
+  },
+  "fixturesActualizados": {
+    "total": 11,
+    "modificados": ["F08", "F10"],
+    "nuevos": ["F11"],
+    "sinCambio": ["F01", "F02", "F03", "F04", "F05", "F06", "F07", "F09"]
+  },
+  "estadoFinalSpec": {
+    "version": "1.0.1",
+    "estado": "DISENO_COMPLETO_AM1_AM3",
+    "implementacionAutorizada": false,
+    "dependencias": {
+      "catalogo": "1.0.0",
+      "cuentas": "1.0.0",
+      "seguridad": "1.0.0"
+    },
+    "apiPrincipal": "resolveRegistrationSchema(context)",
+    "fixtures": 11,
+    "fuentesLectura": 12
+  },
+  "riesgosYAdvertencias": [
+    {
+      "id": "W1",
+      "nivel": "bajo",
+      "descripcion": "AM4–AM8 recomendados pendientes (temporal detallado, resolveHash, roles[])"
+    },
+    {
+      "id": "W2",
+      "nivel": "medio",
+      "descripcion": "Fixtures son salidas resumidas; faltan 2 JSON completos (F01, F08) antes de codificar runtime"
+    },
+    {
+      "id": "W3",
+      "nivel": "medio",
+      "descripcion": "Gap producción: legacy usuarios/{uid} vs diseño perfiles/{perfilId} — sin cambio en esta tarea"
+    },
+    {
+      "id": "W4",
+      "nivel": "bajo",
+      "descripcion": "SPEC-FIELDENGINE-ALCANCE.md aún referencia v1.0.0 y 10 fixtures — no actualizado (fuera de alcance explícito)"
+    },
+    {
+      "id": "W5",
+      "nivel": "bajo",
+      "descripcion": "Fixture temporal_categoria_sugerida no añadido (AM4 recomendado, no obligatorio)"
+    }
+  ],
+  "puedeCongelarseV101": {
+    "respuesta": "SI",
+    "justificacion": "AM1–AM3 cerrados; validación 19/19 PASS; SPEC JSON/MD/fixtures/acta alineados; Seguridad MVP coherente"
+  },
+  "actualizarActaCongelamiento": {
+    "respuesta": "SI",
+    "estado": "APLICADO",
+    "nota": "ACTA-CONGELAMIENTO-FIELDENGINE actualizada a v1.0.1 con historial PATCH_AM1_AM3"
+  },
+  "noAutorizado": [
+    "Runtime FieldEngine",
+    "ValidationEngine",
+    "RenderEngine",
+    "Firestore",
+    "Producción",
+    "Deploy",
+    "Commit",
+    "Auditoría dashboards"
+  ],
+  "siguientePasoSugerido": "Congelar v1.0.1 formalmente (acta ya actualizada); SPEC ValidationEngine cuando el usuario autorice"
+}

@@ -1,0 +1,105 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "versionSchema": "2026-06-10",
+  "version": "2026-06-10",
+  "schemaId": "promociones_perfiles",
+  "nombre": "Promociones de perfiles (separadas de precios base)",
+  "descripcion": "Las promociones NO alteran precios base en config_precios_perfiles. Se resuelven en capa aparte y se congelan al contratar.",
+  "separacionObligatoria": {
+    "preciosBase": "config_precios_perfiles/planes_perfiles",
+    "promociones": "promociones_perfiles",
+    "nuncaMezclar": true,
+    "nota": "Desactivar promoción no elimina ni modifica precios base."
+  },
+  "versionadoPromociones": {
+    "campoContrato": "versionPromocion",
+    "campoCongelado": "promocionAplicada",
+    "historialColeccion": "promociones_perfiles_historial/{id}",
+    "camposHistorial": ["promocionId", "version", "antes", "despues", "autor", "timestamp", "motivo"]
+  },
+  "politicaPromocionCongelada": {
+    "regla": "La promoción vigente al momento de contratar queda congelada hasta fechaVencimiento del contrato.",
+    "noAfectaContratosActivos": true,
+    "aplicaEnRenovacion": "Solo promociones vigentes al momento de renovar (post-vencimiento)"
+  },
+  "tiposPromocion": {
+    "primer_mes_gratis": {
+      "id": "primer_mes_gratis",
+      "nombre": "Primer mes gratis (lanzamiento)",
+      "aplicaA": ["adultos", "persona_independiente", "profesionista_cedula"],
+      "noAplicaA": ["negocio_empresa", "usuario_visitante"],
+      "beneficio": { "diasGratis": 30, "despuesDe": "aprobacion_admin" },
+      "flujo": [
+        "1. Usuario llena registro",
+        "2. estadoRevision = enviado_revision",
+        "3. Admin revisa y aprueba",
+        "4. Al aprobar: inicia periodo promocional 30 días (precioContratado = 0, promocionAplicada = primer_mes_gratis)",
+        "5. Al día 30: estadoContrato → vencido o pago_pendiente renovación con precio vigente",
+        "6. Nunca auto-aprobar ni auto-publicar"
+      ],
+      "activo": true,
+      "version": "2026-06-10-lanzamiento-1"
+    },
+    "negocio_2x1": {
+      "id": "negocio_2x1",
+      "nombre": "2x1 meses (Negocios y Empresas)",
+      "aplicaA": ["negocio_empresa"],
+      "tipo": "multiplicador_tiempo",
+      "regla": "Por cada mes pagado, bonifica el mismo número de meses",
+      "ejemplos": [
+        { "mesesPagados": 1, "mesesBonificados": 1, "mesesTotales": 2 },
+        { "mesesPagados": 3, "mesesBonificados": 3, "mesesTotales": 6 }
+      ],
+      "pagoAdelantado": true,
+      "flujo": [
+        "1. Empresa llena registro → enviado_revision",
+        "2. Admin revisa → autorizado_para_pago",
+        "3. Usuario paga adelantado",
+        "4. pago_confirmado → publicado si sin cambios post-pago",
+        "5. Si modificó datos importantes post-pago → revision_post_pago"
+      ],
+      "activo": true,
+      "version": "2026-06-10-lanzamiento-1"
+    }
+  },
+  "resolucionPromocion": {
+    "algoritmo": [
+      "1. Filtrar promociones activas por formularioId, sectorId, subcategoriaId, geo",
+      "2. Elegir promoción más específica (misma jerarquía que overrides precio)",
+      "3. NO modificar precio base — calcular beneficio aparte",
+      "4. Al contratar: guardar promocionAplicada + versionPromocion en contrato",
+      "5. Congelar hasta fechaVencimiento"
+    ],
+    "especificidad": ["subcategoriaId", "sectorId", "formularioId", "ciudad", "estado", "pais", "global"]
+  },
+  "documentoFirestore": {
+    "coleccion": "promociones_perfiles",
+    "documentoEjemplo": {
+      "promocionId": "primer_mes_gratis",
+      "version": "2026-06-10-lanzamiento-1",
+      "activo": true,
+      "tipo": "primer_mes_gratis",
+      "scope": { "formularioId": "adultos", "pais": "México" },
+      "fechaInicio": "timestamp",
+      "fechaFin": "timestamp|null",
+      "prioridad": 10
+    },
+    "subcoleccionOverrides": "promociones_perfiles/overrides",
+    "escritura": "admin solamente"
+  },
+  "adminFuturo": {
+    "acciones": [
+      "activar_desactivar_promocion",
+      "crear_promocion_por_tipo_registro",
+      "crear_promocion_por_categoria",
+      "crear_promocion_por_subcategoria",
+      "crear_promocion_por_geo",
+      "ver_historial",
+      "ver_promociones_congeladas_en_contratos_activos"
+    ]
+  },
+  "iaArquitecto": {
+    "puedeRecomendar": true,
+    "puedeModificar": false
+  }
+}

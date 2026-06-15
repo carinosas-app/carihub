@@ -1,0 +1,725 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "versionSchema": "2026-06-10",
+  "version": "2026-06-10",
+  "schemaId": "admin_arquitectura_completa",
+  "nombre": "Arquitectura Admin CariHub — diseño integral pre-implementación",
+  "descripcion": "Contrato de diseño para 8 módulos Admin + módulos complementarios ya existentes. Sin implementación, sin deploy. Admin decide; motores ejecutan; IA Arquitecto solo lee y recomienda.",
+  "principiosGlobales": {
+    "adminUnicoDecisor": "Ningún cambio de catálogo, precio, schema, componente o publicación sin Admin (o Cloud Function autorizada por Admin).",
+    "sinHtmlPorCategoria": "Nunca crear resultados.html/perfil.html por subcategoría.",
+    "snapshotPublicado": "Perfiles y banners publicados conservan snapshot (schemaVersion, componentes, precioContratado, promocionAplicada).",
+    "versionadoObligatorio": "Todo cambio estructural crea versión + auditoría + opción rollback.",
+    "geoPrimero": "Búsqueda y disponibilidad siempre requieren país→estado→ciudad antes de texto libre (salvo modo auditoría Admin).",
+    "iaArquitectoSoloLectura": "IA Arquitecto/Supervisor nunca escribe Firestore ni modifica catálogo.",
+    "separacionPerfilesBanners": "Precios, promociones y contratos de perfiles ≠ banners/publicidad.",
+    "estadoActualAdmin": "admin.html monolítico; email único; logsAdmin; sin RBAC; sin módulos de catálogo/schemas/render/búsqueda."
+  },
+  "modulosComplementariosExistentes": {
+    "nota": "No reemplazan los 8 módulos propuestos; conviven en admin.html o se refactorizan después.",
+    "lista": [
+      {
+        "id": "usuarios_cuentas",
+        "estado": "parcial_en_admin.html",
+        "bloqueaLanzamiento": false,
+        "nota": "Gestión usuarios legacy (aprobado/activo). Migrar a estadosRevision unificados."
+      },
+      {
+        "id": "publicidad_banners",
+        "estado": "parcial_en_admin.html",
+        "bloqueaLanzamiento": false,
+        "nota": "solicitudes_anuncios, configuracion_publicidad/precios_banners. Integrar con módulo Comercial."
+      },
+      {
+        "id": "pagos_renovaciones",
+        "estado": "parcial_en_admin.html",
+        "bloqueaLanzamiento": false,
+        "nota": "Colección pagos. Falta vínculo formal con contratos_perfiles."
+      },
+      {
+        "id": "denuncias_soporte",
+        "estado": "parcial_en_admin.html",
+        "bloqueaLanzamiento": false
+      },
+      {
+        "id": "dashboard_metricas",
+        "estado": "parcial_en_admin.html",
+        "bloqueaLanzamiento": false
+      }
+    ],
+    "modulosAdicionalesRecomendados": [
+      {
+        "id": "geo_disponibilidad",
+        "razon": "Cache disponibilidad_categoria_geo y normalización geo — hoy implícito en Búsqueda; puede ser sub-módulo.",
+        "bloqueaLanzamiento": false
+      },
+      {
+        "id": "ia_registro",
+        "razon": "Asistente wizard usuario (sugiere temporal, NO publica). Distinto de IA Arquitecto.",
+        "bloqueaLanzamiento": false
+      },
+      {
+        "id": "configuracion_sistema",
+        "razon": "Feature flags, mantenimiento, mensajes globales, versiones desplegadas.",
+        "bloqueaLanzamiento": false
+      }
+    ]
+  },
+  "permisosGlobalesPropuestos": {
+    "fase1": {
+      "modelo": "email_admin_unico",
+      "actual": "carinosas.anuncios@gmail.com en admin.html + firestore.rules isAdmin()",
+      "coleccionAdmins": "admins/{uid} — futuro"
+    },
+    "fase2": {
+      "roles": [
+        { "id": "super_admin", "puede": ["todo"] },
+        { "id": "catalogo_admin", "puede": ["catalogo", "busqueda", "formularios_read", "ia_arquitecto"] },
+        { "id": "comercial_admin", "puede": ["precios", "promociones", "contratos", "renovaciones"] },
+        { "id": "moderador", "puede": ["revision", "denuncias", "categorias_sugeridas_aprobar"] },
+        { "id": "auditor", "puede": ["lectura_total", "logs", "ia_arquitecto", "export"] },
+        { "id": "ia_arquitecto_bot", "puede": ["lectura_total"], "escritura": false }
+      ],
+      "customClaims": "request.auth.token.role + request.auth.token.adminModules[]"
+    },
+    "auditoriaGlobal": {
+      "coleccion": "logsAdmin/{logId}",
+      "camposObligatorios": [
+        "adminId",
+        "emailAdmin",
+        "modulo",
+        "accion",
+        "entidadTipo",
+        "entidadId",
+        "antes",
+        "despues",
+        "motivo",
+        "impactoEstimado",
+        "resultadoValidacion",
+        "fecha",
+        "ipHash",
+        "userAgentHash"
+      ],
+      "subcoleccionPorModulo": "logsAdmin_{modulo}/{logId} — opcional para consultas rápidas"
+    }
+  },
+  "modulos": {
+    "catalogo_subcategorias": {
+      "id": "catalogo_subcategorias",
+      "nombreUI": "Catálogo y Subcategorías",
+      "objetivo": "Gestionar categorías principales y subcategorías oficiales sin tocar código: CRUD, estados, fusión, alias, búsqueda textual, asignación formulario/arquetipo/componentes, versionado y rollback.",
+      "funciones": [
+        "Ver categorías principales (15 sectores + futuros)",
+        "Ver subcategorías por sector con filtros",
+        "Buscar por nombre, id, keyword, alias",
+        "Crear categoría principal (sector)",
+        "Crear subcategoría",
+        "Editar nombre visible, emoji, panelClass",
+        "Editar busqueda: keywords, aliases, sinonimos, palabrasRelacionadas, erroresComunes, prioridadBusqueda",
+        "Activar/desactivar (estadoActivo)",
+        "Cambiar estado editorial: borrador → en_revision → aprobada → activa | inactiva | suspendida",
+        "Fusionar subcategorías duplicadas (migrar perfiles + redirigir búsqueda)",
+        "Convertir entrada en alias de otra subcategoría",
+        "Asignar formularioId, arquetipo, tipoPerfil, componenteResultados, componentePerfil, schemaVersion",
+        "Bandeja Categorías sugeridas por usuarios (ver módulo revisión — enlace cruzado)",
+        "Ver historial de cambios y versiones",
+        "Preview impacto antes de guardar",
+        "Preview Resultados y Perfil (mock RenderEngine)",
+        "Rollback granular: nombre, aliases, keywords, componentes, estado, schemaVersion",
+        "Marcar flags comerciales de compatibilidad (sin editar precios)",
+        "Export/import snapshot para CI (mapa-registro-categorias.json, sectores-carihub.js)"
+      ],
+      "coleccionesFirestore": {
+        "principal": "catalogo_sectores/{sectorId}",
+        "subcategorias": "catalogo_subcategorias/{subcategoriaId}",
+        "versionesSector": "catalogo_sectores/{sectorId}/versiones/{versionCategoria}",
+        "versionesSub": "catalogo_subcategorias/{subcategoriaId}/versiones/{versionCategoria}",
+        "schemaVersiones": "catalogo_subcategorias/{subcategoriaId}/schema_versiones/{schemaVersion}",
+        "aliases": "catalogo_aliases/{aliasNormalizado} → { subcategoriaIdCanonico, sectorId }",
+        "fusiones": "catalogo_fusiones/{fusionId}",
+        "solicitudes": "solicitudes_categorias/{id} — lectura/acción desde bandeja",
+        "indiceLectura": "indice_busqueda_sectores, indice_busqueda_subcategorias — escritura vía pipeline",
+        "cacheDisponibilidad": "disponibilidad_categoria_geo/{geoKey}_{subcategoriaId} — solo lectura Admin"
+      },
+      "camposDocumentoSector": {
+        "sectorId": "string PK",
+        "categoriaPrincipal": "string",
+        "emoji": "string",
+        "panelClass": "string",
+        "orden": "number",
+        "estadoCategoria": "borrador|en_revision|aprobada|activa|inactiva|suspendida",
+        "estadoActivo": "boolean",
+        "busqueda": "{ keywords[], aliases[], sinonimos[], palabrasRelacionadas[], erroresComunes[], prioridadBusqueda, geoPrimero: true }",
+        "versionCategoria": "number semver interno",
+        "schemaVersion": "string — versión activa del sector (metadatos UI)",
+        "modificadaPor": "adminId",
+        "modificadaEn": "timestamp",
+        "motivoCambio": "string",
+        "snapshotHash": "string"
+      },
+      "camposDocumentoSubcategoria": {
+        "hereda": "mapa-registro-categorias.json matrix[] + config-renderizado-dinamico-schema.json catalogoSubcategoria",
+        "adicionales": {
+          "estadoCategoria": "borrador|en_revision|aprobada|activa|inactiva|fusionada|convertida_en_alias|rechazada|suspendida",
+          "versionCategoria": "number",
+          "fusionadaEn": "subcategoriaId|null",
+          "aliasDe": "subcategoriaId|null",
+          "perfilesAfectadosEstimado": "number — calculado pre-guardado",
+          "comercial": "{ heredaPrecioSector, precioPropio, permiteOverrideGeo, planesPermitidos[] }",
+          "renderizado": "{ fallbackResultados, fallbackPerfil }",
+          "categoriaSugerida": "{ formularioTemporal, usaCategoriaSugerida }"
+        }
+      },
+      "validacionesPreGuardado": [
+        "subcategoriaId unico global (normalizado meta.subcategoriaIdCanonico)",
+        "sectorId existe y activo o en borrador coherente",
+        "formularioId en meta.formularioId",
+        "arquetipo en plantillas del formularioId o arquetiposCatalogo",
+        "tipoPerfil en meta.tipoPerfilValidos",
+        "componenteResultados y componentePerfil en config-registro-componentes-ui-schema",
+        "keywords.length >= 1",
+        "busqueda.geoPrimero === true",
+        "renderizado.fallback* definidos (Generico si falta)",
+        "no requiere HTML nuevo (componente en registro o fallback)",
+        "compatiblePrecios/Promociones/Contratos flags true o justificación Admin",
+        "no campos privados en bloques publicos de busqueda",
+        "fusion: origen y destino distintos; destino activo",
+        "alias: no crear ciclo; no cruzar sectores prohibidos (ej. edecan adultos vs eventos)",
+        "ARQUETIPO_MAPA_SCHEMA_DIFF resuelto o documentado en motivoCambio",
+        "impacto FieldEngine/ValidationEngine/RenderEngine simulado PASS"
+      ],
+      "permisos": {
+        "lectura": ["super_admin", "catalogo_admin", "moderador", "auditor", "ia_arquitecto_bot"],
+        "escritura": ["super_admin", "catalogo_admin"],
+        "fusionAlias": ["super_admin", "catalogo_admin", "moderador"],
+        "rollback": ["super_admin", "catalogo_admin"]
+      },
+      "auditoria": {
+        "acciones": [
+          "sector_crear", "sector_editar", "sector_activar", "sector_desactivar",
+          "sub_crear", "sub_editar", "sub_fusionar", "sub_alias", "sub_rollback",
+          "busqueda_editar", "componentes_asignar", "schema_version_bump"
+        ],
+        "coleccion": "logsAdmin",
+        "campoModulo": "catalogo_subcategorias"
+      },
+      "relaciones": {
+        "formularios_schemas": "Asigna formularioId; dispara validación contra config-registro-*-schema",
+        "precios": "Flags heredaPrecioSector / precioPropio; no edita montos",
+        "renderizado": "Asigna componentes; preview usa ComponentRegistry",
+        "busqueda": "Regenera indice_busqueda_* tras aprobar",
+        "revision": "Bandeja solicitudes_categorias; estados requiere_revision_categoria en perfiles",
+        "ia_arquitecto": "Fuente lectura catálogo activo, fusiones, gaps búsqueda"
+      },
+      "riesgos": [
+        "Desalineación arquetipo mapa vs schema (366 advertencias actuales)",
+        "Fusión sin migrar perfiles deja subcategoriaId huérfanos",
+        "Alias cruzado adultos/eventos confunde búsqueda",
+        "Edición directa Firestore sin pipeline CI desincroniza sectores-carihub.js",
+        "Rollback parcial deja perfiles con snapshots mixtos"
+      ],
+      "bloqueaLanzamiento": {
+        "mvpEstatico": false,
+        "mvpConCatalogoAdmin": true,
+        "mvpConRegistroDinamico": true,
+        "nota": "Lanzamiento con catálogo congelado en JS puede proceder sin este módulo; lanzamiento con Admin gestionando catálogo en vivo lo requiere."
+      }
+    },
+    "formularios_schemas": {
+      "id": "formularios_schemas",
+      "nombreUI": "Formularios y Schemas",
+      "objetivo": "Administrar fieldRegistry, plantillasArquetipo, validaciones y versiones de los 5 formularios de registro + formularios temporales; alimentar FieldEngine y ValidationEngine sin editar JSON manualmente.",
+      "funciones": [
+        "Ver formularios: adultos, persona_independiente, profesionista_cedula, negocio_empresa, usuario_visitante",
+        "Ver formularios temporales: temporal_*",
+        "Editar campos públicos/privados/opcionales por arquetipo",
+        "Definir orden wizard, grupos, labels, tipos, validaciones",
+        "Definir fotosMin/Max, verificacion requerida",
+        "Asignar keywordsIA por subcategoría en schema",
+        "Publicar nueva schemaVersion por formularioId",
+        "Diff entre versiones",
+        "Rollback schemaVersion",
+        "Validar cobertura: toda subcategoria activa tiene entrada en schema",
+        "Simular wizard con datos de prueba",
+        "Exportar JSON para CI (generar-schemas-registro.mjs inverso)"
+      ],
+      "coleccionesFirestore": {
+        "configActiva": "config_registro/{formularioId}",
+        "versiones": "config_registro/{formularioId}/versiones/{schemaVersion}",
+        "arquetipos": "config_arquetipos/{arquetipoId}",
+        "temporales": "config_formularios_temporales/{temporalId}",
+        "meta": "config_registro_meta/global — enlaza a config-registro-schema.meta.json"
+      },
+      "validacionesPreGuardado": [
+        "formularioId válido",
+        "campos sistema no removibles (subcategoriaId, formularioId, sectorId, planId)",
+        "campos privados marcados privado:true y excluidos de render público",
+        "subcategorias[] en schema ⊆ catalogo_subcategorias activas (o pendientes aprobadas)",
+        "plantillaArquetipo referenciada existe",
+        "cambio breaking → nueva schemaVersion obligatoria",
+        "perfiles publicados no migran automáticamente",
+        "validar-schemas-registro.mjs PASS en sandbox"
+      ],
+      "permisos": {
+        "lectura": ["super_admin", "catalogo_admin", "auditor", "ia_arquitecto_bot"],
+        "escritura": ["super_admin"],
+        "publicarVersion": ["super_admin"]
+      },
+      "auditoria": {
+        "acciones": ["schema_editar", "schema_publicar", "schema_rollback", "campo_agregar", "campo_deprecar"],
+        "coleccion": "logsAdmin",
+        "historial": "config_registro/{formularioId}/versiones"
+      },
+      "relaciones": {
+        "catalogo": "subcategoriaId ↔ entrada subcategorias[] en schema",
+        "renderizado": "camposPublicosResultados/Perfil derivados de fieldRegistry",
+        "revision": "correccion_solicitada usa reglas ValidationEngine",
+        "precios": "planId campo sistema; no precios aquí"
+      },
+      "riesgos": [
+        "Cambio campo obligatorio rompe wizards en curso",
+        "Quitar campo privado de schema no borra datos legacy en perfiles",
+        "Doble fuente verdad: Firestore vs scripts/*.json hasta pipeline unificado"
+      ],
+      "bloqueaLanzamiento": {
+        "mvpEstatico": false,
+        "mvpConWizardDinamico": true,
+        "nota": "MVP con schemas en repo (estado actual) no requiere módulo Admin; FieldEngine/ValidationEngine sí lo requieren."
+      }
+    },
+    "precios_planes_promociones_contratos": {
+      "id": "comercial",
+      "nombreUI": "Precios, Planes, Promociones y Contratos",
+      "objetivo": "Gestionar precios multi-dimensionales, planes Básico/Destacado/Premium/VIP, promociones, overrides geo, contratos con precio/promoción congelados y renovaciones — separado para perfiles y banners.",
+      "funciones": [
+        "Ver/editar planes y factores por periodo (semanal, quincenal, mensual)",
+        "Definir precios base por formularioId / sectorId / subcategoriaId",
+        "Overrides por país, estado, ciudad",
+        "Marcar subcategoría: hereda precio sector | precio propio",
+        "Habilitar planes permitidos por subcategoría",
+        "Crear/editar promociones perfiles (promociones_perfiles)",
+        "Crear/editar promociones banners (promociones_banners)",
+        "Versionar precios y promociones (versionPrecio, versionPromocion)",
+        "Ver contratos activos (contratos_perfiles, contratos_banners)",
+        "Confirmar pagos y vincular contrato",
+        "Gestionar renovaciones y vencimientos",
+        "Simular resolución precio para geo+subcategoria+plan",
+        "Historial y rollback de precios (no afecta contratos activos)",
+        "Política primer mes gratis / 2x1 negocio — flags por segmento"
+      ],
+      "coleccionesFirestore": {
+        "preciosPerfiles": "config_precios_perfiles/{docId}",
+        "preciosHistorial": "config_precios_perfiles_historial/{id}",
+        "overridesPrecios": "config_precios_perfiles/overrides/{overrideId}",
+        "promocionesPerfiles": "promociones_perfiles/{promoId}",
+        "overridesPromosPerfiles": "promociones_perfiles/overrides/{overrideId}",
+        "promocionesBanners": "promociones_banners/{promoId}",
+        "preciosBanners": "configuracion_publicidad/precios_banners",
+        "contratosPerfiles": "contratos_perfiles/{contratoId}",
+        "contratosBanners": "contratos_banners/{contratoId}",
+        "renovaciones": "renovaciones/{id}",
+        "pagos": "pagos/{pagoId} — enlace existente admin"
+      },
+      "validacionesPreGuardado": [
+        "planId en [basico, destacado, premium, vip]",
+        "periodo en [semanal, quincenal, mensual]",
+        "override más específico gana — sin solapamiento contradictorio sin flag",
+        "cambio precio no modifica contratos activos (politicaPrecioCongelado)",
+        "cambio promoción no modifica promocionCongelada en contratos",
+        "banners nunca usan config_precios_perfiles",
+        "perfiles nunca usan precios_banners",
+        "versionPrecio incrementa en cada publicación",
+        "simulación resolución devuelve precio > 0 o promo gratis documentada"
+      ],
+      "permisos": {
+        "lectura": ["super_admin", "comercial_admin", "auditor", "ia_arquitecto_bot"],
+        "escrituraPrecios": ["super_admin", "comercial_admin"],
+        "escrituraContratos": ["super_admin", "comercial_admin", "moderador"],
+        "rollback": ["super_admin"]
+      },
+      "auditoria": {
+        "acciones": [
+          "precio_publicar", "precio_override", "promo_crear", "promo_desactivar",
+          "contrato_crear", "contrato_renovar", "pago_confirmar", "precio_rollback"
+        ],
+        "coleccion": "logsAdmin + historiales dedicados"
+      },
+      "relaciones": {
+        "catalogo": "subcategoria.comercial.heredaPrecio / precioPropio",
+        "revision": "autorizado_para_pago, pago_confirmado, publicado",
+        "contratos": "transversal — snapshot al activar",
+        "busqueda": "no directa; disponibilidad no expone precios"
+      },
+      "riesgos": [
+        "Admin baja precio y usuarios activos reclaman — mitigado por congelado",
+        "Override geo mal configurado → precio $0 o absurdo",
+        "Mezclar colecciones perfiles/banners",
+        "pagos legacy sin versionPrecio en contrato"
+      ],
+      "bloqueaLanzamiento": {
+        "mvpManual": false,
+        "mvpAutopago": true,
+        "nota": "Admin actual cobra manual; módulo completo necesario para autopago y congelado formal."
+      }
+    },
+    "renderizado_dinamico": {
+      "id": "renderizado_dinamico",
+      "nombreUI": "Renderizado Dinámico",
+      "objetivo": "Administrar ComponentRegistry, fallbacks, snapshots de render y políticas de preview — sin modificar resultados.html/perfil.html por categoría.",
+      "funciones": [
+        "Ver componentes registrados (ResultCard*, ProfileLayout*)",
+        "Ver mapeo arquetipo→componente, tipoPerfil→fallback",
+        "Asignar/validar componente por subcategoría (delegado desde Catálogo)",
+        "Preview ResultCard y ProfileLayout con datos mock",
+        "Definir camposPublicosResultados y camposPublicosPerfil por subcategoría",
+        "Ver perfiles con snapshot desactualizado (schemaVersion perfil < catálogo)",
+        "Forzar re-revisión masiva tras cambio componente (opcional, con confirmación)",
+        "Registrar versión ComponentRegistry",
+        "Health check: componente existe y carga sin error"
+      ],
+      "coleccionesFirestore": {
+        "componentes": "config_componentes_ui/{componenteId}",
+        "versionesRegistry": "config_componentes_ui/_meta/versiones/{version}",
+        "snapshotsPerfil": "perfiles/{id}.componenteResultados, componentePerfil, schemaVersion — lectura",
+        "colaMigracionRender": "cola_migracion_render/{id} — perfiles pendientes revisión por cambio componente"
+      },
+      "validacionesPreGuardado": [
+        "componenteId en registro o fallback Generico",
+        "camposPublicos ⊆ fieldRegistry público del schemaVersion",
+        "PrivacyGuard elimina privados aunque mal asignados",
+        "cambio componente en subcategoría activa → nueva schemaVersion catálogo",
+        "nunca throw en preview — siempre fallback",
+        "resultados.html y perfil.html sin switch por subcategoriaId"
+      ],
+      "permisos": {
+        "lectura": ["super_admin", "catalogo_admin", "auditor", "ia_arquitecto_bot"],
+        "escritura": ["super_admin", "catalogo_admin"],
+        "migracionMasiva": ["super_admin"]
+      },
+      "auditoria": {
+        "acciones": ["componente_asignar", "registry_publicar", "preview_ejecutar", "migracion_render_solicitar"],
+        "coleccion": "logsAdmin"
+      },
+      "relaciones": {
+        "catalogo": "componenteResultados, componentePerfil por subcategoría",
+        "formularios": "campos públicos derivados de schema",
+        "revision": "revision_post_pago si usuario adopta nueva schemaVersion",
+        "busqueda": "sin relación directa"
+      },
+      "riesgos": [
+        "RenderEngine no implementado — módulo Admin es diseño hasta autorización",
+        "Cambio componente sin re-revisión expone layout incorrecto",
+        "ARQUETIPO_MAPA_SCHEMA_DIFF causa fallback inesperado"
+      ],
+      "bloqueaLanzamiento": {
+        "mvpEstaticoHtml": false,
+        "mvpRenderDinamico": true,
+        "nota": "Usuario pidió NO autorizar RenderEngine en producción aún. Módulo Admin puede existir en diseño; implementación bloqueada hasta catálogo congelado + motores."
+      }
+    },
+    "busqueda_inteligente": {
+      "id": "busqueda_inteligente",
+      "nombreUI": "Búsqueda Inteligente",
+      "objetivo": "Administrar índices de búsqueda, métricas sin resultado, disponibilidad geo, ranking y recomendaciones de aliases — geo-primero.",
+      "funciones": [
+        "Ver/rebuild indice_busqueda_sectores y indice_busqueda_subcategorias",
+        "Ver búsquedas sin resultado (agregados y detalle muestreado)",
+        "Top palabras buscadas sin categoría por geo",
+        "Ciudades con catálogo pero cero perfiles",
+        "Sugerencias de nuevas categorías desde métricas",
+        "Aliases recomendados por IA Descubrimiento (aprobación Admin)",
+        "Ajustar prioridadBusqueda y pesos ranking (con límites)",
+        "Ver disponibilidad_categoria_geo cache",
+        "Invalidar/regenerar cache geo",
+        "Probar flujo geo→categoría→keyword en simulador",
+        "Excluir entradas _sugerida_* del índice público"
+      ],
+      "coleccionesFirestore": {
+        "indiceSectores": "indice_busqueda_sectores/{sectorId}",
+        "indiceSubcategorias": "indice_busqueda_subcategorias/{subcategoriaId}",
+        "sinResultadoAgregados": "busquedas_sin_resultado/{docId}",
+        "sinResultadoEventos": "busquedas_sin_resultado_eventos/{eventoId}",
+        "avisosCategoria": "solicitudes_aviso_categoria/{id}",
+        "disponibilidad": "disponibilidad_categoria_geo/{geoKey}_{subcategoriaId}",
+        "metricasBusqueda": "metricas_busqueda/{periodo}_{geo}"
+      },
+      "validacionesPreGuardado": [
+        "tokensNormalizados sin datos privados",
+        "geoPrimero enforced en índice",
+        "alias no apunta a subcategoría inactiva o fusionada",
+        "rebuild índice tras cambio catálogo aprobado",
+        "ranking weights dentro de rangos documentados",
+        "no indexar solicitudes_categorias pendientes"
+      ],
+      "permisos": {
+        "lectura": ["super_admin", "catalogo_admin", "auditor", "ia_arquitecto_bot"],
+        "escrituraIndice": ["super_admin", "catalogo_admin"],
+        "rebuild": ["super_admin"],
+        "aprobarAliasSugerido": ["super_admin", "catalogo_admin"]
+      },
+      "auditoria": {
+        "acciones": ["indice_rebuild", "ranking_ajustar", "alias_aprobar", "cache_invalidar"],
+        "coleccion": "logsAdmin"
+      },
+      "relaciones": {
+        "catalogo": "fuente tokens desde busqueda.*",
+        "revision": "sin resultado → solicitudes_categorias",
+        "ia_arquitecto": "lectura métricas y gaps",
+        "renderizado": "sin relación"
+      },
+      "riesgos": [
+        "Índice desactualizado vs catálogo JS estático",
+        "Rebuild costoso en 462+ entradas",
+        "Ranking manipulable sin auditoría",
+        "Privacidad: no indexar datos de perfiles"
+      ],
+      "bloqueaLanzamiento": {
+        "mvpBusquedaEstatica": false,
+        "mvpBusquedaInteligente": true,
+        "nota": "Home actual usa sectores-carihub.js; búsqueda inteligente full requiere este módulo + pipeline índice."
+      }
+    },
+    "revision_moderacion": {
+      "id": "revision_moderacion",
+      "nombreUI": "Revisión y Moderación",
+      "objetivo": "Cola unificada de aprobación: perfiles, banners, categorías sugeridas, correcciones, post-pago, denuncias — máquina de estados config-estados-revision-publicacion.",
+      "funciones": [
+        "Cola enviado_revision y requiere_revision_categoria",
+        "Aprobar / rechazar / correccion_solicitada perfiles",
+        "Bandeja solicitudes_categorias: aprobar, fusionar, alias, rechazar, pedir corrección",
+        "Autorizar pago, confirmar pago, publicar, activar, suspender, vencer",
+        "revision_post_pago tras cambios importantes",
+        "Moderar denuncias y soporte",
+        "Ver fotos/INE (campos privados) con PrivacyGuard audit",
+        "Asignar categoría oficial al aprobar sugerencia",
+        "Vincular solicitud_categorias → catalogo_subcategorias",
+        "Promo primer mes gratis / autorizado_gratis",
+        "Historial decisiones por perfil/usuario"
+      ],
+      "coleccionesFirestore": {
+        "perfiles": "perfiles/{id} | usuarios/{id} — migración a perfiles unificado",
+        "solicitudesRegistro": "solicitudes_registro/{id}",
+        "solicitudesCategorias": "solicitudes_categorias/{id}",
+        "solicitudesAnuncios": "solicitudes_anuncios/{id}",
+        "denuncias": "denuncias/{id}",
+        "soporte": "soporte_mensajes/{id}",
+        "colaRevision": "cola_revision/{itemId} — vista materializada opcional"
+      },
+      "validacionesPreGuardado": [
+        "transición estado válida según config-estados-revision-publicacion",
+        "nunca auto-publicar",
+        "categoría sugerida: subcategoriaOficialIdFinal activa antes de publicar",
+        "pago_confirmado requiere evidencia pago",
+        "rechazo requiere motivo",
+        "campos privados no copiados a público en aprobación",
+        "contrato creado al activar con versionPrecio vigente"
+      ],
+      "permisos": {
+        "lectura": ["super_admin", "moderador", "comercial_admin", "auditor"],
+        "decisionPerfiles": ["super_admin", "moderador"],
+        "decisionCategorias": ["super_admin", "moderador", "catalogo_admin"],
+        "decisionPagos": ["super_admin", "comercial_admin"]
+      },
+      "auditoria": {
+        "acciones": [
+          "perfil_aprobar", "perfil_rechazar", "perfil_correccion",
+          "categoria_aprobar", "categoria_fusionar", "categoria_rechazar",
+          "pago_autorizar", "pago_confirmar", "publicar", "suspender"
+        ],
+        "coleccion": "logsAdmin",
+        "privacidad": "log acceso INE/fotos privadas"
+      },
+      "relaciones": {
+        "catalogo": "aprobación crea/activa catalogo_subcategorias",
+        "comercial": "estados pago y contrato",
+        "formularios": "ValidationEngine en envío",
+        "renderizado": "snapshot al publicar",
+        "busqueda": "perfil publicado alimenta disponibilidad"
+      },
+      "riesgos": [
+        "Doble modelo usuarios vs perfiles en admin actual",
+        "Estados legacy (aprobado/activo) vs estadoRevision",
+        "Aprobar categoría sin asignar componentes rompe registro",
+        "Cola sin priorización SLA"
+      ],
+      "bloqueaLanzamiento": {
+        "mvp": true,
+        "nota": "CRÍTICO — ya existe parcialmente; debe unificar estados antes de motores dinámicos. Bloquea lanzamiento formal si no hay flujo revisión mínimo."
+      }
+    },
+    "seguridad": {
+      "id": "seguridad",
+      "nombreUI": "Seguridad",
+      "objetivo": "RBAC, reglas Firestore, logs de seguridad, acceso a datos privados, sesiones admin, alertas y cumplimiento.",
+      "funciones": [
+        "Gestionar admins y roles (fase 2)",
+        "Ver logsAdmin y logsSeguridad",
+        "Ver accesos a campos privados (INE, teléfono)",
+        "Revocar sesiones / forzar re-auth",
+        "Simular reglas Firestore (rules playground)",
+        "Alertas: intentos no autorizados, cambios masivos, rollbacks",
+        "Export auditoría para cumplimiento",
+        "Hash IP/UA en logs — no PII en claro",
+        "Política retención logs",
+        "2FA admin (futuro)"
+      ],
+      "coleccionesFirestore": {
+        "admins": "admins/{uid}",
+        "logsAdmin": "logsAdmin/{logId}",
+        "logsSeguridad": "logsSeguridad/{logId}",
+        "accesosPrivados": "logs_acceso_privado/{id}",
+        "alertas": "alertas_seguridad/{id}"
+      },
+      "validacionesPreGuardado": [
+        "solo super_admin crea admins",
+        "ia_arquitecto_bot sin write en ninguna colección config",
+        "usuario normal write denegado en catalogo_*, config_*, promociones_*",
+        "rules sync con módulos — cada colección nueva tiene rule antes de deploy"
+      ],
+      "permisos": {
+        "lectura": ["super_admin", "auditor"],
+        "escritura": ["super_admin"]
+      },
+      "auditoria": {
+        "acciones": ["admin_crear", "rol_cambiar", "rules_deploy", "acceso_privado"],
+        "coleccion": "logsSeguridad",
+        "meta": "logs de logs — inmutable append-only"
+      },
+      "relaciones": {
+        "todos": "transversal — envuelve cada acción admin",
+        "revision": "audita acceso INE",
+        "ia_arquitecto": "cuenta servicio solo lectura"
+      },
+      "riesgos": [
+        "Email único hardcoded — single point of failure",
+        "Sin 2FA",
+        "Rules no cubren colecciones diseñadas (catalogo, índices)",
+        "Admin lee privados sin trail granular hoy"
+      ],
+      "bloqueaLanzamiento": {
+        "mvpBeta": false,
+        "produccionEscala": true,
+        "nota": "MVP puede usar email único; producción multi-admin y rules completas bloquean escala segura."
+      }
+    },
+    "ia_arquitecto_supervisor": {
+      "id": "ia_arquitecto",
+      "nombreUI": "IA Arquitecto / Supervisor",
+      "objetivo": "Panel de lectura y recomendaciones sobre catálogo, schemas, comercial, búsqueda, revisión y riesgos — sin escribir datos.",
+      "funciones": [
+        "Responder: qué categorías existen, activas, suspendidas, recientes",
+        "Listar fusiones, aliases, pendientes en_revision",
+        "Top búsquedas sin resultado y ciudades sin oferta",
+        "Detectar ARQUETIPO_MAPA_SCHEMA_DIFF y componentes faltantes",
+        "Simular impacto cambio propuesto (dry-run validador)",
+        "Recomendar fusiones/aliases desde métricas",
+        "Alertar cambios que romperían registros o contratos",
+        "Generar reportes para decisión congelamiento catálogo",
+        "Comparar snapshot repo vs Firestore",
+        "Checklist pre-deploy (validar-schemas, índices, rules)",
+        "NO ejecutar: crear categoría, cambiar precio, aprobar perfil"
+      ],
+      "coleccionesFirestore": {
+        "lectura": "todas las anteriores + scripts vía CI artifact store",
+        "escritura": "ninguna — opcional ia_arquitecto_informes/{id} solo recomendaciones",
+        "informes": "ia_arquitecto_informes/{informeId}",
+        "cacheAnalisis": "ia_arquitecto_cache/{hash}"
+      },
+      "validaciones": {
+        "scope": "solo lectura Firestore + read repo artifacts",
+        "salida": "informes marcados recomendacion_no_accion",
+        "humanoEnLoop": "toda acción requiere Admin en módulo correspondiente"
+      },
+      "permisos": {
+        "lectura": ["super_admin", "catalogo_admin", "auditor", "ia_arquitecto_bot"],
+        "escrituraInformes": ["ia_arquitecto_bot", "super_admin"]
+      },
+      "auditoria": {
+        "acciones": ["informe_generar", "consulta_ejecutar", "alerta_emitir"],
+        "coleccion": "logsAdmin",
+        "campoModulo": "ia_arquitecto"
+      },
+      "relaciones": {
+        "catalogo": "estado y gaps",
+        "formularios": "cobertura schema",
+        "comercial": "contratos y versiones",
+        "busqueda": "sin resultado",
+        "revision": "cola pendientes",
+        "seguridad": "cuenta servicio restringida"
+      },
+      "riesgos": [
+        "IA con write accidental — mitigar con rules deny all write",
+        "Alucinación sobre categorías no existentes — anclar a índice",
+        "Exponer datos privados en contexto — PrivacyGuard en prompts",
+        "Recomendación auto-ejecutada sin Admin"
+      ],
+      "bloqueaLanzamiento": {
+        "mvp": false,
+        "nota": "Nice-to-have para operación; no bloquea lanzamiento. Acelera congelamiento catálogo y diagnóstico."
+      }
+    }
+  },
+  "ordenImplementacionRecomendado": [
+    { "fase": 0, "accion": "Congelar catálogo en repo (462 subcategorías) tras resolver advertencias críticas" },
+    { "fase": 1, "modulos": ["seguridad", "revision_moderacion"], "razon": "MVP operativo ya parcial" },
+    { "fase": 2, "modulos": ["catalogo_subcategorias", "busqueda_inteligente"], "razon": "Catálogo vivo + índice" },
+    { "fase": 3, "modulos": ["formularios_schemas"], "razon": "FieldEngine + ValidationEngine" },
+    { "fase": 4, "modulos": ["comercial"], "razon": "Autopago y congelado" },
+    { "fase": 5, "modulos": ["renderizado_dinamico"], "razon": "Tras autorización RenderEngine" },
+    { "fase": 6, "modulos": ["ia_arquitecto"], "razon": "Supervisión continua" }
+  ],
+  "matrizBloqueoLanzamiento": {
+    "lanzamientoBetaManual": {
+      "bloqueantes": ["revision_moderacion minimo"],
+      "noBloqueantes": ["catalogo_admin", "busqueda_inteligente", "renderizado", "ia_arquitecto", "formularios_admin"]
+    },
+    "lanzamientoRegistroDinamico": {
+      "bloqueantes": [
+        "catalogo congelado",
+        "formularios_schemas",
+        "revision_moderacion unificada",
+        "seguridad rules nuevas colecciones"
+      ]
+    },
+    "lanzamientoComercialCompleto": {
+      "bloqueantes": ["comercial", "revision_moderacion", "contratos en rules"]
+    },
+    "lanzamientoBusquedaInteligente": {
+      "bloqueantes": ["busqueda_inteligente", "catalogo_subcategorias o catálogo congelado + pipeline índice"]
+    },
+    "lanzamientoRenderDinamico": {
+      "bloqueantes": ["renderizado_dinamico", "formularios_schemas", "catalogo", "autorizacion_explicita_render_engine"]
+    }
+  },
+  "archivosFuturosImplementacion": {
+    "admin": [
+      "public/admin.html — refactor modular o admin/*.js",
+      "public/js/admin/modulo-catalogo.js",
+      "public/js/admin/modulo-schemas.js",
+      "public/js/admin/modulo-comercial.js",
+      "public/js/admin/modulo-render.js",
+      "public/js/admin/modulo-busqueda.js",
+      "public/js/admin/modulo-revision.js",
+      "public/js/admin/modulo-seguridad.js",
+      "public/js/admin/modulo-ia-arquitecto.js"
+    ],
+    "backend": [
+      "functions/adminCatalogoPublish.mjs",
+      "functions/rebuildIndiceBusqueda.mjs",
+      "functions/validarCambioCatalogo.mjs",
+      "functions/simularImpactoCatalogo.mjs"
+    ],
+    "rules": ["firestore.rules — colecciones catalogo_*, config_*, indice_*, solicitudes_categorias"],
+    "ci": [
+      "scripts/validar-schemas-registro.mjs — gate pre-deploy",
+      "scripts/sync-firestore-catalogo-to-repo.mjs",
+      "scripts/integrar-catalogo-expandido.mjs"
+    ],
+    "schemas": [
+      "scripts/config-admin-catalogo-subcategorias-schema.json",
+      "scripts/config-admin-arquitectura-completa-schema.json"
+    ],
+    "noTocarSinAutorizacion": ["public/resultados.html", "public/perfil.html hasta RenderEngine"]
+  },
+  "diagramaDependencias": "revision_moderacion ← catalogo_subcategorias ← formularios_schemas ← renderizado_dinamico; comercial ⊥ catalogo (flags); busqueda_inteligente ← catalogo; seguridad → todos; ia_arquitecto → lectura todos"
+}

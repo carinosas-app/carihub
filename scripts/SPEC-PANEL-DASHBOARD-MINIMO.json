@@ -1,0 +1,1004 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "$id": "https://carihub.app/schemas/spec-panel-dashboard-minimo.json",
+  "tipo": "SPEC_TECNICA",
+  "nombre": "Panel-Dashboard-Operativo — Especificación técnica formal v1.0.1",
+  "nombreCanon": "SPEC-DASHBOARDS-OPERATIVOS",
+  "nombreLegacy": "SPEC-PANEL-DASHBOARD-MINIMO",
+  "versionSpec": "1.0.1",
+  "fecha": "2026-06-11",
+  "fechaPatch": "2026-06-11",
+  "estado": "DISENO_ALINEADO_MATRIZ",
+  "patchRef": "PATCH-SPEC-PANEL-DASHBOARD-v1.0.1",
+  "implementacionAutorizada": false,
+  "modo": "Solo documentación — sin runtime/Firestore/deploy/commit; NO modifica actas/planes/schemas congelados",
+  "proposito": "Fuente oficial de verdad operacional para Dashboard Perfil, Dashboard Anunciante y Dashboard Administrador. Especializa el shell congelado SPEC-DASHBOARDS sin expandirlo. Cierra GAP-PANEL-DASH.",
+  "principioRector": "El dashboard informa, gestiona y delega; Registro edita; Pagos cobra; Admin concilia; la IA recomienda sin ejecutar acciones persistentes sin confirmación humana.",
+  "cierraGap": "GAP-PANEL-DASH",
+
+  "relacionCapasCongeladas": {
+    "shellArquitectonico": {
+      "fuente": "SPEC-DASHBOARDS.json + ACTA-CONGELAMIENTO-DASHBOARDS.json",
+      "rol": "Arquitectura híbrida admin + shell /cuenta modular — NO se modifica",
+      "estaSpec": "Capa operacional: módulos, navegación, permisos, estados, métricas, IA, inteligencia, config, seguridad"
+    },
+    "registroCuenta": { "fuente": "ACTA-CONGELAMIENTO-REGISTRO-CUENTA", "rol": "DM-01/02 edición wizard; verificación upload" },
+    "pagosContratos": { "fuente": "ACTA-CONGELAMIENTO-PAGOS-CONTRATOS", "rol": "DM-04/05 lectura; DM-06 CTA cobro/renovación" },
+    "adminPlan": { "fuente": "PLAN-MAESTRO-ADMIN", "rol": "RBAC/ámbitos referencia; no sustituye SPEC-ADMIN futuro" }
+  },
+
+  "dependenciasCongeladas": {
+    "registroCuenta": "registro-cuenta-2026-06-11@1.0.0",
+    "pagosContratos": "pagos-contratos-2026-06-11@1.0.0",
+    "dashboardsShell": "dashboards-2026-06-10@1.0.0",
+    "validationEngine": "validationengine-2026-06-10@1.1.0",
+    "renderEngine": "renderengine-2026-06-10@1.0.0",
+    "fieldEngine": "fieldengine-2026-06-10@1.0.1",
+    "seguridadMvp": "seguridad-2026-06-10@1.0.0",
+    "cuentas": "cuentas-2026-06-10@1.0.0",
+    "seoLandings": "seo-landings-2026-06-11@1.0.0",
+    "matrizRutasNavCanonica": "matriz-rutas-nav-canonica-2026-06-11@1.0.0",
+    "sharedCore": "shared-core-2026-06-10@1.0.0",
+    "messenger": "messenger-2026-06-10@1.0.0",
+    "catalogo": "catalogo-2026-06-10@1.0.0",
+    "migracion": "migracion-usuarios-perfiles-2026-06-11@1.0.0",
+    "appPublica": "plan-app-publica-2026-06-11@draft",
+    "agentesIA": "plan-agentes-ia-2026-06-11@draft",
+    "themeEngine": "plan-themeengine-2026-06-11@draft",
+    "economiaSocial": "plan-economia-social-2026-06-11@draft",
+    "p0RuntimeFoundation": "p0-runtime-foundation-2026-06-10@1.0.0"
+  },
+
+  "rutasCanon": {
+    "fuenteObligatoria": "scripts/MATRIZ-RUTAS-NAV-CANONICA.json v1.0.0",
+    "principio": "Una ruta canónica por superficie; esta SPEC consume MATRIZ — no redefine rutas en conflicto",
+    "aliases301": [
+      { "ruta": "/cuenta/anunciante", "destino": "/cuenta/banners", "ref": "C-R01" },
+      { "ruta": "/cuenta/anunciante/*", "destino": "/cuenta/banners/*", "ref": "C-R01" },
+      { "ruta": "/admin/expedientes/perfiles", "destino": "/admin/revision?tipo=perfil", "alternativa": "/admin/perfiles?estado=pendiente", "ref": "C-R03" },
+      { "ruta": "/admin/expedientes/anunciantes", "destino": "/admin/revision?tipo=banner", "alternativa": "/admin/banners?estado=pendiente", "ref": "C-R03" },
+      { "ruta": "/admin/expedientes/pagos", "destino": "/admin/pagos?estado=pendiente", "ref": "C-R03" },
+      { "ruta": "/admin/expedientes/contratos", "destino": "/admin/contratos", "ref": "C-R03" }
+    ],
+    "aliases302": [
+      { "ruta": "/cuenta/perfil/editar", "destino": "/registro/editar/{perfilId}", "ref": "C-R02" },
+      { "ruta": "/cuenta/perfil/editar/*", "destino": "/registro/editar/{perfilId}", "ref": "C-R02" }
+    ],
+    "legacyBridges": {
+      "adminHtml": { "archivo": "public/admin.html", "canon": "/admin/resumen", "ref": "C-R04", "fase": "MVP" },
+      "indexHtml": {
+        "archivo": "public/index.html",
+        "ref": "C-R05",
+        "modales": [
+          { "modal": "modalMiPerfil", "canon": "/cuenta/acceso" },
+          { "modal": "modalPanel", "canon": "/cuenta/perfil" },
+          { "modal": "modalEditar", "canon": "/registro/editar/{perfilId}" },
+          { "modal": "modal-registro", "canon": "/registro/wizard" }
+        ]
+      },
+      "registroBannerHtml": { "archivo": "public/registro-banner.html", "canon": "/registro/banner", "ref": "C-R06", "fase": "MVP" }
+    }
+  },
+
+  "documentosReferenciados": [
+    "scripts/MATRIZ-RUTAS-NAV-CANONICA.json",
+    "scripts/ALINEACION-SPEC-PANEL-DASHBOARD-CON-RUTAS-CANON.json",
+    "scripts/SPEC-DASHBOARDS.json",
+    "scripts/PLAN-MAESTRO-DASHBOARDS.json",
+    "scripts/PLAN-MAESTRO-ADMIN.json",
+    "scripts/SPEC-REGISTRO-CUENTA.json",
+    "scripts/SPEC-PAGOS-CONTRATOS.json",
+    "scripts/SPEC-SEO-LANDINGS.json",
+    "scripts/SPEC-MESSENGER.json",
+    "scripts/SPEC-SHARED-CORE.json",
+    "scripts/SPEC-FIELDENGINE.json",
+    "scripts/SPEC-VALIDATIONENGINE.json",
+    "scripts/SPEC-RENDERENGINE.json",
+    "scripts/ANALISIS-REVISION-MVP-DASHBOARD.json",
+    "scripts/config-estados-revision-publicacion-schema.json",
+    "scripts/config-admin-arquitectura-completa-schema.json",
+    "scripts/config-cuentas-usuario-schema.json",
+    "scripts/config-seguridad-mvp-schema.json",
+    "scripts/AUDITORIA-MAESTRA-COMPLETA-CARIHUB.json"
+  ],
+
+  "noModifica": [
+    "SPEC-DASHBOARDS", "ACTA-CONGELAMIENTO-DASHBOARDS",
+    "SPEC-REGISTRO-CUENTA", "ACTA-CONGELAMIENTO-REGISTRO-CUENTA",
+    "SPEC-PAGOS-CONTRATOS", "ACTA-CONGELAMIENTO-PAGOS-CONTRATOS",
+    "config-estados-revision-publicacion-schema",
+    "PLAN-MAESTRO-DASHBOARDS", "PLAN-MAESTRO-ADMIN",
+    "Producción, Firestore, deploy"
+  ],
+
+  "dashboards": {
+    "perfil": {
+      "id": "dashboard_perfil",
+      "nombre": "Dashboard Perfil — Prestador de Servicios",
+      "rutaBase": "/cuenta/perfil",
+      "roles": ["owner_perfil", "tipoPerfil:adultos|independiente|profesionista|negocio"],
+      "seo": { "robots": "noindex,nofollow" },
+      "modulos": {
+        "resumenGeneral": {
+          "id": "DP-01",
+          "nombre": "Resumen General",
+          "clasificacionMvp": "MVP_obligatorio",
+          "pantallas": ["/cuenta/perfil", "/cuenta"],
+          "widgets": [
+            "estadoCuenta", "estadoPerfil", "estadoPublicacion", "estadoRevision",
+            "estadoVerificacion", "fechaRegistro", "fechaAprobacion", "fechaVencimiento",
+            "diasRestantes", "nivelMembresia"
+          ],
+          "fuenteDatos": {
+            "estadoRevision": "perfiles/{perfilId}.estadoRevision",
+            "fechaVencimiento": "contratos_perfiles/{activo}.fechaVencimiento",
+            "nivelMembresia": "contratos_perfiles/{activo}.planContratado",
+            "verificacion": "perfiles/{perfilId}.verificacion + usuarios/{uid}.emailVerificado"
+          },
+          "acciones": ["ver_detalle", "CTA_editar", "CTA_renovar_si_vencido"]
+        },
+        "perfilPublico": {
+          "id": "DP-02",
+          "nombre": "Perfil Público",
+          "clasificacionMvp": "MVP_obligatorio",
+          "pantallas": ["/cuenta/perfil/publico", "/cuenta/perfil/vista-previa"],
+          "capacidades": [
+            { "id": "ver_perfil_publico", "tipo": "lectura", "mvp": "MVP_obligatorio", "fuente": "RenderEngine snapshot lectura" },
+            { "id": "editar_perfil", "tipo": "CTA", "mvp": "MVP_obligatorio", "destino": "/registro/editar/{perfilId}" },
+            { "id": "vista_previa", "tipo": "lectura", "mvp": "MVP_obligatorio", "fuente": "snapshot borrador vs publicado" },
+            { "id": "solicitar_cambios", "tipo": "CTA", "mvp": "MVP_obligatorio", "destino": "/registro/editar/{perfilId}" },
+            { "id": "historial_cambios", "tipo": "lista", "mvp": "Post-MVP_V1.1", "coleccion": "historial_perfil" },
+            { "id": "historial_revisiones", "tipo": "lista", "mvp": "Post-MVP_V1.1", "coleccion": "historial_perfil" },
+            { "id": "estado_aprobacion", "tipo": "badge", "mvp": "MVP_obligatorio", "campo": "estadoRevision" }
+          ]
+        },
+        "fotografiasMultimedia": {
+          "id": "DP-03",
+          "nombre": "Fotografías y Multimedia",
+          "clasificacionMvp": "MVP_obligatorio",
+          "pantallas": ["/cuenta/perfil/fotos"],
+          "capacidades": [
+            { "id": "foto_principal", "mvp": "MVP_obligatorio", "delega": "Registro seccion=fotos" },
+            { "id": "fotos_secundarias", "mvp": "MVP_obligatorio", "delega": "Registro" },
+            { "id": "reordenar", "mvp": "MVP_obligatorio", "delega": "Registro — NO inline panel" },
+            { "id": "eliminar", "mvp": "MVP_obligatorio", "delega": "Registro" },
+            { "id": "solicitar_actualizacion", "mvp": "MVP_obligatorio", "CTA": "/registro/editar/{perfilId}?seccion=fotos" },
+            { "id": "historial_multimedia", "mvp": "Post-MVP_V1.1", "coleccion": "historial_perfil" }
+          ],
+          "regla": "Panel NO edita fotos inline; CTAs a Registro wizard"
+        },
+        "verificacion": {
+          "id": "DP-04",
+          "nombre": "Verificación",
+          "clasificacionMvp": "MVP_obligatorio",
+          "pantallas": ["/cuenta/perfil/verificacion"],
+          "widgets": [
+            { "id": "estado_verificacion", "mvp": "MVP_obligatorio" },
+            { "id": "ine_validada", "mvp": "MVP_obligatorio", "campo": "verificacion.ine" },
+            { "id": "selfie_validada", "mvp": "MVP_obligatorio", "campo": "verificacion.selfie" },
+            { "id": "mayoria_edad", "mvp": "MVP_obligatorio", "campo": "verificacion.edad" },
+            { "id": "historial_verificaciones", "mvp": "Post-MVP_V1.1" },
+            { "id": "correcciones_solicitadas", "mvp": "MVP_obligatorio", "campo": "observacionesAdmin" }
+          ],
+          "uploadDelegado": "Registro/Cuenta"
+        },
+        "mensajeria": {
+          "id": "DP-05",
+          "nombre": "Mensajería",
+          "clasificacionMvp": "Post-MVP_V1.1",
+          "pantallas": ["/cuenta/perfil/mensajes"],
+          "capacidades": [
+            "conversaciones_activas", "conversaciones_archivadas", "conversaciones_bloqueadas",
+            "conversaciones_denunciadas", "estadisticas_mensajes"
+          ],
+          "nota": "Messenger congelado no autorizado runtime; contacto MVP vía WhatsApp/teléfono externo",
+          "mvpAlternativo": "CTA contacto WhatsApp en perfil público (RenderEngine)"
+        },
+        "estadisticas": {
+          "id": "DP-06",
+          "nombre": "Estadísticas",
+          "clasificacionMvp": "MVP_recomendado",
+          "pantallas": ["/cuenta/perfil/estadisticas"],
+          "metricas": [
+            { "id": "visitas_totales", "mvp": "MVP_obligatorio", "fuente": "estadisticas_visitas" },
+            { "id": "visitas_mensuales", "mvp": "MVP_recomendado" },
+            { "id": "visitas_semanales", "mvp": "MVP_recomendado" },
+            { "id": "visitas_diarias", "mvp": "MVP_recomendado" },
+            { "id": "favoritos_recibidos", "mvp": "MVP_recomendado" },
+            { "id": "contactos_generados", "mvp": "MVP_recomendado" },
+            { "id": "clics_whatsapp", "mvp": "MVP_recomendado" },
+            { "id": "clics_telegram", "mvp": "Post-MVP_V1.1" },
+            { "id": "clics_instagram", "mvp": "Post-MVP_V1.1" },
+            { "id": "clics_x", "mvp": "Post-MVP_V1.1" },
+            { "id": "ctr_perfil", "mvp": "MVP_recomendado", "formula": "contactos/visitas" }
+          ]
+        },
+        "favoritos": {
+          "id": "DP-07",
+          "nombre": "Favoritos",
+          "clasificacionMvp": "MVP_recomendado",
+          "pantallas": ["/cuenta/favoritos"],
+          "capacidades": [
+            { "id": "perfiles_favoritos", "mvp": "MVP_recomendado" },
+            { "id": "historial_favoritos", "mvp": "Post-MVP_V1.1" },
+            { "id": "favoritos_recibidos", "mvp": "MVP_recomendado" }
+          ]
+        },
+        "pagosMembresia": {
+          "id": "DP-08",
+          "nombre": "Pagos y Membresía",
+          "clasificacionMvp": "MVP_obligatorio",
+          "pantallas": ["/cuenta/pagos", "/cuenta/pagos/historial", "/cuenta/pagos/renovar"],
+          "capacidades": [
+            { "id": "estado_pago", "mvp": "MVP_obligatorio", "fuente": "pagos + estadoRevision" },
+            { "id": "historial_pagos", "mvp": "MVP_obligatorio", "limite": 5, "detalle": "/cuenta/pagos/historial" },
+            { "id": "proximo_vencimiento", "mvp": "MVP_obligatorio", "fuente": "contratos_perfiles" },
+            { "id": "renovaciones", "mvp": "MVP_obligatorio", "CTA": "/cuenta/pagos/renovar", "delega": "Pagos" },
+            { "id": "facturas", "mvp": "Post-MVP_V1.1" },
+            { "id": "cfdi", "mvp": "Post-MVP_V1.1" },
+            { "id": "comprobantes_enviados", "mvp": "MVP_obligatorio", "privado": true },
+            { "id": "comprobantes_rechazados", "mvp": "MVP_obligatorio", "privado": true }
+          ],
+          "regla": "Panel lee; Pagos ejecuta cobro; datos fiscales NUNCA en widgets públicos"
+        },
+        "notificaciones": {
+          "id": "DP-09",
+          "nombre": "Notificaciones",
+          "clasificacionMvp": "MVP_recomendado",
+          "dominios": ["sistema", "mensajes", "pagos", "verificaciones", "renovaciones", "moderacion", "seguridad"],
+          "mvp": { "email": true, "panel_badges": true, "in_app_eventbus": "Post-MVP_V1.1" }
+        }
+      }
+    },
+
+    "anunciante": {
+      "id": "dashboard_anunciante",
+      "nombre": "Dashboard Anunciante",
+      "rutaBase": "/cuenta/banners",
+      "roles": ["anunciante", "rolesCuenta:anunciante"],
+      "seo": { "robots": "noindex,nofollow" },
+      "funnelOnboarding": {
+        "id": "ANU-FUN",
+        "nombre": "Funnel alta anunciante",
+        "rutaCanon": "/registro/banner",
+        "legacy": "public/registro-banner.html",
+        "clasificacionMvp": "MVP_obligatorio",
+        "relacionPanel": {
+          "destinoPostAlta": "/cuenta/banners",
+          "nota": "Registro captura datos; panel opera banners post-verificación"
+        },
+        "flujo": [
+          { "paso": 1, "ruta": "/registro/banner", "accion": "alta_anunciante_wizard" },
+          { "paso": 2, "ruta": "/registro/verificacion", "accion": "verificacion_opcional", "delega": "Registro" },
+          { "paso": 3, "ruta": "/cuenta/banners", "accion": "panel_operativo" },
+          { "paso": 4, "ruta": "/cuenta/pagos", "accion": "pago_contrato_banner", "delega": "Pagos" }
+        ],
+        "ctasPanel": [
+          { "label": "Nuevo banner", "destino": "/registro/banner", "contexto": "sin_banners_activos" },
+          { "label": "Renovar", "destino": "/cuenta/banners/renovar" }
+        ],
+        "refMatriz": "ANU-08"
+      },
+      "modulos": {
+        "resumenGeneral": {
+          "id": "DA-01",
+          "nombre": "Resumen General",
+          "clasificacionMvp": "MVP_obligatorio",
+          "widgets": ["estadoCuenta", "estadoNegocio", "estadoVerificacion", "fechaRegistro", "estadoContractual"]
+        },
+        "gestionBanners": {
+          "id": "DA-02",
+          "nombre": "Gestión de Banners",
+          "clasificacionMvp": "MVP_obligatorio",
+          "pantallas": [
+            "/cuenta/banners/activos",
+            "/cuenta/banners/pendientes",
+            "/cuenta/banners/vencidos"
+          ],
+          "submodulos": {
+            "activos": {
+              "lista": ["pantalla", "ubicacion", "slot", "fechaInicio", "fechaFin", "estado"],
+              "fuente": "contratos_banners + creativos"
+            },
+            "pendientes": {
+              "tipos": ["pendiente_revision", "pendiente_pago", "correccion_solicitada"]
+            },
+            "vencidos": {
+              "capacidades": ["historial", "renovacion_rapida"],
+              "CTA": "/cuenta/banners/renovar"
+            }
+          },
+          "separacion": "PC-R05 — contratos_banners ⟂ contratos_perfiles"
+        },
+        "estadisticasPublicitarias": {
+          "id": "DA-03",
+          "nombre": "Estadísticas Publicitarias",
+          "clasificacionMvp": "MVP_recomendado",
+          "metricas": ["impresiones", "clics", "ctr", "contactos_generados", "rendimiento_por_banner", "rendimiento_por_ciudad", "rendimiento_por_categoria"]
+        },
+        "contratos": {
+          "id": "DA-04",
+          "nombre": "Contratos",
+          "clasificacionMvp": "MVP_obligatorio",
+          "estados": ["activos", "pendientes", "suspendidos", "vencidos", "historial_completo"],
+          "fuente": "contratos_banners"
+        },
+        "pagos": {
+          "id": "DA-05",
+          "nombre": "Pagos",
+          "clasificacionMvp": "MVP_obligatorio",
+          "capacidades": ["historial", "facturas", "cfdi", "comprobantes", "renovaciones", "reembolsos"],
+          "cfdiReembolsos": "Post-MVP_V1.1"
+        },
+        "centroComercial": {
+          "id": "DA-06",
+          "nombre": "Centro Comercial",
+          "clasificacionMvp": "Post-MVP_V1.1",
+          "capacidades": ["recomendacion_banners", "espacios_sugeridos", "oportunidades_crecimiento"],
+          "ia": "Agente Comercial — solo recomendación"
+        },
+        "notificaciones": {
+          "id": "DA-07",
+          "nombre": "Notificaciones",
+          "clasificacionMvp": "MVP_recomendado",
+          "dominios": ["renovaciones", "pagos", "vencimientos", "rechazos", "aprobaciones"]
+        }
+      }
+    },
+
+    "administrador": {
+      "id": "dashboard_admin",
+      "nombre": "Dashboard Administrador",
+      "rutaBase": "/admin",
+      "aislado": true,
+      "seo": { "robots": "noindex,nofollow" },
+      "modulos": {
+        "resumenEjecutivo": {
+          "id": "ADM-01",
+          "nombre": "Resumen Ejecutivo",
+          "clasificacionMvp": "MVP_obligatorio",
+          "kpis": [
+            "usuarios_activos", "perfiles_activos", "anunciantes_activos", "banners_activos",
+            "pagos_recibidos", "ingresos", "renovaciones", "denuncias", "revisiones_pendientes"
+          ]
+        },
+        "expedientes": {
+          "id": "ADM-02",
+          "nombre": "Expedientes",
+          "clasificacionMvp": "MVP_obligatorio",
+          "notaUI": "Expedientes = agrupación menú sidebar — NO prefijo URL (C-R03 MATRIZ)",
+          "colas": {
+            "perfiles": {
+              "estados": ["pendientes", "correccion_solicitada", "aprobados", "suspendidos", "vencidos"],
+              "rutaCanon": "/admin/perfiles",
+              "rutaRevision": "/admin/revision?tipo=perfil",
+              "legacyDeprecated": "/admin/expedientes/perfiles"
+            },
+            "anunciantes": {
+              "estados": ["pendientes", "correccion_solicitada", "aprobados", "suspendidos", "vencidos"],
+              "rutaCanon": "/admin/banners",
+              "rutaRevision": "/admin/revision?tipo=banner",
+              "legacyDeprecated": "/admin/expedientes/anunciantes"
+            },
+            "pagos": {
+              "estados": ["pendientes", "confirmados", "rechazados", "reembolsados"],
+              "rutaCanon": "/admin/pagos",
+              "legacyDeprecated": "/admin/expedientes/pagos"
+            },
+            "contratos": {
+              "estados": ["activos", "pendientes", "suspendidos", "vencidos"],
+              "rutaCanon": "/admin/contratos",
+              "legacyDeprecated": "/admin/expedientes/contratos"
+            }
+          }
+        },
+        "moderacion": {
+          "id": "ADM-03",
+          "nombre": "Moderación",
+          "clasificacionMvp": "MVP_obligatorio",
+          "pantallas": ["/admin/denuncias", "/admin/moderacion"],
+          "capacidades": ["denuncias", "reportes", "bloqueos", "sanciones", "historial_disciplinario"]
+        },
+        "auditoria": {
+          "id": "ADM-04",
+          "nombre": "Auditoría",
+          "clasificacionMvp": "MVP_obligatorio",
+          "pantallas": ["/admin/auditoria"],
+          "capacidades": [
+            "bitacora_completa", "acciones_administrativas", "cambios_estado",
+            "cambios_permisos", "historial_accesos"
+          ],
+          "coleccion": "logsAdmin + trail granular futuro"
+        },
+        "metricasGlobales": {
+          "id": "ADM-05",
+          "nombre": "Métricas Globales",
+          "clasificacionMvp": "MVP_recomendado",
+          "pantallas": ["/admin/metricas", "/admin/inteligencia"],
+          "metricas": [
+            "usuarios", "perfiles", "anunciantes", "banners", "ingresos", "conversion",
+            "renovaciones", "churn", "retencion", "proyeccion_financiera"
+          ]
+        }
+      },
+      "nota": "Profundiza PLAN-MAESTRO-ADMIN; no sustituye SPEC-ADMIN formal futuro"
+    }
+  },
+
+  "centrosTransversales": {
+    "agentesIA": {
+      "id": "CX-IA",
+      "nombre": "Centro de Agentes IA",
+      "clasificacionMvp": "Post-MVP_V1.1",
+      "rutasCanon": {
+        "usuario": "/cuenta/asistente",
+        "admin": "/admin/ia",
+        "auditoriaIa": "/admin/ia/auditoria"
+      },
+      "principio": "Solo lectura y recomendación; sin escritura persistente sin confirmación humana (ACTA-DASH)",
+      "agentes": [
+        {
+          "id": "agente_soporte",
+          "nombre": "Agente de Soporte",
+          "alcance": ["FAQ", "guía flujos", "estado cuenta lectura"],
+          "permisos": ["lectura_perfil_propio", "recomendacion"],
+          "limites": ["no_modifica_datos", "no_acceso_pagos", "no_moderacion"],
+          "auditoria": "historial_acciones_ia",
+          "evolucion": "Integración Messenger Post-MVP"
+        },
+        {
+          "id": "agente_comercial",
+          "nombre": "Agente Comercial",
+          "alcance": ["recomendación planes", "upsell", "oportunidades banner"],
+          "permisos": ["lectura_contratos", "recomendacion"],
+          "limites": ["no_modifica_precios", "no_crea_contratos"],
+          "dashboards": ["perfil", "anunciante"]
+        },
+        {
+          "id": "agente_moderador",
+          "nombre": "Agente Moderador",
+          "alcance": ["pre-clasificación denuncias", "sugerencia rechazo/aprobación"],
+          "permisos": ["lectura_cola_revision", "recomendacion"],
+          "limites": ["no_auto_aprueba", "admin_decide"],
+          "dashboards": ["admin"]
+        },
+        {
+          "id": "agente_administrativo",
+          "nombre": "Agente Administrativo",
+          "alcance": ["resumen operativo", "alertas colas", "KPIs"],
+          "permisos": ["lectura_global_scope", "recomendacion"],
+          "limites": ["no_RBAC", "no_rules"],
+          "dashboards": ["admin"]
+        },
+        {
+          "id": "agente_fiscal",
+          "nombre": "Agente Fiscal",
+          "alcance": ["alertas SAT", "validación fiscal sugerida", "CFDI futuro"],
+          "permisos": ["lectura_fiscal_privado", "recomendacion"],
+          "limites": ["no_emite_cfdi", "no_modifica_rfc"],
+          "evolucion": "IA Fiscal Post-MVP V1.2"
+        },
+        {
+          "id": "agente_auditor",
+          "nombre": "Agente Auditor",
+          "alcance": ["patrones anomalía", "resumen logs", "compliance"],
+          "permisos": ["lectura_logs", "recomendacion"],
+          "limites": ["no_borrado_logs", "auditor_rol_humano_decide"],
+          "dashboards": ["admin"]
+        }
+      ]
+    },
+    "actualizaciones": {
+      "id": "CX-ACT",
+      "nombre": "Centro de Actualizaciones",
+      "clasificacionMvp": "MVP_recomendado",
+      "rutaBase": "/cuenta/centro/actualizaciones",
+      "pantallas": [
+        "/cuenta/centro/actualizaciones",
+        "/cuenta/centro/actualizaciones/sat",
+        "/cuenta/centro/actualizaciones/carihub"
+      ],
+      "secciones": {
+        "sat": ["noticias_sat", "sat_movil", "cambios_fiscales", "nuevos_requisitos"],
+        "carihub": ["nuevas_funciones", "mejoras", "mantenimiento"],
+        "alertas": ["seguridad", "pagos", "verificaciones", "contratos"]
+      }
+    },
+    "inteligencia": {
+      "id": "CX-INT",
+      "nombre": "Centro de Inteligencia",
+      "clasificacionMvp": "Post-MVP_V1.1",
+      "rutasCanon": {
+        "usuario": "/cuenta/centro/inteligencia",
+        "anunciante": "/cuenta/banners/inteligencia",
+        "admin": "/admin/inteligencia"
+      },
+      "porRol": {
+        "usuario": ["horarios_mejor_rendimiento", "zonas_mas_visitadas", "tendencias"],
+        "anunciante": ["rendimiento_campana", "rendimiento_ciudad", "rendimiento_categoria"],
+        "administrador": ["kpis_globales", "embudo_conversion", "proyeccion_ingresos"]
+      }
+    },
+    "configuracion": {
+      "id": "CX-CFG",
+      "nombre": "Configuración",
+      "clasificacionMvp": "MVP_obligatorio",
+      "rutaBase": "/cuenta/config",
+      "pantallas": [
+        "/cuenta/config",
+        "/cuenta/config/cuenta",
+        "/cuenta/config/privacidad",
+        "/cuenta/config/notificaciones",
+        "/cuenta/config/apariencia",
+        "/cuenta/config/idioma"
+      ],
+      "secciones": {
+        "cuenta": {
+          "items": ["correo", "contraseña", "recuperacion", "2fa"],
+          "2fa": "Post-MVP_V1.1"
+        },
+        "privacidad": {
+          "items": ["visibilidad", "bloqueos", "restricciones"],
+          "mvp": "MVP_recomendado"
+        },
+        "notificaciones": {
+          "canales": ["correo", "whatsapp", "push"],
+          "push": "Post-MVP_V1.1"
+        },
+        "apariencia": {
+          "items": ["temas", "colores", "personalizacion"],
+          "clasificacionMvp": "Post-MVP_V1.1",
+          "nota": "ThemeEngine 12 temas — MVP tema único plataforma"
+        },
+        "idioma": {
+          "soportados": ["es", "en", "pt"],
+          "traduccion_automatica": "futuro",
+          "mvp": "es_only"
+        }
+      }
+    },
+    "seguridad": {
+      "id": "CX-SEG",
+      "nombre": "Seguridad",
+      "clasificacionMvp": "MVP_obligatorio",
+      "rutasCanon": {
+        "usuario": "/cuenta/seguridad",
+        "sesiones": "/cuenta/seguridad/sesiones",
+        "admin": "/admin/seguridad"
+      },
+      "usuario": {
+        "items": ["sesiones_activas", "dispositivos_conectados", "historial_acceso"],
+        "mvp": "MVP_recomendado"
+      },
+      "administrador": {
+        "items": ["logs", "auditoria_avanzada", "acciones_criticas"],
+        "dobleConfirmacion": true
+      },
+      "sistema": {
+        "items": ["control_permisos", "control_roles", "trazabilidad_completa"]
+      }
+    }
+  },
+
+  "matrizEstados": {
+    "perfil": {
+      "estadosSpec": ["borrador", "pendiente", "correccion_solicitada", "aprobado", "activo", "suspendido", "vencido", "eliminado"],
+      "mapeoSchema": {
+        "borrador": "borrador",
+        "pendiente": "enviado_revision | pago_pendiente | autorizado_para_pago",
+        "correccion_solicitada": "correccion_solicitada",
+        "aprobado": "publicado | pago_confirmado | autorizado_gratis",
+        "activo": "activo",
+        "suspendido": "suspendido",
+        "vencido": "vencido",
+        "eliminado": "rechazado + soft_delete futuro",
+        "rechazado": "rechazado"
+      },
+      "fuente": "config-estados-revision-publicacion-schema — NO modificar"
+    },
+    "banner": {
+      "estadosSpec": ["pendiente", "pago_pendiente", "en_revision", "aprobado", "activo", "suspendido", "vencido"],
+      "fuente": "SPEC-PAGOS-CONTRATOS ContratoBanner + estados schema"
+    },
+    "pago": {
+      "estadosSpec": ["pendiente", "en_revision", "confirmado", "rechazado", "reembolsado"],
+      "mapeoPay": {
+        "pendiente": "pendiente",
+        "en_revision": "en_revision",
+        "confirmado": "pagado",
+        "rechazado": "rechazado",
+        "reembolsado": "reembolsado | parcial"
+      }
+    },
+    "contrato": {
+      "estadosSpec": ["pendiente", "activo", "suspendido", "vencido", "cancelado"],
+      "mapeoPay": {
+        "pendiente": "pendiente_aceptacion",
+        "activo": "activo",
+        "suspendido": "suspendido",
+        "vencido": "vencido",
+        "cancelado": "cancelado"
+      }
+    }
+  },
+
+  "integracionesFuturas": {
+    "runtimeAutorizado": false,
+    "lista": [
+      { "id": "INT-01", "nombre": "WhatsApp", "uso": "contacto perfil + notificaciones", "mvp": "enlace_externo" },
+      { "id": "INT-02", "nombre": "Telegram", "uso": "contacto perfil", "mvp": "Post-MVP" },
+      { "id": "INT-03", "nombre": "Instagram", "uso": "contacto + métricas clics", "mvp": "Post-MVP" },
+      { "id": "INT-04", "nombre": "X/Twitter", "uso": "contacto + métricas", "mvp": "Post-MVP" },
+      { "id": "INT-05", "nombre": "Google Maps", "uso": "negocio NAP", "mvp": "Post-MVP" },
+      { "id": "INT-06", "nombre": "Firebase", "uso": "auth/storage", "runtime": "BLK" },
+      { "id": "INT-07", "nombre": "Stripe", "uso": "pasarela", "runtime": "BLK-02" },
+      { "id": "INT-08", "nombre": "Mercado Pago", "uso": "pasarela", "runtime": "BLK-02" },
+      { "id": "INT-09", "nombre": "OpenPay", "uso": "pasarela", "runtime": "Post-MVP" },
+      { "id": "INT-10", "nombre": "Facturación SAT", "uso": "CFDI", "runtime": "Post-MVP V1.2" },
+      { "id": "INT-11", "nombre": "IA Fiscal", "agente": "agente_fiscal" },
+      { "id": "INT-12", "nombre": "IA Moderación", "agente": "agente_moderador" },
+      { "id": "INT-13", "nombre": "IA Soporte", "agente": "agente_soporte" },
+      { "id": "INT-14", "nombre": "IA Comercial", "agente": "agente_comercial" },
+      { "id": "INT-15", "nombre": "IA Auditoría", "agente": "agente_auditor" },
+      { "id": "INT-16", "nombre": "Multiempresa", "runtime": "Dashboards MINOR 1.1" },
+      { "id": "INT-17", "nombre": "Multipaís", "runtime": "Post-MVP" },
+      { "id": "INT-18", "nombre": "Multiidioma", "runtime": "Post-MVP" }
+    ]
+  },
+
+  "matricesObligatorias": {
+    "matrizModulos": {
+      "descripcion": "Dashboard × módulo × clasificación MVP",
+      "filas": [
+        { "dashboard": "perfil", "modulo": "DP-01 resumen", "mvp": "MVP_obligatorio" },
+        { "dashboard": "perfil", "modulo": "DP-02 perfilPublico", "mvp": "MVP_obligatorio" },
+        { "dashboard": "perfil", "modulo": "DP-03 fotos", "mvp": "MVP_obligatorio" },
+        { "dashboard": "perfil", "modulo": "DP-04 verificacion", "mvp": "MVP_obligatorio" },
+        { "dashboard": "perfil", "modulo": "DP-05 mensajeria", "mvp": "Post-MVP_V1.1" },
+        { "dashboard": "perfil", "modulo": "DP-06 estadisticas", "mvp": "MVP_recomendado" },
+        { "dashboard": "perfil", "modulo": "DP-07 favoritos", "mvp": "MVP_recomendado" },
+        { "dashboard": "perfil", "modulo": "DP-08 pagos", "mvp": "MVP_obligatorio" },
+        { "dashboard": "perfil", "modulo": "DP-09 notificaciones", "mvp": "MVP_recomendado" },
+        { "dashboard": "anunciante", "modulo": "DA-01..DA-05", "mvp": "MVP_obligatorio" },
+        { "dashboard": "anunciante", "modulo": "DA-06 centroComercial", "mvp": "Post-MVP_V1.1" },
+        { "dashboard": "admin", "modulo": "ADM-01..ADM-04", "mvp": "MVP_obligatorio" },
+        { "dashboard": "admin", "modulo": "ADM-05 metricasGlobales", "mvp": "MVP_recomendado" },
+        { "dashboard": "transversal", "modulo": "CX-IA agentes", "mvp": "Post-MVP_V1.1" },
+        { "dashboard": "transversal", "modulo": "CX-CFG cuenta", "mvp": "MVP_obligatorio" }
+      ]
+    },
+    "matrizNavegacion": {
+      "fuenteCanon": "MATRIZ-RUTAS-NAV-CANONICA v1.0.0",
+      "perfil": {
+        "entrada": ["/cuenta", "/cuenta/perfil"],
+        "sidebar": [
+          { "id": "nav_resumen", "label": "Resumen", "ruta": "/cuenta/perfil", "modulo": "DP-01" },
+          { "id": "nav_publico", "label": "Perfil público", "ruta": "/cuenta/perfil/publico", "modulo": "DP-02" },
+          { "id": "nav_fotos", "label": "Fotos", "ruta": "/cuenta/perfil/fotos", "modulo": "DP-03", "cta": "/registro/editar/{perfilId}?seccion=fotos" },
+          { "id": "nav_verificacion", "label": "Verificación", "ruta": "/cuenta/perfil/verificacion", "modulo": "DP-04" },
+          { "id": "nav_estadisticas", "label": "Estadísticas", "ruta": "/cuenta/perfil/estadisticas", "modulo": "DP-06" },
+          { "id": "nav_pagos", "label": "Pagos", "ruta": "/cuenta/pagos", "modulo": "DP-08" },
+          { "id": "nav_favoritos", "label": "Favoritos", "ruta": "/cuenta/favoritos", "modulo": "DP-07" },
+          { "id": "nav_actualizaciones", "label": "Actualizaciones", "ruta": "/cuenta/centro/actualizaciones", "modulo": "CX-ACT" },
+          { "id": "nav_config", "label": "Configuración", "ruta": "/cuenta/config", "modulo": "CX-CFG" },
+          { "id": "nav_seguridad", "label": "Seguridad", "ruta": "/cuenta/seguridad", "modulo": "CX-SEG" }
+        ],
+        "internas": [
+          "/cuenta/perfil/publico", "/cuenta/perfil/fotos", "/cuenta/perfil/verificacion",
+          "/cuenta/perfil/estadisticas", "/cuenta/favoritos", "/cuenta/pagos", "/cuenta/pagos/historial",
+          "/cuenta/pagos/renovar", "/cuenta/contratos"
+        ],
+        "salientes": {
+          "editar": "/registro/editar/{perfilId}",
+          "editar_fotos": "/registro/editar/{perfilId}?seccion=fotos",
+          "pagos": "/cuenta/pagos",
+          "renovar": "/cuenta/pagos/renovar",
+          "ver_publico": "/perfil/{perfilId}/{slug}"
+        }
+      },
+      "anunciante": {
+        "entrada": ["/cuenta/banners"],
+        "sidebar": [
+          { "id": "nav_anu_resumen", "label": "Resumen", "ruta": "/cuenta/banners", "modulo": "DA-01" },
+          { "id": "nav_anu_activos", "label": "Activos", "ruta": "/cuenta/banners/activos", "modulo": "DA-02" },
+          { "id": "nav_anu_pendientes", "label": "Pendientes", "ruta": "/cuenta/banners/pendientes", "modulo": "DA-02" },
+          { "id": "nav_anu_vencidos", "label": "Vencidos", "ruta": "/cuenta/banners/vencidos", "modulo": "DA-02" },
+          { "id": "nav_anu_stats", "label": "Estadísticas", "ruta": "/cuenta/banners/estadisticas", "modulo": "DA-03" },
+          { "id": "nav_anu_contratos", "label": "Contratos", "ruta": "/cuenta/banners/contratos", "modulo": "DA-04" },
+          { "id": "nav_anu_pagos", "label": "Pagos", "ruta": "/cuenta/pagos", "modulo": "DA-05" },
+          { "id": "nav_anu_inteligencia", "label": "Inteligencia", "ruta": "/cuenta/banners/inteligencia", "modulo": "CX-INT", "mvp": "Post-MVP_V1.1" }
+        ],
+        "internas": [
+          "/cuenta/banners/activos", "/cuenta/banners/pendientes", "/cuenta/banners/vencidos",
+          "/cuenta/banners/estadisticas", "/cuenta/banners/contratos", "/cuenta/banners/renovar"
+        ],
+        "salientes": {
+          "nuevo_banner": "/registro/banner",
+          "renovar": "/cuenta/banners/renovar",
+          "pagos": "/cuenta/pagos",
+          "funnel_alta": "/registro/banner"
+        },
+        "aliasesDeprecated": [
+          { "ruta": "/cuenta/anunciante", "destino": "/cuenta/banners", "ref": "C-R01" }
+        ]
+      },
+      "admin": {
+        "entrada": ["/admin", "/admin/resumen"],
+        "legacyBridge": { "archivo": "public/admin.html", "canon": "/admin/resumen" },
+        "sidebar": [
+          { "id": "nav_adm_resumen", "label": "Resumen", "ruta": "/admin/resumen", "modulo": "ADM-01" },
+          { "id": "nav_adm_revision", "label": "Revisión", "ruta": "/admin/revision", "modulo": "ADM-02", "grupo": "expedientes" },
+          { "id": "nav_adm_usuarios", "label": "Usuarios", "ruta": "/admin/usuarios" },
+          { "id": "nav_adm_perfiles", "label": "Perfiles", "ruta": "/admin/perfiles", "modulo": "ADM-02", "grupo": "expedientes" },
+          { "id": "nav_adm_catalogo", "label": "Catálogo", "ruta": "/admin/catalogo" },
+          { "id": "nav_adm_comercial", "label": "Comercial", "ruta": "/admin/comercial" },
+          { "id": "nav_adm_banners", "label": "Banners", "ruta": "/admin/banners", "modulo": "ADM-02", "grupo": "expedientes" },
+          { "id": "nav_adm_pagos", "label": "Pagos", "ruta": "/admin/pagos", "modulo": "ADM-02", "grupo": "expedientes" },
+          { "id": "nav_adm_contratos", "label": "Contratos", "ruta": "/admin/contratos", "modulo": "ADM-02", "grupo": "expedientes" },
+          { "id": "nav_adm_denuncias", "label": "Denuncias", "ruta": "/admin/denuncias", "modulo": "ADM-03" },
+          { "id": "nav_adm_soporte", "label": "Soporte", "ruta": "/admin/soporte" },
+          { "id": "nav_adm_seguridad", "label": "Seguridad", "ruta": "/admin/seguridad", "modulo": "CX-SEG" },
+          { "id": "nav_adm_auditoria", "label": "Auditoría", "ruta": "/admin/auditoria", "modulo": "ADM-04" },
+          { "id": "nav_adm_metricas", "label": "Métricas", "ruta": "/admin/metricas", "modulo": "ADM-05" },
+          { "id": "nav_adm_ia", "label": "IA", "ruta": "/admin/ia", "modulo": "CX-IA", "mvp": "Post-MVP_V1.1" },
+          { "id": "nav_adm_config", "label": "Config sistema", "ruta": "/admin/config" }
+        ],
+        "agrupacionExpedientesUI": {
+          "nota": "Expedientes = grupo menú sidebar; URLs planas CANON — NO /admin/expedientes/*",
+          "items": ["revision", "perfiles", "banners", "pagos", "contratos"]
+        },
+        "internas": [
+          "/admin/revision", "/admin/usuarios", "/admin/perfiles", "/admin/catalogo",
+          "/admin/comercial", "/admin/banners", "/admin/pagos", "/admin/contratos",
+          "/admin/denuncias", "/admin/soporte", "/admin/seguridad", "/admin/auditoria",
+          "/admin/busqueda", "/admin/metricas", "/admin/inteligencia", "/admin/ia", "/admin/config"
+        ],
+        "aliasesDeprecated": [
+          { "ruta": "/admin/expedientes/*", "accion": "redirect_301", "ref": "C-R03", "ver": "rutasCanon.aliases301" }
+        ],
+        "aislado": true
+      },
+      "seo": "Todas /cuenta/* y /admin/* noindex,nofollow; /perfil/{id}/{slug} indexable vía RenderEngine"
+    },
+    "matrizPermisos": {
+      "reglas": [
+        { "accion": "ver_panel_perfil", "roles": ["owner_perfil"], "dashboard": "perfil" },
+        { "accion": "editar_perfil", "roles": ["owner_perfil"], "delega": "Registro wizard" },
+        { "accion": "ver_pagos_propio", "roles": ["owner_perfil", "anunciante"], "soloLectura": true },
+        { "accion": "renovar", "roles": ["owner_perfil", "anunciante"], "delega": "Pagos + gate VE" },
+        { "accion": "ver_banners", "roles": ["anunciante"], "dashboard": "anunciante" },
+        { "accion": "moderar_perfil", "roles": ["admin", "moderador", "operador"], "dashboard": "admin", "ambito": true },
+        { "accion": "confirmar_pago", "roles": ["admin", "comercial_admin"], "dashboard": "admin" },
+        { "accion": "ver_logs", "roles": ["admin", "auditor", "super_admin"], "dashboard": "admin" },
+        { "accion": "ia_recomendar", "roles": ["ia_bot"], "escritura": false }
+      ]
+    },
+    "matrizRoles": {
+      "owner_perfil": { "dashboards": ["perfil"], "descripcion": "Dueño del perfil público" },
+      "anunciante": { "dashboards": ["anunciante", "perfil_reducido_opcional"], "descripcion": "Gestión banners" },
+      "visitante": { "dashboards": ["cuenta_reducida"], "descripcion": "Sin perfil público; favoritos/config" },
+      "super_admin": { "dashboards": ["admin"], "ambito": "global", "fuente": "PLAN-MAESTRO-ADMIN" },
+      "admin": { "dashboards": ["admin"], "ambito": "global|asignado" },
+      "moderador": { "dashboards": ["admin"], "ambito": "asignado" },
+      "soporte": { "dashboards": ["admin"], "ambito": "asignado", "sin_moderacion_catalogo": true },
+      "auditor": { "dashboards": ["admin"], "soloLectura": true },
+      "operador": { "dashboards": ["admin"], "ambito": "estricto_asignado" },
+      "comercial_admin": { "dashboards": ["admin"], "modulos": ["pagos", "contratos", "comercial"] },
+      "ia_bot": { "dashboards": ["transversal"], "escritura": false }
+    },
+    "matrizEstados": {
+      "widgetPorEstadoPerfil": {
+        "borrador": { "resumen": "visible", "pagos": "oculto", "CTA": "completar_registro" },
+        "enviado_revision": { "resumen": "en_revision", "mensaje": "Esperando admin" },
+        "correccion_solicitada": { "observaciones": "visible", "CTA": "editar" },
+        "autorizado_para_pago": { "pagos": "CTA_pagar" },
+        "pago_pendiente": { "pagos": "ultimo_pendiente" },
+        "activo": { "vigencia": "badge_dias", "estadisticas": "visible" },
+        "vencido": { "renovacion": "CTA_obligatorio", "publico": "oculto" },
+        "suspendido": { "motivo": "observaciones_si_existe" }
+      }
+    },
+    "matrizDependencias": {
+      "DP-01": ["ACTA-RC", "config-estados", "ACTA-PAY contratos", "MATRIZ-RUTAS-NAV-CANONICA"],
+      "DP-02": ["ACTA-RC", "SPEC-REGISTRO-CUENTA", "SPEC-RENDERENGINE", "FieldEngine"],
+      "DP-08": ["SPEC-PAY", "ACTA-PAY", "ACTA-VE renovar_contrato"],
+      "DA-02": ["SPEC-PAY contratos_banners", "PC-R05", "MATRIZ ANU-01..08"],
+      "ANU-FUN": ["SPEC-REGISTRO-CUENTA", "MATRIZ C-R06", "registro-banner.html bridge"],
+      "ADM-02": ["PLAN-MAESTRO-ADMIN", "config-admin-schema", "MATRIZ C-R03 rutas planas"],
+      "ADM-03": ["PLAN-MAESTRO-ADMIN", "config-estados"],
+      "CX-IA": ["ACTA-DASH asistentesIA", "ACTA-VE IA trazabilidad", "PLAN-MAESTRO-AGENTES-IA"],
+      "CX-ACT": ["MATRIZ ACT-01..03"],
+      "CX-INT": ["MATRIZ INT-01..03", "Post-MVP V1.1"],
+      "CX-CFG": ["config-cuentas-usuario", "ThemeEngine Post-MVP", "Internacionalización es_only"],
+      "CX-SEG": ["ACTA-SEGURIDAD", "config-seguridad-mvp"],
+      "capasTransversales": {
+        "SharedCore": "eventos lectura; no duplica clientes",
+        "FieldEngine": "edición delegada /registro/editar",
+        "ValidationEngine": "gates renovación; no duplicar en panel",
+        "RenderEngine": "snapshot lectura; URL pública /perfil/{id}/{slug}",
+        "Catalogo": "/admin/catalogo — admin only",
+        "Messenger": "DP-05 Post-MVP; WhatsApp MVP externo",
+        "SEO": "noindex /cuenta/* /admin/*",
+        "Migracion": "bridge perfilId=usuarioId BLK-01",
+        "AppPublica": "index.html modales → rutas canon C-R05",
+        "EconomiaSocial": "Post-MVP V1.2 — fuera alcance panel MVP",
+        "P0RuntimeFoundation": "autorización runtime separada"
+      }
+    },
+    "matrizRiesgos": [
+      { "id": "PDM-R01", "riesgo": "Confusión panel operacional vs shell SPEC-DASHBOARDS", "nivel": "medio", "mitigacion": "relacionCapasCongeladas + clasificacionMvp por módulo" },
+      { "id": "PDM-R02", "riesgo": "Edición inline accidental en dashboard", "nivel": "medio", "mitigacion": "CTAs delegados Registro; reglasCongeladas" },
+      { "id": "PDM-R03", "riesgo": "Churn por falta CTA renovación", "nivel": "alto", "mitigacion": "DP-08 renovaciones + activo/vencido widgets" },
+      { "id": "PDM-R04", "riesgo": "IA auto-ejecuta moderación/pagos", "nivel": "critico", "mitigacion": "agentes solo recomendación; ACTA-DASH + ACTA-PAY" },
+      { "id": "PDM-R05", "riesgo": "Datos fiscales expuestos en panel", "nivel": "alto", "mitigacion": "matrizPrivacidad PrivacyGuard PAY" },
+      { "id": "PDM-R06", "riesgo": "Scope creep shell 11 módulos MVP", "nivel": "medio", "mitigacion": "Post-MVP_V1.1 tags mensajería/historial/EventBus" },
+      { "id": "PDM-R07", "riesgo": "Admin panel mezclado con usuario", "nivel": "alto", "mitigacion": "/admin aislado; matrizRoles" },
+      { "id": "PDM-R08", "riesgo": "Bridge perfilId=usuarioId limitaciones", "nivel": "medio", "mitigacion": "BLK-01 migración paralela documentada" }
+    ],
+    "matrizOwnership": {
+      "estadoRevision": { "lee": "dashboard_perfil", "escribe": "admin + ValidationEngine transiciones" },
+      "camposPerfilPublico": { "lee": "dashboard_perfil", "escribe": "Registro wizard" },
+      "contratoVigencia": { "lee": "dashboard_perfil|anunciante", "escribe": "Pagos + admin confirmación" },
+      "observacionesAdmin": { "lee": "dashboard_perfil", "escribe": "admin" },
+      "comprobantes": { "lee": "dashboard owner privado", "escribe": "Pagos upload + admin validación" },
+      "logsAdmin": { "lee": "admin auditor", "escribe": "sistema + acciones admin" }
+    },
+    "matrizPrivacidad": {
+      "publico_panel": ["estadoRevision label", "diasRestantes", "planContratado nombre", "estadisticas agregadas"],
+      "privado_owner": ["pagos", "comprobantes", "observacionesAdmin", "verificacion detalle"],
+      "nunca_panel": ["RFC completo", "comprobante Storage URL", "datos fiscales raw", "contenido mensajes P2P admin sin auditoría"],
+      "admin_con_auditoria": ["ver_privados scope", "trail obligatorio"]
+    },
+    "matrizSeguridad": {
+      "auth": { "requerida": true, "firebaseAuth": "futuro BLK" },
+      "rbac": { "admin": "PLAN-MAESTRO-ADMIN roles", "usuario": "owner solo propio" },
+      "rateLimits": { "fuente": "ACTA-SEGURIDAD", "aplica": ["pagos", "upload", "login"] },
+      "2fa": { "mvp": false, "postMvp": true },
+      "sesiones": { "listar": "MVP_recomendado", "revocar": "Post-MVP_V1.1" },
+      "dobleConfirmacion": { "acciones": ["reembolso", "suspendido", "borrado", "cambio_RBAC"] }
+    },
+    "matrizAuditoria": {
+      "eventosLoggeables": [
+        "login_logout", "cambio_estado_perfil", "confirmar_pago", "rechazar_pago",
+        "suspender_perfil", "cambio_permiso", "acceso_datos_privados", "accion_ia_recomendacion",
+        "renovacion_iniciada", "comprobante_subido"
+      ],
+      "coleccion": "logsAdmin",
+      "retencion": "indefinida admin; 90d usuario historial acceso futuro",
+      "export": "rol auditor"
+    }
+  },
+
+  "reglasCongeladas": [
+    "Dashboard informa/gestiona/delega; Registro edita; Pagos cobra; Admin concilia",
+    "Edición perfil/fotos siempre vía Registro — nunca inline panel",
+    "DM-04/05 lectura; DM-06 CTA → Pagos — panel NO ejecuta cobro",
+    "No duplicar gates ValidationEngine en dashboard",
+    "IA solo recomienda — sin escritura persistente sin confirmación humana",
+    "Admin /admin aislado — usuario NO usa panel admin",
+    "Datos fiscales/comprobantes NUNCA en widgets dashboard usuario",
+    "Rutas /cuenta/* /admin/* noindex,nofollow",
+    "Mensajería in-app Post-MVP; WhatsApp externo suficiente MVP",
+    "Historial subcolecciones Post-MVP V1.1",
+    "ThemeEngine multi-tema Post-MVP; tema único MVP",
+    "contratos_banners ⟂ contratos_perfiles (PC-R05)",
+    "Rutas /cuenta/banners canon; /cuenta/anunciante deprecated 301",
+    "Rutas admin planas PLAN-ADMIN; /admin/expedientes/* deprecated — grupo UI only",
+    "/registro/banner funnel; /cuenta/banners panel operativo",
+    "Bridge MVP perfilId=usuarioId hasta BLK-01 migración"
+  ],
+
+  "readiness": {
+    "disenoDocumental": 96,
+    "alineacionMatrizRutas": 96,
+    "runtimePanelPerfil": 0,
+    "runtimeAnunciante": 0,
+    "runtimeAdmin": 15,
+    "readinessConstruccionP0": 89,
+    "readinessMvpOperar": 87,
+    "readinessMvpCobrar": 76,
+    "readinessProduccion": 18,
+    "nota": "Diseño alineado MATRIZ v1.0.1; prod legacy admin.html ~40%"
+  },
+
+  "impactoP0": {
+    "cap10DashboardsAntes": 53,
+    "cap10DashboardsDespues": 92,
+    "construccionP0Antes": 84,
+    "construccionP0Despues": 89,
+    "delta": "+5%",
+    "navegacionCanonAntes": 78,
+    "navegacionCanonDespues": 96
+  },
+
+  "impactoMvp": {
+    "mvpOperarDocAntes": 74,
+    "mvpOperarDocDespues": 87,
+    "mvpCobrarDocAntes": 72,
+    "mvpCobrarDocDespues": 76,
+    "gapPanelDashAntes": 35,
+    "gapPanelDashDespues": 96,
+    "documentacionGlobalAntes": 89,
+    "documentacionGlobalDespues": 91,
+    "arquitecturaGlobalAntes": 90,
+    "arquitecturaGlobalDespues": 92
+  },
+
+  "riesgosAbiertos": [
+    { "id": "PDM-RO01", "riesgo": "Runtime /cuenta/* no implementado", "requiere": "Autorización runtime post-acta" },
+    { "id": "PDM-RO02", "riesgo": "BLK-01 migración perfilId", "requiere": "ACTA-MIGRACION ejecución" },
+    { "id": "PDM-RO03", "riesgo": "Messenger in-app Post-MVP", "requiere": "SPEC-MESSENGER runtime" },
+    { "id": "PDM-RO04", "riesgo": "EventBus notificaciones", "requiere": "ValidationEngine EventBus runtime" },
+    { "id": "PDM-RO05", "riesgo": "SPEC-ADMIN formal pendiente", "requiere": "Capa documental RBAC profundo" }
+  ],
+
+  "riesgosMitigados": [
+    { "id": "PDM-RM01", "riesgo": "Solapamiento RC/Dashboard", "mitigacion": "CTAs delegados + matrizOwnership" },
+    { "id": "PDM-RM02", "riesgo": "Churn renovación", "mitigacion": "DP-08 + widgets vencido/por_vencer" },
+    { "id": "PDM-RM03", "riesgo": "Confusión shell vs operacional", "mitigacion": "relacionCapasCongeladas explícita" },
+    { "id": "PDM-RM04", "riesgo": "IA auto-aprueba", "mitigacion": "6 agentes con limites + ACTA-DASH" }
+  ],
+
+  "compatibilidadFutura": {
+    "shellMinor110": "Empresa multi-perfil, operador staff — extiende matrizRoles",
+    "pasarelaBlk02": "Stripe/MP — DP-08 delega sin cambio panel lectura",
+    "messenger": "DP-05 reemplaza contacto externo opcional",
+    "i18n": "CX-CFG idioma es→en/pt",
+    "multiempresa": "INT-16 Dashboards MINOR",
+    "nota": "SPEC diseñada para extensión MINOR sin romper MVP congelado"
+  },
+
+  "validacionesDocumentales": [
+    { "id": "V-01", "check": "No contradice ACTA-CONGELAMIENTO-DASHBOARDS", "resultado": "PASS" },
+    { "id": "V-02", "check": "No contradice ACTA-CONGELAMIENTO-REGISTRO-CUENTA", "resultado": "PASS" },
+    { "id": "V-03", "check": "No contradice ACTA-CONGELAMIENTO-PAGOS-CONTRATOS", "resultado": "PASS" },
+    { "id": "V-04", "check": "No contradice ACTA-CONGELAMIENTO-SEO-LANDINGS", "resultado": "PASS" },
+    { "id": "V-05", "check": "No contradice ACTA-CONGELAMIENTO-VALIDATIONENGINE", "resultado": "PASS" },
+    { "id": "V-06", "check": "No contradice ACTA-CONGELAMIENTO-SEGURIDAD", "resultado": "PASS" },
+    { "id": "V-07", "check": "Estados mapeados a config-estados sin modificar schema", "resultado": "PASS" },
+    { "id": "V-08", "check": "11 matrices obligatorias presentes", "resultado": "PASS" },
+    { "id": "V-09", "check": "3 dashboards definidos (perfil/anunciante/admin)", "resultado": "PASS" },
+    { "id": "V-10", "check": "5 centros transversales definidos", "resultado": "PASS" },
+    { "id": "V-11", "check": "6 agentes IA con límites", "resultado": "PASS" },
+    { "id": "V-12", "check": "Integraciones futuras runtimeAutorizado false", "resultado": "PASS" },
+    { "id": "V-13", "check": "PC-R05 separación banners/perfiles", "resultado": "PASS" },
+    { "id": "V-14", "check": "PrivacyGuard fiscal en matrizPrivacidad", "resultado": "PASS" },
+    { "id": "V-15", "check": "ClasificacionMvp coherente ANALISIS-REVISION-MVP-DASHBOARD", "resultado": "PASS" },
+    { "id": "V-16", "check": "Admin alineado PLAN-MAESTRO-ADMIN roles", "resultado": "PASS" },
+    { "id": "V-17", "check": "noModifica listado explícito", "resultado": "PASS" },
+    { "id": "V-18", "check": "GAP-PANEL-DASH cerrado documentalmente", "resultado": "PASS" },
+    { "id": "V-19", "check": "Mensajería Post-MVP coherente Messenger no autorizado", "resultado": "PASS" },
+    { "id": "V-20", "check": "Readiness e impactoP0/MVP documentados", "resultado": "PASS" },
+    { "id": "V-21", "check": "Edición delegada Registro — no inline", "resultado": "PASS" },
+    { "id": "V-22", "check": "Renovación delegada Pagos — no cobro panel", "resultado": "PASS" },
+    { "id": "V-23", "check": "Admin rutas planas alineadas MATRIZ C-R03 — sin /admin/expedientes/*", "resultado": "PASS" },
+    { "id": "V-24", "check": "/cuenta/banners canon; /cuenta/anunciante alias documentado", "resultado": "PASS" },
+    { "id": "V-25", "check": "/registro/banner funnel + relación /cuenta/banners", "resultado": "PASS" },
+    { "id": "V-26", "check": "Centros transversales rutas canon (IA, ACT, INT, CFG, SEG)", "resultado": "PASS" },
+    { "id": "V-27", "check": "MATRIZ-RUTAS-NAV-CANONICA dependencia obligatoria", "resultado": "PASS" },
+    { "id": "V-28", "check": "Sidebar/menús 3 dashboards alineados matrizMenus", "resultado": "PASS" },
+    { "id": "V-29", "check": "Legacy bridges admin.html + index.html + registro-banner documentados", "resultado": "PASS" },
+    { "id": "V-30", "check": "Coherencia Shared/Core, FE, VE, RE, Catálogo, SEO, Messenger, RC, PAY, Seguridad", "resultado": "PASS" },
+    { "id": "V-31", "check": "Coherencia Cuentas, Migración, Shell DASH, Banners, Admin, App Pública", "resultado": "PASS" },
+    { "id": "V-32", "check": "P0 Runtime Foundation — diseño no autoriza runtime", "resultado": "PASS" },
+    { "id": "V-33", "check": "Agentes IA, ThemeEngine, Interacciones, Economía Social — Post-MVP tags", "resultado": "PASS" },
+    { "id": "V-34", "check": "ADM-02 colas mapeadas a rutasCanon por dominio", "resultado": "PASS" },
+    { "id": "V-35", "check": "Ownership matriz sin contradicción Registro/Pagos/Admin", "resultado": "PASS" }
+  ],
+
+  "veredictoInterno": "PASS",
+
+  "changelog": [
+    {
+      "version": "1.0.1",
+      "fecha": "2026-06-11",
+      "patch": "PATCH-SPEC-PANEL-DASHBOARD-v1.0.1",
+      "nota": "Alineación MATRIZ-RUTAS-NAV-CANONICA: admin rutas planas; centros rutas canon; funnel /registro/banner; aliases301/302; sidebar/menús; dependencias ampliadas; INC-001,004,005,006,010,011 cerrados"
+    },
+    {
+      "version": "1.0.0",
+      "fecha": "2026-06-11",
+      "nota": "SPEC operacional completa: Dashboard Perfil + Anunciante + Admin; 5 centros transversales; 11 matrices; integraciones futuras; cierra GAP-PANEL-DASH; reemplaza borrador panel mínimo 1 página"
+    }
+  ]
+}

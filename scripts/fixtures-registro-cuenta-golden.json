@@ -1,0 +1,213 @@
+{
+  "version": "1.0.0",
+  "specVersion": "1.0.0",
+  "descripcion": "Golden fixtures Registro-Cuenta v1.0.0 — salidas esperadas documentales (no runtime). Cubren visitante, adulto aprobado, rechazo, negocio, anunciante, profesional, verificación rechazada, edición post-publicación, bridge MVP y gate email.",
+  "fixtures": [
+    {
+      "id": "RC-01",
+      "nombre": "Usuario visitante recién registrado",
+      "entrada": {
+        "accion": "registro_auth",
+        "tipoCuenta": "visitante",
+        "formularioId": "usuario_visitante",
+        "email": "visitante@example.com",
+        "emailVerificado": false
+      },
+      "salidaEsperada": {
+        "estadoCuenta": "pendiente_activacion",
+        "rolesCuenta": ["visitante"],
+        "tienePerfilPublico": false,
+        "perfilId": null,
+        "gatesVE": { "enviar_revision": "N/A", "guardar_borrador": "N/A" },
+        "rutaSiguiente": "/cuenta/estado",
+        "clasificacionDatos": { "email": "privado" },
+        "eventos": ["registro_auth", "email_verification_sent"]
+      }
+    },
+    {
+      "id": "RC-02",
+      "nombre": "Perfil adulto aprobado + snapshot publicación",
+      "entrada": {
+        "accion": "admin_aprueba",
+        "perfilId": "uid_adulto_001",
+        "usuarioId": "uid_adulto_001",
+        "formularioId": "adultos",
+        "subcategoriaId": "acompanantes-gdl",
+        "estadoAnterior": "enviado_revision",
+        "emailVerificado": true,
+        "documentos": { "ine_frente": "aprobado", "selfie_fecha": "aprobado" }
+      },
+      "salidaEsperada": {
+        "estadoRevision": "activo",
+        "publico": true,
+        "snapshotAlPublicar": { "generado": true, "version": 1, "consumidor": "RenderEngine" },
+        "gatesVE": { "editar_perfil": "permitido" },
+        "clasificacionDatos": {
+          "alias": "publico",
+          "ineFrente": "sensible",
+          "selfieVerificacion": "sensible"
+        },
+        "privacyGuard": { "ineEnSnapshot": false, "selfieEnSnapshot": false },
+        "eventos": ["historial_perfil.aprobado", "snapshotAlPublicar", "notificacion_usuario.aprobado"]
+      }
+    },
+    {
+      "id": "RC-03",
+      "nombre": "Perfil rechazado + observaciones admin",
+      "entrada": {
+        "accion": "admin_rechaza",
+        "perfilId": "uid_adulto_002",
+        "estadoAnterior": "enviado_revision",
+        "motivoRechazo": "Fotos no cumplen política de contenido"
+      },
+      "salidaEsperada": {
+        "estadoRevision": "rechazado",
+        "publico": false,
+        "observacionesAdmin": "Fotos no cumplen política de contenido",
+        "snapshotAlPublicar": { "generado": false },
+        "gatesVE": { "editar_perfil": "permitido", "enviar_revision": "permitido_tras_edicion" },
+        "clasificacionDatos": { "observacionesAdmin": "administrativo" },
+        "eventos": ["historial_perfil.rechazado", "notificacion_usuario.correccion"]
+      }
+    },
+    {
+      "id": "RC-04",
+      "nombre": "Negocio (hotel) enviado_revision",
+      "entrada": {
+        "accion": "enviar_revision",
+        "perfilId": "uid_hotel_001",
+        "formularioId": "negocio_empresa",
+        "tipoNegocio": "hotel",
+        "emailVerificado": true,
+        "camposCompletos": true,
+        "documentos": { "ine_frente": "subido", "licencia_operacion": "subido" }
+      },
+      "salidaEsperada": {
+        "estadoRevision": "enviado_revision",
+        "publico": false,
+        "flujoEsperado": "admin → autorizado_para_pago → pago → publicado",
+        "gatesVE": { "enviar_revision": "permitido", "editar_perfil": "bloqueado_hasta_correccion" },
+        "schemaOrg": "LocalBusiness",
+        "eventos": ["historial_perfil.enviado_revision", "notificacion_admin.verificacion_recibida"]
+      }
+    },
+    {
+      "id": "RC-05",
+      "nombre": "Anunciante aprobado sin perfil público",
+      "entrada": {
+        "accion": "registro_anunciante",
+        "usuarioId": "uid_anunc_001",
+        "rolesCuenta": ["anunciante"],
+        "perfilPublicoId": null,
+        "slots": ["banner_home", "banner_resultados"]
+      },
+      "salidaEsperada": {
+        "estadoCuenta": "activa",
+        "anuncianteId": "uid_anunc_001",
+        "tienePerfilPublico": false,
+        "publico": false,
+        "deriva": "PLAN-MAESTRO-BANNERS / registro-banner",
+        "gatesVE": { "crear_solicitud_banner": "permitido" },
+        "snapshotAlPublicar": { "generado": false }
+      }
+    },
+    {
+      "id": "RC-06",
+      "nombre": "Profesional (abogado) verificación pendiente",
+      "entrada": {
+        "accion": "enviar_revision",
+        "perfilId": "uid_abog_001",
+        "formularioId": "profesionista_cedula",
+        "profesion": "abogado",
+        "emailVerificado": true,
+        "documentos": {
+          "ine_frente": "en_revision",
+          "cedula_profesional": "subido",
+          "selfie_fecha": "subido"
+        }
+      },
+      "salidaEsperada": {
+        "estadoRevision": "enviado_revision",
+        "publico": false,
+        "verificacionPendiente": ["ine_frente"],
+        "gatesVE": { "enviar_revision": "permitido", "editar_perfil": "bloqueado" },
+        "clasificacionDatos": { "cedulaProfesional": "sensible" },
+        "eventos": ["notificacion_admin.verificacion_recibida"]
+      }
+    },
+    {
+      "id": "RC-07",
+      "nombre": "Verificación rechazada (selfie inválida)",
+      "entrada": {
+        "accion": "admin_rechaza_documento",
+        "perfilId": "uid_adulto_003",
+        "documentoTipo": "selfie_fecha",
+        "motivo": "Selfie ilegible — fecha no visible"
+      },
+      "salidaEsperada": {
+        "documentoEstado": "rechazado",
+        "estadoRevision": "correccion_solicitada",
+        "observacionesAdmin": "Selfie ilegible — fecha no visible",
+        "gatesVE": { "subir_selfie_verificacion": "permitido", "enviar_revision": "bloqueado_hasta_resubir" },
+        "clasificacionDatos": { "selfieVerificacion": "sensible" },
+        "privacyGuard": { "selfieEnSnapshot": false },
+        "eventos": ["documento_rechazado", "notificacion_usuario.correccion"]
+      }
+    },
+    {
+      "id": "RC-08",
+      "nombre": "Edición perfil → actualizacion_pendiente",
+      "entrada": {
+        "accion": "editar_perfil",
+        "perfilId": "uid_adulto_004",
+        "estadoAnterior": "activo",
+        "camposModificados": ["fotoPrincipal", "alias"],
+        "camposImportantes": true
+      },
+      "salidaEsperada": {
+        "estadoRevision": "actualizacion_pendiente",
+        "actualizacionPendiente": true,
+        "publico": true,
+        "snapshotPublico": { "actualizado": false, "versionAnterior": 2 },
+        "gatesVE": { "editar_perfil": "permitido", "enviar_revision": "requerido_reaprobacion" },
+        "eventos": ["historial_perfil.edicion_post_publicacion"]
+      }
+    },
+    {
+      "id": "RC-09",
+      "nombre": "Bridge MVP perfilId=usuarioId",
+      "entrada": {
+        "usuarioId": "firebase_uid_xyz",
+        "perfilId": "firebase_uid_xyz",
+        "modoBridge": "MVP"
+      },
+      "salidaEsperada": {
+        "reglaBridge": "perfilId = usuarioId",
+        "coleccionPerfil": "perfiles/firebase_uid_xyz",
+        "coleccionUsuario": "usuarios/firebase_uid_xyz",
+        "perfilPrincipalId": "firebase_uid_xyz",
+        "compatLegacy": { "lecturaDual": true, "escrituraObjetivo": "perfiles/{perfilId}" },
+        "acta": "ACTA-MIGRACION-USUARIOS-PERFILES"
+      }
+    },
+    {
+      "id": "RC-10",
+      "nombre": "Gate enviar_revision bloqueado (email no verificado)",
+      "entrada": {
+        "accion": "enviar_revision",
+        "perfilId": "uid_adulto_005",
+        "emailVerificado": false,
+        "camposCompletos": true,
+        "documentosCompletos": true
+      },
+      "salidaEsperada": {
+        "gateResultado": "BLOQUEADO",
+        "codigoError": "RC-E01",
+        "mensaje": "Verifica tu correo antes de enviar a revisión",
+        "estadoRevision": "borrador",
+        "gatesVE": { "enviar_revision": "denegado", "accionSugerida": "reenviar_verificacion" },
+        "eventos": []
+      }
+    }
+  ]
+}

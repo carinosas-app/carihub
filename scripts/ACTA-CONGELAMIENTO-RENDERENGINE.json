@@ -1,0 +1,148 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "$id": "https://carihub.app/schemas/acta-congelamiento-renderengine.json",
+  "tipo": "ACTA_CONGELAMIENTO_RENDERENGINE",
+  "titulo": "Acta formal de congelamiento — RenderEngine CariHub",
+  "versionActa": "1.0.0",
+  "fechaCongelamiento": "2026-06-10",
+  "fechaActualizacion": "2026-06-10",
+  "fechaAprobacionSpec": "2026-06-10",
+  "estadoActa": "CONGELADO",
+  "veredictoFinal": "PASS",
+  "modo": "Solo validación y documentación — sin runtime/carpetas/mover/Firestore/deploy/commit; no modifica capas existentes",
+  "autorizacion": {
+    "estado": "APROBADA",
+    "autorizadoPor": "product owner / usuario CariHub",
+    "alcance": "Baseline de diseño RenderEngine v1.0.0 — especificación técnica sin implementación runtime; RE-AU-01..03 cerrados",
+    "artefactosAprobados": [
+      "scripts/SPEC-RENDERENGINE.md",
+      "scripts/SPEC-RENDERENGINE.json",
+      "scripts/fixtures-renderengine-golden.json"
+    ],
+    "auditoria": "scripts/AUDITORIA-SPEC-RENDERENGINE.json",
+    "decisionesPrevias": [
+      "scripts/ADR-RENDER-STRATEGY.json",
+      "scripts/ADR-URL-CANONICA-PERFILES.json"
+    ]
+  },
+  "versionRenderEngine": {
+    "id": "renderengine-2026-06-10",
+    "semver": "1.0.0",
+    "specVersion": "1.0.0",
+    "versionAnterior": null
+  },
+  "dependenciasCongeladas": {
+    "sharedCore": { "version": "shared-core-2026-06-10", "semver": "1.0.0", "acta": "scripts/ACTA-CONGELAMIENTO-SHARED-CORE.json" },
+    "validationengine": { "version": "validationengine-2026-06-10", "semver": "1.1.0" },
+    "fieldengine": { "version": "fieldengine-2026-06-10", "semver": "1.0.1" },
+    "catalogo": { "version": "catalogo-2026-06-10", "semver": "1.0.0" },
+    "seguridad": { "version": "seguridad-2026-06-10", "semver": "1.0.0" },
+    "dashboards": { "version": "dashboards-2026-06-10", "semver": "1.0.0" }
+  },
+  "decisionesArquitectonicasIncorporadas": {
+    "estrategiaRender": "ADR-RENDER-STRATEGY 1.0.0 — híbrido snapshot-first (estático/SSG + snapshots publicados + SSR on-demand long-tail + CSR islas)",
+    "urlCanonica": "ADR-URL-CANONICA-PERFILES 1.0.0 — /perfil/{perfilId}/{slug}; perfilId canónico estable; 301 desde legacy"
+  },
+  "objetoCongelamiento": {
+    "superficiesPublicas": ["home", "resultados", "perfil_publico", "landing pais/estado/ciudad", "landing categoria/categoria_geo", "banner_publico (render)"],
+    "apiPrincipal": "renderHome/renderResults/renderProfile/renderResultCard/renderProfileLayout/renderLanding/renderBannerSlot/renderHead/resolveComponent/resolveUrl/applyPrivacyGuard",
+    "algoritmoResolucionComponente": "snapshot → ComponentRegistry → fallbackPorArquetipo → fallbackPorTipoPerfil → genérico (nunca throw)",
+    "privacyGuard": "obligatorio pre-render; lista negra 21 campos; elimina aunque venga mal guardado",
+    "snapshots": "consume snapshotAlPublicar (FieldEngine 1.0.1); solo estadoPublicacion publicado|activo",
+    "modoRender": "híbrido por superficie (ADR-RENDER-STRATEGY)",
+    "urls": "resolveUrl → canónico /perfil/{perfilId}/{slug} + landings geo (ADR-URL-CANONICA-PERFILES)",
+    "headMeta": "title/canonical/OG/Twitter/JSON-LD (Schema.org) por superficie",
+    "fixtures": "fixtures-renderengine-golden.json — 15 casos"
+  },
+  "validacionCongelamiento": {
+    "cierreRE_AU_01": "PASS — Shared/Core congelado 1.0.0",
+    "cierreRE_AU_02": "PASS — ADR-RENDER-STRATEGY 1.0.0",
+    "cierreRE_AU_03": "PASS — ADR-URL-CANONICA-PERFILES 1.0.0",
+    "consistenciaSpec": "PASS",
+    "consistenciaFixtures": "PASS — 15 casos, cobertura superficies/seguridad/resiliencia/SEO/themeEngine/migración",
+    "consistenciaAuditorias": "PASS — AUDITORIA-SPEC-RENDERENGINE actualizada (veredicto APTA)",
+    "compatibilidadSharedCore": "PASS — consume config/data/helpers/ui/componentRegistry/clientes vía Core",
+    "compatibilidadValidationEngine": "PASS — no valida valores; consume snapshot ya aprobado",
+    "compatibilidadFieldEngine": "PASS — consume snapshot, no FE vivo",
+    "compatibilidadSEO": "PASS — produce HeadMeta/JSON-LD; SEO define sitemap/robots/hreflang",
+    "compatibilidadThemeEngine": "PASS — aplica TokenSet --ch-; sin HTML/JS crudo",
+    "compatibilidadAppPublica": "PASS — motor de Home/Resultados/Perfil",
+    "compatibilidadMigracion": "PASS — URL canónica estable (perfilId); bridge perfilId=usuarioId",
+    "compatibilidadSnapshotsPublicados": "PASS — solo publicado|activo; borradores noindex",
+    "politicaUrlsCanonicas": "PASS — un recurso = un canónico; 301 desde legacy",
+    "politicaPrivacyGuard": "PASS — obligatorio; lista negra; no renderiza privados/borradores",
+    "estrategiaRenderAprobada": "PASS — híbrido snapshot-first",
+    "estabilidadApiPublica": "PASS — 11 métodos definidos por superficie",
+    "cumplimientoSemver_1_0_0": "PASS"
+  },
+  "matrizPassFail": {
+    "totalVerificaciones": 19,
+    "pass": 19,
+    "fail": 0,
+    "observaciones": 0
+  },
+  "bloqueantesRestantes": [],
+  "cadenaRE_AU": {
+    "RE-AU-01": "CERRADO",
+    "RE-AU-02": "CERRADO",
+    "RE-AU-03": "CERRADO",
+    "cadenaCerradaDefinitivamente": true
+  },
+  "riesgosAbiertos": [
+    { "id": "RE-R03", "nivel": "medio", "descripcion": "URLs inestables al migrar → pérdida ranking", "estado": "MITIGADO_DISENO", "nota": "perfilId canónico + 301; ejecución en migración" },
+    { "id": "RE-R04", "nivel": "medio", "descripcion": "Thin content (462 subcategorías × geo)", "estado": "ABIERTO_SEO", "nota": "umbral thin-content lo define capa SEO" },
+    { "id": "RE-AM-01", "nivel": "bajo", "descripcion": "Política thin content landings", "estado": "RECOMENDADO_SEO" },
+    { "id": "RE-AM-02", "nivel": "bajo", "descripcion": "Estrategia de caché/invalidación por (perfilId, schemaVersion)", "estado": "RECOMENDADO_IMPLEMENTACION" },
+    { "id": "RE-AM-03", "nivel": "bajo", "descripcion": "Composición de renderHash", "estado": "RECOMENDADO" },
+    { "id": "RE-AM-04", "nivel": "bajo", "descripcion": "Imágenes responsive (srcset/sizes) para LCP/CLS", "estado": "RECOMENDADO_IMPLEMENTACION" },
+    { "id": "URL-R02", "nivel": "alto", "descripcion": "perfilId opaco vs uid (Seguridad)", "estado": "ABIERTO_SEGURIDAD", "nota": "afecta resolveUrl/slug en runtime" }
+  ],
+  "implementacion": {
+    "runtimeAutorizado": false,
+    "firestoreAutorizado": false,
+    "deployAutorizado": false,
+    "bloqueaRuntimePublico": "Migración usuarios→perfiles (ejecución) y reescritura de páginas — TBD_PRE_RUNTIME",
+    "nota": "v1.0.0 congelada como diseño; implementación requiere autorización explícita posterior"
+  },
+  "motoresRelacionados": {
+    "sharedCore": "CONGELADO 1.0.0 — RenderEngine consume clientes/ComponentRegistry",
+    "validationEngine": "CONGELADO 1.1.0 — no interviene en render de campos aprobados",
+    "fieldEngine": "CONGELADO 1.0.1 — fuente del snapshot",
+    "seo": "Observación 1.0.0 — consume HeadMeta/JSON-LD",
+    "themeEngine": "Observación 1.3.0 — provee TokenSet"
+  },
+  "archivosBaseline": [
+    "scripts/SPEC-RENDERENGINE.md",
+    "scripts/SPEC-RENDERENGINE.json",
+    "scripts/fixtures-renderengine-golden.json",
+    "scripts/AUDITORIA-SPEC-RENDERENGINE.md",
+    "scripts/AUDITORIA-SPEC-RENDERENGINE.json",
+    "scripts/ADR-RENDER-STRATEGY.json",
+    "scripts/ADR-RENDER-STRATEGY.md",
+    "scripts/ADR-URL-CANONICA-PERFILES.json",
+    "scripts/ADR-URL-CANONICA-PERFILES.md",
+    "scripts/ACTA-CONGELAMIENTO-RENDERENGINE.json",
+    "scripts/ACTA-CONGELAMIENTO-RENDERENGINE.md"
+  ],
+  "procedimientoVersionado": {
+    "PATCH": "Clarificaciones, fixtures, renderHash, documentación de caché",
+    "MINOR": "Nuevos componentes/superficies retrocompatibles, nuevos nodos Schema.org",
+    "MAJOR": "Cambio de contrato de RenderOutput/HeadMeta/resolveUrl o de PrivacyGuard",
+    "historialVersiones": [
+      { "semver": "1.0.0", "fecha": "2026-06-10", "evento": "CONGELAMIENTO_INICIAL", "notas": "RE-AU-01..03 cerrados; 19/19 PASS; incorpora ADR-RENDER-STRATEGY y ADR-URL-CANONICA-PERFILES" }
+    ]
+  },
+  "recomendacionesFuturas": [
+    "Auditar políticas thin-content en SPEC-SEO antes de generar landings masivas",
+    "Definir caché/invalidación por (perfilId, schemaVersion) en fase de implementación",
+    "Resolver URL-R02 (perfilId opaco) con Seguridad antes de runtime público",
+    "Especificar imágenes responsive (srcset/sizes) y renderHash en PATCH 1.0.1",
+    "Precondición de runtime público: ejecución de migración usuarios→perfiles + reescritura de páginas App Pública",
+    "Iniciar SPEC-SEO y SPEC-THEMEENGINE apoyados en este baseline"
+  ],
+  "noModifica": [
+    "Capas congeladas existentes (Shared/Core 1.0.0, VE 1.1.0, FieldEngine 1.0.1, Messenger 1.0.0, Dashboards 1.0.0, Catálogo/Cuentas/Seguridad)",
+    "Producción, Firestore, deploy, commit"
+  ],
+  "estado": "CONGELADO"
+}

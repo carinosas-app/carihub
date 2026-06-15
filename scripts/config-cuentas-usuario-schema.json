@@ -1,0 +1,289 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "versionSchema": "2026-06-10",
+  "version": "2026-06-10",
+  "schemaId": "cuentas_usuario",
+  "nombre": "Capa única de identidad de usuario CariHub",
+  "descripcion": "Diseño pre-implementación. usuarioId = Firebase Auth uid. Separa identidad (cuenta) de perfil público, anunciante, contratos y mensajería. Evita migraciones al implementar Messenger, favoritos, IA y motores.",
+  "estadoActualProduccion": {
+    "modelo": "monolito_usuarios",
+    "coleccion": "usuarios/{uid}",
+    "problema": "uid === perfilId; datos cuenta + perfil público + verificación en mismo documento",
+    "coleccionPerfiles": "no_existe_en_produccion",
+    "tipoCuenta": "no_existe_en_produccion",
+    "contratos": "solo_en_schema",
+    "mensajeria": "no_implementada",
+    "bloqueos": "no_existen"
+  },
+  "principios": [
+    "usuarioId nunca cambia — es Firebase Auth uid",
+    "visitante → perfil público = upgrade de cuenta, no registro nuevo",
+    "perfil público vive en perfiles/{perfilId}; usuario guarda punteros",
+    "contratos, pagos y promociones referencian usuarioId siempre",
+    "banners usan anuncianteId (por defecto = usuarioId) + usuarioId",
+    "mensajes, favoritos, denuncias, bloqueos referencian usuarioId",
+    "Admin lee usuarios + joins; nunca asume 1:1 sin verificar punteros"
+  ],
+  "tiposCuenta": {
+    "valores": ["visitante", "adulto", "independiente", "profesionista", "empresa", "anunciante", "admin"],
+    "mapeoFormularioId": {
+      "visitante": "usuario_visitante",
+      "adulto": "adultos",
+      "independiente": "persona_independiente",
+      "profesionista": "profesionista_cedula",
+      "empresa": "negocio_empresa",
+      "anunciante": "null — rol comercial banners, no formulario registro perfil",
+      "admin": "null — rol sistema"
+    },
+    "nota": "anunciante y admin son roles[] además de o en lugar de tipoCuenta primario. Un visitante puede tener roles:['anunciante'] sin perfil público."
+  },
+  "conversionCuenta": {
+    "regla": "Mismo usuarioId; actualizar tipoCuenta + crear perfiles/{perfilId}; conservar subcolecciones",
+    "transiciones": [
+      { "de": "visitante", "a": "adulto", "accion": "crear perfil + tipoCuenta=adulto + formularioId=adultos" },
+      { "de": "visitante", "a": "independiente", "accion": "crear perfil + tipoCuenta=independiente" },
+      { "de": "visitante", "a": "profesionista", "accion": "crear perfil + tipoCuenta=profesionista" },
+      { "de": "visitante", "a": "empresa", "accion": "crear perfil + tipoCuenta=empresa" },
+      { "de": "visitante", "a": "anunciante", "accion": "roles+=anunciante; puede sin perfil público" },
+      { "de": "cualquiera", "a": "anunciante", "accion": "roles+=anunciante sin cambiar tipoCuenta perfil" }
+    ],
+    "conservar": [
+      "usuarioId",
+      "usuarios/{id}/favoritos",
+      "usuarios/{id}/notificaciones",
+      "contratos_perfiles donde usuarioId",
+      "pagos donde usuarioId",
+      "solicitudes_categorias donde usuarioId",
+      "solicitudes_anuncios donde uidAnunciante",
+      "denuncias donde reportanteId",
+      "preferencias",
+      "estadísticas agregadas por usuarioId"
+    ],
+    "condicionVisitanteUpgrade": "contrato vigente → sin recargo registro (config-registro-visitante-schema.json)"
+  },
+  "modeloRelaciones": {
+    "decision": "hibrido_punteros_simples_con_arrays_futuro",
+    "razon": "Firestore favorece documentos y subcolecciones sobre arrays grandes. MVP: punteros singulares + arrays de IDs solo para historial.",
+    "usuario": {
+      "perfilPrincipalId": "string|null — perfil público activo principal",
+      "perfilIds": "string[] — todos los perfiles del usuario (1..N)",
+      "anuncianteId": "string — por defecto = usuarioId; futuro multi-marca ≠ usuarioId",
+      "contratoActivoId": "string|null — contrato_perfil vigente",
+      "contratoIds": "string[] — historial refs",
+      "bannerIds": "no en raíz — query solicitudes_anuncios + anuncios por anuncianteId",
+      "conversaciones": "subcolección usuarios/{id}/conversaciones_meta/{convId} — no array",
+      "favoritos": "subcolección usuarios/{id}/favoritos/{perfilId} — ya existe",
+      "solicitudesCategoria": "query solicitudes_categorias where usuarioId — no duplicar array",
+      "bloqueos": "subcolección usuarios/{id}/bloqueos/{usuarioBloqueadoId}"
+    },
+    "perfil": {
+      "coleccion": "perfiles/{perfilId}",
+      "perfilId": "string — puede = usuarioId en migración legacy o nuevo UUID",
+      "usuarioId": "string obligatorio",
+      "regla": "Ningún perfil público sin usuarioId"
+    },
+    "grafo": {
+      "usuarioId": ["perfiles", "contratos_perfiles", "pagos", "solicitudes_categorias", "denuncias.reportanteId", "favoritos", "bloqueos", "notificaciones", "mensajes"],
+      "perfilId": ["favoritos.perfilId", "denuncias.reportadoId", "mensajes.contextoPerfilId"],
+      "anuncianteId": ["solicitudes_anuncios", "contratos_banners", "anuncios"],
+      "contratoId": ["pagos.contratoId", "renovaciones"]
+    }
+  },
+  "firestore": {
+    "usuarios": {
+      "ruta": "usuarios/{usuarioId}",
+      "descripcion": "Identidad y agregados de cuenta — NO datos públicos extensos del perfil",
+      "camposRaiz": {
+        "usuarioId": "string = document id = Auth uid",
+        "email": "string privado",
+        "tipoCuenta": "visitante|adulto|independiente|profesionista|empresa",
+        "roles": "string[] — anunciante, admin, moderador futuro",
+        "estadoCuenta": "activa|suspendida|eliminada|pendiente_activacion",
+        "createdAt": "timestamp",
+        "updatedAt": "timestamp"
+      },
+      "subobjetos": {
+        "cuenta": {
+          "tipoCuenta": "string",
+          "estadoCuenta": "string",
+          "roles": "string[]",
+          "permisos": "string[] — cache denormalizado; fuente: custom claims"
+        },
+        "perfil": {
+          "perfilPrincipalId": "string|null",
+          "perfilIds": "string[]",
+          "tienePerfilPublico": "boolean",
+          "categoriaId": "sectorId cache",
+          "subcategoriaId": "cache del perfil principal",
+          "formularioId": "cache",
+          "tipoPerfil": "cache",
+          "arquetipo": "cache",
+          "estadoPublicacion": "cache estadoRevision del perfil principal"
+        },
+        "anunciante": {
+          "anuncianteId": "string — default usuarioId",
+          "tieneSolicitudesBanner": "boolean",
+          "solicitudesActivasCount": "number",
+          "contratoBannerActivoId": "string|null"
+        },
+        "verificacion": {
+          "estadoVerificacion": "sin_enviar|enviada|en_revision|aprobada|rechazada|vencida",
+          "fechaEnvio": "timestamp",
+          "fechaRevision": "timestamp",
+          "revisadoPor": "adminId",
+          "motivoRechazo": "string|null",
+          "nivel": "cuenta_basica|persona_estandar|profesional_cedula|negocio"
+        },
+        "mensajeria": {
+          "estadoMensajeria": "habilitada|restringida|suspendida|solo_lectura",
+          "puedeEnviar": "boolean",
+          "puedeRecibir": "boolean",
+          "bloqueosCount": "number",
+          "reportesCount": "number"
+        },
+        "comercial": {
+          "contratoActivoId": "string|null",
+          "contratoIds": "string[]",
+          "planActual": "basico|destacado|premium|vip|null",
+          "periodoActual": "semanal|quincenal|mensual|null",
+          "fechaVencimiento": "timestamp|null",
+          "estadoPago": "string — cache del contrato activo",
+          "precioContratado": "number|null — cache",
+          "versionPrecio": "string|null",
+          "promocionAplicada": "string|null",
+          "versionPromocion": "string|null"
+        },
+        "seguridad": {
+          "riesgoScore": "number 0-100",
+          "duplicadoPotencial": "boolean",
+          "ultimoLogin": "timestamp",
+          "ultimoIPHash": "string",
+          "flags": "string[]"
+        },
+        "preferencias": {
+          "idioma": "es",
+          "notificaciones": "object",
+          "tema": "claro|oscuro",
+          "ciudadPreferida": "string",
+          "geo": { "pais": "", "estado": "", "ciudad": "" }
+        }
+      },
+      "subcolecciones": [
+        "favoritos/{perfilId}",
+        "notificaciones/{id}",
+        "bloqueos/{usuarioId}",
+        "conversaciones_meta/{conversacionId}",
+        "dispositivos/{deviceId}"
+      ]
+    },
+    "perfiles": {
+      "ruta": "perfiles/{perfilId}",
+      "descripcion": "Datos de registro y publicación — público/privado/verificación/snapshot render",
+      "camposObligatorios": [
+        "usuarioId",
+        "perfilId",
+        "formularioId",
+        "sectorId",
+        "subcategoriaId",
+        "arquetipo",
+        "tipoPerfil",
+        "estadoRevision",
+        "tienePerfilPublico",
+        "schemaVersion",
+        "componenteResultados",
+        "componentePerfil",
+        "createdAt",
+        "updatedAt"
+      ],
+      "subcolecciones": ["borradores/{borradorId}", "historial_estados/{id}"]
+    },
+    "anunciantes": {
+      "ruta": "anunciantes/{anuncianteId}",
+      "descripcion": "Opcional si anuncianteId ≠ usuarioId; si no, embed en usuarios.anunciante",
+      "campos": ["anuncianteId", "usuarioId", "nombreComercial", "contratoBannerActivoId", "createdAt"]
+    },
+    "mensajeria": {
+      "conversaciones": "conversaciones/{conversacionId}",
+      "mensajes": "conversaciones/{conversacionId}/mensajes/{mensajeId}",
+      "camposMensaje": {
+        "emisorId": "usuarioId",
+        "receptorId": "usuarioId",
+        "perfilContextoId": "perfilId|null",
+        "texto": "string",
+        "createdAt": "timestamp",
+        "leido": "boolean"
+      }
+    },
+    "denuncias": {
+      "ruta": "denuncias/{denunciaId}",
+      "camposObligatorios": {
+        "reportanteId": "usuarioId",
+        "reportadoId": "usuarioId del dueño del perfil",
+        "perfilId": "perfil denunciado",
+        "motivo": "string",
+        "estado": "pendiente|en_revision|resuelta|rechazada",
+        "createdAt": "timestamp"
+      }
+    },
+    "pagos": {
+      "camposObligatorios": ["usuarioId", "contratoId", "monto", "estado", "createdAt"]
+    }
+  },
+  "estados": {
+    "estadoCuenta": ["activa", "suspendida", "eliminada", "pendiente_activacion"],
+    "estadoVerificacion": ["sin_enviar", "enviada", "en_revision", "aprobada", "rechazada", "vencida"],
+    "estadoMensajeria": ["habilitada", "restringida", "suspendida", "solo_lectura"],
+    "estadoPublicacion": "ver config-estados-revision-publicacion-schema.json"
+  },
+  "adminModuloCuentas": {
+    "nombreUI": "Cuentas de Usuario",
+    "ubicacion": "Admin → Cuentas (nuevo) o ampliar Usuarios",
+    "vista": [
+      "tipoCuenta", "estadoCuenta", "estadoVerificacion", "estadoMensajeria",
+      "perfiles asociados (lista)", "banners/solicitudes", "contratos", "pagos",
+      "denuncias como reportante/reportado", "bloqueos", "riesgoScore", "actividad reciente"
+    ],
+    "auditoria": "logsAdmin — toda acción sobre cuenta/perfil/verificación/mensajeria"
+  },
+  "validacionesFuturas": {
+    "metaSchema": "config-registro-schema.meta.json → seccion identidadUsuario",
+    "validador": "validar-schemas-registro.mjs → validateIdentidadUsuario()",
+    "reglas": [
+      "todo registro Auth crea usuarios/{uid} mínimo con cuenta",
+      "todo perfiles/{id} tiene usuarioId válido",
+      "todo mensaje tiene emisorId y receptorId",
+      "todo favorito tiene usuarioId (path) y perfilId",
+      "toda denuncia tiene reportanteId y reportadoId",
+      "todo pago tiene usuarioId y contratoId",
+      "toda verificación tiene usuarioId",
+      "todo banner/solicitud tiene anuncianteId y usuarioId",
+      "toda solicitudes_categorias tiene usuarioId",
+      "ningún perfil publicado sin usuarioId",
+      "mensaje bloqueado si estadoMensajeria no permite envío",
+      "banner no publica sin anuncianteId",
+      "contrato activo siempre tiene usuarioId"
+    ]
+  },
+  "migracionDesdeLegacy": {
+    "fase1": "Nuevos campos opcionales en usuarios/{uid} sin romper lectura actual",
+    "fase2": "Copiar datos perfil a perfiles/{uid} con usuarioId=uid; usuarios queda hub",
+    "fase3": "Rules: isPublicProfile lee perfiles/{id} no usuarios",
+    "fase4": "Deprecar campos planos en usuarios (nombre, descripcion, etc.)",
+    "compatibilidad": "perfilId = uid durante transición; favoritos sin cambio de path"
+  },
+  "impactoMotores": {
+    "FieldEngine": "Resuelve formularioId desde perfiles + catalogo; usuarioId solo para permisos y estado cuenta",
+    "ValidationEngine": "Valida perfil contra schema; valida cuenta.estadoCuenta antes de enviar revisión",
+    "RenderEngine": "Lee snapshot en perfiles/{id}; usuarioId no en render público",
+    "Messenger": "Requiere usuarios.mensajeria + conversaciones; bloqueos subcolección",
+    "Contratos": "contratos_perfiles.usuarioId + perfilId nullable; comercial cache en usuario",
+    "Favoritos": "Sin cambio path; perfilId apunta a perfiles collection",
+    "Admin": "Vista unificada cuenta + joins"
+  },
+  "recomendacion": {
+    "accion": "integrar_parcialmente_ahora",
+    "antesCongelarCatalogo": "solo_meta_schema_y_FK_usuarioId_en_contratos_solicitudes — no bloquea freeze catálogo",
+    "antesFieldEngine": "obligatorio — congelar diseño cuentas + perfiles separados",
+    "relaciones": "perfilPrincipalId + perfilIds[]; subcolecciones para favoritos/bloqueos/conversaciones; queries para solicitudes"
+  }
+}

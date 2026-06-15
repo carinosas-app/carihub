@@ -1,0 +1,123 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "versionSchema": "2026-06-10",
+  "version": "2026-06-10",
+  "schemaId": "registro_componentes_ui",
+  "nombre": "Registro único de componentes UI reutilizables",
+  "descripcion": "ComponentRegistry carga desde aquí. Toda categoría nueva referencia IDs existentes; nunca crea pantalla nueva.",
+  "resultCards": {
+    "ResultCardPersona": {
+      "tipo": "resultados",
+      "archivoFuturo": "public/js/components/result-card-persona.js",
+      "tipoPerfil": ["persona"],
+      "camposTipicos": ["alias", "edad", "fotoPrincipal", "tagline", "geo.ciudad", "precioDesde", "modalidades"],
+      "varianteAdultos": "ResultCardAdultos → alias"
+    },
+    "ResultCardAdultos": {
+      "tipo": "resultados",
+      "aliasDe": "ResultCardPersona",
+      "nota": "Misma implementación; estilos/badge adultos opcionales vía arquetipo"
+    },
+    "ResultCardProfesional": {
+      "tipo": "resultados",
+      "tipoPerfil": ["persona"],
+      "camposTipicos": ["nombreProfesional", "especialidad", "fotoPrincipal", "precioConsulta", "geo.ciudad", "verificadoPublico"]
+    },
+    "ResultCardNegocio": {
+      "tipo": "resultados",
+      "tipoPerfil": ["negocio"],
+      "camposTipicos": ["nombreComercial", "fotoPrincipal", "horario", "precioDesde", "geo.ciudad", "direccionPublica"]
+    },
+    "ResultCardVenue": {
+      "tipo": "resultados",
+      "tipoPerfil": ["lugar", "negocio"],
+      "camposTipicos": ["nombreComercial", "horario", "precioEntrada", "geo", "fotoPrincipal"]
+    },
+    "ResultCardServicio": {
+      "tipo": "resultados",
+      "tipoPerfil": ["persona"],
+      "camposTipicos": ["alias", "servicio", "tarifaDesde", "geo.ciudad", "fotoPrincipal", "zonaCobertura"]
+    },
+    "ResultCardPareja": {
+      "tipo": "resultados",
+      "tipoPerfil": ["pareja_grupo"]
+    },
+    "ResultCardCreador": {
+      "tipo": "resultados",
+      "tipoPerfil": ["creador"]
+    },
+    "ResultCardEspectaculo": {
+      "tipo": "resultados",
+      "tipoPerfil": ["espectaculo"]
+    },
+    "ResultCardGenerico": {
+      "tipo": "resultados",
+      "tipoPerfil": ["*"],
+      "esFallback": true,
+      "camposMinimos": ["titulo", "subtitulo", "fotoPrincipal", "geo.ciudad", "descripcionCorta"],
+      "resolverTitulo": "alias || nombreComercial || nombreProfesional || 'Perfil'"
+    }
+  },
+  "profileLayouts": {
+    "ProfileLayoutPersona": {
+      "tipo": "perfil",
+      "tipoPerfil": ["persona"],
+      "secciones": ["hero", "servicios", "galeria", "contactoPublico", "geo"]
+    },
+    "ProfileLayoutAdultos": {
+      "tipo": "perfil",
+      "aliasDe": "ProfileLayoutPersona"
+    },
+    "ProfileLayoutProfesional": {
+      "tipo": "perfil",
+      "tipoPerfil": ["persona"],
+      "secciones": ["hero", "credencialesResumen", "servicios", "horario", "contactoPublico"]
+    },
+    "ProfileLayoutNegocio": {
+      "tipo": "perfil",
+      "tipoPerfil": ["negocio"],
+      "secciones": ["hero", "mapa", "galeria", "catalogoServicios", "horario", "contactoPublico"]
+    },
+    "ProfileLayoutVenue": {
+      "tipo": "perfil",
+      "tipoPerfil": ["lugar"],
+      "secciones": ["hero", "reglas", "areas", "cartelera", "mapa"]
+    },
+    "ProfileLayoutServicio": {
+      "tipo": "perfil",
+      "tipoPerfil": ["persona"],
+      "secciones": ["hero", "galeriaTrabajos", "experiencia", "cobertura", "tarifas", "contactoPublico"]
+    },
+    "ProfileLayoutPareja": {
+      "tipo": "perfil",
+      "tipoPerfil": ["pareja_grupo"]
+    },
+    "ProfileLayoutCreador": {
+      "tipo": "perfil",
+      "tipoPerfil": ["creador"]
+    },
+    "ProfileLayoutEspectaculo": {
+      "tipo": "perfil",
+      "tipoPerfil": ["espectaculo"]
+    },
+    "ProfileLayoutHospedaje": {
+      "tipo": "perfil",
+      "tipoPerfil": ["negocio", "lugar"]
+    },
+    "ProfileLayoutGenerico": {
+      "tipo": "perfil",
+      "tipoPerfil": ["*"],
+      "esFallback": true,
+      "secciones": ["hero", "camposPublicosDinamicos", "galeria", "contactoPublicoFiltrado"],
+      "nota": "Itera camposPublicosPerfil del snapshot con FieldEngine"
+    }
+  },
+  "componentRegistry": {
+    "apiFutura": {
+      "get": "ComponentRegistry.get(componenteId) → { render(perfil, campos, opciones) }",
+      "resolveResultCard": "RenderEngine.resolveComponente('resultados', perfil)",
+      "resolveProfileLayout": "RenderEngine.resolveComponente('perfil', perfil)",
+      "isRegistered": "boolean — si false, usar Generico"
+    }
+  }
+}

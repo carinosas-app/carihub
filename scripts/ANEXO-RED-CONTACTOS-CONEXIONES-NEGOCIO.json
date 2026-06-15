@@ -1,0 +1,264 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "tipo": "ANEXO_ANALISIS",
+  "modulo": "INTERACCIONES-ECONOMIA-SOCIAL",
+  "complementoDe": [
+    "scripts/PLAN-MAESTRO-INTERACCIONES.json",
+    "scripts/PLAN-MAESTRO-ECONOMIA-SOCIAL.json",
+    "scripts/PLAN-MAESTRO-DASHBOARDS.json"
+  ],
+  "titulo": "Anexo — Red de Contactos / Conexiones de Negocio (evolución de Amigos hacia Conexiones tipadas)",
+  "fecha": "2026-06-11",
+  "version": "1.0.0",
+  "estado": "ANEXO_ANALISIS_DOCUMENTAL",
+  "modo": "Solo análisis y documentación — sin runtime/carpetas/mover/Firestore/deploy/commit; NO modifica planes/capas/actas/ADRs (solo referencia)",
+  "resolucionInstruccion": "El usuario pidió 'agregar al análisis' y a la vez 'no modificar documentos existentes'. Igual que ANEXO-CRIPTOMONEDAS y ANEXO-AUTOPROPINAS, se resuelve con este anexo complementario nuevo referenciado desde fuera, sin tocar los planes maestros.",
+  "basadoEn": [
+    "scripts/PLAN-MAESTRO-INTERACCIONES.json (FollowGraph, BlockEngine, ActivityFeed, SocialModerationQueue, NotificationsBridge, origen humano/sistema/indexador/agente)",
+    "scripts/PLAN-MAESTRO-DASHBOARDS.json (dashboards tipados, CentroActividad, NotificacionesUnificadas, widgets)",
+    "scripts/PLAN-MAESTRO-ECONOMIA-SOCIAL.json (estados/stories/lives/publicaciones/premium futuros)",
+    "scripts/ANEXO-AUTOPROPINAS-CUENTAS-RELACIONADAS.json (cuentas relacionadas ≠ conexiones legítimas)",
+    "scripts/PLAN-MAESTRO-AGENTES-IA.json (RT-08: IA no mueve/aprueba; deny-write)",
+    "scripts/config-seguridad-mvp-schema.json (rate-limit, reputacionCuenta, duplicadoPotencial)",
+    "scripts/ADR-INDEXACION-ADULTOS.json"
+  ],
+  "objetivo": "Evaluar la evolución de 'Amigos' hacia 'Red de Contactos / Conexiones de Negocio', definir el modelo de conexiones tipadas (perfil/negocio/anunciante), su ciclo de vida, límites, feeds de actividad y la sección de Dashboard 'Actividad de mi red de contactos'.",
+
+  "principioRector": "CariHub/Cariñosas NO es una red social de amistades. Es una red de CONEXIONES tipadas (proveedor/negocio/anunciante) orientada a descubrimiento, relación comercial/profesional y conversión. Toda función se justifica por el nicho real (acompañantes, hoteles, moteles, spas, sex shops, fotógrafos, cirujanos, abogados, contadores, restaurantes, bares, antros y demás proveedores), no por engagement social genérico.",
+
+  "analisisConceptos": {
+    "amigos": { "definicion": "Relación simétrica bidireccional de amistad personal (modelo Facebook/Instagram)", "estadoActual": "NO existe en CariHub", "veredicto": "DESCARTAR — no encaja con el nicho; implica red social genérica" },
+    "seguidores": { "definicion": "Relación asimétrica consumidor→proveedor (FollowGraph en Interacciones)", "estadoActual": "Diseñado en PLAN-MAESTRO-INTERACCIONES; no operativo aún", "veredicto": "MANTENER — sin aprobación; alimenta visibilidad y feed público" },
+    "contactos": { "definicion": "Entidad genérica en la red del usuario (sin tipificar)", "veredicto": "ACOTAR — usar solo como término de presentación UI ('Mis contactos'); el modelo técnico es Conexión tipada" },
+    "conexionesDeNegocio": { "definicion": "Relación bidireccional tipada que requiere aceptación; orientada a servicio, alianza o patrocinio", "veredicto": "ADOPTAR como núcleo del modelo" },
+    "redProfesional": { "definicion": "Subconjunto de conexiones con categorías profesionales (cirujano, abogado, contador, fotógrafo)", "veredicto": "ADOPTAR como etiqueta de presentación / filtro de categoría" },
+    "redDeContactos": { "definicion": "Conjunto de todas las conexiones aceptadas del usuario", "veredicto": "ADOPTAR como nombre de la sección Dashboard y del grafo ConnectionGraph" },
+    "solicitudesDeConexion": { "definicion": "Petición unidireccional que el receptor puede aceptar/rechazar", "veredicto": "ADOPTAR — ciclo de vida explícito" },
+    "solicitudesEntreCategoriasDistintas": { "definicion": "Conexión perfil↔negocio, negocio↔negocio, anunciante↔perfil entre verticales diferentes", "veredicto": "PERMITIR con tipo de arista explícito y reglas por categoría (edad/sensibilidad)" }
+  },
+
+  "veredictoReemplazoAmistad": {
+    "pregunta": "¿Conviene reemplazar completamente el concepto de 'Amistad' por Conexiones de Negocio / Red de Contactos / Contactos Profesionales?",
+    "veredicto": "SÍ — reemplazar 'Amistad' por modelo de DOS planos",
+    "modeloDosPlanos": {
+      "plano1_seguir": {
+        "nombre": "Seguir (FollowGraph)",
+        "direccion": "asimétrico: consumidor → proveedor",
+        "aprobacion": "no requiere",
+        "uso": "visibilidad pública, contador de seguidores, feed público opcional",
+        "modulo": "FollowGraph (Interacciones — ya diseñado)"
+      },
+      "plano2_conexion": {
+        "nombre": "Red de Contactos / Conexiones de Negocio (ConnectionGraph)",
+        "direccion": "bidireccional: A ↔ B (tipada)",
+        "aprobacion": "requiere solicitud + aceptación",
+        "uso": "feed privado 'Actividad de mi red de contactos' en Dashboard; relación comercial/profesional",
+        "modulo": "ConnectionGraph / ConexionesEngine (nuevo — propuesto por este anexo)"
+      }
+    },
+    "terminologiaUI": {
+      "adoptar": ["Red de contactos", "Conexiones de negocio", "Contactos profesionales (sinónimo de presentación)", "Solicitud de conexión"],
+      "descartar": ["Amigos", "Agregar amigo", "Lista de amigos"]
+    }
+  },
+
+  "moduloPropuesto": {
+    "nombre": "ConnectionGraph / ConexionesEngine",
+    "distintoDe": "FollowGraph (asimétrico, sin aprobación)",
+    "responsabilidad": "Grafo de conexiones bidireccionales tipadas, solicitudes, estados de conexión, feed de actividad de contactos aceptados",
+    "ubicacionLogica": "Capa Interacciones (señales sociales); NO Messenger, NO Dashboards (solo consume), NO Admin (decide moderación)"
+  },
+
+  "modeloAristasTipadas": {
+    "tiposEntidad": ["perfil", "negocio", "anunciante"],
+    "tiposArista": [
+      { "id": "perfil_negocio_servicio", "desde": "perfil", "hacia": "negocio", "etiqueta": "cliente_proveedor", "ejemplos": ["Perfil→Hotel", "Perfil→Motel", "Perfil→Spa", "Perfil→Sex Shop", "Perfil→Restaurante", "Perfil→Bar", "Perfil→Antro", "Perfil→Fotógrafo", "Perfil→Cirujano", "Perfil→Abogado", "Perfil→Contador"] },
+      { "id": "negocio_negocio_alianza", "desde": "negocio", "hacia": "negocio", "etiqueta": "alianza_b2b", "ejemplos": ["Hotel↔Spa", "Restaurante↔Bar", "Motel↔Sex Shop (cross-promo)"] },
+      { "id": "anunciante_perfil_patrocinio", "desde": "anunciante", "hacia": "perfil", "etiqueta": "patrocinio_comercial", "ejemplos": ["Anunciante→Perfil (campaña dirigida)"] },
+      { "id": "anunciante_negocio_patrocinio", "desde": "anunciante", "hacia": "negocio", "etiqueta": "patrocinio_comercial", "ejemplos": ["Anunciante→Negocio (banner/campaña local)"] },
+      { "id": "perfil_perfil_profesional", "desde": "perfil", "hacia": "perfil", "etiqueta": "contacto_profesional", "ejemplos": ["Perfil↔Fotógrafo (colaboración)", "Perfil↔Cirujano (referido)"], "nota": "solo si ambos perfiles lo permiten por categoría; no amistad genérica" },
+      { "id": "internacional_futura", "desde": "cualquiera", "hacia": "cualquiera", "etiqueta": "conexion_cross_pais", "fase": "internacional/futuro", "requisitos": ["reglas legales por mercado", "verificación de edad/identidad", "moderación cross-border"] }
+    ],
+    "regla": "Toda arista lleva tipoEntidadOrigen, tipoEntidadDestino, tipoArista, categoriaOrigen, categoriaDestino, estado, fechaSolicitud, fechaAceptacion"
+  },
+
+  "cicloDeVidaConexion": {
+    "descubrir": {
+      "como": ["búsqueda por categoría/geo (App Pública/Resultados)", "perfil público del proveedor", "sugerencias futuras (IA recomienda, deny-write)", "QR/enlace compartido", "referido desde conexión existente"],
+      "requisitos": ["usuario registrado", "email verificado (Seguridad MVP)", "mayoría de edad si categoría sensible"]
+    },
+    "solicitar": {
+      "como": "botón 'Solicitar conexión' en perfil/negocio + mensaje opcional + tipo de arista inferido o seleccionado",
+      "validacion": "ValidationEngine + rate-limit + antifraude (no autopropina/cuenta relacionada como conexión legítima si se detecta fraude)",
+      "notificacion": "NotificationsBridge → receptor (Dashboard + push/email opcional)"
+    },
+    "aceptar": {
+      "como": "receptor acepta en Dashboard (cola de solicitudes pendientes)",
+      "efecto": "arista bidireccional activa; ambos ven actividad del otro en 'Actividad de mi red de contactos'",
+      "notificacion": "emisor notificado"
+    },
+    "rechazar": {
+      "como": "receptor rechaza (silencioso o con motivo opcional)",
+      "efecto": "solicitud cerrada; emisor no puede re-solicitar en ventana (ej. 30 días)",
+      "notificacion": "emisor notificado (genérico, sin detalle)"
+    },
+    "eliminar": {
+      "como": "cualquiera de las dos partes elimina la conexión activa",
+      "efecto": "arista removida; feed deja de mostrar actividad del otro; historial interno conservado (auditoría)",
+      "notificacion": "opcional al otro (configurable)"
+    },
+    "bloquear": {
+      "como": "reutiliza BlockEngine (Interacciones) — bloqueo silencioso",
+      "efecto": "no solicitudes, no feed, no Messenger bidireccional; conexión activa se termina",
+      "notificacion": "silenciosa (no notificar al bloqueado)"
+    },
+    "reportar": {
+      "como": "reutiliza SocialModerationQueue (Interacciones) → Admin",
+      "efecto": "cola de moderación; posible suspensión/restricción de conexiones",
+      "notificacion": "admin"
+    }
+  },
+
+  "estadosConexion": ["pendiente", "aceptada", "rechazada", "eliminada", "bloqueada", "suspendida_admin"],
+
+  "limitesConexiones": {
+    "porTipoCuenta": {
+      "visitante": "0 conexiones (solo seguir si se registra)",
+      "perfil_basico": { "maxActivas": 50, "maxPendientesEnviadas": 10, "maxPendientesRecibidas": 20 },
+      "negocio": { "maxActivas": 200, "maxPendientesEnviadas": 30, "maxPendientesRecibidas": 50 },
+      "anunciante": { "maxActivas": 500, "maxPendientesEnviadas": 50, "maxPendientesRecibidas": 100 }
+    },
+    "porPlan": {
+      "basico": "límites estándar",
+      "destacado": "+25% cupo activas",
+      "premium": "+50% cupo activas",
+      "vip": "+100% cupo activas"
+    },
+    "antifraude": ["rate-limit solicitudes/día (Seguridad MVP)", "no conectar consigo mismo", "no conectar si duplicadoPotencial/autopropina detectada (ANEXO-AUTOPROPINAS)", "umbral velocidad de aceptaciones"],
+    "nota": "Límites son propuesta de diseño; no modifican config-precios-planes-perfiles-schema.json"
+  },
+
+  "sugerenciasContactosFuturas": {
+    "fase": "nacional/internacional/futuro",
+    "fuentes": ["misma categoría/geo", "conexiones de conexiones (2º grado)", "historial de visitas/favoritos", "campañas Banners locales", "IA recomienda (solo lectura, AGENTES-IA deny-write)"],
+    "reglas": ["no sugerir bloqueados", "no sugerir reportados", "respetar edad/categoría sensible", "transparencia: 'Sugerido por CariHub' vs orgánico"]
+  },
+
+  "actividadDeContactos": {
+    "tiposContenido": ["estados", "lives", "publicaciones", "promociones", "historias (stories)", "actividad_reciente", "eventos_futuros", "contenido_premium"],
+    "fuente": "ActivityFeed (Interacciones) filtrado por ConnectionGraph (solo contactos aceptados)",
+    "reglas": [
+      "origen=humano obligatorio para métricas públicas (Interacciones)",
+      "contenido premium: PremiumContentGate (Economía Social); solo visible si pagador/conexión con permiso",
+      "contenido adulto/sensible: noindex, previews moderados (ADR-INDEXACION-ADULTOS)",
+      "promociones: pueden mezclarse con actividad orgánica; etiquetadas como 'Promoción'"
+    ]
+  },
+
+  "objetivoFuncional": "Que un usuario pueda buscar por categoría, encontrar perfiles o negocios, enviar solicitud de conexión y, una vez aceptada, visualizar en su Dashboard toda la actividad relevante de esa conexión (estados, lives, publicaciones, promociones, eventos).",
+
+  "matrizEjemplos": [
+    { "origen": "Perfil", "destino": "Hotel", "tipoArista": "perfil_negocio_servicio", "casoUso": "cliente frecuente / reservas" },
+    { "origen": "Perfil", "destino": "Motel", "tipoArista": "perfil_negocio_servicio", "casoUso": "cliente local" },
+    { "origen": "Perfil", "destino": "Spa", "tipoArista": "perfil_negocio_servicio", "casoUso": "servicios de bienestar" },
+    { "origen": "Perfil", "destino": "Cirujano", "tipoArista": "perfil_negocio_servicio", "casoUso": "consulta/referido profesional" },
+    { "origen": "Perfil", "destino": "Fotógrafo", "tipoArista": "perfil_negocio_servicio", "casoUso": "sesión/colaboración" },
+    { "origen": "Perfil", "destino": "Sex Shop", "tipoArista": "perfil_negocio_servicio", "casoUso": "cliente; requiere edad + categoría adulta" },
+    { "origen": "Perfil", "destino": "Restaurante", "tipoArista": "perfil_negocio_servicio", "casoUso": "cliente frecuente" },
+    { "origen": "Negocio", "destino": "Negocio", "tipoArista": "negocio_negocio_alianza", "casoUso": "cross-promo Hotel+Spa" },
+    { "origen": "Anunciante", "destino": "Perfil", "tipoArista": "anunciante_perfil_patrocinio", "casoUso": "campaña dirigida" },
+    { "origen": "Anunciante", "destino": "Negocio", "tipoArista": "anunciante_negocio_patrocinio", "casoUso": "banner local / co-marketing" }
+  ],
+
+  "feeds": {
+    "tipos": [
+      { "id": "feed_actividad", "contenido": "publicaciones, actividad reciente, eventos", "ordenDefault": "cronologico" },
+      { "id": "feed_promociones", "contenido": "promociones y ofertas de contactos", "ordenDefault": "cronologico", "etiqueta": "Promoción" },
+      { "id": "feed_estados", "contenido": "estados/stories temporales de contactos", "ordenDefault": "cronologico" },
+      { "id": "feed_lives", "contenido": "lives activos y recientes de contactos", "ordenDefault": "live_activo_primero" },
+      { "id": "feed_mixto", "contenido": "todos los anteriores mezclados", "ordenDefault": "configurable_usuario" }
+    ],
+    "priorizacion": {
+      "cronologico": "orden por fecha descendente (MVP)",
+      "relevanciaFutura": "score por plan del contacto, interacción reciente, categoría preferida, geo; IA sugiere orden (solo lectura)",
+      "liveActivo": "lives en curso siempre arriba en feed_lives y feed_mixto"
+    },
+    "configuracionUsuario": "filtros por tipo de contenido, categoría de contacto, silenciar contacto (sin eliminar conexión)"
+  },
+
+  "dashboardSeccionActividadRed": {
+    "nombre": "Actividad de mi red de contactos",
+    "veredicto": "SÍ — incorporar como sección central/widget del CentroActividad (Dashboards)",
+    "ubicacion": "Dashboard Perfil, Dashboard Negocio, Dashboard Anunciante (cada uno ve actividad de SUS contactos aceptados)",
+    "contenido": ["estados", "lives", "publicaciones", "promociones", "eventos futuros", "historias (stories) de contactos aceptados"],
+    "noIncluye": ["actividad de no-contactos (usar Resultados/Home)", "Messenger (conversaciones aparte)", "métricas propias (widgets existentes)"],
+    "moduloHost": "CentroActividad + widget actividad_red_contactos (propuesto)",
+    "rutaSugerida": "/cuenta/red-contactos o tab dentro de /cuenta/actividad"
+  },
+
+  "integraciones": {
+    "dashboard": { "rol": "HOST del feed 'Actividad de mi red de contactos'; cola solicitudes pendientes; gestión conexiones", "modifica": "NO — diseño futuro consume ConnectionGraph" },
+    "interacciones": { "rol": "ConnectionGraph (nuevo) + reutiliza FollowGraph, BlockEngine, SocialModerationQueue, ActivityFeed, NotificationsBridge", "modifica": "NO" },
+    "messenger": { "rol": "Conexión aceptada puede habilitar/contactar vía Messenger (si nivelConfianza ≥ umbral); bloqueo termina ambos", "modifica": "NO" },
+    "economiaSocial": { "rol": "Estados/stories/lives/publicaciones/premium de contactos alimentan feed; propinas solo orgánicas (ANEXO-AUTOPROPINAS)", "modifica": "NO" },
+    "estadosStoriesLivesPublicaciones": { "rol": "Fuentes de contenido del feed; StoriesLivesEngine futuro", "fase": "nacional/futuro" },
+    "notificaciones": { "rol": "NotificationsBridge: solicitud, aceptación, rechazo, actividad destacada de contacto", "modifica": "NO" },
+    "agentesIA": { "rol": "Sugerencias de contactos, orden por relevancia del feed; SOLO lectura/recomendación; deny-write (RT-08)", "modifica": "NO" },
+    "banners": { "rol": "Promociones de anunciantes-conexión aparecen en feed_promociones etiquetadas", "modifica": "NO" },
+    "seguridadMvp": { "rol": "Gates edad/email/estadoSeguridad; rate-limit; duplicadoPotencial", "modifica": "NO" }
+  },
+
+  "privacidadEdadModeracion": {
+    "contenidoAdulto": "feed de contactos con categoría adulta: previews moderados, noindex, mayoría de edad; ADR-INDEXACION-ADULTOS",
+    "visibilidadFeed": "solo contactos ACEPTADOS; no público; no indexable",
+    "contenidoPremium": "PremiumContentGate; noindex; solo pagadores/conexión con permiso",
+    "bloqueoReporte": "BlockEngine + SocialModerationQueue; coherente con Interacciones",
+    "internacional": "conexiones cross-pais sujetas a reglas legales por mercado (futuro)"
+  },
+
+  "riesgos": [
+    { "id": "RC-R01", "nivel": "alto", "riesgo": "Deriva a red social genérica de 'amigos' si no se descarta Amistad", "mitigacion": "terminología UI 'Red de contactos/Conexiones de negocio'; aristas tipadas; no feed público infinito" },
+    { "id": "RC-R02", "nivel": "alto", "riesgo": "Spam de solicitudes de conexión", "mitigacion": "rate-limit, límites por plan, rechazo + ventana re-solicitud, reportar" },
+    { "id": "RC-R03", "nivel": "alto", "riesgo": "Confundir conexión legítima con cuenta relacionada/fraude (ANEXO-AUTOPROPINAS)", "mitigacion": "señales antifraude; conexiones autopropina no cuentan para métricas sociales" },
+    { "id": "RC-R04", "nivel": "medio", "riesgo": "Feed mezcla promociones sin etiquetar → confusión", "mitigacion": "etiqueta 'Promoción' obligatoria; feed_promociones separado" },
+    { "id": "RC-R05", "nivel": "medio", "riesgo": "Contenido sensible de contactos expuesto/indexado", "mitigacion": "feed privado Dashboard; noindex; PrivacyGuard; edad" },
+    { "id": "RC-R06", "nivel": "medio", "riesgo": "Sobrecarga de feed (demasiados contactos)", "mitigacion": "límites por plan; silenciar contacto; paginación; relevancia futura" },
+    { "id": "RC-R07", "nivel": "bajo", "riesgo": "Duplicar FollowGraph y ConnectionGraph sin frontera clara", "mitigacion": "documentar dos planos; Seguir=asimétrico público; Conexión=bidireccional privado Dashboard" }
+  ],
+
+  "dependencias": {
+    "congeladas": ["Interacciones 1.0.0 (FollowGraph, BlockEngine, ActivityFeed)", "Dashboards 1.0.0 (CentroActividad)", "Seguridad MVP 1.0.0", "Messenger 1.0.0"],
+    "planes": ["ECONOMIA-SOCIAL (contenido feed)", "ANEXO-AUTOPROPINAS (fraude conexiones)", "AGENTES-IA (sugerencias)", "BANNERS (promociones)", "ADMIN (moderación solicitudes/reportes)"],
+    "precondiciones": ["FollowGraph operativo", "ConnectionGraph diseñado en SPEC", "ActivityFeed con filtro por grafo", "CentroActividad widget en Dashboards", "StoriesLivesEngine para estados/lives en feed (futuro)"]
+  },
+
+  "impactos": {
+    "interacciones": "Nuevo ConnectionGraph/ConexionesEngine; ActivityFeed filtra por contactos; no modifica FollowGraph",
+    "dashboards": "Nuevo widget 'Actividad de mi red de contactos' + cola solicitudes; no modifica widgets existentes",
+    "messenger": "Conexión aceptada puede ser gate para iniciar conversación; bloqueo sincronizado",
+    "economiaSocial": "Contenido de contactos en feed; premium gating; propinas orgánicas",
+    "nota": "Impactos de diseño futuro; este anexo no modifica documentos existentes ni Firestore"
+  },
+
+  "ordenRecomendadoImplementacion": [
+    { "paso": 1, "accion": "Definir ConnectionGraph + tipos de arista + estados en SPEC-INTERACCIONES o SPEC-RED-CONTACTOS", "prioridad": "P0 (diseño)" },
+    { "paso": 2, "accion": "FollowGraph operativo + solicitar/aceptar/rechazar conexión básica perfil↔negocio", "prioridad": "P1 (nacional)" },
+    { "paso": 3, "accion": "Widget Dashboard 'Actividad de mi red de contactos' + feed_actividad cronológico", "prioridad": "P1" },
+    { "paso": 4, "accion": "Negocio↔negocio, anunciante↔perfil/negocio + feed_promociones + límites por plan", "prioridad": "P2" },
+    { "paso": 5, "accion": "Estados/lives/publicaciones en feed + feed_mixto configurable + relevancia IA", "prioridad": "P2-P3 (futuro)" },
+    { "paso": 6, "accion": "Conexiones internacionales + sugerencias avanzadas + eventos futuros", "prioridad": "P3 (visión futura)" }
+  ],
+
+  "procedencia": {
+    "crearMd": true, "crearJson": true,
+    "justificacion": "La evolución de 'Amigos' hacia conexiones tipadas requiere análisis propio que separe Seguir (asimétrico) de Conexión (bidireccional), defina feeds Dashboard y no derive a red social genérica.",
+    "siguientesPasos": ["SPEC-RED-CONTACTOS o extensión SPEC-INTERACCIONES", "ADR-SEGUIR-VS-CONEXION (frontera dos planos)", "Wireframe widget Dashboard 'Actividad de mi red de contactos'"]
+  },
+  "noModifica": [
+    "PLAN-MAESTRO-INTERACCIONES / ECONOMIA-SOCIAL / DASHBOARDS y demás capas/planes/actas/ADRs",
+    "Producción, Firestore, deploy, commit"
+  ],
+  "changelog": [
+    { "version": "1.0.0", "fecha": "2026-06-11", "nota": "Anexo Red de Contactos/Conexiones de Negocio: veredicto reemplazar Amistad por dos planos (Seguir+Conexión), ConnectionGraph tipado, ciclo de vida, límites, feeds, sección Dashboard 'Actividad de mi red de contactos', integraciones, 7 riesgos RC-Rxx, orden P0-P3" }
+  ]
+}
