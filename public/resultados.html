@@ -895,8 +895,10 @@
     var url;
     if (window.CariHubResultadosDemo && CariHubResultadosDemo.urlPerfil) {
       url = CariHubResultadosDemo.urlPerfil(u, Q);
+    } else if (window.CariHubResultadosDemo && CariHubResultadosDemo.urlPerfil) {
+      url = CariHubResultadosDemo.urlPerfil(u, Q);
     } else if (u.__registrado || u.__demo === false) {
-      url = 'perfil.html?id=' + encodeURIComponent(String(id));
+      url = 'perfil-publico.html?id=' + encodeURIComponent(String(id));
     } else {
       var p = new URLSearchParams();
       p.set('vista', u.__vista || 'adult');
@@ -906,7 +908,13 @@
       if (Q.estado) p.set('estado', Q.estado);
       if (Q.ciudad) p.set('ciudad', Q.ciudad);
       p.set('from', 'resultados');
-      url = './preview/perfil-vista-previa.html?' + p.toString();
+      try {
+        var rv = new URL(location.href).searchParams.get('vista');
+        if (rv === 'con-resultados' || rv === 'con-resultados-4' || rv === 'sin-resultados') {
+          p.set('resVista', rv);
+        }
+      } catch (e) { /* opcional */ }
+      url = './perfil-publico.html?' + p.toString();
     }
     window.location.assign(url);
   };

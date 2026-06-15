@@ -149,9 +149,20 @@
     return _cache.length;
   }
 
-  function urlPerfil(uid) {
-    if (!uid) return 'perfil.html';
-    return 'perfil.html?id=' + encodeURIComponent(String(uid));
+  function urlPerfil(uid, Q) {
+    Q = Q || {};
+    if (global.CariHubResultadosDemo && CariHubResultadosDemo.urlPerfilPublico) {
+      return CariHubResultadosDemo.urlPerfilPublico({ __id: uid, __registrado: true }, Q);
+    }
+    var p = new URLSearchParams();
+    p.set('id', String(uid));
+    if (Q.categoria) p.set('categoria', Q.categoria);
+    if (Q.pais) p.set('pais', Q.pais);
+    if (Q.estado) p.set('estado', Q.estado);
+    if (Q.ciudad) p.set('ciudad', Q.ciudad);
+    p.set('from', 'resultados');
+    if (Q.resVista) p.set('resVista', Q.resVista);
+    return 'perfil-publico.html?' + p.toString();
   }
 
   global.CariHubResultadosRegistrados = {
