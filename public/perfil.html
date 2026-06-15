@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Perfil - CariHub</title>
 <link rel="stylesheet" href="css/banners-publicidad.css">
+<link rel="stylesheet" href="css/ch-slot-dock.css">
 
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
@@ -369,7 +370,7 @@ button{
 
   <div id="bannersSuperioresCariHub" class="top-banners">
 
-    <a class="banner-slot banner-slot--side" href="registro-banner.html?slot=perfil_izquierda" aria-label="Destacado del estado">
+    <a class="banner-slot banner-slot--side" href="registro-banner.html?slot=perfil_izquierda" data-perfil-slot="perfil_izquierda" aria-label="Destacado del estado">
       <div class="banner-slot__stage" data-res-ad-stage="0">
         <div class="banner-slot__dots" aria-hidden="true">
           <span class="banner-slot__dot is-on" data-res-ad-dot="0"></span>
@@ -418,7 +419,7 @@ button{
       </div>
     </a>
 
-    <a class="banner-slot banner-slot--center" href="registro-banner.html?slot=perfil_centro" aria-label="Publicidad CariHub">
+    <a class="banner-slot banner-slot--center" href="registro-banner.html?slot=perfil_centro" data-perfil-slot="perfil_centro" aria-label="Publicidad CariHub">
       <div class="banner-slot__stage" data-res-ad-stage="1">
         <div class="banner-slot__dots" aria-hidden="true">
           <span class="banner-slot__dot is-on" data-res-ad-dot="0"></span>
@@ -490,7 +491,7 @@ button{
       </div>
     </a>
 
-    <a class="banner-slot banner-slot--side" href="registro-banner.html?slot=perfil_derecha" aria-label="Más visibilidad estatal">
+    <a class="banner-slot banner-slot--side" href="registro-banner.html?slot=perfil_derecha" data-perfil-slot="perfil_derecha" aria-label="Más visibilidad estatal">
       <div class="banner-slot__stage" data-res-ad-stage="2">
         <div class="banner-slot__dots" aria-hidden="true">
           <span class="banner-slot__dot is-on" data-res-ad-dot="0"></span>
@@ -539,7 +540,7 @@ button{
 
 
   <div class="banner-bottom-wrap">
-    <a class="banner-slot banner-slot--bottom" href="registro-banner.html?slot=perfil_inferior" aria-label="Anuncio inferior en perfil">
+    <a class="banner-slot banner-slot--bottom" href="registro-banner.html?slot=perfil_inferior" data-perfil-slot="perfil_inferior" aria-label="Anuncio inferior en perfil">
       <div class="banner-slot__stage" data-res-ad-stage="3">
         <div class="banner-slot__dots" aria-hidden="true">
           <span class="banner-slot__dot is-on" data-res-ad-dot="0"></span>
@@ -576,6 +577,11 @@ button{
 
 </div>
 
+<aside class="ch-slot-dock ch-slot-dock--perfil" aria-label="Slots Estados y LIBE (provisional)">
+  <div id="perfilMidEstados" data-slot-id="perfil_estados"></div>
+  <div id="perfilMidLibe" data-slot-id="perfil_libe"></div>
+</aside>
+
 
 <script>
 const firebaseConfig = {
@@ -591,6 +597,7 @@ if (!firebase.apps.length) {
   firebase.initializeApp(firebaseConfig);
 }
 const db = firebase.firestore();
+window.CariHubDB = db;
 
 function obtenerParametro(nombre){
   const url = new URL(window.location.href);
@@ -866,6 +873,10 @@ async function cargarPerfil(){
 
 cargarPerfil();
 </script>
+<script src="js/ch-slot-dock.js"></script>
+<script src="js/banner-perfil.js"></script>
+<script src="js/banner-perfil-laterales.js"></script>
+<script src="js/publicidad-activa.js"></script>
 
 </body>
 </html>

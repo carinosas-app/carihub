@@ -5,15 +5,55 @@
 (function (global) {
   'use strict';
 
-  var SLOTS = {
-    estados: 'resultados_estados',
-    libe: 'resultados_libe'
-  };
+  function queryFromLocation() {
+    if (global.CariHubResultadosDemo && global.CariHubResultadosDemo.queryFromLocation) {
+      return global.CariHubResultadosDemo.queryFromLocation();
+    }
+    try {
+      var p = new URL(global.location.href).searchParams;
+      return {
+        categoria: p.get('categoria') || 'Escort',
+        pais: p.get('pais') || 'México',
+        estado: p.get('estado') || '',
+        ciudad: p.get('ciudad') || ''
+      };
+    } catch (e) {
+      return { categoria: 'Escort', pais: 'México', estado: '', ciudad: '' };
+    }
+  }
+
+  function nivelBusqueda(Q) {
+    if (global.CariHubResultadosDemo && global.CariHubResultadosDemo.nivelBusqueda) {
+      return global.CariHubResultadosDemo.nivelBusqueda(Q);
+    }
+    Q = Q || {};
+    if (Q.ciudad) return 'ciudad';
+    if (Q.estado) return 'estado';
+    if (Q.pais) return 'pais';
+    return 'ciudad';
+  }
+
+  function prefijoSlots(Q) {
+    var n = nivelBusqueda(Q);
+    if (n === 'pais') return 'resultados_pais_';
+    if (n === 'estado') return 'resultados_estado_';
+    return 'resultados_';
+  }
+
+  function slotLateral(Q, lado) {
+    var suf = lado === 'libe' ? 'libe' : 'estados';
+    return prefijoSlots(Q) + suf;
+  }
 
   var LABELS = {
-    resultados_estados: 'Estado publicado',
-    resultados_libe: 'En vivo · LIBE'
+    estados: 'Estado publicado',
+    libe: 'En vivo · LIBE'
   };
+
+  function labelForSlot(slotId) {
+    if (/_libe$/.test(String(slotId || ''))) return LABELS.libe;
+    return LABELS.estados;
+  }
 
   function esc(t) {
     return String(t == null ? '' : t)
@@ -25,8 +65,15 @@
     return 'registro-banner.html?slot=' + encodeURIComponent(slotId);
   }
 
-  function obtenerRenta(slotId) {
-    var rentals = global.CARIHUB_RESULTADOS_LATERALES_RENTALS || {};
+  function obtenerRentals(Q) {
+    var n = nivelBusqueda(Q);
+    if (n === 'pais') return global.CARIHUB_RESULTADOS_PAIS_RENTALS || {};
+    if (n === 'estado') return global.CARIHUB_RESULTADOS_ESTADO_RENTALS || {};
+    return global.CARIHUB_RESULTADOS_LATERALES_RENTALS || {};
+  }
+
+  function obtenerRenta(slotId, Q) {
+    var rentals = obtenerRentals(Q || queryFromLocation());
     return rentals[String(slotId || '')] || null;
   }
 
@@ -49,14 +96,14 @@
   }
 
   function buildVacantSlide(slotId) {
-    if (slotId === SLOTS.libe) return buildLiveMockSlide();
+    if (/_libe$/.test(String(slotId || ''))) return buildLiveMockSlide();
     return buildEstadoMockSlide();
   }
 
-  function buildBannerHTML(slotId) {
-    var rental = obtenerRenta(slotId);
+  function buildBannerHTML(slotId, Q) {
+    var rental = obtenerRenta(slotId, Q);
     var href = linkRegistro(slotId);
-    var label = LABELS[slotId] || '';
+    var label = labelForSlot(slotId);
     var vacantClass = ' res-midband__banner--vacant';
     var slides = '';
     var w = 380;
@@ -80,23 +127,34 @@
     );
   }
 
-  function mount() {
+  function esPaginaSinResultados() {
+    var list = document.getElementById('profilesList');
+    return !!(list && list.classList.contains('res-lista--vacio'));
+  }
+
+  function mount(opts) {
+    opts = opts || {};
+    if (!opts.force && esPaginaSinResultados()) return;
+
+    var Q = opts.Q || queryFromLocation();
     var map = {
-      resMidEstados: SLOTS.estados,
-      resMidLibe: SLOTS.libe
+      resMidEstados: slotLateral(Q, 'estados'),
+      resMidLibe: slotLateral(Q, 'libe')
     };
 
     Object.keys(map).forEach(function (id) {
       var el = document.getElementById(id);
       if (!el) return;
-      el.innerHTML = buildBannerHTML(map[id]);
+      el.innerHTML = buildBannerHTML(map[id], Q);
     });
   }
 
   global.CARIHUB_RESULTADOS_LATERALES_RENTALS = global.CARIHUB_RESULTADOS_LATERALES_RENTALS || {};
+  global.CARIHUB_RESULTADOS_PAIS_RENTALS = global.CARIHUB_RESULTADOS_PAIS_RENTALS || {};
+  global.CARIHUB_RESULTADOS_ESTADO_RENTALS = global.CARIHUB_RESULTADOS_ESTADO_RENTALS || {};
 
   global.CariHubBannerResultadosLaterales = {
-    SLOTS: SLOTS,
+    slotLateral: slotLateral,
     mount: mount,
     linkRegistro: linkRegistro
   };

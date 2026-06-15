@@ -14,6 +14,7 @@
 <script src="../js/carihub-pink-sheen.js"></script>
 <script src="../js/carihub-nav-quick.js"></script>
 <script src="../js/registro-negocio-adulto.js"></script>
+<script src="../js/resultados-demo.js"></script>
 <style>
 :root{
   --acc:#ec2d7a; --acc2:#ff4f9a; --grn:#16a34a;
@@ -41,6 +42,8 @@ button{font-family:inherit;cursor:pointer;}
 .negocio-sobre .sobre-card__desc{margin-bottom:0;}
 .switcher button.is-on{background:#fff;color:#0f172a;border-color:#fff;}
 .switcher span{margin-left:auto;font-size:12px;opacity:.7;}
+body.perfil-desde-resultados .switcher{display:none !important;}
+body.perfil-desde-resultados:not(.fit) #fitOuter{min-height:100vh;}
 .fit-hint{margin-left:0 !important;font-size:11px !important;opacity:.85 !important;color:#ffd0e6;font-weight:700;}
 .rainctl{display:flex;align-items:center;gap:6px;opacity:1 !important;font-weight:700;}
 .rainctl button{background:#3a2a00;color:#ffd34d;border:1px solid #b8860b;padding:6px 11px;font-size:12px;font-weight:800;border-radius:999px;margin-left:0;}
@@ -3741,7 +3744,7 @@ var PB_RES = "../banners/resultados/";
 var PB_ADULT_SLOTS = [
   {
     label:"Banner superior izquierdo",
-    href:"../registro-banner.html?slot=perfil-top-izq",
+    href:"../registro-banner.html?slot=perfil_izquierda",
     slides:[
       {t:"img",src:PB_PERFIL+"perfil1.webp",alt:"¡Anúnciate en Cariñosas! Para más clientes"},
       {t:"img",src:PB_IMG+"ad-banner-pink-01.png",alt:"¡Anúnciate aquí! Impulsa tu negocio y llega a más personas"},
@@ -3751,7 +3754,7 @@ var PB_ADULT_SLOTS = [
   {
     center:true,
     label:"Banner superior central",
-    href:"../registro-banner.html?slot=perfil-top-centro",
+    href:"../registro-banner.html?slot=perfil_centro",
     slides:[
       {t:"img",src:PB_IMG+"ad-banner-black-02.png",alt:"Haz crecer tu negocio — anuncia aquí"},
       {t:"img",src:PB_IMG+"ad-banner-pink-03.png",alt:"¡Anúnciate aquí! Más información"},
@@ -3760,7 +3763,7 @@ var PB_ADULT_SLOTS = [
   },
   {
     label:"Banner superior derecho",
-    href:"../registro-banner.html?slot=perfil-top-der",
+    href:"../registro-banner.html?slot=perfil_derecha",
     slides:[
       {t:"img",src:PB_PERFIL+"perfil2.webp",alt:"¡Anúnciate aquí! Destaca tu marca"},
       {t:"img",src:PB_IMG+"ad-banner-pink-02.png",alt:"¡Anúnciate aquí! Más visibilidad, más clientes"},
@@ -3810,7 +3813,7 @@ var PB_BOTTOM_NEGOCIO = {
 };
 var PB_BOTTOM_ADULT = {
   label:"Banner inferior",
-  href:"../registro-banner.html?slot=perfil-inferior",
+  href:"../registro-banner.html?slot=perfil_inferior",
   bottom:true,
   slides:[
     {t:"img",src:PB_IMG+"ad-banner-pink-01.png",alt:"¿Quieres más clientes? Anuncia tu perfil en Cariñosas"},
@@ -3828,7 +3831,7 @@ function pbCarihubSlots(tipo){
   return b.map(function(row,i){
     return {
       label:row[1],
-      href:"../registro-banner.html?slot=perfil-top-"+i,
+      href:"../registro-banner.html?slot=perfil_"+(i===0?"izquierda":i===1?"centro":"derecha"),
       center:i===1,
       slides:[
         {t:"img",src:PB_CARIHUB_IMGS[i][0],alt:row[1]},
@@ -3843,7 +3846,7 @@ function pbBottomSlot(tipo){
   if(tipo==="adult"||tipo==="dominatrix"||tipo==="masajeIndep"||tipo==="escortGay"||tipo==="escortVip"||tipo==="trans") return PB_BOTTOM_ADULT;
   return {
     label:"Banner inferior",
-    href:"../registro-banner.html?slot=perfil-inferior",
+    href:"../registro-banner.html?slot=perfil_inferior",
     bottom:true,
     slides:[
       {t:"img",src:PB_IMG+"ad-banner-pink-01.png",alt:"¡Anúnciate aquí! Impulsa tu negocio"},
@@ -3911,6 +3914,7 @@ function startPbBannerRotation(){
     },wait);
     pbRotateTimers.push(kick);
   });
+  if(window.CariHubBannerPerfil&&CariHubBannerPerfil.mount) CariHubBannerPerfil.mount();
 }
 
 /* ---------------- banners por tema (3 arriba + 1 abajo, 3 slides c/u) ---------------- */
@@ -5894,6 +5898,91 @@ function renderProEmpresa(u, esEmpresa){
   return '<div class="col">'+left+'</div><div class="col">'+right+'</div>';
 }
 
+/* ---------------- entrada desde resultados ---------------- */
+function queryPerfilPreview(){
+  try{
+    var p=new URL(location.href).searchParams;
+    return{
+      id:p.get("id")||"",
+      vista:p.get("vista")||"",
+      from:p.get("from")||"",
+      categoria:p.get("categoria")||"",
+      pais:p.get("pais")||"",
+      estado:p.get("estado")||"",
+      ciudad:p.get("ciudad")||""
+    };
+  }catch(e){
+    return{id:"",vista:"",from:"",categoria:"",pais:"",estado:"",ciudad:""};
+  }
+}
+function ocultarSwitcherSiResultados(fromResultados){
+  if(!fromResultados) return;
+  document.body.classList.add("perfil-desde-resultados");
+  var sw=document.querySelector(".switcher");
+  if(!sw) return;
+  sw.hidden=true;
+  sw.setAttribute("aria-hidden","true");
+}
+function normalizarVistaPreview(vista){
+  var v=String(vista||"").trim();
+  if(!v) return "";
+  var alias={escort:"adult",acompanante:"adult",adulto:"adult",edecan:"adult"};
+  return alias[v.toLowerCase()]||v;
+}
+function resolverPerfilDesdeQuery(q){
+  q=q||queryPerfilPreview();
+  var vista=normalizarVistaPreview(q.vista)||"negocio";
+  var perfil=null;
+  if(q.id&&window.CariHubResultadosDemo&&CariHubResultadosDemo.perfilPorId){
+    perfil=CariHubResultadosDemo.perfilPorId(q.id,{
+      categoria:q.categoria,pais:q.pais,estado:q.estado,ciudad:q.ciudad
+    });
+    if(perfil&&perfil.__vista) vista=perfil.__vista;
+  }else if(q.categoria&&window.CariHubResultadosDemo&&CariHubResultadosDemo.vistaDeCategoria){
+    vista=CariHubResultadosDemo.vistaDeCategoria(q.categoria);
+  }
+  return{vista:vista,perfil:perfil};
+}
+function demoAssetDesdeResultados(src){
+  var s=String(src||"").trim();
+  if(!s) return s;
+  if(/^(\.\.|\/|https?:)/.test(s)) return s;
+  return "../"+s.replace(/^\.\//,"");
+}
+function aplicarPerfilResultadosEnDemo(vista,u){
+  if(!u||!DEMO[vista]) return;
+  var d=DEMO[vista];
+  if(u.nombre) d.nombre=u.nombre;
+  if(u.edad) d.edad=u.edad;
+  if(u.zona) d.zona=u.zona;
+  if(u.ciudad) d.ciudad=u.ciudad;
+  if(u.estado) d.estado=u.estado;
+  if(u.pais) d.pais=u.pais;
+  if(u.precio) d.precio=u.precio;
+  if(u.categoriaPublica||u.categoria) d.categoria=u.categoriaPublica||u.categoria;
+  if(u.disponibilidad) d.disponibilidad=u.disponibilidad;
+  if(Array.isArray(u.modalidades)&&u.modalidades.length) d.modalidades=u.modalidades.slice();
+  if(u.tagline){ d.tagline=u.tagline; d.frase=u.tagline; }
+  if(u.ubicacion){
+    d.ubicacionPublica=u.ubicacion;
+    var parts=String(u.ubicacion).split(",").map(function(x){return x.trim();}).filter(Boolean);
+    if(parts.length) d.direccionLineas=parts.length>1?[parts[0],parts.slice(1).join(", ")]:[parts[0]];
+  }
+  if(u.fotoURL){
+    var gal=(d.galeria||[]).slice();
+    gal[0]=demoAssetDesdeResultados(u.fotoURL);
+    d.galeria=gal;
+  }
+  if(u.fotosCount) d.fotos=u.fotosCount;
+}
+function iniciarPerfilPreview(){
+  var q=queryPerfilPreview();
+  ocultarSwitcherSiResultados(q.from==="resultados");
+  var resolved=resolverPerfilDesdeQuery(q);
+  if(resolved.perfil) aplicarPerfilResultadosEnDemo(resolved.vista,resolved.perfil);
+  setVista(resolved.vista);
+}
+
 /* ---------------- controlador ---------------- */
 function setVista(tipo){
   var esCari=CARINOSAS_TIPOS.indexOf(tipo)>=0;
@@ -6009,7 +6098,7 @@ if(window.ResizeObserver){
 document.documentElement.classList.add("fit");
 document.body.classList.add("fit");
 if(window.CariHubPinkSheen) CariHubPinkSheen.mountPage(document.body);
-setVista("negocio");
+iniciarPerfilPreview();
 bumpFitDelays();
 </script>
 </body>

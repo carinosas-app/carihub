@@ -518,12 +518,24 @@
     var vista = (u && u.__vista) || vistaDeCategoria(Q.categoria || u.categoria);
     var p = new URLSearchParams();
     p.set('vista', vista);
-    if (Q.categoria || u.categoria) p.set('categoria', Q.categoria || u.categoria);
+    if (u && u.__id) p.set('id', String(u.__id));
+    if (Q.categoria || (u && u.categoria)) p.set('categoria', Q.categoria || u.categoria);
     if (Q.pais) p.set('pais', Q.pais);
     if (Q.estado) p.set('estado', Q.estado);
     if (Q.ciudad) p.set('ciudad', Q.ciudad);
     p.set('from', 'resultados');
     return './preview/perfil-vista-previa.html?' + p.toString();
+  }
+
+  /** Busca un perfil demo canónico por __id (p. ej. demo-violeta). */
+  function perfilPorId(id, Q) {
+    if (!id) return null;
+    Q = Q || queryFromLocation();
+    var todos = PERFILES_CANON.slice();
+    if (PERFIL_CANON_CUARTO) todos.push(PERFIL_CANON_CUARTO);
+    if (PERFIL_CANON_QUINTO) todos.push(PERFIL_CANON_QUINTO);
+    var base = todos.find(function (p) { return p.__id === id; });
+    return base ? clonarPerfil(base, Q) : null;
   }
 
   function safeTxt(t) {
@@ -805,6 +817,30 @@
     return true;
   }
 
+  function syncBannersVista(esVacio, Q) {
+    Q = Q || queryFromLocation();
+    if (global.CariHubPublicidadActiva && typeof global.CariHubPublicidadActiva.syncBannersResultados === 'function') {
+      global.CariHubPublicidadActiva.syncBannersResultados(esVacio, { Q: Q });
+      return;
+    }
+    if (esVacio && global.CariHubBannerSinResultados && global.CariHubBannerSinResultados.syncResultadosPage) {
+      global.CariHubBannerSinResultados.syncResultadosPage(true);
+      return;
+    }
+    if (global.CariHubBannerSinResultados && global.CariHubBannerSinResultados.syncResultadosPage) {
+      global.CariHubBannerSinResultados.syncResultadosPage(false);
+    }
+    if (global.CariHubBannerResultadosPrincipales && global.CariHubBannerResultadosPrincipales.mount) {
+      global.CariHubBannerResultadosPrincipales.mount({ Q: Q });
+    }
+    if (global.CariHubBannerResultadosLaterales && global.CariHubBannerResultadosLaterales.mount) {
+      global.CariHubBannerResultadosLaterales.mount({ Q: Q });
+    }
+    if (global.CariHubResultadosBanners && global.CariHubResultadosBanners.start) {
+      global.CariHubResultadosBanners.start();
+    }
+  }
+
   function renderProfiles(listEl, perfiles, opts) {
     if (!listEl || !Array.isArray(perfiles)) return;
     opts = opts || {};
@@ -818,11 +854,13 @@
     if (!visibles.length) {
       listEl.innerHTML = vacioResultadosHTML(Q);
       listEl.classList.add('res-lista--vacio');
+      syncBannersVista(true, Q);
       return;
     }
 
     listEl.classList.remove('res-lista--vacio');
     listEl.innerHTML = visibles.map(function (u) { return cardHTML(u, Q); }).join('');
+    syncBannersVista(false, Q);
   }
 
   global.CariHubResultadosDemo = {
@@ -848,6 +886,7 @@
     coincideBusqueda: coincideBusqueda,
     coincideDemo: coincideDemo,
     urlPerfil: urlPerfil,
-    urlPerfilDemo: urlPerfilDemo
+    urlPerfilDemo: urlPerfilDemo,
+    perfilPorId: perfilPorId
   };
 })(typeof window !== 'undefined' ? window : globalThis);

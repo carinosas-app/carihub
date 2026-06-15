@@ -29,7 +29,7 @@
 
   <!-- 1) BANNERS rotativos (rosa izq/der · negro centro) -->
   <div class="pb" aria-label="Espacios publicitarios">
-    <a class="pb-slot" href="registro-banner.html?slot=resultados-izq" aria-label="¿Eres nueva? Regístrate ahora">
+    <a class="pb-slot" href="registro-banner.html?slot=resultados_izquierda" data-resultados-slot="resultados_izquierda" aria-label="¿Eres nueva? Regístrate ahora">
       <div class="pb-slot__stage" data-pb-stage>
         <div class="pb-slot__slide is-active" aria-hidden="false">
           <img src="banners/resultados/resultados-es-nueva-izq.png" alt="¿ERES NUEVA? Empieza hoy y gana desde tu primer cliente — REGÍSTRATE AHORA" width="380" height="158" decoding="async">
@@ -43,7 +43,7 @@
         <div class="pb-slot__dots" aria-hidden="true"><span class="pb-slot__dot is-on"></span><span class="pb-slot__dot"></span><span class="pb-slot__dot"></span></div>
       </div>
     </a>
-    <a class="pb-slot pb--center" href="registro-banner.html?slot=resultados-centro" aria-label="Haz crecer tu negocio">
+    <a class="pb-slot pb--center" href="registro-banner.html?slot=resultados_centro" data-resultados-slot="resultados_centro" aria-label="Haz crecer tu negocio">
       <div class="pb-slot__stage" data-pb-stage>
         <div class="pb-slot__slide is-active" aria-hidden="false">
           <img src="banners/resultados/resultados-crecer-centro.png" alt="HAZ CRECER TU NEGOCIO — +210% más clientes — ANUNCIA AQUÍ" width="620" height="158" decoding="async">
@@ -60,7 +60,7 @@
         <div class="pb-slot__dots" aria-hidden="true"><span class="pb-slot__dot is-on"></span><span class="pb-slot__dot"></span><span class="pb-slot__dot"></span><span class="pb-slot__dot"></span></div>
       </div>
     </a>
-    <a class="pb-slot" href="registro-banner.html?slot=resultados-der" aria-label="¿Eres nueva? Regístrate ahora">
+    <a class="pb-slot" href="registro-banner.html?slot=resultados_derecha" data-resultados-slot="resultados_derecha" aria-label="¿Eres nueva? Regístrate ahora">
       <div class="pb-slot__stage" data-pb-stage>
         <div class="pb-slot__slide is-active" aria-hidden="false">
           <img src="banners/resultados/resultados-es-nueva-der.png" alt="¿ERES NUEVA? Empieza hoy y gana desde tu primer cliente — REGÍSTRATE AHORA" width="380" height="158" decoding="async">
@@ -166,7 +166,7 @@
   </div>
 
   <!-- 9) BANNER INFERIOR (patrón .pb-slot--bottom) -->
-  <a class="pb-slot pb-slot--bottom res-bottom" href="registro-banner.html?slot=resultados-inferior" aria-label="Anuncia tu perfil en Cariñosas">
+  <a class="pb-slot pb-slot--bottom res-bottom" href="registro-banner.html?slot=resultados_inferior" data-resultados-slot="resultados_inferior" aria-label="Anuncia tu perfil en Cariñosas">
     <span class="res-bottom__glow" aria-hidden="true"></span>
     <span class="res-bottom__photo"><img src="img/resultados-demo/violeta-2.png" alt="" width="92" height="92" decoding="async"></span>
     <span class="res-bottom__chart" aria-hidden="true">
@@ -243,6 +243,7 @@
 <script src="ciudades.js"></script>
 <script src="js/banner-sin-resultados.js"></script>
 <script src="js/banner-resultados-laterales.js"></script>
+<script src="js/banner-resultados-principales.js"></script>
 <script src="js/resultados-banners.js"></script>
 <script src="js/resultados-registrados.js"></script>
 <script src="js/resultados-demo.js"></script>
@@ -378,6 +379,11 @@
       setListaVacia(list, true);
       if (window.CariHubResultadosDemo && CariHubResultadosDemo.vacioResultadosHTML) {
         list.innerHTML = CariHubResultadosDemo.vacioResultadosHTML(Q);
+      }
+      if (window.CariHubPublicidadActiva && CariHubPublicidadActiva.syncBannersResultados) {
+        CariHubPublicidadActiva.syncBannersResultados(true);
+      } else if (window.CariHubBannerSinResultados && CariHubBannerSinResultados.syncResultadosPage) {
+        CariHubBannerSinResultados.syncResultadosPage(true);
       }
       return;
     }
@@ -892,7 +898,15 @@
     } else if (u.__registrado || u.__demo === false) {
       url = 'perfil.html?id=' + encodeURIComponent(String(id));
     } else {
-      url = './preview/perfil-vista-previa.html';
+      var p = new URLSearchParams();
+      p.set('vista', u.__vista || 'adult');
+      p.set('id', String(id));
+      if (Q.categoria) p.set('categoria', Q.categoria);
+      if (Q.pais) p.set('pais', Q.pais);
+      if (Q.estado) p.set('estado', Q.estado);
+      if (Q.ciudad) p.set('ciudad', Q.ciudad);
+      p.set('from', 'resultados');
+      url = './preview/perfil-vista-previa.html?' + p.toString();
     }
     window.location.assign(url);
   };

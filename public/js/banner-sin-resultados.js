@@ -235,6 +235,106 @@
     }
   }
 
+  function buildMidbandBannerHTML(slotId) {
+    var rental = obtenerRenta(slotId);
+    var href = linkRegistro(slotId);
+    var label = slotId === 'sin_resultados_libe' ? 'En vivo · LIBE' : 'Estados y zonas';
+    var vacantClass = ' res-midband__banner--vacant';
+    var slides = '';
+    var w = 380;
+    var h = 188;
+
+    if (rental && rental.imagen) {
+      href = rental.url || href;
+      vacantClass = ' res-midband__banner--rented';
+      slides =
+        '<div class="pb-slot__slide is-active" aria-hidden="false">' +
+          '<img class="res-midband__preview-img" src="' + esc(rental.imagen) + '" alt="' + esc(rental.titulo || label) + '" width="' + w + '" height="' + h + '" decoding="async">' +
+        '</div>';
+    } else if (slotId === 'sin_resultados_libe') {
+      slides =
+        '<div class="pb-slot__slide is-active res-midband__mock res-midband__mock--live" aria-hidden="false">' +
+          '<img class="res-midband__mock-live-photo" src="img/resultados-demo/live-en-vivo-libe.png" alt="Transmisión en vivo — LIBE" width="' + w + '" height="' + h + '" decoding="async">' +
+          '<span class="res-sr-vacant-msg">Anúnciate aquí</span>' +
+        '</div>';
+    } else {
+      slides =
+        '<div class="pb-slot__slide is-active res-midband__mock res-midband__mock--estado" aria-hidden="false">' +
+          '<img class="res-midband__mock-estado-photo" src="img/resultados-demo/estado-publicado-libe.png" alt="Estado publicado — Mi estado" width="' + w + '" height="' + h + '" decoding="async">' +
+          '<span class="res-sr-vacant-msg">Anúnciate aquí</span>' +
+        '</div>';
+    }
+
+    return (
+      '<a class="pb-slot res-midband__banner' + vacantClass + '" href="' + esc(href) + '" data-sin-resultados-slot="' + esc(slotId) + '" aria-label="' + esc(label) + '">' +
+        '<div class="pb-slot__stage" data-pb-stage>' + slides + '</div>' +
+      '</a>'
+    );
+  }
+
+  function syncMidbandSinResultados() {
+    var map = {
+      resMidEstados: 'sin_resultados_estados',
+      resMidLibe: 'sin_resultados_libe'
+    };
+    Object.keys(map).forEach(function (id) {
+      var el = document.getElementById(id);
+      if (!el) return;
+      el.innerHTML = buildMidbandBannerHTML(map[id]);
+    });
+  }
+
+  function buildMidbandBannerHTML(slotId) {
+    var rental = obtenerRenta(slotId);
+    var href = linkRegistro(slotId);
+    var isLibe = slotId === 'sin_resultados_libe';
+    var label = isLibe ? 'En vivo · LIBE' : 'Estados y zonas';
+    var vacantClass = ' res-midband__banner--vacant';
+    var slides = '';
+    var w = 380;
+    var h = 188;
+
+    if (rental && rental.imagen) {
+      href = rental.url || href;
+      vacantClass = ' res-midband__banner--rented';
+      slides =
+        '<div class="pb-slot__slide is-active" aria-hidden="false">' +
+          '<img class="res-midband__preview-img" src="' + esc(rental.imagen) + '" alt="' + esc(rental.titulo || label) + '" width="' + w + '" height="' + h + '" decoding="async">' +
+        '</div>';
+    } else if (isLibe) {
+      slides = buildLiveLateralMock().replace('res-vacio-side__banner', 'res-midband__mock').replace(/width="160" height="320"/, 'width="' + w + '" height="' + h + '"');
+      slides =
+        '<div class="pb-slot__slide is-active res-midband__mock res-midband__mock--live" aria-hidden="false">' +
+          '<img class="res-midband__mock-live-photo" src="img/resultados-demo/live-en-vivo-libe.png" alt="Transmisión en vivo — valeria.music" width="' + w + '" height="' + h + '" decoding="async">' +
+          '<span class="res-sr-vacant-msg">Anúnciate aquí</span>' +
+        '</div>';
+    } else {
+      slides =
+        '<div class="pb-slot__slide is-active res-midband__mock res-midband__mock--estado" aria-hidden="false">' +
+          '<img class="res-midband__mock-estado-photo" src="img/resultados-demo/estado-publicado-libe.png" alt="Estado publicado — Mi estado" width="' + w + '" height="' + h + '" decoding="async">' +
+          '<span class="res-sr-vacant-msg">Anúnciate aquí</span>' +
+        '</div>';
+    }
+
+    return (
+      '<a class="pb-slot res-midband__banner' + vacantClass + '" href="' + esc(href) + '" data-sin-resultados-slot="' + esc(slotId) + '" aria-label="' + esc(label) + '">' +
+        '<div class="pb-slot__stage" data-pb-stage>' + slides + '</div>' +
+      '</a>'
+    );
+  }
+
+  function syncMidbandSinResultados() {
+    var map = {
+      resMidEstados: 'sin_resultados_estados',
+      resMidLibe: 'sin_resultados_libe'
+    };
+    Object.keys(map).forEach(function (id) {
+      var el = document.getElementById(id);
+      if (!el) return;
+      el.innerHTML = buildMidbandBannerHTML(map[id]);
+    });
+  }
+
   function restaurar(wrap) {
     if (!estadoResultados.guardado) return;
     var pb = wrap.querySelector('.pb');
@@ -254,6 +354,9 @@
 
     if (!esSinResultados) {
       restaurar(wrap);
+      if (global.CariHubBannerResultadosLaterales && global.CariHubBannerResultadosLaterales.mount) {
+        global.CariHubBannerResultadosLaterales.mount();
+      }
       return;
     }
 
@@ -266,6 +369,7 @@
         buildPbSlotHTML('sin_resultados_derecha', { alt: 'Sin resultados — derecha' });
     }
     aplicarInferior(wrap.querySelector('.res-bottom'));
+    syncMidbandSinResultados();
 
     if (global.CariHubResultadosBanners && global.CariHubResultadosBanners.start) {
       global.CariHubResultadosBanners.start();

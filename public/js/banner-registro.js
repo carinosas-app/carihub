@@ -67,6 +67,7 @@
 
     if (rental && rental.imagen) {
       vacant = '';
+      href = rental.url || href;
       slides = slideImagen(rental.imagen, rental.titulo || 'Anuncio en registro');
     } else if (PLACEHOLDERS.length > 1) {
       vacant = ' registro-pb--vacant';

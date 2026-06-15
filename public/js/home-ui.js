@@ -2,11 +2,9 @@
   'use strict';
 /* ── Hero rotativo: 35 slides (34 cat. + motel) + espacio publicitario por categoría ── */
   var HERO_CERCA = '<span class="home-hero__cerca">cerca de ti</span>';
-  var HERO_RENTALS = window.CARIHUB_HERO_RENTALS || {};
   var HERO_BANNER_SLOTS = window.CARIHUB_HERO_BANNER_SLOTS || [
     'home_hero_1', 'home_hero_2', 'home_hero_3', 'home_hero_4', 'home_hero_5'
   ];
-  var HERO_BANNER_RENTALS = window.CARIHUB_HERO_BANNER_RENTALS || {};
   var HERO_PREVIEW_IMAGES = window.CARIHUB_HERO_PREVIEW_IMAGES || {};
 
   function getHeroPreviewImage(slide) {
@@ -48,8 +46,9 @@
   }
 
   function getHeroRental(slide) {
+    var rentals = window.CARIHUB_HERO_RENTALS || {};
     var key = slide.slotKey || slide.categoriaId;
-    return HERO_RENTALS[key] || null;
+    return rentals[key] || null;
   }
 
   function getHeroBannerSlotId(slideIndex) {
@@ -58,7 +57,8 @@
   }
 
   function getHeroBannerRental(slotId) {
-    return slotId ? (HERO_BANNER_RENTALS[slotId] || null) : null;
+    var rentals = window.CARIHUB_HERO_BANNER_RENTALS || {};
+    return slotId ? (rentals[slotId] || null) : null;
   }
 
   function heroBannerLockLabel(slotId) {
@@ -1038,6 +1038,76 @@
       openSectorPicker();
     });
   }
+  function escAttr(t) {
+    return String(t == null ? '' : t)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  function applyHomeSlotRental(anchor, slotId, rental) {
+    if (!anchor || !rental || !rental.imagen) return false;
+    var href = rental.url || ('registro-banner.html?slot=' + encodeURIComponent(slotId));
+    var titulo = rental.titulo || 'Anuncio';
+    anchor.href = href;
+    anchor.setAttribute('aria-label', titulo);
+    anchor.classList.add('home-ad-slot--rented');
+
+    var stage = anchor.querySelector('.home-ad-slot__stage, .home-ad-bottom__stage');
+    if (!stage) return false;
+
+    var isBottom = stage.classList.contains('home-ad-bottom__stage');
+    var slideClass = isBottom ? 'home-ad-bottom__slide' : 'home-ad-slot__slide';
+    var imgClass = isBottom ? 'home-ad-bottom__art' : 'home-ad-slot__art';
+
+    stage.innerHTML =
+      '<div class="' + slideClass + ' is-active" aria-hidden="false">' +
+        '<img class="' + imgClass + '" src="' + escAttr(rental.imagen) + '" alt="' + escAttr(titulo) + '" decoding="async">' +
+      '</div>';
+
+    return true;
+  }
+
+  function remontarHomeAdSlots() {
+    var rentals = window.CARIHUB_HOME_SLOT_RENTALS || {};
+    var map = [
+      { slotId: 'home_izquierda', selector: '[data-slot-id="home_izquierda"]' },
+      { slotId: 'home_derecha', selector: '[data-slot-id="home_derecha"]' },
+      { slotId: 'home_inferior', selector: '[data-slot-id="home_inferior"]' }
+    ];
+
+    map.forEach(function (row) {
+      var rental = rentals[row.slotId];
+      if (!rental) return;
+      var anchor = document.querySelector(row.selector);
+      applyHomeSlotRental(anchor, row.slotId, rental);
+    });
+
+    var catRental = rentals.home_categorias;
+    if (catRental && catRental.imagen) {
+      var catAnuncio = document.querySelector('.home-adultos-picker__anuncio');
+      if (catAnuncio) {
+        catAnuncio.href = catRental.url || 'registro-banner.html?slot=home_categorias';
+        var catImg = catAnuncio.querySelector('img');
+        if (catImg) {
+          catImg.src = catRental.imagen;
+          catImg.alt = catRental.titulo || 'Anúnciate aquí';
+        }
+      }
+    }
+  }
+
+  function remontarPublicidadHome() {
+    initHeroCarousel();
+    remontarHomeAdSlots();
+    if (window.CariHubBannerHomeLaterales && CariHubBannerHomeLaterales.mount) {
+      CariHubBannerHomeLaterales.mount();
+    }
+  }
+
+  window.CariHubHomeUI = {
+    remontarPublicidad: remontarPublicidadHome
+  };
+
   initHeroCarousel();
   initCategorySlots();
   startCategoryRotation();
