@@ -1,0 +1,173 @@
+{
+  "generado": "2026-06-09",
+  "titulo": "Reporte final — congelamientos catálogo y cuentas",
+  "estadoDocumentacion": "COMPLETA",
+  "congelamientos": {
+    "seguridad": {
+      "estado": "CONGELADO",
+      "aprobado": true,
+      "fechaDiseno": "2026-06-09",
+      "version": {
+        "id": "seguridad-2026-06-10",
+        "semver": "1.0.0",
+        "versionSchema": "2026-06-10"
+      },
+      "acta": "scripts/ACTA-CONGELAMIENTO-SEGURIDAD.json",
+      "actaLegible": "scripts/ACTA-CONGELAMIENTO-SEGURIDAD.md",
+      "reporte": "scripts/REPORTE-SEGURIDAD-MVP.md",
+      "schema": "scripts/config-seguridad-mvp-schema.json",
+      "fechaCongelamiento": "2026-06-09",
+      "nota": "Aprobado product owner 2026-06-09"
+    },
+    "catalogo": {
+      "estado": "CONGELADO",
+      "aprobado": true,
+      "fechaAprobacion": "2026-06-09",
+      "version": {
+        "id": "catalogo-2026-06-10",
+        "semver": "1.0.0",
+        "versionMeta": "2026-06-10"
+      },
+      "acta": "scripts/ACTA-CONGELAMIENTO-CATALOGO.json",
+      "actaLegible": "scripts/ACTA-CONGELAMIENTO-CATALOGO.md",
+      "metricas": {
+        "sectores": 15,
+        "subcategorias": 462,
+        "validacion": "PASS",
+        "errores": 0,
+        "advertencias": 0
+      }
+    },
+    "cuentas": {
+      "estado": "CONGELADO",
+      "aprobado": true,
+      "fechaAprobacion": "2026-06-09",
+      "version": {
+        "id": "cuentas-2026-06-10",
+        "semver": "1.0.0",
+        "versionSchema": "2026-06-10"
+      },
+      "acta": "scripts/ACTA-CONGELAMIENTO-CUENTAS.json",
+      "actaLegible": "scripts/ACTA-CONGELAMIENTO-CUENTAS.md",
+      "metricas": {
+        "identidadUsuarioChecks": "16/16 PASS",
+        "errores": 0,
+        "advertenciasIdentidad": 0
+      }
+    }
+  },
+  "dependenciasEntreCongelamientos": [
+    {
+      "de": "cuentas.tipoCuentaPrincipal",
+      "a": "catalogo.formularioId",
+      "relacion": "mapeo fijo visitante|adulto|independiente|profesionista|empresa → formularioId en catálogo congelado"
+    },
+    {
+      "de": "perfiles.subcategoriaId",
+      "a": "catalogo.mapa-registro-categorias.json",
+      "relacion": "cada perfil referencia subcategoriaId del mapa; arquetipo y tipoPerfil vienen del mapa"
+    },
+    {
+      "de": "perfiles.formularioId",
+      "a": "catalogo.schemas registro",
+      "relacion": "FieldEngine resuelve campos desde schema del formularioId según subcategoriaId"
+    },
+    {
+      "de": "usuarios.perfil (cache)",
+      "a": "perfiles + catalogo",
+      "relacion": "cache denormalizado: sectorId, subcategoriaId, formularioId, arquetipo, tipoPerfil"
+    },
+    {
+      "de": "visitante.upgrade",
+      "a": "catalogo + config-registro-visitante-schema.json",
+      "relacion": "upgrade elige formularioId según nuevo tipoCuentaPrincipal; wizard usa catálogo congelado"
+    },
+    {
+      "de": "contratos_perfiles",
+      "a": "catalogo comercial + cuentas.usuarioId",
+      "relacion": "contrato referencia usuarioId; perfilId opcional en visitante; plan/periodo del schema precios congelado"
+    },
+    {
+      "de": "solicitudes_categorias",
+      "a": "catalogo.categoriasSugeridas + cuentas.usuarioId",
+      "relacion": "usuarioId obligatorio; formularios temporales del catálogo hasta aprobación admin"
+    },
+    {
+      "de": "identidadUsuario",
+      "a": "catalogo",
+      "relacion": "independientes en congelamiento; cambios cruzados requieren autorización explícita en ambas actas"
+    }
+  ],
+  "prerequisitosFieldEngineDiseno": {
+    "completos": [
+      {
+        "id": "P1",
+        "item": "Catálogo congelado v1.0.0",
+        "evidencia": "ACTA-CONGELAMIENTO-CATALOGO.json — PASS 0/0"
+      },
+      {
+        "id": "P2",
+        "item": "Cuentas / identidadUsuario congeladas v1.0.0",
+        "evidencia": "ACTA-CONGELAMIENTO-CUENTAS.json — 16/16 PASS"
+      },
+      {
+        "id": "P3",
+        "item": "Mapa ↔ schema alineados (arquetipo, tipoPerfil)",
+        "evidencia": "validacion-schemas-report.json"
+      },
+      {
+        "id": "P4",
+        "item": "FK usuarioId documentadas en meta y schema cuentas",
+        "evidencia": "config-registro-schema.meta.json → reglasFK"
+      },
+      {
+        "id": "P5",
+        "item": "Actas formales JSON + MD para ambos congelamientos",
+        "evidencia": "ACTA-CONGELAMIENTO-*.json / .md"
+      }
+    ],
+    "pendientesAntesDeImplementarFieldEngine": [
+      {
+        "id": "P6",
+        "item": "Especificación técnica FieldEngine aprobada",
+        "estado": "PENDIENTE — siguiente fase diseño"
+      },
+      {
+        "id": "P7",
+        "item": "Golden fixtures (casos de prueba documentados)",
+        "estado": "PENDIENTE — parte de especificación"
+      },
+      {
+        "id": "P8",
+        "item": "Autorización explícita implementación runtime local",
+        "estado": "NO OTORGADA"
+      }
+    ],
+    "listoParaIniciarDisenoFieldEngine": true,
+    "listoParaIniciarDisenoFieldEngineTrasSeguridad": true,
+    "listoParaImplementarFieldEngine": false,
+    "notaOrden": "Congelar Seguridad MVP → SPEC FieldEngine (incluye securityGates) → autorizar implementación"
+  },
+  "motoresBloqueados": {
+    "FieldEngine": { "diseno": "AUTORIZABLE", "implementacion": false },
+    "ValidationEngine": { "diseno": "DESPUES_FIELDENGINE", "implementacion": false },
+    "RenderEngine": { "diseno": false, "implementacion": false, "nota": "Sin autorización explícita" },
+    "Messenger": { "diseno": false, "implementacion": false },
+    "wizardHtml": { "diseno": false, "implementacion": false }
+  },
+  "artefactosDocumentacion": [
+    "scripts/ACTA-CONGELAMIENTO-CATALOGO.json",
+    "scripts/ACTA-CONGELAMIENTO-CATALOGO.md",
+    "scripts/ACTA-CONGELAMIENTO-CUENTAS.json",
+    "scripts/ACTA-CONGELAMIENTO-CUENTAS.md",
+    "scripts/REPORTE-CONGELAMIENTOS-FINAL.json",
+    "scripts/SPEC-FIELDENGINE-ALCANCE.md"
+  ],
+  "restriccionesVigentes": {
+    "runtime": false,
+    "firestore": false,
+    "produccion": false,
+    "deploy": false,
+    "commit": false
+  }
+}

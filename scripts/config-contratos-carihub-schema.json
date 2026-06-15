@@ -1,0 +1,128 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "versionSchema": "2026-06-10",
+  "version": "2026-06-10",
+  "schemaId": "contratos_carihub",
+  "nombre": "Contratos, precio congelado, renovaciones y versionado",
+  "descripcion": "Capa transversal de contratación para perfiles y banners. Independiente de precios base y promociones activas.",
+  "politicaPrecioCongelado": {
+    "regla": "precioContratado y versionPrecio quedan fijos durante toda la vigencia del contrato.",
+    "aplicaA": [
+      "adultos",
+      "persona_independiente",
+      "profesionista_cedula",
+      "negocio_empresa",
+      "usuario_visitante",
+      "banners"
+    ],
+    "cambioAdminNoAfectaActivos": true,
+    "precioNuevoAplicaEn": [
+      "nuevas_contrataciones",
+      "renovaciones_post_vencimiento",
+      "reactivaciones",
+      "cambio_plan",
+      "cambio_categoria",
+      "cambio_subcategoria",
+      "cambio_espacio_banner"
+    ]
+  },
+  "politicaPromocionCongelada": {
+    "regla": "promocionAplicada + versionPromocion congeladas igual que precio.",
+    "referencia": "config-promociones-perfiles-schema.json | config-promociones-banners-schema.json"
+  },
+  "dimensionesPrecio": {
+    "nota": "No existe precio único. Resolución multi-dimensional.",
+    "ejes": [
+      "tipoRegistro / formularioId",
+      "categoriaPrincipal / sectorId",
+      "subcategoriaId",
+      "pais",
+      "estado",
+      "ciudad",
+      "planId",
+      "periodo"
+    ],
+    "tiposRegistro": [
+      "adultos",
+      "persona_independiente",
+      "profesionista_cedula",
+      "negocio_empresa",
+      "usuario_visitante"
+    ],
+    "planes": ["basico", "destacado", "premium", "vip"],
+    "periodos": ["semanal", "quincenal", "mensual"]
+  },
+  "contratoPerfil": {
+    "coleccion": "contratos_perfiles/{contratoId}",
+    "camposObligatorios": {
+      "precioContratado": "number — precio final pagado o 0 si promo gratis",
+      "versionPrecio": "string — snapshot versión config_precios_perfiles",
+      "fechaContratacion": "timestamp",
+      "fechaInicio": "timestamp",
+      "fechaVencimiento": "timestamp",
+      "planContratado": "basico|destacado|premium|vip",
+      "periodoContratado": "semanal|quincenal|mensual",
+      "formularioId": "tipo registro",
+      "sectorId": "categoria principal",
+      "subcategoriaId": "subcategoría",
+      "pais": "string",
+      "estado": "string",
+      "ciudad": "string",
+      "overrideAplicado": "overrideId|null",
+      "promocionAplicada": "promocionId|null",
+      "versionPromocion": "string|null",
+      "estadoContrato": "activo|vencido|suspendido|cancelado",
+      "usuarioId": "uid",
+      "perfilId": "uid|null — null si visitante sin perfil público",
+      "tipoCuenta": "visitante|perfil_publico",
+      "tienePerfilPublico": "boolean",
+      "puedeCrearPerfilGratis": "boolean — true si contrato vigente y aún sin perfil"
+    },
+    "indicesRecomendados": [
+      ["usuarioId", "estadoContrato"],
+      ["fechaVencimiento", "estadoContrato"],
+      ["versionPrecio"],
+      ["promocionAplicada"]
+    ]
+  },
+  "contratoBanner": {
+    "coleccion": "contratos_banners/{contratoId}",
+    "heredaCampos": "config-promociones-banners-schema.json → contratoBanner.camposObligatorios"
+  },
+  "renovaciones": {
+    "coleccion": "renovaciones/{id}",
+    "reglas": [
+      "Renovación solo después de vencimiento o en ventana configurada pre-vencimiento",
+      "Usa precio y promoción vigentes AL MOMENTO de renovar (no hereda congelado anterior)",
+      "Nuevo contrato genera nuevo snapshot precioContratado + versionPrecio",
+      "Registrar renovacionAnteriorContratoId para trazabilidad"
+    ],
+    "campos": ["contratoAnteriorId", "contratoNuevoId", "fechaRenovacion", "precioRenovacion", "versionPrecio", "promocionAplicada", "versionPromocion"]
+  },
+  "historial": {
+    "precios": "config_precios_perfiles_historial",
+    "promocionesPerfiles": "promociones_perfiles_historial",
+    "promocionesBanners": "promociones_banners_historial",
+    "contratos": "contratos_historial — cambios estado admin"
+  },
+  "separacionColecciones": {
+    "perfiles": {
+      "precios": "config_precios_perfiles",
+      "promociones": "promociones_perfiles",
+      "contratos": "contratos_perfiles"
+    },
+    "banners": {
+      "precios": "configuracion_publicidad/precios_banners",
+      "promociones": "promociones_banners",
+      "contratos": "contratos_banners",
+      "solicitudes": "solicitudes_anuncios"
+    },
+    "prohibido": "Mezclar documentos de perfiles y banners en la misma colección de precios o promociones"
+  },
+  "compatibilidadIA": {
+    "iaArquitecto": ["auditar_contratos_congelados", "listar_vencimientos", "detectar_precio_desactualizado_en_renovacion"],
+    "iaComercial": ["ingresos_por_plan", "renovaciones_por_ciudad"],
+    "iaFinanciera": ["pagos_pendientes", "cobranza"],
+    "ningunaIAPuede": ["modificar_precio_contrato_activo", "auto_publicar", "auto_aprobar"]
+  }
+}

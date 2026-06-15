@@ -1,0 +1,303 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "tipo": "PLAN_MAESTRO",
+  "modulo": "SEO-LANDINGS",
+  "titulo": "Plan Maestro SEO y Landings CariHub",
+  "fecha": "2026-06-10",
+  "version": "1.0.0",
+  "estado": "PLAN_DISENO_DOCUMENTAL",
+  "modo": "Solo análisis y documentación — sin runtime/carpetas/mover/Firestore/deploy/commit; no modifica capas/observaciones/ADRs/actas existentes",
+  "autorizadoPor": "product owner / usuario CariHub",
+  "consolidaObservacion": "scripts/OBSERVACION-ARQUITECTONICA-SEO.json v1.0.0 — la referencia y formaliza; NO la modifica",
+  "consumeDecisiones": [
+    "ADR-URL-CANONICA-PERFILES v1.0.0 (URL/slug/canonical) — se CONSUME, no se redefine",
+    "ADR-RENDER-STRATEGY v1.0.0 (snapshot-first híbrido) — se CONSUME",
+    "SPEC-RENDERENGINE v1.0.0 (RenderEngine inyecta head/meta/JSON-LD; PrivacyGuard) — se CONSUME"
+  ],
+  "basadoEn": [
+    "OBSERVACION-ARQUITECTONICA-SEO.json (v1.0.0; 26 líneas SEO-AN-01..26)",
+    "ADR-URL-CANONICA-PERFILES.json", "ADR-RENDER-STRATEGY.json", "SPEC-RENDERENGINE.json",
+    "ACTA-CONGELAMIENTO-RENDERENGINE.json", "ACTA-CONGELAMIENTO-SHARED-CORE.json",
+    "PLAN-MAESTRO-APP-PUBLICA.json", "PLAN-MAESTRO-BANNERS-PUBLICIDAD.json", "ANEXO-ESTRATEGICO-BANNERS-PUBLICIDAD.json",
+    "PLAN-MAESTRO-INTERACCIONES.json", "PLAN-MAESTRO-THEMEENGINE.json", "PLAN-MAESTRO-AGENTES-IA.json",
+    "AUDITORIA-ARQUITECTONICA-GLOBAL-CARIHUB",
+    "public/index.html", "public/resultados.html", "public/perfil.html",
+    "Catálogo 1.0.0 (462 subcategorías)", "config-renderizado-dinamico-schema.json", "config-seguridad-mvp-schema.json"
+  ],
+  "objetivo": "Definir la arquitectura SEO, landings, URLs indexables, metadatos, taxonomía, geografía, categorías y crecimiento orgánico de CariHub, formalizando la observación v1.0.0 en un plan maestro accionable.",
+  "principioRector": "SEO es capa TRANSVERSAL de PRESENTACIÓN INDEXABLE: deriva metadatos de datos publicados (FieldEngine + snapshot RenderEngine), nunca duplica la fuente de verdad ni expone datos privados. Geo-primero coherente con Catálogo. Solo superficies públicas se indexan; dashboards/messenger/admin/borradores SIEMPRE noindex. Sin thin content (umbral mínimo por landing). Adultos con indexación restringida. IA SEO solo sugiere (confirma humano). Admin controla indexación y aprobación de landings.",
+
+  "inventarioActual": {
+    "onPage": "Solo <meta name=\"description\"> + viewport en public/index.html (L7); resto de páginas sin meta description propia",
+    "canonical": "INEXISTENTE en todas las páginas",
+    "openGraph": "INEXISTENTE",
+    "twitterCards": "INEXISTENTE",
+    "jsonLd": "INEXISTENTE (sin Schema.org)",
+    "robotsTxt": "NO EXISTE public/robots.txt",
+    "sitemap": "NO EXISTE public/sitemap*.xml",
+    "urls": "Query-param: perfil.html?id={usuarioId}; páginas estáticas .html (index, resultados, perfil, registro-banner, admin, dashboard-rentero, 404, index-legacy)",
+    "hreflang": "INEXISTENTE",
+    "breadcrumbs": "INEXISTENTE (sin BreadcrumbList)",
+    "render": "Cliente (CSR) — riesgo de meta no visible a crawlers sin RenderEngine snapshot",
+    "gaps": ["sin head dinámico", "sin canonical", "sin OG/Twitter", "sin JSON-LD", "sin robots/sitemap", "URLs no SEO-friendly", "sin landings geo/categoría", "sin control de indexación", "sin ThinContentGuard"]
+  },
+
+  "frontera": {
+    "esSEO": ["metadatos derivados (title/description/canonical)", "JSON-LD/Schema.org", "OG/Twitter", "robots.txt", "sitemaps", "política index/noindex", "registro y reglas de landings", "ThinContentGuard", "hreflang futuro", "breadcrumbs"],
+    "noEsSEO": ["pintar HTML (RenderEngine)", "datos de negocio (FieldEngine)", "definir URL canónica base (ADR-URL-CANONICA)", "definir estrategia de render (ADR-RENDER-STRATEGY)", "moderar contenido (Admin)", "personalización visual (ThemeEngine)"],
+    "regla": "SEO consume el output de RenderEngine y los datos de FieldEngine; no crea HTML paralelo legacy ni fuente de verdad duplicada"
+  },
+
+  "modulosInternos": [
+    "MetaResolver (title/description/keywords derivados de campos públicos)",
+    "SchemaBuilder (JSON-LD: Person/LocalBusiness/Organization/BreadcrumbList/WebSite+SearchAction)",
+    "CanonicalResolver (aplica ADR-URL-CANONICA: perfilId canónico + slug)",
+    "OpenGraphBuilder (og:* + twitter:* + fallback por tipoPerfil)",
+    "BreadcrumbBuilder (país>estado>ciudad>categoría>perfil)",
+    "SitemapGenerator (index + sitemaps por tipo; exclusión noindex/adultos)",
+    "RobotsPolicy (allow público / disallow privado; referencia sitemap)",
+    "LandingRegistry (catálogo de landings con estado y contenido mínimo)",
+    "ThinContentGuard (umbral mínimo de perfiles/contenido para indexar)",
+    "IndexationController (index/noindex/noarchive; desindexación manual Admin)",
+    "GeoTaxonomyMapper (geo Catálogo → landings)",
+    "HreflangResolver (multidioma futuro)",
+    "SeoModerationQueue (aprobación de landings y previews por Admin)",
+    "SeoIAAdvisor (sugiere meta/keywords; confirma humano; auditoría)"
+  ],
+
+  "mapaLandings": [
+    { "id": "landing_pais", "patron": "/{pais}", "index": "si", "contenidoMinimo": "≥1 estado con ≥N perfiles; texto hub único", "schema": "WebSite+BreadcrumbList", "estado": "futuro", "dependeSnapshot": "si" },
+    { "id": "landing_estado", "patron": "/{pais}/{estado}", "index": "si", "contenidoMinimo": "≥1 ciudad con perfiles; texto único", "schema": "BreadcrumbList", "estado": "futuro" },
+    { "id": "landing_ciudad", "patron": "/{pais}/{estado}/{ciudad}", "index": "condicional", "contenidoMinimo": "≥ umbral perfiles publicados; si no → noindex", "schema": "BreadcrumbList", "estado": "futuro" },
+    { "id": "landing_municipio_zona_colonia", "patron": "/{pais}/{estado}/{ciudad}/{zona}", "index": "condicional", "contenidoMinimo": "alto umbral; riesgo de solapamiento", "estado": "futuro_lejano", "nota": "evitar duplicados con ciudad" },
+    { "id": "landing_categoria", "patron": "/categoria/{sector}", "index": "si", "contenidoMinimo": "texto editorial admin + perfiles", "estado": "futuro" },
+    { "id": "landing_subcategoria", "patron": "/categoria/{sector}/{subcategoriaId}", "index": "condicional", "contenidoMinimo": "riesgo thin content (462 subcat); requiere contenido único o canonical a sector", "estado": "futuro" },
+    { "id": "landing_ciudad_categoria", "patron": "/{pais}/{estado}/{ciudad}/{categoria}", "index": "condicional", "contenidoMinimo": "≥ umbral perfiles geo+cat; la más valiosa para SEO local", "schema": "BreadcrumbList+ItemList", "estado": "futuro", "prioridad": "alta" },
+    { "id": "landing_estado_categoria", "patron": "/{pais}/{estado}/{categoria}", "index": "condicional", "estado": "futuro" },
+    { "id": "landing_pais_categoria", "patron": "/{pais}/{categoria}", "index": "condicional", "estado": "futuro" },
+    { "id": "landing_perfil", "patron": "/perfil/{perfilId}/{slug} (canónico = perfilId, ADR-URL-CANONICA)", "index": "condicional", "contenidoMinimo": "perfil PUBLICADO; borrador/no publicado → noindex; adultos → política restringida", "schema": "Person", "estado": "P0", "dependeSnapshot": "si" },
+    { "id": "landing_negocio", "patron": "/perfil/{perfilId}/{slug} (tipoPerfil=negocio)", "index": "condicional", "schema": "LocalBusiness|ProfessionalService", "estado": "futuro" },
+    { "id": "landing_anunciante", "patron": "alias → 301 a perfil/landing", "index": "no (alias)", "estado": "futuro" },
+    { "id": "landing_campanas", "patron": "/campana/{slug}", "index": "no por defecto (efímero/comercial)", "estado": "futuro_lejano" },
+    { "id": "landing_seo_banners", "patron": "landing contextual con slot publicitario", "index": "si (la landing; el creativo NO afecta canónico ni se indexa)", "estado": "futuro", "nota": "alineado PLAN-MAESTRO-BANNERS/ANEXO" },
+    { "id": "landing_seo_interacciones", "patron": "stories/lives", "index": "no (efímero noindex/noarchive)", "estado": "futuro", "nota": "alineado PLAN-MAESTRO-INTERACCIONES" }
+  ],
+
+  "estrategiaUrlSlug": {
+    "fuente": "ADR-URL-CANONICA-PERFILES v1.0.0 (consumida, no redefinida)",
+    "canonicoPerfil": "/perfil/{perfilId}/{slug} con canonical apuntando a forma con perfilId estable (perfilId inmutable; bridge perfilId=usuarioId legacy)",
+    "slug": "derivado de nombre público + geo/categoría; sin PII; normalizado; cambio de slug → 301 al canónico",
+    "landingsGeoCategoria": "patrón O5 /{pais}/{estado}/{ciudad}/{categoria}/... para landings (NO como canónico de perfil)",
+    "alias": "/p/{perfilId}, /negocio/{slug}, /anunciante/{slug} → 301 al canónico",
+    "migracion": "URLs query-param actuales (perfil.html?id=) → 301 a ruta canónica al activar RenderEngine"
+  },
+
+  "estrategiaIndexacion": {
+    "index": ["home_publica", "resultados_publica (con cuidado de parámetros)", "perfil_publico_PUBLICADO", "landings geo con contenido suficiente", "landings categoria con contenido único", "paginas_legales_publicas"],
+    "noindex": ["dashboards", "admin", "messenger", "borradores_perfil", "perfil_no_publicado", "stories/lives_expirados", "contenido_login", "previews_borrador_tema", "landings sin contenido suficiente", "resultados con query infinitos/facetas"],
+    "noarchive": ["contenido efímero (stories/lives activos)"],
+    "controlMeta": "RenderEngine inyecta meta robots según IndexationController; PrivacyGuard impide fugas"
+  },
+
+  "estrategiaCanonicalRedirecciones": {
+    "canonical": "Toda página indexable declara canonical absoluto; perfil → forma perfilId; landing → su patrón geo/categoría preferido (evita duplicados ciudad vs ciudad+categoría)",
+    "r301": ["cambio de slug", "alias vanity → canónico", "query-param legacy → ruta nueva", "http→https", "con/sin trailing slash", "mayúsculas→minúsculas"],
+    "r302": ["redirecciones temporales (mantenimiento, A/B temporal)"],
+    "duplicados": "self-canonical + 301; parámetros de orden/paginación con canonical a la base o rel paginación"
+  },
+
+  "estrategiaSitemap": {
+    "modelo": "sitemap index + sitemaps segmentados",
+    "segmentos": ["sitemap-perfiles (solo publicados, no adultos restringidos)", "sitemap-landings-geo", "sitemap-landings-categoria", "sitemap-legales", "sitemap-imagenes (OG/galería pública)"],
+    "exclusiones": ["noindex", "adultos restringidos", "borradores", "thin content"],
+    "limites": "máx 50k URLs / 50MB por sitemap; particionar; lastmod desde snapshot publicado; changefreq/priority por tipo",
+    "generacion": "desde snapshots publicados (RenderEngine) — no desde datos privados"
+  },
+
+  "estrategiaRobots": {
+    "allow": ["/", "/perfil/", "/categoria/", "landings geo", "/legal/"],
+    "disallow": ["/admin", "/messenger", "/dashboard", "/cuenta", "*?borrador=", "/preview", "*.json de scripts"],
+    "sitemapRef": "Sitemap: https://<dominio>/sitemap.xml",
+    "staging": "staging con Disallow: / + noindex global; nunca indexar entorno de pruebas",
+    "nota": "robots.txt no es mecanismo de privacidad; lo privado va detrás de auth + noindex + reglas Firestore"
+  },
+
+  "estrategiaGeo": {
+    "jerarquia": "país → estado → ciudad → (municipio/zona/colonia futuras), alineada al Catálogo congelado",
+    "seoLocal": "Schema LocalBusiness con geo/NAP para negocios; breadcrumbs geo",
+    "cercaDeMi": "búsqueda por geolocalización del usuario NO genera URL indexable propia; canonical a landing ciudad/ciudad+categoría correspondiente",
+    "duplicados": "evitar landings solapadas (zona vs ciudad) con canonical y umbral de contenido"
+  },
+
+  "estrategiaCategoria": {
+    "taxonomia": "sector → subcategoriaId (462) del Catálogo congelado",
+    "thinContentControl": "subcategorías de baja demanda → noindex o canonical al sector hasta tener contenido único; contenido editorial admin por hub",
+    "alias": "alias de búsqueda → canonical a la subcategoría/sector oficial"
+  },
+
+  "estrategiaPerfilesNegocios": {
+    "perfil": "Schema Person; title/description desde camposPublicosPerfil (FieldEngine); OG con imagen principal moderada",
+    "negocio": "Schema LocalBusiness o ProfessionalService según arquetipo; horarios/NAP/verificaciones (sin schema falso)",
+    "anunciante": "no entidad de URL pública; alias 301",
+    "noPublicado": "perfil no publicado o borrador → noindex + no en sitemap"
+  },
+
+  "estrategiaContenidoAdulto": {
+    "indexacion": "categorías adultas: política restringida — noindex donde aplique legal/políticas de plataforma; o index con safe-listing y previews moderados",
+    "og": "previews OG de categorías adultas moderados (SeoModerationQueue) antes de exponer",
+    "robots": "posibilidad de noarchive/nosnippet en adultos",
+    "legal": "coherente con normas de publicación, mayoría de edad y Seguridad MVP"
+  },
+
+  "estrategiaSchemaOrg": {
+    "tipos": ["Person (perfil)", "LocalBusiness/ProfessionalService (negocio)", "Organization (CariHub)", "BreadcrumbList", "WebSite + SearchAction", "ItemList (landings de listado)"],
+    "generacion": "JSON-LD generado por RenderEngine/SchemaBuilder desde datos publicados; validado con Rich Results; sin campos falsos (verificaciones reales, sin AggregateRating inventado)"
+  },
+
+  "estrategiaSocial": {
+    "openGraph": "og:title, og:description, og:image (≥1200px), og:url (canónico), og:type",
+    "twitter": "summary_large_image (alineado OG); fallback summary",
+    "fallback": "imagen OG por tipoPerfil/categoría cuando no hay imagen propia",
+    "moderacion": "previews de adultos moderados"
+  },
+
+  "controlSeoAdmin": {
+    "acciones": ["aprobar/rechazar landing", "indexar/desindexar manual (override IndexationController)", "marcar thin content", "fusionar duplicados (canonical)", "editar contenido editorial de hubs", "aprobar previews OG sensibles", "revisar sugerencias IA SEO"],
+    "rbac": "según PLAN-MAESTRO-ADMIN (scope geo/categoría); acciones auditadas",
+    "auditoria": "toda acción SEO de Admin/IA en AuditTrail"
+  },
+
+  "politicas": {
+    "thinContent": "Landing geo/categoría se indexa solo si supera umbral mínimo de perfiles publicados y/o contenido único; si no → noindex automático (ThinContentGuard)",
+    "duplicados": "self-canonical, 301 de alias, canonical de facetas/paginación; no clonar contenido entre landings",
+    "datosSensiblesEnURL": "prohibido PII en slugs/URLs; perfilId opaco; sin teléfono/email/INE en URL",
+    "cercaDeMi": "no indexable per se; canonical a landing geo equivalente",
+    "landingsGeoSinContenido": "noindex hasta alcanzar umbral; mostrar contenido relacionado para usuarios, no para índice",
+    "landingsCategoriaSinContenido": "noindex o canonical al sector; contenido editorial admin obligatorio para indexar",
+    "adultos": "indexación restringida + previews moderados + posible noarchive/nosnippet"
+  },
+
+  "integraciones": {
+    "sharedCore": "helpers de URL/slug, tokens, config única (Shared/Core 1.0.0)",
+    "renderEngine": "inyecta head/meta/JSON-LD/canonical desde snapshot; PrivacyGuard; SEO no pinta HTML (RenderEngine 1.0.0)",
+    "validationEngine": "valida acciones seo_publicar_meta/indexar (futuras; no modifica VE congelado)",
+    "fieldEngine": "camposPublicosPerfil alimentan title/description/schema (FieldEngine 1.0.1)",
+    "appPublica": "Home/Resultados/Perfil son superficies indexables (PLAN-MAESTRO-APP-PUBLICA)",
+    "registroCuenta": "estado de publicación/edad condiciona indexación",
+    "dashboards": "shell privado siempre noindex (Dashboards 1.0.0)",
+    "admin": "control de indexación, aprobación de landings, moderación previews (PLAN-MAESTRO-ADMIN)",
+    "banners": "landings SEO pueden alojar slots; creativos no indexables ni afectan canónico (PLAN-MAESTRO-BANNERS + ANEXO)",
+    "interacciones": "stories/lives efímeros noindex/noarchive (PLAN-MAESTRO-INTERACCIONES)",
+    "themeEngine": "no altera contenido canónico; CWV/semántica/alt (PLAN-MAESTRO-THEMEENGINE)",
+    "agentesIA": "SeoIAAdvisor sugiere meta/keywords; confirma humano; deny-write; auditoría (PLAN-MAESTRO-AGENTES-IA RT-01..RT-12)",
+    "catalogo": "sectores/subcategoriaId/geo → landings y sitemap (Catálogo 1.0.0; cambios requieren acta)",
+    "seguridadMvp": "rate-limit IA SEO, gates adultos, estadoSeguridad no index (Seguridad MVP 1.0.0)"
+  },
+
+  "matrices": {
+    "urlIndexacion": {
+      "home": "index, canonical self",
+      "resultados": "index base; facetas/orden → canonical a base o noindex",
+      "perfil_publicado": "index (condicional publicación/adulto)",
+      "perfil_borrador": "noindex",
+      "landing_geo_con_contenido": "index",
+      "landing_geo_sin_contenido": "noindex",
+      "dashboard/admin/messenger": "noindex (robots disallow)",
+      "stories_live_expirado": "noindex/noarchive"
+    },
+    "landingContenidoMinimo": {
+      "pais": "≥1 estado activo + texto hub",
+      "estado": "≥1 ciudad activa",
+      "ciudad": "≥ umbral perfiles publicados",
+      "ciudad_categoria": "≥ umbral perfiles geo+cat",
+      "subcategoria": "contenido único o canonical a sector"
+    },
+    "geoCategoria": "matriz {geoKey} x {categoriaKey} → landing candidata; indexable solo si supera ThinContentGuard",
+    "sitemapPagina": {
+      "perfil_publicado_no_adulto": "sitemap-perfiles",
+      "landing_geo_index": "sitemap-landings-geo",
+      "landing_categoria_index": "sitemap-landings-categoria",
+      "legal": "sitemap-legales",
+      "noindex/borrador/adulto_restringido": "EXCLUIDO"
+    },
+    "canonicalRedireccion": {
+      "slug_cambiado": "301 → canónico actual",
+      "alias_vanity": "301 → canónico",
+      "query_param_legacy": "301 → ruta nueva",
+      "faceta/paginacion": "canonical → base",
+      "http/trailing/case": "301 → forma canónica"
+    },
+    "contenidoAdultoIndex": {
+      "adulto_perfil_publicado": "noindex o index-restringido según política/legal",
+      "adulto_preview_og": "moderado antes de exponer",
+      "adulto_landing": "noindex por defecto salvo safe-listing"
+    },
+    "adminAccionSeo": {
+      "indexar/desindexar": "Admin con scope + auditoría",
+      "aprobar_landing": "Admin (catálogo/geo scope)",
+      "marcar_thin/duplicado": "Admin/sistema",
+      "editar_hub_editorial": "Admin"
+    },
+    "iaSeoAccionAprobacion": {
+      "sugerir_title_description": "usuario/admin confirma",
+      "sugerir_keywords_longtail": "confirma",
+      "detectar_thin_content": "automático (alerta, no aplica)",
+      "prohibido": ["publicar meta sin confirmación", "keyword stuffing", "schema falso", "indexar sin aprobación"]
+    }
+  },
+
+  "riesgos": [
+    { "id": "SEO-R01", "nivel": "critico", "riesgo": "Indexar borradores/perfiles no publicados o dashboards (fuga privacidad)", "mitigacion": "noindex por defecto + PrivacyGuard + robots disallow + IndexationController" },
+    { "id": "SEO-R02", "nivel": "alto", "riesgo": "Thin content masivo por 462 subcategorías → penalización", "mitigacion": "ThinContentGuard + umbral mínimo + canonical a sector + contenido editorial admin" },
+    { "id": "SEO-R03", "nivel": "alto", "riesgo": "URLs inestables al migrar usuarios→perfiles → pérdida de ranking", "mitigacion": "canónico perfilId estable (ADR-URL-CANONICA) + 301 desde query-param legacy" },
+    { "id": "SEO-R04", "nivel": "alto", "riesgo": "Meta no visible a crawlers por render solo-cliente", "mitigacion": "snapshot-first (ADR-RENDER-STRATEGY); RenderEngine inyecta head server/edge" },
+    { "id": "SEO-R05", "nivel": "medio", "riesgo": "Schema falso/engañoso → rich result penalties", "mitigacion": "JSON-LD desde datos reales; sin AggregateRating inventado; validación Rich Results" },
+    { "id": "SEO-R06", "nivel": "medio", "riesgo": "Duplicados por landings solapadas (zona vs ciudad vs ciudad+categoría)", "mitigacion": "canonical preferente + matriz geoCategoria + umbral" },
+    { "id": "SEO-R07", "nivel": "medio", "riesgo": "OG de categorías adultas sin moderar", "mitigacion": "SeoModerationQueue + previews moderados + noarchive/nosnippet" },
+    { "id": "SEO-R08", "nivel": "medio", "riesgo": "IA SEO genera keyword stuffing o meta sin revisar", "mitigacion": "SeoIAAdvisor sugiere; confirma humano; rate-limit; auditoría" },
+    { "id": "SEO-R09", "nivel": "medio", "riesgo": "Parámetros de query en resultados → crawl budget e índice basura", "mitigacion": "canonical a base, noindex de facetas, robots para parámetros" },
+    { "id": "SEO-R10", "nivel": "bajo", "riesgo": "PII en URLs/slugs", "mitigacion": "perfilId opaco; prohibición de PII en slug; normalización" },
+    { "id": "SEO-R11", "nivel": "bajo", "riesgo": "Indexar staging por robots mal configurado", "mitigacion": "staging Disallow:/ + noindex global" }
+  ],
+  "dependencias": {
+    "congeladas": ["Shared/Core 1.0.0", "RenderEngine 1.0.0", "ValidationEngine 1.1.0", "FieldEngine 1.0.1", "Dashboards 1.0.0", "Catálogo 1.0.0", "Seguridad MVP 1.0.0"],
+    "adrs": ["ADR-URL-CANONICA-PERFILES 1.0.0", "ADR-RENDER-STRATEGY 1.0.0"],
+    "planes": ["APP-PUBLICA", "BANNERS-PUBLICIDAD", "ANEXO-BANNERS", "INTERACCIONES", "THEMEENGINE", "AGENTES-IA", "ADMIN"],
+    "observacion": "OBSERVACION-ARQUITECTONICA-SEO v1.0.0 (base)",
+    "precondiciones": ["RenderEngine runtime (head/meta/JSON-LD)", "migración usuarios→perfiles con canónico estable", "snapshots publicados", "política indexación adultos", "umbral thin content definido por Admin"]
+  },
+  "estructuraIdealFutura": {
+    "nota": "Lógica; sin crear carpetas",
+    "capaSEO": "MetaResolver + SchemaBuilder + CanonicalResolver + OpenGraphBuilder + BreadcrumbBuilder + SitemapGenerator + RobotsPolicy + LandingRegistry + ThinContentGuard + IndexationController + GeoTaxonomyMapper + HreflangResolver + SeoModerationQueue + SeoIAAdvisor",
+    "separacion": "SEO (metadatos/índice) ⟂ RenderEngine (pintado) ⟂ FieldEngine (datos) ⟂ Admin (moderación/control) ⟂ ADRs (URL/render decididas)"
+  },
+  "rutasSugeridas": {
+    "publicas": ["/{pais}", "/{pais}/{estado}", "/{pais}/{estado}/{ciudad}", "/{pais}/{estado}/{ciudad}/{categoria}", "/categoria/{sector}", "/categoria/{sector}/{subcategoriaId}", "/perfil/{perfilId}/{slug}", "/sitemap.xml", "/robots.txt"],
+    "admin": ["/admin/seo/landings", "/admin/seo/indexacion", "/admin/seo/thin-content", "/admin/seo/duplicados", "/admin/seo/moderacion-og"]
+  },
+  "ordenRecomendadoImplementacion": [
+    { "paso": 1, "accion": "robots.txt + sitemap básico (home/legales) + canonical + meta description por página (vía RenderEngine head)", "prioridad": "P0", "cierra": "SEO-R01/SEO-R04 base" },
+    { "paso": 2, "accion": "Perfil público indexable: ruta canónica perfilId+slug, 301 desde query-param, Schema Person, OG/Twitter, noindex borradores", "prioridad": "P0", "cierra": "SEO-R03" },
+    { "paso": 3, "accion": "IndexationController + ThinContentGuard + sitemap-perfiles (solo publicados, no adultos)", "prioridad": "P1", "cierra": "SEO-R02/SEO-R07" },
+    { "paso": 4, "accion": "Landings geo (país/estado/ciudad) + ciudad+categoría con umbral + BreadcrumbList + sitemaps geo/categoría", "prioridad": "P1", "cierra": "SEO-R06" },
+    { "paso": 5, "accion": "Landings categoría/subcategoría con contenido editorial admin + canonical a sector para thin", "prioridad": "P2", "cierra": "SEO-R02" },
+    { "paso": 6, "accion": "Control SEO desde Admin (aprobación/indexación/duplicados/moderación OG) + SeoModerationQueue", "prioridad": "P2" },
+    { "paso": 7, "accion": "SeoIAAdvisor (sugerencias con confirmación humana + auditoría)", "prioridad": "P2", "cierra": "SEO-R08" },
+    { "paso": 8, "accion": "Hreflang/multidioma + SEO local avanzado (GBP) + landings campañas/banners/interacciones", "prioridad": "P3" }
+  ],
+
+  "procedenciaPlanMaestro": {
+    "crearMd": true, "crearJson": true,
+    "justificacion": "La observación SEO v1.0.0 es visión general (specSEO: NO_INICIAR); este plan la formaliza en arquitectura accionable (landings, matrices, políticas, orden), consumiendo los ADRs de URL y render ya decididos, sin iniciar SPEC ni runtime.",
+    "siguientesPasos": ["SPEC-SEO-LANDINGS (si se autoriza, post RenderEngine runtime)", "ADR-INDEXACION-ADULTOS (política legal específica)", "Definir umbral numérico de ThinContentGuard con datos reales"]
+  },
+  "noModifica": [
+    "OBSERVACION-ARQUITECTONICA-SEO v1.0.0 (se referencia/formaliza, no se altera)",
+    "ADR-URL-CANONICA-PERFILES / ADR-RENDER-STRATEGY (se consumen)",
+    "Capas congeladas, planes, actas existentes",
+    "Producción, Firestore, deploy, commit"
+  ],
+  "changelog": [
+    { "version": "1.0.0", "fecha": "2026-06-10", "nota": "Plan maestro SEO-Landings: formaliza observación SEO v1.0.0; inventario real, 15 tipos de landing, 14 módulos internos, estrategias URL/indexación/canonical/sitemap/robots/geo/categoría/social/adultos, 8 matrices, políticas anti-thin-content/duplicados/privacidad, integraciones, 11 riesgos y orden P0-P3" }
+  ]
+}

@@ -1,0 +1,100 @@
+{
+  "descripcion": "Ejemplos de salida de FieldEngine.resolve(subcategoriaId) tras merge base + arquetipo + delta. Referencia para ValidationEngine e IA.",
+  "ejemplos": {
+    "escort": {
+      "subcategoriaId": "escort",
+      "nombre": "Escort",
+      "arquetipo": "persona_acompanante",
+      "tipoPerfil": "persona",
+      "componentes": { "resultados": "ResultCardPersona", "perfil": "ProfileLayoutPersona" },
+      "camposPublicosResultados": ["subcategoriaId", "alias", "tagline", "geo", "fotoPrincipal", "galeria", "edad", "precioDesde", "modalidades", "disponibilidad"],
+      "camposPublicosPerfil": ["subcategoriaId", "alias", "tagline", "geo", "fotoPrincipal", "galeria", "sobreMi", "contactoPublico", "metodosPago", "edad", "precioDesde", "modalidades", "disponibilidad", "serviciosIncluidos", "serviciosNoRealizo", "fisico", "idiomas", "orientacion", "horarioMinimo", "horarioDetalle"],
+      "camposPrivados": ["telefonoContacto", "terminosAceptados", "mayorEdadConfirmado", "whatsappPrivado", "ineFrente", "ineReverso", "selfieVerificacion"],
+      "obligatorios": ["alias", "geo.pais", "geo.estado", "geo.ciudad", "geo.zona", "fotoPrincipal", "tagline", "galeria", "edad", "precioDesde", "modalidades", "serviciosIncluidos", "serviciosNoRealizo", "fisico.estatura", "fisico.peso", "horarioMinimo", "telefonoContacto", "terminosAceptados", "mayorEdadConfirmado", "ineFrente", "ineReverso", "selfieVerificacion"],
+      "opcionales": ["disponibilidad", "orientacion", "horarioDetalle"],
+      "fotosMin": 3,
+      "validaciones": [{ "campo": "tagline", "maxLength": 80 }, { "campo": "edad", "min": 18 }],
+      "keywordsIA": ["escort", "acompañante", "citas", "compañía"],
+      "textosAyuda": {
+        "tagline": "Frase corta y discreta para la tarjeta de resultados.",
+        "sobreMi": "Descripción profesional sin lenguaje explícito.",
+        "modalidades": "Recibe, hotel o domicilio."
+      },
+      "coherencia": ["GEO_CIUDAD_REQUERIDA", "FOTOS_MIN", "ESCORT_MODALIDAD", "FACTURACION_COMPLETA"],
+      "facturacionSiDeseoFacturar": ["rfc", "razonSocial", "codigoPostalFiscal", "emailFacturacion", "regimenFiscal", "usoCFDI"],
+      "verificacion": { "tipo": "persona_estandar", "campos": ["ineFrente", "ineReverso", "selfieVerificacion"] },
+      "noPublicos": ["telefonoContacto", "whatsappPrivado", "ineFrente", "ineReverso", "selfieVerificacion", "facturacion"],
+      "firestore": {
+        "coleccion": "perfiles",
+        "paths": { "publico": "publico", "privado": "privado", "verificacion": "verificacion", "facturacion": "facturacion" }
+      }
+    },
+    "contenido": {
+      "subcategoriaId": "contenido",
+      "nombre": "Creador(a) de Contenido",
+      "arquetipo": "persona_creador",
+      "tipoPerfil": "creador",
+      "componentes": { "resultados": "ResultCardCreador", "perfil": "ProfileLayoutCreador" },
+      "camposPublicosResultados": ["subcategoriaId", "alias", "tagline", "geo", "fotoPrincipal", "galeria", "plataformas", "precioSuscripcion", "redesSociales"],
+      "camposPublicosPerfil": ["subcategoriaId", "alias", "tagline", "geo", "fotoPrincipal", "galeria", "sobreMi", "contactoPublico", "plataformas", "precioSuscripcion", "tiposContenido", "redesSociales", "horarioDetalle"],
+      "camposPrivados": ["telefonoContacto", "terminosAceptados", "mayorEdadConfirmado", "ineFrente", "selfieVerificacion"],
+      "obligatorios": ["alias", "geo.ciudad", "fotoPrincipal", "tagline", "galeria", "plataformas", "tiposContenido", "redesSociales", "ineFrente", "selfieVerificacion"],
+      "opcionales": ["precioSuscripcion", "geo.zona"],
+      "fotosMin": 4,
+      "keywordsIA": ["onlyfans", "contenido", "creador", "fansly", "telegram vip"],
+      "coherencia": ["CONTENIDO_PLATAFORMAS", "CREADOR_REDES", "FOTOS_MIN"],
+      "facturacionSiDeseoFacturar": ["rfc", "razonSocial", "codigoPostalFiscal", "emailFacturacion", "regimenFiscal", "usoCFDI"],
+      "verificacion": { "tipo": "creador_plataformas", "campos": ["ineFrente", "selfieVerificacion", "plataformas"] },
+      "noPublicos": ["telefonoContacto", "ineFrente", "selfieVerificacion", "facturacion"]
+    },
+    "hotel_motel": {
+      "subcategoriaId": "hotel_motel",
+      "nombre": "Hotel / Motel",
+      "arquetipo": "negocio_hospedaje",
+      "tipoPerfil": "lugar",
+      "componentes": { "resultados": "ResultCardNegocio", "perfil": "ProfileLayoutNegocio" },
+      "camposPublicosResultados": ["subcategoriaId", "nombreComercial", "tagline", "geo", "fotoPrincipal", "galeria", "tiposHabitacion", "tarifaHora", "tarifaNoche", "amenidades", "horarioDetalle"],
+      "camposPublicosPerfil": ["nombreComercial", "tiposHabitacion", "tarifaHora", "tarifaNoche", "amenidades", "direccion", "metodosPago", "sobreMi", "galeria"],
+      "camposPrivados": ["telefonoContacto", "rfc", "razonSocial", "licenciaOperacion"],
+      "obligatorios": ["nombreComercial", "direccion", "geo.ciudad", "tiposHabitacion", "tarifaHora", "horarioDetalle", "galeria", "rfc", "razonSocial", "licenciaOperacion"],
+      "opcionales": ["tarifaNoche"],
+      "fotosMin": 6,
+      "keywordsIA": ["hotel", "motel", "habitación", "jacuzzi", "por horas"],
+      "coherencia": ["NEGOCIO_DIRECCION", "HOTEL_TARIFA", "FOTOS_MIN"],
+      "facturacionSiDeseoFacturar": ["rfc", "razonSocial", "codigoPostalFiscal", "emailFacturacion", "regimenFiscal", "usoCFDI"],
+      "verificacion": { "tipo": "negocio_estandar", "campos": ["rfc", "razonSocial", "licenciaOperacion"] },
+      "noPublicos": ["telefonoContacto", "rfc", "razonSocial", "licenciaOperacion", "facturacion"]
+    },
+    "club_sw": {
+      "subcategoriaId": "club_sw",
+      "nombre": "Club Swinger",
+      "arquetipo": "negocio_venue",
+      "tipoPerfil": "lugar",
+      "componentes": { "resultados": "ResultCardNegocio", "perfil": "ProfileLayoutVenue" },
+      "camposPublicosResultados": ["nombreComercial", "precioEntrada", "horarioDetalle", "reglasAcceso", "dressCode", "geo"],
+      "camposPublicosPerfil": ["nombreComercial", "precioEntrada", "reglasAcceso", "dressCode", "politicaParejasSingles", "areasVenue", "cartelera", "direccion", "reservaciones"],
+      "obligatorios": ["nombreComercial", "direccion", "precioEntrada", "horarioDetalle", "reglasAcceso", "politicaParejasSingles", "areasVenue", "rfc", "razonSocial", "licenciaOperacion"],
+      "fotosMin": 6,
+      "keywordsIA": ["club swinger", "parejas", "lifestyle"],
+      "coherencia": ["NEGOCIO_DIRECCION", "FOTOS_MIN"],
+      "verificacion": { "tipo": "negocio_estandar" },
+      "noPublicos": ["telefonoContacto", "rfc", "licenciaOperacion", "facturacion"]
+    },
+    "cuckold_hotwife": {
+      "subcategoriaId": "cuckold_hotwife",
+      "nombre": "Cuckold / Hotwife",
+      "arquetipo": "pareja_grupo",
+      "tipoPerfil": "pareja_grupo",
+      "componentes": { "resultados": "ResultCardPareja", "perfil": "ProfileLayoutPareja" },
+      "camposPublicosResultados": ["aliasPareja", "dinamica", "buscan", "geo", "fotoPrincipal", "galeria", "disponibilidad"],
+      "camposPublicosPerfil": ["aliasPareja", "dinamica", "buscan", "miembros", "sobreMi", "reglasAcceso"],
+      "camposPrivados": ["consentimientoDual", "ineFrente", "selfieVerificacion", "whatsappPrivado", "telefonoContacto"],
+      "obligatorios": ["aliasPareja", "dinamica", "buscan", "miembros", "consentimientoDual", "galeria"],
+      "fotosMin": 4,
+      "keywordsIA": ["cuckold", "hotwife", "bull", "pareja"],
+      "coherencia": ["GEO_CIUDAD_REQUERIDA", "FOTOS_MIN"],
+      "verificacion": { "tipo": "pareja_dual", "campos": ["consentimientoDual", "ineFrente", "selfieVerificacion"] },
+      "noPublicos": ["consentimientoDual", "ineFrente", "selfieVerificacion", "whatsappPrivado", "facturacion"]
+    }
+  }
+}

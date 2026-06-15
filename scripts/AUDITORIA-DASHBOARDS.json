@@ -1,0 +1,770 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "tipo": "AUDITORIA_DASHBOARDS",
+  "titulo": "Auditoría integral de dashboards CariHub",
+  "fecha": "2026-06-09",
+  "fechaActualizacionIA": "2026-06-09",
+  "alcance": "Inventario, seguridad, arquitectura, asistentes IA e integración — sin implementación",
+  "dependenciasCongeladas": {
+    "catalogo": "catalogo-2026-06-10@1.0.0",
+    "cuentas": "cuentas-2026-06-10@1.0.0",
+    "seguridad": "seguridad-2026-06-10@1.0.0",
+    "fieldEngine": "fieldengine-2026-06-10@1.0.1"
+  },
+  "resumenEjecutivo": {
+    "dashboardsExistentes": 4,
+    "completos": 0,
+    "parciales": 3,
+    "soloMock": 1,
+    "faltantes": 2,
+    "arquitecturaRecomendada": "hibrido",
+    "modeloDatosProduccion": "monolito_usuarios",
+    "modeloDatosObjetivo": "usuarios_hub + perfiles + contratos + conversaciones",
+    "validacionConsistencia": "PASS_DISEÑO",
+    "generarSpecCongelamiento": {
+      "recomendado": true,
+      "cuando": "Tras aprobación de esta auditoría (incl. capa IA) por product owner",
+      "artefactos": ["SPEC-DASHBOARDS.md", "SPEC-DASHBOARDS.json", "ACTA-CONGELAMIENTO-DASHBOARDS.md", "ACTA-CONGELAMIENTO-DASHBOARDS.json"],
+      "incluirCapaIA": {
+        "obligatorio": true,
+        "antesDeCongelar": true,
+        "seccionSpec": "asistentesIA + politicaSeguridadIA + orquestacion"
+      }
+    },
+    "arquitecturaIA": {
+      "decision": "orquestador_ligero_con_asistentes_especializados",
+      "rechazado": "asistente_unico_global",
+      "motivo": "Límites de permiso, datos privados y auditoría incompatibles entre admin y usuario en un solo agente"
+    }
+  },
+  "inventario": {
+    "dashboard_admin": {
+      "existe": true,
+      "completitud": "parcial_40pct",
+      "archivos": ["public/admin.html"],
+      "schemasDiseno": ["scripts/config-admin-arquitectura-completa-schema.json"],
+      "modulosActuales": [
+        "dashboard_resumen",
+        "usuarios",
+        "activos",
+        "pendientes",
+        "vencidos",
+        "denuncias",
+        "mensajes_soporte",
+        "vistas",
+        "graficas_stub",
+        "pagos_stub",
+        "historial_logsAdmin",
+        "seguridad_logsSeguridad",
+        "solicitudes_publicidad",
+        "anuncios_stub"
+      ],
+      "modulosFaltantes": [
+        "catalogo_subcategorias",
+        "formularios_schemas",
+        "render_componentes",
+        "busqueda_enriquecimiento",
+        "revision_moderacion_unificada",
+        "categorias_sugeridas",
+        "contratos_perfiles",
+        "contratos_banners",
+        "precios_promociones_perfiles",
+        "imagenes_banners_admin",
+        "ia_arquitecto",
+        "rbac_roles",
+        "logs_acceso_privado",
+        "alertas_seguridad"
+      ],
+      "incompleto": [
+        "Pagos sin Stripe/MercadoPago",
+        "Gráficas placeholder",
+        "anuncios colección sin UI gestión",
+        "estadisticas_visitas no conectada al panel",
+        "Mensajes usuario-usuario no conectados",
+        "Sin módulo catálogo/schemas",
+        "Sin RBAC — email único hardcoded",
+        "logsAdmin campos mínimos vs diseño",
+        "denuncias create deshabilitado en rules"
+      ],
+      "lee": ["usuarios", "denuncias", "solicitudes_anuncios", "soporte_mensajes", "logsAdmin", "logsSeguridad", "pagos", "anuncios", "analytics_eventos"],
+      "escribe": ["usuarios", "denuncias", "solicitudes_anuncios", "soporte_mensajes", "logsAdmin"],
+      "coleccionesActuales": ["usuarios", "denuncias", "solicitudes_anuncios", "soporte_mensajes", "logsAdmin", "logsSeguridad", "pagos", "anuncios", "analytics_eventos", "configuracion_publicidad"],
+      "coleccionesFuturas": ["perfiles", "catalogo_subcategorias", "contratos_perfiles", "contratos_banners", "solicitudes_categorias", "admins", "logs_acceso_privado", "alertas_seguridad", "cola_revision"]
+    },
+    "dashboard_perfil_publico": {
+      "existe": "parcial_embebido",
+      "completitud": "parcial_25pct",
+      "archivos": ["public/index.html (modalPanel, modalEditar, modalRegistro)", "public/perfil.html (solo lectura pública)"],
+      "nota": "perfil.html es vista pública, no dashboard de edición",
+      "modulosActuales": [
+        "estado_perfil_resumen",
+        "edicion_campos_publicos_limitados",
+        "registro_perfil_wizard_legacy",
+        "renovacion_placeholder"
+      ],
+      "modulosFaltantes": [
+        "wizard_FieldEngine",
+        "gestion_fotos_completa",
+        "verificacion_INE_selfie",
+        "estadoPublicacion_unificado",
+        "estadisticas_perfil",
+        "denuncias_recibidas",
+        "favoritos_recibidos",
+        "notificaciones",
+        "mensajeria",
+        "contrato_plan_renovacion_real",
+        "snapshot_publicado"
+      ],
+      "incompleto": [
+        "uid === perfilId monolito",
+        "Sin subcategoriaId/formularioId/arquetipo en UI",
+        "Sin FieldEngine merge",
+        "Sin ValidationEngine",
+        "Sin gates estadoSeguridad/estadoVerificacion",
+        "Upgrade visitante no implementado",
+        "Edición desactiva perfil hasta admin aprueba — correcto pero sin wizard"
+      ],
+      "lee": ["usuarios/{uid}"],
+      "escribe": ["usuarios/{uid} (update campos públicos + actualizacionPendiente)"],
+      "coleccionesActuales": ["usuarios"],
+      "coleccionesFuturas": ["perfiles/{perfilId}", "contratos_perfiles", "notificaciones", "estadisticas_perfil"]
+    },
+    "dashboard_publicidad_banners": {
+      "existe": "parcial_funnel_sin_dashboard",
+      "completitud": "parcial_35pct",
+      "archivos": [
+        "public/registro-banner.html",
+        "public/registro-banner2.html",
+        "public/registro-banner-paso3.html",
+        "public/js/precios-publicidad.js",
+        "public/js/banner-inventario-rotacion.js",
+        "public/index.html (modalAnuncio simple, lista solicitudes en panel)"
+      ],
+      "mock": ["public/dashboard-rentero.html"],
+      "modulosActuales": [
+        "funnel_2_pasos",
+        "precios_firestore",
+        "upload_storage",
+        "solicitudes_anuncios_create",
+        "lista_solicitudes_en_panel_cuenta",
+        "admin_revision_estados"
+      ],
+      "modulosFaltantes": [
+        "dashboard_anunciante_gestion_campanas",
+        "edicion_post_pago_con_revision",
+        "renovacion_banner",
+        "contrato_banner_vigente",
+        "pagos_integrados",
+        "estadisticas_impresiones_clics",
+        "activacion_slot_real",
+        "promociones_banners"
+      ],
+      "incompleto": [
+        "paso3 estático sin Firebase",
+        "anuncios colección sin UI anunciante",
+        "signInAnonymously en paso1 — conflicto rules solicitudes",
+        "Sin contratos_banners",
+        "Sin gate emailVerificado/Turnstile",
+        "dashboard-rentero.html mock sin wiring"
+      ],
+      "lee": ["configuracion_publicidad/precios_banners", "solicitudes_anuncios (owner)"],
+      "escribe": ["solicitudes_anuncios", "Storage solicitudes_anuncios/"],
+      "coleccionesActuales": ["solicitudes_anuncios", "configuracion_publicidad"],
+      "coleccionesFuturas": ["contratos_banners", "anuncios", "pagos", "promociones_banners"]
+    },
+    "dashboard_usuario_visitante": {
+      "existe": "parcial_embebido",
+      "completitud": "parcial_15pct",
+      "archivos": [
+        "public/index.html (modalMiPerfil, modalPanel, modalFavoritos, home-ui mensajes stub)",
+        "public/js/home-bridge.js",
+        "public/js/home-ui.js"
+      ],
+      "schemasDiseno": ["scripts/config-registro-visitante-schema.json → DashboardVisitante"],
+      "modulosActuales": [
+        "login_registro_email",
+        "panel_cuenta_minimo",
+        "favoritos_ui",
+        "mensajes_demo_copy",
+        "solicitudes_publicidad_lista"
+      ],
+      "modulosFaltantes": [
+        "DashboardVisitante_completo",
+        "registro_visitante_FieldEngine",
+        "upgrade_WizardCrearPerfilDesdeVisitante",
+        "contrato_visitante",
+        "denuncias_realizar",
+        "categorias_sugeridas",
+        "preferencias",
+        "bloqueos",
+        "notificaciones",
+        "seguridad_cuenta",
+        "estadoMensajeria_gates"
+      ],
+      "incompleto": [
+        "No distingue visitante vs perfil en tipoCuenta",
+        "Favoritos usa signInAnonymously — roto vs diseño",
+        "Mensajes solo texto demo",
+        "denuncias create=false en rules",
+        "Sin subcolección bloqueos",
+        "Sin upgrade sin nueva cuenta"
+      ],
+      "lee": ["usuarios/{uid}", "usuarios/{uid}/favoritos", "solicitudes_anuncios"],
+      "escribe": ["usuarios/{uid}", "usuarios/{uid}/favoritos", "solicitudes_anuncios"],
+      "coleccionesActuales": ["usuarios", "usuarios/favoritos", "solicitudes_anuncios"],
+      "coleccionesFuturas": ["usuarios (hub)", "contratos_perfiles", "solicitudes_categorias", "usuarios/bloqueos", "usuarios/notificaciones", "conversaciones"]
+    }
+  },
+  "seguridad": {
+    "admin": {
+      "requiereLogin": true,
+      "rolesActuales": ["email_unico: carinosas.anuncios@gmail.com"],
+      "rolesRequeridos": ["super_admin", "catalogo_admin", "comercial_admin", "moderador", "auditor"],
+      "permisosNecesarios": ["lectura_total", "escritura_moderacion", "acceso_privado_INE", "cambio_precios", "cambio_catalogo", "cambio_seguridad", "contratos"],
+      "datosPrivadosMuestra": ["INE", "selfie", "verificacion.*", "email", "telefono", "datosPrivados solicitudes"],
+      "datosPrivadosEscribe": ["estados revision", "notas admin", "respuestas soporte"],
+      "validacionesActuales": ["isAdmin email en cliente", "firestore.rules isAdmin()", "confirm dialogs"],
+      "validacionesFaltantes": ["RBAC custom claims", "logs_acceso_privado al ver INE", "reauth acciones críticas", "Turnstile admin login", "rate limits", "alertas_seguridad", "diffHash en logsAdmin"],
+      "rulesActuales": ["isAdmin() lectura/escritura amplia", "logsSeguridad create=false"],
+      "rulesFuturas": ["admins/{uid}", "perfiles admin paths", "catalogo_subcategorias admin only", "logs_acceso_privado"],
+      "logsRequeridos": ["logsAdmin", "logsSeguridad", "logs_acceso_privado", "alertas_seguridad"],
+      "auditar": ["aprobar/rechazar perfil", "ver INE/selfie", "cambio precio", "cambio estado seguridad", "cambio solicitud banner", "delete usuario"],
+      "reauth": ["delete usuario", "cambio precios catálogo", "export masivo", "cambio rules"],
+      "emailVerificado": ["no exigido actualmente para admin"],
+      "estadoSeguridad": ["no implementado en admin UI"],
+      "estadoMensajeria": ["no aplica"],
+      "riesgosSinProteccion": ["Cualquier cuenta con ese email = admin total", "INE visible sin log acceso privado", "Cliente-only gate bypasseable si rules fallan", "Sin 2FA admin"]
+    },
+    "perfil_publico": {
+      "requiereLogin": true,
+      "roles": ["owner perfil", "admin lectura"],
+      "permisos": ["editar borrador", "enviar revision", "subir fotos", "renovar"],
+      "datosPrivados": ["INE", "contacto privado", "facturacion"],
+      "validacionesActuales": ["usuarioUpdateDuenoValido rules", "image type/size cliente", "actualizacionPendiente flag"],
+      "validacionesFaltantes": ["FieldEngine gates", "emailVerificado para enviar_revision", "estadoSeguridad restringido=solo borrador", "Turnstile", "ValidationEngine valores"],
+      "rulesActuales": ["owner update con campos bloqueados"],
+      "rulesFuturas": ["perfiles/{perfilId} owner write pre-aprobacion", "Storage INE owner+admin"],
+      "auditar": ["envio revision", "cambio fotos", "cambio datos post-publicacion"],
+      "reauth": ["cambio email", "eliminar perfil"],
+      "emailVerificado": ["requerido diseño para enviar_revision y contratar"],
+      "estadoSeguridad": ["restringido bloquea enviar_revision; permite borrador"],
+      "riesgos": ["Owner puede intentar escribir campos admin si rules drift", "Sin verificación email obligatoria", "Monolito mezcla público/privado"]
+    },
+    "publicidad_banners": {
+      "requiereLogin": "parcial — paso1 anonymous, paso2 cuenta real",
+      "roles": ["anunciante owner", "admin"],
+      "permisos": ["crear solicitud", "ver propias", "editar pre-pago", "post-pago solo con revision admin"],
+      "validacionesActuales": ["solicitudCreateValida rules", "uidAnunciante match"],
+      "validacionesFaltantes": ["emailVerificado", "estadoSeguridad normal para contratar", "Turnstile", "bloqueo edicion post-pago sin admin"],
+      "rulesActuales": ["create non-anonymous", "update admin only"],
+      "rulesFuturas": ["contratos_banners owner read", "anuncios owner read activos"],
+      "auditar": ["cambio creativo post-pago", "renovacion", "pago completado"],
+      "emailVerificado": ["requerido diseño solicitud_banner"],
+      "estadoSeguridad": ["restringido bloquea nuevos banners diseño"],
+      "riesgos": ["Anonymous en paso1", "Sin dashboard post-solicitud", "Admin update manual sin trail completo"]
+    },
+    "usuario_visitante": {
+      "requiereLogin": "parcial — favoritos intenta anonymous",
+      "roles": ["visitante", "cualquier autenticado para panel básico"],
+      "permisos": ["favoritos", "mensajes futuro", "denuncias", "upgrade perfil", "preferencias"],
+      "validacionesActuales": ["isOwner favoritos", "usuarioCuentaAutenticada para solicitudes"],
+      "validacionesFaltantes": ["tipoCuenta visitante", "contrato vigente upgrade", "estadoMensajeria", "bloqueos", "denuncias create", "rate limits"],
+      "riesgos": ["Favoritos anonymous roto", "Sin separación visitante/perfil", "Mensajes demo engañoso", "denuncias deshabilitadas"]
+    }
+  },
+  "arquitecturaRecomendada": {
+    "decision": "hibrido",
+    "opcionesEvaluadas": {
+      "separados": { "pro": "Aislamiento admin", "contra": "4 codebases duplican auth/nav" },
+      "modular_unico": { "pro": "Un shell", "contra": "Admin no debe compartir bundle con usuarios" },
+      "hibrido": { "pro": "Admin aislado + shell usuario modular por roles", "contra": "Requiere router roles claro" }
+    },
+    "estructura": {
+      "admin": {
+        "ruta": "/admin.html → futuro /admin/* modular",
+        "aislado": true,
+        "motivo": "Superficie ataque, RBAC, logs privados"
+      },
+      "usuarioModular": {
+        "ruta": "/cuenta/* o dashboard-rentero.html evolucionado",
+        "shell": "DashboardShell por rolesCuenta[] + tipoCuentaPrincipal",
+        "modulos": ["cuenta", "perfil", "banners", "mensajes", "favoritos", "notificaciones", "seguridad", "upgrade"]
+      }
+    },
+    "absorcionModulos": {
+      "dashboard_admin_absorbe": ["catalogo", "revision", "seguridad global", "contratos", "pagos admin", "denuncias", "categorias_sugeridas_aprobacion", "banners admin"],
+      "dashboard_usuario_absorbe": ["visitante DashboardVisitante", "favoritos", "preferencias", "denuncias realizadas", "mensajes", "notificaciones", "upgrade"],
+      "dashboard_perfil_absorbe": ["wizard edicion", "verificacion", "estadisticas", "renovacion perfil", "estado publicacion"],
+      "dashboard_banners_absorbe": ["solicitudes", "contratos banner", "creativos", "renovaciones", "stats anuncio"]
+    }
+  },
+  "integracionPorCuenta": {
+    "perfil_publico": {
+      "camposConexion": ["usuarioId", "perfilId", "perfilPrincipalId", "categoriaId", "subcategoriaId", "formularioId", "arquetipo", "tipoPerfil", "estadoCuenta", "estadoVerificacion", "estadoPublicacion", "estadoSeguridad", "contratoActivoId", "planActual", "fechaVencimiento"],
+      "relaciones": ["mensajes", "favoritos_recibidos", "denuncias_recibidas", "estadisticas", "notificaciones"],
+      "motores": ["FieldEngine", "ValidationEngine", "RenderEngine snapshot", "Contratos", "Messenger", "Seguridad"]
+    },
+    "visitante": {
+      "camposConexion": ["usuarioId", "tipoCuentaPrincipal", "rolesCuenta[]", "estadoCuenta", "estadoMensajeria", "estadoSeguridad"],
+      "relaciones": ["favoritos", "mensajes", "bloqueos", "denuncias_realizadas", "solicitudes_categorias", "notificaciones", "preferencias", "upgrade"],
+      "motores": ["FieldEngine visitante", "ValidationEngine", "Contratos visitante", "Messenger", "Seguridad"]
+    },
+    "anunciante_banners": {
+      "camposConexion": ["usuarioId", "anuncianteId", "estadoCuenta", "estadoSeguridad"],
+      "relaciones": ["solicitudes_anuncios", "contratos_banners", "anuncios", "pagos", "renovaciones", "estadisticas", "notificaciones"],
+      "motores": ["Contratos", "Pagos", "ValidationEngine", "Seguridad", "RenderEngine slots"]
+    },
+    "admin": {
+      "camposConexion": ["usuarioId", "rolesCuenta[]", "permisos"],
+      "relaciones": ["logsAdmin", "logsSeguridad", "cola_revision", "usuarios", "perfiles", "banners", "contratos", "pagos", "denuncias", "catalogo", "seguridad"],
+      "motores": ["Catálogo", "Cuentas", "Seguridad", "todos lectura"]
+    }
+  },
+  "mensajeria": {
+    "estado": "no_implementada",
+    "dashboardsQueMuestran": {
+      "admin": "soporte_mensajes — no mensajes P2P",
+      "usuario_visitante": "modal demo home-ui.js",
+      "perfil_publico": "stub mismo modal",
+      "banners": "no aplica directo"
+    },
+    "modeloFuturo": {
+      "coleccion": "conversaciones/{conversacionId}",
+      "subcoleccion": "mensajes/{mensajeId}",
+      "metaUsuario": "usuarios/{id}/conversaciones_meta/{convId}",
+      "campos": {
+        "emisorId": "usuarioId Auth",
+        "receptorId": "usuarioId",
+        "perfilContextoId": "perfil destino si aplica",
+        "anuncioContextoId": "solicitud/anuncio si aplica",
+        "estadoMensajeria": "en usuarios.mensajeria",
+        "bloqueos": "usuarios/{id}/bloqueos/{id}",
+        "spamScore": "usuarios.mensajeria.spamScore"
+      },
+      "escenarios": {
+        "visitante_a_perfil": "requiere cuenta + estadoMensajeria habilitada + emailVerificado + no bloqueado",
+        "visitante_a_anunciante": "anuncioContextoId; mismos gates",
+        "perfil_responde": "conversacion existente; respeta estadoMensajeria receptor",
+        "cuenta_perfil_mas_banners": "perfilContextoId + anuncioContextoId en metadata; UI unifica en módulo mensajes",
+        "admin_suspende": "estadoMensajeria=suspendida → sin envío; UI muestra banner"
+      },
+      "notificaciones": "usuarios/{id}/notificaciones + push futuro",
+      "limites": "nivelConfianza, rate limits Seguridad MVP"
+    }
+  },
+  "visibilidadPorTipoCuenta": {
+    "visitante": ["cuenta", "favoritos", "mensajes", "notificaciones", "preferencias", "upgrade_perfil", "seguridad_basica", "denuncias", "categorias_sugeridas"],
+    "perfil_publico_sin_banners": ["cuenta", "perfil", "mensajes", "favoritos", "estadisticas", "verificacion", "renovacion", "notificaciones", "denuncias_recibidas"],
+    "anunciante_sin_perfil": ["cuenta", "banners", "solicitudes", "pagos", "mensajes", "notificaciones"],
+    "empresa_perfil_mas_banners": ["todos modulos usuario menos admin"],
+    "profesionista_perfil_mas_banners": ["igual empresa"],
+    "adulto_perfil_mas_banners": ["igual + gates verificacion mayoria edad"],
+    "admin": ["panel admin completo según rol RBAC"]
+  },
+  "dependenciasMotores": {
+    "admin": { "catalogo": "alta", "cuentas": "alta", "seguridad": "alta", "fieldEngine": "media", "validationEngine": "baja", "renderEngine": "media", "messenger": "baja", "contratos": "alta", "pagos": "alta", "denuncias": "alta", "favoritos": "baja", "banners": "alta" },
+    "perfil_publico": { "catalogo": "alta", "cuentas": "alta", "seguridad": "alta", "fieldEngine": "alta", "validationEngine": "alta", "renderEngine": "alta", "messenger": "media", "contratos": "alta", "pagos": "alta", "denuncias": "media", "favoritos": "baja", "banners": "baja" },
+    "banners": { "catalogo": "baja", "cuentas": "media", "seguridad": "alta", "fieldEngine": "baja", "validationEngine": "alta", "renderEngine": "media", "messenger": "baja", "contratos": "alta", "pagos": "alta", "denuncias": "baja", "favoritos": "ninguna", "banners": "alta" },
+    "visitante": { "catalogo": "media", "cuentas": "alta", "seguridad": "alta", "fieldEngine": "alta", "validationEngine": "alta", "renderEngine": "baja", "messenger": "alta", "contratos": "alta", "pagos": "alta", "denuncias": "media", "favoritos": "alta", "banners": "media" }
+  },
+  "riesgosArquitectura": [
+    { "id": "A1", "nivel": "alto", "descripcion": "Monolito usuarios/{uid} impide perfiles múltiples, visitante upgrade y snapshot RenderEngine" },
+    { "id": "A2", "nivel": "alto", "descripcion": "Dashboards embebidos en index.html — no escalables ni testeables" },
+    { "id": "A3", "nivel": "medio", "descripcion": "dashboard-rentero.html mock desconectado del funnel real" },
+    { "id": "A4", "nivel": "medio", "descripcion": "Duplicación index.html vs index-legacy.html" },
+    { "id": "A5", "nivel": "medio", "descripcion": "Sin router por rolesCuenta[] — mismo panel para todos" }
+  ],
+  "riesgosSeguridad": [
+    { "id": "S1", "nivel": "critico", "descripcion": "Admin = un solo email sin RBAC ni logs_acceso_privado" },
+    { "id": "S2", "nivel": "alto", "descripcion": "Favoritos anonymous vs rules non-anonymous" },
+    { "id": "S3", "nivel": "alto", "descripcion": "denuncias create=false — usuarios no pueden denunciar" },
+    { "id": "S4", "nivel": "alto", "descripcion": "Sin Turnstile ni rate limits en dashboards" },
+    { "id": "S5", "nivel": "medio", "descripcion": "INE/selfie en admin sin auditoría acceso privado" },
+    { "id": "S6", "nivel": "medio", "descripcion": "registro-banner paso1 anonymous" }
+  ],
+  "recomendaciones": [
+    "Incluir capa asistentesIA en SPEC-DASHBOARDS antes de congelar acta",
+    "Congelar SPEC-DASHBOARDS antes de implementar ValidationEngine runtime",
+    "Mantener admin.html separado; evolucionar a módulos según config-admin-arquitectura",
+    "Unificar visitante+perfil+banners en DashboardShell modular (base dashboard-rentero.html)",
+    "Migrar datos a usuarios hub + perfiles/{perfilId} antes de wizard FieldEngine",
+    "Implementar RBAC fase 2; fase 1 reforzar rules + logs_acceso_privado",
+    "Corregir favoritos: cuenta real no anonymous",
+    "Habilitar denuncias create con validación ValidationEngine",
+    "Conectar mensajería solo tras Messenger spec; hasta entonces quitar copy engañoso o marcar 'próximamente'"
+  ],
+  "ordenImplementacionFuturo": [
+    "1. SPEC-DASHBOARDS (con asistentesIA) + acta congelamiento",
+    "2. ValidationEngine spec",
+    "3. Refactor auth shell + rolesCuenta lectura",
+    "4. Migración modelo usuarios→perfiles (diseño acta cuentas)",
+    "5. Dashboard visitante (FieldEngine F08/F11)",
+    "6. Dashboard perfil wizard (FieldEngine merge)",
+    "7. Dashboard banners (contratos + pagos)",
+    "8. Admin módulos catálogo/revisión",
+    "9. Messenger + módulo mensajes dashboards",
+    "10. RBAC admin fase 2"
+  ],
+  "noImplementarTodavia": [
+    "Runtime dashboards nuevos",
+    "Cambios firestore.rules producción",
+    "Deploy",
+    "Messenger P2P",
+    "Stripe/MercadoPago live",
+    "RBAC multi-admin",
+    "IA Arquitecto escritura",
+    "Migración legacy sin acta migración",
+    "Runtime asistentes IA",
+    "Auto-aprobación IA perfiles/banners/precios/categorías",
+    "IA con acceso INE/selfie para usuarios no-admin"
+  ],
+  "asistentesIA": {
+    "version": "1.0.0-diseno",
+    "referencias": [
+      "scripts/config-admin-arquitectura-completa-schema.json → ia_arquitecto_supervisor",
+      "scripts/config-registro-visitante-schema.json → ia_registro implícito en upgrade",
+      "scripts/config-seguridad-mvp-schema.json → mensajeriaFutura, logsAuditoria",
+      "scripts/SPEC-FIELDENGINE.json → resolveRegistrationSchema dry-run"
+    ],
+    "orquestacion": {
+      "componente": "IAOrchestrator",
+      "rol": "Enrutar por dashboardContext + rolesCuenta[] + permisos; nunca ejecutar tools directamente",
+      "contextos": ["visitante", "perfil_publico", "publicidad_banners", "admin_arquitecto", "admin_moderador", "admin_comercial", "admin_seguridad"],
+      "patronUI": "Un panel chat por dashboard; backend instancia asistente especializado según contexto activo"
+    },
+    "politicaSeguridadGlobal": {
+      "reglasObligatorias": [
+        "IA no modifica datos sin confirmación humana explícita",
+        "IA no aprueba perfiles automáticamente",
+        "IA no aprueba banners automáticamente",
+        "IA no cambia precios automáticamente",
+        "IA no cambia categorías/catálogo automáticamente",
+        "IA no accede INE/selfies/documentos privados salvo rol Admin autorizado con logs_acceso_privado",
+        "IA no muestra datos privados de terceros a usuarios",
+        "IA respeta rolesCuenta[], permisos RBAC, estadoSeguridad, estadoMensajeria",
+        "Toda salida ejecutable se registra como recomendacion IA — no acción final",
+        "IA Arquitecto: solo lectura salvo autorización futura explícita por acta"
+      ],
+      "coleccionRecomendaciones": "ia_recomendaciones/{id}",
+      "camposRecomendacion": ["asistenteId", "usuarioId", "dashboardContext", "accionSugerida", "payload", "estado", "confirmadoPor", "confirmadoEn", "createdAt"],
+      "estadosRecomendacion": ["sugerida", "aceptada_humano", "rechazada_humano", "expirada"],
+      "logs": ["logsAdmin modulo=ia_*", "logsSeguridad consultas_sensibles", "logs_acceso_privado si INE"],
+      "rateLimits": "Seguridad MVP — ventana por usuario y por asistente",
+      "privacyGuard": "Redactar email/telefono/INE de terceros en prompts usuario"
+    },
+    "porDashboard": {
+      "usuario_visitante": {
+        "asistenteId": "ia_asistente_cuenta",
+        "nombreUI": "Asistente de cuenta",
+        "objetivo": "Guiar visitante en cuenta, favoritos, upgrade, seguridad y navegación sin acceso a datos ajenos",
+        "funcionesPermitidas": [
+          "Explicar estados cuenta: estadoCuenta, estadoMensajeria, estadoSeguridad (lectura propia)",
+          "Listar favoritos propios (metadatos públicos del perfil guardado)",
+          "Sugerir categorías del catálogo público para upgrade o búsqueda",
+          "Explicar flujo categoría sugerida temporal (sin enviar)",
+          "Orientar upgrade a perfil público (WizardCrearPerfilDesdeVisitante, contrato vigente)",
+          "Explicar límites mensajería futura según estadoMensajeria",
+          "Ayuda general plataforma y FAQs",
+          "Pre-rellenar borrador campos visitante (solo tras confirmación usuario)"
+        ],
+        "funcionesProhibidas": [
+          "Aprobar/rechazar cualquier entidad",
+          "Leer mensajes de otros usuarios",
+          "Leer INE/selfie/documentos",
+          "Modificar contratos o precios",
+          "Publicar perfil o enviar revisión sin confirmación",
+          "Enviar categoría sugerida sin confirmación + ValidationEngine",
+          "Ver datos privados de perfiles favoritos (solo públicos)"
+        ],
+        "datosPuedeLeer": [
+          "usuarios/{propio}: cuenta, mensajeria.estado*, seguridad.estado* (no scores admin)",
+          "usuarios/{propio}/favoritos → perfiles públicos referenciados (campos públicos)",
+          "mapa-registro-categorias.json sector/subcategoría (público diseño)",
+          "config-registro-visitante-schema.json (campos visitante)",
+          "solicitudes_categorias propias (futuro)",
+          "notificaciones propias"
+        ],
+        "datosNoDebeLeer": [
+          "INE, selfie, verificacion documentos",
+          "Otros usuarios/{uid}",
+          "logsAdmin, logsSeguridad",
+          "configuracion_publicidad precios internos admin",
+          "denuncias de terceros",
+          "riesgoScore/reputacion detalle admin"
+        ],
+        "accionesSugeridas": [
+          "Borrador alias o preferencias",
+          "Lista pasos upgrade perfil",
+          "Texto explicativo estado restringido",
+          "Propuesta subcategoriaId para upgrade (usuario confirma wizard)"
+        ],
+        "accionesEjecutablesFuturas": [
+          "Guardar preferencias notificación (post-confirmación)",
+          "Abrir wizard upgrade con subcategoriaId preseleccionada (post-confirmación)",
+          "Marcar tutorial completado"
+        ],
+        "confirmacionHumanaObligatoria": true,
+        "modulosCongelados": {
+          "catalogo": "lectura pública sectores/subcategorías",
+          "cuentas": "tipoCuenta visitante, upgrade sin nuevo Auth",
+          "seguridad": "gates estadoSeguridad, emailVerificado para acciones futuras",
+          "fieldEngine": "resolve usuario_visitante F08; upgrade F11"
+        }
+      },
+      "perfil_publico": {
+        "asistenteId": "ia_asistente_perfil",
+        "nombreUI": "Asistente de perfil",
+        "objetivo": "Ayudar a completar, mejorar y corregir perfil público del owner sin publicar automáticamente",
+        "funcionesPermitidas": [
+          "Listar campos faltantes vía FieldEngine resolveRegistrationSchema (dry-run)",
+          "Sugerir mejoras descripción (tono, claridad) — no inventar hechos",
+          "Explicar motivo rechazo admin (texto motivoRechazo si owner)",
+          "Preparar checklist correcciones para reenvío revisión",
+          "Explicar estadísticas agregadas propias (vistas, favoritos recibidos count)",
+          "Orientar renovación y verificación según contrato/estadoVerificacion",
+          "Etiqueta mensajería: buenas prácticas (sin leer hilos ajenos)",
+          "Sugerir fotos faltantes según fotosMin FieldEngine"
+        ],
+        "funcionesProhibidas": [
+          "Aprobar perfil o saltar revisión admin",
+          "Inventar credenciales o precios no declarados",
+          "Leer INE/selfie (owner los sube; IA no analiza documento)",
+          "Modificar snapshot publicado",
+          "Enviar revisión sin confirmación + ValidationEngine + gates",
+          "Ver denuncias con datos identificables del denunciante"
+        ],
+        "datosPuedeLeer": [
+          "perfiles/{propio} campos públicos + estadoRevision + motivoRechazo",
+          "ResolvedRegistrationSchema del propio contexto (FieldEngine)",
+          "contratos_perfiles propio (plan, vencimiento)",
+          "estadisticas_perfil agregadas propias",
+          "verificacion.estadoVerificacion (no imágenes)",
+          "gates securityGates FieldEngine para explicar bloqueos"
+        ],
+        "datosNoDebeLeer": [
+          "verificacion.ineURL, selfieURL, documentos",
+          "Datos de otros perfiles salvo públicos en resultados",
+          "Cola admin revisión",
+          "Precios admin o márgenes"
+        ],
+        "accionesSugeridas": [
+          "Borrador descripcion mejorada",
+          "Lista obligatorios pendientes",
+          "Pasos verificación INE",
+          "Recordatorio renovación"
+        ],
+        "accionesEjecutablesFuturas": [
+          "Aplicar borrador campo público (post-confirmación + ValidationEngine)",
+          "Iniciar flujo subida foto (abre UI; no sube solo)",
+          "Solicitar reenvío revisión (post-confirmación + gates)"
+        ],
+        "confirmacionHumanaObligatoria": true,
+        "modulosCongelados": {
+          "fieldEngine": "resolve por subcategoriaId; gates guardar_borrador/enviar_revision",
+          "validationEngine": "validar valores antes de persistir",
+          "renderEngine": "explicar snapshot; no modificar",
+          "seguridad": "estadoSeguridad restringido = solo borrador"
+        }
+      },
+      "publicidad_banners": {
+        "asistenteId": "ia_asistente_publicidad",
+        "nombreUI": "Asistente de publicidad",
+        "objetivo": "Explicar espacios, funnels y campañas del anunciante owner sin activar pagos ni creativos automáticamente",
+        "funcionesPermitidas": [
+          "Explicar slots (home, resultados, perfil) y formatos",
+          "Estimar precio vía precios-publicidad + config Firestore (lectura pública precios_banners)",
+          "Listar solicitudes_anuncios propias y estados",
+          "Explicar correcciones notaAdmin",
+          "Orientar renovación y documentos faltantes",
+          "Explicar estadísticas agregadas impresiones/clics (futuro)",
+          "Comparar periodos contratados (lectura contrato)"
+        ],
+        "funcionesProhibidas": [
+          "Aprobar banner o activar slot",
+          "Modificar creativo post-pago sin flujo revisión",
+          "Procesar pago automático",
+          "Cambiar precios configuracion_publicidad",
+          "Ver solicitudes de otros anunciantes",
+          "Leer datosPrivados INE de otros"
+        ],
+        "datosPuedeLeer": [
+          "solicitudes_anuncios donde uidAnunciante=propio",
+          "configuracion_publicidad/precios_banners (lectura pública)",
+          "contratos_banners propios (futuro)",
+          "anuncios activos propios (futuro)",
+          "pagos propios estado (futuro)",
+          "inventario rotación slots (público UI)"
+        ],
+        "datosNoDebeLeer": [
+          "solicitudes ajenas",
+          "Override precios internos no publicados",
+          "Métricas globales plataforma",
+          "Documentos identidad raw Storage"
+        ],
+        "accionesSugeridas": [
+          "Borrador copy banner",
+          "Checklist documentos paso 2",
+          "Explicación estado requiere_correccion",
+          "Propuesta slot/periodo"
+        ],
+        "accionesEjecutablesFuturas": [
+          "Prellenar registro-banner localStorage (post-confirmación)",
+          "Abrir paso funnel con slot seleccionado",
+          "Enviar corrección solicitud (post-confirmación + ValidationEngine)"
+        ],
+        "confirmacionHumanaObligatoria": true,
+        "modulosCongelados": {
+          "seguridad": "solicitud_banner gate emailVerificado + estadoSeguridad",
+          "contratos": "contratos_banners diseño",
+          "validationEngine": "validar solicitud create"
+        }
+      },
+      "admin": {
+        "asistentes": {
+          "ia_arquitecto": {
+            "nombreUI": "IA Arquitecto / Supervisor",
+            "objetivo": "Supervisión catálogo, schemas, búsqueda, impacto cambios — solo lectura",
+            "funcionesPermitidas": [
+              "Consultar catálogo, mapa, schemas, busqueda sin resultado",
+              "Dry-run validador y FieldEngine impacto",
+              "Detectar drift mapa vs schema",
+              "Informes recomendación congelamiento",
+              "Comparar versiones repo vs Firestore",
+              "Checklist pre-deploy"
+            ],
+            "funcionesProhibidas": [
+              "Cualquier write Firestore config o catálogo",
+              "Aprobar perfiles/banners",
+              "Cambiar precios",
+              "Crear categorías sin humano",
+              "Leer INE/selfie salvo super_admin con log (futuro acotado)"
+            ],
+            "datosPuedeLeer": ["Colecciones config", "catalogo_subcategorias", "agregados busqueda", "scripts artifacts", "métricas sin PII"],
+            "datosNoDebeLeer": ["Contenido mensajes P2P usuario", "INE en claro por defecto"],
+            "escritura": "solo ia_arquitecto_informes/{id} recomendaciones",
+            "confirmacionHumanaObligatoria": true,
+            "referencia": "config-admin-arquitectura-completa-schema.json ia_arquitecto_supervisor"
+          },
+          "ia_moderador": {
+            "nombreUI": "IA Moderador",
+            "objetivo": "Priorizar cola revisión, sugerir aprobar/rechazar con evidencia pública — humano decide",
+            "funcionesPermitidas": [
+              "Resumir perfil pendiente (campos públicos + flags)",
+              "Detectar inconsistencias obvias vs schema",
+              "Sugerir motivo rechazo plantilla",
+              "Priorizar cola por riesgo/denuncias count",
+              "Resumir solicitud categoría sugerida",
+              "Comparar duplicados potenciales (metadatos)"
+            ],
+            "funcionesProhibidas": [
+              "Aprobar o rechazar automáticamente",
+              "Mostrar INE/selfie a moderador sin rol y sin log",
+              "Suspender cuenta sin humano",
+              "Modificar estadoPublicacion directo"
+            ],
+            "datosPuedeLeer": ["perfiles pendientes públicos", "cola_revision", "denuncias agregadas", "estadoVerificacion sin imágenes por defecto"],
+            "datosNoDebeLeer": ["Mensajes privados P2P", "Pagos tarjeta"],
+            "accesoPrivado": "INE/selfie solo si moderador/super_admin humano abre vista → entonces IA puede resumir metadatos, no almacenar imagen en prompt",
+            "accionesEjecutablesFuturas": ["Crear borrador notaAdmin", "Pre-seleccionar motivo rechazo en formulario"],
+            "confirmacionHumanaObligatoria": true
+          },
+          "ia_comercial": {
+            "nombreUI": "IA Comercial",
+            "objetivo": "Analizar contratos, promociones, banners, renovaciones — sugerir acciones comerciales",
+            "funcionesPermitidas": [
+              "Resumir contratos vencidos próximos",
+              "Sugerir promoción según historial agregado",
+              "Analizar conversión solicitudes→activo",
+              "Proponer ajuste precio con justificación (informe)",
+              "Detectar solicitudes banner atascadas"
+            ],
+            "funcionesProhibidas": [
+              "Cambiar precios en Firestore",
+              "Aprobar pago o activar banner",
+              "Modificar contratoActivoId",
+              "Otorgar descuentos automáticos"
+            ],
+            "datosPuedeLeer": ["contratos_*", "pagos agregados", "solicitudes_anuncios", "configuracion_publicidad", "promociones schemas"],
+            "datosNoDebeLeer": ["INE anunciantes", "Mensajes usuarios"],
+            "confirmacionHumanaObligatoria": true
+          },
+          "ia_seguridad": {
+            "nombreUI": "IA Seguridad",
+            "objetivo": "Correlacionar riesgo, fraude, abuso — sugerir elevación estadoSeguridad",
+            "funcionesPermitidas": [
+              "Resumir logsSeguridad y alertas",
+              "Detectar patrones multicuenta (hashes)",
+              "Sugerir estadoSeguridad observacion/restringido",
+              "Priorizar alertas_seguridad",
+              "Correlacionar denuncias + spamScore mensajería"
+            ],
+            "funcionesProhibidas": [
+              "Cambiar estadoSeguridad automáticamente",
+              "Bloquear login sin humano",
+              "Exponer ipHash/deviceIdHash a roles no seguridad",
+              "Leer contraseñas o tokens"
+            ],
+            "datosPuedeLeer": ["logsSeguridad", "alertas_seguridad", "usuarios.seguridad agregados", "denuncias metadatos", "rate limit counters"],
+            "datosNoDebeLeer": ["Contenido mensajes claro masivo PII"],
+            "confirmacionHumanaObligatoria": true
+          }
+        }
+      }
+    },
+    "integracionModulosCongelados": {
+      "catalogo": {
+        "usoIA": "Arquitecto lectura total; usuario lectura sectores/subcategorías públicas; Moderador coherencia arquetipo",
+        "prohibido": "IA usuario escribe catálogo"
+      },
+      "cuentas": {
+        "usoIA": "Respetar tipoCuenta, rolesCuenta[], perfilPrincipalId, upgrade visitante",
+        "prohibido": "IA crea nuevo Auth user en upgrade"
+      },
+      "seguridadMVP": {
+        "usoIA": "Gates estadoSeguridad/estadoMensajeria/emailVerificado; logs; rate limits consultas IA",
+        "prohibido": "IA bypass Turnstile"
+      },
+      "fieldEngine": {
+        "usoIA": "ia_asistente_perfil y ia_registro usan resolveRegistrationSchema dry-run",
+        "prohibido": "IA persiste ResolvedRegistrationSchema"
+      }
+    },
+    "riesgosIA": [
+      { "id": "IA1", "nivel": "critico", "descripcion": "Asistente único con tools admin expuestos a usuario" },
+      { "id": "IA2", "nivel": "alto", "descripcion": "Filtración INE/selfie en contexto prompt usuario" },
+      { "id": "IA3", "nivel": "alto", "descripcion": "Auto-ejecución recomendación sin confirmación" },
+      { "id": "IA4", "nivel": "alto", "descripcion": "Alucinación categorías no existentes en upgrade visitante" },
+      { "id": "IA5", "nivel": "medio", "descripcion": "IA Moderador sesga aprobar por volumen cola" },
+      { "id": "IA6", "nivel": "medio", "descripcion": "Coste API sin rate limits por dashboard" }
+    ],
+    "recomendacionesIA": [
+      "Incluir capa asistentesIA en SPEC-DASHBOARDS antes de congelar",
+      "Implementar IAOrchestrator con allowlist tools por asistenteId",
+      "Persistir solo ia_recomendaciones + logs — nunca acción directa",
+      "PrivacyGuard obligatorio en pipeline prompts usuario",
+      "Anclar respuestas catálogo a índice/mapa — no inventar subcategoriaId",
+      "Admin: 4 asistentes separados con service accounts distintas (futuro)",
+      "Fase 1 usuario: solo ia_asistente_cuenta FAQ; fase 2 perfil con FieldEngine"
+    ],
+    "fueraDeAlcanceIA": [
+      "Implementación LLM runtime",
+      "Fine-tuning modelos",
+      "IA genera imágenes banner",
+      "IA analiza INE con OCR automático sin acta privacidad",
+      "IA responde mensajes P2P en nombre del usuario sin confirmación",
+      "IA Arquitecto write catálogo aunque se pida en chat"
+    ],
+    "incluirEnSpecDashboards": {
+      "respuesta": "SI_OBLIGATORIO",
+      "secciones": [
+        "asistentesIA.porDashboard",
+        "politicaSeguridadGlobal",
+        "orquestacion",
+        "integracionModulosCongelados",
+        "ia_recomendaciones contrato",
+        "matriz permisos IA × rol × dashboard"
+      ],
+      "antesDeActaCongelamiento": true
+    }
+  }
+}

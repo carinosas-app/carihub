@@ -1,0 +1,397 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "$id": "https://carihub.app/schemas/alineacion-spec-panel-dashboard-con-rutas-canon.json",
+  "tipo": "ALINEACION_DOCUMENTAL",
+  "nombre": "Alineación SPEC-PANEL-DASHBOARD con MATRIZ-RUTAS-NAV-CANONICA",
+  "version": "1.0.0",
+  "fecha": "2026-06-11",
+  "estado": "RECONCILIACION_PRE_RATIFICACION",
+  "modo": "Solo análisis — NO modifica archivos existentes; sin runtime",
+  "veredictoGlobal": "FAIL_RATIFICACION",
+  "veredictoAlineacionParcial": "PASS_CONDICIONAL",
+  "proposito": "Comparar SPEC-PANEL, ACTA, auditorías y fixtures contra MATRIZ-RUTAS-NAV-CANONICA v1.0.0; listar inconsistencias y cambios requeridos antes de ratificación documental.",
+
+  "archivosRevisados": {
+    "obligatorios": {
+      "MATRIZ-RUTAS-NAV-CANONICA.json": { "existe": true, "rol": "Fuente canon rutas/nav/menús" },
+      "MATRIZ-RUTAS-NAV-CANONICA.md": { "existe": true, "rol": "Resumen canon" },
+      "SPEC-PANEL-DASHBOARD-MINIMO.json": { "existe": true, "version": "1.0.0", "lineas": "~761" },
+      "SPEC-PANEL-DASHBOARD-MINIMO.md": { "existe": true, "version": "1.0.0" },
+      "ACTA-CONGELAMIENTO-PANEL-DASHBOARD.json": { "existe": true, "estadoActa": "CONGELADO" },
+      "ACTA-CONGELAMIENTO-PANEL-DASHBOARD.md": { "existe": true },
+      "AUDITORIA-SPEC-PANEL-DASHBOARD-MINIMO.json": { "existe": true, "estado": "HUERFANA" },
+      "AUDITORIA-SPEC-PANEL-DASHBOARD-MINIMO.md": { "existe": true, "estado": "HUERFANA" },
+      "SPEC-DASHBOARDS.json": { "existe": true, "estado": "CONGELADO shell" },
+      "ACTA-CONGELAMIENTO-DASHBOARDS.json": { "existe": true },
+      "PLAN-MAESTRO-DASHBOARDS.json": { "existe": true },
+      "PLAN-MAESTRO-ADMIN.json": { "existe": true },
+      "SPEC-REGISTRO-CUENTA.json": { "existe": true },
+      "SPEC-PAGOS-CONTRATOS.json": { "existe": true },
+      "SPEC-SEO-LANDINGS.json": { "existe": true }
+    },
+    "relacionados": {
+      "fixtures-panel-dashboard-minimo-golden.json": { "existe": true, "estado": "PARCIALMENTE_VIGENTE" },
+      "ANALISIS-REVISION-MVP-DASHBOARD.json": { "existe": true, "nota": "Referencia DM-01..10; no en lista obligatoria" }
+    }
+  },
+
+  "archivosNuevosCreados": [
+    "scripts/ALINEACION-SPEC-PANEL-DASHBOARD-CON-RUTAS-CANON.json",
+    "scripts/ALINEACION-SPEC-PANEL-DASHBOARD-CON-RUTAS-CANON.md"
+  ],
+
+  "archivosExistentesNoModificados": [
+    "SPEC-PANEL-DASHBOARD-MINIMO.json",
+    "SPEC-PANEL-DASHBOARD-MINIMO.md",
+    "ACTA-CONGELAMIENTO-PANEL-DASHBOARD.json",
+    "ACTA-CONGELAMIENTO-PANEL-DASHBOARD.md",
+    "AUDITORIA-SPEC-PANEL-DASHBOARD-MINIMO.json",
+    "AUDITORIA-SPEC-PANEL-DASHBOARD-MINIMO.md",
+    "fixtures-panel-dashboard-minimo-golden.json",
+    "MATRIZ-RUTAS-NAV-CANONICA.json",
+    "Todos los demás del corpus"
+  ],
+
+  "validacionDecisionesCanonicas": {
+    "dashboardAnunciante": {
+      "canon_banners": { "esperado": "/cuenta/banners", "spec": "PASS", "evidencia": "dashboards.anunciante.rutaBase" },
+      "alias_anunciante_301": { "esperado": "deprecated/redirect", "spec": "AUSENTE", "severidad": "media", "nota": "SPEC no documenta alias; solo ausencia de /cuenta/anunciante" },
+      "funnel_registro_banner": { "esperado": "/registro/banner", "spec": "AUSENTE", "severidad": "alta", "nota": "No en módulos anunciante ni matrizNavegacion" },
+      "panel_operativo_banners": { "esperado": "/cuenta/banners/*", "spec": "PASS" }
+    },
+    "edicionPerfil": {
+      "canon_registro_editar": { "esperado": "/registro/editar/{perfilId}", "spec": "PASS", "evidencia": "CTAs DP-02, DP-03, matrices" },
+      "dashboard_solo_cta": { "esperado": "sin edición inline", "spec": "PASS", "evidencia": "reglasCongeladas, capacidades tipo CTA" },
+      "cuenta_perfil_editar_no_principal": { "esperado": "no ruta operativa", "spec": "PASS", "evidencia": "No aparece en pantallas SPEC; solo PLAN-MAESTRO-DASHBOARDS externo" }
+    },
+    "admin": {
+      "canon_admin_star": { "esperado": "/admin/* PLAN-ADMIN", "spec": "PARCIAL", "evidencia": "matrizNavegacion usa /admin/expedientes/* — FAIL" },
+      "admin_html_bridge": { "esperado": "documentado legacy", "spec": "AUSENTE", "severidad": "media" },
+      "expedientes_grupo_ui": { "esperado": "no URL física", "spec": "FAIL", "evidencia": "matrizNavegacion.admin.internas incluye expedientes/*" }
+    },
+    "home": {
+      "index_bridge": { "esperado": "modales → rutas canon", "spec": "AUSENTE", "severidad": "media", "nota": "Documentado en MATRIZ; no en SPEC-PANEL" },
+      "futuro_modular": { "esperado": "documentado sin runtime", "spec": "PARCIAL", "evidencia": "alcanceNoIncluido runtime" }
+    },
+    "seo": {
+      "resultados_noindex": { "esperado": "noindex,follow", "spec": "PASS_INDIRECTO", "evidencia": "SPEC-SEO referenciado; SPEC-PANEL noindex /cuenta" },
+      "perfil_publico_canon": { "esperado": "/perfil/{perfilId}/{slug}", "spec": "PASS", "evidencia": "CTA ver_publico RenderEngine" }
+    }
+  },
+
+  "comparacionPorDominioRutas": {
+    "publicas": { "canon": 7, "specAlineadas": 1, "specIndirectas": 1, "gap": "Landings/home no en SPEC-PANEL (OK — fuera alcance)" },
+    "cuentaPerfil": { "canon": 17, "specAlineadas": 14, "gaps": ["/cuenta/estado fusionable", "centros transversales sin ruta"] },
+    "anunciante": { "canon": 8, "specAlineadas": 7, "gaps": ["/registro/banner funnel"] },
+    "admin": { "canon": 19, "specAlineadas": 12, "gaps": ["/admin/expedientes/* obsoletas en matrizNavegacion", "falta mapeo ADM-02 colas→rutas"] },
+    "pagosContratos": { "canon": 4, "specAlineadas": 4, "estado": "PASS" },
+    "facturacion": { "canon": "/cuenta/facturacion Post-MVP", "specAlineadas": 0, "estado": "PASS_PostMVP_doc" },
+    "configSeguridad": { "canon": 10, "specModulos": 2, "specRutasExplicitas": 0, "estado": "GAP — centros sin pantallas" },
+    "iaActualizacionesInteligencia": { "canon": 9, "specModulos": 5, "specRutasExplicitas": 0, "estado": "GAP" }
+  },
+
+  "inconsistencias": [
+    {
+      "id": "INC-001",
+      "severidad": "critica",
+      "archivo": "SPEC-PANEL-DASHBOARD-MINIMO.json",
+      "seccion": "matricesObligatorias.matrizNavegacion.admin.internas",
+      "valorActual": ["/admin/expedientes/perfiles", "/admin/expedientes/anunciantes", "/admin/expedientes/pagos", "/admin/moderacion", "/admin/auditoria", "/admin/metricas"],
+      "valorCanonico": ["/admin/revision", "/admin/perfiles", "/admin/banners", "/admin/pagos", "/admin/contratos", "/admin/denuncias", "/admin/moderacion", "/admin/auditoria", "/admin/metricas"],
+      "accion": "Reemplazar expedientes/* por rutas PLAN-ADMIN planas; expedientes = agrupación menú",
+      "modificacionInmediata": false,
+      "requiereAutorizacion": true,
+      "prioridad": "P0"
+    },
+    {
+      "id": "INC-002",
+      "severidad": "critica",
+      "archivo": "AUDITORIA-SPEC-PANEL-DASHBOARD-MINIMO.json",
+      "seccion": "global",
+      "valorActual": "Audita borrador minimal: 8 matrices, 4 contratos Panel*, distincionCritica panel 1 página, verificacion shell Post-MVP",
+      "valorCanonico": "Auditar SPEC operativo v1.0.0: 11 matrices, 3 dashboards, 5 centros, MATRIZ-RUTAS-NAV-CANONICA",
+      "accion": "Regenerar AUDITORIA-SPEC-PANEL v2.0.0 (archivo nuevo o reemplazo autorizado)",
+      "modificacionInmediata": false,
+      "requiereAutorizacion": true,
+      "prioridad": "P0"
+    },
+    {
+      "id": "INC-003",
+      "severidad": "alta",
+      "archivo": "ACTA-CONGELAMIENTO-PANEL-DASHBOARD.json",
+      "seccion": "estadoActa / veredictoCapaCongelada",
+      "valorActual": "estadoActa: CONGELADO; diseño SÍ; 22 validaciones PASS pre-MATRIZ",
+      "valorCanonico": "CONGELADO_PARCIAL pendiente ratificación post-MATRIZ; condición: SPEC alineado",
+      "accion": "ACTA v1.1 o addendum ratificación tras correcciones SPEC",
+      "modificacionInmediata": false,
+      "requiereAutorizacion": true,
+      "prioridad": "P0"
+    },
+    {
+      "id": "INC-004",
+      "severidad": "alta",
+      "archivo": "SPEC-PANEL-DASHBOARD-MINIMO.json",
+      "seccion": "centrosTransversales",
+      "valorActual": "Módulos CX-ACT, CX-INT, CX-CFG, CX-SEG sin rutas/pantallas",
+      "valorCanonico": "/cuenta/centro/actualizaciones, /cuenta/centro/inteligencia, /cuenta/config/*, /cuenta/seguridad/*",
+      "accion": "Añadir bloque rutasCanonicas referenciando MATRIZ-RUTAS-NAV-CANONICA",
+      "modificacionInmediata": false,
+      "requiereAutorizacion": true,
+      "prioridad": "P1"
+    },
+    {
+      "id": "INC-005",
+      "severidad": "alta",
+      "archivo": "SPEC-PANEL-DASHBOARD-MINIMO.json",
+      "seccion": "dashboards.anunciante",
+      "valorActual": "Sin /registro/banner en funnel",
+      "valorCanonico": "ANU-08 /registro/banner funnel; panel /cuenta/banners",
+      "accion": "Documentar funnel en DA-01 o sección onboardingAnunciante",
+      "modificacionInmediata": false,
+      "requiereAutorizacion": true,
+      "prioridad": "P1"
+    },
+    {
+      "id": "INC-006",
+      "severidad": "alta",
+      "archivo": "SPEC-PANEL-DASHBOARD-MINIMO.json",
+      "seccion": "documentosReferenciados",
+      "valorActual": "Sin MATRIZ-RUTAS-NAV-CANONICA",
+      "valorCanonico": "scripts/MATRIZ-RUTAS-NAV-CANONICA.json como dependencia canon",
+      "accion": "Añadir referencia + campo rutasCanon: MATRIZ v1.0.0",
+      "modificacionInmediata": false,
+      "requiereAutorizacion": true,
+      "prioridad": "P1"
+    },
+    {
+      "id": "INC-007",
+      "severidad": "alta",
+      "archivo": "AUDITORIA-SPEC-PANEL-DASHBOARD-MINIMO.json",
+      "seccion": "matrizConsistencia",
+      "valorActual": "Verificación '8 matrices obligatorias' PASS",
+      "valorCanonico": "11 matrices en SPEC actual",
+      "accion": "Actualizar verificaciones en auditoría regenerada",
+      "modificacionInmediata": false,
+      "requiereAutorizacion": true,
+      "prioridad": "P1"
+    },
+    {
+      "id": "INC-008",
+      "severidad": "media",
+      "archivo": "SPEC-PANEL-DASHBOARD-MINIMO.json",
+      "seccion": "nombre / $id",
+      "valorActual": "nombre: Panel-Dashboard-Operativo; archivo: SPEC-PANEL-DASHBOARD-MINIMO",
+      "valorCanonico": "Coherencia naming — ver decisiónNombreSpec",
+      "accion": "Metadata alias o rename futuro",
+      "modificacionInmediata": false,
+      "requiereAutorizacion": true,
+      "prioridad": "P2"
+    },
+    {
+      "id": "INC-009",
+      "severidad": "media",
+      "archivo": "PLAN-MAESTRO-DASHBOARDS.json",
+      "seccion": "dashboards.perfil.rutas / dashboards.anunciante.rutas",
+      "valorActual": "/cuenta/perfil/editar, /cuenta/anunciante/*",
+      "valorCanonico": "/registro/editar/{id}, /cuenta/banners/*",
+      "accion": "Nota reconciliación — PLAN no modificado; MATRIZ prevalece sobre PLAN",
+      "modificacionInmediata": false,
+      "requiereAutorizacion": true,
+      "prioridad": "P2",
+      "nota": "Archivo congelado indirectamente — actualizar en PLAN MINOR futuro"
+    },
+    {
+      "id": "INC-010",
+      "severidad": "media",
+      "archivo": "SPEC-PANEL-DASHBOARD-MINIMO.json",
+      "seccion": "global",
+      "valorActual": "Sin sección legacyBridge / aliases301",
+      "valorCanonico": "resolucionConflictos C-R01..C-R06 de MATRIZ",
+      "accion": "Importar o referenciar bloque aliases desde MATRIZ",
+      "modificacionInmediata": false,
+      "requiereAutorizacion": true,
+      "prioridad": "P1"
+    },
+    {
+      "id": "INC-011",
+      "severidad": "media",
+      "archivo": "dashboards.administrador.modulos.expedientes",
+      "seccion": "ADM-02",
+      "valorActual": "colas sin rutasCanon mapeadas",
+      "valorCanonico": "perfiles→/admin/perfiles; pagos→/admin/pagos; etc.",
+      "accion": "Añadir rutasCanon por cola en ADM-02",
+      "modificacionInmediata": false,
+      "requiereAutorizacion": true,
+      "prioridad": "P1"
+    },
+    {
+      "id": "INC-012",
+      "severidad": "media",
+      "archivo": "fixtures-panel-dashboard-minimo-golden.json",
+      "seccion": "fixtures",
+      "valorActual": "8 casos perfil/registro; sin /cuenta/banners ni /registro/banner",
+      "valorCanonico": "PDM-09 anunciante activo; PDM-10 funnel banner",
+      "accion": "Regenerar fixtures post-SPEC alineado",
+      "modificacionInmediata": false,
+      "requiereAutorizacion": true,
+      "prioridad": "P1"
+    },
+    {
+      "id": "INC-013",
+      "severidad": "baja",
+      "archivo": "ACTA-CONGELAMIENTO-PANEL-DASHBOARD.json",
+      "seccion": "documentosFuente / artefactosAprobados",
+      "valorActual": "Sin MATRIZ ni AUDITORIA ni fixtures",
+      "valorCanonico": "Incluir MATRIZ v1.0.0 + AUDITORIA v2 + fixtures v2",
+      "accion": "ACTA v1.1",
+      "modificacionInmediata": false,
+      "requiereAutorizacion": true,
+      "prioridad": "P2"
+    },
+    {
+      "id": "INC-014",
+      "severidad": "baja",
+      "archivo": "SPEC-PANEL-DASHBOARD-MINIMO.md",
+      "seccion": "Centros transversales",
+      "valorActual": "Sin rutas /cuenta/centro/*",
+      "valorCanonico": "Rutas MATRIZ sección 3",
+      "accion": "Sincronizar MD con JSON post-corrección",
+      "modificacionInmediata": false,
+      "requiereAutorizacion": true,
+      "prioridad": "P2"
+    },
+    {
+      "id": "INC-015",
+      "severidad": "baja",
+      "archivo": "AUDITORIA-MAESTRA-COMPLETA-CARIHUB.json",
+      "seccion": "GAP-PANEL-DASH",
+      "valorActual": "35% pendiente SPEC (pre panel operativo)",
+      "valorCanonico": "Actualizar v2.1 post-ratificación",
+      "accion": "AUDITORIA-MAESTRA v2.1 — fuera alcance inmediato",
+      "modificacionInmediata": false,
+      "requiereAutorizacion": true,
+      "prioridad": "P2"
+    }
+  ],
+
+  "conflictosResueltosPorMatriz": [
+    "C-R01 /cuenta/banners — SPEC ya alineado",
+    "C-R02 /registro/editar — SPEC CTAs alineados",
+    "C-R03 /admin/expedientes — MATRIZ resuelve; SPEC matrizNavegacion NO actualizada",
+    "C-R04 admin.html bridge — MATRIZ documenta; SPEC/ACTA no",
+    "C-R05 index.html modales — MATRIZ documenta; SPEC no",
+    "C-R06 /registro/banner — MATRIZ documenta; SPEC parcial"
+  ],
+
+  "conflictosPendientes": [
+    "C-P01 /cuenta/negocio — MINOR 1.1",
+    "C-P02 /operador — SPEC-ADMIN",
+    "C-P03 /messenger — Post-MVP (WhatsApp MVP OK)",
+    "INC-001 admin expedientes en SPEC",
+    "INC-002 auditoría huérfana",
+    "INC-003 ACTA prematura CONGELADO"
+  ],
+
+  "decisionNombreSpec": {
+    "opciones": [
+      {
+        "id": "OPT-A",
+        "nombre": "Mantener SPEC-PANEL-DASHBOARD-MINIMO",
+        "pros": ["Sin rename archivos/acta", "ACTA ya referencia nombre", "GAP-PANEL-DASH histórico"],
+        "contras": ["Confunde con panel 1 página ANALISIS-MVP", "Nombre interno ya dice Operativo", "Alcance ≠ mínimo"]
+      },
+      {
+        "id": "OPT-B",
+        "nombre": "Renombrar a SPEC-DASHBOARDS-OPERATIVOS",
+        "pros": ["Coherente alcance real", "Distinto de SPEC-DASHBOARDS shell", "Claro para implementadores"],
+        "contras": ["Requiere rename 4+ archivos", "ACTA v1.1", "Auditorías/fixtures rename"]
+      }
+    ],
+    "recomendacionP0": "OPT-B conceptual con alias temporal",
+    "implementacionRecomendada": {
+      "fase1": "Mantener filename SPEC-PANEL-DASHBOARD-MINIMO hasta ratificación",
+      "fase2": "Añadir en JSON: nombreCanon: SPEC-DASHBOARDS-OPERATIVOS, nombreLegacy: SPEC-PANEL-DASHBOARD-MINIMO",
+      "fase3": "Rename físico en entrega v1.1 post-ratificación (autorización explícita)",
+      "justificacion": "Minimiza churn pre-ratificación; resuelve confusión en metadata antes de rename"
+    },
+    "coherenciaShell": "SPEC-DASHBOARDS = shell arquitectónico congelado; SPEC-DASHBOARDS-OPERATIVOS = capa operacional — relación padre/hijo documentada en MATRIZ",
+    "riesgoConfusion": "Alto si se mantiene MINIMO sin alias; Medio con alias metadata",
+    "impactoMigraciones": "Bajo — solo paths documentales; runtime usa MATRIZ canon"
+  },
+
+  "evaluacionActa": {
+    "versionActual": "1.0.0",
+    "estadoDeclarado": "CONGELADO",
+    "recomendacion": "NO ratificar como fuente oficial hasta correcciones",
+    "versionPropuesta": "1.1.0",
+    "tipoCongelamiento": "PARCIAL_DISENO — runtime NO",
+    "condicionesPreRatificacion": [
+      "SPEC matrizNavegacion.admin alineada a MATRIZ canon (INC-001)",
+      "SPEC referencia MATRIZ-RUTAS-NAV-CANONICA v1.0.0 (INC-006)",
+      "Centros transversales con rutas explícitas (INC-004)",
+      "AUDITORIA-SPEC v2.0.0 regenerada (INC-002)",
+      "Fixtures PDM-01..10 regenerados (INC-012)",
+      "Addendum aliases301 documentado en SPEC (INC-010)"
+    ],
+    "conservarV1_0_0": "Como borrador congelado provisional 2026-06-11 — superseded by v1.1 post-MATRIZ",
+    "ratificacionPosterior": "Tras PASS auditoría v2 + checklist INC cerrados"
+  },
+
+  "evaluacionAuditoriaSpec": {
+    "estado": "HUERFANA",
+    "audita": "Borrador minimal pre-expansión operativa",
+    "evidencia": [
+      "Verificación '8 matrices' vs 11 actuales",
+      "Verificación 'distincionCritica panel mínimo 1 página'",
+      "Verificación '4 contratos Panel*' — ausentes en SPEC operativo actual",
+      "Fecha misma que SPEC operativo pero contenido desalineado"
+    ],
+    "regenerar": {
+      "archivoPropuesto": "AUDITORIA-SPEC-PANEL-DASHBOARD-MINIMO v2.0.0 (reemplazo autorizado)",
+      "verificacionesMinimas": 25,
+      "incluir": ["MATRIZ-RUTAS-NAV-CANONICA cross-check", "11 matrices", "3 dashboards", "5 centros", "aliases301", "admin rutas planas"],
+      "fixtures": "Regenerar PDM-01..10 incluyendo anunciante y admin cola"
+    },
+    "validacionesRepetir": [
+      "Coherencia ACTA-RC, ACTA-PAY, ACTA-DASH, ACTA-SEO",
+      "Rutas canon vs matrizNavegacion",
+      "Menús vs matrizMenus MATRIZ",
+      "Permisos vs matrizPermisos",
+      "noModifica respetado"
+    ]
+  },
+
+  "impactoMetricas": {
+    "navegacionCanonica": { "antesAlineacion": 92, "specVsMatriz": 78, "despuesCorreccionesEstimado": 96 },
+    "documentacionGlobal": { "antes": 89, "despuesEstimado": 91, "delta": 2 },
+    "arquitecturaGlobalCap10": { "antes": 90, "despuesEstimado": 92, "delta": 2 },
+    "construccionP0": { "antes": 88, "despuesEstimado": 89, "delta": 1 },
+    "mvpOperarDoc": { "antes": 85, "despuesEstimado": 87, "delta": 2 },
+    "mvpCobrarDoc": { "antes": 76, "despuesEstimado": 76, "delta": 0 },
+    "riesgoImplementacion": { "antes": "medio-alto", "despues": "medio-bajo", "nota": "INC-001 admin routes principal riesgo deuda" },
+    "riesgoDeudaTecnica": { "antes": "alto si ratifica ACTA sin fix", "despues": "medio post-fix" },
+    "alineacionSpecPanelVsMatriz": { "antes": 78, "despuesEstimado": 96, "delta": 18 }
+  },
+
+  "cambiosRequeridosAutorizacionPosterior": [
+    { "archivo": "SPEC-PANEL-DASHBOARD-MINIMO.json", "motivo": "INC-001 admin nav", "prioridad": "P0", "riesgo": "Implementadores usan URLs incorrectas" },
+    { "archivo": "SPEC-PANEL-DASHBOARD-MINIMO.json", "motivo": "INC-004,006,010 centros+MATRIZ+aliases", "prioridad": "P1", "riesgo": "Nav incompleta" },
+    { "archivo": "SPEC-PANEL-DASHBOARD-MINIMO.md", "motivo": "Sincronizar JSON", "prioridad": "P1", "riesgo": "Bajo" },
+    { "archivo": "AUDITORIA-SPEC-PANEL-DASHBOARD-MINIMO.json", "motivo": "Regenerar v2", "prioridad": "P0", "riesgo": "Veredicto PASS falso" },
+    { "archivo": "fixtures-panel-dashboard-minimo-golden.json", "motivo": "PDM anunciante+admin", "prioridad": "P1", "riesgo": "CI fixtures desactualizados" },
+    { "archivo": "ACTA-CONGELAMIENTO-PANEL-DASHBOARD.json", "motivo": "v1.1 ratificación", "prioridad": "P0", "riesgo": "Congelamiento prematuro" }
+  ],
+
+  "siguienteAccionRecomendada": {
+    "orden": 1,
+    "accion": "Autorizar patch SPEC-PANEL v1.0.1 (solo rutas/nav/aliases/MATRIZ ref) — INC-001,004,005,006,010,011",
+    "orden2": "Regenerar AUDITORIA-SPEC v2.0.0 + fixtures PDM-01..10",
+    "orden3": "ACTA-CONGELAMIENTO-PANEL-DASHBOARD v1.1.0 ratificación",
+    "orden4": "AUDITORIA-MAESTRA-COMPLETA v2.1",
+    "orden5": "Decidir rename SPEC-DASHBOARDS-OPERATIVOS en v1.1 o v2.0"
+  },
+
+  "changelog": [
+    { "version": "1.0.0", "fecha": "2026-06-11", "nota": "Reconciliación pre-ratificación: 15 inconsistencias; FAIL ratificación; PASS condicional 78% alineación SPEC↔MATRIZ" }
+  ]
+}

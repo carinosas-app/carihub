@@ -1,0 +1,124 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "$id": "https://carihub.app/schemas/acta-congelamiento-fieldengine.json",
+  "tipo": "ACTA_CONGELAMIENTO_FIELDENGINE",
+  "titulo": "Acta formal de congelamiento — FieldEngine CariHub",
+  "versionActa": "1.0.1",
+  "fechaCongelamiento": "2026-06-09",
+  "fechaActualizacion": "2026-06-09",
+  "fechaAprobacionSpec": "2026-06-09",
+  "estadoActa": "CONGELADO",
+  "autorizacion": {
+    "estado": "APROBADA",
+    "autorizadoPor": "product owner / usuario CariHub",
+    "alcance": "Baseline de diseño FieldEngine v1.0.1 — especificación técnica sin implementación runtime; AM1–AM3 cerrados",
+    "artefactosAprobados": [
+      "scripts/SPEC-FIELDENGINE.md",
+      "scripts/SPEC-FIELDENGINE.json",
+      "scripts/fixtures-fieldengine-golden.json"
+    ],
+    "auditoria": "scripts/AUDITORIA-SPEC-FIELDENGINE.json",
+    "reporteCierreAM": "scripts/REPORTE-SPEC-FIELDENGINE-v1.0.1.json"
+  },
+  "versionFieldEngine": {
+    "id": "fieldengine-2026-06-10",
+    "semver": "1.0.1",
+    "specVersion": "1.0.1",
+    "versionAnterior": "1.0.0"
+  },
+  "dependenciasCongeladas": {
+    "catalogo": { "version": "catalogo-2026-06-10", "semver": "1.0.0" },
+    "cuentas": { "version": "cuentas-2026-06-10", "semver": "1.0.0" },
+    "seguridad": { "version": "seguridad-2026-06-10", "semver": "1.0.0" }
+  },
+  "objetoCongelamiento": {
+    "apiPrincipal": "resolveRegistrationSchema(context) → ResolvedRegistrationSchema",
+    "algoritmoMerge": "meta.base → plantillasArquetipo[arquetipo] → sub.delta → fieldRegistry",
+    "algoritmoResolucion": "rama visitante | rama temporal | rama estándar merge",
+    "fuentesLectura": [
+      "mapa-registro-categorias.json",
+      "config-registro-{formularioId}-schema.json",
+      "config-registro-schema.meta.json",
+      "config-registro-componentes-ui-schema.json",
+      "config-cuentas-usuario-schema.json",
+      "config-seguridad-mvp-schema.json",
+      "config-categorias-sugeridas-schema.json",
+      "config-renderizado-dinamico-schema.json",
+      "config-contratos-carihub-schema.json"
+    ],
+    "securityGates": "evaluateSecurityGates — estados cuenta/seguridad; guardar_borrador incluye restringido; Turnstile en ValidationEngine",
+    "politicaSchemaVersion": "publicado congela; borrador nuevo usa catálogo vigente",
+    "snapshotAlPublicar": "mapeo desde ResolvedRegistrationSchema → config-renderizado-dinamico-schema.json",
+    "fixtures": "fixtures-fieldengine-golden.json — 11 casos"
+  },
+  "ajustesObligatoriosCerrados": {
+    "AM1": {
+      "estado": "CERRADO",
+      "cambio": "guardar_borrador permitido en estadoSeguridad=restringido",
+      "fixture": "F10"
+    },
+    "AM2": {
+      "estado": "CERRADO",
+      "cambio": "subcategoriaId opcional visitante registro inicial; obligatorio en upgrade_perfil_publico",
+      "fixtures": ["F08", "F11"]
+    },
+    "AM3": {
+      "estado": "CERRADO",
+      "cambio": "Fuentes categorías sugeridas, renderizado dinámico, contratos, snapshotAlPublicar",
+      "referencias": [
+        "config-categorias-sugeridas-schema.json",
+        "config-renderizado-dinamico-schema.json",
+        "config-contratos-carihub-schema.json"
+      ]
+    }
+  },
+  "addendumPreImplementacion": {
+    "obligatoriosPendientes": [],
+    "recomendado": ["AM4 algoritmo temporal detallado", "AM5 sección snapshot extendida", "AM6 facturacion/verificacion merge", "AM7 resolveHash", "AM8 roles anunciante en CuentaContext"],
+    "referencia": "scripts/AUDITORIA-SPEC-FIELDENGINE.json → ajustesMenoresRecomendados"
+  },
+  "implementacion": {
+    "runtimeAutorizado": false,
+    "firestoreAutorizado": false,
+    "deployAutorizado": false,
+    "nota": "v1.0.1 congelada como diseño; implementación requiere autorización explícita posterior"
+  },
+  "motoresRelacionados": {
+    "validationEngine": "CONGELADO v1.0.0 — consume ResolvedRegistrationSchema",
+    "renderEngine": "No autorizado; consume snapshot publicado, no FieldEngine live",
+    "wizardHtml": "No autorizado; consumidor de campos resueltos",
+    "messenger": "Sin dependencia directa FieldEngine"
+  },
+  "archivosBaseline": [
+    "scripts/SPEC-FIELDENGINE.md",
+    "scripts/SPEC-FIELDENGINE.json",
+    "scripts/fixtures-fieldengine-golden.json",
+    "scripts/SPEC-FIELDENGINE-ALCANCE.md",
+    "scripts/AUDITORIA-SPEC-FIELDENGINE.md",
+    "scripts/AUDITORIA-SPEC-FIELDENGINE.json",
+    "scripts/ACTA-CONGELAMIENTO-FIELDENGINE.json",
+    "scripts/ACTA-CONGELAMIENTO-FIELDENGINE.md",
+    "scripts/REPORTE-SPEC-FIELDENGINE-v1.0.1.json",
+    "scripts/REPORTE-SPEC-FIELDENGINE-v1.0.1.md"
+  ],
+  "procedimientoVersionado": {
+    "PATCH": "Clarificaciones, fixtures, resolveHash, documentación snapshot",
+    "MINOR": "Nuevos modos resolución, validationProfile export, wizardSections",
+    "MAJOR": "Cambio estructura ResolvedRegistrationSchema o fuente arquetipo",
+    "historialVersiones": [
+      {
+        "semver": "1.0.0",
+        "fecha": "2026-06-09",
+        "evento": "CONGELAMIENTO_INICIAL",
+        "notas": "Spec aprobada; auditoría con 3 ajustes obligatorios pre-implementación"
+      },
+      {
+        "semver": "1.0.1",
+        "fecha": "2026-06-09",
+        "evento": "PATCH_AM1_AM3",
+        "notas": "Cierre AM1 guardar_borrador restringido; AM2 visitante subcategoriaId condicional; AM3 fuentes snapshot/contratos/temporal"
+      }
+    ]
+  },
+  "estado": "CONGELADO"
+}

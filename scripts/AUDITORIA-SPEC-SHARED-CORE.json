@@ -1,0 +1,85 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "tipo": "AUDITORIA_SPEC",
+  "objeto": "SPEC-SHARED-CORE",
+  "versionSpecAuditada": "1.0.0",
+  "fecha": "2026-06-10",
+  "estado": "AUDITORIA_CONSISTENCIA_COMPLETADA",
+  "veredicto": "CONGELABLE_TRAS_APROBACION — sin hallazgos bloqueantes; ACTA no generada por instrucción",
+  "alcance": "Verificar cierre de SC-AO-01..06, consistencia interna, coherencia con corpus congelado y ADRs, y cobertura de fixtures.",
+  "verificacionCierreAjustes": [
+    { "id": "SC-AO-01", "tema": "SPEC formal (API/tipos/semver/superficie)", "resultado": "CERRADO", "evidencia": "api{}, tipos{}, semver{}, superficiePublica{}" },
+    { "id": "SC-AO-02", "tema": "Catálogo 34 vs 462", "resultado": "CERRADO", "evidencia": "estrategiaCatalogo: 462 canónico + compatProduccion()" },
+    { "id": "SC-AO-03", "tema": "Tokens / --rosa", "resultado": "CERRADO", "evidencia": "--ch-rosa #ec2d7a + variantes + alias admin; corrección home-modals documentada" },
+    { "id": "SC-AO-04", "tema": "Carga/segmentación geo", "resultado": "CERRADO", "evidencia": "geo.segmentacion índice + lazy" },
+    { "id": "SC-AO-05", "tema": "Frontera clientes vs motores", "resultado": "CERRADO", "evidencia": "clientesContratos + validationClient/fieldClient/renderClient delegan" },
+    { "id": "SC-AO-06", "tema": "Anti god-module + acíclico", "resultado": "CERRADO", "evidencia": "reglasAntiGodModule + reglasAntiCiclos + grafoAciclico + fixtures C18/C19" }
+  ],
+  "matrizConsistencia": [
+    { "verificacion": "Clientes no reimplementan motores congelados", "resultado": "PASS", "nota": "validationClient/fieldClient/renderClient solo delegan" },
+    { "verificacion": "ComponentRegistry referencia contrato existente", "resultado": "PASS", "nota": "config-registro-componentes-ui-schema.json + config-renderizado-dinamico-schema.json" },
+    { "verificacion": "resolveUrl coherente con ADR-URL-CANONICA-PERFILES", "resultado": "PASS", "nota": "/perfil/{perfilId}/{slug}; fixture C17" },
+    { "verificacion": "modoRender no es responsabilidad de Core", "resultado": "PASS", "nota": "Core expone renderClient; estrategia vive en ADR-RENDER-STRATEGY/RenderEngine" },
+    { "verificacion": "Catálogo canónico = catalogo-2026-06-10@1.0.0", "resultado": "PASS", "nota": "compat 34 vía flag activoProduccion; no modifica producción" },
+    { "verificacion": "Tokens canónicos sin colisión (prefijo --ch-)", "resultado": "PASS", "nota": "Evita choque con --rosa legacy; corrección documentada" },
+    { "verificacion": "Grafo acíclico apps→Core", "resultado": "PASS", "nota": "Core→app prohibido; fixture C18 build-time" },
+    { "verificacion": "Regla de admisión rechaza dominio", "resultado": "PASS", "nota": "fixture C19 (ETIQUETAS→Banners)" },
+    { "verificacion": "RBAC fuente única", "resultado": "PASS", "nota": "fixture C20; admin.html + firestore.rules consumen contrato" },
+    { "verificacion": "No modifica capas congeladas ni producción", "resultado": "PASS" }
+  ],
+  "fortalezas": [
+    "Cierra los 6 ajustes obligatorios con evidencia puntual",
+    "Superficie pública explícita por sub-capa (core.config/data/helpers/ui/engines)",
+    "Decisión vinculante de catálogo (462 + compat) sin tocar producción",
+    "Resolución concreta de tokens y --rosa con convención --ch-",
+    "Frontera cliente/motor nítida; preserva motores congelados",
+    "Grafo acíclico verificable + regla de admisión anti god-module",
+    "20 fixtures golden con cobertura por sub-capa"
+  ],
+  "debilidades": [
+    "Sin validador automatizado aún (recomendado, no bloqueante)",
+    "Sin SPEC-SHARED-CORE-ALCANCE.md (recomendado)",
+    "Decisión perfilId opaco vs uid queda referida a Seguridad (no resuelta aquí, pero fuera de alcance Core)"
+  ],
+  "riesgos": [
+    { "id": "SCS-R01", "nivel": "medio", "riesgo": "Adopción parcial: páginas que sigan con firebaseConfig propio durante transición", "mitigacion": "Plan de adopción por página (implementación futura)" },
+    { "id": "SCS-R02", "nivel": "medio", "riesgo": "compatProduccion desincronizado del catálogo real hasta migración", "mitigacion": "flag activoProduccion como única fuente; revisar en migración" },
+    { "id": "SCS-R03", "nivel": "bajo", "riesgo": "Tokens --ch-* conviven con --rosa legacy hasta corregir CSS", "mitigacion": "Alias temporal + corrección home-modals documentada" },
+    { "id": "SCS-R04", "nivel": "bajo", "riesgo": "Versionado MAJOR de Core impacta muchas apps", "mitigacion": "semver + rango compatible declarado por app" }
+  ],
+  "dependencias": {
+    "congeladas": ["VE 1.1.0", "FieldEngine 1.0.1", "Catálogo 1.0.0", "Cuentas 1.0.0", "Seguridad 1.0.0", "Dashboards 1.0.0", "Messenger 1.0.0"],
+    "enDiseno": ["RenderEngine 1.0.0 (SPEC)", "App Pública (plan)", "SEO/ThemeEngine (observaciones)"],
+    "adrsPrevios": ["ADR-RENDER-STRATEGY 1.0.0", "ADR-URL-CANONICA-PERFILES 1.0.0"]
+  },
+  "fueraDeAlcance": [
+    "Runtime de Core",
+    "Migración real catálogo 34→462",
+    "Reglas VE / merge FE / render RenderEngine",
+    "Editor ThemeEngine",
+    "Reescritura de páginas",
+    "Decisión perfilId opaco (Seguridad)"
+  ],
+  "coberturaFixtures": { "total": 20, "subcapas": ["config", "helpers", "data(catálogo+geo)", "ui(tokens+registry)", "engines(clientes)", "arquitectura(acíclico+admisión)"] },
+  "ajustesObligatoriosRestantes": [],
+  "ajustesRecomendados": [
+    { "id": "SCS-AR-01", "tema": "validar-spec-shared-core.mjs" },
+    { "id": "SCS-AR-02", "tema": "SPEC-SHARED-CORE-ALCANCE.md" },
+    { "id": "SCS-AR-03", "tema": "Plan de adopción por página (firebaseConfig→Core)" },
+    { "id": "SCS-AR-04", "tema": "Decisión perfilId opaco con Seguridad" }
+  ],
+  "recomendacionCongelamiento": {
+    "puedeCongelarse": true,
+    "condicion": "Aprobación explícita del product owner",
+    "hallazgosBloqueantes": 0,
+    "actaProcede": false,
+    "notaActa": "ACTA-CONGELAMIENTO-SHARED-CORE NO generada: el usuario indicó no aprobar congelamiento todavía",
+    "desbloquea": "Al congelar Core → cierra RE-AU-01 → habilita ACTA-CONGELAMIENTO-RENDERENGINE"
+  },
+  "criteriosAceptacion": [
+    "SC-AO-01..06 cerrados: PASS",
+    "Consistencia con corpus y ADRs: PASS",
+    "Cobertura fixtures suficiente: PASS",
+    "Hallazgos bloqueantes: 0 → CONGELABLE tras aprobación"
+  ]
+}

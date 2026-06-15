@@ -1,0 +1,234 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "versionSchema": "2026-06-10",
+  "version": "2026-06-10",
+  "schemaId": "busqueda_categorias",
+  "nombre": "Arquitectura de búsqueda inteligente de categorías y subcategorías",
+  "descripcion": "Diseño para Home, Resultados, Registro, IAs y Admin. Ubicación primero; texto después. Sin datos privados en índice público.",
+  "consumidores": [
+    "Home",
+    "Resultados",
+    "Registro de perfiles",
+    "IA Registro",
+    "IA Descubrimiento de Categorías",
+    "IA Buscador Inteligente",
+    "IA Arquitecto / Supervisor",
+    "Admin"
+  ],
+  "flujoObligatorio": {
+    "orden": [
+      { "paso": 1, "campo": "pais", "obligatorio": true, "descripcion": "Primer filtro — restringe todo el universo de búsqueda" },
+      { "paso": 2, "campo": "estado", "obligatorio": true },
+      { "paso": 3, "campo": "ciudad", "obligatorio": true },
+      { "paso": 4, "campo": "categoria", "obligatorio": false, "nota": "sectorId o categoriaPrincipal" },
+      { "paso": 5, "campo": "palabraClave", "obligatorio": false, "nota": "texto libre del usuario" }
+    ],
+    "regla": "Nunca ejecutar búsqueda de texto sin país+estado+ciudad resueltos (salvo modo Admin auditoría global)."
+  },
+  "motores": {
+    "GeoResolver": "Normaliza país/estado/ciudad; valida contra catálogo geo CariHub",
+    "CatalogSearchEngine": "Coincidencias sobre índice de categorías (sin consultar perfiles privados)",
+    "AvailabilityEngine": "Cuenta perfiles publicados/activos por geo + subcategoría",
+    "Ranker": "Ordena sugerencias según ranking definido",
+    "ZeroResultsLogger": "Persiste búsquedas sin resultado para inteligencia de producto",
+    "PrivacyGuard": "Filtra campos permitidos antes de exponer cualquier sugerencia"
+  },
+  "normalizacionTexto": {
+    "pasos": [
+      "trim + lowercase",
+      "quitar acentos (NFD)",
+      "colapsar espacios",
+      "singular/plural heurístico (español: -s, -es, -ces)",
+      "corrección opcional erroresComunes → término canónico",
+      "tokenización por espacios y guiones"
+    ],
+    "fuentesCoincidencia": [
+      "nombre categoriaPrincipal / sector.nombre",
+      "nombre subcategoria",
+      "subcategoriaId canónico",
+      "keywords[]",
+      "aliases[]",
+      "sinonimos[]",
+      "palabrasRelacionadas[]",
+      "erroresComunes[] (mapeo a término correcto)",
+      "texto parcial (prefijo y contains)",
+      "keywordsIA de schemas de registro (heredadas al índice)"
+    ]
+  },
+  "modeloDatos": {
+    "sector": {
+      "descripcion": "Categoría principal (15 sectores + adultos catálogo)",
+      "campos": {
+        "sectorId": "string — id estable (ej. hogar, salud)",
+        "categoriaPrincipal": "string — nombre visible",
+        "categoriaPadre": "null — raíz del árbol",
+        "formularioId": "null a nivel sector — se resuelve en subcategoría",
+        "keywords": "string[]",
+        "aliases": "string[]",
+        "sinonimos": "string[]",
+        "palabrasRelacionadas": "string[]",
+        "erroresComunes": "string[]",
+        "prioridadBusqueda": "number 0-100 — default sector 40",
+        "estadoActivo": "boolean",
+        "emoji": "string opcional UI"
+      },
+      "fuenteVerdad": "public/js/sectores-carihub.js → CARIHUB_SECTORES",
+      "indiceFirestore": "indice_busqueda_sectores/{sectorId}"
+    },
+    "subcategoria": {
+      "descripcion": "Unidad atómica de búsqueda y registro",
+      "camposObligatorios": [
+        "subcategoriaId",
+        "subcategoria",
+        "sectorId",
+        "categoriaPrincipal",
+        "categoriaPadre",
+        "formularioId",
+        "tipoPerfil",
+        "arquetipo",
+        "prioridadBusqueda",
+        "estadoActivo"
+      ],
+      "camposBusqueda": {
+        "keywords": "string[] — términos de alta intención",
+        "aliases": "string[] — nombres alternativos exactos (ej. HVAC → técnicos en clima)",
+        "sinonimos": "string[] — equivalentes semánticos",
+        "palabrasRelacionadas": "string[] — expansión suave (ej. casa → bienes raíces)",
+        "erroresComunes": "string[] — typos frecuentes que mapean a esta entrada"
+      },
+      "herencia": {
+        "keywordsIA": "Desde config-registro-*-schema.json → subcategorias[].keywordsIA",
+        "aliasesSubcategoriaId": "Desde meta.convenciones.aliasesSubcategoriaId",
+        "nombreCanonico": "slug(subcategoria) y subcategoriaId canónico meta"
+      },
+      "fuenteVerdad": "scripts/mapa-registro-categorias.json (matrix[])",
+      "indiceFirestore": "indice_busqueda_subcategorias/{subcategoriaId}"
+    },
+    "bloqueBusquedaEnMapa": {
+      "descripcion": "Extensión propuesta por fila matrix[] — no rompe campos actuales",
+      "ejemplo": {
+        "subcategoriaId": "tecnicos-en-clima-hvac",
+        "sectorId": "hogar",
+        "formularioId": "persona_independiente",
+        "busqueda": {
+          "keywords": ["clima", "aire acondicionado", "minisplit", "hvac", "refrigeración"],
+          "aliases": ["HVAC", "A/C", "aire"],
+          "sinonimos": ["técnico en climatización", "instalador de minisplit"],
+          "palabrasRelacionadas": ["calefacción", "ventilación", "mantenimiento de aires"],
+          "erroresComunes": ["clima", "minisplir", "minisplis", "haac", "hvca"],
+          "prioridadBusqueda": 70,
+          "estadoActivo": true
+        }
+      }
+    }
+  },
+  "ranking": {
+    "orden": [
+      { "rank": 1, "criterio": "coincidencia_exacta", "peso": 100, "campos": ["subcategoria", "subcategoriaId", "aliases"] },
+      { "rank": 2, "criterio": "coincidencia_alias", "peso": 90, "campos": ["aliases"] },
+      { "rank": 3, "criterio": "coincidencia_sinonimo", "peso": 80, "campos": ["sinonimos"] },
+      { "rank": 4, "criterio": "coincidencia_parcial", "peso": 60, "campos": ["keywords", "palabrasRelacionadas", "nombre sector"] },
+      { "rank": 5, "criterio": "disponibilidad_ciudad", "peso": 50, "fuente": "disponibilidad_categoria_geo" },
+      { "rank": 6, "criterio": "disponibilidad_ciudades_cercanas", "peso": 35, "fuente": "geo_vecindad + disponibilidad" },
+      { "rank": 7, "criterio": "popularidad_futura", "peso": 25, "fuente": "metricas_busqueda + contadores sin resultado resueltos" },
+      { "rank": 8, "criterio": "perfil_verificado_activo", "peso": 15, "fuente": "perfiles con badge verificado/plan premium" }
+    ],
+    "formula": "score = sum(peso_i * factor_i) + prioridadBusqueda; desempate por subcategoriaId",
+    "nota": "Ubicación ya filtró universo; ranking ordena dentro del geo seleccionado"
+  },
+  "disponibilidad": {
+    "niveles": [
+      { "id": "catalogo_existe", "descripcion": "Subcategoría existe en catálogo maestro (siempre true si está en índice)" },
+      { "id": "perfiles_ciudad", "descripcion": "Hay perfiles estadoRevision in [publicado, activo] en ciudad" },
+      { "id": "perfiles_estado", "descripcion": "Hay perfiles activos en el estado" },
+      { "id": "perfiles_pais", "descripcion": "Hay perfiles activos en el país" },
+      { "id": "sin_resultados", "descripcion": "Catálogo existe pero cero perfiles en país" }
+    ],
+    "coleccionCache": "disponibilidad_categoria_geo/{geoKey}_{subcategoriaId}",
+    "geoKey": "pais|estado|ciudad normalizados",
+    "camposCache": {
+      "conteoCiudad": "number",
+      "conteoEstado": "number",
+      "conteoPais": "number",
+      "ultimaActualizacion": "timestamp",
+      "ciudadesCercanasConResultados": "string[]"
+    },
+    "fuenteConteo": {
+      "coleccion": "perfiles",
+      "filtrosPublicos": [
+        "estadoRevision in ['publicado','activo']",
+        "tienePerfilPublico != false",
+        "geo.pais, geo.estado, geo.ciudad coinciden"
+      ],
+      "camposLeidos": ["subcategoriaId", "sectorId", "geo", "planId", "verificado"],
+      "prohibidoLeer": ["INE", "telefono", "rfc", "datosVerificacion", "camposPrivados"]
+    },
+    "sinResultadosEnCiudad": {
+      "opcionesUI": [
+        "ver_ciudades_cercanas",
+        "ver_resultados_estatales",
+        "ver_resultados_nacionales",
+        "registrarme_en_esta_categoria",
+        "solicitar_aviso_cuando_haya_resultados",
+        "no_encuentro_mi_categoria",
+        "solicitar_nueva_subcategoria",
+        "registrarme_proponiendo_esta_categoria"
+      ],
+      "categoriaSugerida": "config-categorias-sugeridas-schema.json — formulario temporal + solicitudes_categorias",
+      "registrarme": "deep-link a wizard con sectorId+subcategoriaId+geo precargados",
+      "aviso": "coleccion solicitudes_aviso_categoria (email/uid + geo + subcategoriaId)"
+    }
+  },
+  "privacidad": {
+    "permitidoEnBusquedaPublica": [
+      "nombres categoría/subcategoría",
+      "keywords/aliases/sinonimos del catálogo",
+      "geo pública de perfiles (pais, estado, ciudad)",
+      "estado publicado/activo/verificado según reglas sitio",
+      "alias público, tagline, foto principal (solo en Resultados — no en autocompletado de catálogo)"
+    ],
+    "prohibido": [
+      "INE", "selfie verificación", "teléfonos privados", "RFC", "razón social",
+      "datos de verificación internos", "estadoRevision administrativo detallado",
+      "notas admin", "precio contratado", "promociones congeladas"
+    ],
+    "ia": "IAs de búsqueda solo leen índice + agregados; IA Arquitecto lee busquedas_sin_resultado agregadas"
+  },
+  "integracionFutura": {
+    "busquedaTradicional": "CatalogSearchEngine + Ranker",
+    "autocompletado": "prefijo sobre indice_busqueda_subcategorias.tokensNormalizados",
+    "sugerenciasAutomaticas": "palabrasRelacionadas + disponibilidad_ciudad",
+    "iaRegistro": "IA sugiere subcategoriaId desde palabraClave + geo",
+    "iaDescubrimiento": "expande sinonimos y detecta gaps en catálogo",
+    "iaBuscadorInteligente": "re-ranking semántico sobre top-N del Ranker (no reemplaza geo)",
+    "iaArquitecto": "audita busquedas_sin_resultado, propone nuevas keywords/categorías",
+    "admin": "CRUD keywords/aliases; fusionar duplicados; activar/desactivar estadoActivo"
+  },
+  "pipelines": {
+    "buildIndice": [
+      "1. Leer sectores-carihub.js + mapa-registro-categorias.json",
+      "2. Merge keywordsIA desde schemas registro por subcategoriaId",
+      "3. Aplicar overrides busqueda en matrix[].busqueda si existe",
+      "4. Generar tokensNormalizados[] por entrada",
+      "5. Escribir indice_busqueda_* (Firestore o JSON local en dev)",
+      "6. NO incluir datos de perfiles en índice de catálogo"
+    ],
+    "refreshDisponibilidad": [
+      "1. Cloud Function / job periódico o onWrite perfil publicado",
+      "2. Incrementar/decrementar conteos por geoKey+subcategoriaId",
+      "3. Recalcular ciudadesCercanasConResultados desde geo_vecindad"
+    ]
+  },
+  "categoriasSugeridas": {
+    "referencia": "config-categorias-sugeridas-schema.json",
+    "regla": "Entradas _sugerida_* o sin subcategoriaOficialIdFinal NO se indexan en indice_busqueda público",
+    "trasAprobacionAdmin": "Ingestión a mapa + busqueda.keywords + índice"
+  },
+  "referencias": {
+    "ejemplos": "scripts/ejemplos-busqueda-categorias.json",
+    "sinResultado": "scripts/config-busqueda-sin-resultado-schema.json",
+    "categoriasSugeridas": "scripts/config-categorias-sugeridas-schema.json",
+    "mapa": "scripts/mapa-registro-categorias.json",
+    "meta": "scripts/config-registro-schema.meta.json"
+  }
+}

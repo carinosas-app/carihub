@@ -1,0 +1,195 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "tipo": "PLAN_MAESTRO",
+  "modulo": "THEMEENGINE",
+  "titulo": "Plan Maestro ThemeEngine CariHub",
+  "fecha": "2026-06-10",
+  "version": "1.0.0",
+  "estado": "PLAN_DISENO_DOCUMENTAL",
+  "modo": "Solo análisis y documentación — sin runtime/carpetas/mover/Firestore/deploy/commit; no modifica capas/observaciones existentes",
+  "autorizadoPor": "product owner / usuario CariHub",
+  "consolidaObservacion": "scripts/OBSERVACION-ARQUITECTONICA-THEMEENGINE.json v1.3.0 — la referencia y formaliza; NO la modifica",
+  "basadoEn": [
+    "OBSERVACION-ARQUITECTONICA-THEMEENGINE.json (v1.3.0)",
+    "public/dashboard-rentero.html (12 body.tema-*)",
+    "SPEC-SHARED-CORE (tokens --ch-)", "ACTA-CONGELAMIENTO-RENDERENGINE.json", "ACTA-CONGELAMIENTO-SHARED-CORE.json",
+    "PLAN-MAESTRO-APP-PUBLICA.json", "PLAN-MAESTRO-REGISTRO-CUENTA.json", "PLAN-MAESTRO-DASHBOARDS.json",
+    "PLAN-MAESTRO-ADMIN.json", "PLAN-MAESTRO-PAGOS-CONTRATOS.json", "PLAN-MAESTRO-BANNERS-PUBLICIDAD.json",
+    "PLAN-MAESTRO-INTERACCIONES.json", "PLAN-MAESTRO-AGENTES-IA.json",
+    "ValidationEngine 1.1.0", "FieldEngine 1.0.1", "config-seguridad-mvp-schema.json"
+  ],
+  "objetivo": "Definir la arquitectura funcional, visual, operativa, creativa, comercial, de seguridad y accesibilidad del ecosistema ThemeEngine, consolidando la observación v1.3.0 en un plan maestro formal.",
+  "principioRector": "ThemeEngine es PRESENTACIÓN CONTROLADA: solo componentes autorizados + tokens de tema; nunca HTML/CSS/JS libre. El usuario personaliza dentro de whitelist; Admin aprueba superficies públicas; RenderEngine pinta; FieldEngine aporta datos; la IA solo sugiere (confirma humano). Borrador ≠ publicado; toda publicación pública audita y puede requerir revisión.",
+
+  "inventarioActual": {
+    "unicaImplementacion": "12 clases body.tema-* inline en public/dashboard-rentero.html (L35-46): rojo, morado, negro, dorado, azul, verde, arcoiris, trans, femboy, hotel, spa, sexshop — prototipo no integrado",
+    "tokensCanonicos": "SPEC-SHARED-CORE define --ch-* (resolvió --rosa divergente)",
+    "vision": "OBSERVACION-ARQUITECTONICA-THEMEENGINE v1.3.0: 10 superficies, editor Canva, tokens, plantillas, IA diseño, A11Y, seguridad, rollback, roles, backlog (autorizadoDiseno:false, specThemeEngine: NO_INICIAR)",
+    "gaps": ["sin ThemeRegistry", "sin editor", "sin tokens aplicados fuera del prototipo", "sin versionado/rollback", "sin moderación visual"]
+  },
+
+  "frontera": {
+    "esThemeEngine": ["tokens de tema", "layout dentro de slots autorizados", "componentes whitelisted", "plantillas", "skins por superficie", "preview/borrador/publicación visual", "historial/rollback visual"],
+    "noEsThemeEngine": ["datos de negocio (FieldEngine)", "render/pintado final (RenderEngine)", "cobro/planes (Pagos)", "moderación de contenido (Admin)", "mensajería (Messenger)"],
+    "regla": "ThemeEngine = presentación; nunca datos ni lógica de negocio ni código libre"
+  },
+
+  "modulosInternos": [
+    "ThemeRegistry (temas/tokens por superficie+entidad)",
+    "TokenResolver (resuelve --ch-* + overrides dentro de límites)",
+    "ComponentWhitelist (catálogo de componentes permitidos)",
+    "TemplateStore (plantillas oficiales/categoría/personal/corporativa)",
+    "VisualEditor (lienzo tipo Canva, drag entre slots)",
+    "PreviewRenderer (preview responsive M/T/E, borrador vs publicado)",
+    "DraftStore (borradores visuales)",
+    "VersionHistory/Rollback (versiones publicadas + restaurar)",
+    "A11yGuard (contraste/WCAG/reduced motion)",
+    "VisualModerationQueue (revisión de temas en superficies públicas)",
+    "ThemeIAAdvisor (sugerencias; confirma humano)"
+  ],
+
+  "superficiesEditables": [
+    { "id": "perfil_publico", "edita": ["portada", "galerías", "orden secciones", "tokens", "widgets whitelist"], "noEdita": ["chrome global", "datos verificación", "campos FieldEngine"], "aprobacion": "parcial (publicación alineada a estadosRevision; adultos/categoría sensible exige revisión)", "publicaDirecto": "no (revisión)", "borrador": "si", "clonar": "si (propio/oficial)", "compartir": "parcial (marketplace futuro)", "plantilla": "parcial", "ia": "si (paleta, orden, plantilla cercana)", "bloqueado": ["nav", "modales sistema"], "obligatorio": ["foto principal", "info mínima"], "impactoSEO": "alto", "impactoPerf": "alto (LCP)", "impactoPrivacidad": "medio (PrivacyGuard)", "impactoSeguridad": "alto", "impactoA11Y": "alto" },
+    { "id": "dashboard_perfil", "edita": ["widgets", "orden módulos", "tokens", "atajos"], "aprobacion": "no (privado)", "publicaDirecto": "si (privado)", "borrador": "si", "clonar": "si", "compartir": "no", "plantilla": "si", "ia": "si", "impactoSEO": "n/a", "impactoA11Y": "medio" },
+    { "id": "dashboard_negocio", "edita": ["widgets operativos", "tema corporativo", "promociones visuales"], "aprobacion": "no (salvo promo a publicación externa)", "compartir": "parcial (corporativo intra-cuenta)", "plantilla": "si", "ia": "si" },
+    { "id": "dashboard_anunciante", "edita": ["layout", "widgets", "atajos"], "aprobacion": "parcial (creativos a moderación comercial)", "plantilla": "parcial", "ia": "si" },
+    { "id": "dashboard_empresa_futuro", "estado": "futuro", "edita": ["multi-perfil corporativo"], "aprobacion": "titular/admin" },
+    { "id": "dashboard_operador_futuro", "estado": "futuro", "edita": ["layout personal dentro de scope"], "aprobacion": "no (privado, scoped)" },
+    { "id": "banners_publicitarios", "edita": ["imágenes", "videos", "textos", "botones", "layouts de plantilla"], "noEdita": ["tamaño/slot del sistema"], "aprobacion": "si (siempre revisión/comercial)", "publicaDirecto": "no", "borrador": "si", "clonar": "si", "compartir": "parcial", "plantilla": "parcial", "ia": "si (CTA, safe zones)", "impactoPerf": "alto", "impactoSeguridad": "alto" },
+    { "id": "tarjetas_resultados", "edita": ["plantilla", "componentes visibles whitelist", "distribución"], "noEdita": ["card global"], "aprobacion": "parcial (afecta listado público)", "plantilla": "no (solo variantes por arquetipo)", "compartir": "no", "ia": "si (plantilla cercana)", "impactoSEO": "alto", "impactoPerf": "alto (móvil)" },
+    { "id": "home_futura", "edita": ["widgets permitidos", "componentes promocionales"], "aprobacion": "si (solo admin define composición global)", "personalizableUsuario": "no", "plantilla": "admin", "ia": "si (composición banner)" },
+    { "id": "landings_seo", "edita": ["bloques de contenido de plantilla", "tokens"], "noEdita": ["contenido canónico/metadatos SEO base"], "aprobacion": "si (catalogo_admin)", "publicaDirecto": "no", "impactoSEO": "crítico", "impactoPerf": "alto", "nota": "creativos no indexables; banner no afecta canónico" },
+    { "id": "messenger_futuro", "estado": "futuro", "edita": ["tema claro/oscuro", "densidad", "fondo chat propio"], "noEdita": ["skin del interlocutor", "layout chat ajeno"], "aprobacion": "no", "compartir": "no", "ia": "parcial", "impactoPrivacidad": "alto" },
+    { "id": "interacciones_futuras", "estado": "futuro", "edita": ["marco story (hereda tokens)", "overlays oficiales"], "noEdita": ["player live", "stickers fuera de catálogo"], "aprobacion": "parcial (contenido media sí)", "impactoPrivacidad": "alto" },
+    { "id": "stories_futuras", "estado": "futuro", "edita": ["marco/overlay oficial"], "noEdita": ["estructura player"], "aprobacion": "parcial", "impactoA11Y": "medio" },
+    { "id": "lives_futuras", "estado": "futuro", "edita": ["marco/branding oficial"], "noEdita": ["player live"], "aprobacion": "parcial (moderación live)", "impactoPerf": "alto" }
+  ],
+
+  "roles": {
+    "visitante": { "edicionVisual": "ninguna (solo ve resultado)", "plantillas": "no", "publicacion": "no", "clonado": "no", "compartir": "no", "rollback": "no", "marketplace": "no", "limitesPersonalizacion": "total", "limitesIA": "n/a" },
+    "perfil_independiente": { "edicionVisual": "perfil público + dashboard perfil", "plantillas": "oficiales + personales", "publicacion": "con revisión (público)", "clonado": "propio/oficial", "compartir": "parcial (futuro)", "rollback": "propio", "marketplace": "consumidor (futuro)", "limitesIA": "sugerencias, confirma" },
+    "negocio": { "hereda": "perfil_independiente", "adicional": ["tema corporativo intra-cuenta", "dashboard negocio"], "compartir": "parcial (corporativo)", "marketplace": "publicar plantilla (futuro)" },
+    "anunciante": { "hereda": "perfil_independiente", "adicional": ["dashboard anunciante", "creativos banner"], "publicacion": "banner requiere admin", "limitesPersonalizacion": "slots tamaño fijo" },
+    "empresa_futura": { "estado": "futuro", "edicionVisual": "multi-perfil corporativo", "compartir": "tema corporativo herdable", "rollback": "corporativo + por perfil" },
+    "operador_futuro": { "estado": "futuro", "edicionVisual": "layout personal dentro de scope", "publicacion": "no", "limitesPersonalizacion": "estricto por scope" },
+    "admin": { "edicionVisual": "todas (moderación) + home + defaults por subcategoría", "plantillas": "oficiales (CRUD)", "publicacion": "aprobar superficies públicas", "clonado": "si", "compartir": "intra-admin (RBAC)", "rollback": "forzado de cualquier usuario", "marketplace": "moderar (futuro)" },
+    "superadmin": { "hereda": "admin", "adicional": ["tokens globales", "bloqueo de elementos", "rollback global"] },
+    "agente_ia_interno": { "edicionVisual": "ninguna (solo sugiere borrador)", "publicacion": "nunca", "limitesIA": "sin generar HTML/CSS/JS; sin aplicar sin confirmación; sin leer chats; auditoría obligatoria" }
+  },
+
+  "ciclosDeVida": {
+    "tema": "crear/elegir → tokens dentro de límites → A11yGuard → borrador → preview → (público: revisión admin) → publicado(versión) → rollback/restaurar default",
+    "plantilla": "oficial(admin curada, versionada) | categoría(default por subcategoría) | personal(fork a borrador) | corporativa(intra-cuenta) → aplicar/duplicar/restaurar → marketplace(futuro)",
+    "borradorVisual": "autoguardado → comparar con publicado → solicitar revisión → publicar | descartar | expira (futuro)",
+    "publicacionVisual": "borrador → validación(VE futura) + A11yGuard + sanitización → (superficie pública: VisualModerationQueue) → publicado(snapshot themeSnapshotId) → auditoría"
+  },
+
+  "matrices": {
+    "superficieElementosEditables": "Ver superficiesEditables[].edita / noEdita (14 superficies)",
+    "rolPermisosVisuales": "Ver roles{} (9 roles con edición/plantillas/publicación/clonado/compartir/rollback/marketplace/límites)",
+    "componentePermitidoProhibido": {
+      "permitidos": ["seccion", "columna", "grid", "spacer", "divider", "hero_portada", "galeria", "bloque_texto(tipado)", "lista_servicios", "tabla_tarifas", "horarios", "mapa", "badges", "cta_contacto", "widgets dashboard", "banner_slot", "result_card_shell"],
+      "prohibidos": ["editor_codigo_html", "editor_css_libre", "scripts_embebidos", "iframes_externos", "importar_html_crudo", "event_handlers_en_atributos", "position:fixed sobre chrome", "z-index arbitrario", "@font-face arbitrario", "url externa sin validar"]
+    },
+    "temaTokensRenderEngine": {
+      "tokens": ["--ch-primary/secondary/accent/background/surface/text/textMuted/border/success/warning/error", "--ch-font-heading/body/caption", "--ch-spacing*", "--ch-radius*", "--ch-shadow*"],
+      "flujo": "ThemeEngine produce themeSnapshot(tokens+layout) → RenderEngine pinta perfil/resultados/landing sin HTML por categoría → PrivacyGuard",
+      "regla": "única vía de estilo = tokens; no propiedades CSS arbitrarias"
+    },
+    "plantillaSuperficieAprobacion": {
+      "oficial_sistema→cualquier_superficie": "admin",
+      "personal→perfil_publico": "revisión",
+      "personal→dashboard": "directo (privado)",
+      "creativo→banner": "siempre revisión comercial",
+      "plantilla→home": "solo admin",
+      "plantilla→landing_seo": "catalogo_admin"
+    },
+    "iaDisenoAccionAprobacion": {
+      "sugerir_paleta": "usuario confirma",
+      "sugerir_orden_secciones": "usuario confirma",
+      "generar_texto_CTA": "usuario confirma + moderación si sensible",
+      "detectar_contraste_A11Y": "automático (obligatorio, no aplica cambios)",
+      "sugerir_plantilla": "usuario confirma",
+      "optimizar_banner_safezones": "usuario/admin confirma",
+      "prohibido": ["generar HTML/CSS/JS", "aplicar sin confirmación", "insertar media sin escaneo", "leer chats"]
+    }
+  },
+
+  "politicas": {
+    "seguridadVisual": ["sin JS de usuario (crítico)", "sin HTML libre sin sanitización", "sin CSS peligroso (fixed/z-index/import externo)", "solo componentes autorizados", "solo tokens de tema", "URLs de Storage validado/biblioteca", "texto sanitizado sin event handlers", "elementos bloqueados por admin inmutables", "no superponer sobre chrome global", "rate-limit guardado (Seguridad MVP)"],
+    "accesibilidad": ["WCAG 2.2", "validar contraste al elegir colores", "alt text obligatorio en imágenes informativas", "orden de lectura lógico", "foco teclado", "no depender solo de color", "tamaños táctiles mínimos móvil", "reduced motion", "body ≥16px móvil", "respetar zoom"],
+    "performance": ["Mobile First", "Core Web Vitals (LCP/CLS/INP)", "lazy loading", "optimización/peso máximo de media", "dimensiones reservadas (anti-CLS)", "límite de animaciones"],
+    "moderacionVisual": ["superficies públicas → VisualModerationQueue", "adultos/categoría sensible → plantillas restringidas + revisión", "media escaneada", "historial/auditoría obligatorio", "rollback admin forzado"]
+  },
+
+  "integraciones": {
+    "sharedCore": "tokens --ch-* canónicos + helpers (Shared/Core 1.0.0)",
+    "renderEngine": "consume themeSnapshot (tokens+layout); pinta sin HTML por categoría; PrivacyGuard (RenderEngine 1.0.0)",
+    "validationEngine": "valida publicar_tema/guardar_borrador/subir_media (acciones futuras; no modifica VE congelado)",
+    "fieldEngine": "datos de negocio ≠ tema; snapshotAlPublicar puede incluir themeSnapshotId (FieldEngine 1.0.1)",
+    "appPublica": "perfil/resultados/home consumen temas vía RenderEngine; carga liviana",
+    "registroCuenta": "estado/plan/edad condiciona personalización",
+    "dashboards": "shell modular absorbe skins; notificaciones/historial no cambian por tema (Dashboards 1.0.0)",
+    "admin": "plantillas oficiales, defaults, bloqueo de elementos, moderación, rollback (PLAN-MAESTRO-ADMIN)",
+    "messenger": "tema sistema + preferencias propias; no skin de UI ajena (Messenger 1.0.0)",
+    "pagos": "plan habilita capacidades de tema (límites de plantillas/IA por plan)",
+    "contratos": "vigencia de plan condiciona capacidades premium de tema",
+    "banners": "creativos en slots con plantillas aprobadas (PLAN-MAESTRO-BANNERS)",
+    "interacciones": "stories/live heredan tokens; overlays oficiales (PLAN-MAESTRO-INTERACCIONES)",
+    "seo": "tema no altera contenido canónico; creativos no indexables",
+    "agentesIA": "ThemeIAAdvisor (sugiere, confirma humano); alineado PLAN-MAESTRO-AGENTES-IA (deny-write, auditoría)",
+    "seguridadMvp": "rate-limit, Turnstile en publicación, sanitización media (Seguridad MVP 1.0.0)",
+    "a11y": "SPEC A11Y transversal futura; paletas/tipografías certificadas"
+  },
+
+  "riesgos": [
+    { "id": "TE-R01", "nivel": "critico", "riesgo": "CSS/HTML/JS libre = XSS y rotura de shell global", "mitigacion": "sin código libre; solo componentes+tokens; sanitización; nodos tipados" },
+    { "id": "TE-R02", "nivel": "alto", "riesgo": "Personalización antes de RenderEngine = doble HTML legacy y snapshot", "mitigacion": "ThemeEngine espera contrato snapshot de RenderEngine" },
+    { "id": "TE-R03", "nivel": "alto", "riesgo": "Tema daña Core Web Vitals (media pesada, CLS)", "mitigacion": "lazy, peso máximo, dimensiones reservadas, preview perf" },
+    { "id": "TE-R04", "nivel": "alto", "riesgo": "Contraste/A11Y insuficiente", "mitigacion": "A11yGuard obligatorio + paletas certificadas + TE-IA-04" },
+    { "id": "TE-R05", "nivel": "alto", "riesgo": "Tema público inapropiado (adultos)", "mitigacion": "plantillas restringidas + VisualModerationQueue + revisión obligatoria" },
+    { "id": "TE-R06", "nivel": "medio", "riesgo": "Acoplar tema con datos FieldEngine", "mitigacion": "separación presentación vs datos; themeSnapshotId aparte" },
+    { "id": "TE-R07", "nivel": "medio", "riesgo": "URLs externas en fondos (SSRF/tracking)", "mitigacion": "solo Storage validado/biblioteca sistema" },
+    { "id": "TE-R08", "nivel": "medio", "riesgo": "IA aplica cambios sin confirmación / genera código", "mitigacion": "IA solo sugiere; confirma humano; deny HTML/CSS/JS; auditoría" },
+    { "id": "TE-R09", "nivel": "medio", "riesgo": "Costo de almacenamiento/moderación de media (editor Canva)", "mitigacion": "límites por plan/superficie + optimización" },
+    { "id": "TE-R10", "nivel": "bajo", "riesgo": "Inconsistencia tema por categoría sin catálogo versionado", "mitigacion": "defaults por subcategoría desde catálogo congelado" }
+  ],
+  "dependencias": {
+    "congeladas": ["Shared/Core 1.0.0", "RenderEngine 1.0.0", "ValidationEngine 1.1.0", "FieldEngine 1.0.1", "Dashboards 1.0.0", "Messenger 1.0.0", "Seguridad MVP 1.0.0", "Catálogo 1.0.0"],
+    "planes": ["APP-PUBLICA", "REGISTRO-CUENTA", "DASHBOARDS", "ADMIN", "PAGOS-CONTRATOS", "BANNERS", "INTERACCIONES", "AGENTES-IA"],
+    "observacion": "OBSERVACION-ARQUITECTONICA-THEMEENGINE v1.3.0 (base)",
+    "precondiciones": ["contrato snapshot RenderEngine", "migración usuarios→perfiles (temas por perfilId)", "Dashboards shell estable", "ComponentWhitelist + ThemeRegistry", "ValidationEngine acciones de tema"]
+  },
+  "estructuraIdealFutura": {
+    "nota": "Lógica; sin crear carpetas",
+    "capaThemeEngine": "ThemeRegistry + TokenResolver + ComponentWhitelist + TemplateStore + VisualEditor + PreviewRenderer + DraftStore + VersionHistory + A11yGuard + VisualModerationQueue + ThemeIAAdvisor",
+    "separacion": "ThemeEngine (presentación) ⟂ FieldEngine (datos) ⟂ RenderEngine (pintado) ⟂ Admin (moderación) ⟂ Pagos (capacidades por plan)"
+  },
+  "rutasSugeridas": {
+    "usuario": ["/cuenta/tema", "/cuenta/perfil/editor", "/cuenta/banners/:id/editor", "/cuenta/tema/historial"],
+    "admin": ["/admin/themeengine/plantillas", "/admin/themeengine/defaults", "/admin/themeengine/moderacion", "/admin/themeengine/tokens-globales"]
+  },
+  "ordenRecomendadoImplementacion": [
+    { "paso": 1, "accion": "ThemeRegistry + TokenResolver (--ch-*) + ComponentWhitelist (deny código libre)", "prioridad": "P0", "cierra": "TE-R01/TE-R06" },
+    { "paso": 2, "accion": "Temas a nivel tokens en perfil/dashboard (sin editor) vía RenderEngine snapshot", "prioridad": "P1", "cierra": "TE-R02" },
+    { "paso": 3, "accion": "DraftStore + PreviewRenderer + VersionHistory/Rollback + A11yGuard", "prioridad": "P1", "cierra": "TE-R03/TE-R04" },
+    { "paso": 4, "accion": "TemplateStore (oficiales/categoría/personal) + defaults por subcategoría", "prioridad": "P1", "cierra": "TE-R10" },
+    { "paso": 5, "accion": "VisualEditor tipo Canva (slots autorizados) + VisualModerationQueue + límites por plan", "prioridad": "P2", "cierra": "TE-R05/TE-R09" },
+    { "paso": 6, "accion": "ThemeIAAdvisor (sugerencias, confirma humano, auditoría)", "prioridad": "P2", "cierra": "TE-R08" },
+    { "paso": 7, "accion": "Temas messenger/interacciones/stories/lives + marketplace/corporativo/multiidioma/A-B (backlog)", "prioridad": "P3" }
+  ],
+
+  "procedenciaPlanMaestro": {
+    "crearMd": true, "crearJson": true,
+    "justificacion": "La observación v1.3.0 ya tiene visión profunda pero no es un plan maestro accionable; este plan formaliza superficies, roles, matrices, ciclos de vida y orden de implementación, manteniendo todas las restricciones de seguridad/A11Y, sin iniciar SPEC ni runtime.",
+    "siguientesPasos": ["SPEC-THEMEENGINE (si se autoriza, post RenderEngine runtime)", "SPEC-A11Y transversal", "ADR-TOKENS-TEMA (mapa --ch-* ↔ superficies)"]
+  },
+  "noModifica": [
+    "OBSERVACION-ARQUITECTONICA-THEMEENGINE v1.3.0 (se referencia/formaliza, no se altera)",
+    "Capas congeladas y planes existentes",
+    "Producción, Firestore, deploy, commit"
+  ],
+  "changelog": [
+    { "version": "1.0.0", "fecha": "2026-06-10", "nota": "Plan maestro ThemeEngine: consolida observación v1.3.0; 14 superficies editables, 9 roles, módulos internos, ciclos de vida, 6 matrices, políticas (seguridad/A11Y/performance/moderación), integraciones, riesgos y orden de implementación" }
+  ]
+}

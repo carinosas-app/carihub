@@ -1,0 +1,142 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "versionSchema": "2026-06-10",
+  "version": "2026-06-10",
+  "schemaId": "estados_revision_publicacion",
+  "nombre": "Estados administrativos — perfiles y banners",
+  "descripcion": "Máquina de estados unificada. Ningún perfil ni banner se publica sin revisión admin. Cambios post-pago disparan revision_post_pago.",
+  "reglasGlobales": [
+    "Ningún perfil ni banner se publica sin revisión admin",
+    "Nunca auto-aprobar registro",
+    "Nunca auto-publicar tras pago si hubo cambios en campos importantes",
+    "Admin es quien autoriza pago, confirma pago y publica",
+    "IA puede sugerir; Admin decide"
+  ],
+  "estados": {
+    "borrador": { "orden": 1, "publico": false, "descripcion": "Wizard incompleto o autosave" },
+    "enviado_revision": { "orden": 2, "publico": false, "descripcion": "Registro enviado, cola admin" },
+    "correccion_solicitada": { "orden": 3, "publico": false, "descripcion": "Admin pidió correcciones" },
+    "autorizado_para_pago": { "orden": 4, "publico": false, "descripcion": "Admin autorizó proceder a pago" },
+    "pago_pendiente": { "orden": 5, "publico": false, "descripcion": "Esperando transferencia/depósito usuario" },
+    "pago_confirmado": { "orden": 6, "publico": false, "descripcion": "Admin confirmó pago recibido" },
+    "revision_post_pago": { "orden": 7, "publico": false, "descripcion": "Cambios importantes después del pago" },
+    "publicado": { "orden": 8, "publico": true, "descripcion": "Visible según plan (puede ser promo gratis)" },
+    "activo": { "orden": 9, "publico": true, "descripcion": "Contrato vigente y publicado" },
+    "vencido": { "orden": 10, "publico": false, "descripcion": "Contrato expirado" },
+    "suspendido": { "orden": 11, "publico": false, "descripcion": "Bloqueado por admin" },
+    "rechazado": { "orden": 12, "publico": false, "descripcion": "Registro rechazado" },
+    "requiere_revision_categoria": {
+      "orden": 2.5,
+      "publico": false,
+      "descripcion": "Categoría/subcategoría propuesta por usuario — pendiente Admin"
+    },
+    "categoria_autorizada": {
+      "orden": 2.6,
+      "publico": false,
+      "descripcion": "Admin aprobó/fusionó categoría; continúa flujo comercial estándar"
+    },
+    "categoria_rechazada": {
+      "orden": 2.7,
+      "publico": false,
+      "descripcion": "Propuesta de categoría rechazada; registro puede corregir o cancelar"
+    },
+    "autorizado_gratis": {
+      "orden": 4.5,
+      "publico": false,
+      "descripcion": "Tras aprobar categoría + registro — promo primer mes gratis"
+    }
+  },
+  "flujos": {
+    "perfiles_personales_primer_mes_gratis": {
+      "aplicaA": ["adultos", "persona_independiente", "profesionista_cedula"],
+      "secuencia": [
+        "borrador → enviado_revision",
+        "enviado_revision → correccion_solicitada | rechazado | publicado (inicia 30 días gratis)",
+        "publicado → activo (durante promo)",
+        "activo → vencido (fin 30 días)",
+        "vencido → pago_pendiente (renovación precio vigente)"
+      ],
+      "nota": "Tras aprobación admin inicia promo; NO pasa por pago inicial"
+    },
+    "perfiles_negocio_2x1": {
+      "aplicaA": ["negocio_empresa"],
+      "secuencia": [
+        "borrador → enviado_revision",
+        "enviado_revision → correccion_solicitada | rechazado | autorizado_para_pago",
+        "autorizado_para_pago → pago_pendiente → pago_confirmado",
+        "pago_confirmado → publicado (si sin cambios) | revision_post_pago (si cambios)",
+        "revision_post_pago → publicado | correccion_solicitada | rechazado",
+        "publicado → activo → vencido"
+      ]
+    },
+    "visitante": {
+      "aplicaA": ["usuario_visitante"],
+      "secuencia": [
+        "borrador → enviado_revision | pago_pendiente (según política)",
+        "pago_confirmado → activo (sin perfil público)",
+        "activo + solicitaCrearPerfil → wizard perfil sin nuevo cobro registro",
+        "activo → vencido"
+      ],
+      "campos": ["tipoCuenta:visitante", "tienePerfilPublico:false", "puedeCrearPerfilGratis:true"]
+    },
+    "categoria_sugerida_usuario": {
+      "aplicaA": ["adultos", "persona_independiente", "profesionista_cedula", "negocio_empresa", "usuario_visitante", "cualquier_sector"],
+      "referencia": "config-categorias-sugeridas-schema.json",
+      "secuencia": [
+        "borrador → enviado_revision + requiere_revision_categoria",
+        "requiere_revision_categoria → categoria_autorizada | categoria_rechazada | fusionada (vía solicitudes_categorias)",
+        "categoria_autorizada → correccion_solicitada | autorizado_para_pago | autorizado_gratis | publicado",
+        "categoria_rechazada → correccion_solicitada | rechazado",
+        "NUNCA publicado/activo sin categoria_autorizada"
+      ],
+      "formulario": "formulario temporal según actividad — NO catálogo inexistente"
+    },
+    "banners": {
+      "aplicaA": ["banners"],
+      "secuencia": [
+        "borrador → enviado_revision",
+        "enviado_revision → correccion_solicitada | rechazado | autorizado_para_pago",
+        "autorizado_para_pago → pago_pendiente → pago_confirmado",
+        "pago_confirmado → publicado | revision_post_pago",
+        "revision_post_pago → publicado | correccion_solicitada",
+        "publicado → activo → vencido"
+      ],
+      "pagoAdelantadoObligatorio": true
+    }
+  },
+  "revisionPostPago": {
+    "disparadoresPerfil": [
+      "cambio fotoPrincipal o galeria",
+      "cambio datos verificacion",
+      "cambio categoria o subcategoria",
+      "cambio campos privados fiscales"
+    ],
+    "disparadoresBanner": "config-promociones-banners-schema.json → revisionPostPago.camposImportantes",
+    "accion": "estadoRevision → revision_post_pago, publicado=false hasta admin"
+  },
+  "adminAcciones": {
+    "porEstado": {
+      "enviado_revision": ["aprobar", "rechazar", "solicitar_correccion", "autorizar_pago"],
+      "requiere_revision_categoria": [
+        "aprobar_categoria_nueva",
+        "fusionar_con_existente",
+        "convertir_en_alias",
+        "rechazar_categoria",
+        "solicitar_correccion"
+      ],
+      "categoria_autorizada": ["aprobar_registro", "autorizar_pago", "autorizar_gratis", "solicitar_correccion"],
+      "categoria_rechazada": ["solicitar_correccion", "rechazar_registro"],
+      "autorizado_para_pago": ["marcar_pago_pendiente"],
+      "pago_pendiente": ["confirmar_pago", "rechazar"],
+      "pago_confirmado": ["publicar", "enviar_revision_post_pago"],
+      "revision_post_pago": ["aprobar_publicacion", "solicitar_correccion", "rechazar"],
+      "activo": ["suspender", "marcar_vencido"],
+      "vencido": ["ofrecer_renovacion"]
+    }
+  },
+  "firestore": {
+    "perfilesCampo": "estadoRevision",
+    "bannersCampo": "estadoSolicitud | estadoAdmin — unificar a estadoRevision en migración",
+    "contratosCampo": "estadoContrato"
+  }
+}

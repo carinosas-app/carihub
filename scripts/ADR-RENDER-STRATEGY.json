@@ -1,0 +1,196 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "tipo": "ADR",
+  "id": "ADR-RENDER-STRATEGY",
+  "titulo": "Estrategia de render para CariHub (App Pública + RenderEngine)",
+  "fecha": "2026-06-10",
+  "version": "1.0.0",
+  "estado": "PROPUESTA — decisión documental, sin implementar",
+  "modo": "Solo análisis y documentación — sin runtime/carpetas/mover/Firestore/deploy/commit",
+  "autorizadoPor": "product owner / usuario CariHub",
+  "contexto": {
+    "resumen": "SPEC-RENDERENGINE v1.0.0 quedó como diseño con 3 hallazgos bloqueantes; uno es RE-AU-02 (estrategia de render no decidida). Este ADR decide la estrategia para desbloquear la SPEC.",
+    "infraActual": {
+      "hosting": "Firebase Hosting estático (public/)",
+      "functions": "Cloud Functions v2 (gen2), Node 24, firebase-functions ^7, firebase-admin ^13; hoy solo job programado vencerPerfiles",
+      "datos": "Firestore",
+      "renderActual": "Cliente (CSR). resultados.html lee toda la colección y filtra en cliente (riesgo AP-R01)"
+    },
+    "basadoEn": [
+      "scripts/SPEC-RENDERENGINE.json",
+      "scripts/AUDITORIA-SPEC-RENDERENGINE.json",
+      "scripts/PLAN-MAESTRO-APP-PUBLICA.json",
+      "scripts/PLAN-MAESTRO-SHARED-CORE.json",
+      "scripts/OBSERVACION-ARQUITECTONICA-SEO.json",
+      "firebase.json",
+      "functions/index.js"
+    ]
+  },
+  "opcionesEvaluadas": {
+    "A_render_cliente_actual": {
+      "descripcion": "CSR: HTML mínimo + JS que pinta tras leer Firestore en cliente",
+      "seo": "malo (contenido tardío, crawl parcial)",
+      "rendimiento": "LCP/INP pobres en móvil; depende del cliente",
+      "coreWebVitals": "malo",
+      "costo": "bajo (sin compute)",
+      "complejidad": "baja (estado actual)",
+      "firebaseHosting": "total",
+      "firestore": "total, pero patrón actual NO escala (lee colección completa)",
+      "datosPrivados": "alto riesgo si filtra en cliente",
+      "escalabilidadNacional": "limitada",
+      "escalabilidadInternacional": "mala",
+      "mantenimiento": "frágil (lógica inline)",
+      "veredicto": "Insuficiente para superficies SEO; aceptable solo para zonas no indexables"
+    },
+    "B_SSR_cloud_functions": {
+      "descripcion": "HTML renderizado en servidor por Cloud Functions/Cloud Run vía Hosting rewrites",
+      "seo": "excelente (HTML completo en la respuesta)",
+      "rendimiento": "bueno con CDN; TTFB depende de cold start",
+      "coreWebVitals": "bueno",
+      "costo": "medio (compute por request; mitigable con cache CDN)",
+      "complejidad": "media-alta (infra, rewrites, cold starts)",
+      "firebaseHosting": "compatible vía rewrites a función/Cloud Run",
+      "firestore": "lectura server-side con admin SDK (sin reglas cliente)",
+      "datosPrivados": "bajo riesgo (PrivacyGuard server-side)",
+      "escalabilidadNacional": "buena",
+      "escalabilidadInternacional": "buena (multi-región + CDN)",
+      "mantenimiento": "moderado",
+      "veredicto": "Ideal para Perfil y long-tail de landings/resultados dinámicos"
+    },
+    "C_prerender_build_time": {
+      "descripcion": "Generación estática en build (SSG) de páginas conocidas",
+      "seo": "excelente",
+      "rendimiento": "óptimo (HTML servido por CDN)",
+      "coreWebVitals": "óptimo",
+      "costo": "muy bajo en runtime; costo en build",
+      "complejidad": "media (pipeline de build); rígido ante datos cambiantes",
+      "firebaseHosting": "total (archivos estáticos)",
+      "firestore": "lectura en build, no en request",
+      "datosPrivados": "bajo riesgo (se publica solo lo aprobado)",
+      "escalabilidadNacional": "buena para combos finitos",
+      "escalabilidadInternacional": "buena",
+      "mantenimiento": "rebuild ante cambios; no apto para volumen alto/volátil",
+      "veredicto": "Ideal para Home y landings geo/categoría de alta demanda (finitas)"
+    },
+    "D_snapshot_estatico_hosting": {
+      "descripcion": "Hosting estático sirviendo snapshots publicados (HTML por perfil/landing) regenerados al publicar (ISR-like)",
+      "seo": "excelente",
+      "rendimiento": "óptimo (CDN)",
+      "coreWebVitals": "óptimo",
+      "costo": "bajo runtime; compute solo al publicar/regenerar",
+      "complejidad": "media (pipeline publish→snapshot; invalidación)",
+      "firebaseHosting": "total",
+      "firestore": "se lee al publicar; render no lee en request",
+      "datosPrivados": "muy bajo (snapshot ya filtrado por PrivacyGuard)",
+      "escalabilidadNacional": "muy buena",
+      "escalabilidadInternacional": "muy buena",
+      "mantenimiento": "bueno si el pipeline está bien definido",
+      "veredicto": "Encaja con snapshotAlPublicar ya diseñado en FieldEngine/RenderEngine"
+    },
+    "E_hibrido": {
+      "descripcion": "Combina C/D para contenido estable + B (SSR on-demand) para long-tail/volátil + CSR solo en islas interactivas no indexables",
+      "seo": "excelente",
+      "rendimiento": "óptimo donde importa",
+      "coreWebVitals": "óptimo",
+      "costo": "optimizado (compute solo en long-tail)",
+      "complejidad": "media-alta (orquestación por superficie)",
+      "firebaseHosting": "total + rewrites selectivos",
+      "firestore": "mixto (build/publish + request long-tail)",
+      "datosPrivados": "bajo (PrivacyGuard en build y server)",
+      "escalabilidadNacional": "óptima",
+      "escalabilidadInternacional": "óptima",
+      "mantenimiento": "requiere disciplina pero es el más sostenible",
+      "veredicto": "RECOMENDADO — mejor balance global"
+    }
+  },
+  "estrategiaPorSuperficie": {
+    "home": { "mvp": "estático (prerender shell) + islas CSR no indexables", "futuro": "SSG con regeneración periódica de destacados", "justificacion": "Contenido casi fijo; LCP crítico" },
+    "resultados": { "mvp": "consulta server-side (Firestore índices compuestos) + SSR/edge para SEO de combos; canonical normalizado", "futuro": "cache CDN por filtro popular + SSR long-tail", "critico": "ELIMINAR filtrado en cliente (AP-R01)" },
+    "perfilPublico": { "mvp": "snapshot estático servido por Hosting (regenerado al publicar) o SSR on-demand con cache por (perfilId, schemaVersion)", "futuro": "ISR-like vía pipeline publish→snapshot", "justificacion": "Mejor SEO + privacidad (snapshot filtrado)" },
+    "landingsSEO": {
+      "pais": { "mvp": "estático (pocas, alta demanda)", "futuro": "SSG" },
+      "estado": { "mvp": "estático para top + SSR long-tail", "futuro": "SSG + SSR" },
+      "ciudad": { "mvp": "SSR on-demand con umbral thin-content; estático para ciudades top", "futuro": "ISR" },
+      "categoria": { "mvp": "estático para subcategorías populares + SSR resto", "futuro": "SSG + SSR" },
+      "categoria_geo": { "mvp": "SSR on-demand con guard thin-content (462 × geo es enorme)", "futuro": "ISR selectivo por demanda real" }
+    }
+  },
+  "matrizComparativa": {
+    "criterios": ["SEO", "rendimiento", "CWV", "costo", "complejidad", "hostingFirebase", "firestore", "datosPrivados", "escalaNacional", "escalaInternacional", "mantenimiento"],
+    "filas": [
+      { "opcion": "A CSR actual", "SEO": "1", "rendimiento": "2", "CWV": "1", "costo": "5", "complejidad": "5", "hostingFirebase": "5", "firestore": "2", "datosPrivados": "1", "escalaNacional": "2", "escalaInternacional": "1", "mantenimiento": "2" },
+      { "opcion": "B SSR Functions", "SEO": "5", "rendimiento": "4", "CWV": "4", "costo": "3", "complejidad": "2", "hostingFirebase": "4", "firestore": "5", "datosPrivados": "5", "escalaNacional": "4", "escalaInternacional": "4", "mantenimiento": "3" },
+      { "opcion": "C Prerender SSG", "SEO": "5", "rendimiento": "5", "CWV": "5", "costo": "5", "complejidad": "3", "hostingFirebase": "5", "firestore": "4", "datosPrivados": "5", "escalaNacional": "4", "escalaInternacional": "4", "mantenimiento": "3" },
+      { "opcion": "D Snapshot estático", "SEO": "5", "rendimiento": "5", "CWV": "5", "costo": "4", "complejidad": "3", "hostingFirebase": "5", "firestore": "4", "datosPrivados": "5", "escalaNacional": "5", "escalaInternacional": "5", "mantenimiento": "4" },
+      { "opcion": "E Híbrido", "SEO": "5", "rendimiento": "5", "CWV": "5", "costo": "4", "complejidad": "2", "hostingFirebase": "5", "firestore": "5", "datosPrivados": "5", "escalaNacional": "5", "escalaInternacional": "5", "mantenimiento": "4" }
+    ],
+    "escala": "1=peor … 5=mejor",
+    "nota": "complejidad: 5=más simple, 1=más complejo"
+  },
+  "recomendacionPrincipal": {
+    "opcion": "E — Híbrido snapshot-first",
+    "definicion": "Estático/SSG + snapshots publicados para contenido estable; SSR on-demand (Cloud Functions/Cloud Run vía Hosting rewrites) para long-tail y resultados; CSR solo en islas interactivas no indexables. PrivacyGuard server-side/build. Cache CDN por (perfilId, schemaVersion).",
+    "porQue": "Maximiza SEO y CWV donde importa, controla costo (compute solo en long-tail), reutiliza snapshotAlPublicar ya diseñado, mantiene compatibilidad total con Firebase Hosting + Functions existentes y minimiza riesgo de datos privados."
+  },
+  "recomendacionMVP": {
+    "alcance": "Lo mínimo para SEO correcto y escalabilidad sin sobre-ingeniería",
+    "acciones": [
+      "1. Resultados server-side con índices compuestos Firestore (matar filtrado en cliente AP-R01) — P0",
+      "2. Perfil público vía snapshot servido por Hosting o SSR on-demand con cache — P0/P1",
+      "3. Home estático (shell prerender) + islas CSR no indexables — P1",
+      "4. Landings: estático para país/estado/ciudad/categoría top; diferir long-tail — P1",
+      "5. renderHead server-side/build (meta/OG/JSON-LD) — P1"
+    ],
+    "evitarEnMVP": ["SSR de todo", "generar 462×geo landings", "framework SSR completo si no se justifica"]
+  },
+  "recomendacionFutura": [
+    "ISR-like: pipeline publish→snapshot con regeneración incremental e invalidación CDN",
+    "SSR multi-región para escala internacional",
+    "Cache de borde (edge) para meta y landings populares",
+    "Generación selectiva de long-tail guiada por demanda real (analytics)",
+    "Evaluar framework (Next/Astro) solo si la complejidad lo justifica; mantener vanilla mientras sea suficiente"
+  ],
+  "riesgos": [
+    { "id": "RS-R01", "nivel": "alto", "riesgo": "Mantener CSR en Resultados perpetúa AP-R01 (no escala, costo lectura)", "mitigacion": "server-side + índices en MVP" },
+    { "id": "RS-R02", "nivel": "medio", "riesgo": "Cold starts en SSR Functions afectan TTFB", "mitigacion": "min instances / Cloud Run + CDN cache" },
+    { "id": "RS-R03", "nivel": "medio", "riesgo": "Explosión de landings (462 × geo) → thin content/costo build", "mitigacion": "umbral thin-content + SSR on-demand long-tail" },
+    { "id": "RS-R04", "nivel": "medio", "riesgo": "Invalidez de snapshots tras republicar (datos viejos en CDN)", "mitigacion": "invalidación por (perfilId, schemaVersion)" },
+    { "id": "RS-R05", "nivel": "medio", "riesgo": "Fuga de datos privados si PrivacyGuard solo en cliente", "mitigacion": "PrivacyGuard en build/server (admin SDK)" },
+    { "id": "RS-R06", "nivel": "bajo", "riesgo": "Complejidad operativa del híbrido", "mitigacion": "límites claros por superficie; documentar pipeline" }
+  ],
+  "dependencias": {
+    "sharedCore": "Config/tokens/helpers/catálogo/geo deben venir de Core (precondición)",
+    "renderEngine": "Este ADR fija modoRender por superficie y la política de caché del SPEC",
+    "fieldEngine": "snapshotAlPublicar es el insumo del modelo snapshot-first (congelado 1.0.1)",
+    "seo": "Consume renderHead/JSON-LD; define sitemap/robots/hreflang/umbral thin-content",
+    "themeEngine": "TokenSet aplicado en build/SSR; no inyecta HTML crudo",
+    "banners": "Slots como islas (datos de Banners); no bloquean indexación",
+    "interacciones": "Contenido efímero noindex; islas CSR",
+    "migracionUsuariosPerfiles": "URL canónica estable (perfilId) condiciona snapshot/SSR — RE-AU-03",
+    "firebase": "Hosting rewrites → Cloud Functions/Cloud Run (gen2 ya disponible)"
+  },
+  "decisionQueDesbloqueaSpecRenderEngine": {
+    "hallazgoCerrado": "RE-AU-02 (estrategia de render no decidida)",
+    "resolucion": "modoRender por defecto = híbrido snapshot-first; perfil/landing estable = estático/snapshot; long-tail/resultados = SSR on-demand; islas = CSR",
+    "impactoEnSpec": [
+      "Fija RenderContext.modoRender y su default por superficie",
+      "Confirma diseño de caché por (perfilId, schemaVersion)",
+      "Confirma PrivacyGuard server-side/build",
+      "Confirma Resultados server-side (corrige AP-R01)"
+    ],
+    "hallazgosRestantesParaCongelar": ["RE-AU-01 Shared/Core no congelado", "RE-AU-03 URL canónica de migración"]
+  },
+  "procedenciaADR": {
+    "crearMd": true,
+    "crearJson": true,
+    "justificacion": "Es una decisión arquitectónica con alternativas y consecuencias claras; un ADR es el formato correcto y desbloquea formalmente RE-AU-02."
+  },
+  "consecuencias": {
+    "positivas": ["SEO/CWV óptimos en superficies clave", "costo controlado", "privacidad reforzada", "compatibilidad con infra actual", "escala nacional e internacional"],
+    "negativas": ["Mayor complejidad operativa que CSR", "requiere pipeline de snapshot e invalidación", "disciplina de límites por superficie"]
+  },
+  "noModifica": ["Capas congeladas (VE 1.1.0, FieldEngine 1.0.1, Messenger 1.0.0, Dashboards 1.0.0)", "Producción, Firestore, deploy, commit"],
+  "changelog": [
+    { "version": "1.0.0", "fecha": "2026-06-10", "nota": "ADR inicial: comparativa de 5 opciones, recomendación híbrido snapshot-first, estrategia por superficie, cierre RE-AU-02" }
+  ]
+}

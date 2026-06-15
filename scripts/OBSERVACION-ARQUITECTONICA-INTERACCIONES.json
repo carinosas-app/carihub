@@ -1,0 +1,413 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "tipo": "OBSERVACION_ARQUITECTONICA",
+  "titulo": "Capa futura — Interacciones y Comunicación",
+  "fecha": "2026-06-09",
+  "fechaActualizacion": "2026-06-09",
+  "versionObservacion": "1.2.1",
+  "estado": "OBSERVACION_COMPLETA_ETAPA",
+  "autorizadoDiseno": false,
+  "autorizadoDisenoSpecCompleta": false,
+  "autorizadoRuntime": false,
+  "ampliacionObservacion": "CONGELADA — no ampliar hasta nueva autorización explícita",
+  "registradoPor": "product owner / usuario CariHub",
+  "nota": "Solo arquitectura objetivo futura. No forma parte de las cinco capas congeladas. No sustituye SPEC Interacciones.",
+  "alcanceFuturoPosible": [
+    "estados_temporales_stories",
+    "transmisiones_en_vivo",
+    "grafo_seguidores",
+    "comentarios_publicos",
+    "reacciones",
+    "solicitudes_contacto",
+    "messenger",
+    "conversaciones",
+    "encuestas",
+    "moderacion_interaccion",
+    "notificaciones_seguidores",
+    "controles_privacidad",
+    "ia_social_futura"
+  ],
+  "visionFuturaDocumentada": [
+    "stories",
+    "comentarios",
+    "reacciones",
+    "seguidores",
+    "messenger",
+    "transmisiones_en_vivo",
+    "notificaciones_a_seguidores",
+    "controles_privacidad",
+    "moderacion",
+    "ia_social_futura"
+  ],
+  "preferenciasArquitectonicasStories": {
+    "titulo": "Estados Temporales (Stories)",
+    "estado": "PREFERENCIA_FUTURA_NO_DISENADA",
+    "elegibilidad": {
+      "publicar": {
+        "requiereCuentaRegistrada": true,
+        "requiereAutenticacion": true,
+        "visitantesSinCuentaPuedenPublicar": false
+      },
+      "cumplimientoObligatorio": [
+        "cuentas-2026-06-10@1.0.0",
+        "seguridad-2026-06-10@1.0.0",
+        "estadoSeguridad",
+        "rolesCuenta[]",
+        "permisos de cuenta"
+      ],
+      "modulosActivosRequeridos": {
+        "alMenosUno": true,
+        "valores": ["perfil_publico", "negocio", "profesionista", "banners"]
+      }
+    },
+    "disponibilidad": {
+      "modulosHabilitados": ["perfil_publico", "negocio", "profesionista", "banners"],
+      "superficiesVisibilidadFuturas": [
+        "perfil_publico",
+        "dashboards",
+        "resultados",
+        "espacios_promocionales_por_definir"
+      ]
+    },
+    "limites": {
+      "maxEstadosActivosPorPeriodo24h": 2,
+      "periodoVentana": "24h",
+      "expiracionAutomatica": "24h",
+      "conservarHistorialExpirados": false,
+      "eliminacionAnticipadaPorPropietario": true,
+      "alExpirar": {
+        "ocultarPublico": true,
+        "ocultarDashboards": true,
+        "eliminarMediaAsociada": "puede_automatico"
+      }
+    },
+    "contenidoPermitido": {
+      "tipos": ["texto", "foto", "video_corto"]
+    },
+    "audio": {
+      "fotoConAudioFondo": true,
+      "videoConAudio": true,
+      "inicioSilenciadoObligatorio": true,
+      "reproduccionAutomaticaConAudio": false,
+      "activacionAudio": "manual_por_visitante",
+      "nota": "Todo contenido con pista de audio debe iniciar muted; el visitante decide activar"
+    },
+    "interaccionPublica": {
+      "habilitablesPorEstado": ["comentarios", "respuestas", "reacciones"],
+      "controlesPropietario": {
+        "activarDesactivarComentarios": true,
+        "activarDesactivarReacciones": true,
+        "elegirQuienPuedeComentar": true,
+        "elegirQuienPuedeVerComentarios": true,
+        "ocultarComentarios": true,
+        "eliminarComentarios": true,
+        "fijarComentariosDestacados": true,
+        "bloquearUsuariosParaComentar": true
+      },
+      "expiracionInteracciones": "comentarios_y_reacciones_expiran_con_el_estado"
+    },
+    "interaccionPrivadaMessenger": {
+      "ctasPosibles": [
+        "enviar_mensaje",
+        "contactar",
+        "preguntar_disponibilidad",
+        "solicitar_informacion"
+      ],
+      "controlesPropietario": {
+        "activarDesactivarMensajesDesdeEstado": true,
+        "elegirQuienPuedeEnviarMensajesDesdeEstado": true
+      },
+      "persistenciaConversaciones": {
+        "expiranConEstado": false,
+        "nota": "Las conversaciones originadas por un estado NO expiran cuando el estado expira",
+        "metadataObligatoria": ["estadoId", "perfilId", "bannerId_si_aplica", "fechaOrigen"]
+      }
+    },
+    "visitantesSinCuenta": {
+      "pueden": [
+        "ver_estados_publicos",
+        "ver_comentarios_publicos",
+        "ver_reacciones_visibles"
+      ],
+      "noPueden": [
+        "comentar",
+        "responder_comentarios",
+        "reaccionar",
+        "enviar_mensajes_desde_estados",
+        "participar_encuestas",
+        "crear_estados"
+      ]
+    },
+    "visualizaciones": {
+      "propietarioConsulta": {
+        "totalVistas": true,
+        "usuariosQueVisualizaron": true,
+        "fechaHoraAproximadaVisualizacion": true
+      },
+      "preferenciaUsuario": {
+        "mostrarIdentidadAlVer": "opcional_por_usuario",
+        "ocultarIdentidadAlVer": "opcional_por_usuario",
+        "siOcultaIdentidad": {
+          "cuentaEnEstadisticas": true,
+          "apareceComo": "visualizacion_anonima"
+        }
+      }
+    },
+    "estadisticasPropietario": [
+      "vistas",
+      "comentarios",
+      "reacciones",
+      "mensajes_generados_desde_estado"
+    ],
+    "moderacion": {
+      "accionesUsuario": ["reportar_estado", "reportar_comentario", "bloquear_usuario"],
+      "moderacionAdministrativa": true,
+      "politicaContenidoIlegal": {
+        "takedownInmediato": true,
+        "categoriasExplicitas": ["armas", "menores", "violencia", "contenido_ilegal"]
+      }
+    },
+    "cumplimientoCapasCongeladas": {
+      "cuentas_1_0_0": ["usuarioId", "rolesCuenta[]", "permisos", "perfilId", "anuncianteId"],
+      "seguridad_mvp_1_0_0": ["estadoSeguridad", "rate_limits", "moderacion", "denuncias"],
+      "estadoSeguridad": {
+        "publicarPermitido": ["normal", "observacion"],
+        "publicarDenegado": ["suspendido", "bloqueado"]
+      }
+    },
+    "integracionCapasExistentes": {
+      "notificaciones": "aviso estado activo a seguidores; no historial expirados",
+      "historial": "excluido para estados expirados",
+      "estadisticas": "durante vigencia",
+      "ia": "sugerencias sin auto-publicar",
+      "validationEngine_futuro": "validar publicación, comentarios, reportes, gates estadoSeguridad"
+    }
+  },
+  "preferenciasArquitectonicasTransmisionesEnVivo": {
+    "titulo": "Transmisiones en Vivo",
+    "estado": "PREFERENCIA_FUTURA_NO_DISENADA",
+    "independienteDeStories": true,
+    "nota": "Arquitectura futura separada de Estados Temporales (Stories)",
+    "cuotaDiaria": {
+      "maxMinutosPorDia": 30,
+      "periodoVentana": "24h",
+      "distribucionLibrePorPropietario": true,
+      "ejemplosValidos": [
+        "1 transmisión de 30 minutos",
+        "2 transmisiones de 15 minutos",
+        "3 transmisiones de 10 minutos"
+      ],
+      "nota": "El propietario reparte los 30 minutos diarios como prefiera; no diseñado aún el enforcement"
+    },
+    "notificaciones": {
+      "alIniciarTransmision": true,
+      "destinatarios": "quienes_siguen_a_la_cuenta",
+      "canal": "sistema_notificaciones_unificado_dashboards_1_0_0",
+      "nota": "El sistema debe poder notificar a seguidores al iniciar el en vivo"
+    },
+    "controlesPropietario": {
+      "dueñoContexto": "perfil_o_anunciante",
+      "activarDesactivarComentarios": true,
+      "activarDesactivarReacciones": true,
+      "activarDesactivarMensajesPrivados": true,
+      "audienciaVerEnVivo": {
+        "opciones": ["publico", "usuarios_registrados", "seguidores"],
+        "elegiblePorDueño": true
+      },
+      "audienciaComentar": {
+        "opciones": ["usuarios_registrados", "seguidores", "nadie"],
+        "elegiblePorDueño": true
+      },
+      "audienciaMensajesPrivados": {
+        "opciones": ["usuarios_registrados", "seguidores", "nadie"],
+        "elegiblePorDueño": true
+      }
+    },
+    "interaccionPublica": {
+      "habilitables": ["comentarios", "reacciones"],
+      "pertenecenAlEventoEnVivo": true,
+      "expiracionAlTerminarTransmision": "pueden_expirar",
+      "nota": "Comentarios y reacciones del en vivo pertenecen al evento; pueden expirar al terminar la transmisión"
+    },
+    "interaccionPrivadaMessenger": {
+      "persistenciaConversaciones": {
+        "expiranConTransmision": false,
+        "nota": "Las conversaciones privadas generadas desde un en vivo NO expiran cuando termina la transmisión"
+      },
+      "metadataOrigenObligatoria": ["liveId", "perfilId", "bannerId_si_aplica", "fechaOrigen"]
+    },
+    "superficiesVisibilidad": [
+      "perfil_publico",
+      "dashboards",
+      "resultados",
+      "espacios_promocionales_por_definir"
+    ],
+    "moderacion": {
+      "usuario": ["reportar", "bloquear"],
+      "administrativa": {
+        "moderar": true,
+        "suspender": true,
+        "ocultar": true,
+        "motivo": "abuso"
+      },
+      "politicaContenidoIlegal": {
+        "takedownInmediato": true,
+        "categoriasExplicitas": ["armas", "menores", "violencia", "contenido_ilegal"]
+      }
+    },
+    "cumplimientoSeguridad": {
+      "seguridadMvp_1_0_0": true,
+      "estadoSeguridad": true,
+      "rateLimits": true,
+      "reportes": true,
+      "bloqueos": true,
+      "nota": "Deben aplicar gates y controles de Seguridad MVP antes de publicar o interactuar en en vivo"
+    },
+    "cumplimientoCapasCongeladas": "Cuentas 1.0.0, Seguridad MVP 1.0.0, estadoSeguridad, rolesCuenta[], permisos, Dashboards notificaciones 1.0.0"
+  },
+  "aclaracionFinalEnVivo": {
+    "version": "1.2.1",
+    "fecha": "2026-06-09",
+    "estado": "DOCUMENTADO_SOLO_OBSERVACION",
+    "resume": "Reglas deseadas Transmisiones en Vivo — ver preferenciasArquitectonicasTransmisionesEnVivo",
+    "puntosClave": [
+      "30 min/día por cuenta — sin cambio",
+      "Notificación a seguidores al iniciar — Dashboards 1.0.0",
+      "Dueño activa/desactiva comentarios, reacciones y mensajes privados",
+      "Audiencias configurables: ver / comentar / mensajear",
+      "Comentarios y reacciones pueden expirar con el evento; Messenger persiste con liveId",
+      "Admin puede moderar, suspender u ocultar por abuso",
+      "Seguridad MVP, estadoSeguridad, rate limits, reportes y bloqueos aplican"
+    ]
+  },
+  "grafoSeguidoresYNotificaciones": {
+    "estado": "PREFERENCIA_FUTURA_NO_DISENADA",
+    "nota": "Requiere capa social de seguimiento; no existe en capas congeladas actuales",
+    "relacion": {
+      "tipo": "seguir_perfil_o_cuenta",
+      "descripcion": "Usuario A sigue al publicador B; la notificación va a seguidores de B"
+    },
+    "eventosQueNotificanSeguidores": [
+      "publicacion_estado_temporal",
+      "inicio_transmision_en_vivo"
+    ],
+    "reglas": {
+      "notificarAlPublicarEstado": true,
+      "notificarAlIniciarTransmisionEnVivo": true,
+      "destinatarios": "usuarios_que_siguen_al_publicador",
+      "canal": "sistema_notificaciones_unificado_dashboards_1_0_0",
+      "noNotificarEstadosExpirados": true,
+      "preferenciasUsuarioFuturas": "silenciar_seguido — por definir en SPEC"
+    }
+  },
+  "arquitecturaObjetivoFutura": {
+    "nota": "Clasificación tentativa por nivel; no compromete alcance hasta workshop y SPEC Interacciones",
+    "nivel1": {
+      "titulo": "Stories, social básico y transmisiones",
+      "funciones": [
+        "estados_24h",
+        "comentarios",
+        "reacciones",
+        "mensajes_desde_estados",
+        "audio_foto_video_muted",
+        "estadisticas",
+        "reportes",
+        "bloqueos",
+        "moderacion",
+        "encuestas",
+        "preguntas_y_respuestas",
+        "compartir_estados",
+        "menciones",
+        "etiquetas",
+        "ubicacion",
+        "destacados",
+        "ver_quien_vio_estado",
+        "estados_patrocinados",
+        "transmisiones_en_vivo_30min_dia",
+        "notificaciones_a_seguidores_estado_y_envivo"
+      ]
+    },
+    "nivel2": {
+      "titulo": "Social avanzado y comunicación en tiempo real",
+      "funciones": [
+        "grupos",
+        "canales",
+        "videollamadas",
+        "llamadas_de_voz",
+        "ia_social_avanzada",
+        "traduccion_automatica_conversaciones",
+        "resumenes_ia_conversaciones"
+      ]
+    }
+  },
+  "dependenciasCongeladasRelacionadas": {
+    "catalogo": "contexto perfil/subcategoria — sin modificar",
+    "cuentas": "usuarioId, roles, módulos shell",
+    "seguridad": "estadoSeguridad, moderación, rate limits",
+    "fieldEngine": "sin impacto directo",
+    "dashboards": "notificaciones unificadas, estadísticas, shell módulos",
+    "validationEngine": "futuro validador — SPEC pendiente congelamiento"
+  },
+  "dependenciasCapaInteracciones": {
+    "posterioresObligatorias": [
+      { "capa": "ValidationEngine", "estado": "SPEC en curso — siguiente paso roadmap" },
+      { "capa": "Messenger", "estado": "SPEC pendiente — posterior a ValidationEngine" }
+    ],
+    "relacionadas": [
+      { "capa": "Dashboards", "version": "1.0.0", "uso": "shell módulos, notificaciones unificadas, estadísticas" },
+      { "capa": "Seguridad MVP", "version": "1.0.0", "uso": "estadoSeguridad, rate limits, reportes, bloqueos, moderación" },
+      { "capa": "RenderEngine", "estado": "futuro", "uso": "superficies públicas stories/en vivo/resultados" },
+      { "capa": "Notificaciones", "referencia": "SPEC-DASHBOARDS §14", "uso": "avisos seguidores, eventos interacción" },
+      { "capa": "EventBus", "estado": "ValidationEngine diseño", "uso": "fan-out notificaciones e historial post-validación" }
+    ],
+    "specInteracciones": "NO_INICIAR — observación v1.2.1 suficiente para esta etapa"
+  },
+  "cierreEtapa": {
+    "fecha": "2026-06-09",
+    "aprobadoPor": "product owner / usuario CariHub",
+    "declaracion": "Observación arquitectónica Interacciones v1.2.1 considerada completa para esta etapa",
+    "accionesProhibidasAhora": [
+      "ampliar_observacion",
+      "iniciar_SPEC_Interacciones",
+      "implementar_runtime",
+      "modificar_capas_congeladas"
+    ],
+    "siguientePasoRoadmap": "SPEC ValidationEngine v1.0.0"
+  },
+  "puntoRoadmap": {
+    "fase": "FASE_7_POST_MESSENGER",
+    "orden": 7,
+    "roadmapActualNoInterrumpir": "SPEC ValidationEngine v1.0.0 diseño",
+    "specInteraccionesCompleta": "NO iniciar — solo observación",
+    "precondiciones": [
+      "ValidationEngine congelado",
+      "SPEC Messenger congelada",
+      "EventBus canónico",
+      "Migración usuarios→perfiles si aplica"
+    ],
+    "secuenciaSugerida": [
+      "1. SPEC ValidationEngine congelada ← roadmap actual",
+      "2. SPEC Messenger congelada",
+      "3. Runtime Messenger MVP",
+      "4. Workshop Interacciones (Stories + transmisiones + seguidores)",
+      "5. SPEC Interacciones — solo si se aprueba alcance",
+      "6. Nivel 1 MVP",
+      "7. Nivel 2 — acta separada"
+    ]
+  },
+  "riesgosSiSeAnticipa": [
+    "Diseñar SPEC Interacciones antes de ValidationEngine y Messenger",
+    "Notificaciones a seguidores sin grafo social ni EventBus",
+    "Transmisiones en vivo sin cuota 30 min/día ni moderación",
+    "Conversaciones live sin metadata liveId/perfilId",
+    "Confundir Stories (24h, 2/día) con transmisiones (30 min/día)",
+    "Audio autoplay violando UX y políticas navegador"
+  ],
+  "changelog": [
+    { "version": "1.0.0", "fecha": "2026-06-09", "nota": "Observación inicial + preferencias stories básicas" },
+    { "version": "1.1.0", "fecha": "2026-06-09", "nota": "Ampliación stories: audio, interacción, visitantes, stats, moderación" },
+    { "version": "1.2.0", "fecha": "2026-06-09", "nota": "Transmisiones en vivo 30 min/día; grafo seguidores y notificaciones; roadmap nivel 1/2; revoca envivo corto ambiguo v1.1" },
+    { "version": "1.2.1", "fecha": "2026-06-09", "nota": "Aclaración final en vivo: controles dueño, audiencias, expiración comentarios/reacciones, liveId Messenger, moderación admin, Seguridad MVP" },
+    { "version": "1.2.1-cierre", "fecha": "2026-06-09", "nota": "Cierre etapa: observación completa; ampliación congelada; SPEC Interacciones no iniciar; roadmap → ValidationEngine" }
+  ]
+}

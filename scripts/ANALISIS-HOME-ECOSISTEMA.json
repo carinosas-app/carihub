@@ -1,0 +1,401 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "tipo": "ANALISIS_ARQUITECTONICO",
+  "titulo": "Análisis profundo — ecosistema Home CariHub",
+  "fecha": "2026-06-09",
+  "versionAnalisis": "1.0.0",
+  "alcance": "Todo el repositorio — Home y dependencias cruzadas",
+  "archivosModificados": false,
+  "referenciaModularizacion": "scripts/OBSERVACION-ARQUITECTONICA-MODULARIZACION-APLICACIONES.json",
+  "resumenEjecutivo": {
+    "veredicto": "Home es un monolito de ~2.200 líneas HTML + ~1.330 líneas JS inline + 8 módulos JS + 5 CSS + Firebase completo, que mezcla descubrimiento público con registro, cuenta, pagos, banners y favoritos.",
+    "porcentajeEstimadoNoHome": "55-65% del bundle actual debería vivir en otros módulos",
+    "alineacionPlanoModular": "Baja — contradice P0 delimitar núcleo público",
+    "deudaPrincipal": "Separación visual nueva (mockup v4) convive con runtime legacy embebido en el mismo index.html"
+  },
+  "inventarioArchivos": {
+    "html": [
+      { "ruta": "public/index.html", "rol": "Home producción", "lineasAprox": 2208, "notas": "Monolito principal; data-page=home" },
+      { "ruta": "public/index-legacy.html", "rol": "Backup pre-migración mockup", "notas": "Referencia histórica; no es entry alternativo activo" },
+      { "ruta": "tmp/preview/v3/home-html-real-mockup-v4.html", "rol": "Origen diseño mockup", "notas": "Fuente de migrate-home.mjs" }
+    ],
+    "css": [
+      { "ruta": "public/css/home.css", "lineasAprox": 3483, "rol": "Estilos shell Home + hero + layout" },
+      { "ruta": "public/css/home-vcards.css", "rol": "Tarjetas categoría/sector (vcards)" },
+      { "ruta": "public/css/home-sector-scroll.css", "rol": "Animación scroll sectores" },
+      { "ruta": "public/css/home-modals.css", "rol": "Modales legacy (.modal) + parcial home-modal" },
+      { "ruta": "public/css/home-adultos-cat-picker.css", "rol": "Picker premium categorías adultos" }
+    ],
+    "jsHome": [
+      { "ruta": "public/js/hero-home.js", "rol": "Config slides hero (CARIHUB_HERO_SLIDES)" },
+      { "ruta": "public/js/home-ui.js", "rol": "Carousel hero, slots categoría, sectores, ads, modales UI" },
+      { "ruta": "public/js/home-vcards.js", "rol": "Plantillas visuales tarjetas categoría/sector" },
+      { "ruta": "public/js/home-sector-scroll.js", "rol": "Motor scroll vertical sectores" },
+      { "ruta": "public/js/home-bridge.js", "rol": "Puente UI nueva ↔ funciones inline index" },
+      { "ruta": "public/js/adultos-cat-picker.js", "rol": "Modal categorías adultos premium" }
+    ],
+    "jsCompartidosCargadosEnHome": [
+      { "ruta": "public/js/catalogos-carihub.js", "rol": "Catálogo categorías home (~34 adultas)" },
+      { "ruta": "public/js/sectores-carihub.js", "rol": "15 sectores CariHub" },
+      { "ruta": "public/js/categoria-iconos.js", "rol": "Iconos categoría" },
+      { "ruta": "public/js/sector-scroll-data.js", "rol": "Datos scroll por sector" },
+      { "ruta": "public/paises.js", "rol": "Listas países" },
+      { "ruta": "public/estados.js", "rol": "Estados por país" },
+      { "ruta": "public/ciudades.js", "rol": "Ciudades por estado" }
+    ],
+    "jsRelacionadosNoCargadosEnHome": [
+      { "ruta": "public/js/precios-publicidad.js", "cargadoEn": "registro-banner.html" },
+      { "ruta": "public/js/banner-inventario-rotacion.js", "cargadoEn": "registro-banner.html" }
+    ],
+    "scriptsBuild": [
+      { "ruta": "scripts/migrate-home.mjs", "rol": "Extracción mockup v4 → index + CSS + JS" }
+    ],
+    "videos": {
+      "encontrados": 0,
+      "nota": "Home usa solo imágenes estáticas (PNG/JPG/WebP); sin video hero"
+    }
+  },
+  "assets": {
+    "imgHome": { "ruta": "public/img/home/", "archivos": 60, "categorias": ["logos", "hero-*", "sectores", "sectores-card", "banners", "promo"] },
+    "imgAdultosCat": { "ruta": "public/img/adultos-cat/", "archivos": 63, "uso": "Picker categorías adultos + anuncio embebido" },
+    "imgMenuIcons": { "ruta": "public/img/menu-icons/", "archivos": 12, "uso": "Menú lateral" },
+    "fuentesExternas": [
+      "Google Fonts: Allura, Great Vibes, Italianno, Montserrat, Pinyon Script, Sacramento (7 familias)"
+    ]
+  },
+  "firebaseYStorage": {
+    "sdksCargados": ["firebase-app-compat 9.6.1", "firebase-auth-compat", "firebase-firestore-compat", "firebase-storage-compat"],
+    "inicializacion": "Inline en index.html head — config expuesta en cliente",
+    "coleccionesFirestore": [
+      { "coleccion": "usuarios/{uid}", "operaciones": ["set registro", "get panel", "update edición pública"], "moduloCorrecto": "Registro/Dashboards", "enHome": true },
+      { "coleccion": "usuarios/{uid}/favoritos/{perfilId}", "operaciones": ["get", "set", "delete", "orderBy"], "moduloCorrecto": "Interacciones o Cuenta", "enHome": true },
+      { "coleccion": "solicitudes_anuncios", "operaciones": ["add", "where uidAnunciante"], "moduloCorrecto": "Banners/Publicidad", "enHome": true },
+      { "coleccion": "estadisticas_visitas", "operaciones": ["add en cada load"], "moduloCorrecto": "Analytics/Admin", "enHome": true }
+    ],
+    "storagePaths": [
+      "perfiles/{uid}/foto-principal-*",
+      "perfiles/{uid}/extra-*",
+      "verificaciones/{uid}/ine-*",
+      "verificaciones/{uid}/selfie-*",
+      "solicitudes_anuncios/*"
+    ],
+    "auth": {
+      "metodos": ["createUserWithEmailAndPassword", "signInWithEmailAndPassword", "signInAnonymously"],
+      "onAuthStateChanged": "Auto anonymous si no hay usuario (favoritos)",
+      "cargaEnVisitanteFrio": true
+    },
+    "pagosHardcoded": {
+      "stripe": "LINK_STRIPE en index.html",
+      "mercadoPago": "LINK_MERCADO_PAGO en index.html",
+      "moduloCorrecto": "Pagos/Contratos"
+    }
+  },
+  "localStorage": [
+    {
+      "clave": "carihub_acceso_ok",
+      "valor": "1",
+      "uso": "Puerta 18+ tras checkboxes modalAntiBot",
+      "persistencia": "Sin expiración",
+      "riesgo": "No es verificación real de edad ni anti-bot"
+    }
+  ],
+  "navegacionYEnlaces": {
+    "salidaPrincipal": "./resultados.html?categoria&pais&estado&ciudad&v=timestamp",
+    "banners": "registro-banner.html (+ ?slot=home_categorias)",
+    "deepLinks": ["?abrir=anuncio", "?abrir=registro"],
+    "whatsappAdmin": "528112304664",
+    "sinEnlacesA": ["perfil.html directo desde home shell", "admin.html", "messenger", "dashboard-rentero.html"]
+  },
+  "modalesYUI": {
+    "sistemaNuevo_homeModal": [
+      "modal-verificados", "modal-privacidad", "modal-mensajes", "modal-favoritos (info)",
+      "modal-registro (solo copy CTA)", "modal-avanzada", "modal-otros-sectores",
+      "modal-sectores", "modal-categorias", "home-adultos-picker"
+    ],
+    "sistemaLegacy_modal": [
+      "modalSelector", "modalAntiBot", "modalAnuncio", "modalContacto", "modalDenuncia",
+      "modalLegal", "modalFavoritos (CRUD)", "modalMiPerfil", "modalPanel",
+      "modalEditar", "modalRegistro (wizard 3 pasos)"
+    ],
+    "menuLateral": "12 enlaces — mezcla cuenta, legal, anuncios, denuncias"
+  },
+  "perteneceCorrectamenteAHome": [
+    "Hero rotativo y branding",
+    "Formulario búsqueda (categoría, país, estado, ciudad)",
+    "CTA Buscar ahora → resultados",
+    "Grid categorías destacadas (6 slots rotativos)",
+    "Grid sectores (6 slots + ver otros)",
+    "Pills de confianza (copy, no funcionalidad messenger)",
+    "Slots publicitarios estáticos / placeholder (home-ad-slot, banner inferior)",
+    "Menú: legal + 18+ + soporte vía WhatsApp (liviano)",
+    "Puerta 18+ (concepto; implementación mejorable)"
+  ],
+  "mezcladoIncorrectamenteEnHome": [
+    { "bloque": "Wizard registro 3 pasos + INE/selfie", "lineasAprox": 320, "destino": "MOD-REGISTRO-WIZARD /registro" },
+    { "bloque": "Login, crear cuenta, panel cuenta, editar perfil", "destino": "MOD-DASHBOARDS /cuenta" },
+    { "bloque": "Renovación Stripe/Mercado Pago", "destino": "MOD-PAGOS-CONTRATOS" },
+    { "bloque": "Solicitud anuncio + upload imagen Firestore", "destino": "MOD-BANNERS /anuncios" },
+    { "bloque": "Favoritos CRUD + auth anónima", "destino": "MOD-INTERACCIONES o Cuenta" },
+    { "bloque": "plantillaCardPerfil + toggleFavorito", "destino": "Resultados/Perfil — código posiblemente muerto en Home" },
+    { "bloque": "registrarVisita → estadisticas_visitas", "destino": "Analytics/Admin" },
+    { "bloque": "CATEGORIAS_BUSCADOR duplicada vs catalogos-carihub", "destino": "Catálogo único" }
+  ],
+  "dependenciasCruzadas": {
+    "resultados": {
+      "archivo": "public/resultados.html",
+      "comparteConHome": ["query params búsqueda", "colección usuarios", "Firebase config"],
+      "noComparte": ["CSS home.*", "JS home-*", "diseño visual — stack Arial inline ~1957 líneas"],
+      "riesgo": "Experiencia visual discontinua Cariñosas (home) vs CariHub (resultados title)"
+    },
+    "perfil": {
+      "archivo": "public/perfil.html",
+      "comparteConHome": ["usuarios/{id}", "Firestore"],
+      "noComparte": ["home.css", "banners-publicidad.css propio"],
+      "riesgo": "Sin navegación unificada desde nuevo home shell"
+    },
+    "registroBanner": {
+      "archivo": "public/registro-banner.html",
+      "enlaceDesdeHome": ["home-ad-slot", "banner inferior", "picker adultos"],
+      "stackPropio": "precios-publicidad.js, banner-inventario-rotacion.js, mockups slots"
+    },
+    "admin": {
+      "archivo": "public/admin.html",
+      "relacion": "Ningún enlace directo desde home; flujo solicitudes_anuncios converge en admin"
+    },
+    "dashboards": {
+      "archivo": "public/dashboard-rentero.html",
+      "relacion": "Mención en grep; no integrado en index.html actual"
+    }
+  },
+  "catalogoVsProduccion": {
+    "homeUsa": "catalogos-carihub.js (~34 categorías adultas) + CATEGORIAS_BUSCADOR hardcoded (18 strings con emojis)",
+    "disenoCongelado": "462 subcategorías en Catálogo 1.0.0 — home no consume registry completo",
+    "sectores": "sectores-carihub.js alineado con 15 sectores diseño"
+  },
+  "rendimiento": {
+    "riesgos": [
+      "Firebase Auth+Firestore+Storage en primera visita aunque solo se busque",
+      "7 familias Google Fonts",
+      "~123 imágenes referenciables en home ecosystem",
+      "Hero carousel DOM rebuild + interval 4.5s",
+      "home.css ~3483 líneas incluye reglas proto-laptop/tablet/iphone de mockup",
+      "estadisticas_visitas write por cada page load",
+      "catalogos + geo + 13 scripts antes de interactividad completa",
+      "Sin lazy load Firebase ni code-splitting"
+    ],
+    "metricasSugeridas": ["LCP hero", "TBT por Firebase", "Peso total transferido mobile 3G"]
+  },
+  "escalabilidad": {
+    "riesgos": [
+      "index.html inline JS imposible de testear/versionar por módulo",
+      "Duplicación lógica búsqueda/ubicación entre index-legacy y bridge",
+      "Imposible desplegar Home sin desplegar wizard y pagos",
+      "Hero banner rentals (CARIHUB_HERO_BANNER_RENTALS) vacío — monetización no cableada",
+      "Migración usuarios→perfiles romperá favoritos y panel si no se planifica"
+    ]
+  },
+  "seo": {
+    "presente": ["title Cariñosas", "meta description", "h1 en hero (rotativo)"],
+    "ausente": ["canonical", "og:*", "twitter:card", "schema.org", "hreflang", "sitemap link", "landings por ciudad/sector"],
+    "inconsistencias": ["Marca Cariñosas vs CariHub en legales y resultados", "data-tema=escort fijo en html"],
+    "observacionSEO": "Alineado con OBSERVACION-ARQUITECTONICA-SEO — landings /s/:slug futuras"
+  },
+  "uxUi": {
+    "fortalezas": [
+      "Jerarquía visual clara: hero → búsqueda → categorías → CTA",
+      "Accesibilidad parcial: aria-labels, roles dialog, visually-hidden labels",
+      "Picker adultos premium diferenciado",
+      "Trust pills educan sin salir de home"
+    ],
+    "debilidades": [
+      "Doble sistema modal (home-modal vs .modal) — estilos inconsistentes",
+      "home-modals.css usa --rosa no definido en home.css (Bugbot)",
+      "Favoritos: promesa en UI vs errores anonymous auth",
+      "Buscar cerca: geolocation solo muestra alert, no completa ciudad",
+      "Registrarse abre wizard legacy, no experiencia nueva",
+      "Muchos sparkles/animaciones — posible fatiga visual móvil"
+    ]
+  },
+  "movil": {
+    "observaciones": [
+      "Viewport meta correcto",
+      "home.css extenso con breakpoints proto-* heredados del mockup",
+      "Menú full-screen usable",
+      "Hero texto multi-línea adaptativo (isLaptopHero checks en JS)",
+      "Riesgo scroll jank por animaciones sector-scroll + hero simultáneas",
+      "Formularios legacy modal no optimizados para teclado virtual (pasos largos)"
+    ]
+  },
+  "observacionesPorCapaFutura": {
+    "renderEngine": {
+      "hoy": "home-vcards.js construye tarjetas procedimentalmente; resultados/perfil usan HTML estático",
+      "futuro": "Unificar tarjeta resultado y teaser categoría vía snapshot; hero preview images → RenderEngine",
+      "precondicion": "config-renderizado-dinamico-schema.json"
+    },
+    "themeEngine": {
+      "hoy": "data-tema=escort, tokens CSS hardcoded en vcards (CAT_OVERRIDES)",
+      "futuro": "Variables tema por sector/categoría sin re-deploy; editor no en home bundle",
+      "nota": "home-vcards templates (classic/neon/...) son prototipo ThemeEngine"
+    },
+    "interacciones": {
+      "hoy": "Favoritos Firestore, trust pill mensajes (copy only)",
+      "futuro": "Favoritos + seguidores fuera de home; deep link /messenger tras auth",
+      "conflicto": "Anonymous auth en home vs diseño Messenger autenticado"
+    },
+    "iaFutura": {
+      "hoy": "data-agente-context=home en main — hook sin implementación",
+      "oportunidades": ["Asistente búsqueda natural en hero", "Recomendación categoría por ciudad", "Moderación denuncias"],
+      "restriccion": "No cargar LLM en home — orquestador en dashboard"
+    }
+  },
+  "productoYNegocio": {
+    "valorUsuario": [
+      "Hero multi-categoría comunica amplitud del directorio",
+      "Búsqueda geo estructurada reduce fricción",
+      "Exploración sectores no-adultos abre TAM más allá de escort",
+      "Trust pills reducen ansiedad primer visitante"
+    ],
+    "conversionRegistro": [
+      "CTA Registrarse prominente (hero CTA + menú)",
+      "Primer mes gratis en wizard — fuerte gancho",
+      "Fricción: wizard largo 3 pasos con INE en modal pequeño"
+    ],
+    "conversionAnunciante": [
+      "Slots home-ad + banner inferior + registro-banner.html",
+      "Hero slots home_hero_1..5 preparados sin inventory live",
+      "Modal anuncio en home captura leads sin salir"
+    ],
+    "monetizacion": [
+      "Banners estáticos placeholder → contratos_banners futuro",
+      "Stripe/MP en panel renovación — no debe estar en home público",
+      "Rotación ads JS (startAdRotation) lista para inventory dinámico"
+    ],
+    "perfilesYNegocios": [
+      "Sector grid destaca negocios (spa, antros, moteles)",
+      "Vcards con fotos reales por categoría — buen preview",
+      "Falta teaser perfiles reales destacados en home (social proof)"
+    ]
+  },
+  "matrizFaltaSobra": {
+    "faltaEnHome": [
+      "Perfiles destacados / recientes cerca (teaser → resultados)",
+      "Enlaces SEO ciudad/sector",
+      "Breadcrumbs o indicador progreso búsqueda",
+      "Open Graph y canonical",
+      "Banner inventory dinámico desde Firestore/config",
+      "Geolocalización real que pre-llene ciudad",
+      "Indicador perfiles verificados activos (número social proof)",
+      "Footer estructurado con mapa del sitio"
+    ],
+    "sobraEnHome": [
+      "Wizard registro completo",
+      "Panel cuenta y edición perfil",
+      "Pagos renovación",
+      "CRUD favoritos",
+      "Formulario solicitud anuncio completo",
+      "Firebase Storage en carga inicial",
+      "plantillaCardPerfil (si no se usa)",
+      "CATEGORIAS_BUSCADOR duplicado",
+      "Reglas CSS proto-mockup no usadas en producción"
+    ],
+    "simplificar": [
+      "Un solo sistema de modales",
+      "Menú: quitar duplicados favoritos/registro",
+      "Cargar Firebase solo al abrir cuenta/registro",
+      "Reducir fuentes a 2 familias",
+      "Lazy load imágenes hero bajo fold"
+    ],
+    "separar": [
+      "Registro → /registro",
+      "Cuenta → /cuenta",
+      "Anuncios → /anuncios o registro-banner (ya parcial)",
+      "Favoritos → /cuenta/favoritos",
+      "Analytics visitas → backend/admin"
+    ],
+    "agregar": [
+      "Strip perfiles verificados",
+      "Popular en {ciudad} links",
+      "JSON-LD Organization + WebSite",
+      "Preconnect firebase solo on-demand"
+    ],
+    "innecesario": [
+      "Auth anónima automática en load",
+      "Doble modal favoritos (info + CRUD)",
+      "Detectar ubicación stub",
+      "index-legacy en deploy si no se usa"
+    ]
+  },
+  "oportunidades": [
+    { "id": "O-H01", "titulo": "Bundle público < 200KB JS", "impacto": "alto", "esfuerzo": "medio" },
+    { "id": "O-H02", "titulo": "Hero banner rentals dinámicos", "impacto": "alto monetización", "esfuerzo": "medio" },
+    { "id": "O-H03", "titulo": "Landings SEO por sector desde home sectores", "impacto": "alto tráfico", "esfuerzo": "alto" },
+    { "id": "O-H04", "titulo": "Teaser resultados sin navegar (3 cards)", "impacto": "medio conversión", "esfuerzo": "bajo" },
+    { "id": "O-H05", "titulo": "Unificar marca Cariñosas/CariHub", "impacto": "medio confianza", "esfuerzo": "bajo" }
+  ],
+  "riesgos": [
+    { "id": "R-H01", "nivel": "alto", "titulo": "Monolito bloquea modularización P0" },
+    { "id": "R-H02", "nivel": "alto", "titulo": "Datos sensibles INE en mismo bundle que home público" },
+    { "id": "R-H03", "nivel": "alto", "titulo": "CSS --rosa roto en modales legacy (Bugbot)" },
+    { "id": "R-H04", "nivel": "medio", "titulo": "Favoritos anonymous puede fallar — UX rota" },
+    { "id": "R-H05", "nivel": "medio", "titulo": "Catálogo home desalineado con 462 subcategorías diseño" },
+    { "id": "R-H06", "nivel": "medio", "titulo": "Performance móvil por peso assets+fonts+firebase" },
+    { "id": "R-H07", "nivel": "medio", "titulo": "Migración perfiles rompe favoritos y panel embebido" }
+  ],
+  "recomendacionesPrioritarias": [
+    { "prioridad": 1, "accion": "Congelar contrato núcleo home — lista blanca de scripts y modales permitidos" },
+    { "prioridad": 2, "accion": "Extraer ~1300 líneas inline a módulos lazy (sin cambiar UX aún)" },
+    { "prioridad": 3, "accion": "Firebase defer: cargar solo en interacción cuenta/registro/anuncio" },
+    { "prioridad": 4, "accion": "Corregir variables CSS modales o aislar modales legacy fuera de home" },
+    { "prioridad": 5, "accion": "Añadir OG + canonical mínimo" },
+    { "prioridad": 6, "accion": "Cablear hero banner slots a inventory o registro-banner" }
+  ],
+  "mejorasRapidas": [
+    "Definir :root --rosa en home-modals.css o importar tokens",
+    "Eliminar signInAnonymously en onAuthStateChanged hasta favoritos separados",
+    "Preload solo logo + primer hero image",
+    "Unificar title/description marca",
+    "Quitar plantillaCardPerfil si confirmado muerto",
+    "document.referrer ya capturado — usar en analytics backend futuro, no firestore cliente"
+  ],
+  "mejorasFuturas": [
+    "App shell home con dynamic import /cuenta /registro /anuncios",
+    "RenderEngine para cards categoría y resultados",
+    "Turnstile real en puerta 18+ (Seguridad MVP diseño)",
+    "Service worker cache estáticos home",
+    "A/B hero CTA registrarse vs buscar"
+  ],
+  "veredictoArquitectoPrincipal": {
+    "agregar": [
+      "Teaser social proof (N perfiles verificados en {ciudad})",
+      "SEO head completo y enlaces explorar por ciudad",
+      "Lazy Firebase + división bundle",
+      "Inventory dinámico banners hero y home-ad-slot",
+      "Footer legal compacto siempre visible"
+    ],
+    "quitar": [
+      "Wizard 3 pasos y modalPanel del index",
+      "Stripe/MP del HTML home",
+      "Auth anónima automática",
+      "CATEGORIAS_BUSCADOR hardcoded",
+      "CSS proto-mockup muerto en home.css",
+      "estadisticas_visitas desde cliente"
+    ],
+    "mover": [
+      "modalRegistro → /registro",
+      "modalMiPerfil/modalPanel/modalEditar → /cuenta",
+      "modalAnuncio → registro-banner o /anuncios",
+      "modalFavoritos CRUD → /cuenta/favoritos",
+      "modalLegal largo → páginas estáticas /legal/*",
+      "solicitudes_anuncios write → módulo banners"
+    ],
+    "dejarIgual": [
+      "Estructura visual mockup v4 (hero, search, cat grid, sectores)",
+      "home-ui.js + hero-home.js + home-vcards.js (como núcleo presentación)",
+      "Flujo buscar → resultados.html con query params",
+      "Enlaces registro-banner.html desde slots publicitarios",
+      "sectores-carihub + picker adultos como descubrimiento",
+      "Puerta 18+ (mejorar implementación, mantener concepto)",
+      "home-bridge.js como patrón adaptación hasta router formal"
+    ]
+  }
+}

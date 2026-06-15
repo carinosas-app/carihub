@@ -1,0 +1,420 @@
+{
+  "version": "1.0.0",
+  "specVersion": "1.0.0",
+  "messengerVersion": "messenger-2026-06-10",
+  "descripcion": "Golden fixtures diseño Messenger v1.0.0 OB-MSG cerrados — sin runtime",
+  "obMSG": "OB-MSG-1–8 cerrados",
+  "dependencias": {
+    "validationEngine": "1.0.0",
+    "seguridad": "1.0.0",
+    "cuentas": "1.0.0",
+    "dashboards": "1.0.0"
+  },
+  "fixtures": [
+    {
+      "id": "M01_mensaje_enviar_ok",
+      "accion": "mensaje_enviar",
+      "entrada": {
+        "emisorId": "u1",
+        "receptorId": "u2",
+        "conversacionId": "c1",
+        "estadoConversacion": "activa",
+        "seguridad": { "emailVerificado": true, "telefonoVerificado": true, "estadoSeguridad": "normal", "nivelConfianza": 55 },
+        "mensajeria": { "estadoMensajeria": "habilitada", "spamScore": 10 },
+        "texto": "Hola, ¿disponible?"
+      },
+      "salidaEsperada": {
+        "ok": true,
+        "estadoEntrega": "enviado",
+        "origenMensaje": "humano",
+        "fanOutPlan": [
+          { "destino": "historial", "tipoEvento": "mensaje_enviado" },
+          { "destino": "notificacion", "tipoEvento": "mensaje_nuevo" }
+        ]
+      }
+    },
+    {
+      "id": "M02_email_no_verificado",
+      "accion": "mensaje_enviar",
+      "entrada": {
+        "emisorId": "u1",
+        "seguridad": { "emailVerificado": false, "telefonoVerificado": true },
+        "mensajeria": { "estadoMensajeria": "habilitada" }
+      },
+      "salidaEsperada": { "ok": false, "codigo": "EMAIL_NO_VERIFICADO", "http": 403 }
+    },
+    {
+      "id": "M03_telefono_no_verificado",
+      "accion": "mensaje_enviar",
+      "entrada": {
+        "emisorId": "u1",
+        "seguridad": { "emailVerificado": true, "telefonoVerificado": false },
+        "mensajeria": { "estadoMensajeria": "habilitada" }
+      },
+      "salidaEsperada": { "ok": false, "codigo": "TELEFONO_NO_VERIFICADO", "http": 403 }
+    },
+    {
+      "id": "M04_estado_mensajeria_suspendida",
+      "accion": "mensaje_enviar",
+      "entrada": {
+        "emisorId": "u1",
+        "seguridad": { "emailVerificado": true, "telefonoVerificado": true },
+        "mensajeria": { "estadoMensajeria": "suspendida" }
+      },
+      "salidaEsperada": { "ok": false, "codigo": "ESTADO_MENSAJERIA_DENEGADO", "http": 403 }
+    },
+    {
+      "id": "M05_bloqueo_bidireccional",
+      "accion": "mensaje_enviar",
+      "entrada": {
+        "emisorId": "u1",
+        "receptorId": "u2",
+        "bloqueoActivo": { "u2_bloquea_u1": true },
+        "seguridad": { "emailVerificado": true, "telefonoVerificado": true },
+        "mensajeria": { "estadoMensajeria": "habilitada" }
+      },
+      "salidaEsperada": { "ok": false, "codigo": "BLOQUEO_ACTIVO", "http": 403 }
+    },
+    {
+      "id": "M06_solicitud_conversacion_adultos",
+      "accion": "conversacion_iniciar",
+      "entrada": {
+        "emisorId": "u1",
+        "receptorId": "u2",
+        "perfilContextoId": "p_adulto",
+        "subcategoriaId": "escort",
+        "seguridad": { "emailVerificado": true, "telefonoVerificado": true, "nivelConfianza": 50 },
+        "mensajeria": { "estadoMensajeria": "habilitada" }
+      },
+      "salidaEsperada": {
+        "ok": true,
+        "estadoConversacion": "solicitud_enviada",
+        "solicitudPendiente": true,
+        "fanOutPlan": [{ "destino": "notificacion", "tipoEvento": "solicitud_conversacion" }]
+      }
+    },
+    {
+      "id": "M07_aceptar_solicitud",
+      "accion": "solicitud_conversacion_aceptar",
+      "entrada": {
+        "receptorId": "u2",
+        "conversacionId": "c_sol",
+        "estadoConversacion": "solicitud_enviada",
+        "solicitudDeUsuarioId": "u1"
+      },
+      "salidaEsperada": {
+        "ok": true,
+        "estadoConversacion": "activa",
+        "fanOutPlan": [{ "destino": "notificacion", "tipoEvento": "solicitud_aceptada" }]
+      }
+    },
+    {
+      "id": "M08_rechazar_solicitud",
+      "accion": "solicitud_conversacion_rechazar",
+      "entrada": {
+        "receptorId": "u2",
+        "conversacionId": "c_sol",
+        "estadoConversacion": "solicitud_enviada"
+      },
+      "salidaEsperada": {
+        "ok": true,
+        "estadoConversacion": "solicitud_rechazada",
+        "fanOutPlan": [{ "destino": "notificacion", "tipoEvento": "solicitud_rechazada" }]
+      }
+    },
+    {
+      "id": "M09_mensaje_antes_aceptar_denegado",
+      "accion": "mensaje_enviar",
+      "entrada": {
+        "emisorId": "u1",
+        "estadoConversacion": "solicitud_enviada",
+        "seguridad": { "emailVerificado": true, "telefonoVerificado": true },
+        "mensajeria": { "estadoMensajeria": "habilitada" }
+      },
+      "salidaEsperada": { "ok": false, "codigo": "SOLICITUD_PENDIENTE", "http": 403 }
+    },
+    {
+      "id": "M10_rate_limit_usuario_nuevo",
+      "accion": "mensaje_enviar",
+      "entrada": {
+        "emisorId": "u_nuevo",
+        "seguridad": { "nivelConfianza": 25, "emailVerificado": true, "telefonoVerificado": true },
+        "rateLimitState": "excedido_mensaje_futuro_usuario_nuevo_24h"
+      },
+      "salidaEsperada": { "ok": false, "codigo": "RATE_LIMIT_EXCEDIDO", "http": 429 }
+    },
+    {
+      "id": "M11_spam_score_umbral_60",
+      "accion": "mensaje_enviar",
+      "entrada": {
+        "emisorId": "u_spam",
+        "mensajeria": { "estadoMensajeria": "habilitada", "spamScore": 62 },
+        "seguridad": { "emailVerificado": true, "telefonoVerificado": true }
+      },
+      "salidaEsperada": {
+        "ok": false,
+        "codigo": "SPAM_SCORE_UMBRAL",
+        "http": 403,
+        "efectoSistema": "estadoMensajeria → restringida"
+      }
+    },
+    {
+      "id": "M12_reportar_conversacion",
+      "accion": "reportar_conversacion",
+      "entrada": {
+        "reportanteId": "u2",
+        "reportadoId": "u1",
+        "conversacionId": "c1",
+        "motivo": "acoso",
+        "seguridad": { "emailVerificado": true }
+      },
+      "salidaEsperada": {
+        "ok": true,
+        "reporteEstado": "pendiente",
+        "fanOutPlan": [
+          { "destino": "notificacion", "tipoEvento": "reporte_recibido", "destinatario": "admin" },
+          { "destino": "historial", "tipoEvento": "conversacion_reportada" }
+        ]
+      }
+    },
+    {
+      "id": "M13_eliminar_para_todos_dentro_ventana",
+      "accion": "mensaje_eliminar_para_todos",
+      "entrada": {
+        "emisorId": "u1",
+        "mensajeId": "m1",
+        "createdAt": "2026-06-09T12:00:00Z",
+        "now": "2026-06-09T12:10:00Z",
+        "ventanaMinutos": 15,
+        "enInvestigacion": false,
+        "reportePendiente": false
+      },
+      "salidaEsperada": {
+        "ok": true,
+        "eliminadoParaTodos": true,
+        "auditoria": "historial mensaje_eliminado_para_todos",
+        "uiAmbos": "[mensaje eliminado]"
+      }
+    },
+    {
+      "id": "M14_eliminar_fuera_ventana",
+      "accion": "mensaje_eliminar_para_todos",
+      "entrada": {
+        "emisorId": "u1",
+        "mensajeId": "m1",
+        "createdAt": "2026-06-09T10:00:00Z",
+        "now": "2026-06-09T12:00:00Z",
+        "ventanaMinutos": 15
+      },
+      "salidaEsperada": { "ok": false, "codigo": "MENSAJE_ELIMINAR_VENTANA_EXPIRADA", "http": 400 }
+    },
+    {
+      "id": "M15_eliminar_conversacion_investigacion",
+      "accion": "mensaje_eliminar_para_todos",
+      "entrada": {
+        "emisorId": "u1",
+        "conversacion": { "enInvestigacion": true },
+        "dentroVentana": true
+      },
+      "salidaEsperada": { "ok": false, "codigo": "CONVERSACION_EN_INVESTIGACION", "http": 403 }
+    },
+    {
+      "id": "M16_automatizacion_bienvenida",
+      "accion": "automatizacion_enviar",
+      "entrada": {
+        "ownerId": "u_empresa",
+        "reglaId": "reg_bienvenida",
+        "reglaActiva": true,
+        "trigger": "primera_conversacion_nueva",
+        "conversacionId": "c_new",
+        "sinBloqueo": true,
+        "estadoMensajeria": "habilitada"
+      },
+      "salidaEsperada": {
+        "ok": true,
+        "origenMensaje": "automatizacion",
+        "marcadoAutomatizado": true,
+        "reglaAutomatizacionId": "reg_bienvenida",
+        "fanOutPlan": [
+          { "destino": "historial", "tipoEvento": "mensaje_automatizado_enviado" },
+          { "destino": "notificacion", "tipoEvento": "mensaje_nuevo", "metadata": { "automatizado": true } }
+        ]
+      }
+    },
+    {
+      "id": "M17_automatizacion_bloqueada_reporte",
+      "accion": "automatizacion_enviar",
+      "entrada": {
+        "ownerId": "u1",
+        "reglaActiva": true,
+        "conversacion": { "reportada": true, "reportePendiente": true }
+      },
+      "salidaEsperada": { "ok": false, "codigo": "AUTOMATIZACION_NO_AUTORIZADA", "http": 403 }
+    },
+    {
+      "id": "M18_automatizacion_masiva_prohibida",
+      "accion": "automatizacion_enviar",
+      "entrada": {
+        "ownerId": "u_spam",
+        "mismoContenidoHash": "abc",
+        "destinosUltimaHora": 15,
+        "limite": 5
+      },
+      "salidaEsperada": { "ok": false, "codigo": "AUTOMATIZACION_MASIVA_PROHIBIDA", "http": 403 }
+    },
+    {
+      "id": "M19_admin_deshabilitar_subcategoria",
+      "accion": "admin_messenger_deshabilitar_ambito",
+      "entrada": {
+        "adminId": "admin1",
+        "ambito": { "tipo": "subcategoria", "subcategoriaId": "escort" },
+        "modo": "deshabilitado",
+        "motivo": "mantenimiento moderación"
+      },
+      "salidaEsperada": {
+        "ok": true,
+        "auditoria": { "adminId": "admin1", "motivo": true, "fecha": true },
+        "fanOutPlan": [{ "destino": "logsAdmin", "modulo": "mensajeria_admin" }]
+      }
+    },
+    {
+      "id": "M20_empresa_operador_envia",
+      "accion": "mensaje_enviar",
+      "entrada": {
+        "emisorId": "u_empresa",
+        "operadorId": "op1",
+        "receptorId": "u_cliente",
+        "tipoCuenta": "empresa",
+        "seguridad": { "emailVerificado": true, "telefonoVerificado": true },
+        "mensajeria": { "estadoMensajeria": "habilitada" }
+      },
+      "salidaEsperada": {
+        "ok": true,
+        "mensaje": { "emisorId": "u_empresa", "operadorId": "op1", "origenMensaje": "humano" },
+        "auditoria": "operadorId en logs"
+      }
+    },
+    {
+      "id": "M21_adjunto_imagen_fase2",
+      "accion": "mensaje_enviar",
+      "entrada": {
+        "tipo": "imagen",
+        "fasePlataforma": 1
+      },
+      "salidaEsperada": { "ok": false, "codigo": "ADJUNTO_FASE_NO_DISPONIBLE", "http": 400 }
+    },
+    {
+      "id": "M22_control_global_solo_lectura",
+      "accion": "mensaje_enviar",
+      "entrada": {
+        "emisorId": "u1",
+        "controlAdmin": { "ambito": "global", "modo": "solo_lectura", "activo": true },
+        "seguridad": { "emailVerificado": true, "telefonoVerificado": true }
+      },
+      "salidaEsperada": { "ok": false, "codigo": "MESSENGER_DESHABILITADO_AMBITO", "http": 403 }
+    },
+    {
+      "id": "M23_archivar_conversacion_local",
+      "accion": "conversacion_archivar",
+      "entrada": { "usuarioId": "u1", "conversacionId": "c1" },
+      "salidaEsperada": {
+        "ok": true,
+        "conversaciones_meta": { "archivada": true },
+        "mensajesServidor": "sin cambio"
+      }
+    },
+    {
+      "id": "M24_ia_sugerir_respuesta_no_envia",
+      "accion": "ia_asistente_sugerir_respuesta",
+      "entrada": {
+        "ownerId": "u1",
+        "conversacionId": "c1",
+        "confirmacionUsuario": false
+      },
+      "salidaEsperada": {
+        "ok": true,
+        "salida": "borrador_ui_solamente",
+        "mensajePersistido": false,
+        "origenMensaje": null
+      }
+    },
+    {
+      "id": "M25_conversacion_iniciar_directa_empresa",
+      "accion": "conversacion_iniciar",
+      "entrada": {
+        "emisorId": "u1",
+        "receptorId": "u2",
+        "modoInicio": "directa",
+        "subcategoriaId": "contador",
+        "perfilContextoId": "p_empresa",
+        "seguridad": { "emailVerificado": true, "telefonoVerificado": true, "nivelConfianza": 70 },
+        "mensajeria": { "estadoMensajeria": "habilitada" }
+      },
+      "salidaEsperada": {
+        "ok": true,
+        "estadoConversacion": "activa",
+        "solicitudPendiente": false,
+        "fanOutPlan": [{ "destino": "notificacion", "tipoEvento": "conversacion_iniciada" }]
+      }
+    },
+    {
+      "id": "M26_bloqueo_usuario",
+      "accion": "bloqueo_usuario",
+      "entrada": { "usuarioId": "u2", "usuarioBloqueadoId": "u1" },
+      "salidaEsperada": {
+        "ok": true,
+        "fanOutPlan": [
+          { "destino": "historial", "tipoEvento": "usuario_bloqueado" },
+          { "destino": "logsSeguridad", "tipo": "bloqueo_usuario" }
+        ]
+      }
+    },
+    {
+      "id": "M27_reportar_mensaje",
+      "accion": "reportar_mensaje",
+      "entrada": {
+        "reportanteId": "u2",
+        "mensajeId": "m1",
+        "conversacionId": "c1",
+        "motivo": "contenido_inapropiado"
+      },
+      "salidaEsperada": { "ok": true, "reporteEstado": "pendiente" }
+    },
+    {
+      "id": "M28_estado_restringida_solo_respuesta",
+      "accion": "mensaje_enviar",
+      "entrada": {
+        "emisorId": "u1",
+        "conversacionId": "c_existente",
+        "estadoConversacion": "activa",
+        "mensajeria": { "estadoMensajeria": "restringida" },
+        "seguridad": { "emailVerificado": true, "telefonoVerificado": true }
+      },
+      "salidaEsperada": { "ok": true, "nota": "restringida permite respuesta en conversación existente" }
+    },
+    {
+      "id": "M29_eliminar_reporte_pendiente_bloqueado",
+      "accion": "mensaje_eliminar_para_todos",
+      "entrada": {
+        "emisorId": "u1",
+        "dentroVentana": true,
+        "reportePendiente": true
+      },
+      "salidaEsperada": { "ok": false, "codigo": "MENSAJE_REPORTADO_NO_ELIMINABLE", "http": 403 }
+    },
+    {
+      "id": "M30_conversacion_id_deterministico",
+      "accion": "conversacion_iniciar",
+      "entrada": {
+        "participanteMenorId": "u_aaa",
+        "participanteMayorId": "u_zzz",
+        "perfilContextoId": "p1"
+      },
+      "salidaEsperada": {
+        "ok": true,
+        "conversacionId": "sha256_base64url(u_aaa|u_zzz|p1|v1)",
+        "mismoParDistintoPerfil": "conversacionId distinto si perfilContextoId distinto"
+      }
+    }
+  ]
+}

@@ -1,0 +1,86 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "tipo": "AUDITORIA_CONSISTENCIA_ACTA_MINOR",
+  "nombre": "Auditoría de consistencia — ACTA-MINOR-VALIDATIONENGINE-1.1.0-MESSENGER",
+  "fecha": "2026-06-09",
+  "actaAuditada": "scripts/ACTA-MINOR-VALIDATIONENGINE-1.1.0-MESSENGER.json",
+  "auditoriaPropuestaBase": "scripts/AUDITORIA-PROPUESTA-VE-MINOR-1.1.0.json",
+  "veredictoGeneral": "CONSISTENTE_APROBADA_MINOR_DISENO",
+  "aprobarActaMinor": true,
+  "autorizaAplicarCambios": false,
+  "autorizaRuntime": false,
+  "modificoArchivosCongelados": false,
+  "checks": [
+    { "id": "CHK-M01", "requisito": "REQ-01 fanOutPlan OB-VE2", "resultado": "PASS", "evidencia": "algoritmoTransformacion + ejemplo mensaje_enviar" },
+    { "id": "CHK-M02", "requisito": "REQ-02 routing conversacion_iniciar", "resultado": "PASS", "evidencia": "eliminarRegistry + mapeo modoInicio" },
+    { "id": "CHK-M03", "requisito": "REQ-03 messengerHabilitadoAmbito", "resultado": "PASS", "evidencia": "gatesValidateStates.messengerHabilitadoAmbito" },
+    { "id": "CHK-M04", "requisito": "REQ-04 spamScore >= 60", "resultado": "PASS", "evidencia": "denegarSi spamScore >= 60" },
+    { "id": "CHK-M05", "requisito": "REQ-05 errores canónicos SPEC VE", "resultado": "PASS", "evidencia": "erroresNuevos + guiaErroresEntradas" },
+    { "id": "CHK-M06", "requisito": "REQ-06 lista 24 registry", "resultado": "PASS", "evidencia": "accionesRegistryMensajeria length 24" },
+    { "id": "CHK-M07", "requisito": "REQ-07 validador VE09-VE25", "resultado": "PASS", "evidencia": "cambiosAlAplicar validar-spec-validationengine.mjs" },
+    { "id": "CHK-M08", "requisito": "REQ-08 procedimiento MINOR 1.1.0", "resultado": "PASS", "evidencia": "semverObjetivo + entradaHistorialVersiones" },
+    { "id": "CHK-M09", "descripcion": "Compatibilidad VE 1.0.0 pipeline sin cambio", "resultado": "PASS" },
+    { "id": "CHK-M10", "descripcion": "Compatibilidad Messenger 1.0.0 sin modificar SPEC", "resultado": "PASS" },
+    { "id": "CHK-M11", "descripcion": "Fixtures V19-V24 obligatorios documentados", "resultado": "PASS" },
+    { "id": "CHK-M12", "descripcion": "telefonoVerificado gate documentado", "resultado": "PASS" },
+    { "id": "CHK-M13", "descripcion": "No autoriza aplicación ni runtime", "resultado": "PASS" },
+    { "id": "CHK-M14", "descripcion": "Alineación fanout propuesta v1.0.1 24 entradas", "resultado": "PASS" },
+    { "id": "CHK-M15", "descripcion": "OB-MSG-8 gates cerrados en diseño acta", "resultado": "PASS" }
+  ],
+  "metricas": {
+    "checksTotal": 15,
+    "checksPass": 15,
+    "checksFail": 0,
+    "reqIncorporados": "8/8"
+  },
+  "coberturaRequisitos": {
+    "REQ-01": "COMPLETO",
+    "REQ-02": "COMPLETO",
+    "REQ-03": "COMPLETO",
+    "REQ-04": "COMPLETO",
+    "REQ-05": "COMPLETO",
+    "REQ-06": "COMPLETO",
+    "REQ-07": "COMPLETO",
+    "REQ-08": "COMPLETO"
+  },
+  "referenciasCruzadas": [
+    { "origen": "ACTA-MINOR", "destino": "ACTA-CONGELAMIENTO-VALIDATIONENGINE 1.0.0", "tipo": "procedimientoVersionado.MINOR", "consistente": true },
+    { "origen": "ACTA-MINOR", "destino": "ACTA-CONGELAMIENTO-MESSENGER 1.0.0", "tipo": "integracion", "consistente": true },
+    { "origen": "ACTA-MINOR", "destino": "registry-messenger-fanout-propuesta v1.0.1", "tipo": "fuente fanOut", "consistente": true },
+    { "origen": "ACTA-MINOR", "destino": "AUDITORIA-PROPUESTA-VE-MINOR-1.1.0", "tipo": "derivacion REQ", "consistente": true },
+    { "origen": "ACTA-MINOR", "destino": "SPEC-MESSENGER OB-MSG-8", "tipo": "gates", "consistente": true }
+  ],
+  "advertencias": [
+    {
+      "id": "ADV-M01",
+      "descripcion": "Archivos baseline sin modificar — aplicación pendiente TBD_APLICACION_EXPLICITA_PO",
+      "bloqueaActa": false,
+      "bloqueaRuntime": true
+    },
+    {
+      "id": "ADV-M02",
+      "descripcion": "Validador VE09 fallará hasta aplicar registry 60 acciones",
+      "bloqueaActa": false,
+      "bloqueaAplicacion": false
+    },
+    {
+      "id": "ADV-M03",
+      "descripcion": "Addendum ACTA-CONGELAMIENTO-VALIDATIONENGINE recomendado al aplicar — no obligatorio en acta diseño",
+      "bloqueaActa": false
+    }
+  ],
+  "veredictoFinal": {
+    "estado": "APROBADA_MINOR_DISENO",
+    "procedeAplicacionDiff": false,
+    "condicionAplicacion": "Autorización PO explícita aplicación + ejecutar diff diffResumenAlAplicar + validador VE01-VE25 PASS",
+    "condicionRuntime": "Aplicación acta + migración perfiles ejecutada + runtime autorizado por capa",
+    "razon": "15/15 checks PASS; REQ-01..08 incorporados; sin modificación archivos congelados en esta entrega"
+  },
+  "changelog": [
+    {
+      "version": "1.0.0",
+      "fecha": "2026-06-09",
+      "nota": "Auditoría consistencia acta MINOR VE 1.1.0 Messenger"
+    }
+  ]
+}

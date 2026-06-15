@@ -1,0 +1,378 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "$id": "https://carihub.app/schemas/spec-pagos-contratos.json",
+  "tipo": "SPEC_TECNICA",
+  "nombre": "Pagos-Contratos — Especificación técnica formal",
+  "versionSpec": "1.0.0",
+  "fecha": "2026-06-11",
+  "estado": "DISENO_INICIAL",
+  "implementacionAutorizada": false,
+  "modo": "Solo análisis, especificación, fixtures, auditoría y documentación — sin runtime/carpetas/mover/Firestore/deploy/commit; NO modifica planes/schemas/actas existentes",
+  "proposito": "Convertir PLAN-MAESTRO-PAGOS-CONTRATOS y schemas de contratos/precios en SPEC formal, completa, validable y congelable. Cierra GAP-SPEC-PAY (ACTA-CONGELAMIENTO-P0-RUNTIME-FOUNDATION).",
+  "principioRector": "El pago confirma; el contrato congela; el motor activa. Precio y promoción quedan CONGELADOS durante la vigencia (politicaPrecioCongelado). Admin concilia y decide; ninguna IA modifica contratos activos ni auto-aprueba pagos.",
+  "cierraGap": "GAP-SPEC-PAY",
+
+  "dependenciasCongeladas": {
+    "sharedCore": "shared-core-2026-06-10@1.0.0 (ACTA-CONGELAMIENTO-SHARED-CORE)",
+    "fieldEngine": "fieldengine-2026-06-10@1.0.1 (ACTA-CONGELAMIENTO-FIELDENGINE)",
+    "validationEngine": "validationengine-2026-06-10@1.1.0 (ACTA-CONGELAMIENTO-VALIDATIONENGINE)",
+    "renderEngine": "renderengine-2026-06-10@1.0.0 (ACTA-CONGELAMIENTO-RENDERENGINE)",
+    "seguridadMvp": "seguridad-2026-06-10@1.0.0 (ACTA-CONGELAMIENTO-SEGURIDAD)",
+    "dashboards": "dashboards-2026-06-10@1.0.0 (ACTA-CONGELAMIENTO-DASHBOARDS)",
+    "cuentas": "cuentas-2026-06-10@1.0.0 (ACTA-CONGELAMIENTO-CUENTAS)",
+    "registroCuenta": "registro-cuenta-2026-06-11@1.0.0 (ACTA-CONGELAMIENTO-REGISTRO-CUENTA)",
+    "seoLandings": "seo-landings-2026-06-11@1.0.0 (ACTA-CONGELAMIENTO-SEO-LANDINGS)"
+  },
+  "documentosReferenciados": [
+    "scripts/PLAN-MAESTRO-PAGOS-CONTRATOS.json",
+    "scripts/config-contratos-carihub-schema.json",
+    "scripts/config-precios-planes-perfiles-schema.json",
+    "scripts/config-promociones-perfiles-schema.json",
+    "scripts/config-promociones-banners-schema.json",
+    "scripts/config-estados-revision-publicacion-schema.json",
+    "scripts/ANEXO-CRIPTOMONEDAS-PAGOS-CONTRATOS.json",
+    "scripts/ACTA-CONGELAMIENTO-REGISTRO-CUENTA.json",
+    "scripts/ANALISIS-REVISION-MVP-DASHBOARD.json",
+    "scripts/MATRIZ-MVP-CARIHUB.json"
+  ],
+  "noModifica": [
+    "PLAN-MAESTRO-PAGOS-CONTRATOS", "config-contratos-carihub-schema", "config-precios-planes-perfiles-schema",
+    "config-promociones-*-schema", "ACTA-CONGELAMIENTO-REGISTRO-CUENTA", "ANEXO-CRIPTOMONEDAS-PAGOS-CONTRATOS",
+    "SPEC-FIELDENGINE", "SPEC-VALIDATIONENGINE", "SPEC-RENDERENGINE", "Producción, Firestore, deploy"
+  ],
+
+  "fronterasModulo": {
+    "pagosContratos": ["PricingResolver", "ContractFactory", "PaymentLedger", "ComprobanteValidator", "activación servicio", "renovaciones"],
+    "registroCuenta": ["datos cliente/fiscales", "estados pre-pago", "NO cobra ni resuelve precios"],
+    "dashboards": ["DM-04 vigencia", "DM-05 pagos", "DM-06 CTA renovación — solo lectura"],
+    "admin": ["conciliación", "confirmar/rechazar pago", "reembolsos", "modificar precios config (no activos)"],
+    "banners": ["contratos_banners", "solicitudes_anuncios", "precios_banners separados"],
+    "renderEngine": ["estado contrato/pago determina publicar/ocultar", "NO renderiza UI pagos"],
+    "fieldEngine": ["campos fiscales resueltos", "NO pricing"],
+    "validationEngine": ["gates pago/contrato/comprobante/renovación", "NO duplicar en Pagos"],
+    "economiaSocial": ["propinas/premium futuro", "usuarioId ancla", "Post-MVP"]
+  },
+
+  "tiposCliente": {
+    "perfil_independiente": { "contrato": "contratos_perfiles", "productos": ["membresia", "renovacion"] },
+    "negocio": { "contrato": "contratos_perfiles", "formularioId": "negocio_empresa", "fiscal": "opcional RFC" },
+    "anunciante": { "contrato": "contratos_banners", "productos": ["banner", "campaña", "espacio", "paquete"] },
+    "usuario_visitante": { "contrato": "contratos_perfiles", "cobraRegistroInicial": true, "publicaPerfilAlInicio": false, "puedeCrearPerfilGratis": "si contrato vigente sin perfil" },
+    "empresa_futura": { "estado": "FUTURO", "multiPerfil": true }
+  },
+
+  "productosCobrables": {
+    "perfiles": ["membresia", "renovacion", "verificacion_futura"],
+    "banners": ["banner", "campaña", "espacio", "paquete"],
+    "separacionObligatoria": "Productos perfil NUNCA usan precios_banners y viceversa (PC-R05)",
+    "futuros": ["servicios premium", "boost temporal", "destacados puntuales"]
+  },
+
+  "preciosVigencias": {
+    "moneda": "MXN",
+    "ivaIncluido": true,
+    "redondeo": 50,
+    "planes": ["basico", "destacado", "premium", "vip"],
+    "periodos": { "semanal": 0.35, "quincenal": 0.65, "mensual": 1.0, "anual": "reservado inactivo MVP" },
+    "pricingResolver": {
+      "pasos": ["base global", "porFormulario", "override subcategoria>sector>formulario>ciudad>estado>pais>global", "factorPeriodo", "redondeo50", "aplicarPromocion"],
+      "fuente": "config-precios-planes-perfiles-schema.json",
+      "coleccion": "config_precios_perfiles"
+    },
+    "politicaPrecioCongelado": {
+      "regla": "precioContratado + versionPrecio fijos hasta fechaVencimiento",
+      "cambioAdminNoAfectaActivos": true,
+      "renovacionUsaPrecioVigente": true,
+      "fuente": "config-contratos-carihub-schema.json"
+    },
+    "banners": { "fuente": "configuracion_publicidad/precios_banners", "separado": true }
+  },
+
+  "contratosCapa": {
+    "contractFactory": {
+      "colecciones": { "perfiles": "contratos_perfiles/{id}", "banners": "contratos_banners/{id}", "renovaciones": "renovaciones/{id}" },
+      "snapshotCongelado": ["precioContratado", "versionPrecio", "promocionAplicada", "versionPromocion", "planContratado", "periodoContratado"],
+      "aceptacionDigital": { "campos": ["aceptoTerminos", "versionTerminos", "fechaAceptacion", "hashContrato"], "regla": "Sin aceptación → pendiente_aceptacion; no activa servicio" },
+      "estadosContractuales": ["borrador", "pendiente_aceptacion", "activo", "suspendido", "vencido", "cancelado", "renovado", "reemplazado"]
+    }
+  },
+
+  "pagosCapa": {
+    "paymentLedger": {
+      "coleccion": "pagos/{pagoId}",
+      "estados": ["pendiente", "en_revision", "pagado", "rechazado", "cancelado", "reembolsado", "suspendido", "duplicado", "parcial", "por_vencer", "vencido"],
+      "metodosMvp": ["transferencia", "SPEI", "deposito", "comprobante_manual"],
+      "metodosPasarela": { "estado": "documentado BLK-02", "opciones": ["Stripe", "Mercado_Pago", "tarjeta"], "webhook": "webhookPasarela → confirmarPago" },
+      "camposClave": ["pagoId", "usuarioId", "contratoId", "monto", "moneda", "metodo", "estadoPago", "referencia", "comprobanteId", "duplicadoDe", "pasarela", "idTransaccionPasarela"]
+    }
+  },
+
+  "comprobantes": {
+    "coleccion": "comprobantes/{id}",
+    "tipos": ["comprobante_pago_pasarela", "comprobante_manual"],
+    "ciclo": "subido → en_revision → validado | rechazado → historial",
+    "validacion": { "accionVE": "comprobante_pago", "storage": "privado", "admin": "validadoPor + motivoRechazo" }
+  },
+
+  "facturacion": {
+    "opcional": true,
+    "campos": ["RFC", "razonSocial", "usoCFDI", "regimenFiscal", "correoFacturacion"],
+    "cfdi": { "estado": "FUTURO_V1.2", "referencia": "MATRIZ-MVP F-059" },
+    "regla": "Factura no bloquea activación; datos fiscales sensibles con auditoría admin"
+  },
+
+  "cicloVidaEstados": {
+    "pago": {
+      "transiciones": {
+        "pendiente": ["en_revision", "cancelado"],
+        "en_revision": ["pagado", "rechazado", "duplicado", "parcial"],
+        "pagado": ["reembolsado", "por_vencer"],
+        "rechazado": ["pendiente", "cancelado"]
+      }
+    },
+    "contrato": {
+      "transiciones": {
+        "borrador": ["pendiente_aceptacion", "cancelado"],
+        "pendiente_aceptacion": ["activo", "cancelado"],
+        "activo": ["suspendido", "vencido", "cancelado"],
+        "vencido": ["renovado", "cancelado"]
+      }
+    },
+    "perfilPublicacion": {
+      "fuente": "config-estados-revision-publicacion-schema.json",
+      "flujoNegocio": "enviado_revision → autorizado_para_pago → pago_pendiente → pago_confirmado → publicado",
+      "flujoAdultoGratis": "enviado_revision → publicado (primer mes gratis)"
+    }
+  },
+
+  "relacionPagoServicio": {
+    "activacionPerfil": "contrato activo + pago_confirmado + revision aprobada → publicado/activo",
+    "activacionBanner": "autorizado_para_pago → pago_confirmado → publicado (sin cambios post-pago)",
+    "noActiva": ["pago_pendiente", "pago_rechazado", "comprobante_rechazado"],
+    "vencimiento": "fechaVencimiento sin renovación → vencido + oculto (RenderEngine no publica)",
+    "reembolso": "pago→reembolsado; contrato→cancelado/suspendido; auditoría obligatoria",
+    "duplicado": "marcar duplicadoDe; conciliación admin; reembolso o crédito"
+  },
+
+  "renovaciones": {
+    "renewalScheduler": {
+      "jobs": ["recordatorio_pre_vencimiento", "aviso_vencimiento", "suspension_automatica_impago", "reactivacion_post_pago"],
+      "regla": "Renovación usa precio/promo VIGENTES al renovar; NO hereda congelado anterior",
+      "accionVE": "renovar_contrato",
+      "gatesVE": { "emailVerificado": true, "estadoSeguridad": ["normal", "observacion"], "contratoVigenteOExpirado": true }
+    }
+  },
+
+  "dashboardIntegracion": {
+    "DM-04": { "nombre": "Vigencia plan", "fuente": "contratos_perfiles.fechaVencimiento", "soloLectura": true },
+    "DM-05": { "nombre": "Pagos realizados", "fuente": "pagos/{pagoId}", "soloLectura": true },
+    "DM-06": { "nombre": "CTA renovación", "accion": "renovarContrato → Pagos", "clasificacion": "MVP_obligatorio" },
+    "nota": "Dashboards visualizan; conciliación/aprobación en Admin"
+  },
+
+  "seguridad": {
+    "antifraude": ["duplicadoDe", "match monto↔contrato", "limites por usuario", "ComprobanteValidator"],
+    "dobleConfirmacion": ["reembolso", "cancelar contrato activo", "modificar vigencia activo"],
+    "iaDenyWrite": "Ninguna IA modifica contrato activo ni auto-aprueba pagos (PC-R09, RT-08)",
+    "fiscal": "RFC/datos fiscales — PrivacyAccessGuard admin auditado",
+    "rateLimits": { "fuente": "config-seguridad-mvp-schema", "acciones": ["registrar_pago", "subir_comprobante", "renovar_contrato"] }
+  },
+
+  "matricesObligatorias": {
+    "productoPrecioVigencia": {
+      "perfil_basico_mensual": { "formularioId": "adultos", "plan": "basico", "periodo": "mensual", "ejemploMXN": 499 },
+      "perfil_vip_mensual": { "plan": "vip", "periodo": "mensual", "ejemploMXN": 1999 },
+      "banner_espacio": { "precio": "precios_banners por espacio", "vigencia": "diasTotales" },
+      "visitante_registro": { "formularioId": "usuario_visitante", "cobraRegistro": true, "publicaInicio": false }
+    },
+    "resolucionPrecio": {
+      "orden": ["baseGlobal", "porFormulario", "overrideGeo", "factorPeriodo", "redondeo50", "promocion"],
+      "overridePrioridad": "subcategoria > sector > formulario > ciudad > estado > pais > global"
+    },
+    "pagoServicioActivacion": {
+      "pago_confirmado+contrato_activo+revision_ok": "publicado/activo",
+      "pago_pendiente": "no activa",
+      "pago_rechazado": "no activa, reintento",
+      "vencido_sin_renovacion": "oculto",
+      "reembolsado": "suspendido/cancelado"
+    },
+    "contratoProducto": {
+      "contratos_perfiles": ["membresia", "renovacion"],
+      "contratos_banners": ["banner", "campaña", "espacio", "paquete"],
+      "renovaciones": ["renovacion perfil", "renovacion banner"]
+    },
+    "estadoPagoAcciones": {
+      "pendiente": ["subir_comprobante", "cancelar"],
+      "en_revision": ["admin confirmar", "admin rechazar"],
+      "pagado": ["ver historial", "renovar"],
+      "rechazado": ["reenviar comprobante"],
+      "duplicado": ["conciliacion admin"]
+    },
+    "transicionPago": {
+      "pendiente": ["en_revision", "cancelado"],
+      "en_revision": ["pagado", "rechazado", "duplicado", "parcial"],
+      "pagado": ["reembolsado"],
+      "rechazado": ["pendiente", "cancelado"]
+    },
+    "transicionContrato": {
+      "borrador": ["pendiente_aceptacion", "cancelado"],
+      "pendiente_aceptacion": ["activo", "cancelado"],
+      "activo": ["suspendido", "vencido", "cancelado"],
+      "vencido": ["renovado", "cancelado"]
+    },
+    "rolPermisos": {
+      "usuario": ["ver_pagos_propios", "subir_comprobante", "renovar_contrato", "aceptar_terminos"],
+      "comercial_admin": ["confirmar_pago", "validar_comprobante", "modificar_precios_config"],
+      "super_admin": ["reembolso", "excepcion_vigencia", "cancelar_contrato"],
+      "auditor": ["lectura_financiera"],
+      "ia_bot": ["lectura_ingresos_vencimientos", "deny_write"]
+    },
+    "metodoPago": {
+      "transferencia": { "mvp": true, "confirmacion": "manual admin" },
+      "SPEI": { "mvp": true, "confirmacion": "manual admin" },
+      "comprobante_manual": { "mvp": true, "requiere": "ComprobanteValidator" },
+      "Stripe": { "mvp": "documentado", "bloqueador": "BLK-02" },
+      "Mercado_Pago": { "mvp": "documentado", "bloqueador": "BLK-02" },
+      "cripto": { "mvp": false, "futuro": "ANEXO-CRIPTOMONEDAS" }
+    },
+    "promocionAplicacion": {
+      "primer_mes_gratis": { "precioContratado": 0, "fuente": "config-promociones-perfiles-schema" },
+      "tiempo_igual_gratis_banner": { "fuente": "config-promociones-banners-schema", "ejemplo": "7→14 días" },
+      "congelamiento": "promocionAplicada + versionPromocion fijos en contrato activo"
+    },
+    "fronteraModulos": {
+      "pagos_vs_registro": "Registro estados pre-pago; Pagos cobro/contrato",
+      "pagos_vs_dashboard": "Dashboard lectura DM-04/05/06; Pagos ejecuta renovación",
+      "pagos_vs_admin": "Admin concilia; Pagos define estados",
+      "pagos_vs_banners": "contratos_banners separado contratos_perfiles"
+    },
+    "errorMensaje": {
+      "PAY-E01": { "codigo": "MONTO_NO_COINCIDE", "mensaje": "El monto no coincide con el contrato", "fuente": "ValidationEngine" },
+      "PAY-E02": { "codigo": "COMPROBANTE_RECHAZADO", "mensaje": "Tu comprobante fue rechazado. Revisa las observaciones.", "accion": "resubir" },
+      "PAY-E03": { "codigo": "PAGO_DUPLICADO", "mensaje": "Este pago ya fue registrado", "accion": "contactar_soporte" },
+      "PAY-E04": { "codigo": "CONTRATO_NO_ACEPTADO", "mensaje": "Debes aceptar los términos del contrato" },
+      "PAY-E05": { "codigo": "RENOVACION_BLOQUEADA", "mensaje": "Verifica tu correo antes de renovar", "gate": "renovar_contrato" },
+      "PAY-E06": { "codigo": "REEMBOLSO_REQUIERE_APROBACION", "mensaje": "Reembolso requiere aprobación superior" }
+    },
+    "comprobanteValidacion": {
+      "formatos": ["image/jpeg", "image/png", "application/pdf"],
+      "maxMB": 10,
+      "estados": ["pendiente", "validado", "rechazado"],
+      "storage": "privado pagos|contratos/comprobantes"
+    },
+    "fiscalClasificacion": {
+      "RFC": "sensible", "razonSocial": "sensible", "comprobantePago": "sensible",
+      "precioContratado": "administrativo", "factura": "legal",
+      "privacyGuard": "Nunca en snapshot público perfil"
+    }
+  },
+
+  "contratos": {
+    "Pago": {
+      "pagoId": "string", "usuarioId": "string", "contratoId": "string", "monto": "number",
+      "moneda": "MXN", "metodo": "enum", "estadoPago": "string", "referencia": "string|null",
+      "comprobanteId": "string|null", "duplicadoDe": "string|null", "pasarela": "string|null",
+      "idTransaccionPasarela": "string|null", "confirmadoPor": "adminId|null", "fechaPago": "timestamp"
+    },
+    "ContratoPerfil": {
+      "contratoId": "string", "usuarioId": "string", "perfilId": "string|null",
+      "precioContratado": "number", "versionPrecio": "string", "planContratado": "enum",
+      "periodoContratado": "enum", "promocionAplicada": "string|null", "versionPromocion": "string|null",
+      "fechaInicio": "timestamp", "fechaVencimiento": "timestamp", "estadoContrato": "enum",
+      "aceptoTerminos": "boolean", "puedeCrearPerfilGratis": "boolean"
+    },
+    "ContratoBanner": {
+      "extends": "campos congelados similares", "coleccion": "contratos_banners/{id}",
+      "anuncianteId": "string", "espacioId": "string", "diasTotales": "number"
+    },
+    "Renovacion": {
+      "renovacionId": "string", "contratoAnteriorId": "string", "contratoNuevoId": "string",
+      "precioRenovacion": "number", "versionPrecio": "string", "fechaRenovacion": "timestamp",
+      "nota": "Precio vigente al renovar, no congelado anterior"
+    },
+    "ComprobantePago": {
+      "comprobanteId": "string", "pagoId": "string", "tipo": "enum", "estado": "enum",
+      "storagePath": "string", "validadoPor": "adminId|null", "motivoRechazo": "string|null"
+    },
+    "PrecioResuelto": {
+      "montoFinal": "number", "moneda": "MXN", "planId": "string", "periodo": "string",
+      "formularioId": "string", "overrideAplicado": "string|null", "versionPrecio": "string",
+      "desglose": "object"
+    },
+    "PromocionAplicada": {
+      "promocionId": "string", "versionPromocion": "string", "tipo": "enum",
+      "descuentoPct": "number|null", "diasBonificados": "number|null", "precioFinal": "number"
+    },
+    "AceptacionDigital": {
+      "aceptoTerminos": "boolean", "versionTerminos": "string", "fechaAceptacion": "timestamp",
+      "evidencia": "ipHash,userAgentHash,uid", "hashContrato": "string"
+    },
+    "SnapshotPrecioCongelado": {
+      "precioContratado": "number", "versionPrecio": "string", "promocionAplicada": "string|null",
+      "versionPromocion": "string|null", "generadoEn": "timestamp", "inmutable": true
+    }
+  },
+
+  "api": {
+    "cotizarPrecio": { "entrada": "CotizacionInput", "salida": "PrecioResuelto", "delega": ["PricingResolver", "config_precios_perfiles"] },
+    "crearContrato": { "entrada": "ContratoInput", "salida": "ContratoPerfil|ContratoBanner", "delega": ["ContractFactory", "SnapshotPrecioCongelado"] },
+    "registrarPago": { "entrada": "PagoInput", "salida": "Pago", "delega": ["ValidationEngine", "PaymentLedger"] },
+    "subirComprobante": { "entrada": "ComprobanteUpload", "salida": "ComprobantePago", "delega": ["ValidationEngine.comprobante_pago", "Storage"] },
+    "confirmarPagoAdmin": { "entrada": "pagoId", "salida": "Pago", "actor": "comercial_admin", "dispara": "activacionServicio" },
+    "renovarContrato": { "entrada": "contratoId", "salida": "Renovacion", "delega": ["ValidationEngine.renovar_contrato"] },
+    "webhookPasarela": { "entrada": "WebhookPayload", "salida": "Pago", "estado": "documentado BLK-02", "idempotente": true },
+    "obtenerEstadoContrato": { "entrada": "contratoId", "salida": "ContratoEstadoResumen", "incluye": ["estadoContrato", "fechaVencimiento", "pagos", "activacion"] }
+  },
+
+  "rutas": {
+    "usuario": ["/cuenta/pagos", "/cuenta/pagos/historial", "/cuenta/pagos/renovar", "/cuenta/contratos", "/cuenta/facturacion"],
+    "admin": ["/admin/pagos", "/admin/pagos/conciliacion", "/admin/contratos", "/admin/comprobantes", "/admin/reembolsos"],
+    "seoRobots": "noindex,nofollow en todas (SPEC-SEO-LANDINGS superficiesPrivadas)"
+  },
+
+  "integraciones": {
+    "sharedCore": { "consume": ["initFirebase", "validationClient", "helpers"], "noReimplementa": true },
+    "validationEngine": { "consume": ["renovar_contrato", "comprobante_pago", "gates monto/estado"], "noDuplica": true },
+    "fieldEngine": { "consume": ["campos fiscales"], "noDuplica": "pricing" },
+    "renderEngine": { "recibe": "estado contrato activo/vencido", "efecto": "publicar/ocultar snapshot" },
+    "registroCuenta": { "entrega": "usuarioId, perfilId, estados revision", "recibe": "activación post-pago" },
+    "dashboards": { "entrega": "DM-04/05/06 datos", "noDuplica": "conciliación" },
+    "admin": { "recibe": "cola pagos/comprobantes", "escribe": "confirmar/rechazar/reembolso" },
+    "banners": { "contratos": "contratos_banners", "separado": "precios_banners" },
+    "seoLandings": { "coherente": "vencido/suspendido noindex" }
+  },
+
+  "riesgos": [
+    { "id": "PC-R01", "nivel": "critico", "riesgo": "Cobro 100% manual sin trazabilidad", "mitigacion": "PaymentLedger + estados + auditoría" },
+    { "id": "PC-R02", "nivel": "critico", "riesgo": "Modificar precio afectaría contratos activos", "mitigacion": "politicaPrecioCongelado" },
+    { "id": "PC-R03", "nivel": "alto", "riesgo": "Pagos duplicados", "mitigacion": "duplicadoDe + match monto" },
+    { "id": "PC-R04", "nivel": "alto", "riesgo": "Comprobante fraudulento", "mitigacion": "ComprobanteValidator + admin" },
+    { "id": "PC-R05", "nivel": "alto", "riesgo": "Mezclar precios perfiles vs banners", "mitigacion": "separacionObligatoria colecciones" },
+    { "id": "PC-R06", "nivel": "medio", "riesgo": "Reembolso sin control", "mitigacion": "doble confirmación + auditoría" },
+    { "id": "PC-R07", "nivel": "medio", "riesgo": "RFC expuesto", "mitigacion": "PrivacyAccessGuard fiscal" },
+    { "id": "PC-R08", "nivel": "medio", "riesgo": "Vencimiento por flag sin contrato", "mitigacion": "contratos_perfiles + RenewalScheduler" },
+    { "id": "PC-R09", "nivel": "bajo", "riesgo": "IA write accidental", "mitigacion": "deny-write RT-08" },
+    { "id": "PAY-SPEC-01", "nivel": "medio", "riesgo": "Pasarela BLK-02 sin runtime", "mitigacion": "Flujo manual MVP documentado; webhook contrato listo" }
+  ],
+
+  "criteriosAceptacion": [
+    "CA-01: Toda transición pago/contrato pasa ValidationEngine",
+    "CA-02: precioContratado congelado en contrato activo",
+    "CA-03: Renovación usa precio vigente, no congelado anterior",
+    "CA-04: Separación perfiles ⟂ banners en colecciones",
+    "CA-05: Comprobantes/RFC nunca en snapshot público",
+    "CA-06: pago_confirmado + contrato activo dispara activación servicio",
+    "CA-07: Admin concilia; IA deny-write pagos",
+    "CA-08: DM-05/06 consumen PaymentLedger",
+    "CA-09: Fixtures PAY-01..PAY-10 PASS",
+    "CA-10: Auditoría SPEC PASS sin bloqueantes"
+  ],
+
+  "futuroDocumentado": {
+    "cripto": { "fuente": "ANEXO-CRIPTOMONEDAS-PAGOS-CONTRATOS", "mvp": false, "monedaContrato": "MXN siempre" },
+    "cfdi": { "referencia": "MATRIZ-MVP F-059", "mvp": false },
+    "pasarelaAutoRenovacion": { "mvp": false, "requiere": "método guardado + ADR" },
+    "multiMoneda": { "mvp": false, "referencia": "MATRIZ-MVP F-049" },
+    "adrPasarela": "ADR-PASARELA-PAGO Stripe vs Mercado Pago — pendiente"
+  }
+}

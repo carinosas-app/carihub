@@ -1,0 +1,59 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "tipo": "ANEXO_INTEGRACION",
+  "nombre": "Anexo — Integración Messenger con Dashboards 1.0.0",
+  "version": "1.0.0",
+  "fecha": "2026-06-09",
+  "obMSG": "OB-MSG-7",
+  "estado": "DOCUMENTO_ANEXO",
+  "nota": "No modifica ACTA-CONGELAMIENTO-DASHBOARDS ni SPEC-DASHBOARDS.json congelados. Define mapeo de extensión Messenger.",
+  "dashboardsCongelado": "dashboards-2026-06-10@1.0.0",
+  "dominioNotificacionesMensajes": {
+    "congeladoEnDashboards": ["mensaje_nuevo", "mensaje_leido", "conversacion_archivada"],
+    "extensionMessenger": [
+      { "tipoEvento": "solicitud_conversacion", "mapeo": "nuevo tipo en dominio mensajes — metadata.solicitud=true" },
+      { "tipoEvento": "solicitud_aceptada", "mapeo": "nuevo tipo en dominio mensajes" },
+      { "tipoEvento": "solicitud_rechazada", "mapeo": "nuevo tipo en dominio mensajes" },
+      { "tipoEvento": "conversacion_iniciada", "mapeo": "nuevo tipo — inicio directo sin solicitud" },
+      { "tipoEvento": "mensajeria_restringida", "mapeo": "dominio seguridad existente evento mensajeria_suspendida — reutilizar o metadata" },
+      { "tipoEvento": "reporte_resuelto", "mapeo": "nuevo tipo mensajes o denuncias según origen reporte" },
+      { "tipoEvento": "automatizaciones_suspendidas", "mapeo": "nuevo tipo mensajes" }
+    ],
+    "notificacionesAdminExtension": [
+      { "tipoEvento": "mensajeria.reporte_recibido", "mapeo": "admin notificaciones — módulo mensajeria UI; no dominio congelado de 10" },
+      { "tipoEvento": "mensajeria.alerta_seguridad", "mapeo": "admin cola seguridad" },
+      { "tipoEvento": "mensajeria.cola_moderacion", "mapeo": "admin moderación" },
+      { "tipoEvento": "mensajeria.control_admin_aplicado", "mapeo": "admin auditoría" }
+    ],
+    "implementacionDiseño": "Usar campo dominio=mensajes con tipoEvento extendido + metadata; admin usa entidadTipo=mensajeria_admin hasta PATCH dashboards futuro"
+  },
+  "dominioHistorialMensajes": {
+    "congeladoEnDashboards": ["conversacion_iniciada", "mensaje_enviado", "mensaje_recibido", "bloqueo", "reporte"],
+    "extensionMessenger": [
+      "solicitud_conversacion_enviada",
+      "solicitud_aceptada",
+      "solicitud_rechazada",
+      "mensaje_eliminado_para_todos",
+      "mensaje_automatizado_enviado",
+      "conversacion_archivada",
+      "conversacion_silenciada",
+      "conversacion_cerrada_admin"
+    ],
+    "coleccionLectura": "usuarios/{id}/conversaciones_meta + agregados — sin cambiar diseño dashboards congelado",
+    "contenidoMensaje": "Solo metadatos en historial; texto en conversaciones/{id}/mensajes"
+  },
+  "shellUsuario": {
+    "moduloMensajes": "Enlace /messenger — badge desde conversaciones_meta.mensajesNoLeidos sum",
+    "moduloActividad": "Incluye dominio historial_mensajes extendido en filtros"
+  },
+  "adminModulo": {
+    "ruta": "/admin/mensajeria",
+    "nota": "Módulo UI nuevo — no en acta dashboards congelada; consume mismos patrones notificaciones/historial"
+  },
+  "patchDashboardsFuturo": {
+    "requeridoParaRuntimeCompleto": true,
+    "bloqueanteCongelamientoMessenger": false,
+    "semverSugerido": "1.1.0 dashboards",
+    "alternativaMVP": "metadata en tipos existentes mensaje_nuevo y conversacion_iniciada"
+  }
+}

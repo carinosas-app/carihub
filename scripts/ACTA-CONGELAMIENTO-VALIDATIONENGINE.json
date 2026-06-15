@@ -1,0 +1,121 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "$id": "https://carihub.app/schemas/acta-congelamiento-validationengine.json",
+  "tipo": "ACTA_CONGELAMIENTO_VALIDATIONENGINE",
+  "titulo": "Acta formal de congelamiento — ValidationEngine CariHub",
+  "versionActa": "1.0.0",
+  "fechaElaboracion": "2026-06-09",
+  "fechaCongelamiento": "2026-06-09",
+  "fechaAprobacionSpec": "2026-06-09",
+  "estadoActa": "CONGELADO",
+  "autorizacion": {
+    "estado": "APROBADA",
+    "autorizadoPor": "product owner / usuario CariHub",
+    "fechaAprobacion": "2026-06-09",
+    "alcance": "Baseline de diseño ValidationEngine v1.0.0 — puente entre capas congeladas y runtime futuro; OB-VE1–OB-VE5 cerrados; sin implementación runtime",
+    "artefactosAprobados": [
+      "scripts/SPEC-VALIDATIONENGINE.md",
+      "scripts/SPEC-VALIDATIONENGINE.json",
+      "scripts/registry-validationengine-eventos.json",
+      "scripts/fixtures-validationengine-golden.json",
+      "scripts/AUDITORIA-SPEC-VALIDATIONENGINE.md",
+      "scripts/AUDITORIA-SPEC-VALIDATIONENGINE.json",
+      "scripts/AUDITORIA-FINAL-SPEC-VALIDATIONENGINE.md",
+      "scripts/AUDITORIA-FINAL-SPEC-VALIDATIONENGINE.json",
+      "scripts/validar-spec-validationengine.mjs"
+    ],
+    "auditorias": [
+      "scripts/AUDITORIA-SPEC-VALIDATIONENGINE.json",
+      "scripts/AUDITORIA-FINAL-SPEC-VALIDATIONENGINE.json"
+    ]
+  },
+  "versionValidationEngine": {
+    "id": "validationengine-2026-06-10",
+    "semver": "1.0.0",
+    "specVersion": "1.0.0"
+  },
+  "dependenciasCongeladas": {
+    "catalogo": { "version": "catalogo-2026-06-10", "semver": "1.0.0", "acta": "scripts/ACTA-CONGELAMIENTO-CATALOGO.json" },
+    "cuentas": { "version": "cuentas-2026-06-10", "semver": "1.0.0", "acta": "scripts/ACTA-CONGELAMIENTO-CUENTAS.json" },
+    "seguridad": { "version": "seguridad-2026-06-10", "semver": "1.0.0", "acta": "scripts/ACTA-CONGELAMIENTO-SEGURIDAD.json" },
+    "fieldEngine": { "version": "fieldengine-2026-06-10", "semver": "1.0.1", "acta": "scripts/ACTA-CONGELAMIENTO-FIELDENGINE.json" },
+    "dashboards": { "version": "dashboards-2026-06-10", "semver": "1.0.0", "acta": "scripts/ACTA-CONGELAMIENTO-DASHBOARDS.json" }
+  },
+  "referenciaFuturaNoCongelada": {
+    "interacciones": "scripts/OBSERVACION-ARQUITECTONICA-INTERACCIONES.json v1.2.1 — OBSERVACION_COMPLETA_ETAPA"
+  },
+  "objetoCongelamiento": {
+    "apiPrincipal": "validateAction(context) → ValidationResult | ValidationError",
+    "pipeline": "14 pasos — formulario, dashboard, validateAuth, turnstile, rate limits, estados, FieldEngine, campos, media, acción, fanOutPlan, emitEventoCanonico",
+    "eventBus": "contratoMultiDestino fanOutPlan[] → notificaciones + historial + logsSeguridad + ia_recomendaciones",
+    "registryAcciones": "registry-validationengine-eventos.json — 39 acciones",
+    "validacionMedia": "8 tipos upload + rechazo archivos peligrosos",
+    "guiaErrores": "gatesVsEstados — GATE_SEGURIDAD_DENEGADO vs ESTADO_SEGURIDAD_DENEGADO",
+    "fixtures": "fixtures-validationengine-golden.json — 18 casos V01–V18"
+  },
+  "auditoriaFinalPreCongelamiento": {
+    "archivo": "scripts/AUDITORIA-FINAL-SPEC-VALIDATIONENGINE.json",
+    "fecha": "2026-06-09",
+    "ajustesObligatoriosPreAprobacion": {
+      "estado": "CERRADOS",
+      "items": ["OB-VE1", "OB-VE2", "OB-VE3", "OB-VE4", "OB-VE5"]
+    }
+  },
+  "ajustesObligatoriosCerrados": {
+    "OB-VE1": { "estado": "CERRADO", "cambio": "Pipeline unificado; validateAuth paso 3 explícito" },
+    "OB-VE2": { "estado": "CERRADO", "cambio": "contratoMultiDestino fanOutPlan; sin mapeoAccionEvento duplicado" },
+    "OB-VE3": { "estado": "CERRADO", "cambio": "Registry 39 acciones con emitir explícito" },
+    "OB-VE4": { "estado": "CERRADO", "cambio": "enviar_revision notif admin verificaciones.verificacion_recibida → cola_revision" },
+    "OB-VE5": { "estado": "CERRADO", "cambio": "guiaErrores + ESTADO_CUENTA_INVALIDO" }
+  },
+  "addendumPreImplementacion": {
+    "recomendadoNoBloqueante": ["AM-VE1 fixtures V19-V24", "AM-VE2 acta migración perfilId=uid", "AM-VE5 logs_acceso_privado en fan-out admin"]
+  },
+  "implementacion": {
+    "runtimeAutorizado": false,
+    "firestoreAutorizado": false,
+    "produccionAutorizado": false,
+    "deployAutorizado": false,
+    "nota": "v1.0.0 congelada como diseño; implementación runtime requiere autorización explícita posterior"
+  },
+  "motoresRelacionados": {
+    "fieldEngine": "Consumidor congelado — resolve + securityGates",
+    "renderEngine": "No autorizado — post-validación snapshot",
+    "messenger": "SPEC siguiente arquitectónica — hooks mensajeria_futura en registry",
+    "interacciones": "Observación v1.2.1 — Fase 7 post-Messenger"
+  },
+  "archivosBaseline": [
+    "scripts/SPEC-VALIDATIONENGINE.md",
+    "scripts/SPEC-VALIDATIONENGINE.json",
+    "scripts/registry-validationengine-eventos.json",
+    "scripts/fixtures-validationengine-golden.json",
+    "scripts/AUDITORIA-SPEC-VALIDATIONENGINE.md",
+    "scripts/AUDITORIA-SPEC-VALIDATIONENGINE.json",
+    "scripts/AUDITORIA-FINAL-SPEC-VALIDATIONENGINE.md",
+    "scripts/AUDITORIA-FINAL-SPEC-VALIDATIONENGINE.json",
+    "scripts/ACTA-CONGELAMIENTO-VALIDATIONENGINE.md",
+    "scripts/ACTA-CONGELAMIENTO-VALIDATIONENGINE.json",
+    "scripts/validar-spec-validationengine.mjs"
+  ],
+  "procedimientoVersionado": {
+    "PATCH": "Fixtures, errores, clarificaciones registry",
+    "MINOR": "Nuevas acciones en registry; dominios EventBus",
+    "MAJOR": "Cambio ValidationContext o orden pipeline obligatorio",
+    "historialVersiones": [
+      {
+        "semver": "1.0.0",
+        "fecha": "2026-06-09",
+        "evento": "CONGELAMIENTO_INICIAL",
+        "notas": "Aprobación PO; OB-VE1–5; auditoría final; registry 39 acciones"
+      },
+      {
+        "semver": "1.1.0",
+        "fecha": "2026-06-09",
+        "evento": "MINOR_MESSENGER_INTEGRACION",
+        "acta": "scripts/ACTA-MINOR-VALIDATIONENGINE-1.1.0-MESSENGER.json",
+        "notas": "Registry 60 acciones; gates OB-MSG-8; fixtures V19–V24; fanOutPlan Messenger"
+      }
+    ]
+  },
+  "estado": "CONGELADO"
+}

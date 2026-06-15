@@ -1,0 +1,117 @@
+{
+  "version": "1.0.0",
+  "specVersion": "1.0.0",
+  "descripcion": "Golden fixtures de diseño Shared/Core v1.0.0 — salidas esperadas resumidas (no runtime). Cubren config singleton, helpers, catálogo 462+compat 34, geo lazy, tokens (--rosa), clientes VE/FE/RenderEngine y grafo acíclico.",
+  "fixtures": [
+    {
+      "id": "C01_firebase_init_singleton",
+      "entrada": { "api": "core.config.initFirebase", "llamadas": 2 },
+      "salidaEsperada": { "instanciaUnica": true, "idempotente": true, "nota": "Segunda llamada devuelve la misma app; reemplaza los 6 firebaseConfig duplicados" }
+    },
+    {
+      "id": "C02_getDb_sin_init",
+      "entrada": { "api": "core.config.getDb", "estado": "sin initFirebase previo" },
+      "salidaEsperada": { "error": "CORE_FIREBASE_NO_INIT", "http": 500 }
+    },
+    {
+      "id": "C03_textoSeguro",
+      "entrada": { "api": "core.helpers.text.textoSeguro", "valor": "<b>Ana</b> & cía" },
+      "salidaEsperada": { "salida": "&lt;b&gt;Ana&lt;/b&gt; &amp; cía", "nota": "Una sola implementación canónica (antes ×5)" }
+    },
+    {
+      "id": "C04_limpiarTelefono",
+      "entrada": { "api": "core.helpers.phone.limpiarTelefono", "valor": "+52 (811) 230-4664" },
+      "salidaEsperada": { "salida": "528112304664" }
+    },
+    {
+      "id": "C05_normalizarTexto",
+      "entrada": { "api": "core.helpers.text.normalizarTexto", "valor": "Médico Pediátra" },
+      "salidaEsperada": { "salida": "medico pediatra" }
+    },
+    {
+      "id": "C06_slugify",
+      "entrada": { "api": "core.helpers.format.slugify", "valor": "Dra. López — Psicólogos" },
+      "salidaEsperada": { "salida": "dra-lopez-psicologos", "nota": "Alineado ADR-URL-CANONICA-PERFILES (sin PII, NFKD)" }
+    },
+    {
+      "id": "C07_catalogo_canonico_462",
+      "entrada": { "api": "core.data.catalog.getSubcategoria", "subcategoriaId": "escort" },
+      "salidaEsperada": { "sectorId": "adultos", "formularioId": "adultos", "arquetipo": "persona_acompanante", "activoProduccion": true, "fuente": "catálogo canónico 462" }
+    },
+    {
+      "id": "C08_catalogo_compat_produccion",
+      "entrada": { "api": "core.data.catalog.compatProduccion" },
+      "salidaEsperada": { "cantidadAprox": 34, "regla": "subconjunto activoProduccion=true", "nota": "Superficies no migradas usan esto; nuevas usan 462 — cierra SC-AO-02" }
+    },
+    {
+      "id": "C09_geo_paises_index",
+      "entrada": { "api": "core.data.geo.listPaises" },
+      "salidaEsperada": { "tipo": "índice liviano", "lazyEstadosCiudades": true }
+    },
+    {
+      "id": "C10_geo_lazy_estados",
+      "entrada": { "api": "core.data.geo.loadEstados", "pais": "mexico" },
+      "salidaEsperada": { "promesa": true, "cargaBajoDemanda": true, "nota": "Cierra SC-AO-04 (segmentación)" }
+    },
+    {
+      "id": "C11_token_rosa_canonico",
+      "entrada": { "api": "core.ui.tokens.get", "token": "--ch-rosa" },
+      "salidaEsperada": { "valor": "#ec2d7a", "nota": "Resuelve divergencia; admin usa alias --ch-rosa-admin=#c2185b — cierra SC-AO-03" }
+    },
+    {
+      "id": "C12_token_no_definido_fallback",
+      "entrada": { "api": "core.ui.tokens.get", "token": "--ch-inexistente" },
+      "salidaEsperada": { "error": "CORE_TOKEN_NO_DEFINIDO", "http": 200, "fallback": "token base", "log": true }
+    },
+    {
+      "id": "C13_componentRegistry_get",
+      "entrada": { "api": "core.ui.componentRegistry.get", "componentId": "ResultCardProfesional" },
+      "salidaEsperada": { "encontrado": true, "fuente": "config-registro-componentes-ui-schema.json" }
+    },
+    {
+      "id": "C14_componentRegistry_fallback",
+      "entrada": { "api": "core.ui.componentRegistry.get", "componentId": "Inexistente" },
+      "salidaEsperada": { "fallback": "ResultCardGenerico", "nota": "Nunca throw" }
+    },
+    {
+      "id": "C15_validationClient_delega",
+      "entrada": { "api": "core.engines.validationClient.evaluate", "accion": "enviar_revision" },
+      "salidaEsperada": { "delegaA": "ValidationEngine 1.1.0", "coreImplementaReglas": false, "nota": "Frontera cliente vs motor — cierra SC-AO-05" }
+    },
+    {
+      "id": "C16_fieldClient_delega",
+      "entrada": { "api": "core.engines.fieldClient.resolve", "context": { "subcategoriaId": "contadores" } },
+      "salidaEsperada": { "delegaA": "FieldEngine 1.0.1", "salida": "ResolvedRegistrationSchema", "coreImplementaMerge": false }
+    },
+    {
+      "id": "C17_renderClient_resolveUrl",
+      "entrada": { "api": "core.engines.renderClient.resolveUrl", "ctx": { "perfilId": "p_123", "slug": "ana-monterrey" } },
+      "salidaEsperada": { "canonical": "/perfil/p_123/ana-monterrey", "nota": "Contrato ADR-URL-CANONICA-PERFILES" }
+    },
+    {
+      "id": "C18_grafo_aciclico_import_prohibido",
+      "entrada": { "escenario": "core.helpers importa desde app-publica" },
+      "salidaEsperada": { "error": "CORE_IMPORT_CICLICO", "tipo": "build-time", "nota": "apps → Core permitido; Core → app PROHIBIDO — cierra SC-AO-06" }
+    },
+    {
+      "id": "C19_admision_rechaza_dominio",
+      "entrada": { "escenario": "intentar añadir ETIQUETAS_ESTADO_SOLICITUD_PUBLICIDAD a core.data" },
+      "salidaEsperada": { "rechazado": true, "motivo": "lógica de dominio (Banners/Admin) — viola regla de admisión", "destino": "APP_BANNERS/Admin" }
+    },
+    {
+      "id": "C20_rbac_fuente_unica",
+      "entrada": { "api": "core.config.rbac.adminEmails" },
+      "salidaEsperada": { "fuenteUnica": true, "nota": "admin.html y firestore.rules consumen el mismo contrato; sin hardcode disperso" }
+    }
+  ],
+  "cobertura": {
+    "config": ["init singleton", "getDb sin init", "rbac fuente única"],
+    "helpers": ["textoSeguro", "limpiarTelefono", "normalizarTexto", "slugify"],
+    "catalogo": ["canónico 462", "compat 34 (SC-AO-02)"],
+    "geo": ["índice", "lazy (SC-AO-04)"],
+    "tokens": ["--ch-rosa canónico (SC-AO-03)", "fallback"],
+    "ui": ["componentRegistry get/fallback"],
+    "clientes": ["validationClient", "fieldClient", "renderClient (SC-AO-05)"],
+    "arquitectura": ["grafo acíclico", "admisión anti god-module (SC-AO-06)"]
+  }
+}

@@ -1,0 +1,116 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "$id": "https://carihub.app/schemas/acta-congelamiento-seguridad.json",
+  "tipo": "ACTA_CONGELAMIENTO_SEGURIDAD",
+  "titulo": "Acta formal de congelamiento — Seguridad MVP CariHub",
+  "versionActa": "1.0.0",
+  "fechaCongelamiento": "2026-06-09",
+  "fechaAprobacion": "2026-06-09",
+  "estadoActa": "CONGELADO",
+  "autorizacion": {
+    "estado": "APROBADA",
+    "autorizadoPor": "product owner / usuario CariHub",
+    "fechaAutorizacion": "2026-06-09",
+    "decisionesAprobadas": [
+      "Cloudflare Turnstile como solución anti-bots principal",
+      "Firebase Authentication como proveedor de identidad",
+      "Verificación de correo electrónico obligatoria (Firebase Auth nativa)",
+      "riesgoScore, reputacionCuenta, nivelConfianza y estadoSeguridad integrados a identidadUsuario",
+      "logsSeguridad, logsAdmin, logs_acceso_privado y alertas_seguridad documentados",
+      "Rate limits documentados para formularios críticos (IP, usuario, email, teléfono, dispositivo)",
+      "Messenger protegido mediante estadoMensajeria, reputación, spamScore, bloqueos y límites",
+      "OTP telefónico, 2FA, RBAC avanzado y device fingerprint — post-MVP",
+      "Firebase App Check como capa complementaria SDK (diseño MVP recomendado)",
+      "Firestore Security Rules y Storage Rules — diseño objetivo; producción legacy sin modificar"
+    ]
+  },
+  "versionSeguridad": {
+    "id": "seguridad-2026-06-10",
+    "semver": "1.0.0",
+    "versionSchema": "2026-06-10",
+    "schemaDetalle": "scripts/config-seguridad-mvp-schema.json"
+  },
+  "dependenciasCongeladas": {
+    "catalogo": {
+      "estado": "CONGELADO",
+      "version": "catalogo-2026-06-10",
+      "semver": "1.0.0",
+      "acta": "scripts/ACTA-CONGELAMIENTO-CATALOGO.json"
+    },
+    "cuentas": {
+      "estado": "CONGELADO",
+      "version": "cuentas-2026-06-10",
+      "semver": "1.0.0",
+      "acta": "scripts/ACTA-CONGELAMIENTO-CUENTAS.json"
+    }
+  },
+  "objetoCongelamiento": {
+    "antiBots": "Cloudflare Turnstile primario",
+    "antiBotsFallback": "reCAPTCHA v3 documentado",
+    "identidad": "Firebase Authentication",
+    "appCheck": "Capa complementaria SDK Firebase — MVP recomendado",
+    "antiSpam": "Límites por IP, usuario, email, teléfono, dispositivo",
+    "deteccionFraude": "riesgoScore, reputacionCuenta, nivelConfianza, duplicadoPotencial, multicuentas, emails desechables",
+    "estadosSeguridad": "normal, observacion, restringido, suspendido, bloqueado",
+    "verificacionEmail": "Firebase Auth obligatoria MVP",
+    "verificacionTelefono": "Post-MVP",
+    "mensajeriaFutura": "estadoMensajeria, spamScore, bloqueos, reportes, mute, límites diarios y por conversación",
+    "moderacion": "Suspensión parcial, mensajería, publicaciones, comercial, bloqueo total",
+    "logsAuditoria": "logsAdmin, logsSeguridad, logs_acceso_privado, alertas_seguridad, historial acciones críticas"
+  },
+  "decisionesTecnicasCongeladas": {
+    "proveedorAntiBotFormularios": "cloudflare_turnstile",
+    "proveedorIdentidad": "firebase_authentication",
+    "verificacionEmail": "firebase_auth_obligatoria_mvp",
+    "verificacionTelefono": "post_mvp",
+    "appCheck": "mvp_recomendado_complemento_sdk",
+    "rateLimitBackend": "cloud_functions + rate_limits (diseño)",
+    "piiEnLogs": "prohibido_claro_solo_hash"
+  },
+  "mvpObligatorioPreLanzamiento": [
+    "Cloudflare Turnstile en login, registro, recuperación, denuncia, categoría sugerida, contacto",
+    "Firebase Auth + email verificado antes de revisión/contrato/banner/categoría sugerida",
+    "Rate limits IP/email/usuario/dispositivo en formularios críticos",
+    "estadoSeguridad + riesgoScore + reputacionCuenta + nivelConfianza + flags",
+    "logsSeguridad + logs_acceso_privado + alertas_seguridad",
+    "Detección multicuentas y emails desechables (diseño)",
+    "Contrato ValidationEngine: verify Turnstile server-side",
+    "Firebase App Check en cliente oficial (diseño)"
+  ],
+  "postMVP": [
+    "OTP teléfono obligatorio selectivo",
+    "2FA admin",
+    "RBAC multi-admin completo",
+    "Device fingerprint avanzado",
+    "ML fraude",
+    "reCAPTCHA fallback automático",
+    "Messenger runtime completo"
+  ],
+  "archivosBaseline": [
+    "scripts/config-seguridad-mvp-schema.json",
+    "scripts/REPORTE-SEGURIDAD-MVP.json",
+    "scripts/REPORTE-SEGURIDAD-MVP.md",
+    "scripts/ACTA-CONGELAMIENTO-SEGURIDAD.json",
+    "scripts/ACTA-CONGELAMIENTO-SEGURIDAD.md",
+    "scripts/REPORTE-CONGELAMIENTOS-CONSOLIDADO.json",
+    "scripts/REPORTE-CONGELAMIENTOS-CONSOLIDADO.md"
+  ],
+  "procedimientoVersionado": {
+    "historialVersiones": [
+      {
+        "semver": "1.0.0",
+        "versionSeguridad": "seguridad-2026-06-10",
+        "fecha": "2026-06-09",
+        "evento": "CONGELAMIENTO_INICIAL",
+        "notas": "Tercera capa arquitectura; aprobada por product owner."
+      }
+    ]
+  },
+  "restriccionesVigentes": {
+    "runtime": false,
+    "firestore": false,
+    "produccion": false,
+    "deploy": false
+  },
+  "estado": "CONGELADO"
+}

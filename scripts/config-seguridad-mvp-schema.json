@@ -1,0 +1,483 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "versionSchema": "2026-06-10",
+  "version": "2026-06-10",
+  "schemaId": "seguridad_mvp",
+  "nombre": "CariHub — Seguridad MVP (anti-bots, anti-spam, reputación)",
+  "descripcion": "Diseño pre-implementación. Medidas mínimas obligatorias antes de lanzamiento público. No modifica Firestore ni producción hasta fase autorizada.",
+  "estado": "CONGELADO",
+  "fechaCongelamiento": "2026-06-09",
+  "acta": "scripts/ACTA-CONGELAMIENTO-SEGURIDAD.json",
+  "dependenciasCongeladas": {
+    "catalogo": { "id": "catalogo-2026-06-10", "semver": "1.0.0", "acta": "ACTA-CONGELAMIENTO-CATALOGO.json" },
+    "cuentas": { "id": "cuentas-2026-06-10", "semver": "1.0.0", "acta": "ACTA-CONGELAMIENTO-CUENTAS.json" }
+  },
+  "antiBots": {
+    "recomendacionPrincipal": "cloudflare_turnstile",
+    "alternativa": "google_recaptcha_v3",
+    "comparativa": {
+      "cloudflare_turnstile": {
+        "ventajas": [
+          "Gratis con verificaciones ilimitadas en plan Free",
+          "Sin perfilado cross-site tipo Google",
+          "Modos managed/invisible/non-interactive",
+          "WCAG 2.2 AAA",
+          "No requiere proxy Cloudflare en el sitio",
+          "Adecuado para volumen alto de formularios sin costo incremental"
+        ],
+        "desventajas": [
+          "Máx. 20 widgets por cuenta Free; 10 hostnames por widget",
+          "Validación server-side requiere secret en backend (Cloud Function)",
+          "Ecosistema WordPress menor que reCAPTCHA",
+          "Enterprise solo si se necesita >20 widgets o off-label ($$$)"
+        ],
+        "costoEstimadoMVP": "$0/mes — plan Free suficiente para CariHub MVP (1 sitio, <10 formularios/widgets)",
+        "integracionCariHub": "Widget en login/registro/formularios públicos; token → Cloud Function verify; score implícito pass/fail + action binding"
+      },
+      "google_recaptcha_v3": {
+        "ventajas": [
+          "Invisible, score 0.0–1.0 continuo",
+          "Integración madura con Firebase/App Check (opcional)",
+          "Amplio ecosistema y documentación"
+        ],
+        "desventajas": [
+          "Free tier reducido (~10.000 assessments/mes en Cloud 2026)",
+          "Costo $8/mes flat 10K–100K; $1/1000 adicional",
+          "Dependencia Google / privacidad",
+          "Score opaco; umbrales requieren tuning",
+          "Migración a reCAPTCHA Enterprise si escala"
+        ],
+        "costoEstimadoMVP": "$0/mes si <10K verificaciones/mes; riesgo de costo al crecer",
+        "integracionCariHub": "grecaptcha.execute → token → Cloud Function siteverify; umbral score ≥0.5 MVP (ajustable)"
+      }
+    },
+    "decision": {
+      "proveedor": "cloudflare_turnstile",
+      "razon": "Costo cero predecible, privacidad, un solo dominio carihub.app, pocos widgets; CariHub no necesita 20+ widgets distintos",
+      "fallback": "recaptcha_v3 solo si Turnstile indisponible en región/dispositivo — documentar en runbook",
+      "accionesProtegidasMinimo": ["login", "registro_auth", "registro_perfil", "recuperacion_password", "denuncia", "categoria_sugerida", "contacto_publico", "solicitud_banner"]
+    }
+  },
+  "formulariosProtegidos": {
+    "registro_perfiles": {
+      "prioridad": "critica",
+      "turnstile": true,
+      "rateLimit": ["ip", "email", "dispositivo"],
+      "emailVerificadoRequerido": "antes_enviar_revision",
+      "nota": "Wizard FieldEngine + Firebase Auth signup"
+    },
+    "registro_anunciantes": {
+      "prioridad": "critica",
+      "turnstile": true,
+      "rateLimit": ["ip", "usuario", "email"],
+      "roles": "anunciante sin perfil público posible",
+      "nota": "solicitudes_anuncios + contratos_banners"
+    },
+    "categorias_sugeridas": {
+      "prioridad": "alta",
+      "turnstile": true,
+      "rateLimit": ["ip", "usuario", "email"],
+      "maxPorUsuarioDia": 3,
+      "nota": "solicitudes_categorias — anti-flood catálogo"
+    },
+    "denuncias": {
+      "prioridad": "alta",
+      "turnstile": true,
+      "rateLimit": ["ip", "usuario"],
+      "maxPorUsuarioDia": 10,
+      "maxPorPerfilObjetivoDia": 3,
+      "nota": "Permitir anónimo con Turnstile + IP estricto"
+    },
+    "contacto": {
+      "prioridad": "media",
+      "turnstile": true,
+      "rateLimit": ["ip", "email"],
+      "maxPorIpHora": 5,
+      "nota": "Formulario soporte público; sin Auth opcional"
+    },
+    "recuperacion_password": {
+      "prioridad": "critica",
+      "turnstile": true,
+      "rateLimit": ["ip", "email"],
+      "maxPorEmailHora": 3,
+      "nota": "Firebase sendPasswordResetEmail + Turnstile previo"
+    },
+    "login": {
+      "prioridad": "critica",
+      "turnstile": true,
+      "rateLimit": ["ip", "email", "dispositivo"],
+      "maxIntentosFallidos": 5,
+      "ventanaBloqueoMinutos": 15,
+      "nota": "Tras N fallos → Turnstile obligatorio + backoff"
+    },
+    "publicaciones_futuras": {
+      "prioridad": "alta",
+      "turnstile": false,
+      "rateLimit": ["usuario", "perfil"],
+      "gates": ["estadoSeguridad", "emailVerificado", "estadoVerificacion", "estadoRevision"],
+      "nota": "Usuario autenticado; anti-spam por reputación y límites de edición"
+    }
+  },
+  "antiSpam": {
+    "dimensiones": ["ip", "usuario", "email", "telefono", "dispositivo"],
+    "almacenamientoLimites": {
+      "coleccion": "rate_limits/{bucketId}",
+      "bucketId": "hash(tipo+valor+accion+ventana)",
+      "ttl": "ventana + margen",
+      "nota": "Diseño Firestore con TTL o Cloud Function cleanup — no implementar aún"
+    },
+    "limitesPorAccion": {
+      "registro_cuenta": {
+        "ip": { "ventana": "1h", "max": 5 },
+        "email": { "ventana": "24h", "max": 3 },
+        "dispositivo": { "ventana": "24h", "max": 3 }
+      },
+      "login_fallido": {
+        "ip": { "ventana": "15m", "max": 20 },
+        "email": { "ventana": "15m", "max": 5 },
+        "dispositivo": { "ventana": "15m", "max": 10 }
+      },
+      "recuperacion_password": {
+        "ip": { "ventana": "1h", "max": 10 },
+        "email": { "ventana": "1h", "max": 3 }
+      },
+      "denuncia": {
+        "ip": { "ventana": "24h", "max": 15 },
+        "usuario": { "ventana": "24h", "max": 10 },
+        "perfilObjetivo": { "ventana": "24h", "max": 5 }
+      },
+      "categoria_sugerida": {
+        "usuario": { "ventana": "24h", "max": 3 },
+        "ip": { "ventana": "24h", "max": 10 }
+      },
+      "mensaje_futuro": {
+        "usuario": { "ventana": "1h", "max": 60 },
+        "usuario_nuevo": { "ventana": "24h", "max": 20, "condicion": "nivelConfianza < 40" },
+        "conversacion": { "ventana": "1m", "max": 10 }
+      },
+      "publicacion_edicion": {
+        "usuario": { "ventana": "1h", "max": 30 },
+        "perfil": { "ventana": "24h", "max": 10, "tipo": "cambios_estado_revision" }
+      }
+    }
+  },
+  "identidadUsuarioExtension": {
+    "subobjeto": "usuarios.seguridad",
+    "camposExistentes": ["riesgoScore", "duplicadoPotencial", "ultimoLogin", "ultimoIPHash", "flags"],
+    "camposNuevosCongelados": {
+      "estadoSeguridad": "normal|observacion|restringido|suspendido|bloqueado",
+      "reputacionCuenta": "number 0-100 — confianza agregada post-MVP comportamiento",
+      "nivelConfianza": "number 0-100 — usado para límites dinámicos Messenger",
+      "emailVerificado": "boolean — mirror Auth emailVerified",
+      "fechaVerificacionEmail": "timestamp|null",
+      "telefonoVerificado": "boolean",
+      "fechaVerificacionTelefono": "timestamp|null",
+      "telefonoE164": "string|null — hash o truncado en logs",
+      "dispositivoConfianza": "number 0-100 — último device fingerprint score",
+      "spamScore": "number 0-100 — acumulado eventos spam",
+      "ultimoTurnstileAt": "timestamp",
+      "intentosLoginFallidos": "number",
+      "bloqueoHasta": "timestamp|null"
+    },
+    "subobjetoVerificacionEmail": {
+      "ubicacion": "usuarios.cuenta o usuarios.verificacion",
+      "emailVerificado": "boolean",
+      "fechaVerificacionEmail": "timestamp",
+      "reenviosRestantes": "number",
+      "ultimoReenvioAt": "timestamp",
+      "expiracionEnlaceHoras": 24
+    }
+  },
+  "riesgoReputacion": {
+    "riesgoScore": {
+      "rango": "0-100",
+      "inicial": 10,
+      "umbrales": {
+        "bajo": "0-29",
+        "medio": "30-59",
+        "alto": "60-79",
+        "critico": "80-100"
+      },
+      "incrementos": [
+        { "evento": "login_fallido", "delta": 2, "capHora": 10 },
+        { "evento": "rate_limit_excedido", "delta": 15 },
+        { "evento": "denuncia_recibida_valida", "delta": 20 },
+        { "evento": "denuncia_recibida_rechazada", "delta": 0 },
+        { "evento": "duplicado_potencial_detectado", "delta": 25 },
+        { "evento": "turnstile_fallido", "delta": 10 },
+        { "evento": "email_no_verificado_7d", "delta": 5 }
+      ],
+      "decrementos": [
+        { "evento": "email_verificado", "delta": -10 },
+        { "evento": "verificacion_identidad_aprobada", "delta": -20 },
+        { "evento": "contrato_activo_30d", "delta": -15 },
+        { "evento": "sin_incidentes_90d", "delta": -10 }
+      ]
+    },
+    "reputacionCuenta": {
+      "rango": "0-100",
+      "inicial": 50,
+      "uso": "Visibilidad suave, prioridad revisión admin, elegibilidad promociones",
+      "ejemplos": [
+        "Cuenta nueva email verificado, sin perfil: reputacion 55",
+        "Perfil publicado 6 meses sin denuncias: reputacion 75",
+        "3 denuncias válidas en 30d: reputacion 25"
+      ]
+    },
+    "nivelConfianza": {
+      "rango": "0-100",
+      "formula": "min(100, reputacionCuenta + bonusVerificacion - riesgoScore)",
+      "bonusVerificacion": { "email": 10, "telefono": 15, "ine_aprobada": 20, "cedula_aprobada": 25, "rfc_negocio": 20 },
+      "usoLimites": "Messenger y categorías sugeridas usan nivelConfianza para caps dinámicos"
+    },
+    "duplicadoPotencial": {
+      "senales": ["mismoIPHash_registros_24h", "mismoDeviceId", "email_similar", "telefono_similar", "ine_hash_duplicado"],
+      "accion": "flag + estadoSeguridad observacion + cola admin"
+    },
+    "flags": {
+      "valoresEjemplo": [
+        "EMAIL_NO_VERIFICADO",
+        "TELEFONO_NO_VERIFICADO",
+        "DUPLICADO_SOSPECHOSO",
+        "RATE_LIMIT_HIT",
+        "DENUNCIA_PENDIENTE",
+        "BOT_SOSPECHOSO",
+        "PAIS_ALTO_RIESGO",
+        "DISPOSITIVO_NUEVO"
+      ]
+    }
+  },
+  "mensajeriaFutura": {
+    "estadoMensajeria": {
+      "habilitada": "envío y recepción normal si nivelConfianza ≥ 40",
+      "restringida": "solo respuesta a conversaciones existentes; no iniciar nuevas",
+      "suspendida": "sin envío; lectura opcional",
+      "solo_lectura": "recibir y leer; no enviar"
+    },
+    "spamScore": {
+      "campo": "usuarios.mensajeria.spamScore",
+      "incremento": ["mensajes_identicos", "urls_masivas", "reportes_usuarios", "rate_limit_mensajes"],
+      "umbralRestringir": 60,
+      "umbralSuspender": 80
+    },
+    "bloqueos": {
+      "ruta": "usuarios/{usuarioId}/bloqueos/{usuarioBloqueadoId}",
+      "efecto": "no mensajes bidireccionales"
+    },
+    "reportes": {
+      "incrementa": "mensajeria.reportesCount y riesgoScore",
+      "umbralRevision": 3
+    },
+    "limitesMensajes": {
+      "nuevo_usuario_24h": 20,
+      "estandar_hora": 60,
+      "burst_minuto": 10,
+      "adjuntos": "fase_post_mvp"
+    }
+  },
+  "logsAuditoria": {
+    "logsAdmin": {
+      "ruta": "logsAdmin/{logId}",
+      "eventos": ["perfil_aprobar", "perfil_rechazar", "categoria_aprobar", "precio_cambiar", "cuenta_suspendir"],
+      "campos": ["actorId", "modulo", "accion", "targetId", "diffHash", "ipHash", "uaHash", "createdAt"],
+      "retencionDias": 365
+    },
+    "logsSeguridad": {
+      "ruta": "logsSeguridad/{logId}",
+      "eventos": [
+        "login_exitoso", "login_fallido", "rate_limit", "turnstile_fallido",
+        "estado_seguridad_cambio", "email_verificado", "telefono_verificado",
+        "duplicado_detectado", "admin_acceso_privado"
+      ],
+      "campos": ["tipo", "usuarioId|null", "ipHash", "deviceIdHash", "metadata", "severidad", "createdAt"],
+      "retencionDias": 180,
+      "pii": "prohibido en claro — solo hash"
+    },
+    "logs_acceso_privado": {
+      "ruta": "logs_acceso_privado/{id}",
+      "eventos": ["admin_vio_ine", "admin_vio_telefono", "admin_exporto_datos"],
+      "campos": ["adminId", "usuarioId", "campo", "motivo", "createdAt"],
+      "retencionDias": 730
+    },
+    "alertas_seguridad": {
+      "ruta": "alertas_seguridad/{id}",
+      "disparadores": [
+        "riesgoScore >= 80",
+        "intentos_login_masivos_ip",
+        "oleada_denuncias",
+        "cambio_masivo_estados",
+        "rules_bypass_intento"
+      ],
+      "severidad": ["info", "warning", "critical"],
+      "destino": "admin modulo seguridad + email super_admin"
+    }
+  },
+  "verificacionEmail": {
+    "proveedor": "firebase_auth_email_verification",
+    "campos": {
+      "emailVerificado": "boolean — sync Auth user.emailVerified",
+      "fechaVerificacionEmail": "timestamp al confirmar"
+    },
+    "reenvio": {
+      "maxPorHora": 3,
+      "maxPorDia": 5,
+      "cooldownSegundos": 60,
+      "requiereTurnstile": true
+    },
+    "expiracionEnlace": {
+      "horas": 24,
+      "accionExpirado": "permitir reenvío con Turnstile"
+    },
+    "restriccionesSinVerificar": {
+      "permitido": ["login", "ver_perfiles_publicos", "favoritos", "borrador_perfil"],
+      "bloqueado": ["enviar_revision", "publicar", "contratar_plan", "solicitud_banner", "categoria_sugerida", "mensajeria_futura"],
+      "diasGraciaRegistro": 7,
+      "postGracia": "estadoSeguridad restringido hasta verificar"
+    }
+  },
+  "verificacionTelefono": {
+    "fase": "POST_MVP_OPCIONAL",
+    "proveedorRecomendado": "firebase_phone_auth | twilio_verify",
+    "campos": {
+      "telefonoVerificado": "boolean",
+      "fechaVerificacionTelefono": "timestamp",
+      "telefonoE164": "string en usuarios (privado)"
+    },
+    "otp": {
+      "longitud": 6,
+      "expiracionMinutos": 10,
+      "intentosMaximos": 5,
+      "bloqueoTemporalMinutos": 30
+    },
+    "restriccionesMVP": "No obligatorio lanzamiento; obligatorio para adultos VIP o montos altos — fase 2",
+    "bonus": "nivelConfianza +15 al verificar"
+  },
+  "estadosSeguridad": {
+    "valores": ["normal", "observacion", "restringido", "suspendido", "bloqueado"],
+    "efectos": {
+      "normal": {
+        "publicaciones": "permitidas según estadoRevision",
+        "mensajeria": "según estadoMensajeria",
+        "verificacion": "flujo estándar",
+        "contratos": "permitidos",
+        "banners": "permitidos"
+      },
+      "observacion": {
+        "publicaciones": "envío a revisión prioritaria admin",
+        "mensajeria": "habilitada con límites reducidos 50%",
+        "verificacion": "obligatoria antes de publicar",
+        "contratos": "permitidos",
+        "banners": "revisión manual"
+      },
+      "restringido": {
+        "publicaciones": "solo borrador; no enviar revisión",
+        "mensajeria": "restringida o solo_lectura",
+        "verificacion": "puede enviar documentos",
+        "contratos": "no nuevos; renovación caso a caso",
+        "banners": "bloqueados"
+      },
+      "suspendido": {
+        "publicaciones": "perfil despublicado si estaba activo",
+        "mensajeria": "suspendida",
+        "verificacion": "congelada",
+        "contratos": "pausados",
+        "banners": "pausados"
+      },
+      "bloqueado": {
+        "publicaciones": "ninguna",
+        "mensajeria": "ninguna",
+        "verificacion": "ninguna",
+        "contratos": "cancelación según política",
+        "banners": "retirados",
+        "login": "denegado salvo apelación admin"
+      }
+    },
+    "transicionesAdmin": "solo admin/moderador vía modulo seguridad o revision_moderacion"
+  },
+  "firebaseNativo": {
+    "proveedorIdentidad": "firebase_authentication",
+    "verificacionEmail": {
+      "proveedor": "firebase_auth_email_verification",
+      "obligatorioMVP": true,
+      "campos": ["emailVerificado", "fechaVerificacionEmail"]
+    },
+    "recuperacionPassword": {
+      "proveedor": "firebase_auth_sendPasswordResetEmail",
+      "turnstilePrevio": true
+    },
+    "verificacionTelefono": {
+      "proveedor": "firebase_phone_auth | twilio_verify",
+      "fase": "post_mvp",
+      "notaMVP": "No obligatorio lanzamiento; evaluar fase 2 para adultos VIP o montos altos"
+    },
+    "appCheck": {
+      "fase": "mvp_recomendado",
+      "proveedores": ["reCAPTCHA_enterprise_provider | devicecheck | play_integrity"],
+      "uso": "Proteger llamadas Firestore/Storage/Cloud Functions desde cliente oficial",
+      "complementoTurnstile": "Turnstile protege formularios HTML públicos; App Check protege SDK Firebase",
+      "nota": "No sustituye Turnstile en login/registro web; capas complementarias"
+    },
+    "firestoreSecurityRules": {
+      "estado": "legacy_produccion",
+      "disenoObjetivo": "Rules alineadas a perfiles/, usuarios hub, contratos — implementación fase posterior",
+      "referencia": "firestore.rules (no modificado en congelamiento)"
+    },
+    "storageRules": {
+      "diseno": "INE/selfie solo owner + admin; fotos perfil owner write pre-aprobación",
+      "implementacion": "fase_posterior"
+    }
+  },
+  "deteccionFraude": {
+    "riesgoScore": "ver riesgoReputacion.riesgoScore",
+    "reputacionCuenta": "ver riesgoReputacion.reputacionCuenta",
+    "nivelConfianza": "ver riesgoReputacion.nivelConfianza",
+    "duplicadoPotencial": "ver riesgoReputacion.duplicadoPotencial",
+    "multicuentas": {
+      "senales": ["mismoIPHash_24h", "mismoDeviceIdHash", "patronEmailDesechable", "ineHash_duplicado"],
+      "accion": "duplicadoPotencial=true, riesgoScore+=25, estadoSeguridad observacion"
+    },
+    "cuentasDesechables": {
+      "dominiosBloqueados": ["mailinator.com", "guerrillamail.com", "tempmail.com", "10minutemail.com"],
+      "patron": "lista expandible en config; bloqueo en registro",
+      "flag": "EMAIL_DESECHABLE_SOSPECHOSO"
+    }
+  },
+  "moderacion": {
+    "suspensionParcial": "estadoSeguridad observacion o restringido",
+    "suspensionMensajeria": "estadoMensajeria suspendida | solo_lectura",
+    "suspensionPublicaciones": "estadoSeguridad restringido — solo borrador",
+    "suspensionComercial": "contratos pausados; sin nuevos banners",
+    "bloqueoTotal": "estadoSeguridad bloqueado + estadoCuenta suspendida"
+  },
+  "impactoModulos": {
+    "cuentas": "Extiende usuarios.seguridad y verificacion email/tel; estados seguridad orthogonal a estadoCuenta",
+    "catalogo": "Sin cambio estructural; categorías sugeridas consumen límites anti-spam",
+    "fieldEngine": "Gates: emailVerificado, estadoSeguridad permite borrador; no exponer campos si bloqueado",
+    "validationEngine": "Valida Turnstile token server-side; rate limits; coherencia con estadoSeguridad",
+    "messenger": "estadoMensajeria + spamScore + bloqueos + nivelConfianza",
+    "revision_moderacion": "Cola priorizada por riesgoScore y flags",
+    "admin": "Módulo seguridad: logs, alertas, cambio estadoSeguridad",
+    "ia_arquitecto": "Lectura métricas spam/denuncias; no escribe; alertas diseño"
+  },
+  "mvpVsFuturo": {
+    "obligatorioMVP": [
+      "cloudflare_turnstile en login/registro/recuperación/denuncia/categoría sugerida/contacto",
+      "rate limits IP/email login y registro",
+      "verificacion email Firebase + restricciones sin verificar",
+      "estadoSeguridad + riesgoScore básico + flags",
+      "logsSeguridad + logs_acceso_privado diseño",
+      "alertas_seguridad umbrales críticos",
+      "integración ValidationEngine contrato token Turnstile"
+    ],
+    "postMVP": [
+      "verificacion telefono OTP",
+      "spamScore Messenger completo",
+      "reputacionCuenta dinámica avanzada",
+      "device fingerprint proveedor externo",
+      "2FA admin",
+      "RBAC multi-admin completo",
+      "App Check + reCAPTCHA fallback",
+      "ML detección fraude"
+    ]
+  }
+}

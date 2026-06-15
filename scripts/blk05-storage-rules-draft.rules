@@ -1,0 +1,294 @@
+// ============================================================================
+// SECCION 1 — ENCABEZADO DE SEGURIDAD
+// ============================================================================
+//
+//   ####  BORRADOR — NO DEPLOY — NO PRODUCCION  ####
+//
+//   Archivo: scripts/blk05-storage-rules-draft.rules
+//   Tipo:    Firebase STORAGE rules (no Firestore)
+//   Parte de: BLK-05 / GAP-RULES-FIRESTORE-ALIGNMENT v1.0.0 (fase 2)
+//
+//   ADVERTENCIAS OBLIGATORIAS:
+//     - BORRADOR (diseno conceptual, no productivo).
+//     - NO DEPLOY.
+//     - NO PRODUCCION.
+//     - NO PEGAR DIRECTO EN STORAGE RULES (storage.rules real no existe aun).
+//     - REQUIERE REVISION (arquitectura + seguridad).
+//     - REQUIERE EMULADOR (Storage + Firestore) antes de cualquier uso.
+//     - REQUIERE BLK-01 (perfiles/{perfilId} + ownerUid + bridge).
+//     - REQUIERE CUSTOM CLAIMS (admin/moderador/soporte/auditor/sistema).
+//     - REQUIERE VALIDACION CON FIRESTORE RULES (cross-check de ownership/estado).
+//
+//   ALINEACION (lectura, sin modificar):
+//     - scripts/blk05-firestore-rules-perfiles-draft.rules (helpers/roles/estados)
+//     - scripts/blk05-rules-perfiles.test.mjs + fixtures
+//     - scripts/GAP-RULES-FIRESTORE-ALIGNMENT-v1.0.0.json (privacidad/RBAC)
+//     - scripts/PLAN-CONSTRUCCION-BLK-01-MIGRACION-PERFILID v1.0.0 (bridge)
+//     - MATRIZ-RUTAS-NAV-CANONICA / ACTA-RC / ACTA-PAY / ACTA-PANEL v1.1
+//
+//   PRINCIPIO RECTOR: default-deny; KYC/financiero/admin nunca bajo /public/;
+//   owner sube a /pending|/private; la aprobacion a publico la decide admin via
+//   Firestore (no por metadata libre del cliente). Las Storage Rules validan
+//   contra documentos Firestore cuando es posible (firestore.get/exists).
+// ============================================================================
+
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // ========================================================================
+    // SECCION 3 — HELPERS CONCEPTUALES
+    // ========================================================================
+    // NOTA BLK-05: los roles dependen de CUSTOM CLAIMS (request.auth.token.role
+    // / .roles[]). Sin claims, solo isOwnerByUid funciona.
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function hasRole(role) {
+      return isSignedIn() && (
+        (('role' in request.auth.token) && request.auth.token.role == role)
+        || (('roles' in request.auth.token) && (role in request.auth.token.roles))
+      );
+    }
+    function hasAnyRole(roles) {
+      return isSignedIn() && (
+        (('role' in request.auth.token) && (request.auth.token.role in roles))
+        || (('roles' in request.auth.token) && request.auth.token.roles.hasAny(roles))
+      );
+    }
+
+    function isAdmin()     { return hasAnyRole(['super_admin', 'admin']); }
+    function isModerator() { return hasRole('moderador') || isAdmin(); }
+    function isSupport()   { return hasRole('soporte') || isAdmin(); }
+    function isAuditor()   { return hasRole('auditor') || isAdmin(); }
+    function isSystem()    { return hasRole('sistema'); }
+    function isAgenteIA()  { return hasRole('agente_ia'); } // sin acceso directo
+
+    function isOwnerByUid(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    // SECCION 14/15 — cross-check Firestore (requiere BLK-01: perfiles/ + ownerUid)
+    function perfilDoc(perfilId) {
+      return firestore.get(/databases/(default)/documents/perfiles/$(perfilId)).data;
+    }
+    function isProfileOwner(perfilId) {
+      return isSignedIn()
+        && firestore.exists(/databases/(default)/documents/perfiles/$(perfilId))
+        && perfilDoc(perfilId).ownerUid == request.auth.uid;
+    }
+    function perfilEsPublico(perfilId) {
+      return firestore.exists(/databases/(default)/documents/perfiles/$(perfilId))
+        && perfilDoc(perfilId).estadoPublicacion == 'activo'
+        && perfilDoc(perfilId).visible == true
+        && perfilDoc(perfilId).publicado == true
+        && perfilDoc(perfilId).suspendido != true
+        && perfilDoc(perfilId).eliminado != true
+        && perfilDoc(perfilId).vencido != true;
+    }
+    function bannerDoc(bannerId) {
+      return firestore.get(/databases/(default)/documents/banners/$(bannerId)).data;
+    }
+    function isBannerOwner(bannerId) {
+      return isSignedIn()
+        && firestore.exists(/databases/(default)/documents/banners/$(bannerId))
+        && bannerDoc(bannerId).ownerUid == request.auth.uid;
+    }
+    function bannerEsPublico(bannerId) {
+      return firestore.exists(/databases/(default)/documents/banners/$(bannerId))
+        && bannerDoc(bannerId).estado == 'activo';
+    }
+
+    // SECCION 11 — validacion MIME
+    function isValidImage() {
+      return request.resource.contentType in ['image/jpeg', 'image/png', 'image/webp'];
+    }
+    function isValidVideo() {
+      return request.resource.contentType in ['video/mp4', 'video/webm'];
+    }
+    function isValidPdf() {
+      return request.resource.contentType == 'application/pdf';
+    }
+    // MIME peligroso explicitamente negado (HTML/JS/SVG/ejecutables/zip/sin tipo)
+    function mimeSeguro() {
+      return isValidImage() || isValidVideo() || isValidPdf();
+    }
+
+    // SECCION 12 — tamano maximo
+    function isUnderMaxSize(maxBytes) {
+      return request.resource.size != null && request.resource.size <= maxBytes;
+    }
+    // limites recomendados (bytes)
+    function MB(n) { return n * 1024 * 1024; }
+
+    // SECCION 13 — metadata: NO confiar ciegamente. publicApproved/revisionStatus
+    // SOLO se consideran validos si coinciden con Firestore (ver SECCION 4).
+    function metaTienePerfil(perfilId) {
+      return request.resource.metadata != null
+        && request.resource.metadata.perfilId == perfilId
+        && request.resource.metadata.ownerUid == request.auth.uid;
+    }
+
+    function isPublicApprovedMedia(perfilId) {
+      // La fuente de verdad es Firestore, no la metadata del archivo.
+      return perfilEsPublico(perfilId);
+    }
+    function isSensitiveKycPath() { return false; } // marcador conceptual; KYC se trata en su match
+
+    // ========================================================================
+    // SECCION 2 — RUTAS DE STORAGE + SECCION 10 — SEPARACION POR SENSIBILIDAD
+    // ========================================================================
+    // publico        -> /perfiles/{id}/public/**, /banners/{id}/public/**
+    // privado owner   -> /perfiles/{id}/pending/**
+    // sensible KYC    -> /perfiles/{id}/private/kyc/**
+    // financiero      -> /perfiles/{id}/private/pagos/**, /banners/{id}/private/comprobantes/**
+    // administrativo  -> /admin/{expedienteId}/**
+    // legacy/bridge   -> /usuarios/{uid}/legacy/** (deny por defecto)
+
+    // ---- PERFIL PUBLICO (SECCION 4) ----------------------------------------
+    // Lectura publica solo si el PERFIL es publico en Firestore + MIME imagen.
+    // El owner NO publica directo: subir a /public no esta permitido al owner;
+    // la promocion a publico la realiza admin/sistema (flujo Firestore).
+    match /perfiles/{perfilId}/public/foto-principal/{fileId} {
+      allow read: if isPublicApprovedMedia(perfilId) || isProfileOwner(perfilId) || isModerator() || isAuditor();
+      allow write: if (isAdmin() || isSystem())          // promocion a publico
+        && isValidImage() && isUnderMaxSize(MB(5));
+    }
+    match /perfiles/{perfilId}/public/galeria/{fileId} {
+      allow read: if isPublicApprovedMedia(perfilId) || isProfileOwner(perfilId) || isModerator() || isAuditor();
+      allow write: if (isAdmin() || isSystem())
+        && isValidImage() && isUnderMaxSize(MB(8));
+    }
+
+    // ---- PERFIL PENDIENTE / NO APROBADO (SECCION 5) ------------------------
+    match /perfiles/{perfilId}/pending/fotos/{fileId} {
+      allow read: if isProfileOwner(perfilId) || isModerator(); // publico NO
+      allow create, update: if isProfileOwner(perfilId)
+        && metaTienePerfil(perfilId)
+        && isValidImage() && isUnderMaxSize(MB(8));
+      allow delete: if isProfileOwner(perfilId) || isAdmin();
+      // owner NO puede marcar como publica/aprobada (eso es admin via Firestore).
+    }
+
+    // ---- KYC SENSIBLE (SECCION 6) ------------------------------------------
+    // INE frente/reverso + selfie. NUNCA bajo /public. Publico jamas lee.
+    match /perfiles/{perfilId}/private/kyc/{tipo}/{fileId} {
+      allow read: if isProfileOwner(perfilId) || isModerator() || isAuditor() || isSupport();
+      // soporte: lectura limitada si el diseno lo aprueba (atencion);
+      // auditor: lectura de trazabilidad; agente IA: SIN acceso.
+      allow create: if isProfileOwner(perfilId)
+        && metaTienePerfil(perfilId)
+        && (tipo in ['ine-frente', 'ine-reverso', 'selfie'])
+        && (isValidImage() || isValidPdf())
+        && isUnderMaxSize(MB(10));
+      allow update, delete: if false; // KYC inmutable desde cliente (admin via flujo)
+    }
+
+    // ---- COMPROBANTES DE PAGO (SECCION 7) ----------------------------------
+    match /perfiles/{perfilId}/private/pagos/comprobantes/{fileId} {
+      allow read: if isProfileOwner(perfilId) || isAdmin() || isAuditor();
+      allow create: if isProfileOwner(perfilId)
+        && metaTienePerfil(perfilId)
+        && (isValidImage() || isValidPdf())
+        && isUnderMaxSize(MB(10));
+      allow update, delete: if false; // comprobante validado no se edita por owner
+    }
+
+    // ---- BANNERS (SECCION 8) -----------------------------------------------
+    match /banners/{bannerId}/public/media/{fileId} {
+      allow read: if bannerEsPublico(bannerId) || isBannerOwner(bannerId) || isModerator() || isAuditor();
+      allow write: if (isAdmin() || isSystem())   // publico solo si aprobado (admin)
+        && (isValidImage() || isValidVideo())
+        && (
+          (isValidImage() && isUnderMaxSize(MB(10)))
+          || (isValidVideo() && isUnderMaxSize(MB(50)))
+        );
+    }
+    match /banners/{bannerId}/pending/media/{fileId} {
+      allow read: if isBannerOwner(bannerId) || isModerator();
+      allow create, update: if isBannerOwner(bannerId)
+        && (isValidImage() || isValidVideo())
+        && (
+          (isValidImage() && isUnderMaxSize(MB(10)))
+          || (isValidVideo() && isUnderMaxSize(MB(50)))
+        );
+      allow delete: if isBannerOwner(bannerId) || isAdmin();
+    }
+    match /banners/{bannerId}/private/comprobantes/{fileId} {
+      allow read: if isBannerOwner(bannerId) || isAdmin() || isAuditor();
+      allow create: if isBannerOwner(bannerId)
+        && (isValidImage() || isValidPdf()) && isUnderMaxSize(MB(10));
+      allow update, delete: if false;
+    }
+
+    // ---- DOCUMENTOS ADMIN (SECCION 9) --------------------------------------
+    // Owner NUNCA lee documentos internos admin. Publico jamas. Escritura admin/sistema.
+    match /admin/{expedienteId}/documentos/{fileId} {
+      allow read: if isAdmin() || isModerator() || isAuditor() || isSupport();
+      allow write: if (isAdmin() || isSystem())
+        && mimeSeguro() && isUnderMaxSize(MB(15));
+    }
+    match /admin/{expedienteId}/evidencias/{fileId} {
+      allow read: if isAdmin() || isModerator() || isAuditor();
+      allow write: if (isAdmin() || isSystem())
+        && mimeSeguro() && isUnderMaxSize(MB(15));
+    }
+
+    // ---- LEGACY / BRIDGE (SECCION 2) ---------------------------------------
+    // Monolito usuarios/{uid}: solo lectura restringida al owner/admin; deny write.
+    // NO activar antes del bridge BLK-01 (ver SECCION 15).
+    match /usuarios/{uid}/legacy/{fileId} {
+      allow read: if isOwnerByUid(uid) || isAdmin();
+      allow write: if false;
+    }
+
+    // ========================================================================
+    // DEFAULT-DENY GLOBAL — todo lo no declarado se niega.
+    // ========================================================================
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
+
+// ============================================================================
+// SECCION 16 — RELACION CON CUSTOM CLAIMS
+//   Dependen de claims server-side: admin, super_admin, moderador, soporte,
+//   auditor, sistema. agente_ia NO tiene acceso directo a Storage.
+//   Sin claims, solo isOwnerByUid / isProfileOwner (por Firestore) funcionarian.
+//
+// SECCION 17 — RIESGOS CUBIERTOS POR ESTE BORRADOR
+//   - Exposicion de INE/selfie: KYC solo en /private/kyc, publico nunca lee,
+//     ningun KYC bajo /public.
+//   - Lectura publica de archivos privados: default-deny + reads por owner/rol.
+//   - Subida de archivos maliciosos: whitelist MIME (mimeSeguro), HTML/JS/SVG/
+//     ejecutables/zip negados.
+//   - Autopublicacion de media: owner sube a /pending; /public solo admin/sistema.
+//   - Acceso cruzado a media ajena: isProfileOwner/isBannerOwner por Firestore.
+//   - Acceso a comprobantes ajenos: read solo owner+admin/auditor.
+//   - Acceso a documentos admin: solo roles admin/moderador/soporte/auditor.
+//   - Subida de archivos enormes: isUnderMaxSize por tipo de ruta.
+//   - MIME peligroso: negado por whitelist.
+//
+// SECCION 18 — RIESGOS NO CUBIERTOS (DECLARADOS)
+//   - Escaneo antivirus: NO incluido (requiere Cloud Functions/3rd party).
+//   - Moderacion automatica de contenido: NO incluida.
+//   - Procesamiento/optimizacion/compresion de imagenes: NO incluido.
+//   - Signed URLs: NO definidas.
+//   - CDN / cache: NO definido.
+//   - Cloud Functions (promocion a publico, validacion profunda): NO implementadas.
+//   - Emulador: NO ejecutado.
+//   - Deploy: NO autorizado.
+//   - Metadata del cliente (publicApproved/revisionStatus): NO confiable sin
+//     validacion Firestore/Cloud Functions (la verdad esta en Firestore).
+//
+// SECCION 15 — RELACION CON BLK-01
+//   - Depende de perfilId y ownerUid en perfiles/{perfilId} (Firestore).
+//   - Incompatible parcialmente con el monolito usuarios/{uid}: las rutas
+//     /perfiles/** y los firestore.get(perfiles/...) NO funcionan hasta el bridge.
+//   - NO activar /perfiles/** ni /banners/** antes de BLK-01 (perfiles poblada).
+//   - /usuarios/{uid}/legacy/** es el unico path coherente con el monolito.
+// ============================================================================

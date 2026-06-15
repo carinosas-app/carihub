@@ -1,0 +1,102 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "tipo": "AUDITORIA_SPEC",
+  "nombre": "Auditoría consistencia — Messenger v1.0.0",
+  "fecha": "2026-06-09",
+  "versionSpecAuditada": "1.0.0",
+  "veredicto": "SUPERSEDED_BY_AUDITORIA_FINAL",
+  "auditoriaFinal": "scripts/AUDITORIA-FINAL-SPEC-MESSENGER.json",
+  "puedeCongelarse": false,
+  "puedeCongelarseTrasOB_MSG": true,
+  "aprobarCongelamientoAhora": false,
+  "condicionCongelamiento": "Cerrar OB-MSG-1–8 + actualizar acta — ver AUDITORIA-FINAL-SPEC-MESSENGER",
+  "validador": "scripts/validar-spec-messenger.mjs",
+  "1_compatibilidadCapasCongeladas": {
+    "validationEngine_1_0_0": {
+      "estado": "COMPATIBLE_CON_PROPUESTA_MINOR",
+      "fortalezas": [
+        "Patrón validateAction respetado para todas las acciones",
+        "fanOutPlan documentado en registry-messenger-fanout-propuesta.json",
+        "Pipeline IA-Seguridad alineado con pasos VE",
+        "bloqueo_usuario ya parcialmente en registry VE"
+      ],
+      "debilidades": [
+        "Registry VE placeholders mensaje_enviar/conversacion_iniciar sin fanOutPlan activo",
+        "Acciones nuevas no en registry congelado — requiere acta MINOR VE 1.1.0"
+      ],
+      "accion": "PROPUESTA-ACTA-MINOR-VALIDATIONENGINE-MESSENGER.json — no modificar VE ahora"
+    },
+    "cuentas_1_0_0": {
+      "estado": "COMPATIBLE",
+      "fortalezas": ["estadoMensajeria", "bloqueos subcolección", "conversaciones_meta", "email/teléfono verificación"],
+      "debilidades": ["Producción monolito usuarios/{uid} — acta migración pendiente"]
+    },
+    "seguridad_mvp_1_0_0": {
+      "estado": "COMPATIBLE",
+      "fortalezas": ["mensajeriaFutura", "spamScore", "rateLimits.mensaje_futuro", "nivelConfianza", "estadoSeguridad"],
+      "debilidades": []
+    },
+    "dashboards_1_0_0": {
+      "estado": "COMPATIBLE",
+      "fortalezas": ["dominio mensajes notificaciones", "historial", "ia_recomendaciones", "admin módulo"],
+      "debilidades": ["Dominios notificación mensajeria admin a formalizar en PATCH dashboards futuro — no bloqueante diseño"]
+    },
+    "fieldEngine_1_0_1": {
+      "estado": "SIN_DEPENDENCIA_DIRECTA",
+      "nota": "Messenger no resuelve campos registro"
+    },
+    "catalogo_1_0_0": {
+      "estado": "COMPATIBLE",
+      "uso": "controles admin por subcategoriaId/sectorId; solicitud conversación adultos"
+    }
+  },
+  "2_coberturaRequisitosPO": {
+    "arquitectura_rutas_modelo": "COMPLETO",
+    "conversaciones_mensajes_participantes": "COMPLETO",
+    "solicitudes_aceptar_rechazar": "COMPLETO",
+    "estados_mensaje_conversacion": "COMPLETO",
+    "archivar_silenciar_fijar": "COMPLETO",
+    "politicas_eliminacion_investigacion": "COMPLETO",
+    "permisos_tipoCuenta_roles": "COMPLETO",
+    "perfiles_publicos_verificacion": "COMPLETO",
+    "bloqueos_reportes_moderacion": "COMPLETO",
+    "anti_spam_spamScore_rateLimits": "COMPLETO",
+    "notificaciones_historial_eventBus": "COMPLETO",
+    "integraciones_VE_Dashboards_Seguridad_Interacciones": "COMPLETO",
+    "ia_seguridad_traduccion_asistente": "COMPLETO",
+    "adjuntos_fases": "COMPLETO",
+    "multiusuario_empresa": "COMPLETO",
+    "admin_conversaciones_denunciadas": "COMPLETO",
+    "automatizaciones_mensajeria": "COMPLETO",
+    "control_administrativo_granular": "COMPLETO"
+  },
+  "3_hallazgos": [
+    {
+      "id": "H-MSG-01",
+      "nivel": "info",
+      "descripcion": "VE congelado requiere MINOR para fanOutPlan — documentado correctamente"
+    },
+    {
+      "id": "H-MSG-02",
+      "nivel": "bajo",
+      "descripcion": "Grupos N participantes fuera v1.0.0 — explícito en fueraDeAlcance"
+    },
+    {
+      "id": "H-MSG-03",
+      "nivel": "medio",
+      "descripcion": "Ventana 15min eliminar para todos — validar con PO en runtime UX"
+    }
+  ],
+  "4_riesgos": "Ver SPEC-MESSENGER.json → riesgos R-MSG-01 a R-MSG-07",
+  "5_dependencias": {
+    "congeladas_ok": true,
+    "pendientes": ["acta migración usuarios→perfiles", "acta MINOR VE 1.1.0 opcional pre-runtime"]
+  },
+  "6_fueraDeAlcance": "Ver SPEC-MESSENGER.json → fueraDeAlcance",
+  "recomendacionCongelamiento": {
+    "listoParaRevisionPO": true,
+    "aprobarAhora": false,
+    "acta": "scripts/ACTA-CONGELAMIENTO-MESSENGER.json — PENDIENTE_APROBACION_PRODUCT_OWNER",
+    "fixtures": "24 casos M01–M24"
+  }
+}

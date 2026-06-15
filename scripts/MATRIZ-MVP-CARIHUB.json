@@ -1,0 +1,451 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "tipo": "MATRIZ_MVP",
+  "titulo": "Matriz MVP CariHub/Cariñosas — Delimitación mínima viable",
+  "fecha": "2026-06-11",
+  "version": "1.0.0",
+  "modo": "Solo documentación — complemento AUDITORIA-MAESTRA-CARIHUB v1.0.0",
+  "basadoEn": [
+    "scripts/AUDITORIA-MAESTRA-CARIHUB.json",
+    "scripts/MATRIZ-MADUREZ-CARIHUB.json",
+    "scripts/MATRIZ-DEPENDENCIAS-CARIHUB.json",
+    "scripts/ROADMAP-MAESTRO-CARIHUB.json",
+    "scripts/PLAN-MAESTRO-ECONOMIA-SOCIAL.json",
+    "scripts/PLAN-MAESTRO-PAGOS-CONTRATOS.json",
+    "scripts/PLAN-MAESTRO-REGISTRO-CUENTA.json",
+    "scripts/PLAN-MAESTRO-INTERACCIONES.json",
+    "scripts/ANEXO-AUTOPROPINAS-CUENTAS-RELACIONADAS.json",
+    "scripts/ANEXO-RED-CONTACTOS-CONEXIONES-NEGOCIO.json",
+    "scripts/ANEXO-CRIPTOMONEDAS-PAGOS-CONTRATOS.json"
+  ],
+  "escalaClasificacion": ["MVP_obligatorio", "MVP_recomendado", "Post-MVP", "Futuro", "Experimental"],
+  "definiciones": {
+    "MVP_obligatorio": "Sin esto no se cumple una de las 9 capacidades núcleo ni un gate de beta/cobro/producción",
+    "MVP_recomendado": "Mejora conversión/seguridad/operación; puede omitirse en beta privada muy acotada",
+    "Post-MVP": "V1.1–V2.0; valor incremental post-lanzamiento nacional",
+    "Futuro": "Visión estratégica sin fecha; depende de escala o regulación",
+    "Experimental": "Sin diseño cerrado; alto riesgo; no bloquea MVP"
+  },
+  "umbralesLanzamiento": {
+    "betaPrivada": {
+      "descripcion": "Cohort cerrado (<100 perfiles); operación manual tolerada; SEO mínimo",
+      "funcionesIndispensables": [
+        "Auth registro cuenta",
+        "Wizard perfil FieldEngine (1 arquetipo piloto)",
+        "Guardar borrador + enviar revisión",
+        "Verificación email + INE/selfie upload",
+        "Admin aprobar/rechazar perfil",
+        "Perfil público visible (slug o id)",
+        "Home + resultados server-side básico",
+        "Puerta 18+ + Turnstile registro",
+        "Bridge perfilId mínimo",
+        "Contacto externo (WhatsApp/teléfono en perfil)"
+      ],
+      "puedeOmitir": ["Pasarela automática", "Contratos digitales", "Messenger", "Banners cobro online", "Dashboards shell", "robots/sitemap completo", "RBAC admin granular"]
+    },
+    "betaPublica": {
+      "descripcion": "Apertura nacional controlada; SEO indexable Home; anti-abuso activo",
+      "funcionesIndispensables": [
+        "Todo beta privada",
+        "Resultados server-side + noindex",
+        "RenderEngine head Home/Perfil",
+        "robots.txt + sitemap.xml",
+        "ValidationEngine server-side",
+        "Firestore rules alineadas",
+        "Seguridad gates completos",
+        "Recuperación contraseña",
+        "Admin RBAC básico (multi-admin)",
+        "Moderación denuncias"
+      ],
+      "puedeOmitir": ["Messenger", "Propinas", "Economía social", "Banners pasarela", "Dashboards completos", "Landings dinámicas"]
+    },
+    "cobrar": {
+      "descripcion": "Monetización perfiles activa (membresía/renovación MXN)",
+      "funcionesIndispensables": [
+        "Pasarela Stripe o MercadoPago integrada",
+        "Planes básico/destacado/premium/vip (config-precios-planes-perfiles)",
+        "Contratos_perfiles + precio congelado vigencia",
+        "Webhook confirmación pago → activar publicación",
+        "Admin conciliación pagos + vencimientos",
+        "Estados revisión: pago_pendiente → activo",
+        "Comprobante/recibo básico",
+        "ValidationEngine validación montos/planes"
+      ],
+      "puedeOmitir": ["Propinas", "Cripto", "Banners pasarela automática", "Facturación CFDI automática", "Contratos banners digitales"]
+    },
+    "produccion": {
+      "descripcion": "Operación nacional estable; cumplimiento; escalabilidad",
+      "funcionesIndispensables": [
+        "Todo cobrar + beta pública",
+        "URL canónica /perfil/{slug}",
+        "Dashboard perfil MVP (estado, plan, editar)",
+        "Renovaciones automáticas + alertas vencimiento",
+        "Banners: solicitud + cobro + rotación inventario",
+        "Audit trail admin",
+        "Backup/monitoreo operacional",
+        "ThinContentGuard calibrado (adultos noindex MVP)",
+        "Denuncias + moderación SLA",
+        "KYC/verificación teléfono (recomendado→obligatorio producción)"
+      ],
+      "puedeOmitir": ["Messenger", "Economía social", "Red contactos", "Lives/Stories", "IA avanzada", "i18n", "Marketplace"]
+    }
+  },
+  "mvpMinimoPosible": {
+    "nombre": "MVP-MIN Cariñosas Nacional",
+    "respuestaExplicita": "El MVP más pequeño que satisface las 9 capacidades núcleo SIN depender de funcionalidades futuras",
+    "capacidadesNucleo": {
+      "1_registrarPerfiles": {
+        "cumple": true,
+        "componentes": ["Firebase Auth", "Wizard FieldEngine snapshot", "perfiles/{perfilId} + bridge uid", "ValidationEngine guardar_borrador"],
+        "excluye": ["Messenger", "Red contactos", "ThemeEngine", "multi-arquetipo simultáneo"]
+      },
+      "2_verificarPerfiles": {
+        "cumple": true,
+        "componentes": ["Email verification gate", "INE/selfie Storage", "Admin módulo verificaciones", "estados revision publicacion"],
+        "excluye": ["Verificación teléfono OTP (recomendado V1.1)", "KYC automatizado", "IA verificación"]
+      },
+      "3_publicarPerfiles": {
+        "cumple": true,
+        "componentes": ["Flujo borrador→revision→aprobado→activo", "PrivacyGuard RenderEngine", "Plan/contrato vigente gate"],
+        "excluye": ["Landings SEO dinámicas", "Indexación adultos", "DestacadoHome automático IA"]
+      },
+      "4_cobrarPerfiles": {
+        "cumple": true,
+        "componentes": ["Pasarela 1 (Stripe o MP)", "4 planes MXN", "contratos_perfiles", "webhook activación"],
+        "excluye": ["Propinas", "Cripto", "multimoneda", "CFDI automático", "Economía social"]
+      },
+      "5_mostrarPerfiles": {
+        "cumple": true,
+        "componentes": ["Home indexable", "Resultados server-side noindex", "Perfil slug/id + RenderEngine head", "Catálogo geo"],
+        "excluye": ["Messenger inbox", "Favoritos sync", "Seguir", "Stories en perfil"]
+      },
+      "6_recibirContactos": {
+        "cumple": true,
+        "componentes": ["Campos contacto FieldEngine (WhatsApp/teléfono/email público)", "Botón contactar + gate 18+", "Contador visitas opcional"],
+        "notaCritica": "MVP-MIN usa contacto EXTERNO (click-to-WhatsApp/call). NO requiere Messenger runtime.",
+        "excluye": ["Messenger", "Solicitudes conversación", "ConnectionGraph", "Formulario interno"]
+      },
+      "7_administrarPerfiles": {
+        "cumple": true,
+        "componentes": ["Admin usuarios/perfiles", "Moderación verificación", "Estados revisión", "Denuncias básicas", "RBAC mínimo 2+ admins"],
+        "excluye": ["RBAC scopes geo", "Cumplimiento automatizado", "IA moderación"]
+      },
+      "8_administrarPagos": {
+        "cumple": true,
+        "componentes": ["Feed pagos admin", "Confirmación webhook/manual", "Vencimientos flag", "Contratos consulta"],
+        "excluye": ["Conciliación cripto", "Propinas ledger", "Facturación fiscal automática"]
+      },
+      "9_administrarAnuncios": {
+        "cumple": true,
+        "componentes": ["solicitudes_anuncios", "Admin aprobar/rechazar", "Inventario rotación banners", "Precios banners config"],
+        "excluye": ["Pasarela banners automática (V1.1)", "Estadísticas avanzadas", "Campañas programadas IA"]
+      }
+    },
+    "dependenciasPermitidas": [
+      "Shared/Core (mínimo extraído)",
+      "FieldEngine snapshot",
+      "ValidationEngine server-side",
+      "RenderEngine head básico",
+      "Seguridad MVP gates",
+      "Catálogo 1.0.0",
+      "Cuentas bridge perfilId",
+      "ACTA-MIGRACION runtime",
+      "SPEC-SEO-LANDINGS reglas MVP (noindex resultados/adultos)"
+    ],
+    "dependenciasProhibidas": [
+      "Messenger",
+      "Economía Social / TipsEngine",
+      "Interacciones FollowGraph/ConnectionGraph",
+      "Lives/Stories/Publicaciones",
+      "Agentes IA avanzados",
+      "Criptomonedas",
+      "i18n/hreflang",
+      "Marketplace",
+      "ThemeEngine completo"
+    ],
+    "modulosRuntimeEstimados": 28,
+    "modulosVisionCompleta": 92,
+    "duracionEstimadaSemanas": "16-22",
+    "duracionVisionCompletaSemanas": "80-120"
+  },
+  "analisisEspecifico": {
+    "economiaSocial": {
+      "clasificacion": "Post-MVP",
+      "versionObjetivo": "V1.2",
+      "motivoPostergacion": "Capa completa de monetización social; depende Pagos operativo + Interacciones + antifraude",
+      "dependencias": ["Pagos pasarela", "Interacciones P1", "Seguridad MVP reputación", "SocialMonetizationLedger"],
+      "impactoSiEliminaDelMVP": "Ninguno en 9 capacidades núcleo; solo pierde upsell social (premium/exclusivo/repost)",
+      "incluyeEnMVP": false
+    },
+    "propinas": {
+      "clasificacion": "Post-MVP",
+      "versionObjetivo": "V1.2",
+      "motivoPostergacion": "Requiere Pagos + TipsEngine + reglas fiscales + ANEXO-AUTOPROPINAS antifraude",
+      "dependencias": ["Pagos", "Economía Social", "Seguridad MVP señales autopropina", "Admin conciliación"],
+      "impactoSiEliminaDelMVP": "Ninguno; contacto y membresía cubren monetización MVP",
+      "incluyeEnMVP": false,
+      "nota": "Propinas en perfil = fase nacional (PLAN-MAESTRO-ECONOMIA-SOCIAL matrizFuncionFase)"
+    },
+    "criptomonedas": {
+      "clasificacion": "Futuro",
+      "versionObjetivo": "V2.0+",
+      "motivoPostergacion": "Regulación MX/internacional; ANEXO-CRIPTOMONEDAS explícito post-nacional",
+      "dependencias": ["Pagos MXN estable", "KYC", "cumplimiento legal", "multimoneda"],
+      "impactoSiEliminaDelMVP": "Ninguno; MXN suficiente para nacional",
+      "incluyeEnMVP": false
+    },
+    "lives": {
+      "clasificacion": "Futuro",
+      "versionObjetivo": "V2.0",
+      "motivoPostergacion": "StoriesLivesEngine inexistente; alto riesgo moderación/edad/contenido adulto en vivo",
+      "dependencias": ["Interacciones", "Streaming infra", "Moderación live", "Economía social propinas lives"],
+      "impactoSiEliminaDelMVP": "Ninguno; vitrina estática + contacto externo suficiente",
+      "incluyeEnMVP": false
+    },
+    "stories": {
+      "clasificacion": "Futuro",
+      "versionObjetivo": "V2.0",
+      "motivoPostergacion": "Escaparate temporal comercial; no existe engine; depende Interacciones + media pipeline",
+      "dependencias": ["Interacciones", "RenderEngine media", "Moderación", "Seguridad MVP"],
+      "impactoSiEliminaDelMVP": "Ninguno en conversión MVP; pierde marketing temporal",
+      "incluyeEnMVP": false
+    },
+    "redDeContactos": {
+      "clasificacion": "Post-MVP",
+      "versionObjetivo": "V1.2",
+      "motivoPostergacion": "ANEXO-RED-CONTACTOS define FollowGraph + ConnectionGraph; requiere Dashboards + Interacciones runtime",
+      "dependencias": ["Interacciones", "Dashboards", "Messenger opcional"],
+      "impactoSiEliminaDelMVP": "Bajo; contacto directo WhatsApp/teléfono cubre MVP; pierde red social profesional",
+      "incluyeEnMVP": false,
+      "nota": "Rechaza modelo Amigos; ConnectionGraph bidireccional = post-MVP"
+    },
+    "iaAvanzada": {
+      "clasificacion": "Post-MVP",
+      "versionObjetivo": "V1.2-V2.0",
+      "motivoPostergacion": "PLAN-MAESTRO-AGENTES-IA documental; guardrails runtime inexistentes; ANALISIS-MESSENGER-IA-SEGURIDAD",
+      "dependencias": ["Messenger", "ValidationEngine", "Seguridad MVP rate-limit IA"],
+      "impactoSiEliminaDelMVP": "Ninguno operativo; pierde asistencia SEO/moderación/soporte automatizado",
+      "incluyeEnMVP": false,
+      "subcomponentes": {
+        "SeoIAAdvisor": { "clasificacion": "MVP_recomendado", "nota": "Congelado diseño; puede ser manual admin en MVP-MIN" },
+        "AgentesMessenger": { "clasificacion": "Post-MVP", "versionObjetivo": "V1.2" },
+        "AgentesAdmin": { "clasificacion": "Futuro", "versionObjetivo": "V2.0" }
+      }
+    },
+    "internacionalizacion": {
+      "clasificacion": "Futuro",
+      "versionObjetivo": "V2.0+",
+      "motivoPostergacion": "Sin plan i18n; mercado MVP = MX nacional",
+      "dependencias": ["Multi-idioma", "Multi-país geo", "Pagos multi-país", "Legal por jurisdicción"],
+      "impactoSiEliminaDelMVP": "Ninguno para lanzamiento MX",
+      "incluyeEnMVP": false
+    },
+    "multimoneda": {
+      "clasificacion": "Futuro",
+      "versionObjetivo": "V2.0",
+      "motivoPostergacion": "politicaPrecioCongelado MXN en Pagos; cripto anexo post-nacional",
+      "dependencias": ["Pagos", "Contabilidad", "Tipo de cambio", "Cumplimiento fiscal"],
+      "impactoSiEliminaDelMVP": "Ninguno; 4 planes MXN cubren cobro nacional",
+      "incluyeEnMVP": false
+    },
+    "hreflang": {
+      "clasificacion": "Futuro",
+      "versionObjetivo": "V2.0",
+      "motivoPostergacion": "SPEC-SEO-LANDINGS marca hreflang futuro; requiere multi-idioma + URLs por locale",
+      "dependencias": ["i18n", "RenderEngine multi-locale", "Catálogo traducido"],
+      "impactoSiEliminaDelMVP": "Ninguno MX monolingüe",
+      "incluyeEnMVP": false
+    },
+    "seoInternacional": {
+      "clasificacion": "Futuro",
+      "versionObjetivo": "V2.0+",
+      "motivoPostergacion": "Landings geo MX suficientes MVP; expansión país requiere catálogo/geo/legal por mercado",
+      "dependencias": ["hreflang", "ThinContentGuard por mercado", "ADR indexación por país"],
+      "impactoSiEliminaDelMVP": "Ninguno lanzamiento nacional",
+      "incluyeEnMVP": false
+    },
+    "marketplaceFuturo": {
+      "clasificacion": "Experimental",
+      "versionObjetivo": "Futuro",
+      "motivoPostergacion": "No existe plan/spec; modelo actual = vitrina + contacto directo, no transacción marketplace",
+      "dependencias": ["Pagos escrow", "Contratos servicio", "Disputas", "Economía social", "Reputación"],
+      "impactoSiEliminaDelMVP": "Ninguno; Cariñosas no es marketplace en MVP",
+      "incluyeEnMVP": false
+    }
+  },
+  "funcionesPostergadas": {
+    "V1_1": {
+      "label": "V1.1 — Post-lanzamiento inmediato (0-3 meses post-producción)",
+      "funciones": [
+        { "id": "V11-01", "nombre": "Dashboard perfil shell completo", "motivo": "Mejora retención; no bloquea 9 capacidades", "dependencia": "RenderEngine + DASH", "impactoEliminar": "Usuarios editan vía wizard/registro; operable pero incómodo" },
+        { "id": "V11-02", "nombre": "Pasarela banners automática", "motivo": "Hoy admin confirma manual", "dependencia": "Pagos", "impactoEliminar": "Anuncios siguen con confirmación manual admin" },
+        { "id": "V11-03", "nombre": "Verificación teléfono OTP", "motivo": "Anti-abuso; no en prod hoy", "dependencia": "Seguridad MVP + SMS provider", "impactoEliminar": "Mayor riesgo spam registro" },
+        { "id": "V11-04", "nombre": "Favoritos alineados diseño", "motivo": "Existe parcial monolito", "dependencia": "Interacciones mínimo", "impactoEliminar": "Pierde retención; no bloquea contacto" },
+        { "id": "V11-05", "nombre": "Messenger MVP (solicitud + chat 1:1)", "motivo": "Alternativa a WhatsApp; SPEC congelado", "dependencia": "MSG + VE + SEC", "impactoEliminar": "Contacto externo sigue funcionando" },
+        { "id": "V11-06", "nombre": "Renovaciones automáticas + emails", "motivo": "Reduce churn manual", "dependencia": "Pagos + Contratos", "impactoEliminar": "Admin gestiona vencidos manualmente" },
+        { "id": "V11-07", "nombre": "Landings categoría estáticas", "motivo": "SEO long-tail", "dependencia": "SEO + RenderEngine", "impactoEliminar": "Home+resultados suficientes MVP" }
+      ]
+    },
+    "V1_2": {
+      "label": "V1.2 — Expansión social-monetización (3-9 meses post-producción)",
+      "funciones": [
+        { "id": "V12-01", "nombre": "Seguir (FollowGraph asimétrico)", "motivo": "Interacciones P2", "dependencia": "INT + DASH", "impactoEliminar": "Sin feed seguidos; reencuentro vía favoritos/búsqueda" },
+        { "id": "V12-02", "nombre": "Red Contactos (ConnectionGraph)", "motivo": "ANEXO-RED-CONTACTOS", "dependencia": "INT + DASH", "impactoEliminar": "Sin red profesional bidireccional" },
+        { "id": "V12-03", "nombre": "Propinas clase A (legítimas)", "motivo": "Economía social fase nacional", "dependencia": "Pagos + TipsEngine + ANEXO-AUTOPROPINAS", "impactoEliminar": "Monetización solo membresía/planes" },
+        { "id": "V12-04", "nombre": "Compartir perfil social", "motivo": "Bajo costo; ENCAJA Cariñosas", "dependencia": "RenderEngine + SEO canonical", "impactoEliminar": "Compartir URL manual" },
+        { "id": "V12-05", "nombre": "Notificaciones unificadas MVP", "motivo": "Dashboards DO2/DO6", "dependencia": "DASH + EventBus", "impactoEliminar": "Email/admin manual para alertas" },
+        { "id": "V12-06", "nombre": "Agentes IA SEO advisor runtime", "motivo": "Congelado SPEC-SEO", "dependencia": "SEO + IA", "impactoEliminar": "SEO manual admin" },
+        { "id": "V12-07", "nombre": "Videos básicos perfil", "motivo": "PLAN economía social fase nacional", "dependencia": "FieldEngine media + Storage", "impactoEliminar": "Solo fotos galería" }
+      ]
+    },
+    "V2_0": {
+      "label": "V2.0 — Plataforma social comercial madura (9-18 meses)",
+      "funciones": [
+        { "id": "V20-01", "nombre": "Stories escaparate comercial", "motivo": "Alto esfuerzo moderación", "dependencia": "Interacciones + media pipeline", "impactoEliminar": "Sin marketing temporal" },
+        { "id": "V20-02", "nombre": "Lives con moderación", "motivo": "Riesgo legal/edad alto", "dependencia": "Streaming + moderación live", "impactoEliminar": "Sin canal live" },
+        { "id": "V20-03", "nombre": "Contenido premium/exclusivo", "motivo": "PremiumContentGate", "dependencia": "Economía social + Pagos", "impactoEliminar": "Monetización planes solamente" },
+        { "id": "V20-04", "nombre": "Propinas en stories/lives", "motivo": "Requiere engines sociales", "dependencia": "TipsEngine + Stories/Lives", "impactoEliminar": "Propinas solo perfil si existen" },
+        { "id": "V20-05", "nombre": "ThemeEngine runtime unificado", "motivo": "12 temas prototipo existente", "dependencia": "TE + RE", "impactoEliminar": "Tema único plataforma" },
+        { "id": "V20-06", "nombre": "Estados/publicaciones feed", "motivo": "PLAN interacciones futuro", "dependencia": "INT completo", "impactoEliminar": "Sin feed estados" },
+        { "id": "V20-07", "nombre": "Agentes IA Messenger/Admin", "motivo": "Guardrails + costo", "dependencia": "MSG + IA + SEC", "impactoEliminar": "Soporte humano admin" }
+      ]
+    },
+    "Futuro": {
+      "label": "Futuro — Expansión internacional / visión largo plazo",
+      "funciones": [
+        { "id": "FUT-01", "nombre": "Multi-idioma i18n", "motivo": "Mercado MX primero", "dependencia": "SC + RE refactor", "impactoEliminar": "Solo español MX" },
+        { "id": "FUT-02", "nombre": "Hreflang + SEO internacional", "motivo": "Requiere i18n", "dependencia": "i18n + SEO", "impactoEliminar": "SEO solo carihub.mx" },
+        { "id": "FUT-03", "nombre": "Multimoneda / multi-país pagos", "motivo": "MXN congelado MVP", "dependencia": "Pagos + legal", "impactoEliminar": "Solo MXN" },
+        { "id": "FUT-04", "nombre": "Criptomonedas / stablecoins", "motivo": "ANEXO post-nacional regulación", "dependencia": "Pagos + KYC + legal", "impactoEliminar": "Fiat MXN único" },
+        { "id": "FUT-05", "nombre": "Marketplace transaccional", "motivo": "Experimental; cambio modelo negocio", "dependencia": "Escrow + disputas + economía", "impactoEliminar": "Modelo vitrina+contacto permanece" },
+        { "id": "FUT-06", "nombre": "Indexación selectiva perfiles adultos", "motivo": "ADR O8 futuro ThinContentGuard", "dependencia": "SEO + calibración + legal", "impactoEliminar": "Adultos noindex permanente" },
+        { "id": "FUT-07", "nombre": "Empresa multi-perfil / operadores", "motivo": "PLAN pagos empresa_futura", "dependencia": "Admin RBAC scopes", "impactoEliminar": "1 cuenta = 1 perfil MVP" }
+      ]
+    }
+  },
+  "funcionalidades": [
+    { "id": "F-001", "nombre": "Auth Firebase (email/password)", "dominio": "Registro", "clasificacion": "MVP_obligatorio", "betaPrivada": true, "betaPublica": true, "cobrar": true, "produccion": true },
+    { "id": "F-002", "nombre": "Bridge perfilId (migración)", "dominio": "Cuentas", "clasificacion": "MVP_obligatorio", "betaPrivada": true, "betaPublica": true, "cobrar": true, "produccion": true, "dependencia": "ACTA-MIGRACION" },
+    { "id": "F-003", "nombre": "Wizard registro FieldEngine", "dominio": "Registro", "clasificacion": "MVP_obligatorio", "betaPrivada": true, "betaPublica": true, "cobrar": true, "produccion": true },
+    { "id": "F-004", "nombre": "Verificación email", "dominio": "Registro", "clasificacion": "MVP_obligatorio", "betaPrivada": true, "betaPublica": true, "cobrar": true, "produccion": true },
+    { "id": "F-005", "nombre": "Verificación INE/selfie", "dominio": "Registro", "clasificacion": "MVP_obligatorio", "betaPrivada": true, "betaPublica": true, "cobrar": true, "produccion": true },
+    { "id": "F-006", "nombre": "Verificación teléfono OTP", "dominio": "Registro", "clasificacion": "MVP_recomendado", "versionPostergada": "V1.1", "motivoPostergacion": "No existe en prod; mejora anti-abuso", "dependencia": "SMS provider", "impactoEliminar": "Riesgo spam registro elevado" },
+    { "id": "F-007", "nombre": "Estados revisión publicación", "dominio": "Registro", "clasificacion": "MVP_obligatorio", "betaPrivada": true, "betaPublica": true, "cobrar": true, "produccion": true },
+    { "id": "F-008", "nombre": "Publicación perfil activo", "dominio": "App Pública", "clasificacion": "MVP_obligatorio", "betaPrivada": true, "betaPublica": true, "cobrar": true, "produccion": true },
+    { "id": "F-009", "nombre": "Home indexable", "dominio": "App Pública", "clasificacion": "MVP_obligatorio", "betaPublica": true, "cobrar": true, "produccion": true },
+    { "id": "F-010", "nombre": "Resultados server-side + noindex", "dominio": "App Pública", "clasificacion": "MVP_obligatorio", "betaPublica": true, "cobrar": true, "produccion": true },
+    { "id": "F-011", "nombre": "Perfil público (slug/id)", "dominio": "App Pública", "clasificacion": "MVP_obligatorio", "betaPrivada": true, "betaPublica": true, "cobrar": true, "produccion": true },
+    { "id": "F-012", "nombre": "RenderEngine head básico", "dominio": "Arquitectura", "clasificacion": "MVP_obligatorio", "betaPublica": true, "cobrar": true, "produccion": true },
+    { "id": "F-013", "nombre": "URL canónica /perfil/{slug}", "dominio": "SEO", "clasificacion": "MVP_recomendado", "betaPublica": true, "produccion": true, "motivoPostergacion": "id funciona beta privada", "impactoEliminar": "SEO subóptimo; funcional con ?id=" },
+    { "id": "F-014", "nombre": "robots.txt + sitemap.xml", "dominio": "SEO", "clasificacion": "MVP_obligatorio", "betaPublica": true, "produccion": true },
+    { "id": "F-015", "nombre": "PrivacyGuard adultos noindex", "dominio": "SEO", "clasificacion": "MVP_obligatorio", "betaPublica": true, "produccion": true },
+    { "id": "F-016", "nombre": "Contacto externo WhatsApp/teléfono", "dominio": "Contacto", "clasificacion": "MVP_obligatorio", "betaPrivada": true, "betaPublica": true, "cobrar": true, "produccion": true, "nota": "Satisface recibir contactos sin Messenger" },
+    { "id": "F-017", "nombre": "Puerta 18+ / anti-bot Turnstile", "dominio": "Seguridad", "clasificacion": "MVP_obligatorio", "betaPrivada": true, "betaPublica": true, "cobrar": true, "produccion": true },
+    { "id": "F-018", "nombre": "ValidationEngine server-side", "dominio": "Arquitectura", "clasificacion": "MVP_obligatorio", "betaPublica": true, "cobrar": true, "produccion": true },
+    { "id": "F-019", "nombre": "Firestore rules alineadas", "dominio": "Seguridad", "clasificacion": "MVP_obligatorio", "betaPublica": true, "cobrar": true, "produccion": true },
+    { "id": "F-020", "nombre": "Pasarela pagos Stripe/MP", "dominio": "Monetización", "clasificacion": "MVP_obligatorio", "cobrar": true, "produccion": true },
+    { "id": "F-021", "nombre": "Planes 4 tiers MXN", "dominio": "Monetización", "clasificacion": "MVP_obligatorio", "cobrar": true, "produccion": true },
+    { "id": "F-022", "nombre": "Contratos_perfiles + precio congelado", "dominio": "Monetización", "clasificacion": "MVP_obligatorio", "cobrar": true, "produccion": true },
+    { "id": "F-023", "nombre": "Webhook pago → activar perfil", "dominio": "Monetización", "clasificacion": "MVP_obligatorio", "cobrar": true, "produccion": true },
+    { "id": "F-024", "nombre": "Admin moderación perfiles", "dominio": "Admin", "clasificacion": "MVP_obligatorio", "betaPrivada": true, "betaPublica": true, "cobrar": true, "produccion": true },
+    { "id": "F-025", "nombre": "Admin conciliación pagos", "dominio": "Admin", "clasificacion": "MVP_obligatorio", "cobrar": true, "produccion": true },
+    { "id": "F-026", "nombre": "Admin solicitudes anuncios", "dominio": "Admin", "clasificacion": "MVP_obligatorio", "betaPrivada": true, "betaPublica": true, "cobrar": true, "produccion": true },
+    { "id": "F-027", "nombre": "Inventario banners rotación", "dominio": "Publicidad", "clasificacion": "MVP_obligatorio", "produccion": true },
+    { "id": "F-028", "nombre": "RBAC admin multi-usuario", "dominio": "Admin", "clasificacion": "MVP_recomendado", "betaPublica": true, "produccion": true, "motivoPostergacion": "Beta privada puede 1 admin", "impactoEliminar": "SPOF operador único" },
+    { "id": "F-029", "nombre": "Recuperación contraseña", "dominio": "Registro", "clasificacion": "MVP_obligatorio", "betaPublica": true, "produccion": true },
+    { "id": "F-030", "nombre": "Dashboard perfil MVP", "dominio": "Dashboards", "clasificacion": "MVP_recomendado", "versionPostergada": "V1.1", "produccion": true, "motivoPostergacion": "Wizard+admin cubren beta", "impactoEliminar": "UX edición degradada" },
+    { "id": "F-031", "nombre": "Denuncias + moderación", "dominio": "Admin", "clasificacion": "MVP_obligatorio", "betaPublica": true, "produccion": true },
+    { "id": "F-032", "nombre": "Renovaciones/vencimientos alertas", "dominio": "Monetización", "clasificacion": "MVP_recomendado", "versionPostergada": "V1.1", "produccion": true, "impactoEliminar": "Gestión manual vencidos" },
+    { "id": "F-033", "nombre": "Messenger solicitud + chat", "dominio": "Messenger", "clasificacion": "Post-MVP", "versionPostergada": "V1.1", "motivoPostergacion": "Contacto externo cubre MVP; SPEC congelado alto esfuerzo", "dependencia": "MSG+VE+SEC", "impactoEliminar": "WhatsApp/teléfono suficiente" },
+    { "id": "F-034", "nombre": "Favoritos sincronizados", "dominio": "Interacciones", "clasificacion": "Post-MVP", "versionPostergada": "V1.1", "motivoPostergacion": "Retención; no contacto", "dependencia": "INT", "impactoEliminar": "Sin lista favoritos persistente cross-device" },
+    { "id": "F-035", "nombre": "Seguir (FollowGraph)", "dominio": "Interacciones", "clasificacion": "Post-MVP", "versionPostergada": "V1.2", "motivoPostergacion": "PLAN interacciones P2", "dependencia": "INT+DASH", "impactoEliminar": "Sin feed seguidos" },
+    { "id": "F-036", "nombre": "Red Contactos (ConnectionGraph)", "dominio": "Interacciones", "clasificacion": "Post-MVP", "versionPostergada": "V1.2", "motivoPostergacion": "ANEXO-RED-CONTACTOS", "dependencia": "INT+DASH", "impactoEliminar": "Sin red profesional" },
+    { "id": "F-037", "nombre": "Propinas perfil", "dominio": "Economía Social", "clasificacion": "Post-MVP", "versionPostergada": "V1.2", "motivoPostergacion": "TipsEngine + fiscal + antifraude", "dependencia": "Pagos+ES+ANEXO-AUTOPROPINAS", "impactoEliminar": "Monetización solo planes" },
+    { "id": "F-038", "nombre": "Economía Social completa", "dominio": "Economía Social", "clasificacion": "Post-MVP", "versionPostergada": "V1.2-V2.0", "motivoPostergacion": "Capa entera post-Pagos+Interacciones", "dependencia": "ES+INT+PAY", "impactoEliminar": "Sin premium social/repost/add-ons" },
+    { "id": "F-039", "nombre": "Compartir perfil social", "dominio": "Interacciones", "clasificacion": "Post-MVP", "versionPostergada": "V1.2", "motivoPostergacion": "Bajo valor vs URL copy MVP", "dependencia": "INT+SEO", "impactoEliminar": "Copy link manual" },
+    { "id": "F-040", "nombre": "Contenido premium/exclusivo", "dominio": "Economía Social", "clasificacion": "Post-MVP", "versionPostergada": "V2.0", "motivoPostergacion": "PremiumContentGate", "dependencia": "ES+Pagos", "impactoEliminar": "Todo perfil visible según plan" },
+    { "id": "F-041", "nombre": "Stories", "dominio": "Interacciones", "clasificacion": "Futuro", "versionPostergada": "V2.0", "motivoPostergacion": "Engine inexistente", "dependencia": "INT+media", "impactoEliminar": "Sin escaparate temporal" },
+    { "id": "F-042", "nombre": "Lives", "dominio": "Interacciones", "clasificacion": "Futuro", "versionPostergada": "V2.0", "motivoPostergacion": "Moderación live + riesgo", "dependencia": "Streaming+SEC", "impactoEliminar": "Sin live comercial" },
+    { "id": "F-043", "nombre": "Publicaciones feed", "dominio": "Interacciones", "clasificacion": "Futuro", "versionPostergada": "V2.0", "motivoPostergacion": "UGC pipeline", "dependencia": "INT", "impactoEliminar": "Sin feed publicaciones" },
+    { "id": "F-044", "nombre": "Propinas stories/lives", "dominio": "Economía Social", "clasificacion": "Futuro", "versionPostergada": "V2.0", "motivoPostergacion": "Requiere stories/lives", "dependencia": "TipsEngine+Stories/Lives", "impactoEliminar": "N/A sin stories/lives" },
+    { "id": "F-045", "nombre": "Agentes IA avanzados", "dominio": "IA", "clasificacion": "Post-MVP", "versionPostergada": "V1.2-V2.0", "motivoPostergacion": "Guardrails runtime", "dependencia": "IA+MSG+SEC", "impactoEliminar": "Operación manual" },
+    { "id": "F-046", "nombre": "ThemeEngine 12 temas", "dominio": "Diseño", "clasificacion": "Post-MVP", "versionPostergada": "V2.0", "motivoPostergacion": "Prototipo no producción", "dependencia": "TE+RE", "impactoEliminar": "Tema único plataforma" },
+    { "id": "F-047", "nombre": "Landings SEO dinámicas", "dominio": "SEO", "clasificacion": "Post-MVP", "versionPostergada": "V1.1-V1.2", "motivoPostergacion": "ThinContentGuard calibración", "dependencia": "SEO+RE+CAT", "impactoEliminar": "SEO Home+resultados only" },
+    { "id": "F-048", "nombre": "Criptomonedas pagos", "dominio": "Monetización", "clasificacion": "Futuro", "versionPostergada": "Futuro", "motivoPostergacion": "Regulación", "dependencia": "ANEXO-CRIPTOMONEDAS", "impactoEliminar": "MXN fiat único" },
+    { "id": "F-049", "nombre": "Multimoneda", "dominio": "i18n", "clasificacion": "Futuro", "versionPostergada": "Futuro", "motivoPostergacion": "MXN congelado", "dependencia": "Pagos+legal", "impactoEliminar": "Solo pesos MX" },
+    { "id": "F-050", "nombre": "Multi-idioma i18n", "dominio": "i18n", "clasificacion": "Futuro", "versionPostergada": "Futuro", "motivoPostergacion": "Mercado MX", "dependencia": "SC+RE", "impactoEliminar": "Español único" },
+    { "id": "F-051", "nombre": "Hreflang", "dominio": "i18n", "clasificacion": "Futuro", "versionPostergada": "Futuro", "motivoPostergacion": "Requiere i18n", "dependencia": "i18n+SEO", "impactoEliminar": "Sin alternates locale" },
+    { "id": "F-052", "nombre": "SEO internacional multi-país", "dominio": "SEO", "clasificacion": "Futuro", "versionPostergada": "Futuro", "motivoPostergacion": "Expansión geo", "dependencia": "hreflang+catálogo", "impactoEliminar": "MX only" },
+    { "id": "F-053", "nombre": "Marketplace transaccional", "dominio": "Monetización", "clasificacion": "Experimental", "versionPostergada": "Futuro", "motivoPostergacion": "Cambio modelo; sin spec", "dependencia": "Escrow+disputas", "impactoEliminar": "Modelo vitrina permanece" },
+    { "id": "F-054", "nombre": "Pasarela banners automática", "dominio": "Publicidad", "clasificacion": "MVP_recomendado", "versionPostergada": "V1.1", "produccion": true, "motivoPostergacion": "Manual admin viable MVP", "impactoEliminar": "Confirmación manual pagos banner" },
+    { "id": "F-055", "nombre": "Extracción Shared/Core módulo", "dominio": "Arquitectura", "clasificacion": "MVP_obligatorio", "betaPrivada": true, "motivoPostergacion": null, "nota": "Puede ser extracción mínima inline→módulo" },
+    { "id": "F-056", "nombre": "Catálogo 1.0.0 runtime", "dominio": "Arquitectura", "clasificacion": "MVP_obligatorio", "betaPrivada": true, "betaPublica": true, "produccion": true },
+    { "id": "F-057", "nombre": "Estados/publicaciones", "dominio": "Interacciones", "clasificacion": "Futuro", "versionPostergada": "V2.0", "motivoPostergacion": "Feed social no MVP", "dependencia": "INT", "impactoEliminar": "Sin muro estados" },
+    { "id": "F-058", "nombre": "Notificaciones push/email unificadas", "dominio": "Dashboards", "clasificacion": "Post-MVP", "versionPostergada": "V1.2", "motivoPostergacion": "EventBus no runtime", "dependencia": "DASH", "impactoEliminar": "Alertas admin/email básico" },
+    { "id": "F-059", "nombre": "CFDI facturación automática", "dominio": "Monetización", "clasificacion": "Post-MVP", "versionPostergada": "V1.2", "motivoPostergacion": "Fiscal complejo", "dependencia": "Pagos+PAC", "impactoEliminar": "Facturación manual/contador" },
+    { "id": "F-060", "nombre": "Autopropinas detección clase B/C/D", "dominio": "Economía Social", "clasificacion": "Post-MVP", "versionPostergada": "V1.2", "motivoPostergacion": "Solo relevante con propinas", "dependencia": "ANEXO-AUTOPROPINAS+Propinas", "impactoEliminar": "N/A sin propinas" }
+  ],
+  "resumenClasificacion": {
+    "MVP_obligatorio": 29,
+    "MVP_recomendado": 7,
+    "Post-MVP": 14,
+    "Futuro": 9,
+    "Experimental": 1,
+    "total": 60
+  },
+  "metricasReduccion": {
+    "baseline": "Visión completa corpus (92 módulos MATRIZ-MADUREZ + roadmap P0-P3)",
+    "mvpMin": "MVP-MIN 28 módulos runtime + 29 funciones obligatorias",
+    "reduccionComplejidad": {
+      "modulos": { "visionCompleta": 92, "mvpMin": 28, "reduccionPorcentaje": 70, "formula": "(92-28)/92" },
+      "funcionalidades": { "visionCompleta": 60, "mvpObligatorio": 29, "reduccionPorcentaje": 52, "formula": "(60-29)/60 clasificadas; 29/60=48% scope MVP" },
+      "capasCongeladasRequeridas": { "visionCompleta": 10, "mvpMin": 7, "nota": "MVP-MIN requiere SC, FE, VE, SEC, CAT, CU, SEO parcial; pospone MSG, DASH completo, RE completo" },
+      "dependenciasRuntime": { "visionCompleta": 67, "mvpMin": 22, "reduccionPorcentaje": 67 }
+    },
+    "reduccionTiempoEstimado": {
+      "visionCompletaSemanas": "80-120",
+      "mvpMinSemanas": "16-22",
+      "reduccionPorcentaje": 78,
+      "nota": "Estimación documental P0 foundation vs roadmap completo P0-P3",
+      "desgloseMvpMinSemanas": {
+        "migracionPerfilId": 3,
+        "fieldEngineValidationRuntime": 4,
+        "renderEngineSeoBasico": 3,
+        "pagosPasarelaContratos": 4,
+        "adminPagosAnuncios": 2,
+        "seguridadGatesRules": 2,
+        "integracionQA": 2
+      }
+    },
+    "reduccionRiesgoLanzamiento": {
+      "visionCompletaRiesgosCriticos": 10,
+      "mvpMinRiesgosCriticos": 4,
+      "reduccionPorcentaje": 60,
+      "riesgosEliminadosDelScope": [
+        "IA sin guardrails",
+        "Propinas fraude/autopropina",
+        "Cripto regulación",
+        "Lives moderación contenido adulto",
+        "Messenger AML/fraude",
+        "Marketplace disputas",
+        "i18n/hreflang inconsistencia",
+        "Red contactos abuso/graph"
+      ],
+      "riesgosResidualesMvp": [
+        "Filtrado resultados (mitigado server-side P0)",
+        "Gap perfilId (mitigado bridge P0)",
+        "Pagos fiscal básico (manual CFDI V1.2)",
+        "Admin SPOF si no RBAC V1.1"
+      ],
+      "indiceRiesgoRelativo": { "visionCompleta": 100, "mvpMin": 38, "reduccionPorcentaje": 62 }
+    }
+  },
+  "veredicto": {
+    "mvpMinimoFactible": true,
+    "nombre": "MVP-MIN Cariñosas Nacional",
+    "sinDependenciasFuturas": true,
+    "contactoVia": "externo_whatsapp_telefono",
+    "noRequiere": ["Messenger", "Economía Social", "Propinas", "Cripto", "Lives", "Stories", "Red Contactos", "IA avanzada", "i18n", "Marketplace"],
+    "recomendacion": "Lanzar MVP-MIN con 29 funciones obligatorias; añadir 7 recomendadas antes de beta pública nacional; postergar 24 funciones a V1.1-V2.0/Futuro"
+  }
+}

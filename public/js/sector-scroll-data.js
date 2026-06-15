@@ -1,0 +1,197 @@
+(function () {
+  'use strict';
+
+  /** Primera lista (profesionales / independientes) por sector — para los 6 cuadritos rotativos */
+  window.CARIHUB_SECTOR_SCROLL_ITEMS = {
+    adultos: [
+      'Acompañantes independientes',
+      'Modelos independientes',
+      'Edecanes',
+      'Strippers',
+      'Bailarines exóticos',
+      'Creadores de contenido',
+      'Masajistas para adultos',
+      'Dominatrix profesionales',
+      'Artistas para despedidas',
+      'Modelos webcam',
+      'Parejas independientes',
+      'Influencers para adultos',
+      'Animadores para despedidas',
+      'Performers fetichistas',
+      'Cosplayers para eventos privados',
+      'Presentadores para eventos exclusivos',
+      'Artistas de entretenimiento para adultos'
+    ],
+    bienestar: [
+      'Tarotistas',
+      'Astrólogos',
+      'Lectores de cartas',
+      'Coaches espirituales',
+      'Terapeutas holísticos',
+      'Reiki',
+      'Sanadores energéticos',
+      'Guías de meditación',
+      'Numerólogos',
+      'Canalizadores',
+      'Terapeutas de cristales',
+      'Instructores mindfulness',
+      'Facilitadores espirituales',
+      'Consejeros holísticos',
+      'Terapeutas de sonido',
+      'Practicantes de aromaterapia'
+    ],
+    salud: [
+      'Médicos generales',
+      'Psicólogos',
+      'Nutriólogos',
+      'Fisioterapeutas',
+      'Entrenadores personales',
+      'Enfermeros particulares',
+      'Cuidadores',
+      'Quiroprácticos',
+      'Paramédicos',
+      'Masajistas terapéuticos',
+      'Terapeutas ocupacionales',
+      'Coaches de salud',
+      'Instructores fitness',
+      'Acompañantes para adultos mayores',
+      'Técnicos en rehabilitación'
+    ],
+    profesionales: [
+      'Abogados',
+      'Contadores',
+      'Arquitectos',
+      'Ingenieros',
+      'Diseñadores',
+      'Consultores',
+      'Traductores',
+      'Peritos',
+      'Gestores',
+      'Asesores financieros',
+      'Asesores fiscales',
+      'Mediadores',
+      'Auditores independientes',
+      'Notificadores'
+    ],
+    automotriz: [
+      'Mecánicos a domicilio',
+      'Electromecánicos',
+      'Pintores automotrices',
+      'Choferes privados',
+      'Instaladores de audio',
+      'Detalladores',
+      'Técnicos en baterías',
+      'Técnicos en aire acondicionado automotriz',
+      'Lavadores móviles',
+      'Ajustadores independientes'
+    ],
+    hogar: [
+      'Albañiles',
+      'Plomeros',
+      'Electricistas',
+      'Carpinteros',
+      'Soldadores',
+      'Pintores',
+      'Jardineros',
+      'Técnicos en clima',
+      'Herreros',
+      'Impermeabilizadores',
+      'Instaladores de paneles solares',
+      'Técnicos en cámaras de seguridad',
+      'Instaladores de pisos',
+      'Instaladores de cocinas'
+    ],
+    comercio: [
+      'Revendedores',
+      'Comerciantes',
+      'Distribuidores independientes',
+      'Vendedores por catálogo',
+      'Emprendedores',
+      'Importadores independientes',
+      'Vendedores ambulantes',
+      'Comisionistas',
+      'Representantes comerciales'
+    ],
+    'bienes-raices': [
+      'Asesores inmobiliarios',
+      'Corredores independientes',
+      'Administradores de propiedades',
+      'Promotores inmobiliarios',
+      'Valuadores'
+    ],
+    eventos: [
+      'DJs',
+      'Cantantes',
+      'Músicos',
+      'Fotógrafos',
+      'Videógrafos',
+      'Maquillistas',
+      'Animadores',
+      'Organizadores',
+      'Maestros de ceremonia',
+      'Magos',
+      'Comediantes',
+      'Locutores'
+    ],
+    transporte: [
+      'Conductores',
+      'Repartidores',
+      'Fleteros',
+      'Mensajeros',
+      'Mudanceros',
+      'Operadores de carga',
+      'Conductores ejecutivos'
+    ],
+    educacion: [
+      'Maestros particulares',
+      'Tutores',
+      'Instructores',
+      'Coaches',
+      'Capacitadores',
+      'Asesores académicos',
+      'Profesores de idiomas',
+      'Instructores deportivos'
+    ],
+    tecnologia: [
+      'Programadores',
+      'Diseñadores web',
+      'Diseñadores gráficos',
+      'Editores de video',
+      'Community Managers',
+      'Especialistas SEO',
+      'Técnicos en computación',
+      'Especialistas en IA',
+      'Desarrolladores móviles',
+      'Analistas de datos'
+    ],
+    restaurantes: [
+      'Chefs privados',
+      'Cocineros',
+      'Reposteros',
+      'Parrilleros',
+      'Bartenders',
+      'Food trucks',
+      'Banqueteros',
+      'Meseros para eventos'
+    ],
+    mascotas: [
+      'Paseadores',
+      'Entrenadores caninos',
+      'Groomers',
+      'Cuidadores',
+      'Adiestradores',
+      'Pet sitters',
+      'Paseadores especializados'
+    ],
+    industria: [
+      'Técnicos industriales',
+      'Auditores',
+      'Consultores empresariales',
+      'Supervisores de calidad',
+      'Reclutadores independientes',
+      'Técnicos en maquinaria',
+      'Inspectores',
+      'Asesores industriales'
+    ]
+  };
+})();

@@ -1,0 +1,496 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "$id": "https://carihub.app/schemas/acta-congelamiento-registro-cuenta.json",
+  "tipo": "ACTA_CONGELAMIENTO_REGISTRO_CUENTA",
+  "titulo": "Acta formal de congelamiento — Registro-Cuenta CariHub",
+  "versionActa": "1.0.0",
+  "fechaCongelamiento": "2026-06-11",
+  "fechaActualizacion": "2026-06-11",
+  "fechaAprobacionSpec": "2026-06-11",
+  "estadoActa": "CONGELADO",
+  "veredictoFinal": "PASS",
+  "procedeCongelamiento": true,
+  "modo": "Solo validación y documentación — sin runtime/carpetas/mover/Firestore/deploy/commit; no modifica documentos existentes",
+
+  "autorizacion": {
+    "estado": "APROBADA",
+    "autorizadoPor": "product owner / usuario CariHub",
+    "fechaAutorizacion": "2026-06-11",
+    "alcance": "Baseline de diseño Registro-Cuenta v1.0.0 — capa identidad/onboarding; referencia obligatoria para implementación futura de registro, autenticación, perfiles, negocios, profesionales, anunciantes, verificación, publicación y dashboard mínimo operativo",
+    "artefactosAprobados": [
+      "scripts/SPEC-REGISTRO-CUENTA.md",
+      "scripts/SPEC-REGISTRO-CUENTA.json",
+      "scripts/fixtures-registro-cuenta-golden.json",
+      "scripts/AUDITORIA-SPEC-REGISTRO-CUENTA.md",
+      "scripts/AUDITORIA-SPEC-REGISTRO-CUENTA.json",
+      "scripts/ACTA-CONGELAMIENTO-REGISTRO-CUENTA.json",
+      "scripts/ACTA-CONGELAMIENTO-REGISTRO-CUENTA.md"
+    ],
+    "documentosFuente": [
+      "scripts/PLAN-MAESTRO-REGISTRO-CUENTA.json",
+      "scripts/SPEC-REGISTRO-CUENTA.json",
+      "scripts/AUDITORIA-SPEC-REGISTRO-CUENTA.json",
+      "scripts/fixtures-registro-cuenta-golden.json",
+      "scripts/ACTA-MIGRACION-USUARIOS-PERFILES.json",
+      "scripts/ANALISIS-REVISION-MVP-DASHBOARD.json",
+      "scripts/AUDITORIA-MAESTRA-CARIHUB.json",
+      "scripts/MATRIZ-MADUREZ-CARIHUB.json",
+      "scripts/MATRIZ-DEPENDENCIAS-CARIHUB.json",
+      "scripts/MATRIZ-MVP-CARIHUB.json",
+      "scripts/ROADMAP-MAESTRO-CARIHUB.json",
+      "scripts/ACTA-CONGELAMIENTO-P0-RUNTIME-FOUNDATION.json",
+      "scripts/ACTA-CONGELAMIENTO-SHARED-CORE.json",
+      "scripts/ACTA-CONGELAMIENTO-RENDERENGINE.json",
+      "scripts/ACTA-CONGELAMIENTO-FIELDENGINE.json",
+      "scripts/ACTA-CONGELAMIENTO-VALIDATIONENGINE.json",
+      "scripts/ACTA-CONGELAMIENTO-SEGURIDAD.json",
+      "scripts/ACTA-CONGELAMIENTO-DASHBOARDS.json",
+      "scripts/ACTA-CONGELAMIENTO-CUENTAS.json",
+      "scripts/ACTA-CONGELAMIENTO-SEO-LANDINGS.json",
+      "scripts/ACTA-CONGELAMIENTO-CATALOGO.json"
+    ]
+  },
+
+  "versionRegistroCuenta": {
+    "id": "registro-cuenta-2026-06-11",
+    "semver": "1.0.0",
+    "specVersion": "1.0.0",
+    "versionAnterior": null,
+    "cierraGap": "GAP-SPEC-REG"
+  },
+
+  "veredictoCapaCongelada": {
+    "respuestaGlobal": "PARCIALMENTE",
+    "disenoDocumental": { "congelado": true, "respuesta": "SÍ", "detalle": "SPEC+fixtures+políticas v1.0.0 = fuente oficial de verdad diseño" },
+    "runtimeProduccion": { "congelado": false, "respuesta": "NO", "detalle": "Runtime, Firestore, deploy, migración ejecución requieren autorización explícita posterior" },
+    "justificacion": "Auditoría PASS 90% sin bloqueantes; SPEC+fixtures completos; dependencias compatibles; pero runtime no autorizado, migración TBD_PRE_RUNTIME, validador script pendiente, recuperación contraseña prod faltante"
+  },
+
+  "metricasVeredicto": {
+    "completitudPorcentaje": 90,
+    "madurezDisenoPorcentaje": 88,
+    "readinessConstruccionPorcentaje": 76,
+    "readinessMvpPorcentaje": 70,
+    "readinessProduccionPorcentaje": 30
+  },
+
+  "alcanceCongelado": {
+    "registro": {
+      "usuario": ["visitante", "adulto", "independiente", "profesionista", "empresa", "anunciante"],
+      "perfil": ["persona_acompanante", "modelo", "masajista", "persona_independiente", "profesionista"],
+      "negocio": ["hotel", "motel", "spa", "sex_shop", "restaurante", "bar", "antro", "local_comercial"],
+      "profesional": ["abogado", "contador", "medico", "cirujano", "fotografo", "terapeuta"],
+      "anunciante": ["banner_home", "banner_resultados", "banner_perfil", "sinPerfilPublicoOpcional"]
+    },
+    "cuenta": ["login", "logout", "recuperacion_password", "cambio_password", "verificacion_email", "sesiones", "bloqueo", "reactivacion"],
+    "perfil": ["creacion_wizard", "edicion", "publicacion_snapshot", "renovacion_delegada", "suspension", "archivado", "eliminacion_logica"],
+    "verificacion": ["correo", "ine_frente", "ine_reverso", "selfie_fecha", "cedula_profesional_condicional", "revision_admin", "observacionesAdmin"],
+    "dashboardMinimo": {
+      "enRegistro": ["DM-01 editar información", "DM-02 editar fotografías"],
+      "enDashboard": ["DM-03 estado", "DM-04 vigencia", "DM-05 pagos", "DM-06 renovación", "DM-07 estadísticas", "DM-08 verificación", "DM-09 contacto", "DM-10 observaciones"]
+    },
+    "publicacion": ["snapshotAlPublicar", "actualizacionPendiente", "revision_post_pago", "PrivacyGuard"],
+    "bridge": ["perfilId=usuarioId MVP", "perfiles/{perfilId} fuente verdad"],
+    "matrices": 12,
+    "contratos": 9,
+    "apiLogica": 8,
+    "rutas": ["/cuenta/*", "/registro/*", "noindex,nofollow todas"]
+  },
+
+  "alcanceNoCongelado": {
+    "runtime": "Implementación runtime Registro/Cuenta — NO autorizada",
+    "firestore": "Colecciones perfiles/usuarios runtime — NO autorizadas",
+    "migracionEjecucion": "ACTA-MIGRACION fase ejecución — TBD_PRE_RUNTIME",
+    "validador": "validar-spec-registro-cuenta.mjs — pendiente (RC-AM-02)",
+    "telefonoOtp": "Verificación teléfono OTP — FUTURO_V1.1",
+    "rfcDomicilio": "RFC, comprobante domicilio, razón social — fuera MVP congelado",
+    "multiPerfilOperativo": "usuario.perfilIds[] operativo — futuro; MVP 1:1",
+    "eliminacionFisica": "Eliminación física documentos/cuenta — futuro legal+admin",
+    "dispositivosConfianza": "Lista dispositivos — post-MVP"
+  },
+
+  "dependenciasCongeladas": {
+    "sharedCore": { "version": "shared-core-2026-06-10", "semver": "1.0.0", "acta": "scripts/ACTA-CONGELAMIENTO-SHARED-CORE.json", "rol": "initFirebase, clients, catalog, geo", "contradicciones": "ninguna" },
+    "fieldEngine": { "version": "fieldengine-2026-06-10", "semver": "1.0.1", "acta": "scripts/ACTA-CONGELAMIENTO-FIELDENGINE.json", "rol": "resolveRegistrationSchema, snapshotAlPublicar, securityGates", "contradicciones": "ninguna" },
+    "validationEngine": { "version": "validationengine-2026-06-10", "semver": "1.1.0", "acta": "scripts/ACTA-CONGELAMIENTO-VALIDATIONENGINE.json", "rol": "guardar_borrador, enviar_revision, subir_verificacion_*, editar_perfil", "contradicciones": "ninguna" },
+    "renderEngine": { "version": "renderengine-2026-06-10", "semver": "1.0.0", "acta": "scripts/ACTA-CONGELAMIENTO-RENDERENGINE.json", "rol": "consume SnapshotPublicacion; PrivacyGuard; no rutas privadas", "contradicciones": "ninguna" },
+    "seguridadMvp": { "version": "seguridad-2026-06-10", "semver": "1.0.0", "acta": "scripts/ACTA-CONGELAMIENTO-SEGURIDAD.json", "rol": "Turnstile, rate limits, estadoSeguridad, gates adultos", "contradicciones": "ninguna" },
+    "dashboards": { "version": "dashboards-2026-06-10", "semver": "1.0.0", "acta": "scripts/ACTA-CONGELAMIENTO-DASHBOARDS.json", "rol": "DM-03..10 lectura; CTA editar → Registro", "contradicciones": "ninguna" },
+    "seoLandings": { "version": "seo-landings-2026-06-11", "semver": "1.0.0", "acta": "scripts/ACTA-CONGELAMIENTO-SEO-LANDINGS.json", "rol": "/cuenta /registro noindex; snapshot público vía RE", "contradicciones": "ninguna" },
+    "cuentas": { "version": "cuentas-2026-06-10", "semver": "1.0.0", "acta": "scripts/ACTA-CONGELAMIENTO-CUENTAS.json", "rol": "hub usuarios/{uid}, punteros, roles; CU=identidad, RC=flujos", "contradicciones": "ninguna" },
+    "catalogo": { "version": "catalogo-2026-06-10", "semver": "1.0.0", "acta": "scripts/ACTA-CONGELAMIENTO-CATALOGO.json", "rol": "462 subcategorías → formularioId", "contradicciones": "ninguna" },
+    "admin": { "plan": "PLAN-MAESTRO-ADMIN v1.0.0", "rol": "aprobar/rechazar, observaciones, moderación verificación", "contradicciones": "ninguna" },
+    "pagos": { "plan": "PLAN-MAESTRO-PAGOS-CONTRATOS v1.0.0", "rol": "renovación, webhook activación; Registro delega, no duplica", "contradicciones": "ninguna" },
+    "privacyGuard": { "fuente": "RenderEngine + SPEC-REGISTRO-CUENTA clasificacionDatos", "rol": "docs verificación nunca en snapshot público", "contradicciones": "ninguna" }
+  },
+
+  "fronterasModulo": {
+    "registroCuenta": "Auth, wizard, verificación, edición, estados pre-publicación, trigger snapshot",
+    "actaCuentas": "Hub identidad usuarioId, roles, punteros — no flujos wizard",
+    "dashboards": "Lectura estado; edición delegada a Registro DM-01/02",
+    "fieldEngine": "Consume; no reimplementa campos",
+    "validationEngine": "Consume; no reimplementa gates",
+    "renderEngine": "Recibe snapshot; no usado en rutas privadas"
+  },
+
+  "contratosCongeladosDetalle": {
+    "Usuario": { "version": "1.0.0", "madurez": "alta", "estabilidad": "congelada_diseno", "extensibilidad": "perfilIds[] futuro", "compatibilidadFutura": "multi-perfil, wallet puntero, i18n locale en hub" },
+    "Cuenta": { "version": "1.0.0", "madurez": "alta", "estabilidad": "congelada_diseno", "extensibilidad": "telefonoVerificado, dispositivosConfianza", "compatibilidadFutura": "OTP V1.1, MFA futuro" },
+    "Perfil": { "version": "1.0.0", "madurez": "alta", "estabilidad": "congelada_diseno", "extensibilidad": "campos FieldEngine dinámicos", "compatibilidadFutura": "premium flags, economía social metadata" },
+    "Negocio": { "version": "1.0.0", "madurez": "alta", "estabilidad": "congelada_diseno", "extensibilidad": "extends Perfil", "compatibilidadFutura": "LocalBusiness schema, multi-sucursal futuro" },
+    "Profesional": { "version": "1.0.0", "madurez": "alta", "estabilidad": "congelada_diseno", "extensibilidad": "cedulaProfesional", "compatibilidadFutura": "verificación ampliada vía ADR" },
+    "Anunciante": { "version": "1.0.0", "madurez": "alta", "estabilidad": "congelada_diseno", "extensibilidad": "perfilPublicoId opcional", "compatibilidadFutura": "multi-marca anuncianteId ≠ usuarioId" },
+    "DocumentoVerificacion": { "version": "1.0.0", "madurez": "alta", "estabilidad": "congelada_diseno", "extensibilidad": "nuevos tipos doc vía ADR", "compatibilidadFutura": "KYC ampliado SPEC futura" },
+    "EstadoPerfil": { "version": "1.0.0", "madurez": "alta", "estabilidad": "congelada_diseno", "extensibilidad": "config-estados-revision-publicacion", "compatibilidadFutura": "nuevos estados vía schema versionado" },
+    "SnapshotPublicacion": { "version": "1.0.0", "madurez": "alta", "estabilidad": "congelada_diseno", "extensibilidad": "version increment", "compatibilidadFutura": "RenderEngine, SEO, i18n slug" }
+  },
+
+  "contratosCongelados": [
+    "Usuario", "Cuenta", "Perfil", "Negocio", "Profesional", "Anunciante",
+    "DocumentoVerificacion", "EstadoPerfil", "SnapshotPublicacion"
+  ],
+
+  "matricesCongeladas": [
+    "tipoRegistroCampos", "tipoRegistroDocumentos", "rolPermisos", "estadoAcciones",
+    "flujoEventos", "campoClasificacion", "pantallaRuta", "errorMensaje",
+    "documentoValidacion", "cambioRevisionRequerida", "usuarioPerfil", "perfilPublicacion"
+  ],
+
+  "reglasCongeladas": [
+    "Registro/Cuenta = identidad y onboarding; NO renderiza superficies públicas",
+    "Toda acción usuario pasa ValidationEngine antes de persistir",
+    "Wizard resuelve schema vía FieldEngine por subcategoriaId",
+    "Documentos verificación NUNCA en snapshot público (PrivacyGuard)",
+    "enviar_revision bloqueado sin emailVerificado (RC-E01)",
+    "Edición camposImportantes dispara actualizacionPendiente",
+    "snapshotAlPublicar al aprobar admin; FieldEngine AM3",
+    "Nunca auto-publicar ni auto-activar sin admin/pago",
+    "Rutas /cuenta /registro noindex,nofollow (SEO-Landings)",
+    "Bridge MVP perfilId=usuarioId",
+    "DM-01/02 edición en Registro; DM-03..10 lectura Dashboard",
+    "1 perfil principal MVP; duplicado prohibido",
+    "Consumir motores congelados; no reimplementar FE/VE"
+  ],
+
+  "decisionesAceptadas": [
+    { "id": "RC-D01", "decision": "Capa Registro = identidad/onboarding consume FE/VE/SC/SEC", "fuente": "PLAN + SPEC principioRector" },
+    { "id": "RC-D02", "decision": "Bridge MVP perfilId=usuarioId", "fuente": "ACTA-MIGRACION + SPEC bridgeUsuarioPerfil" },
+    { "id": "RC-D03", "decision": "Estados única fuente config-estados-revision-publicacion", "fuente": "SPEC cicloVidaEstados" },
+    { "id": "RC-D04", "decision": "Publicación vía snapshotAlPublicar → RenderEngine", "fuente": "SPEC publicacion + FE AM3" },
+    { "id": "RC-D05", "decision": "Verificación MVP: email + INE + selfie", "fuente": "SPEC verificacion + MATRIZ-MVP F-004/F-005" },
+    { "id": "RC-D06", "decision": "Frontera dashboard DM-01..10", "fuente": "ANALISIS-REVISION-MVP-DASHBOARD" },
+    { "id": "RC-D07", "decision": "Anunciante sin perfil público obligatorio", "fuente": "SPEC tiposRegistro.anunciante" },
+    { "id": "RC-D08", "decision": "Negocio flujo autorizado_para_pago → pago → publicado", "fuente": "SPEC cicloVidaEstados" },
+    { "id": "RC-D09", "decision": "Clasificación datos público/privado/sensible/admin/auditoría", "fuente": "SPEC clasificacionDatos" },
+    { "id": "RC-D10", "decision": "Teléfono OTP documentado FUTURO_V1.1 no MVP", "fuente": "SPEC cuenta.verificacionTelefono + MATRIZ-MVP F-006" }
+  ],
+
+  "decisionesRechazadas": [
+    { "id": "RC-RJ01", "decision": "Auto-publicar perfil sin revisión admin", "motivo": "transicionesInvalidas SPEC; fraude/privacidad" },
+    { "id": "RC-RJ02", "decision": "Exponer INE/selfie en snapshot público", "motivo": "PrivacyGuard; RC-R01" },
+    { "id": "RC-RJ03", "decision": "Reimplementar gates ValidationEngine en Registro", "motivo": "RC-R06; motores congelados" },
+    { "id": "RC-RJ04", "decision": "Auth embebido en Home post-desacople", "motivo": "RC-R03" },
+    { "id": "RC-RJ05", "decision": "Multi-perfil operativo MVP", "motivo": "Bridge 1:1 MVP; multi-perfil futuro" },
+    { "id": "RC-RJ06", "decision": "Indexar rutas /cuenta /registro", "motivo": "SEO-Landings superficiesPrivadas" }
+  ],
+
+  "validacionCongelamiento": {
+    "planMaestroRegistroCuenta": { "resultado": "PASS", "evidencia": "Flujos RC-R01..07, pantallas, fronteras formalizados en SPEC" },
+    "specRegistroCuenta": { "resultado": "PASS", "evidencia": "12 matrices, 9 contratos, 8 API, rutas noindex" },
+    "auditoriaSpecRegistroCuenta": { "resultado": "PASS", "evidencia": "20/20 verificaciones; 0 bloqueantes; 90% completitud" },
+    "fixturesRc01Rc10": { "resultado": "PASS", "evidencia": "10 casos: gates, bridge, publicación, rechazo, anunciante" },
+    "fieldEngine101": { "resultado": "PASS", "evidencia": "resolveRegistrationSchema, snapshotAlPublicar — consumo sin duplicación" },
+    "validationEngine110": { "resultado": "PASS", "evidencia": "guardar_borrador, enviar_revision, subir_verificacion_*" },
+    "seguridadMvp100": { "resultado": "PASS", "evidencia": "Turnstile, rate limits, estadoSeguridad, gates adultos" },
+    "sharedCore100": { "resultado": "PASS", "evidencia": "initFirebase, clients, catalog, geo" },
+    "renderEngine100": { "resultado": "PASS", "evidencia": "consume snapshot; PrivacyGuard; no rutas privadas" },
+    "seoLandings100": { "resultado": "PASS", "evidencia": "/cuenta /registro noindex,nofollow" },
+    "actaP0RuntimeFoundation": { "resultado": "PASS", "evidencia": "GAP-SPEC-REG cerrado documentalmente; CAP-11 ~90%" },
+    "actaCuentas100": { "resultado": "PASS", "evidencia": "Usuario/Cuenta hub coherente; frontera CU vs RC" },
+    "actaDashboards100": { "resultado": "PASS", "evidencia": "DM-01..10 frontera edición vs lectura" },
+    "actaMigracionUsuariosPerfiles": { "resultado": "PASS", "evidencia": "bridge perfilId=usuarioId; fixture RC-09" },
+    "auditoriaMaestraCarihub": { "resultado": "PASS", "evidencia": "Coherencia arquitectura global; CAP-11 actualizable" },
+    "matrizMvpCarihub": { "resultado": "PASS", "evidencia": "F-001..F-007 registro MVP_obligatorio alineado SPEC" },
+    "matrizMadurezDependenciasRoadmap": { "resultado": "PASS", "evidencia": "RD-11 SPEC formalizado; dependencias FE/VE/SC" }
+  },
+
+  "matrizPassFail": {
+    "totalVerificaciones": 17,
+    "pass": 17,
+    "fail": 0,
+    "observaciones": 4
+  },
+
+  "matrizEvolucionFutura": {
+    "porContrato": {
+      "Usuario": { "extensibleSinCambios": ["rolesCuenta append", "locale futuro"], "extensibleMinor": ["perfilIds[]"], "requiereADR": ["multi-perfil obligatorio"], "requiereSPEC": ["walletId puntero"], "requiereMigracion": ["cutover perfilIds desde 1:1"] },
+      "Cuenta": { "extensibleSinCambios": ["ultimoLogin"], "extensibleMinor": ["telefonoVerificado"], "requiereADR": ["OTP obligatorio"], "requiereSPEC": ["MFA"], "requiereMigracion": ["backfill telefono"] },
+      "Perfil": { "extensibleSinCambios": ["campos FieldEngine"], "extensibleMinor": ["flags premium"], "requiereADR": ["campos economía social"], "requiereSPEC": ["contenido premium registro"], "requiereMigracion": ["split monolito legacy"] },
+      "SnapshotPublicacion": { "extensibleSinCambios": ["version++"], "extensibleMinor": ["i18n slug"], "requiereADR": ["indexación cambio"], "requiereSPEC": ["internacionalización"], "requiereMigracion": ["regenerar snapshots"] }
+    },
+    "impactoEcosistema": {
+      "economiaSocial": { "impacto": "extensibleMinor", "mecanismo": "roles + campos perfil; usuarioId ancla; SPEC Economía Social futura" },
+      "propinas": { "impacto": "extensibleSinCambios", "mecanismo": "usuarioId receptor; no altera Registro core" },
+      "premium": { "impacto": "extensibleMinor", "mecanismo": "flags perfil + planId; Pagos existente" },
+      "messenger": { "impacto": "extensibleSinCambios", "mecanismo": "usuarioId participante; Messenger V1.1 fuera MVP" },
+      "redContactos": { "impacto": "extensibleSinCambios", "mecanismo": "usuarioId grafo; subcolecciones CU" },
+      "stories": { "impacto": "requiereSPEC", "mecanismo": "perfilId autor; Interacciones SPEC" },
+      "lives": { "impacto": "requiereSPEC", "mecanismo": "perfilId host; Interacciones SPEC" },
+      "criptomonedas": { "impacto": "requiereSPEC", "mecanismo": "wallet puntero en Cuenta; ANEXO-CRIPTOMONEDAS" },
+      "internacionalizacion": { "impacto": "requiereADR", "mecanismo": "locale país moneda en hub; no reconstrucción" },
+      "ia": { "impacto": "extensibleMinor", "mecanismo": "agentes asisten wizard; RT-08 deny-write" },
+      "multiPerfil": { "impacto": "requiereADR", "mecanismo": "perfilIds[] + perfilPrincipalId; ACTA-MIGRACION fase 2" }
+    },
+    "conclusion": "Identidad/onboarding es punto de anclaje; features futuras extienden perfiles/usuarioId sin reconstrucción arquitectónica"
+  },
+
+  "matrizOwnership": {
+    "Usuario": { "propietario": "auth.uid", "admin": "lectura/escritura hub", "moderador": "lectura delegada", "sistema": "timestamps", "auditoria": "logsAdmin", "lectura": ["owner", "admin"], "escritura": ["owner campos cuenta", "admin suspende"], "aprobacion": ["admin reactivación"], "suspension": ["admin"], "eliminacion": ["admin eliminacion_logica"] },
+    "Cuenta": { "propietario": "auth.uid", "admin": "estadoCuenta, estadoSeguridad", "sistema": "emailVerificado sync Auth", "lectura": ["owner", "admin"], "escritura": ["owner credenciales", "admin bloqueo"], "aprobacion": ["admin"], "suspension": ["admin"], "eliminacion": ["admin"] },
+    "Perfil": { "propietario": "usuarioId owner", "admin": "transiciones estado, observaciones", "moderador": "verificación delegada", "sistema": "vencido automático", "auditoria": "historial_perfil", "lectura": ["owner", "admin", "publico parcial vía snapshot"], "escritura": ["owner borrador/activo", "admin suspende"], "aprobacion": ["admin publicar/rechazar"], "suspension": ["admin"], "eliminacion": ["admin archivar"] },
+    "Negocio": { "extends": "Perfil", "aprobacion": ["admin + flujo pago negocio"] },
+    "DocumentoVerificacion": { "propietario": "owner perfil", "admin": "aprobar/rechazar", "lectura": ["owner", "admin_verificacion"], "escritura": ["owner subir", "admin estado"], "nuncaPublico": true },
+    "SnapshotPublicacion": { "propietario": "sistema FieldEngine", "lectura": ["publico vía RenderEngine", "admin"], "escritura": ["sistema trigger admin_aprueba"], "eliminacion": ["versionado; no delete público"] }
+  },
+
+  "matrizPrivacidad": {
+    "niveles": ["publico", "privado", "sensible", "legal", "auditoria"],
+    "campos": {
+      "alias": { "nivel": "publico", "visibilidad": "snapshot", "edicion": "owner", "exportacion": "admin", "retencion": "vida perfil", "eliminacion": "con perfil" },
+      "email": { "nivel": "privado", "visibilidad": "owner+admin", "edicion": "owner", "exportacion": "admin legal", "retencion": "vida cuenta", "eliminacion": "cuenta" },
+      "telefonoContacto": { "nivel": "privado", "visibilidad": "owner+admin", "edicion": "owner", "nuncaSnapshot": true },
+      "whatsapp": { "nivel": "publico", "visibilidad": "snapshot contactoPublico", "edicion": "owner" },
+      "ineFrente": { "nivel": "sensible", "visibilidad": "owner+admin_verificacion", "edicion": "owner subir", "exportacion": "admin legal", "retencion": "legal", "privacyGuard": "NUNCA snapshot" },
+      "selfieVerificacion": { "nivel": "sensible", "privacyGuard": "NUNCA snapshot" },
+      "rfc": { "nivel": "sensible", "futuro": true, "privacyGuard": "NUNCA snapshot" },
+      "estadoRevision": { "nivel": "administrativo", "visibilidad": "owner lectura + admin escritura" },
+      "observacionesAdmin": { "nivel": "administrativo", "visibilidad": "owner lectura" },
+      "historial_perfil": { "nivel": "auditoria", "appendOnly": true, "visibilidad": "admin" },
+      "terminosAceptados": { "nivel": "legal", "retencion": "obligatoria legal" }
+    },
+    "privacyGuardCumplimiento": "PASS — docs verificación y PII privada excluidos de SnapshotPublicacion; fixtures RC-02, RC-07"
+  },
+
+  "matrizRevisionAdministrativa": {
+    "perfil_adulto_independiente": { "registro": "no requiere revisión", "enviar_revision": "requiere revisión admin", "publicacion": "bloquea hasta admin aprueba + docs OK" },
+    "negocio": { "registro": "no requiere revisión", "enviar_revision": "requiere revisión admin", "publicacion": "bloquea hasta pago confirmado + admin" },
+    "profesional": { "registro": "no requiere revisión", "enviar_revision": "requiere revisión admin + cédula", "publicacion": "bloquea hasta docs profesionales OK" },
+    "anunciante": { "registro": "no requiere revisión perfil", "perfilPublico": "opcional", "banner": "requiere revisión Banners post-registro", "publicacionPerfil": "N/A si sin perfil" },
+    "visitante": { "registro": "no requiere revisión", "publicacion": "N/A sin perfil público" },
+    "edicionPostPublicacion": { "camposImportantes": "requiere revisión re-aprobación", "camposMenores": "no requiere revisión" }
+  },
+
+  "matrizPublicacion": {
+    "estados": ["borrador", "enviado_revision", "correccion_solicitada", "requiere_revision_categoria", "autorizado_para_pago", "pago_pendiente", "pago_confirmado", "revision_post_pago", "publicado", "activo", "vencido", "suspendido", "rechazado", "archivado", "actualizacion_pendiente"],
+    "transicionesValidas": [
+      { "de": "borrador", "a": "enviado_revision", "actor": "usuario", "evento": "enviar_revision VE" },
+      { "de": "enviado_revision", "a": "correccion_solicitada", "actor": "admin" },
+      { "de": "enviado_revision", "a": "publicado", "actor": "admin", "evento": "snapshotAlPublicar" },
+      { "de": "enviado_revision", "a": "autorizado_para_pago", "actor": "admin", "tipo": "negocio" },
+      { "de": "correccion_solicitada", "a": "enviado_revision", "actor": "usuario" },
+      { "de": "pago_confirmado", "a": "publicado", "actor": "admin|sistema" },
+      { "de": "publicado", "a": "activo", "actor": "sistema|admin" },
+      { "de": "activo", "a": "vencido", "actor": "sistema" },
+      { "de": "activo", "a": "actualizacion_pendiente", "actor": "usuario", "trigger": "editar camposImportantes" },
+      { "de": "vencido", "a": "pago_pendiente", "actor": "usuario", "via": "Dashboard renovación" }
+    ],
+    "transicionesInvalidas": [
+      { "de": "borrador", "a": "publicado", "motivo": "Nunca auto-publicar" },
+      { "de": "rechazado", "a": "activo", "motivo": "Requiere nuevo envío revisión" },
+      { "de": "cualquiera", "a": "activo", "condicion": "sin admin/pago", "motivo": "Nunca auto-activar" }
+    ],
+    "ownershipPublicacion": { "triggerSnapshot": "admin_aprueba|sistema post-pago", "consumidor": "RenderEngine", "fuenteVerdad": "perfiles/{perfilId}" }
+  },
+
+  "bridgeUsuarioPerfil": {
+    "mvp": { "regla": "perfilId = usuarioId", "cardinalidad": "1:1", "coleccionPerfil": "perfiles/{perfilId}", "coleccionUsuario": "usuarios/{usuarioId}", "fixture": "RC-09" },
+    "futuro": { "regla": "usuario.perfilIds[]", "cardinalidad": "1:N", "perfilPrincipalId": "puntero activo", "requiere": "ADR multi-perfil + ACTA-MIGRACION fase 2" },
+    "legacy": { "monolito": "usuarios/{uid}", "lecturaDual": "transitorio migración", "escrituraObjetivo": "perfiles/{perfilId}" },
+    "riesgos": ["RC-R02 monolito", "RC-SPEC-01 migración TBD_PRE_RUNTIME"],
+    "estrategiaTransicion": "ACTA-MIGRACION-USUARIOS-PERFILES fases; bridge MVP no bloquea construcción diseño"
+  },
+
+  "compatibilidadFuturaEcosistema": {
+    "economiaSocial": { "soporta": true, "mecanismo": "usuarioId + roles; extensión campos perfil", "reconstruccion": false },
+    "propinas": { "soporta": true, "mecanismo": "usuarioId receptor; ANEXO-AUTOPROPINAS", "reconstruccion": false },
+    "walletFutura": { "soporta": true, "mecanismo": "puntero walletId en Cuenta futuro", "reconstruccion": false },
+    "criptomonedas": { "soporta": true, "mecanismo": "ANEXO-CRIPTOMONEDAS; no en registro MVP", "reconstruccion": false },
+    "contenidoPremium": { "soporta": true, "mecanismo": "flags plan premium en perfil/contrato", "reconstruccion": false },
+    "estados": { "soporta": true, "mecanismo": "perfilId autor; Interacciones fuera Registro", "reconstruccion": false },
+    "stories": { "soporta": true, "mecanismo": "perfilId; SPEC Interacciones futura", "reconstruccion": false },
+    "lives": { "soporta": true, "mecanismo": "perfilId host; Interacciones futura", "reconstruccion": false },
+    "redContactos": { "soporta": true, "mecanismo": "usuarioId subcolecciones CU", "reconstruccion": false },
+    "messenger": { "soporta": true, "mecanismo": "usuarioId; V1.1 fuera MVP", "reconstruccion": false },
+    "agentesIA": { "soporta": true, "mecanismo": "asistencia wizard; RT-08 deny-write", "reconstruccion": false },
+    "marketplaceFuturo": { "soporta": true, "mecanismo": "negocio/perfil extendido", "reconstruccion": false },
+    "internacionalizacion": { "soporta": true, "mecanismo": "locale/pais en hub; ADR i18n futuro", "reconstruccion": false },
+    "multiMoneda": { "soporta": true, "mecanismo": "Pagos/contratos; no Registro core", "reconstruccion": false },
+    "multiPais": { "soporta": true, "mecanismo": "geo FieldEngine + hub locale", "reconstruccion": false },
+    "multiIdioma": { "soporta": true, "mecanismo": "UI ThemeEngine; datos perfil multi-lang futuro ADR", "reconstruccion": false }
+  },
+
+  "auditoriaRiesgos": {
+    "bajo": [
+      { "id": "RC-R07", "tema": "Estados inconsistentes", "mitigacion": "config-estados única fuente" },
+      { "id": "RC-R05", "tema": "Solapamiento Registro/Dashboard", "mitigacion": "Frontera DM congelada" }
+    ],
+    "medio": [
+      { "id": "RC-R04", "tema": "Recuperación contraseña prod", "mitigacion": "Incluido SPEC; implementar runtime" },
+      { "id": "RC-R06", "tema": "Reimplementar VE/FE", "mitigacion": "Regla congelada consumir clientes" },
+      { "id": "RC-SPEC-01", "tema": "Migración ejecución", "mitigacion": "ACTA-MIGRACION documentada" },
+      { "id": "RC-AR-01", "tema": "Validador script ausente", "mitigacion": "RC-AM-02 post-acta" },
+      { "id": "RC-AR-02", "tema": "Escalabilidad multi-perfil", "mitigacion": "ADR futuro; MVP 1:1" }
+    ],
+    "alto": [
+      { "id": "RC-R01", "tema": "Privacidad datos sensibles", "mitigacion": "noindex + Storage + PrivacyGuard" },
+      { "id": "RC-R02", "tema": "Monolito usuarios/{uid}", "mitigacion": "Bridge perfiles/{perfilId}" },
+      { "id": "RC-R03", "tema": "Auth embebido Home", "mitigacion": "App Registro separada" },
+      { "id": "RC-AR-03", "tema": "Fraude verificación", "mitigacion": "Admin revisión + selfie + rate limits" }
+    ],
+    "critico": [
+      { "id": "BLK-01", "tema": "Migración perfilId sin runtime", "mitigacion": "Prerequisito P0; no bloquea congelamiento diseño", "afecta": "construcción no producción" }
+    ]
+  },
+
+  "riesgosAceptados": [
+    { "id": "RC-RA01", "riesgo": "Bridge MVP 1:1 limita multi-marca", "mitigacionCongelada": "perfilIds[] futuro documentado" },
+    { "id": "RC-RA02", "riesgo": "Teléfono OTP ausente MVP", "mitigacionCongelada": "Email + Turnstile + rate limits; V1.1 OTP" },
+    { "id": "RC-RA03", "riesgo": "Legacy monolito durante transición", "mitigacionCongelada": "Lectura dual ACTA-MIGRACION" }
+  ],
+
+  "riesgosAbiertos": [
+    { "id": "RC-RO01", "riesgo": "Migración TBD_PRE_RUNTIME", "estado": "ABIERTO", "requiere": "Autorización runtime + ACTA-MIGRACION ejecución" },
+    { "id": "RC-RO02", "riesgo": "Validador validar-spec-registro-cuenta.mjs", "estado": "ABIERTO", "requiere": "Script post-congelamiento" },
+    { "id": "RC-RO03", "riesgo": "Recuperación/cambio contraseña prod", "estado": "ABIERTO_IMPLEMENTACION", "requiere": "Runtime autorizado" },
+    { "id": "RC-RO04", "riesgo": "Firestore rules alineadas Registro", "estado": "ABIERTO", "requiere": "BLK-05 P0" },
+    { "id": "RC-RO05", "riesgo": "Multi-perfil operativo", "estado": "ABIERTO_FUTURO", "requiere": "ADR + ACTA 1.1+" }
+  ],
+
+  "readinessConstruccion": {
+    "dimensiones": {
+      "documental": { "antesSpec": 55, "despuesActa": 90 },
+      "arquitecturaDiseno": { "antesSpec": 55, "despuesActa": 88 },
+      "contratos": { "antesSpec": 50, "despuesActa": 92 },
+      "validacionFixtures": { "antesSpec": 40, "despuesActa": 85 },
+      "seguridadIntegracion": { "antesSpec": 53, "despuesActa": 80 },
+      "publicacion": { "antesSpec": 60, "despuesActa": 88 },
+      "dashboardFrontera": { "antesSpec": 53, "despuesActa": 75 },
+      "integracionMotores": { "antesSpec": 70, "despuesActa": 86 }
+    },
+    "agregados": {
+      "construccionFutura": 76,
+      "mvpOperarCapaRegistro": 70,
+      "produccion": 30
+    },
+    "nota": "Producción baja por runtime/migración/rules pendientes; diseño apto construcción autorizada"
+  },
+
+  "impactoActaP0RuntimeFoundation": {
+    "antesSpecRegistroCuenta": {
+      "cap11RegistroCuenta": { "porcentaje": 55, "estado": "PLAN+schemas", "acta": null },
+      "gapSpecReg": "abierto",
+      "porcentajeGlobalConstruccionP0": 72,
+      "bloqueadoresTotales": ["GAP-SPEC-REG", "BLK-01", "GAP-SPEC-PAY"]
+    },
+    "despuesActaRegistroCuenta": {
+      "cap11RegistroCuenta": { "porcentaje": 90, "estado": "CONGELADO_DISENO", "acta": "ACTA-CONGELAMIENTO-REGISTRO-CUENTA v1.0.0" },
+      "gapSpecReg": "cerrado",
+      "porcentajeGlobalConstruccionP0": 78,
+      "bloqueadoresTotales": ["BLK-01 migración", "GAP-SPEC-PAY", "GAP-PANEL-DASH"],
+      "mvpOperarRegistro": { "antes": 55, "despues": 70 }
+    },
+    "nota": "Recálculo documental en esta acta; ACTA-P0 no modificada"
+  },
+
+  "gobernanzaCambios": {
+    "permitidosSinADR": [
+      "Fixtures golden adicionales retrocompatibles",
+      "Clarificaciones documentales PATCH",
+      "validar-spec-registro-cuenta.mjs",
+      "Campos opcionales retrocompatibles en contratos",
+      "Mensajes error RC-E* adicionales"
+    ],
+    "requierenADR": [
+      "Bridge multi-perfil operativo 1:N",
+      "Teléfono OTP obligatorio MVP",
+      "Política verificación ampliada (domicilio/RFC obligatorio)",
+      "Eliminación física cuentas/perfiles",
+      "Cambio regla no auto-publicar"
+    ],
+    "requierenNuevaSPEC": [
+      "Wallet/cripto en flujo registro",
+      "KYC ampliado internacional",
+      "Internacionalización registro (multi-país onboarding)",
+      "Integración Messenger en registro"
+    ],
+    "requierenNuevaActa": [
+      "SPEC-REGISTRO-CUENTA 1.1+ MINOR",
+      "SPEC-REGISTRO-CUENTA 2.0+ MAJOR contratos/matrices",
+      "Cambio reglas congeladas base",
+      "Cambio bridge MVP perfilId=usuarioId"
+    ]
+  },
+
+  "bloqueantesRestantes": [],
+
+  "observaciones": [
+    { "id": "RC-AM-01", "nivel": "menor", "tema": "Verificación teléfono OTP futuro V1.1", "accion": "Post-MVP cuando SMS listo" },
+    { "id": "RC-AM-02", "nivel": "menor", "tema": "Validador validar-spec-registro-cuenta.mjs pendiente", "accion": "Crear post-congelamiento diseño" },
+    { "id": "RC-AM-03", "nivel": "menor", "tema": "Migración TBD_PRE_RUNTIME ejecución separada", "accion": "ACTA-MIGRACION fase runtime" },
+    { "id": "RC-AM-04", "nivel": "menor", "tema": "Recuperación/cambio contraseña prod faltante", "accion": "Implementar en runtime autorizado" }
+  ],
+
+  "recomendacionSiguienteCapa": [
+    { "prioridad": 1, "capa": "SPEC-PAGOS-CONTRATOS", "motivo": "GAP-SPEC-PAY bloqueador MVP-COBRAR", "referencia": "ROADMAP RD-03" },
+    { "prioridad": 2, "capa": "Runtime migración bridge perfilId", "motivo": "BLK-01 prerequisito construcción RE/SEO/CU", "referencia": "ROADMAP RD-01" },
+    { "prioridad": 3, "capa": "validar-spec-registro-cuenta.mjs", "motivo": "RC-AM-02 CI fixtures", "referencia": "AUDITORIA-SPEC-REGISTRO-CUENTA" },
+    { "prioridad": 4, "capa": "SPEC-PANEL-DASHBOARD-MINIMO", "motivo": "GAP-PANEL-DASH frontera runtime DM-03..10", "referencia": "ACTA-P0" }
+  ],
+
+  "implementacion": {
+    "runtimeAutorizado": false,
+    "firestoreAutorizado": false,
+    "deployAutorizado": false,
+    "nota": "v1.0.0 congelada como diseño documental; implementación runtime requiere autorización explícita posterior"
+  },
+
+  "archivosBaseline": [
+    "scripts/SPEC-REGISTRO-CUENTA.md",
+    "scripts/SPEC-REGISTRO-CUENTA.json",
+    "scripts/fixtures-registro-cuenta-golden.json",
+    "scripts/AUDITORIA-SPEC-REGISTRO-CUENTA.md",
+    "scripts/AUDITORIA-SPEC-REGISTRO-CUENTA.json",
+    "scripts/ACTA-CONGELAMIENTO-REGISTRO-CUENTA.json",
+    "scripts/ACTA-CONGELAMIENTO-REGISTRO-CUENTA.md"
+  ],
+
+  "procedimientoVersionado": {
+    "PATCH": "Fixtures, validador, clarificaciones, mensajes error",
+    "MINOR": "Teléfono OTP, campos opcionales, multi-perfil documentado operativo (con ADR)",
+    "MAJOR": "Cambio contratos Usuario/Perfil/EstadoPerfil, bridge MVP, matrices base publicación",
+    "historialVersiones": [
+      { "semver": "1.0.0", "fecha": "2026-06-11", "evento": "CONGELAMIENTO_INICIAL", "notas": "17/17 PASS validación acta; 20/20 auditoría SPEC; GAP-SPEC-REG cerrado; CAP-11 ~90%; runtime NO autorizado" }
+    ]
+  },
+
+  "recomendacionesFuturas": [
+    "Autorizar runtime Registro/Cuenta con plan adopción explícito",
+    "Ejecutar ACTA-MIGRACION-USUARIOS-PERFILES (BLK-01)",
+    "Implementar validar-spec-registro-cuenta.mjs",
+    "SPEC-PAGOS-CONTRATOS para cerrar GAP-SPEC-PAY",
+    "Firestore rules alineadas config-seguridad-mvp (BLK-05)",
+    "ADR multi-perfil antes de operar 1:N"
+  ],
+
+  "noModifica": [
+    "PLAN-MAESTRO-REGISTRO-CUENTA, SPEC-REGISTRO-CUENTA, AUDITORIA-SPEC-REGISTRO-CUENTA, fixtures",
+    "ACTA-P0, ACTA-CUENTAS, ACTA-SC/FE/VE/RE/SEC/DASH/SEO/CAT, matrices maestras, schemas",
+    "Producción, Firestore, deploy, commit"
+  ],
+
+  "estado": "CONGELADO",
+
+  "changelog": [
+    { "version": "1.0.0", "fecha": "2026-06-11", "nota": "Congelamiento diseño Registro-Cuenta: PASS; PARCIALMENTE (diseño SÍ, runtime NO); GAP-SPEC-REG cerrado; CAP-11 55%→90%; P0 global 72%→78%" }
+  ]
+}

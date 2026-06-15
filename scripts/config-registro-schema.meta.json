@@ -1,0 +1,541 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://carihub.app/schemas/config-registro-schema.meta.json",
+  "title": "CariHub — Meta Schema Registro Dinámico",
+  "description": "Contrato compartido para schemas de registro, precios, promociones, contratos, estados y revisión. Usado por FieldEngine, ValidationEngine, IA Arquitecto y validar-schemas-registro.mjs.",
+  "versionMeta": "2026-06-10",
+  "convenciones": {
+    "versionSchema": "Fecha ISO o semver del schema de registro. Obligatorio en raíz (alias aceptado: version).",
+    "formularioId": {
+      "adultos": "config-registro-adultos-schema.json",
+      "persona_independiente": "config-registro-independiente-schema.json",
+      "profesionista_cedula": "config-registro-profesionista-schema.json",
+      "negocio_empresa": "config-registro-negocio-schema.json",
+      "usuario_visitante": "config-registro-visitante-schema.json",
+      "config_precios_planes_perfiles": "config-precios-planes-perfiles-schema.json"
+    },
+    "mapaFormularioToFormularioId": {
+      "Formulario Adultos": "adultos",
+      "Formulario Adultos o Independiente": "adultos",
+      "Formulario Persona Independiente": "persona_independiente",
+      "Formulario Independiente o Negocio": "persona_independiente",
+      "Formulario Profesionista": "profesionista_cedula",
+      "Formulario Negocio": "negocio_empresa"
+    },
+    "tipoPerfilValidos": ["persona", "negocio", "lugar", "creador", "espectaculo", "pareja_grupo"],
+    "camposSistema": ["subcategoriaId", "formularioId", "sectorId", "planId", "facturacion"],
+    "camposAnidadosPermitidos": {
+      "geo": ["pais", "estado", "ciudad", "zona"],
+      "fisico": ["estatura", "peso", "complexion", "cabello", "ojos", "tatuajes", "piercings"],
+      "contactoPublico": ["whatsapp", "telegram", "instagram", "onlyfans", "x", "mensajeInterno", "llamada", "sitioWeb", "telefono"],
+      "facturacion": ["rfc", "razonSocial", "codigoPostalFiscal", "emailFacturacion", "regimenFiscal", "usoCFDI"]
+    },
+    "subcategoriaIdCanonico": "minúsculas, sin acentos, separador _ entre tokens (escort_gay ≡ escort gay ≡ escort-gay)",
+    "aliasesSubcategoriaId": {
+      "table_dance": "tabledance",
+      "antro": "antro_restaurant_bar",
+      "antro_lgbt": "antro_restaurant_bar_lgbt",
+      "cabinas": "cabinas_glory_holes",
+      "club_sw": "club_sw",
+      "sex_shop": "sex_shop",
+      "hotel_motel": "hotel_motel",
+      "cuckold_hotwife": "cuckold_hotwife",
+      "cine_xxx": "cine_xxx",
+      "tom_boy": "tom_boy",
+      "tom_fem": "tom_fem",
+      "escort_gay": "escort_gay",
+      "escort_vip": "escort_vip"
+    },
+    "preciosPerfilesVsBanners": {
+      "perfiles": "config_precios_perfiles / config-precios-planes-perfiles-schema.json",
+      "banners": "configuracion_publicidad/precios_banners — NUNCA mezclar colecciones ni formularioId",
+      "promocionesPerfiles": "promociones_perfiles — separadas de precios base",
+      "promocionesBanners": "promociones_banners — separadas de precios_banners"
+    },
+    "adminEditableFuturo": {
+      "perfiles": "config_precios_perfiles/planes_perfiles + overrides (admin write)",
+      "promocionesPerfiles": "promociones_perfiles + overrides (admin write)",
+      "promocionesBanners": "promociones_banners (admin write)",
+      "contratos": "contratos_perfiles + contratos_banners (sistema write, admin read/acciones)",
+      "registro": "config_registro_{formularioId} opcional en Firestore",
+      "historial": "config_precios_perfiles_historial + promociones_*_historial — solo admin/CI"
+    },
+    "tiposRegistroComercial": [
+      "adultos",
+      "persona_independiente",
+      "profesionista_cedula",
+      "negocio_empresa",
+      "usuario_visitante"
+    ],
+    "planesComerciales": ["basico", "destacado", "premium", "vip"],
+    "periodosComerciales": ["semanal", "quincenal", "mensual"],
+    "periodosComercialesFuturos": {
+      "anual": "Factor reservado en config-precios-planes-perfiles-schema.json → periodosComercialesFuturos.anual (activo: false). No usar en contratos MVP."
+    },
+    "arquetiposEquivalencia": {
+      "descripcion": "Tabla de equivalencia legacy mapa → canónico schema. El mapa debe escribir siempre el canónico; esta tabla documenta migración.",
+      "legacyAMap": {
+        "adulto_persona": "persona_acompanante | persona_espectaculo | persona_dominatrix | pareja_grupo (por sub adultos)",
+        "adulto_negocio": "negocio_retail | negocio_bienestar | negocio_venue | negocio_hospedaje (por sub adultos)",
+        "creador_contenido": "persona_creador",
+        "negocio_local": "negocio_servicios_local | negocio_institucion | negocio_hospedaje | negocio_venue | negocio_alimentos | negocio_comercio | negocio_inmobiliario",
+        "persona_servicio": "persona_servicio_general | persona_bienestar_individual | persona_servicio_movil | persona_servicio_oficio | persona_servicio_profesional | persona_servicio_salud_auxiliar",
+        "profesional_certificado": "profesional_salud | profesional_salud_mental | profesional_tecnico_legal | profesional_veterinario"
+      },
+      "estrategia": "unificación de nombres en mapa + tabla de equivalencia en meta + generar-schemas lee arquetipo/tipoPerfil del mapa"
+    },
+    "estadosRevision": [
+      "borrador",
+      "enviado_revision",
+      "correccion_solicitada",
+      "autorizado_para_pago",
+      "pago_pendiente",
+      "pago_confirmado",
+      "revision_post_pago",
+      "publicado",
+      "activo",
+      "vencido",
+      "suspendido",
+      "rechazado"
+    ]
+  },
+  "arquitecturaComercial": {
+    "precioCongelado": "config-contratos-carihub-schema.json → politicaPrecioCongelado",
+    "promocionCongelada": "config-promociones-perfiles-schema.json | config-promociones-banners-schema.json",
+    "visitanteSinPerfilPublico": "config-registro-visitante-schema.json",
+    "estadosYFlujos": "config-estados-revision-publicacion-schema.json",
+    "reglasPublicacion": [
+      "Ningún perfil ni banner se publica sin revisión admin",
+      "Cambios importantes post-pago → revision_post_pago",
+      "Promociones no alteran precios base",
+      "Contratos activos no se ven afectados por cambios admin de precio/promoción"
+    ]
+  },
+  "arquitecturaRenderizadoDinamico": {
+    "schema": "config-renderizado-dinamico-schema.json",
+    "componentes": "config-registro-componentes-ui-schema.json",
+    "regla": "resultados.html y perfil.html sin switch por subcategoriaId",
+    "motores": ["RenderEngine", "ComponentRegistry", "PrivacyGuard", "SchemaResolver"],
+    "fallback": { "resultados": "ResultCardGenerico", "perfil": "ProfileLayoutGenerico" },
+    "versionado": "Perfil conserva schemaVersion al publicar; catálogo puede incrementar versión"
+  },
+  "arquitecturaCategoriasSugeridas": {
+    "schema": "config-categorias-sugeridas-schema.json",
+    "coleccion": "solicitudes_categorias",
+    "formulariosTemporales": [
+      "temporal_adultos",
+      "temporal_persona_independiente",
+      "temporal_profesionista_cedula",
+      "temporal_negocio_empresa",
+      "temporal_banner"
+    ],
+    "estadosSolicitud": [
+      "sugerida_usuario",
+      "en_revision_admin",
+      "aprobada",
+      "fusionada",
+      "convertida_en_alias",
+      "rechazada"
+    ],
+    "estadosRegistroExtra": [
+      "requiere_revision_categoria",
+      "categoria_autorizada",
+      "categoria_rechazada",
+      "autorizado_gratis"
+    ],
+    "reglaPublicacion": "Nunca publicar en catálogo oficial ni perfil público hasta decisión Admin"
+  },
+  "arquitecturaBusqueda": {
+    "schema": "config-busqueda-categorias-schema.json",
+    "sinResultado": "config-busqueda-sin-resultado-schema.json",
+    "ejemplos": "ejemplos-busqueda-categorias.json",
+    "flujoGeoPrimero": ["pais", "estado", "ciudad", "categoria?", "palabraClave?"],
+    "indiceFirestore": {
+      "sectores": "indice_busqueda_sectores/{sectorId}",
+      "subcategorias": "indice_busqueda_subcategorias/{subcategoriaId}",
+      "disponibilidad": "disponibilidad_categoria_geo/{geoKey}_{subcategoriaId}"
+    },
+    "relacionKeywordsIA": "keywordsIA en schemas registro se heredan a busqueda.keywords al construir índice",
+    "bloqueMapa": "matrix[].busqueda — extensión opcional en mapa-registro-categorias.json"
+  },
+  "identidadUsuario": {
+    "schemaDetalle": "scripts/config-cuentas-usuario-schema.json",
+    "descripcion": "Capa única de identidad: usuarioId = Firebase Auth uid. Hub usuarios separado de perfiles públicos. Diseño pre-runtime; no migrar Firestore hasta FieldEngine.",
+    "principios": [
+      "usuarioId nunca cambia",
+      "visitante → perfil público = upgrade de cuenta, no nuevo Auth user",
+      "admin es rol en roles[], no tipoCuenta de perfil público",
+      "anunciante es rol; anuncianteId MVP = usuarioId",
+      "contratos y pagos siempre referencian usuarioId",
+      "Messenger futuro exige estadoMensajeria en usuarios"
+    ],
+    "modeloRecomendado": {
+      "hub": "usuarios/{usuarioId} — cuenta, estados, punteros, no datos extensos de perfil",
+      "perfiles": "perfiles/{perfilId} — registro y publicación; usuarioId obligatorio",
+      "perfilPrincipalId": "puntero al perfil público activo principal",
+      "perfilIds": "array de todos los perfiles del usuario (escalabilidad 1..N)",
+      "contratoActivoId": "puntero; historial en contratos_perfiles / contratos_banners",
+      "anuncianteId": "default usuarioId en MVP; colección anunciantes solo multi-marca futura",
+      "favoritos": "subcolección usuarios/{usuarioId}/favoritos/{perfilId}",
+      "conversaciones": "subcolección futura usuarios/{usuarioId}/conversaciones_meta/{conversacionId}",
+      "solicitudesCategoria": "query solicitudes_categorias where usuarioId — sin array en raíz"
+    },
+    "tiposCuenta": {
+      "valores": ["visitante", "adulto", "independiente", "profesionista", "empresa"],
+      "mapeoFormularioId": {
+        "visitante": "usuario_visitante",
+        "adulto": "adultos",
+        "independiente": "persona_independiente",
+        "profesionista": "profesionista_cedula",
+        "empresa": "negocio_empresa"
+      }
+    },
+    "rolesCuenta": {
+      "valores": ["anunciante", "admin", "moderador", "auditor"],
+      "nota": "roles[] permite multirol: visitante + anunciante sin perfil público; admin nunca es tipoCuenta"
+    },
+    "estados": {
+      "estadoCuenta": ["activa", "suspendida", "eliminada", "pendiente_activacion"],
+      "estadoVerificacion": ["sin_enviar", "enviada", "en_revision", "aprobada", "rechazada", "vencida"],
+      "estadoMensajeria": ["habilitada", "restringida", "suspendida", "solo_lectura"],
+      "estadoPublicacion": "ver convenciones.estadosRevision + estados categoría sugerida"
+    },
+    "conversionCuenta": {
+      "regla": "Mismo usuarioId al evolucionar visitante → adulto|independiente|profesionista|empresa|anunciante",
+      "conservar": ["favoritos", "pagos", "contratos", "solicitudes_categorias", "solicitudes_anuncios", "preferencias", "mensajes futuros"],
+      "schema": "config-registro-visitante-schema.json → WizardCrearPerfilDesdeVisitante",
+      "sinNuevoAuthUser": true
+    },
+    "colecciones": {
+      "usuarios": {
+        "ruta": "usuarios/{usuarioId}",
+        "descripcion": "Hub identidad — Auth uid = document id",
+        "camposRaizObligatorios": ["usuarioId", "email", "tipoCuenta", "estadoCuenta", "createdAt", "updatedAt"],
+        "subobjetos": ["cuenta", "perfil", "anunciante", "verificacion", "mensajeria", "comercial", "seguridad", "preferencias"],
+        "subcolecciones": ["favoritos", "notificaciones", "bloqueos", "conversaciones_meta", "dispositivos"]
+      },
+      "perfiles": {
+        "ruta": "perfiles/{perfilId}",
+        "descripcion": "Datos registro/publicación; separado de usuarios en diseño objetivo",
+        "fkObligatorias": ["usuarioId", "perfilId", "formularioId", "sectorId", "subcategoriaId", "estadoRevision"],
+        "notaLegacy": "Producción actual usa usuarios/{uid} como perfil — migración faseada; perfilId puede = usuarioId en transición"
+      },
+      "contratos_perfiles": {
+        "ruta": "contratos_perfiles/{contratoId}",
+        "schema": "config-contratos-carihub-schema.json → contratoPerfil",
+        "fkObligatorias": ["usuarioId", "estadoContrato", "versionPrecio"],
+        "fkOpcionales": ["perfilId"]
+      },
+      "contratos_banners": {
+        "ruta": "contratos_banners/{contratoId}",
+        "schema": "config-contratos-carihub-schema.json → contratoBanner + config-promociones-banners-schema.json",
+        "fkObligatorias": ["usuarioId", "anuncianteId", "estadoContrato"],
+        "nota": "anuncianteId MVP = usuarioId"
+      },
+      "solicitudes_categorias": {
+        "ruta": "solicitudes_categorias/{solicitudCategoriaId}",
+        "schema": "config-categorias-sugeridas-schema.json",
+        "fkObligatorias": ["usuarioId", "registroId", "estadoSolicitudCategoria"]
+      },
+      "solicitudes_anuncios": {
+        "ruta": "solicitudes_anuncios/{solicitudId}",
+        "fkObligatorias": ["usuarioId"],
+        "fkAlternativas": ["uidAnunciante"],
+        "nota": "uidAnunciante legacy = usuarioId; normalizar a usuarioId en diseño nuevo"
+      },
+      "favoritos": {
+        "ruta": "usuarios/{usuarioId}/favoritos/{perfilId}",
+        "fkObligatorias": ["usuarioId", "perfilId"],
+        "nota": "usuarioId implícito en path; perfilId apunta a perfiles/{perfilId}"
+      },
+      "denuncias": {
+        "ruta": "denuncias/{denunciaId}",
+        "fkObligatorias": ["perfilId"],
+        "fkOpcionales": ["reportanteId"],
+        "fkRequeridasUnaDe": ["reportadoId", "perfilId"],
+        "nota": "reportadoId = usuarioId dueño del perfil denunciado"
+      },
+      "pagos": {
+        "ruta": "pagos/{pagoId}",
+        "fkObligatorias": ["usuarioId"],
+        "fkCondicionales": ["contratoId"],
+        "nota": "contratoId obligatorio si pago vinculado a contrato activo"
+      },
+      "verificaciones": {
+        "ruta": "solicitudes_verificacion/{id} | usuarios.verificacion",
+        "fkObligatorias": ["usuarioId"]
+      },
+      "mensajeriaFutura": {
+        "conversaciones": "conversaciones/{conversacionId}",
+        "mensajes": "conversaciones/{conversacionId}/mensajes/{mensajeId}",
+        "fkObligatorias": ["emisorId", "receptorId"],
+        "reglaEnvio": "usuarios.mensajeria.estadoMensajeria permite envío",
+        "subcoleccionMeta": "usuarios/{usuarioId}/conversaciones_meta/{conversacionId}"
+      }
+    },
+    "reglasFK": {
+      "perfiles.usuarioId": { "obligatorio": true, "tipo": "string", "ref": "usuarios/{usuarioId}" },
+      "solicitudes_categorias.usuarioId": { "obligatorio": true, "tipo": "string", "ref": "usuarios/{usuarioId}" },
+      "contratos_perfiles.usuarioId": { "obligatorio": true, "tipo": "string", "ref": "usuarios/{usuarioId}" },
+      "contratos_banners.usuarioId": { "obligatorio": true, "tipo": "string", "ref": "usuarios/{usuarioId}" },
+      "contratos_banners.anuncianteId": { "obligatorio": true, "tipo": "string", "ref": "usuarios/{usuarioId} en MVP" },
+      "solicitudes_anuncios.usuarioId": { "obligatorio": true, "alternativa": "uidAnunciante", "ref": "usuarios/{usuarioId}" },
+      "pagos.usuarioId": { "obligatorio": true, "ref": "usuarios/{usuarioId}" },
+      "pagos.contratoId": { "obligatorio": "si_aplica_contrato", "ref": "contratos_perfiles|contratos_banners" },
+      "denuncias.reportanteId": { "obligatorio": false, "ref": "usuarios/{usuarioId}" },
+      "denuncias.reportadoId": { "obligatorio": "perfilId_o_reportadoId", "ref": "usuarios/{usuarioId}" },
+      "denuncias.perfilId": { "obligatorio": true, "ref": "perfiles/{perfilId}" },
+      "mensajes.emisorId": { "obligatorio": true, "cuando": "messenger_implementado", "ref": "usuarios/{usuarioId}" },
+      "mensajes.receptorId": { "obligatorio": true, "cuando": "messenger_implementado", "ref": "usuarios/{usuarioId}" },
+      "perfilPublicado.sinUsuarioId": { "obligatorio": false, "prohibido": true, "regla": "Ningún perfil publicado sin usuarioId" }
+    },
+    "validacionesObligatorias": {
+      "descripcion": "validateIdentidadUsuario() en validar-schemas-registro.mjs",
+      "checks": [
+        "meta_identidadUsuario_existe",
+        "schema_cuentas_usuario_existe",
+        "perfiles_usuarioId_en_schemas_registro",
+        "solicitudes_categorias_usuarioId",
+        "contratos_perfiles_usuarioId",
+        "contratos_banners_usuarioId_anuncianteId",
+        "solicitudes_anuncios_usuarioId_o_uidAnunciante",
+        "pagos_usuarioId_documentado",
+        "denuncias_fk_documentadas",
+        "mensajeria_estadoMensajeria_documentado",
+        "visitante_upgrade_sin_nueva_cuenta",
+        "roles_multirol_documentado",
+        "admin_es_rol_no_tipoCuenta",
+        "favoritos_subcoleccion_documentada",
+        "perfilPrincipalId_perfilIds_documentado"
+      ]
+    },
+    "impactoMotores": {
+      "FieldEngine": "Lee perfiles/{perfilId}; valida estadoCuenta activa antes de wizard",
+      "ValidationEngine": "FK usuarioId + estados cuenta/verificación/mensajería",
+      "RenderEngine": "Snapshot en perfiles; usuarioId no expuesto en render público",
+      "Messenger": "estadoMensajeria + emisorId/receptorId + bloqueos subcolección",
+      "Contratos": "usuarioId obligatorio; perfilId nullable para visitante",
+      "Admin": "Vista cuenta unificada usuarios + joins perfiles/contratos/banners"
+    }
+  },
+  "validacionesComercialesObligatorias": {
+    "descripcion": "ValidationEngine y validar-schemas-registro.mjs deben comprobar (diseño; implementación futura en runtime)",
+    "checks": [
+      "existencia_precio_congelado",
+      "existencia_promocion_congelada",
+      "existencia_versionado_precios",
+      "existencia_versionado_promociones",
+      "existencia_contratos_activos",
+      "existencia_historial",
+      "promociones_separadas_de_precios",
+      "existencia_overrides",
+      "separacion_perfiles_banners",
+      "usuario_visitante_cuenta_pagada_sin_perfil_publico_inicial",
+      "compatibilidad_admin",
+      "compatibilidad_renovaciones",
+      "compatibilidad_vencimientos",
+      "compatibilidad_revision_admin",
+      "compatibilidad_revision_post_pago",
+      "compatibilidad_ia_arquitecto"
+    ]
+  },
+  "definitions": {
+    "fieldDescriptor": {
+      "type": "object",
+      "required": ["id", "label", "tipo"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "label": { "type": "string" },
+        "tipo": {
+          "type": "string",
+          "enum": [
+            "text", "textarea", "number", "decimal", "currency", "boolean", "enum", "select",
+            "tags", "checklist", "checkboxGroup", "image", "image[]", "file", "phone", "email",
+            "url", "rfc", "geo", "address", "mapPin", "schedule", "duration", "richtext",
+            "group", "serviceMenu", "productList", "platformList", "urlList", "roomList",
+            "eventList", "memberList", "badge"
+          ]
+        },
+        "privado": { "type": "boolean" },
+        "iaCopy": { "type": "boolean" },
+        "maxLength": { "type": "number" },
+        "min": { "type": "number" },
+        "max": { "type": "number" },
+        "opciones": { "type": "array", "items": { "type": "string" } },
+        "campos": { "type": "array", "items": { "type": "string" } },
+        "mapa": { "type": "boolean" },
+        "tonoPublico": { "type": "string" }
+      }
+    },
+    "plantillaArquetipo": {
+      "type": "object",
+      "required": ["tipoPerfil", "componentes", "fotosMin", "verificacionTipo"],
+      "properties": {
+        "tipoPerfil": { "type": "string" },
+        "heredaDe": { "type": "string" },
+        "componentes": {
+          "type": "object",
+          "required": ["resultados", "perfil"],
+          "properties": {
+            "resultados": { "type": "string" },
+            "perfil": { "type": "string" }
+          }
+        },
+        "camposPublicosResultados": { "type": "array", "items": { "type": "string" } },
+        "camposPublicosPerfil": { "type": "array", "items": { "type": "string" } },
+        "camposPrivados": { "type": "array", "items": { "type": "string" } },
+        "obligatoriosExtra": { "type": "array", "items": { "type": "string" } },
+        "opcionalesExtra": { "type": "array", "items": { "type": "string" } },
+        "fotosMin": { "type": "number", "minimum": 0 },
+        "fotosMax": { "type": "number", "minimum": 1 },
+        "verificacionTipo": { "type": "string" },
+        "keywordsIA": { "type": "array", "items": { "type": "string" } },
+        "textosAyuda": { "type": "object", "additionalProperties": { "type": "string" } }
+      }
+    },
+    "busquedaMetadata": {
+      "type": "object",
+      "description": "Metadatos de búsqueda por categoría/subcategoría — ver config-busqueda-categorias-schema.json",
+      "properties": {
+        "keywords": { "type": "array", "items": { "type": "string" } },
+        "aliases": { "type": "array", "items": { "type": "string" } },
+        "sinonimos": { "type": "array", "items": { "type": "string" } },
+        "palabrasRelacionadas": { "type": "array", "items": { "type": "string" } },
+        "erroresComunes": { "type": "array", "items": { "type": "string" } },
+        "prioridadBusqueda": { "type": "number", "minimum": 0, "maximum": 100 },
+        "estadoActivo": { "type": "boolean" }
+      }
+    },
+    "mapaRegistroEntry": {
+      "type": "object",
+      "description": "Fila de mapa-registro-categorias.json con extensión busqueda",
+      "required": ["sectorId", "subcategoriaId", "formularioId"],
+      "properties": {
+        "sectorId": { "type": "string" },
+        "categoriaPrincipal": { "type": "string" },
+        "categoriaPadre": { "type": "string", "const": "sectorId del padre — mismo que sectorId en subcategoría" },
+        "subcategoriaId": { "type": "string" },
+        "subcategoria": { "type": "string" },
+        "formularioId": { "type": "string" },
+        "tipoPerfil": { "type": "string" },
+        "arquetipo": { "type": "string" },
+        "busqueda": { "$ref": "#/definitions/busquedaMetadata" }
+      }
+    },
+    "subcategoriaEntry": {
+      "type": "object",
+      "required": ["subcategoriaId", "nombre", "arquetipo", "tipoPerfil"],
+      "properties": {
+        "subcategoriaId": { "type": "string", "minLength": 1 },
+        "nombre": { "type": "string" },
+        "sectorId": { "type": "string" },
+        "arquetipo": { "type": "string" },
+        "tipoPerfil": { "type": "string" },
+        "heredaDe": { "type": "string" },
+        "delta": { "type": "object" },
+        "keywordsIA": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+        "busqueda": { "$ref": "#/definitions/busquedaMetadata" },
+        "textosAyuda": { "type": "object" },
+        "coherenciaExtra": { "type": "array" }
+      }
+    },
+    "schemaRegistro": {
+      "type": "object",
+      "required": ["formularioId", "meta", "plantillasArquetipo", "subcategorias"],
+      "properties": {
+        "$schema": { "type": "string" },
+        "versionSchema": { "type": "string" },
+        "version": { "type": "string" },
+        "formularioId": {
+          "type": "string",
+          "enum": ["adultos", "persona_independiente", "profesionista_cedula", "negocio_empresa"]
+        },
+        "meta": {
+          "type": "object",
+          "required": ["fieldRegistry", "base", "verificacionTipos", "facturacionTipos", "coherenciaGlobal", "componentesUI", "firestoreRecomendado"],
+          "properties": {
+            "fieldRegistry": { "type": "object" },
+            "base": { "type": "object" },
+            "verificacionTipos": { "type": "object", "minProperties": 1 },
+            "facturacionTipos": { "type": "object", "minProperties": 1 },
+            "coherenciaGlobal": { "type": "array" },
+            "componentesUI": { "type": "object", "minProperties": 1 },
+            "firestoreRecomendado": { "type": "object" }
+          }
+        },
+        "plantillasArquetipo": { "type": "object", "minProperties": 1 },
+        "subcategorias": { "type": "array", "items": { "$ref": "#/definitions/subcategoriaEntry" } }
+      }
+    },
+    "schemaPreciosPerfiles": {
+      "type": "object",
+      "required": [
+        "formularioId",
+        "versionSchema",
+        "planes",
+        "preciosBase",
+        "resolucionPrecio",
+        "historialCambios",
+        "firestoreRecomendado"
+      ],
+      "properties": {
+        "formularioId": { "const": "config_precios_planes_perfiles" },
+        "versionSchema": { "type": "string" },
+        "planes": {
+          "type": "object",
+          "required": ["basico", "destacado", "premium", "vip"]
+        },
+        "preciosBase": { "type": "object" },
+        "resolucionPrecio": { "type": "object" },
+        "overrides": { "type": "object" },
+        "historialCambios": { "type": "object" },
+        "firestoreRecomendado": { "type": "object" },
+        "alineacionBanners": { "type": "object" }
+      }
+    }
+  },
+  "fieldEngine": {
+    "algoritmo": [
+      "1. Cargar meta.base del schema según formularioId",
+      "2. Cargar plantillasArquetipo[sub.arquetipo] (resolver heredaDe si aplica)",
+      "3. Aplicar subcategorias[].delta",
+      "4. Validar campos contra fieldRegistry + camposSistema",
+      "5. Exponer listas finales y reglas coherencia"
+    ]
+  },
+  "validationEngine": {
+    "fuentesReglas": ["meta.base.obligatorios", "plantilla.obligatoriosExtra", "delta.obligatoriosExtra", "coherenciaGlobal", "coherenciaExtra", "verificacionTipos", "facturacionTipos"]
+  },
+  "archivos": {
+    "registro": [
+      "scripts/config-registro-adultos-schema.json",
+      "scripts/config-registro-independiente-schema.json",
+      "scripts/config-registro-profesionista-schema.json",
+      "scripts/config-registro-negocio-schema.json",
+      "scripts/config-registro-visitante-schema.json"
+    ],
+    "precios": ["scripts/config-precios-planes-perfiles-schema.json"],
+    "promociones": [
+      "scripts/config-promociones-perfiles-schema.json",
+      "scripts/config-promociones-banners-schema.json"
+    ],
+    "contratos": ["scripts/config-contratos-carihub-schema.json"],
+    "estados": ["scripts/config-estados-revision-publicacion-schema.json"],
+    "mapa": ["scripts/mapa-registro-categorias.json"],
+    "busqueda": [
+      "scripts/config-busqueda-categorias-schema.json",
+      "scripts/config-busqueda-sin-resultado-schema.json",
+      "scripts/ejemplos-busqueda-categorias.json"
+    ],
+    "categoriasSugeridas": ["scripts/config-categorias-sugeridas-schema.json"],
+    "renderizado": [
+      "scripts/config-renderizado-dinamico-schema.json",
+      "scripts/config-registro-componentes-ui-schema.json"
+    ],
+    "validador": ["scripts/validar-schemas-registro.mjs"],
+    "identidadUsuario": [
+      "scripts/config-cuentas-usuario-schema.json",
+      "scripts/config-admin-arquitectura-completa-schema.json"
+    ]
+  }
+}

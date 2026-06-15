@@ -1,0 +1,490 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "$id": "https://carihub.app/schemas/spec-seo-landings.json",
+  "tipo": "SPEC_TECNICA",
+  "nombre": "SEO-Landings — Especificación técnica formal",
+  "versionSpec": "1.0.0",
+  "fecha": "2026-06-11",
+  "estado": "DISENO_INICIAL",
+  "implementacionAutorizada": false,
+  "modo": "Solo análisis, especificación, fixtures, auditoría y documentación — sin runtime/carpetas/mover/Firestore/deploy/commit; NO modifica planes/ADRs/actas/capas existentes",
+  "proposito": "Convertir las decisiones arquitectónicas aprobadas (PLAN-MAESTRO-SEO-LANDINGS, ADR-INDEXACION-ADULTOS, ADR-URL-CANONICA-PERFILES, ADR-RENDER-STRATEGY) en una SPEC formal, completa, validable y congelable para SEO/Landings de CariHub/Cariñosas.",
+  "principioRector": "SEO es capa TRANSVERSAL de presentación indexable: deriva metadatos de datos publicados (FieldEngine snapshot + RenderEngine), nunca duplica fuente de verdad ni expone datos privados. Geo-primero. Solo superficies públicas indexables. Sin thin content (ThinContentGuard). Adultos: política híbrida O8 (ADR-INDEXACION-ADULTOS). IA SEO solo sugiere; Admin aprueba. RenderEngine inyecta head; SEO no pinta HTML paralelo.",
+
+  "dependenciasCongeladas": {
+    "sharedCore": "shared-core-2026-06-10@1.0.0 (ACTA-CONGELAMIENTO-SHARED-CORE)",
+    "renderEngine": "renderengine-2026-06-10@1.0.0 (ACTA-CONGELAMIENTO-RENDERENGINE)",
+    "fieldEngine": "fieldengine-2026-06-10@1.0.1",
+    "validationEngine": "validationengine-2026-06-10@1.1.0",
+    "catalogo": "catalogo-2026-06-10@1.0.0",
+    "seguridadMvp": "seguridad-2026-06-10@1.0.0"
+  },
+  "decisionesConsumidas": {
+    "ADR-URL-CANONICA-PERFILES": "Canónico perfil/negocio: /perfil/{perfilId}/{slug}; landings geo separadas; alias → 301",
+    "ADR-RENDER-STRATEGY": "Híbrido snapshot-first; prerender/SSG para Home/landings; snapshot estático al publicar perfil",
+    "ADR-INDEXACION-ADULTOS": "O8 híbrida: MVP noindex perfiles adultos individuales; index hubs genéricos +18; futuro verificados no explícitos"
+  },
+  "planesReferenciados": [
+    "PLAN-MAESTRO-SEO-LANDINGS v1.0.0",
+    "PLAN-MAESTRO-APP-PUBLICA v1.0.0",
+    "PLAN-MAESTRO-BANNERS-PUBLICIDAD v1.0.0",
+    "ANEXO-ESTRATEGICO-BANNERS-PUBLICIDAD v1.0.0",
+    "PLAN-MAESTRO-INTERACCIONES v1.0.0",
+    "PLAN-MAESTRO-THEMEENGINE v1.0.0",
+    "PLAN-MAESTRO-AGENTES-IA v1.0.0",
+    "ANALISIS-REEVALUACION-INDEXACION-PERFILES-ADULTOS v1.0.0"
+  ],
+
+  "modulosInternos": [
+    "MetaResolver", "SchemaBuilder", "CanonicalResolver", "OpenGraphBuilder", "BreadcrumbBuilder",
+    "SitemapGenerator", "RobotsPolicy", "LandingRegistry", "ThinContentGuard", "IndexationController",
+    "GeoTaxonomyMapper", "HreflangResolver (futuro)", "SeoModerationQueue", "SeoIAAdvisor"
+  ],
+
+  "superficiesSeo": {
+    "indexablesMvp": [
+      { "id": "home", "patron": "/", "index": "index,follow", "schema": ["WebSite", "SearchAction"] },
+      { "id": "landing_pais", "patron": "/{pais}", "index": "condicional", "thinContentGuard": true },
+      { "id": "landing_estado", "patron": "/{pais}/{estado}", "index": "condicional", "thinContentGuard": true },
+      { "id": "landing_ciudad", "patron": "/{pais}/{estado}/{ciudad}", "index": "condicional", "thinContentGuard": true },
+      { "id": "landing_categoria", "patron": "/categoria/{sector}", "index": "condicional", "thinContentGuard": true },
+      { "id": "landing_pais_categoria", "patron": "/{pais}/{categoria}", "index": "condicional", "fase": "futuro" },
+      { "id": "landing_estado_categoria", "patron": "/{pais}/{estado}/{categoria}", "index": "condicional", "fase": "futuro" },
+      { "id": "landing_ciudad_categoria", "patron": "/{pais}/{estado}/{ciudad}/{categoria}", "index": "condicional", "prioridad": "alta", "thinContentGuard": true },
+      { "id": "landing_ciudad_subcategoria", "patron": "/{pais}/{estado}/{ciudad}/{sector}/{subcategoriaId}", "index": "condicional", "thinContentGuard": true, "fase": "futuro" },
+      { "id": "perfil_publico_no_adulto", "patron": "/perfil/{perfilId}/{slug}", "index": "condicional", "requiere": "PUBLICADO + no adulto restringido + verificado según política" },
+      { "id": "negocio_publico", "patron": "/perfil/{perfilId}/{slug}", "index": "condicional", "schema": "LocalBusiness|ProfessionalService" },
+      { "id": "paginas_legales", "patron": "/legal/*", "index": "index,follow" }
+    ],
+    "noindexSiempre": [
+      { "id": "resultados", "patron": "/resultados*", "robots": "noindex,follow", "canonical": "base sin query infinitos o landing geo+cat equivalente", "nota": "Resultados dinámicos noindex/canonicalizados (ADR O7)" },
+      { "id": "resultados_query", "patron": "/*?*", "robots": "noindex,follow", "condicion": "query de filtro/orden/paginación infinita" },
+      { "id": "perfil_adulto_mvp", "robots": "noindex,follow", "nota": "ADR-INDEXACION-ADULTOS MVP" },
+      { "id": "perfil_no_verificado", "robots": "noindex,nofollow" },
+      { "id": "perfil_explicito", "robots": "noindex,nofollow,noarchive" },
+      { "id": "perfil_borrador", "robots": "noindex,nofollow" },
+      { "id": "perfil_suspendido", "robots": "noindex", "http": "410 si eliminado definitivo" },
+      { "id": "perfil_revision", "robots": "noindex,nofollow" },
+      { "id": "anunciante_publico", "robots": "noindex", "redirect": "301 a landing/perfil si aplica" },
+      { "id": "dashboard", "robots": "noindex,nofollow", "disallow": true },
+      { "id": "admin", "robots": "noindex,nofollow", "disallow": true },
+      { "id": "messenger", "robots": "noindex,nofollow", "disallow": true },
+      { "id": "cuenta", "robots": "noindex,nofollow", "disallow": true },
+      { "id": "estados", "robots": "noindex,noarchive", "fase": "futuro" },
+      { "id": "lives", "robots": "noindex,noarchive", "fase": "futuro" },
+      { "id": "publicaciones", "robots": "noindex", "fase": "futuro" },
+      { "id": "contenido_premium", "robots": "noindex,nofollow" },
+      { "id": "actividad_contactos", "robots": "noindex", "nota": "ANEXO-RED-CONTACTOS feed privado Dashboard" },
+      { "id": "cerca_de_mi", "robots": "noindex", "canonical": "landing ciudad o ciudad+categoría equivalente" }
+    ],
+    "futuras": [
+      "landing_municipio", "landing_zona", "landing_categoria_servicio", "landing_campanas",
+      "landing_banners_seo", "landing_promociones", "landing_editorial", "landing_internacional", "landing_multidioma"
+    ]
+  },
+
+  "urlsYSlugs": {
+    "fuente": "ADR-URL-CANONICA-PERFILES v1.0.0 (consumida, no redefinida)",
+    "canonicoPerfilNegocio": "/perfil/{perfilId}/{slug}",
+    "reglaResolucion": "Recurso resuelve SIEMPRE por perfilId; slug decorativo; canonical apunta a forma con perfilId",
+    "legacy": {
+      "actual": "perfil.html?id={usuarioId}",
+      "transicion": "301 permanente a /perfil/{perfilId}/{slug} al activar RenderEngine",
+      "bridge": "perfilId = usuarioId para cuentas legacy (ACTA-MIGRACION-USUARIOS-PERFILES)"
+    },
+    "landingsGeo": "/{pais}/{estado}/{ciudad}[/{categoria}[/{subcategoriaId}]]",
+    "landingsCategoria": "/categoria/{sector}[/{subcategoriaId}]",
+    "alias301": ["/p/{perfilId}", "/negocio/{slug}", "/anunciante/{slug}"],
+    "normalizacion": {
+      "acentos": "NFD + eliminar diacríticos → ASCII",
+      "caracteresEspeciales": "solo a-z0-9 y guión; espacios→guion; colapsar guiones; minúsculas",
+      "duplicados": "perfilId único; slug no requiere unicidad global",
+      "cambioSlug": "301 al canónico actual (perfilId estable)",
+      "cambioCiudadCategoria": "301 si cambia landing geo; perfil canónico NO cambia (perfilId)",
+      "trailingSlash": "sin trailing slash canónico",
+      "httpHttps": "301 a https",
+      "mayusculas": "301 a minúsculas"
+    },
+    "queryParamsActuales": {
+      "perfil.html?id=": "legacy → 301",
+      "resultados filtros": "noindex; canonical a base o landing geo+cat",
+      "paginacion": "rel=next/prev + canonical página 1 o self-canonical paginada"
+    },
+    "redirects": {
+      "301": ["legacy query-param", "alias vanity", "cambio slug", "http→https", "trailing slash", "mayúsculas", "landing duplicada→canónica superior"],
+      "302": ["mantenimiento temporal", "A/B temporal"]
+    },
+    "prohibidoEnUrl": ["PII", "teléfono", "email", "INE", "datos sensibles"]
+  },
+
+  "indexacion": {
+    "valoresRobots": {
+      "index": "permitir indexación",
+      "noindex": "no indexar",
+      "follow": "seguir enlaces",
+      "nofollow": "no seguir enlaces",
+      "noarchive": "no cachear (stories/lives/adultos)",
+      "nosnippet": "sin snippet (perfiles sensibles)",
+      "noimageindex": "no indexar imágenes",
+      "max-snippet": "limitar snippet",
+      "max-image-preview": "none|standard|large"
+    },
+    "matrizEstadoPerfil": {
+      "publicado_no_adulto_verificado": { "index": "index,follow", "sitemap": "si", "condicion": "no categoría adulta restringida MVP" },
+      "publicado_adulto_mvp": { "index": "noindex,follow", "sitemap": "no", "nota": "ADR O8 MVP" },
+      "publicado_adulto_verificado_no_explicito_futuro": { "index": "index condicional", "sitemap": "condicional", "fase": "futuro nacional", "nota": "ANALISIS-REEVALUACION opción F" },
+      "no_verificado": { "index": "noindex,nofollow", "sitemap": "no" },
+      "explicito": { "index": "noindex,nofollow,noarchive", "sitemap": "no" },
+      "borrador": { "index": "noindex,nofollow", "sitemap": "no" },
+      "revision": { "index": "noindex,nofollow", "sitemap": "no" },
+      "suspendido": { "index": "noindex", "sitemap": "no", "http": "410 si eliminado" },
+      "vencido": { "index": "noindex", "sitemap": "no" }
+    },
+    "thinContent": {
+      "guard": "ThinContentGuard",
+      "accionInsuficiente": "noindex + canonical a landing superior (estado/país/sector)",
+      "accionDuplicado": "self-canonical o 301 a canónica preferida"
+    },
+    "robotsTxt": {
+      "allow": ["/", "/perfil/", "/categoria/", "/mexico/", "/legal/"],
+      "disallow": ["/admin", "/dashboard", "/cuenta", "/messenger", "/preview", "/*?borrador=", "/scripts/"],
+      "sitemap": "https://{dominio}/sitemap.xml",
+      "botsIA": {
+        "GPTBot": "Disallow perfiles sensibles; Allow landings genéricas",
+        "Google-Extended": "Allow landings genéricas; Disallow /perfil/ adultos",
+        "PerplexityBot": "Disallow /perfil/; Allow hubs",
+        "ClaudeBot": "Disallow /perfil/; Allow hubs",
+        "CCBot": "Disallow /perfil/"
+      }
+    },
+    "sitemaps": {
+      "modelo": "sitemap index + segmentados",
+      "segmentos": ["sitemap-public.xml", "sitemap-geo.xml", "sitemap-categorias.xml", "sitemap-landings.xml", "sitemap-perfiles.xml (futuro no adultos)", "sitemap-negocios.xml", "sitemap-legales.xml", "sitemap-imagenes-moderadas.xml"],
+      "exclusiones": ["noindex", "borradores", "suspendidos", "vencidos", "adultos restringidos MVP", "thin content", "query strings"],
+      "limites": "max 50000 URLs / 50MB por archivo; particionar",
+      "lastmod": "desde snapshot publicadoAt",
+      "prioridad": "home 1.0; ciudad+cat 0.8; perfil 0.6; legal 0.3",
+      "changefreq": "weekly landings; daily perfiles activos; monthly legal"
+    }
+  },
+
+  "contenidoAdulto": {
+    "politica": "ADR-INDEXACION-ADULTOS O8 (consumida)",
+    "mvp": {
+      "noindex": ["perfiles adultos individuales", "resultados dinámicos adultos", "perfiles no verificados", "contenido explícito", "stories/lives"],
+      "index": ["landings geo adultas genéricas con contenido suficiente (+18)", "landings categoría/geo+categoría con ThinContentGuard"],
+      "ageGate": "+18 cookie/consentimiento; paridad crawler (no cloaking)",
+      "safeSearch": "rating: adult + RTA meta",
+      "og": "solo landings genéricas; imagen moderada; nunca foto explícita perfil",
+      "snippets": "nosnippet/max-snippet:0 en perfiles sensibles; max-image-preview:none"
+    },
+    "futuro": {
+      "habilitable": "perfiles verificados no explícitos por mercado legal",
+      "condiciones": ["INE+selfie+mayorEdad", "contenido no explícito", "legalidad por país", "OG moderado SeoModerationQueue"]
+    },
+    "motoresIA": {
+      "noai": "meta donde motor respete",
+      "noimageai": "en media sensible",
+      "robotsTxt": "reglas user-agent IA",
+      "origen": "PrivacyGuard nunca sirve PII/media explícita en HTML público"
+    },
+    "riesgoCloaking": "age gate NO debe servir HTML distinto al crawler; etiquetado adult + paridad contenido"
+  },
+
+  "metadatos": {
+    "campos": {
+      "title": { "max": 60, "fuente": "MetaResolver desde camposPublicos", "fallback": "tipoPerfil + geo + CariHub" },
+      "metaDescription": { "max": 160, "fuente": "tagline/descripcionPublica", "fallback": "plantilla por arquetipo" },
+      "canonical": { "absoluto": true, "fuente": "CanonicalResolver ADR-URL" },
+      "robots": { "fuente": "IndexationController" },
+      "ogTitle": { "fallback": "title" },
+      "ogDescription": { "fallback": "metaDescription" },
+      "ogImage": { "minWidth": 1200, "fallback": "imagen por tipoPerfil/categoría", "moderacion": "SeoModerationQueue adultos" },
+      "ogUrl": { "igual": "canonical" },
+      "twitterCard": "summary_large_image",
+      "jsonLd": "SchemaBuilder",
+      "hreflang": { "fase": "futuro internacional" }
+    },
+    "porSuperficie": {
+      "home": ["WebSite", "SearchAction", "Organization"],
+      "landing_geo": ["WebPage", "BreadcrumbList", "Place"],
+      "landing_categoria": ["WebPage", "BreadcrumbList", "ItemList"],
+      "perfil": ["Person|LocalBusiness", "BreadcrumbList"],
+      "negocio": ["LocalBusiness|ProfessionalService", "BreadcrumbList"]
+    },
+    "sanitizacion": "strip HTML; escape entities; PrivacyGuard pre-meta",
+    "privacyGuard": "Obligatorio antes de generar cualquier meta/schema/OG"
+  },
+
+  "schemaOrg": {
+    "tiposPermitidos": ["WebSite", "WebPage", "BreadcrumbList", "LocalBusiness", "Organization", "Person (limitado)", "Service", "ItemList", "Place", "FAQPage (futuro)", "Offer (futuro)"],
+    "tiposProhibidosEnAdultos": ["AggregateRating inventado", "Review falso", "Person con PII"],
+    "datosProhibidos": ["telefonoPrivado", "whatsappPrivado", "ine", "rfc", "direccionExactaPrivada", "emailPrivado"],
+    "datosPermitidos": ["nombrePublico", "geoAgregada", "categoria", "horariosPublicos", "urlCanonica", "imagenModerada"],
+    "generacion": "SchemaBuilder desde snapshot publicado; validación Rich Results; sin schema engañoso"
+  },
+
+  "renderEngineIntegracion": {
+    "fuenteRender": "RenderEngine 1.0.0 (congelado)",
+    "fuenteDatos": "FieldEngine snapshotAlPublicar (ProfileSnapshot)",
+    "fuenteTokens": "Shared/Core 1.0.0",
+    "fuenteReglas": "ValidationEngine 1.0.1 (acciones seo futuras)",
+    "estrategia": "ADR-RENDER-STRATEGY snapshot-first híbrido",
+    "modoRenderPorSuperficie": {
+      "home": "prerender/SSG",
+      "landings_geo_cat": "prerender/SSG + regeneración batch",
+      "perfil": "snapshot estático al publicar + CDN",
+      "resultados": "SSR futuro o noindex CSR temporal"
+    },
+    "contrato": {
+      "entrada": "RenderSeoInput (SeoContext + ProfileSnapshot|LandingContext)",
+      "salida": "RenderSeoOutput (MetadataPayload + SchemaPayload + IndexationPolicy aplicada)",
+      "renderHash": "hash(snapshotVersion + componente + tokens + locale + seoPolicyVersion)",
+      "canonicalHash": "hash(perfilId + slug + geoKey + categoriaKey)",
+      "invalidacionCache": "al republicar perfil (perfilId, schemaVersion); al aprobar landing Admin",
+      "errores": {
+        "404": "recurso no encontrado / no publicado",
+        "410": "eliminado definitivamente",
+        "301": "redirect canónico",
+        "302": "temporal"
+      }
+    },
+    "privacyGuard": "Gate obligatorio pre-renderHead; lista negra SPEC-RENDERENGINE",
+    "contenidoMinimoRender": "fallback seguro si snapshot incompleto; nunca throw"
+  },
+
+  "landingContentRequirements": {
+    "umbrales": {
+      "pais": { "minEstadosActivos": 1, "textoEditorialMinChars": 300 },
+      "estado": { "minCiudadesActivas": 1, "textoEditorialMinChars": 200 },
+      "ciudad": { "minPerfilesPublicados": 5, "textoEditorialMinChars": 150 },
+      "categoria": { "textoEditorialMinChars": 400, "minPerfilesNacional": 10 },
+      "subcategoria": { "textoEditorialMinChars": 300, "minPerfilesNacional": 5, "fallback": "canonical a sector si thin" },
+      "ciudad_categoria": { "minPerfilesGeoCat": 3, "textoEditorialMinChars": 150 },
+      "ciudad_subcategoria": { "minPerfilesGeoSubcat": 2, "textoEditorialMinChars": 100 }
+    },
+    "elementosRequeridos": ["titulo H1 único", "texto descriptivo", "breadcrumb", "listado perfiles/negocios (si aplica)", "CTA buscar", "meta title/description"],
+    "elementosOpcionales": ["FAQ futura", "banners slot", "promociones", "filtros no indexables"],
+    "accionNoCumple": "noindex + canonical superior + excluir sitemap"
+  },
+
+  "bannersYSeo": {
+    "reglas": [
+      "Banners NO crean thin content (landing debe cumplir umbral sin contar banner)",
+      "Creativos banner NO indexables; no afectan canonical",
+      "Banners NO contaminan title/description/schema (slot separado DOM)",
+      "Imágenes banner: lazy loading, alt moderado, dimensiones fijas (CLS)",
+      "Campanas geo/categoría/ciudad: landing indexable; creativo no",
+      "Core Web Vitals: lazy below-fold; reservar espacio slot"
+    ],
+    "indexables": "landing contextual con slot; NO el creativo",
+    "noIndexables": "creativo, preview borrador, dashboard inventario"
+  },
+
+  "interaccionesYSeo": {
+    "noIndexables": ["visitas", "favoritos", "estados", "lives", "publicaciones", "reposts", "actividad contactos", "contenido premium", "propinas", "métricas sociales"],
+    "separacion": "Señales internas ranking interno ≠ SEO público; origen humano/sistema/indexador/agente (Interacciones)",
+    "boost": "BoostEngine afecta orden interno, NO contadores SEO"
+  },
+
+  "themeEngineYSeo": {
+    "restricciones": [
+      "Temas NO modifican canonical, robots, title, meta, JSON-LD",
+      "Temas NO inyectan HTML/CSS/JS libre (solo tokens/componentes autorizados)",
+      "Temas NO ocultan contenido crítico (cloaking)",
+      "Contraste WCAG; mobile-first; imágenes responsive",
+      "CWV: no bloquear LCP con CSS tema"
+    ]
+  },
+
+  "agentesIAYSeo": {
+    "permitido": ["sugerir title/description", "sugerir FAQ", "detectar thin content", "detectar duplicados", "sugerir canonical", "sugerir mejoras"],
+    "prohibido": ["publicar sin aprobación humana", "indexar sin autorización", "exponer datos sensibles", "generar contenido engañoso", "escribir robots/sitemap directamente"],
+    "auditTrail": "SeoAgentSuggestion registrada; humano aprueba (Admin)",
+    "reglasTransversales": "RT-08 deny-write; RT-01 solo lectura datos"
+  },
+
+  "adminSeo": {
+    "acciones": ["aprobar landing", "index manual override", "noindex manual", "canonical manual controlado", "revisar thin content", "revisar duplicados", "revisar adulto/OG", "revisar metadatos", "revisar sitemap", "aprobar sugerencia IA"],
+    "permisos": "RBAC PLAN-MAESTRO-ADMIN; scope geo/categoría",
+    "dobleConfirmacion": ["index manual perfil adulto futuro", "desindexar masivo", "canonical override global"],
+    "auditoria": "SeoAuditEvent + logsAdmin; bitácora obligatoria"
+  },
+
+  "requisitosFuncionales": [
+    { "id": "RF-SEO-01", "desc": "Resolver URL entrante a SeoRoute + superficie" },
+    { "id": "RF-SEO-02", "desc": "Generar MetadataPayload desde snapshot/campos públicos" },
+    { "id": "RF-SEO-03", "desc": "Aplicar CanonicalPolicy (ADR-URL)" },
+    { "id": "RF-SEO-04", "desc": "Aplicar IndexationPolicy + RobotsPolicy" },
+    { "id": "RF-SEO-05", "desc": "Generar sitemaps segmentados excluyendo noindex" },
+    { "id": "RF-SEO-06", "desc": "Aplicar noindex automático por estado/thin/adulto" },
+    { "id": "RF-SEO-07", "desc": "ThinContentGuard evalúa umbral y canonical superior" },
+    { "id": "RF-SEO-08", "desc": "Bloquear contenido privado (PrivacyGuard)" },
+    { "id": "RF-SEO-09", "desc": "Bloquear/indexar adulto según ADR-INDEXACION-ADULTOS" },
+    { "id": "RF-SEO-10", "desc": "Generar Schema.org JSON-LD válido" },
+    { "id": "RF-SEO-11", "desc": "Integrar RenderEngine.renderHead con SeoContext" },
+    { "id": "RF-SEO-12", "desc": "Integrar Admin override IndexationController" },
+    { "id": "RF-SEO-13", "desc": "Integrar IA sugerencias con cola aprobación" },
+    { "id": "RF-SEO-14", "desc": "Generar matrices URL→política exportables" },
+    { "id": "RF-SEO-15", "desc": "Validar fixtures golden documentales" },
+    { "id": "RF-SEO-16", "desc": "301 legacy perfil.html?id= → canónico" },
+    { "id": "RF-SEO-17", "desc": "Generar robots.txt con reglas bots IA" },
+    { "id": "RF-SEO-18", "desc": "Age gate +18 sin cloaking en superficies adultas" }
+  ],
+
+  "requisitosNoFuncionales": [
+    { "id": "RNF-SEO-01", "desc": "LCP < 2.5s en landings prerender" },
+    { "id": "RNF-SEO-02", "desc": "CLS < 0.1 (banners lazy + dimensiones)" },
+    { "id": "RNF-SEO-03", "desc": "INP < 200ms superficies públicas" },
+    { "id": "RNF-SEO-04", "desc": "Privacidad: cero PII en meta/schema/OG" },
+    { "id": "RNF-SEO-05", "desc": "Seguridad: sanitización meta; no XSS en head" },
+    { "id": "RNF-SEO-06", "desc": "Escalabilidad nacional: sitemaps particionados" },
+    { "id": "RNF-SEO-07", "desc": "Escalabilidad internacional: hreflang futuro" },
+    { "id": "RNF-SEO-08", "desc": "Mantenibilidad: políticas versionadas seoPolicyVersion" },
+    { "id": "RNF-SEO-09", "desc": "Compatibilidad Firebase Hosting + CDN" },
+    { "id": "RNF-SEO-10", "desc": "Cloud Functions futura para SSR/sitemap gen" },
+    { "id": "RNF-SEO-11", "desc": "Accesibilidad WCAG 2.2 AA landings" },
+    { "id": "RNF-SEO-12", "desc": "Mobile-first indexación y render" },
+    { "id": "RNF-SEO-13", "desc": "Observabilidad: logs generación sitemap/meta" },
+    { "id": "RNF-SEO-14", "desc": "Auditoría: trail Admin/IA SEO" }
+  ],
+
+  "contratosYTipos": {
+    "SeoContext": { "superficie": "SeoSurface", "locale": "string", "geoKey": "object|null", "categoriaKey": "object|null", "perfilSnapshot": "ProfileSnapshot|null", "modoRender": "enum", "seoPolicyVersion": "string" },
+    "SeoSurface": "enum: home|resultados|perfil|negocio|anunciante|landing_pais|landing_estado|landing_ciudad|landing_categoria|landing_subcategoria|landing_geo_categoria|landing_cerca_de_mi|legal|...",
+    "SeoRoute": { "path": "string", "params": "object", "superficie": "SeoSurface", "legacy": "boolean" },
+    "CanonicalPolicy": { "url": "string absoluta", "selfReferential": "boolean", "superiorFallback": "string|null" },
+    "IndexationPolicy": { "robots": "string", "indexable": "boolean", "reason": "string", "overrideAdmin": "boolean" },
+    "RobotsPolicy": { "meta": "string", "xRobotsTag": "string|null", "robotsTxt": "string|null" },
+    "SitemapEntry": { "loc": "string", "lastmod": "ISO8601", "changefreq": "string", "priority": "number" },
+    "MetadataPayload": { "title": "string", "description": "string", "canonical": "string", "robots": "string", "hreflang": "array|null" },
+    "OpenGraphPayload": { "ogTitle": "string", "ogDescription": "string", "ogImage": "string", "ogUrl": "string", "ogType": "string" },
+    "TwitterCardPayload": { "card": "string", "title": "string", "description": "string", "image": "string" },
+    "SchemaPayload": { "jsonLd": "object[]", "types": "string[]" },
+    "LandingContentRequirements": { "superficie": "SeoSurface", "umbrales": "object", "cumple": "boolean" },
+    "ThinContentDecision": { "indexable": "boolean", "canonicalSuperior": "string|null", "motivo": "string" },
+    "AdultIndexationDecision": { "indexable": "boolean", "robots": "string", "ageGate": "boolean", "safeSearchRating": "string", "motivo": "string" },
+    "RenderSeoInput": { "seoContext": "SeoContext", "snapshot": "ProfileSnapshot|LandingSnapshot", "privacyGuardPassed": "boolean" },
+    "RenderSeoOutput": { "metadata": "MetadataPayload", "openGraph": "OpenGraphPayload", "twitter": "TwitterCardPayload", "schema": "SchemaPayload", "indexation": "IndexationPolicy", "renderHash": "string", "canonicalHash": "string" },
+    "SeoAuditEvent": { "actorId": "string", "accion": "string", "targetUrl": "string", "diff": "object", "timestamp": "ISO8601" },
+    "SeoAdminAction": { "tipo": "enum", "requiereDobleConfirmacion": "boolean", "scope": "object" },
+    "SeoAgentSuggestion": { "suggestionId": "string", "tipo": "enum", "payload": "object", "estado": "pendiente|aprobada|rechazada", "auditTrail": "array" }
+  },
+
+  "matrices": {
+    "urlRender": {
+      "/": "renderHome + MetaResolver",
+      "/resultados*": "renderResults + noindex policy",
+      "/perfil/{id}/{slug}": "renderProfile + IndexationController",
+      "/{pais}/{estado}/{ciudad}/{cat}": "renderLanding + ThinContentGuard",
+      "/categoria/{sector}": "renderLanding + ThinContentGuard"
+    },
+    "urlIndexacion": {
+      "home": "index,follow",
+      "resultados": "noindex,follow",
+      "resultados?filtro=": "noindex,follow",
+      "perfil_adulto_mvp": "noindex,follow",
+      "perfil_no_verificado": "noindex,nofollow",
+      "perfil_explicito": "noindex,nofollow,noarchive",
+      "perfil_publicado_estandar": "index,follow",
+      "negocio_publicado": "index,follow",
+      "landing_ciudad_categoria_ok": "index,follow",
+      "landing_thin": "noindex,follow + canonical superior",
+      "dashboard_admin_messenger": "noindex,nofollow"
+    },
+    "urlCanonical": {
+      "perfil_slug_incorrecto": "canonical /perfil/{perfilId}/{slugCorrecto}",
+      "perfil_legacy": "301 → canónico",
+      "resultados_filtros": "canonical /resultados base o landing geo+cat",
+      "paginacion": "self-canonical o canonical p1",
+      "landing_duplicada": "canonical landing preferida"
+    },
+    "urlSitemap": {
+      "home": "sitemap-public",
+      "landing_geo_index": "sitemap-geo",
+      "landing_cat_index": "sitemap-categorias",
+      "perfil_index": "sitemap-perfiles",
+      "negocio_index": "sitemap-negocios",
+      "noindex": "EXCLUIDO"
+    },
+    "landingContenidoMinimo": "ver landingContentRequirements.umbrales",
+    "landingSchema": {
+      "pais": ["WebSite", "BreadcrumbList"],
+      "ciudad_categoria": ["WebPage", "BreadcrumbList", "ItemList"],
+      "perfil": ["Person", "BreadcrumbList"],
+      "negocio": ["LocalBusiness", "BreadcrumbList"]
+    },
+    "landingIndexNoindex": {
+      "cumple_umbral": "index",
+      "no_cumple": "noindex + canonical superior",
+      "adulto_hub_generico": "index +18",
+      "adulto_perfil_mvp": "noindex"
+    },
+    "paginaRobots": "ver superficiesSeo.indexablesMvp + noindexSiempre",
+    "paginaMetadatos": "ver metadatos.porSuperficie",
+    "contenidoAdultoPoliticaSeo": {
+      "explicito": "noindex; sin OG; max-image-preview:none",
+      "sugerente_mvp": "noindex perfil; index hub",
+      "verificado_no_explicito_futuro": "index condicional",
+      "hub_generico": "index +18 + OG moderado"
+    },
+    "tipoPerfilPoliticaSeo": {
+      "persona_adulto": "noindex MVP",
+      "persona_estandar": "index si publicado",
+      "negocio": "index condicionado",
+      "anunciante": "noindex URL pública"
+    },
+    "estadoPerfilIndexacion": "ver indexacion.matrizEstadoPerfil",
+    "bannersImpactoSeo": {
+      "creativo": "no indexable; no meta",
+      "landing_con_slot": "indexable si cumple umbral",
+      "cls": "lazy + dimensiones reservadas"
+    },
+    "interaccionesIndexacion": "todo noindex (ver interaccionesYSeo)",
+    "themeEngineRestricciones": "ver themeEngineYSeo",
+    "agentesIaAccionAprobacion": {
+      "sugerir_meta": "IA sugiere → Admin aprueba",
+      "indexar": "solo Admin humano",
+      "publicar": "solo Admin humano"
+    },
+    "adminSeoPermisoAccion": {
+      "super_admin": ["index override", "sitemap regen", "canonical global"],
+      "moderador": ["aprobar OG adulto", "thin content mark"],
+      "operador_scope": ["aprobar landing en su geo/cat"]
+    },
+    "errorHttp": {
+      "404": "no encontrado / no publicado",
+      "410": "eliminado",
+      "301": "redirect permanente",
+      "302": "redirect temporal"
+    }
+  },
+
+  "criteriosAceptacion": [
+    "Toda superficie indexable tiene MetadataPayload + canonical + robots + JSON-LD",
+    "Ningún perfil adulto MVP en sitemap ni index",
+    "Resultados dinámicos noindex",
+    "ThinContentGuard activo en landings geo/cat",
+    "Legacy perfil.html?id= redirige 301",
+    "PrivacyGuard bloquea PII en meta/schema",
+    "IA no publica/indexa sin aprobación",
+    "Admin override auditado",
+    "Fixtures golden PASS",
+    "No contradice ADRs congelados/consumidos"
+  ],
+
+  "fixturesGolden": "scripts/fixtures-seo-landings-golden.json",
+  "validacion": {
+    "scriptFuturo": "scripts/validar-spec-seo-landings.mjs",
+    "entrada": ["SPEC-SEO-LANDINGS.json", "fixtures-seo-landings-golden.json"],
+    "salida": "validacion-spec-seo-landings-report.json"
+  },
+
+  "noModifica": [
+    "PLAN-MAESTRO-SEO-LANDINGS, ADR-*, ACTA-*, SPEC-RENDERENGINE, capas congeladas",
+    "Producción, Firestore, deploy, commit"
+  ],
+  "changelog": {
+    "1.0.0": "SPEC formal SEO-Landings: 20 secciones (superficies, URLs, indexación, adulto, metadatos, Schema.org, sitemaps, RenderEngine, landings mínimo, banners, interacciones, ThemeEngine, IA, Admin, RF/RNF, contratos, matrices, fixtures, criterios aceptación). Consume ADR-INDEXACION-ADULTOS O8, ADR-URL-CANONICA, ADR-RENDER-STRATEGY."
+  }
+}

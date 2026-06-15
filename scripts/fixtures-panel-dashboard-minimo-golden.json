@@ -1,0 +1,186 @@
+{
+  "version": "2.0.0",
+  "specVersion": "1.0.1",
+  "matrizRef": "MATRIZ-RUTAS-NAV-CANONICA v1.0.0",
+  "descripcion": "Golden fixtures Dashboard Operativo v2.0.0 — PDM-01..10 alineados SPEC v1.0.1 + MATRIZ canon (no runtime).",
+  "fixtures": [
+    {
+      "id": "PDM-01",
+      "nombre": "Perfil borrador — sin contrato activo",
+      "entrada": {
+        "usuarioId": "uid_borrador_001",
+        "perfilId": "uid_borrador_001",
+        "estadoRevision": "borrador",
+        "contratoActivo": null,
+        "verificacion": { "email": false, "ine": "pendiente", "selfie": "pendiente" }
+      },
+      "salidaEsperada": {
+        "ruta": "/cuenta/perfil",
+        "modulosVisibles": ["DP-01", "DP-02", "DP-04"],
+        "modulosOcultos": ["DP-08 detalle_pagos"],
+        "DP-01": { "label": "Borrador", "badge": "warning" },
+        "CTAs": [{ "modulo": "DP-02", "label": "Completar perfil", "href": "/registro/editar/uid_borrador_001" }],
+        "sidebar": ["nav_resumen", "nav_publico", "nav_fotos", "nav_verificacion"],
+        "emptyState": "borrador_incompleto"
+      }
+    },
+    {
+      "id": "PDM-02",
+      "nombre": "Perfil activo — contrato vigente",
+      "entrada": {
+        "usuarioId": "uid_activo_001",
+        "perfilId": "uid_activo_001",
+        "estadoRevision": "activo",
+        "contratoActivo": {
+          "contratoId": "ctr_001",
+          "planContratado": "basico",
+          "fechaVencimiento": "2026-07-11T00:00:00Z",
+          "estadoContrato": "activo",
+          "diasRestantes": 30
+        },
+        "verificacion": { "email": true, "ine": "aprobado", "selfie": "aprobado" }
+      },
+      "salidaEsperada": {
+        "ruta": "/cuenta/perfil",
+        "modulosVisibles": ["DP-01", "DP-02", "DP-06", "DP-08", "DP-09"],
+        "DP-01": { "label": "Activo", "badge": "success", "diasRestantes": 30 },
+        "CTAs": [
+          { "modulo": "DP-02", "href": "/registro/editar/uid_activo_001" },
+          { "modulo": "DP-03", "href": "/registro/editar/uid_activo_001?seccion=fotos" }
+        ],
+        "verPublico": "/perfil/uid_activo_001/{slug}",
+        "edicionInline": false
+      }
+    },
+    {
+      "id": "PDM-03",
+      "nombre": "Perfil vencido — CTA renovación Pagos",
+      "entrada": {
+        "usuarioId": "uid_vencido_001",
+        "perfilId": "uid_vencido_001",
+        "estadoRevision": "vencido",
+        "contratoActivo": { "estadoContrato": "vencido", "fechaVencimiento": "2026-05-01T00:00:00Z" }
+      },
+      "salidaEsperada": {
+        "ruta": "/cuenta/perfil",
+        "DP-01": { "label": "Vencido", "badge": "danger" },
+        "DP-08": { "CTA": { "label": "Renovar plan", "href": "/cuenta/pagos/renovar" }, "delegaCobro": "Pagos" },
+        "renderPublico": "oculto RenderEngine",
+        "gateVE": "renovar_contrato"
+      }
+    },
+    {
+      "id": "PDM-04",
+      "nombre": "Pago pendiente — historial + CTA pagos",
+      "entrada": {
+        "usuarioId": "uid_pago_pend_001",
+        "perfilId": "uid_pago_pend_001",
+        "estadoRevision": "pago_pendiente",
+        "ultimosPagos": [{ "pagoId": "pay_pend_001", "estadoPago": "pendiente" }]
+      },
+      "salidaEsperada": {
+        "ruta": "/cuenta/pagos",
+        "DP-08": { "estado": "pendiente", "ctaHistorial": "/cuenta/pagos/historial", "CTA": "/cuenta/pagos" },
+        "panelNoEjecutaCobro": true
+      }
+    },
+    {
+      "id": "PDM-05",
+      "nombre": "Corrección solicitada — observaciones admin",
+      "entrada": {
+        "usuarioId": "uid_corr_001",
+        "perfilId": "uid_corr_001",
+        "estadoRevision": "correccion_solicitada",
+        "observacionesAdmin": "La foto no cumple políticas."
+      },
+      "salidaEsperada": {
+        "ruta": "/cuenta/perfil",
+        "DP-01": { "observacionesAdmin": "visible", "soloLectura": true },
+        "CTAs": [{ "href": "/registro/editar/uid_corr_001" }],
+        "adminRutaCanon": "/admin/revision?tipo=perfil"
+      }
+    },
+    {
+      "id": "PDM-06",
+      "nombre": "Visitante sin perfil — panel reducido",
+      "entrada": {
+        "usuarioId": "uid_visitante_001",
+        "perfilId": null,
+        "tipoCuenta": "visitante"
+      },
+      "salidaEsperada": {
+        "ruta": "/cuenta/perfil",
+        "emptyState": "sin_perfil",
+        "modulosOcultos": ["DP-02", "DP-03", "DP-04", "DP-08"],
+        "CTA": { "label": "Crear perfil", "href": "/registro/wizard" },
+        "sidebarReducido": ["nav_config", "nav_seguridad", "nav_favoritos"]
+      }
+    },
+    {
+      "id": "PDM-07",
+      "nombre": "Negocio autorizado_para_pago",
+      "entrada": {
+        "usuarioId": "uid_negocio_001",
+        "perfilId": "uid_negocio_001",
+        "formularioId": "negocio",
+        "estadoRevision": "autorizado_para_pago"
+      },
+      "salidaEsperada": {
+        "ruta": "/cuenta/perfil",
+        "DP-08": { "CTA": { "label": "Pagar membresía", "href": "/cuenta/pagos" } },
+        "flujo": "autorizado_para_pago → pago → activo"
+      }
+    },
+    {
+      "id": "PDM-08",
+      "nombre": "CTA edición delega Registro — no inline",
+      "entrada": {
+        "usuarioId": "uid_edit_001",
+        "perfilId": "uid_edit_001",
+        "accionUsuario": "click_editar"
+      },
+      "salidaEsperada": {
+        "comportamiento": "navegacion CTA",
+        "destino": "/registro/editar/uid_edit_001",
+        "edicionInline": false,
+        "regla": "Panel lectura+CTA; Registro edita FieldEngine"
+      }
+    },
+    {
+      "id": "PDM-09",
+      "nombre": "Anunciante activo — panel /cuenta/banners",
+      "entrada": {
+        "usuarioId": "uid_anu_001",
+        "rolesCuenta": ["anunciante"],
+        "contratosBanners": [{ "bannerId": "bn_001", "estado": "activo", "slot": "home_top" }]
+      },
+      "salidaEsperada": {
+        "ruta": "/cuenta/banners",
+        "modulosVisibles": ["DA-01", "DA-02", "DA-04", "DA-05"],
+        "sidebar": ["nav_anu_resumen", "nav_anu_activos", "nav_anu_contratos", "nav_anu_pagos"],
+        "aliasDeprecated": { "desde": "/cuenta/anunciante", "redirect": "/cuenta/banners" },
+        "separacion": "contratos_banners ⟂ contratos_perfiles PC-R05",
+        "CTA_nuevo": "/registro/banner"
+      }
+    },
+    {
+      "id": "PDM-10",
+      "nombre": "Funnel /registro/banner → panel operativo",
+      "entrada": {
+        "usuarioId": "uid_anu_nuevo_001",
+        "rolesCuenta": [],
+        "accion": "alta_anunciante"
+      },
+      "salidaEsperada": {
+        "flujo": [
+          { "paso": 1, "ruta": "/registro/banner", "modulo": "ANU-FUN", "legacy": "registro-banner.html" },
+          { "paso": 2, "ruta": "/registro/verificacion", "delega": "Registro" },
+          { "paso": 3, "ruta": "/cuenta/banners", "modulo": "DA-01", "panelOperativo": true },
+          { "paso": 4, "ruta": "/cuenta/pagos", "delega": "Pagos" }
+        ],
+        "noConfundir": "registro/banner = funnel; cuenta/banners = panel",
+        "refMatriz": "ANU-08, C-R06"
+      }
+    }
+  ]
+}

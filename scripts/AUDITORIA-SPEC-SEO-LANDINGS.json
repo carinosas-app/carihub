@@ -1,0 +1,77 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "tipo": "AUDITORIA_SPEC",
+  "objeto": "SPEC-SEO-LANDINGS",
+  "versionSpecAuditada": "1.0.0",
+  "fecha": "2026-06-11",
+  "estado": "AUDITORIA_CONSISTENCIA",
+  "veredicto": "PASS",
+  "veredictoCongelamiento": "APTA_PARA_CONGELAMIENTO_DISENO — procede ACTA-CONGELAMIENTO-SEO-LANDINGS v1.0.0 (capa diseño documental; runtime no autorizado)",
+  "alcanceAuditoria": "Consistencia interna SPEC vs ADRs/planes congelados, cobertura fixtures golden, privacidad/adultos, matrices y criterios de aceptación.",
+
+  "matrizConsistencia": [
+    { "verificacion": "No contradice ADR-INDEXACION-ADULTOS O8 (MVP noindex perfiles adultos)", "resultado": "PASS", "evidencia": "superficiesSeo.noindexSiempre.perfil_adulto_mvp; fixture SEO-05" },
+    { "verificacion": "No contradice ADR-URL-CANONICA-PERFILES (/perfil/{perfilId}/{slug})", "resultado": "PASS", "evidencia": "urlsYSlugs.canonicoPerfilNegocio; fixture SEO-18" },
+    { "verificacion": "No contradice ADR-RENDER-STRATEGY (snapshot-first híbrido)", "resultado": "PASS", "evidencia": "renderEngineIntegracion.estrategia; modoRenderPorSuperficie" },
+    { "verificacion": "Respeta ACTA-CONGELAMIENTO-SHARED-CORE (tokens/helpers URL)", "resultado": "PASS", "evidencia": "dependenciasCongeladas.sharedCore; SEO consume, no modifica" },
+    { "verificacion": "Respeta ACTA-CONGELAMIENTO-RENDERENGINE (renderHead, PrivacyGuard)", "resultado": "PASS", "evidencia": "renderEngineIntegracion.privacyGuard; contrato RenderSeoInput/Output" },
+    { "verificacion": "PrivacyGuard impide PII en meta/schema/OG", "resultado": "PASS", "evidencia": "metadatos.sanitizacion; schemaOrg.datosProhibidos; RF-SEO-08" },
+    { "verificacion": "No indexa perfiles adultos MVP", "resultado": "PASS", "evidencia": "indexacion.matrizEstadoPerfil.publicado_adulto_mvp; SEO-05" },
+    { "verificacion": "Resultados dinámicos noindex/canonicalizados", "resultado": "PASS", "evidencia": "superficiesSeo.noindexSiempre.resultados; SEO-11; ADR O7" },
+    { "verificacion": "Landings tienen ThinContentGuard", "resultado": "PASS", "evidencia": "landingContentRequirements; SEO-04; RF-SEO-07" },
+    { "verificacion": "Sitemaps excluyen noindex/borradores/adultos MVP/thin", "resultado": "PASS", "evidencia": "indexacion.sitemaps.exclusiones" },
+    { "verificacion": "IA no tiene ejecución automática (RT-08)", "resultado": "PASS", "evidencia": "agentesIAYSeo.prohibido; matrices.agentesIaAccionAprobacion" },
+    { "verificacion": "Admin tiene control y auditoría SEO", "resultado": "PASS", "evidencia": "adminSeo; SeoAuditEvent; dobleConfirmacion" },
+    { "verificacion": "Coherente PLAN-MAESTRO-SEO-LANDINGS (formaliza plan)", "resultado": "PASS", "evidencia": "módulos, landings, políticas alineadas" },
+    { "verificacion": "Coherente ANALISIS-REEVALUACION (futuro verificados no explícitos)", "resultado": "PASS", "evidencia": "contenidoAdulto.futuro; fixture SEO-06" },
+    { "verificacion": "Banners no contaminan SEO (PLAN/ANEXO Banners)", "resultado": "PASS", "evidencia": "bannersYSeo.reglas" },
+    { "verificacion": "Interacciones no indexables (PLAN-MAESTRO-INTERACCIONES)", "resultado": "PASS", "evidencia": "interaccionesYSeo" },
+    { "verificacion": "ThemeEngine no altera canonical/robots (PLAN-MAESTRO-THEMEENGINE)", "resultado": "PASS", "evidencia": "themeEngineYSeo.restricciones" },
+    { "verificacion": "Fixtures golden cubren casos obligatorios del prompt", "resultado": "PASS", "evidencia": "18 fixtures SEO-01..SEO-18" },
+    { "verificacion": "No modifica documentos existentes", "resultado": "PASS", "evidencia": "noModifica en SPEC" }
+  ],
+
+  "bloqueantes": [],
+  "observaciones": [
+    { "id": "SEO-AM-01", "nivel": "menor", "tema": "Validador runtime ausente", "detalle": "validar-spec-seo-landings.mjs propuesto pero no implementado; congelamiento es documental", "accion": "Crear validador en fase post-congelamiento diseño" },
+    { "id": "SEO-AM-02", "nivel": "menor", "tema": "Umbrales ThinContentGuard numéricos", "detalle": "Umbrales (5/3/10 perfiles) son propuesta; calibrar con datos reales post-MVP", "accion": "Revisar con tráfico real antes de runtime" },
+    { "id": "SEO-AM-03", "nivel": "menor", "tema": "Hreflang/internacional", "detalle": "Marcado futuro; no bloquea congelamiento diseño MVP nacional", "accion": "ADR hreflang en fase internacional" },
+    { "id": "SEO-AM-04", "nivel": "menor", "tema": "SSR resultados temporal", "detalle": "Resultados CSR actual con noindex hasta SSR; coherente con ADR pero CWV temporal", "accion": "Priorizar SSR o snapshot resultados en implementación" },
+    { "id": "SEO-AM-05", "nivel": "menor", "tema": "Age gate vs cloaking", "detalle": "Política documentada; requiere prueba técnica en implementación", "accion": "Test crawler parity en QA" }
+  ],
+
+  "riesgosAbiertos": [
+    { "id": "SEO-R01", "nivel": "alto", "riesgo": "Thin content masivo 462 subcategorías × geo", "mitigacion": "ThinContentGuard + canonical superior; ya en SPEC" },
+    { "id": "SEO-R02", "nivel": "alto", "riesgo": "Cloaking accidental age gate adultos", "mitigacion": "paridad crawler; fixture/policy documentada" },
+    { "id": "SEO-R03", "nivel": "medio", "riesgo": "Motores IA ignoran robots.txt", "mitigacion": "PrivacyGuard origen + noai/noimageai" },
+    { "id": "SEO-R04", "nivel": "medio", "riesgo": "Calibración umbrales incorrecta", "mitigacion": "revisión con datos reales post-lanzamiento" }
+  ],
+
+  "coberturaFixtures": {
+    "total": 18,
+    "casos": ["home", "ciudad index", "ciudad+cat index", "thin noindex", "adulto MVP noindex", "verificado futuro", "no verificado", "explícito", "negocio", "anunciante", "resultados query", "duplicado canonical", "suspendida 410", "borrador", "OG adulto moderado", "bot IA bloqueado/permitido", "legacy 301"],
+    "resultado": "PASS"
+  },
+
+  "actaCongelamiento": {
+    "procede": true,
+    "versionPropuesta": "1.0.0",
+    "tipo": "CONGELAMIENTO_DISENO_DOCUMENTAL",
+    "condiciones": [
+      "Runtime SEO no autorizado hasta implementación explícita",
+      "Umbrales ThinContentGuard sujetos a calibración con datos reales",
+      "Validador fixtures pendiente (SEO-AM-01)",
+      "Hreflang/internacional fuera de alcance MVP congelado"
+    ],
+    "nota": "Congelamiento de CAPA DE DISEÑO (SPEC+fixtures+políticas); no implica deploy ni Firestore"
+  },
+
+  "dependencias": {
+    "consumidas": ["ADR-INDEXACION-ADULTOS", "ADR-URL-CANONICA-PERFILES", "ADR-RENDER-STRATEGY", "PLAN-MAESTRO-SEO-LANDINGS", "SPEC-RENDERENGINE", "ACTA-SHARED-CORE", "ACTA-RENDERENGINE"],
+    "noModificadas": true
+  },
+
+  "changelog": [
+    { "version": "1.0.0", "fecha": "2026-06-11", "nota": "Auditoría SPEC-SEO-LANDINGS: PASS; 19 verificaciones PASS; 0 bloqueantes; 5 observaciones menores; procede ACTA-CONGELAMIENTO-SEO-LANDINGS diseño v1.0.0" }
+  ]
+}

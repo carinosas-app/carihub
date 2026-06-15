@@ -1,0 +1,209 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "tipo": "PLAN_MAESTRO",
+  "modulo": "ECONOMIA-SOCIAL",
+  "titulo": "Plan Maestro Economía Social CariHub / Cariñosas",
+  "fecha": "2026-06-11",
+  "version": "1.0.0",
+  "estado": "PLAN_DISENO_DOCUMENTAL",
+  "modo": "Solo análisis y documentación — sin runtime/carpetas/mover/Firestore/deploy/commit; no modifica capas/planes/observaciones/ADRs/actas existentes",
+  "autorizadoPor": "product owner / usuario CariHub",
+  "basadoEn": [
+    "scripts/config-precios-planes-perfiles-schema.json (planes basico/destacado/premium/vip)",
+    "scripts/PLAN-MAESTRO-INTERACCIONES.json (stories/lives/publicaciones futuros)",
+    "scripts/PLAN-MAESTRO-PAGOS-CONTRATOS.json (politicaPrecioCongelado, MXN, IA no aprueba pagos)",
+    "scripts/ANEXO-CRIPTOMONEDAS-PAGOS-CONTRATOS.json",
+    "scripts/PLAN-MAESTRO-BANNERS-PUBLICIDAD.json",
+    "scripts/ACTA-CONGELAMIENTO-MESSENGER.json",
+    "scripts/PLAN-MAESTRO-DASHBOARDS.json",
+    "scripts/PLAN-MAESTRO-ADMIN.json",
+    "scripts/PLAN-MAESTRO-AGENTES-IA.json",
+    "scripts/ADR-INDEXACION-ADULTOS.json",
+    "scripts/config-registro-adultos-schema.json",
+    "scripts/config-seguridad-mvp-schema.json"
+  ],
+  "objetivo": "Definir la arquitectura de monetización social futura de Cariñosas (propinas, contenido premium/exclusivo, compartir/repost, planes Básico/Destacado/Premium/VIP, add-ons de media) y VALIDAR explícitamente que cada función está orientada al ecosistema CariHub/Cariñosas y no a una red social genérica.",
+
+  "principioRector": "La economía social de Cariñosas monetiza la RELACIÓN proveedor↔cliente del nicho real (acompañantes/negocios/anunciantes), NO un feed social genérico. Toda función se justifica por captar, retener o convertir en el contexto Cariñosas. El precio de planes/contratos sigue CONGELADO en MXN (Pagos, politicaPrecioCongelado); propinas/compras son transacciones aparte. Ninguna IA aprueba pagos. Contenido sensible respeta ADR-INDEXACION-ADULTOS, mayoría de edad y moderación.",
+
+  "validacionOrientacionCarinosas": {
+    "confirmacionExplicita": "SÍ — todo el análisis está orientado al ecosistema CariHub/Cariñosas (catálogo geo-primero, verticales reales incluyendo acompañantes/negocios/anunciantes), NO a una red social genérica tipo Instagram/TikTok",
+    "criterioEncaje": "Una función ENCAJA si sirve a: descubrimiento del proveedor, conversión a contacto/contrato, retención del cliente, o monetización directa del proveedor real. Si solo genera 'engagement social' sin conversión al nicho, se ACOTA o EXCLUYE.",
+    "diferenciaConRedSocialGenerica": [
+      "No es feed infinito de extraños; es vitrina de proveedores geo-localizados",
+      "El 'follow' sirve para reencontrar al proveedor, no para construir audiencia masiva",
+      "Las propinas/premium monetizan al PROVEEDOR real, no a creadores de contenido genérico",
+      "Stories/lives son escaparate comercial temporal, no entretenimiento social puro"
+    ]
+  },
+
+  "inventarioActual": {
+    "planes": "REALES y definidos: basico $299, destacado $599, premium $999, vip $1499 MXN (config-precios-planes-perfiles-schema.json); badge + destacadoHome por plan",
+    "propinas": "NO existen — función nueva propuesta por este plan",
+    "contenidoPremium": "NO existe — nuevo",
+    "storiesLivesPublicaciones": "NO existen — futuros (PLAN-MAESTRO-INTERACCIONES los marca como futuro)",
+    "compartirRepost": "compartir existe como evento social futuro (Interacciones); repost NO existe",
+    "addonsMedia": "fotos/galería/video existen como campos (config-registro-adultos-schema); 'HD/optimizada' y add-ons de pago NO existen como producto",
+    "pagos": "sin pasarela conectada (admin.html); economía social depende de Pagos operativo"
+  },
+
+  "modulosInternos": [
+    "TipsEngine (propinas: emisor→receptor, comisión plataforma, MXN, comprobante)",
+    "PremiumContentGate (gating de contenido premium/exclusivo por pago/plan)",
+    "ShareService (compartir evento social; respeta privacidad/edad)",
+    "RepostService (repost en perfil propio del proveedor)",
+    "PlanEntitlements (qué desbloquea cada plan en lo social)",
+    "MediaAddonsStore (fotos HD, video, destacar story como add-ons de pago)",
+    "SocialMonetizationLedger (libro de transacciones sociales, concilia con Pagos)"
+  ],
+
+  "matrizFuncionPantallas": {
+    "propinas": ["Perfil Público", "Estados", "Stories", "Lives", "Publicaciones", "Dashboard Perfil (recibidas)"],
+    "compartir": ["Perfil Público", "Resultados", "Estados", "Publicaciones", "Lives"],
+    "repost": ["Perfil Público", "Dashboard Perfil"],
+    "contenido_premium": ["Perfil Público", "Publicaciones", "Stories", "Dashboard Perfil (gestión)"],
+    "contenido_exclusivo": ["Perfil Público", "Publicaciones", "Lives"],
+    "planes": ["Resultados (prioridad/badge)", "Home (destacadoHome)", "Perfil Público (badge)", "Dashboard Perfil/Negocio/Anunciante (gestión)"],
+    "fotos_HD_optimizadas": ["Perfil Público", "Resultados (thumb)", "Galería"],
+    "videos": ["Perfil Público", "Stories", "Lives", "Publicaciones"],
+    "addons": ["Dashboard Perfil/Negocio/Anunciante (compra)", "Perfil Público (efecto)"]
+  },
+
+  "matrizFuncionModulos": {
+    "propinas": ["TipsEngine", "Pagos", "SocialMonetizationLedger", "Interacciones (origen)", "Admin (conciliación)", "Seguridad MVP (antifraude/edad)"],
+    "compartir": ["ShareService", "Interacciones", "RenderEngine", "SEO (canonical)", "ADR-INDEXACION-ADULTOS"],
+    "repost": ["RepostService", "Interacciones", "Dashboards"],
+    "contenido_premium": ["PremiumContentGate", "Pagos", "FieldEngine (campos)", "RenderEngine (PrivacyGuard)", "Admin (moderación)"],
+    "contenido_exclusivo": ["PremiumContentGate", "Pagos", "StoriesLivesEngine (futuro)", "Admin"],
+    "planes": ["PlanEntitlements", "Pagos", "Contratos", "Dashboards", "RenderEngine (prioridad)"],
+    "fotos_HD_optimizadas": ["MediaAddonsStore", "FieldEngine", "RenderEngine", "ThemeEngine (presentación)"],
+    "videos": ["MediaAddonsStore", "RenderEngine", "Seguridad MVP (escaneo)", "Interacciones"],
+    "addons": ["MediaAddonsStore", "Pagos", "Contratos", "Dashboards"]
+  },
+
+  "matrizFuncionFase": {
+    "planes_basico_destacado_premium_vip": "MVP (ya definidos; activan con Pagos)",
+    "fotos_optimizadas": "MVP (optimización básica de imagen)",
+    "videos_basicos_perfil": "fase nacional",
+    "fotos_HD_addon": "fase nacional",
+    "compartir_perfil": "MVP (compartir perfil público no sensible)",
+    "compartir_estados_publicaciones": "fase nacional (cuando existan estados/publicaciones)",
+    "repost_perfil_propio": "fase nacional",
+    "propinas_perfil": "fase nacional (requiere Pagos operativo + reglas fiscales)",
+    "propinas_estados_stories": "fase internacional / futuro (cuando existan stories)",
+    "propinas_lives": "futuro (requiere StoriesLivesEngine)",
+    "propinas_publicaciones": "futuro",
+    "contenido_premium": "fase internacional / futuro",
+    "contenido_exclusivo": "futuro",
+    "addons_avanzados": "fase nacional → internacional",
+    "monetizacion_social_completa": "visión futura"
+  },
+
+  "validacionPorSuperficie": {
+    "perfil_publico": { "funciones": ["badge/plan", "compartir", "repost", "propinas (futuro)", "premium gate (futuro)", "fotos HD/video"], "encaje": "ENCAJA — núcleo de conversión Cariñosas" },
+    "resultados": { "funciones": ["prioridad por plan", "badge", "thumb optimizado", "compartir"], "encaje": "ENCAJA — descubrimiento; NO propinas aquí" },
+    "home": { "funciones": ["destacadoHome (premium/vip)"], "encaje": "ENCAJA — solo vitrina por plan; sin feed social genérico" },
+    "estados": { "funciones": ["compartir", "propinas (futuro)"], "encaje": "ENCAJA acotado — escaparate temporal, no muro social" },
+    "stories": { "funciones": ["propinas (futuro)", "premium (futuro)", "video"], "encaje": "ENCAJA futuro — escaparate comercial temporal con edad/moderación" },
+    "lives": { "funciones": ["propinas (futuro)", "exclusivo (futuro)"], "encaje": "ENCAJA futuro — alto riesgo; requiere moderación live + edad" },
+    "publicaciones": { "funciones": ["propinas (futuro)", "premium/exclusivo (futuro)", "compartir"], "encaje": "ENCAJA futuro — contenido del proveedor, no UGC masivo" },
+    "dashboard_perfil": { "funciones": ["ver propinas recibidas", "gestionar premium", "comprar add-ons", "gestionar plan"], "encaje": "ENCAJA — panel de monetización del proveedor" },
+    "dashboard_negocio": { "funciones": ["plan", "add-ons", "estadísticas comerciales"], "encaje": "ENCAJA" },
+    "dashboard_anunciante": { "funciones": ["plan", "relación con Banners (no propinas)"], "encaje": "ENCAJA — monetización vía Banners, no social" },
+    "interacciones": { "funciones": ["origen de evento social (compartir/seguir) que habilita lo social"], "encaje": "ENCAJA — provee señales; no maneja dinero" },
+    "messenger": { "funciones": ["NINGUNA monetización directa MVP"], "encaje": "EXCLUIR pagos dentro de Messenger en MVP (riesgo AML/fraude); solo enlazar a contacto" },
+    "pagos": { "funciones": ["procesa propinas/premium/add-ons/planes"], "encaje": "ENCAJA — backbone financiero; precio congelado MXN" },
+    "contratos": { "funciones": ["planes y add-ons recurrentes"], "encaje": "ENCAJA — propinas NO son contrato (transacción puntual)" },
+    "banners": { "funciones": ["monetización publicitaria de anunciantes"], "encaje": "ENCAJA pero SEPARADO de economía social (es publicidad, no social)" }
+  },
+
+  "planesEntitlements": {
+    "basico": { "precioMXN": 299, "social": ["perfil público", "fotos optimizadas", "compartir"], "destacadoHome": false },
+    "destacado": { "precioMXN": 599, "social": ["+ badge destacado", "prioridad media en resultados"], "destacadoHome": false },
+    "premium": { "precioMXN": 999, "social": ["+ badge premium", "destacadoHome", "más cupo de galería/video"], "destacadoHome": true },
+    "vip": { "precioMXN": 1499, "social": ["+ badge vip", "máxima prioridad", "stories/lives destacados (futuro)", "mayor cupo media"], "destacadoHome": true },
+    "nota": "Precios y entitlements EXISTEN en config-precios-planes-perfiles-schema.json; este plan NO los modifica, solo mapea su dimensión social",
+    "addons": {
+      "fotos_HD": "add-on de calidad de imagen (futuro)",
+      "video_extra": "cupo adicional de video (futuro)",
+      "destacar_story": "boost temporal de story (futuro)",
+      "regla": "add-ons se cobran vía Pagos; no rompen precio congelado del plan base"
+    }
+  },
+
+  "propinas": {
+    "modelo": "emisor (cliente) → receptor (proveedor) con comisión de plataforma; SIEMPRE en MXN; comprobante; registrado en SocialMonetizationLedger y conciliado por Admin",
+    "porSuperficie": ["perfil (nacional)", "estados/stories (futuro)", "lives (futuro)", "publicaciones (futuro)"],
+    "reglas": ["mayoría de edad verificada de emisor y receptor", "límites antifraude/rate-limit (Seguridad MVP)", "reglas fiscales: ingreso del proveedor; retención/factura según marco", "IA no aprueba ni mueve fondos (AGENTES-IA RT-08)", "no propinas dentro de Messenger en MVP"],
+    "riesgoClave": "AML/fraude/edad; por eso fase nacional+ y nunca P2P libre sin control"
+  },
+
+  "contenidoPremiumExclusivo": {
+    "gating": "PremiumContentGate desbloquea por pago puntual o plan; contenido servido solo a pagadores",
+    "privacidad": "RenderEngine PrivacyGuard impide fuga; contenido premium NUNCA indexable (noindex; ADR-INDEXACION-ADULTOS)",
+    "moderacion": "Admin + ValidationEngine; edad/categoría sensible obligatorias",
+    "diferencia": "premium = pago para acceder; exclusivo = limitado a cierto tier/seguidores",
+    "encajeCarinosas": "Monetiza al proveedor real; NO convierte la plataforma en OnlyFans genérico — acotado a vitrina del nicho con moderación estricta"
+  },
+
+  "compartirRepost": {
+    "compartir": "evento social (Interacciones) que genera URL canónica (SEO); contenido sensible respeta ADR-INDEXACION-ADULTOS (preview moderado, posible noindex)",
+    "repost": "el proveedor reorganiza/destaca su propio contenido en su perfil; NO repost de terceros (evita UGC masivo y problemas de derechos/consentimiento)",
+    "limites": ["no compartir contenido premium/exclusivo de pago", "no exponer PII", "previews adultos moderados"]
+  },
+
+  "exclusionesExplicitas": [
+    { "funcion": "Feed social infinito de extraños", "veredicto": "EXCLUIR — no es Cariñosas; rompe modelo geo-vitrina" },
+    { "funcion": "Repost de contenido de terceros", "veredicto": "EXCLUIR — riesgo de derechos/consentimiento; solo repost propio" },
+    { "funcion": "Pagos/propinas dentro de Messenger (MVP)", "veredicto": "EXCLUIR en MVP — riesgo AML/fraude; Messenger solo conversación" },
+    { "funcion": "Monetización de creadores ajenos al nicho (UGC genérico)", "veredicto": "EXCLUIR — fuera de la visión Cariñosas" },
+    { "funcion": "Propinas anónimas sin verificación de edad", "veredicto": "EXCLUIR — riesgo legal/edad" },
+    { "funcion": "Contenido premium indexable", "veredicto": "EXCLUIR — siempre noindex (privacidad/ADR adultos)" },
+    { "funcion": "Suscripción recurrente automática a perfil (tipo OnlySubs) en MVP", "veredicto": "ACOTAR a futuro con marco fiscal/AML; no MVP" }
+  ],
+
+  "riesgos": [
+    { "id": "ES-R01", "nivel": "critico", "riesgo": "Propinas/premium sin verificación de edad", "mitigacion": "mayoría de edad obligatoria emisor/receptor; gates Seguridad MVP" },
+    { "id": "ES-R02", "nivel": "critico", "riesgo": "AML/lavado por flujos P2P de dinero", "mitigacion": "comisión vía plataforma, sin P2P libre, KYC/limites, conciliación Admin" },
+    { "id": "ES-R03", "nivel": "alto", "riesgo": "Fiscal: ingresos de proveedor no declarados/sin factura", "mitigacion": "reglas fiscales, comprobantes, CFDI en MXN (Pagos)" },
+    { "id": "ES-R04", "nivel": "alto", "riesgo": "Reputación: deriva a OnlyFans/UGC explícito indexable", "mitigacion": "premium noindex, moderación, exclusiones explícitas, ADR-INDEXACION-ADULTOS" },
+    { "id": "ES-R05", "nivel": "alto", "riesgo": "Fraude en propinas/contracargos", "mitigacion": "antifraude, irreversibilidad controlada, política de disputas (Admin)" },
+    { "id": "ES-R06", "nivel": "medio", "riesgo": "Romper precio congelado al mezclar add-ons con plan", "mitigacion": "add-ons como transacción separada; plan sigue congelado (Pagos)" },
+    { "id": "ES-R07", "nivel": "medio", "riesgo": "IA moviendo/aprobando dinero", "mitigacion": "AGENTES-IA RT-08: IA solo sugiere/alerta, humano aprueba" },
+    { "id": "ES-R08", "nivel": "medio", "riesgo": "Contenido premium filtrado a buscadores/IA", "mitigacion": "PrivacyGuard + noindex + robots IA (ADR-INDEXACION-ADULTOS)" }
+  ],
+  "dependencias": {
+    "congeladas": ["Pagos backbone (cuando opere)", "RenderEngine 1.0.0", "FieldEngine 1.0.1", "Messenger 1.0.0", "Seguridad MVP 1.0.0", "Catálogo 1.0.0"],
+    "planes": ["INTERACCIONES (stories/lives/publicaciones/compartir)", "PAGOS-CONTRATOS", "ANEXO-CRIPTOMONEDAS", "DASHBOARDS", "ADMIN", "BANNERS", "AGENTES-IA", "THEMEENGINE", "SEO-LANDINGS"],
+    "adrs": ["ADR-INDEXACION-ADULTOS (premium noindex)", "ADR-URL-CANONICA (compartir)"],
+    "precondiciones": ["Pagos con pasarela operativa", "verificación de edad/identidad", "StoriesLivesEngine (para propinas en stories/lives)", "reglas fiscales definidas", "moderación social activa"]
+  },
+  "impactos": {
+    "pagos": "Nuevos tipos de transacción (propina/premium/addon) reutilizan ciclo de Pagos; precio de plan congelado intacto — NO se modifica el plan host",
+    "contratos": "Planes/add-ons recurrentes son contratos; propinas NO son contrato (puntual) — sin cambios al plan host",
+    "interacciones": "compartir/repost/seguir son señales sociales de Interacciones; economía social las consume — sin modificar Interacciones",
+    "nota": "Todos los impactos son de diseño futuro; este plan no modifica documentos existentes ni Firestore"
+  },
+  "ordenRecomendadoImplementacion": [
+    { "paso": 1, "accion": "PlanEntitlements (mapear dimensión social de planes ya definidos) + fotos optimizadas + compartir perfil", "prioridad": "P0 (MVP)" },
+    { "paso": 2, "accion": "Pagos operativo → propinas en perfil + add-ons (fotos HD/video) + repost propio", "prioridad": "P1 (nacional)" },
+    { "paso": 3, "accion": "Estados/Publicaciones + compartir + propinas en estados", "prioridad": "P2 (nacional→internacional)" },
+    { "paso": 4, "accion": "Contenido premium/exclusivo (PremiumContentGate + noindex + moderación)", "prioridad": "P2 (internacional)" },
+    { "paso": 5, "accion": "StoriesLivesEngine → propinas en stories/lives", "prioridad": "P3 (futuro)" },
+    { "paso": 6, "accion": "Monetización social completa + analítica", "prioridad": "P3 (visión futura)" }
+  ],
+
+  "procedenciaPlanMaestro": {
+    "crearMd": true, "crearJson": true,
+    "justificacion": "La monetización social está dispersa (planes existen; propinas/premium/stories no) y requiere un plan propio que la ancle al nicho Cariñosas, defina fases y excluya patrones de red social genérica, respetando precio congelado, edad, AML y ADR-INDEXACION-ADULTOS.",
+    "siguientesPasos": ["SPEC-ECONOMIA-SOCIAL (post Pagos operativo)", "ADR-PROPINAS-AML-FISCAL (reglas de dinero P2P)", "Definir comisión de plataforma y reglas fiscales con datos reales"]
+  },
+  "noModifica": [
+    "config-precios-planes-perfiles-schema.json y planes (se referencian, no se alteran)",
+    "PLAN-MAESTRO-INTERACCIONES / PAGOS-CONTRATOS / BANNERS y demás capas/planes/actas/ADRs",
+    "Producción, Firestore, deploy, commit"
+  ],
+  "changelog": [
+    { "version": "1.0.0", "fecha": "2026-06-11", "nota": "Plan maestro Economía Social: validación de orientación a Cariñosas (no red social genérica); módulos (TipsEngine/PremiumContentGate/ShareService/RepostService/PlanEntitlements/MediaAddonsStore/SocialMonetizationLedger), 3 matrices (función→pantalla/módulo/fase), validación por 15 superficies, planes/entitlements/add-ons, propinas, premium/exclusivo, compartir/repost, 7 exclusiones explícitas, 8 riesgos y orden P0-P3" }
+  ]
+}

@@ -9,7 +9,8 @@
 <title>Publicidad Premium | Cariñosas</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/modal-carihub.css">
+<link rel="stylesheet" href="css/modal-carihub.css">
+<link rel="stylesheet" href="css/banner-registro.css">
 
 <script src="paises.js"></script>
 <script src="estados.js"></script>
@@ -17,6 +18,7 @@
 <script src="/js/modal-carihub.js"></script>
 <script src="/js/catalogos-carihub.js"></script>
 <script src="/js/precios-publicidad.js"></script>
+<script src="/js/banner-inventario-rotacion.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
@@ -38,6 +40,7 @@ if(!firebase.apps.length){
 const auth = firebase.auth();
 const db = firebase.firestore();
 const storage = firebase.storage();
+window.CariHubDB = db;
 </script>
 
 <style>
@@ -102,27 +105,18 @@ box-shadow:
 0 0 60px rgba(255,20,147,.10);
 }
 
-.banner-premium-info{
-width:102%;
-margin:-55px auto 0px;
-padding:0;
-display:flex;
-justify-content:center;
-align-items:center;
+.registro-banner-shell {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  padding: 58px 2% 0;
+  box-sizing: border-box;
 }
 
-.banner-premium-info img{
-width:96%;
-max-width:1200px;
-height:auto;
-display:block;
-margin:auto;
-border-radius:26px;
-object-fit:contain;
-object-position:center;
-box-shadow:
-0 0 20px rgba(255,20,147,.16),
-0 0 45px rgba(255,20,147,.10);
+.registro-banner-top--page {
+  width: 96%;
+  max-width: 1200px;
+  margin: 0 auto 20px;
 }
 
 .btn-close-floating{
@@ -1296,6 +1290,80 @@ color:#8a4a62;
 font-weight:700;
 }
 
+.apariciones-publicidad{
+grid-column:1/-1;
+padding:18px 20px;
+border-radius:22px;
+background:linear-gradient(145deg,#fff8fc 0%,#ffe8f3 100%);
+border:2px solid rgba(255,20,147,.22);
+box-shadow:0 8px 22px rgba(255,20,147,.08);
+}
+.apariciones-publicidad.oculto{display:none!important}
+.apariciones-publicidad__zona{margin-bottom:14px}
+.apariciones-publicidad__badge{
+display:inline-block;
+font-size:10px;
+font-weight:800;
+letter-spacing:.35px;
+text-transform:uppercase;
+color:#fff;
+background:linear-gradient(90deg,#ff008c,#ff4fc3);
+padding:4px 10px;
+border-radius:999px;
+margin-bottom:8px;
+}
+.apariciones-publicidad__zona strong{
+display:block;
+font-size:17px;
+color:#6d1040;
+margin-bottom:4px;
+}
+.apariciones-publicidad__zona small{
+display:block;
+font-size:12px;
+color:#8a4a62;
+font-weight:600;
+}
+.apariciones-publicidad__grid{
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:10px;
+margin-bottom:12px;
+}
+.apariciones-publicidad__grid div{
+background:rgba(255,255,255,.82);
+border:1px solid rgba(255,20,147,.16);
+border-radius:16px;
+padding:12px 10px;
+text-align:center;
+}
+.apariciones-publicidad__grid span{
+display:block;
+font-size:11px;
+font-weight:700;
+color:#9a5a72;
+text-transform:uppercase;
+letter-spacing:.25px;
+margin-bottom:6px;
+}
+.apariciones-publicidad__grid b{
+display:block;
+font-size:15px;
+line-height:1.25;
+color:#d6006c;
+font-weight:800;
+}
+.apariciones-publicidad__nota{
+margin:0;
+font-size:11px;
+line-height:1.45;
+color:#7a4a5e;
+font-weight:600;
+}
+@media (max-width:640px){
+.apariciones-publicidad__grid{grid-template-columns:1fr}
+}
+
 .precio-controles-publicos{
 grid-column:1/-1;
 display:grid;
@@ -2263,7 +2331,8 @@ justify-self:center;
 align-self:start;
 }
 
-.mockup-premium-real img{
+.mockup-premium-real img,
+.mockup-premium-panel--principal img{
 width:100%;
 max-width:1400px;
 display:block;
@@ -2272,6 +2341,132 @@ box-shadow:0 10px 35px rgba(255,0,140,.15);
 }
 .mockup-premium-real{
 overflow:visible;
+}
+
+.mockup-premium-scroll-hint{
+margin:0 0 10px;
+font-size:12px;
+font-weight:800;
+color:#9a4070;
+text-align:center;
+line-height:1.35;
+}
+
+.mockup-premium-scroll{
+width:100%;
+overflow-x:auto;
+-webkit-overflow-scrolling:touch;
+border-radius:28px;
+scroll-snap-type:x proximity;
+}
+
+.mockup-premium-stage{
+display:flex;
+align-items:flex-start;
+gap:18px;
+width:max-content;
+min-width:100%;
+padding-bottom:4px;
+}
+
+.mockup-premium-panel--principal{
+position:relative;
+flex:0 0 auto;
+width:min(1400px,calc(100vw - 96px));
+scroll-snap-align:start;
+}
+
+.mockup-premium-panel--categorias{
+position:relative;
+flex:0 0 auto;
+width:min(290px,38vw);
+scroll-snap-align:start;
+}
+
+.mockup-categorias-preview{
+position:relative;
+min-height:540px;
+padding:14px 12px 16px;
+border-radius:26px;
+overflow:hidden;
+background:linear-gradient(180deg,#fff8fc 0%,#ffe8f3 55%,#ffd6eb 100%);
+border:2px solid rgba(255,20,147,.22);
+box-shadow:0 10px 32px rgba(255,0,140,.14);
+}
+
+.mockup-categorias-preview__eyebrow{
+margin:0 0 6px;
+font-size:10px;
+font-weight:800;
+letter-spacing:.08em;
+text-transform:uppercase;
+color:#ad1457;
+text-align:center;
+}
+
+.mockup-categorias-preview__title{
+margin:0 0 10px;
+font-size:15px;
+font-weight:900;
+color:#c2185b;
+text-align:center;
+}
+
+.mockup-categorias-preview__banner-wrap{
+position:relative;
+height:92px;
+margin-bottom:12px;
+border-radius:16px;
+overflow:hidden;
+border:1px solid rgba(255,20,147,.18);
+}
+
+.mockup-categorias-preview__banner-wrap img{
+width:100%;
+height:100%;
+object-fit:cover;
+display:block;
+}
+
+.mockup-categorias-preview__grid{
+display:grid;
+grid-template-columns:repeat(3,minmax(0,1fr));
+gap:7px;
+}
+
+.mockup-categorias-preview__card{
+aspect-ratio:1;
+border-radius:12px;
+background:rgba(255,255,255,.55);
+border:1px dashed rgba(233,30,99,.28);
+}
+
+.mockup-slots--categorias{
+position:absolute;
+inset:0;
+height:100%;
+aspect-ratio:auto;
+z-index:12;
+}
+
+.mockup-premium-movil-panels{
+display:flex;
+align-items:flex-start;
+gap:14px;
+width:max-content;
+min-width:100%;
+}
+
+.mockup-premium-movil-panel--principal{
+position:relative;
+flex:0 0 auto;
+width:980px;
+}
+
+.mockup-premium-movil-panel--categorias{
+position:relative;
+flex:0 0 auto;
+width:280px;
 }
 
 .mockup-premium-real{
@@ -2487,9 +2682,247 @@ overflow:hidden;
 text-shadow:0 1px 1px rgba(255,255,255,.55);
 }
 
-.mockup-premium-real.ubicacion-lista .slot-hotspot{
+.mockup-premium-real.ubicacion-lista .slot-hotspot,
+.mockup-premium-real.slots-globales-listos .slot-hotspot.slot-global-publicidad{
 opacity:.94;
 pointer-events:auto;
+}
+
+.mockup-premium-real.slots-globales-listos .slot-hotspot.slot-local-publicidad,
+.mockup-premium-real.ubicacion-lista-local .slot-hotspot.slot-local-publicidad{
+opacity:.78;
+pointer-events:none;
+cursor:not-allowed;
+}
+
+.mockup-premium-real.ubicacion-lista-local .slot-hotspot.slot-local-publicidad{
+opacity:.94;
+pointer-events:auto;
+cursor:pointer;
+}
+
+.mockup-premium-movil-panel--principal.slots-globales-listos .slot-hotspot-movil-premium.slot-global-publicidad{
+opacity:.94;
+pointer-events:auto;
+}
+
+.mockup-premium-movil-panel--principal.slots-globales-listos .slot-hotspot-movil-premium.slot-local-publicidad,
+.mockup-premium-movil-panel--principal:not(.ubicacion-lista-local) .slot-hotspot-movil-premium.slot-local-publicidad{
+opacity:.78;
+pointer-events:none;
+cursor:not-allowed;
+}
+
+.mockup-premium-movil-panel--principal.ubicacion-lista-local .slot-hotspot-movil-premium.slot-local-publicidad{
+opacity:.94;
+pointer-events:auto;
+cursor:pointer;
+}
+
+.mockup-premium-real.slots-globales-listos .mockup-home-hero-slots,
+.mockup-premium-movil-panel--principal.slots-globales-listos .mockup-home-hero-slots{
+pointer-events:auto;
+}
+
+.mockup-selects.ubicacion-opcional-global .mockup-ubicacion-field[data-ubicacion]{
+opacity:.42;
+pointer-events:none;
+}
+
+.mockup-selects.ubicacion-opcional-global::before{
+content:"Los banners de pantalla principal son globales: no requieren categoría ni ciudad.";
+display:block;
+grid-column:1/-1;
+margin:0 0 4px;
+padding:10px 12px;
+border-radius:12px;
+background:rgba(255,255,255,.55);
+border:1px solid #ffb4d2;
+color:#7a003c;
+font-size:13px;
+font-weight:700;
+line-height:1.35;
+position:relative;
+z-index:1;
+}
+
+.mockup-selects.ubicacion-requerida-local::before{
+content:"Para resultados o perfil: elige categoría, país, estado y ciudad. Te guiamos paso a paso.";
+display:block;
+grid-column:1/-1;
+margin:0 0 8px;
+padding:10px 12px;
+border-radius:12px;
+background:rgba(255,255,255,.62);
+border:1px solid #ff8fc4;
+color:#7a003c;
+font-size:13px;
+font-weight:800;
+line-height:1.35;
+position:relative;
+z-index:1;
+}
+
+.mockup-selects.ubicacion-requerida-local.ubicacion-opcional-global::before{
+content:"Para resultados o perfil: elige categoría, país, estado y ciudad. Te guiamos paso a paso.";
+}
+
+/* Fondo rosa + destellos (reutilizable en pantallas y paneles) */
+.carihub-pink-sheen{
+position:relative;
+overflow:hidden;
+}
+
+.carihub-pink-sheen__fondo{
+position:absolute;
+inset:0;
+z-index:0;
+pointer-events:none;
+overflow:hidden;
+background:
+linear-gradient(168deg,#fff 0%,#ffe8f3 36%,#ffc9e0 68%,#ffb4d2 100%),
+linear-gradient(180deg,#ffd9e8 0%,#ffc2da 100%);
+}
+
+.carihub-pink-sheen__brillo{
+position:absolute;
+inset:0;
+background:
+radial-gradient(ellipse 95% 75% at 50% -8%,rgba(255,255,255,.88),transparent 56%),
+radial-gradient(ellipse 70% 55% at 88% 95%,rgba(255,195,218,.52),transparent 54%),
+linear-gradient(125deg,rgba(255,255,255,.5) 0%,transparent 40%,rgba(255,255,255,.28) 55%,transparent 80%);
+box-shadow:inset 0 0 48px rgba(255,255,255,.38);
+}
+
+.carihub-pink-sheen__destellos{
+position:absolute;
+inset:0;
+overflow:hidden;
+}
+
+.carihub-pink-sheen > :not(.carihub-pink-sheen__fondo){
+position:relative;
+z-index:1;
+}
+
+.carihub-spark{
+position:absolute;
+left:var(--x);
+top:var(--y);
+width:var(--sz,5px);
+height:var(--sz,5px);
+border-radius:50%;
+transform:translate(-50%,-50%);
+pointer-events:none;
+}
+
+.carihub-spark--flash{
+background:radial-gradient(circle,#fff 0%,rgba(255,255,255,.75) 34%,rgba(255,195,220,.4) 58%,transparent 78%);
+box-shadow:0 0 8px #fff,0 0 16px rgba(255,175,210,.9),0 0 28px rgba(255,95,165,.5);
+animation:carihubSparkFlash var(--dur,3.4s) ease-in-out infinite;
+animation-delay:var(--d,0s);
+}
+
+.carihub-spark--glow{
+background:radial-gradient(circle,rgba(255,245,250,1) 0%,rgba(255,185,215,.6) 48%,transparent 74%);
+box-shadow:0 0 10px rgba(255,155,195,1),0 0 20px rgba(255,90,160,.45);
+animation:carihubSparkGlow var(--dur,5s) ease-in-out infinite;
+animation-delay:var(--d,0s);
+}
+
+.carihub-spark--star{
+border-radius:0;
+background:transparent!important;
+box-shadow:none!important;
+animation:carihubSparkStar var(--dur,4.6s) ease-in-out infinite;
+animation-delay:var(--d,0s);
+}
+
+.carihub-spark--star::before,
+.carihub-spark--star::after{
+content:'';
+position:absolute;
+left:50%;
+top:50%;
+transform:translate(-50%,-50%);
+background:linear-gradient(90deg,transparent,#fff,transparent);
+box-shadow:0 0 8px rgba(255,255,255,.9),0 0 14px rgba(255,170,210,.65);
+}
+
+.carihub-spark--star::before{width:var(--sz,7px);height:2px}
+.carihub-spark--star::after{width:2px;height:var(--sz,7px)}
+
+@keyframes carihubSparkFlash{
+0%,100%{opacity:0;transform:translate(-50%,-50%) scale(.12)}
+8%{opacity:1;transform:translate(-50%,-50%) scale(1.7)}
+16%{opacity:.05;transform:translate(-50%,-50%) scale(.2)}
+42%{opacity:.95;transform:translate(-50%,-50%) scale(1.45)}
+58%{opacity:.08;transform:translate(-50%,-50%) scale(.25)}
+74%{opacity:1;transform:translate(-50%,-50%) scale(1.85)}
+}
+
+@keyframes carihubSparkGlow{
+0%,100%{opacity:.06;transform:translate(-50%,-50%) scale(.4)}
+28%{opacity:.9;transform:translate(-50%,-50%) scale(1.35)}
+52%{opacity:.12;transform:translate(-50%,-50%) scale(.55)}
+78%{opacity:1;transform:translate(-50%,-50%) scale(1.6)}
+}
+
+@keyframes carihubSparkStar{
+0%,100%{opacity:0;transform:translate(-50%,-50%) rotate(0deg) scale(.15)}
+12%{opacity:1;transform:translate(-50%,-50%) rotate(22deg) scale(1.85)}
+24%{opacity:.05;transform:translate(-50%,-50%) rotate(38deg) scale(.25)}
+55%{opacity:.92;transform:translate(-50%,-50%) rotate(72deg) scale(1.6)}
+70%{opacity:1;transform:translate(-50%,-50%) rotate(88deg) scale(2.05)}
+84%{opacity:0;transform:translate(-50%,-50%) rotate(100deg) scale(.2)}
+}
+
+@media (prefers-reduced-motion:reduce){
+.carihub-spark,.modal-banner-spark{animation:none!important;opacity:.35}
+}
+
+.mockup-selects.carihub-pink-sheen{
+padding:12px;
+border-radius:18px;
+border:1px solid rgba(255,20,147,.18);
+}
+
+.disponibilidad-general-publicidad.carihub-pink-sheen,
+#precioEstimadoPublicidadBox .precio-seleccionado.carihub-pink-sheen,
+.apariciones-publicidad.carihub-pink-sheen,
+.slots-movil.carihub-pink-sheen,
+.formato-periodo-publicidad.carihub-pink-sheen,
+.selector-espacio-inline.carihub-pink-sheen{
+padding:12px 14px;
+border-radius:18px;
+}
+
+.modal-formato-periodo-banner__panel.carihub-pink-sheen{
+background:transparent;
+}
+
+.modal-formato-periodo-banner__panel.carihub-pink-sheen .modal-formato-periodo-banner__body,
+.modal-formato-periodo-banner__panel.carihub-pink-sheen .modal-formato-periodo-banner__footer{
+background:rgba(255,255,255,.72);
+}
+
+.select-premium-opcion .cat-digital-badge{
+display:inline-flex;
+align-items:center;
+justify-content:center;
+min-width:20px;
+height:20px;
+margin-right:8px;
+padding:0 5px;
+border-radius:7px;
+font-size:9px;
+font-weight:900;
+letter-spacing:.04em;
+text-transform:uppercase;
+color:#fff;
+background:linear-gradient(135deg,#ff5c9a 0%,#ff008c 55%,#c80062 100%);
+box-shadow:0 0 0 1px rgba(255,255,255,.45),0 4px 10px rgba(255,0,120,.28);
+vertical-align:middle;
 }
 
 .slot-hotspot.disponible{
@@ -2550,8 +2983,363 @@ font-size:11px;
 line-height:1.05;
 }
 
-.slot-hotspot .slot-texto-dinamico strong{
+.slot-hotspot .slot-texto-dinamico strong,
+.slot-hotspot .slot-texto-dinamico .slot-precio-banner{
 color:#7a0048;
+}
+
+.slot-hotspot .slot-texto-dinamico .slot-precio-banner{
+font-size:12px;
+font-weight:900;
+}
+
+.slot-hotspot-movil-premium .slot-texto-dinamico .slot-precio-banner{
+font-size:8px;
+font-weight:900;
+color:#7a0048;
+}
+
+.modal-formato-periodo-banner{
+position:fixed;
+inset:0;
+z-index:1200;
+display:flex;
+align-items:center;
+justify-content:center;
+padding:max(12px,env(safe-area-inset-top)) 12px max(12px,env(safe-area-inset-bottom));
+background:rgba(20,5,15,.55);
+backdrop-filter:blur(4px);
+overflow:hidden;
+}
+
+.modal-formato-periodo-banner.oculto{
+display:none;
+}
+
+.modal-formato-periodo-banner__panel{
+display:flex;
+flex-direction:column;
+width:min(400px,100%);
+max-height:min(88vh,620px);
+border-radius:22px;
+background:#fff;
+border:2px solid #ffb4d2;
+box-shadow:0 18px 48px rgba(255,0,140,.22);
+overflow:hidden;
+}
+
+.modal-formato-periodo-banner__header{
+position:relative;
+flex:0 0 auto;
+padding:18px 16px 14px;
+overflow:hidden;
+border-bottom:1px solid rgba(255,20,147,.16);
+}
+
+.modal-formato-periodo-banner__header-bg{
+position:absolute;
+inset:0;
+z-index:0;
+pointer-events:none;
+overflow:hidden;
+background:
+linear-gradient(168deg,#fff 0%,#ffe8f3 36%,#ffc9e0 68%,#ffb4d2 100%),
+linear-gradient(180deg,#ffd9e8 0%,#ffc2da 100%);
+}
+
+.modal-formato-periodo-banner__header-sheen{
+position:absolute;
+inset:0;
+background:
+radial-gradient(ellipse 95% 75% at 50% -8%,rgba(255,255,255,.88),transparent 56%),
+radial-gradient(ellipse 70% 55% at 88% 95%,rgba(255,195,218,.52),transparent 54%),
+linear-gradient(125deg,rgba(255,255,255,.5) 0%,transparent 40%,rgba(255,255,255,.28) 55%,transparent 80%);
+box-shadow:inset 0 0 48px rgba(255,255,255,.38);
+}
+
+.modal-formato-periodo-banner__header-sparkles{
+position:absolute;
+inset:0;
+overflow:hidden;
+}
+
+.modal-banner-spark{
+position:absolute;
+left:var(--x);
+top:var(--y);
+width:var(--sz,5px);
+height:var(--sz,5px);
+border-radius:50%;
+transform:translate(-50%,-50%);
+pointer-events:none;
+}
+
+.modal-banner-spark--flash{
+background:radial-gradient(circle,#fff 0%,rgba(255,255,255,.75) 34%,rgba(255,195,220,.4) 58%,transparent 78%);
+box-shadow:0 0 8px #fff,0 0 16px rgba(255,175,210,.9),0 0 28px rgba(255,95,165,.5);
+animation:modalBannerSparkFlash var(--dur,3.4s) ease-in-out infinite;
+animation-delay:var(--d,0s);
+}
+
+.modal-banner-spark--glow{
+background:radial-gradient(circle,rgba(255,245,250,1) 0%,rgba(255,185,215,.6) 48%,transparent 74%);
+box-shadow:0 0 10px rgba(255,155,195,1),0 0 20px rgba(255,90,160,.45);
+animation:modalBannerSparkGlow var(--dur,5s) ease-in-out infinite;
+animation-delay:var(--d,0s);
+}
+
+.modal-banner-spark--star{
+border-radius:0;
+background:transparent!important;
+box-shadow:none!important;
+animation:modalBannerSparkStar var(--dur,4.6s) ease-in-out infinite;
+animation-delay:var(--d,0s);
+}
+
+.modal-banner-spark--star::before,
+.modal-banner-spark--star::after{
+content:'';
+position:absolute;
+left:50%;
+top:50%;
+transform:translate(-50%,-50%);
+background:linear-gradient(90deg,transparent,#fff,transparent);
+box-shadow:0 0 8px rgba(255,255,255,.9),0 0 14px rgba(255,170,210,.65);
+}
+
+.modal-banner-spark--star::before{width:var(--sz,7px);height:2px}
+.modal-banner-spark--star::after{width:2px;height:var(--sz,7px)}
+
+@keyframes modalBannerSparkFlash{
+0%,100%{opacity:0;transform:translate(-50%,-50%) scale(.12)}
+8%{opacity:1;transform:translate(-50%,-50%) scale(1.7)}
+16%{opacity:.05;transform:translate(-50%,-50%) scale(.2)}
+42%{opacity:.95;transform:translate(-50%,-50%) scale(1.45)}
+58%{opacity:.08;transform:translate(-50%,-50%) scale(.25)}
+74%{opacity:1;transform:translate(-50%,-50%) scale(1.85)}
+}
+
+@keyframes modalBannerSparkGlow{
+0%,100%{opacity:.06;transform:translate(-50%,-50%) scale(.4)}
+28%{opacity:.9;transform:translate(-50%,-50%) scale(1.35)}
+52%{opacity:.12;transform:translate(-50%,-50%) scale(.55)}
+78%{opacity:1;transform:translate(-50%,-50%) scale(1.6)}
+}
+
+@keyframes modalBannerSparkStar{
+0%,100%{opacity:0;transform:translate(-50%,-50%) rotate(0deg) scale(.15)}
+12%{opacity:1;transform:translate(-50%,-50%) rotate(22deg) scale(1.85)}
+24%{opacity:.05;transform:translate(-50%,-50%) rotate(38deg) scale(.25)}
+55%{opacity:.92;transform:translate(-50%,-50%) rotate(72deg) scale(1.6)}
+70%{opacity:1;transform:translate(-50%,-50%) rotate(88deg) scale(2.05)}
+84%{opacity:0;transform:translate(-50%,-50%) rotate(100deg) scale(.2)}
+}
+
+@media (prefers-reduced-motion:reduce){
+.modal-banner-spark{animation:none!important;opacity:.35}
+}
+
+.modal-formato-periodo-banner__header-inner{
+position:relative;
+z-index:1;
+}
+
+.modal-formato-periodo-banner__body{
+flex:1 1 auto;
+min-height:0;
+overflow-y:auto;
+overflow-x:hidden;
+padding:10px 16px 8px;
+-webkit-overflow-scrolling:touch;
+overscroll-behavior:contain;
+}
+
+.modal-formato-periodo-banner__footer{
+flex:0 0 auto;
+padding:10px 16px 14px;
+border-top:1px solid rgba(255,20,147,.16);
+background:#fff;
+box-shadow:0 -10px 24px rgba(255,0,140,.08);
+}
+
+.modal-formato-periodo-banner__panel h3{
+margin:0 0 6px;
+color:#7a003c;
+font-size:17px;
+line-height:1.2;
+}
+
+.modal-formato-periodo-banner__panel p{
+margin:0;
+color:#5a2a42;
+font-size:12px;
+line-height:1.35;
+}
+
+.modal-formato-periodo-banner__grupo{
+margin-bottom:10px;
+}
+
+.modal-formato-periodo-banner__grupo:last-child{
+margin-bottom:0;
+}
+
+.modal-formato-periodo-banner__label{
+display:block;
+margin-bottom:8px;
+font-size:12px;
+font-weight:800;
+letter-spacing:.04em;
+text-transform:uppercase;
+color:#7a003c;
+}
+
+.modal-formato-periodo-banner__chips{
+display:flex;
+flex-wrap:wrap;
+gap:8px;
+}
+
+.modal-formato-periodo-banner__chips--formato,
+.modal-formato-periodo-banner__chips--periodo{
+display:grid;
+grid-template-columns:repeat(2,minmax(0,1fr));
+gap:8px;
+}
+
+.modal-formato-periodo-banner__chips--formato button,
+.modal-formato-periodo-banner__chips--periodo button{
+width:100%;
+min-width:0;
+padding:10px 8px;
+font-size:12px;
+}
+
+.modal-formato-periodo-banner__dias-panel{
+margin-top:12px;
+padding-top:12px;
+border-top:1px dashed rgba(255,20,147,.28);
+}
+
+.modal-formato-periodo-banner__dias-panel.oculto{
+display:none;
+}
+
+.modal-formato-periodo-banner__dias-panel .modal-formato-periodo-banner__label{
+display:block;
+margin-bottom:8px;
+}
+
+.modal-formato-periodo-banner__chips--dias{
+display:grid;
+grid-template-columns:repeat(4,minmax(0,1fr));
+gap:6px;
+}
+
+.modal-formato-periodo-banner__chips--dias button{
+width:100%;
+min-width:0;
+padding:7px 4px;
+font-size:11px;
+}
+
+.modal-formato-periodo-banner__dias-custom{
+display:flex;
+align-items:center;
+gap:6px;
+margin-top:8px;
+flex-wrap:wrap;
+}
+
+.modal-formato-periodo-banner__dias-custom label{
+font-size:12px;
+font-weight:700;
+color:#7a003c;
+}
+
+.modal-formato-periodo-banner__dias-custom input{
+width:72px;
+height:38px;
+padding:0 10px;
+border-radius:10px;
+border:1.5px solid rgba(122,0,60,.22);
+font-weight:700;
+}
+
+.modal-formato-periodo-banner__dias-custom button{
+height:38px;
+padding:0 12px;
+border-radius:10px;
+border:2px solid rgba(255,20,147,.28);
+background:#fff0f6;
+color:#7a003c;
+font-size:12px;
+font-weight:800;
+cursor:pointer;
+}
+
+.modal-formato-periodo-banner__chips button{
+flex:1 1 calc(50% - 8px);
+min-width:120px;
+padding:10px 12px;
+border-radius:12px;
+border:2px solid rgba(255,20,147,.28);
+background:#fff0f6;
+color:#7a003c;
+font-size:13px;
+font-weight:800;
+cursor:pointer;
+transition:.15s ease;
+}
+
+.modal-formato-periodo-banner__chips button.activo{
+background:linear-gradient(135deg,#ff008c,#9b0056);
+border-color:#ff008c;
+color:#fff;
+box-shadow:0 0 0 2px rgba(255,255,255,.7),0 0 16px rgba(255,0,140,.35);
+}
+
+.modal-formato-periodo-banner__chips--formato button,
+.modal-formato-periodo-banner__chips--periodo button,
+.modal-formato-periodo-banner__chips--dias button{
+flex:none;
+min-width:0;
+width:100%;
+box-sizing:border-box;
+}
+
+.modal-formato-periodo-banner__precio{
+margin:0 0 10px;
+padding:10px 12px;
+border-radius:12px;
+background:#fff7fb;
+border:1px solid rgba(255,20,147,.2);
+text-align:center;
+color:#7a003c;
+font-weight:800;
+font-size:13px;
+line-height:1.3;
+}
+
+.modal-formato-periodo-banner__precio.oculto{
+display:none;
+}
+
+.modal-formato-periodo-banner__acciones{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:8px;
+}
+
+.modal-formato-periodo-banner__acciones .btn,
+.modal-formato-periodo-banner__acciones .btn-back{
+width:100%;
+min-height:42px;
+padding:10px 12px;
+border-radius:14px;
+font-size:14px;
+font-weight:800;
+line-height:1.1;
 }
 
 .precio-estimado-oculto{
@@ -2766,6 +3554,10 @@ pointer-events:auto;
 display:none !important;
 }
 
+#precioEstimadoPublicidadBox.precio-home-listo{
+display:block !important;
+}
+
 .slots-movil{
 display:none;
 }
@@ -2863,6 +3655,127 @@ border-color:#fff;
 box-shadow:0 0 0 3px rgba(255,0,140,.92),0 0 28px rgba(255,0,140,.72);
 }
 
+.mockup-home-hero-zone{
+position:absolute;
+left:11.8%;
+top:5.8%;
+width:21.8%;
+height:28%;
+z-index:13;
+pointer-events:none;
+overflow:hidden;
+}
+
+.mockup-home-hero-zone::before{
+content:"";
+position:absolute;
+inset:0;
+z-index:0;
+clip-path:polygon(18% 0,100% 0,100% 100%,10% 100%);
+background:#fff0f6;
+}
+
+.mockup-home-hero-visual{
+position:absolute;
+inset:0;
+z-index:1;
+clip-path:polygon(18% 0,100% 0,100% 100%,10% 100%);
+background:#fff0f6;
+border:2px solid #ffb4d2;
+box-shadow:0 0 0 1px rgba(255,255,255,.65);
+opacity:1;
+pointer-events:none;
+}
+
+.mockup-home-hero-visual__label{
+position:absolute;
+left:24%;
+top:5px;
+right:4px;
+font-size:clamp(7px,.55vw,9px);
+font-weight:900;
+letter-spacing:.05em;
+text-transform:uppercase;
+color:#7a003c;
+text-align:center;
+line-height:1.15;
+opacity:0;
+transition:opacity .18s ease;
+}
+
+.mockup-premium-real.ubicacion-lista .mockup-home-hero-visual__label,
+.mockup-premium-real.slots-globales-listos .mockup-home-hero-visual__label,
+.mockup-premium-movil-panel--principal.ubicacion-lista-hero .mockup-home-hero-visual__label,
+.mockup-premium-movil-panel--principal.slots-globales-listos .mockup-home-hero-visual__label{
+opacity:1;
+}
+
+.mockup-home-hero-slots{
+position:absolute;
+inset:0;
+z-index:2;
+clip-path:polygon(18% 0,100% 0,100% 100%,10% 100%);
+pointer-events:none;
+overflow:hidden;
+}
+
+.mockup-home-hero-slots .slot-hotspot .slot-texto-dinamico b,
+.mockup-home-hero-slots .slot-hotspot-movil-premium .slot-texto-dinamico b{
+font-size:clamp(6px,.45vw,8px);
+}
+
+.mockup-home-hero-slots .slot-hotspot .slot-texto-dinamico small,
+.mockup-home-hero-slots .slot-hotspot-movil-premium .slot-texto-dinamico small,
+.mockup-home-hero-slots .slot-hotspot .slot-texto-dinamico strong,
+.mockup-home-hero-slots .slot-hotspot-movil-premium .slot-texto-dinamico strong{
+font-size:clamp(5px,.4vw,7px);
+}
+
+.mockup-premium-real.ubicacion-lista .mockup-home-hero-slots,
+.mockup-premium-movil-panel--principal.ubicacion-lista-hero .mockup-home-hero-slots{
+pointer-events:auto;
+}
+
+.mockup-home-hero-slots .slot-hotspot,
+.mockup-home-hero-slots .slot-hotspot-movil-premium{
+left:0;
+width:100%;
+border-radius:8px;
+font-size:clamp(8px,.5vw,11px);
+padding:2px 4px;
+border-width:2px;
+}
+
+.mockup-home-hero-slots .slot-hotspot.disponible,
+.mockup-home-hero-slots .slot-hotspot-movil-premium.disponible{
+background:#fff0f6;
+border-color:#ffb4d2;
+box-shadow:0 0 0 2px rgba(255,20,147,.28),0 0 18px rgba(255,0,140,.24);
+color:#7a003c;
+}
+
+.mockup-home-hero-slots .slot-hotspot.no-disponible,
+.mockup-home-hero-slots .slot-hotspot-movil-premium.no-disponible{
+background:rgba(20,5,15,.92);
+}
+
+.mockup-home-hero-slots .slot-hotspot.seleccionado,
+.mockup-home-hero-slots .slot-hotspot-movil-premium.seleccionado{
+background:rgba(255,0,140,.18);
+border-color:#fff;
+}
+
+.slot-home-hero-1,.slot-mobile-home-hero-1{top:0;height:20%;}
+.slot-home-hero-2,.slot-mobile-home-hero-2{top:20%;height:20%;}
+.slot-home-hero-3,.slot-mobile-home-hero-3{top:40%;height:20%;}
+.slot-home-hero-4,.slot-mobile-home-hero-4{top:60%;height:20%;}
+.slot-home-hero-5,.slot-mobile-home-hero-5{top:80%;height:20%;}
+
+.slot-categorias-banner{left:4%;top:11%;width:92%;height:19%;}
+.mockup-premium-panel--registro img{width:100%;display:block;border-radius:16px;}
+.slot-registro-superior{left:4%;top:6%;width:92%;height:22%;}
+.mockup-premium-movil-panel--registro img{width:100%;display:block;border-radius:12px;}
+.slot-mobile-registro-superior{left:4%;top:8%;width:92%;height:20%;}
 .slot-home-izquierda{left:2.0%;top:55.9%;width:14.9%;height:12.3%;}
 .slot-home-derecha{left:17.6%;top:55.9%;width:14.9%;height:12.3%;}
 .slot-home-inferior{left:2.0%;top:74.0%;width:30.4%;height:13.3%;}
@@ -2917,8 +3830,9 @@ display:flex;
 flex-direction:column;
 }
 
-.mockup-premium-real img{
-display:none;
+.mockup-premium-scroll,
+.mockup-premium-scroll-hint{
+display:none !important;
 }
 
 .mockup-premium-real::before{
@@ -3064,14 +3978,19 @@ order:2;
 
 .mockup-premium-movil-stage{
 position:relative;
-min-width:980px;
-width:980px;
+min-width:1280px;
+width:max-content;
 max-width:none;
 }
 
-.mockup-premium-movil-stage img{
+.mockup-premium-movil-panel--principal,
+.mockup-premium-movil-panel--categorias{
+position:relative;
+}
+
+.mockup-premium-movil-panel--principal img{
 display:block;
-width:100%;
+width:980px;
 height:auto;
 border-radius:18px;
 box-shadow:0 10px 28px rgba(255,0,140,.14);
@@ -3132,6 +4051,7 @@ line-height:1;
 color:#7a0048;
 }
 
+.slot-mobile-categorias-banner{left:4%;top:11%;width:92%;height:19%;}
 .slot-mobile-home-izquierda{left:2.0%;top:55.9%;width:14.9%;height:12.3%;}
 .slot-mobile-home-derecha{left:17.6%;top:55.9%;width:14.9%;height:12.3%;}
 .slot-mobile-home-inferior{left:2.0%;top:74.0%;width:30.4%;height:13.3%;}
@@ -3207,10 +4127,8 @@ display:none !important;
 
 }
 body.paso-2 .hero-anunciantes,
-body.paso-2 .banner-premium-info,
 body.paso-2 > .hero,
 body.paso-3 .hero-anunciantes,
-body.paso-3 .banner-premium-info,
 body.paso-3 > .hero{
   display:none !important;
 }
@@ -3249,6 +4167,20 @@ onclick="volverPagina()">
 <div class="bg-glow"></div>
 <div class="bg-glow2"></div>
 
+<div class="registro-banner-shell registro-banner-shell--page" id="registroBannerShell">
+  <div class="registro-banner-top registro-banner-top--page" data-registro-banner-slot="registro_superior" aria-label="Espacio publicitario en registro">
+    <a class="registro-pb registro-pb--vacant" href="registro-banner.html?slot=registro_superior" aria-label="Anúnciate aquí — banner superior en registro">
+      <div class="registro-pb__stage">
+        <div class="registro-pb__slide is-active" aria-hidden="false">
+          <span class="registro-pb__vacant-title">Anúnciate aquí</span>
+          <span class="registro-pb__vacant-hint">Banner superior · todas las pantallas de registro</span>
+        </div>
+      </div>
+    </a>
+  </div>
+</div>
+<script src="js/publicidad-activa.js"></script>
+<script src="js/banner-registro.js"></script>
 
 <div class="main">
 
@@ -3256,11 +4188,6 @@ onclick="volverPagina()">
 
 <!-- HERO -->
 <div id="contenidoSoloPaso1">
-<div class="banner-premium-info">
-
-<img src="img/banner-premium-info.webp">
-
-</div>
 
 <div class="hero">
 
@@ -3299,66 +4226,114 @@ Con tu cuenta podrás:
 
 <div class="mockup-premium-real">
 
-  <img
-  src="img/imgmockup-banners-movil-vacio.jpg"
-  alt="Espacios publicitarios premium">
+  <p class="mockup-premium-scroll-hint">Home, resultados, perfil y registro a la izquierda · desliza a la derecha para ver la pantalla de elegir categoría</p>
 
-  <div class="mockup-slots" aria-hidden="true">
-    <button type="button" class="slot-hotspot slot-home-izquierda" data-slot-id="home_izquierda" aria-label="Publicidad izquierda en pantalla principal"></button>
-    <button type="button" class="slot-hotspot slot-home-derecha" data-slot-id="home_derecha" aria-label="Publicidad derecha en pantalla principal"></button>
-    <button type="button" class="slot-hotspot slot-home-inferior" data-slot-id="home_inferior" aria-label="Publicidad inferior en pantalla principal"></button>
-    <button type="button" class="slot-hotspot slot-resultados-izquierda" data-slot-id="resultados_izquierda" aria-label="Publicidad izquierda en pantalla de resultados"></button>
-    <button type="button" class="slot-hotspot slot-resultados-centro" data-slot-id="resultados_centro" aria-label="Publicidad central en pantalla de resultados"></button>
-    <button type="button" class="slot-hotspot slot-resultados-derecha" data-slot-id="resultados_derecha" aria-label="Publicidad derecha en pantalla de resultados"></button>
-    <button type="button" class="slot-hotspot slot-resultados-inferior" data-slot-id="resultados_inferior" aria-label="Publicidad inferior en pantalla de resultados"></button>
-    <button type="button" class="slot-hotspot slot-perfil-izquierda" data-slot-id="perfil_izquierda" aria-label="Publicidad izquierda en pantalla de perfil"></button>
-    <button type="button" class="slot-hotspot slot-perfil-centro" data-slot-id="perfil_centro" aria-label="Publicidad central en pantalla de perfil"></button>
-    <button type="button" class="slot-hotspot slot-perfil-derecha" data-slot-id="perfil_derecha" aria-label="Publicidad derecha en pantalla de perfil"></button>
-    <button type="button" class="slot-hotspot slot-perfil-inferior" data-slot-id="perfil_inferior" aria-label="Publicidad inferior en pantalla de perfil"></button>
+  <div class="mockup-premium-scroll" id="mockupPremiumPublicidadScroll">
+    <div class="mockup-premium-stage">
+      <div class="mockup-premium-panel mockup-premium-panel--principal" data-pantalla-publicidad="principal">
+        <img
+        src="img/imgmockup-banners-movil-vacio.jpg"
+        alt="Espacios publicitarios premium: home, resultados y perfil">
+
+        <div class="mockup-slots" aria-hidden="true">
+          <div class="mockup-home-hero-zone">
+            <div class="mockup-home-hero-visual" aria-hidden="true">
+              <span class="mockup-home-hero-visual__label">5 espacios · parte superior</span>
+            </div>
+            <div class="mockup-home-hero-slots">
+              <button type="button" class="slot-hotspot slot-home-hero-1" data-slot-id="home_hero_1" aria-label="Imagen 1 en pantalla principal"></button>
+              <button type="button" class="slot-hotspot slot-home-hero-2" data-slot-id="home_hero_2" aria-label="Imagen 2 en pantalla principal"></button>
+              <button type="button" class="slot-hotspot slot-home-hero-3" data-slot-id="home_hero_3" aria-label="Imagen 3 en pantalla principal"></button>
+              <button type="button" class="slot-hotspot slot-home-hero-4" data-slot-id="home_hero_4" aria-label="Imagen 4 en pantalla principal"></button>
+              <button type="button" class="slot-hotspot slot-home-hero-5" data-slot-id="home_hero_5" aria-label="Imagen 5 en pantalla principal"></button>
+            </div>
+          </div>
+          <button type="button" class="slot-hotspot slot-home-izquierda" data-slot-id="home_izquierda" aria-label="Publicidad izquierda en pantalla principal"></button>
+          <button type="button" class="slot-hotspot slot-home-derecha" data-slot-id="home_derecha" aria-label="Publicidad derecha en pantalla principal"></button>
+          <button type="button" class="slot-hotspot slot-home-inferior" data-slot-id="home_inferior" aria-label="Publicidad inferior en pantalla principal"></button>
+          <button type="button" class="slot-hotspot slot-resultados-izquierda" data-slot-id="resultados_izquierda" aria-label="Publicidad izquierda en pantalla de resultados"></button>
+          <button type="button" class="slot-hotspot slot-resultados-centro" data-slot-id="resultados_centro" aria-label="Publicidad central en pantalla de resultados"></button>
+          <button type="button" class="slot-hotspot slot-resultados-derecha" data-slot-id="resultados_derecha" aria-label="Publicidad derecha en pantalla de resultados"></button>
+          <button type="button" class="slot-hotspot slot-resultados-inferior" data-slot-id="resultados_inferior" aria-label="Publicidad inferior en pantalla de resultados"></button>
+          <button type="button" class="slot-hotspot slot-perfil-izquierda" data-slot-id="perfil_izquierda" aria-label="Publicidad izquierda en pantalla de perfil"></button>
+          <button type="button" class="slot-hotspot slot-perfil-centro" data-slot-id="perfil_centro" aria-label="Publicidad central en pantalla de perfil"></button>
+          <button type="button" class="slot-hotspot slot-perfil-derecha" data-slot-id="perfil_derecha" aria-label="Publicidad derecha en pantalla de perfil"></button>
+          <button type="button" class="slot-hotspot slot-perfil-inferior" data-slot-id="perfil_inferior" aria-label="Publicidad inferior en pantalla de perfil"></button>
+        </div>
+      </div>
+
+      <div class="mockup-premium-panel mockup-premium-panel--registro" data-pantalla-publicidad="registro">
+        <img src="img/banner-premium-info.webp" alt="Pantallas de registro — perfil, cuenta y publicidad">
+        <div class="mockup-slots" aria-hidden="true">
+          <button type="button" class="slot-hotspot slot-registro-superior slot-global-publicidad" data-slot-id="registro_superior" aria-label="Banner superior en todas las pantallas de registro"></button>
+        </div>
+      </div>
+
+      <div class="mockup-premium-panel mockup-premium-panel--categorias" data-pantalla-publicidad="categorias">
+        <div class="mockup-categorias-preview" aria-hidden="true">
+          <p class="mockup-categorias-preview__eyebrow">Adultos</p>
+          <h3 class="mockup-categorias-preview__title">Elegir categoría</h3>
+          <div class="mockup-categorias-preview__banner-wrap">
+            <img src="img/adultos-cat/img-04.jpg" alt="" decoding="async">
+          </div>
+          <div class="mockup-categorias-preview__grid">
+            <span class="mockup-categorias-preview__card"></span>
+            <span class="mockup-categorias-preview__card"></span>
+            <span class="mockup-categorias-preview__card"></span>
+            <span class="mockup-categorias-preview__card"></span>
+            <span class="mockup-categorias-preview__card"></span>
+            <span class="mockup-categorias-preview__card"></span>
+          </div>
+        </div>
+        <div class="mockup-slots mockup-slots--categorias" aria-hidden="true">
+          <button type="button" class="slot-hotspot slot-categorias-banner" data-slot-id="home_categorias" aria-label="Banner en pantalla elegir categoría"></button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <div class="mockup-selects" aria-label="Ubicación de publicidad premium">
-    <div class="mockup-ubicacion-field">
+    <div class="mockup-ubicacion-field mockup-ubicacion-field--categoria">
     <select id="categoriaPublicidad" name="categoriaPublicidad" aria-label="Categoría del anuncio">
       <option value="">Selecciona una categoría</option>
-      <option value="general">✨ Todas las categorías</option>
-      <option value="Hotel">🏨 Hotel</option>
-      <option value="Motel">🏩 Motel</option>
-      <option value="Spa">🪷 Spa</option>
-      <option value="Sex shop">🛍️ Sex shop</option>
-      <option value="Escort">💎 Escort</option>
-      <option value="Escort gay">🌈 Escort gay</option>
-      <option value="Escort VIP">⭐ Escort VIP</option>
-      <option value="Evento swinger">🪩 Evento swinger</option>
-      <option value="Club SW">🥂 Club SW</option>
-      <option value="Masajes">💆 Masajes</option>
-      <option value="Agencia">🏢 Agencia</option>
-      <option value="Negocio local">📍 Negocio local</option>
-      <option value="Bar LGBTIQ+">🏳️‍🌈 Bar LGBTIQ+</option>
-      <option value="Cabinas / Glory holes">🚪 Cabinas / Glory holes</option>
-      <option value="Lesbians">🌈 Lesbians</option>
-      <option value="Tom boy">♂ Tom boy</option>
-      <option value="Tom fem">♀ Tom fem</option>
-      <option value="Cine xxx">🎬 Cine xxx</option>
-      <option value="Hotwife-Cuckcold">💍 Hotwife-Cuckcold</option>
+      <option value="general">Todas las categorías</option>
+      <option value="Hotel">Hotel</option>
+      <option value="Motel">Motel</option>
+      <option value="Spa">Spa</option>
+      <option value="Sex shop">Sex shop</option>
+      <option value="Escort">Escort</option>
+      <option value="Escort gay">Escort gay</option>
+      <option value="Escort VIP">Escort VIP</option>
+      <option value="Evento swinger">Evento swinger</option>
+      <option value="Club SW">Club SW</option>
+      <option value="Masajes">Masajes</option>
+      <option value="Agencia">Agencia</option>
+      <option value="Negocio local">Negocio local</option>
+      <option value="Bar LGBTIQ+">Bar LGBTIQ+</option>
+      <option value="Cabinas / Glory holes">Cabinas / Glory holes</option>
+      <option value="Lesbians">Lesbians</option>
+      <option value="Tom boy">Tom boy</option>
+      <option value="Tom fem">Tom fem</option>
+      <option value="Cine xxx">Cine xxx</option>
+      <option value="Hotwife-Cuckcold">Hotwife-Cuckcold</option>
     </select>
     </div>
 
-    <div class="mockup-ubicacion-field">
+    <div class="mockup-ubicacion-field" data-ubicacion="pais">
     <select id="paisPublicidad" class="mockup-select" aria-label="País">
       <option value="">Selecciona un país</option>
     </select>
     <input id="paisPublicidadManual" class="oculto" type="text" placeholder="Escribe el país" list="sugerenciasPaisPublicidadManual">
     </div>
 
-    <div class="mockup-ubicacion-field">
+    <div class="mockup-ubicacion-field" data-ubicacion="estado">
     <select id="estadoPublicidad" class="mockup-select" aria-label="Estado" disabled>
       <option value="">Selecciona un Estado</option>
     </select>
     <input id="estadoPublicidadManual" class="oculto" type="text" placeholder="Escribe el Estado" list="sugerenciasEstadoPublicidadManual">
     </div>
 
-    <div class="mockup-ubicacion-field">
+    <div class="mockup-ubicacion-field" data-ubicacion="ciudad">
     <select id="ciudadPublicidad" class="mockup-select" aria-label="Ciudad" disabled>
       <option value="">Selecciona una Ciudad</option>
     </select>
@@ -3370,22 +4345,117 @@ Con tu cuenta podrás:
 
 <div class="mockup-premium-movil" id="mockupPremiumPublicidadMovil" aria-label="Mockup premium móvil de espacios publicitarios">
   <div class="mockup-premium-movil-stage">
-    <img src="img/imgmockup-banners-movil-vacio.jpg" alt="Mockup premium de espacios publicitarios Cariñosas">
-    <button type="button" class="slot-hotspot-movil-premium slot-mobile-home-izquierda" data-slot-id="home_izquierda" aria-label="Home izquierda"></button>
-    <button type="button" class="slot-hotspot-movil-premium slot-mobile-home-derecha" data-slot-id="home_derecha" aria-label="Home derecha"></button>
-    <button type="button" class="slot-hotspot-movil-premium slot-mobile-home-inferior" data-slot-id="home_inferior" aria-label="Home inferior"></button>
-    <button type="button" class="slot-hotspot-movil-premium slot-mobile-resultados-izquierda" data-slot-id="resultados_izquierda" aria-label="Resultados izquierda"></button>
-    <button type="button" class="slot-hotspot-movil-premium slot-mobile-resultados-centro" data-slot-id="resultados_centro" aria-label="Resultados centro"></button>
-    <button type="button" class="slot-hotspot-movil-premium slot-mobile-resultados-derecha" data-slot-id="resultados_derecha" aria-label="Resultados derecha"></button>
-    <button type="button" class="slot-hotspot-movil-premium slot-mobile-resultados-inferior" data-slot-id="resultados_inferior" aria-label="Resultados inferior"></button>
-    <button type="button" class="slot-hotspot-movil-premium slot-mobile-perfil-izquierda" data-slot-id="perfil_izquierda" aria-label="Perfil izquierda"></button>
-    <button type="button" class="slot-hotspot-movil-premium slot-mobile-perfil-centro" data-slot-id="perfil_centro" aria-label="Perfil centro"></button>
-    <button type="button" class="slot-hotspot-movil-premium slot-mobile-perfil-derecha" data-slot-id="perfil_derecha" aria-label="Perfil derecha"></button>
-    <button type="button" class="slot-hotspot-movil-premium slot-mobile-perfil-inferior" data-slot-id="perfil_inferior" aria-label="Perfil inferior"></button>
+    <div class="mockup-premium-movil-panels">
+      <div class="mockup-premium-movil-panel mockup-premium-movil-panel--principal">
+        <img src="img/imgmockup-banners-movil-vacio.jpg" alt="Mockup premium de espacios publicitarios Cariñosas">
+        <div class="mockup-home-hero-zone mockup-home-hero-zone--movil">
+          <div class="mockup-home-hero-visual" aria-hidden="true">
+            <span class="mockup-home-hero-visual__label">5 espacios · parte superior</span>
+          </div>
+          <div class="mockup-home-hero-slots">
+            <button type="button" class="slot-hotspot-movil-premium slot-mobile-home-hero-1" data-slot-id="home_hero_1" aria-label="Home imagen 1"></button>
+            <button type="button" class="slot-hotspot-movil-premium slot-mobile-home-hero-2" data-slot-id="home_hero_2" aria-label="Home imagen 2"></button>
+            <button type="button" class="slot-hotspot-movil-premium slot-mobile-home-hero-3" data-slot-id="home_hero_3" aria-label="Home imagen 3"></button>
+            <button type="button" class="slot-hotspot-movil-premium slot-mobile-home-hero-4" data-slot-id="home_hero_4" aria-label="Home imagen 4"></button>
+            <button type="button" class="slot-hotspot-movil-premium slot-mobile-home-hero-5" data-slot-id="home_hero_5" aria-label="Home imagen 5"></button>
+          </div>
+        </div>
+        <button type="button" class="slot-hotspot-movil-premium slot-mobile-home-izquierda" data-slot-id="home_izquierda" aria-label="Home izquierda"></button>
+        <button type="button" class="slot-hotspot-movil-premium slot-mobile-home-derecha" data-slot-id="home_derecha" aria-label="Home derecha"></button>
+        <button type="button" class="slot-hotspot-movil-premium slot-mobile-home-inferior" data-slot-id="home_inferior" aria-label="Home inferior"></button>
+        <button type="button" class="slot-hotspot-movil-premium slot-mobile-resultados-izquierda" data-slot-id="resultados_izquierda" aria-label="Resultados izquierda"></button>
+        <button type="button" class="slot-hotspot-movil-premium slot-mobile-resultados-centro" data-slot-id="resultados_centro" aria-label="Resultados centro"></button>
+        <button type="button" class="slot-hotspot-movil-premium slot-mobile-resultados-derecha" data-slot-id="resultados_derecha" aria-label="Resultados derecha"></button>
+        <button type="button" class="slot-hotspot-movil-premium slot-mobile-resultados-inferior" data-slot-id="resultados_inferior" aria-label="Resultados inferior"></button>
+        <button type="button" class="slot-hotspot-movil-premium slot-mobile-perfil-izquierda" data-slot-id="perfil_izquierda" aria-label="Perfil izquierda"></button>
+        <button type="button" class="slot-hotspot-movil-premium slot-mobile-perfil-centro" data-slot-id="perfil_centro" aria-label="Perfil centro"></button>
+        <button type="button" class="slot-hotspot-movil-premium slot-mobile-perfil-derecha" data-slot-id="perfil_derecha" aria-label="Perfil derecha"></button>
+        <button type="button" class="slot-hotspot-movil-premium slot-mobile-perfil-inferior" data-slot-id="perfil_inferior" aria-label="Perfil inferior"></button>
+      </div>
+      <div class="mockup-premium-movil-panel mockup-premium-movil-panel--registro">
+        <img src="img/banner-premium-info.webp" alt="Registro — banner superior">
+        <button type="button" class="slot-hotspot-movil-premium slot-mobile-registro-superior slot-global-publicidad" data-slot-id="registro_superior" aria-label="Registro banner superior"></button>
+      </div>
+      <div class="mockup-premium-movil-panel mockup-premium-movil-panel--categorias">
+        <div class="mockup-categorias-preview" aria-hidden="true">
+          <p class="mockup-categorias-preview__eyebrow">Adultos</p>
+          <h3 class="mockup-categorias-preview__title">Elegir categoría</h3>
+          <div class="mockup-categorias-preview__banner-wrap">
+            <img src="img/adultos-cat/img-04.jpg" alt="" decoding="async">
+          </div>
+          <div class="mockup-categorias-preview__grid">
+            <span class="mockup-categorias-preview__card"></span>
+            <span class="mockup-categorias-preview__card"></span>
+            <span class="mockup-categorias-preview__card"></span>
+            <span class="mockup-categorias-preview__card"></span>
+            <span class="mockup-categorias-preview__card"></span>
+            <span class="mockup-categorias-preview__card"></span>
+          </div>
+        </div>
+        <button type="button" class="slot-hotspot-movil-premium slot-mobile-categorias-banner" data-slot-id="home_categorias" aria-label="Banner elegir categoría"></button>
+      </div>
+    </div>
   </div>
 </div>
 
 <div class="slots-movil" id="slotsMovilPublicidad" aria-live="polite"></div>
+
+<div class="modal-formato-periodo-banner oculto" id="modalFormatoPeriodoBanner" role="dialog" aria-modal="true" aria-labelledby="modalFormatoPeriodoTitulo">
+  <div class="modal-formato-periodo-banner__panel">
+    <div class="modal-formato-periodo-banner__header">
+      <div class="modal-formato-periodo-banner__header-bg" aria-hidden="true">
+        <div class="modal-formato-periodo-banner__header-sheen"></div>
+        <div class="modal-formato-periodo-banner__header-sparkles">
+          <span class="modal-banner-spark modal-banner-spark--flash" style="--x:10%;--y:22%;--d:0s;--dur:3.2s;--sz:5px"></span>
+          <span class="modal-banner-spark modal-banner-spark--glow" style="--x:28%;--y:38%;--d:.9s;--dur:5.2s;--sz:6px"></span>
+          <span class="modal-banner-spark modal-banner-spark--star" style="--x:52%;--y:18%;--d:.4s;--dur:4.4s;--sz:8px"></span>
+          <span class="modal-banner-spark modal-banner-spark--flash" style="--x:72%;--y:32%;--d:1.6s;--dur:3.6s;--sz:4px"></span>
+          <span class="modal-banner-spark modal-banner-spark--glow" style="--x:88%;--y:55%;--d:2.2s;--dur:5.6s;--sz:5px"></span>
+          <span class="modal-banner-spark modal-banner-spark--flash" style="--x:18%;--y:68%;--d:1.1s;--dur:3.8s;--sz:5px"></span>
+          <span class="modal-banner-spark modal-banner-spark--star" style="--x:62%;--y:72%;--d:2.8s;--dur:4.8s;--sz:7px"></span>
+        </div>
+      </div>
+      <div class="modal-formato-periodo-banner__header-inner">
+        <h3 id="modalFormatoPeriodoTitulo">Configura tu banner de home</h3>
+        <p id="modalFormatoPeriodoSubtitulo">Elige formato y periodo para ver el precio.</p>
+      </div>
+    </div>
+    <div class="modal-formato-periodo-banner__body">
+      <div class="modal-formato-periodo-banner__grupo">
+        <span class="modal-formato-periodo-banner__label">Formato</span>
+        <div class="modal-formato-periodo-banner__chips modal-formato-periodo-banner__chips--formato" id="modalFormatoChips">
+          <button type="button" data-tipo="imagen">Imagen</button>
+          <button type="button" data-tipo="video">Video</button>
+        </div>
+      </div>
+      <div class="modal-formato-periodo-banner__grupo">
+        <span class="modal-formato-periodo-banner__label">Por periodo</span>
+        <div class="modal-formato-periodo-banner__chips modal-formato-periodo-banner__chips--periodo" id="modalPeriodoChips">
+          <button type="button" data-periodo="semanal">Semanal</button>
+          <button type="button" data-periodo="mensual">Mensual</button>
+          <button type="button" data-periodo="quincenal">Quincenal</button>
+          <button type="button" data-modo="diario" id="modalPeriodoModoDiario">Por día</button>
+        </div>
+        <div class="modal-formato-periodo-banner__dias-panel oculto" id="modalPeriodoDiasPanel" aria-live="polite">
+          <span class="modal-formato-periodo-banner__label">Elige cuántos días</span>
+          <div class="modal-formato-periodo-banner__chips modal-formato-periodo-banner__chips--dias" id="modalPeriodoDiasChips"></div>
+          <div class="modal-formato-periodo-banner__dias-custom">
+            <label for="modalPeriodoDiasCustom">Otros días</label>
+            <input type="number" id="modalPeriodoDiasCustom" min="1" max="29" inputmode="numeric" placeholder="1-29">
+            <button type="button" id="modalPeriodoDiasCustomAplicar">Usar días</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-formato-periodo-banner__footer">
+      <div class="modal-formato-periodo-banner__precio oculto" id="modalFormatoPeriodoPrecio" aria-live="polite"></div>
+      <div class="modal-formato-periodo-banner__acciones">
+        <button type="button" class="btn btn-back" id="modalFormatoPeriodoCancelar">Cancelar</button>
+        <button type="button" class="btn" id="modalFormatoPeriodoConfirmar" disabled>Confirmar</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <div class="selector-espacio-inline oculto" id="selectorEspacioPublicidadBox">
 
@@ -3398,6 +4468,20 @@ Selecciona el espacio que deseas rentar
 <option value="home_izquierda">Publicidad izquierda — Pantalla principal</option>
 <option value="home_derecha">Publicidad derecha — Pantalla principal</option>
 <option value="home_inferior">Publicidad inferior — Pantalla principal</option>
+<option value="home_categorias">Banner selector categorías — Pantalla elegir categoría</option>
+<option value="home_hero_1">Imagen 1 — Pantalla principal</option>
+<option value="home_hero_2">Imagen 2 — Pantalla principal</option>
+<option value="home_hero_3">Imagen 3 — Pantalla principal</option>
+<option value="home_hero_4">Imagen 4 — Pantalla principal</option>
+<option value="home_hero_5">Imagen 5 — Pantalla principal</option>
+<option value="sin_resultados_izquierda">Sin resultados — izquierda (todo el sitio)</option>
+<option value="sin_resultados_centro">Sin resultados — centro (todo el sitio)</option>
+<option value="sin_resultados_derecha">Sin resultados — derecha (todo el sitio)</option>
+<option value="sin_resultados_inferior">Sin resultados — inferior (todo el sitio)</option>
+<option value="sin_resultados_estados">Sin resultados — lateral Estados y zonas</option>
+<option value="sin_resultados_libe">Sin resultados — lateral LIBE</option>
+<option value="home_estados">Home — lateral Estados y zonas</option>
+<option value="home_libe">Home — lateral LIBE</option>
 <option value="resultados_izquierda">Publicidad izquierda — Pantalla de resultados</option>
 <option value="resultados_centro">Publicidad central — Pantalla de resultados</option>
 <option value="resultados_derecha">Publicidad derecha — Pantalla de resultados</option>
@@ -3406,6 +4490,14 @@ Selecciona el espacio que deseas rentar
 <option value="perfil_centro">Publicidad central — Pantalla de perfil</option>
 <option value="perfil_derecha">Publicidad derecha — Pantalla de perfil</option>
 <option value="perfil_inferior">Publicidad inferior — Pantalla de perfil</option>
+<option value="resultados_estados">Resultados — lateral Estados y zonas</option>
+<option value="resultados_libe">Resultados — lateral LIBE</option>
+<option value="resultados_pais_estados">Resultados país — lateral Estados y zonas</option>
+<option value="resultados_pais_libe">Resultados país — lateral LIBE</option>
+<option value="resultados_estado_estados">Resultados estado — lateral Estados y zonas</option>
+<option value="resultados_estado_libe">Resultados estado — lateral LIBE</option>
+<option value="perfil_estados">Perfil — lateral Estados y zonas</option>
+<option value="perfil_libe">Perfil — lateral LIBE</option>
 </select>
 
 </div>
@@ -3418,10 +4510,22 @@ Selecciona el espacio que deseas rentar
   </select>
   <select id="periodoPublicidadControl" name="periodoPublicidad" aria-label="Periodo de renta">
     <option value="">Selecciona periodo de renta</option>
-    <option value="semanal">Semanal</option>
-    <option value="quincenal">Quincenal</option>
-    <option value="mensual">Mensual</option>
   </select>
+</div>
+
+<div class="apariciones-publicidad oculto" id="aparicionesPublicidadBox" aria-live="polite">
+  <div class="apariciones-publicidad__zona">
+    <span class="apariciones-publicidad__badge">Apariciones estimadas</span>
+    <strong id="aparicionesZonaNombre">—</strong>
+    <small id="aparicionesZonaRotacion">Selecciona un espacio en el mockup de arriba</small>
+  </div>
+  <div class="apariciones-publicidad__grid">
+    <div><span>Al día</span><b id="aparicionesDia">—</b></div>
+    <div><span>Quincena</span><b id="aparicionesQuincena">—</b></div>
+    <div><span>Al mes</span><b id="aparicionesMes">—</b></div>
+  </div>
+  <p class="apariciones-publicidad__nota">Cifras orientativas según la rotación de tu espacio. Lo incluido en tu renta es el inventario mínimo; si hay menos anuncios activos o espacios sin video, puedes recibir más apariciones de regalo.</p>
+  <p class="apariciones-publicidad__nota apariciones-publicidad__nota--sin-resultados oculto" id="aparicionesSinResultadosNota">Tu anuncio aparece en <strong>todas</strong> las pantallas del sitio donde un usuario busque y no encuentre resultados (cualquier categoría, país, estado o ciudad).</p>
 </div>
 
 <div class="input-group full precio-estimado-oculto" id="precioEstimadoPublicidadBox">
@@ -3794,14 +4898,18 @@ function validarPaso1Publicidad(){
   const faltantes=[];
 
   const selector=document.getElementById("selectorPublicidad");
+  const slotId=selector?.value||"";
+  const esGlobal=esSlotPublicidadGlobal(slotId);
 
-  if(!valorCategoriaPublicidad()) faltantes.push("Seleccionar categoría");
+  if(!esGlobal){
+    if(!valorCategoriaPublicidad()) faltantes.push("Seleccionar categoría");
+    if(!valorUbicacionPublicidad("pais")) faltantes.push("Seleccionar país");
+    if(!valorUbicacionPublicidad("estado")) faltantes.push("Seleccionar estado");
+    if(!valorUbicacionPublicidad("ciudad")) faltantes.push("Seleccionar ciudad");
+  }
+
   if(!valorInput('[name="periodoPublicidad"]')) faltantes.push("Seleccionar periodo de renta");
   if(!valorInput('[name="tipoContenidoPublicidad"]')) faltantes.push("Seleccionar formato del anuncio");
-
-  if(!valorUbicacionPublicidad("pais")) faltantes.push("Seleccionar país");
-  if(!valorUbicacionPublicidad("estado")) faltantes.push("Seleccionar estado");
-  if(!valorUbicacionPublicidad("ciudad")) faltantes.push("Seleccionar ciudad");
 
   if(!selector?.value) faltantes.push("Seleccionar espacio publicitario");
 
@@ -3938,6 +5046,222 @@ const disponibilidadPublicidadDemo={
   "San Nicol\u00e1s":["home_derecha","resultados_izquierda"]
 };
 
+const slotsPublicidadGlobales=[
+  "registro_superior",
+  "home_categorias",
+  "home_hero_1","home_hero_2","home_hero_3","home_hero_4","home_hero_5",
+  "home_izquierda","home_derecha","home_inferior",
+  "home_estados","home_libe",
+  "sin_resultados_izquierda","sin_resultados_centro","sin_resultados_derecha","sin_resultados_inferior",
+  "sin_resultados_estados","sin_resultados_libe"
+];
+const ocupacionSlotsDemo={
+  home_hero_2:1,
+  home_izquierda:1,
+  home_derecha:2,
+  home_inferior:2
+};
+const UBI_PUBLICIDAD_GLOBAL={
+  pais:"Plataforma",
+  estado:"Global",
+  ciudad:"Toda la plataforma"
+};
+let slotPendienteFormatoPeriodo="";
+let slotLocalPendiente="";
+let modalTipoSeleccionado="";
+let modalPeriodoSeleccionado="";
+let modalModoPeriodo="";
+
+function esSlotPublicidadGlobal(slotId){
+  return slotsPublicidadGlobales.includes(String(slotId||""));
+}
+
+function esSlotPublicidadLocal(slotId){
+  const valor=String(slotId||"");
+  return valor.startsWith("resultados_")||valor.startsWith("perfil_");
+}
+
+function contextoLocalPublicidadCompleto(){
+  return Boolean(
+    valorCategoriaPublicidad()
+    && valorUbicacionPublicidad("pais")
+    && valorUbicacionPublicidad("estado")
+    && valorUbicacionPublicidad("ciudad")
+  );
+}
+
+function slotHotspotInteractuable(slotId){
+  const valor=String(slotId||"");
+  if(!valor)return false;
+  if(esSlotPublicidadGlobal(valor)){
+    return slotsGlobalesDisponibles().includes(valor);
+  }
+  if(!esSlotPublicidadLocal(valor))return false;
+  if(!contextoLocalPublicidadCompleto())return false;
+  const ciudad=valorUbicacionPublicidad("ciudad");
+  return slotsDisponiblesActuales(ciudad).includes(valor);
+}
+
+function htmlDestellosRosaCarihub(){
+  return `
+    <span class="carihub-spark carihub-spark--flash" style="--x:10%;--y:22%;--d:0s;--dur:3.2s;--sz:5px"></span>
+    <span class="carihub-spark carihub-spark--glow" style="--x:28%;--y:38%;--d:.9s;--dur:5.2s;--sz:6px"></span>
+    <span class="carihub-spark carihub-spark--star" style="--x:52%;--y:18%;--d:.4s;--dur:4.4s;--sz:8px"></span>
+    <span class="carihub-spark carihub-spark--flash" style="--x:72%;--y:32%;--d:1.6s;--dur:3.6s;--sz:4px"></span>
+    <span class="carihub-spark carihub-spark--glow" style="--x:88%;--y:55%;--d:2.2s;--dur:5.6s;--sz:5px"></span>
+    <span class="carihub-spark carihub-spark--flash" style="--x:18%;--y:68%;--d:1.1s;--dur:3.8s;--sz:5px"></span>
+    <span class="carihub-spark carihub-spark--star" style="--x:62%;--y:72%;--d:2.8s;--dur:4.8s;--sz:7px"></span>
+  `;
+}
+
+function crearCapaBrilloRosa(){
+  const capa=document.createElement("div");
+  capa.className="carihub-pink-sheen__fondo";
+  capa.setAttribute("aria-hidden","true");
+  capa.innerHTML=`<div class="carihub-pink-sheen__brillo"></div><div class="carihub-pink-sheen__destellos">${htmlDestellosRosaCarihub()}</div>`;
+  return capa;
+}
+
+function decorarFondoRosaBrillo(elemento){
+  if(!elemento||elemento.dataset.carihubSheenDecorado==="1")return;
+  elemento.classList.add("carihub-pink-sheen");
+  elemento.insertBefore(crearCapaBrilloRosa(),elemento.firstChild);
+  elemento.dataset.carihubSheenDecorado="1";
+}
+
+function decorarFondosRosaBrilloPublicidad(){
+  [
+    ".mockup-selects",
+    ".modal-formato-periodo-banner__body",
+    ".modal-formato-periodo-banner__footer",
+    "#disponibilidadGeneralPublicidad",
+    "#aparicionesPublicidadBox",
+    "#formatoPeriodoPublicidadBox",
+    "#selectorEspacioPublicidadBox",
+    "#precioEstimadoPublicidadBox .precio-seleccionado",
+    "#slotsMovilPublicidad"
+  ].forEach(selector=>{
+    document.querySelectorAll(selector).forEach(decorarFondoRosaBrillo);
+  });
+}
+
+function insigniaDigitalCategoria(texto){
+  const limpio=String(texto||"").replace(/[^\p{L}\p{N}]/gu,"").trim();
+  const siglas=limpio.split(/\s+/).filter(Boolean).slice(0,2).map(p=>p.charAt(0)).join("").toUpperCase();
+  return siglas||"CH";
+}
+
+function abrirSelectorPremiumPorId(id){
+  const select=document.getElementById(id);
+  if(!select||select.disabled)return false;
+  const wrapper=select.closest(".select-premium-carihub");
+  if(wrapper){
+    cerrarSelectoresPremiumCarihub(wrapper);
+    wrapper.classList.add("abierto");
+    wrapper.querySelector(".select-premium-boton")?.setAttribute("aria-expanded","true");
+    wrapper.querySelector(".select-premium-boton")?.focus();
+    return true;
+  }
+  select.focus();
+  return true;
+}
+
+function avanzarCascadaUbicacionLocal(){
+  if(!slotLocalPendiente)return;
+  requestAnimationFrame(()=>{
+    if(!valorCategoriaPublicidad()){
+      abrirSelectorPremiumPorId("categoriaPublicidad");
+      return;
+    }
+    if(!valorUbicacionPublicidad("pais")){
+      abrirSelectorPremiumPorId("paisPublicidad");
+      return;
+    }
+    if(!valorUbicacionPublicidad("estado")){
+      abrirSelectorPremiumPorId("estadoPublicidad");
+      return;
+    }
+    if(!valorUbicacionPublicidad("ciudad")){
+      abrirSelectorPremiumPorId("ciudadPublicidad");
+      return;
+    }
+    intentarCompletarSeleccionLocalPendiente();
+  });
+}
+
+function intentarCompletarSeleccionLocalPendiente(){
+  if(!slotLocalPendiente||!contextoLocalPublicidadCompleto())return;
+  const slotId=slotLocalPendiente;
+  slotLocalPendiente="";
+  document.querySelector(".mockup-selects")?.classList.remove("ubicacion-requerida-local");
+  seleccionarSlotPublicidad(slotId);
+}
+
+function iniciarSeleccionBannerLocal(slotId){
+  if(!esSlotPublicidadLocal(slotId))return;
+  slotLocalPendiente=slotId;
+  const selector=document.getElementById("selectorPublicidad");
+  if(selector)selector.value="";
+  document.getElementById("precioEstimadoPublicidadBox")?.classList.remove("precio-home-listo");
+  document.querySelector(".mockup-selects")?.classList.remove("ubicacion-opcional-global");
+  document.querySelector(".mockup-selects")?.classList.add("ubicacion-requerida-local");
+  decorarFondoRosaBrillo(document.querySelector(".mockup-selects"));
+  actualizarVistaPublicidad();
+  document.querySelector(".mockup-selects")?.scrollIntoView({behavior:"smooth",block:"nearest"});
+  avanzarCascadaUbicacionLocal();
+}
+
+function publicidadGlobalConfigurada(slotId){
+  if(!esSlotPublicidadGlobal(slotId))return false;
+  const {tipo,periodo}=opcionesPrecioPublicidadActual();
+  return camposPrecioPublicidadCompletos(slotId,tipo,periodo);
+}
+
+function tituloModalSlotPublicidad(slotId){
+  const valor=String(slotId||"");
+  const match=valor.match(/^home_hero_(\d+)$/);
+  if(match)return `Pantalla principal · imagen ${match[1]}`;
+  return nombresSlotsPublicidad[valor]||valor;
+}
+
+function ocupacionSlotPublicidad(slotId){
+  const slot=configPrecioPublicidadEfectiva().slots?.[slotId]||{};
+  const capacidad=Math.max(0,Number(slot.capacidadMaxima)||0);
+  if(slot.activo===false||capacidad===0){
+    return{capacidad:0,ocupados:0,disponibles:0};
+  }
+  const ocupados=Math.min(capacidad,Math.max(0,Number(ocupacionSlotsDemo[slotId])||0));
+  return{
+    capacidad,
+    ocupados,
+    disponibles:Math.max(0,capacidad-ocupados)
+  };
+}
+
+function textoCupoSlotPublicidad(slotId){
+  const {capacidad,disponibles}=ocupacionSlotPublicidad(slotId);
+  if(capacidad===0)return "Cerrado";
+  if(disponibles<=0)return "Ocupado";
+  if(capacidad===1)return "Disponible";
+  return `Disponible ${disponibles}/${capacidad}`;
+}
+
+function slotTieneDisponibilidad(slotId){
+  return ocupacionSlotPublicidad(slotId).disponibles>0;
+}
+
+function slotsGlobalesDisponibles(){
+  const todos=todosSlotsPublicidad();
+  return slotsPublicidadGlobales.filter(slotId=>
+    todos.includes(slotId)&&slotTieneDisponibilidad(slotId)
+  );
+}
+
+const slotPublicidadPendiente=(()=>{
+  const valor=new URLSearchParams(window.location.search).get("slot");
+  return valor&&String(valor).trim()||"";
+})();
+
 const CONFIG_PRECIOS_PUBLICIDAD_FALLBACK=PreciosPublicidad.CONFIG_PRECIOS_PUBLICIDAD_FALLBACK;
 
 let configPreciosPublicidad=CONFIG_PRECIOS_PUBLICIDAD_FALLBACK;
@@ -4028,20 +5352,60 @@ const nombresSlotsPublicidad={
   home_izquierda:"Home - izquierda superior",
   home_derecha:"Home - derecha superior",
   home_inferior:"Home - inferior",
+  home_estados:"Home - lateral Estados y zonas",
+  home_libe:"Home - lateral LIBE",
+  home_categorias:"Home - selector de categorías",
+  home_hero_1:"Home - imagen 1",
+  home_hero_2:"Home - imagen 2",
+  home_hero_3:"Home - imagen 3",
+  home_hero_4:"Home - imagen 4",
+  home_hero_5:"Home - imagen 5",
+  sin_resultados_izquierda:"Sin resultados - izquierda superior",
+  sin_resultados_centro:"Sin resultados - centro superior",
+  sin_resultados_derecha:"Sin resultados - derecha superior",
+  sin_resultados_inferior:"Sin resultados - inferior",
+  sin_resultados_estados:"Sin resultados - lateral Estados y zonas",
+  sin_resultados_libe:"Sin resultados - lateral LIBE",
   resultados_izquierda:"Resultados - izquierda superior",
   resultados_centro:"Resultados - centro superior",
   resultados_derecha:"Resultados - derecha superior",
   resultados_inferior:"Resultados - inferior",
+  resultados_estados:"Resultados - lateral Estados y zonas",
+  resultados_libe:"Resultados - lateral LIBE",
+  resultados_pais_izquierda:"Resultados país - izquierda superior",
+  resultados_pais_centro:"Resultados país - centro superior",
+  resultados_pais_derecha:"Resultados país - derecha superior",
+  resultados_pais_inferior:"Resultados país - inferior",
+  resultados_pais_estados:"Resultados país - lateral Estados y zonas",
+  resultados_pais_libe:"Resultados país - lateral LIBE",
+  resultados_estado_izquierda:"Resultados estado - izquierda superior",
+  resultados_estado_centro:"Resultados estado - centro superior",
+  resultados_estado_derecha:"Resultados estado - derecha superior",
+  resultados_estado_inferior:"Resultados estado - inferior",
+  resultados_estado_estados:"Resultados estado - lateral Estados y zonas",
+  resultados_estado_libe:"Resultados estado - lateral LIBE",
   perfil_izquierda:"Perfil - izquierda superior",
   perfil_centro:"Perfil - centro superior",
   perfil_derecha:"Perfil - derecha superior",
-  perfil_inferior:"Perfil - inferior"
+  perfil_inferior:"Perfil - inferior",
+  perfil_estados:"Perfil - lateral Estados y zonas",
+  perfil_libe:"Perfil - lateral LIBE"
 };
 
 const nombresHotspotsPublicidad={
   home_izquierda:"Home izquierdo",
   home_derecha:"Home derecho",
   home_inferior:"Home inferior",
+  home_categorias:"Selector categorías",
+  home_hero_1:"Imagen 1",
+  home_hero_2:"Imagen 2",
+  home_hero_3:"Imagen 3",
+  home_hero_4:"Imagen 4",
+  home_hero_5:"Imagen 5",
+  sin_resultados_izquierda:"Sin resultados izquierdo",
+  sin_resultados_centro:"Sin resultados centro",
+  sin_resultados_derecha:"Sin resultados derecho",
+  sin_resultados_inferior:"Sin resultados inferior",
   resultados_izquierda:"Resultados izquierdo",
   resultados_centro:"Resultados centro",
   resultados_derecha:"Resultados derecho",
@@ -4056,6 +5420,120 @@ function opcionesPrecioPublicidadActual(){
   const periodo=document.querySelector('[name="periodoPublicidad"]')?.value||"";
   const tipo=document.querySelector('[name="tipoContenidoPublicidad"]')?.value||"";
   return {periodo,tipo};
+}
+
+function etiquetaPeriodoPublicidadUi(periodo){
+  if(window.PreciosPublicidad?.etiquetaPeriodoPublicidad){
+    return PreciosPublicidad.etiquetaPeriodoPublicidad(periodo);
+  }
+  return String(periodo||"").trim();
+}
+
+function poblarOpcionesPeriodoPublicidad(){
+  const select=document.getElementById("periodoPublicidadControl");
+  if(!select)return;
+  const seleccion=select.value;
+  select.innerHTML='<option value="">Selecciona periodo de renta</option>';
+  const grupoDias=document.createElement("optgroup");
+  grupoDias.label="Por días";
+  for(let dias=1;dias<=29;dias+=1){
+    const option=document.createElement("option");
+    option.value=`diario_${dias}`;
+    option.textContent=dias===1?"1 día":`${dias} días`;
+    grupoDias.appendChild(option);
+  }
+  select.appendChild(grupoDias);
+  const grupoPeriodo=document.createElement("optgroup");
+  grupoPeriodo.label="Por periodo";
+  [
+    ["semanal","Semanal (7 días)"],
+    ["quincenal","Quincenal (15 días)"],
+    ["mensual","Mensual (30 días)"]
+  ].forEach(([valor,texto])=>{
+    const option=document.createElement("option");
+    option.value=valor;
+    option.textContent=texto;
+    grupoPeriodo.appendChild(option);
+  });
+  select.appendChild(grupoPeriodo);
+  if(seleccion&&select.querySelector(`option[value="${seleccion}"]`)){
+    select.value=seleccion;
+  }
+}
+
+function pintarChipsPeriodoDiasModal(){
+  const contenedor=document.getElementById("modalPeriodoDiasChips");
+  if(!contenedor||contenedor.dataset.listo==="1")return;
+  contenedor.innerHTML="";
+  for(let dias=1;dias<=7;dias+=1){
+    const btn=document.createElement("button");
+    btn.type="button";
+    btn.dataset.periodo=`diario_${dias}`;
+    btn.textContent=dias===1?"1 día":`${dias} días`;
+    btn.addEventListener("click",()=>{
+      seleccionarPeriodoModalPublicidad(btn.dataset.periodo||"");
+    });
+    contenedor.appendChild(btn);
+  }
+  contenedor.dataset.listo="1";
+}
+
+function panelDiasPeriodoModalVisible(mostrar){
+  document.getElementById("modalPeriodoDiasPanel")?.classList.toggle("oculto",!mostrar);
+}
+
+function activarModoPeriodoDiarioModal(){
+  modalModoPeriodo="diario";
+  modalPeriodoSeleccionado="";
+  panelDiasPeriodoModalVisible(true);
+  marcarPeriodoModalActivo("");
+}
+
+function seleccionarPeriodoFijoModal(periodo){
+  modalModoPeriodo="periodo";
+  modalPeriodoSeleccionado=periodo||"";
+  panelDiasPeriodoModalVisible(false);
+  marcarPeriodoModalActivo(periodo);
+  actualizarPreviewPrecioModalFormato();
+}
+
+function marcarPeriodoModalActivo(periodo){
+  const custom=document.getElementById("modalPeriodoDiasCustom");
+  const modoDiarioBtn=document.getElementById("modalPeriodoModoDiario");
+  const parsed=PreciosPublicidad?.parsePeriodoPublicidad?.(periodo)||{tipo:"",dias:0};
+
+  if(parsed.tipo==="diario"){
+    modalModoPeriodo="diario";
+    panelDiasPeriodoModalVisible(true);
+  }else if(periodo==="semanal"||periodo==="quincenal"||periodo==="mensual"){
+    modalModoPeriodo="periodo";
+    panelDiasPeriodoModalVisible(false);
+  }else if(modalModoPeriodo==="diario"){
+    panelDiasPeriodoModalVisible(true);
+  }
+
+  document.querySelectorAll("#modalPeriodoChips button[data-periodo]").forEach(btn=>{
+    btn.classList.toggle("activo",btn.dataset.periodo===periodo);
+  });
+  modoDiarioBtn?.classList.toggle("activo",modalModoPeriodo==="diario");
+  document.querySelectorAll("#modalPeriodoDiasChips button").forEach(btn=>{
+    btn.classList.toggle("activo",btn.dataset.periodo===periodo);
+  });
+  if(custom){
+    if(parsed.tipo==="diario"&&parsed.dias>7){
+      custom.value=String(parsed.dias);
+    }else{
+      custom.value="";
+    }
+  }
+}
+
+function seleccionarPeriodoModalPublicidad(periodo){
+  modalModoPeriodo="diario";
+  modalPeriodoSeleccionado=periodo||"";
+  panelDiasPeriodoModalVisible(true);
+  marcarPeriodoModalActivo(periodo);
+  actualizarPreviewPrecioModalFormato();
 }
 
 function redondearPrecioHaciaArriba(valor,multiplo=50){
@@ -4089,6 +5567,9 @@ function contextoPrecioPublicidadActual(){
 
 function camposPrecioPublicidadCompletos(slotId,tipo,periodo){
   const contexto=contextoPrecioPublicidadActual();
+  if(esSlotPublicidadGlobal(slotId)){
+    return Boolean(slotId&&tipo&&periodo);
+  }
   return Boolean(
     contexto.categoria
     && contexto.pais
@@ -4114,26 +5595,184 @@ function configPrecioPublicidadEfectiva(){
 
 function calcularPrecioPublicidad(slotId){
   const {periodo,tipo}=opcionesPrecioPublicidadActual();
+  if(esSlotPublicidadLocal(slotId)&&!contextoLocalPublicidadCompleto())return null;
   if(!camposPrecioPublicidadCompletos(slotId,tipo,periodo))return null;
   return calcularPrecioPublicidadDesdeConfig(configPrecioPublicidadEfectiva(),slotId,tipo,periodo,1);
 }
 
 function contenidoHotspotPublicidad(slotId,disponible){
   const nombre=nombresHotspotsPublicidad[slotId]||nombresSlotsPublicidad[slotId]||"Banner";
-  const slot=configPrecioPublicidadEfectiva().slots?.[slotId]||{};
-  const capacidad=Number(slot.capacidadMaxima)||1;
+  const cupo=textoCupoSlotPublicidad(slotId);
 
-  if(!disponible){
+  if(esSlotPublicidadLocal(slotId)&&!contextoLocalPublicidadCompleto()){
+    return `<span class="slot-texto-dinamico"><b>${nombre}</b><small>Ubicación requerida</small></span>`;
+  }
+
+  if(!disponible||cupo==="Ocupado"){
     return `<span class="slot-texto-dinamico"><b>${nombre}</b><small>Ocupado</small></span>`;
   }
 
+  const selector=document.getElementById("selectorPublicidad");
+  const esSeleccionado=selector?.value===slotId;
   const {tipo,periodo}=opcionesPrecioPublicidadActual();
-  const calculo=camposPrecioPublicidadCompletos(slotId,tipo,periodo)
+  const calculo=esSeleccionado&&camposPrecioPublicidadCompletos(slotId,tipo,periodo)
     ? calcularPrecioPublicidadDesdeConfig(configPrecioPublicidadEfectiva(),slotId,tipo,periodo,1)
     : null;
-  const precio=calculo?`<strong>$${calculo.total.toLocaleString("es-MX")} ${calculo.moneda||"MXN"}</strong>`:"";
+  const precio=calculo
+    ? `<strong class="slot-precio-banner">$${calculo.total.toLocaleString("es-MX")}</strong><small>${calculo.moneda||"MXN"}</small>`
+    : (esSeleccionado?`<small>Elige formato y periodo</small>`:"");
 
-  return `<span class="slot-texto-dinamico"><b>${nombre}</b><small>Disponible 1/${capacidad}</small>${precio}</span>`;
+  if(/^home_hero_\d+$/.test(slotId)&&!esSeleccionado){
+    return `<span class="slot-texto-dinamico"><b>${nombre}</b><small>${cupo}</small></span>`;
+  }
+
+  return `<span class="slot-texto-dinamico"><b>${nombre}</b><small>${cupo}</small>${precio}</span>`;
+}
+
+function aplicarFormatoPeriodoEnControles(tipo,periodo,notificar){
+  const tipoCtrl=document.getElementById("tipoContenidoPublicidadControl");
+  const periodoCtrl=document.getElementById("periodoPublicidadControl");
+  if(tipoCtrl)tipoCtrl.value=tipo||"";
+  if(periodoCtrl)periodoCtrl.value=periodo||"";
+  if(notificar!==false){
+    tipoCtrl?.dispatchEvent(new Event("change",{bubbles:true}));
+    periodoCtrl?.dispatchEvent(new Event("change",{bubbles:true}));
+  }
+}
+
+function actualizarPreviewPrecioModalFormato(){
+  const precioBox=document.getElementById("modalFormatoPeriodoPrecio");
+  const confirmar=document.getElementById("modalFormatoPeriodoConfirmar");
+  const slotId=slotPendienteFormatoPeriodo;
+  const listo=Boolean(slotId&&modalTipoSeleccionado&&modalPeriodoSeleccionado);
+
+  confirmar&&(confirmar.disabled=!listo);
+
+  if(!precioBox)return;
+  if(!listo){
+    precioBox.classList.add("oculto");
+    precioBox.textContent="";
+    return;
+  }
+
+  const calculo=calcularPrecioPublicidadDesdeConfig(
+    configPrecioPublicidadEfectiva(),
+    slotId,
+    modalTipoSeleccionado,
+    modalPeriodoSeleccionado,
+    1
+  );
+
+  if(!calculo){
+    precioBox.classList.add("oculto");
+    precioBox.textContent="";
+    return;
+  }
+
+  precioBox.classList.remove("oculto");
+  precioBox.innerHTML=`Precio estimado:<br><strong>$${calculo.total.toLocaleString("es-MX")} ${calculo.moneda||"MXN"}</strong>`;
+}
+
+function cerrarModalFormatoPeriodoBanner(){
+  document.getElementById("modalFormatoPeriodoBanner")?.classList.add("oculto");
+  slotPendienteFormatoPeriodo="";
+  modalTipoSeleccionado="";
+  modalPeriodoSeleccionado="";
+  modalModoPeriodo="";
+  panelDiasPeriodoModalVisible(false);
+  document.querySelectorAll("#modalFormatoChips button, #modalPeriodoChips button, #modalPeriodoDiasChips button").forEach(btn=>{
+    btn.classList.remove("activo");
+  });
+  const custom=document.getElementById("modalPeriodoDiasCustom");
+  if(custom)custom.value="";
+  document.getElementById("modalFormatoPeriodoPrecio")?.classList.add("oculto");
+}
+
+function abrirModalFormatoPeriodoBanner(slotId){
+  const modal=document.getElementById("modalFormatoPeriodoBanner");
+  if(!modal||!slotId)return;
+
+  slotPendienteFormatoPeriodo=slotId;
+  const occ=ocupacionSlotPublicidad(slotId);
+  const titulo=document.getElementById("modalFormatoPeriodoTitulo");
+  const subtitulo=document.getElementById("modalFormatoPeriodoSubtitulo");
+  const selector=document.getElementById("selectorPublicidad");
+  const {tipo,periodo}=opcionesPrecioPublicidadActual();
+
+  if(titulo)titulo.textContent=tituloModalSlotPublicidad(slotId);
+  if(subtitulo){
+    subtitulo.textContent=occ.capacidad===1
+      ? "Espacio exclusivo en home. Elige si será imagen o video y el periodo de renta."
+      : `Hay ${occ.disponibles} de ${occ.capacidad} espacios disponibles. Elige formato y periodo.`;
+  }
+
+  pintarChipsPeriodoDiasModal();
+  modalTipoSeleccionado=selector?.value===slotId?tipo:"";
+  modalPeriodoSeleccionado=selector?.value===slotId?periodo:"";
+  modalModoPeriodo="";
+  if(!modalPeriodoSeleccionado)panelDiasPeriodoModalVisible(false);
+
+  document.querySelectorAll("#modalFormatoChips button").forEach(btn=>{
+    const activo=btn.dataset.tipo===modalTipoSeleccionado;
+    btn.classList.toggle("activo",activo);
+  });
+  marcarPeriodoModalActivo(modalPeriodoSeleccionado);
+
+  modal.classList.remove("oculto");
+  actualizarPreviewPrecioModalFormato();
+}
+
+function confirmarModalFormatoPeriodoBanner(){
+  const slotId=slotPendienteFormatoPeriodo;
+  const tipo=modalTipoSeleccionado;
+  const periodo=modalPeriodoSeleccionado;
+  if(!slotId||!tipo||!periodo)return;
+  cerrarModalFormatoPeriodoBanner();
+  aplicarFormatoPeriodoEnControles(tipo,periodo,false);
+  finalizarSeleccionSlotPublicidad(slotId);
+}
+
+function inicializarModalFormatoPeriodoBanner(){
+  poblarOpcionesPeriodoPublicidad();
+  pintarChipsPeriodoDiasModal();
+  document.getElementById("modalFormatoPeriodoCancelar")?.addEventListener("click",cerrarModalFormatoPeriodoBanner);
+  document.getElementById("modalFormatoPeriodoConfirmar")?.addEventListener("click",confirmarModalFormatoPeriodoBanner);
+  document.getElementById("modalFormatoPeriodoBanner")?.addEventListener("click",event=>{
+    if(event.target?.id==="modalFormatoPeriodoBanner")cerrarModalFormatoPeriodoBanner();
+  });
+  document.querySelectorAll("#modalFormatoChips button").forEach(btn=>{
+    btn.addEventListener("click",()=>{
+      modalTipoSeleccionado=btn.dataset.tipo||"";
+      document.querySelectorAll("#modalFormatoChips button").forEach(item=>{
+        item.classList.toggle("activo",item===btn);
+      });
+      actualizarPreviewPrecioModalFormato();
+    });
+  });
+  document.querySelectorAll("#modalPeriodoChips button[data-periodo]").forEach(btn=>{
+    btn.addEventListener("click",()=>{
+      seleccionarPeriodoFijoModal(btn.dataset.periodo||"");
+    });
+  });
+  document.getElementById("modalPeriodoModoDiario")?.addEventListener("click",()=>{
+    activarModoPeriodoDiarioModal();
+    actualizarPreviewPrecioModalFormato();
+  });
+  document.getElementById("modalPeriodoDiasCustomAplicar")?.addEventListener("click",()=>{
+    const dias=document.getElementById("modalPeriodoDiasCustom")?.value||"";
+    const periodo=PreciosPublicidad?.periodoDiarioDesdeDias?.(dias)||"";
+    if(!periodo){
+      alert("Escribe cuántos días quieres rentar (de 1 a 29).");
+      return;
+    }
+    seleccionarPeriodoModalPublicidad(periodo);
+  });
+  document.getElementById("modalPeriodoDiasCustom")?.addEventListener("keydown",event=>{
+    if(event.key==="Enter"){
+      event.preventDefault();
+      document.getElementById("modalPeriodoDiasCustomAplicar")?.click();
+    }
+  });
 }
 
 const aliasUbicacionPublicidad={
@@ -4507,38 +6146,67 @@ function prepararSelectManualUbicacion(tipo){
 }
 
 function todosSlotsPublicidad(){
-  return Array.from(document.querySelectorAll(".slot-hotspot")).map(slot=>slot.dataset.slotId).filter(Boolean);
+  const ids=new Set();
+  document.querySelectorAll(".slot-hotspot[data-slot-id], .slot-hotspot-movil-premium[data-slot-id]").forEach(slot=>{
+    const slotId=slot.dataset.slotId||"";
+    if(slotId)ids.add(slotId);
+  });
+  return Array.from(ids);
 }
 
 function pantallaDeSlotPublicidad(slotId){
   const valor=String(slotId||"");
+  if(valor==="home_categorias")return "categorias";
   if(valor.startsWith("home_"))return "home";
+  if(valor.startsWith("sin_resultados_"))return "sin_resultados";
+  if(valor.startsWith("resultados_pais_"))return "resultados_pais";
+  if(valor.startsWith("resultados_estado_"))return "resultados_estado";
   if(valor.startsWith("resultados_"))return "resultados";
   if(valor.startsWith("perfil_"))return "perfil";
+  if(valor.startsWith("registro_"))return "registro";
   return "";
 }
 
 function enfocarPantallaPublicidad(slotId){
-  if(!window.matchMedia("(max-width:700px)").matches)return;
   const pantalla=pantallaDeSlotPublicidad(slotId);
   if(!pantalla)return;
 
-  const contenedor=document.getElementById("mockupPremiumPublicidadMovil");
-  const stage=contenedor?.querySelector(".mockup-premium-movil-stage");
-  if(contenedor&&stage){
-    const centros={home:.183,resultados:.504,perfil:.820};
-    const centroPantalla=stage.offsetLeft+(stage.offsetWidth*(centros[pantalla]||1/2));
-    const maxScroll=contenedor.scrollWidth-contenedor.clientWidth;
-    const scrollObjetivo=Math.max(0,Math.min(maxScroll,centroPantalla-(contenedor.clientWidth/2)));
-    contenedor.scrollTo({left:scrollObjetivo,behavior:"smooth"});
+  const scrollDesktop=document.getElementById("mockupPremiumPublicidadScroll");
+  const contenedorMovil=document.getElementById("mockupPremiumPublicidadMovil");
+  const isMobile=window.matchMedia("(max-width:700px)").matches;
+
+  if(pantalla==="categorias"){
+    if(isMobile&&contenedorMovil){
+      const panel=contenedorMovil.querySelector(".mockup-premium-movil-panel--categorias");
+      if(panel){
+        const scrollObjetivo=panel.offsetLeft-Math.max(0,(contenedorMovil.clientWidth-panel.offsetWidth)/2);
+        contenedorMovil.scrollTo({left:Math.max(0,scrollObjetivo),behavior:"smooth"});
+      }
+    }else if(scrollDesktop){
+      const panel=scrollDesktop.querySelector(".mockup-premium-panel--categorias");
+      if(panel){
+        scrollDesktop.scrollTo({left:Math.max(0,panel.offsetLeft-12),behavior:"smooth"});
+      }
+    }
     return;
   }
 
-  document.querySelector(`[data-pantalla-publicidad="${pantalla}"]`)?.scrollIntoView({
-    behavior:"smooth",
-    block:"nearest",
-    inline:"center"
-  });
+  if(!isMobile){
+    if(scrollDesktop){
+      scrollDesktop.scrollTo({left:0,behavior:"smooth"});
+    }
+    return;
+  }
+
+  const panelPrincipal=contenedorMovil?.querySelector(".mockup-premium-movil-panel--principal");
+  if(contenedorMovil&&panelPrincipal){
+    const panelWidth=panelPrincipal.offsetWidth||980;
+    const centros={home:.16,resultados:.504,perfil:.820,registro:.92};
+    const centroPantalla=panelPrincipal.offsetLeft+(panelWidth*(centros[pantalla]||0.5));
+    const maxScroll=contenedorMovil.scrollWidth-contenedorMovil.clientWidth;
+    const scrollObjetivo=Math.max(0,Math.min(maxScroll,centroPantalla-(contenedorMovil.clientWidth/2)));
+    contenedorMovil.scrollTo({left:scrollObjetivo,behavior:"smooth"});
+  }
 }
 
 function inicializarUbicacionPublicidad(){
@@ -4564,8 +6232,9 @@ function ocultarSelectorEspacioPublicidad(){
   selectorBox?.classList.add("oculto");
   formatoBox?.classList.add("oculto");
   precioBox?.classList.add("precio-estimado-oculto");
+  precioBox?.classList.remove("precio-home-listo");
 
-  if(selector){
+  if(selector&&!slotLocalPendiente){
     selector.value="";
   }
 
@@ -4576,7 +6245,7 @@ function actualizarEstadosPublicidad(){
   const estado=document.getElementById("estadoPublicidad");
   const pais=document.getElementById("paisPublicidad");
 
-  ocultarSelectorEspacioPublicidad();
+  if(!slotLocalPendiente)ocultarSelectorEspacioPublicidad();
   if(pais?.value==="__manual__"){
     alternarCampoManualPublicidad("pais");
     prepararSelectManualUbicacion("pais");
@@ -4593,6 +6262,7 @@ function actualizarEstadosPublicidad(){
   estado.disabled=!paisValor;
 
   actualizarVistaPublicidad();
+  if(slotLocalPendiente)avanzarCascadaUbicacionLocal();
 }
 
 function manejarTeclaManualUbicacion(event,tipo){
@@ -4605,7 +6275,7 @@ function actualizarCiudadesPublicidad(){
   const ciudad=document.getElementById("ciudadPublicidad");
   const estadoSelect=document.getElementById("estadoPublicidad");
 
-  ocultarSelectorEspacioPublicidad();
+  if(!slotLocalPendiente)ocultarSelectorEspacioPublicidad();
 
   if(estadoSelect?.value==="__manual__"){
     alternarCampoManualPublicidad("estado");
@@ -4623,14 +6293,26 @@ function actualizarCiudadesPublicidad(){
   ciudad.disabled=!estadoValor;
 
   actualizarVistaPublicidad();
+  if(slotLocalPendiente)avanzarCascadaUbicacionLocal();
 }
 
 function slotsDisponiblesActuales(ciudad){
-  // Temporal hasta conectar Firestore: si es ciudad nueva, todos los espacios aparecen disponibles.
+  const todos=todosSlotsPublicidad();
+  let disponibles;
   if(disponibilidadPublicidadDemo[ciudad]){
-    return Array.from(new Set([...disponibilidadPublicidadDemo[ciudad],"resultados_centro"]));
+    disponibles=Array.from(new Set([
+      ...disponibilidadPublicidadDemo[ciudad].filter(slotId=>!slotId.startsWith("home_")),
+      "resultados_centro"
+    ]));
+  }else{
+    disponibles=todos.filter(slotId=>!slotsPublicidadGlobales.includes(slotId));
   }
-  return todosSlotsPublicidad();
+  slotsPublicidadGlobales.forEach(slotId=>{
+    if(todos.includes(slotId)&&slotTieneDisponibilidad(slotId)&&!disponibles.includes(slotId)){
+      disponibles.push(slotId);
+    }
+  });
+  return disponibles;
 }
 
 function actualizarOpcionesSelectorPublicidad(disponibles){
@@ -4680,21 +6362,41 @@ function textoDisponibilidadGeneralPublicidad(cantidad){
   return "No hay disponibilidad por ahora";
 }
 
-function actualizarDisponibilidadGeneralPublicidad(disponibilidadLista,disponibles){
+function actualizarDisponibilidadGeneralPublicidad(disponibilidadLocal,disponibles,disponiblesGlobales){
   const contenedor=document.getElementById("disponibilidadGeneralPublicidad");
   if(!contenedor)return;
 
-  contenedor.classList.toggle("oculto",!disponibilidadLista);
-
-  if(!disponibilidadLista){
+  const slotSeleccionado=document.getElementById("selectorPublicidad")?.value||"";
+  if(publicidadGlobalConfigurada(slotSeleccionado)){
+    contenedor.classList.add("oculto");
     contenedor.textContent="";
+    return;
+  }
+
+  const mostrar=disponibilidadLocal||disponiblesGlobales.length>0;
+  contenedor.classList.toggle("oculto",!mostrar);
+
+  if(!mostrar){
+    contenedor.textContent="";
+    return;
+  }
+
+  if(!disponibilidadLocal&&disponiblesGlobales.length>0){
+    contenedor.textContent="Banners de pantalla principal: elige uno sin categoría ni ciudad. Para resultados o perfil, completa ubicación.";
     return;
   }
 
   contenedor.textContent=textoDisponibilidadGeneralPublicidad(disponibles.length);
 }
 
-function actualizarSlotsMovilPublicidad(disponibilidadLista,disponibles){
+function actualizarRequisitosUbicacionPublicidad(slotId){
+  const esGlobal=esSlotPublicidadGlobal(slotId);
+  const modoLocal=Boolean(slotLocalPendiente);
+  document.querySelector(".mockup-selects")?.classList.toggle("ubicacion-opcional-global",esGlobal&&!modoLocal);
+  document.querySelector(".mockup-selects")?.classList.toggle("ubicacion-requerida-local",modoLocal);
+}
+
+function actualizarSlotsMovilPublicidad(disponibilidadLocal,disponibles,disponiblesGlobales){
   const contenedor=document.getElementById("slotsMovilPublicidad");
   const selector=document.getElementById("selectorPublicidad");
   const ubicacion=ubicacionPublicidadActual();
@@ -4703,13 +6405,15 @@ function actualizarSlotsMovilPublicidad(disponibilidadLista,disponibles){
 
   if(!contenedor)return;
 
-  if(!disponibilidadLista){
-    contenedor.innerHTML='<h3>Espacios publicitarios</h3><div class="slots-movil-grid"><div class="slot-movil-btn ocupado">Elige categoría, país, estado y ciudad para ver espacios disponibles.</div></div>';
+  if(!disponibilidadLocal&&disponiblesGlobales.length===0){
+    contenedor.innerHTML='<h3>Espacios publicitarios</h3><div class="slots-movil-grid"><div class="slot-movil-btn ocupado">Elige categoría, país, estado y ciudad para ver espacios locales, o toca un banner de pantalla principal en el mockup.</div></div>';
     return;
   }
 
   const slots=todosSlotsPublicidad();
-  const titulo=categoria==="general"?`Espacios en ${ubicacion.ciudad}`:`Espacios de ${categoriaTexto} en ${ubicacion.ciudad}`;
+  const titulo=disponibilidadLocal
+    ? (categoria==="general"?`Espacios en ${ubicacion.ciudad}`:`Espacios de ${categoriaTexto} en ${ubicacion.ciudad}`)
+    : "Banners de pantalla principal (globales)";
   const ciudadConHistorial=Boolean(disponibilidadPublicidadDemo[ubicacion.ciudad]);
  const slotSeleccionado=selector?.value || "";
 
@@ -4717,6 +6421,8 @@ function actualizarSlotsMovilPublicidad(disponibilidadLista,disponibles){
 ? `Espacio seleccionado:<br><strong>${nombresSlotsPublicidad[slotSeleccionado] || slotSeleccionado}</strong>`
 : disponibles.length === 0
   ? "No hay disponibilidad por ahora en este espacio."
+  : !disponibilidadLocal
+  ? "Estos banners se muestran en home para todos los usuarios. No necesitas elegir categoría ni ciudad."
   : ciudadConHistorial
   ? `Estos espacios corresponden a ${categoriaTexto} en ${ubicacion.ciudad}. Si el espacio que quieres está ocupado, puedes revisar otra zona cercana.`
   : `Ciudad nueva o sin historial exacto para ${categoriaTexto}. Puedes elegir un espacio disponible y administración revisará la ubicación.`;
@@ -4726,12 +6432,24 @@ function actualizarSlotsMovilPublicidad(disponibilidadLista,disponibles){
     <div class="slot-movil-aviso">${aviso}</div>
     <div class="slots-movil-grid">
       ${slots.map(slotId=>{
+        const esGlobal=esSlotPublicidadGlobal(slotId);
+        const slotActivo=esGlobal?disponiblesGlobales.length>0:disponibilidadLocal;
         const disponible=disponibles.includes(slotId);
         const seleccionado=selector?.value===slotId;
-        const estado=seleccionado?"Seleccionado":(disponible?"Disponible":"Ocupado");
+        const cupo=textoCupoSlotPublicidad(slotId);
+        const estado=!slotActivo?"Ubicación requerida":(seleccionado?"Seleccionado":cupo);
+        const habilitado=slotActivo&&disponible&&cupo!=="Ocupado";
+        let precioMovil="";
+        if(seleccionado&&habilitado){
+          const {tipo,periodo}=opcionesPrecioPublicidadActual();
+          const calculo=camposPrecioPublicidadCompletos(slotId,tipo,periodo)
+            ? calcularPrecioPublicidadDesdeConfig(configPrecioPublicidadEfectiva(),slotId,tipo,periodo,1)
+            : null;
+          if(calculo)precioMovil=`<br>$${calculo.total.toLocaleString("es-MX")} ${calculo.moneda||"MXN"}`;
+        }
         return `
-          <button type="button" class="slot-movil-btn ${disponible?"disponible":"ocupado"} ${seleccionado?"seleccionado":""}" data-slot-movil="${slotId}" ${disponible?"":"disabled"}>
-            <span>${nombresSlotsPublicidad[slotId]||slotId}<br>${estado}</span>
+          <button type="button" class="slot-movil-btn ${habilitado?"disponible":"ocupado"} ${seleccionado?"seleccionado":""}" data-slot-movil="${slotId}" ${habilitado?"":"disabled"}>
+            <span>${nombresSlotsPublicidad[slotId]||slotId}<br>${estado}${precioMovil}</span>
           </button>
         `;
       }).join("")}
@@ -4740,13 +6458,21 @@ function actualizarSlotsMovilPublicidad(disponibilidadLista,disponibles){
 
   contenedor.querySelectorAll("[data-slot-movil]").forEach(boton=>{
     boton.addEventListener("click",()=>{
+      const slotId=boton.dataset.slotMovil||"";
+      if(!slotHotspotInteractuable(slotId)){
+        if(esSlotPublicidadLocal(slotId))iniciarSeleccionBannerLocal(slotId);
+        return;
+      }
       feedbackInteraccion(boton);
-      seleccionarSlotPublicidad(boton.dataset.slotMovil||"");
+      seleccionarSlotPublicidad(slotId);
       if(window.matchMedia("(max-width:700px)").matches){
         document.querySelector(".mockup-premium-real img")?.scrollIntoView({behavior:"smooth",block:"center"});
       }
     });
   });
+
+  delete contenedor.dataset.carihubSheenDecorado;
+  decorarFondoRosaBrillo(contenedor);
 }
 
 function actualizarVistaPublicidad(){
@@ -4764,55 +6490,117 @@ function actualizarVistaPublicidad(){
 
   const ubicacionLista=Boolean(ubicacionActual.pais&&ubicacionActual.estado&&ubicacionActual.ciudad);
   const categoriaLista=Boolean(valorCategoriaPublicidad());
-  const disponibilidadLista=ubicacionLista&&categoriaLista;
-  const disponibles=disponibilidadLista?slotsDisponiblesActuales(ubicacionActual.ciudad):[];
+  const disponibilidadLocal=ubicacionLista&&categoriaLista;
+  const disponiblesGlobales=slotsGlobalesDisponibles();
+  const disponiblesLocales=disponibilidadLocal
+    ? slotsDisponiblesActuales(ubicacionActual.ciudad).filter(slotId=>!esSlotPublicidadGlobal(slotId))
+    : [];
+  const disponibles=Array.from(new Set([...disponiblesGlobales,...disponiblesLocales]));
+  const slotSeleccionado=selector?.value||"";
+  const puedeUsarSelector=disponiblesGlobales.length>0||disponibilidadLocal;
   configPrecioPublicidadEfectiva();
   actualizarOpcionesSelectorPublicidad(disponibles);
 
-  if(mockup)mockup.classList.toggle("ubicacion-lista",disponibilidadLista);
-  selectorBox?.classList.toggle("oculto",!disponibilidadLista);
-  formatoBox?.classList.toggle("oculto",!selector?.value);
-  actualizarDisponibilidadGeneralPublicidad(disponibilidadLista,disponibles);
+  if(mockup){
+    mockup.classList.toggle("ubicacion-lista",disponibilidadLocal);
+    mockup.classList.toggle("slots-globales-listos",disponiblesGlobales.length>0);
+  }
+  const panelMovilPrincipal=document.querySelector(".mockup-premium-movil-panel--principal");
+  panelMovilPrincipal?.classList.toggle("ubicacion-lista-hero",disponibilidadLocal||disponiblesGlobales.length>0);
+  panelMovilPrincipal?.classList.toggle("ubicacion-lista-local",disponibilidadLocal);
+  panelMovilPrincipal?.classList.toggle("slots-globales-listos",disponiblesGlobales.length>0);
+  mockup?.classList.toggle("ubicacion-lista-local",disponibilidadLocal);
+  const homeYaConfigurado=publicidadGlobalConfigurada(slotSeleccionado);
+  const mostrarSelectorInline=(puedeUsarSelector||slotSeleccionado)&&!homeYaConfigurado;
+  selectorBox?.classList.toggle("oculto",!mostrarSelectorInline);
+  actualizarDisponibilidadGeneralPublicidad(disponibilidadLocal,disponibles,disponiblesGlobales);
+  actualizarRequisitosUbicacionPublicidad(slotSeleccionado);
 
   if(selector){
     selector.disabled=false;
-    if(!disponibilidadLista){
-      selector.value="";
+    if(!puedeUsarSelector){
+      if(!slotSeleccionado)selector.value="";
       selector.options[0].textContent="Primero selecciona categoría, país, estado y ciudad";
     }else if(disponibles.length === 0){
       selector.value="";
       selector.options[0].textContent="No hay disponibilidad por ahora";
+    }else if(!disponibilidadLocal&&disponiblesGlobales.length>0){
+      selector.options[0].textContent="Selecciona un banner de pantalla principal";
     }else{
       selector.options[0].textContent="Presiona aquí para seleccionar publicidad disponible";
     }
   }
 
-  formatoBox?.classList.toggle("oculto",!selector?.value || !disponibilidadLista);
+  const puedeMostrarFormato=Boolean(selector?.value)
+    &&(esSlotPublicidadGlobal(selector.value)||disponibilidadLocal)
+    &&!homeYaConfigurado;
+  formatoBox?.classList.toggle("oculto",!puedeMostrarFormato);
 
   slots.forEach(slot=>{
     const slotId=slot.dataset.slotId||"";
+    const esGlobal=esSlotPublicidadGlobal(slotId);
+    const esLocal=esSlotPublicidadLocal(slotId);
+    const slotActivo=esGlobal
+      ? disponiblesGlobales.length>0
+      : (esLocal?disponibilidadLocal:false);
     const disponible=disponibles.includes(slotId);
     const seleccionado=selector?.value===slotId;
-    slot.classList.toggle("disponible",disponibilidadLista&&disponible);
-    slot.classList.toggle("no-disponible",disponibilidadLista&&!disponible);
+    slot.classList.toggle("slot-global-publicidad",esGlobal);
+    slot.classList.toggle("slot-local-publicidad",esLocal);
+    slot.classList.toggle("disponible",slotActivo&&disponible);
+    slot.classList.toggle("no-disponible",slotActivo&&!disponible);
     slot.classList.toggle("seleccionado",seleccionado);
-    slot.dataset.estadoLabel=disponibilidadLista
+    slot.dataset.estadoLabel=slotActivo
       ? (disponible?`${seleccionado?"Seleccionado":"Disponible"}`:"Ocupado")
       : "";
     if(slot.classList.contains("slot-hotspot")||slot.classList.contains("slot-hotspot-movil-premium")){
-      slot.innerHTML=disponibilidadLista?contenidoHotspotPublicidad(slotId,disponible):"";
+      slot.innerHTML=(slotActivo||esLocal)?contenidoHotspotPublicidad(slotId,disponible):"";
+      slot.toggleAttribute("aria-disabled",!slotHotspotInteractuable(slotId));
     }
   });
 
-  actualizarSlotsMovilPublicidad(disponibilidadLista,disponibles);
+  actualizarSlotsMovilPublicidad(disponibilidadLocal,disponibles,disponiblesGlobales);
+
+  if(slotPublicidadPendiente&&selector?.value!==slotPublicidadPendiente){
+    const pendienteGlobal=esSlotPublicidadGlobal(slotPublicidadPendiente);
+    const puedePendiente=pendienteGlobal
+      ? disponiblesGlobales.includes(slotPublicidadPendiente)
+      : disponibilidadLocal&&disponibles.includes(slotPublicidadPendiente);
+    if(puedePendiente){
+      if(esSlotPublicidadGlobal(slotPublicidadPendiente))abrirModalFormatoPeriodoBanner(slotPublicidadPendiente);
+      else seleccionarSlotPublicidad(slotPublicidadPendiente);
+    }
+  }
+
   actualizarPrecioAnuncio();
+}
+
+function finalizarSeleccionSlotPublicidad(slotId){
+  const selector=document.getElementById("selectorPublicidad");
+  if(!selector||!slotId)return;
+  selector.value=slotId;
+  const slot=document.querySelector(`[data-slot-id="${slotId}"]`);
+  feedbackInteraccion(slot||selector);
+  actualizarVistaPublicidad();
+  actualizarPrecioAnuncio();
+  enfocarPantallaPublicidad(slotId);
+  if(publicidadGlobalConfigurada(slotId)){
+    requestAnimationFrame(()=>{
+      document.getElementById("precioEstimadoPublicidadBox")?.scrollIntoView({behavior:"smooth",block:"nearest"});
+    });
+  }
 }
 
 function seleccionarSlotPublicidad(slotId){
   const selector=document.getElementById("selectorPublicidad");
   const ubicacionLista=Boolean(valorUbicacionPublicidad("pais")&&valorUbicacionPublicidad("estado")&&valorUbicacionPublicidad("ciudad"));
   const categoriaLista=Boolean(valorCategoriaPublicidad());
-  const disponibles=slotsDisponiblesActuales(valorUbicacionPublicidad("ciudad"));
+  const esGlobal=esSlotPublicidadGlobal(slotId);
+  const disponiblesGlobales=slotsGlobalesDisponibles();
+  const disponiblesLocales=ubicacionLista&&categoriaLista
+    ? slotsDisponiblesActuales(valorUbicacionPublicidad("ciudad")).filter(id=>!esSlotPublicidadGlobal(id))
+    : [];
+  const disponibles=Array.from(new Set([...disponiblesGlobales,...disponiblesLocales]));
 
   if(!selector||selector.disabled)return;
   if(!slotId){
@@ -4820,10 +6608,8 @@ function seleccionarSlotPublicidad(slotId){
     return;
   }
 
-  if(!categoriaLista||!ubicacionLista){
-    selector.value="";
-    alert("Primero selecciona categoría, país, estado y ciudad.");
-    actualizarVistaPublicidad();
+  if(!esGlobal&&(!categoriaLista||!ubicacionLista)){
+    iniciarSeleccionBannerLocal(slotId);
     return;
   }
 
@@ -4843,12 +6629,46 @@ function seleccionarSlotPublicidad(slotId){
     return;
   }
 
-  selector.value=slotId;
-  const slot=document.querySelector(`[data-slot-id="${slotId}"]`);
-  feedbackInteraccion(slot||selector);
-  actualizarVistaPublicidad();
-  actualizarPrecioAnuncio();
-  enfocarPantallaPublicidad(slotId);
+  if(esGlobal){
+    abrirModalFormatoPeriodoBanner(slotId);
+    return;
+  }
+
+  finalizarSeleccionSlotPublicidad(slotId);
+}
+
+function actualizarAparicionesPublicidad(){
+  const selector=document.getElementById("selectorPublicidad");
+  const slotId=selector?.value||"";
+  const box=document.getElementById("aparicionesPublicidadBox");
+
+  if(publicidadGlobalConfigurada(slotId)){
+    box?.classList.add("oculto");
+    return;
+  }
+
+  const configEfectiva=configPrecioPublicidadEfectiva();
+  const slot=configEfectiva.slots?.[slotId];
+  const capacidad=slot?.capacidadMaxima;
+
+  if(!window.BannerInventarioRotacion?.actualizarPanel){
+    box?.classList.toggle("oculto",!slotId);
+    return;
+  }
+
+  window.BannerInventarioRotacion.actualizarPanel({
+    box:"aparicionesPublicidadBox",
+    zona:"aparicionesZonaNombre",
+    rotacion:"aparicionesZonaRotacion",
+    dia:"aparicionesDia",
+    quincena:"aparicionesQuincena",
+    mes:"aparicionesMes"
+  },slotId,capacidad);
+
+  const notaSr=document.getElementById("aparicionesSinResultadosNota");
+  if(notaSr){
+    notaSr.classList.toggle("oculto",!/^sin_resultados_/.test(String(slotId||"")));
+  }
 }
 
 function actualizarPrecioAnuncio(){
@@ -4856,6 +6676,7 @@ function actualizarPrecioAnuncio(){
   const configEfectiva=configPrecioPublicidadEfectiva();
   const slot=configEfectiva.slots?.[selector?.value||""];
   const precioBox=document.getElementById("precioEstimadoPublicidadBox");
+  actualizarAparicionesPublicidad();
   const titulo=document.getElementById("precioAnuncioTitulo");
   const monto=document.getElementById("precioAnuncioMonto");
   const detalle=document.getElementById("precioAnuncioDetalle");
@@ -4866,12 +6687,25 @@ function actualizarPrecioAnuncio(){
   const listoParaPrecio=camposPrecioPublicidadCompletos(selector?.value||"",tipo,periodo);
 
   if(!titulo||!monto||!detalle||!input)return;
-  precioBox?.classList.toggle("precio-estimado-oculto",!listoParaPrecio);
+  const homeListo=publicidadGlobalConfigurada(selector?.value||"");
+  const slotLocalSinContexto=esSlotPublicidadLocal(selector?.value||"")&&!contextoLocalPublicidadCompleto();
+  precioBox?.classList.toggle("precio-estimado-oculto",!listoParaPrecio||slotLocalSinContexto);
+  precioBox?.classList.toggle("precio-home-listo",homeListo&&listoParaPrecio);
+
+  if(slotLocalSinContexto){
+    titulo.textContent="Precio según espacio seleccionado";
+    monto.textContent="Precio pendiente";
+    detalle.textContent="Para resultados o perfil, primero elige categoría, país, estado y ciudad.";
+    input.value="";
+    return;
+  }
 
   if(!slot||!listoParaPrecio){
     titulo.textContent="Precio según espacio seleccionado";
     monto.textContent="Precio pendiente";
-    detalle.textContent="Selecciona categoría, ubicación, banner, contenido y periodo para calcular el precio.";
+    detalle.textContent=esSlotPublicidadGlobal(selector?.value||"")
+      ? "Selecciona banner de pantalla principal, contenido y periodo para calcular el precio."
+      : "Selecciona categoría, ubicación, banner, contenido y periodo para calcular el precio.";
     input.value="";
     if(inputTipo)inputTipo.value=tipo;
     if(inputPeriodo)inputPeriodo.value=periodo;
@@ -4890,7 +6724,7 @@ function actualizarPrecioAnuncio(){
   }
 
   const total=calculo.total;
-  const etiquetaPeriodo={semanal:"semanal",quincenal:"quincenal",mensual:"mensual recomendado"}[periodo]||"mensual recomendado";
+  const etiquetaPeriodo=etiquetaPeriodoPublicidadUi(periodo)||"mensual recomendado";
   const etiquetaTipo=tipo==="video"?"video":"imagen";
 
   titulo.textContent=slot.nombre || "Precio según espacio seleccionado";
@@ -4979,7 +6813,7 @@ function cargarCategoriasPublicidadDesdeCatalogo(){
   window.CariHubCatalogos.categorias().forEach(categoria=>{
     const option=document.createElement("option");
     option.value=categoria.nombre;
-    option.textContent=categoria.label;
+    option.textContent=categoria.nombre||categoria.label;
     select.appendChild(option);
   });
 
@@ -5000,6 +6834,7 @@ function actualizarCategoriaPublicidad(conFeedback=false){
   }
   if(conFeedback)feedbackInteraccion(select);
   actualizarVistaPublicidad();
+  if(slotLocalPendiente)avanzarCascadaUbicacionLocal();
 }
 
 function actualizarSwitchesPublicidad(){
@@ -5088,7 +6923,16 @@ function selectorPremiumCarihub(select){
       const item=document.createElement("button");
       item.type="button";
       item.className="select-premium-opcion";
-      item.textContent=option.textContent;
+      const etiqueta=option.textContent||"";
+      if(option.value&&!option.disabled&&option.value!=="__manual__"){
+        const badge=document.createElement("span");
+        badge.className="cat-digital-badge";
+        badge.textContent=insigniaDigitalCategoria(etiqueta);
+        item.appendChild(badge);
+        item.append(etiqueta);
+      }else{
+        item.textContent=etiqueta;
+      }
       item.dataset.value=option.value;
       item.setAttribute("role","option");
       item.setAttribute("aria-selected",String(option.value===select.value));
@@ -5167,9 +7011,10 @@ document.addEventListener("DOMContentLoaded",()=>{
   document.getElementById("estadoPublicidadManual")?.addEventListener("keydown",event=>manejarTeclaManualUbicacion(event,"estado"));
   document.getElementById("estadoPublicidadManual")?.addEventListener("blur",()=>{corregirManualUbicacion("estado");confirmarUbicacionManual("estado");});
  document.getElementById("ciudadPublicidad")?.addEventListener("change",()=>{
-  ocultarSelectorEspacioPublicidad();
+  if(!slotLocalPendiente)ocultarSelectorEspacioPublicidad();
   alternarCampoManualPublicidad("ciudad");
   actualizarVistaPublicidad();
+  if(slotLocalPendiente)avanzarCascadaUbicacionLocal();
 });
   document.getElementById("ciudadPublicidadManual")?.addEventListener("input",()=>actualizarManualUbicacion("ciudad"));
   document.getElementById("ciudadPublicidadManual")?.addEventListener("keyup",()=>actualizarManualUbicacion("ciudad"));
@@ -5184,7 +7029,7 @@ document.addEventListener("DOMContentLoaded",()=>{
   document.getElementById("necesitaFacturaCfdi")?.addEventListener("change",alternarCamposFacturaCfdi);
   document.getElementById("imagenPublicidadPrincipal")?.addEventListener("change",event=>actualizarPreviewBannerPrincipal(event.currentTarget));
  document.getElementById("categoriaPublicidad")?.addEventListener("change",()=>{
-  ocultarSelectorEspacioPublicidad();
+  if(!slotLocalPendiente)ocultarSelectorEspacioPublicidad();
   actualizarCategoriaPublicidad(true);
 });
   document.getElementById("nombreComercialVisible")?.addEventListener("input",actualizarMensajeContactoPublicidad);
@@ -5211,15 +7056,25 @@ document.addEventListener("DOMContentLoaded",()=>{
 
   document.querySelectorAll(".slot-hotspot").forEach(slot=>{
     slot.addEventListener("click",()=>{
+      const slotId=slot.dataset.slotId||"";
+      if(!slotHotspotInteractuable(slotId)){
+        if(esSlotPublicidadLocal(slotId))iniciarSeleccionBannerLocal(slotId);
+        return;
+      }
       feedbackInteraccion(slot);
-      seleccionarSlotPublicidad(slot.dataset.slotId||"");
+      seleccionarSlotPublicidad(slotId);
     });
   });
 
   document.querySelectorAll(".slot-hotspot-movil-premium").forEach(slot=>{
     slot.addEventListener("click",()=>{
+      const slotId=slot.dataset.slotId||"";
+      if(!slotHotspotInteractuable(slotId)){
+        if(esSlotPublicidadLocal(slotId))iniciarSeleccionBannerLocal(slotId);
+        return;
+      }
       feedbackInteraccion(slot);
-      seleccionarSlotPublicidad(slot.dataset.slotId||"");
+      seleccionarSlotPublicidad(slotId);
     });
   });
 
@@ -5228,8 +7083,10 @@ document.addEventListener("DOMContentLoaded",()=>{
   });
 
   agregarAccesoPreviewPantalla2();
+  inicializarModalFormatoPeriodoBanner();
   cargarCategoriasPublicidadDesdeCatalogo();
   inicializarSelectoresPremiumCarihub();
+  decorarFondosRosaBrilloPublicidad();
   alternarCamposFacturaCfdi();
   actualizarPrecioAnuncio();
   actualizarCategoriaPublicidad();
@@ -5436,13 +7293,15 @@ async function continuarPaso1Publicidad(event){
     return;
   }
 
+  const esGlobal=esSlotPublicidadGlobal(slotId);
   const datosPaso1 = {
     solicitudTemporalId: solicitudTemporalId,
     nombreNegocio: document.getElementById("nombreComercialVisible")?.value.trim() || "",
-    categoria: document.getElementById("categoriaPublicidad")?.value || "",
-    pais: valorUbicacionPublicidad("pais"),
-    estado: valorUbicacionPublicidad("estado"),
-    ciudad: valorUbicacionPublicidad("ciudad"),
+    categoria: esGlobal?"general":(document.getElementById("categoriaPublicidad")?.value || ""),
+    pais: esGlobal?UBI_PUBLICIDAD_GLOBAL.pais:valorUbicacionPublicidad("pais"),
+    estado: esGlobal?UBI_PUBLICIDAD_GLOBAL.estado:valorUbicacionPublicidad("estado"),
+    ciudad: esGlobal?UBI_PUBLICIDAD_GLOBAL.ciudad:valorUbicacionPublicidad("ciudad"),
+    alcancePublicidad: esGlobal?"global":"local",
     pantalla: division.pantalla,
     espacio: division.espacio,
     slotId: slotId,

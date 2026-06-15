@@ -1,0 +1,177 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "tipo": "MAPA_MAESTRO",
+  "titulo": "Mapa Maestro CariHub — estado actual y plano futuro definitivo",
+  "fecha": "2026-06-09",
+  "version": "1.0.0",
+  "modo": "Solo documentación — sin runtime/carpetas/Firestore/deploy/commit",
+  "fuente": "scripts/AUDITORIA-ARQUITECTONICA-GLOBAL-CARIHUB.json + OBSERVACION-MODULARIZACION 1.0.0 + 7 actas + 4 SPEC",
+
+  "estadoActualResumen": {
+    "produccion": "Monolito multipágina (index, resultados, perfil, admin, registro-banner) con Firebase compartido por copia",
+    "diseñoCongelado": "7 capas + Messenger 1.0.0 + VE 1.1.0; migración perfiles aprobada sin runtime",
+    "gapPrincipal": "Producción usuarios/{uid} monolito vs diseño usuarios hub + perfiles/{perfilId}"
+  },
+
+  "mapaActual": {
+    "APP_PUBLICA": "PARCIAL_MEZCLADA",
+    "APP_REGISTRO": "MEZCLADA_EN_HOME",
+    "APP_DASHBOARD": "PARCIAL_MEZCLADA",
+    "APP_ADMIN": "PARCIAL_REAL",
+    "APP_MESSENGER": "CONGELADA_DISENO_SIN_RUNTIME",
+    "APP_PAGOS": "PENDIENTE_MEZCLADA",
+    "APP_BANNERS": "PARCIAL_REAL",
+    "APP_INTERACCIONES": "OBSERVACION_MEZCLADA",
+    "APP_SEO": "OBSERVACION",
+    "APP_THEMEENGINE": "OBSERVACION",
+    "APP_AGENTES": "FUTURA",
+    "SHARED_CORE": "PARCIAL_DISPERSO"
+  },
+
+  "planoMaestroFuturo": {
+    "APP_PUBLICA": {
+      "bundle": "liviano",
+      "submodulos": {
+        "Home": { "ruta": "/", "componentes": ["Hero", "BuscadorGeo", "GridCategorias", "GridSectores", "TrustPills", "AdSlot"], "preparacion": "parcial" },
+        "Resultados": { "ruta": "/resultados", "componentes": ["FiltroGeo", "ResultCard", "Paginacion", "BannerLateral"], "preparacion": "parcial", "pendienteCritico": "query server-side + índices (hoy filtra cliente)" },
+        "PerfilPublico": { "ruta": "/perfil/:perfilId", "componentes": ["PerfilHeader", "Galeria", "ContactoWhatsApp", "BannerInline"], "preparacion": "parcial", "nota": "página SEO canónica" }
+      },
+      "dependencias": ["SHARED/Catálogo", "RenderEngine", "SEO"]
+    },
+    "APP_REGISTRO": {
+      "bundle": "lazy",
+      "submodulos": {
+        "RegistroPerfil": { "ruta": "/registro/perfil", "schema": "config-registro-adultos / independiente / profesionista" },
+        "RegistroNegocio": { "ruta": "/registro/negocio", "schema": "config-registro-negocio-schema" },
+        "RegistroAnunciante": { "ruta": "/registro/anunciante", "nota": "puede converger con BANNERS" },
+        "Wizard": { "ruta": "/registro/wizard/:formularioId", "motor": "FieldEngine 1.0.1 + VE 1.1.0" },
+        "Verificaciones": { "ruta": "/registro/verificacion", "datos": "INE, selfie — storage verificaciones/{uid}", "sensible": true }
+      },
+      "dependencias": ["FieldEngine", "ValidationEngine", "Cuentas", "Seguridad MVP", "5 config schemas"]
+    },
+    "APP_DASHBOARD": {
+      "bundle": "lazy",
+      "submodulos": {
+        "Perfil": { "ruta": "/cuenta/perfil" },
+        "Negocio": { "ruta": "/cuenta/negocio" },
+        "Anunciante": { "ruta": "/cuenta/anunciante" },
+        "Empresa": { "ruta": "/cuenta/empresa", "nota": "multi-operador" },
+        "Operador": { "ruta": "/cuenta/operador", "coleccion": "messenger_operadores" }
+      },
+      "shell": "modular por tipoCuentaPrincipal/rolesCuenta (SPEC-DASHBOARDS)",
+      "dependencias": ["Cuentas", "VE 1.1.0", "ANEXO Messenger-Dashboards", "migración perfiles"]
+    },
+    "APP_MESSENGER": {
+      "bundle": "lazy realtime",
+      "submodulos": {
+        "Conversaciones": { "ruta": "/messenger", "coleccion": "conversaciones + conversaciones_meta" },
+        "Solicitudes": { "ruta": "/messenger/solicitudes" },
+        "Reportes": { "ruta": "/messenger/reportes", "coleccion": "reportes_mensajeria" },
+        "TraduccionFutura": { "estado": "futuro" }
+      },
+      "adminRutas": ["/admin/mensajeria"],
+      "dependencias": ["ValidationEngine 1.1.0 (60 acciones)", "Dashboards notificaciones", "perfiles migrados", "Seguridad MVP"]
+    },
+    "APP_ADMIN": {
+      "bundle": "pesado interno",
+      "submodulos": {
+        "Moderacion": { "coleccion": "usuarios, denuncias" },
+        "Seguridad": { "coleccion": "logsSeguridad, alertas_seguridad" },
+        "Pagos": { "coleccion": "pagos, contratos_*" },
+        "Revisiones": { "coleccion": "perfiles/historial_estados, solicitudes_anuncios" },
+        "IAAdmin": { "coleccion": "ia_arquitecto_informes" }
+      },
+      "ruta": "/admin",
+      "dependencias": ["RBAC fase 2", "Dashboards admin_separado", "VE", "config-admin-arquitectura-completa-schema (8 módulos)"]
+    },
+    "APP_PAGOS": {
+      "bundle": "lazy",
+      "submodulos": {
+        "Contratos": { "coleccion": "contratos_perfiles, contratos_banners" },
+        "Renovaciones": { "coleccion": "contratos_*/renovaciones" },
+        "Facturacion": { "estado": "futuro" },
+        "Cobros": { "pasarela": "Stripe/MP — NO autorizado live" }
+      },
+      "ruta": "/cuenta/contratos",
+      "dependencias": ["config-contratos-carihub-schema", "Cuentas", "VE"]
+    },
+    "APP_BANNERS": {
+      "bundle": "lazy",
+      "submodulos": {
+        "Espacios": { "fuente": "banner-inventario-rotacion.js, slots home/resultados/perfil/hero" },
+        "Campanas": { "coleccion": "solicitudes_anuncios, anuncios" },
+        "Creativos": { "storage": "solicitudes_anuncios/*" },
+        "Estadisticas": { "estado": "pendiente métricas reales" }
+      },
+      "ruta": "/anuncios",
+      "dependencias": ["precios-publicidad.js", "configuracion_publicidad/precios_banners", "Pagos"]
+    },
+    "APP_INTERACCIONES": {
+      "bundle": "lazy pesado futuro",
+      "submodulos": { "Stories": {}, "Lives": {}, "Seguidores": {}, "Comentarios": {}, "Reacciones": {} },
+      "ruta": "/interacciones",
+      "dependencias": ["OBSERVACION 1.2.1", "Messenger", "perfiles", "VE social futuro"]
+    },
+    "APP_THEMEENGINE": {
+      "bundle": "lazy",
+      "submodulos": { "Temas": {}, "Widgets": {}, "Plantillas": {}, "EditorVisual": { "tipo": "Canva" } },
+      "ruta": "/cuenta/apariencia",
+      "fuenteTokensActual": ["dashboard-rentero (12 temas)", "home-vcards (6 templates)", "data-tema"],
+      "dependencias": ["RenderEngine SPEC (precondición)", "OBSERVACION 1.3.0", "perfiles"]
+    },
+    "APP_SEO": {
+      "bundle": "SSG/islas livianas",
+      "submodulos": { "Pais": {}, "Estado": {}, "Ciudad": {}, "Categoria": {}, "Landings": {} },
+      "rutas": ["/s/:slug", "/ciudad/:ciudad", "/explorar/:sector", "/sitemap.xml"],
+      "dependencias": ["OBSERVACION SEO 1.0.0", "Catálogo", "Render landings", "perfilId canónico"]
+    },
+    "APP_AGENTES": {
+      "bundle": "transversal lazy",
+      "submodulos": { "Auditoria": {}, "Soporte": {}, "Moderacion": {}, "Seguridad": {}, "Traduccion": {}, "SEO": {}, "Diseno": {} },
+      "uiEmbebida": ["/cuenta/asistente", "/admin/ia", "/messenger/asistente"],
+      "dependencias": ["Dashboards orquestador", "VE ia_*", "Messenger iaSeguridad", "LLM NO autorizado"]
+    },
+    "SHARED_CORE": {
+      "componentes": {
+        "Firebase": { "actual": "config duplicado x5", "objetivo": "init único" },
+        "Firestore": { "helpers": "centralizar acceso" },
+        "ValidationEngine": { "estado": "1.1.0 diseño congelado" },
+        "FieldEngine": { "estado": "1.0.1 diseño congelado" },
+        "Helpers": { "ej": "textoSeguro, limpiarTelefono, normalizarTexto (hoy en index)" },
+        "Catalogos": { "fuente": "catalogos-carihub, sectores-carihub, 462 subcategorías" },
+        "ComponentesCompartidos": { "ej": "modal-carihub, banners-publicidad.css, ResultCard" },
+        "TokensVisuales": { "objetivo": "design tokens → ThemeEngine" },
+        "ConfiguracionGlobal": { "ej": "firebaseConfig, WHATSAPP_ADMIN, links pago, ETIQUETAS_ESTADO" }
+      }
+    }
+  },
+
+  "flujosClave": [
+    "Descubrimiento: SEO landing/Home → Resultados → Perfil público → contacto",
+    "Onboarding: Registro/Wizard → Verificación → Dashboard cuenta",
+    "Monetización perfil: Dashboard → Pagos/Contratos → renovación",
+    "Monetización anunciante: Home slot → Banners funnel → Pagos → Admin aprueba",
+    "Comunicación: Perfil/Dashboard → Messenger (autenticado)",
+    "Moderación: Registro/Messenger/Banners → Admin colas → VE estados"
+  ],
+
+  "ordenIdealConstruccion": [
+    "Fase 0 (P0): SHARED/Core (firebaseConfig único, catálogo, geo, tokens) + delimitar núcleo Home",
+    "Fase 1 (P1): Resultados query server-side + Perfil + RenderEngine mínimo + SEO head",
+    "Fase 2 (P1): Registro/Wizard + Dashboard shell (tras migración perfiles)",
+    "Fase 3 (P1): Admin separado + RBAC fase 2",
+    "Fase 4 (P2): Messenger (runtime + rules)",
+    "Fase 5 (P2): Pagos + Banners consolidados",
+    "Fase 6 (P2): SEO landings masivas",
+    "Fase 7 (P3): Interacciones",
+    "Fase 8 (P4): ThemeEngine",
+    "Fase 9 (P5): Agentes IA"
+  ],
+  "ordenIdealMigracion": [
+    "1. Datos: usuarios/{uid} → usuarios hub + perfiles/{perfilId} (acta migración, anexo operacional TBD)",
+    "2. Config: extraer firebaseConfig a core único",
+    "3. Código: extraer inline index.html a módulos",
+    "4. UI: unificar modales en modal-carihub",
+    "5. Catálogo: alinear producción a 462 subcategorías"
+  ]
+}

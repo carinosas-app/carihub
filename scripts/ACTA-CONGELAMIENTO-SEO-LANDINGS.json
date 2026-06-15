@@ -1,0 +1,290 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "$id": "https://carihub.app/schemas/acta-congelamiento-seo-landings.json",
+  "tipo": "ACTA_CONGELAMIENTO_SEO_LANDINGS",
+  "titulo": "Acta formal de congelamiento — SEO-Landings CariHub",
+  "versionActa": "1.0.0",
+  "fechaCongelamiento": "2026-06-11",
+  "fechaActualizacion": "2026-06-11",
+  "fechaAprobacionSpec": "2026-06-11",
+  "estadoActa": "CONGELADO",
+  "veredictoFinal": "PASS",
+  "procedeCongelamiento": true,
+  "modo": "Solo validación y documentación — sin runtime/carpetas/mover/Firestore/deploy/commit; no modifica documentos existentes",
+
+  "autorizacion": {
+    "estado": "APROBADA",
+    "autorizadoPor": "product owner / usuario CariHub",
+    "alcance": "Baseline de diseño SEO-Landings v1.0.0 — capa transversal de presentación indexable; referencia obligatoria para implementación futura de SEO, indexación, URLs, metadatos, sitemaps, render SEO y crecimiento orgánico",
+    "artefactosAprobados": [
+      "scripts/SPEC-SEO-LANDINGS.md",
+      "scripts/SPEC-SEO-LANDINGS.json",
+      "scripts/fixtures-seo-landings-golden.json",
+      "scripts/AUDITORIA-SPEC-SEO-LANDINGS.md",
+      "scripts/AUDITORIA-SPEC-SEO-LANDINGS.json"
+    ],
+    "documentosFuente": [
+      "scripts/PLAN-MAESTRO-SEO-LANDINGS.json",
+      "scripts/ADR-INDEXACION-ADULTOS.json",
+      "scripts/ANALISIS-REEVALUACION-INDEXACION-PERFILES-ADULTOS.json",
+      "scripts/ADR-URL-CANONICA-PERFILES.json",
+      "scripts/ADR-RENDER-STRATEGY.json",
+      "scripts/ACTA-CONGELAMIENTO-SHARED-CORE.json",
+      "scripts/ACTA-CONGELAMIENTO-RENDERENGINE.json",
+      "scripts/AUDITORIA-ARQUITECTONICA-GLOBAL-CARIHUB.json"
+    ]
+  },
+
+  "versionSeoLandings": {
+    "id": "seo-landings-2026-06-11",
+    "semver": "1.0.0",
+    "specVersion": "1.0.0",
+    "versionAnterior": null
+  },
+
+  "alcanceCongelado": {
+    "superficiesSeo": ["home indexable", "landings geo (país/estado/ciudad)", "landings categoría/subcategoría", "landings geo+categoría", "perfil público (condicional)", "negocio público (condicional)", "páginas legales", "políticas noindex para resultados/privados/adultos/social"],
+    "urlsSlugsCanonical": ["estructura /perfil/{perfilId}/{slug}", "landings geo /{pais}/{estado}/{ciudad}[/{categoria}]", "landings categoría /categoria/{sector}", "normalización acentos/caracteres", "301 legacy perfil.html?id=", "alias 301", "redirects 301/302", "canonical tags obligatorios"],
+    "indexacion": ["index/noindex/follow/nofollow/noarchive/nosnippet", "robots meta", "robots.txt", "sitemaps segmentados", "matriz estado perfil → indexación", "ThinContentGuard", "AdultIndexationPolicy O8"],
+    "metadatos": ["title", "meta description", "canonical URL", "robots meta", "Open Graph", "Twitter Cards", "Schema.org JSON-LD", "breadcrumbs", "fallbacks", "sanitización", "PrivacyGuard SEO"],
+    "modulos": ["MetaResolver", "SchemaBuilder", "CanonicalResolver", "OpenGraphBuilder", "BreadcrumbBuilder", "SitemapGenerator", "RobotsPolicy", "LandingRegistry", "ThinContentGuard", "IndexationController", "GeoTaxonomyMapper", "SeoModerationQueue", "SeoIAAdvisor"],
+    "renderSeo": ["RenderSeoInput/Output", "integración RenderEngine.renderHead", "snapshot-first ADR-RENDER-STRATEGY", "renderHash/canonicalHash", "404/410/301/302"],
+    "seoAdmin": ["IndexationController override", "aprobar landing", "thin/duplicados", "OG adulto", "auditoría SeoAuditEvent", "RBAC + doble confirmación"],
+    "seoIA": ["SeoIAAdvisor sugerencias", "deny-write RT-08", "AuditTrail", "sin publicar/indexar automático"],
+    "futuroDocumentadoNoCongelado": ["SEO internacional", "hreflang", "multidioma", "landing municipio/zona", "perfiles verificados no explícitos indexables"]
+  },
+
+  "alcanceNoCongelado": {
+    "runtime": "Implementación runtime SEO (sitemap gen, robots.txt deploy, SSR) — NO autorizada",
+    "firestore": "Colecciones SEO runtime — NO autorizadas",
+    "validador": "validar-spec-seo-landings.mjs — pendiente",
+    "umbralesCalibrados": "Números ThinContentGuard sujetos a calibración con datos reales",
+    "internacional": "Hreflang, multidioma, cross-border — fuera MVP congelado",
+    "premiumSocial": "SEO economía social / contenido premium / marketplace — requiere SPEC futura",
+    "perfilesAdultosIndexables": "Indexación futura verificados no explícitos — requiere ADR v1.1+"
+  },
+
+  "dependenciasCongeladas": {
+    "sharedCore": { "version": "shared-core-2026-06-10", "semver": "1.0.0", "acta": "scripts/ACTA-CONGELAMIENTO-SHARED-CORE.json", "rol": "tokens/helpers URL/slug" },
+    "renderEngine": { "version": "renderengine-2026-06-10", "semver": "1.0.0", "acta": "scripts/ACTA-CONGELAMIENTO-RENDERENGINE.json", "rol": "renderHead, PrivacyGuard, snapshot" },
+    "fieldEngine": { "version": "fieldengine-2026-06-10", "semver": "1.0.1", "rol": "snapshotAlPublicar, camposPublicos" },
+    "validationEngine": { "version": "validationengine-2026-06-10", "semver": "1.1.0", "rol": "acciones seo futuras" },
+    "catalogo": { "version": "catalogo-2026-06-10", "semver": "1.0.0", "rol": "geo/taxonomía landings" },
+    "seguridadMvp": { "version": "seguridad-2026-06-10", "semver": "1.0.0", "rol": "gates edad, rate-limit" },
+    "admin": { "plan": "PLAN-MAESTRO-ADMIN v1.0.0", "rol": "RBAC SEO, moderación, auditoría" },
+    "themeEngine": { "plan": "PLAN-MAESTRO-THEMEENGINE v1.0.0", "rol": "restricciones: no alterar canonical/robots/meta" },
+    "agentesIA": { "plan": "PLAN-MAESTRO-AGENTES-IA v1.0.0", "rol": "RT-08 deny-write; sugerencias SEO" }
+  },
+
+  "decisionesArquitectonicasIncorporadas": {
+    "indexacionAdultos": "ADR-INDEXACION-ADULTOS O8 — híbrida por riesgo; MVP noindex perfiles adultos individuales; index hubs genéricos +18",
+    "reevaluacionAdultos": "ANALISIS-REEVALUACION mantiene ADR MVP; futuro opción F (verificados no explícitos) vía ADR v1.1+",
+    "urlCanonica": "ADR-URL-CANONICA-PERFILES — /perfil/{perfilId}/{slug}; perfilId estable; 301 legacy",
+    "renderStrategy": "ADR-RENDER-STRATEGY — snapshot-first híbrido; SEO consume RenderEngine head"
+  },
+
+  "contratosCongelados": [
+    "SeoContext", "SeoSurface", "SeoRoute", "CanonicalPolicy", "IndexationPolicy", "RobotsPolicy",
+    "SitemapEntry", "MetadataPayload", "OpenGraphPayload", "TwitterCardPayload", "SchemaPayload",
+    "LandingContentRequirements", "ThinContentDecision", "AdultIndexationDecision",
+    "RenderSeoInput", "RenderSeoOutput", "SeoAuditEvent", "SeoAdminAction", "SeoAgentSuggestion"
+  ],
+
+  "matricesCongeladas": [
+    "urlRender", "urlIndexacion", "urlCanonical", "urlSitemap",
+    "landingContenidoMinimo", "landingSchema", "landingIndexNoindex", "landingRobots",
+    "paginaRobots", "paginaMetadatos", "contenidoAdultoPoliticaSeo", "tipoPerfilPoliticaSeo",
+    "estadoPerfilIndexacion", "bannersImpactoSeo", "interaccionesIndexacion",
+    "themeEngineRestricciones", "agentesIaAccionAprobacion", "adminSeoPermisoAccion", "errorHttp"
+  ],
+
+  "reglasCongeladas": [
+    "Home indexable (index,follow)",
+    "Resultados dinámicos noindex,follow + canonical",
+    "Perfiles adultos MVP noindex (ADR O8)",
+    "Perfiles explícitos noindex,nofollow,noarchive (siempre)",
+    "Perfiles no verificados noindex,nofollow (siempre)",
+    "ThinContentGuard obligatorio en landings geo/categoría",
+    "Canonical absoluto obligatorio en toda superficie indexable",
+    "Sitemap segmentado obligatorio; excluir noindex",
+    "OG moderado obligatorio en adultos (SeoModerationQueue)",
+    "Protección de datos obligatoria (PrivacyGuard pre-meta)",
+    "Separación SEO público vs datos privados obligatoria",
+    "IA no publica/indexa sin aprobación humana (RT-08)",
+    "Banners no contaminan meta/canonical",
+    "Interacciones/social/premium/contactos noindex",
+    "ThemeEngine no modifica canonical/robots/meta"
+  ],
+
+  "decisionesAceptadas": [
+    { "id": "SEO-D01", "decision": "Política híbrida O8 para adultos (ADR-INDEXACION-ADULTOS)", "fuente": "ADR + SPEC" },
+    { "id": "SEO-D02", "decision": "Canónico perfil /perfil/{perfilId}/{slug} (ADR-URL-CANONICA)", "fuente": "ADR + SPEC" },
+    { "id": "SEO-D03", "decision": "Render SEO vía RenderEngine snapshot-first (ADR-RENDER-STRATEGY)", "fuente": "ADR + SPEC" },
+    { "id": "SEO-D04", "decision": "Resultados dinámicos noindex (ADR O7)", "fuente": "ADR + SPEC" },
+    { "id": "SEO-D05", "decision": "ThinContentGuard con canonical superior si no cumple umbral", "fuente": "SPEC + PLAN" },
+    { "id": "SEO-D06", "decision": "Sitemaps index + segmentados; exclusiones noindex", "fuente": "SPEC" },
+    { "id": "SEO-D07", "decision": "Hubs geo/categoría adultos indexables con +18 y contenido suficiente", "fuente": "ADR O3/O5/O8" },
+    { "id": "SEO-D08", "decision": "Legacy perfil.html?id= → 301 canónico", "fuente": "ADR-URL + SPEC" },
+    { "id": "SEO-D09", "decision": "Motores IA: robots + noai/noimageai + PrivacyGuard origen", "fuente": "ADR + SPEC" },
+    { "id": "SEO-D10", "decision": "Mantener ADR MVP noindex perfiles adultos (ANALISIS-REEVALUACION)", "fuente": "ANALISIS" },
+    { "id": "SEO-D11", "decision": "SeoIAAdvisor sugiere; Admin aprueba; AuditTrail", "fuente": "SPEC + AGENTES-IA" },
+    { "id": "SEO-D12", "decision": "Cerca de mí no indexable; canonical a landing geo", "fuente": "PLAN + SPEC" }
+  ],
+
+  "decisionesRechazadas": [
+    { "id": "SEO-RJ01", "decision": "Indexar todos los perfiles adultos individuales MVP", "motivo": "Riesgo legal/reputacional/privacidad (ADR O1 rechazada; ANALISIS mantiene MVP)" },
+    { "id": "SEO-RJ02", "decision": "Indexar resultados dinámicos con query/facetas", "motivo": "Crawl budget, duplicados, thin (ADR O7)" },
+    { "id": "SEO-RJ03", "decision": "Indexar contenido premium", "motivo": "Privacidad/monetización; Economía Social noindex" },
+    { "id": "SEO-RJ04", "decision": "Indexar estados/stories", "motivo": "Efímero; Interacciones noindex/noarchive" },
+    { "id": "SEO-RJ05", "decision": "Indexar lives", "motivo": "Efímero; Interacciones noindex/noarchive" },
+    { "id": "SEO-RJ06", "decision": "Indexar actividad social (contactos, reposts, propinas)", "motivo": "Privado/interno; no es SEO público" },
+    { "id": "SEO-RJ07", "decision": "Indexar contenido privado (dashboard, messenger, cuenta, borradores)", "motivo": "Auth + noindex + disallow" },
+    { "id": "SEO-RJ08", "decision": "Exponer datos sensibles en meta/schema/OG/snippets", "motivo": "PrivacyGuard; ADR AD-R01" },
+    { "id": "SEO-RJ09", "decision": "Indexación agresiva O1 (todo público adulto)", "motivo": "ADR O1 RECHAZADA" },
+    { "id": "SEO-RJ10", "decision": "IA publica/indexa SEO automáticamente", "motivo": "RT-08 AGENTES-IA" }
+  ],
+
+  "riesgosAceptados": [
+    { "id": "SEO-RA01", "riesgo": "Thin content masivo (462 subcategorías × geo)", "mitigacionCongelada": "ThinContentGuard + canonical superior" },
+    { "id": "SEO-RA02", "riesgo": "Crecimiento geo masivo de landings", "mitigacionCongelada": "Umbrales + editorial admin + sitemap segmentado" },
+    { "id": "SEO-RA03", "riesgo": "Contenido adulto (legal/reputación/SafeSearch)", "mitigacionCongelada": "O8 noindex individuos MVP; hubs +18; OG moderado" },
+    { "id": "SEO-RA04", "riesgo": "SafeSearch clasificación adult", "mitigacionCongelada": "rating adult + RTA meta + max-image-preview:none" },
+    { "id": "SEO-RA05", "riesgo": "Bots IA ignoran robots", "mitigacionCongelada": "PrivacyGuard origen + noai/noimageai + robots.txt" },
+    { "id": "SEO-RA06", "riesgo": "Internacionalización futura (jurisdicción)", "mitigacionCongelada": "Documentado fuera MVP; ADR futuro requerido" }
+  ],
+
+  "riesgosAbiertos": [
+    { "id": "SEO-RO01", "riesgo": "Hreflang no definido", "estado": "ABIERTO", "requiere": "ADR internacional" },
+    { "id": "SEO-RO02", "riesgo": "Internacionalización cross-border", "estado": "ABIERTO", "requiere": "ADR + SPEC internacional" },
+    { "id": "SEO-RO03", "riesgo": "Calibración ThinContentGuard (umbrales numéricos)", "estado": "ABIERTO", "requiere": "Datos reales post-MVP; posible PATCH 1.0.1" },
+    { "id": "SEO-RO04", "riesgo": "Política futura perfiles verificados no explícitos indexables", "estado": "ABIERTO", "requiere": "ADR-INDEXACION-ADULTOS v1.1+ (opción F ANALISIS)" },
+    { "id": "SEO-RO05", "riesgo": "Cloaking accidental age gate", "estado": "ABIERTO_IMPLEMENTACION", "requiere": "QA crawler parity" },
+    { "id": "SEO-RO06", "riesgo": "Validador fixtures ausente", "estado": "ABIERTO", "requiere": "validar-spec-seo-landings.mjs" },
+    { "id": "SEO-RO07", "riesgo": "SSR resultados temporal (CWV)", "estado": "ABIERTO_IMPLEMENTACION", "requiere": "Implementación ADR-RENDER-STRATEGY" }
+  ],
+
+  "cambiosProhibidosSinADR": [
+    "política de indexación adultos (ADR-INDEXACION-ADULTOS)",
+    "estructura URL canónica perfil (ADR-URL-CANONICA-PERFILES)",
+    "canonical policy base",
+    "robots policy base",
+    "sitemap strategy (segmentación/exclusiones)",
+    "ThinContentGuard (existencia y regla noindex)",
+    "render strategy SEO (ADR-RENDER-STRATEGY)",
+    "regla MVP noindex perfiles adultos individuales",
+    "regla noindex resultados dinámicos",
+    "PrivacyGuard SEO obligatorio"
+  ],
+
+  "cambiosRequierenADR": [
+    "indexación futura perfiles adultos verificados no explícitos",
+    "indexación internacional por mercado",
+    "multidioma / hreflang",
+    "nuevas superficies indexables no listadas en SPEC 1.0.0",
+    "cambios de canonical policy global",
+    "cambios de render strategy SEO",
+    "relajación noindex explícitos/no verificados"
+  ],
+
+  "cambiosRequierenNuevaSPEC": [
+    "SEO internacional completo",
+    "SEO multidioma",
+    "SEO contenido premium (Economía Social)",
+    "SEO economía social / propinas / actividad contactos",
+    "SEO marketplace futuro",
+    "SEO campañas/banners avanzado más allá de reglas base"
+  ],
+
+  "cambiosRequierenNuevaActa": [
+    "SPEC-SEO-LANDINGS 1.1+ (MINOR)",
+    "SPEC-SEO-LANDINGS 2.0+ (MAJOR contratos/matrices)",
+    "Cambios de contratos congelados (SeoContext, IndexationPolicy, etc.)",
+    "Cambios de matrices congeladas",
+    "Cambios de políticas base (reglas congeladas)"
+  ],
+
+  "validacionCongelamiento": {
+    "planMaestroSeoLandings": "PASS — SPEC formaliza y extiende",
+    "adrIndexacionAdultos": "PASS — consumida O8; no contradice",
+    "analisisReevaluacion": "PASS — coherente; futuro vía ADR v1.1+",
+    "specSeoLandings": "PASS — 20 secciones; RF/RNF; contratos; matrices",
+    "fixturesSeo": "PASS — 18 casos SEO-01..SEO-18",
+    "auditoriaSeo": "PASS — 19/19 verificaciones; 0 bloqueantes",
+    "adrUrlCanonica": "PASS — consumida",
+    "adrRenderStrategy": "PASS — consumida",
+    "actaSharedCore": "PASS — dependencia congelada",
+    "actaRenderEngine": "PASS — dependencia congelada",
+    "auditoriaGlobal": "PASS — coherente con arquitectura global"
+  },
+
+  "matrizPassFail": {
+    "totalVerificaciones": 11,
+    "pass": 11,
+    "fail": 0,
+    "observaciones": 5
+  },
+
+  "bloqueantesRestantes": [],
+
+  "observaciones": [
+    { "id": "SEO-AM-01", "nivel": "menor", "tema": "Validador validar-spec-seo-landings.mjs pendiente" },
+    { "id": "SEO-AM-02", "nivel": "menor", "tema": "Umbrales ThinContentGuard calibrables con datos reales" },
+    { "id": "SEO-AM-03", "nivel": "menor", "tema": "Hreflang/internacional fuera MVP congelado" },
+    { "id": "SEO-AM-04", "nivel": "menor", "tema": "SSR resultados temporal hasta implementación" },
+    { "id": "SEO-AM-05", "nivel": "menor", "tema": "Age gate vs cloaking — prueba QA pendiente" }
+  ],
+
+  "compatibilidadFutura": {
+    "renderEngine": "SEO consume renderHead/RenderSeoOutput; no duplica HTML",
+    "fieldEngine": "Meta desde snapshot publicado; no FE vivo",
+    "sharedCore": "Helpers URL/slug/tokens",
+    "admin": "IndexationController override auditado",
+    "agentesIA": "SeoIAAdvisor lectura/sugerencia; RT-08",
+    "themeEngine": "Restricciones documentadas; no altera SEO head",
+    "internacional": "HreflangResolver reservado; ADR futuro",
+    "adultosFuturo": "Opción F ANALISIS vía ADR v1.1+ sin romper MVP congelado"
+  },
+
+  "implementacion": {
+    "runtimeAutorizado": false,
+    "firestoreAutorizado": false,
+    "deployAutorizado": false,
+    "nota": "v1.0.0 congelada como diseño documental; implementación runtime requiere autorización explícita posterior"
+  },
+
+  "archivosBaseline": [
+    "scripts/SPEC-SEO-LANDINGS.md",
+    "scripts/SPEC-SEO-LANDINGS.json",
+    "scripts/fixtures-seo-landings-golden.json",
+    "scripts/AUDITORIA-SPEC-SEO-LANDINGS.md",
+    "scripts/AUDITORIA-SPEC-SEO-LANDINGS.json",
+    "scripts/ACTA-CONGELAMIENTO-SEO-LANDINGS.json",
+    "scripts/ACTA-CONGELAMIENTO-SEO-LANDINGS.md"
+  ],
+
+  "procedimientoVersionado": {
+    "PATCH": "Calibración umbrales ThinContentGuard, fixtures, clarificaciones, validador",
+    "MINOR": "Nuevas landings retrocompatibles, hreflang (con ADR), nuevos tipos Schema.org",
+    "MAJOR": "Cambio contratos IndexationPolicy/CanonicalPolicy/AdultIndexationPolicy o matrices base",
+    "historialVersiones": [
+      { "semver": "1.0.0", "fecha": "2026-06-11", "evento": "CONGELAMIENTO_INICIAL", "notas": "11/11 PASS validación; 19/19 auditoría SPEC; 0 bloqueantes; incorpora ADR O8, ADR-URL, ADR-RENDER-STRATEGY" }
+    ]
+  },
+
+  "recomendacionesFuturas": [
+    "Implementar validar-spec-seo-landings.mjs",
+    "Calibrar umbrales ThinContentGuard con datos reales post-MVP",
+    "ADR-INDEXACION-ADULTOS v1.1+ antes de indexar verificados no explícitos",
+    "ADR hreflang/internacional en fase cross-border",
+    "Runtime SEO: sitemap gen + robots.txt + RenderEngine head integration",
+    "QA age gate crawler parity",
+    "SPEC SEO internacional/multidioma cuando aplique"
+  ],
+
+  "noModifica": [
+    "PLAN-MAESTRO-SEO-LANDINGS, ADRs, SPEC, auditoría y demás capas/actas existentes (solo referencia)",
+    "Producción, Firestore, deploy, commit"
+  ],
+
+  "estado": "CONGELADO"
+}

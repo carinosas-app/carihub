@@ -1,0 +1,428 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "$id": "https://carihub.app/schemas/acta-migracion-usuarios-perfiles.json",
+  "tipo": "ACTA_MIGRACION_USUARIOS_PERFILES",
+  "titulo": "Acta formal de diseño de migración — usuarios monolito → hub + perfiles CariHub",
+  "versionActa": "1.0.0",
+  "fechaActa": "2026-06-09",
+  "estado": "APROBADA_DISENO",
+  "clasificacion": "ACTA_MIGRACION_DISENO",
+  "autorizacion": {
+    "estado": "APROBADA",
+    "autorizadoPor": "product owner / usuario CariHub",
+    "fechaAutorizacion": "2026-06-09",
+    "alcance": "Formalización diseño de migración: modelo objetivo hub + perfiles, bridge transitorio, dependencias arquitectónicas. Sin runtime, sin Firestore, sin producción, sin deploy, sin modificar capas congeladas.",
+    "noAutoriza": [
+      "ejecución migración datos",
+      "scripts ETL o Cloud Functions",
+      "modificación firestore.rules",
+      "cambios producción",
+      "deploy",
+      "modificación actas de congelamiento existentes"
+    ]
+  },
+  "antecedentes": {
+    "workshop": "scripts/WORKSHOP-MIGRACION-USUARIOS-PERFILES-ANALISIS.json",
+    "modeloObjetivoCongelado": "scripts/ACTA-CONGELAMIENTO-CUENTAS.json",
+    "schemaCuentas": "scripts/config-cuentas-usuario-schema.json",
+    "produccionRules": "firestore.rules",
+    "nota": "Esta acta cierra el diseño documental de migración; la ejecución requiere acta operacional o autorización runtime explícita."
+  },
+  "objetivos": [
+    "Formalizar el modelo objetivo hub usuarios + perfiles separados como destino post-migración",
+    "Documentar el bridge transitorio perfilId = usuarioId para cuentas legacy",
+    "Enumerar colecciones afectadas, FK y dependencias arquitectónicas entre capas congeladas",
+    "Definir criterios de éxito de diseño y precondiciones pre-runtime",
+    "Registrar riesgos eliminados a nivel diseño y riesgos remanentes hasta ejecución",
+    "Marcar explícitamente elementos TBD_PRE_RUNTIME para operación y producción",
+    "Satisfacer referencia AM-VE2 (bridge migración) sin modificar ValidationEngine 1.0.0 congelado"
+  ],
+  "alcance": {
+    "enAlcance": [
+      "Definición modelo post-migración hub + perfiles",
+      "Reglas bridge perfilId = usuarioId y fases transitorias de diseño",
+      "Inventario colecciones afectadas y acciones previstas",
+      "Impacto por capa arquitectónica (lectura diseño)",
+      "Criterios de éxito diseño, pre-runtime y post-runtime",
+      "Dependencias con capas congeladas y pendientes paralelos",
+      "Vacíos documentados con etiqueta TBD_PRE_RUNTIME"
+    ],
+    "fueraAlcance": [
+      "Scripts de migración o validación ETL",
+      "Ventana de mantenimiento producción",
+      "Rollback ejecutado en Firestore",
+      "Modificación firestore.rules",
+      "Inventario volumétrico producción (conteo documentos)",
+      "Mapeo campo a campo exhaustivo monolito → hub/perfiles",
+      "Fechas de cutover o calendario producción"
+    ],
+    "modificacionCapasCongeladas": false,
+    "referenciaSinModificacion": [
+      "scripts/ACTA-CONGELAMIENTO-CATALOGO.json",
+      "scripts/ACTA-CONGELAMIENTO-CUENTAS.json",
+      "scripts/ACTA-CONGELAMIENTO-SEGURIDAD.json",
+      "scripts/ACTA-CONGELAMIENTO-FIELDENGINE.json",
+      "scripts/ACTA-CONGELAMIENTO-DASHBOARDS.json",
+      "scripts/ACTA-CONGELAMIENTO-VALIDATIONENGINE.json",
+      "scripts/ACTA-CONGELAMIENTO-MESSENGER.json"
+    ]
+  },
+  "modeloActual": {
+    "nombre": "monolito_usuarios",
+    "produccion": "LEGACY_NO_MODIFICADO",
+    "coleccionPrincipal": "usuarios/{uid}",
+    "auth": "Firebase Auth uid = document id",
+    "descripcion": "Cuenta, perfil público, verificación, estados comerciales y datos de publicación coexisten en un solo documento.",
+    "visibilidadPublica": {
+      "reglaRules": "aprobado && activo && !vencido",
+      "archivo": "firestore.rules",
+      "funcion": "isPublicProfile()"
+    },
+    "camposLegacyRelevantes": [
+      "uid", "email", "aprobado", "activo", "vencido", "estadoRevision", "estadoPago",
+      "actualizacionPendiente", "fechaPublicacion", "fechaVencimiento", "verificacion",
+      "datos perfil mezclados (nombre, geo, formularioId, sectorId, subcategoriaId, etc.)"
+    ],
+    "coleccionesActivasProduccion": {
+      "usuarios": "monolito cuenta+perfil",
+      "usuarios_favoritos": "subcolección usuarios/{id}/favoritos/{perfilId}",
+      "solicitudes_anuncios": "uidAnunciante",
+      "denuncias": "create false para usuario",
+      "pagos": "admin only",
+      "anuncios": "admin only",
+      "configuracion_publicidad": "activa",
+      "estadisticas_visitas": "activa",
+      "logsAdmin": "activa",
+      "logsSeguridad": "activa",
+      "soporte_mensajes": "admin soporte — distinto de Messenger diseño"
+    },
+    "coleccionesDiseñoAusentesProduccion": [
+      "perfiles/{perfilId}",
+      "contratos_perfiles",
+      "contratos_banners",
+      "solicitudes_categorias",
+      "conversaciones",
+      "usuarios/notificaciones",
+      "usuarios/bloqueos",
+      "usuarios/conversaciones_meta",
+      "usuarios/dispositivos"
+    ],
+    "gapPrincipal": "usuarios/{uid} monolito vs diseño hub usuarios/{usuarioId} + perfiles/{perfilId}"
+  },
+  "modeloObjetivo": {
+    "fuenteCongelada": "scripts/ACTA-CONGELAMIENTO-CUENTAS.json",
+    "versionCuentas": "cuentas-2026-06-10@1.0.0",
+    "hub": {
+      "ruta": "usuarios/{usuarioId}",
+      "documentId": "usuarioId = Auth uid inmutable",
+      "proposito": "Identidad, estados cuenta/verificación/mensajería/seguridad, punteros comerciales, subcolecciones — NO datos extensos del perfil público",
+      "camposRaizObligatorios": ["usuarioId", "email", "tipoCuentaPrincipal", "estadoCuenta", "createdAt", "updatedAt"],
+      "subobjetos": ["cuenta", "perfil", "anunciante", "verificacion", "mensajeria", "comercial", "seguridad", "preferencias"],
+      "punterosPerfil": {
+        "perfilPrincipalId": "perfil público activo principal",
+        "perfilIds": "array todos los perfiles del usuario (escalabilidad 1..N)",
+        "tienePerfilPublico": "boolean"
+      },
+      "subcolecciones": [
+        "usuarios/{usuarioId}/favoritos/{perfilId}",
+        "usuarios/{usuarioId}/notificaciones/{id}",
+        "usuarios/{usuarioId}/bloqueos/{usuarioBloqueadoId}",
+        "usuarios/{usuarioId}/conversaciones_meta/{conversacionId}",
+        "usuarios/{usuarioId}/dispositivos/{deviceId}"
+      ]
+    },
+    "perfiles": {
+      "ruta": "perfiles/{perfilId}",
+      "regla": "Ningún perfil público sin usuarioId obligatorio",
+      "camposObligatorios": [
+        "usuarioId", "perfilId", "formularioId", "sectorId", "subcategoriaId",
+        "arquetipo", "tipoPerfil", "estadoRevision", "tienePerfilPublico",
+        "schemaVersion", "componenteResultados", "componentePerfil",
+        "createdAt", "updatedAt"
+      ],
+      "subcolecciones": ["borradores/{borradorId}", "historial_estados/{id}"]
+    },
+    "principiosPostMigracion": [
+      "usuarioId nunca cambia — es Firebase Auth uid",
+      "perfil público vive en perfiles/{perfilId}; hub guarda punteros y cache mínimo",
+      "contratos, pagos y promociones referencian usuarioId siempre",
+      "banners: anuncianteId (MVP = usuarioId) + usuarioId",
+      "mensajes, favoritos, denuncias y bloqueos referencian usuarioId y/o perfilId según FK congeladas",
+      "visitante → perfil público = upgrade de cuenta, no nuevo usuario Auth"
+    ],
+    "equivalenciaVisibilidadPublica": {
+      "legacy": "aprobado && activo && !vencido en usuarios/{uid}",
+      "objetivo": "estadoRevision aprobado/publicado + tienePerfilPublico + estados cuenta activa en hub",
+      "detalleMapeo": "TBD_PRE_RUNTIME",
+      "nota": "Tabla campo a campo en anexo operacional futuro"
+    }
+  },
+  "bridgeTransitorio": {
+    "id": "BRIDGE-MIG-01",
+    "regla": "perfilId = usuarioId para cuentas migradas desde monolito legacy (fase bridge)",
+    "cierraRecomendacion": "AM-VE2",
+    "fuentes": [
+      "scripts/config-registro-schema.meta.json → notaLegacy",
+      "scripts/AUDITORIA-FINAL-SPEC-VALIDATIONENGINE.json → AM-VE2",
+      "scripts/AUDITORIA-SPEC-FIELDENGINE.json → M2 legacy uid"
+    ],
+    "aplicaCuando": [
+      "Usuario con perfil público existente en monolito usuarios/{uid}",
+      "Primera extracción a perfiles/{perfilId} sin cambiar URLs ni favoritos"
+    ],
+    "noAplicaCuando": [
+      "Nuevo perfil adicional distinto al principal (perfilId UUID nuevo)",
+      "Cuenta visitante sin perfil público",
+      "Cuenta solo anunciante sin perfil público"
+    ],
+    "implicaciones": {
+      "favoritos": "usuarios/{uid}/favoritos/{perfilId} — con bridge perfilId=uid refs válidas tras crear perfiles/{uid}",
+      "urls": "perfil.html?perfilId=uid mantiene compatibilidad sin redirección",
+      "storage": "paths diseño perfiles/{perfilId}/... operativos con perfilId=uid en fase bridge",
+      "validationEngine": "owner checks y Storage asumen perfiles/{perfilId} — bridge habilita sin reescribir VE congelado",
+      "messenger": "perfilContextoId y conversacionId trío par+perfil resuelven perfiles/{uid}",
+      "fieldEngine": "Wizard escribe perfiles/{perfilId}; bridge permite perfilId=usuarioId en transición"
+    },
+    "salidaBridge": {
+      "disparadores": ["multi-perfil por usuario", "nuevo perfilId UUID", "política producto post-migración"],
+      "acciones": [
+        "Actualizar usuarios.perfil.perfilPrincipalId y perfilIds[]",
+        "Redirecciones 301 URLs canónicas (SEO)",
+        "Conservar perfiles legacy bridge como histórico o alias"
+      ],
+      "fechaSalida": "TBD_PRE_RUNTIME"
+    },
+    "fasesTransitoriasDiseno": [
+      {
+        "fase": 1,
+        "nombre": "extraccion",
+        "descripcion": "Crear perfiles/{uid} extrayendo campos públicos desde usuarios/{uid}; hub conserva estados cuenta/verificación",
+        "ejecucion": "TBD_PRE_RUNTIME"
+      },
+      {
+        "fase": 2,
+        "nombre": "punteros_hub",
+        "descripcion": "usuarios.perfil.perfilPrincipalId=uid; perfilIds=[uid]; tienePerfilPublico según equivalencia",
+        "ejecucion": "TBD_PRE_RUNTIME"
+      },
+      {
+        "fase": 3,
+        "nombre": "lectura_dual",
+        "descripcion": "Runtime lee perfil desde perfiles con fallback usuarios hasta deprecación",
+        "ejecucion": "TBD_PRE_RUNTIME"
+      },
+      {
+        "fase": 4,
+        "nombre": "deprecacion_monolito",
+        "descripcion": "Eliminar campos perfil duplicados en usuarios — semver MAJOR cuentas futuro",
+        "ejecucion": "TBD_PRE_RUNTIME"
+      },
+      {
+        "fase": 5,
+        "nombre": "multiperfil",
+        "descripcion": "Nuevos perfiles UUID; bridge solo legacy",
+        "ejecucion": "TBD_PRE_RUNTIME"
+      }
+    ]
+  },
+  "coleccionesAfectadas": [
+    { "coleccion": "usuarios/{usuarioId}", "accion": "REFACTOR hub", "prioridad": "critica", "ejecucion": "TBD_PRE_RUNTIME" },
+    { "coleccion": "perfiles/{perfilId}", "accion": "CREAR extracción monolito", "prioridad": "critica", "ejecucion": "TBD_PRE_RUNTIME" },
+    { "coleccion": "usuarios/{id}/favoritos/{perfilId}", "accion": "VALIDAR refs → perfiles", "prioridad": "alta", "nota": "Ya existe producción", "ejecucion": "TBD_PRE_RUNTIME" },
+    { "coleccion": "solicitudes_anuncios", "accion": "NORMALIZAR uidAnunciante → usuarioId", "prioridad": "media", "ejecucion": "TBD_PRE_RUNTIME" },
+    { "coleccion": "contratos_perfiles", "accion": "CREAR al runtime contratos", "prioridad": "alta", "ejecucion": "TBD_PRE_RUNTIME" },
+    { "coleccion": "contratos_banners", "accion": "CREAR", "prioridad": "media", "ejecucion": "TBD_PRE_RUNTIME" },
+    { "coleccion": "pagos", "accion": "VINCULAR usuarioId explícito", "prioridad": "media", "ejecucion": "TBD_PRE_RUNTIME" },
+    { "coleccion": "denuncias", "accion": "perfilId donde reportado sea perfil", "prioridad": "media", "ejecucion": "TBD_PRE_RUNTIME" },
+    { "coleccion": "usuarios/notificaciones", "accion": "CREAR subcolección", "prioridad": "alta", "ejecucion": "TBD_PRE_RUNTIME" },
+    { "coleccion": "usuarios/bloqueos", "accion": "CREAR", "prioridad": "alta", "ejecucion": "TBD_PRE_RUNTIME" },
+    { "coleccion": "usuarios/conversaciones_meta", "accion": "CREAR", "prioridad": "alta", "ejecucion": "TBD_PRE_RUNTIME" },
+    { "coleccion": "conversaciones", "accion": "CREAR Messenger runtime", "prioridad": "messenger_runtime", "ejecucion": "TBD_PRE_RUNTIME" },
+    { "coleccion": "solicitudes_categorias", "accion": "CREAR", "prioridad": "baja", "ejecucion": "TBD_PRE_RUNTIME" }
+  ],
+  "impactoPorCapa": {
+    "contratos": {
+      "referencia": "scripts/config-contratos-carihub-schema.json",
+      "diseno": "contratos_perfiles, contratos_banners — usuarioId obligatorio",
+      "produccion": "Schema documental; colección no activa en rules",
+      "migracion": "Crear al habilitar runtime contratos; visitante upgrade conserva contrato vigente",
+      "riesgo": "alto_pre_renovaciones",
+      "ejecucion": "TBD_PRE_RUNTIME"
+    },
+    "banners": {
+      "referencia": "scripts/config-promociones-banners-schema.json",
+      "diseno": "anuncianteId MVP=usuarioId; solicitudes_anuncios + anuncios",
+      "produccion": "solicitudes_anuncios activa con uidAnunciante",
+      "migracion": "Normalizar usuarioId; conservar uidAnunciante como alias transitorio opcional",
+      "riesgo": "medio",
+      "ejecucion": "TBD_PRE_RUNTIME"
+    },
+    "favoritos": {
+      "referencia": "scripts/ACTA-CONGELAMIENTO-CUENTAS.json",
+      "diseno": "usuarios/{id}/favoritos/{perfilId} → perfiles/{perfilId}",
+      "produccion": "Subcolección existe; perfiles puede no existir",
+      "migracion": "Crear perfiles antes de validar; bridge perfilId=uid",
+      "riesgo": "medio",
+      "ejecucion": "TBD_PRE_RUNTIME"
+    },
+    "notificaciones": {
+      "referencia": "scripts/SPEC-DASHBOARDS.json",
+      "diseno": "usuarios/{id}/notificaciones — productor unificado",
+      "produccion": "Modales home legacy; sin subcolección",
+      "migracion": "Nueva subcolección; cutover UI sin migrar modales",
+      "riesgo": "alto_DO6_productor",
+      "ejecucion": "TBD_PRE_RUNTIME"
+    },
+    "messenger": {
+      "referencia": "scripts/SPEC-MESSENGER.json",
+      "diseno": "conversacionId trío usuario-par-perfil; perfilContextoId",
+      "produccion": "NO_IMPLEMENTADO",
+      "migracion": "Estados mensajeria en hub; conversaciones_meta; requiere perfiles + bridge",
+      "riesgo": "alto_R_MSG_01",
+      "bloqueaRuntime": true,
+      "ejecucion": "TBD_PRE_RUNTIME"
+    },
+    "dashboards": {
+      "referencia": "scripts/SPEC-DASHBOARDS.json",
+      "diseno": "shell modular por tipoCuentaPrincipal y roles[]",
+      "produccion": "index.html modales parciales",
+      "migracion": "evaluateDashboardAction asume hub; perfiles en rutas separadas",
+      "riesgo": "medio_dashboard_shell",
+      "ejecucion": "TBD_PRE_RUNTIME"
+    },
+    "validationEngine": {
+      "referencia": "scripts/SPEC-VALIDATIONENGINE.json",
+      "diseno": "Storage perfiles/{perfilId}; owner checks perfiles.usuarioId",
+      "produccion": "NO_IMPLEMENTADO",
+      "migracion": "Esta acta satisface AM-VE2 por referencia bridge — VE 1.0.0 no se modifica",
+      "riesgo": "critico_RI_owner_storage",
+      "ejecucion": "TBD_PRE_RUNTIME"
+    },
+    "interacciones": {
+      "referencia": "scripts/OBSERVACION-ARQUITECTONICA-INTERACCIONES.json v1.2.1",
+      "diseno": "Perfiles publicadores; seguidores futuro",
+      "migracion": "Requiere perfiles/{perfilId}; no bloquea SPEC Interacciones documental",
+      "riesgo": "medio_futuro"
+    },
+    "renderEngine": {
+      "referencia": "scripts/config-renderizado-dinamico-schema.json",
+      "diseno": "perfil.html lee snapshot desde perfiles",
+      "produccion": "HTML legacy mezclado",
+      "migracion": "Fuente lectura → perfiles/{perfilId}; bridge uid",
+      "riesgo": "alto_pre_render",
+      "ejecucion": "TBD_PRE_RUNTIME"
+    },
+    "themeEngine": {
+      "referencia": "scripts/OBSERVACION-ARQUITECTONICA-THEMEENGINE.json v1.3.0",
+      "migracion": "DEP-TE-02 satisfecho a nivel diseño; temas por perfilId",
+      "riesgo": "medio_futuro",
+      "ejecucion": "TBD_PRE_RUNTIME"
+    },
+    "seo": {
+      "referencia": "scripts/OBSERVACION-ARQUITECTONICA-SEO.json v1.0.0",
+      "migracion": "Bridge mantiene URLs; 301 al salir bridge",
+      "riesgo": "medio_R_SEO_urls",
+      "ejecucion": "TBD_PRE_RUNTIME"
+    }
+  },
+  "dependencias": {
+    "congeladasRequeridas": [
+      { "capa": "Cuentas", "version": "1.0.0", "acta": "scripts/ACTA-CONGELAMIENTO-CUENTAS.json", "uso": "Modelo hub/perfiles destino" },
+      { "capa": "Catálogo", "version": "1.0.0", "acta": "scripts/ACTA-CONGELAMIENTO-CATALOGO.json", "uso": "formularioId, subcategoriaId en perfiles" },
+      { "capa": "FieldEngine", "version": "1.0.1", "acta": "scripts/ACTA-CONGELAMIENTO-FIELDENGINE.json", "uso": "Wizard perfiles/{perfilId}" },
+      { "capa": "Seguridad", "version": "1.0.0", "acta": "scripts/ACTA-CONGELAMIENTO-SEGURIDAD.json", "uso": "estadoSeguridad en hub" }
+    ],
+    "congeladasImpactadasSinModificar": [
+      { "capa": "Dashboards", "version": "1.0.0", "relacion": "notificaciones hub, shell modular" },
+      { "capa": "ValidationEngine", "version": "1.0.0", "relacion": "AM-VE2 bridge referenciado" },
+      { "capa": "Messenger", "version": "1.0.0", "relacion": "perfilContextoId, conversaciones_meta" }
+    ],
+    "pendientesParalelos": [
+      { "item": "VE MINOR 1.1.0 Messenger", "archivo": "scripts/PROPUESTA-ACTA-MINOR-VALIDATIONENGINE-MESSENGER.json", "bloqueaActaMigracion": false },
+      { "item": "Dashboards 1.1.0 eventos mensajería", "archivo": "scripts/ANEXO-MESSENGER-INTEGRACION-DASHBOARDS.json", "bloqueaActaMigracion": false },
+      { "item": "SPEC RenderEngine", "bloqueaActaMigracion": false, "bloqueaRuntimePublico": true },
+      { "item": "Anexo operacional migración", "estado": "NO_EXISTE", "bloqueaEjecucion": true }
+    ],
+    "bloqueaRuntimeDe": [
+      "Messenger",
+      "ValidationEngine",
+      "Dashboards unificado",
+      "FieldEngine wizard producción",
+      "RenderEngine",
+      "Contratos runtime",
+      "ThemeEngine runtime",
+      "SEO landings perfiles"
+    ],
+    "nota": "Esta acta de diseño es precondición documental; la ejecución migración es precondición operacional adicional."
+  },
+  "criteriosExito": {
+    "diseno": [
+      "Acta migración v1.0.0 aprobada (esta acta)",
+      "Bridge perfilId=usuarioId formalizado",
+      "Colecciones afectadas y FK documentadas",
+      "Impacto por capa registrado",
+      "Vacíos TBD_PRE_RUNTIME explícitos",
+      "Capas congeladas referenciadas sin modificación"
+    ],
+    "preRuntime": [
+      "Colección perfiles/{perfilId} poblada usuarios con perfil público",
+      "Hub sin campos perfil duplicados críticos o lectura dual definida y ejecutada",
+      "Favoritos referencian perfiles existentes",
+      "Equivalencia isPublicProfile verificada",
+      "Storage paths perfiles/{perfilId} operativos",
+      "firestore.rules actualizadas",
+      "Inventario producción y mapeo campo a campo completados"
+    ],
+    "postRuntime": [
+      "Cero regresión URLs públicas perfil",
+      "ValidationEngine owner checks PASS fixtures bridge",
+      "Messenger perfilContextoId resuelve perfiles",
+      "Dashboards notificaciones en subcolección hub"
+    ],
+    "preRuntimeMarcados": "Todos los ítems preRuntime y postRuntime con ejecución no autorizada por esta acta — TBD_PRE_RUNTIME salvo criterios diseño ya satisfechos"
+  },
+  "riesgosEliminados": [
+    { "id": "R-PROD-01", "nivel": "alto", "descripcion": "Gap monolito vs hub+perfiles sin acta formal", "estado": "MITIGADO_DISENO" },
+    { "id": "R-MIG-01", "nivel": "medio", "descripcion": "Bridge perfilId=uid informal", "estado": "CERRADO_DISENO" },
+    { "id": "R-MSG-01", "nivel": "alto", "descripcion": "conversacionId y contexto perfil Messenger sin diseño migración", "estado": "MITIGADO_DISENO" },
+    { "id": "RI-VE-owner", "nivel": "critico", "descripcion": "Owner checks VE asumen perfiles/{perfilId} sin bridge documentado", "estado": "MITIGADO_DISENO_AM-VE2" },
+    { "id": "DO1", "nivel": "medio", "descripcion": "Favoritos/notificaciones dueño perfil ambiguo", "estado": "MITIGADO_DISENO" },
+    { "id": "R-TE-02-dep", "nivel": "medio", "descripcion": "DEP-TE-02 acta migración pendiente", "estado": "SATISFECHO_DISENO" },
+    { "id": "R-SEO-urls", "nivel": "medio", "descripcion": "URLs canónicas sin política bridge", "estado": "MITIGADO_DISENO" }
+  ],
+  "riesgosRemanentes": [
+    { "id": "R-MIG-EXEC", "nivel": "alto", "descripcion": "Ejecución ETL no diseñada", "mitigacion": "Anexo operacional TBD_PRE_RUNTIME" },
+    { "id": "R-MIG-DUAL", "nivel": "alto", "descripcion": "Período lectura dual monolito+perfiles", "mitigacion": "TBD_PRE_RUNTIME fase 3" },
+    { "id": "R-MIG-STORAGE", "nivel": "alto", "descripcion": "Migración archivos Storage a perfiles/{perfilId}/", "mitigacion": "TBD_PRE_RUNTIME inventario Storage" },
+    { "id": "R-MIG-RULES", "nivel": "alto", "descripcion": "Reescritura firestore.rules", "mitigacion": "TBD_PRE_RUNTIME acta operacional" },
+    { "id": "R-MIG-UI", "nivel": "medio", "descripcion": "index.html/admin.html legacy vs Dashboards shell", "mitigacion": "Cutover UI TBD_PRE_RUNTIME" },
+    { "id": "R-MIG-NOTIF", "nivel": "medio", "descripcion": "Dos sistemas notificaciones hasta cutover", "mitigacion": "TBD_PRE_RUNTIME" },
+    { "id": "R-MIG-MULTI", "nivel": "medio", "descripcion": "Multi-perfil post-bridge y redirecciones", "mitigacion": "TBD_PRE_RUNTIME fase 5" },
+    { "id": "R-VE-01", "nivel": "alto", "descripcion": "VE MINOR 1.1.0 Messenger pendiente", "mitigacion": "Propuesta acta MINOR separada" },
+    { "id": "R-MSG-02", "nivel": "medio", "descripcion": "Índices/realtime Messenger", "mitigacion": "Addendum pre-implementación" },
+    { "id": "R-PROD-EXEC", "nivel": "alto", "descripcion": "Producción sigue monolito hasta ejecución", "mitigacion": "No autorizado por esta acta" }
+  ],
+  "vaciosIdentificados": [
+    { "id": "VAC-01", "tema": "Inventario producción", "descripcion": "Conteo usuarios, campos poblados, favoritos huérfanos", "etiqueta": "TBD_PRE_RUNTIME" },
+    { "id": "VAC-02", "tema": "Mapeo campo a campo", "descripcion": "Tabla exhaustiva usuarios/{uid} → hub vs perfiles", "etiqueta": "TBD_PRE_RUNTIME" },
+    { "id": "VAC-03", "tema": "Storage Firebase", "descripcion": "Paths actuales vs perfiles/{perfilId}/...", "etiqueta": "TBD_PRE_RUNTIME" },
+    { "id": "VAC-04", "tema": "Estrategia cutover", "descripcion": "Big-bang vs incremental; ventana; rollback", "etiqueta": "TBD_PRE_RUNTIME" },
+    { "id": "VAC-05", "tema": "Lectura dual", "descripcion": "Módulos código que leen usuarios vs perfiles", "etiqueta": "TBD_PRE_RUNTIME" },
+    { "id": "VAC-06", "tema": "isPublicProfile", "descripcion": "Equivalencia aprobado/activo/vencido → estadoRevision", "etiqueta": "TBD_PRE_RUNTIME" },
+    { "id": "VAC-07", "tema": "Visitantes sin perfil", "descripcion": "Solo anunciante o solo favoritos", "etiqueta": "TBD_PRE_RUNTIME" },
+    { "id": "VAC-08", "tema": "soporte_mensajes vs Messenger", "descripcion": "Coexistencia colecciones", "etiqueta": "TBD_PRE_RUNTIME" }
+  ],
+  "artefactosRelacionados": {
+    "workshop": "scripts/WORKSHOP-MIGRACION-USUARIOS-PERFILES-ANALISIS.json",
+    "auditoria": "scripts/AUDITORIA-ACTA-MIGRACION-USUARIOS-PERFILES.json",
+    "actaLegible": "scripts/ACTA-MIGRACION-USUARIOS-PERFILES.md",
+    "reporteConsolidado": "scripts/REPORTE-CONGELAMIENTOS-CONSOLIDADO.json"
+  },
+  "changelog": [
+    {
+      "version": "1.0.0",
+      "fecha": "2026-06-09",
+      "nota": "Acta formal de diseño de migración — hub + perfiles + bridge BRIDGE-MIG-01"
+    }
+  ]
+}

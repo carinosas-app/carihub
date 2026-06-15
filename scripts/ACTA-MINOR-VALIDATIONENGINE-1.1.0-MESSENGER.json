@@ -1,0 +1,383 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "$id": "https://carihub.app/schemas/acta-minor-validationengine-1.1.0-messenger.json",
+  "tipo": "ACTA_MINOR_VALIDATIONENGINE",
+  "titulo": "Acta formal MINOR — ValidationEngine 1.1.0 integración Messenger",
+  "versionActa": "1.0.0",
+  "fechaActa": "2026-06-09",
+  "estado": "APLICADA_DOCUMENTAL",
+  "clasificacion": "ACTA_MINOR_SEMVER",
+  "semverObjetivo": {
+    "capa": "ValidationEngine",
+    "versionId": "validationengine-2026-06-10",
+    "semverAnterior": "1.0.0",
+    "semverNuevo": "1.1.0",
+    "tipoIncremento": "MINOR",
+    "fundamento": "scripts/ACTA-CONGELAMIENTO-VALIDATIONENGINE.json → procedimientoVersionado.MINOR"
+  },
+  "autorizacion": {
+    "estado": "APROBADA",
+    "autorizadoPor": "product owner / usuario CariHub",
+    "fechaAutorizacion": "2026-06-09",
+    "alcance": "Formalización acta MINOR VE 1.1.0 Messenger: fanOutPlan, registry, gates, errores, fixtures, validador. Incorpora REQ-01..08 de auditoría final.",
+    "noAutoriza": [
+      "aplicación de cambios en archivos baseline congelados",
+      "runtime ValidationEngine o Messenger",
+      "Firestore",
+      "producción",
+      "deploy",
+      "modificación directa ACTA-CONGELAMIENTO-VALIDATIONENGINE.json",
+      "modificación SPEC-MESSENGER.json congelado"
+    ],
+    "aplicacionArchivos": "APLICADA_2026-06-09 — diff documental en baseline VE; runtime no autorizado"
+  },
+  "antecedentes": {
+    "validationEngineCongelado": "scripts/ACTA-CONGELAMIENTO-VALIDATIONENGINE.json v1.0.0",
+    "messengerCongelado": "scripts/ACTA-CONGELAMIENTO-MESSENGER.json v1.0.0",
+    "propuestaOrigen": "scripts/PROPUESTA-ACTA-MINOR-VALIDATIONENGINE-MESSENGER.json",
+    "auditoriaPropuesta": "scripts/AUDITORIA-PROPUESTA-VE-MINOR-1.1.0.json",
+    "fanoutFuente": "scripts/registry-messenger-fanout-propuesta.json v1.0.1",
+    "obMSG": ["OB-MSG-3", "OB-MSG-4", "OB-MSG-8"],
+    "actaMigracionDiseno": "scripts/ACTA-MIGRACION-USUARIOS-PERFILES.json v1.0.0"
+  },
+  "objetivos": [
+    "Formalizar semver MINOR 1.1.0 ValidationEngine para integración Messenger 1.0.0 congelado",
+    "Definir fanOutPlan canónico OB-VE2 para 24 acciones mensajería",
+    "Documentar gates validateStates: telefonoVerificado, messengerHabilitadoAmbito, spamScore >= 60",
+    "Catalogar errores canónicos nuevos en SPEC VE",
+    "Especificar fixtures obligatorios V19–V24",
+    "Definir diff registry 39 → 60 acciones y actualización validador",
+    "Cerrar R-VE-01 diseño sin modificar archivos congelados hasta aplicación"
+  ],
+  "compatibilidad": {
+    "validationEngine100": {
+      "estado": "COMPATIBLE_MINOR",
+      "pipeline14Pasos": "SIN_CAMBIO",
+      "ValidationContext": "SIN_CAMBIO",
+      "contratoMultiDestinoOB-VE2": "PRESERVADO — fanOutPlan[] obligatorio",
+      "guiaErroresOB-VE5": "EXTENDIDO — nuevas entradas gatesVsEstados",
+      "accionesExistentesNoMensajeria": "SIN_CAMBIO",
+      "nota": "MINOR válido según procedimientoVersionado; no es MAJOR"
+    },
+    "messenger100": {
+      "estado": "COMPATIBLE_SIN_MODIFICAR_SPEC",
+      "accionesCatalogo": 23,
+      "integracionValidationEngine": "SATISFECHO_AL_APLICAR_ACTA",
+      "registryFanOut": "registry-messenger-fanout-propuesta.json v1.0.1 absorbido en registry VE al aplicar",
+      "specNoModificado": true
+    },
+    "dependenciasCongeladas": {
+      "dashboards": "1.0.0 — dominios historial_mensajes y notificaciones mensajes",
+      "seguridad": "1.0.0 — telefonoVerificado, estadoSeguridad",
+      "cuentas": "1.0.0 — estadoMensajeria, mensajeria.spamScore",
+      "fieldEngine": "1.0.1 — sin cambio"
+    }
+  },
+  "requisitosAuditoriaIncorporados": {
+    "REQ-01": {
+      "id": "REQ-01",
+      "titulo": "Transformación plantilla fanout → fanOutPlan[] canónico",
+      "estado": "INCORPORADO",
+      "algoritmoTransformacion": {
+        "descripcion": "Al aplicar acta, cada entrada de registry-messenger-fanout-propuesta se convierte a fanOutPlan[] según OB-VE2",
+        "reglas": [
+          "Si historial.emitir === true → fanOutPlan.push({ destino: 'historial', dominio, tipoEvento, destinatario: 'usuarioId' | dinámico })",
+          "Si notificacion.emitir === true → por cada item en notificacion.items → fanOutPlan.push({ destino: 'notificacion', dominio, tipoEvento, destinatario })",
+          "Si logsSeguridad.emitir === true | condicional_* → registrar en entrada registry logsSeguridad; no duplicar en fanOutPlan salvo diseño explícito",
+          "Si iaRecomendaciones.emitir condicional → metadata fanOutPlan o side-channel ia_recomendaciones según patrón enviar_revision",
+          "Si logsAdmin.emitir → side-channel logsAdmin",
+          "Eliminar dependencia de placeholders emitir:false en mensaje_enviar y conversacion_iniciar legacy"
+        ],
+        "ejemploMensajeEnviar": {
+          "accion": "mensaje_enviar",
+          "fanOutPlan": [
+            { "destino": "historial", "dominio": "historial_mensajes", "tipoEvento": "mensaje_enviado", "destinatario": "usuarioId" },
+            { "destino": "notificacion", "dominio": "mensajes", "tipoEvento": "mensaje_nuevo", "destinatario": "receptorId_dinamico" }
+          ],
+          "logsSeguridad": { "emitir": "condicional_spam", "tipo": "mensaje_enviado" },
+          "iaRecomendaciones": { "emitir": "condicional_senal_riesgo", "estadoNuevo": "sugerida" }
+        }
+      },
+      "archivoAplicacion": "scripts/registry-validationengine-eventos.json"
+    },
+    "REQ-02": {
+      "id": "REQ-02",
+      "titulo": "Eliminación conversacion_iniciar y routing modoInicio",
+      "estado": "INCORPORADO",
+      "eliminarRegistry": ["conversacion_iniciar"],
+      "routing": {
+        "entradaCliente": "conversacion_iniciar",
+        "metadata": "metadata.modoInicio",
+        "resolucion": {
+          "directa": "conversacion_iniciar_directa",
+          "solicitud": "conversacion_iniciar_solicitud"
+        },
+        "pasoPipeline": "Antes de paso 12 fanOutPlan — normalizar accion en validateAction",
+        "fuente": "registry-messenger-fanout-propuesta.json → mapeoConversacionIniciar"
+      },
+      "specAcciones": "SPEC Messenger accion catalogo conversacion_iniciar permanece; VE resuelve variante internamente"
+    },
+    "REQ-03": {
+      "id": "REQ-03",
+      "titulo": "Gate messengerHabilitadoAmbito en validateStates",
+      "estado": "INCORPORADO",
+      "pasoPipeline": 6,
+      "campo": "messengerHabilitadoAmbito",
+      "lectura": "Resolución controles admin ámbito SPEC Messenger §controlesAdmin — boolean efectivo por precedencia",
+      "denegarSi": "messengerHabilitadoAmbito === false",
+      "error": "MESSENGER_DESHABILITADO_AMBITO",
+      "accionesAfectadas": "Todas acciones grupo mensajeria salvo acciones admin_messenger_habilitar_ambito",
+      "archivoAplicacion": "scripts/SPEC-VALIDATIONENGINE.json → validateStates + guiaErrores"
+    },
+    "REQ-04": {
+      "id": "REQ-04",
+      "titulo": "Umbral spamScore >= 60",
+      "estado": "INCORPORADO",
+      "pasoPipeline": 6,
+      "campoCanonico": "usuarios.mensajeria.spamScore",
+      "umbral": 60,
+      "regla": "Denegar si spamScore >= 60",
+      "error": "SPAM_SCORE_UMBRAL",
+      "accionesPreCheck": ["mensaje_enviar", "conversacion_iniciar_directa", "conversacion_iniciar_solicitud", "automatizacion_enviar"],
+      "sideEffect": "Restringir mensajería vía acción admin separada — validateAction NO muta spamScore",
+      "alineacionMessenger": "SPEC-MESSENGER.json antiSpam.spamScore + restringido_por_spamScore si >= 60"
+    },
+    "REQ-05": {
+      "id": "REQ-05",
+      "titulo": "Errores canónicos en SPEC VE + guiaErrores",
+      "estado": "INCORPORADO",
+      "destino": "scripts/SPEC-VALIDATIONENGINE.json",
+      "secciones": ["errores", "guiaErrores.gatesVsEstados"],
+      "erroresNuevos": {
+        "TELEFONO_NO_VERIFICADO": { "http": 403, "retry": false, "origen": "validateStates", "pasoPipeline": 6 },
+        "MESSENGER_DESHABILITADO_AMBITO": { "http": 403, "retry": false, "origen": "validateStates", "pasoPipeline": 6 },
+        "SPAM_SCORE_UMBRAL": { "http": 403, "retry": false, "origen": "validateStates", "pasoPipeline": 6 }
+      },
+      "erroresReutilizados": ["ESTADO_MENSAJERIA_DENEGADO", "EMAIL_NO_VERIFICADO", "ESTADO_SEGURIDAD_DENEGADO", "RATE_LIMIT_EXCEDIDO"],
+      "erroresSoloMessengerRuntime": ["BLOQUEO_ACTIVO", "SOLICITUD_PENDIENTE", "CONVERSACION_EN_INVESTIGACION"],
+      "guiaErroresEntradas": [
+        { "codigo": "TELEFONO_NO_VERIFICADO", "cuando": "usuarios.seguridad.telefonoVerificado !== true en acciones envío/inicio" },
+        { "codigo": "MESSENGER_DESHABILITADO_AMBITO", "cuando": "control admin ámbito deshabilita messenger para contexto" },
+        { "codigo": "SPAM_SCORE_UMBRAL", "cuando": "usuarios.mensajeria.spamScore >= 60" }
+      ]
+    },
+    "REQ-06": {
+      "id": "REQ-06",
+      "titulo": "Anexo lista canónica 24 claves registry mensajería",
+      "estado": "INCORPORADO",
+      "registryTotalEsperado": 60,
+      "registryMensajeriaEsperado": 24,
+      "accionesRegistryMensajeria": [
+        "mensaje_enviar",
+        "conversacion_iniciar_directa",
+        "conversacion_iniciar_solicitud",
+        "solicitud_conversacion_aceptar",
+        "solicitud_conversacion_rechazar",
+        "bloqueo_usuario",
+        "bloqueo_usuario_remover",
+        "reportar_conversacion",
+        "reportar_mensaje",
+        "reportar_usuario_mensajeria",
+        "mensaje_eliminar_para_todos",
+        "conversacion_archivar",
+        "conversacion_silenciar",
+        "conversacion_fijar",
+        "conversacion_ocultar",
+        "automatizacion_enviar",
+        "automatizacion_activar",
+        "automatizacion_desactivar",
+        "admin_automatizaciones_suspendir",
+        "admin_messenger_suspender",
+        "admin_messenger_suspension_levantar",
+        "admin_messenger_deshabilitar_ambito",
+        "admin_messenger_habilitar_ambito",
+        "admin_conversacion_cerrar"
+      ],
+      "accionesEliminadas": ["conversacion_iniciar"],
+      "excluidasSinFanOut": ["ia_asistente_sugerir_respuesta"],
+      "specAccionesGrupo": {
+        "renombrar": "mensajeria_futura → mensajeria",
+        "incluir": "23 acciones catalogo Messenger + alias routing conversacion_iniciar documentado en SPEC"
+      }
+    },
+    "REQ-07": {
+      "id": "REQ-07",
+      "titulo": "Actualización validar-spec-validationengine.mjs",
+      "estado": "INCORPORADO",
+      "archivo": "scripts/validar-spec-validationengine.mjs",
+      "cambiosAlAplicar": [
+        "VE09_registry_completo_60 — conteo spec === registry === 60",
+        "VE20_mensajeria_grupo_renombrado — acciones.mensajeria presente, mensajeria_futura ausente",
+        "VE21_mensaje_enviar_fanOut — fanOutPlan historial_mensajes + mensaje_nuevo",
+        "VE22_errores_messenger_gates — TELEFONO_NO_VERIFICADO, MESSENGER_DESHABILITADO_AMBITO, SPAM_SCORE_UMBRAL en spec.errores",
+        "VE23_fixtures_count_24 — fixtures.length >= 24",
+        "VE24_sin_conversacion_iniciar_registry — registry no contiene conversacion_iniciar",
+        "VE25_compatibilidad_messenger — spec.compatibilidad.messenger_1_0_0 presente"
+      ],
+      "checksActualesPreservados": "VE01–VE19 existentes deben seguir PASS tras aplicación"
+    },
+    "REQ-08": {
+      "id": "REQ-08",
+      "titulo": "Procedimiento MINOR formal y semver 1.1.0",
+      "estado": "INCORPORADO",
+      "procedimiento": {
+        "tipo": "MINOR",
+        "noRequiere": "Cambio ValidationContext, orden pipeline, MAJOR semver",
+        "archivosBaselineAfectadosAlAplicar": [
+          "scripts/SPEC-VALIDATIONENGINE.json",
+          "scripts/SPEC-VALIDATIONENGINE.md",
+          "scripts/registry-validationengine-eventos.json",
+          "scripts/fixtures-validationengine-golden.json",
+          "scripts/validar-spec-validationengine.mjs"
+        ],
+        "archivosNoModificados": [
+          "scripts/ACTA-CONGELAMIENTO-VALIDATIONENGINE.json",
+          "scripts/ACTA-CONGELAMIENTO-MESSENGER.json",
+          "scripts/SPEC-MESSENGER.json"
+        ],
+        "entradaHistorialVersiones": {
+          "semver": "1.1.0",
+          "fecha": "TBD_APLICACION",
+          "evento": "MINOR_MESSENGER_INTEGRACION",
+          "acta": "scripts/ACTA-MINOR-VALIDATIONENGINE-1.1.0-MESSENGER.json",
+          "notas": "Registry 60 acciones; gates OB-MSG-8; fixtures V19-V24"
+        },
+        "registryVersion": "1.0.0 → 1.1.0",
+        "specVersionSpec": "1.0.0 → 1.1.0",
+        "addendumActaVE100": "Recomendado addendum en ACTA-CONGELAMIENTO-VALIDATIONENGINE referenciando esta acta MINOR — no modificar acta sin autorización"
+      }
+    }
+  },
+  "gatesValidateStates": {
+    "pasoPipeline": 6,
+    "telefonoVerificado": {
+      "campo": "usuarios.seguridad.telefonoVerificado",
+      "requerido": true,
+      "acciones": ["mensaje_enviar", "conversacion_iniciar_directa", "conversacion_iniciar_solicitud"],
+      "accionesViaRouting": ["conversacion_iniciar → resuelve variantes"],
+      "error": "TELEFONO_NO_VERIFICADO",
+      "obMSG": "OB-MSG-8"
+    },
+    "messengerHabilitadoAmbito": {
+      "campo": "messengerHabilitadoAmbito",
+      "requerido": true,
+      "denegarSi": false,
+      "error": "MESSENGER_DESHABILITADO_AMBITO",
+      "excepciones": ["admin_messenger_habilitar_ambito", "admin_messenger_deshabilitar_ambito"]
+    },
+    "spamScore": {
+      "campo": "usuarios.mensajeria.spamScore",
+      "umbral": 60,
+      "denegarSi": "spamScore >= 60",
+      "error": "SPAM_SCORE_UMBRAL",
+      "acciones": ["mensaje_enviar", "conversacion_iniciar_directa", "conversacion_iniciar_solicitud", "automatizacion_enviar"]
+    },
+    "estadoMensajeriaExistente": {
+      "error": "ESTADO_MENSAJERIA_DENEGADO",
+      "reglaRestringida": "estadoMensajeria restringida: solo mensaje_enviar en conversaciones existentes activa|reportada — no conversacion_iniciar directa",
+      "fuente": "SPEC-MESSENGER.json integracionValidationEngine.gatesMessengerValidateStates"
+    },
+    "ordenEvaluacionGatesMensajeria": [
+      "messengerHabilitadoAmbito",
+      "estadoMensajeria / estadoSeguridad",
+      "telefonoVerificado",
+      "spamScore"
+    ]
+  },
+  "fanOutPlanCanonico": {
+    "contrato": "OB-VE2 contratoMultiDestino — fanOutPlan[] post-validación exitosa",
+    "dominiosHistorialNuevos": ["historial_mensajes"],
+    "dominiosNotificacion": ["mensajes", "mensajeria"],
+    "fuenteAbsorcion": "scripts/registry-messenger-fanout-propuesta.json v1.0.1",
+    "postAplicacion": "registry-messenger-fanout-propuesta.json estado PROPUESTA_ABSORBIDA — referencia histórica",
+    "condicionalesDocumentados": ["condicional_spam", "condicional_senal_riesgo", "condicional_abuso", "condicional_investigacion", "condicional"]
+  },
+  "fixturesObligatorios": {
+    "archivo": "scripts/fixtures-validationengine-golden.json",
+    "versionEsperada": "1.1.0",
+    "existentesPreservados": "V01..V18 sin modificación obligatoria",
+    "nuevosObligatorios": [
+      {
+        "id": "V19_mensaje_enviar_ok",
+        "accion": "mensaje_enviar",
+        "salidaEsperada": { "ok": true, "fanOutPlan": ["historial_mensajes.mensaje_enviado", "mensajes.mensaje_nuevo"] }
+      },
+      {
+        "id": "V20_mensaje_enviar_telefono_no_verificado",
+        "accion": "mensaje_enviar",
+        "entrada": { "seguridad": { "telefonoVerificado": false } },
+        "salidaEsperada": { "ok": false, "codigo": "TELEFONO_NO_VERIFICADO", "http": 403 }
+      },
+      {
+        "id": "V21_mensaje_enviar_spam_score_umbral",
+        "accion": "mensaje_enviar",
+        "entrada": { "mensajeria": { "spamScore": 65 } },
+        "salidaEsperada": { "ok": false, "codigo": "SPAM_SCORE_UMBRAL", "http": 403 }
+      },
+      {
+        "id": "V22_conversacion_iniciar_directa_ok",
+        "accion": "conversacion_iniciar_directa",
+        "salidaEsperada": { "ok": true, "fanOutPlan": ["historial_mensajes.conversacion_iniciada", "mensajes.conversacion_iniciada"] }
+      },
+      {
+        "id": "V23_conversacion_iniciar_solicitud_ok",
+        "accion": "conversacion_iniciar_solicitud",
+        "salidaEsperada": { "ok": true, "fanOutPlan": ["historial_mensajes.solicitud_conversacion_enviada", "mensajes.solicitud_conversacion"] }
+      },
+      {
+        "id": "V24_messenger_deshabilitado_ambito",
+        "accion": "mensaje_enviar",
+        "entrada": { "messengerHabilitadoAmbito": false },
+        "salidaEsperada": { "ok": false, "codigo": "MESSENGER_DESHABILITADO_AMBITO", "http": 403 }
+      }
+    ],
+    "totalEsperado": 24
+  },
+  "diffResumenAlAplicar": {
+    "SPEC-VALIDATIONENGINE.json": [
+      "versionSpec 1.1.0",
+      "acciones.mensajeria_futura → acciones.mensajeria (24 claves + routing conversacion_iniciar)",
+      "validateStates gates mensajeria documentados",
+      "errores + guiaErrores 3 códigos nuevos",
+      "compatibilidad.messenger_1_0_0",
+      "fixtures.casos 24"
+    ],
+    "registry-validationengine-eventos.json": [
+      "version 1.1.0",
+      "eliminar conversacion_iniciar",
+      "actualizar mensaje_enviar, bloqueo_usuario",
+      "añadir 21 acciones messenger",
+      "fanOutPlan[] por acción"
+    ],
+    "fixtures-validationengine-golden.json": ["añadir V19–V24"],
+    "validar-spec-validationengine.mjs": ["VE09→60", "VE20–VE25 nuevos checks"]
+  },
+  "riesgos": {
+    "eliminadosAlAplicarActa": [
+      { "id": "R-VE-01", "descripcion": "Runtime Messenger sin registry VE completo" },
+      { "id": "R-VE-MINOR-01", "descripcion": "Desalineación fanOutPlan plantilla vs OB-VE2 — cerrado por REQ-01" }
+    ],
+    "remanentes": [
+      { "id": "R-VE-MINOR-02", "nivel": "alto", "descripcion": "Archivos congelados sin aplicar hasta autorización explícita" },
+      { "id": "R-MSG-02", "nivel": "medio", "descripcion": "Índices Firestore Messenger — fuera alcance MINOR" },
+      { "id": "R-PROD-EXEC", "nivel": "alto", "descripcion": "Migración perfiles no ejecutada" }
+    ]
+  },
+  "artefactos": {
+    "actaLegible": "scripts/ACTA-MINOR-VALIDATIONENGINE-1.1.0-MESSENGER.md",
+    "auditoria": "scripts/AUDITORIA-ACTA-MINOR-VALIDATIONENGINE-1.1.0-MESSENGER.json",
+    "propuestaSupersedida": "scripts/PROPUESTA-ACTA-MINOR-VALIDATIONENGINE-MESSENGER.json"
+  },
+  "changelog": [
+    {
+      "version": "1.0.0",
+      "fecha": "2026-06-09",
+      "nota": "Acta formal MINOR VE 1.1.0 Messenger — REQ-01..08 incorporados; sin aplicación archivos"
+    },
+    {
+      "version": "1.0.0-aplicada",
+      "fecha": "2026-06-09",
+      "nota": "Diff documental aplicado en SPEC, registry, fixtures, validador; historialVersiones acta VE"
+    }
+  ]
+}

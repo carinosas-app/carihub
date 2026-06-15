@@ -1,0 +1,166 @@
+{
+  "version": "1.0.0",
+  "specVersion": "1.0.0",
+  "descripcion": "Golden fixtures SEO-Landings v1.0.0 — salidas esperadas documentales (no runtime). Cubren home, landings geo/cat, perfiles adulto/estándar/negocio, resultados, thin content, duplicados, adulto OG, bots IA, borrador/suspendido.",
+  "fixtures": [
+    {
+      "id": "SEO-01_home_indexable",
+      "entrada": { "superficie": "home", "path": "/" },
+      "salidaEsperada": {
+        "indexation": { "robots": "index,follow", "indexable": true },
+        "metadata": { "title": "CariHub — ...", "canonical": "https://carihub.app/" },
+        "schema": { "types": ["WebSite", "SearchAction", "Organization"] },
+        "sitemap": "sitemap-public.xml"
+      }
+    },
+    {
+      "id": "SEO-02_ciudad_indexable",
+      "entrada": { "superficie": "landing_ciudad", "path": "/mexico/jalisco/guadalajara", "perfilesPublicados": 12, "textoEditorialChars": 200 },
+      "salidaEsperada": {
+        "thinContentDecision": { "indexable": true, "motivo": "supera umbral 5 perfiles" },
+        "indexation": { "robots": "index,follow" },
+        "schema": { "types": ["WebPage", "BreadcrumbList", "Place"] },
+        "sitemap": "sitemap-geo.xml"
+      }
+    },
+    {
+      "id": "SEO-03_ciudad_categoria_indexable",
+      "entrada": { "superficie": "landing_ciudad_categoria", "path": "/mexico/jalisco/guadalajara/restaurantes", "perfilesGeoCat": 8 },
+      "salidaEsperada": {
+        "thinContentDecision": { "indexable": true },
+        "indexation": { "robots": "index,follow" },
+        "schema": { "types": ["WebPage", "BreadcrumbList", "ItemList"] },
+        "prioridad": "alta"
+      }
+    },
+    {
+      "id": "SEO-04_ciudad_categoria_thin_noindex",
+      "entrada": { "superficie": "landing_ciudad_categoria", "path": "/mexico/jalisco/tapalpa/dentistas", "perfilesGeoCat": 1 },
+      "salidaEsperada": {
+        "thinContentDecision": { "indexable": false, "canonicalSuperior": "/mexico/jalisco/tapalpa", "motivo": "bajo umbral 3" },
+        "indexation": { "robots": "noindex,follow" },
+        "sitemap": "EXCLUIDO"
+      }
+    },
+    {
+      "id": "SEO-05_perfil_adulto_mvp_noindex",
+      "entrada": { "superficie": "perfil", "path": "/perfil/p_123/ana-gdl", "categoriaAdulta": true, "estadoPublicacion": "publicado", "verificado": true },
+      "salidaEsperada": {
+        "adultIndexationDecision": { "indexable": false, "robots": "noindex,follow", "motivo": "ADR O8 MVP perfiles adultos individuales" },
+        "sitemap": "EXCLUIDO",
+        "openGraph": { "ogImage": "moderada", "nota": "no explícita" }
+      }
+    },
+    {
+      "id": "SEO-06_perfil_verificado_futuro_no_explicito",
+      "entrada": { "superficie": "perfil", "fase": "futuro_nacional", "categoriaAdulta": true, "verificado": true, "explicito": false, "mercadoLegal": true },
+      "salidaEsperada": {
+        "adultIndexationDecision": { "indexable": true, "robots": "index,follow", "condiciones": ["verificado", "no explícito", "legal mercado"], "nota": "ANALISIS-REEVALUACION opción F" },
+        "sitemap": "sitemap-perfiles.xml condicional"
+      }
+    },
+    {
+      "id": "SEO-07_perfil_no_verificado_noindex",
+      "entrada": { "superficie": "perfil", "verificado": false, "estadoPublicacion": "publicado" },
+      "salidaEsperada": {
+        "indexation": { "robots": "noindex,nofollow", "indexable": false },
+        "sitemap": "EXCLUIDO"
+      }
+    },
+    {
+      "id": "SEO-08_perfil_explicito_noindex",
+      "entrada": { "superficie": "perfil", "explicito": true },
+      "salidaEsperada": {
+        "indexation": { "robots": "noindex,nofollow,noarchive" },
+        "openGraph": { "prohibido": "og:image explícita" },
+        "schema": { "prohibido": "Person con datos sensibles" }
+      }
+    },
+    {
+      "id": "SEO-09_negocio_publico_index_condicionado",
+      "entrada": { "superficie": "negocio", "path": "/perfil/p_456/restaurante-centro", "tipoPerfil": "negocio", "estadoPublicacion": "publicado", "categoriaAdulta": false },
+      "salidaEsperada": {
+        "indexation": { "robots": "index,follow", "indexable": true },
+        "schema": { "types": ["LocalBusiness", "BreadcrumbList"] },
+        "sitemap": "sitemap-negocios.xml"
+      }
+    },
+    {
+      "id": "SEO-10_anunciante_noindex",
+      "entrada": { "superficie": "anunciante", "path": "/anunciante/acme" },
+      "salidaEsperada": {
+        "indexation": { "robots": "noindex", "indexable": false },
+        "redirect": "301 a landing/perfil si aplica"
+      }
+    },
+    {
+      "id": "SEO-11_resultados_query_noindex",
+      "entrada": { "superficie": "resultados", "path": "/resultados?categoria=spa&ciudad=monterrey&orden=precio" },
+      "salidaEsperada": {
+        "indexation": { "robots": "noindex,follow" },
+        "canonical": "/mexico/nuevo-leon/monterrey/spas o /resultados base",
+        "sitemap": "EXCLUIDO"
+      }
+    },
+    {
+      "id": "SEO-12_landing_duplicado_canonical",
+      "entrada": { "superficie": "landing_subcategoria", "path": "/categoria/belleza/manicure", "perfilesNacional": 2 },
+      "salidaEsperada": {
+        "thinContentDecision": { "indexable": false, "canonicalSuperior": "/categoria/belleza" },
+        "indexation": { "robots": "noindex,follow" }
+      }
+    },
+    {
+      "id": "SEO-13_landing_suspendida_410",
+      "entrada": { "superficie": "landing_ciudad", "estadoLanding": "suspendida_eliminada" },
+      "salidaEsperada": {
+        "http": 410,
+        "indexation": { "robots": "noindex" },
+        "sitemap": "EXCLUIDO"
+      }
+    },
+    {
+      "id": "SEO-14_contenido_borrador_noindex",
+      "entrada": { "superficie": "perfil", "estadoPublicacion": "borrador" },
+      "salidaEsperada": {
+        "indexation": { "robots": "noindex,nofollow" },
+        "renderEngine": "RENDER_SUPERFICIE_PRIVADA o no render público"
+      }
+    },
+    {
+      "id": "SEO-15_og_adulto_imagen_moderada",
+      "entrada": { "superficie": "landing_geo_adulta", "path": "/mexico/jalisco/guadalajara/acompanantes", "contenidoSuficiente": true },
+      "salidaEsperada": {
+        "indexation": { "robots": "index,follow", "ageGate": true, "safeSearchRating": "adult" },
+        "openGraph": { "ogImage": "imagen_generica_moderada", "aprobacion": "SeoModerationQueue" },
+        "nota": "sin media explícita"
+      }
+    },
+    {
+      "id": "SEO-16_bot_ia_perfil_bloqueado",
+      "entrada": { "userAgent": "GPTBot", "path": "/perfil/p_123/ana-gdl" },
+      "salidaEsperada": {
+        "robotsTxt": "Disallow /perfil/ para bots IA sensibles",
+        "html": "sin PII; PrivacyGuard activo",
+        "nota": "defensa en profundidad"
+      }
+    },
+    {
+      "id": "SEO-17_bot_ia_hub_permitido",
+      "entrada": { "userAgent": "Google-Extended", "path": "/mexico/jalisco/guadalajara/restaurantes" },
+      "salidaEsperada": {
+        "robotsTxt": "Allow landing genérica",
+        "indexation": { "indexable": true }
+      }
+    },
+    {
+      "id": "SEO-18_legacy_perfil_301",
+      "entrada": { "path": "/perfil.html?id=uid_legacy_abc" },
+      "salidaEsperada": {
+        "http": 301,
+        "location": "/perfil/uid_legacy_abc/{slug}",
+        "canonical": "forma perfilId estable"
+      }
+    }
+  ]
+}

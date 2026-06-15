@@ -1,0 +1,407 @@
+{
+  "$meta": {
+    "archivo": "scripts/blk05-rbac-custom-claims-matrices.json",
+    "documento": "RBAC / Custom Claims — Matrices estructuradas (referencia arquitectonica)",
+    "version": "1.0.0",
+    "fecha": "2026-06-11",
+    "estado": "BORRADOR_REFERENCIA_NO_EJECUTABLE",
+    "parteDe": "GAP-RULES-FIRESTORE-ALIGNMENT v1.0.0 (fase 2) / BLK-05",
+    "companion": "scripts/blk05-rbac-custom-claims-design.md",
+    "advertencias": [
+      "BORRADOR — NO DEPLOY — NO PRODUCCION",
+      "NO asignar custom claims reales con estas matrices todavia",
+      "NO modifica firestore.rules ni storage.rules reales",
+      "NO ejecutar — no Firebase, no Firestore, no Storage, no emulador, no commits",
+      "REQUIERE BLK-01 (perfiles/{perfilId}, ownerUid, hub usuarios)",
+      "REQUIERE BLK-05 (asignacion de claims server-side / Cloud Functions)",
+      "REQUIERE revision manual de seguridad antes de cualquier uso"
+    ],
+    "alineacion": [
+      "scripts/blk05-firestore-rules-perfiles-draft.rules",
+      "scripts/blk05-storage-rules-draft.rules",
+      "scripts/blk05-storage-rules-test-plan.md",
+      "scripts/blk05-rules-perfiles.test.mjs",
+      "scripts/GAP-RULES-FIRESTORE-ALIGNMENT-v1.0.0.json",
+      "scripts/config-seguridad-mvp-schema.json",
+      "scripts/PLAN-CONSTRUCCION-BLK-01-MIGRACION-PERFILID v1.0.0",
+      "scripts/MATRIZ-RUTAS-NAV-CANONICA.json",
+      "scripts/ACTA-CONGELAMIENTO-SEGURIDAD.json",
+      "scripts/ACTA-CONGELAMIENTO-REGISTRO-CUENTA.json",
+      "scripts/ACTA-CONGELAMIENTO-PAGOS-CONTRATOS.json",
+      "scripts/ACTA-CONGELAMIENTO-PANEL-DASHBOARD-v1.1.0.json"
+    ],
+    "principioRector": "Default-deny + minimo privilegio + separacion de privilegios; claims son fuente de verdad de rol en rules; datos sensibles/financieros nunca publicos; toda asignacion/revocacion/elevacion deja traza forense."
+  },
+
+  "indice100Puntos": {
+    "base_operativa_1_25": [
+      "1. Modelo conceptual RBAC + Custom Claims",
+      "2. Catalogo de roles (negocio + plataforma)",
+      "3. Schema canonico del custom claim (token)",
+      "4. Jerarquia y herencia de roles",
+      "5. Mapa rol -> permisos (capacidades)",
+      "6. Mapa claim -> rule helper (Firestore/Storage)",
+      "7. Roles de negocio vs roles de plataforma",
+      "8. Rol owner / ownership (no es claim, es relacion de dato)",
+      "9. Rol sistema / service account",
+      "10. Rol agente_ia (read-only, nunca escribe)",
+      "11. super_admin vs admin",
+      "12. moderador: alcance",
+      "13. soporte: alcance",
+      "14. auditor: alcance (read + traza, sin edicion)",
+      "15. Estados de seguridad de cuenta (orthogonal a rol)",
+      "16. Fuente de verdad del rol (claim vs doc Firestore)",
+      "17. Propagacion del claim (token refresh / latencia)",
+      "18. Tamano y limites del claim (1000 bytes)",
+      "19. Versionado del claim (claimsVersion)",
+      "20. Bootstrap inicial (primer super_admin)",
+      "21. Asignacion de claims (quien puede / como)",
+      "22. Validacion de claims (servidor + rules)",
+      "23. Sincronizacion claim <-> doc usuarios.roles",
+      "24. Errores / fallback si falta claim",
+      "25. Roadmap RBAC (MVP -> post-MVP -> escala)"
+    ],
+    "ampliacion_arquitectonica_26_100": [
+      "26. Matriz Claim <-> Dashboard",
+      "27. Matriz Claim <-> Accion Critica",
+      "28. Separacion de Privilegios (SoD)",
+      "29. Principio de Minimo Privilegio",
+      "30. Elevacion Temporal de Privilegios",
+      "31. Revocacion de Emergencia",
+      "32. Rotacion de Roles",
+      "33. Roles Mutuamente Excluyentes",
+      "34. Roles Delegados",
+      "35. Roles Regionales futuros",
+      "36. Auditoria de Asignacion de Claims",
+      "37. Auditoria de Revocacion de Claims",
+      "38. Auditoria de Elevacion Temporal",
+      "39. Auditoria de Accesos Sensibles",
+      "40. Auditoria de Acciones Administrativas",
+      "41. Retencion de Logs RBAC",
+      "42. Evidencia Forense",
+      "43. Dashboard Admin <-> Claims",
+      "44. Dashboard Moderador <-> Claims",
+      "45. Dashboard Soporte <-> Claims",
+      "46. Dashboard Auditor <-> Claims",
+      "47. Dashboard Sistema <-> Claims",
+      "48. Claim <-> Coleccion Firestore",
+      "49. Claim <-> Documento",
+      "50. Claim <-> Campo Sensible",
+      "51. Claim <-> Estado",
+      "52. Claim <-> Ownership",
+      "53. Claim <-> Subcoleccion",
+      "54. Claim <-> Ruta Storage",
+      "55. Claim <-> Tipo de Archivo",
+      "56. Claim <-> KYC",
+      "57. Claim <-> Comprobantes",
+      "58. Claim <-> Evidencias",
+      "59. Flujo Alta de Admin",
+      "60. Flujo Baja de Admin",
+      "61. Flujo Alta de Moderador",
+      "62. Flujo Baja de Moderador",
+      "63. Flujo Alta de Soporte",
+      "64. Flujo Baja de Soporte",
+      "65. Flujo Alta de Auditor",
+      "66. Flujo Baja de Auditor",
+      "67. Requisitos 2FA",
+      "68. Politica de Contrasenas",
+      "69. Gestion de Sesiones",
+      "70. Revocacion Global de Tokens",
+      "71. Refresh Tokens",
+      "72. Dispositivos Confiables",
+      "73. Bloqueo por Riesgo",
+      "74. Claims Assignment Function",
+      "75. Claims Revocation Function",
+      "76. Claims Audit Function",
+      "77. Claims Validation Function",
+      "78. Claims Sync Function",
+      "79. Compatibilidad Multiempresa",
+      "80. Compatibilidad Multipais",
+      "81. Compatibilidad Multiadmin",
+      "82. Operadores Regionales",
+      "83. Franquicias",
+      "84. Delegaciones",
+      "85. Riesgos de Escalacion Horizontal",
+      "86. Riesgos de Escalacion Vertical",
+      "87. Claims Corruptos",
+      "88. Claims Huerfanos",
+      "89. Claims Obsoletos",
+      "90. Riesgos de Bypass RBAC",
+      "91. Readiness RBAC",
+      "92. Readiness Firestore Rules",
+      "93. Readiness Storage Rules",
+      "94. Readiness Dashboard Admin",
+      "95. Readiness Seguridad",
+      "96. Dependencias BLK-01",
+      "97. Dependencias BLK-05",
+      "98. Dependencias Dashboard",
+      "99. Checklist Preproduccion",
+      "100. Veredicto PASS/FAIL"
+    ]
+  },
+
+  "catalogoRoles": {
+    "nota": "Roles de negocio NO se modelan como claim de plataforma; derivan de datos (tipoCuenta, ownership). Solo roles de plataforma viven en custom claims. agente_ia y sistema son claims de servicio.",
+    "rolesNegocio": [
+      { "id": "visitante", "claim": false, "fuente": "sin sesion / anonimo", "descripcion": "Lectura de contenido publico", "escribe": "no (salvo flujos server+turnstile)" },
+      { "id": "usuario", "claim": false, "fuente": "Auth + usuarios/{uid}", "descripcion": "Cuenta basica: favoritos, contacto, configuracion propia", "escribe": "propio gated" },
+      { "id": "prestador", "claim": false, "fuente": "usuarios.tipoCuenta", "descripcion": "Persona/independiente con perfil publico", "escribe": "perfil propio gated" },
+      { "id": "negocio", "claim": false, "fuente": "usuarios.tipoCuenta", "descripcion": "Entidad/negocio con perfil publico", "escribe": "perfil propio gated" },
+      { "id": "anunciante", "claim": false, "fuente": "usuarios.tipoCuenta", "descripcion": "Banners/publicidad, puede no tener perfil publico", "escribe": "solicitudes/banners propios gated" }
+    ],
+    "rolesPlataforma": [
+      { "id": "super_admin", "claim": true, "claimValue": "super_admin", "descripcion": "Control total; unico que asigna/revoca claims de plataforma y gestiona otros admins", "exclusivoCon": [], "critico": true },
+      { "id": "admin", "claim": true, "claimValue": "admin", "descripcion": "Operacion administrativa: aprobacion, suspension, pagos, configuracion", "exclusivoCon": ["auditor"], "critico": true },
+      { "id": "moderador", "claim": true, "claimValue": "moderador", "descripcion": "Revision de contenido/perfiles/denuncias; cambios de estado de moderacion", "exclusivoCon": ["auditor"], "critico": false },
+      { "id": "soporte", "claim": true, "claimValue": "soporte", "descripcion": "Atencion a usuarios; lectura limitada; sin acceso KYC completo ni pagos", "exclusivoCon": ["auditor"], "critico": false },
+      { "id": "auditor", "claim": true, "claimValue": "auditor", "descripcion": "Lectura de trazabilidad y logs; SIN edicion; acceso sensible deja log_acceso_privado", "exclusivoCon": ["admin", "moderador", "soporte"], "critico": true },
+      { "id": "agente_ia", "claim": true, "claimValue": "agente_ia", "descripcion": "Lectura controlada de metricas; NUNCA escritura", "exclusivoCon": ["admin", "moderador", "soporte", "auditor"], "critico": false },
+      { "id": "sistema", "claim": true, "claimValue": "sistema", "descripcion": "Service account / Cloud Functions; escribe estados, ledger, logs", "exclusivoCon": ["humano"], "critico": true }
+    ]
+  },
+
+  "claimSchema": {
+    "estrategia": "Custom claim 'role' (string unico) preferido para MVP; 'roles' (array) reservado para multi-rol futuro. hasRole/hasAnyRole en rules ya soportan ambos.",
+    "limiteBytes": 1000,
+    "campos": {
+      "role": "string — rol unico de plataforma (super_admin|admin|moderador|soporte|auditor|agente_ia|sistema)",
+      "roles": "string[] — OPCIONAL multi-rol futuro; evitar en MVP",
+      "claimsVersion": "number — version del esquema de claims para invalidar tokens viejos",
+      "assignedBy": "string(uid) — quien asigno (solo super_admin para roles criticos)",
+      "assignedAt": "number(epoch ms) — emision",
+      "expiresAt": "number(epoch ms)|null — elevacion temporal (seccion 30)",
+      "scopeRegion": "string|null — futuro multi-pais/regional (no MVP)",
+      "scopeOrg": "string|null — futuro multi-empresa/franquicia (no MVP)",
+      "mfa": "boolean — 2FA verificado en la sesion (futuro)",
+      "deviceTrust": "number 0-100 — confianza de dispositivo (futuro)"
+    },
+    "noDebeContener": [
+      "PII (email, telefono, nombre)",
+      "secretos / tokens de pago",
+      "datos que cambian con frecuencia (riesgoScore, estadoSeguridad)",
+      "permisos granulares por documento (eso vive en rules + datos)"
+    ],
+    "fuenteDeVerdad": "El claim es fuente de verdad del ROL en rules. usuarios/{uid}.roles es espejo legible para UI/auditoria, NUNCA autoritativo para seguridad.",
+    "sincronizacion": "Cloud Function setea claim Y escribe usuarios.roles + logsAdmin. Divergencia claim<->doc = alerta_seguridad."
+  },
+
+  "jerarquiaHerencia": {
+    "modelo": "Herencia parcial declarada en rules (no transitiva libre).",
+    "reglas": [
+      "isAdmin() = super_admin OR admin",
+      "isModerator() = moderador OR isAdmin()",
+      "isSupport() = soporte OR isAdmin()",
+      "isAuditor() = auditor OR isAdmin()",
+      "super_admin NO hereda auditor (SoD: auditor debe ser observador puro; ver seccion 28/33)",
+      "sistema NO hereda nada humano; es servicio",
+      "agente_ia NO hereda lectura privada/financiera"
+    ],
+    "advertenciaSoD": "La inclusion de isAdmin() dentro de isAuditor() es comodidad operativa MVP, pero ROMPE separacion de privilegios para auditoria independiente. Ver seccion 28: en post-MVP el auditor debe ser claim exclusivo sin herencia admin."
+  },
+
+  "matrizRolPermisos": {
+    "leyenda": { "R": "read", "C": "create", "U": "update", "D": "delete", "Ap": "aprobar", "Rx": "rechazar", "Sx": "suspender", "Rs": "restaurar", "-": "sin acceso" },
+    "filas": [
+      { "capacidad": "leer perfil publico", "visitante": "R", "usuario": "R", "prestador": "R", "anunciante": "R", "admin": "R", "moderador": "R", "soporte": "R", "auditor": "R", "agente_ia": "R", "sistema": "R" },
+      { "capacidad": "editar perfil propio (gated)", "prestador": "U", "negocio": "U", "admin": "-", "moderador": "-", "soporte": "-", "auditor": "-", "agente_ia": "-", "sistema": "-" },
+      { "capacidad": "aprobar/rechazar perfil", "prestador": "-", "admin": "Ap/Rx", "moderador": "Ap/Rx", "soporte": "-", "auditor": "-", "agente_ia": "-", "sistema": "-" },
+      { "capacidad": "suspender/restaurar perfil", "admin": "Sx/Rs", "moderador": "Sx", "soporte": "-", "auditor": "-", "sistema": "-" },
+      { "capacidad": "leer KYC/sensible", "owner": "R(propio)", "admin": "R", "moderador": "R", "soporte": "R(limitado)", "auditor": "R(con log)", "agente_ia": "-", "sistema": "-" },
+      { "capacidad": "leer/operar pagos", "owner": "R(propio)", "admin": "R/Ap/Rx", "moderador": "-", "soporte": "R(limitado)", "auditor": "R", "agente_ia": "-", "sistema": "C/U(ledger)" },
+      { "capacidad": "asignar/revocar claims", "super_admin": "C/U/D", "admin": "-", "otros": "-" },
+      { "capacidad": "leer logs auditoria", "admin": "R", "auditor": "R", "moderador": "R(scope)", "soporte": "-", "agente_ia": "-", "sistema": "C" },
+      { "capacidad": "configuracion global plataforma", "super_admin": "U", "admin": "U(scope)", "otros": "-" },
+      { "capacidad": "escribir logs/ledger/estados server", "sistema": "C/U", "otros": "-" }
+    ]
+  },
+
+  "matriz26_ClaimDashboard": {
+    "descripcion": "Punto 26/43-47: que dashboard ve cada claim.",
+    "filas": [
+      { "claim": "super_admin", "dashboards": ["ADM-* (todo)", "ADM-seguridad", "ADM-RBAC/claims", "ADM-04 auditoria", "ADM-pagos"], "nota": "Unico con ADM-RBAC/claims (gestion de admins)" },
+      { "claim": "admin", "dashboards": ["ADM-02 revision", "ADM-pagos", "ADM-04 auditoria(R)", "ADM-seguridad(scope)", "ADM-perfiles"], "nota": "Sin ADM-RBAC/claims salvo super_admin" },
+      { "claim": "moderador", "dashboards": ["ADM-02 revision", "ADM-perfiles(revision)", "ADM-denuncias", "ADM-media(revision)"], "nota": "Sin pagos, sin RBAC, sin config global" },
+      { "claim": "soporte", "dashboards": ["ADM-soporte/mensajes", "vista limitada de cuenta usuario"], "nota": "Sin KYC completo, sin pagos, sin estados criticos" },
+      { "claim": "auditor", "dashboards": ["ADM-04 auditoria", "ADM-logs", "vistas read-only de cualquier modulo"], "nota": "Solo lectura; cada acceso sensible loguea" },
+      { "claim": "agente_ia", "dashboards": ["CX-IA metricas (read)"], "nota": "Sin UI de escritura" },
+      { "claim": "sistema", "dashboards": ["sin UI — backend"], "nota": "No tiene dashboard humano" }
+    ]
+  },
+
+  "matriz27_ClaimAccionCritica": {
+    "descripcion": "Punto 27: acciones criticas y que claim las autoriza. Toda accion critica DEBE dejar log.",
+    "filas": [
+      { "accion": "asignar claim de plataforma", "autoriza": ["super_admin"], "log": "logsAdmin + logs_acceso_privado", "doble_control": "recomendado (seccion 28)" },
+      { "accion": "revocar claim / revocacion de emergencia", "autoriza": ["super_admin"], "log": "logsAdmin + alertas_seguridad", "doble_control": "no bloqueante en emergencia" },
+      { "accion": "elevacion temporal de privilegio", "autoriza": ["super_admin"], "log": "logsAdmin (con expiresAt)", "doble_control": "si" },
+      { "accion": "aprobar/publicar perfil", "autoriza": ["admin", "moderador"], "log": "logsAdmin", "doble_control": "no" },
+      { "accion": "suspender cuenta/perfil", "autoriza": ["admin", "moderador(perfil)"], "log": "logsAdmin", "doble_control": "no" },
+      { "accion": "leer/exportar KYC", "autoriza": ["admin", "moderador", "auditor", "soporte(limitado)"], "log": "logs_acceso_privado", "doble_control": "no" },
+      { "accion": "operar/aprobar pago", "autoriza": ["admin"], "log": "logsAdmin + ledger sistema", "doble_control": "recomendado montos altos" },
+      { "accion": "cambiar configuracion global", "autoriza": ["super_admin"], "log": "logsAdmin", "doble_control": "si" },
+      { "accion": "eliminar fisico (prohibido)", "autoriza": [], "log": "N/A", "doble_control": "soft-delete por estado unicamente" }
+    ]
+  },
+
+  "matriz48_ClaimColeccionFirestore": {
+    "descripcion": "Puntos 48-53: cruce claim x coleccion/documento/campo/estado/ownership/subcoleccion. Alineado con GAP-RULES y blk05-firestore-rules-perfiles-draft.rules.",
+    "leyenda": { "R": "read", "C": "create", "U": "update", "D": "delete", "Ap": "aprobar", "Rx": "rechazar", "Sx": "suspender", "Rs": "restaurar", "-": "sin acceso", "owner": "solo dueno del dato" },
+    "filas": [
+      { "coleccion": "perfiles/{perfilId}", "owner": "R/U(gated)", "admin": "R/U/Ap/Rx/Sx/Rs", "moderador": "R/Sx/Ap/Rx", "soporte": "R", "auditor": "R", "agente_ia": "R", "sistema": "U(estados)" },
+      { "coleccion": "perfiles/{perfilId}/verificaciones", "owner": "R/C(propio)", "admin": "R/Ap/Rx", "moderador": "R/Ap/Rx", "soporte": "R(limitado)", "auditor": "R(log)", "agente_ia": "-", "sistema": "U" },
+      { "coleccion": "perfiles/{perfilId}/media", "owner": "R/C/U(propio gated)", "admin": "R/Ap/Rx", "moderador": "R/Ap/Rx", "auditor": "R", "publico": "R(solo aprobada publica)", "sistema": "U" },
+      { "coleccion": "perfiles/{perfilId}/estadisticas", "owner": "R(propio)", "admin": "R", "auditor": "R", "agente_ia": "R(agregado)", "sistema": "C/U", "publico": "-" },
+      { "coleccion": "perfiles/{perfilId}/auditoria", "owner": "-", "admin": "R", "auditor": "R", "sistema": "C(append-only)", "otros": "-" },
+      { "coleccion": "usuarios/{uid} (hub)", "owner": "R/U(propio gated)", "admin": "R/U(scope)", "auditor": "R", "soporte": "R(limitado)", "sistema": "U(estados/claims-espejo)" },
+      { "coleccion": "pagos/{pagoId}", "owner": "R(propio)", "admin": "R/Ap/Rx", "auditor": "R", "soporte": "R(limitado)", "sistema": "C/U(ledger)", "moderador": "-" },
+      { "coleccion": "contratos / contratos_banners", "owner": "R(propio)", "admin": "R/U/Sx/Rs", "auditor": "R", "sistema": "C/U", "otros": "-" },
+      { "coleccion": "banners / anuncios", "owner": "R(propio)", "admin": "R/U/Ap/Rx/Sx", "moderador": "R/Sx", "auditor": "R", "sistema": "U(servir)" },
+      { "coleccion": "denuncias", "visitante": "C(server+turnstile)", "admin": "R/U/Ap/Rx", "moderador": "R/U/Ap/Rx", "auditor": "R", "sistema": "C" },
+      { "coleccion": "logsAdmin / logsSeguridad", "admin": "R/C", "auditor": "R", "moderador": "R(scope)", "sistema": "C", "otros": "-" },
+      { "coleccion": "logs_acceso_privado", "admin": "R", "auditor": "R", "sistema": "C", "otros": "-" },
+      { "coleccion": "alertas_seguridad / rate_limits", "admin": "R(alertas)", "auditor": "R", "sistema": "C/U", "otros": "-" },
+      { "coleccion": "claims_audit (RBAC log proyectado)", "super_admin": "R", "auditor": "R", "sistema": "C(append-only)", "otros": "-" }
+    ]
+  },
+
+  "matriz50_CamposSensibles": {
+    "descripcion": "Punto 50/56/57: campos por sensibilidad y quien lee. Ningun campo sensible es publico.",
+    "categorias": {
+      "publico": { "campos": ["alias", "slug", "categoria", "ciudad", "estado", "pais", "descripcionPublica", "fotoPrincipalPublica", "fotosPublicas", "serviciosPublicos", "horario", "zona", "modalidad", "precioPublico", "contactosPublicos"], "lectura": ["todos"] },
+      "privadoOwner": { "campos": ["nombreReal", "fechaNacimiento", "domicilio", "correoPrivado", "telefonoPrivado"], "lectura": ["owner", "admin", "moderador", "auditor(log)", "soporte(limitado)"] },
+      "kyc": { "campos": ["ineFrente", "ineReverso", "selfieVerificacion", "kyc"], "lectura": ["owner", "admin", "moderador", "auditor(log)"], "nota": "soporte NO ve KYC completo; agente_ia NUNCA" },
+      "financiero": { "campos": ["pagos", "contratos", "comprobantes", "facturacion", "referenciasPago", "datosBancarios"], "lectura": ["owner(propio)", "admin", "auditor"], "escritura": ["sistema"] },
+      "admin": { "campos": ["ownerUid", "perfilId", "estadoPublicacion", "notasAdmin", "metadatosRevision", "roles", "claimsVersion"], "lectura": ["admin", "auditor"], "escritura": ["admin(estados)", "sistema", "super_admin(roles/claims)"] }
+    }
+  },
+
+  "matriz54_ClaimStorage": {
+    "descripcion": "Puntos 54-58: cruce claim x ruta Storage x tipo de archivo. Alineado con blk05-storage-rules-draft.rules.",
+    "filas": [
+      { "ruta": "/perfiles/{perfilId}/public/foto-principal", "read": ["todos (si aprobada)"], "write": ["sistema", "admin"], "tipos": ["image/jpeg", "image/png", "image/webp"], "maxMB": 5 },
+      { "ruta": "/perfiles/{perfilId}/public/galeria", "read": ["todos (si aprobada)"], "write": ["sistema", "admin"], "tipos": ["image/*"], "maxMB": 8 },
+      { "ruta": "/perfiles/{perfilId}/pending/fotos", "read": ["owner", "moderador", "admin"], "write": ["owner"], "tipos": ["image/*"], "maxMB": 8 },
+      { "ruta": "/perfiles/{perfilId}/private/kyc/*", "read": ["owner", "moderador", "admin", "auditor", "soporte(limitado)"], "write": ["owner"], "tipos": ["image/*", "application/pdf"], "maxMB": 10, "nota": "NUNCA publico; auditor lee con log_acceso_privado" },
+      { "ruta": "/perfiles/{perfilId}/private/pagos/comprobantes", "read": ["owner", "admin", "auditor"], "write": ["owner"], "tipos": ["image/*", "application/pdf"], "maxMB": 10 },
+      { "ruta": "/banners/{bannerId}/public/media", "read": ["todos (si aprobada)"], "write": ["sistema", "admin"], "tipos": ["image/*", "video/mp4", "video/webm"], "maxMB": "10 img / 50 video" },
+      { "ruta": "/banners/{bannerId}/pending/media", "read": ["owner", "moderador", "admin"], "write": ["owner(anunciante)"], "tipos": ["image/*", "video/*"], "maxMB": "10/50" },
+      { "ruta": "/banners/{bannerId}/private/comprobantes", "read": ["owner", "admin", "auditor"], "write": ["owner"], "tipos": ["application/pdf", "image/*"], "maxMB": 10 },
+      { "ruta": "/admin/{expedienteId}/documentos|evidencias", "read": ["admin", "moderador", "soporte(autorizado)", "auditor"], "write": ["admin", "sistema"], "tipos": ["application/pdf", "image/*"], "maxMB": 15, "nota": "owner NO accede; publico NO accede" },
+      { "ruta": "/usuarios/{uid}/legacy", "read": ["owner", "admin"], "write": ["nadie (deny)"], "tipos": ["legacy"], "nota": "bridge BLK-01; solo lectura" }
+    ]
+  },
+
+  "segregacionPrivilegios_28_33": {
+    "sod": {
+      "descripcion": "Punto 28: nadie debe poder iniciar y aprobar/auditar la misma accion critica.",
+      "reglas": [
+        "Quien crea/edita contenido (owner) NO aprueba (admin/moderador).",
+        "Quien aprueba pagos (admin) NO es quien concilia auditoria (auditor).",
+        "Quien asigna claims (super_admin) deja traza que el auditor revisa (auditor != super_admin).",
+        "sistema ejecuta, humanos autorizan; humanos no firman como sistema."
+      ]
+    },
+    "minimoPrivilegio_29": "Cada rol recibe SOLO las capacidades de su funcion. soporte sin pagos/KYC completo; moderador sin pagos/RBAC; agente_ia sin escritura; auditor sin edicion.",
+    "elevacionTemporal_30": { "mecanismo": "claim con expiresAt (epoch ms) + scope acotado; Cloud Function revoca al expirar; rules ignoran claim si now > expiresAt", "autoriza": "super_admin", "log": "logsAdmin + claims_audit (motivo, ventana, aprobador)" },
+    "rolesMutuamenteExcluyentes_33": [
+      ["auditor", "admin"],
+      ["auditor", "moderador"],
+      ["auditor", "soporte"],
+      ["agente_ia", "cualquier rol humano de escritura"],
+      ["sistema", "cualquier rol humano"]
+    ]
+  },
+
+  "auditoriaRBAC_36_42": {
+    "coleccionesLog": {
+      "logsAdmin": { "ruta": "logsAdmin/{logId}", "retencionDias": 365, "eventos": ["claim_asignado", "claim_revocado", "elevacion_temporal", "perfil_aprobar", "pago_aprobar", "config_cambiar"] },
+      "logsSeguridad": { "ruta": "logsSeguridad/{logId}", "retencionDias": 180, "eventos": ["login", "rules_bypass_intento", "estado_seguridad_cambio"] },
+      "logs_acceso_privado": { "ruta": "logs_acceso_privado/{id}", "retencionDias": 730, "eventos": ["admin_vio_ine", "auditor_vio_kyc", "admin_exporto_datos"] },
+      "alertas_seguridad": { "ruta": "alertas_seguridad/{id}", "severidad": ["info", "warning", "critical"], "disparadores": ["claim_divergente", "revocacion_emergencia", "escalacion_detectada"] },
+      "claims_audit": { "ruta": "claims_audit/{id}", "estado": "PROYECTADA", "retencionDias": 730, "append_only": true, "campos": ["targetUid", "rolAntes", "rolDespues", "accion", "actorUid", "motivo", "expiresAt", "ipHash", "uaHash", "createdAt"] }
+    },
+    "evidenciaForense_42": "Logs append-only, PII solo hash, diffHash de cambios, retencion >= 730d para RBAC/acceso sensible, export firmado por super_admin con log_acceso_privado.",
+    "retencion_41": { "rbac_claims_audit": 730, "acceso_privado": 730, "admin": 365, "seguridad": 180 }
+  },
+
+  "flujosAltaBaja_59_66": {
+    "altaAdmin_59": ["super_admin inicia", "verificar identidad + 2FA activo", "asignar claim role=admin (Claims Assignment Function)", "escribir usuarios.roles + claims_audit + logsAdmin", "notificar; forzar re-login (token refresh)"],
+    "bajaAdmin_60": ["super_admin inicia o revocacion emergencia", "Claims Revocation Function quita role", "revocar tokens (revokeRefreshTokens)", "espejar usuarios.roles", "claims_audit + alertas_seguridad"],
+    "altaModerador_61": ["super_admin/admin inicia", "asignar role=moderador scope revision", "log + re-login"],
+    "bajaModerador_62": ["revocar claim", "revoke tokens", "log"],
+    "altaSoporte_63": ["super_admin/admin inicia", "asignar role=soporte (sin KYC completo/pagos)", "log + re-login"],
+    "bajaSoporte_64": ["revocar claim", "revoke tokens", "log"],
+    "altaAuditor_65": ["super_admin inicia (exclusivo, sin herencia admin en post-MVP)", "asignar role=auditor read-only", "log + re-login"],
+    "bajaAuditor_66": ["revocar claim", "revoke tokens", "log"]
+  },
+
+  "identidadSesion_67_73": {
+    "mfa_67": { "obligatorio": ["super_admin", "admin", "auditor"], "recomendado": ["moderador", "soporte"], "fase": "post-MVP (config-seguridad: 2FA admin postMVP)" },
+    "passwords_68": { "minLongitud": 12, "complejidad": "passphrase recomendado", "rotacionForzada": "no por tiempo; si por incidente", "proveedor": "Firebase Auth", "recuperacion": "sendPasswordResetEmail + Turnstile previo" },
+    "sesiones_69": { "duracionToken": "1h ID token", "refresh": "rotacion soportada", "inactividad": "cierre recomendado admin", "concurrencia": "limitar dispositivos admin (futuro)" },
+    "revocacionGlobalTokens_70": "admin.auth().revokeRefreshTokens(uid) ante baja/compromiso; rules validan auth_time vs tokensValidAfterTime",
+    "refreshTokens_71": "Token de ID caduca 1h; cambios de claim requieren refresh (getIdToken(true)) o re-login para propagar (latencia hasta 1h, ver seccion 17)",
+    "dispositivosConfiables_72": { "campo": "deviceTrust 0-100", "fuente": "config-seguridad dispositivoConfianza", "uso": "bloqueo/MFA adicional si dispositivo nuevo en rol critico" },
+    "bloqueoPorRiesgo_73": { "fuente": "estadoSeguridad + riesgoScore", "efecto": "estadoSeguridad bloqueado -> login denegado; rol NO opera aunque tenga claim", "nota": "estado de seguridad es orthogonal y prevalece sobre el rol" }
+  },
+
+  "claimsFunctions_74_78": {
+    "nota": "Especificacion conceptual de Cloud Functions. NO implementadas. Solo callable por super_admin (o sistema) con App Check + 2FA.",
+    "assignment_74": { "nombre": "assignPlatformRole", "input": ["targetUid", "role", "expiresAt?", "scope?", "motivo"], "guard": "caller super_admin + 2FA", "efecto": "setCustomUserClaims + usuarios.roles + claims_audit + logsAdmin", "valida": "rol en catalogo, SoD, exclusion mutua, limite bytes" },
+    "revocation_75": { "nombre": "revokePlatformRole", "input": ["targetUid", "motivo", "emergencia?"], "guard": "caller super_admin", "efecto": "setCustomUserClaims(role:null) + revokeRefreshTokens + claims_audit + alertas_seguridad" },
+    "audit_76": { "nombre": "auditClaims", "input": ["filtros"], "guard": "super_admin|auditor", "efecto": "lee claims_audit/logsAdmin; export firmado deja log_acceso_privado" },
+    "validation_77": { "nombre": "validateClaims", "input": ["uid?"], "guard": "sistema|super_admin", "efecto": "compara claim vs usuarios.roles; reporta corruptos/huerfanos/obsoletos; alerta divergencias (secciones 87-89)" },
+    "sync_78": { "nombre": "syncClaims", "input": ["uid?"], "guard": "sistema", "efecto": "reconcilia doc<->claim; claim es autoritativo; corrige espejo doc; programado + on-write" }
+  },
+
+  "multiTenant_79_84": {
+    "estado": "POST-MVP / NO DISENO ACTIVO — campos scopeOrg/scopeRegion reservados pero inertes en MVP",
+    "multiempresa_79": "scopeOrg en claim acota dashboards/colecciones a una org; rules deberian comparar scopeOrg con doc.orgId (no MVP)",
+    "multipais_80": "scopeRegion acota datos por pais/region; SEO/legal por jurisdiccion",
+    "multiadmin_81": "Varios admins ya soportados por claims (a diferencia del legacy email unico); super_admin gestiona el conjunto",
+    "operadoresRegionales_82": "rol regional = admin con scopeRegion; ve solo su region",
+    "franquicias_83": "scopeOrg = franquicia; SoD entre franquicia y plataforma central",
+    "delegaciones_84": "elevacion temporal acotada por scope (seccion 30) para cubrir ausencias"
+  },
+
+  "riesgos_85_90": [
+    { "id": "R-85", "tipo": "Escalacion horizontal", "descripcion": "Rol accede a datos de otro tenant/owner del mismo nivel", "mitigacion": "ownership + scopeOrg/scopeRegion + isProfileOwner; default-deny", "residual": "alto hasta multi-tenant implementado (no MVP)" },
+    { "id": "R-86", "tipo": "Escalacion vertical", "descripcion": "Rol bajo obtiene capacidades de rol alto", "mitigacion": "claims server-side only; rules no confian en doc; assign solo super_admin; SoD", "residual": "medio (depende de proteger Assignment Function)" },
+    { "id": "R-87", "tipo": "Claims corruptos", "descripcion": "claim con valor invalido/fuera de catalogo", "mitigacion": "validateClaims + rules ignoran roles desconocidos (default-deny)", "residual": "bajo" },
+    { "id": "R-88", "tipo": "Claims huerfanos", "descripcion": "claim sin usuario/doc espejo o usuario eliminado con claim activo", "mitigacion": "syncClaims + on-delete revoke + alerta divergencia", "residual": "medio" },
+    { "id": "R-89", "tipo": "Claims obsoletos", "descripcion": "claimsVersion vieja / token no refrescado", "mitigacion": "claimsVersion + revokeRefreshTokens + forzar re-login", "residual": "medio (latencia 1h)" },
+    { "id": "R-90", "tipo": "Bypass RBAC", "descripcion": "lectura/escritura directa SDK saltando UI", "mitigacion": "rules son la frontera real + App Check + server-side para acciones criticas", "residual": "alto hasta blk05 rules desplegadas (hoy legacy email unico)" }
+  ],
+
+  "readiness_91_98": {
+    "rbac_91": { "antes": "10%", "despues_doc": "70%", "nota": "diseno completo; sin claims reales ni rules desplegadas" },
+    "firestoreRules_92": { "estado": "borrador (blk05-firestore-rules-perfiles-draft.rules)", "pct": "60%", "bloqueadoPor": ["BLK-01", "claims reales", "emulador"] },
+    "storageRules_93": { "estado": "borrador (blk05-storage-rules-draft.rules)", "pct": "55%", "bloqueadoPor": ["BLK-01", "claims reales", "emulador", "Cloud Functions"] },
+    "dashboardAdmin_94": { "estado": "SPEC congelado (ACTA-PANEL-DASHBOARD v1.1.0)", "pct": "70%", "bloqueadoPor": ["RBAC runtime", "BLK-01"] },
+    "seguridad_95": { "estado": "config-seguridad CONGELADO; RBAC multi-admin postMVP", "pct": "65%", "bloqueadoPor": ["claims", "2FA admin", "rules deploy"] },
+    "dependenciasBLK01_96": "perfiles/{perfilId} + ownerUid + hub bridge: isProfileOwner/bridgeOwnerValido no operan sin BLK-01",
+    "dependenciasBLK05_97": "asignacion de claims server-side + deploy de rules; sin esto RBAC es solo diseño",
+    "dependenciasDashboard_98": "ADM-RBAC/claims UI (solo super_admin) + dashboards por rol dependen de claims propagados"
+  },
+
+  "checklistPreproduccion_99": [
+    "BLK-01 ejecutado (perfiles/ownerUid/hub) y validado",
+    "Claims Assignment/Revocation/Validation/Sync Functions implementadas y protegidas (super_admin + 2FA + App Check)",
+    "Primer super_admin bootstrap por proceso seguro fuera de banda",
+    "blk05 Firestore + Storage rules validadas en emulador (suite verde)",
+    "claims_audit + logs_acceso_privado activos con retencion >=730d",
+    "SoD verificada: auditor sin herencia admin en post-MVP; exclusiones mutuas aplicadas",
+    "revokeRefreshTokens probado (baja/emergencia)",
+    "2FA obligatorio para super_admin/admin/auditor",
+    "Plan de revocacion de emergencia documentado y ensayado",
+    "Divergencia claim<->doc = alerta critica monitoreada",
+    "Revision manual de seguridad firmada por super_admin"
+  ],
+
+  "veredicto_100": {
+    "documental": "PASS — referencia arquitectonica RBAC/Custom Claims completa (100 puntos)",
+    "runtime": "FAIL (esperado) — no ejecutable: requiere BLK-01 + BLK-05 + Cloud Functions + emulador + deploy",
+    "produccion": "FAIL (esperado) — no autorizado; checklist preproduccion pendiente",
+    "resumen": "Diseño listo para revision manual; implementacion bloqueada por dependencias declaradas. NO ejecutar."
+  }
+}

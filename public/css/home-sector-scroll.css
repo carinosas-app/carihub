@@ -1,0 +1,111 @@
+/* Interior animado — 6 cuadritos «Explora otras categorías» */
+.home-sector-card{container-type:size}
+.home-sector-card__layer .home-sector-scroll{
+  position:absolute;inset:0;display:flex;flex-direction:column;
+  background:var(--vc-foot-bg,linear-gradient(180deg,#f8c4d4 0%,#f0a8be 100%));
+  border-radius:inherit;overflow:hidden;
+  padding:0;
+  box-sizing:border-box;
+  font-size:clamp(7.5px,5.8cqh,12px);
+}
+
+/* Arriba fijo: solo Encuentra */
+.home-sector-scroll__top{
+  flex:0 0 auto;
+  z-index:3;
+  padding:clamp(5px,1.3cqh,9px) clamp(4px,1cqh,7px) clamp(4px,.95cqh,6px);
+  background:linear-gradient(180deg,#f8c4d4 0%,#f3b0c6 100%);
+  border-bottom:1px solid rgba(255,255,255,.28);
+  box-shadow:0 2px 6px rgba(240,168,190,.55);
+}
+.home-sector-scroll__lead{
+  display:block;
+  padding:clamp(2px,.5cqh,4px) clamp(3px,.7cqh,5px);
+  border-radius:4px;
+  background:linear-gradient(90deg,#e91e63 0%,#ff5c9a 100%);
+  color:#fff;
+  font-weight:900;
+  font-size:1em;
+  line-height:1.1;
+  text-align:center;
+  letter-spacing:.03em;
+  box-shadow:0 1px 3px rgba(136,24,72,.28);
+}
+
+/* Centro: solo profesiones en scroll */
+.home-sector-scroll__viewport{
+  flex:1 1 auto;
+  min-height:0;
+  overflow:hidden;
+  position:relative;
+  z-index:1;
+  padding:clamp(3px,.7cqh,5px) clamp(3px,.85cqh,6px) 0;
+  -webkit-mask-image:linear-gradient(180deg,transparent 0%,#000 8%,#000 70%,transparent 100%);
+  mask-image:linear-gradient(180deg,transparent 0%,#000 8%,#000 70%,transparent 100%);
+}
+.home-sector-scroll__track{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:clamp(2px,.65cqh,5px);
+  will-change:transform;
+}
+.home-sector-scroll__track.is-scrolling{
+  animation:homeSectorDrain var(--scroll-dur,6s) linear forwards;
+}
+@keyframes homeSectorDrain{
+  from{transform:translateY(0)}
+  to{transform:translateY(calc(-1 * var(--scroll-dist,0px)))}
+}
+.home-sector-scroll__item{
+  color:#fff;
+  font-weight:900;
+  font-size:1.02em;
+  line-height:1.16;
+  text-align:center;
+  width:100%;
+  word-break:break-word;
+  flex-shrink:0;
+  letter-spacing:.02em;
+  text-shadow:0 1px 2px rgba(136,24,72,.5),0 0 1px rgba(80,10,40,.35);
+}
+.home-sector-scroll__spacer{
+  display:block;
+  width:100%;
+  flex-shrink:0;
+  height:0;
+}
+
+/* Abajo fijo: Cerca de ti (blanco) */
+.home-sector-scroll__foot{
+  flex:0 0 auto;
+  z-index:3;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  min-height:clamp(16px,4.8cqh,24px);
+  padding:clamp(3px,.9cqh,6px) clamp(3px,.85cqh,6px) clamp(4px,1cqh,7px);
+  background:linear-gradient(180deg,#f3b0c6 0%,#f0a8be 45%,#eca6be 100%);
+  border-top:1px solid rgba(255,255,255,.35);
+  box-shadow:0 -6px 12px rgba(236,166,190,1);
+}
+.home-sector-scroll__cerca{
+  display:inline-flex;
+  align-items:center;
+  gap:clamp(1px,.4cqh,3px);
+  color:#fff;
+  font-weight:900;
+  font-size:.9em;
+  line-height:1.1;
+  letter-spacing:.02em;
+}
+.home-sector-scroll__pin{
+  width:1em;
+  height:1em;
+  flex-shrink:0;
+  color:#fff;
+}
+
+@media (prefers-reduced-motion:reduce){
+  .home-sector-scroll__track.is-scrolling{animation:none}
+}

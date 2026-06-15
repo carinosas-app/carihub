@@ -1,0 +1,4732 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "versionSchema": "2026-06-10",
+  "version": "2026-06-10",
+  "formularioId": "persona_independiente",
+  "nombre": "Registro Persona Independiente",
+  "descripcion": "Schema registry para registro dinámico Persona Independiente. FieldEngine: merge(base, plantillaArquetipo, deltaSubcategoria). Alineado con config-registro-adultos-schema.json.",
+  "alineacionAdultos": {
+    "comparteFieldRegistry": [
+      "geo",
+      "fotoPrincipal",
+      "galeria",
+      "tagline",
+      "sobreMi",
+      "metodosPago",
+      "contactoPublico",
+      "telefonoContacto",
+      "whatsappPrivado",
+      "ineFrente",
+      "ineReverso",
+      "selfieVerificacion",
+      "rfc",
+      "razonSocial"
+    ],
+    "mismasColeccionesFirestore": true,
+    "mismosComponentesBase": {
+      "resultados": "ResultCardServicio",
+      "perfil": "ProfileLayoutServicio"
+    }
+  },
+  "meta": {
+    "fieldRegistry": {
+      "alias": {
+        "id": "alias",
+        "label": "Alias o nombre visible",
+        "tipo": "text",
+        "maxLength": 50,
+        "tonoPublico": "profesional"
+      },
+      "nombreComercial": {
+        "id": "nombreComercial",
+        "label": "Nombre comercial (opcional)",
+        "tipo": "text",
+        "maxLength": 80
+      },
+      "tagline": {
+        "id": "tagline",
+        "label": "Frase corta",
+        "tipo": "textarea",
+        "maxLength": 100,
+        "iaCopy": true
+      },
+      "geo": {
+        "id": "geo",
+        "label": "Ubicación base",
+        "tipo": "geo",
+        "campos": [
+          "pais",
+          "estado",
+          "ciudad",
+          "zona"
+        ]
+      },
+      "zonaCobertura": {
+        "id": "zonaCobertura",
+        "label": "Zona de cobertura",
+        "tipo": "tags",
+        "iaCopy": true
+      },
+      "oficioServicio": {
+        "id": "oficioServicio",
+        "label": "Oficio / servicio principal",
+        "tipo": "text",
+        "maxLength": 120
+      },
+      "serviciosOfrecidos": {
+        "id": "serviciosOfrecidos",
+        "label": "Servicios ofrecidos",
+        "tipo": "checklist",
+        "iaCopy": true
+      },
+      "experiencia": {
+        "id": "experiencia",
+        "label": "Experiencia",
+        "tipo": "richtext",
+        "iaCopy": true
+      },
+      "anosExperiencia": {
+        "id": "anosExperiencia",
+        "label": "Años de experiencia",
+        "tipo": "number",
+        "min": 0,
+        "max": 60
+      },
+      "tarifaDesde": {
+        "id": "tarifaDesde",
+        "label": "Tarifa desde (MXN)",
+        "tipo": "currency"
+      },
+      "unidadTarifa": {
+        "id": "unidadTarifa",
+        "label": "Unidad de cobro",
+        "tipo": "enum",
+        "opciones": [
+          "por_hora",
+          "por_servicio",
+          "por_visita",
+          "por_m2",
+          "por_proyecto",
+          "cotizacion"
+        ]
+      },
+      "disponibilidad": {
+        "id": "disponibilidad",
+        "label": "Disponibilidad",
+        "tipo": "enum",
+        "opciones": [
+          "inmediata",
+          "con_cita",
+          "fines_de_semana",
+          "urgencias_24h"
+        ]
+      },
+      "horarioDetalle": {
+        "id": "horarioDetalle",
+        "label": "Horario de atención",
+        "tipo": "schedule"
+      },
+      "atencionDomicilio": {
+        "id": "atencionDomicilio",
+        "label": "Atención a domicilio",
+        "tipo": "boolean"
+      },
+      "materialesIncluidos": {
+        "id": "materialesIncluidos",
+        "label": "Materiales incluidos",
+        "tipo": "tags"
+      },
+      "certificaciones": {
+        "id": "certificaciones",
+        "label": "Certificaciones (no cédula)",
+        "tipo": "tags"
+      },
+      "fotoPrincipal": {
+        "id": "fotoPrincipal",
+        "label": "Foto principal",
+        "tipo": "image"
+      },
+      "galeria": {
+        "id": "galeria",
+        "label": "Fotos de trabajos realizados",
+        "tipo": "image[]"
+      },
+      "sobreMi": {
+        "id": "sobreMi",
+        "label": "Sobre mí / presentación",
+        "tipo": "richtext",
+        "iaCopy": true
+      },
+      "metodosPago": {
+        "id": "metodosPago",
+        "label": "Métodos de pago",
+        "tipo": "checkboxGroup",
+        "opciones": [
+          "efectivo",
+          "transferencia",
+          "tarjeta",
+          "credito"
+        ]
+      },
+      "contactoPublico": {
+        "id": "contactoPublico",
+        "label": "Contacto visible",
+        "tipo": "group",
+        "campos": [
+          "whatsapp",
+          "telegram",
+          "mensajeInterno",
+          "llamada"
+        ]
+      },
+      "portfolioURL": {
+        "id": "portfolioURL",
+        "label": "Portafolio / redes",
+        "tipo": "url"
+      },
+      "deseoFacturar": {
+        "id": "deseoFacturar",
+        "label": "Deseo facturar",
+        "tipo": "boolean",
+        "privado": true
+      },
+      "telefonoPrivado": {
+        "id": "telefonoPrivado",
+        "label": "Teléfono privado",
+        "tipo": "phone",
+        "privado": true
+      },
+      "whatsappPrivado": {
+        "id": "whatsappPrivado",
+        "label": "WhatsApp real",
+        "tipo": "phone",
+        "privado": true
+      },
+      "ineFrente": {
+        "id": "ineFrente",
+        "label": "INE frente",
+        "tipo": "file",
+        "privado": true
+      },
+      "ineReverso": {
+        "id": "ineReverso",
+        "label": "INE reverso",
+        "tipo": "file",
+        "privado": true
+      },
+      "selfieVerificacion": {
+        "id": "selfieVerificacion",
+        "label": "Selfie verificación CariHub",
+        "tipo": "file",
+        "privado": true
+      },
+      "rfc": {
+        "id": "rfc",
+        "label": "RFC",
+        "tipo": "rfc",
+        "privado": true
+      },
+      "razonSocial": {
+        "id": "razonSocial",
+        "label": "Razón social",
+        "tipo": "text",
+        "privado": true
+      },
+      "codigoPostalFiscal": {
+        "id": "codigoPostalFiscal",
+        "label": "C.P. fiscal",
+        "tipo": "text",
+        "privado": true
+      },
+      "emailFacturacion": {
+        "id": "emailFacturacion",
+        "label": "Email facturación",
+        "tipo": "email",
+        "privado": true
+      },
+      "regimenFiscal": {
+        "id": "regimenFiscal",
+        "label": "Régimen fiscal",
+        "tipo": "select",
+        "privado": true
+      },
+      "usoCFDI": {
+        "id": "usoCFDI",
+        "label": "Uso CFDI",
+        "tipo": "select",
+        "privado": true
+      },
+      "terminosAceptados": {
+        "id": "terminosAceptados",
+        "label": "Términos aceptados",
+        "tipo": "boolean",
+        "privado": true
+      },
+      "mayorEdadConfirmado": {
+        "id": "mayorEdadConfirmado",
+        "label": "Mayor de edad confirmado",
+        "tipo": "boolean",
+        "privado": true
+      }
+    },
+    "base": {
+      "camposPublicosResultados": [
+        "subcategoriaId",
+        "alias",
+        "tagline",
+        "geo",
+        "oficioServicio",
+        "tarifaDesde",
+        "fotoPrincipal",
+        "galeria"
+      ],
+      "camposPublicosPerfil": [
+        "subcategoriaId",
+        "alias",
+        "tagline",
+        "geo",
+        "oficioServicio",
+        "serviciosOfrecidos",
+        "experiencia",
+        "anosExperiencia",
+        "tarifaDesde",
+        "unidadTarifa",
+        "zonaCobertura",
+        "disponibilidad",
+        "horarioDetalle",
+        "atencionDomicilio",
+        "fotoPrincipal",
+        "galeria",
+        "sobreMi",
+        "metodosPago",
+        "contactoPublico"
+      ],
+      "camposPrivados": [
+        "telefonoPrivado",
+        "whatsappPrivado",
+        "deseoFacturar",
+        "terminosAceptados",
+        "mayorEdadConfirmado"
+      ],
+      "obligatorios": [
+        "alias",
+        "geo.pais",
+        "geo.estado",
+        "geo.ciudad",
+        "geo.zona",
+        "oficioServicio",
+        "tarifaDesde",
+        "fotoPrincipal",
+        "galeria",
+        "tagline",
+        "telefonoPrivado",
+        "ineFrente",
+        "ineReverso",
+        "selfieVerificacion",
+        "terminosAceptados",
+        "mayorEdadConfirmado"
+      ],
+      "opcionales": [
+        "nombreComercial",
+        "portfolioURL",
+        "certificaciones",
+        "materialesIncluidos",
+        "anosExperiencia",
+        "atencionDomicilio"
+      ],
+      "fotosMin": 3,
+      "fotosMax": 12,
+      "fotosMaxPorPlan": {
+        "basico": 3,
+        "destacado": 6,
+        "premium": 10,
+        "vip": 12
+      },
+      "noPublicos": [
+        "telefonoPrivado",
+        "whatsappPrivado",
+        "ineFrente",
+        "ineReverso",
+        "selfieVerificacion",
+        "rfc",
+        "razonSocial",
+        "codigoPostalFiscal",
+        "emailFacturacion",
+        "regimenFiscal",
+        "usoCFDI",
+        "facturacion"
+      ],
+      "verificacionTipo": "persona_estandar",
+      "facturacionTipo": "cfdi_opcional",
+      "nivelRevisionAdmin": "baja"
+    },
+    "verificacionTipos": {
+      "persona_estandar": {
+        "campos": [
+          "ineFrente",
+          "ineReverso",
+          "selfieVerificacion"
+        ],
+        "obligatorios": [
+          "ineFrente",
+          "ineReverso",
+          "selfieVerificacion"
+        ],
+        "validacionAdmin": "manual",
+        "notas": "INE + selfie. No se publican."
+      },
+      "persona_o_microempresa": {
+        "campos": [
+          "ineFrente",
+          "ineReverso",
+          "selfieVerificacion",
+          "rfc"
+        ],
+        "obligatorios": [
+          "ineFrente",
+          "selfieVerificacion"
+        ],
+        "validacionAdmin": "manual",
+        "notas": "Para arquetipo empresa_servicios (consultores/coaches ambiguos). RFC opcional hasta facturar."
+      }
+    },
+    "facturacionTipos": {
+      "cfdi_opcional": {
+        "cuando": "deseoFacturar === true",
+        "camposRequeridos": [
+          "rfc",
+          "razonSocial",
+          "codigoPostalFiscal",
+          "emailFacturacion",
+          "regimenFiscal",
+          "usoCFDI"
+        ],
+        "camposOpcionales": [
+          "nombreComercial"
+        ],
+        "notas": "Facturación opcional para independientes."
+      }
+    },
+    "coherenciaGlobal": [
+      {
+        "id": "GEO_COMPLETA",
+        "si": "true",
+        "requiere": [
+          "geo.ciudad",
+          "geo.zona"
+        ],
+        "severidad": "error"
+      },
+      {
+        "id": "TARIFA_POSITIVA",
+        "si": "tarifaDesde <= 0",
+        "severidad": "error",
+        "mensaje": "La tarifa debe ser mayor a cero."
+      },
+      {
+        "id": "FOTOS_MIN",
+        "si": "true",
+        "requiere": [
+          "galeria.count >= fotosMin"
+        ],
+        "severidad": "error"
+      },
+      {
+        "id": "FOTOS_MAX_PLAN",
+        "si": "true",
+        "requiere": [
+          "galeria.count <= fotosMaxPlan"
+        ],
+        "severidad": "error"
+      },
+      {
+        "id": "COBERTURA_MOVIL",
+        "si": "atencionDomicilio == true",
+        "requiere": [
+          "zonaCobertura"
+        ],
+        "severidad": "error"
+      },
+      {
+        "id": "FACTURACION_COMPLETA",
+        "si": "deseoFacturar == true",
+        "requiere": [
+          "rfc",
+          "razonSocial",
+          "codigoPostalFiscal"
+        ],
+        "severidad": "error"
+      },
+      {
+        "id": "TAGLINE_LONGITUD",
+        "si": "tagline.length > 100",
+        "severidad": "advertencia",
+        "mensaje": "Acorta la frase para resultados."
+      }
+    ],
+    "componentesUI": {
+      "ResultCardServicio": "Tarjeta: foto trabajo + alias + oficio + tarifa desde + zona",
+      "ProfileLayoutServicio": "Perfil: galería trabajos + experiencia + cobertura + horario + contacto",
+      "ResultCardServicioMovil": "Tarjeta con badge 'A domicilio' + cobertura",
+      "ProfileLayoutServicioMovil": "Perfil móvil con mapa de cobertura"
+    },
+    "firestoreRecomendado": {
+      "colecciones": {
+        "config_registro_independiente": "Un doc por subcategoriaId (opcional; puede usarse schema único)",
+        "perfiles": "Documento raíz por perfilId",
+        "perfiles/{id}/borradores": "Autosave wizard",
+        "ia_logs": "Sugerencias IA auditables",
+        "solicitudes_verificacion": "Cola admin"
+      },
+      "documentoPerfil": {
+        "raiz": [
+          "usuarioId",
+          "formularioId",
+          "subcategoriaId",
+          "sectorId",
+          "arquetipo",
+          "tipoPerfil",
+          "planId",
+          "estadoPublicacion",
+          "estadoVerificacion"
+        ],
+        "publico": "Campos visibles en web",
+        "privado": "Nunca en lectura pública",
+        "verificacion": "INE, selfie, estado revisión",
+        "facturacion": "null o objeto si deseoFacturar",
+        "meta": [
+          "versionSchema",
+          "borradorCompletoPct",
+          "iaUltimaRevision"
+        ]
+      }
+    }
+  },
+  "plantillasArquetipo": {
+    "persona_servicio_general": {
+      "tipoPerfil": "persona",
+      "componentes": {
+        "resultados": "ResultCardServicio",
+        "perfil": "ProfileLayoutServicio"
+      },
+      "camposPublicosResultados": [
+        "disponibilidad"
+      ],
+      "camposPublicosPerfil": [
+        "certificaciones"
+      ],
+      "camposPrivados": [
+        "whatsappPrivado",
+        "ineFrente",
+        "ineReverso",
+        "selfieVerificacion"
+      ],
+      "obligatoriosExtra": [
+        "serviciosOfrecidos",
+        "zonaCobertura"
+      ],
+      "opcionalesExtra": [
+        "unidadTarifa"
+      ],
+      "fotosMin": 3,
+      "fotosMax": 12,
+      "verificacionTipo": "persona_estandar",
+      "keywordsIA": [
+        "independiente",
+        "servicio",
+        "oficio",
+        "técnico",
+        "a domicilio",
+        "profesional independiente"
+      ],
+      "textosAyuda": {
+        "tagline": "Ej: 'Plomero certificado con 10 años de experiencia en zona norte'.",
+        "experiencia": "Describe trabajos realizados, garantías y tiempos de respuesta.",
+        "zonaCobertura": "Colonias, municipios o radio de servicio.",
+        "galeria": "Sube fotos reales de trabajos terminados (sin datos personales de clientes)."
+      }
+    },
+    "persona_servicio_oficio": {
+      "heredaDe": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "componentes": {
+        "resultados": "ResultCardServicio",
+        "perfil": "ProfileLayoutServicio"
+      },
+      "obligatoriosExtra": [
+        "atencionDomicilio",
+        "materialesIncluidos"
+      ],
+      "opcionalesExtra": [
+        "anosExperiencia"
+      ],
+      "fotosMin": 3,
+      "fotosMax": 10,
+      "keywordsIA": [
+        "plomero",
+        "electricista",
+        "albañil",
+        "herrero",
+        "pintor",
+        "cerrajero",
+        "hvac",
+        "paneles solares"
+      ],
+      "textosAyuda": {
+        "materialesIncluidos": "Indica si incluyes refacciones básicas o solo mano de obra."
+      }
+    },
+    "persona_servicio_movil": {
+      "heredaDe": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "componentes": {
+        "resultados": "ResultCardServicioMovil",
+        "perfil": "ProfileLayoutServicioMovil"
+      },
+      "obligatoriosExtra": [
+        "atencionDomicilio",
+        "zonaCobertura",
+        "disponibilidad"
+      ],
+      "fotosMin": 2,
+      "fotosMax": 8,
+      "keywordsIA": [
+        "a domicilio",
+        "móvil",
+        "urgencias",
+        "grúa",
+        "mecánico",
+        "chofer",
+        "mensajería"
+      ]
+    },
+    "persona_servicio_bienestar": {
+      "heredaDe": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "componentes": {
+        "resultados": "ResultCardServicio",
+        "perfil": "ProfileLayoutServicio"
+      },
+      "camposPublicosPerfil": [
+        "certificaciones",
+        "horarioDetalle"
+      ],
+      "obligatoriosExtra": [
+        "certificaciones",
+        "horarioDetalle"
+      ],
+      "fotosMin": 2,
+      "fotosMax": 8,
+      "keywordsIA": [
+        "reiki",
+        "tarot",
+        "masajes",
+        "terapia",
+        "coach",
+        "meditación",
+        "holístico"
+      ],
+      "textosAyuda": {
+        "certificaciones": "Cursos, diplomas o certificaciones (no sustituyen cédula profesional)."
+      }
+    },
+    "persona_servicio_profesional": {
+      "heredaDe": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "obligatoriosExtra": [
+        "portfolioURL",
+        "anosExperiencia"
+      ],
+      "fotosMin": 3,
+      "fotosMax": 15,
+      "keywordsIA": [
+        "instructor",
+        "tutor",
+        "consultor",
+        "diseño",
+        "marketing",
+        "capacitación"
+      ]
+    },
+    "persona_servicio_salud_auxiliar": {
+      "heredaDe": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "obligatoriosExtra": [
+        "certificaciones",
+        "horarioDetalle"
+      ],
+      "fotosMin": 2,
+      "fotosMax": 6,
+      "keywordsIA": [
+        "enfermería",
+        "cuidado",
+        "rehabilitación",
+        "auxiliar",
+        "domicilio"
+      ],
+      "textosAyuda": {
+        "certificaciones": "Certificaciones de salud; si eres profesional titulado usa formulario Profesionista."
+      }
+    },
+    "empresa_servicios": {
+      "tipoPerfil": "persona",
+      "componentes": {
+        "resultados": "ResultCardServicio",
+        "perfil": "ProfileLayoutServicio"
+      },
+      "camposPublicosPerfil": [
+        "portfolioURL",
+        "serviciosOfrecidos"
+      ],
+      "camposPrivados": [
+        "ineFrente",
+        "ineReverso",
+        "selfieVerificacion",
+        "rfc"
+      ],
+      "obligatoriosExtra": [
+        "portfolioURL",
+        "serviciosOfrecidos"
+      ],
+      "opcionalesExtra": [
+        "rfc",
+        "razonSocial"
+      ],
+      "fotosMin": 3,
+      "fotosMax": 12,
+      "verificacionTipo": "persona_o_microempresa",
+      "keywordsIA": [
+        "consultor",
+        "coach",
+        "diseño",
+        "marketing",
+        "freelance",
+        "microempresa"
+      ],
+      "textosAyuda": {
+        "portfolioURL": "Casos de éxito, portafolio o sitio web."
+      }
+    }
+  },
+  "subcategorias": [
+    {
+      "subcategoriaId": "temazcales",
+      "nombre": "Temazcales",
+      "sectorId": "bienestar",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "temazcales",
+        "bienestar"
+      ]
+    },
+    {
+      "subcategoriaId": "centros-holisticos",
+      "nombre": "Centros Holísticos",
+      "sectorId": "bienestar",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "centros holísticos",
+        "bienestar"
+      ]
+    },
+    {
+      "subcategoriaId": "centros-de-bienestar",
+      "nombre": "Centros de Bienestar",
+      "sectorId": "bienestar",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "centros de bienestar",
+        "bienestar"
+      ]
+    },
+    {
+      "subcategoriaId": "centros-de-meditacion",
+      "nombre": "Centros de Meditación",
+      "sectorId": "bienestar",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "centros de meditación",
+        "bienestar"
+      ]
+    },
+    {
+      "subcategoriaId": "centros-de-yoga",
+      "nombre": "Centros de Yoga",
+      "sectorId": "bienestar",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "centros de yoga",
+        "bienestar"
+      ]
+    },
+    {
+      "subcategoriaId": "centros-de-sanacion",
+      "nombre": "Centros de Sanación",
+      "sectorId": "bienestar",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "centros de sanación",
+        "bienestar"
+      ]
+    },
+    {
+      "subcategoriaId": "retiros-espirituales",
+      "nombre": "Retiros Espirituales",
+      "sectorId": "bienestar",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "retiros espirituales",
+        "bienestar"
+      ]
+    },
+    {
+      "subcategoriaId": "turismo-espiritual",
+      "nombre": "Turismo Espiritual",
+      "sectorId": "bienestar",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "turismo espiritual",
+        "bienestar"
+      ]
+    },
+    {
+      "subcategoriaId": "medicina-ancestral",
+      "nombre": "Medicina Ancestral",
+      "sectorId": "bienestar",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "medicina ancestral",
+        "bienestar"
+      ]
+    },
+    {
+      "subcategoriaId": "chamanismo",
+      "nombre": "Chamanismo",
+      "sectorId": "bienestar",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "chamanismo",
+        "bienestar"
+      ]
+    },
+    {
+      "subcategoriaId": "ceremonias-tradicionales",
+      "nombre": "Ceremonias Tradicionales",
+      "sectorId": "bienestar",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "ceremonias tradicionales",
+        "bienestar"
+      ]
+    },
+    {
+      "subcategoriaId": "terapias-holisticas",
+      "nombre": "Terapias Holísticas",
+      "sectorId": "bienestar",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "terapias holísticas",
+        "bienestar"
+      ]
+    },
+    {
+      "subcategoriaId": "reiki",
+      "nombre": "Reiki",
+      "sectorId": "bienestar",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "reiki",
+        "bienestar"
+      ]
+    },
+    {
+      "subcategoriaId": "biomagnetismo",
+      "nombre": "Biomagnetismo",
+      "sectorId": "bienestar",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "biomagnetismo",
+        "bienestar"
+      ]
+    },
+    {
+      "subcategoriaId": "acupuntura",
+      "nombre": "Acupuntura",
+      "sectorId": "bienestar",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "acupuntura",
+        "bienestar"
+      ]
+    },
+    {
+      "subcategoriaId": "aromaterapia",
+      "nombre": "Aromaterapia",
+      "sectorId": "bienestar",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "aromaterapia",
+        "bienestar"
+      ]
+    },
+    {
+      "subcategoriaId": "sonoterapia",
+      "nombre": "Sonoterapia",
+      "sectorId": "bienestar",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "sonoterapia",
+        "bienestar"
+      ]
+    },
+    {
+      "subcategoriaId": "terapias-energeticas",
+      "nombre": "Terapias Energéticas",
+      "sectorId": "bienestar",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "terapias energéticas",
+        "bienestar"
+      ]
+    },
+    {
+      "subcategoriaId": "terapias-alternativas",
+      "nombre": "Terapias Alternativas",
+      "sectorId": "bienestar",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "terapias alternativas",
+        "bienestar"
+      ]
+    },
+    {
+      "subcategoriaId": "medicina-natural",
+      "nombre": "Medicina Natural",
+      "sectorId": "bienestar",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "medicina natural",
+        "bienestar"
+      ]
+    },
+    {
+      "subcategoriaId": "naturopatia",
+      "nombre": "Naturopatía",
+      "sectorId": "bienestar",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "naturopatía",
+        "bienestar"
+      ]
+    },
+    {
+      "subcategoriaId": "herbolaria",
+      "nombre": "Herbolaria",
+      "sectorId": "bienestar",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "herbolaria",
+        "bienestar"
+      ]
+    },
+    {
+      "subcategoriaId": "ayurveda",
+      "nombre": "Ayurveda",
+      "sectorId": "bienestar",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "ayurveda",
+        "bienestar"
+      ]
+    },
+    {
+      "subcategoriaId": "medicina-tradicional-china",
+      "nombre": "Medicina Tradicional China",
+      "sectorId": "bienestar",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "medicina tradicional china",
+        "bienestar"
+      ]
+    },
+    {
+      "subcategoriaId": "flores-de-bach",
+      "nombre": "Flores de Bach",
+      "sectorId": "bienestar",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "flores de bach",
+        "bienestar"
+      ]
+    },
+    {
+      "subcategoriaId": "homeopatia",
+      "nombre": "Homeopatía",
+      "sectorId": "bienestar",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "homeopatía",
+        "bienestar"
+      ]
+    },
+    {
+      "subcategoriaId": "masajes-holisticos",
+      "nombre": "Masajes Holísticos",
+      "sectorId": "bienestar",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "masajes holísticos",
+        "bienestar"
+      ]
+    },
+    {
+      "subcategoriaId": "masajes-relajantes",
+      "nombre": "Masajes Relajantes",
+      "sectorId": "bienestar",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "masajes relajantes",
+        "bienestar"
+      ]
+    },
+    {
+      "subcategoriaId": "masajes-terapeuticos",
+      "nombre": "Masajes Terapéuticos",
+      "sectorId": "bienestar",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "masajes terapéuticos",
+        "bienestar"
+      ]
+    },
+    {
+      "subcategoriaId": "yoga",
+      "nombre": "Yoga",
+      "sectorId": "bienestar",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "yoga",
+        "bienestar"
+      ]
+    },
+    {
+      "subcategoriaId": "pilates",
+      "nombre": "Pilates",
+      "sectorId": "bienestar",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "pilates",
+        "bienestar"
+      ]
+    },
+    {
+      "subcategoriaId": "meditacion",
+      "nombre": "Meditación",
+      "sectorId": "bienestar",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "meditación",
+        "bienestar"
+      ]
+    },
+    {
+      "subcategoriaId": "breathwork",
+      "nombre": "Breathwork",
+      "sectorId": "bienestar",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "breathwork",
+        "bienestar"
+      ]
+    },
+    {
+      "subcategoriaId": "coaching-de-vida",
+      "nombre": "Coaching de Vida",
+      "sectorId": "bienestar",
+      "arquetipo": "persona_bienestar_individual",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_bienestar_individual",
+      "delta": {},
+      "keywordsIA": [
+        "coaching de vida",
+        "bienestar"
+      ]
+    },
+    {
+      "subcategoriaId": "coaching-espiritual",
+      "nombre": "Coaching Espiritual",
+      "sectorId": "bienestar",
+      "arquetipo": "persona_bienestar_individual",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_bienestar_individual",
+      "delta": {},
+      "keywordsIA": [
+        "coaching espiritual",
+        "bienestar"
+      ]
+    },
+    {
+      "subcategoriaId": "desarrollo-personal",
+      "nombre": "Desarrollo Personal",
+      "sectorId": "bienestar",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "desarrollo personal",
+        "bienestar"
+      ]
+    },
+    {
+      "subcategoriaId": "crecimiento-personal",
+      "nombre": "Crecimiento Personal",
+      "sectorId": "bienestar",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "crecimiento personal",
+        "bienestar"
+      ]
+    },
+    {
+      "subcategoriaId": "tarot",
+      "nombre": "Tarot",
+      "sectorId": "bienestar",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "tarot",
+        "bienestar"
+      ]
+    },
+    {
+      "subcategoriaId": "astrologia",
+      "nombre": "Astrología",
+      "sectorId": "bienestar",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "astrología",
+        "bienestar"
+      ]
+    },
+    {
+      "subcategoriaId": "numerologia",
+      "nombre": "Numerología",
+      "sectorId": "bienestar",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "numerología",
+        "bienestar"
+      ]
+    },
+    {
+      "subcategoriaId": "lectura-de-cartas",
+      "nombre": "Lectura de Cartas",
+      "sectorId": "bienestar",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "lectura de cartas",
+        "bienestar"
+      ]
+    },
+    {
+      "subcategoriaId": "lectura-de-runas",
+      "nombre": "Lectura de Runas",
+      "sectorId": "bienestar",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "lectura de runas",
+        "bienestar"
+      ]
+    },
+    {
+      "subcategoriaId": "feng-shui",
+      "nombre": "Feng Shui",
+      "sectorId": "bienestar",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "feng shui",
+        "bienestar"
+      ]
+    },
+    {
+      "subcategoriaId": "limpias-energeticas",
+      "nombre": "Limpias Energéticas",
+      "sectorId": "bienestar",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "limpias energéticas",
+        "bienestar"
+      ]
+    },
+    {
+      "subcategoriaId": "cristaloterapia",
+      "nombre": "Cristaloterapia",
+      "sectorId": "bienestar",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "cristaloterapia",
+        "bienestar"
+      ]
+    },
+    {
+      "subcategoriaId": "tiendas-esotericas",
+      "nombre": "Tiendas Esotéricas",
+      "sectorId": "bienestar",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "tiendas esotéricas",
+        "bienestar"
+      ]
+    },
+    {
+      "subcategoriaId": "productos-holisticos",
+      "nombre": "Productos Holísticos",
+      "sectorId": "bienestar",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "productos holísticos",
+        "bienestar"
+      ]
+    },
+    {
+      "subcategoriaId": "productos-naturistas",
+      "nombre": "Productos Naturistas",
+      "sectorId": "bienestar",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "productos naturistas",
+        "bienestar"
+      ]
+    },
+    {
+      "subcategoriaId": "suplementos-naturales",
+      "nombre": "Suplementos Naturales",
+      "sectorId": "bienestar",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "suplementos naturales",
+        "bienestar"
+      ]
+    },
+    {
+      "subcategoriaId": "herbolarios",
+      "nombre": "Herbolarios",
+      "sectorId": "bienestar",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "herbolarios",
+        "bienestar"
+      ]
+    },
+    {
+      "subcategoriaId": "naturistas",
+      "nombre": "Naturistas",
+      "sectorId": "bienestar",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "naturistas",
+        "bienestar"
+      ]
+    },
+    {
+      "subcategoriaId": "dentistas-y-clinicas-dentales",
+      "nombre": "Dentistas y Clínicas Dentales",
+      "sectorId": "salud",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "dentistas y clínicas dentales",
+        "salud"
+      ]
+    },
+    {
+      "subcategoriaId": "psiquiatras",
+      "nombre": "Psiquiatras",
+      "sectorId": "salud",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "psiquiatras",
+        "salud"
+      ]
+    },
+    {
+      "subcategoriaId": "nutriologos",
+      "nombre": "Nutriólogos",
+      "sectorId": "salud",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "nutriólogos",
+        "salud"
+      ]
+    },
+    {
+      "subcategoriaId": "fisioterapeutas",
+      "nombre": "Fisioterapeutas",
+      "sectorId": "salud",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "fisioterapeutas",
+        "salud"
+      ]
+    },
+    {
+      "subcategoriaId": "quiropracticos",
+      "nombre": "Quiroprácticos",
+      "sectorId": "salud",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "quiroprácticos",
+        "salud"
+      ]
+    },
+    {
+      "subcategoriaId": "oftalmologia-y-opticas",
+      "nombre": "Oftalmología y Ópticas",
+      "sectorId": "salud",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "oftalmología y ópticas",
+        "salud"
+      ]
+    },
+    {
+      "subcategoriaId": "audiologia-y-aparatos-auditivos",
+      "nombre": "Audiología y Aparatos Auditivos",
+      "sectorId": "salud",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "audiología y aparatos auditivos",
+        "salud"
+      ]
+    },
+    {
+      "subcategoriaId": "ginecologia-y-obstetricia",
+      "nombre": "Ginecología y Obstetricia",
+      "sectorId": "salud",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "ginecología y obstetricia",
+        "salud"
+      ]
+    },
+    {
+      "subcategoriaId": "urologia",
+      "nombre": "Urología",
+      "sectorId": "salud",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "urología",
+        "salud"
+      ]
+    },
+    {
+      "subcategoriaId": "pediatria",
+      "nombre": "Pediatría",
+      "sectorId": "salud",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "pediatría",
+        "salud"
+      ]
+    },
+    {
+      "subcategoriaId": "dermatologia",
+      "nombre": "Dermatología",
+      "sectorId": "salud",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "dermatología",
+        "salud"
+      ]
+    },
+    {
+      "subcategoriaId": "cardiologia",
+      "nombre": "Cardiología",
+      "sectorId": "salud",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "cardiología",
+        "salud"
+      ]
+    },
+    {
+      "subcategoriaId": "cirugia-general",
+      "nombre": "Cirugía General",
+      "sectorId": "salud",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "cirugía general",
+        "salud"
+      ]
+    },
+    {
+      "subcategoriaId": "cirugia-plastica-y-estetica",
+      "nombre": "Cirugía Plástica y Estética",
+      "sectorId": "salud",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "cirugía plástica y estética",
+        "salud"
+      ]
+    },
+    {
+      "subcategoriaId": "medicina-estetica",
+      "nombre": "Medicina Estética",
+      "sectorId": "salud",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "medicina estética",
+        "salud"
+      ]
+    },
+    {
+      "subcategoriaId": "laboratorios-clinicos",
+      "nombre": "Laboratorios Clínicos",
+      "sectorId": "salud",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "laboratorios clínicos",
+        "salud"
+      ]
+    },
+    {
+      "subcategoriaId": "estudios-de-diagnostico-e-imagen",
+      "nombre": "Estudios de Diagnóstico e Imagen",
+      "sectorId": "salud",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "estudios de diagnóstico e imagen",
+        "salud"
+      ]
+    },
+    {
+      "subcategoriaId": "ultrasonidos-y-rayos-x",
+      "nombre": "Ultrasonidos y Rayos X",
+      "sectorId": "salud",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "ultrasonidos y rayos x",
+        "salud"
+      ]
+    },
+    {
+      "subcategoriaId": "enfermeria-a-domicilio",
+      "nombre": "Enfermería a Domicilio",
+      "sectorId": "salud",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {
+        "obligatoriosExtra": [
+          "atencionDomicilio",
+          "zonaCobertura"
+        ],
+        "fotosMin": 2
+      },
+      "keywordsIA": [
+        "enfermería a domicilio",
+        "salud"
+      ]
+    },
+    {
+      "subcategoriaId": "cuidado-de-adultos-mayores",
+      "nombre": "Cuidado de Adultos Mayores",
+      "sectorId": "salud",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "cuidado de adultos mayores",
+        "salud"
+      ]
+    },
+    {
+      "subcategoriaId": "rehabilitacion-fisica",
+      "nombre": "Rehabilitación Física",
+      "sectorId": "salud",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "rehabilitación física",
+        "salud"
+      ]
+    },
+    {
+      "subcategoriaId": "terapias-de-lenguaje",
+      "nombre": "Terapias de Lenguaje",
+      "sectorId": "salud",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "terapias de lenguaje",
+        "salud"
+      ]
+    },
+    {
+      "subcategoriaId": "terapias-de-aprendizaje",
+      "nombre": "Terapias de Aprendizaje",
+      "sectorId": "salud",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "terapias de aprendizaje",
+        "salud"
+      ]
+    },
+    {
+      "subcategoriaId": "centros-de-rehabilitacion",
+      "nombre": "Centros de Rehabilitación",
+      "sectorId": "salud",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "centros de rehabilitación",
+        "salud"
+      ]
+    },
+    {
+      "subcategoriaId": "centros-de-salud-mental",
+      "nombre": "Centros de Salud Mental",
+      "sectorId": "salud",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "centros de salud mental",
+        "salud"
+      ]
+    },
+    {
+      "subcategoriaId": "bancos-de-sangre",
+      "nombre": "Bancos de Sangre",
+      "sectorId": "salud",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "bancos de sangre",
+        "salud"
+      ]
+    },
+    {
+      "subcategoriaId": "farmacias",
+      "nombre": "Farmacias",
+      "sectorId": "salud",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "farmacias",
+        "salud"
+      ]
+    },
+    {
+      "subcategoriaId": "farmacias-especializadas",
+      "nombre": "Farmacias Especializadas",
+      "sectorId": "salud",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "farmacias especializadas",
+        "salud"
+      ]
+    },
+    {
+      "subcategoriaId": "protesis-y-ortesis",
+      "nombre": "Prótesis y Ortesis",
+      "sectorId": "salud",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "prótesis y ortesis",
+        "salud"
+      ]
+    },
+    {
+      "subcategoriaId": "oxigeno-medicinal",
+      "nombre": "Oxígeno Medicinal",
+      "sectorId": "salud",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "oxígeno medicinal",
+        "salud"
+      ]
+    },
+    {
+      "subcategoriaId": "laboratorios-dentales",
+      "nombre": "Laboratorios Dentales",
+      "sectorId": "salud",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "laboratorios dentales",
+        "salud"
+      ]
+    },
+    {
+      "subcategoriaId": "salud-ocupacional",
+      "nombre": "Salud Ocupacional",
+      "sectorId": "salud",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "salud ocupacional",
+        "salud"
+      ]
+    },
+    {
+      "subcategoriaId": "medicina-del-trabajo",
+      "nombre": "Medicina del Trabajo",
+      "sectorId": "salud",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "medicina del trabajo",
+        "salud"
+      ]
+    },
+    {
+      "subcategoriaId": "servicios-funerarios",
+      "nombre": "Servicios Funerarios",
+      "sectorId": "salud",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "servicios funerarios",
+        "salud"
+      ]
+    },
+    {
+      "subcategoriaId": "casas-de-retiro",
+      "nombre": "Casas de Retiro",
+      "sectorId": "salud",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "casas de retiro",
+        "salud"
+      ]
+    },
+    {
+      "subcategoriaId": "asilos-y-residencias-asistidas",
+      "nombre": "Asilos y Residencias Asistidas",
+      "sectorId": "salud",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "asilos y residencias asistidas",
+        "salud"
+      ]
+    },
+    {
+      "subcategoriaId": "despachos-juridicos",
+      "nombre": "Despachos Jurídicos",
+      "sectorId": "profesionales",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "despachos jurídicos",
+        "profesionales"
+      ]
+    },
+    {
+      "subcategoriaId": "despachos-contables",
+      "nombre": "Despachos Contables",
+      "sectorId": "profesionales",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "despachos contables",
+        "profesionales"
+      ]
+    },
+    {
+      "subcategoriaId": "asesoria-fiscal",
+      "nombre": "Asesoría Fiscal",
+      "sectorId": "profesionales",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "asesoría fiscal",
+        "profesionales"
+      ]
+    },
+    {
+      "subcategoriaId": "auditoria",
+      "nombre": "Auditoría",
+      "sectorId": "profesionales",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "auditoría",
+        "profesionales"
+      ]
+    },
+    {
+      "subcategoriaId": "notarias",
+      "nombre": "Notarías",
+      "sectorId": "profesionales",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "notarías",
+        "profesionales"
+      ]
+    },
+    {
+      "subcategoriaId": "corredurias-publicas",
+      "nombre": "Corredurías Públicas",
+      "sectorId": "profesionales",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "corredurías públicas",
+        "profesionales"
+      ]
+    },
+    {
+      "subcategoriaId": "gestoria-y-tramites",
+      "nombre": "Gestoría y Trámites",
+      "sectorId": "profesionales",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "gestoría y trámites",
+        "profesionales"
+      ]
+    },
+    {
+      "subcategoriaId": "arquitectos",
+      "nombre": "Arquitectos",
+      "sectorId": "profesionales",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "arquitectos",
+        "profesionales"
+      ]
+    },
+    {
+      "subcategoriaId": "despachos-de-arquitectura",
+      "nombre": "Despachos de Arquitectura",
+      "sectorId": "profesionales",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "despachos de arquitectura",
+        "profesionales"
+      ]
+    },
+    {
+      "subcategoriaId": "despachos-de-ingenieria",
+      "nombre": "Despachos de Ingeniería",
+      "sectorId": "profesionales",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "despachos de ingeniería",
+        "profesionales"
+      ]
+    },
+    {
+      "subcategoriaId": "topografia",
+      "nombre": "Topografía",
+      "sectorId": "profesionales",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "topografía",
+        "profesionales"
+      ]
+    },
+    {
+      "subcategoriaId": "avaluos",
+      "nombre": "Avalúos",
+      "sectorId": "profesionales",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "avalúos",
+        "profesionales"
+      ]
+    },
+    {
+      "subcategoriaId": "peritos",
+      "nombre": "Peritos",
+      "sectorId": "profesionales",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "peritos",
+        "profesionales"
+      ]
+    },
+    {
+      "subcategoriaId": "consultoria-financiera",
+      "nombre": "Consultoría Financiera",
+      "sectorId": "profesionales",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "consultoría financiera",
+        "profesionales"
+      ]
+    },
+    {
+      "subcategoriaId": "consultoria-de-negocios",
+      "nombre": "Consultoría de Negocios",
+      "sectorId": "profesionales",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "consultoría de negocios",
+        "profesionales"
+      ]
+    },
+    {
+      "subcategoriaId": "recursos-humanos",
+      "nombre": "Recursos Humanos",
+      "sectorId": "profesionales",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "recursos humanos",
+        "profesionales"
+      ]
+    },
+    {
+      "subcategoriaId": "reclutamiento-y-seleccion",
+      "nombre": "Reclutamiento y Selección",
+      "sectorId": "profesionales",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "reclutamiento y selección",
+        "profesionales"
+      ]
+    },
+    {
+      "subcategoriaId": "estudios-socioeconomicos",
+      "nombre": "Estudios Socioeconómicos",
+      "sectorId": "profesionales",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "estudios socioeconómicos",
+        "profesionales"
+      ]
+    },
+    {
+      "subcategoriaId": "coaching-ejecutivo",
+      "nombre": "Coaching Ejecutivo",
+      "sectorId": "profesionales",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "coaching ejecutivo",
+        "profesionales"
+      ]
+    },
+    {
+      "subcategoriaId": "traduccion-e-interpretacion",
+      "nombre": "Traducción e Interpretación",
+      "sectorId": "profesionales",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "traducción e interpretación",
+        "profesionales"
+      ]
+    },
+    {
+      "subcategoriaId": "marketing-y-publicidad",
+      "nombre": "Marketing y Publicidad",
+      "sectorId": "profesionales",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "marketing y publicidad",
+        "profesionales"
+      ]
+    },
+    {
+      "subcategoriaId": "diseno-grafico",
+      "nombre": "Diseño Gráfico",
+      "sectorId": "profesionales",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "diseño gráfico",
+        "profesionales"
+      ]
+    },
+    {
+      "subcategoriaId": "diseno-de-interiores",
+      "nombre": "Diseño de Interiores",
+      "sectorId": "profesionales",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "diseño de interiores",
+        "profesionales"
+      ]
+    },
+    {
+      "subcategoriaId": "branding-e-identidad-corporativa",
+      "nombre": "Branding e Identidad Corporativa",
+      "sectorId": "profesionales",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "branding e identidad corporativa",
+        "profesionales"
+      ]
+    },
+    {
+      "subcategoriaId": "fotografia-profesional",
+      "nombre": "Fotografía Profesional",
+      "sectorId": "profesionales",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "fotografía profesional",
+        "profesionales"
+      ]
+    },
+    {
+      "subcategoriaId": "produccion-de-video",
+      "nombre": "Producción de Video",
+      "sectorId": "profesionales",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "producción de video",
+        "profesionales"
+      ]
+    },
+    {
+      "subcategoriaId": "relaciones-publicas",
+      "nombre": "Relaciones Públicas",
+      "sectorId": "profesionales",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "relaciones públicas",
+        "profesionales"
+      ]
+    },
+    {
+      "subcategoriaId": "investigacion-de-mercados",
+      "nombre": "Investigación de Mercados",
+      "sectorId": "profesionales",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "investigación de mercados",
+        "profesionales"
+      ]
+    },
+    {
+      "subcategoriaId": "desarrollo-organizacional",
+      "nombre": "Desarrollo Organizacional",
+      "sectorId": "profesionales",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "desarrollo organizacional",
+        "profesionales"
+      ]
+    },
+    {
+      "subcategoriaId": "franquicias",
+      "nombre": "Franquicias",
+      "sectorId": "profesionales",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "franquicias",
+        "profesionales"
+      ]
+    },
+    {
+      "subcategoriaId": "seguros",
+      "nombre": "Seguros",
+      "sectorId": "profesionales",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "seguros",
+        "profesionales"
+      ]
+    },
+    {
+      "subcategoriaId": "agentes-de-seguros",
+      "nombre": "Agentes de Seguros",
+      "sectorId": "profesionales",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "agentes de seguros",
+        "profesionales"
+      ]
+    },
+    {
+      "subcategoriaId": "asesoria-patrimonial",
+      "nombre": "Asesoría Patrimonial",
+      "sectorId": "profesionales",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "asesoría patrimonial",
+        "profesionales"
+      ]
+    },
+    {
+      "subcategoriaId": "asesoria-en-inversiones",
+      "nombre": "Asesoría en Inversiones",
+      "sectorId": "profesionales",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "asesoría en inversiones",
+        "profesionales"
+      ]
+    },
+    {
+      "subcategoriaId": "comercio-internacional",
+      "nombre": "Comercio Internacional",
+      "sectorId": "profesionales",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "comercio internacional",
+        "profesionales"
+      ]
+    },
+    {
+      "subcategoriaId": "importacion-y-exportacion",
+      "nombre": "Importación y Exportación",
+      "sectorId": "profesionales",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "importación y exportación",
+        "profesionales"
+      ]
+    },
+    {
+      "subcategoriaId": "certificaciones-y-normatividad",
+      "nombre": "Certificaciones y Normatividad",
+      "sectorId": "profesionales",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "certificaciones y normatividad",
+        "profesionales"
+      ]
+    },
+    {
+      "subcategoriaId": "seguridad-e-higiene",
+      "nombre": "Seguridad e Higiene",
+      "sectorId": "profesionales",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "seguridad e higiene",
+        "profesionales"
+      ]
+    },
+    {
+      "subcategoriaId": "gestion-de-calidad",
+      "nombre": "Gestión de Calidad",
+      "sectorId": "profesionales",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "gestión de calidad",
+        "profesionales"
+      ]
+    },
+    {
+      "subcategoriaId": "consultoria-ambiental",
+      "nombre": "Consultoría Ambiental",
+      "sectorId": "profesionales",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "consultoría ambiental",
+        "profesionales"
+      ]
+    },
+    {
+      "subcategoriaId": "talleres-mecanicos",
+      "nombre": "Talleres Mecánicos",
+      "sectorId": "automotriz",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "talleres mecánicos",
+        "automotriz"
+      ]
+    },
+    {
+      "subcategoriaId": "vulcanizadoras",
+      "nombre": "Vulcanizadoras",
+      "sectorId": "automotriz",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "vulcanizadoras",
+        "automotriz"
+      ]
+    },
+    {
+      "subcategoriaId": "lotes-de-autos",
+      "nombre": "Lotes de Autos",
+      "sectorId": "automotriz",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "lotes de autos",
+        "automotriz"
+      ]
+    },
+    {
+      "subcategoriaId": "refaccionarias",
+      "nombre": "Refaccionarias",
+      "sectorId": "automotriz",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "refaccionarias",
+        "automotriz"
+      ]
+    },
+    {
+      "subcategoriaId": "hojalateria-y-pintura",
+      "nombre": "Hojalatería y Pintura",
+      "sectorId": "automotriz",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "hojalatería y pintura",
+        "automotriz"
+      ]
+    },
+    {
+      "subcategoriaId": "lavado-de-autos",
+      "nombre": "Lavado de Autos",
+      "sectorId": "automotriz",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "lavado de autos",
+        "automotriz"
+      ]
+    },
+    {
+      "subcategoriaId": "gruas-y-auxilio-vial",
+      "nombre": "Grúas y Auxilio Vial",
+      "sectorId": "automotriz",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "grúas y auxilio vial",
+        "automotriz"
+      ]
+    },
+    {
+      "subcategoriaId": "mecanicos-a-domicilio",
+      "nombre": "Mecánicos a domicilio",
+      "sectorId": "automotriz",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {
+        "obligatoriosExtra": [
+          "atencionDomicilio",
+          "zonaCobertura"
+        ],
+        "fotosMin": 2
+      },
+      "keywordsIA": [
+        "mecánicos a domicilio",
+        "automotriz"
+      ]
+    },
+    {
+      "subcategoriaId": "electromecanicos",
+      "nombre": "Electromecánicos",
+      "sectorId": "automotriz",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "electromecánicos",
+        "automotriz"
+      ]
+    },
+    {
+      "subcategoriaId": "tecnicos-en-baterias",
+      "nombre": "Técnicos en baterías",
+      "sectorId": "automotriz",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "técnicos en baterías",
+        "automotriz"
+      ]
+    },
+    {
+      "subcategoriaId": "tecnicos-en-a-c-automotriz",
+      "nombre": "Técnicos en A/C automotriz",
+      "sectorId": "automotriz",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "técnicos en a/c automotriz",
+        "automotriz"
+      ]
+    },
+    {
+      "subcategoriaId": "instaladores-de-audio-car-multimedia",
+      "nombre": "Instaladores de audio / car multimedia",
+      "sectorId": "automotriz",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "instaladores de audio / car multimedia",
+        "automotriz"
+      ]
+    },
+    {
+      "subcategoriaId": "detallado-automotriz-premium",
+      "nombre": "Detallado automotriz premium",
+      "sectorId": "automotriz",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "detallado automotriz premium",
+        "automotriz"
+      ]
+    },
+    {
+      "subcategoriaId": "plomeros",
+      "nombre": "Plomeros",
+      "sectorId": "hogar",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {
+        "disponibilidad": {
+          "opcionesExtra": [
+            "urgencias_24h"
+          ]
+        }
+      },
+      "keywordsIA": [
+        "plomeros",
+        "hogar"
+      ]
+    },
+    {
+      "subcategoriaId": "electricistas",
+      "nombre": "Electricistas",
+      "sectorId": "hogar",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {
+        "disponibilidad": {
+          "opcionesExtra": [
+            "urgencias_24h"
+          ]
+        }
+      },
+      "keywordsIA": [
+        "electricistas",
+        "hogar"
+      ]
+    },
+    {
+      "subcategoriaId": "pintores",
+      "nombre": "Pintores",
+      "sectorId": "hogar",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "pintores",
+        "hogar"
+      ]
+    },
+    {
+      "subcategoriaId": "albaniles",
+      "nombre": "Albañiles",
+      "sectorId": "hogar",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "albañiles",
+        "hogar"
+      ]
+    },
+    {
+      "subcategoriaId": "carpinteros",
+      "nombre": "Carpinteros",
+      "sectorId": "hogar",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "carpinteros",
+        "hogar"
+      ]
+    },
+    {
+      "subcategoriaId": "herreros",
+      "nombre": "Herreros",
+      "sectorId": "hogar",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "herreros",
+        "hogar"
+      ]
+    },
+    {
+      "subcategoriaId": "jardineria",
+      "nombre": "Jardinería",
+      "sectorId": "hogar",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "jardinería",
+        "hogar"
+      ]
+    },
+    {
+      "subcategoriaId": "fumigacion",
+      "nombre": "Fumigación",
+      "sectorId": "hogar",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "fumigación",
+        "hogar"
+      ]
+    },
+    {
+      "subcategoriaId": "limpieza-del-hogar",
+      "nombre": "Limpieza del Hogar",
+      "sectorId": "hogar",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "limpieza del hogar",
+        "hogar"
+      ]
+    },
+    {
+      "subcategoriaId": "mantenimiento-general",
+      "nombre": "Mantenimiento General",
+      "sectorId": "hogar",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "mantenimiento general",
+        "hogar"
+      ]
+    },
+    {
+      "subcategoriaId": "tecnicos-en-clima-hvac",
+      "nombre": "Técnicos en clima / HVAC",
+      "sectorId": "hogar",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {
+        "obligatoriosExtra": [
+          "certificaciones"
+        ]
+      },
+      "keywordsIA": [
+        "técnicos en clima / hvac",
+        "hogar"
+      ]
+    },
+    {
+      "subcategoriaId": "impermeabilizadores",
+      "nombre": "Impermeabilizadores",
+      "sectorId": "hogar",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "impermeabilizadores",
+        "hogar"
+      ]
+    },
+    {
+      "subcategoriaId": "instaladores-de-paneles-solares",
+      "nombre": "Instaladores de paneles solares",
+      "sectorId": "hogar",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {
+        "obligatoriosExtra": [
+          "certificaciones"
+        ]
+      },
+      "keywordsIA": [
+        "instaladores de paneles solares",
+        "hogar"
+      ]
+    },
+    {
+      "subcategoriaId": "tecnicos-en-camaras-de-seguridad",
+      "nombre": "Técnicos en cámaras de seguridad",
+      "sectorId": "hogar",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "técnicos en cámaras de seguridad",
+        "hogar"
+      ]
+    },
+    {
+      "subcategoriaId": "instaladores-de-pisos",
+      "nombre": "Instaladores de pisos",
+      "sectorId": "hogar",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "instaladores de pisos",
+        "hogar"
+      ]
+    },
+    {
+      "subcategoriaId": "cerrajeros",
+      "nombre": "Cerrajeros",
+      "sectorId": "hogar",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {
+        "disponibilidad": {
+          "opcionesExtra": [
+            "urgencias_24h"
+          ]
+        }
+      },
+      "keywordsIA": [
+        "cerrajeros",
+        "hogar"
+      ]
+    },
+    {
+      "subcategoriaId": "domotica-casa-inteligente",
+      "nombre": "Domótica / casa inteligente",
+      "sectorId": "hogar",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "domótica / casa inteligente",
+        "hogar"
+      ]
+    },
+    {
+      "subcategoriaId": "abarrotes",
+      "nombre": "Abarrotes",
+      "sectorId": "comercio",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "abarrotes",
+        "comercio"
+      ]
+    },
+    {
+      "subcategoriaId": "zapaterias",
+      "nombre": "Zapaterías",
+      "sectorId": "comercio",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "zapaterías",
+        "comercio"
+      ]
+    },
+    {
+      "subcategoriaId": "tiendas-de-ropa",
+      "nombre": "Tiendas de Ropa",
+      "sectorId": "comercio",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "tiendas de ropa",
+        "comercio"
+      ]
+    },
+    {
+      "subcategoriaId": "farmacias-de-barrio",
+      "nombre": "Farmacias de Barrio",
+      "sectorId": "comercio",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "farmacias de barrio",
+        "comercio"
+      ]
+    },
+    {
+      "subcategoriaId": "papelerias",
+      "nombre": "Papelerías",
+      "sectorId": "comercio",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "papelerías",
+        "comercio"
+      ]
+    },
+    {
+      "subcategoriaId": "ferreterias",
+      "nombre": "Ferreterías",
+      "sectorId": "comercio",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "ferreterías",
+        "comercio"
+      ]
+    },
+    {
+      "subcategoriaId": "mayoreo",
+      "nombre": "Mayoreo",
+      "sectorId": "comercio",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "mayoreo",
+        "comercio"
+      ]
+    },
+    {
+      "subcategoriaId": "tiendas-de-conveniencia",
+      "nombre": "Tiendas de Conveniencia",
+      "sectorId": "comercio",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "tiendas de conveniencia",
+        "comercio"
+      ]
+    },
+    {
+      "subcategoriaId": "agente-inmobiliario-independiente",
+      "nombre": "Agente Inmobiliario Independiente",
+      "sectorId": "bienes-raices",
+      "arquetipo": "persona_servicio_profesional",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_profesional",
+      "delta": {},
+      "keywordsIA": [
+        "agente inmobiliario independiente",
+        "bienes raices"
+      ]
+    },
+    {
+      "subcategoriaId": "asesor-inmobiliario",
+      "nombre": "Asesor Inmobiliario",
+      "sectorId": "bienes-raices",
+      "arquetipo": "persona_servicio_profesional",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_profesional",
+      "delta": {},
+      "keywordsIA": [
+        "asesor inmobiliario",
+        "bienes raices"
+      ]
+    },
+    {
+      "subcategoriaId": "corredor-inmobiliario",
+      "nombre": "Corredor Inmobiliario",
+      "sectorId": "bienes-raices",
+      "arquetipo": "persona_servicio_profesional",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_profesional",
+      "delta": {},
+      "keywordsIA": [
+        "corredor inmobiliario",
+        "bienes raices"
+      ]
+    },
+    {
+      "subcategoriaId": "promotor-de-propiedades",
+      "nombre": "Promotor de Propiedades",
+      "sectorId": "bienes-raices",
+      "arquetipo": "persona_servicio_profesional",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_profesional",
+      "delta": {},
+      "keywordsIA": [
+        "promotor de propiedades",
+        "bienes raices"
+      ]
+    },
+    {
+      "subcategoriaId": "administrador-de-propiedades",
+      "nombre": "Administrador de Propiedades",
+      "sectorId": "bienes-raices",
+      "arquetipo": "persona_servicio_profesional",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_profesional",
+      "delta": {},
+      "keywordsIA": [
+        "administrador de propiedades",
+        "bienes raices"
+      ]
+    },
+    {
+      "subcategoriaId": "valuador-inmobiliario",
+      "nombre": "Valuador Inmobiliario",
+      "sectorId": "bienes-raices",
+      "arquetipo": "persona_servicio_profesional",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_profesional",
+      "delta": {},
+      "keywordsIA": [
+        "valuador inmobiliario",
+        "bienes raices"
+      ]
+    },
+    {
+      "subcategoriaId": "rentas-vacacionales-independiente",
+      "nombre": "Rentas Vacacionales Independiente",
+      "sectorId": "bienes-raices",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "rentas vacacionales independiente",
+        "bienes raices"
+      ]
+    },
+    {
+      "subcategoriaId": "rentas-temporales-independiente",
+      "nombre": "Rentas Temporales Independiente",
+      "sectorId": "bienes-raices",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "rentas temporales independiente",
+        "bienes raices"
+      ]
+    },
+    {
+      "subcategoriaId": "dj",
+      "nombre": "DJ",
+      "sectorId": "eventos",
+      "arquetipo": "persona_servicio_profesional",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_profesional",
+      "delta": {},
+      "keywordsIA": [
+        "dj",
+        "eventos"
+      ]
+    },
+    {
+      "subcategoriaId": "maestro-de-ceremonias",
+      "nombre": "Maestro de Ceremonias",
+      "sectorId": "eventos",
+      "arquetipo": "persona_servicio_profesional",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_profesional",
+      "delta": {},
+      "keywordsIA": [
+        "maestro de ceremonias",
+        "eventos"
+      ]
+    },
+    {
+      "subcategoriaId": "animador",
+      "nombre": "Animador",
+      "sectorId": "eventos",
+      "arquetipo": "persona_servicio_profesional",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_profesional",
+      "delta": {},
+      "keywordsIA": [
+        "animador",
+        "eventos"
+      ]
+    },
+    {
+      "subcategoriaId": "payaso",
+      "nombre": "Payaso",
+      "sectorId": "eventos",
+      "arquetipo": "persona_servicio_profesional",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_profesional",
+      "delta": {},
+      "keywordsIA": [
+        "payaso",
+        "eventos"
+      ]
+    },
+    {
+      "subcategoriaId": "mago",
+      "nombre": "Mago",
+      "sectorId": "eventos",
+      "arquetipo": "persona_servicio_profesional",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_profesional",
+      "delta": {},
+      "keywordsIA": [
+        "mago",
+        "eventos"
+      ]
+    },
+    {
+      "subcategoriaId": "comediante",
+      "nombre": "Comediante",
+      "sectorId": "eventos",
+      "arquetipo": "persona_servicio_profesional",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_profesional",
+      "delta": {},
+      "keywordsIA": [
+        "comediante",
+        "eventos"
+      ]
+    },
+    {
+      "subcategoriaId": "cantante",
+      "nombre": "Cantante",
+      "sectorId": "eventos",
+      "arquetipo": "persona_servicio_profesional",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_profesional",
+      "delta": {},
+      "keywordsIA": [
+        "cantante",
+        "eventos"
+      ]
+    },
+    {
+      "subcategoriaId": "mariachi-independiente",
+      "nombre": "Mariachi Independiente",
+      "sectorId": "eventos",
+      "arquetipo": "persona_servicio_profesional",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_profesional",
+      "delta": {},
+      "keywordsIA": [
+        "mariachi independiente",
+        "eventos"
+      ]
+    },
+    {
+      "subcategoriaId": "grupo-musical-independiente",
+      "nombre": "Grupo Musical Independiente",
+      "sectorId": "eventos",
+      "arquetipo": "persona_servicio_profesional",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_profesional",
+      "delta": {},
+      "keywordsIA": [
+        "grupo musical independiente",
+        "eventos"
+      ]
+    },
+    {
+      "subcategoriaId": "fotografo-de-eventos",
+      "nombre": "Fotógrafo de Eventos",
+      "sectorId": "eventos",
+      "arquetipo": "persona_servicio_profesional",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_profesional",
+      "delta": {},
+      "keywordsIA": [
+        "fotógrafo de eventos",
+        "eventos"
+      ]
+    },
+    {
+      "subcategoriaId": "videografo",
+      "nombre": "Videógrafo",
+      "sectorId": "eventos",
+      "arquetipo": "persona_servicio_profesional",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_profesional",
+      "delta": {},
+      "keywordsIA": [
+        "videógrafo",
+        "eventos"
+      ]
+    },
+    {
+      "subcategoriaId": "organizador-de-eventos",
+      "nombre": "Organizador de Eventos",
+      "sectorId": "eventos",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "organizador de eventos",
+        "eventos"
+      ]
+    },
+    {
+      "subcategoriaId": "wedding-planner",
+      "nombre": "Wedding Planner",
+      "sectorId": "eventos",
+      "arquetipo": "persona_servicio_profesional",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_profesional",
+      "delta": {},
+      "keywordsIA": [
+        "wedding planner",
+        "eventos"
+      ]
+    },
+    {
+      "subcategoriaId": "decorador-de-eventos",
+      "nombre": "Decorador de Eventos",
+      "sectorId": "eventos",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "decorador de eventos",
+        "eventos"
+      ]
+    },
+    {
+      "subcategoriaId": "sonidista",
+      "nombre": "Sonidista",
+      "sectorId": "eventos",
+      "arquetipo": "persona_servicio_profesional",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_profesional",
+      "delta": {},
+      "keywordsIA": [
+        "sonidista",
+        "eventos"
+      ]
+    },
+    {
+      "subcategoriaId": "iluminacion-para-eventos",
+      "nombre": "Iluminación para Eventos",
+      "sectorId": "eventos",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "iluminación para eventos",
+        "eventos"
+      ]
+    },
+    {
+      "subcategoriaId": "locutor",
+      "nombre": "Locutor",
+      "sectorId": "eventos",
+      "arquetipo": "persona_servicio_profesional",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_profesional",
+      "delta": {},
+      "keywordsIA": [
+        "locutor",
+        "eventos"
+      ]
+    },
+    {
+      "subcategoriaId": "presentador",
+      "nombre": "Presentador",
+      "sectorId": "eventos",
+      "arquetipo": "persona_servicio_profesional",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_profesional",
+      "delta": {},
+      "keywordsIA": [
+        "presentador",
+        "eventos"
+      ]
+    },
+    {
+      "subcategoriaId": "edecan-para-eventos",
+      "nombre": "Edecán para Eventos",
+      "sectorId": "eventos",
+      "arquetipo": "persona_servicio_profesional",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_profesional",
+      "delta": {},
+      "keywordsIA": [
+        "edecán para eventos",
+        "eventos"
+      ]
+    },
+    {
+      "subcategoriaId": "modelo-para-eventos",
+      "nombre": "Modelo para Eventos",
+      "sectorId": "eventos",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "modelo para eventos",
+        "eventos"
+      ]
+    },
+    {
+      "subcategoriaId": "pinatas-y-festejos",
+      "nombre": "Piñatas y Festejos",
+      "sectorId": "eventos",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "piñatas y festejos",
+        "eventos"
+      ]
+    },
+    {
+      "subcategoriaId": "chofer-privado",
+      "nombre": "Chofer Privado",
+      "sectorId": "transporte",
+      "arquetipo": "persona_servicio_movil",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_movil",
+      "delta": {
+        "obligatoriosExtra": [
+          "atencionDomicilio",
+          "zonaCobertura"
+        ],
+        "fotosMin": 2
+      },
+      "keywordsIA": [
+        "chofer privado",
+        "transporte"
+      ]
+    },
+    {
+      "subcategoriaId": "conductor-ejecutivo",
+      "nombre": "Conductor Ejecutivo",
+      "sectorId": "transporte",
+      "arquetipo": "persona_servicio_movil",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_movil",
+      "delta": {
+        "obligatoriosExtra": [
+          "atencionDomicilio",
+          "zonaCobertura"
+        ],
+        "fotosMin": 2
+      },
+      "keywordsIA": [
+        "conductor ejecutivo",
+        "transporte"
+      ]
+    },
+    {
+      "subcategoriaId": "mensajero",
+      "nombre": "Mensajero",
+      "sectorId": "transporte",
+      "arquetipo": "persona_servicio_movil",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_movil",
+      "delta": {
+        "obligatoriosExtra": [
+          "atencionDomicilio",
+          "zonaCobertura"
+        ],
+        "fotosMin": 2
+      },
+      "keywordsIA": [
+        "mensajero",
+        "transporte"
+      ]
+    },
+    {
+      "subcategoriaId": "repartidor-local",
+      "nombre": "Repartidor Local",
+      "sectorId": "transporte",
+      "arquetipo": "persona_servicio_movil",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_movil",
+      "delta": {
+        "obligatoriosExtra": [
+          "atencionDomicilio",
+          "zonaCobertura"
+        ],
+        "fotosMin": 2
+      },
+      "keywordsIA": [
+        "repartidor local",
+        "transporte"
+      ]
+    },
+    {
+      "subcategoriaId": "flete-ligero",
+      "nombre": "Flete Ligero",
+      "sectorId": "transporte",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {
+        "obligatoriosExtra": [
+          "atencionDomicilio",
+          "zonaCobertura"
+        ],
+        "fotosMin": 2
+      },
+      "keywordsIA": [
+        "flete ligero",
+        "transporte"
+      ]
+    },
+    {
+      "subcategoriaId": "operador-de-carga",
+      "nombre": "Operador de Carga",
+      "sectorId": "transporte",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {
+        "obligatoriosExtra": [
+          "atencionDomicilio",
+          "zonaCobertura"
+        ],
+        "fotosMin": 2
+      },
+      "keywordsIA": [
+        "operador de carga",
+        "transporte"
+      ]
+    },
+    {
+      "subcategoriaId": "motomensajero",
+      "nombre": "Motomensajero",
+      "sectorId": "transporte",
+      "arquetipo": "persona_servicio_movil",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_movil",
+      "delta": {
+        "obligatoriosExtra": [
+          "atencionDomicilio",
+          "zonaCobertura"
+        ],
+        "fotosMin": 2
+      },
+      "keywordsIA": [
+        "motomensajero",
+        "transporte"
+      ]
+    },
+    {
+      "subcategoriaId": "courier-independiente",
+      "nombre": "Courier Independiente",
+      "sectorId": "transporte",
+      "arquetipo": "persona_servicio_movil",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_movil",
+      "delta": {
+        "obligatoriosExtra": [
+          "atencionDomicilio",
+          "zonaCobertura"
+        ],
+        "fotosMin": 2
+      },
+      "keywordsIA": [
+        "courier independiente",
+        "transporte"
+      ]
+    },
+    {
+      "subcategoriaId": "transporte-de-carga",
+      "nombre": "Transporte de Carga",
+      "sectorId": "transporte",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {
+        "obligatoriosExtra": [
+          "atencionDomicilio",
+          "zonaCobertura"
+        ],
+        "fotosMin": 2
+      },
+      "keywordsIA": [
+        "transporte de carga",
+        "transporte"
+      ]
+    },
+    {
+      "subcategoriaId": "transporte-refrigerado",
+      "nombre": "Transporte Refrigerado",
+      "sectorId": "transporte",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {
+        "obligatoriosExtra": [
+          "atencionDomicilio",
+          "zonaCobertura"
+        ],
+        "fotosMin": 2
+      },
+      "keywordsIA": [
+        "transporte refrigerado",
+        "transporte"
+      ]
+    },
+    {
+      "subcategoriaId": "transporte-ejecutivo",
+      "nombre": "Transporte Ejecutivo",
+      "sectorId": "transporte",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {
+        "obligatoriosExtra": [
+          "atencionDomicilio",
+          "zonaCobertura"
+        ],
+        "fotosMin": 2
+      },
+      "keywordsIA": [
+        "transporte ejecutivo",
+        "transporte"
+      ]
+    },
+    {
+      "subcategoriaId": "transporte-turistico",
+      "nombre": "Transporte Turístico",
+      "sectorId": "transporte",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {
+        "obligatoriosExtra": [
+          "atencionDomicilio",
+          "zonaCobertura"
+        ],
+        "fotosMin": 2
+      },
+      "keywordsIA": [
+        "transporte turístico",
+        "transporte"
+      ]
+    },
+    {
+      "subcategoriaId": "transporte-escolar",
+      "nombre": "Transporte Escolar",
+      "sectorId": "transporte",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {
+        "obligatoriosExtra": [
+          "atencionDomicilio",
+          "zonaCobertura"
+        ],
+        "fotosMin": 2
+      },
+      "keywordsIA": [
+        "transporte escolar",
+        "transporte"
+      ]
+    },
+    {
+      "subcategoriaId": "almacenes-y-bodegas",
+      "nombre": "Almacenes y Bodegas",
+      "sectorId": "transporte",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {
+        "obligatoriosExtra": [
+          "atencionDomicilio",
+          "zonaCobertura"
+        ],
+        "fotosMin": 2
+      },
+      "keywordsIA": [
+        "almacenes y bodegas",
+        "transporte"
+      ]
+    },
+    {
+      "subcategoriaId": "distribucion-de-mercancias",
+      "nombre": "Distribución de Mercancías",
+      "sectorId": "transporte",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {
+        "obligatoriosExtra": [
+          "atencionDomicilio",
+          "zonaCobertura"
+        ],
+        "fotosMin": 2
+      },
+      "keywordsIA": [
+        "distribución de mercancías",
+        "transporte"
+      ]
+    },
+    {
+      "subcategoriaId": "ultima-milla",
+      "nombre": "Última Milla",
+      "sectorId": "transporte",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {
+        "obligatoriosExtra": [
+          "atencionDomicilio",
+          "zonaCobertura"
+        ],
+        "fotosMin": 2
+      },
+      "keywordsIA": [
+        "última milla",
+        "transporte"
+      ]
+    },
+    {
+      "subcategoriaId": "logistica-internacional",
+      "nombre": "Logística Internacional",
+      "sectorId": "transporte",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {
+        "obligatoriosExtra": [
+          "atencionDomicilio",
+          "zonaCobertura"
+        ],
+        "fotosMin": 2
+      },
+      "keywordsIA": [
+        "logística internacional",
+        "transporte"
+      ]
+    },
+    {
+      "subcategoriaId": "logistica-local",
+      "nombre": "Logística Local",
+      "sectorId": "transporte",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {
+        "obligatoriosExtra": [
+          "atencionDomicilio",
+          "zonaCobertura"
+        ],
+        "fotosMin": 2
+      },
+      "keywordsIA": [
+        "logística local",
+        "transporte"
+      ]
+    },
+    {
+      "subcategoriaId": "maestro-particular",
+      "nombre": "Maestro Particular",
+      "sectorId": "educacion",
+      "arquetipo": "persona_servicio_profesional",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_profesional",
+      "delta": {},
+      "keywordsIA": [
+        "maestro particular",
+        "educacion"
+      ]
+    },
+    {
+      "subcategoriaId": "tutor-academico",
+      "nombre": "Tutor Académico",
+      "sectorId": "educacion",
+      "arquetipo": "persona_servicio_profesional",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_profesional",
+      "delta": {},
+      "keywordsIA": [
+        "tutor académico",
+        "educacion"
+      ]
+    },
+    {
+      "subcategoriaId": "profesor-de-idiomas",
+      "nombre": "Profesor de Idiomas",
+      "sectorId": "educacion",
+      "arquetipo": "persona_servicio_profesional",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_profesional",
+      "delta": {},
+      "keywordsIA": [
+        "profesor de idiomas",
+        "educacion"
+      ]
+    },
+    {
+      "subcategoriaId": "profesor-de-matematicas",
+      "nombre": "Profesor de Matemáticas",
+      "sectorId": "educacion",
+      "arquetipo": "persona_servicio_profesional",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_profesional",
+      "delta": {},
+      "keywordsIA": [
+        "profesor de matemáticas",
+        "educacion"
+      ]
+    },
+    {
+      "subcategoriaId": "profesor-de-musica",
+      "nombre": "Profesor de Música",
+      "sectorId": "educacion",
+      "arquetipo": "persona_servicio_profesional",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_profesional",
+      "delta": {},
+      "keywordsIA": [
+        "profesor de música",
+        "educacion"
+      ]
+    },
+    {
+      "subcategoriaId": "profesor-de-arte",
+      "nombre": "Profesor de Arte",
+      "sectorId": "educacion",
+      "arquetipo": "persona_servicio_profesional",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_profesional",
+      "delta": {},
+      "keywordsIA": [
+        "profesor de arte",
+        "educacion"
+      ]
+    },
+    {
+      "subcategoriaId": "coach-educativo",
+      "nombre": "Coach Educativo",
+      "sectorId": "educacion",
+      "arquetipo": "persona_servicio_profesional",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_profesional",
+      "delta": {},
+      "keywordsIA": [
+        "coach educativo",
+        "educacion"
+      ]
+    },
+    {
+      "subcategoriaId": "instructor-de-manejo",
+      "nombre": "Instructor de Manejo",
+      "sectorId": "educacion",
+      "arquetipo": "persona_servicio_profesional",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_profesional",
+      "delta": {},
+      "keywordsIA": [
+        "instructor de manejo",
+        "educacion"
+      ]
+    },
+    {
+      "subcategoriaId": "instructor-deportivo",
+      "nombre": "Instructor Deportivo",
+      "sectorId": "educacion",
+      "arquetipo": "persona_servicio_profesional",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_profesional",
+      "delta": {},
+      "keywordsIA": [
+        "instructor deportivo",
+        "educacion"
+      ]
+    },
+    {
+      "subcategoriaId": "instructor-de-computacion",
+      "nombre": "Instructor de Computación",
+      "sectorId": "educacion",
+      "arquetipo": "persona_servicio_profesional",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_profesional",
+      "delta": {},
+      "keywordsIA": [
+        "instructor de computación",
+        "educacion"
+      ]
+    },
+    {
+      "subcategoriaId": "universidades",
+      "nombre": "Universidades",
+      "sectorId": "educacion",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "universidades",
+        "educacion"
+      ]
+    },
+    {
+      "subcategoriaId": "cursos-en-linea",
+      "nombre": "Cursos en Línea",
+      "sectorId": "educacion",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "cursos en línea",
+        "educacion"
+      ]
+    },
+    {
+      "subcategoriaId": "preparatoria",
+      "nombre": "Preparatoria",
+      "sectorId": "educacion",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "preparatoria",
+        "educacion"
+      ]
+    },
+    {
+      "subcategoriaId": "guarderias",
+      "nombre": "Guarderías",
+      "sectorId": "educacion",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "guarderías",
+        "educacion"
+      ]
+    },
+    {
+      "subcategoriaId": "talleres-creativos",
+      "nombre": "Talleres Creativos",
+      "sectorId": "educacion",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "talleres creativos",
+        "educacion"
+      ]
+    },
+    {
+      "subcategoriaId": "programador",
+      "nombre": "Programador",
+      "sectorId": "tecnologia",
+      "arquetipo": "persona_servicio_profesional",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_profesional",
+      "delta": {},
+      "keywordsIA": [
+        "programador",
+        "tecnologia"
+      ]
+    },
+    {
+      "subcategoriaId": "desarrollador-web",
+      "nombre": "Desarrollador Web",
+      "sectorId": "tecnologia",
+      "arquetipo": "persona_servicio_profesional",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_profesional",
+      "delta": {},
+      "keywordsIA": [
+        "desarrollador web",
+        "tecnologia"
+      ]
+    },
+    {
+      "subcategoriaId": "desarrollador-movil",
+      "nombre": "Desarrollador Móvil",
+      "sectorId": "tecnologia",
+      "arquetipo": "persona_servicio_profesional",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_profesional",
+      "delta": {},
+      "keywordsIA": [
+        "desarrollador móvil",
+        "tecnologia"
+      ]
+    },
+    {
+      "subcategoriaId": "disenador-grafico",
+      "nombre": "Diseñador Gráfico",
+      "sectorId": "tecnologia",
+      "arquetipo": "persona_servicio_profesional",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_profesional",
+      "delta": {},
+      "keywordsIA": [
+        "diseñador gráfico",
+        "tecnologia"
+      ]
+    },
+    {
+      "subcategoriaId": "disenador-ux-ui",
+      "nombre": "Diseñador UX/UI",
+      "sectorId": "tecnologia",
+      "arquetipo": "persona_servicio_profesional",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_profesional",
+      "delta": {},
+      "keywordsIA": [
+        "diseñador ux/ui",
+        "tecnologia"
+      ]
+    },
+    {
+      "subcategoriaId": "editor-de-video",
+      "nombre": "Editor de Video",
+      "sectorId": "tecnologia",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "editor de video",
+        "tecnologia"
+      ]
+    },
+    {
+      "subcategoriaId": "community-manager",
+      "nombre": "Community Manager",
+      "sectorId": "tecnologia",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "community manager",
+        "tecnologia"
+      ]
+    },
+    {
+      "subcategoriaId": "especialista-seo",
+      "nombre": "Especialista SEO",
+      "sectorId": "tecnologia",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "especialista seo",
+        "tecnologia"
+      ]
+    },
+    {
+      "subcategoriaId": "especialista-sem",
+      "nombre": "Especialista SEM",
+      "sectorId": "tecnologia",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "especialista sem",
+        "tecnologia"
+      ]
+    },
+    {
+      "subcategoriaId": "administrador-de-redes-sociales",
+      "nombre": "Administrador de Redes Sociales",
+      "sectorId": "tecnologia",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "administrador de redes sociales",
+        "tecnologia"
+      ]
+    },
+    {
+      "subcategoriaId": "soporte-tecnico-independiente",
+      "nombre": "Soporte Técnico Independiente",
+      "sectorId": "tecnologia",
+      "arquetipo": "persona_servicio_profesional",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_profesional",
+      "delta": {},
+      "keywordsIA": [
+        "soporte técnico independiente",
+        "tecnologia"
+      ]
+    },
+    {
+      "subcategoriaId": "tecnico-en-computadoras",
+      "nombre": "Técnico en Computadoras",
+      "sectorId": "tecnologia",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "técnico en computadoras",
+        "tecnologia"
+      ]
+    },
+    {
+      "subcategoriaId": "especialista-en-ciberseguridad-independiente",
+      "nombre": "Especialista en Ciberseguridad Independiente",
+      "sectorId": "tecnologia",
+      "arquetipo": "persona_servicio_profesional",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_profesional",
+      "delta": {},
+      "keywordsIA": [
+        "especialista en ciberseguridad independiente",
+        "tecnologia"
+      ]
+    },
+    {
+      "subcategoriaId": "consultor-it",
+      "nombre": "Consultor IT",
+      "sectorId": "tecnologia",
+      "arquetipo": "persona_servicio_profesional",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_profesional",
+      "delta": {},
+      "keywordsIA": [
+        "consultor it",
+        "tecnologia"
+      ]
+    },
+    {
+      "subcategoriaId": "automatizacion-ia",
+      "nombre": "Automatización IA",
+      "sectorId": "tecnologia",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "automatización ia",
+        "tecnologia"
+      ]
+    },
+    {
+      "subcategoriaId": "prompt-engineer",
+      "nombre": "Prompt Engineer",
+      "sectorId": "tecnologia",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "prompt engineer",
+        "tecnologia"
+      ]
+    },
+    {
+      "subcategoriaId": "creador-de-contenido-digital",
+      "nombre": "Creador de Contenido Digital",
+      "sectorId": "tecnologia",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "creador de contenido digital",
+        "tecnologia"
+      ]
+    },
+    {
+      "subcategoriaId": "desarrollo-de-software",
+      "nombre": "Desarrollo de Software",
+      "sectorId": "tecnologia",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "desarrollo de software",
+        "tecnologia"
+      ]
+    },
+    {
+      "subcategoriaId": "desarrollo-de-apps",
+      "nombre": "Desarrollo de Apps",
+      "sectorId": "tecnologia",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "desarrollo de apps",
+        "tecnologia"
+      ]
+    },
+    {
+      "subcategoriaId": "desarrollo-web",
+      "nombre": "Desarrollo Web",
+      "sectorId": "tecnologia",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "desarrollo web",
+        "tecnologia"
+      ]
+    },
+    {
+      "subcategoriaId": "servicios-cloud",
+      "nombre": "Servicios Cloud",
+      "sectorId": "tecnologia",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "servicios cloud",
+        "tecnologia"
+      ]
+    },
+    {
+      "subcategoriaId": "consultoria-tecnologica",
+      "nombre": "Consultoría Tecnológica",
+      "sectorId": "tecnologia",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "consultoría tecnológica",
+        "tecnologia"
+      ]
+    },
+    {
+      "subcategoriaId": "produccion-audiovisual",
+      "nombre": "Producción Audiovisual",
+      "sectorId": "tecnologia",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "producción audiovisual",
+        "tecnologia"
+      ]
+    },
+    {
+      "subcategoriaId": "estudio-de-diseno",
+      "nombre": "Estudio de Diseño",
+      "sectorId": "tecnologia",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "estudio de diseño",
+        "tecnologia"
+      ]
+    },
+    {
+      "subcategoriaId": "redes-y-telecomunicaciones",
+      "nombre": "Redes y Telecomunicaciones",
+      "sectorId": "tecnologia",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "redes y telecomunicaciones",
+        "tecnologia"
+      ]
+    },
+    {
+      "subcategoriaId": "chef-privado",
+      "nombre": "Chef Privado",
+      "sectorId": "restaurantes",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "chef privado",
+        "restaurantes"
+      ]
+    },
+    {
+      "subcategoriaId": "repostero",
+      "nombre": "Repostero",
+      "sectorId": "restaurantes",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "repostero",
+        "restaurantes"
+      ]
+    },
+    {
+      "subcategoriaId": "panadero-independiente",
+      "nombre": "Panadero Independiente",
+      "sectorId": "restaurantes",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "panadero independiente",
+        "restaurantes"
+      ]
+    },
+    {
+      "subcategoriaId": "parrillero",
+      "nombre": "Parrillero",
+      "sectorId": "restaurantes",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "parrillero",
+        "restaurantes"
+      ]
+    },
+    {
+      "subcategoriaId": "cocinero-a-domicilio",
+      "nombre": "Cocinero a Domicilio",
+      "sectorId": "restaurantes",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {
+        "obligatoriosExtra": [
+          "atencionDomicilio",
+          "zonaCobertura"
+        ],
+        "fotosMin": 2
+      },
+      "keywordsIA": [
+        "cocinero a domicilio",
+        "restaurantes"
+      ]
+    },
+    {
+      "subcategoriaId": "bartender",
+      "nombre": "Bartender",
+      "sectorId": "restaurantes",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "bartender",
+        "restaurantes"
+      ]
+    },
+    {
+      "subcategoriaId": "mesero-para-eventos",
+      "nombre": "Mesero para Eventos",
+      "sectorId": "restaurantes",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "mesero para eventos",
+        "restaurantes"
+      ]
+    },
+    {
+      "subcategoriaId": "catering-independiente",
+      "nombre": "Catering Independiente",
+      "sectorId": "restaurantes",
+      "arquetipo": "persona_servicio_oficio",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_oficio",
+      "delta": {},
+      "keywordsIA": [
+        "catering independiente",
+        "restaurantes"
+      ]
+    },
+    {
+      "subcategoriaId": "elaboracion-de-postres",
+      "nombre": "Elaboración de Postres",
+      "sectorId": "restaurantes",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "elaboración de postres",
+        "restaurantes"
+      ]
+    },
+    {
+      "subcategoriaId": "comida-saludable",
+      "nombre": "Comida Saludable",
+      "sectorId": "restaurantes",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "comida saludable",
+        "restaurantes"
+      ]
+    },
+    {
+      "subcategoriaId": "preparacion-de-banquetes",
+      "nombre": "Preparación de Banquetes",
+      "sectorId": "restaurantes",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "preparación de banquetes",
+        "restaurantes"
+      ]
+    },
+    {
+      "subcategoriaId": "pizzeria",
+      "nombre": "Pizzería",
+      "sectorId": "restaurantes",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "pizzería",
+        "restaurantes"
+      ]
+    },
+    {
+      "subcategoriaId": "hamburgueseria",
+      "nombre": "Hamburguesería",
+      "sectorId": "restaurantes",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "hamburguesería",
+        "restaurantes"
+      ]
+    },
+    {
+      "subcategoriaId": "food-truck",
+      "nombre": "Food Truck",
+      "sectorId": "restaurantes",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "food truck",
+        "restaurantes"
+      ]
+    },
+    {
+      "subcategoriaId": "cocina-economica",
+      "nombre": "Cocina Económica",
+      "sectorId": "restaurantes",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "cocina económica",
+        "restaurantes"
+      ]
+    },
+    {
+      "subcategoriaId": "banquetes",
+      "nombre": "Banquetes",
+      "sectorId": "restaurantes",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "banquetes",
+        "restaurantes"
+      ]
+    },
+    {
+      "subcategoriaId": "comida-a-domicilio",
+      "nombre": "Comida a Domicilio",
+      "sectorId": "restaurantes",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {
+        "obligatoriosExtra": [
+          "atencionDomicilio",
+          "zonaCobertura"
+        ],
+        "fotosMin": 2
+      },
+      "keywordsIA": [
+        "comida a domicilio",
+        "restaurantes"
+      ]
+    },
+    {
+      "subcategoriaId": "antros-y-bares",
+      "nombre": "Antros y Bares",
+      "sectorId": "restaurantes",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "antros y bares",
+        "restaurantes"
+      ]
+    },
+    {
+      "subcategoriaId": "vida-nocturna",
+      "nombre": "Vida Nocturna",
+      "sectorId": "restaurantes",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "vida nocturna",
+        "restaurantes"
+      ]
+    },
+    {
+      "subcategoriaId": "paseador-de-perros",
+      "nombre": "Paseador de Perros",
+      "sectorId": "mascotas",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "paseador de perros",
+        "mascotas"
+      ]
+    },
+    {
+      "subcategoriaId": "entrenador-canino",
+      "nombre": "Entrenador Canino",
+      "sectorId": "mascotas",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "entrenador canino",
+        "mascotas"
+      ]
+    },
+    {
+      "subcategoriaId": "cuidador-de-mascotas",
+      "nombre": "Cuidador de Mascotas",
+      "sectorId": "mascotas",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "cuidador de mascotas",
+        "mascotas"
+      ]
+    },
+    {
+      "subcategoriaId": "groomer",
+      "nombre": "Groomer",
+      "sectorId": "mascotas",
+      "arquetipo": "persona_servicio_oficio",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_oficio",
+      "delta": {},
+      "keywordsIA": [
+        "groomer",
+        "mascotas"
+      ]
+    },
+    {
+      "subcategoriaId": "fotografo-de-mascotas",
+      "nombre": "Fotógrafo de Mascotas",
+      "sectorId": "mascotas",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "fotógrafo de mascotas",
+        "mascotas"
+      ]
+    },
+    {
+      "subcategoriaId": "adiestrador",
+      "nombre": "Adiestrador",
+      "sectorId": "mascotas",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "adiestrador",
+        "mascotas"
+      ]
+    },
+    {
+      "subcategoriaId": "rescatista-independiente",
+      "nombre": "Rescatista Independiente",
+      "sectorId": "mascotas",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "rescatista independiente",
+        "mascotas"
+      ]
+    },
+    {
+      "subcategoriaId": "guarderia-para-mascotas",
+      "nombre": "Guardería para Mascotas",
+      "sectorId": "mascotas",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "guardería para mascotas",
+        "mascotas"
+      ]
+    },
+    {
+      "subcategoriaId": "hotel-para-mascotas",
+      "nombre": "Hotel para Mascotas",
+      "sectorId": "mascotas",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "hotel para mascotas",
+        "mascotas"
+      ]
+    },
+    {
+      "subcategoriaId": "tienda-de-mascotas",
+      "nombre": "Tienda de Mascotas",
+      "sectorId": "mascotas",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "tienda de mascotas",
+        "mascotas"
+      ]
+    },
+    {
+      "subcategoriaId": "criadero-autorizado",
+      "nombre": "Criadero Autorizado",
+      "sectorId": "mascotas",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "criadero autorizado",
+        "mascotas"
+      ]
+    },
+    {
+      "subcategoriaId": "servicio-funerario-para-mascotas",
+      "nombre": "Servicio Funerario para Mascotas",
+      "sectorId": "mascotas",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "servicio funerario para mascotas",
+        "mascotas"
+      ]
+    },
+    {
+      "subcategoriaId": "consultor-empresarial-independiente",
+      "nombre": "Consultor Empresarial Independiente",
+      "sectorId": "industria",
+      "arquetipo": "persona_servicio_profesional",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_profesional",
+      "delta": {},
+      "keywordsIA": [
+        "consultor empresarial independiente",
+        "industria"
+      ]
+    },
+    {
+      "subcategoriaId": "auditor-independiente",
+      "nombre": "Auditor Independiente",
+      "sectorId": "industria",
+      "arquetipo": "persona_servicio_oficio",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_oficio",
+      "delta": {},
+      "keywordsIA": [
+        "auditor independiente",
+        "industria"
+      ]
+    },
+    {
+      "subcategoriaId": "reclutador-independiente",
+      "nombre": "Reclutador Independiente",
+      "sectorId": "industria",
+      "arquetipo": "persona_servicio_oficio",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_oficio",
+      "delta": {},
+      "keywordsIA": [
+        "reclutador independiente",
+        "industria"
+      ]
+    },
+    {
+      "subcategoriaId": "asesor-de-procesos",
+      "nombre": "Asesor de Procesos",
+      "sectorId": "industria",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "asesor de procesos",
+        "industria"
+      ]
+    },
+    {
+      "subcategoriaId": "inspector-de-calidad",
+      "nombre": "Inspector de Calidad",
+      "sectorId": "industria",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "inspector de calidad",
+        "industria"
+      ]
+    },
+    {
+      "subcategoriaId": "consultor-iso",
+      "nombre": "Consultor ISO",
+      "sectorId": "industria",
+      "arquetipo": "persona_servicio_oficio",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_oficio",
+      "delta": {},
+      "keywordsIA": [
+        "consultor iso",
+        "industria"
+      ]
+    },
+    {
+      "subcategoriaId": "gestor-de-tramites-empresariales",
+      "nombre": "Gestor de Trámites Empresariales",
+      "sectorId": "industria",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "gestor de trámites empresariales",
+        "industria"
+      ]
+    },
+    {
+      "subcategoriaId": "consultoria-fiscal",
+      "nombre": "Consultoría Fiscal",
+      "sectorId": "industria",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "consultoría fiscal",
+        "industria"
+      ]
+    },
+    {
+      "subcategoriaId": "consultoria-legal",
+      "nombre": "Consultoría Legal",
+      "sectorId": "industria",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "consultoría legal",
+        "industria"
+      ]
+    },
+    {
+      "subcategoriaId": "certificaciones-iso",
+      "nombre": "Certificaciones ISO",
+      "sectorId": "industria",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "certificaciones iso",
+        "industria"
+      ]
+    },
+    {
+      "subcategoriaId": "servicios-contables",
+      "nombre": "Servicios Contables",
+      "sectorId": "industria",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "servicios contables",
+        "industria"
+      ]
+    },
+    {
+      "subcategoriaId": "servicios-administrativos",
+      "nombre": "Servicios Administrativos",
+      "sectorId": "industria",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "servicios administrativos",
+        "industria"
+      ]
+    },
+    {
+      "subcategoriaId": "servicios-corporativos",
+      "nombre": "Servicios Corporativos",
+      "sectorId": "industria",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "servicios corporativos",
+        "industria"
+      ]
+    },
+    {
+      "subcategoriaId": "empaques-y-embalaje",
+      "nombre": "Empaques y Embalaje",
+      "sectorId": "industria",
+      "arquetipo": "persona_servicio_general",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_servicio_general",
+      "delta": {},
+      "keywordsIA": [
+        "empaques y embalaje",
+        "industria"
+      ]
+    }
+  ]
+}

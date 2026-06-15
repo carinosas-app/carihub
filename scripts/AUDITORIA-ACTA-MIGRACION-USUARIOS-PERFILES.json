@@ -1,0 +1,148 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "tipo": "AUDITORIA_CONSISTENCIA_ACTA",
+  "nombre": "Auditoría de consistencia — ACTA-MIGRACION-USUARIOS-PERFILES v1.0.0",
+  "fecha": "2026-06-09",
+  "actaAuditada": "scripts/ACTA-MIGRACION-USUARIOS-PERFILES.json",
+  "versionActa": "1.0.0",
+  "workshopBase": "scripts/WORKSHOP-MIGRACION-USUARIOS-PERFILES-ANALISIS.json",
+  "veredictoGeneral": "CONSISTENTE_APROBADA_DISENO",
+  "aprobarActaDiseno": true,
+  "autorizaEjecucionMigracion": false,
+  "autorizaRuntime": false,
+  "modificoCapasCongeladas": false,
+  "checks": [
+    {
+      "id": "CHK-01",
+      "descripcion": "Acta declara clasificación APROBADA_DISENO y no autoriza runtime/Firestore/producción",
+      "resultado": "PASS"
+    },
+    {
+      "id": "CHK-02",
+      "descripcion": "Modelo objetivo alineado con ACTA-CONGELAMIENTO-CUENTAS.json sin modificarla",
+      "resultado": "PASS",
+      "evidencia": "referenciaSinModificacion incluye 7 actas congeladas"
+    },
+    {
+      "id": "CHK-03",
+      "descripcion": "Bridge BRIDGE-MIG-01 perfilId=usuarioId coherente con config-registro-schema.meta.json notaLegacy",
+      "resultado": "PASS"
+    },
+    {
+      "id": "CHK-04",
+      "descripcion": "AM-VE2 satisfecho por referencia acta sin editar SPEC-VALIDATIONENGINE ni acta VE",
+      "resultado": "PASS",
+      "evidencia": "bridgeTransitorio.cierraRecomendacion = AM-VE2"
+    },
+    {
+      "id": "CHK-05",
+      "descripcion": "SPEC-MESSENGER perfilContextoId y conversacionId trío cubiertos en impacto messenger",
+      "resultado": "PASS"
+    },
+    {
+      "id": "CHK-06",
+      "descripcion": "SPEC-DASHBOARDS notificaciones hub y favoritos DO1 en impacto",
+      "resultado": "PASS"
+    },
+    {
+      "id": "CHK-07",
+      "descripcion": "FieldEngine M2 legacy perfilId=uid referenciado vía bridge",
+      "resultado": "PASS"
+    },
+    {
+      "id": "CHK-08",
+      "descripcion": "firestore.rules producción monolito documentado en modeloActual",
+      "resultado": "PASS"
+    },
+    {
+      "id": "CHK-09",
+      "descripcion": "Workshop vacíos VAC-01..08 incorporados con etiqueta TBD_PRE_RUNTIME",
+      "resultado": "PASS"
+    },
+    {
+      "id": "CHK-10",
+      "descripcion": "Elementos ejecución (ETL, cutover, rules, Storage) marcados TBD_PRE_RUNTIME",
+      "resultado": "PASS"
+    },
+    {
+      "id": "CHK-11",
+      "descripcion": "Riesgos eliminados workshop ⊆ riesgosEliminados acta",
+      "resultado": "PASS"
+    },
+    {
+      "id": "CHK-12",
+      "descripcion": "DEP-TE-02 ThemeEngine satisfecho a nivel diseño",
+      "resultado": "PASS"
+    },
+    {
+      "id": "CHK-13",
+      "descripcion": "OBSERVACION-ARQUITECTONICA-SEO URLs canónicas en impacto seo",
+      "resultado": "PASS"
+    },
+    {
+      "id": "CHK-14",
+      "descripcion": "No se crearon scripts ni se modificó firestore.rules",
+      "resultado": "PASS"
+    }
+  ],
+  "metricas": {
+    "checksTotal": 14,
+    "checksPass": 14,
+    "checksFail": 0,
+    "checksWarn": 0
+  },
+  "inconsistencias": [],
+  "advertencias": [
+    {
+      "id": "ADV-01",
+      "descripcion": "Equivalencia isPublicProfile detalle mapeo pendiente — VAC-06 TBD_PRE_RUNTIME",
+      "bloqueaActaDiseno": false
+    },
+    {
+      "id": "ADV-02",
+      "descripcion": "Anexo operacional migración (mapeo campo a campo, inventario) no existe — requerido pre-ejecución",
+      "bloqueaActaDiseno": false,
+      "bloqueaEjecucion": true
+    },
+    {
+      "id": "ADV-03",
+      "descripcion": "Producción permanece monolito hasta autorización ejecución explícita",
+      "bloqueaActaDiseno": false
+    }
+  ],
+  "coberturaWorkshop": {
+    "alcance": "COMPLETA",
+    "objetivos": "COMPLETA",
+    "modeloActual": "COMPLETA",
+    "modeloObjetivo": "COMPLETA",
+    "bridge": "COMPLETA",
+    "impactoPorCapa": "COMPLETA_11_CAPAS",
+    "criteriosExito": "COMPLETA",
+    "riesgos": "COMPLETA",
+    "dependencias": "COMPLETA",
+    "vacios": "COMPLETA_8"
+  },
+  "referenciasCruzadas": [
+    { "origen": "ACTA-MIGRACION", "destino": "ACTA-CONGELAMIENTO-CUENTAS", "tipo": "modelo_objetivo", "consistente": true },
+    { "origen": "ACTA-MIGRACION", "destino": "AUDITORIA-FINAL-SPEC-VALIDATIONENGINE AM-VE2", "tipo": "bridge", "consistente": true },
+    { "origen": "ACTA-MIGRACION", "destino": "SPEC-MESSENGER", "tipo": "perfilContextoId", "consistente": true },
+    { "origen": "ACTA-MIGRACION", "destino": "SPEC-DASHBOARDS", "tipo": "notificaciones_favoritos", "consistente": true },
+    { "origen": "ACTA-MIGRACION", "destino": "firestore.rules", "tipo": "produccion_legacy", "consistente": true },
+    { "origen": "WORKSHOP", "destino": "ACTA-MIGRACION", "tipo": "derivacion", "consistente": true }
+  ],
+  "veredictoFinal": {
+    "estado": "APROBADA_DISENO",
+    "procedeEjecucionMigracion": false,
+    "procedeRuntimeCapasAfectadas": false,
+    "condicionEjecucion": "Anexo operacional + autorización explícita PO + completar VAC-01..08",
+    "siguienteDocumentoRecomendado": "ANEXO-OPERACIONAL-MIGRACION-USUARIOS-PERFILES (no autorizado aún)",
+    "razon": "14/14 checks PASS; acta diseño consistente con 7 capas congeladas y workshop; ejecución explícitamente TBD_PRE_RUNTIME"
+  },
+  "changelog": [
+    {
+      "version": "1.0.0",
+      "fecha": "2026-06-09",
+      "nota": "Auditoría inicial consistencia acta migración diseño"
+    }
+  ]
+}

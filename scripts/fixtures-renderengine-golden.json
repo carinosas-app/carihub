@@ -1,0 +1,223 @@
+{
+  "version": "1.0.0",
+  "specVersion": "1.0.0",
+  "catalogoVersion": "catalogo-2026-06-10",
+  "descripcion": "Golden fixtures de diseño RenderEngine v1.0.0 — salidas esperadas resumidas (no runtime). Cubren home, resultados, perfil, landings geo/categoría, banner, PrivacyGuard, fallback y bloqueo de superficies privadas.",
+  "fixtures": [
+    {
+      "id": "R01_home_movil",
+      "entrada": {
+        "api": "renderHome",
+        "contexto": { "superficie": "home", "dispositivo": "movil", "locale": "es-MX", "modoRender": "prerender" }
+      },
+      "salidaEsperada": {
+        "componentesUsados": ["Hero", "GridSectores", "GridCategorias", "Buscador", "VcardDestacados", "BannerSlot"],
+        "indexable": true,
+        "head": { "robots": "index,follow", "jsonLd": ["WebSite", "SearchAction"] },
+        "assetsDiferidos": ["vcards_fuera_de_fold", "banner_grid"]
+      }
+    },
+    {
+      "id": "R02_resultados_geo_categoria",
+      "entrada": {
+        "api": "renderResults",
+        "contexto": { "superficie": "resultados", "dispositivo": "movil" },
+        "query": { "categoria": "dentistas", "pais": "mexico", "estado": "nuevo-leon", "ciudad": "monterrey", "page": 1 },
+        "perfiles": "ProfileSnapshot[] (server-side filtrado)"
+      },
+      "salidaEsperada": {
+        "componentesUsados": ["ResultCardProfesional"],
+        "indexable": true,
+        "head": { "title": "Dentistas en Monterrey, Nuevo León", "canonical": "/mexico/nuevo-leon/monterrey/dentistas", "jsonLd": ["ItemList", "BreadcrumbList"] },
+        "nota": "Filtrado server-side; NUNCA leer toda la colección ni filtrar en cliente"
+      }
+    },
+    {
+      "id": "R03_perfil_escort_adultos",
+      "entrada": {
+        "api": "renderProfile",
+        "snapshot": {
+          "perfilId": "p_123",
+          "estadoPublicacion": "activo",
+          "subcategoriaOficialIdFinal": "escort",
+          "arquetipoFinal": "persona_acompanante",
+          "tipoPerfilFinal": "persona",
+          "componentePerfil": "ProfileLayoutAdultos",
+          "schemaVersion": "2026-06-10",
+          "geo": { "pais": "mexico", "estado": "jalisco", "ciudad": "guadalajara" }
+        }
+      },
+      "salidaEsperada": {
+        "componentesUsados": ["ProfileLayoutAdultos"],
+        "indexable": false,
+        "head": { "robots": "noindex,follow", "openGraph": { "ogImage": "fotoPrincipal_publica_moderada" }, "jsonLd": ["Person", "BreadcrumbList"] },
+        "nota": "Adultos: noindex; OG moderado; PrivacyGuard activo"
+      }
+    },
+    {
+      "id": "R04_perfil_negocio_localbusiness",
+      "entrada": {
+        "api": "renderProfile",
+        "snapshot": {
+          "perfilId": "p_456",
+          "estadoPublicacion": "publicado",
+          "subcategoriaOficialIdFinal": "restaurante",
+          "arquetipoFinal": "negocio_local",
+          "tipoPerfilFinal": "negocio",
+          "componentePerfil": "ProfileLayoutNegocio",
+          "schemaVersion": "2026-06-10"
+        }
+      },
+      "salidaEsperada": {
+        "componentesUsados": ["ProfileLayoutNegocio"],
+        "indexable": true,
+        "head": { "robots": "index,follow", "jsonLd": ["LocalBusiness", "BreadcrumbList"] }
+      }
+    },
+    {
+      "id": "R05_resultcard_fallback_arquetipo",
+      "entrada": {
+        "api": "renderResultCard",
+        "snapshot": { "componenteResultados": "ComponenteInexistente", "arquetipoFinal": "profesional_certificado", "tipoPerfilFinal": "persona" }
+      },
+      "salidaEsperada": {
+        "componenteResuelto": "ResultCardProfesional",
+        "fallbacksAplicados": ["fallbackPorArquetipo"],
+        "nota": "Paso 3 del algoritmo: snapshot inexistente → resuelve por arquetipo"
+      }
+    },
+    {
+      "id": "R06_resultcard_fallback_generico",
+      "entrada": {
+        "api": "renderResultCard",
+        "snapshot": { "componenteResultados": "X", "arquetipoFinal": "desconocido", "tipoPerfilFinal": "desconocido" }
+      },
+      "salidaEsperada": {
+        "componenteResuelto": "ResultCardGenerico",
+        "fallbacksAplicados": ["fallbackPorTipoPerfil_fallido", "generico"],
+        "errorInterno": "COMPONENTE_DESCONOCIDO",
+        "http": 200,
+        "nota": "Nunca throw; tarjeta mínima segura"
+      }
+    },
+    {
+      "id": "R07_privacyguard_bloquea_privados",
+      "entrada": {
+        "api": "applyPrivacyGuard",
+        "snapshot": { "publico": { "alias": "Ana", "geo.ciudad": "Cancún", "ine": "MAL_GUARDADO", "telefono": "555...", "cedula": "123", "notasAdmin": "x" }, "camposPublicosPerfil": ["alias", "geo.ciudad"] }
+      },
+      "salidaEsperada": {
+        "safeView": { "alias": "Ana", "geo.ciudad": "Cancún" },
+        "camposEliminados": ["ine", "telefono", "cedula", "notasAdmin"],
+        "logSeguridad": true,
+        "nota": "Elimina lista negra aunque venga en snapshot mal guardado"
+      }
+    },
+    {
+      "id": "R08_landing_ciudad",
+      "entrada": {
+        "api": "renderLanding",
+        "contexto": { "nivel": "ciudad", "geo": { "pais": "mexico", "estado": "cdmx", "ciudad": "cdmx" }, "page": 1 }
+      },
+      "salidaEsperada": {
+        "indexable": true,
+        "head": { "canonical": "/mexico/cdmx/cdmx", "jsonLd": ["BreadcrumbList", "ItemList"] },
+        "componentesUsados": ["HubCiudad", "ResultCardGenerico"],
+        "nota": "Si población/contenido mínimo no se cumple → política SEO puede noindex (fuera de RenderEngine)"
+      }
+    },
+    {
+      "id": "R09_landing_categoria_geo",
+      "entrada": {
+        "api": "renderLanding",
+        "contexto": { "nivel": "categoria_geo", "geo": { "pais": "mexico", "estado": "nuevo-leon", "ciudad": "monterrey" }, "subcategoriaId": "abogados" }
+      },
+      "salidaEsperada": {
+        "indexable": true,
+        "head": { "title": "Abogados en Monterrey", "canonical": "/mexico/nuevo-leon/monterrey/abogados", "jsonLd": ["ItemList", "BreadcrumbList"] }
+      }
+    },
+    {
+      "id": "R10_banner_slot_render_only",
+      "entrada": {
+        "api": "renderBannerSlot",
+        "contexto": { "slotId": "res_center_1", "posicion": "resultados_center", "creativo": { "imagen": "promo.jpg", "alt": "Publicidad", "href": "registro-banner.html" } }
+      },
+      "salidaEsperada": {
+        "html": "slot con creativo recibido",
+        "nota": "RenderEngine NO decide inventario ni rotación; solo pinta el creativo de Banners"
+      }
+    },
+    {
+      "id": "R11_bloqueo_superficie_privada",
+      "entrada": {
+        "api": "renderProfile",
+        "contexto": { "superficie": "dashboards" }
+      },
+      "salidaEsperada": {
+        "error": "RENDER_SUPERFICIE_PRIVADA",
+        "http": 403,
+        "nota": "Dashboards/Messenger/Admin/Wizard nunca se renderizan públicamente"
+      }
+    },
+    {
+      "id": "R12_snapshot_borrador_no_renderiza",
+      "entrada": {
+        "api": "renderProfile",
+        "snapshot": { "perfilId": "p_789", "estadoPublicacion": "borrador" }
+      },
+      "salidaEsperada": {
+        "error": "SNAPSHOT_NO_PUBLICADO",
+        "http": 404,
+        "indexable": false,
+        "nota": "Solo publicado|activo; borradores noindex y sin render público"
+      }
+    },
+    {
+      "id": "R13_head_dinamico_perfil_profesionista",
+      "entrada": {
+        "api": "renderHead",
+        "snapshot": { "tipoPerfilFinal": "persona", "arquetipoFinal": "profesional_certificado", "subcategoriaOficialIdFinal": "psicologos", "geo": { "ciudad": "Puebla" }, "publico": { "nombreProfesional": "Dra. López" } }
+      },
+      "salidaEsperada": {
+        "title": "Dra. López — Psicólogos en Puebla",
+        "jsonLd": ["ProfessionalService", "BreadcrumbList"],
+        "openGraph": { "ogType": "profile", "ogImage": "fotoPrincipal_o_fallback" },
+        "nota": "Meta derivada de camposPublicos; sin PII privada"
+      }
+    },
+    {
+      "id": "R14_tema_themeengine_aplicado",
+      "entrada": {
+        "api": "renderProfile",
+        "contexto": { "tema": { "origen": "ThemeEngine", "variables": { "--color-primario": "#7b2ff7" } } },
+        "snapshot": { "perfilId": "p_900", "estadoPublicacion": "activo", "componentePerfil": "ProfileLayoutCreador" }
+      },
+      "salidaEsperada": {
+        "componentesUsados": ["ProfileLayoutCreador"],
+        "tokensAplicados": ["--color-primario=#7b2ff7"],
+        "nota": "ThemeEngine provee TokenSet autorizado; sin HTML/JS crudo"
+      }
+    },
+    {
+      "id": "R15_migracion_url_canonica_estable",
+      "entrada": {
+        "api": "resolveUrl",
+        "contexto": { "perfilId": "p_legacy_42", "slug": "ana-monterrey" }
+      },
+      "salidaEsperada": {
+        "canonical": "/perfil/p_legacy_42/ana-monterrey",
+        "breadcrumb": ["Inicio", "México", "Nuevo León", "Monterrey", "Perfil"],
+        "nota": "perfilId estable preservado en migración usuarios→perfiles (evita pérdida de ranking)"
+      }
+    }
+  ],
+  "cobertura": {
+    "superficies": ["home", "resultados", "perfil", "landing_ciudad", "landing_categoria_geo", "banner"],
+    "seguridad": ["PrivacyGuard", "bloqueo superficie privada", "borrador no renderiza", "adultos noindex"],
+    "resiliencia": ["fallback arquetipo", "fallback genérico", "nunca throw"],
+    "seo": ["head dinámico", "Schema.org", "OG", "canonical", "breadcrumb"],
+    "themeEngine": ["TokenSet aplicado"],
+    "migracion": ["URL canónica estable"]
+  }
+}

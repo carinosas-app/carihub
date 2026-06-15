@@ -1,0 +1,132 @@
+{
+  "generado": "2026-06-09",
+  "titulo": "Reporte Seguridad MVP — análisis y diseño",
+  "estado": "CONGELADO",
+  "fechaCongelamiento": "2026-06-09",
+  "acta": "scripts/ACTA-CONGELAMIENTO-SEGURIDAD.json",
+  "recomendacionCongelarAntesFieldEngine": true,
+  "checklistCobertura": {
+    "cloudflare_turnstile": true,
+    "firebase_app_check": true,
+    "verificacion_correo": true,
+    "riesgoScore": true,
+    "logsSeguridad": true,
+    "estados_seguridad": true,
+    "anti_spam": true,
+    "anti_abuso": true,
+    "proteccion_messenger": true,
+    "acta_congelamiento": true
+  },
+  "razonCongelarAntesFieldEngine": "FieldEngine y ValidationEngine requieren contrato de gates (emailVerificado, estadoSeguridad, turnstileAction) y límites anti-abuso; sin Seguridad MVP congelada el spec FieldEngine quedaría incompleto.",
+  "recomendacionTecnica": {
+    "antiBot": "Cloudflare Turnstile (primario)",
+    "antiBotFallback": "reCAPTCHA v3 si Turnstile no disponible",
+    "verificacionEmail": "Firebase Auth email verification",
+    "verificacionTelefono": "Post-MVP (Firebase Phone o Twilio Verify)",
+    "rateLimiting": "Cloud Functions + Firestore rate_limits con TTL (implementación futura)",
+    "validacionServerSide": "Toda acción con Turnstile exige verify en backend antes de write"
+  },
+  "riesgosDetectados": [
+    {
+      "id": "R1",
+      "severidad": "critica",
+      "riesgo": "Admin único por email hardcoded en firestore.rules",
+      "impacto": "Single point of failure; sin RBAC",
+      "mitigacionMVP": "Documentado; logsSeguridad; plan RBAC fase 2",
+      "mitigacionLanzamiento": "Multi-admin + custom claims antes de escala"
+    },
+    {
+      "id": "R2",
+      "severidad": "critica",
+      "riesgo": "Sin CAPTCHA/bot protection en producción actual",
+      "impacto": "Registro masivo, denuncias flood, credential stuffing",
+      "mitigacionMVP": "Turnstile obligatorio en formularios críticos"
+    },
+    {
+      "id": "R3",
+      "severidad": "alta",
+      "riesgo": "Email no verificado puede operar en legacy",
+      "impacto": "Cuentas desechables, spam perfiles",
+      "mitigacionMVP": "emailVerificado gate antes enviar_revision"
+    },
+    {
+      "id": "R4",
+      "severidad": "alta",
+      "riesgo": "Sin rate limiting documentado",
+      "impacto": "Abuso API/Firestore, costos, DoS lógico",
+      "mitigacionMVP": "Límites por IP/email/usuario en diseño"
+    },
+    {
+      "id": "R5",
+      "severidad": "alta",
+      "riesgo": "PII en logs admin inexistente o incompleto",
+      "impacto": "Cumplimiento, fuga datos",
+      "mitigacionMVP": "logs_acceso_privado + hash IP/UA"
+    },
+    {
+      "id": "R6",
+      "severidad": "media",
+      "riesgo": "Messenger sin diseño anti-spam previo",
+      "impacto": "Re-trabajo si se implementa sin contrato",
+      "mitigacionMVP": "Diseño spamScore/estadoMensajeria congelado"
+    },
+    {
+      "id": "R7",
+      "severidad": "media",
+      "riesgo": "reCAPTCHA v3 costo al escalar >10K/mes",
+      "impacto": "Costo operativo imprevisto",
+      "mitigacionMVP": "Elegir Turnstile gratis"
+    },
+    {
+      "id": "R8",
+      "severidad": "media",
+      "riesgo": "Duplicados cuenta (misma persona múltiples perfiles spam)",
+      "impacto": "Catálogo contaminado",
+      "mitigacionMVP": "duplicadoPotencial + riesgoScore + revisión"
+    },
+    {
+      "id": "R9",
+      "severidad": "baja",
+      "riesgo": "Rules no cubren colecciones diseñadas (perfiles, contratos)",
+      "impacto": "Gap seguridad pre-migración",
+      "mitigacionMVP": "Documentado en acta; rules en fase implementación"
+    }
+  ],
+  "comparativaAntiBots": {
+    "ganador": "cloudflare_turnstile",
+    "turnstile": { "costoMVP": 0, "privacidad": "alta", "friccion": "baja", "limiteWidgets": 20 },
+    "recaptcha_v3": { "costoMVP": "0 hasta 10K/mes", "costo50K": 8, "privacidad": "media-baja", "friccion": "baja" }
+  },
+  "formulariosProtegidosResumen": {
+    "criticos": ["login", "registro_auth", "registro_perfil", "recuperacion_password"],
+    "altos": ["denuncia", "categoria_sugerida", "registro_anunciante"],
+    "medios": ["contacto_publico"],
+    "autenticadosSinCaptcha": ["publicacion_edicion", "mensajes_futuro"]
+  },
+  "limitesAntiAbusoResumen": {
+    "registro": "5/IP/h, 3/email/día",
+    "login_fallido": "5/email/15m → bloqueo 15m",
+    "recuperacion": "3/email/h",
+    "denuncia": "10/usuario/día, 15/IP/día",
+    "categoria_sugerida": "3/usuario/día",
+    "mensajes_futuro": "60/hora (20 si cuenta nueva)"
+  },
+  "estadosSeguridad": ["normal", "observacion", "restringido", "suspendido", "bloqueado"],
+  "mvpObligatorio": 7,
+  "postMVP": 8,
+  "artefactosGenerados": [
+    "scripts/config-seguridad-mvp-schema.json",
+    "scripts/REPORTE-SEGURIDAD-MVP.json",
+    "scripts/REPORTE-SEGURIDAD-MVP.md",
+    "scripts/ACTA-CONGELAMIENTO-SEGURIDAD.json",
+    "scripts/ACTA-CONGELAMIENTO-SEGURIDAD.md"
+  ],
+  "proximoPasoTrasCongelamiento": "Congelar Seguridad MVP → redactar SPEC FieldEngine incluyendo sección securityGates",
+  "restriccionesRespetadas": {
+    "runtime": false,
+    "firestore": false,
+    "produccion": false,
+    "deploy": false,
+    "commit": false
+  }
+}

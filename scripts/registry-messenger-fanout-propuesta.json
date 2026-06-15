@@ -1,0 +1,195 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "tipo": "REGISTRY_FANOUT_PROPUESTA",
+  "nombre": "Propuesta fanOutPlan Messenger — para futura acta MINOR ValidationEngine",
+  "version": "1.0.1",
+  "fecha": "2026-06-09",
+  "estado": "PROPUESTA_ABSORBIDA",
+  "obMSG": "OB-MSG-3 OB-MSG-4 cerrados",
+  "nota": "Absorbida en registry-validationengine-eventos.json v1.1.0 — ACTA-MINOR-VALIDATIONENGINE-1.1.0-MESSENGER aplicada",
+  "mapeoConversacionIniciar": {
+    "accionVE": "conversacion_iniciar",
+    "variantes": {
+      "modoInicio=directa": "conversacion_iniciar_directa",
+      "modoInicio=solicitud": "conversacion_iniciar_solicitud"
+    }
+  },
+  "acciones": {
+    "mensaje_enviar": {
+      "historial": { "emitir": true, "dominio": "historial_mensajes", "tipoEvento": "mensaje_enviado" },
+      "notificacion": { "emitir": true, "items": [{ "dominio": "mensajes", "tipoEvento": "mensaje_nuevo" }] },
+      "logsSeguridad": { "emitir": "condicional_spam", "tipo": "mensaje_enviado" },
+      "iaRecomendaciones": { "emitir": "condicional_senal_riesgo", "estadoNuevo": "sugerida" },
+      "logsAdmin": { "emitir": false }
+    },
+    "conversacion_iniciar_directa": {
+      "historial": { "emitir": true, "dominio": "historial_mensajes", "tipoEvento": "conversacion_iniciada" },
+      "notificacion": { "emitir": true, "items": [{ "dominio": "mensajes", "tipoEvento": "conversacion_iniciada" }] },
+      "logsSeguridad": { "emitir": false },
+      "iaRecomendaciones": { "emitir": false },
+      "logsAdmin": { "emitir": false }
+    },
+    "conversacion_iniciar_solicitud": {
+      "historial": { "emitir": true, "dominio": "historial_mensajes", "tipoEvento": "solicitud_conversacion_enviada" },
+      "notificacion": { "emitir": true, "items": [{ "dominio": "mensajes", "tipoEvento": "solicitud_conversacion" }] },
+      "logsSeguridad": { "emitir": false },
+      "iaRecomendaciones": { "emitir": false },
+      "logsAdmin": { "emitir": false }
+    },
+    "solicitud_conversacion_aceptar": {
+      "historial": { "emitir": true, "dominio": "historial_mensajes", "tipoEvento": "solicitud_aceptada" },
+      "notificacion": { "emitir": true, "items": [{ "dominio": "mensajes", "tipoEvento": "solicitud_aceptada" }] },
+      "logsSeguridad": { "emitir": false },
+      "iaRecomendaciones": { "emitir": false },
+      "logsAdmin": { "emitir": false }
+    },
+    "solicitud_conversacion_rechazar": {
+      "historial": { "emitir": true, "dominio": "historial_mensajes", "tipoEvento": "solicitud_rechazada" },
+      "notificacion": { "emitir": true, "items": [{ "dominio": "mensajes", "tipoEvento": "solicitud_rechazada" }] },
+      "logsSeguridad": { "emitir": false },
+      "iaRecomendaciones": { "emitir": false },
+      "logsAdmin": { "emitir": false }
+    },
+    "bloqueo_usuario": {
+      "historial": { "emitir": true, "dominio": "historial_actividad_cuenta", "tipoEvento": "usuario_bloqueado" },
+      "notificacion": { "emitir": false },
+      "logsSeguridad": { "emitir": true, "tipo": "bloqueo_usuario" },
+      "iaRecomendaciones": { "emitir": false },
+      "logsAdmin": { "emitir": false }
+    },
+    "bloqueo_usuario_remover": {
+      "historial": { "emitir": true, "dominio": "historial_actividad_cuenta", "tipoEvento": "usuario_desbloqueado" },
+      "notificacion": { "emitir": false },
+      "logsSeguridad": { "emitir": true, "tipo": "bloqueo_usuario_removido" },
+      "iaRecomendaciones": { "emitir": false },
+      "logsAdmin": { "emitir": false }
+    },
+    "reportar_conversacion": {
+      "historial": { "emitir": true, "dominio": "historial_actividad_cuenta", "tipoEvento": "conversacion_reportada" },
+      "notificacion": { "emitir": true, "items": [{ "dominio": "mensajeria", "tipoEvento": "reporte_recibido", "destinatario": "admin" }] },
+      "logsSeguridad": { "emitir": true, "tipo": "reporte_mensajeria" },
+      "iaRecomendaciones": { "emitir": "condicional", "estadoNuevo": "sugerida" },
+      "logsAdmin": { "emitir": true, "modulo": "mensajeria_reportes" }
+    },
+    "reportar_mensaje": {
+      "historial": { "emitir": true, "dominio": "historial_actividad_cuenta", "tipoEvento": "mensaje_reportado" },
+      "notificacion": { "emitir": true, "items": [{ "dominio": "mensajeria", "tipoEvento": "reporte_recibido", "destinatario": "admin" }] },
+      "logsSeguridad": { "emitir": true, "tipo": "reporte_mensaje" },
+      "iaRecomendaciones": { "emitir": "condicional", "estadoNuevo": "sugerida" },
+      "logsAdmin": { "emitir": true, "modulo": "mensajeria_reportes" }
+    },
+    "reportar_usuario_mensajeria": {
+      "historial": { "emitir": true, "dominio": "historial_actividad_cuenta", "tipoEvento": "usuario_reportado_mensajeria" },
+      "notificacion": { "emitir": true, "items": [{ "dominio": "mensajeria", "tipoEvento": "reporte_recibido", "destinatario": "admin" }] },
+      "logsSeguridad": { "emitir": true, "tipo": "reporte_usuario" },
+      "iaRecomendaciones": { "emitir": false },
+      "logsAdmin": { "emitir": true, "modulo": "mensajeria_reportes" }
+    },
+    "mensaje_eliminar_para_todos": {
+      "historial": { "emitir": true, "dominio": "historial_mensajes", "tipoEvento": "mensaje_eliminado_para_todos" },
+      "notificacion": { "emitir": false },
+      "logsSeguridad": { "emitir": true, "tipo": "mensaje_eliminado" },
+      "iaRecomendaciones": { "emitir": false },
+      "logsAdmin": { "emitir": "condicional_investigacion" }
+    },
+    "conversacion_archivar": {
+      "historial": { "emitir": true, "dominio": "historial_mensajes", "tipoEvento": "conversacion_archivada" },
+      "notificacion": { "emitir": false },
+      "logsSeguridad": { "emitir": false },
+      "iaRecomendaciones": { "emitir": false },
+      "logsAdmin": { "emitir": false }
+    },
+    "conversacion_silenciar": {
+      "historial": { "emitir": true, "dominio": "historial_mensajes", "tipoEvento": "conversacion_silenciada" },
+      "notificacion": { "emitir": false },
+      "logsSeguridad": { "emitir": false },
+      "iaRecomendaciones": { "emitir": false },
+      "logsAdmin": { "emitir": false }
+    },
+    "conversacion_fijar": {
+      "historial": { "emitir": true, "dominio": "historial_mensajes", "tipoEvento": "conversacion_fijada" },
+      "notificacion": { "emitir": false },
+      "logsSeguridad": { "emitir": false },
+      "iaRecomendaciones": { "emitir": false },
+      "logsAdmin": { "emitir": false }
+    },
+    "conversacion_ocultar": {
+      "historial": { "emitir": true, "dominio": "historial_mensajes", "tipoEvento": "conversacion_oculta_local" },
+      "notificacion": { "emitir": false },
+      "logsSeguridad": { "emitir": false },
+      "iaRecomendaciones": { "emitir": false },
+      "logsAdmin": { "emitir": false }
+    },
+    "automatizacion_enviar": {
+      "historial": { "emitir": true, "dominio": "historial_mensajes", "tipoEvento": "mensaje_automatizado_enviado" },
+      "notificacion": { "emitir": true, "items": [{ "dominio": "mensajes", "tipoEvento": "mensaje_nuevo", "metadata": { "automatizado": true } }] },
+      "logsSeguridad": { "emitir": true, "tipo": "automatizacion_mensajeria" },
+      "iaRecomendaciones": { "emitir": false },
+      "logsAdmin": { "emitir": "condicional_abuso" }
+    },
+    "automatizacion_activar": {
+      "historial": { "emitir": true, "dominio": "historial_actividad_cuenta", "tipoEvento": "automatizacion_activada" },
+      "notificacion": { "emitir": false },
+      "logsSeguridad": { "emitir": false },
+      "iaRecomendaciones": { "emitir": false },
+      "logsAdmin": { "emitir": false }
+    },
+    "automatizacion_desactivar": {
+      "historial": { "emitir": true, "dominio": "historial_actividad_cuenta", "tipoEvento": "automatizacion_desactivada" },
+      "notificacion": { "emitir": false },
+      "logsSeguridad": { "emitir": false },
+      "iaRecomendaciones": { "emitir": false },
+      "logsAdmin": { "emitir": false }
+    },
+    "admin_automatizaciones_suspendir": {
+      "historial": { "emitir": true, "dominio": "historial_actividad_cuenta", "tipoEvento": "automatizaciones_suspendidas_admin" },
+      "notificacion": { "emitir": true, "items": [{ "dominio": "mensajes", "tipoEvento": "automatizaciones_suspendidas" }] },
+      "logsSeguridad": { "emitir": true, "tipo": "admin_automatizaciones_suspendidas" },
+      "iaRecomendaciones": { "emitir": false },
+      "logsAdmin": { "emitir": true, "modulo": "mensajeria_admin" }
+    },
+    "admin_messenger_suspender": {
+      "historial": { "emitir": true, "dominio": "historial_actividad_cuenta", "tipoEvento": "mensajeria_suspendida_admin" },
+      "notificacion": { "emitir": true, "items": [{ "dominio": "mensajes", "tipoEvento": "mensajeria_restringida" }, { "dominio": "mensajeria", "tipoEvento": "control_admin_aplicado", "destinatario": "admin" }] },
+      "logsSeguridad": { "emitir": true, "tipo": "admin_messenger_control" },
+      "iaRecomendaciones": { "emitir": false },
+      "logsAdmin": { "emitir": true, "modulo": "mensajeria_admin" }
+    },
+    "admin_messenger_suspension_levantar": {
+      "historial": { "emitir": true, "dominio": "historial_actividad_cuenta", "tipoEvento": "mensajeria_suspension_levantada" },
+      "notificacion": { "emitir": true, "items": [{ "dominio": "mensajes", "tipoEvento": "mensajeria_restaurada" }] },
+      "logsSeguridad": { "emitir": true, "tipo": "admin_messenger_control" },
+      "iaRecomendaciones": { "emitir": false },
+      "logsAdmin": { "emitir": true, "modulo": "mensajeria_admin" }
+    },
+    "admin_messenger_deshabilitar_ambito": {
+      "historial": { "emitir": true, "dominio": "historial_admin", "tipoEvento": "messenger_deshabilitado_ambito" },
+      "notificacion": { "emitir": false },
+      "logsSeguridad": { "emitir": true, "tipo": "admin_messenger_global" },
+      "iaRecomendaciones": { "emitir": false },
+      "logsAdmin": { "emitir": true, "modulo": "mensajeria_admin" }
+    },
+    "admin_messenger_habilitar_ambito": {
+      "historial": { "emitir": true, "dominio": "historial_admin", "tipoEvento": "messenger_habilitado_ambito" },
+      "notificacion": { "emitir": false },
+      "logsSeguridad": { "emitir": true, "tipo": "admin_messenger_global" },
+      "iaRecomendaciones": { "emitir": false },
+      "logsAdmin": { "emitir": true, "modulo": "mensajeria_admin" }
+    },
+    "admin_conversacion_cerrar": {
+      "historial": { "emitir": true, "dominio": "historial_mensajes", "tipoEvento": "conversacion_cerrada_admin" },
+      "notificacion": { "emitir": true, "items": [{ "dominio": "mensajes", "tipoEvento": "conversacion_cerrada" }, { "dominio": "mensajeria", "tipoEvento": "conversacion_cerrada_admin", "destinatario": "admin" }] },
+      "logsSeguridad": { "emitir": true, "tipo": "admin_conversacion_cerrada" },
+      "iaRecomendaciones": { "emitir": false },
+      "logsAdmin": { "emitir": true, "modulo": "mensajeria_admin" }
+    }
+  },
+  "accionesSinFanOutPersistencia": {
+    "ia_asistente_sugerir_respuesta": "Solo borrador UI — no persiste mensaje; fuera fanOut Messenger"
+  },
+  "cobertura": {
+    "accionesCatalogoSPEC": 23,
+    "entradasRegistry": 24,
+    "incluyeVariantesIniciar": true
+  }
+}

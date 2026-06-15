@@ -1,0 +1,104 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "tipo": "AUDITORIA_SPEC",
+  "objeto": "SPEC-REGISTRO-CUENTA",
+  "versionSpecAuditada": "1.0.0",
+  "fecha": "2026-06-11",
+  "estado": "AUDITORIA_CONSISTENCIA",
+  "veredicto": "PASS",
+  "completitudPorcentaje": 90,
+  "veredictoCongelamiento": "APTA_PARA_CONGELAMIENTO_DISENO — procede ACTA-CONGELAMIENTO-REGISTRO-CUENTA v1.0.0 (capa diseño documental; runtime no autorizado)",
+  "cierraGap": "GAP-SPEC-REG",
+  "alcanceAuditoria": "Consistencia SPEC vs planes/schemas/actas congelados, cobertura fixtures golden, fronteras Dashboard, bridge migración, privacidad verificación, matrices y criterios de aceptación.",
+
+  "matrizConsistencia": [
+    { "verificacion": "No contradice ACTA-CONGELAMIENTO-SHARED-CORE", "resultado": "PASS", "evidencia": "integraciones.sharedCore consume clientes; noModifica" },
+    { "verificacion": "No contradice ACTA-CONGELAMIENTO-FIELDENGINE", "resultado": "PASS", "evidencia": "consume resolveRegistrationSchema, snapshotAlPublicar; no duplica campos" },
+    { "verificacion": "No contradice ACTA-CONGELAMIENTO-VALIDATIONENGINE", "resultado": "PASS", "evidencia": "acciones guardar_borrador, enviar_revision, subir_verificacion_* delegadas" },
+    { "verificacion": "No contradice ACTA-CONGELAMIENTO-RENDERENGINE", "resultado": "PASS", "evidencia": "publicacion.snapshotAlPublicar → RenderEngine; rutas privadas no usan RE" },
+    { "verificacion": "No contradice ACTA-CONGELAMIENTO-SEGURIDAD", "resultado": "PASS", "evidencia": "seguridad consume config-seguridad-mvp; Turnstile, rate limits" },
+    { "verificacion": "No contradice ACTA-CONGELAMIENTO-DASHBOARDS", "resultado": "PASS", "evidencia": "dashboardMinimoOperativo DM-01..10; frontera edición vs lectura" },
+    { "verificacion": "No contradice ACTA-CONGELAMIENTO-CUENTAS", "resultado": "PASS", "evidencia": "contratos Usuario/Cuenta alineados config-cuentas-usuario-schema" },
+    { "verificacion": "No contradice ACTA-CONGELAMIENTO-SEO-LANDINGS", "resultado": "PASS", "evidencia": "rutas /cuenta /registro noindex,nofollow" },
+    { "verificacion": "No duplica FieldEngine/ValidationEngine", "resultado": "PASS", "evidencia": "fronterasModulo + integraciones.noDuplica" },
+    { "verificacion": "Bridge coherente ACTA-MIGRACION-USUARIOS-PERFILES", "resultado": "PASS", "evidencia": "bridgeUsuarioPerfil.mvp perfilId=usuarioId; fixture RC-09" },
+    { "verificacion": "Estados alineados config-estados-revision-publicacion", "resultado": "PASS", "evidencia": "cicloVidaEstados.fuente + transicionesValidas/Invalidas" },
+    { "verificacion": "PrivacyGuard: docs verificación nunca públicos", "resultado": "PASS", "evidencia": "clasificacionDatos.sensible.nuncaPublico; fixtures RC-02, RC-07" },
+    { "verificacion": "Dashboard frontera DM-01..10 coherente ANALISIS-REVISION-MVP-DASHBOARD", "resultado": "PASS", "evidencia": "dashboardMinimoOperativo enRegistro vs enDashboardConsumido" },
+    { "verificacion": "Tipos registro referencian schemas sin modificarlos", "resultado": "PASS", "evidencia": "documentosReferenciados config-registro-*; noModifica" },
+    { "verificacion": "11+ matrices obligatorias presentes", "resultado": "PASS", "evidencia": "12 matrices en matricesObligatorias" },
+    { "verificacion": "9 contratos TypeScript-like presentes", "resultado": "PASS", "evidencia": "contratos: Usuario, Cuenta, Perfil, Negocio, Profesional, Anunciante, DocumentoVerificacion, EstadoPerfil, SnapshotPublicacion" },
+    { "verificacion": "Fixtures cubren 8+ casos obligatorios RC-01..RC-10", "resultado": "PASS", "evidencia": "10 fixtures golden" },
+    { "verificacion": "GAP-SPEC-REG cerrado documentalmente", "resultado": "PASS", "evidencia": "cierraGap + criteriosAceptacion CA-01..CA-10" },
+    { "verificacion": "noModifica respetado (solo archivos nuevos)", "resultado": "PASS", "evidencia": "noModifica en SPEC; entrega 5 archivos nuevos" },
+    { "verificacion": "Coherente PLAN-MAESTRO-REGISTRO-CUENTA (formaliza plan)", "resultado": "PASS", "evidencia": "flujos, pantallas, riesgos RC-R01..07 heredados" }
+  ],
+
+  "bloqueantes": [],
+
+  "observaciones": [
+    { "id": "RC-AM-01", "nivel": "menor", "tema": "Verificación teléfono OTP", "detalle": "Documentado como FUTURO_V1.1; no bloquea MVP diseño", "accion": "Incluir en SPEC minor post-MVP cuando Pagos/SMS listo" },
+    { "id": "RC-AM-02", "nivel": "menor", "tema": "Validador script pendiente", "detalle": "validar-spec-registro-cuenta.mjs no implementado; congelamiento es documental", "accion": "Crear validador en fase post-congelamiento diseño" },
+    { "id": "RC-AM-03", "nivel": "menor", "tema": "Migración TBD_PRE_RUNTIME", "detalle": "Bridge MVP documentado; ejecución migración separada de SPEC", "accion": "ACTA-MIGRACION fase ejecución post-autorización runtime" },
+    { "id": "RC-AM-04", "nivel": "menor", "tema": "Recuperación/cambio contraseña prod", "detalle": "Incluidos en SPEC; estadoProd faltante en código actual", "accion": "Implementar en runtime autorizado" }
+  ],
+
+  "riesgosAbiertos": [
+    { "id": "RC-R01", "nivel": "alto", "riesgo": "Datos sensibles en rutas indexables", "mitigacion": "noindex + Storage + PrivacyGuard; ya en SPEC" },
+    { "id": "RC-R02", "nivel": "alto", "riesgo": "Escritura monolito usuarios/{uid}", "mitigacion": "bridge perfiles/{perfilId}; ACTA-MIGRACION" },
+    { "id": "RC-SPEC-01", "nivel": "medio", "riesgo": "Migración ejecución pendiente", "mitigacion": "TBD_PRE_RUNTIME documentado" }
+  ],
+
+  "coberturaFixtures": {
+    "total": 10,
+    "casos": ["visitante", "adulto aprobado+snapshot", "rechazado+observaciones", "negocio enviado_revision", "anunciante sin perfil", "profesional verificación pendiente", "selfie rechazada", "edicion actualizacion_pendiente", "bridge MVP", "gate email no verificado"],
+    "resultado": "PASS"
+  },
+
+  "impactoActaP0": {
+    "cap11RegistroCuentaAntes": "55%",
+    "cap11RegistroCuentaDespues": "90%",
+    "gapSpecReg": "cerrado",
+    "listoConstruccionP0Estimado": "78%"
+  },
+
+  "actaCongelamiento": {
+    "procede": true,
+    "versionPropuesta": "1.0.0",
+    "tipo": "CONGELAMIENTO_DISENO_DOCUMENTAL",
+    "condiciones": [
+      "Runtime Registro/Cuenta no autorizado hasta implementación explícita",
+      "Teléfono OTP, RFC, domicilio fiscal fuera de alcance MVP congelado",
+      "Migración usuarios→perfiles ejecución separada (TBD_PRE_RUNTIME)",
+      "Validador fixtures pendiente (RC-AM-02)"
+    ],
+    "nota": "Congelamiento de CAPA DE DISEÑO (SPEC+fixtures+políticas); no implica deploy ni Firestore"
+  },
+
+  "dependencias": {
+    "consumidas": [
+      "PLAN-MAESTRO-REGISTRO-CUENTA",
+      "ACTA-MIGRACION-USUARIOS-PERFILES",
+      "config-cuentas-usuario-schema",
+      "config-estados-revision-publicacion-schema",
+      "config-registro-*-schema",
+      "mapa-registro-categorias",
+      "SPEC-FIELDENGINE",
+      "SPEC-VALIDATIONENGINE",
+      "ANALISIS-REVISION-MVP-DASHBOARD",
+      "ACTA-SHARED-CORE",
+      "ACTA-FIELDENGINE",
+      "ACTA-VALIDATIONENGINE",
+      "ACTA-RENDERENGINE",
+      "ACTA-SEGURIDAD",
+      "ACTA-DASHBOARDS",
+      "ACTA-CUENTAS",
+      "ACTA-SEO-LANDINGS"
+    ],
+    "noModificadas": true
+  },
+
+  "changelog": [
+    { "version": "1.0.0", "fecha": "2026-06-11", "nota": "Auditoría SPEC-REGISTRO-CUENTA: PASS 90%; 20 verificaciones PASS; 0 bloqueantes; 4 observaciones menores; cierra GAP-SPEC-REG; procede ACTA-CONGELAMIENTO-REGISTRO-CUENTA diseño v1.0.0" }
+  ]
+}

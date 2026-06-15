@@ -1,0 +1,270 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "tipo": "PLAN_MAESTRO",
+  "modulo": "BANNERS_PUBLICIDAD",
+  "titulo": "Plan Maestro Banners y Publicidad CariHub",
+  "fecha": "2026-06-10",
+  "version": "1.0.0",
+  "estado": "PLAN_DISENO_DOCUMENTAL",
+  "modo": "Solo análisis y documentación — sin runtime/carpetas/mover/Firestore/deploy/commit; no modifica capas existentes",
+  "autorizadoPor": "product owner / usuario CariHub",
+  "basadoEn": [
+    "public/js/banner-inventario-rotacion.js (inventario diario + rotación)",
+    "public/js/precios-publicidad.js (resolución de precio)",
+    "scripts/seed-configuracion-publicidad.json (17 slots, capacidades, precios)",
+    "scripts/config-promociones-banners-schema.json (promo tiempo igual gratis, flujo banner)",
+    "public/registro-banner.html / registro-banner2.html / registro-banner-paso3.html",
+    "public/css/banners-publicidad.css",
+    "PLAN-MAESTRO-PAGOS-CONTRATOS.json",
+    "PLAN-MAESTRO-ADMIN.json",
+    "PLAN-MAESTRO-DASHBOARDS.json",
+    "ACTA-CONGELAMIENTO-SHARED-CORE.json",
+    "ACTA-CONGELAMIENTO-RENDERENGINE.json",
+    "public/admin.html (solicitudes_anuncios)"
+  ],
+  "objetivo": "Definir la arquitectura funcional, comercial, operativa, estadística y financiera del ecosistema Banners/Publicidad, separado de Pagos/Contratos (cobro/contrato), RenderEngine (pintado público) y Dashboards (visualización).",
+  "principioRector": "Banners administra INVENTARIO y CREATIVOS. Pagos/Contratos cobra y congela; RenderEngine pinta el slot publicado; Admin aprueba/concilia. Un slot publica solo con contrato_banner activo + pago_confirmado. Métricas reales > estimadas.",
+
+  "inventarioActual": {
+    "estado": "DISENO_AVANZADO_con_precios_y_slots; runtime de captación parcial (registro-banner) y aprobación manual en admin (solicitudes_anuncios)",
+    "archivos": {
+      "inventarioRotacion": "public/js/banner-inventario-rotacion.js — INVENTARIO_DIARIO_BASE + cálculo de apariciones (estimadas)",
+      "precios": "public/js/precios-publicidad.js + seed-configuracion-publicidad.json",
+      "promos": "config-promociones-banners-schema.json — tiempo igual gratis + contratoBanner",
+      "captacion": "registro-banner.html (+2/+paso3) — funnel anunciante",
+      "css": "public/css/banners-publicidad.css",
+      "adminAprobacion": "admin.html → solicitudes_anuncios (revisión/autorización manual)"
+    },
+    "slots": {
+      "total": 17, "pantallas": ["home(9)", "resultados(4)", "perfil(4)"],
+      "home": {
+        "home_izquierda": { "cap": 2, "precioMensualImagen": 1300 },
+        "home_derecha": { "cap": 2, "precioMensualImagen": 1300 },
+        "home_inferior": { "cap": 3, "precioMensualImagen": 850 },
+        "home_categorias": { "cap": 1, "precioMensualImagen": 1000 },
+        "home_hero_1..5": { "cap": 1, "precioMensualImagen": 5000, "exclusivo": true }
+      },
+      "resultados": {
+        "resultados_izquierda": { "cap": 3, "precioMensualImagen": 500 },
+        "resultados_centro": { "cap": 2, "precioMensualImagen": 600 },
+        "resultados_derecha": { "cap": 3, "precioMensualImagen": 500 },
+        "resultados_inferior": { "cap": 3, "precioMensualImagen": 350 }
+      },
+      "perfil": {
+        "perfil_izquierda": { "cap": 3, "precioMensualImagen": 500 },
+        "perfil_centro": { "cap": 2, "precioMensualImagen": 600 },
+        "perfil_derecha": { "cap": 3, "precioMensualImagen": 500 },
+        "perfil_inferior": { "cap": 3, "precioMensualImagen": 350 }
+      }
+    },
+    "aparicionesDiariasBase": "home_hero 1200/día, home_categorias 650, home_izq/der 420, home_inferior 360, resultados_centro 340, resultados_izq/der 280, resultados_inferior 220, perfil_centro 320, perfil_izq/der 260, perfil_inferior 210 — REPARTIDAS entre capacidad (estimadas, no impresiones reales)",
+    "estadisticasReales": "NO existen — apariciones son proyección; no hay colección de impresiones/clicks/CTR en runtime"
+  },
+
+  "inventarioFuturo": {
+    "pantallas": ["Home", "Resultados", "Perfil", "Landing País", "Landing Estado", "Landing Ciudad", "Landing Categoría", "Landing Subcategoría", "Landing SEO geo+categoría"],
+    "espaciosFuturos": ["slots en landings SEO", "slots intercalados en resultados (in-feed)", "slots por categoría", "video doble/triple en hero", "espacios nacionales/internacionales"],
+    "regla": "Nuevos slots se declaran en configuracion_publicidad (mismo modelo pantalla/espacio/capacidad/precio); RenderEngine los pinta sin HTML nuevo por categoría"
+  },
+
+  "modeloInventario": {
+    "jerarquia": "pantalla → espacio → slotId → ocupación(capacidad)",
+    "estadosOcupacion": ["disponible", "parcial(ocupado<capacidad)", "completo(ocupado===capacidad)"],
+    "campos": ["slotId", "pantalla", "espacio", "capacidadMaxima", "ocupados", "disponibles", "activo", "rotacion"],
+    "rotacion": "cap=1 → exclusivo; cap>1 → rotación entre N activos; hero/categorias siempre exclusivos",
+    "aparicionesEstimadas": "INVENTARIO_DIARIO_BASE[slot]/capacidad (dia, x15 quincena, x30 mes)"
+  },
+
+  "contenidos": {
+    "tipos": ["imagen", "video", "audio(futuro)"],
+    "multiEspacio": ["imagen múltiple", "video doble", "video triple", "múltiples slots por campaña"],
+    "multiplicadores": { "imagen": 1, "video": 2 },
+    "atributos": ["duracion(video)", "peso/optimización", "formato responsivo", "rotacion"],
+    "validacion": "ValidationEngine + KYC anunciante; creativos revisados antes de publicar"
+  },
+
+  "campanas": {
+    "tipos": ["simple(1 slot)", "multiple(varios slots/paquete)", "geografica(país/estado/ciudad)", "por_categoria/subcategoria", "nacional", "internacional(futuro)"],
+    "coleccion": "campañas → contratos_banners (1..N slots)",
+    "regla": "Campaña = agrupación de N contratos/slots con vigencia común; precio = suma de slots"
+  },
+
+  "estadisticas": {
+    "actual": "estimadas (apariciones) — sin tracking real",
+    "futuras": ["impresiones reales", "clicks", "CTR", "aperturas", "conversiones(futuro)"],
+    "visibilidad": {
+      "anunciante": ["impresiones/apariciones de SUS banners", "clicks", "CTR", "vigencia restante"],
+      "admin": ["ocupación por slot", "ingresos por slot/pantalla", "CTR global", "slots completos/vacíos", "fraude/anomalías"]
+    },
+    "politicaMetricas": "Distinguir métrica REAL vs ESTIMADA en UI; no inflar; impresiones contadas server-side; anti-bot en clicks; privacidad (sin PII del visitante)",
+    "colecciones_propuestas": ["estadisticas_banner/{slotId}_{periodo}", "eventos_banner/{eventoId} (impresion|click)"]
+  },
+
+  "precios": {
+    "moneda": "MXN", "ivaIncluido": true, "redondeo": 50,
+    "factoresPeriodo": { "semanal": 0.35, "quincenal": 0.65, "mensual": 1 },
+    "multiplicadorVideo": 2,
+    "modoPrecio": ["automatico (base × factor)", "manual (precio fijo por periodo)"],
+    "resolucion": "precioMensualImagenBase(slot) × multiplicadorTipo × factorPeriodo → redondeo 50 (IVA incluido); o precio manual del slot",
+    "preciosHome": "hero 5000, izq/der 1300, categorias 1000, inferior 850 (mensual imagen)",
+    "preciosResultados": "centro 600, izq/der 500, inferior 350",
+    "preciosPerfil": "centro 600, izq/der 500, inferior 350",
+    "video": "× 2 sobre imagen",
+    "promociones": "tiempo igual gratis (7→14, 15→30, 30→60, 90→180) — pago adelantado obligatorio",
+    "descuentos": "por paquete/campaña múltiple (futuro, editable Admin)",
+    "reglasFuturasEditables": "Admin comercial edita precios/overrides/promos; NO afecta contratos activos (congelado)",
+    "fuenteVerdad": "configuracion_publicidad/precios_banners (separado de config_precios_perfiles)"
+  },
+
+  "contratos": {
+    "tipos": ["contrato_banner(1 slot)", "contrato_campaña(N slots)"],
+    "coleccion": "contratos_banners/{contratoId}",
+    "campos": ["usuarioId", "anuncianteId", "slotId", "pantalla", "espacio", "precioPagado", "precioContratado", "versionPrecio", "promocionAplicada", "versionPromocion", "diasPagados", "diasBonificados", "diasTotales", "fechaInicio", "fechaVencimiento", "estadoContrato", "requiereRevisionPostPago", "datosModificadosDespuesDePago", "pais", "estado", "ciudad"],
+    "congelado": "precioContratado + promocionAplicada fijos durante diasTotales",
+    "vigencia/renovacion/vencimiento/suspension/reactivacion/cancelacion": "gobernados por PLAN-MAESTRO-PAGOS-CONTRATOS",
+    "revisionPostPago": "cambios en imagenPrincipal/imagenesAdicionales/mensaje/slot/categoria/ciudad/documentos → revision_post_pago (bloquea publicación hasta aprobar)"
+  },
+
+  "cicloCompleto": "solicitud → revisión (Admin) → autorizado_para_pago → pago_pendiente → pago_confirmado → contrato_banner → publicación (RenderEngine) → estadísticas → por_vencer → vencimiento → (renovación | oculto)",
+
+  "dashboards": {
+    "anunciante": ["mis banners/campañas", "estado y vigencia", "apariciones/impresiones, clicks, CTR", "comprobantes", "renovar"],
+    "banners_operacion": ["ocupación por slot", "calendario de vigencias", "creativos pendientes"],
+    "admin_publicidad": ["cola solicitudes_anuncios", "ingresos por slot/pantalla", "ocupación global", "anomalías/fraude", "precios/promos"],
+    "nota": "Dashboards solo visualizan; aprobación/conciliación en Admin; ver Dashboards 1.0.0 (publicidad_banners) y PLAN-MAESTRO-DASHBOARDS"
+  },
+
+  "admin": {
+    "acciones": ["revisión", "aprobación", "rechazo(motivo)", "autorizar_para_pago", "confirmar_pago", "suspensión", "reactivación", "modificación_manual_creativo/slot", "auditoría", "modificar_precios/promos"],
+    "controlReforzado": {
+      "dobleConfirmacion": ["suspender banner activo público", "cancelar campaña con reembolso", "modificar slot de contrato activo"],
+      "auditoriaObligatoria": ["aprobar/rechazar", "confirmar pago", "acceso a KYC anunciante", "modificar precios"],
+      "aprobacionSuperior": ["reembolso", "excepción de precio", "override de inventario (publicar sobre capacidad)"]
+    },
+    "referencia": "RBAC: super_admin, comercial_admin, moderador (revisión), admin — ver PLAN-MAESTRO-ADMIN"
+  },
+
+  "automatizaciones": {
+    "jobs": ["publicacion_automatica (al confirmar pago + revisión OK)", "vencimiento_automatico (fechaVencimiento)", "renovacion_automatica(futuro)", "recordatorio_pre_vencimiento", "alertas (slot completo, creativo caído, anomalía CTR)"],
+    "regla": "Vencimiento oculta, no borra; rotación recalculada al activar/vencer; jobs idempotentes con log"
+  },
+
+  "integraciones": {
+    "sharedCore": "tokens visuales, helpers, config (Shared/Core 1.0.0)",
+    "validationEngine": "valida creativos/estados/transiciones de banner (VE 1.1.0)",
+    "fieldEngine": "datos del anunciante/creativo como campos resueltos (FieldEngine 1.0.1)",
+    "renderEngine": "pinta el slot publicado desde snapshot; no decide cobro ni inventario (RenderEngine 1.0.0)",
+    "dashboards": "visualización anunciante/admin (Dashboards 1.0.0)",
+    "admin": "revisión/aprobación/conciliación (PLAN-MAESTRO-ADMIN)",
+    "pagosContratos": "cobro + contrato_banner congelado + vigencias (PLAN-MAESTRO-PAGOS-CONTRATOS)",
+    "appPublica": "Home/Resultados/Perfil exponen los slots; carga liviana/lazy",
+    "seo": "banner vencido/oculto no afecta indexación; creativos no indexables",
+    "themeEngine": "estilos del contenedor de banner por tema (no del creativo)",
+    "agentesIA": "iaComercial recomienda precios/ocupación (solo lectura); no auto-publica"
+  },
+
+  "matrices": {
+    "pantallaBannerSlotCapacidad": {
+      "home": { "slots": 9, "capacidadTotal": "izq2+der2+inf3+cat1+hero(1x5)=13", "exclusivos": ["home_categorias", "home_hero_1..5"] },
+      "resultados": { "slots": 4, "capacidadTotal": "izq3+centro2+der3+inf3=11" },
+      "perfil": { "slots": 4, "capacidadTotal": "izq3+centro2+der3+inf3=11" }
+    },
+    "campanaPagoContratoPublicacion": {
+      "simple": "1 solicitud → 1 pago → 1 contrato_banner → 1 slot publicado",
+      "multiple/campaña": "1 solicitud → 1 pago (suma) → N contratos_banners → N slots publicados",
+      "geografica": "slots filtrados por pais/estado/ciudad en landing/resultados",
+      "publica_si": "contrato activo + pago_confirmado + (sin cambios post-pago o revisión post-pago aprobada)"
+    },
+    "estadoTransicion": {
+      "solicitud": ["en_revision", "rechazado"],
+      "en_revision": ["autorizado_para_pago", "rechazado", "correccion_solicitada"],
+      "autorizado_para_pago": ["pago_pendiente"],
+      "pago_pendiente": ["pago_confirmado", "vencido(sin pago)"],
+      "pago_confirmado": ["publicado", "revision_post_pago"],
+      "revision_post_pago": ["publicado", "rechazado"],
+      "publicado": ["por_vencer", "suspendido"],
+      "por_vencer": ["renovado", "vencido"],
+      "vencido": ["renovado", "oculto"],
+      "suspendido": ["publicado(reactivar)", "cancelado"]
+    },
+    "permisos": {
+      "crear_solicitud": ["anunciante"],
+      "revisar/aprobar/rechazar": ["super_admin", "moderador", "comercial_admin"],
+      "confirmar_pago": ["super_admin", "comercial_admin"],
+      "suspender/reactivar": ["super_admin", "admin", "moderador"],
+      "modificar_precios": ["super_admin", "comercial_admin"],
+      "ver_stats_propias": ["anunciante(dueño)"],
+      "ver_stats_globales": ["super_admin", "comercial_admin", "auditor"]
+    },
+    "estadisticas": {
+      "impresion": "incremento server-side al pintar slot (anti-bot)",
+      "click": "evento validado (anti-fraude, dedup por sesión)",
+      "CTR": "clicks/impresiones",
+      "visibleAnunciante": ["impresiones", "clicks", "CTR", "vigencia"],
+      "visibleAdmin": ["+ ingresos", "ocupación", "anomalías"]
+    },
+    "preciosVigencias": {
+      "home_hero": { "mensual_imagen": 5000, "video": 10000, "semanal": "x0.35", "quincenal": "x0.65" },
+      "home_izq/der": { "mensual_imagen": 1300 },
+      "home_categorias": { "mensual_imagen": 1000 },
+      "home_inferior": { "mensual_imagen": 850 },
+      "resultados/perfil_centro": { "mensual_imagen": 600 },
+      "resultados/perfil_izq/der": { "mensual_imagen": 500 },
+      "resultados/perfil_inferior": { "mensual_imagen": 350 },
+      "promo": "tiempo igual gratis duplica diasTotales (pago adelantado)"
+    }
+  },
+
+  "modulosInternos": ["InventoryManager (slots/capacidad/ocupación)", "RotationEngine (selección de creativo por slot)", "CreativeStore (imagen/video, validación)", "CampaignBuilder (N slots)", "AdImpressionTracker (impresiones/clicks server-side)", "AdStatsReporter (CTR, ocupación)", "AdPricingResolver (delegado/alineado con precios-publicidad)", "AdReviewQueue (solicitudes_anuncios)"],
+  "rutasSugeridas": {
+    "anunciante": ["/cuenta/banners", "/cuenta/banners/nuevo", "/cuenta/banners/:id/stats", "/cuenta/banners/renovar"],
+    "captacion": ["/anunciar (registro-banner)"],
+    "admin": ["/admin/publicidad", "/admin/publicidad/solicitudes", "/admin/publicidad/inventario", "/admin/publicidad/precios"]
+  },
+
+  "riesgos": [
+    { "id": "BP-R01", "nivel": "critico", "riesgo": "Estadísticas son ESTIMADAS (apariciones), no reales — el anunciante puede sentirse engañado", "mitigacion": "AdImpressionTracker server-side + etiquetar estimado vs real" },
+    { "id": "BP-R02", "nivel": "alto", "riesgo": "Publicar sobre capacidad (overbooking del slot)", "mitigacion": "InventoryManager con bloqueo por capacidadMaxima + override con aprobación superior" },
+    { "id": "BP-R03", "nivel": "alto", "riesgo": "Banner publicado sin contrato/pago confirmado", "mitigacion": "publicar solo con contrato_banner activo + pago_confirmado (gate)" },
+    { "id": "BP-R04", "nivel": "alto", "riesgo": "Doble fuente de verdad de precios (seed JSON + JS fallback + Firestore)", "mitigacion": "configuracion_publicidad/precios_banners como única fuente; JS solo fallback" },
+    { "id": "BP-R05", "nivel": "medio", "riesgo": "Cambio de precio afecta campañas activas", "mitigacion": "precio/promoción congelados (config-contratos)" },
+    { "id": "BP-R06", "nivel": "medio", "riesgo": "Banners pesados (hero/video) dañan CWV de Home", "mitigacion": "lazy load, peso máximo, optimización, RenderEngine snapshot" },
+    { "id": "BP-R07", "nivel": "medio", "riesgo": "Click fraud / impresiones infladas", "mitigacion": "anti-bot, dedup por sesión, validación server-side" },
+    { "id": "BP-R08", "nivel": "medio", "riesgo": "Creativo inapropiado publicado", "mitigacion": "revisión obligatoria + revision_post_pago + moderación" },
+    { "id": "BP-R09", "nivel": "bajo", "riesgo": "Aprobación manual no escala (solicitudes_anuncios en admin.html)", "mitigacion": "AdReviewQueue con SLA + automatización publicación" }
+  ],
+  "dependencias": {
+    "congeladas": ["Shared/Core 1.0.0", "RenderEngine 1.0.0", "ValidationEngine 1.1.0", "FieldEngine 1.0.1", "Dashboards 1.0.0"],
+    "planes": ["PLAN-MAESTRO-PAGOS-CONTRATOS (cobro/contrato)", "PLAN-MAESTRO-ADMIN (revisión/RBAC)", "PLAN-MAESTRO-DASHBOARDS (visualización)"],
+    "schemasDiseno": ["config-promociones-banners-schema.json", "seed-configuracion-publicidad.json"],
+    "precondiciones": ["AdImpressionTracker (stats reales)", "RenderEngine pintando slots", "rules para configuracion_publicidad/contratos_banners/estadisticas_banner", "migración usuarios→perfiles/anunciante"]
+  },
+  "estructuraIdealFutura": {
+    "nota": "Lógica; sin crear carpetas",
+    "appBanners": "captación /anunciar + gestión en /cuenta/banners + consola /admin/publicidad",
+    "core": ["InventoryManager", "RotationEngine", "CreativeStore", "AdImpressionTracker", "AdStatsReporter", "AdPricingResolver", "AdReviewQueue"],
+    "separacion": "Inventario/creativos (este módulo) ⟂ cobro/contrato (Pagos) ⟂ pintado (RenderEngine) ⟂ visualización (Dashboards)"
+  },
+  "ordenRecomendadoImplementacion": [
+    { "paso": 1, "accion": "Unificar fuente de precios en configuracion_publicidad (JS solo fallback) + AdPricingResolver", "prioridad": "P0", "cierra": "BP-R04" },
+    { "paso": 2, "accion": "InventoryManager con capacidad/ocupación + gate de publicación (contrato+pago)", "prioridad": "P0", "cierra": "BP-R02/BP-R03" },
+    { "paso": 3, "accion": "AdReviewQueue (migrar solicitudes_anuncios) + revisión/revision_post_pago", "prioridad": "P1", "cierra": "BP-R08/BP-R09" },
+    { "paso": 4, "accion": "AdImpressionTracker + AdStatsReporter (impresiones/clicks/CTR reales, anti-fraude)", "prioridad": "P1", "cierra": "BP-R01/BP-R07" },
+    { "paso": 5, "accion": "RotationEngine + RenderEngine pintando slots con lazy/optimización", "prioridad": "P1", "cierra": "BP-R06" },
+    { "paso": 6, "accion": "CampaignBuilder (multi-slot/geo) + promociones/descuentos", "prioridad": "P2" },
+    { "paso": 7, "accion": "Slots en landings SEO + video doble/triple + internacional", "prioridad": "P3" }
+  ],
+
+  "procedenciaPlanMaestro": {
+    "crearMd": true, "crearJson": true,
+    "justificacion": "El inventario de banners ya está parcialmente implementado (17 slots, precios, rotación, captación) pero disperso y sin estadísticas reales ni gate de publicación formal; requiere plan propio que unifique inventario, creativos, estadísticas y su frontera con Pagos/RenderEngine/Admin.",
+    "siguientesPasos": ["SPEC-BANNERS (si se autoriza congelar)", "ADR-METRICAS-PUBLICIDAD (real vs estimado)", "integración con SPEC-PAGOS-CONTRATOS"]
+  },
+  "noModifica": [
+    "Capas congeladas y schemas/seed de publicidad existentes (se referencian, no se alteran)",
+    "Producción, Firestore, deploy, commit"
+  ],
+  "changelog": [
+    { "version": "1.0.0", "fecha": "2026-06-10", "nota": "Plan maestro Banners/Publicidad: inventario actual(17 slots)/futuro, modelo de inventario, contenidos, campañas, estadísticas, precios/vigencias, contratos, ciclo completo, dashboards, admin, automatizaciones, integraciones, matrices, riesgos y orden de implementación" }
+  ]
+}

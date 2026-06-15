@@ -1,0 +1,175 @@
+{
+  "$meta": {
+    "archivo": "scripts/blk01-seed-emulador.json",
+    "proposito": "Dataset SEED ficticio para validar blk01-inventario.mjs y blk01-dryrun-migracion.mjs en EMULADOR. NO es data real, NO contiene PII.",
+    "estado": "NO_CARGADO — referencia. No cargar sin autorizacion explicita del PO.",
+    "entornoObligatorio": {
+      "proyecto": "demo-carihub (NUNCA carihub-app)",
+      "FIRESTORE_EMULATOR_HOST": "127.0.0.1:8080",
+      "GCLOUD_PROJECT": "demo-carihub"
+    },
+    "anonimizacion": [
+      "Datos 100% ficticios e inventados.",
+      "Sin PII real, sin telefonos reales, sin correos reales.",
+      "Sin INE real, sin RFC real, sin nombres de personas reales.",
+      "Correos usan dominio @example.test; telefonos usan rango ficticio 555-01xx."
+    ],
+    "convenciones": {
+      "timestamp": "Los objetos {\"$timestamp\":\"<ISO8601>\"} representan un Firestore Timestamp; un cargador (aun no autorizado) debe convertirlos con admin.firestore.Timestamp.fromDate(new Date(iso)).",
+      "favoritos": "Se cargan en la subcoleccion usuarios/{ownerUid}/favoritos/{perfilId} (collectionGroup 'favoritos'). El id del doc favorito ES el perfilId referenciado.",
+      "huerfano": "Un favorito es huerfano si su perfilId NO existe como doc en usuarios/ (bridge perfilId=uid)."
+    },
+    "casosIncluidos": [
+      "perfil activo (publico vigente)",
+      "perfil vencido",
+      "perfil pendiente (registro_pendiente)",
+      "usuario sin perfil",
+      "usuario con KYC ficticio",
+      "favorito valido",
+      "favorito huerfano"
+    ],
+    "noCargarTodavia": true
+  },
+
+  "usuarios": {
+    "demo_uid_activo": {
+      "uid": "demo_uid_activo",
+      "email": "activo@example.test",
+      "nombre": "Perfil Demo Activo",
+      "aprobado": true,
+      "activo": true,
+      "vencido": false,
+      "estadoRevision": "publicado",
+      "estadoPago": "pagado",
+      "pagado": true,
+      "primerMesGratis": false,
+      "fechaVencimiento": { "$timestamp": "2027-01-01T00:00:00.000Z" },
+      "fechaPublicacion": { "$timestamp": "2026-05-01T00:00:00.000Z" },
+      "geo": { "ciudad": "Ciudad Demo", "estado": "Estado Demo", "pais": "MX" },
+      "formularioId": "form_demo_independiente",
+      "sectorId": "sector_demo",
+      "subcategoriaId": "subcat_demo",
+      "arquetipo": "independiente",
+      "tipoPerfil": "persona",
+      "descripcion": "Descripcion publica ficticia para pruebas de emulador.",
+      "fotos": ["https://placehold.test/foto1.jpg"],
+      "schemaVersion": "1.0.0",
+      "componenteResultados": "card_resultado_v1",
+      "componentePerfil": "perfil_v1",
+      "createdAt": { "$timestamp": "2026-04-01T00:00:00.000Z" },
+      "updatedAt": { "$timestamp": "2026-05-01T00:00:00.000Z" }
+    },
+
+    "demo_uid_vencido": {
+      "uid": "demo_uid_vencido",
+      "email": "vencido@example.test",
+      "nombre": "Perfil Demo Vencido",
+      "aprobado": true,
+      "activo": true,
+      "vencido": true,
+      "estadoRevision": "publicado",
+      "estadoPago": "vencido",
+      "pagado": false,
+      "primerMesGratis": false,
+      "fechaVencimiento": { "$timestamp": "2026-01-01T00:00:00.000Z" },
+      "fechaPublicacion": { "$timestamp": "2025-10-01T00:00:00.000Z" },
+      "geo": { "ciudad": "Ciudad Demo", "estado": "Estado Demo", "pais": "MX" },
+      "formularioId": "form_demo_independiente",
+      "sectorId": "sector_demo",
+      "subcategoriaId": "subcat_demo",
+      "arquetipo": "independiente",
+      "tipoPerfil": "persona",
+      "descripcion": "Perfil ficticio vencido para validar mapeo de estado.",
+      "fotos": ["https://placehold.test/foto2.jpg"],
+      "schemaVersion": "1.0.0",
+      "componenteResultados": "card_resultado_v1",
+      "componentePerfil": "perfil_v1",
+      "createdAt": { "$timestamp": "2025-09-01T00:00:00.000Z" },
+      "updatedAt": { "$timestamp": "2026-01-02T00:00:00.000Z" }
+    },
+
+    "demo_uid_pendiente": {
+      "uid": "demo_uid_pendiente",
+      "email": "pendiente@example.test",
+      "nombre": "Perfil Demo Pendiente",
+      "aprobado": false,
+      "activo": false,
+      "vencido": false,
+      "estadoRevision": "registro_pendiente",
+      "estadoPago": "sin_pago",
+      "pagado": false,
+      "primerMesGratis": true,
+      "geo": { "ciudad": "Ciudad Demo", "estado": "Estado Demo", "pais": "MX" },
+      "formularioId": "form_demo_independiente",
+      "sectorId": "sector_demo",
+      "subcategoriaId": "subcat_demo",
+      "arquetipo": "independiente",
+      "tipoPerfil": "persona",
+      "descripcion": "Perfil ficticio en registro pendiente (borrador).",
+      "fotos": [],
+      "schemaVersion": "1.0.0",
+      "componenteResultados": "card_resultado_v1",
+      "componentePerfil": "perfil_v1",
+      "createdAt": { "$timestamp": "2026-06-01T00:00:00.000Z" },
+      "updatedAt": { "$timestamp": "2026-06-01T00:00:00.000Z" }
+    },
+
+    "demo_uid_sin_perfil": {
+      "uid": "demo_uid_sin_perfil",
+      "email": "sinperfil@example.test",
+      "estadoRevision": "sin_perfil",
+      "estadoPago": "sin_pago",
+      "schemaVersion": "1.0.0",
+      "createdAt": { "$timestamp": "2026-06-05T00:00:00.000Z" },
+      "updatedAt": { "$timestamp": "2026-06-05T00:00:00.000Z" }
+    },
+
+    "demo_uid_kyc": {
+      "uid": "demo_uid_kyc",
+      "email": "kyc@example.test",
+      "nombre": "Perfil Demo KYC",
+      "aprobado": false,
+      "activo": false,
+      "vencido": false,
+      "estadoRevision": "registro_pendiente",
+      "estadoPago": "sin_pago",
+      "pagado": false,
+      "primerMesGratis": true,
+      "verificacion": {
+        "estado": "en_revision",
+        "ineFrente": "emulador://ficticio/ine-frente-demo.jpg",
+        "ineReverso": "emulador://ficticio/ine-reverso-demo.jpg",
+        "selfie": "emulador://ficticio/selfie-demo.jpg",
+        "nota": "Documentos KYC totalmente ficticios; no representan identidad real."
+      },
+      "geo": { "ciudad": "Ciudad Demo", "estado": "Estado Demo", "pais": "MX" },
+      "formularioId": "form_demo_independiente",
+      "sectorId": "sector_demo",
+      "subcategoriaId": "subcat_demo",
+      "arquetipo": "independiente",
+      "tipoPerfil": "persona",
+      "descripcion": "Perfil ficticio con KYC en revision para validar separacion de campos sensibles.",
+      "fotos": ["https://placehold.test/foto3.jpg"],
+      "schemaVersion": "1.0.0",
+      "componenteResultados": "card_resultado_v1",
+      "componentePerfil": "perfil_v1",
+      "createdAt": { "$timestamp": "2026-06-03T00:00:00.000Z" },
+      "updatedAt": { "$timestamp": "2026-06-03T00:00:00.000Z" }
+    }
+  },
+
+  "favoritos": [
+    {
+      "ownerUid": "demo_uid_sin_perfil",
+      "perfilId": "demo_uid_activo",
+      "tipo": "valido",
+      "createdAt": { "$timestamp": "2026-06-06T00:00:00.000Z" }
+    },
+    {
+      "ownerUid": "demo_uid_sin_perfil",
+      "perfilId": "demo_perfil_inexistente_999",
+      "tipo": "huerfano",
+      "createdAt": { "$timestamp": "2026-06-06T00:00:00.000Z" }
+    }
+  ]
+}

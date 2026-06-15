@@ -1,0 +1,456 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "$id": "https://carihub.app/schemas/spec-registro-cuenta.json",
+  "tipo": "SPEC_TECNICA",
+  "nombre": "Registro-Cuenta — Especificación técnica formal",
+  "versionSpec": "1.0.0",
+  "fecha": "2026-06-11",
+  "estado": "DISENO_INICIAL",
+  "implementacionAutorizada": false,
+  "modo": "Solo análisis, especificación, fixtures, auditoría y documentación — sin runtime/carpetas/mover/Firestore/deploy/commit; NO modifica planes/schemas/actas existentes",
+  "proposito": "Convertir PLAN-MAESTRO-REGISTRO-CUENTA y schemas de registro en SPEC formal, completa, validable y congelable. Cierra GAP-SPEC-REG (ACTA-CONGELAMIENTO-P0-RUNTIME-FOUNDATION).",
+  "principioRector": "Registro/Cuenta es la capa de IDENTIDAD y ONBOARDING: alta de cuenta, autenticación, verificación, wizard/edición de perfil vía FieldEngine, gestión de credenciales y estados pre-publicación. Consume Shared/Core, FieldEngine, ValidationEngine y Seguridad MVP; NO renderiza superficies públicas; NO reimplementa reglas de motores congelados.",
+  "cierraGap": "GAP-SPEC-REG",
+
+  "dependenciasCongeladas": {
+    "sharedCore": "shared-core-2026-06-10@1.0.0 (ACTA-CONGELAMIENTO-SHARED-CORE)",
+    "renderEngine": "renderengine-2026-06-10@1.0.0 (ACTA-CONGELAMIENTO-RENDERENGINE)",
+    "fieldEngine": "fieldengine-2026-06-10@1.0.1 (ACTA-CONGELAMIENTO-FIELDENGINE)",
+    "validationEngine": "validationengine-2026-06-10@1.1.0 (ACTA-CONGELAMIENTO-VALIDATIONENGINE)",
+    "seguridadMvp": "seguridad-2026-06-10@1.0.0 (ACTA-CONGELAMIENTO-SEGURIDAD)",
+    "catalogo": "catalogo-2026-06-10@1.0.0 (ACTA-CONGELAMIENTO-CATALOGO)",
+    "cuentas": "cuentas-2026-06-10@1.0.0 (ACTA-CONGELAMIENTO-CUENTAS)",
+    "dashboards": "dashboards-2026-06-10@1.0.0 (ACTA-CONGELAMIENTO-DASHBOARDS)",
+    "seoLandings": "seo-landings-2026-06-11@1.0.0 (ACTA-CONGELAMIENTO-SEO-LANDINGS)"
+  },
+  "documentosReferenciados": [
+    "scripts/PLAN-MAESTRO-REGISTRO-CUENTA.json",
+    "scripts/ACTA-MIGRACION-USUARIOS-PERFILES.json",
+    "scripts/config-cuentas-usuario-schema.json",
+    "scripts/config-estados-revision-publicacion-schema.json",
+    "scripts/config-registro-adultos-schema.json",
+    "scripts/config-registro-independiente-schema.json",
+    "scripts/config-registro-profesionista-schema.json",
+    "scripts/config-registro-negocio-schema.json",
+    "scripts/config-registro-visitante-schema.json",
+    "scripts/config-registro-componentes-ui-schema.json",
+    "scripts/mapa-registro-categorias.json",
+    "scripts/ANALISIS-REVISION-MVP-DASHBOARD.json"
+  ],
+  "noModifica": [
+    "PLAN-MAESTRO-REGISTRO-CUENTA", "config-registro-*-schema", "config-cuentas-usuario-schema",
+    "config-estados-revision-publicacion-schema", "ACTA-MIGRACION-USUARIOS-PERFILES",
+    "SPEC-FIELDENGINE", "SPEC-VALIDATIONENGINE", "SPEC-RENDERENGINE", "SPEC-DASHBOARDS", "SPEC-SEO-LANDINGS",
+    "Producción, Firestore, deploy"
+  ],
+
+  "fronterasModulo": {
+    "registroCuenta": ["Auth", "alta cuenta", "verificación documentos", "wizard FieldEngine", "edición perfil", "estados pre-publicación", "snapshotAlPublicar trigger"],
+    "dashboards": ["Panel post-login lectura", "métricas", "renovaciones UI", "notificaciones", "CTA editar → Registro"],
+    "appPublica": ["Home/Resultados/Perfil público", "CTA registro/login", "no auth embebido post-desacople"],
+    "admin": ["Aprobar/rechazar", "observaciones", "moderación verificación", "publicar/suspender"],
+    "pagos": ["contratar_plan", "webhook activación", "Renovación CTA en Dashboard"],
+    "banners": ["solicitudes_anuncios post-registro anunciante", "creativos", "cobro"],
+    "fieldEngine": ["resolveRegistrationSchema", "campos/fotos/componentes", "securityGates definición"],
+    "validationEngine": ["validateFieldValues", "gates acción", "rate limits", "Turnstile"],
+    "renderEngine": ["consume snapshotAlPublicar", "PrivacyGuard", "NO usado en rutas privadas /cuenta /registro"]
+  },
+
+  "tiposRegistro": {
+    "usuario": {
+      "estadosCuenta": ["visitante", "pendiente_activacion", "activa", "suspendida", "eliminada_logica"],
+      "roles": ["visitante", "adulto", "independiente", "profesionista", "empresa", "anunciante", "admin"],
+      "descripcion": "Firebase Auth uid = usuarioId; hub usuarios/{usuarioId}"
+    },
+    "perfilPublico": {
+      "arquetipos": ["persona_acompanante", "modelo", "masajista", "persona_independiente", "profesionista"],
+      "formularios": ["adultos", "persona_independiente", "profesionista_cedula"],
+      "resolucion": "mapa-registro-categorias.json → subcategoriaId → formularioId (FieldEngine)",
+      "categoriasFuturas": "Nuevas subcategorías vía catálogo congelado + mapa; sin hardcode en SPEC"
+    },
+    "negocio": {
+      "tipos": ["hotel", "motel", "spa", "sex_shop", "restaurante", "bar", "antro", "local_comercial"],
+      "formularioId": "negocio_empresa",
+      "schema": "config-registro-negocio-schema.json",
+      "negociosFuturos": "Extensión catálogo sector negocios"
+    },
+    "profesional": {
+      "tipos": ["abogado", "contador", "medico", "cirujano", "fotografo", "terapeuta"],
+      "formularioId": "profesionista_cedula",
+      "schema": "config-registro-profesionista-schema.json",
+      "documentosExtra": ["cedula_profesional"]
+    },
+    "anunciante": {
+      "slots": ["banner_home", "banner_resultados", "banner_perfil"],
+      "perfilPublicoRequerido": false,
+      "anuncianteId": "usuarioId MVP",
+      "postRegistro": "Deriva a PLAN-MAESTRO-BANNERS / registro-banner.html",
+      "campanasFuturas": "Post-MVP V1.1"
+    }
+  },
+
+  "cuenta": {
+    "login": { "metodo": "email_password", "provider": "Firebase Auth", "ruta": "/cuenta/acceso", "accionVE": "login" },
+    "logout": { "metodo": "signOut", "ruta": "cualquier privada", "invalidaSesion": true },
+    "crearCuenta": { "metodo": "createUserWithEmailAndPassword", "ruta": "/cuenta/crear", "accionVE": "registro_auth", "turnstile": true },
+    "recuperacionPassword": { "metodo": "sendPasswordResetEmail", "ruta": "/cuenta/recuperar", "accionVE": "recuperacion_password", "estadoProd": "faltante — incluido SPEC" },
+    "cambioPassword": { "metodo": "reauth + updatePassword", "ruta": "/cuenta/seguridad", "estadoProd": "faltante — incluido SPEC" },
+    "verificacionEmail": { "metodo": "sendEmailVerification", "gate": "enviar_revision requiere emailVerificado=true", "campo": "usuarios.seguridad.emailVerificado" },
+    "verificacionTelefono": { "estado": "FUTURO_V1.1", "metodo": "OTP SMS", "campo": "usuarios.seguridad.telefonoVerificado", "nota": "Documentado; no MVP" },
+    "sesiones": { "provider": "Firebase Auth session", "revocacion": "logout + admin suspende cuenta" },
+    "dispositivos": { "estado": "FUTURO", "nota": "Lista dispositivos/confianza post-MVP" },
+    "bloqueo": { "tipos": ["temporal_rate_limit", "estadoSeguridad_restringido", "cuenta_suspendida"], "fuente": "config-seguridad-mvp-schema" },
+    "reactivacion": { "responsable": "admin", "flujo": "suspendido → admin reactiva → activa" }
+  },
+
+  "perfil": {
+    "creacion": { "via": "wizard FieldEngine post-cuenta", "coleccion": "perfiles/{perfilId}", "accionesVE": ["guardar_borrador", "enviar_revision"] },
+    "edicion": { "via": "/registro/editar/{perfilId}", "reentraWizard": true, "accionVE": "editar_perfil", "disparaRevision": "camposImportantes cambiados → actualizacion_pendiente" },
+    "duplicado": { "permitido": false, "mvp": "1 perfil principal por usuario salvo multi-perfil futuro" },
+    "suspension": { "responsable": "admin", "estado": "suspendido", "publico": false },
+    "eliminacionLogica": { "estadoCuenta": "eliminada", "perfil": "archivado", "publico": false, "retencion": "según política legal" },
+    "eliminacionFisica": { "estado": "FUTURO", "requiere": "proceso legal + admin" },
+    "archivado": { "estado": "archivado", "publico": false, "recuperable": "admin" },
+    "renovacion": { "delegado": "Pagos + Dashboard CTA", "registro": "actualiza estado tras webhook" }
+  },
+
+  "verificacion": {
+    "tipos": {
+      "correo": { "mvp": true, "metodo": "Firebase sendEmailVerification", "obligatorioPara": "enviar_revision" },
+      "telefono": { "mvp": false, "futuro": "V1.1 OTP" },
+      "ine_frente": { "mvp": true, "storage": "perfiles/{perfilId}/verificacion/ine-frente", "accionVE": "subir_verificacion_ine_frente" },
+      "ine_reverso": { "mvp": true, "recomendado": true, "accionVE": "subir_verificacion_ine_reverso" },
+      "selfie_fecha": { "mvp": true, "storage": "perfiles/{perfilId}/verificacion/selfie", "accionVE": "subir_selfie_verificacion" },
+      "comprobante_domicilio": { "mvp": false, "futuro": "negocio/profesional" },
+      "rfc": { "mvp": false, "futuro": "facturación" },
+      "razon_social": { "mvp": false, "futuro": "negocio fiscal" },
+      "cedula_profesional": { "mvp": "condicional", "aplica": "profesionista_cedula" }
+    },
+    "estadosDocumento": ["pendiente", "subido", "en_revision", "aprobado", "rechazado", "expirado"],
+    "rechazo": { "campo": "verificacion.observacionesAdmin", "visibleUsuario": true, "dispara": "correccion_solicitada" },
+    "aprobacion": { "responsable": "admin", "dispara": "continua flujo publicación" },
+    "auditoria": { "coleccion": "historial_verificaciones", "eventos": ["documento_subido", "documento_aprobado", "documento_rechazado"] }
+  },
+
+  "cicloVidaEstados": {
+    "fuente": "config-estados-revision-publicacion-schema.json",
+    "estadosPerfil": ["borrador", "enviado_revision", "correccion_solicitada", "requiere_revision_categoria", "categoria_autorizada", "categoria_rechazada", "autorizado_para_pago", "autorizado_gratis", "pago_pendiente", "pago_confirmado", "revision_post_pago", "publicado", "activo", "vencido", "suspendido", "rechazado", "archivado"],
+    "estadosCuenta": ["pendiente_activacion", "activa", "suspendida", "eliminada_logica"],
+    "transicionesValidas": [
+      { "de": "borrador", "a": "enviado_revision", "actor": "usuario", "accionVE": "enviar_revision", "precondiciones": ["emailVerificado", "camposObligatorios", "documentosRequeridos"] },
+      { "de": "enviado_revision", "a": "correccion_solicitada", "actor": "admin" },
+      { "de": "enviado_revision", "a": "rechazado", "actor": "admin" },
+      { "de": "enviado_revision", "a": "publicado", "actor": "admin", "flujo": "primer_mes_gratis" },
+      { "de": "enviado_revision", "a": "autorizado_para_pago", "actor": "admin", "flujo": "negocio" },
+      { "de": "correccion_solicitada", "a": "enviado_revision", "actor": "usuario", "accionVE": "enviar_revision" },
+      { "de": "autorizado_para_pago", "a": "pago_pendiente", "actor": "usuario|sistema" },
+      { "de": "pago_pendiente", "a": "pago_confirmado", "actor": "admin|webhook" },
+      { "de": "pago_confirmado", "a": "publicado", "actor": "admin|sistema", "condicion": "sin cambios importantes" },
+      { "de": "pago_confirmado", "a": "revision_post_pago", "actor": "sistema", "condicion": "cambios importantes post-pago" },
+      { "de": "publicado", "a": "activo", "actor": "sistema|admin" },
+      { "de": "activo", "a": "vencido", "actor": "sistema", "trigger": "contratoVencido" },
+      { "de": "activo", "a": "suspendido", "actor": "admin" },
+      { "de": "vencido", "a": "pago_pendiente", "actor": "usuario", "via": "Dashboard renovación" },
+      { "de": "suspendido", "a": "activo", "actor": "admin" }
+    ],
+    "transicionesInvalidas": [
+      { "de": "borrador", "a": "publicado", "motivo": "Nunca auto-publicar" },
+      { "de": "rechazado", "a": "activo", "motivo": "Requiere nuevo envío revisión" },
+      { "de": "cualquiera", "a": "activo", "condicion": "sin admin + pago si aplica", "motivo": "Nunca auto-activar" }
+    ],
+    "eventosDisparados": {
+      "enviar_revision": ["historial_perfil.enviado_revision", "notificacion_admin.verificacion_recibida"],
+      "admin_aprueba": ["historial_perfil.aprobado", "trigger_snapshotAlPublicar"],
+      "admin_rechaza": ["historial_perfil.rechazado", "notificacion_usuario.correccion"]
+    }
+  },
+
+  "clasificacionDatos": {
+    "niveles": ["publico", "privado", "sensible", "administrativo", "auditoria"],
+    "reglas": {
+      "publico": { "ver": ["visitante", "usuario", "admin"], "editar": ["owner"], "exportar": ["admin"], "eliminar": ["admin"], "ejemplos": ["alias", "tagline", "geo", "fotoPrincipal", "contactoPublico.whatsApp"] },
+      "privado": { "ver": ["owner", "admin"], "editar": ["owner"], "exportar": ["admin"], "eliminar": ["owner", "admin"], "ejemplos": ["email", "telefonoContacto", "terminosAceptados"] },
+      "sensible": { "ver": ["owner", "admin_verificacion"], "editar": ["owner"], "exportar": ["admin_legal"], "eliminar": ["admin"], "nuncaPublico": true, "ejemplos": ["ineFrente", "ineReverso", "selfieVerificacion", "rfc"] },
+      "administrativo": { "ver": ["admin"], "editar": ["admin"], "ejemplos": ["estadoRevision", "observacionesAdmin", "planId", "vencido"] },
+      "auditoria": { "ver": ["admin"], "editar": ["sistema"], "appendOnly": true, "ejemplos": ["historial_perfil", "logsAdmin", "SeoAuditEvent"] }
+    },
+    "privacyGuard": "RenderEngine NUNCA expone sensible/privado en snapshot público"
+  },
+
+  "bridgeUsuarioPerfil": {
+    "mvp": {
+      "regla": "perfilId = usuarioId",
+      "coleccionLegacy": "usuarios/{uid} monolito",
+      "coleccionObjetivo": "perfiles/{perfilId} + usuarios/{usuarioId} hub",
+      "acta": "ACTA-MIGRACION-USUARIOS-PERFILES"
+    },
+    "futuro": {
+      "regla": "usuario.perfilIds[] — 1..N perfiles",
+      "perfilPrincipalId": "puntero perfil activo principal",
+      "multiMarcaAnunciante": "anuncianteId puede ≠ usuarioId"
+    },
+    "compatibilidadLegacy": {
+      "lecturaDual": "Bridge transitorio perfilId=usuarioId durante migración",
+      "escrituraObjetivo": "perfiles/{perfilId} únicamente post-cutover"
+    },
+    "estrategiaMigracion": "ACTA-MIGRACION fases; TBD_PRE_RUNTIME ejecución"
+  },
+
+  "publicacion": {
+    "snapshotAlPublicar": {
+      "fuente": "FieldEngine AM3 + SPEC-FIELDENGINE",
+      "trigger": "transición a publicado|activo (primera vez o re-publicación)",
+      "contenido": "camposPublicosPerfil + metadatos SEO + renderHash",
+      "consumidor": "RenderEngine.renderHead + App Pública perfil"
+    },
+    "fuenteVerdad": "perfiles/{perfilId} documento vivo; snapshot es derivado inmutable versionado",
+    "actualizacionPendiente": {
+      "campo": "actualizacionPendiente | estadoRevision=actualizacion_pendiente",
+      "disparador": "editar_perfil cambia camposImportantes",
+      "efecto": "snapshot público NO actualiza hasta re-aprobación admin"
+    },
+    "revisionPosterior": { "estado": "revision_post_pago", "trigger": "cambios post-pago en camposImportantes" },
+    "integracionRenderEngine": {
+      "privacidad": "Rutas /cuenta /registro noindex — SPEC-SEO-LANDINGS",
+      "publico": "RenderEngine consume snapshot; PrivacyGuard filtra PII"
+    }
+  },
+
+  "dashboardMinimoOperativo": {
+    "frontera": "PLAN-MAESTRO-DASHBOARDS + ANALISIS-REVISION-MVP-DASHBOARD",
+    "enRegistroCuenta": [
+      { "id": "DM-01", "nombre": "Editar información", "ruta": "/registro/editar/{perfilId}", "clasificacion": "MVP_obligatorio" },
+      { "id": "DM-02", "nombre": "Editar fotografías", "ruta": "/registro/editar/{perfilId}#fotos", "clasificacion": "MVP_obligatorio" }
+    ],
+    "enDashboardConsumido": [
+      { "id": "DM-03", "nombre": "Estado aprobación", "clasificacion": "MVP_obligatorio", "soloLectura": true },
+      { "id": "DM-04", "nombre": "Vigencia plan", "clasificacion": "MVP_obligatorio" },
+      { "id": "DM-05", "nombre": "Pagos realizados", "clasificacion": "MVP_obligatorio", "fuente": "Pagos" },
+      { "id": "DM-06", "nombre": "CTA renovación", "clasificacion": "MVP_obligatorio", "fuente": "Pagos" },
+      { "id": "DM-07", "nombre": "Estadísticas básicas", "clasificacion": "MVP_recomendado" },
+      { "id": "DM-08", "nombre": "Estatus verificación", "clasificacion": "MVP_obligatorio" },
+      { "id": "DM-09", "nombre": "Contacto activo visible", "clasificacion": "MVP_obligatorio" },
+      { "id": "DM-10", "nombre": "Observaciones admin", "clasificacion": "MVP_obligatorio" }
+    ],
+    "futuro": ["Notificaciones in-app", "Historial completo", "Shell SPEC 11 módulos"]
+  },
+
+  "seguridad": {
+    "roles": ["anonimo", "visitante", "usuario", "owner_perfil", "anunciante", "admin", "operador"],
+    "ownership": { "regla": "usuarioId === auth.uid para editar perfil propio", "accionVE": "ownerCheck" },
+    "rateLimits": { "fuente": "config-seguridad-mvp-schema", "acciones": ["registro_auth", "login", "enviar_revision", "subir_*"] },
+    "turnstile": { "acciones": ["registro_auth", "registro_visitante", "login_sospechoso"], "fuente": "Seguridad MVP" },
+    "captcha": { "alias": "Turnstile MVP", "fallback": "rate limit + bloqueo temporal" },
+    "bloqueoTemporal": { "estadoSeguridad": ["restringido", "bloqueado"], "duracion": "config-seguridad-mvp-schema" },
+    "auditoria": { "eventos": ["login", "registro", "enviar_revision", "subir_verificacion", "admin_accion"], "destino": "logsAdmin + historial" },
+    "gatesAdultos": ["mayorEdadConfirmado", "voluntariedad", "anti-bot", "estadoSeguridad normal|observacion"]
+  },
+
+  "matricesObligatorias": {
+    "tipoRegistroCampos": {
+      "adultos": { "formularioId": "adultos", "obligatorios": ["alias", "geo", "fotoPrincipal", "contactoPublico", "mayorEdadConfirmado"], "fuente": "config-registro-adultos-schema" },
+      "persona_independiente": { "formularioId": "persona_independiente", "fuente": "config-registro-independiente-schema" },
+      "profesionista_cedula": { "formularioId": "profesionista_cedula", "extra": ["cedulaProfesional"], "fuente": "config-registro-profesionista-schema" },
+      "negocio_empresa": { "formularioId": "negocio_empresa", "fuente": "config-registro-negocio-schema" },
+      "usuario_visitante": { "formularioId": "usuario_visitante", "sinPerfilPublico": true, "fuente": "config-registro-visitante-schema" },
+      "anunciante": { "roles": ["anunciante"], "sinWizardPerfil": true, "deriva": "Banners" }
+    },
+    "tipoRegistroDocumentos": {
+      "adultos": ["ine_frente", "selfie_fecha"],
+      "profesionista_cedula": ["ine_frente", "cedula_profesional", "selfie_fecha"],
+      "negocio_empresa": ["ine_frente", "licencia_operacion"],
+      "anunciante": [],
+      "visitante": []
+    },
+    "rolPermisos": {
+      "anonimo": ["login", "registro_auth", "registro_visitante", "recuperacion_password"],
+      "usuario": ["guardar_borrador", "enviar_revision", "editar_perfil", "subir_verificacion_*", "logout"],
+      "owner_perfil": ["editar_propio", "ver_estado_propio", "ver_observaciones_admin"],
+      "anunciante": ["crear_solicitud_banner"],
+      "admin": ["aprobar", "rechazar", "suspender", "observaciones", "publicar"],
+      "operador": ["moderar_delegado"]
+    },
+    "estadoAcciones": {
+      "borrador": ["guardar_borrador", "editar", "enviar_revision"],
+      "enviado_revision": ["ver_estado"],
+      "correccion_solicitada": ["editar", "enviar_revision"],
+      "activo": ["editar", "renovar"],
+      "vencido": ["renovar", "ver_estado"],
+      "suspendido": ["ver_estado", "contactar_soporte"],
+      "rechazado": ["editar", "enviar_revision"]
+    },
+    "flujoEventos": {
+      "registro_cuenta": ["registro_auth", "email_verification_sent"],
+      "wizard_completo": ["guardar_borrador", "enviar_revision"],
+      "enviar_revision": ["validate VE", "notif admin", "historial_perfil"],
+      "admin_aprueba": ["estado→publicado|activo", "snapshotAlPublicar", "notif usuario"],
+      "edicion_post_publicacion": ["actualizacion_pendiente", "revision_post_pago?"]
+    },
+    "campoClasificacion": {
+      "alias": "publico", "geo": "publico", "whatsapp": "publico", "telefonoContacto": "privado",
+      "ineFrente": "sensible", "selfieVerificacion": "sensible", "estadoRevision": "administrativo",
+      "observacionesAdmin": "administrativo", "historial_perfil": "auditoria"
+    },
+    "pantallaRuta": {
+      "acceso": "/cuenta/acceso", "crear": "/cuenta/crear", "recuperar": "/cuenta/recuperar",
+      "seguridad": "/cuenta/seguridad", "wizard": "/registro/wizard", "verificacion": "/registro/verificacion",
+      "editar": "/registro/editar/{perfilId}", "estado": "/cuenta/estado",
+      "seo": "todas noindex,follow"
+    },
+    "errorMensaje": {
+      "RC-E01": { "codigo": "EMAIL_NO_VERIFICADO", "mensaje": "Verifica tu correo antes de enviar a revisión", "accion": "reenviar_verificacion" },
+      "RC-E02": { "codigo": "CAMPOS_OBLIGATORIOS", "mensaje": "Completa los campos requeridos", "fuente": "FieldEngine" },
+      "RC-E03": { "codigo": "DOCUMENTO_RECHAZADO", "mensaje": "Tu verificación fue rechazada. Revisa las observaciones.", "accion": "resubir" },
+      "RC-E04": { "codigo": "CUENTA_SUSPENDIDA", "mensaje": "Tu cuenta está suspendida. Contacta soporte." },
+      "RC-E05": { "codigo": "RATE_LIMIT", "mensaje": "Demasiados intentos. Intenta más tarde.", "fuente": "ValidationEngine" },
+      "RC-E06": { "codigo": "NOT_OWNER", "mensaje": "No tienes permiso para editar este perfil" }
+    },
+    "documentoValidacion": {
+      "ine_frente": { "formatos": ["image/jpeg", "image/png"], "maxMB": 5, "accionVE": "subir_verificacion_ine_frente" },
+      "ine_reverso": { "formatos": ["image/jpeg", "image/png"], "maxMB": 5 },
+      "selfie_fecha": { "formatos": ["image/jpeg"], "maxMB": 5, "requiere": "fecha visible + rostro" },
+      "cedula_profesional": { "formatos": ["image/jpeg", "image/pdf"], "maxMB": 10 }
+    },
+    "cambioRevisionRequerida": {
+      "camposImportantes": ["alias", "geo", "fotoPrincipal", "galeria", "contactoPublico", "subcategoriaId"],
+      "camposSinRevision": ["disponibilidad", "horarioDetalle"],
+      "postPago": "cualquier campoImportante → revision_post_pago"
+    },
+    "usuarioPerfil": {
+      "mvp": { "cardinalidad": "1:1", "perfilId": "usuarioId", "coleccion": "perfiles/{perfilId}" },
+      "futuro": { "cardinalidad": "1:N", "campo": "usuario.perfilIds[]" },
+      "visitante": { "tienePerfilPublico": false, "upgrade": "crear perfil sin nuevo cobro registro" },
+      "anunciante": { "perfilPublicoOpcional": true, "anuncianteId": "usuarioId" }
+    },
+    "perfilPublicacion": {
+      "borrador": { "publico": false, "snapshot": null },
+      "enviado_revision": { "publico": false },
+      "activo": { "publico": true, "snapshot": "requerido", "renderEngine": "consume" },
+      "vencido": { "publico": false, "snapshot": "conservado_no_servido" },
+      "suspendido": { "publico": false, "http": "410 opcional SEO" }
+    }
+  },
+
+  "contratos": {
+    "Usuario": {
+      "usuarioId": "string (Firebase Auth uid)",
+      "email": "string",
+      "tipoCuentaPrincipal": "enum visitante|adulto|independiente|profesionista|empresa",
+      "rolesCuenta": "string[]",
+      "estadoCuenta": "enum pendiente_activacion|activa|suspendida|eliminada_logica",
+      "perfilPrincipalId": "string|null",
+      "perfilIds": "string[]",
+      "anuncianteId": "string",
+      "seguridad": "SecurityContext",
+      "creadoEn": "timestamp",
+      "actualizadoEn": "timestamp"
+    },
+    "Cuenta": {
+      "extends": "Usuario",
+      "emailVerificado": "boolean",
+      "telefonoVerificado": "boolean (futuro)",
+      "estadoSeguridad": "enum normal|observacion|restringido|bloqueado",
+      "ultimoLogin": "timestamp",
+      "dispositivosConfianza": "Device[] (futuro)"
+    },
+    "Perfil": {
+      "perfilId": "string",
+      "usuarioId": "string (owner)",
+      "subcategoriaId": "string",
+      "formularioId": "string",
+      "tipoPerfil": "enum persona|negocio",
+      "estadoRevision": "EstadoPerfil",
+      "campos": "Record<string, unknown> (FieldEngine resolved)",
+      "actualizacionPendiente": "boolean",
+      "snapshotVersion": "number|null",
+      "publico": "boolean derivado",
+      "creadoEn": "timestamp",
+      "publicadoEn": "timestamp|null"
+    },
+    "Negocio": { "extends": "Perfil", "tipoPerfil": "negocio", "formularioId": "negocio_empresa", "schemaOrg": "LocalBusiness" },
+    "Profesional": { "extends": "Perfil", "formularioId": "profesionista_cedula", "cedulaProfesional": "DocumentoVerificacion" },
+    "Anunciante": {
+      "anuncianteId": "string",
+      "usuarioId": "string",
+      "perfilPublicoId": "string|null",
+      "datosComerciales": "object",
+      "rolesCuenta": ["anunciante"]
+    },
+    "DocumentoVerificacion": {
+      "tipo": "enum ine_frente|ine_reverso|selfie|cedula|licencia",
+      "estado": "enum pendiente|subido|en_revision|aprobado|rechazado",
+      "storagePath": "string",
+      "subidoEn": "timestamp",
+      "revisadoPor": "adminId|null",
+      "observaciones": "string|null"
+    },
+    "EstadoPerfil": {
+      "valor": "string (config-estados-revision-publicacion)",
+      "publico": "boolean",
+      "permiteEdicion": "boolean",
+      "observacionesAdmin": "string|null"
+    },
+    "SnapshotPublicacion": {
+      "perfilId": "string",
+      "version": "number",
+      "camposPublicos": "object",
+      "renderHash": "string",
+      "canonicalSlug": "string",
+      "generadoEn": "timestamp",
+      "fuente": "FieldEngine.snapshotAlPublicar"
+    }
+  },
+
+  "api": {
+    "crearCuenta": { "entrada": "CrearCuentaInput", "salida": "Usuario", "delega": ["Firebase Auth", "ValidationEngine.registro_auth"] },
+    "login": { "entrada": "LoginInput", "salida": "Session", "delega": ["Firebase Auth", "ValidationEngine.login"] },
+    "iniciarWizard": { "entrada": "WizardContext", "salida": "ResolvedRegistrationSchema", "delega": ["FieldEngine.resolveRegistrationSchema"] },
+    "guardarBorrador": { "entrada": "PerfilDraft", "salida": "Perfil", "delega": ["ValidationEngine.guardar_borrador", "Firestore perfiles"] },
+    "enviarRevision": { "entrada": "perfilId", "salida": "EstadoPerfil", "delega": ["ValidationEngine.enviar_revision"] },
+    "subirDocumento": { "entrada": "DocumentoUpload", "salida": "DocumentoVerificacion", "delega": ["ValidationEngine.subir_*", "Storage"] },
+    "editarPerfil": { "entrada": "PerfilEdit", "salida": "Perfil", "delega": ["FieldEngine", "ValidationEngine.editar_perfil"] },
+    "obtenerEstadoCuenta": { "entrada": "usuarioId", "salida": "CuentaEstadoResumen", "incluye": ["estadoCuenta", "estadoRevision", "verificacion", "observacionesAdmin"] }
+  },
+
+  "rutas": {
+    "basePrivada": "/cuenta y /registro",
+    "auth": ["/cuenta/acceso", "/cuenta/crear", "/cuenta/recuperar", "/cuenta/seguridad"],
+    "registro": ["/registro/wizard", "/registro/verificacion", "/registro/editar/{perfilId}", "/cuenta/estado"],
+    "seoRobots": "noindex,nofollow en todas (SPEC-SEO-LANDINGS superficiesPrivadas)"
+  },
+
+  "integraciones": {
+    "sharedCore": { "consume": ["initFirebase", "fieldClient", "validationClient", "helpers", "catalog", "geo"], "noReimplementa": true },
+    "fieldEngine": { "consume": ["resolveRegistrationSchema", "evaluateSecurityGates", "snapshotAlPublicar"], "noDuplica": "resolución campos" },
+    "validationEngine": { "consume": ["validate acciones registro/perfil/verificacion"], "noDuplica": "gates y rate limits" },
+    "renderEngine": { "producePara": "snapshotAlPublicar", "noUsaEn": "rutas privadas" },
+    "seguridadMvp": { "consume": ["estadoSeguridad", "Turnstile", "reputacion"], "noDuplica": true },
+    "dashboards": { "entrega": "Cuenta+Perfil estado", "recibeCTA": "editar → Registro" },
+    "seoLandings": { "coherente": "privado noindex; publico vía snapshot" },
+    "admin": { "recibe": "cola revisión", "escribe": "observacionesAdmin, transiciones estado" }
+  },
+
+  "riesgos": [
+    { "id": "RC-R01", "nivel": "alto", "riesgo": "Datos sensibles en rutas indexables", "mitigacion": "Rutas privadas noindex + Storage protegido + PrivacyGuard" },
+    { "id": "RC-R02", "nivel": "alto", "riesgo": "Escritura monolito usuarios/{uid}", "mitigacion": "Bridge perfilId + perfiles/{perfilId}" },
+    { "id": "RC-R03", "nivel": "alto", "riesgo": "Auth embebido en Home", "mitigacion": "App Registro separada" },
+    { "id": "RC-R04", "nivel": "medio", "riesgo": "Teléfono/recuperación faltantes prod", "mitigacion": "Incluidos SPEC; teléfono V1.1" },
+    { "id": "RC-R05", "nivel": "medio", "riesgo": "Solapamiento Registro vs Dashboard", "mitigacion": "Frontera DM-01/02 vs DM-03..10" },
+    { "id": "RC-R06", "nivel": "medio", "riesgo": "Reimplementar VE/FE", "mitigacion": "Consumir clientes congelados" },
+    { "id": "RC-R07", "nivel": "bajo", "riesgo": "Estados inconsistentes cutover", "mitigacion": "config-estados-revision-publicacion única fuente" },
+    { "id": "RC-SPEC-01", "nivel": "medio", "riesgo": "Migración TBD_PRE_RUNTIME", "mitigacion": "ACTA-MIGRACION; bridge MVP documentado" }
+  ],
+
+  "criteriosAceptacion": [
+    "CA-01: Toda acción usuario pasa ValidationEngine antes de persistir",
+    "CA-02: Wizard resuelve schema vía FieldEngine por subcategoriaId",
+    "CA-03: Documentos verificación nunca en snapshot público",
+    "CA-04: enviar_revision bloqueado sin emailVerificado",
+    "CA-05: Edición camposImportantes dispara actualizacionPendiente",
+    "CA-06: snapshotAlPublicar generado al aprobar admin",
+    "CA-07: Rutas /cuenta /registro noindex",
+    "CA-08: Bridge MVP perfilId=usuarioId soportado",
+    "CA-09: Fixtures golden RC-01..RC-10 PASS",
+    "CA-10: Auditoría SPEC PASS sin bloqueantes"
+  ]
+}

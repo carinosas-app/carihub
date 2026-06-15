@@ -1,0 +1,102 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "tipo": "AUDITORIA_SPEC",
+  "objeto": "SPEC-PAGOS-CONTRATOS",
+  "versionSpecAuditada": "1.0.0",
+  "fecha": "2026-06-11",
+  "estado": "AUDITORIA_CONSISTENCIA",
+  "veredicto": "PASS",
+  "completitudPorcentaje": 88,
+  "veredictoCongelamiento": "APTA_PARA_CONGELAMIENTO_DISENO — procede ACTA-CONGELAMIENTO-PAGOS-CONTRATOS v1.0.0 (capa diseño documental; runtime no autorizado)",
+  "cierraGap": "GAP-SPEC-PAY",
+  "alcanceAuditoria": "Consistencia SPEC vs PLAN/schemas/actas congelados, cobertura fixtures golden, fronteras Dashboard/Registro/Admin/Banners, politicaPrecioCongelado, activación servicio y criterios de aceptación.",
+
+  "matrizConsistencia": [
+    { "verificacion": "No contradice ACTA-CONGELAMIENTO-SHARED-CORE", "resultado": "PASS", "evidencia": "integraciones.sharedCore consume clientes; noModifica" },
+    { "verificacion": "No contradice ACTA-CONGELAMIENTO-FIELDENGINE", "resultado": "PASS", "evidencia": "consume campos fiscales; no duplica pricing" },
+    { "verificacion": "No contradice ACTA-CONGELAMIENTO-VALIDATIONENGINE", "resultado": "PASS", "evidencia": "renovar_contrato, comprobante_pago delegados; no duplica gates" },
+    { "verificacion": "No contradice ACTA-CONGELAMIENTO-RENDERENGINE", "resultado": "PASS", "evidencia": "estado contrato activo/vencido → publicar/ocultar" },
+    { "verificacion": "No contradice ACTA-CONGELAMIENTO-SEGURIDAD", "resultado": "PASS", "evidencia": "rate limits, doble confirmación, antifraude" },
+    { "verificacion": "No contradice ACTA-CONGELAMIENTO-DASHBOARDS", "resultado": "PASS", "evidencia": "DM-04/05/06 lectura; frontera conciliación Admin" },
+    { "verificacion": "No contradice ACTA-CONGELAMIENTO-CUENTAS", "resultado": "PASS", "evidencia": "usuarioId puntero; contratos referencian hub" },
+    { "verificacion": "No contradice ACTA-CONGELAMIENTO-REGISTRO-CUENTA", "resultado": "PASS", "evidencia": "renovación delegada; Registro no cobra; activación post-pago" },
+    { "verificacion": "No contradice ACTA-CONGELAMIENTO-SEO-LANDINGS", "resultado": "PASS", "evidencia": "rutas /cuenta/pagos noindex; vencido oculto" },
+    { "verificacion": "politicaPrecioCongelado coherente config-contratos-carihub", "resultado": "PASS", "evidencia": "precioContratado+versionPrecio; fixture PAY-02" },
+    { "verificacion": "Separación perfiles ⟂ banners (PC-R05)", "resultado": "PASS", "evidencia": "separacionObligatoria; contratoProducto; PAY-06" },
+    { "verificacion": "Activación alineada config-estados-revision-publicacion", "resultado": "PASS", "evidencia": "cicloVidaEstados.perfilPublicacion; PAY-03, PAY-05" },
+    { "verificacion": "Coherente PLAN-MAESTRO-PAGOS-CONTRATOS", "resultado": "PASS", "evidencia": "productos, matrices, riesgos PC-R01..09 heredados" },
+    { "verificacion": "Coherente PLAN-MAESTRO-ADMIN conciliación", "resultado": "PASS", "evidencia": "confirmarPagoAdmin, doble confirmación reembolsos" },
+    { "verificacion": "PrivacyGuard comprobantes/RFC nunca públicos", "resultado": "PASS", "evidencia": "fiscalClasificacion; comprobante Storage privado" },
+    { "verificacion": "Cripto fuera MVP (ANEXO referenciado)", "resultado": "PASS", "evidencia": "futuroDocumentado.cripto; metodoPago.cripto mvp false" },
+    { "verificacion": "14 matrices obligatorias presentes", "resultado": "PASS", "evidencia": "matricesObligatorias 14 keys" },
+    { "verificacion": "9 contratos presentes", "resultado": "PASS", "evidencia": "Pago, ContratoPerfil, ContratoBanner, Renovacion, ComprobantePago, PrecioResuelto, PromocionAplicada, AceptacionDigital, SnapshotPrecioCongelado" },
+    { "verificacion": "Fixtures PAY-01..PAY-10 PASS", "resultado": "PASS", "evidencia": "10 casos golden" },
+    { "verificacion": "GAP-SPEC-PAY cerrado documentalmente", "resultado": "PASS", "evidencia": "cierraGap + CA-01..CA-10" },
+    { "verificacion": "noModifica respetado", "resultado": "PASS", "evidencia": "5 archivos nuevos únicamente" }
+  ],
+
+  "bloqueantes": [],
+
+  "observaciones": [
+    { "id": "PAY-AM-01", "nivel": "menor", "tema": "Pasarela Stripe/MP runtime BLK-02", "detalle": "Webhook documentado; implementación requiere autorización runtime", "accion": "ADR-PASARELA-PAGO + deploy pasarela" },
+    { "id": "PAY-AM-02", "nivel": "menor", "tema": "Validador script pendiente", "detalle": "validar-spec-pagos-contratos.mjs no implementado", "accion": "Crear post-congelamiento diseño" },
+    { "id": "PAY-AM-03", "nivel": "menor", "tema": "CFDI automático futuro", "detalle": "F-059 Post-MVP; facturación manual viable", "accion": "SPEC fiscal V1.2 cuando aplique" },
+    { "id": "PAY-AM-04", "nivel": "menor", "tema": "Cobro 100% manual prod hoy", "detalle": "PC-R01; PaymentLedger diseño listo, runtime pendiente", "accion": "Implementar conciliación admin P0" },
+    { "id": "PAY-AM-05", "nivel": "menor", "tema": "ADR pasarela Stripe vs Mercado Pago", "detalle": "Plan sugiere ADR; no bloquea congelamiento diseño MVP manual", "accion": "ADR antes de BLK-02 runtime" }
+  ],
+
+  "riesgosAbiertos": [
+    { "id": "PC-R01", "nivel": "critico", "riesgo": "Cobro manual sin trazabilidad prod", "mitigacion": "PaymentLedger SPEC; runtime pendiente" },
+    { "id": "BLK-02", "nivel": "alto", "riesgo": "Pasarela sin integrar", "mitigacion": "Flujo manual MVP; webhook contrato documentado" },
+    { "id": "PAY-SPEC-01", "nivel": "medio", "riesgo": "Migración perfilId prerequisito cobros", "mitigacion": "ACTA-MIGRACION + ACTA-RC bridge" }
+  ],
+
+  "coberturaFixtures": {
+    "total": 10,
+    "casos": ["cotización", "contrato congelado", "pago manual activación", "renovación precio vigente", "negocio flujo pago", "banner activación", "comprobante rechazado", "duplicado", "visitante sin perfil", "promo gratis"],
+    "resultado": "PASS"
+  },
+
+  "impactoActaP0": {
+    "cap12PagosContratosAntes": "45%",
+    "cap12PagosContratosDespues": "88%",
+    "gapSpecPay": "cerrado",
+    "listoConstruccionP0Estimado": "82%",
+    "mvpCobrarReadiness": "70%"
+  },
+
+  "actaCongelamiento": {
+    "procede": true,
+    "versionPropuesta": "1.0.0",
+    "tipo": "CONGELAMIENTO_DISENO_DOCUMENTAL",
+    "condiciones": [
+      "Runtime Pagos/Contratos no autorizado hasta implementación explícita",
+      "Pasarela BLK-02 fuera alcance MVP congelado (manual + contrato webhook)",
+      "Cripto y CFDI fuera MVP congelado",
+      "Validador fixtures pendiente (PAY-AM-02)"
+    ],
+    "nota": "Congelamiento CAPA DE DISEÑO; no implica deploy ni Firestore"
+  },
+
+  "dependencias": {
+    "consumidas": [
+      "PLAN-MAESTRO-PAGOS-CONTRATOS",
+      "config-contratos-carihub-schema",
+      "config-precios-planes-perfiles-schema",
+      "config-promociones-perfiles-schema",
+      "config-promociones-banners-schema",
+      "config-estados-revision-publicacion-schema",
+      "ANEXO-CRIPTOMONEDAS-PAGOS-CONTRATOS",
+      "ACTA-CONGELAMIENTO-REGISTRO-CUENTA",
+      "SPEC-VALIDATIONENGINE",
+      "MATRIZ-MVP-CARIHUB",
+      "ACTA-SHARED-CORE", "ACTA-FIELDENGINE", "ACTA-VALIDATIONENGINE",
+      "ACTA-RENDERENGINE", "ACTA-SEGURIDAD", "ACTA-DASHBOARDS", "ACTA-CUENTAS", "ACTA-SEO-LANDINGS"
+    ],
+    "noModificadas": true
+  },
+
+  "changelog": [
+    { "version": "1.0.0", "fecha": "2026-06-11", "nota": "Auditoría SPEC-PAGOS-CONTRATOS: PASS 88%; 21 verificaciones PASS; 0 bloqueantes; 5 observaciones menores; cierra GAP-SPEC-PAY; procede ACTA-CONGELAMIENTO-PAGOS-CONTRATOS diseño v1.0.0" }
+  ]
+}

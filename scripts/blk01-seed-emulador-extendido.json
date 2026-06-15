@@ -1,0 +1,335 @@
+{
+  "$meta": {
+    "nombre": "BLK-01 Seed Extendido (casos borde) — solo EMULADOR",
+    "version": "1.0.0",
+    "fecha": "2026-06-11",
+    "objetivo": "Dataset ficticio ampliado para probar migracion aditiva BLK-01 con escenarios realistas: multiples perfiles, negocio/anunciante, KYC aprobado, colisiones reales contra perfiles/, owner inconsistente, slug duplicado, bridge previo, datos incompletos, idempotencia avanzada.",
+    "estado": "NO_CARGADO — referencia. No cargar sin autorizacion y sin adaptar el loader (ver README).",
+    "entornoObligatorio": {
+      "projectIdEsperado": "demo-carihub",
+      "prohibido": "carihub-app",
+      "FIRESTORE_EMULATOR_HOST": "127.0.0.1:8080",
+      "GCLOUD_PROJECT": "demo-carihub"
+    },
+    "advertencia": "BORRADOR — NO PRODUCCION. Datos 100% ficticios. Sin PII/INE/RFC/selfie/telefonos/correos reales. emails @example.test, uids demo_*, URLs *.example.test.",
+    "compatibilidadLoader": {
+      "soportadoHoy": ["usuarios (map)", "favoritos (array)"],
+      "requiereAdaptacion": ["perfiles (map de perfiles preexistentes) — el loader actual NO lo carga; necesario para colisiones reales (casos 9/28/29/30)"]
+    },
+    "casosCubiertos": {
+      "1_persona_activo": "usuarios.demo_persona_activo",
+      "2_persona_vencido": "usuarios.demo_persona_vencido",
+      "3_persona_pendiente": "usuarios.demo_persona_pendiente",
+      "4_usuario_sin_perfil": "usuarios.demo_sin_perfil",
+      "5_kyc_en_revision": "usuarios.demo_kyc_revision",
+      "6_kyc_aprobado": "usuarios.demo_kyc_aprobado",
+      "7_multiples_perfiles": "usuarios.demo_multi_perfiles",
+      "8_negocio_anunciante": "usuarios.demo_negocio",
+      "9_perfil_preexistente_colision": "perfiles.demo_colision + usuarios.demo_colision",
+      "10_slug_duplicado": "usuarios.demo_slug_dup_a + usuarios.demo_slug_dup_b",
+      "11_fotos_vacias": "usuarios.demo_fotos_vacias",
+      "12_geo_incompleta": "usuarios.demo_geo_incompleta",
+      "13_campos_minimos": "usuarios.demo_minimo",
+      "14_actualizacion_pendiente": "usuarios.demo_actualizacion_pendiente",
+      "15_favorito_valido": "favoritos[0]",
+      "16_favorito_huerfano": "favoritos[1]",
+      "17_favorito_a_perfil_migrado": "favoritos[2]",
+      "18_pago_vencido": "usuarios.demo_persona_vencido (estadoPago vencido)",
+      "19_pago_activo": "usuarios.demo_persona_activo (estadoPago pagado)",
+      "20_creado_sin_publicos": "usuarios.demo_creado_sin_publicos",
+      "21_perfilIds_poblado": "usuarios.demo_multi_perfiles.perfil.perfilIds",
+      "22_perfilPrincipalId_preexistente": "usuarios.demo_multi_perfiles.perfil.perfilPrincipalId",
+      "23_estadoBridge_previo": "usuarios.demo_multi_perfiles.perfil.estadoBridge",
+      "24_legacy_completo": "usuarios.demo_persona_activo",
+      "25_legacy_incompleto": "usuarios.demo_legacy_incompleto",
+      "26_schema_antiguo": "usuarios.demo_schema_antiguo (schemaVersion 0.9.0)",
+      "27_schema_actual": "usuarios.demo_persona_activo (schemaVersion 1.0.0)",
+      "28_perfil_parcialmente_migrado": "perfiles.demo_parcial + usuarios.demo_parcial",
+      "29_perfil_owner_correcto": "perfiles.demo_owner_ok + usuarios.demo_owner_ok",
+      "30_perfil_owner_inconsistente": "perfiles.demo_owner_inconsistente + usuarios.demo_owner_inconsistente"
+    }
+  },
+
+  "usuarios": {
+    "demo_persona_activo": {
+      "uid": "demo_persona_activo", "email": "activo@example.test", "nombre": "Persona Activo Demo",
+      "aprobado": true, "activo": true, "vencido": false, "estadoRevision": "publicado",
+      "estadoPago": "pagado", "pagado": true, "primerMesGratis": false,
+      "fechaVencimiento": { "$timestamp": "2027-03-01T00:00:00.000Z" }, "fechaPublicacion": { "$timestamp": "2026-05-01T00:00:00.000Z" },
+      "geo": { "ciudad": "Ciudad Demo", "estado": "Estado Demo", "pais": "MX" },
+      "formularioId": "form_demo_independiente", "sectorId": "sector_demo", "subcategoriaId": "subcat_demo",
+      "arquetipo": "independiente", "tipoPerfil": "persona", "descripcion": "Persona activa ficticia.",
+      "fotos": ["https://placehold.example.test/a1.jpg"], "schemaVersion": "1.0.0",
+      "componenteResultados": "card_resultado_v1", "componentePerfil": "perfil_v1",
+      "createdAt": { "$timestamp": "2026-04-01T00:00:00.000Z" }, "updatedAt": { "$timestamp": "2026-05-01T00:00:00.000Z" }
+    },
+    "demo_persona_vencido": {
+      "uid": "demo_persona_vencido", "email": "vencido@example.test", "nombre": "Persona Vencido Demo",
+      "aprobado": true, "activo": true, "vencido": true, "estadoRevision": "publicado",
+      "estadoPago": "vencido", "pagado": false, "primerMesGratis": false,
+      "fechaVencimiento": { "$timestamp": "2026-01-01T00:00:00.000Z" }, "fechaPublicacion": { "$timestamp": "2025-09-01T00:00:00.000Z" },
+      "geo": { "ciudad": "Ciudad Demo", "estado": "Estado Demo", "pais": "MX" },
+      "formularioId": "form_demo_independiente", "sectorId": "sector_demo", "subcategoriaId": "subcat_demo",
+      "arquetipo": "independiente", "tipoPerfil": "persona", "descripcion": "Persona vencida ficticia.",
+      "fotos": ["https://placehold.example.test/v1.jpg"], "schemaVersion": "1.0.0",
+      "componenteResultados": "card_resultado_v1", "componentePerfil": "perfil_v1",
+      "createdAt": { "$timestamp": "2025-08-01T00:00:00.000Z" }, "updatedAt": { "$timestamp": "2026-01-02T00:00:00.000Z" }
+    },
+    "demo_persona_pendiente": {
+      "uid": "demo_persona_pendiente", "email": "pendiente@example.test", "nombre": "Persona Pendiente Demo",
+      "aprobado": false, "activo": false, "vencido": false, "estadoRevision": "registro_pendiente",
+      "estadoPago": "sin_pago", "pagado": false, "primerMesGratis": true,
+      "geo": { "ciudad": "Ciudad Demo", "estado": "Estado Demo", "pais": "MX" },
+      "formularioId": "form_demo_independiente", "sectorId": "sector_demo", "subcategoriaId": "subcat_demo",
+      "arquetipo": "independiente", "tipoPerfil": "persona", "descripcion": "Persona pendiente ficticia.",
+      "fotos": [], "schemaVersion": "1.0.0",
+      "componenteResultados": "card_resultado_v1", "componentePerfil": "perfil_v1",
+      "createdAt": { "$timestamp": "2026-06-01T00:00:00.000Z" }, "updatedAt": { "$timestamp": "2026-06-01T00:00:00.000Z" }
+    },
+    "demo_sin_perfil": {
+      "uid": "demo_sin_perfil", "email": "sinperfil@example.test", "estadoRevision": "sin_perfil",
+      "estadoPago": "sin_pago", "schemaVersion": "1.0.0",
+      "createdAt": { "$timestamp": "2026-06-05T00:00:00.000Z" }, "updatedAt": { "$timestamp": "2026-06-05T00:00:00.000Z" }
+    },
+    "demo_kyc_revision": {
+      "uid": "demo_kyc_revision", "email": "kycrev@example.test", "nombre": "KYC Revision Demo",
+      "aprobado": false, "activo": false, "vencido": false, "estadoRevision": "registro_pendiente",
+      "estadoPago": "sin_pago", "pagado": false, "primerMesGratis": true,
+      "verificacion": { "estado": "en_revision", "ineFrente": "emulador://ficticio/ine-frente.jpg", "ineReverso": "emulador://ficticio/ine-reverso.jpg", "selfie": "emulador://ficticio/selfie.jpg" },
+      "geo": { "ciudad": "Ciudad Demo", "estado": "Estado Demo", "pais": "MX" },
+      "formularioId": "form_demo_independiente", "sectorId": "sector_demo", "subcategoriaId": "subcat_demo",
+      "arquetipo": "independiente", "tipoPerfil": "persona", "descripcion": "KYC en revision ficticio.",
+      "fotos": ["https://placehold.example.test/k1.jpg"], "schemaVersion": "1.0.0",
+      "componenteResultados": "card_resultado_v1", "componentePerfil": "perfil_v1",
+      "createdAt": { "$timestamp": "2026-06-03T00:00:00.000Z" }, "updatedAt": { "$timestamp": "2026-06-03T00:00:00.000Z" }
+    },
+    "demo_kyc_aprobado": {
+      "uid": "demo_kyc_aprobado", "email": "kycok@example.test", "nombre": "KYC Aprobado Demo",
+      "aprobado": true, "activo": true, "vencido": false, "estadoRevision": "publicado",
+      "estadoPago": "pagado", "pagado": true, "primerMesGratis": false,
+      "fechaVencimiento": { "$timestamp": "2027-02-01T00:00:00.000Z" }, "fechaPublicacion": { "$timestamp": "2026-05-10T00:00:00.000Z" },
+      "verificacion": { "estado": "aprobado", "ineFrente": "emulador://ficticio/ine-frente-ok.jpg", "ineReverso": "emulador://ficticio/ine-reverso-ok.jpg", "selfie": "emulador://ficticio/selfie-ok.jpg", "fechaAprobacion": { "$timestamp": "2026-05-08T00:00:00.000Z" } },
+      "geo": { "ciudad": "Ciudad Demo", "estado": "Estado Demo", "pais": "MX" },
+      "formularioId": "form_demo_independiente", "sectorId": "sector_demo", "subcategoriaId": "subcat_demo",
+      "arquetipo": "independiente", "tipoPerfil": "persona", "descripcion": "KYC aprobado ficticio.",
+      "fotos": ["https://placehold.example.test/ka.jpg"], "schemaVersion": "1.0.0",
+      "componenteResultados": "card_resultado_v1", "componentePerfil": "perfil_v1",
+      "createdAt": { "$timestamp": "2026-04-20T00:00:00.000Z" }, "updatedAt": { "$timestamp": "2026-05-10T00:00:00.000Z" }
+    },
+    "demo_multi_perfiles": {
+      "uid": "demo_multi_perfiles", "email": "multi@example.test", "nombre": "Multi Perfiles Demo",
+      "aprobado": true, "activo": true, "vencido": false, "estadoRevision": "publicado",
+      "estadoPago": "pagado", "pagado": true, "primerMesGratis": false,
+      "fechaVencimiento": { "$timestamp": "2027-04-01T00:00:00.000Z" }, "fechaPublicacion": { "$timestamp": "2026-05-15T00:00:00.000Z" },
+      "geo": { "ciudad": "Ciudad Demo", "estado": "Estado Demo", "pais": "MX" },
+      "formularioId": "form_demo_independiente", "sectorId": "sector_demo", "subcategoriaId": "subcat_demo",
+      "arquetipo": "independiente", "tipoPerfil": "persona", "descripcion": "Usuario con multiples perfiles y bridge previo.",
+      "fotos": ["https://placehold.example.test/m1.jpg"], "schemaVersion": "1.0.0",
+      "componenteResultados": "card_resultado_v1", "componentePerfil": "perfil_v1",
+      "perfil": { "perfilPrincipalId": "demo_multi_perfiles", "perfilIds": ["demo_multi_perfiles", "demo_multi_perfiles_2"], "estadoBridge": "migrado", "migradoBlk01": true, "schemaVersion": "1.0.0" },
+      "createdAt": { "$timestamp": "2026-04-15T00:00:00.000Z" }, "updatedAt": { "$timestamp": "2026-05-15T00:00:00.000Z" }
+    },
+    "demo_negocio": {
+      "uid": "demo_negocio", "email": "negocio@example.test", "nombre": "Negocio Anunciante Demo",
+      "aprobado": true, "activo": true, "vencido": false, "estadoRevision": "publicado",
+      "estadoPago": "pagado", "pagado": true, "primerMesGratis": false,
+      "fechaVencimiento": { "$timestamp": "2027-05-01T00:00:00.000Z" }, "fechaPublicacion": { "$timestamp": "2026-05-20T00:00:00.000Z" },
+      "geo": { "ciudad": "Ciudad Demo", "estado": "Estado Demo", "pais": "MX" },
+      "formularioId": "form_demo_negocio", "sectorId": "sector_demo", "subcategoriaId": "subcat_demo_negocio",
+      "arquetipo": "anunciante", "tipoPerfil": "negocio", "descripcion": "Negocio/anunciante ficticio.",
+      "fotos": ["https://placehold.example.test/n1.jpg"], "schemaVersion": "1.0.0",
+      "componenteResultados": "card_resultado_negocio_v1", "componentePerfil": "perfil_negocio_v1",
+      "createdAt": { "$timestamp": "2026-04-25T00:00:00.000Z" }, "updatedAt": { "$timestamp": "2026-05-20T00:00:00.000Z" }
+    },
+    "demo_colision": {
+      "uid": "demo_colision", "email": "colision@example.test", "nombre": "Colision Demo",
+      "aprobado": true, "activo": true, "vencido": false, "estadoRevision": "publicado",
+      "estadoPago": "pagado", "pagado": true, "primerMesGratis": false,
+      "fechaVencimiento": { "$timestamp": "2027-06-01T00:00:00.000Z" }, "fechaPublicacion": { "$timestamp": "2026-05-22T00:00:00.000Z" },
+      "geo": { "ciudad": "Ciudad Demo", "estado": "Estado Demo", "pais": "MX" },
+      "formularioId": "form_demo_independiente", "sectorId": "sector_demo", "subcategoriaId": "subcat_demo",
+      "arquetipo": "independiente", "tipoPerfil": "persona", "descripcion": "Usuario cuyo perfil YA existe en perfiles/ (colision).",
+      "fotos": ["https://placehold.example.test/c1.jpg"], "schemaVersion": "1.0.0",
+      "componenteResultados": "card_resultado_v1", "componentePerfil": "perfil_v1",
+      "createdAt": { "$timestamp": "2026-04-10T00:00:00.000Z" }, "updatedAt": { "$timestamp": "2026-05-22T00:00:00.000Z" }
+    },
+    "demo_slug_dup_a": {
+      "uid": "demo_slug_dup_a", "email": "sluga@example.test", "nombre": "Perfil Duplicado",
+      "aprobado": true, "activo": true, "vencido": false, "estadoRevision": "publicado",
+      "estadoPago": "pagado", "pagado": true, "primerMesGratis": false,
+      "fechaVencimiento": { "$timestamp": "2027-01-15T00:00:00.000Z" }, "fechaPublicacion": { "$timestamp": "2026-05-02T00:00:00.000Z" },
+      "geo": { "ciudad": "Ciudad Demo", "estado": "Estado Demo", "pais": "MX" },
+      "formularioId": "form_demo_independiente", "sectorId": "sector_demo", "subcategoriaId": "subcat_demo",
+      "arquetipo": "independiente", "tipoPerfil": "persona", "descripcion": "Nombre que colisiona en slug con demo_slug_dup_b.",
+      "fotos": ["https://placehold.example.test/sa.jpg"], "schemaVersion": "1.0.0",
+      "componenteResultados": "card_resultado_v1", "componentePerfil": "perfil_v1",
+      "createdAt": { "$timestamp": "2026-04-02T00:00:00.000Z" }, "updatedAt": { "$timestamp": "2026-05-02T00:00:00.000Z" }
+    },
+    "demo_slug_dup_b": {
+      "uid": "demo_slug_dup_b", "email": "slugb@example.test", "nombre": "Perfil Duplicado",
+      "aprobado": true, "activo": true, "vencido": false, "estadoRevision": "publicado",
+      "estadoPago": "pagado", "pagado": true, "primerMesGratis": false,
+      "fechaVencimiento": { "$timestamp": "2027-01-16T00:00:00.000Z" }, "fechaPublicacion": { "$timestamp": "2026-05-03T00:00:00.000Z" },
+      "geo": { "ciudad": "Ciudad Demo", "estado": "Estado Demo", "pais": "MX" },
+      "formularioId": "form_demo_independiente", "sectorId": "sector_demo", "subcategoriaId": "subcat_demo",
+      "arquetipo": "independiente", "tipoPerfil": "persona", "descripcion": "Mismo nombre que demo_slug_dup_a (slug potencialmente duplicado).",
+      "fotos": ["https://placehold.example.test/sb.jpg"], "schemaVersion": "1.0.0",
+      "componenteResultados": "card_resultado_v1", "componentePerfil": "perfil_v1",
+      "createdAt": { "$timestamp": "2026-04-03T00:00:00.000Z" }, "updatedAt": { "$timestamp": "2026-05-03T00:00:00.000Z" }
+    },
+    "demo_fotos_vacias": {
+      "uid": "demo_fotos_vacias", "email": "fotos@example.test", "nombre": "Sin Fotos Demo",
+      "aprobado": true, "activo": true, "vencido": false, "estadoRevision": "publicado",
+      "estadoPago": "pagado", "pagado": true, "primerMesGratis": false,
+      "fechaVencimiento": { "$timestamp": "2027-01-20T00:00:00.000Z" }, "fechaPublicacion": { "$timestamp": "2026-05-04T00:00:00.000Z" },
+      "geo": { "ciudad": "Ciudad Demo", "estado": "Estado Demo", "pais": "MX" },
+      "formularioId": "form_demo_independiente", "sectorId": "sector_demo", "subcategoriaId": "subcat_demo",
+      "arquetipo": "independiente", "tipoPerfil": "persona", "descripcion": "Perfil con fotos vacias.",
+      "fotos": [], "schemaVersion": "1.0.0",
+      "componenteResultados": "card_resultado_v1", "componentePerfil": "perfil_v1",
+      "createdAt": { "$timestamp": "2026-04-04T00:00:00.000Z" }, "updatedAt": { "$timestamp": "2026-05-04T00:00:00.000Z" }
+    },
+    "demo_geo_incompleta": {
+      "uid": "demo_geo_incompleta", "email": "geo@example.test", "nombre": "Geo Incompleta Demo",
+      "aprobado": true, "activo": true, "vencido": false, "estadoRevision": "publicado",
+      "estadoPago": "pagado", "pagado": true, "primerMesGratis": false,
+      "fechaVencimiento": { "$timestamp": "2027-01-25T00:00:00.000Z" }, "fechaPublicacion": { "$timestamp": "2026-05-05T00:00:00.000Z" },
+      "geo": { "ciudad": "Ciudad Demo" },
+      "formularioId": "form_demo_independiente", "sectorId": "sector_demo", "subcategoriaId": "subcat_demo",
+      "arquetipo": "independiente", "tipoPerfil": "persona", "descripcion": "Perfil con geo incompleta (solo ciudad).",
+      "fotos": ["https://placehold.example.test/g1.jpg"], "schemaVersion": "1.0.0",
+      "componenteResultados": "card_resultado_v1", "componentePerfil": "perfil_v1",
+      "createdAt": { "$timestamp": "2026-04-05T00:00:00.000Z" }, "updatedAt": { "$timestamp": "2026-05-05T00:00:00.000Z" }
+    },
+    "demo_minimo": {
+      "uid": "demo_minimo", "email": "minimo@example.test", "nombre": "Minimo Valido Demo",
+      "aprobado": false, "activo": false, "vencido": false, "estadoRevision": "registro_pendiente",
+      "estadoPago": "sin_pago",
+      "formularioId": "form_demo_independiente", "sectorId": "sector_demo", "subcategoriaId": "subcat_demo",
+      "arquetipo": "independiente", "tipoPerfil": "persona",
+      "schemaVersion": "1.0.0",
+      "componenteResultados": "card_resultado_v1", "componentePerfil": "perfil_v1",
+      "createdAt": { "$timestamp": "2026-06-07T00:00:00.000Z" }, "updatedAt": { "$timestamp": "2026-06-07T00:00:00.000Z" }
+    },
+    "demo_actualizacion_pendiente": {
+      "uid": "demo_actualizacion_pendiente", "email": "actual@example.test", "nombre": "Actualizacion Pendiente Demo",
+      "aprobado": true, "activo": true, "vencido": false, "estadoRevision": "actualizacion_pendiente",
+      "actualizacionPendiente": true,
+      "estadoPago": "pagado", "pagado": true, "primerMesGratis": false,
+      "fechaVencimiento": { "$timestamp": "2027-02-10T00:00:00.000Z" }, "fechaPublicacion": { "$timestamp": "2026-05-06T00:00:00.000Z" },
+      "geo": { "ciudad": "Ciudad Demo", "estado": "Estado Demo", "pais": "MX" },
+      "formularioId": "form_demo_independiente", "sectorId": "sector_demo", "subcategoriaId": "subcat_demo",
+      "arquetipo": "independiente", "tipoPerfil": "persona", "descripcion": "Perfil con actualizacion pendiente.",
+      "fotos": ["https://placehold.example.test/ap.jpg"], "schemaVersion": "1.0.0",
+      "componenteResultados": "card_resultado_v1", "componentePerfil": "perfil_v1",
+      "createdAt": { "$timestamp": "2026-04-06T00:00:00.000Z" }, "updatedAt": { "$timestamp": "2026-05-06T00:00:00.000Z" }
+    },
+    "demo_creado_sin_publicos": {
+      "uid": "demo_creado_sin_publicos", "email": "creado@example.test",
+      "estadoRevision": "sin_perfil", "estadoPago": "sin_pago", "primerMesGratis": true,
+      "schemaVersion": "1.0.0",
+      "createdAt": { "$timestamp": "2026-06-08T00:00:00.000Z" }, "updatedAt": { "$timestamp": "2026-06-08T00:00:00.000Z" }
+    },
+    "demo_legacy_incompleto": {
+      "uid": "demo_legacy_incompleto", "email": "legacyinc@example.test", "nombre": "Legacy Incompleto Demo",
+      "aprobado": true, "activo": true, "vencido": false, "estadoRevision": "publicado",
+      "estadoPago": "pagado",
+      "sectorId": "sector_demo",
+      "tipoPerfil": "persona", "descripcion": "Legacy incompleto: faltan formularioId/subcategoriaId/arquetipo/componentes.",
+      "fotos": ["https://placehold.example.test/li.jpg"], "schemaVersion": "1.0.0",
+      "createdAt": { "$timestamp": "2026-04-07T00:00:00.000Z" }, "updatedAt": { "$timestamp": "2026-05-07T00:00:00.000Z" }
+    },
+    "demo_schema_antiguo": {
+      "uid": "demo_schema_antiguo", "email": "schemaold@example.test", "nombre": "Schema Antiguo Demo",
+      "aprobado": true, "activo": true, "vencido": false, "estadoRevision": "publicado",
+      "estadoPago": "pagado", "pagado": true, "primerMesGratis": false,
+      "fechaVencimiento": { "$timestamp": "2027-02-20T00:00:00.000Z" }, "fechaPublicacion": { "$timestamp": "2026-05-08T00:00:00.000Z" },
+      "geo": { "ciudad": "Ciudad Demo", "estado": "Estado Demo", "pais": "MX" },
+      "formularioId": "form_demo_independiente", "sectorId": "sector_demo", "subcategoriaId": "subcat_demo",
+      "arquetipo": "independiente", "tipoPerfil": "persona", "descripcion": "Perfil con schemaVersion antiguo.",
+      "fotos": ["https://placehold.example.test/so.jpg"], "schemaVersion": "0.9.0",
+      "componenteResultados": "card_resultado_v1", "componentePerfil": "perfil_v1",
+      "createdAt": { "$timestamp": "2026-03-01T00:00:00.000Z" }, "updatedAt": { "$timestamp": "2026-05-08T00:00:00.000Z" }
+    },
+    "demo_parcial": {
+      "uid": "demo_parcial", "email": "parcial@example.test", "nombre": "Parcialmente Migrado Demo",
+      "aprobado": true, "activo": true, "vencido": false, "estadoRevision": "publicado",
+      "estadoPago": "pagado", "pagado": true, "primerMesGratis": false,
+      "fechaVencimiento": { "$timestamp": "2027-03-10T00:00:00.000Z" }, "fechaPublicacion": { "$timestamp": "2026-05-09T00:00:00.000Z" },
+      "geo": { "ciudad": "Ciudad Demo", "estado": "Estado Demo", "pais": "MX" },
+      "formularioId": "form_demo_independiente", "sectorId": "sector_demo", "subcategoriaId": "subcat_demo",
+      "arquetipo": "independiente", "tipoPerfil": "persona", "descripcion": "Usuario con perfil parcialmente migrado en perfiles/.",
+      "fotos": ["https://placehold.example.test/pp.jpg"], "schemaVersion": "1.0.0",
+      "componenteResultados": "card_resultado_v1", "componentePerfil": "perfil_v1",
+      "createdAt": { "$timestamp": "2026-04-08T00:00:00.000Z" }, "updatedAt": { "$timestamp": "2026-05-09T00:00:00.000Z" }
+    },
+    "demo_owner_ok": {
+      "uid": "demo_owner_ok", "email": "ownerok@example.test", "nombre": "Owner Correcto Demo",
+      "aprobado": true, "activo": true, "vencido": false, "estadoRevision": "publicado",
+      "estadoPago": "pagado", "pagado": true, "primerMesGratis": false,
+      "fechaVencimiento": { "$timestamp": "2027-03-20T00:00:00.000Z" }, "fechaPublicacion": { "$timestamp": "2026-05-11T00:00:00.000Z" },
+      "geo": { "ciudad": "Ciudad Demo", "estado": "Estado Demo", "pais": "MX" },
+      "formularioId": "form_demo_independiente", "sectorId": "sector_demo", "subcategoriaId": "subcat_demo",
+      "arquetipo": "independiente", "tipoPerfil": "persona", "descripcion": "Usuario con perfil preexistente de ownerUid correcto.",
+      "fotos": ["https://placehold.example.test/oo.jpg"], "schemaVersion": "1.0.0",
+      "componenteResultados": "card_resultado_v1", "componentePerfil": "perfil_v1",
+      "createdAt": { "$timestamp": "2026-04-09T00:00:00.000Z" }, "updatedAt": { "$timestamp": "2026-05-11T00:00:00.000Z" }
+    },
+    "demo_owner_inconsistente": {
+      "uid": "demo_owner_inconsistente", "email": "ownerbad@example.test", "nombre": "Owner Inconsistente Demo",
+      "aprobado": true, "activo": true, "vencido": false, "estadoRevision": "publicado",
+      "estadoPago": "pagado", "pagado": true, "primerMesGratis": false,
+      "fechaVencimiento": { "$timestamp": "2027-03-25T00:00:00.000Z" }, "fechaPublicacion": { "$timestamp": "2026-05-12T00:00:00.000Z" },
+      "geo": { "ciudad": "Ciudad Demo", "estado": "Estado Demo", "pais": "MX" },
+      "formularioId": "form_demo_independiente", "sectorId": "sector_demo", "subcategoriaId": "subcat_demo",
+      "arquetipo": "independiente", "tipoPerfil": "persona", "descripcion": "Usuario cuyo perfil preexistente tiene ownerUid inconsistente (riesgo).",
+      "fotos": ["https://placehold.example.test/oi.jpg"], "schemaVersion": "1.0.0",
+      "componenteResultados": "card_resultado_v1", "componentePerfil": "perfil_v1",
+      "createdAt": { "$timestamp": "2026-04-11T00:00:00.000Z" }, "updatedAt": { "$timestamp": "2026-05-12T00:00:00.000Z" }
+    }
+  },
+
+  "favoritos": [
+    { "ownerUid": "demo_sin_perfil", "perfilId": "demo_persona_activo", "tipo": "valido_y_perfil_migrable", "createdAt": { "$timestamp": "2026-06-06T00:00:00.000Z" } },
+    { "ownerUid": "demo_sin_perfil", "perfilId": "demo_perfil_inexistente_999", "tipo": "huerfano", "createdAt": { "$timestamp": "2026-06-06T00:00:00.000Z" } },
+    { "ownerUid": "demo_persona_activo", "perfilId": "demo_colision", "tipo": "favorito_a_perfil_preexistente", "createdAt": { "$timestamp": "2026-06-06T00:00:00.000Z" } }
+  ],
+
+  "perfiles": {
+    "demo_colision": {
+      "perfilId": "demo_colision", "usuarioId": "demo_colision", "ownerUid": "demo_colision",
+      "alias": "Colision Demo", "slug": "colision-demo", "tipoPerfil": "persona", "arquetipo": "independiente",
+      "sectorId": "sector_demo", "subcategoriaId": "subcat_demo", "formularioId": "form_demo_independiente",
+      "geo": { "ciudad": "Ciudad Demo", "estado": "Estado Demo", "pais": "MX" }, "descripcion": "Perfil preexistente (colision).",
+      "fotos": ["https://placehold.example.test/c1.jpg"], "estadoPublicacion": "publicado", "estadoPago": "pagado",
+      "fechaVencimiento": { "$timestamp": "2027-06-01T00:00:00.000Z" }, "tienePerfilPublico": true, "schemaVersion": "1.0.0",
+      "createdAt": { "$timestamp": "2026-04-10T00:00:00.000Z" }, "updatedAt": { "$timestamp": "2026-05-22T00:00:00.000Z" },
+      "migracion": { "origen": "usuarios", "blk": "BLK-01", "version": "BLK-01-emulador-1.0.0", "modo": "COMMIT" }
+    },
+    "demo_parcial": {
+      "perfilId": "demo_parcial", "usuarioId": "demo_parcial", "ownerUid": "demo_parcial",
+      "alias": "Parcialmente Migrado Demo", "slug": "parcialmente-migrado-demo", "tipoPerfil": "persona",
+      "estadoPublicacion": "publicado", "schemaVersion": "1.0.0",
+      "createdAt": { "$timestamp": "2026-04-08T00:00:00.000Z" }, "updatedAt": { "$timestamp": "2026-05-09T00:00:00.000Z" },
+      "migracion": { "origen": "usuarios", "blk": "BLK-01", "version": "BLK-01-emulador-0.9.0", "modo": "PARCIAL" }
+    },
+    "demo_owner_ok": {
+      "perfilId": "demo_owner_ok", "usuarioId": "demo_owner_ok", "ownerUid": "demo_owner_ok",
+      "alias": "Owner Correcto Demo", "slug": "owner-correcto-demo", "tipoPerfil": "persona", "arquetipo": "independiente",
+      "sectorId": "sector_demo", "subcategoriaId": "subcat_demo", "formularioId": "form_demo_independiente",
+      "geo": { "ciudad": "Ciudad Demo", "estado": "Estado Demo", "pais": "MX" }, "descripcion": "Perfil con owner correcto.",
+      "fotos": ["https://placehold.example.test/oo.jpg"], "estadoPublicacion": "publicado", "estadoPago": "pagado",
+      "tienePerfilPublico": true, "schemaVersion": "1.0.0",
+      "createdAt": { "$timestamp": "2026-04-09T00:00:00.000Z" }, "updatedAt": { "$timestamp": "2026-05-11T00:00:00.000Z" }
+    },
+    "demo_owner_inconsistente": {
+      "perfilId": "demo_owner_inconsistente", "usuarioId": "demo_owner_inconsistente", "ownerUid": "demo_otro_owner_999",
+      "alias": "Owner Inconsistente Demo", "slug": "owner-inconsistente-demo", "tipoPerfil": "persona", "arquetipo": "independiente",
+      "sectorId": "sector_demo", "subcategoriaId": "subcat_demo", "formularioId": "form_demo_independiente",
+      "geo": { "ciudad": "Ciudad Demo", "estado": "Estado Demo", "pais": "MX" }, "descripcion": "Perfil con ownerUid != perfilId/usuarioId (riesgo).",
+      "fotos": ["https://placehold.example.test/oi.jpg"], "estadoPublicacion": "publicado", "estadoPago": "pagado",
+      "tienePerfilPublico": true, "schemaVersion": "1.0.0",
+      "createdAt": { "$timestamp": "2026-04-11T00:00:00.000Z" }, "updatedAt": { "$timestamp": "2026-05-12T00:00:00.000Z" }
+    }
+  }
+}

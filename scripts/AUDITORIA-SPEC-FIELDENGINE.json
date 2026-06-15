@@ -1,0 +1,163 @@
+{
+  "generado": "2026-06-09",
+  "titulo": "Auditoría técnica — SPEC FieldEngine v1.0.0",
+  "artefactosAuditados": [
+    "scripts/SPEC-FIELDENGINE.md",
+    "scripts/SPEC-FIELDENGINE.json",
+    "scripts/fixtures-fieldengine-golden.json"
+  ],
+  "capasCongeladasReferencia": {
+    "catalogo": "catalogo-2026-06-10@1.0.0",
+    "cuentas": "cuentas-2026-06-10@1.0.0",
+    "seguridad": "seguridad-2026-06-10@1.0.0"
+  },
+  "veredicto": {
+    "puedeCongelarseSinCambios": false,
+    "requiereAjustesMenores": true,
+    "recomendacionCongelamiento": "CONGELAR v1.0.0 como baseline aprobado con addendum v1.0.1 documentando 8 ajustes menores obligatorios antes de implementación",
+    "generarActa": true,
+    "implementacionAutorizada": false
+  },
+  "fortalezas": [
+    "Separación clara de responsabilidades: resolución de campos vs validación vs render vs persistencia",
+    "Alineación explícita con tres capas congeladas y mapa como fuente de arquetipo/tipoPerfil",
+    "Algoritmo merge base → plantilla → delta coherente con config-registro-adultos-schema.json resolucionFieldEngine",
+    "securityGates integrados sin duplicar Turnstile/rate limits (delegados a ValidationEngine)",
+    "Política schemaVersion sensata: publicado congela versión; nuevos borradores usan catálogo vigente",
+    "10 golden fixtures cubren adultos, profesionista, negocio, independiente, visitante, gates seguridad",
+    "canonicalId documentado — compatible con validador y catálogo adultos con espacios",
+    "Fuera de alcance explícito reduce scope creep"
+  ],
+  "debilidades": [
+    "Contradicción guardar_borrador vs estadoSeguridad=restringido entre SPEC gates y Seguridad MVP / fixture F10",
+    "subcategoriaId obligatorio en SPEC.json pero opcional para visitante en SPEC.md",
+    "Fuentes de lectura incompletas: faltan config-categorias-sugeridas-schema.json y config-renderizado-dinamico-schema.json",
+    "Modo temporal_categoria_sugerida sin contrato de resolución contra formulariosTemporales",
+    "merge no documenta heredaDe, facturacionTipos, verificacionTipos ni badges/delta extendido",
+    "resolveHash sin definición de cálculo",
+    "Prioridad mapa vs schema para componentes UI no formalizada",
+    "Carga multi-schemaVersion para borradores legacy no especificada",
+    "Fixtures con salidas resumidas (obligatoriosIncluyen) sin JSON resuelto completo — no ejecutables como tests aún"
+  ],
+  "riesgosArquitectura": [
+    {
+      "id": "A1",
+      "severidad": "alta",
+      "titulo": "Inconsistencia securityGates restringido",
+      "descripcion": "SPEC excluye restringido de guardar_borrador; Seguridad MVP y F10 permiten borrador en restringido",
+      "impacto": "Implementación bloquearía borradores legítimos o violaría acta Seguridad"
+    },
+    {
+      "id": "A2",
+      "severidad": "alta",
+      "titulo": "Snapshot render incompleto",
+      "descripcion": "RenderEngine espera snapshot en perfil; FieldEngine no define qué bloques de ResolvedRegistrationSchema se persisten al publicar",
+      "impacto": "Re-trabajo costoso al autorizar RenderEngine"
+    },
+    {
+      "id": "A3",
+      "severidad": "media",
+      "titulo": "Migración legacy no modelada",
+      "descripcion": "Producción usa usuarios/{uid} monolito; FieldEngine asume perfiles/{perfilId}",
+      "impacto": "Dual-write o adaptador obligatorio en fase migración — costo alto si se ignora"
+    },
+    {
+      "id": "A4",
+      "severidad": "media",
+      "titulo": "Modo alternativo ambiguo",
+      "descripcion": "modoRegistroAlternativo es nombre arquetipo; algoritmo no detalla re-merge plantilla completa ni campos que cambian",
+      "impacto": "masajes y futuros casos pueden resolver campos incorrectos"
+    },
+    {
+      "id": "A5",
+      "severidad": "media",
+      "titulo": "FORM_IND_NEG / empresa_servicios",
+      "descripcion": "Filas mapa ambiguas independiente vs negocio no tienen flujo en spec",
+      "impacto": "Wizard puede asignar formulario incorrecto sin disambiguación"
+    },
+    {
+      "id": "A6",
+      "severidad": "baja",
+      "titulo": "Multi-perfil 1..N",
+      "descripcion": "Cuentas congeladas permiten perfilIds[]; spec resuelve por subcategoriaId sin contexto perfilId existente",
+      "impacto": "Cambio categoría mid-draft no especificado"
+    }
+  ],
+  "dependenciasOcultas": [
+    "config-categorias-sugeridas-schema.json — formulariosTemporales y modo temporal",
+    "config-renderizado-dinamico-schema.json — contrato snapshotAlPublicar",
+    "config-contratos-carihub-schema.json — gate contratar_plan y visitante con contrato vigente",
+    "config-estados-revision-publicacion-schema.json — enviar_revision vs estadosRevision",
+    "validar-schemas-registro.mjs — canonicalId debe ser módulo compartido único",
+    "arquetipos-catalogo.mjs — riesgo duplicar lógica si FieldEngine reimplementa"
+  ],
+  "casosLimiteNoContemplados": [
+    "subcategoriaId válido en mapa pero ausente en schema.subcategorias[] (drift post-generación)",
+    "schemaVersion borrador antigua sin archivo schema en repo",
+    "seguridad/context omitido — gates default permitir o denegar?",
+    "estadoSeguridad=observacion + enviar_revision — ¿cola prioritaria solo ValidationEngine/Admin?",
+    "Upgrade visitante: resolve con subcategoriaId nuevo + contratoActivoId en cuenta",
+    "Anunciante sin perfil público: solicitud_banner sin resolveRegistrationSchema de perfil",
+    "Cambio arquetipo en catálogo MAJOR con perfiles publicados en versión anterior",
+    "Campos grupo (fisico, geo, contactoPublico) — obligatorios anidados vs expandir en wizard",
+    "IA Registro sugiere modo alternativo — quién setea context.modo",
+    "perfilId = usuarioId en migración legacy resolviendo mismo schema"
+  ],
+  "compatibilidadCapas": {
+    "catalogo_1_0_0": { "estado": "compatible", "nota": "Mapa 462/462 alineado; arquetipo desde mapa coherente con freeze" },
+    "cuentas_1_0_0": { "estado": "compatible_con_reservas", "nota": "CuentaContext cubre campos core; faltan roles[], anuncianteId para gates banner" },
+    "seguridad_mvp_1_0_0": { "estado": "compatible_con_ajuste", "nota": "Corregir gate guardar_borrador + restringido" }
+  },
+  "compatibilidadFutura": {
+    "validationEngine": { "estado": "buena", "nota": "Contrato claro; falta export validationProfile explícito desde ResolvedRegistrationSchema" },
+    "renderEngine": { "estado": "parcial", "nota": "Falta contrato snapshot; RenderEngine no debe llamar FieldEngine en lectura pública" },
+    "messenger": { "estado": "buena", "nota": "Sin solapamiento; gates separados" },
+    "wizardHtml": { "estado": "buena", "nota": "Consumidor natural de campos[] resueltos; falta orden pasos/wizardSections" },
+    "categoriasSugeridas": { "estado": "incompleta", "nota": "Modo temporal sin fuente lectura ni algoritmo detallado" },
+    "contratos": { "estado": "parcial", "nota": "gate contratar_plan sin vínculo visitante upgrade + config-contratos" }
+  },
+  "migracionLegacy": {
+    "modeloActual": "usuarios/{uid} monolito; aprobado/activo en mismo doc; favoritos usuarios/{uid}/favoritos",
+    "modeloObjetivo": "usuarios hub + perfiles/{perfilId}",
+    "escenarios": [
+      { "id": "M1", "descripcion": "Nuevo registro post-lanzamiento — FieldEngine + perfiles/{id} desde día 1" },
+      { "id": "M2", "descripcion": "Legacy uid — perfilId=usuarioId; FieldEngine funciona; datos en usuarios hasta fase copia" },
+      { "id": "M3", "descripcion": "Borrador legacy en usuarios sin schemaVersion — requiere resolve con versión default o migración manual" },
+      { "id": "M4", "descripcion": "Publicado legacy sin snapshot componentes — RenderEngine necesita backfill o HTML legacy paralelo" }
+    ],
+    "costoSiIgnorado": "muy_alto"
+  },
+  "cambiosCostososPostImplementacion": [
+    "Redefinir formato ResolvedRegistrationSchema.campos[] (rompe wizard y ValidationEngine)",
+    "Mover securityGates a ValidationEngine únicamente (refactor dos motores)",
+    "Cambiar fuente arquetipo de mapa a recálculo en runtime",
+    "No versionar schema en perfil publicado (rompe RenderEngine snapshot)",
+    "Omitir snapshot al publicar (RenderEngine dependería de catálogo live — prohibido por diseño)",
+    "Resolver solo por subcategoriaId sin sectorId si en futuro hay colisión cross-sector",
+    "Implementar merge sin módulo canonicalId compartido con validador"
+  ],
+  "resolucionV101": {
+    "fecha": "2026-06-09",
+    "specVersion": "1.0.1",
+    "estado": "AM1_AM3_CERRADOS",
+    "reporte": "scripts/REPORTE-SPEC-FIELDENGINE-v1.0.1.json"
+  },
+  "ajustesMenoresRecomendados": [
+    { "id": "AM1", "prioridad": "obligatorio", "estado": "cerrado_v1.0.1", "cambio": "securityGates.guardar_borrador incluir restringido; alinear F10 y Seguridad MVP" },
+    { "id": "AM2", "prioridad": "obligatorio", "estado": "cerrado_v1.0.1", "cambio": "FieldEngineContext: subcategoriaId condicional visitante; flujoVisitante registro_inicial | upgrade_perfil_publico" },
+    { "id": "AM3", "prioridad": "obligatorio", "estado": "cerrado_v1.0.1", "cambio": "Fuentes lectura: config-categorias-sugeridas-schema.json, config-renderizado-dinamico-schema.json, config-contratos-carihub-schema.json; snapshotAlPublicar" },
+    { "id": "AM4", "prioridad": "recomendado", "cambio": "Documentar algoritmo temporal_categoria_sugerida → formularioTemporal + formularioIdBase" },
+    { "id": "AM5", "prioridad": "recomendado", "cambio": "Añadir sección snapshotAlPublicar: subset de ResolvedRegistrationSchema → perfil" },
+    { "id": "AM6", "prioridad": "recomendado", "cambio": "Documentar merge facturacionTipos + verificacionTipos + prioridad componentes mapa>plantilla" },
+    { "id": "AM7", "prioridad": "recomendado", "cambio": "Definir resolveHash (SHA256 de inputs + schemaVersion)" },
+    { "id": "AM8", "prioridad": "recomendado", "cambio": "Añadir CuentaContext.roles[] y comportamiento gates anunciante sin perfil" }
+  ],
+  "recomendaciones": [
+    "Congelar FieldEngine v1.0.0 como baseline de diseño con addendum AM1–AM3 obligatorios pre-implementación",
+    "Generar ACTA-CONGELAMIENTO-FIELDENGINE v1.0.0 referenciando auditoría y ajustes pendientes",
+    "Próximo documento: SPEC ValidationEngine consumiendo validationProfile de salida FieldEngine",
+    "Extraer canonicalId + merge a módulo compartido scripts/field-engine-core.mjs en fase implementación",
+    "Ampliar fixtures con al menos 2 salidas JSON completas (F01 escort, F08 visitante) antes de codificar",
+    "Documentar estrategia migración M2–M4 en acta separada antes de runtime"
+  ]
+}

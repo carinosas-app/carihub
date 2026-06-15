@@ -1,0 +1,786 @@
+/* Prueba visual aislada v2 — mini-banners, sin iconos ni círculos */
+
+:root {
+  /* Rosa interior tarjetas: cercano a «Buscar ahora», un poco más suave */
+  --ap-btn-rosa: linear-gradient(180deg, #ff5c9a 0%, #e91e63 52%, #d81b7a 100%);
+  --ap-btn-rosa-sombra: 0 2px 8px rgba(233, 30, 99, 0.22);
+}
+
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+body.ap-preview {
+  margin: 0;
+  min-height: 100vh;
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+  color: #2a1f28;
+  background: linear-gradient(180deg, #fff8fb 0%, #fce8f0 100%);
+}
+
+.ap-preview__shell {
+  width: min(100%, 392px);
+  margin: 0 auto;
+  padding: 18px 14px 28px;
+}
+
+.ap-preview__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 12px;
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(100, 50, 75, 0.1);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #7a3f5c;
+}
+
+.ap-preview__badge-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #c2185b;
+}
+
+.ap-preview__note {
+  margin: 0 0 14px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.65);
+  border: 1px solid rgba(100, 50, 75, 0.08);
+  font-size: 10px;
+  line-height: 1.5;
+  color: #5c4a55;
+}
+
+.ap-preview__note strong { color: #321c28; }
+
+/* Simula el panel del picker de producción */
+.ap-section {
+  position: relative;
+  border-radius: 18px;
+  padding: 14px 12px 12px;
+  background: rgba(255, 198, 218, 0.58);
+  border: 1px solid rgba(255, 255, 255, 0.42);
+  box-shadow: 0 12px 40px rgba(233, 30, 99, 0.14);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  overflow: hidden;
+}
+
+.ap-section__flashes {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.ap-bg-flash {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  transform: skewX(-14deg) scale(0.85);
+  border-radius: 42% 58% 55% 45% / 48% 42% 58% 52%;
+}
+
+.ap-bg-flash--white {
+  background: #fff;
+  filter: blur(7px);
+}
+
+.ap-bg-flash--pink {
+  background: rgba(255, 120, 168, 0.72);
+  filter: blur(9px);
+}
+
+.ap-bg-flash--sm {
+  width: 18% !important;
+  height: 14% !important;
+}
+
+/* Salpicaduras blancas */
+.ap-bg-flash--1 {
+  width: 38%;
+  height: 32%;
+  top: 6%;
+  left: -6%;
+  animation: ap-bg-flash 4.2s ease-in-out infinite;
+}
+
+.ap-bg-flash--2 {
+  width: 22%;
+  height: 18%;
+  top: 22%;
+  right: 8%;
+  animation: ap-bg-flash 3.6s ease-in-out infinite 0.8s;
+}
+
+.ap-bg-flash--3 {
+  width: 16%;
+  height: 12%;
+  top: 44%;
+  left: 28%;
+  animation: ap-bg-flash 3.2s ease-in-out infinite 1.6s;
+}
+
+.ap-bg-flash--4 {
+  width: 20%;
+  height: 15%;
+  bottom: 18%;
+  right: 14%;
+  animation: ap-bg-flash 3.8s ease-in-out infinite 2.4s;
+}
+
+.ap-bg-flash--5 {
+  width: 14%;
+  height: 11%;
+  top: 72%;
+  left: 6%;
+  animation: ap-bg-flash 3.4s ease-in-out infinite 0.4s;
+}
+
+/* Salpicaduras rosas */
+.ap-bg-flash--p1 {
+  width: 44%;
+  height: 36%;
+  top: 12%;
+  right: -10%;
+  animation: ap-bg-flash-pink 4.6s ease-in-out infinite 0.5s;
+}
+
+.ap-bg-flash--p2 {
+  width: 32%;
+  height: 28%;
+  top: 38%;
+  left: -4%;
+  animation: ap-bg-flash-pink 5s ease-in-out infinite 1.8s;
+}
+
+.ap-bg-flash--p3 {
+  width: 24%;
+  height: 20%;
+  bottom: 10%;
+  left: 18%;
+  animation: ap-bg-flash-pink 4.4s ease-in-out infinite 2.8s;
+}
+
+.ap-bg-flash--p4 {
+  width: 18%;
+  height: 14%;
+  top: 58%;
+  right: 22%;
+  animation: ap-bg-flash-pink 3.5s ease-in-out infinite 1.2s;
+}
+
+.ap-bg-flash--p5 {
+  width: 15%;
+  height: 12%;
+  top: 8%;
+  left: 42%;
+  animation: ap-bg-flash-pink 3.3s ease-in-out infinite 3.2s;
+}
+
+.ap-section__head,
+.ap-section__hero,
+.ap-grid {
+  position: relative;
+  z-index: 1;
+}
+
+.ap-floating-close {
+  position: fixed;
+  top: max(12px, env(safe-area-inset-top, 0px));
+  right: max(12px, env(safe-area-inset-right, 0px));
+  z-index: 9999;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 2px solid rgba(255, 255, 255, 0.85);
+  border-radius: 50%;
+  background: var(--ap-btn-rosa);
+  color: #fff;
+  font-size: 22px;
+  font-weight: 400;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 20px rgba(233, 30, 99, 0.38);
+  animation: ap-close-float 2.2s ease-in-out infinite;
+  transition: box-shadow 0.2s ease, filter 0.2s ease;
+  will-change: transform;
+}
+
+.ap-floating-close:hover {
+  animation-play-state: paused;
+  transform: translateY(-3px) scale(1.08);
+  box-shadow: 0 10px 24px rgba(233, 30, 99, 0.48);
+  filter: brightness(1.05);
+}
+
+.ap-floating-close:active {
+  animation-play-state: paused;
+  transform: translateY(1px) scale(0.94);
+}
+
+body.ap-preview--closing .ap-floating-close {
+  animation: none;
+  opacity: 0;
+  transform: scale(0.85);
+  transition: opacity 0.22s ease, transform 0.22s ease;
+  pointer-events: none;
+}
+
+.ap-section.is-closing {
+  opacity: 0;
+  transform: scale(0.97) translateY(6px);
+  transition: opacity 0.28s ease, transform 0.28s ease;
+  pointer-events: none;
+}
+
+body.ap-preview--closing {
+  opacity: 0.92;
+  transition: opacity 0.28s ease;
+}
+
+.ap-section__head { margin: 0 0 10px; padding: 0 2px; }
+
+.ap-section__eyebrow {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #9a6a82;
+}
+
+.ap-section__title {
+  margin: 0 0 3px;
+  font-size: 14px;
+  font-weight: 900;
+  line-height: 1.2;
+  color: #c2185b;
+}
+
+.ap-section__hint {
+  margin: 0;
+  font-size: 8px;
+  font-weight: 600;
+  color: #7d6672;
+}
+
+.ap-section__hero {
+  margin: 0 0 10px;
+  border-radius: 12px;
+  overflow: hidden;
+  height: 72px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow: 0 4px 16px rgba(233, 30, 99, 0.12);
+}
+
+.ap-section__hero img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 40%;
+  display: block;
+}
+
+/* Misma rejilla y gap que home-cat-picker__list */
+.ap-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+  list-style: none;
+  margin: 0;
+  padding: 2px 2px 8px;
+  max-height: min(72vh, 560px);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+
+/* Mismo footprint que .home-cat-picker__item */
+.ap-card {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  min-height: 52px;
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  border-radius: 12px;
+  background: transparent;
+  overflow: hidden;
+  cursor: default;
+  box-shadow: 0 2px 10px rgba(233, 30, 99, 0.1);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.ap-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(233, 30, 99, 0.2);
+}
+
+/* Mini-banner: ~36% de la tarjeta, sin círculo */
+.ap-card__visual {
+  flex: 0 0 36%;
+  max-width: 36%;
+  position: relative;
+  overflow: hidden;
+  border-right: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+.ap-card__name {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  padding: 8px 8px 8px 7px;
+  font-size: 9px;
+  font-weight: 800;
+  line-height: 1.25;
+  color: #fff;
+  background: var(--ap-btn-rosa);
+  box-shadow: var(--ap-btn-rosa-sombra);
+  overflow: hidden;
+}
+
+.ap-card__name-sparks {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.ap-name-spark {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: rgba(255, 248, 252, 0.95);
+  box-shadow:
+    0 0 2px rgba(255, 255, 255, 0.9),
+    0 0 5px rgba(255, 190, 220, 0.55);
+  opacity: 0;
+  pointer-events: none;
+  animation: ap-name-spark ease-in-out infinite;
+  animation-delay: calc(var(--ap-spark-d, 0s) + var(--ap-card-d, 0s));
+}
+
+.ap-name-spark--1 {
+  --ap-spark-d: 0s;
+  top: 11%;
+  left: 7%;
+  animation-duration: 4.3s;
+}
+
+.ap-name-spark--2 {
+  --ap-spark-d: 1.9s;
+  top: 68%;
+  left: 78%;
+  animation-duration: 3.1s;
+}
+
+.ap-name-spark--3 {
+  --ap-spark-d: 3.2s;
+  top: 24%;
+  right: 5%;
+  animation-duration: 5.4s;
+}
+
+.ap-name-spark--4 {
+  --ap-spark-d: 0.8s;
+  bottom: 10%;
+  left: 16%;
+  animation-duration: 2.9s;
+}
+
+.ap-name-spark--5 {
+  --ap-spark-d: 4.6s;
+  top: 44%;
+  left: 46%;
+  animation-duration: 3.7s;
+}
+
+.ap-card:nth-child(6n+2) { --ap-card-d: 0.55s; }
+.ap-card:nth-child(6n+3) { --ap-card-d: 1.15s; }
+.ap-card:nth-child(6n+4) { --ap-card-d: 1.85s; }
+.ap-card:nth-child(6n+5) { --ap-card-d: 2.45s; }
+.ap-card:nth-child(6n)   { --ap-card-d: 3.05s; }
+
+.ap-card__name-text {
+  position: relative;
+  z-index: 1;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
+}
+
+/* ── Mini-banner fotográfico (imágenes del usuario) ── */
+.ap-scene {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.ap-scene--photo {
+  background: #120a10;
+}
+
+.ap-card__photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.ap-scene__sheen {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    rgba(255, 255, 255, 0.08) 0%,
+    transparent 42%,
+    rgba(0, 0, 0, 0.18) 100%
+  );
+  pointer-events: none;
+}
+
+.ap-card__visual::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 28%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.22));
+  pointer-events: none;
+}
+
+.ap-scene--fallback {
+  background: linear-gradient(145deg, #ffd6e8, #c2185b);
+}
+
+/* Fondos base por escena */
+.ap-scene--escort {
+  background: linear-gradient(145deg, #ffd6e8 0%, #f06292 42%, #ad1457 100%);
+}
+
+.ap-scene--escort-gay {
+  background: linear-gradient(180deg, #1a1220 0%, #2d1a35 100%);
+}
+
+.ap-scene--edecan { background: linear-gradient(180deg, #2a1525, #1a1018); }
+.ap-scene--stripper { background: linear-gradient(180deg, #1a0e14, #0d080c); }
+.ap-scene--gigolo { background: #0e1218; }
+.ap-scene--acompanante { background: #16121a; }
+.ap-scene--petit { background: #fff5f8; }
+.ap-scene--contenido { background: #0d1116; }
+.ap-scene--tabledance { background: #0e0c12; }
+.ap-scene--sexshop {
+  background: linear-gradient(180deg, #fce4f0 0%, #f48fb1 38%, #c2185b 100%);
+}
+.ap-scene--spa { background: #e0f2f1; }
+.ap-scene--masajes { background: #fff8f5; }
+.ap-scene--club-sw { background: #1a1028; }
+.ap-scene--antro { background: #120a14; }
+.ap-scene--antro-lgbt { background: #0d0a10; }
+.ap-scene--hotel { background: #0f0a14; }
+.ap-scene--cabinas { background: #1a0a0a; }
+.ap-scene--trans { background: #10141c; }
+.ap-scene--femboy { background: #fff0f6; }
+.ap-scene--swinger { background: #1a0f18; }
+.ap-scene--unicorns { background: #120818; }
+.ap-scene--cuckold { background: #1a1010; }
+.ap-scene--singles { background: #141018; }
+.ap-scene--hotwife { background: #1a1014; }
+.ap-scene--lesbians { background: #161018; }
+.ap-scene--tom-boy { background: #0e1420; }
+.ap-scene--tom-fem { background: #fff5f8; }
+.ap-scene--dotados { background: #1a1010; }
+.ap-scene--fetiche { background: #0a0a0c; }
+.ap-scene--sado { background: #120808; }
+.ap-scene--dominatrix { background: #0d0808; }
+.ap-scene--cine { background: #0a0810; }
+
+/* ── 1 · Escort — glam rosa ── */
+
+.ap-scene--escort .ap-glam-sweep {
+  position: absolute;
+  inset: -20% -40%;
+  background: linear-gradient(105deg, transparent 30%, rgba(255, 255, 255, 0.45) 48%, transparent 66%);
+  animation: ap-sweep 5s ease-in-out infinite;
+}
+
+.ap-scene--escort .ap-bokeh {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.35);
+  filter: blur(1px);
+}
+
+.ap-scene--escort .ap-bokeh--1 { width: 14px; height: 14px; top: 8%; left: 12%; opacity: 0.5; }
+.ap-scene--escort .ap-bokeh--2 { width: 8px; height: 8px; top: 55%; left: 68%; opacity: 0.35; }
+.ap-scene--escort .ap-bokeh--3 { width: 10px; height: 10px; bottom: 12%; left: 22%; opacity: 0.4; }
+
+/* ── 2 · Escort VIP — lujo dorado ── */
+.ap-scene--vip {
+  background: linear-gradient(160deg, #1a0f1e 0%, #2d1a35 45%, #120a14 100%);
+}
+
+.ap-scene--vip .ap-vip-glow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 35%, rgba(255, 215, 100, 0.35), transparent 62%);
+}
+
+.ap-scene--vip .ap-spark {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 6px #ffd54f;
+  animation: ap-spark 2.6s ease-in-out infinite;
+}
+
+.ap-scene--vip .ap-spark--1 { top: 18%; left: 22%; }
+.ap-scene--vip .ap-spark--2 { top: 28%; right: 18%; animation-delay: 0.7s; }
+.ap-scene--vip .ap-spark--3 { bottom: 22%; left: 40%; animation-delay: 1.3s; }
+
+/* ── 3 · Modelos — pasarela editorial ── */
+.ap-scene--modelos {
+  background: linear-gradient(180deg, #0d0a10 0%, #1a1220 55%, #2a1a28 100%);
+}
+
+.ap-scene--modelos .ap-flash {
+  position: absolute;
+  background: #fff;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.ap-scene--modelos .ap-flash--1 {
+  width: 40%;
+  height: 55%;
+  top: 5%;
+  left: -5%;
+  transform: skewX(-12deg);
+  animation: ap-flash 3.2s ease-in-out infinite;
+}
+
+.ap-scene--modelos .ap-flash--2 {
+  width: 35%;
+  height: 50%;
+  top: 10%;
+  right: -8%;
+  transform: skewX(10deg);
+  animation: ap-flash 3.2s ease-in-out infinite 1.1s;
+}
+
+.ap-scene--modelos .ap-runway-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 18%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+}
+
+/* ── 4 · Sex Shop — tienda moderna ── */
+.ap-scene--sexshop {
+  background: linear-gradient(180deg, #fce4f0 0%, #f48fb1 38%, #c2185b 100%);
+}
+
+.ap-scene--sexshop .ap-store-glow {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 55%;
+  background: linear-gradient(0deg, rgba(255, 255, 255, 0.22), transparent);
+}
+
+.ap-scene--sexshop .ap-neon-pulse {
+  animation: ap-neon 3s ease-in-out infinite;
+}
+
+.ap-pride-glow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 30%, rgba(255, 255, 255, 0.12), transparent 65%);
+}
+
+.ap-stage-light {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(255, 213, 79, 0.35), transparent 70%);
+}
+
+.ap-rec-dot { display: none; }
+
+.ap-scene--contenido .ap-rec-dot {
+  display: block;
+  position: absolute;
+  top: 18%;
+  right: 12%;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #e53935;
+  box-shadow: 0 0 6px #e53935;
+  animation: ap-rec 1.1s steps(1) infinite;
+}
+
+.ap-light {
+  position: absolute;
+  top: 0;
+  width: 33%;
+  height: 70%;
+  opacity: 0.12;
+  animation: ap-light 3.6s ease-in-out infinite;
+}
+
+.ap-light--1 { left: 0; background: #7c4dff; }
+.ap-light--2 { right: 0; background: #e91e63; animation-delay: 1.2s; }
+
+.ap-steam {
+  position: absolute;
+  width: 12px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.35);
+  filter: blur(3px);
+  animation: ap-steam 4s ease-in-out infinite;
+}
+
+.ap-steam--1 { top: 15%; left: 30%; }
+.ap-steam--2 { top: 10%; left: 55%; animation-delay: 1.5s; }
+
+.ap-neon-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #7c4dff, #e91e63, #00bcd4);
+  opacity: 0.6;
+  animation: ap-neon 2.5s ease-in-out infinite;
+}
+
+.ap-preview__footer {
+  margin-top: 14px;
+  font-size: 9px;
+  line-height: 1.5;
+  text-align: center;
+  color: #8a7380;
+}
+
+.ap-preview__footer a {
+  color: #9c3d72;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+@keyframes ap-sweep {
+  0%, 100% { transform: translateX(-30%) rotate(8deg); opacity: 0.4; }
+  50% { transform: translateX(30%) rotate(8deg); opacity: 0.85; }
+}
+
+@keyframes ap-spark {
+  0%, 100% { opacity: 0.2; transform: scale(0.7); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
+
+@keyframes ap-flash {
+  0%, 100% { opacity: 0; }
+  8% { opacity: 0.28; }
+  12% { opacity: 0.05; }
+  20% { opacity: 0; }
+}
+
+@keyframes ap-bg-flash {
+  0%, 100% { opacity: 0; transform: skewX(-14deg) scale(0.8); }
+  6% { opacity: 0.55; transform: skewX(-10deg) scale(1); }
+  10% { opacity: 0.12; transform: skewX(-12deg) scale(1.04); }
+  18% { opacity: 0; transform: skewX(-14deg) scale(0.88); }
+}
+
+@keyframes ap-bg-flash-pink {
+  0%, 100% { opacity: 0; transform: skewX(10deg) scale(0.78) rotate(-2deg); }
+  7% { opacity: 0.48; transform: skewX(6deg) scale(1.02) rotate(1deg); }
+  12% { opacity: 0.1; transform: skewX(8deg) scale(1.05) rotate(0deg); }
+  20% { opacity: 0; transform: skewX(12deg) scale(0.9) rotate(-1deg); }
+}
+
+@keyframes ap-name-spark {
+  0%, 100% { opacity: 0; transform: scale(0.35); }
+  5% { opacity: 0.92; transform: scale(1); }
+  11% { opacity: 0; transform: scale(0.3); }
+}
+
+@keyframes ap-close-float {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+    box-shadow: 0 6px 20px rgba(233, 30, 99, 0.38);
+  }
+  50% {
+    transform: translateY(-10px) scale(1.04);
+    box-shadow: 0 14px 28px rgba(233, 30, 99, 0.45);
+  }
+}
+
+@keyframes ap-neon {
+  0%, 100% { filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.4)); opacity: 0.5; }
+  50% { filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.85)); opacity: 1; }
+}
+
+@keyframes ap-rec {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.2; }
+}
+
+@keyframes ap-steam {
+  0%, 100% { transform: translateY(0); opacity: 0.2; }
+  50% { transform: translateY(-6px); opacity: 0.5; }
+}
+
+@keyframes ap-fig-sway {
+  0%, 100% { transform: rotate(-1deg); }
+  50% { transform: rotate(1deg); }
+}
+
+@keyframes ap-fig-walk {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(1.5px); }
+}
+
+.ap-fig-sway { transform-origin: 32px 28px; animation: ap-fig-sway 4.2s ease-in-out infinite; }
+.ap-fig-walk { transform-origin: 32px 30px; animation: ap-fig-walk 3.8s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ap-glam-sweep,
+  .ap-spark,
+  .ap-flash,
+  .ap-neon-pulse,
+  .ap-fig-sway,
+  .ap-fig-walk,
+  .ap-light,
+  .ap-steam,
+  .ap-neon-bar,
+  .ap-rec-dot,
+  .ap-bg-flash,
+  .ap-name-spark,
+  .ap-floating-close { animation: none !important; }
+
+  .ap-bg-flash--pink,
+  .ap-bg-flash--white,
+  .ap-name-spark { opacity: 0.2; }
+}

@@ -1,0 +1,81 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "versionSchema": "2026-06-10",
+  "version": "2026-06-10",
+  "formularioId": "usuario_visitante",
+  "nombre": "Registro Usuario Visitante",
+  "descripcion": "Cuenta interna sin perfil público inicial. Paga contrato de acceso; puede crear perfil público después sin nuevo cobro de registro inicial si el contrato sigue vigente.",
+  "politicaComercial": {
+    "cobraRegistroInicial": true,
+    "publicaPerfilAlInicio": false,
+    "puedeCrearPerfilDespues": true,
+    "nuevoCobroRegistroAlCrearPerfil": false,
+    "condicionCrearPerfilSinRecargo": "estadoContrato in ['activo','publicado'] && fechaVencimiento > now",
+    "preciosDesde": "config_precios_perfiles (formularioId: usuario_visitante)",
+    "promocionesDesde": "promociones_perfiles (separado de precios base)"
+  },
+  "meta": {
+    "fieldRegistry": {
+      "email": { "id": "email", "label": "Correo electrónico", "tipo": "email", "privado": true },
+      "alias": { "id": "alias", "label": "Alias (opcional)", "tipo": "text", "maxLength": 40 },
+      "geo": { "id": "geo", "label": "Ciudad de referencia", "tipo": "geo", "campos": ["pais", "estado", "ciudad"] },
+      "aceptaTerminos": { "id": "aceptaTerminos", "label": "Acepta términos", "tipo": "boolean", "privado": true },
+      "aceptaPrivacidad": { "id": "aceptaPrivacidad", "label": "Acepta privacidad", "tipo": "boolean", "privado": true },
+      "preferenciasNotificacion": { "id": "preferenciasNotificacion", "label": "Preferencias de notificación", "tipo": "checklist", "opciones": ["mensajes", "favoritos", "renovaciones", "promociones"] }
+    },
+    "base": {
+      "camposPublicosResultados": [],
+      "camposPublicosPerfil": [],
+      "camposPrivados": ["email", "aceptaTerminos", "aceptaPrivacidad", "preferenciasNotificacion"],
+      "obligatorios": ["email", "geo.pais", "geo.estado", "geo.ciudad", "aceptaTerminos", "aceptaPrivacidad"],
+      "opcionales": ["alias", "preferenciasNotificacion"],
+      "fotosMin": 0,
+      "fotosMax": 0,
+      "verificacionTipo": "cuenta_basica",
+      "facturacionTipo": "cfdi_opcional",
+      "nivelRevisionAdmin": "baja"
+    },
+    "verificacionTipos": {
+      "cuenta_basica": {
+        "campos": ["email"],
+        "obligatorios": ["email"],
+        "validacionAdmin": "automatica_email",
+        "notas": "Sin INE obligatoria al registrar visitante."
+      }
+    },
+    "facturacionTipos": {
+      "cfdi_opcional": {
+        "cuando": "deseoFacturar === true",
+        "camposRequeridos": ["rfc", "razonSocial", "codigoPostalFiscal", "emailFacturacion"],
+        "notas": "Opcional para visitante."
+      }
+    },
+    "coherenciaGlobal": [
+      { "id": "SIN_PERFIL_PUBLICO", "si": "tienePerfilPublico == true", "requiere": ["perfilPublicoId"], "severidad": "error" },
+      { "id": "CONTRATO_VIGENTE_CREAR_PERFIL", "si": "solicitaCrearPerfil == true", "requiere": ["estadoContrato", "fechaVencimiento"], "severidad": "error" }
+    ],
+    "componentesUI": {
+      "DashboardVisitante": "Panel: mensajes, favoritos, notificaciones, crear perfil",
+      "WizardCrearPerfilDesdeVisitante": "Upgrade a perfil público sin recargo registro si contrato vigente"
+    },
+    "firestoreRecomendado": {
+      "coleccion": "usuarios",
+      "camposRaiz": {
+        "tipoCuenta": "visitante",
+        "tienePerfilPublico": false,
+        "puedeCrearPerfilGratis": true,
+        "estadoContrato": "pendiente | activo | vencido | suspendido",
+        "fechaInicio": "timestamp",
+        "fechaVencimiento": "timestamp",
+        "planContratado": "basico|destacado|premium|vip",
+        "periodoContratado": "semanal|quincenal|mensual",
+        "contratoId": "ref contratos_perfiles/{id}",
+        "perfilPublicoId": "null hasta upgrade"
+      },
+      "subcolecciones": ["favoritos", "notificaciones", "mensajes_internos"]
+    }
+  },
+  "funcionesHabilitadas": ["mensajeria_interna", "favoritos", "seguimiento", "notificaciones", "dashboard_basico"],
+  "flujoEstados": "ver config-estados-revision-publicacion-schema.json → perfiles.visitante",
+  "keywordsIA": ["visitante", "cuenta", "favoritos", "mensajes", "sin perfil público"]
+}

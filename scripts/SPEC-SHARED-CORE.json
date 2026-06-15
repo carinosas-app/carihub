@@ -1,0 +1,266 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "$id": "https://carihub.app/schemas/spec-shared-core.json",
+  "tipo": "SPEC_TECNICA",
+  "nombre": "Shared/Core — Especificación técnica",
+  "versionSpec": "1.0.0",
+  "fecha": "2026-06-10",
+  "fechaActualizacion": "2026-06-10",
+  "estado": "DISENO_COMPLETO_SC-AO-01_SC-AO-06",
+  "implementacionAutorizada": false,
+  "congelamientoAprobado": false,
+  "changelog": {
+    "1.0.0": ["SPEC formal desde PLAN-MAESTRO-SHARED-CORE; cierre SC-AO-01..06: API pública, tipos/contratos, semver, decisión catálogo 462+compat, contrato tokens y resolución --rosa, segmentación geo, frontera clientes vs motores, superficie pública y grafo acíclico"]
+  },
+  "proposito": "Capa base común de CariHub: configuración, datos compartidos, helpers, UI base y CLIENTES de motores. No implementa reglas de negocio (ValidationEngine), no resuelve schemas de registro (FieldEngine), no renderiza (RenderEngine); expone clientes/contratos a esos motores. Core NO depende de ninguna app.",
+  "principioRector": "Un elemento entra a Core solo si lo consumen 2+ apps y es estable. Core expone una superficie pública explícita por sub-capa. Grafo de dependencias acíclico: apps → Core; nunca Core → app.",
+  "baseDocumental": [
+    "scripts/PLAN-MAESTRO-SHARED-CORE.json",
+    "scripts/AUDITORIA-SHARED-CORE.json",
+    "scripts/config-renderizado-dinamico-schema.json",
+    "scripts/config-registro-componentes-ui-schema.json",
+    "scripts/ADR-RENDER-STRATEGY.json",
+    "scripts/ADR-URL-CANONICA-PERFILES.json"
+  ],
+  "dependenciasCongeladas": {
+    "validationengine": "validationengine-2026-06-10@1.1.0",
+    "fieldengine": "fieldengine-2026-06-10@1.0.1",
+    "catalogo": "catalogo-2026-06-10@1.0.0",
+    "cuentas": "cuentas-2026-06-10@1.0.0",
+    "seguridad": "seguridad-2026-06-10@1.0.0"
+  },
+  "dependenciasEnDiseno": {
+    "renderengine": "SPEC-RENDERENGINE 1.0.0 (no congelado) — Core expone ComponentRegistry/resolveUrl como contrato",
+    "appPublica": "PLAN-MAESTRO-APP-PUBLICA 1.0.0 (consumidor)",
+    "seo": "OBSERVACION-SEO 1.0.0",
+    "themeEngine": "OBSERVACION-THEMEENGINE 1.3.0"
+  },
+
+  "semver": {
+    "versionCore": "1.0.0",
+    "PATCH": "Correcciones, helpers nuevos no-breaking, fixtures, documentación",
+    "MINOR": "Nuevos exports retrocompatibles, nuevos tokens, nuevos datos de catálogo/geo",
+    "MAJOR": "Cambio de firma en API pública, eliminación de export, cambio de contrato de cliente o de tokens canónicos",
+    "regla": "Apps declaran rango compatible de Core; cambios MAJOR requieren acta y migración de consumidores"
+  },
+
+  "superficiePublica": {
+    "descripcion": "Exports organizados por sub-capa (namespaces lógicos). SOLO esto es API pública; lo demás es interno.",
+    "core.config": ["initFirebase()", "getApp()", "getAuth()", "getDb()", "getStorage()", "appConfig", "rbac"],
+    "core.data": ["catalog", "geo"],
+    "core.helpers": ["text", "phone", "date", "format"],
+    "core.ui": ["tokens", "baseStyles", "modal", "componentRegistry"],
+    "core.engines": ["validationClient", "fieldClient", "renderClient"],
+    "reglaImport": "apps importan desde core.*; PROHIBIDO core importar desde apps (grafo acíclico)"
+  },
+
+  "api": {
+    "initFirebase": { "entrada": "void", "salida": "FirebaseHandles", "descripcion": "Inicializa app única (singleton); idempotente. Reemplaza los 6 firebaseConfig duplicados" },
+    "getDb": { "entrada": "void", "salida": "Firestore", "nota": "Lectura pública vía Core; auth/storage solo si la app lo requiere" },
+    "catalog.getSubcategoria": { "entrada": "subcategoriaId", "salida": "SubcategoriaCanonica | null" },
+    "catalog.listSectores": { "entrada": "void", "salida": "Sector[]" },
+    "catalog.compatProduccion": { "entrada": "void", "salida": "Subcategoria[] (subconjunto activo en producción)", "nota": "Adaptador 34→462; ver estrategiaCatalogo" },
+    "geo.listPaises": { "entrada": "void", "salida": "Pais[] (índice liviano)" },
+    "geo.loadEstados": { "entrada": "paisId", "salida": "Promise<Estado[]>", "nota": "lazy" },
+    "geo.loadCiudades": { "entrada": "paisId+estadoId", "salida": "Promise<Ciudad[]>", "nota": "lazy" },
+    "helpers.text.textoSeguro": { "entrada": "string", "salida": "string (HTML-escaped)" },
+    "helpers.text.normalizarTexto": { "entrada": "string", "salida": "string (lower, sin diacríticos)" },
+    "helpers.phone.limpiarTelefono": { "entrada": "string", "salida": "string (E.164-ish)" },
+    "helpers.date.formatearFechaPerfil": { "entrada": "Date|Timestamp", "salida": "string" },
+    "helpers.format.slugify": { "entrada": "string", "salida": "string (slug; ver ADR-URL-CANONICA)" },
+    "ui.tokens.get": { "entrada": "tokenName", "salida": "string (valor CSS var)" },
+    "ui.componentRegistry.get": { "entrada": "componentId", "salida": "ComponentDef | fallback", "nota": "Contrato de config-registro-componentes-ui-schema.json" },
+    "engines.validationClient.evaluate": { "entrada": "VEAccion+contexto", "salida": "Promise<VEResultado>", "nota": "DELEGA a ValidationEngine 1.1.0; Core NO implementa reglas" },
+    "engines.fieldClient.resolve": { "entrada": "FieldEngineContext", "salida": "Promise<ResolvedRegistrationSchema>", "nota": "DELEGA a FieldEngine 1.0.1" },
+    "engines.renderClient.resolveComponent": { "entrada": "ProfileSnapshot+tipo", "salida": "componentId", "nota": "Contrato RenderEngine" },
+    "engines.renderClient.resolveUrl": { "entrada": "UrlContext", "salida": "{canonical, slug, breadcrumb}", "nota": "Contrato ADR-URL-CANONICA-PERFILES" }
+  },
+
+  "tipos": {
+    "FirebaseHandles": { "app": "FirebaseApp", "auth": "Auth", "db": "Firestore", "storage": "Storage" },
+    "AppConfig": {
+      "projectId": "string",
+      "whatsappAdmin": "string",
+      "flags": "Record<string,boolean>",
+      "endpoints": "Record<string,string>",
+      "nota": "Datos sensibles (apiKey) viven en config; RBAC en rbac"
+    },
+    "Rbac": { "adminEmails": "string[]", "regla": "Fuente única; admin.html y firestore.rules consumen el mismo contrato (sin hardcode disperso)" },
+    "SubcategoriaCanonica": {
+      "subcategoriaId": "string",
+      "sectorId": "string",
+      "categoriaPrincipal": "string",
+      "formularioId": "string",
+      "arquetipo": "string",
+      "tipoPerfil": "string",
+      "componenteResultados": "string",
+      "componentePerfil": "string",
+      "schemaVersion": "string",
+      "activoProduccion": "boolean (true = en el subconjunto de 34)"
+    },
+    "TokenSet": { "variables": "Record<string,string>", "origen": "core.ui.tokens base | ThemeEngine override" },
+    "UrlContext": { "perfilId": "string", "slug": "string?", "geo": "{pais,estado,ciudad}?", "subcategoriaId": "string?" }
+  },
+
+  "firebaseConfigUnico": {
+    "problema": "firebaseConfig duplicado en 6 páginas activas (index, resultados, perfil, admin, registro-banner, registro-banner2)",
+    "solucion": "core.config.initFirebase() singleton idempotente; las páginas dejan de declarar config propia",
+    "sensible": "apiKey/config se centralizan; cambiar proyecto = editar 1 fuente",
+    "auth/storage": "no se inicializan en superficies públicas que no los requieren (alineado App Pública)"
+  },
+
+  "estrategiaCatalogo": {
+    "decision": "Core expone el catálogo CANÓNICO de diseño (462, catalogo-2026-06-10@1.0.0) como fuente de verdad",
+    "compatibilidad": "core.data.catalog.compatProduccion() devuelve el subconjunto activo en producción (≈34) vía flag activoProduccion, hasta que la migración alinee superficies",
+    "consumo": {
+      "superficiesNoMigradas": "usan compatProduccion() (34) para no romper",
+      "superficiesNuevas/migradas": "usan catálogo canónico (462)"
+    },
+    "cierra": "SC-AO-02",
+    "nota": "No se modifica producción; es contrato de lectura. La alineación real es tarea de migración."
+  },
+
+  "geo": {
+    "fuente": "paises.js / estados.js / ciudades.js (vía Core)",
+    "segmentacion": {
+      "decision": "Índice de países liviano cargado siempre; estados y ciudades LAZY por país/estado",
+      "mercadoPrincipal": "MX puede precargarse; resto on-demand",
+      "cierra": "SC-AO-04"
+    },
+    "api": ["geo.listPaises", "geo.loadEstados(pais)", "geo.loadCiudades(pais,estado)"]
+  },
+
+  "tokensVisuales": {
+    "contrato": "core.ui.tokens define variables canónicas con prefijo --ch-",
+    "resolucionRosa": {
+      "problema": "--rosa divergente: público #ec2d7a (resultados/perfil/home) vs admin #c2185b; home-modals.css usa --rosa/--rosa2/--rosa-suave NO definidas (roto)",
+      "decision": {
+        "--ch-rosa": "#ec2d7a (marca pública canónica)",
+        "--ch-rosa-2": "#d81b60 (shade intermedio para gradientes)",
+        "--ch-rosa-suave": "#fce4ec (fondo suave)",
+        "--ch-rosa-admin": "#c2185b (variante admin, alias documentado)"
+      },
+      "correccionHomeModals": "home-modals.css referenciará tokens definidos (--ch-rosa*); se documenta la corrección, NO se implementa aquí",
+      "cierra": "SC-AO-03"
+    },
+    "themeEngine": "ThemeEngine override sobre tokens base; Core no implementa el editor"
+  },
+
+  "helpersComunes": {
+    "incluye": ["text.textoSeguro", "text.normalizarTexto", "phone.limpiarTelefono", "date.formatearFechaPerfil", "format.slugify"],
+    "duplicacionEvidenciada": "textoSeguro×5, limpiarTelefono×2",
+    "regla": "Funciones puras, sin estado, sin dependencias de dominio"
+  },
+  "validacionesComunes": {
+    "core": "Solo formato ligero (longitud, patrón, imagen tipo/tamaño) en helpers.format",
+    "noCore": "Reglas de negocio, gates de seguridad, rate limits, Turnstile → ValidationEngine 1.1.0 vía validationClient",
+    "frontera": "Core NUNCA decide aprobar/rechazar por reglas; solo formatea/normaliza"
+  },
+  "constantesGlobales": {
+    "core": ["appConfig.whatsappAdmin", "rbac.adminEmails", "flags", "endpoints"],
+    "noCore": ["ETIQUETAS_ESTADO_SOLICITUD_PUBLICIDAD (→ Banners/Admin)", "LINK_STRIPE/LINK_MERCADO_PAGO (→ Pagos)", "LIMITE_USUARIOS (→ Admin)"]
+  },
+  "assetsCompartidos": {
+    "core": ["logos/branding base"],
+    "noCore": ["creativos de banner (→ Banners)", "imágenes específicas de Home"]
+  },
+  "scriptsComunes": { "core": ["modal-carihub"], "nota": "multi-consumidor (perfil, banner); formalizado en core.ui.modal" },
+  "estilosBase": { "core": ["base.css (reset/box-sizing)", "tokens.css"], "noCore": ["banners-publicidad.css (→ Banners)", "home*.css (→ App Pública)"] },
+  "componentesReutilizables": {
+    "contrato": "core.ui.componentRegistry referencia config-registro-componentes-ui-schema.json",
+    "regla": "Core expone el registro/contrato; los componentes concretos de render los implementa RenderEngine",
+    "fallback": "ResultCardGenerico | ProfileLayoutGenerico (config-renderizado-dinamico-schema.json)"
+  },
+
+  "clientesContratos": {
+    "validationClient": { "delega": "ValidationEngine 1.1.0", "expone": "evaluate(accion, contexto)", "noHace": "no implementa reglas/eventos; solo invoca contrato" },
+    "fieldClient": { "delega": "FieldEngine 1.0.1", "expone": "resolve(context) → ResolvedRegistrationSchema", "noHace": "no resuelve merge por su cuenta" },
+    "renderClient": { "delega": "RenderEngine (SPEC 1.0.0)", "expone": "resolveComponent, resolveUrl, componentRegistry.get", "noHace": "no renderiza HTML; provee contrato/resolución" },
+    "fronteraClientesVsMotores": "Core = fachada estable y delgada; los motores son la fuente de verdad. Core puede versionarse sin tocar motores congelados.",
+    "cierra": "SC-AO-05"
+  },
+
+  "queEntra": ["config Firebase/RBAC", "catálogo canónico + compat", "geo + segmentación", "helpers puros", "tokens base + base.css", "modal", "ComponentRegistry contrato", "clientes VE/FE/RenderEngine"],
+  "queNoEntra": ["reglas de VE", "merge de FE", "render HTML", "links de pago", "etiquetas/lógica de Banners", "wizard/INE", "lógica admin", "editor ThemeEngine", "LLM/prompts de Agentes", "CSS específico de Home/Banners"],
+
+  "reglasAntiGodModule": [
+    "Admisión: 2+ apps consumidoras Y estabilidad demostrada",
+    "Superficie pública explícita por sub-capa; lo no exportado es interno",
+    "Prohibido lógica de dominio en Core",
+    "Revisión obligatoria al añadir export nuevo",
+    "cierra": "SC-AO-06 (parte 1)"
+  ],
+  "reglasAntiCiclos": [
+    "apps → core.* permitido",
+    "core → app PROHIBIDO",
+    "core.engines delega a motores (no a apps)",
+    "Verificación: análisis de dependencias (dependency-cruiser conceptual) debe dar grafo acíclico",
+    "cierra": "SC-AO-06 (parte 2)"
+  ],
+  "grafoAciclico": {
+    "direccion": "unidireccional apps → Core → (motores congelados)",
+    "capas": ["core.config (raíz)", "core.data", "core.helpers", "core.ui", "core.engines"],
+    "invariante": "Ninguna sub-capa de Core importa de una app; core.engines solo referencia contratos de motores"
+  },
+
+  "compatibilidad": {
+    "appPublica": "Consume config, data, helpers, ui, renderClient — consumidor puro",
+    "registro": "Consume fieldClient, validationClient, catalog, geo, modal",
+    "dashboards": "Consume config, validationClient, helpers; estado perfil con helpers.date",
+    "messenger": "Consume config, validationClient, helpers; UI propia",
+    "admin": "Consume config.rbac (fuente única), helpers; etiquetas de dominio fuera de Core",
+    "banners": "Consume catalog, geo, modal, helpers; precios/creativos fuera",
+    "themeEngine": "Extiende tokens base; editor fuera de Core",
+    "seo": "Consume renderClient (head/canonical) y data; sin acoplamiento extra",
+    "agentesIA": "Consumen config y validationClient; prompts/LLM fuera de Core"
+  },
+
+  "errores": {
+    "CORE_FIREBASE_NO_INIT": { "http": 500, "retry": false, "nota": "getDb/getAuth antes de initFirebase" },
+    "CORE_SUBCATEGORIA_NO_ENCONTRADA": { "http": 404, "retry": false },
+    "CORE_GEO_NO_DISPONIBLE": { "http": 404, "retry": true, "nota": "lazy load falló" },
+    "CORE_TOKEN_NO_DEFINIDO": { "http": 200, "retry": false, "nota": "fallback a token base; log" },
+    "CORE_IMPORT_CICLICO": { "tipo": "build-time", "nota": "violación grafo acíclico — falla de compilación/lint" }
+  },
+
+  "fueraDeAlcance": [
+    "Implementación runtime de Core",
+    "Reglas de ValidationEngine / merge de FieldEngine / render de RenderEngine",
+    "Migración real de catálogo 34→462 (tarea de migración)",
+    "Implementación del editor ThemeEngine",
+    "Pagos, Banners (inventario/precios), Admin (lógica), Messenger (UI/realtime)",
+    "Reescritura de las 6 páginas (solo define el contrato que adoptarán)",
+    "Decisión perfilId opaco vs uid (Seguridad — referida en ADR-URL-CANONICA URL-R02)"
+  ],
+  "entregables": {
+    "specMarkdown": "scripts/SPEC-SHARED-CORE.md",
+    "specJson": "scripts/SPEC-SHARED-CORE.json",
+    "fixtures": "scripts/fixtures-shared-core-golden.json",
+    "auditoriaJson": "scripts/AUDITORIA-SPEC-SHARED-CORE.json",
+    "auditoriaMarkdown": "scripts/AUDITORIA-SPEC-SHARED-CORE.md"
+  },
+  "cierreAjustesObligatorios": {
+    "SC-AO-01": { "estado": "CERRADO", "evidencia": "api + tipos + semver + superficiePublica" },
+    "SC-AO-02": { "estado": "CERRADO", "evidencia": "estrategiaCatalogo (462 canónico + compatProduccion)" },
+    "SC-AO-03": { "estado": "CERRADO", "evidencia": "tokensVisuales.resolucionRosa (--ch-rosa #ec2d7a + variantes)" },
+    "SC-AO-04": { "estado": "CERRADO", "evidencia": "geo.segmentacion (índice + lazy)" },
+    "SC-AO-05": { "estado": "CERRADO", "evidencia": "clientesContratos.fronteraClientesVsMotores" },
+    "SC-AO-06": { "estado": "CERRADO", "evidencia": "reglasAntiGodModule + reglasAntiCiclos + grafoAciclico" }
+  },
+  "criteriosAceptacionSpec": [
+    "API y tipos sin ambigüedad por sub-capa",
+    "SC-AO-01..06 cerrados con evidencia",
+    "Clientes VE/FE/RenderEngine sin reimplementar motores",
+    "Grafo acíclico definido y verificable",
+    "Fixtures golden cubren config, helpers, catálogo+compat, geo lazy, tokens, clientes y grafo",
+    "Aprobación product owner antes de implementar y de congelar"
+  ],
+  "recomendacionCongelamiento": {
+    "puedeCongelarse": "SÍ_TRAS_APROBACION",
+    "motivo": "SC-AO-01..06 cerrados; consistencia verificada en AUDITORIA-SPEC-SHARED-CORE",
+    "ajustesRecomendadosNoBloqueantes": ["validar-spec-shared-core.mjs", "SPEC-SHARED-CORE-ALCANCE.md", "decisión perfilId opaco con Seguridad"],
+    "actaProcede": false,
+    "notaActa": "No se genera ACTA-CONGELAMIENTO-SHARED-CORE: el usuario indicó no aprobar congelamiento todavía"
+  },
+  "noModifica": ["Capas congeladas (VE 1.1.0, FieldEngine 1.0.1, Messenger 1.0.0, Dashboards 1.0.0, Catálogo/Cuentas/Seguridad)", "Producción, Firestore, deploy, commit"]
+}

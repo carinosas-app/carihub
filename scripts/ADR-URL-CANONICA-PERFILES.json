@@ -1,0 +1,208 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "tipo": "ADR",
+  "id": "ADR-URL-CANONICA-PERFILES",
+  "titulo": "URL canónica y slugs para perfiles, negocios y landings (migración usuarios → perfiles)",
+  "fecha": "2026-06-10",
+  "version": "1.0.0",
+  "estado": "PROPUESTA — decisión documental, sin implementar",
+  "modo": "Solo análisis y documentación — sin runtime/carpetas/mover/Firestore/deploy/commit",
+  "autorizadoPor": "product owner / usuario CariHub",
+  "resuelve": "RE-AU-03 (bloqueante de SPEC-RENDERENGINE: URL canónica de migración)",
+  "contexto": {
+    "urlActual": "public/perfil.html?id={usuarioId} (query param; id = doc usuarios/{uid}). resultados.html enlaza ./perfil.html?id=<uid>",
+    "modeloIds": {
+      "usuarioId": "Firebase Auth uid — INMUTABLE (hub usuarios/{usuarioId})",
+      "perfilId": "ID del perfil público (perfiles/{perfilId}); en fase bridge perfilId = usuarioId; multi-perfil futuro = UUID nuevo",
+      "negocioId": "No es entidad separada en MVP — negocio es un perfil con tipoPerfil=negocio → usa perfilId",
+      "anuncianteId": "MVP = usuarioId (Banners); no entidad de URL pública de perfil"
+    },
+    "bridge": "BRIDGE-MIG-01: perfilId = usuarioId para cuentas legacy (ACTA-MIGRACION-USUARIOS-PERFILES)",
+    "basadoEn": [
+      "scripts/SPEC-RENDERENGINE.json",
+      "scripts/ADR-RENDER-STRATEGY.json",
+      "scripts/ACTA-MIGRACION-USUARIOS-PERFILES.json",
+      "scripts/OBSERVACION-ARQUITECTONICA-SEO.json",
+      "scripts/config-renderizado-dinamico-schema.json",
+      "public/perfil.html",
+      "public/resultados.html"
+    ]
+  },
+  "opcionesEvaluadas": {
+    "O1_perfil_perfilId": {
+      "patron": "/perfil/:perfilId",
+      "estabilidad": "máxima (ID inmutable)",
+      "seo": "media (sin keywords en URL)",
+      "legibilidad": "baja",
+      "riesgoCambio": "nulo",
+      "datosSensibles": "bajo (perfilId opaco; NO usar uid si se considera sensible)",
+      "veredicto": "Base sólida pero pobre en SEO sin slug"
+    },
+    "O2_perfil_slug": {
+      "patron": "/perfil/:slug",
+      "estabilidad": "baja (slug puede cambiar/colisionar)",
+      "seo": "alta",
+      "legibilidad": "alta",
+      "riesgoCambio": "alto (cambio de alias rompe URL; requiere 301)",
+      "riesgoDuplicados": "alto (colisión de slugs)",
+      "veredicto": "Inestable como canónico puro"
+    },
+    "O3_p_perfilId": { "patron": "/p/:perfilId", "nota": "Variante corta de O1; buena para share/MVP; SEO pobre", "veredicto": "Útil como ruta corta secundaria" },
+    "O4_p_slug": { "patron": "/p/:slug", "nota": "Corta + slug; misma inestabilidad de O2", "veredicto": "No canónico" },
+    "O5_geo_categoria_slug": {
+      "patron": "/mx/:estado/:ciudad/:categoria/:slug",
+      "seo": "muy alta (geo + categoría + keywords)",
+      "estabilidad": "baja para PERFIL (si cambia ciudad/categoría cambia URL)",
+      "riesgoCambio": "alto si se usa como canónico de perfil",
+      "veredicto": "Excelente para LANDINGS, peligroso como canónico de perfil"
+    },
+    "O6_categoria_ciudad_slug": { "patron": "/categoria/:categoria/:ciudad/:slug", "veredicto": "Variante de landing; mismo criterio que O5" },
+    "O7_negocio_slug": { "patron": "/negocio/:slug", "nota": "Vanity para negocios; inestable como canónico", "veredicto": "Solo como alias → 301 al canónico" },
+    "O8_anunciante_slug": { "patron": "/anunciante/:slug", "nota": "Anunciante no es superficie pública de perfil", "veredicto": "Descartado para URL pública de perfil" },
+    "O9_hibrido_id_slug": {
+      "patron": "/perfil/:perfilId/:slug",
+      "estabilidad": "máxima (resuelve por perfilId; slug decorativo)",
+      "seo": "alta (slug con keywords)",
+      "riesgoCambio": "nulo (cambiar slug NO rompe; ID resuelve; 301 opcional)",
+      "riesgoDuplicados": "bajo (ID único; slug no necesita ser único)",
+      "datosSensibles": "bajo si perfilId es opaco",
+      "veredicto": "RECOMENDADO como canónico de perfil/negocio"
+    },
+    "O10_corta_mvp_seo_futura": {
+      "patron": "ruta corta MVP (/perfil/:perfilId) + ruta SEO futura (/perfil/:perfilId/:slug y landings geo)",
+      "veredicto": "RECOMENDADO como ESTRATEGIA temporal→futura"
+    }
+  },
+  "recomendacionPrincipal": {
+    "perfil": "/perfil/:perfilId/:slug — híbrido ID interno + slug público (O9)",
+    "regla": "perfilId es la fuente de verdad y el canónico; slug es decorativo y opcional. El recurso resuelve SIEMPRE por perfilId aunque el slug falte o cambie.",
+    "landings": {
+      "geo": "/:pais/:estado/:ciudad",
+      "geoCategoria": "/:pais/:estado/:ciudad/:subcategoriaId",
+      "categoria": "/c/:subcategoriaId"
+    },
+    "porQue": "Combina estabilidad inmutable (no se pierde ranking al editar alias/ciudad/categoría) con SEO fuerte vía slug y landings geo. Compatible con bridge perfilId=usuarioId y con multi-perfil futuro (UUID)."
+  },
+  "recomendacionMVP": {
+    "duranteBridge": [
+      "Canónico de perfil: /perfil/:perfilId (perfilId = usuarioId por BRIDGE-MIG-01)",
+      "Compatibilidad: 301 de perfil.html?id={uid} → /perfil/{uid}",
+      "resultados.html enlaza al nuevo canónico /perfil/{perfilId}[/{slug}]",
+      "Slug opcional desde el inicio si hay alias; si no, ruta sin slug válida",
+      "Landings geo top + categoría top como estáticas (ADR-RENDER-STRATEGY)"
+    ],
+    "evitar": ["geo/categoría como canónico de perfil", "slug como único identificador", "exponer email/teléfono/uid sensible en slug"]
+  },
+  "recomendacionFutura": [
+    "Multi-perfil: nuevos perfiles = perfilId UUID (no uid); /perfil/:perfilId/:slug se mantiene",
+    "Vanity opcional /negocio/:slug y /@:alias → 301 al canónico /perfil/:perfilId/:slug",
+    "Landings SEO completas geo + geo×categoría con guard thin-content",
+    "Considerar perfilId opaco (UUID) incluso en bridge si uid se considera dato sensible (decisión de seguridad)"
+  ],
+  "politicaSlugs": {
+    "formato": "minúsculas, ASCII, guiones; derivado de alias/nombreComercial/nombreProfesional + desambiguador corto",
+    "noPII": "Nunca email, teléfono, nombre legal completo, RFC ni uid Auth como slug visible",
+    "unicidad": "NO obligatoria (el perfilId garantiza unicidad); colisiones aceptables porque resuelve el ID",
+    "longitud": "máx ~60 chars; normalización unicode (NFKD) + strip diacríticos",
+    "cambioSlug": "Permitido; no rompe el recurso (resuelve por perfilId); emitir 301 del slug viejo al nuevo por higiene SEO",
+    "adultos": "Slug sin términos explícitos prohibidos; moderación"
+  },
+  "politicaCanonical": {
+    "fuenteVerdad": "perfilId",
+    "tagCanonical": "<link rel=canonical href=/perfil/{perfilId}/{slugActual}>",
+    "siSlugAusente": "canónico = /perfil/{perfilId} (válido)",
+    "landings": "canónico propio por landing; perfiles NO declaran canónico hacia landings",
+    "resultadosFaceted": "canónico normalizado por orden fijo de parámetros (categoria,pais,estado,ciudad); evitar variantes duplicadas",
+    "regla": "Un recurso = un canónico; RenderEngine.resolveUrl produce el canónico"
+  },
+  "politicaNoindex": {
+    "noindex": [
+      "perfil no publicado / borrador (SNAPSHOT_NO_PUBLICADO)",
+      "perfiles adultos donde la política lo exija",
+      "landings thin-content bajo umbral",
+      "resultados con filtros vacíos o duplicados",
+      "/p/:perfilId ruta corta (canónico apunta a la larga) — opcional noindex,follow",
+      "dashboards, messenger, admin, wizard (no son superficie pública)"
+    ],
+    "index": ["perfil publicado|activo", "landings geo/categoría con contenido suficiente", "home", "resultados canónicos"]
+  },
+  "politicaRedirecciones301": {
+    "legacyQueryParam": "perfil.html?id={uid} → 301 /perfil/{uid}",
+    "cambioSlug": "/perfil/{perfilId}/{slugViejo} → 301 /perfil/{perfilId}/{slugNuevo}",
+    "vanity": "/negocio/{slug} y /@{alias} → 301 /perfil/{perfilId}/{slug}",
+    "salidaBridge": "Si un perfil legacy pasa a perfilId UUID (poco común): 301 /perfil/{uid} → /perfil/{uuid} y conservar el legacy como alias histórico",
+    "rutaCorta": "/p/{perfilId} → 301 (o canónico) a /perfil/{perfilId}/{slug}",
+    "regla": "Toda URL antigua resuelve con 301 a su canónico — cero pérdida de ranking"
+  },
+  "politicaDuplicados": {
+    "evitar": [
+      "Mismo perfil indexable por slug y por id sin canónico unificado",
+      "Landings que solapan (ciudad vs ciudad+categoría) sin canónico claro",
+      "Parámetros de query en distinto orden generando URLs distintas"
+    ],
+    "mitigacion": ["canónico único por perfilId", "orden fijo de query params", "jerarquía landing con breadcrumb y canónico propio"]
+  },
+  "politicaBridgePerfilIdUsuarioId": {
+    "regla": "En fase bridge perfilId = usuarioId; la URL /perfil/{perfilId} = /perfil/{uid} mantiene compatibilidad sin redirección de datos",
+    "favoritos": "usuarios/{uid}/favoritos/{perfilId} válidos con perfilId=uid",
+    "salida": "Multi-perfil futuro introduce UUID; perfil principal legacy conserva uid o migra con 301",
+    "seguridad": "Si uid se clasifica como sensible, recomendar perfilId opaco desde el inicio (decisión seguridad — ver riesgos)"
+  },
+  "politicaNegociosAnunciantes": {
+    "negocio": "Un negocio es un perfil (tipoPerfil=negocio) → canónico /perfil/{perfilId}/{slug}; vanity /negocio/{slug} → 301",
+    "anunciante": "anuncianteId (MVP=usuarioId) pertenece a Banners; NO genera URL pública de perfil; los banners son creativos que enlazan a destinos, no superficies canónicas de perfil",
+    "multiSucursal": "Futuro: cada sucursal = perfil propio con su perfilId/canónico"
+  },
+  "impacto": {
+    "seo": "URLs estables + slug con keywords + landings geo = mejor indexación sin riesgo de pérdida por cambios de alias. Canónico único elimina duplicados.",
+    "renderEngine": "Define RenderEngine.resolveUrl: entrada {perfilId, slug?, geo?, subcategoriaId?} → {canonical, slug, breadcrumb}. Cierra el formato de URL del SPEC.",
+    "migracion": "Bridge perfilId=usuarioId hace que las URLs nuevas funcionen sin mover datos; 301 desde query param legacy. Sin pérdida de ranking en cutover."
+  },
+  "compatibilidad": {
+    "seo": "Provee patrón de URLs, canónico, noindex, 301, hreflang futuro",
+    "renderEngine": "resolveUrl + canónico por perfilId (alinea SPEC-RENDERENGINE)",
+    "fieldEngineSnapshot": "snapshotAlPublicar aporta subcategoriaId/tipoPerfil/geo para construir slug/landing; perfilId estable",
+    "migracion": "BRIDGE-MIG-01 perfilId=usuarioId; fases 1-5 de la acta",
+    "themeEngine": "Temas por perfilId — coherente con URL canónica",
+    "banners": "anuncianteId no es URL de perfil; creativos enlazan a destinos",
+    "interacciones": "Contenido efímero (stories/live) noindex; no genera canónico de perfil"
+  },
+  "riesgos": [
+    { "id": "URL-R01", "nivel": "alto", "riesgo": "Cambiar el esquema de URL DESPUÉS de indexar → pérdida masiva de ranking", "mitigacion": "Fijar canónico /perfil/{perfilId}/{slug} ahora (este ADR) antes de runtime público" },
+    { "id": "URL-R02", "nivel": "alto", "riesgo": "uid Auth expuesto en URL si se considera dato sensible", "mitigacion": "Evaluar perfilId opaco (UUID) desde bridge; decisión de seguridad documentada" },
+    { "id": "URL-R03", "nivel": "medio", "riesgo": "Duplicados por slug+id o landings solapadas", "mitigacion": "Canónico único + orden fijo de params + jerarquía landing" },
+    { "id": "URL-R04", "nivel": "medio", "riesgo": "Slug con PII o términos prohibidos", "mitigacion": "Política de slugs + moderación adultos" },
+    { "id": "URL-R05", "nivel": "medio", "riesgo": "Romper favoritos/refs legacy al introducir UUID", "mitigacion": "Conservar bridge + 301 + alias histórico" },
+    { "id": "URL-R06", "nivel": "bajo", "riesgo": "Slug colisiona", "mitigacion": "ID resuelve; slug no requiere unicidad" }
+  ],
+  "dependencias": {
+    "renderEngine": "Consume resolveUrl/canónico (cierra RE-AU-03)",
+    "seo": "Define sitemap/robots/hreflang sobre estas URLs",
+    "migracion": "BRIDGE-MIG-01 y fases (ACTA-MIGRACION-USUARIOS-PERFILES)",
+    "fieldEngine": "snapshotAlPublicar como fuente de slug/landing",
+    "seguridad": "Decisión perfilId opaco vs uid (URL-R02)"
+  },
+  "decisionQueDesbloqueaSpecRenderEngine": {
+    "hallazgoCerrado": "RE-AU-03 (URL canónica de migración)",
+    "resolucion": "Canónico de perfil = /perfil/{perfilId}/{slug}; perfilId estable (bridge=usuarioId); 301 desde query param legacy; landings geo/categoría con canónico propio",
+    "impactoEnSpec": [
+      "Fija RenderEngine.resolveUrl (entrada/salida y canónico)",
+      "Confirma estabilidad de URL en migración (sin pérdida de ranking)",
+      "Habilita política noindex/301/duplicados del SPEC"
+    ],
+    "hallazgosRestantesParaCongelar": ["RE-AU-01 Shared/Core no congelado"]
+  },
+  "procedenciaADR": {
+    "crearMd": true,
+    "crearJson": true,
+    "justificacion": "Decisión arquitectónica con alternativas y consecuencias; ADR es el formato correcto y cierra RE-AU-03."
+  },
+  "consecuencias": {
+    "positivas": ["Estabilidad de URL e identidad", "SEO fuerte con slug+landings", "cero pérdida de ranking en migración", "duplicados controlados", "compatibilidad con bridge y multi-perfil"],
+    "negativas": ["Requiere decisión de seguridad sobre uid en URL", "necesita capa de 301 y resolución por ID", "slug management (moderación/normalización)"]
+  },
+  "noModifica": ["Capas congeladas (VE 1.1.0, FieldEngine 1.0.1, Messenger 1.0.0, Dashboards 1.0.0, Cuentas/Catálogo/Seguridad)", "Producción, Firestore, deploy, commit"],
+  "changelog": [
+    { "version": "1.0.0", "fecha": "2026-06-10", "nota": "ADR inicial: URL canónica /perfil/{perfilId}/{slug}, políticas slug/canonical/noindex/301/duplicados/bridge/negocios, cierre RE-AU-03" }
+  ]
+}

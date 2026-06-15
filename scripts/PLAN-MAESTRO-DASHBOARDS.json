@@ -1,0 +1,265 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "tipo": "PLAN_MAESTRO",
+  "modulo": "DASHBOARDS",
+  "titulo": "Plan Maestro Dashboards CariHub",
+  "fecha": "2026-06-10",
+  "version": "1.0.0",
+  "estado": "PLAN_DISENO_DOCUMENTAL",
+  "modo": "Solo análisis y documentación — sin runtime/carpetas/mover/Firestore/deploy/commit; no modifica capas existentes",
+  "autorizadoPor": "product owner / usuario CariHub",
+  "basadoEn": [
+    "scripts/SPEC-DASHBOARDS.json (CONGELADO 1.0.0)",
+    "scripts/ACTA-CONGELAMIENTO-DASHBOARDS.json",
+    "scripts/PLAN-MAESTRO-REGISTRO-CUENTA.json",
+    "scripts/ACTA-CONGELAMIENTO-SHARED-CORE.json",
+    "scripts/ACTA-CONGELAMIENTO-RENDERENGINE.json",
+    "scripts/AUDITORIA-ARQUITECTONICA-GLOBAL-CARIHUB.json",
+    "scripts/config-cuentas-usuario-schema.json",
+    "scripts/config-admin-arquitectura-completa-schema.json"
+  ],
+  "objetivo": "Definir la arquitectura funcional del ecosistema Dashboards y la frontera definitiva entre Cuenta, Dashboards, Admin y módulos futuros, sin modificar la capa Dashboards 1.0.0 congelada.",
+  "principioRector": "Dashboards es la capa de GESTIÓN DIARIA POST-LOGIN. Un único shell modular por tipoCuentaPrincipal + rolesCuenta[] pinta los módulos pertinentes. No hace onboarding (Cuenta), no modera el sistema (Admin), no renderiza superficies públicas (RenderEngine).",
+
+  "reconciliacionConSpecCongelado": {
+    "advertencia": "SPEC-DASHBOARDS 1.0.0 (CONGELADO) define 4 dashboards: dashboard_admin, dashboard_perfil, dashboard_banners, dashboard_cuenta(visitante), bajo un shell modular por tipoCuenta+roles. Este plan NO lo modifica.",
+    "mapeo5Solicitados": {
+      "Dashboard Perfil": "= dashboard_perfil congelado (tipoPerfil persona: adulto/independiente/profesionista)",
+      "Dashboard Negocio": "VARIANTE de dashboard_perfil (tipoPerfil=negocio) — mismo shell, componentes negocio; NO es dashboard nuevo congelado",
+      "Dashboard Anunciante": "= dashboard_banners congelado (rolesCuenta incluye anunciante)",
+      "Dashboard Empresa": "EXTENSIÓN futura: tipoCuentaPrincipal=empresa con multi-perfil/multi-sucursal — requiere Dashboards MINOR 1.1.0",
+      "Dashboard Operador": "NUEVO: rol staff/sub-admin con permisos delegados — NO existe en baseline; requiere RBAC + Dashboards/Admin MINOR"
+    },
+    "implicacion": "Perfil, Negocio y Anunciante caben en el baseline 1.0.0. Empresa y Operador son extensiones propuestas que, de adoptarse, exigen una versión MINOR de Dashboards (no se aplica aquí)."
+  },
+
+  "fronteraDefinitiva": {
+    "cuenta": "Identidad/onboarding/credenciales/verificación (PLAN-MAESTRO-REGISTRO-CUENTA). Entra al sistema y crea el perfil.",
+    "dashboards": "Gestión diaria del perfil/negocio/anuncios ya creados: ver estado, editar (re-entra a wizard de Cuenta), métricas, renovaciones, notificaciones, historial.",
+    "admin": "Moderación global, aprobaciones, RBAC, catálogo/schemas, seguridad del sistema (aislado en /admin).",
+    "futuros": "Empresa (multi-perfil), Operador (staff delegado) — extensiones por rol."
+  },
+
+  "inventarioActual": {
+    "produccion": [
+      { "elemento": "public/admin.html", "rol": "dashboard_admin parcial (~40%)", "estado": "RBAC por email único" },
+      { "elemento": "public/dashboard-rentero.html", "rol": "UI base de shell usuario (prototipo, 12 temas)", "estado": "no integrado a Firebase" },
+      { "elemento": "public/index.html modales (modalPanel/modalEditar/modalMiPerfil)", "rol": "dashboard_perfil + dashboard_cuenta embebidos", "estado": "parcial en Home" }
+    ],
+    "colecciones": ["usuarios/{uid} (monolito)", "estadisticas_visitas", "logsAdmin", "solicitudes_anuncios", "pagos (admin)"],
+    "ausentes": ["shell /cuenta modular", "perfiles/{perfilId}", "contratos_perfiles/banners", "notificaciones subcolección", "historial subcolecciones", "RBAC admins/{uid}"]
+  },
+  "mezcladoEnHome": ["modalPanel (panel cuenta)", "modalEditar (edición)", "estadísticas visita básicas", "estado perfil/actualizacionPendiente"],
+  "queDebeMoverseADashboards": ["panel de cuenta", "estado de publicación/revisión (solo lectura + CTA)", "métricas/estadísticas", "renovaciones", "notificaciones in-app", "historial de actividad", "punto de entrada a edición (que delega a Cuenta/wizard)"],
+
+  "dashboards": {
+    "perfil": {
+      "id": "dashboard_perfil",
+      "baseline": "CONGELADO 1.0.0",
+      "objetivos": ["Gestionar el perfil público propio", "Mantener verificación y vigencia", "Ver desempeño"],
+      "responsabilidades": ["estado publicación", "edición (vía wizard Cuenta)", "fotos", "verificación", "renovación", "estadísticas", "mensajes", "notificaciones", "historial"],
+      "limites": ["No aprueba su propia revisión", "No modera", "No cobra"],
+      "pantallasPrincipales": ["Resumen perfil", "Editar perfil", "Fotos", "Verificación", "Estadísticas", "Mensajes", "Renovación", "Actividad"],
+      "rutas": ["/cuenta", "/cuenta/perfil", "/cuenta/perfil/editar", "/cuenta/perfil/estadisticas", "/cuenta/perfil/verificacion"],
+      "datosAdministrados": ["perfiles/{perfilId} (campos públicos propios)", "verificación estados", "estadisticas_visitas (lectura)"],
+      "roles": ["dueño perfil (tipoPerfil persona)"],
+      "permisos": { "editar": ["campos públicos vía wizard"], "soloLectura": ["estadoRevision", "verificación resuelta", "estadísticas"], "requiereRevision": ["cambios que disparan actualizacionPendiente"], "requiereAprobacionAdmin": ["publicación inicial", "re-revisión"] },
+      "accionesPermitidas": ["guardar_borrador", "enviar_revision", "renovar", "responder_mensajes", "subir_fotos"],
+      "accionesProhibidas": ["auto-aprobar", "ver datos de otros", "cambiar precios de catálogo"],
+      "widgets": ["estado_publicacion", "completitud_perfil", "vistas_recientes", "mensajes_no_leidos", "vencimiento", "verificacion_estado"],
+      "metricas": ["vistas perfil", "favoritos recibidos", "conversaciones iniciadas", "días para vencimiento"],
+      "notificaciones": ["verificaciones", "renovaciones", "mensajes", "seguridad"],
+      "historial": ["historial_perfil", "historial_verificaciones", "historial_actividad_cuenta"],
+      "iaAsistente": "ia_asistente_perfil (confirmación humana; FieldEngine dry-run)"
+    },
+    "negocio": {
+      "id": "dashboard_perfil (variante negocio)",
+      "baseline": "VARIANTE de dashboard_perfil 1.0.0",
+      "objetivos": ["Gestionar ficha de negocio (LocalBusiness)"],
+      "diferenciasVsPerfil": ["componentes negocio", "horarios/NAP", "documentos negocio", "posible multi-sucursal (→ Empresa)"],
+      "rutas": ["/cuenta/negocio", "/cuenta/negocio/editar"],
+      "datosAdministrados": ["perfiles/{perfilId} tipoPerfil=negocio"],
+      "permisos": "igual que perfil con campos de negocio",
+      "widgets": ["ficha_negocio", "horarios", "vistas", "verificacion"],
+      "nota": "Mismo shell; no es dashboard congelado aparte"
+    },
+    "anunciante": {
+      "id": "dashboard_banners",
+      "baseline": "CONGELADO 1.0.0",
+      "objetivos": ["Gestionar campañas/banners contratados"],
+      "responsabilidades": ["funnel contratación", "solicitudes", "campañas activas", "creativos", "renovaciones", "pagos banner", "estadísticas anuncio", "historial"],
+      "limites": ["No aprueba sus banners (Admin)", "No fija precios"],
+      "pantallasPrincipales": ["Resumen campañas", "Nueva solicitud", "Creativos", "Estadísticas anuncio", "Pagos/renovación", "Actividad banners"],
+      "rutas": ["/cuenta/anunciante", "/cuenta/anunciante/solicitud", "/cuenta/anunciante/campanas", "/cuenta/anunciante/estadisticas"],
+      "datosAdministrados": ["solicitudes_anuncios", "anuncios", "contratos_banners (futuro)"],
+      "roles": ["rolesCuenta incluye anunciante (anuncianteId=usuarioId MVP)"],
+      "permisos": { "editar": ["creativos antes de aprobación", "datos solicitud"], "soloLectura": ["estado aprobación", "estadísticas"], "requiereAprobacionAdmin": ["activación de banner", "correcciones"] },
+      "accionesPermitidas": ["crear_solicitud", "subir_creativo", "pagar", "renovar"],
+      "accionesProhibidas": ["auto-activar banner", "editar inventario global"],
+      "widgets": ["campanas_activas", "impresiones", "clics", "vencimiento_banner", "estado_solicitud"],
+      "metricas": ["impresiones", "clics/CTR", "días activos", "conversión funnel"],
+      "notificaciones": ["banners", "pagos", "renovaciones"],
+      "historial": ["historial_banners", "historial_pagos"],
+      "iaAsistente": "ia_asistente_publicidad (confirmación humana)"
+    },
+    "empresa": {
+      "id": "dashboard_empresa",
+      "baseline": "EXTENSION_FUTURA — requiere Dashboards MINOR 1.1.0",
+      "objetivos": ["Gestionar múltiples perfiles/sucursales bajo una cuenta empresa"],
+      "responsabilidades": ["multi-perfil", "roles internos (gestor de sucursal)", "facturación consolidada", "métricas agregadas"],
+      "limites": ["No es Admin del sistema", "permisos acotados a sus perfiles"],
+      "rutas": ["/cuenta/empresa", "/cuenta/empresa/perfiles", "/cuenta/empresa/sucursales", "/cuenta/empresa/facturacion"],
+      "datosAdministrados": ["usuarios.perfilIds[] (multi-perfil)", "perfiles/{perfilId} múltiples", "contratos consolidados"],
+      "roles": ["tipoCuentaPrincipal=empresa", "miembros con sub-roles (futuro)"],
+      "permisos": { "editar": ["perfiles propios de la empresa"], "requiereAprobacionAdmin": ["alta de cada sucursal pública"] },
+      "widgets": ["resumen_multisucursal", "metricas_agregadas", "facturacion"],
+      "dependeDe": ["multi-perfil (UUID) post-bridge", "ADR-URL-CANONICA multi-perfil", "roles internos"],
+      "nota": "No incluido en baseline congelado; propuesta para MINOR"
+    },
+    "operador": {
+      "id": "dashboard_operador",
+      "baseline": "NUEVO — no existe en baseline; requiere RBAC + Dashboards/Admin MINOR",
+      "objetivos": ["Staff con permisos delegados (moderación parcial, soporte, revisión) sin ser super-admin"],
+      "responsabilidades": ["colas asignadas (revisión perfiles, soporte, denuncias) según permisos"],
+      "limites": ["Permisos delegados granulares", "sin acceso a configuración crítica del sistema", "todo auditado"],
+      "rutas": ["/operador", "/operador/revisiones", "/operador/soporte", "/operador/denuncias"],
+      "datosAdministrados": ["subconjunto de colas admin según rol"],
+      "roles": ["admins/{uid} con scope/claims acotados (operador, moderador, soporte)"],
+      "permisos": { "editar": ["estados de items asignados"], "requiereAprobacionAdmin": ["acciones fuera de su scope"], "soloLectura": ["paneles globales no asignados"] },
+      "accionesProhibidas": ["cambiar RBAC", "configurar catálogo/schemas", "ver datos fuera de scope"],
+      "widgets": ["mi_cola", "pendientes", "sla", "mis_acciones"],
+      "dependeDe": ["RBAC custom claims + admins/{uid}", "config-admin-arquitectura-completa-schema.json", "logsAdmin"],
+      "nota": "Frontera con Admin: Operador es Admin con scope reducido; vive en /admin o /operador con RBAC. Propuesta futura."
+    }
+  },
+
+  "matrices": {
+    "dashboardFunciones": {
+      "perfil": ["editar_perfil(wizard)", "verificacion", "renovacion", "estadisticas", "mensajes", "historial"],
+      "negocio": ["editar_negocio", "horarios", "verificacion", "estadisticas"],
+      "anunciante": ["solicitud", "creativos", "pago", "renovacion", "estadisticas_anuncio"],
+      "empresa": ["multi_perfil", "sucursales", "facturacion", "metricas_agregadas"],
+      "operador": ["revisar_cola", "soporte", "moderar_denuncias(scope)"]
+    },
+    "dashboardPermisos": {
+      "perfil": "owner: editar campos públicos; lectura estados; revisión admin para publicar",
+      "negocio": "owner: igual perfil + campos negocio",
+      "anunciante": "owner: editar solicitud/creativo; activación por admin",
+      "empresa": "owner empresa: editar sus perfiles; alta sucursal por admin",
+      "operador": "claims acotados; editar solo items asignados; auditado"
+    },
+    "dashboardWidgets": {
+      "perfil": ["estado_publicacion", "completitud", "vistas", "mensajes", "vencimiento", "verificacion"],
+      "negocio": ["ficha_negocio", "horarios", "vistas", "verificacion"],
+      "anunciante": ["campanas_activas", "impresiones", "clics", "vencimiento", "estado_solicitud"],
+      "empresa": ["resumen_multisucursal", "metricas_agregadas", "facturacion"],
+      "operador": ["mi_cola", "pendientes", "sla", "mis_acciones"]
+    },
+    "dashboardMetricas": {
+      "perfil": ["vistas", "favoritos", "conversaciones", "dias_vencimiento"],
+      "negocio": ["vistas", "contactos", "verificacion"],
+      "anunciante": ["impresiones", "CTR", "dias_activos", "conversion_funnel"],
+      "empresa": ["agregado vistas/contactos por sucursal", "ingresos"],
+      "operador": ["items_resueltos", "tiempo_respuesta", "SLA"]
+    },
+    "dashboardModulosExternos": {
+      "perfil": ["Cuenta(wizard/edición)", "RenderEngine(snapshot)", "Messenger(mensajes)", "Pagos(renovación)", "Interacciones(favoritos recibidos)", "FieldEngine", "ValidationEngine"],
+      "negocio": ["Cuenta", "RenderEngine", "Pagos", "FieldEngine"],
+      "anunciante": ["Banners", "Pagos", "Admin(aprobación)", "RenderEngine(render slot)"],
+      "empresa": ["Cuenta(multi-perfil)", "Pagos(consolidado)", "Admin"],
+      "operador": ["Admin", "ValidationEngine", "Messenger(soporte)", "Seguridad"]
+    }
+  },
+
+  "modulosInternos": ["AuthShell(lectura roles)", "DashboardRouter(por tipoCuenta+roles)", "NotificacionesUnificadas(bus)", "CentroActividad(historial)", "IAOrchestrator(asistentes)", "SecurityGates(VE/Seguridad)"],
+  "rutasSugeridas": {
+    "shellUsuario": "/cuenta (modular: perfil|negocio|anunciante|empresa según tipoCuenta+roles)",
+    "operador": "/operador (RBAC scope)",
+    "admin": "/admin (aislado)",
+    "nota": "Todas privadas y noindex (RenderEngine no renderiza dashboards)"
+  },
+  "permisosSugeridos": {
+    "modelo": "tipoCuentaPrincipal + rolesCuenta[] + (futuro) admins/{uid} claims",
+    "owner": "edita solo lo propio; lectura de estados resueltos",
+    "admin": "aprueba/modera; RBAC",
+    "operador": "claims acotados auditados",
+    "ia": "solo recomienda; nunca auto-ejecuta (política congelada)"
+  },
+
+  "pertenenciaDashboard": {
+    "perteneceADashboard": ["gestión diaria de perfil/negocio/anuncios propios", "estado/métricas/notificaciones/historial", "punto de entrada a edición", "renovaciones (CTA)"],
+    "noPerteneceADashboard": ["onboarding/alta/credenciales (Cuenta)", "moderación global/RBAC (Admin)", "render público (RenderEngine)", "reglas de validación (VE)", "resolución de schema (FieldEngine)", "cobro real (Pagos)", "inventario/precios banners (Banners)", "datos de favoritos/visitas crudos (Interacciones)", "edición de temas (ThemeEngine)", "prompts/LLM (Agentes IA)"]
+  },
+  "destinoPorModulo": {
+    "cuenta": ["wizard", "verificación", "credenciales", "alta de perfil"],
+    "admin": ["aprobaciones", "moderación", "catálogo/schemas", "RBAC", "Operador como scope admin"],
+    "messenger": ["mensajería P2P (Dashboard solo muestra resumen/acceso)"],
+    "pagos": ["checkout/cobro (Dashboard muestra estado y CTA)"],
+    "banners": ["inventario/rotación/precios (Dashboard anunciante gestiona sus campañas)"],
+    "interacciones": ["favoritos/visitas/denuncias datos (Dashboard muestra agregados)"],
+    "themeEngine": ["personalización visual (Dashboard ofrece punto de entrada)"],
+    "agentesIA": ["LLM/prompts (Dashboard muestra recomendaciones, nunca auto-ejecuta)"],
+    "sharedCore": ["initFirebase, helpers, tokens, clientes VE/FE/RenderEngine, notificaciones contrato"]
+  },
+
+  "relacionesConModulos": {
+    "renderEngine": "Dashboards NO renderiza público; consume snapshot solo lectura para previsualizar estado",
+    "sharedCore": "Consume config/helpers/tokens/clientes (Core 1.0.0)",
+    "validationEngine": "Gates de acciones (enviar_revision, contratar) vía validationClient",
+    "fieldEngine": "Edición re-entra al wizard FieldEngine (dry-run para IA)",
+    "messenger": "Resumen de mensajes/acceso; contenido en Messenger",
+    "pagos": "Estado de pago/renovación + CTA; cobro en Pagos",
+    "banners": "Dashboard anunciante gestiona campañas; inventario/precios en Banners",
+    "interacciones": "Muestra favoritos recibidos/visitas agregadas; datos en Interacciones",
+    "admin": "Operador = scope reducido de Admin; aprobaciones en Admin",
+    "themeEngine": "Punto de entrada a personalización; editor en ThemeEngine",
+    "agentesIA": "Asistentes por dashboard (7 IA); solo recomendaciones con confirmación humana"
+  },
+
+  "riesgos": [
+    { "id": "DB-R01", "nivel": "alto", "riesgo": "Taxonomía de 5 dashboards diverge del baseline congelado (4)", "mitigacion": "Perfil/Negocio/Anunciante caben; Empresa/Operador requieren Dashboards MINOR — no aplicar sin acta" },
+    { "id": "DB-R02", "nivel": "alto", "riesgo": "Shell /cuenta depende de routing y de migración usuarios→perfiles (DO8/A1)", "mitigacion": "Refactor routing + migración previa" },
+    { "id": "DB-R03", "nivel": "alto", "riesgo": "Operador sin RBAC real (hoy admin email único, S1)", "mitigacion": "RBAC custom claims + admins/{uid} antes de Operador" },
+    { "id": "DB-R04", "nivel": "medio", "riesgo": "Notificaciones/historial requieren EventBus y subcolecciones inexistentes (DO2/DO6)", "mitigacion": "Diseñar productor de eventos; MVP acotado" },
+    { "id": "DB-R05", "nivel": "medio", "riesgo": "PII en historial (verificaciones/seguridad) (A4/S3)", "mitigacion": "PrivacyGuard en dominios sensibles; solo estados" },
+    { "id": "DB-R06", "nivel": "medio", "riesgo": "Solapamiento Cuenta↔Dashboards (edición)", "mitigacion": "Edición vive en wizard de Cuenta; Dashboard es el punto de entrada" },
+    { "id": "DB-R07", "nivel": "bajo", "riesgo": "Spam de recomendaciones IA (A5)", "mitigacion": "Límites + preferencias notificaciones" }
+  ],
+  "dependencias": {
+    "congeladas": ["Dashboards 1.0.0", "Shared/Core 1.0.0", "RenderEngine 1.0.0", "FieldEngine 1.0.1", "ValidationEngine 1.1.0", "Catálogo/Cuentas/Seguridad 1.0.0", "Messenger 1.0.0"],
+    "precondiciones": ["Migración usuarios→perfiles", "RBAC admin (para Operador)", "Productor de eventos notificaciones (Cloud Functions)", "Registro/Cuenta extraído"],
+    "extensionesPropuestas": ["Dashboards MINOR 1.1.0 para Empresa + Operador"]
+  },
+  "estructuraIdealFutura": {
+    "nota": "Lógica; sin crear carpetas.",
+    "shellUsuario": "/cuenta — router por tipoCuenta+roles → módulos: perfil | negocio | anunciante | (empresa fut.)",
+    "operador": "/operador — Admin con scope (RBAC)",
+    "admin": "/admin — aislado",
+    "transversales": ["NotificacionesUnificadas", "CentroActividad", "IAOrchestrator"],
+    "consumeDe": ["Shared/Core", "VE/FieldEngine/RenderEngine clientes", "Messenger/Pagos/Banners/Interacciones (resúmenes)"]
+  },
+  "ordenRecomendadoImplementacion": [
+    { "paso": 1, "accion": "Shell /cuenta modular básico (perfil) tras extraer Registro/Cuenta", "prioridad": "P0", "depende": "Registro/Cuenta + Core" },
+    { "paso": 2, "accion": "Dashboard perfil: estado, edición(CTA wizard), estadísticas lectura", "prioridad": "P0" },
+    { "paso": 3, "accion": "Dashboard anunciante (panel post-solicitud)", "prioridad": "P1", "depende": "Banners" },
+    { "paso": 4, "accion": "Notificaciones MVP (seguridad/verificaciones/renovaciones/banners) + EventBus", "prioridad": "P1", "depende": "Cloud Functions" },
+    { "paso": 5, "accion": "Centro de actividad MVP (actividad_cuenta, historial_perfil/banners)", "prioridad": "P1" },
+    { "paso": 6, "accion": "RBAC admin + Operador (scope)", "prioridad": "P2", "depende": "RBAC", "requiereActa": "Dashboards MINOR" },
+    { "paso": 7, "accion": "Dashboard empresa (multi-perfil)", "prioridad": "P2", "depende": "multi-perfil", "requiereActa": "Dashboards MINOR" }
+  ],
+
+  "procedenciaPlanMaestro": {
+    "crearMd": true,
+    "crearJson": true,
+    "justificacion": "Organiza el ecosistema dashboards y fija fronteras Cuenta/Dashboards/Admin/futuros sin tocar la capa congelada; identifica qué requeriría un Dashboards MINOR.",
+    "siguientesPasos": ["Si se adoptan Empresa/Operador → PROPUESTA-ACTA-MINOR-DASHBOARDS-1.1.0", "PLAN-MAESTRO-ADMIN (RBAC)", "Anexo operacional de migración"]
+  },
+  "noModifica": [
+    "Capa Dashboards 1.0.0 congelada (este plan no la altera)",
+    "Otras capas congeladas (Shared/Core, RenderEngine, VE, FieldEngine, Messenger, Cuentas/Catálogo/Seguridad)",
+    "Producción, Firestore, deploy, commit"
+  ],
+  "changelog": [
+    { "version": "1.0.0", "fecha": "2026-06-10", "nota": "Plan maestro Dashboards: ecosistema, fronteras, 5 dashboards mapeados al baseline 4, matrices y orden de implementación" }
+  ]
+}

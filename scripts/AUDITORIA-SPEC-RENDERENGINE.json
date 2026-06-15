@@ -1,0 +1,101 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "tipo": "AUDITORIA_SPEC",
+  "objeto": "SPEC-RENDERENGINE",
+  "versionSpecAuditada": "1.0.0",
+  "fecha": "2026-06-10",
+  "estado": "AUDITORIA_CONSISTENCIA_ACTUALIZADA_2026-06-10",
+  "veredicto": "APTA_PARA_CONGELAR — 3 hallazgos bloqueantes CERRADOS (RE-AU-01/02/03)",
+  "revisionCierre": {
+    "fecha": "2026-06-10",
+    "RE-AU-01": "CERRADO — ACTA-CONGELAMIENTO-SHARED-CORE 1.0.0 (Shared/Core congelado)",
+    "RE-AU-02": "CERRADO — ADR-RENDER-STRATEGY 1.0.0 (híbrido snapshot-first)",
+    "RE-AU-03": "CERRADO — ADR-URL-CANONICA-PERFILES 1.0.0 (/perfil/{perfilId}/{slug})"
+  },
+  "alcanceAuditoria": "Consistencia interna de la SPEC, coherencia con corpus congelado y contratos existentes, cobertura de fixtures y verificación de restricciones de privacidad.",
+  "matrizConsistencia": [
+    { "verificacion": "Componentes y fallback coinciden con config-renderizado-dinamico-schema.json", "resultado": "PASS", "nota": "Reutiliza registrados, aliases, fallbackPorArquetipo/tipoPerfil" },
+    { "verificacion": "Lista negra PrivacyGuard idéntica a nuncaMostrar del contrato base", "resultado": "PASS", "nota": "21 campos prohibidos alineados" },
+    { "verificacion": "snapshotAlPublicar coherente con FieldEngine 1.0.1", "resultado": "PASS", "nota": "ProfileSnapshot mapea campos snapshot del SPEC-FIELDENGINE" },
+    { "verificacion": "No llama FieldEngine/ValidationEngine vivo en render", "resultado": "PASS", "nota": "Solo consume snapshot; VE/FE congelados intactos" },
+    { "verificacion": "Superficies privadas excluidas (dashboards/messenger/admin/borradores)", "resultado": "PASS", "nota": "RENDER_SUPERFICIE_PRIVADA + SNAPSHOT_NO_PUBLICADO + fixtures R11/R12" },
+    { "verificacion": "Head/JSON-LD/OG coherentes con OBSERVACION-SEO 1.0.0", "resultado": "PASS", "nota": "Schema.org Person/LocalBusiness/ProfessionalService/ItemList/BreadcrumbList/WebSite" },
+    { "verificacion": "Adultos noindex / OG moderado", "resultado": "PASS", "nota": "Fixture R03" },
+    { "verificacion": "TokenSet desde Core/ThemeEngine sin HTML crudo", "resultado": "PASS", "nota": "Fixture R14 coherente con THEMEENGINE 1.3.0" },
+    { "verificacion": "Resultados server-side (no client-side filtering)", "resultado": "PASS", "nota": "Fixture R02 explícito; corrige riesgo AP-R01 de App Pública" },
+    { "verificacion": "URL canónica estable en migración", "resultado": "PASS", "nota": "Fixture R15; perfilId preservado" },
+    { "verificacion": "Dependencia Shared/Core declarada como precondición no congelada", "resultado": "PASS", "nota": "RESUELTO: Shared/Core congelado 1.0.0 (ACTA-CONGELAMIENTO-SHARED-CORE)" },
+    { "verificacion": "Decisión SSR vs prerender vs snapshot estático", "resultado": "PASS", "nota": "RESUELTO: ADR-RENDER-STRATEGY fija híbrido snapshot-first; modoRender por superficie" },
+    { "verificacion": "URL canónica de migración", "resultado": "PASS", "nota": "RESUELTO: ADR-URL-CANONICA-PERFILES /perfil/{perfilId}/{slug}" }
+  ],
+  "hallazgos": {
+    "bloqueantesParaCongelar": [
+      { "id": "RE-AU-01", "tema": "Shared/Core no congelado", "detalle": "RenderEngine consume config/helpers/catálogo/geo/tokens/ComponentRegistry de Core.", "estado": "CERRADO", "cierre": "ACTA-CONGELAMIENTO-SHARED-CORE 1.0.0" },
+      { "id": "RE-AU-02", "tema": "Estrategia de render no decidida", "detalle": "SSR/prerender/snapshot estático afecta CWV, SEO y caché.", "estado": "CERRADO", "cierre": "ADR-RENDER-STRATEGY 1.0.0 (híbrido snapshot-first)" },
+      { "id": "RE-AU-03", "tema": "URL canónica de migración", "detalle": "perfilId/slug canónico estable para no perder ranking.", "estado": "CERRADO", "cierre": "ADR-URL-CANONICA-PERFILES 1.0.0" }
+    ],
+    "bloqueantesRestantes": [],
+    "ajustesMenoresRecomendados": [
+      { "id": "RE-AM-01", "tema": "Política thin content landings", "detalle": "Definir umbral mínimo de perfiles/contenido para indexar landing (coordinar con SEO)." },
+      { "id": "RE-AM-02", "tema": "Estrategia de caché/invalidación", "detalle": "Detallar invalidación por (perfilId, schemaVersion) al republicar." },
+      { "id": "RE-AM-03", "tema": "renderHash", "detalle": "Definir composición del hash para reproducibilidad (snapshot + componente + tokens + locale)." },
+      { "id": "RE-AM-04", "tema": "Imágenes responsive", "detalle": "Especificar srcset/sizes y dimensiones para LCP/CLS." },
+      { "id": "RE-AM-05", "tema": "Breadcrumb canónico", "detalle": "Unificar breadcrumb con jerarquía geo país>estado>ciudad>categoría." }
+    ]
+  },
+  "riesgos": [
+    { "id": "RE-R01", "nivel": "alto", "riesgo": "Fuga de datos privados si PrivacyGuard no es obligatorio en todos los caminos", "mitigacion": "Gate único pre-render + fixtures R07; log de intentos" },
+    { "id": "RE-R02", "nivel": "alto", "riesgo": "Indexar borradores/dashboards/messenger por error", "mitigacion": "Whitelist de superficies indexables + robots noindex + R11/R12" },
+    { "id": "RE-R03", "nivel": "medio", "riesgo": "URLs inestables al migrar → pérdida ranking", "mitigacion": "perfilId canónico + 301 en cambios de slug" },
+    { "id": "RE-R04", "nivel": "medio", "riesgo": "Thin content masivo por 462 subcategorías × geo", "mitigacion": "Umbral de indexación + contenido editorial hub" },
+    { "id": "RE-R05", "nivel": "medio", "riesgo": "Schema.org engañoso (verificaciones)", "mitigacion": "Solo datos públicos verificables; nunca schema falso" },
+    { "id": "RE-R06", "nivel": "medio", "riesgo": "Acoplar RenderEngine a FieldEngine vivo", "mitigacion": "Consumir solo snapshot congelado" },
+    { "id": "RE-R07", "nivel": "bajo", "riesgo": "Regresión visual por tokens divergentes", "mitigacion": "TokenSet desde Core; corregir --rosa en Core" }
+  ],
+  "riesgosSiSeExtraeImplementaMal": [
+    "RenderEngine que lee Firestore vivo y filtra en cliente (repite AP-R01)",
+    "HTML SEO paralelo fuera del motor → doble fuente de verdad",
+    "ThemeEngine inyectando markup arbitrario → XSS/seguridad",
+    "Render que rompe la página por componente faltante (sin fallback)"
+  ],
+  "dependencias": {
+    "congeladas": ["catalogo 1.0.0", "FieldEngine 1.0.1", "ValidationEngine 1.1.0", "Seguridad MVP 1.0.0", "Dashboards 1.0.0"],
+    "noCongeladas": ["Shared/Core v1.0.0 (precondición)", "App Pública v1.0.0 (consumidor)", "SEO obs 1.0.0", "ThemeEngine obs 1.3.0"],
+    "contratoBase": "config-renderizado-dinamico-schema.json"
+  },
+  "fueraDeAlcance": [
+    "Runtime/SSR real, CDN, edge",
+    "Persistencia/escritura Firestore",
+    "Validación de valores (VE) y resolución de schema (FE)",
+    "Inventario/rotación/precios de Banners",
+    "Editor ThemeEngine",
+    "Sitemap/robots/hreflang runtime (capa SEO)",
+    "Migración de datos (solo consume snapshot)"
+  ],
+  "cobertura Fixtures": {
+    "total": 15,
+    "superficies": "home, resultados, perfil (adultos/negocio/profesionista), landings (ciudad, categoría_geo), banner",
+    "seguridad": "PrivacyGuard, superficie privada, borrador, adultos noindex",
+    "resiliencia": "fallback arquetipo, fallback genérico",
+    "seo": "head dinámico, Schema.org, OG, canonical",
+    "themeEngine": "TokenSet",
+    "migracion": "URL canónica"
+  },
+  "recomendacionActaCongelamiento": {
+    "procede": false,
+    "motivo": "3 hallazgos bloqueantes (Core no congelado, estrategia render no decidida, URL canónica migración).",
+    "ruta": [
+      "1. Congelar Shared/Core v1.0.0",
+      "2. Decidir SSR/prerender/snapshot estático",
+      "3. Confirmar URL canónica en migración usuarios→perfiles",
+      "4. Cerrar ajustes menores RE-AM-01..05",
+      "5. Aprobación product owner → ACTA-CONGELAMIENTO-RENDERENGINE"
+    ]
+  },
+  "criteriosAceptacion": [
+    "Consistencia con contrato base: PASS",
+    "Privacidad y superficies privadas: PASS",
+    "Cobertura fixtures suficiente: PASS",
+    "Sin hallazgos bloqueantes para CONGELAR: PASS (3 cerrados: RE-AU-01/02/03) → APTA para ACTA"
+  ]
+}

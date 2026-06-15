@@ -1,0 +1,249 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "versionSchema": "2026-06-10",
+  "version": "2026-06-10",
+  "schemaId": "renderizado_dinamico",
+  "nombre": "Renderizado dinámico Resultados y Perfil sin pantallas por categoría",
+  "descripcion": "resultados.html y perfil.html reutilizan componentes genéricos según metadata del perfil y del catálogo. Nunca hardcodear subcategorías en HTML.",
+  "reglaPrincipal": "Admin aprueba categoría → se asignan componente + campos + schemaVersion → FieldEngine/RenderEngine pintan sin nuevo HTML.",
+  "pantallas": {
+    "resultados.html": {
+      "motor": "RenderEngine.renderResultCard(perfil, contexto)",
+      "sinSwitchPorSubcategoria": true,
+      "entrada": ["lista perfiles públicos filtrados por geo + subcategoriaId"]
+    },
+    "perfil.html": {
+      "motor": "RenderEngine.renderProfileLayout(perfil, contexto)",
+      "sinSwitchPorSubcategoria": true,
+      "entrada": ["perfilId → documento perfil con snapshot render"]
+    }
+  },
+  "componentesResultados": {
+    "registrados": [
+      "ResultCardPersona",
+      "ResultCardProfesional",
+      "ResultCardNegocio",
+      "ResultCardAdultos",
+      "ResultCardVenue",
+      "ResultCardServicio",
+      "ResultCardPareja",
+      "ResultCardCreador",
+      "ResultCardEspectaculo",
+      "ResultCardGenerico"
+    ],
+    "aliases": {
+      "ResultCardAdultos": "ResultCardPersona",
+      "ResultCardServicio": "ResultCardServicio"
+    },
+    "fallbackPorTipoPerfil": {
+      "persona": "ResultCardPersona",
+      "negocio": "ResultCardNegocio",
+      "lugar": "ResultCardVenue",
+      "creador": "ResultCardCreador",
+      "espectaculo": "ResultCardEspectaculo",
+      "pareja_grupo": "ResultCardPareja",
+      "default": "ResultCardGenerico"
+    },
+    "fallbackPorArquetipo": {
+      "adulto_persona": "ResultCardAdultos",
+      "persona_acompanante": "ResultCardAdultos",
+      "profesional_certificado": "ResultCardProfesional",
+      "profesional_salud": "ResultCardProfesional",
+      "negocio_local": "ResultCardNegocio",
+      "persona_servicio": "ResultCardServicio",
+      "persona_servicio_oficio": "ResultCardServicio"
+    }
+  },
+  "componentesPerfil": {
+    "registrados": [
+      "ProfileLayoutPersona",
+      "ProfileLayoutProfesional",
+      "ProfileLayoutNegocio",
+      "ProfileLayoutAdultos",
+      "ProfileLayoutVenue",
+      "ProfileLayoutServicio",
+      "ProfileLayoutPareja",
+      "ProfileLayoutCreador",
+      "ProfileLayoutEspectaculo",
+      "ProfileLayoutHospedaje",
+      "ProfileLayoutGenerico"
+    ],
+    "aliases": {
+      "ProfileLayoutAdultos": "ProfileLayoutPersona"
+    },
+    "fallbackPorTipoPerfil": {
+      "persona": "ProfileLayoutPersona",
+      "negocio": "ProfileLayoutNegocio",
+      "lugar": "ProfileLayoutVenue",
+      "creador": "ProfileLayoutCreador",
+      "espectaculo": "ProfileLayoutEspectaculo",
+      "pareja_grupo": "ProfileLayoutPareja",
+      "default": "ProfileLayoutGenerico"
+    },
+    "reglaSinLayoutEspecifico": "Si componentePerfil no existe en registro → ProfileLayoutGenerico"
+  },
+  "renderEngine": {
+    "algoritmoResolucionComponente": [
+      "1. Leer perfil.componenteResultados | perfil.componentePerfil (snapshot al publicar)",
+      "2. Si existe y está en registro componentesUI → usar",
+      "3. Si no, resolver por perfil.arquetipoFinal → fallbackPorArquetipo",
+      "4. Si no, resolver por perfil.tipoPerfilFinal → fallbackPorTipoPerfil",
+      "5. Si componente desconocido o error carga → ResultCardGenerico | ProfileLayoutGenerico",
+      "6. NUNCA throw que rompa la página — siempre fallback + log interno"
+    ],
+    "algoritmoCampos": [
+      "1. Cargar schema registro según perfil.schemaVersion + formularioIdFinal",
+      "2. Intersectar datos perfil.publico con camposPublicosResultados | camposPublicosPerfil del snapshot",
+      "3. PrivacyGuard elimina campos prohibidos aunque estén mal guardados",
+      "4. FieldEngine aplica labels, tipos y orden visual del arquetipo",
+      "5. Renderizar solo valores públicos seguros"
+    ],
+    "modulosFuturos": {
+      "RenderEngine": "public/js/render-engine.js",
+      "ComponentRegistry": "public/js/component-registry.js",
+      "PrivacyGuard": "public/js/privacy-guard.js",
+      "SchemaResolver": "public/js/schema-resolver.js"
+    },
+    "notaImplementacion": "Un solo import dinámico: ComponentRegistry.get(componenteId).render(perfil, camposPermitidos)"
+  },
+  "snapshotAlPublicar": {
+    "descripcion": "Al pasar a publicado/activo, congelar config render en el documento perfil",
+    "camposObligatorios": {
+      "categoriaOficialIdFinal": "sectorId",
+      "subcategoriaOficialIdFinal": "subcategoriaId",
+      "formularioIdFinal": "string",
+      "arquetipoFinal": "string",
+      "tipoPerfilFinal": "string",
+      "componenteResultados": "string",
+      "componentePerfil": "string",
+      "schemaVersion": "string — versión schema registro al publicar",
+      "camposPublicosResultados": "string[]",
+      "camposPublicosPerfil": "string[]",
+      "estadoPublicacion": "publicado|activo",
+      "estadoRevision": "string",
+      "etiquetaUI": "categoria_nueva|categoria_revisada|null"
+    },
+    "origen": "catalogo_subcategorias/{subcategoriaId} @ schemaVersion + decisión Admin"
+  },
+  "catalogoSubcategoria": {
+    "coleccion": "catalogo_subcategorias/{subcategoriaId}",
+    "descripcion": "Documento oficial post-aprobación Admin — alimenta mapa, búsqueda y render",
+    "campos": {
+      "sectorId": "string",
+      "categoriaPrincipal": "string",
+      "subcategoria": "string",
+      "subcategoriaId": "string",
+      "formularioId": "string",
+      "arquetipo": "string",
+      "tipoPerfil": "string",
+      "componenteResultados": "string",
+      "componentePerfil": "string",
+      "camposPublicosResultados": "string[]",
+      "camposPublicosPerfil": "string[]",
+      "camposPrivados": "string[] — nunca renderizar",
+      "schemaVersion": "string — versión activa para nuevos registros",
+      "estadoCategoria": "en_revision|aprobada|fusionada|convertida_en_alias|rechazada|suspendida",
+      "aprobadoPor": "admin uid",
+      "aprobadoEn": "timestamp",
+      "historialCambios": "subcolección versiones",
+      "busqueda": "keywords, aliases, sinonimos — ver config-busqueda-categorias"
+    },
+    "versionado": {
+      "subcoleccion": "catalogo_subcategorias/{id}/schema_versiones/{schemaVersion}",
+      "reglas": [
+        "Cambio Admin en campos públicos o componentes → nueva schemaVersion",
+        "Perfiles publicados conservan schemaVersion con que fueron aprobados",
+        "Nuevos registros usan schemaVersion activa del catálogo",
+        "Perfil existente que edita y adopta nueva versión → revision Admin obligatoria"
+      ],
+      "camposVersion": ["schemaVersion", "componenteResultados", "componentePerfil", "camposPublicosResultados", "camposPublicosPerfil", "cambios", "autor", "timestamp"]
+    }
+  },
+  "adminAprobacionCategoria": {
+    "referencia": "config-categorias-sugeridas-schema.json",
+    "debeConfirmar": [
+      "formularioIdFinal",
+      "arquetipoFinal",
+      "tipoPerfilFinal",
+      "componenteResultados",
+      "componentePerfil",
+      "camposPublicosResultados",
+      "camposPublicosPerfil",
+      "camposPrivados",
+      "keywords",
+      "aliases",
+      "sinonimos",
+      "schemaVersion inicial (ej. 2026-06-10.1)"
+    ],
+    "pipelinePostAprobacion": [
+      "1. Escribir catalogo_subcategorias/{id}",
+      "2. Actualizar mapa-registro-categorias.json (CI/script)",
+      "3. Actualizar sectores-carihub.js si sector nuevo",
+      "4. Actualizar config-registro-*-schema si campos nuevos",
+      "5. Regenerar indice_busqueda",
+      "6. NO crear HTML en resultados.html ni perfil.html"
+    ]
+  },
+  "cambiosPosterioresAdmin": {
+    "noRomperPublicados": true,
+    "nuevaVersion": "Incrementar schemaVersion en catalogo_subcategorias",
+    "perfilesExistentes": "Mantienen schemaVersion + componentes snapshot en documento perfil",
+    "nuevosRegistros": "Usan schemaVersion activa",
+    "migracionPerfil": {
+      "disparador": "Usuario edita perfil y wizard detecta schemaVersion perfil < catálogo activo",
+      "accion": "estadoRevision → enviado_revision o revision_post_pago según cambios",
+      "trasAprobacion": "Actualizar snapshot render en perfil a nueva schemaVersion"
+    }
+  },
+  "fallbackObligatorio": {
+    "siComponenteInexistente": "ResultCardGenerico | ProfileLayoutGenerico",
+    "siErrorRender": "Mostrar tarjeta mínima: foto, nombre/alias, ciudad, etiqueta",
+    "etiquetasUI": {
+      "categoria_nueva": "Categoría nueva",
+      "categoria_revisada": "Categoría revisada"
+    },
+    "camposMinimosSeguros": ["alias", "nombreComercial", "nombreProfesional", "tagline", "geo.ciudad", "fotoPrincipal", "precioDesde", "tarifaDesde"],
+    "nuncaMostrar": [
+      "INE", "ine", "selfie", "telefonoPrivado", "telefono", "rfc", "razonSocial",
+      "datosFiscales", "facturacion", "verificacion", "cedula", "numeroCedula",
+      "comprobanteCedula", "notasAdmin", "documentosPrivados", "comprobantePago",
+      "estadoRevision", "decisionAdminCategoria", "solicitudCategoriaId"
+    ]
+  },
+  "reglaSeguridad": {
+    "privacyGuard": "Capa obligatoria antes de cualquier render — lista negra fallback.reglaSeguridad",
+    "resultados": "Solo camposPublicosResultados filtrados",
+    "perfil": "Solo camposPublicosPerfil + configuración visual arquetipo",
+    "auditoria": "Intento render campo privado → log ia_logs / seguridad, no mostrar"
+  },
+  "integracionFieldEngine": {
+    "fieldEngine": "Resuelve definición de campo (label, tipo, orden) desde schema @ schemaVersion",
+    "validationEngine": "Valida antes de publicar; no afecta render de campos ya aprobados públicos",
+    "flujo": "schemaVersion → cargar JSON schema → plantillaArquetipo[arquetipo] → campos públicos"
+  },
+  "estadosRelacionados": {
+    "categoria": {
+      "estadoCategoria": ["en_revision", "aprobada", "fusionada", "convertida_en_alias", "rechazada", "suspendida"],
+      "schemaVersion": "activa en catálogo",
+      "aprobadoPor": "admin uid",
+      "aprobadoEn": "timestamp",
+      "historialCambios": "schema_versiones + admin_log"
+    },
+    "perfil": {
+      "estadoPublicacion": "borrador|publicado|oculto",
+      "estadoRevision": "ver config-estados-revision-publicacion-schema.json",
+      "schemaVersion": "congelada al publicar",
+      "categoriaOficialIdFinal": "sectorId",
+      "subcategoriaOficialIdFinal": "subcategoriaId",
+      "componenteResultados": "snapshot",
+      "componentePerfil": "snapshot"
+    }
+  },
+  "antiPatrones": [
+    "if (subcategoriaId === 'escort') en resultados.html",
+    "Crear resultados-escort.html o perfil-dentista.html",
+    "Hardcodear lista subcategorías en JS de resultados",
+    "Leer campos privados del documento perfil en cliente público",
+    "Omitir fallback genérico"
+  ]
+}
