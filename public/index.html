@@ -6,6 +6,9 @@
 <title>Cariñosas — Acompañantes independientes cerca de ti</title>
 <meta name="description" content="Encuentra acompañantes cariñosas cerca de ti. Perfiles reales, verificados y actualizados.">
 <link href="https://fonts.googleapis.com/css2?family=Allura&family=Great+Vibes&family=Italianno&family=Montserrat:wght@500;600;700;800;900&family=Pinyon+Script&family=Sacramento&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="fonts/fonts.css">
+<link rel="stylesheet" href="css/carihub-premium-theme.css">
+<link rel="stylesheet" href="css/carihub-pink-sheen.css">
 <link rel="stylesheet" href="css/home.css">
 <link rel="stylesheet" href="css/home-vcards.css">
 <link rel="stylesheet" href="css/home-sector-scroll.css">
@@ -76,7 +79,7 @@ const CATEGORIAS_BUSCADOR = [
 ];
 </script>
 </head>
-<body data-page="home">
+<body data-page="home" data-tema="adult">
 
 <span id="textoCategoria" class="visually-hidden" aria-hidden="true"></span>
 <span id="textoPais" class="visually-hidden" aria-hidden="true"></span>
@@ -2191,6 +2194,21 @@ const params = new URLSearchParams(window.location.search);
   if(abrir === "registro"){
     setTimeout(function(){
       abrirRegistro();
+      if(params.get("intencion")==="gratificar"){
+        var perfilGrat=params.get("perfil")||"";
+        var montoGrat=params.get("monto")||"";
+        if(perfilGrat){
+          setTimeout(function(){
+            alert("Gratificación pendiente para "+perfilGrat+(montoGrat?(" — $"+montoGrat+" MXN"):"")+".\n\nCompleta registro o inicio de sesión para continuar con el pago.");
+          },900);
+        }
+      }
+    },700);
+  }
+
+  if(abrir === "mensajes"){
+    setTimeout(function(){
+      alert("Mensajes internos: próximamente. Perfil: "+(params.get("perfil")||""));
     },700);
   }
 
@@ -2202,6 +2220,7 @@ const params = new URLSearchParams(window.location.search);
 
 });
 </script>
+<script src="js/carihub-pink-sheen.js"></script>
 <script src="js/hero-home.js"></script>
 <script src="js/sector-scroll-data.js"></script>
 <script src="js/home-sector-scroll.js"></script>
@@ -2213,5 +2232,8 @@ const params = new URLSearchParams(window.location.search);
 <script src="js/publicidad-activa.js"></script>
 <script src="js/home-bridge.js"></script>
 <script src="js/banner-registro.js"></script>
+<script>
+if(window.CariHubPinkSheen&&CariHubPinkSheen.mountPage){CariHubPinkSheen.mountPage(document.body);}
+</script>
 </body>
 </html>

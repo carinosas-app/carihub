@@ -16,6 +16,8 @@
 <script src="../js/registro-negocio-adulto.js"></script>
 <script src="../js/resultados-demo.js"></script>
 <script src="../js/perfil-publico-init.js"></script>
+<script src="../js/perfil-contactos.js"></script>
+<script src="../js/perfil-gratificar.js"></script>
 <style>
 :root{
   --acc:#ec2d7a; --acc2:#ff4f9a; --grn:#16a34a;
@@ -2947,6 +2949,9 @@ const CIC = {
 /* Orden canónico Adulto — todas las categorías de perfil */
 var CONTACTOS_CANON=["wa","tg","ig","fb","of","x","msg","tel","gmail"];
 function contactosLista(u){
+  if(window.CariHubPerfilContactos&&CariHubPerfilContactos.lista){
+    return CariHubPerfilContactos.lista(u||{});
+  }
   return CONTACTOS_CANON;
 }
 function contactCallIcon(){
@@ -3000,17 +3005,21 @@ function brandLogoSVG(k){
   };
   return s[k]||'';
 }
-function contactos(list, adulto){
-  var items = list || [];
+function contactos(u, adulto){
+  u=u||{};
+  var links=(window.CariHubPerfilContactos&&CariHubPerfilContactos.contactLinks)
+    ?CariHubPerfilContactos.contactLinks(u):[];
+  function extAttr(key){
+    return (key==="wa"||key==="tg"||key==="ig"||key==="fb"||key==="of"||key==="x"||key==="msg")
+      ?' target="_blank" rel="noopener noreferrer"':'';
+  }
   if(!adulto){
-    return items.map(function(k){
-      var label=CIC[k]; if(!label) return "";
-      return '<a href="#"><span class="ic ic-brand">'+brandLogoSVG(k)+'</span>'+safe(label)+'</a>';
+    return links.map(function(it){
+      return '<a href="'+safe(it.href)+'"'+extAttr(it.key)+'><span class="ic ic-brand">'+brandLogoSVG(it.key)+'</span>'+safe(it.label)+'</a>';
     }).join("");
   }
-  var html = items.map(function(k){
-    var label=CIC[k]; if(!label) return "";
-    return '<a href="#">'+contactIconHTML(k)+safe(label)+'</a>';
+  var html=links.map(function(it){
+    return '<a href="'+safe(it.href)+'"'+extAttr(it.key)+'>'+contactIconHTML(it.key)+safe(it.label)+'</a>';
   }).join("");
   return '<div class="contact">'+html+'</div>';
 }
@@ -3322,7 +3331,7 @@ function negocioContactCardHTML(u){
   return '<div class="pcard pcard--contact pcard--negocio-contact">'+
     '<div class="contact-h">Métodos de contacto</div>'+
     '<div class="negocio-contact__lower">'+
-      contactos(contactosLista(u), true)+
+      contactos(u, true)+
       contactFooterRow(u)+
       negocioContactMetaHTML(u)+
     '</div>'+
@@ -3484,6 +3493,10 @@ function pickGratAmount(n){
   updateGratSplit();
 }
 function confirmarGratificacion(){
+  if(window.CariHubPerfilGratificar&&CariHubPerfilGratificar.confirmar){
+    CariHubPerfilGratificar.confirmar(_gratState);
+    return;
+  }
   var fee=Math.round(_gratState.amount*GRAT_COMISION);
   var net=_gratState.amount-fee;
   alert(
@@ -4009,7 +4022,7 @@ function adultoTriPrecioHTML(u){
 function adultoContactSimpleHTML(u){
   return '<div class="pcard pcard--contact">'+
     '<div class="contact-h">Métodos de contacto</div>'+
-    contactos(contactosLista(u), true)+
+    contactos(u, true)+
     contactFooterRow(u)+
   '</div>';
 }
@@ -5766,7 +5779,7 @@ function renderMedicoProfesional(u){
       (u.consultaEnLinea?'<div class="pro-online">📹 '+safe(u.consultaEnLineaTexto||"Consulta en línea disponible")+'</div>':"")+
       '<button type="button" class="pro-cta-cita">Agendar cita</button>'+
       '<div class="pcard__h" style="margin:16px 0 10px">Métodos de contacto</div>'+
-      '<div class="contact" style="margin-top:0">'+contactos(contactosLista(u))+'</div>'+
+      '<div class="contact" style="margin-top:0">'+contactos(u, false)+'</div>'+
       '<div class="feat-line">'+(u.feats||[]).map(function(f){return '<span>✔ '+safe(f)+'</span>';}).join("")+'</div>'+
     '</div>'+
     '<div class="pcard"><div class="pcard__h">📄 Sobre mí</div>'+
@@ -5857,7 +5870,7 @@ function renderProEmpresa(u, esEmpresa){
         '<div><div class="lbl">⏱ Tiempo de respuesta</div><div class="mini">'+safe(u.tiempoRespuesta)+'</div><div class="urg">'+safe(u.urgencias)+' · Atención inmediata</div></div>'+
       '</div>'+
       '<div class="pcard__h" style="margin:16px 0 10px">Métodos de contacto</div>'+
-      '<div class="contact" style="margin-top:0">'+contactos(contactosLista(u))+'</div>'+
+      '<div class="contact" style="margin-top:0">'+contactos(u, false)+'</div>'+
       '<div class="feat-line">'+(u.feats||[]).map(function(f){return '<span>✔ '+safe(f)+'</span>';}).join("")+'</div>'+
     '</div>'+
     '<div class="pcard"><div class="pcard__h">'+(esEmpresa?"📄 Sobre nosotros":"📄 Sobre mí")+'</div>'+
@@ -5975,6 +5988,9 @@ function aplicarPerfilResultadosEnDemo(vista,u){
   if(u.categoriaPublica||u.categoria) d.categoria=u.categoriaPublica||u.categoria;
   if(u.disponibilidad) d.disponibilidad=u.disponibilidad;
   if(Array.isArray(u.modalidades)&&u.modalidades.length) d.modalidades=u.modalidades.slice();
+  if(u.contactoPublico) d.contactoPublico=u.contactoPublico;
+  if(u.telefono) d.telefono=u.telefono;
+  if(u.email) d.email=u.email;
   if(u.tagline){ d.tagline=u.tagline; d.frase=u.tagline; }
   if(u.descripcion){ d.sobreMi=String(u.descripcion).slice(0,500); }
   if(u.horario && !u.disponibilidad) d.disponibilidad=String(u.horario).slice(0,48);
