@@ -98,6 +98,9 @@
       fotoURL: foto,
       fotosExtraURL: data.fotosExtraURL || [],
       fotosCount: Math.max(foto ? 1 : 0, 1 + extras),
+      telefono: data.telefono || '',
+      email: data.email || '',
+      contactoPublico: data.contactoPublico || null,
       horario: data.horario || '',
       servicios: data.servicios || '',
       fechaPublicacion: data.fechaPublicacion || null
