@@ -24,9 +24,45 @@
     return isPreviewPath() ? "../resultados.html" : "resultados.html";
   }
 
+  function resultadosHrefFromQuery(q) {
+    q = q || {};
+    var base = resultadosHref();
+    var params = new URLSearchParams();
+    if (q.categoria) params.set("categoria", q.categoria);
+    if (q.pais) params.set("pais", q.pais);
+    if (q.estado) params.set("estado", q.estado);
+    if (q.ciudad) params.set("ciudad", q.ciudad);
+    if (q.vista === "con-resultados" || q.vista === "con-resultados-4" || q.vista === "sin-resultados") {
+      params.set("vista", q.vista);
+    } else if (q.resVista === "con-resultados" || q.resVista === "con-resultados-4" || q.resVista === "sin-resultados") {
+      params.set("vista", q.resVista);
+    }
+    var qs = params.toString();
+    return qs ? base + "?" + qs : base;
+  }
+
+  function perfilQueryFromPage() {
+    if (global.CariHubPerfilPublico && CariHubPerfilPublico.queryPerfilPublico) {
+      return CariHubPerfilPublico.queryPerfilPublico();
+    }
+    try {
+      var p = new URL(global.location.href).searchParams;
+      return {
+        categoria: p.get("categoria") || "",
+        pais: p.get("pais") || "",
+        estado: p.get("estado") || "",
+        ciudad: p.get("ciudad") || "",
+        vista: p.get("vista") || "",
+        resVista: p.get("resVista") || ""
+      };
+    } catch (e) {
+      return { categoria: "", pais: "", estado: "", ciudad: "", vista: "", resVista: "" };
+    }
+  }
+
   function closeHref(context) {
     if (context === "resultados") return indexHref();
-    if (context === "perfil") return resultadosHref();
+    if (context === "perfil") return resultadosHrefFromQuery(perfilQueryFromPage());
     return indexHref();
   }
 
@@ -109,6 +145,7 @@
     QUICK: QUICK,
     indexHref: indexHref,
     resultadosHref: resultadosHref,
+    resultadosHrefFromQuery: resultadosHrefFromQuery,
     closeHref: closeHref,
     closeButtonHTML: closeButtonHTML,
     quickItemsHTML: quickItemsHTML,

@@ -503,28 +503,31 @@
       '</div>';
   }
 
-  function urlPerfil(u, Q) {
-    if (u && (u.__registrado || u.__demo === false) && u.__id) {
-      if (global.CariHubResultadosRegistrados && CariHubResultadosRegistrados.urlPerfil) {
-        return CariHubResultadosRegistrados.urlPerfil(u.__id);
-      }
-      return 'perfil.html?id=' + encodeURIComponent(String(u.__id));
-    }
-    return urlPerfilDemo(u, Q);
-  }
-
-  function urlPerfilDemo(u, Q) {
+  function urlPerfilPublico(u, Q) {
     Q = Q || {};
-    var vista = (u && u.__vista) || vistaDeCategoria(Q.categoria || u.categoria);
+    var vista = (u && u.__vista) || vistaDeCategoria(Q.categoria || (u && u.categoria));
     var p = new URLSearchParams();
-    p.set('vista', vista);
     if (u && u.__id) p.set('id', String(u.__id));
+    p.set('vista', vista);
     if (Q.categoria || (u && u.categoria)) p.set('categoria', Q.categoria || u.categoria);
     if (Q.pais) p.set('pais', Q.pais);
     if (Q.estado) p.set('estado', Q.estado);
     if (Q.ciudad) p.set('ciudad', Q.ciudad);
     p.set('from', 'resultados');
-    return './preview/perfil-vista-previa.html?' + p.toString();
+    var modoRes = vistaPreviaModo();
+    if (modoRes) p.set('resVista', modoRes);
+    return './perfil-publico.html?' + p.toString();
+  }
+
+  function urlPerfil(u, Q) {
+    if (u && (u.__registrado || u.__demo === false) && u.__id) {
+      return urlPerfilPublico(u, Q);
+    }
+    return urlPerfilDemo(u, Q);
+  }
+
+  function urlPerfilDemo(u, Q) {
+    return urlPerfilPublico(u, Q);
   }
 
   /** Busca un perfil demo canónico por __id (p. ej. demo-violeta). */
@@ -886,6 +889,7 @@
     coincideBusqueda: coincideBusqueda,
     coincideDemo: coincideDemo,
     urlPerfil: urlPerfil,
+    urlPerfilPublico: urlPerfilPublico,
     urlPerfilDemo: urlPerfilDemo,
     perfilPorId: perfilPorId
   };
