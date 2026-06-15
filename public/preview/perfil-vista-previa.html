@@ -18,6 +18,7 @@
 <script src="../js/perfil-publico-init.js"></script>
 <script src="../js/perfil-contactos.js"></script>
 <script src="../js/perfil-gratificar.js"></script>
+<script src="../js/perfil-enlaces.js"></script>
 <style>
 :root{
   --acc:#ec2d7a; --acc2:#ff4f9a; --grn:#16a34a;
@@ -5988,9 +5989,14 @@ function aplicarPerfilResultadosEnDemo(vista,u){
   if(u.categoriaPublica||u.categoria) d.categoria=u.categoriaPublica||u.categoria;
   if(u.disponibilidad) d.disponibilidad=u.disponibilidad;
   if(Array.isArray(u.modalidades)&&u.modalidades.length) d.modalidades=u.modalidades.slice();
+  if(u.__id) d.__id=u.__id;
+  if(u.uid) d.uid=u.uid;
+  if(u.__demo!=null) d.__demo=u.__demo;
   if(u.contactoPublico) d.contactoPublico=u.contactoPublico;
   if(u.telefono) d.telefono=u.telefono;
   if(u.email) d.email=u.email;
+  if(u.direccion) d.direccion=u.direccion;
+  if(u.mapsUrl||u.googleMapsUrl) d.mapsUrl=u.mapsUrl||u.googleMapsUrl;
   if(u.tagline){ d.tagline=u.tagline; d.frase=u.tagline; }
   if(u.descripcion){ d.sobreMi=String(u.descripcion).slice(0,500); }
   if(u.horario && !u.disponibilidad) d.disponibilidad=String(u.horario).slice(0,48);
@@ -6060,6 +6066,7 @@ function setVista(tipo){
   else if(tipo==="medico") inner=renderMedicoProfesional(u);
   else inner=renderProEmpresa(u, tipo==="empresa");
   document.getElementById("wrap").innerHTML = shell(tipo, inner);
+  if(window.CariHubPerfilEnlaces) CariHubPerfilEnlaces.wire(document.getElementById("wrap"), u);
   startPbBannerRotation();
   stopActividadNegocioRotation();
   window.scrollTo({top:0});
