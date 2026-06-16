@@ -267,12 +267,17 @@
       ts: Date.now(),
       reanudar: true
     });
+    if (global.CariHubHomeIntenciones && CariHubHomeIntenciones.marcarReanudar) {
+      CariHubHomeIntenciones.marcarReanudar('mensajes');
+    }
     cerrarModalMensajes();
     if (typeof global.abrirMiPerfil === 'function') {
       global.abrirMiPerfil();
       return;
     }
-    if (typeof global.abrirRegistro === 'function') global.abrirRegistro();
+    if (typeof global.abrirCuentaPersonal === 'function') {
+      global.abrirCuentaPersonal();
+    }
   }
 
   function irARegistro(perfil) {
@@ -283,12 +288,16 @@
       ts: Date.now(),
       reanudar: true
     });
+    if (global.CariHubHomeIntenciones && CariHubHomeIntenciones.marcarReanudar) {
+      CariHubHomeIntenciones.marcarReanudar('mensajes');
+    }
     cerrarModalMensajes();
-    if (typeof global.abrirRegistro === 'function') {
-      global.abrirRegistro();
-      global.setTimeout(function () {
-        global.alert('Crea tu cuenta o inicia sesión para enviar el mensaje a ' + (perfil.nombre || 'el perfil') + '.');
-      }, 700);
+    if (typeof global.abrirCuentaPersonal === 'function') {
+      global.abrirCuentaPersonal();
+      return;
+    }
+    if (typeof global.abrirMiPerfil === 'function') {
+      global.abrirMiPerfil();
     }
   }
 
@@ -336,6 +345,7 @@
   }
 
   function bindAuth() {
+    if (global.CariHubHomeIntenciones) return;
     var auth = global.auth || global.CariHubAuth;
     if (!auth || typeof auth.onAuthStateChanged !== 'function') return;
     auth.onAuthStateChanged(function (user) {

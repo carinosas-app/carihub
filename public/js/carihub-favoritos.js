@@ -1,5 +1,5 @@
 /**
- * Favoritos — usuarios/{uid}/favoritos (auth anónima o registrada).
+ * Favoritos — usuarios/{uid}/favoritos (requiere cuenta social, no anónima).
  */
 (function (global) {
   'use strict';
@@ -12,24 +12,40 @@
 
   function auth() {
     if (global.CariHubAuth) return global.CariHubAuth;
+    if (global.auth) return global.auth;
     if (global.firebase && typeof firebase.auth === 'function') return firebase.auth();
     return null;
   }
 
-  function limpiarTelefono(t) {
-    return String(t || '').replace(/\D/g, '');
+  function cuentaReal() {
+    if (global.CariHubCuentaSocial && CariHubCuentaSocial.cuentaReal) {
+      return CariHubCuentaSocial.cuentaReal();
+    }
+    var user = auth() && auth().currentUser;
+    return !!(user && !user.isAnonymous);
   }
 
-  async function asegurarUsuario() {
-    var a = auth();
-    if (!a) throw new Error('Auth no disponible');
-    if (!a.currentUser) await a.signInAnonymously();
-    return a.currentUser;
+  function pedirCuentaSocial(perfilId) {
+    if (global.CariHubCuentaSocial && CariHubCuentaSocial.requiereCuentaSocial) {
+      return CariHubCuentaSocial.requiereCuentaSocial({
+        intencion: 'favoritos',
+        perfil: perfilId || '',
+        modo: 'entrar'
+      });
+    }
+    if (typeof global.abrirMiPerfil === 'function') {
+      global.abrirMiPerfil();
+      return false;
+    }
+    global.location.href = 'index.html?abrir=registro&intencion=favoritos' +
+      (perfilId ? '&perfil=' + encodeURIComponent(perfilId) : '');
+    return false;
   }
 
   async function esFavorito(perfilId) {
     try {
-      var user = auth() && auth().currentUser;
+      if (!cuentaReal()) return false;
+      var user = auth().currentUser;
       if (!user || !perfilId) return false;
       var firestore = db();
       if (!firestore) return false;
@@ -41,10 +57,15 @@
   }
 
   async function toggleFavorito(perfilId, boton) {
+    if (!cuentaReal()) {
+      pedirCuentaSocial(perfilId);
+      return null;
+    }
+
     try {
-      var user = await asegurarUsuario();
+      var user = auth().currentUser;
       var firestore = db();
-      if (!firestore) return false;
+      if (!firestore || !user) return false;
       var favRef = firestore.collection('usuarios').doc(user.uid).collection('favoritos').doc(perfilId);
       var favDoc = await favRef.get();
 
@@ -59,8 +80,27 @@
       }
 
       var perfilDoc = await firestore.collection('usuarios').doc(perfilId).get();
-      if (!perfilDoc.exists) return false;
-      var p = perfilDoc.data() || {};
+      var p = perfilDoc.exists ? (perfilDoc.data() || {}) : null;
+
+      if (!p && global.CariHubResultadosDemo && CariHubResultadosDemo.perfilPorId) {
+        var demo = CariHubResultadosDemo.perfilPorId(perfilId, {});
+        if (demo && demo.nombre) {
+          p = {
+            nombre: demo.nombre,
+            ciudad: demo.ciudad || '',
+            estado: demo.estado || '',
+            pais: demo.pais || '',
+            categoria: demo.categoria || demo.categoriaPublica || '',
+            fotoURL: demo.fotoURL || (demo.galeria && demo.galeria[0]) || '',
+            precio: demo.precio || '',
+            modalidad: demo.modalidad || '',
+            telefono: demo.telefono || '',
+            __demo: true
+          };
+        }
+      }
+
+      if (!p) return false;
 
       await favRef.set({
         perfilId: perfilId,
@@ -73,6 +113,7 @@
         precio: p.precio || '',
         modalidad: p.modalidad || '',
         telefono: p.telefono || '',
+        esDemo: p.__demo === true,
         fechaGuardado: firebase.firestore.FieldValue.serverTimestamp()
       });
 
@@ -84,7 +125,7 @@
       return true;
     } catch (error) {
       console.warn('[CariHubFavoritos]', error);
-      if (global.alert) alert('No se pudo guardar en favoritos. Intenta de nuevo.');
+      if (global.alert) global.alert('No se pudo guardar en favoritos. Intenta de nuevo.');
       return null;
     }
   }
@@ -93,11 +134,7 @@
     root = root || document;
     var botones = root.querySelectorAll('[data-fav-perfil]');
     if (!botones.length) return;
-    try {
-      await asegurarUsuario();
-    } catch (e) {
-      return;
-    }
+    if (!cuentaReal()) return;
     var tareas = [];
     botones.forEach(function (btn) {
       var id = btn.getAttribute('data-fav-perfil');
@@ -113,15 +150,15 @@
   }
 
   async function prepararUsuario() {
-    return asegurarUsuario();
+    if (!cuentaReal()) return null;
+    return auth().currentUser;
   }
 
   global.CariHubFavoritos = {
-    asegurarUsuario: asegurarUsuario,
-    prepararUsuario: prepararUsuario,
     esFavorito: esFavorito,
     toggleFavorito: toggleFavorito,
     sincronizarBotones: sincronizarBotones,
-    limpiarTelefono: limpiarTelefono
+    prepararUsuario: prepararUsuario,
+    cuentaReal: cuentaReal
   };
-})(typeof window !== 'undefined' ? window : this);
+})(typeof window !== 'undefined' ? window : globalThis);

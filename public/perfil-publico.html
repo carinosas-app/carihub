@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es"><head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -18,10 +18,18 @@
 <script src="js/perfil-contactos.js"></script>
 
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
 <script src="js/resultados-registrados.js"></script>
+<script src="js/carihub-cuenta-social.js"></script>
+<script src="js/carihub-gratificaciones.js"></script>
 <script src="js/perfil-gratificar.js"></script>
 <script src="js/perfil-enlaces.js"></script>
+<script src="js/carihub-favoritos.js"></script>
+<script src="js/ch-slot-dock.js"></script>
+<script src="js/banner-perfil.js"></script>
+<script src="js/banner-perfil-laterales.js"></script>
+<script src="js/publicidad-activa.js"></script>
 <style>
 :root{
   --acc:#ec2d7a; --acc2:#ff4f9a; --grn:#16a34a;
@@ -1960,6 +1968,15 @@ body.fit [data-vista="adult"] .negocio-pie-card__ubic .negocio-ubic__side{
 body.fit [data-vista="negocio"] .negocio-info-grid{grid-template-columns:1fr 1fr !important;}
 #fitOuter{width:100%;min-height:0;box-sizing:border-box;}
 body:not(.fit) #fitOuter{min-height:calc(100vh - 52px);}
+.toolbar-action--fav.res-fav{
+  font-size:18px;line-height:1;min-width:40px;padding:8px 10px;
+}
+.toolbar-action--fav.res-fav.is-on,.toolbar-action--fav.res-fav.activo{color:#ec2d7a;}
+.is-highlight{
+  outline:3px solid #ec2d7a;outline-offset:3px;
+  box-shadow:0 0 0 6px rgba(236,45,122,.22);
+  transition:box-shadow .2s ease,outline-color .2s ease;
+}
 </style>
 </head>
 <body data-tema="adult" class="perfil-publico perfil-desde-resultados">
@@ -1970,7 +1987,7 @@ body:not(.fit) #fitOuter{min-height:calc(100vh - 52px);}
   <div class="grat-modal__box" role="dialog" aria-labelledby="gratModalTitle">
     <button type="button" class="grat-modal__close" onclick="closeGratificarModal()" aria-label="Cerrar">×</button>
     <h3 id="gratModalTitle" class="grat-modal__title">Gratificar</h3>
-    <p class="grat-modal__desc">Enlaza tu cuenta de pago para enviar monedas. La plataforma retiene una comisión de servicio; el resto se transfiere al perfil, como en las redes sociales.</p>
+    <p class="grat-modal__desc">Requiere cuenta social (no anónima). Registramos cada movimiento con trazabilidad. Límite por operación: $2,000 MXN.</p>
     <div id="gratModalCtx" class="grat-modal__ctx"></div>
     <div class="grat-split">
       <div class="grat-split__item"><span>Comisión plataforma (<span id="gratPct">20</span>%)</span><b id="gratFee">$0</b></div>
@@ -1981,9 +1998,11 @@ body:not(.fit) #fitOuter{min-height:calc(100vh - 52px);}
       <button type="button" data-amt="100" onclick="pickGratAmount(100)">100</button>
       <button type="button" data-amt="200" onclick="pickGratAmount(200)">200</button>
       <button type="button" data-amt="500" onclick="pickGratAmount(500)">500</button>
+      <button type="button" data-amt="1000" onclick="pickGratAmount(1000)">1000</button>
+      <button type="button" data-amt="2000" onclick="pickGratAmount(2000)">2000</button>
     </div>
-    <button type="button" class="grat-modal__cta" onclick="confirmarGratificacion()">Enlazar cuenta y gratificar</button>
-    <p class="grat-modal__note">Vista previa: el cobro real se conectará a tu pasarela de pagos y monedero del perfil.</p>
+    <button type="button" class="grat-modal__cta" onclick="confirmarGratificacion()">Gratificar con mi cuenta</button>
+    <p class="grat-modal__note">Fase inicial: registro demo sin cobro real. Pagos y retiros requieren revisión legal/fiscal.</p>
   </div>
 </div>
 
@@ -3338,9 +3357,24 @@ function profileCrumbQuickHTML(){
     renderIcon:function(name){ return svgIcon(name); }
   });
 }
-function profileActionsHTML(){
-  return '<button type="button" class="toolbar-action">'+profileShareIcon()+'<span>Compartir</span></button>'+
+function profileActionsHTML(u){
+  u=u||window.__perfilActual||{};
+  var perfilId=String(u.__id||u.uid||(window.CariHubPerfilPublico&&CariHubPerfilPublico.queryPerfilPublico?CariHubPerfilPublico.queryPerfilPublico().id:"")||"").trim();
+  var favBtn=perfilId
+    ?'<button type="button" class="toolbar-action toolbar-action--fav res-fav" data-fav-perfil="'+safe(perfilId)+'" aria-label="Guardar en favoritos" aria-pressed="false" onclick="toggleFavPerfil(this,event)">♡</button>'
+    :'';
+  return favBtn+
+    '<button type="button" class="toolbar-action">'+profileShareIcon()+'<span>Compartir</span></button>'+
     '<button type="button" class="toolbar-action">'+profileReportIcon()+'<span>Reportar</span></button>';
+}
+function toggleFavPerfil(btn,ev){
+  if(ev) ev.preventDefault();
+  if(!btn) return;
+  var id=btn.getAttribute("data-fav-perfil");
+  if(!id) return;
+  if(window.CariHubFavoritos&&CariHubFavoritos.toggleFavorito){
+    CariHubFavoritos.toggleFavorito(id,btn);
+  }
 }
 
 function liveBroadcastIcon(){
@@ -3391,10 +3425,12 @@ function actividadGiftIcon(){
 }
 
 var GRAT_COMISION = 0.20;
-var _gratState = {perfil:"", source:"", amount:100};
+var _gratState = {perfil:"", nombre:"", source:"", amount:100};
 
-function gratificarBtnHTML(nombre, source){
-  return '<button type="button" class="feed-grat-btn" data-grat-perfil="'+safe(nombre)+'" data-grat-source="'+safe(source)+'">'+
+function gratificarBtnHTML(u, source){
+  u = u || {};
+  var pid = String(u.__id || u.uid || u.nombre || "").trim();
+  return '<button type="button" class="feed-grat-btn" data-grat-perfil="'+safe(pid)+'" data-grat-nombre="'+safe(u.nombre||"")+'" data-grat-source="'+safe(source)+'">'+
     '<span class="feed-grat-btn__fx" aria-hidden="true">'+
       '<span class="feed-grat-btn__spark feed-grat-btn__spark--1"></span>'+
       '<span class="feed-grat-btn__spark feed-grat-btn__spark--2"></span>'+
@@ -3424,14 +3460,15 @@ function updateGratSplit(){
   if(netEl) netEl.textContent=formatGratMXN(net);
   if(pctEl) pctEl.textContent=String(Math.round(GRAT_COMISION*100));
 }
-function openGratificarModal(perfil, source){
-  _gratState.perfil=perfil||"";
+function openGratificarModal(perfilId, source, nombreDisplay){
+  _gratState.perfil=perfilId||"";
+  _gratState.nombre=nombreDisplay||perfilId||"";
   _gratState.source=source||"perfil";
   _gratState.amount=100;
   var modal=document.getElementById("gratModal");
   var ctx=document.getElementById("gratModalCtx");
   var title=document.getElementById("gratModalTitle");
-  if(title) title.textContent="Gratificar a "+(_gratState.perfil||"perfil");
+  if(title) title.textContent="Gratificar a "+(_gratState.nombre||"perfil");
   if(ctx) ctx.textContent=gratSourceLabel(_gratState.source);
   document.querySelectorAll("#gratAmounts button").forEach(function(b){
     b.classList.toggle("is-on", Number(b.getAttribute("data-amt"))===_gratState.amount);
@@ -3457,8 +3494,12 @@ function pickGratAmount(n){
   updateGratSplit();
 }
 function confirmarGratificacion(){
+  if(window.CariHubPerfilPublico&&CariHubPerfilPublico.initFirebaseIfNeeded){
+    CariHubPerfilPublico.initFirebaseIfNeeded();
+  }
   if(window.CariHubPerfilGratificar&&CariHubPerfilGratificar.confirmar){
-    CariHubPerfilGratificar.confirmar(_gratState);
+    var r=CariHubPerfilGratificar.confirmar(_gratState);
+    if(r==="done") closeGratificarModal();
     return;
   }
   var fee=Math.round(_gratState.amount*GRAT_COMISION);
@@ -3477,7 +3518,11 @@ function confirmarGratificacion(){
 document.addEventListener("click", function(e){
   var btn=e.target.closest(".feed-grat-btn");
   if(btn){
-    openGratificarModal(btn.getAttribute("data-grat-perfil"), btn.getAttribute("data-grat-source"));
+    openGratificarModal(
+      btn.getAttribute("data-grat-perfil"),
+      btn.getAttribute("data-grat-source"),
+      btn.getAttribute("data-grat-nombre")
+    );
     return;
   }
   if(e.target.id==="gratModal") closeGratificarModal();
@@ -3614,7 +3659,7 @@ function panelActividadCompact(u, esEmpresa){
           '<span class="act-card__don-gift">'+actividadGiftIcon()+'</span>'+
         '</div>'+
       '</div>'+
-      gratificarBtnHTML(u.nombre,"actividad")+
+      gratificarBtnHTML(u,"actividad")+
     '</div></div>';
 }
 function panelLiveCompact(u){
@@ -3638,7 +3683,7 @@ function panelLiveCompact(u){
         '<p class="live-card__desc">'+safe(titulo)+'</p>'+
         '<a class="live-card__btn" href="#">'+liveBellIcon()+'<span>Activar recordatorio</span></a>'+
       '</div>'+
-      gratificarBtnHTML(u.nombre,"live")+
+      gratificarBtnHTML(u,"live")+
     '</div></div>';
 }
 function panelLiveNegocio(u,solo){
@@ -3931,7 +3976,8 @@ var CARINOSAS_TIPOS=["adult","dominatrix","masajeIndep","escortGay","escortVip",
 var PRO_LAYOUTS=["pro","empresa","medico"];
 
 /* ---------------- shells ---------------- */
-function shell(tipo, inner){
+function shell(tipo, inner, u){
+  u = u || window.__perfilActual || {};
   var t = THEME[tipo];
   var esCari=CARINOSAS_TIPOS.indexOf(tipo)>=0;
   var pinSVG = '<svg width="22" height="22" viewBox="0 0 24 24"><path d="M12 2c-3.9 0-7 3.1-7 7 0 5 7 13 7 13s7-8 7-13c0-3.9-3.1-7-7-7z" fill="'+(esCari?"#ec2d7a":"#2563eb")+'"/><circle cx="12" cy="9" r="2.6" fill="#fff"/></svg>';
@@ -3960,7 +4006,7 @@ function shell(tipo, inner){
         '<a class="toolbar-action back-action" href="'+backHref+'">'+profileBackArrow()+'<span>Volver a resultados</span></a>'+
       '</div>'+
       '<div class="profile-toolbar-center">'+profileCrumbQuickHTML()+'</div>'+
-      '<div class="profile-toolbar-right">'+profileActionsHTML()+'</div>'+
+      '<div class="profile-toolbar-right">'+profileActionsHTML(u)+'</div>'+
     '</div>'+
     (esCari ? inner : '<div class="pgrid">'+inner+'</div>')+
     (esCari ? "" : bottomBannerHTML(tipo));
@@ -5981,7 +6027,97 @@ function aplicarPerfilResultadosEnDemo(vista,u){
   if(u.fotosCount) d.fotos=u.fotosCount;
   else if(d.galeria&&d.galeria.length) d.fotos=d.galeria.length;
 }
+function resaltarElementoPerfil(el){
+  if(!el) return;
+  el.classList.add("is-highlight");
+  el.scrollIntoView({behavior:"smooth",block:"center"});
+  window.setTimeout(function(){ el.classList.remove("is-highlight"); }, 2400);
+}
+function abrirEnlacePerfil(href){
+  href=String(href||"").trim();
+  if(!/^https?:\/\//i.test(href)) return false;
+  window.open(href,"_blank","noopener");
+  return true;
+}
+function scrollContactosPerfil(u){
+  var titulo=document.querySelector(".contact-h");
+  if(titulo) titulo.scrollIntoView({behavior:"smooth",block:"start"});
+  var links=document.querySelectorAll(".contact a[href]");
+  var preferido=null;
+  links.forEach(function(a){
+    if(preferido) return;
+    var h=(a.getAttribute("href")||"").toLowerCase();
+    if(/wa\.me|whatsapp|api\.whatsapp/.test(h)) preferido=a;
+  });
+  if(!preferido&&links.length) preferido=links[0];
+  if(preferido) resaltarElementoPerfil(preferido);
+  else if(titulo) resaltarElementoPerfil(titulo);
+}
+function ejecutarAccionReservar(u){
+  u=u||window.__perfilActual||{};
+  var cta=document.querySelector(".pb-negocio-promo__cta");
+  if(cta){
+    resaltarElementoPerfil(cta);
+    var hrefCta=cta.getAttribute("href")||"";
+    if(/^https?:\/\//i.test(hrefCta)){
+      window.setTimeout(function(){ window.open(hrefCta,"_blank","noopener"); }, 450);
+    }
+    return;
+  }
+  var href=(window.CariHubPerfilEnlaces&&CariHubPerfilEnlaces.reservarUrl)
+    ?CariHubPerfilEnlaces.reservarUrl(u):"";
+  if(abrirEnlacePerfil(href)) return;
+  scrollContactosPerfil(u);
+}
+function ejecutarAccionAgendar(u){
+  u=u||window.__perfilActual||{};
+  var btn=document.querySelector(".pro-cta-cita");
+  if(btn){
+    resaltarElementoPerfil(btn);
+    btn.click();
+    return;
+  }
+  if(window.CariHubPerfilContactos&&CariHubPerfilContactos.buildHref){
+    var wa=CariHubPerfilContactos.buildHref("wa",u);
+    if(wa){
+      var sep=wa.indexOf("?")>=0?"&":"?";
+      var msg=encodeURIComponent("Hola, me gustaría agendar una cita. Vi tu perfil en Cariñosas.");
+      window.open(wa+sep+"text="+msg,"_blank","noopener");
+      return;
+    }
+    var tel=CariHubPerfilContactos.buildHref("tel",u);
+    if(abrirEnlacePerfil(tel)) return;
+  }
+  scrollContactosPerfil(u);
+}
+function aplicarAccionPerfilDesdeQuery(u){
+  u = u || window.__perfilActual || {};
+  var params;
+  try{
+    params=new URLSearchParams(window.location.search);
+  }catch(e){
+    return;
+  }
+  if(params.get("gratificar")==="1"){
+    var monto=Number(params.get("monto"))||100;
+    var source=params.get("gratSource")||params.get("source")||"perfil";
+    var pid=String(u.__id||u.uid||params.get("id")||"").trim();
+    openGratificarModal(pid, source, u.nombre||pid);
+    if(monto>0) pickGratAmount(monto);
+    return;
+  }
+  if(params.get("accion")==="reservar"){
+    window.setTimeout(function(){ ejecutarAccionReservar(u); }, 400);
+    return;
+  }
+  if(params.get("accion")==="agendar"){
+    window.setTimeout(function(){ ejecutarAccionAgendar(u); }, 400);
+  }
+}
 function iniciarPerfilPreview(){
+  if(window.CariHubPerfilPublico&&CariHubPerfilPublico.initFirebaseIfNeeded){
+    CariHubPerfilPublico.initFirebaseIfNeeded();
+  }
   var q=queryPerfilPreview();
   ocultarSwitcherSiResultados(q.from==="resultados");
   function pintar(resolved){
@@ -6024,12 +6160,27 @@ function setVista(tipo){
     applyNegocioPack((sel&&sel.value)||"hospedaje");
   }
   var u=DEMO[tipo];
+  window.__perfilActual=u;
   var inner;
   if(esCari) inner=renderPerfilCariñosas(u, tipo);
   else if(tipo==="medico") inner=renderMedicoProfesional(u);
   else inner=renderProEmpresa(u, tipo==="empresa");
-  document.getElementById("wrap").innerHTML = shell(tipo, inner);
+  document.getElementById("wrap").innerHTML = shell(tipo, inner, u);
   if(window.CariHubPerfilEnlaces) CariHubPerfilEnlaces.wire(document.getElementById("wrap"), u);
+  if(window.CariHubFavoritos&&CariHubFavoritos.sincronizarBotones){
+    CariHubFavoritos.sincronizarBotones(document.getElementById("wrap"));
+  }
+  if(window.CariHubPublicidadActiva){
+    if(CariHubPublicidadActiva.cargar){
+      CariHubPublicidadActiva.cargar().then(function(){
+        if(CariHubBannerPerfil&&CariHubBannerPerfil.mount) CariHubBannerPerfil.mount();
+        if(CariHubBannerPerfilLaterales&&CariHubBannerPerfilLaterales.mount) CariHubBannerPerfilLaterales.mount();
+      });
+    }else if(CariHubPublicidadActiva.remontarPerfil){
+      CariHubPublicidadActiva.remontarPerfil();
+    }
+  }
+  aplicarAccionPerfilDesdeQuery(u);
   startPbBannerRotation();
   stopActividadNegocioRotation();
   window.scrollTo({top:0});

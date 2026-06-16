@@ -889,6 +889,10 @@
 
   /* ── Modales ── */
   function openModal(id) {
+    if (id === 'registro') {
+      window.location.href = 'registro-perfil.html';
+      return;
+    }
     var modal = document.getElementById('modal-' + id);
     if (!modal) return;
     if (id === 'mensajes') {
@@ -1112,7 +1116,9 @@
   }
 
   window.CariHubHomeUI = {
-    remontarPublicidad: remontarPublicidadHome
+    remontarPublicidad: remontarPublicidadHome,
+    openModal: openModal,
+    closeModal: closeModal
   };
 
   initHeroCarousel();

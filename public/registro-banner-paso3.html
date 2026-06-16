@@ -210,28 +210,39 @@ button{
 <div class="contenedor">
 <div class="registro-banner-top registro-banner-top--page" data-registro-banner-slot="registro_superior"></div>
 
-<div class="titulo">
+<div class="titulo" id="paso3Titulo">
 ✅ Solicitud enviada correctamente
 </div>
 
-<p class="subtitulo">
+<p class="subtitulo" id="paso3Subtitulo">
 Tu solicitud publicitaria fue recibida. El equipo de soporte revisará la información enviada y te notificará cuando exista una actualización.
 </p>
 
 <div class="card">
-<div class="estado-principal">
-<span>🟡</span>
-Solicitud en revisión
+<div class="estado-principal" id="paso3Estado">
+<span id="paso3EstadoIcon">🟡</span>
+<span id="paso3EstadoTexto">Solicitud en revisión</span>
 </div>
-<p>
+<p id="paso3EstadoDetalle">
 No necesitas mantener esta pantalla abierta. Puedes cerrar el navegador y volver después iniciando sesión con tu correo y contraseña.
 </p>
 </div>
 
+<div class="card" id="paso3AuthAviso" hidden>
+<h3>🔐 Inicia sesión para ver el detalle completo</h3>
+<p id="paso3AuthTexto">
+Tu solicitud fue registrada en este dispositivo. Para confirmar el estado en el servidor, inicia sesión con el <strong>correo de acceso del anunciante</strong> que creaste en el paso 2.
+</p>
+<div class="botones" style="margin-top:16px;">
+<button type="button" class="btn-principal" id="paso3BtnLogin">Ir a iniciar sesión</button>
+</div>
+</div>
+
 <div class="card">
 <h3>📋 Resumen de tu solicitud</h3>
+<p id="paso3SolicitudId" style="margin:0 0 14px;font-weight:800;color:#7a003c;"></p>
 
-<div class="resumen">
+<div class="resumen" id="paso3Resumen">
 
 <div class="item">
 <strong>Información pública</strong>
@@ -271,8 +282,8 @@ Si solicitaste CFDI, el equipo revisará RFC, razón social, domicilio fiscal, c
 <div class="card">
 <h3>📌 Estado del proceso</h3>
 
-<div class="timeline">
-<div class="paso activo">🟡 1. Solicitud enviada y pendiente de revisión</div>
+<div class="timeline" id="paso3Timeline">
+<div class="paso activo" data-paso="1">🟡 1. Solicitud enviada y pendiente de revisión</div>
 <div class="paso">⚪ 2. Revisión del equipo de soporte</div>
 <div class="paso">⚪ 3. Aprobación o solicitud de correcciones</div>
 <div class="paso">⚪ 4. Habilitación para pago</div>
@@ -374,6 +385,7 @@ Nueva solicitud
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
 <script>
 (function () {
@@ -387,9 +399,191 @@ Nueva solicitud
   };
   if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
   window.CariHubDB = firebase.firestore();
+  window.CariHubAuth = firebase.auth();
 })();
 </script>
 <script src="js/publicidad-activa.js"></script>
 <script src="js/banner-registro.js"></script>
+<script>
+(function () {
+  var db = window.CariHubDB;
+  var auth = window.CariHubAuth || (window.firebase && firebase.auth && firebase.auth());
+  var solicitudId = localStorage.getItem('ultimaSolicitudPublicidadId') || '';
+  var authCard = document.getElementById('paso3AuthAviso');
+  var loginBtn = document.getElementById('paso3BtnLogin');
+
+  function esc(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  function fmtFecha(v) {
+    if (!v) return 'Pendiente';
+    try {
+      var d = v.toDate ? v.toDate() : new Date(v);
+      if (isNaN(d.getTime())) return 'Pendiente';
+      return d.toLocaleString('es-MX');
+    } catch (e) {
+      return 'Pendiente';
+    }
+  }
+
+  function mapEstado(estado) {
+    var e = String(estado || 'revision_soporte').toLowerCase();
+    if (e.indexOf('aprob') >= 0) return { icon: '🟢', texto: 'Solicitud aprobada', paso: 3 };
+    if (e.indexOf('pago') >= 0) return { icon: '💳', texto: 'Pendiente de pago', paso: 4 };
+    if (e.indexOf('activ') >= 0) return { icon: '✅', texto: 'Publicidad activa', paso: 6 };
+    if (e.indexOf('correc') >= 0) return { icon: '🟠', texto: 'Correcciones solicitadas', paso: 2 };
+    return { icon: '🟡', texto: 'Solicitud en revisión', paso: 1 };
+  }
+
+  function itemResumen(titulo, valor) {
+    return '<div class="item"><strong>' + esc(titulo) + '</strong>' + esc(valor || '—') + '</div>';
+  }
+
+  function leerPaso1Local() {
+    try {
+      return JSON.parse(localStorage.getItem('solicitudPublicidadPaso1') || '{}') || {};
+    } catch (e) {
+      return {};
+    }
+  }
+
+  function esAnuncianteAutenticado(user) {
+    return !!(user && !user.isAnonymous);
+  }
+
+  function mostrarAvisoAuth(visible) {
+    if (authCard) authCard.hidden = !visible;
+  }
+
+  function renderSolicitud(id, d, opts) {
+    opts = opts || {};
+    d = d || {};
+    var estado = mapEstado(d.estadoSolicitud || d.estadoAdmin);
+    var titulo = document.getElementById('paso3Titulo');
+    var subtitulo = document.getElementById('paso3Subtitulo');
+    var estadoIcon = document.getElementById('paso3EstadoIcon');
+    var estadoTexto = document.getElementById('paso3EstadoTexto');
+    var estadoDetalle = document.getElementById('paso3EstadoDetalle');
+    var idEl = document.getElementById('paso3SolicitudId');
+    var resumen = document.getElementById('paso3Resumen');
+    var timeline = document.getElementById('paso3Timeline');
+    var prefijoLocal = opts.local ? 'Resumen local (sin confirmar en servidor): ' : 'ID de solicitud: ';
+
+    if (titulo) titulo.textContent = '✅ Solicitud enviada correctamente';
+    if (subtitulo) {
+      subtitulo.textContent = opts.local
+        ? 'Guardamos una copia de tu solicitud en este dispositivo. Inicia sesión como anunciante para verificar el estado en el servidor.'
+        : ('Tu solicitud publicitaria fue recibida el ' +
+          fmtFecha(d.fechaEnvioRevision || d.fecha) +
+          '. Te notificaremos cuando exista una actualización.');
+    }
+    if (estadoIcon) estadoIcon.textContent = estado.icon;
+    if (estadoTexto) estadoTexto.textContent = estado.texto;
+    if (estadoDetalle) {
+      estadoDetalle.textContent = d.emailAnunciante
+        ? ('Correo de acceso registrado: ' + d.emailAnunciante + '. Puedes cerrar esta pantalla y volver más tarde iniciando sesión.')
+        : 'No necesitas mantener esta pantalla abierta. Puedes cerrar el navegador y volver después iniciando sesión con tu correo y contraseña.';
+    }
+    if (idEl) idEl.textContent = prefijoLocal + (id || solicitudId || '—');
+
+    if (resumen) {
+      resumen.innerHTML =
+        itemResumen('Anuncio / negocio', d.nombreNegocio) +
+        itemResumen('Categoría', d.categoria) +
+        itemResumen('Ubicación', [d.ciudad, d.estado, d.pais].filter(Boolean).join(', ')) +
+        itemResumen('Espacio publicitario', [d.pantalla, d.espacio, d.slotId].filter(Boolean).join(' · ')) +
+        itemResumen('Periodo', d.periodoPublicidad) +
+        itemResumen('Tipo de contenido', d.tipoContenidoPublicidad) +
+        itemResumen('Precio referencia', d.precioAnuncio) +
+        itemResumen('Estado actual', estado.texto);
+    }
+
+    if (timeline) {
+      timeline.querySelectorAll('.paso').forEach(function (el, idx) {
+        var n = idx + 1;
+        el.classList.toggle('activo', n === estado.paso);
+        el.classList.toggle('is-done', n < estado.paso);
+      });
+    }
+  }
+
+  function renderDesdeLocal() {
+    var p1 = leerPaso1Local();
+    if (!p1.nombreNegocio && !p1.slotId && !solicitudId) {
+      var idEl = document.getElementById('paso3SolicitudId');
+      if (idEl) {
+        idEl.textContent = 'No encontramos el identificador de la solicitud en este dispositivo.';
+      }
+      return;
+    }
+    renderSolicitud(solicitudId, {
+      nombreNegocio: p1.nombreNegocio,
+      categoria: p1.categoria,
+      pais: p1.pais,
+      estado: p1.estado,
+      ciudad: p1.ciudad,
+      pantalla: p1.pantalla,
+      espacio: p1.espacio,
+      slotId: p1.slotId,
+      periodoPublicidad: p1.periodoPublicidad,
+      tipoContenidoPublicidad: p1.tipoContenidoPublicidad,
+      precioAnuncio: p1.precioAnuncio,
+      estadoSolicitud: 'revision_soporte'
+    }, { local: true });
+  }
+
+  function cargarDesdeFirestore() {
+    if (!db || !solicitudId) {
+      renderDesdeLocal();
+      return;
+    }
+    db.collection('solicitudes_anuncios').doc(solicitudId).get()
+      .then(function (doc) {
+        if (!doc.exists) {
+          renderDesdeLocal();
+          var idEl = document.getElementById('paso3SolicitudId');
+          if (idEl && solicitudId) {
+            idEl.textContent = 'No se encontró la solicitud ' + solicitudId + ' en el servidor. Mostramos datos locales.';
+          }
+          return;
+        }
+        mostrarAvisoAuth(false);
+        renderSolicitud(doc.id, doc.data());
+      })
+      .catch(function () {
+        renderDesdeLocal();
+        var idEl = document.getElementById('paso3SolicitudId');
+        if (idEl && solicitudId) {
+          idEl.textContent = 'No pudimos confirmar la solicitud ' + solicitudId + ' en el servidor. Mostramos datos locales.';
+        }
+      });
+  }
+
+  if (loginBtn) {
+    loginBtn.addEventListener('click', function () {
+      window.location.href = 'registro-banner2.html';
+    });
+  }
+
+  function iniciar(user) {
+    if (esAnuncianteAutenticado(user)) {
+      mostrarAvisoAuth(false);
+      cargarDesdeFirestore();
+      return;
+    }
+    mostrarAvisoAuth(true);
+    renderDesdeLocal();
+  }
+
+  if (auth && typeof auth.onAuthStateChanged === 'function') {
+    auth.onAuthStateChanged(iniciar);
+  } else {
+    renderDesdeLocal();
+    if (!solicitudId) mostrarAvisoAuth(true);
+  }
+})();
+</script>
 </body>
 </html>

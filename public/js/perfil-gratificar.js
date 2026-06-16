@@ -1,5 +1,5 @@
 /**
- * Flujo de gratificación — redirige al registro/login con intención guardada.
+ * Flujo de gratificación — cuenta social obligatoria, límites e historial (fase inicial).
  */
 (function (global) {
   'use strict';
@@ -18,6 +18,16 @@
     return qs ? base + '?' + qs : base;
   }
 
+  function cuentaReal() {
+    if (global.CariHubGratificaciones && CariHubGratificaciones.cuentaReal) {
+      return CariHubGratificaciones.cuentaReal();
+    }
+    if (global.CariHubCuentaSocial && CariHubCuentaSocial.cuentaReal) {
+      return CariHubCuentaSocial.cuentaReal();
+    }
+    return false;
+  }
+
   function confirmar(state) {
     state = state || {};
     var perfil = String(state.perfil || '').trim();
@@ -27,6 +37,30 @@
       global.alert('Elige un monto para gratificar.');
       return false;
     }
+
+    if (global.CariHubGratificaciones) {
+      var validacion = CariHubGratificaciones.validarMonto(amount);
+      if (!validacion.ok) {
+        global.alert(validacion.mensaje);
+        return false;
+      }
+    }
+
+    if (cuentaReal() && global.CariHubGratificaciones) {
+      var resultado = CariHubGratificaciones.registrarMovimiento({
+        monto: amount,
+        destinatarioPerfil: perfil,
+        destinatarioNombre: state.nombre || '',
+        source: source
+      });
+      if (resultado.ok) {
+        global.alert(resultado.mensaje);
+        return 'done';
+      }
+      if (resultado.mensaje) global.alert(resultado.mensaje);
+      return false;
+    }
+
     try {
       global.sessionStorage.setItem('chGratIntencion', JSON.stringify({
         perfil: perfil,
@@ -35,6 +69,7 @@
         ts: Date.now()
       }));
     } catch (e) { /* opcional */ }
+
     global.location.href = indexHref({
       abrir: 'registro',
       intencion: 'gratificar',
@@ -42,11 +77,12 @@
       monto: String(amount),
       source: source
     });
-    return true;
+    return 'redirect';
   }
 
   global.CariHubPerfilGratificar = {
     indexHref: indexHref,
-    confirmar: confirmar
+    confirmar: confirmar,
+    cuentaReal: cuentaReal
   };
 })(typeof window !== 'undefined' ? window : globalThis);
