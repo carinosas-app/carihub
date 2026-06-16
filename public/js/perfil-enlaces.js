@@ -112,6 +112,13 @@
       if (tel) return tel;
     }
     var id = perfilId(u);
+    if (global.CariHubHomeIntenciones && CariHubHomeIntenciones.guardar && CariHubHomeIntenciones.KEYS) {
+      CariHubHomeIntenciones.guardar(CariHubHomeIntenciones.KEYS.reservar, {
+        perfil: id,
+        ts: Date.now(),
+        reanudar: true
+      });
+    }
     return indexHref({
       abrir: 'registro',
       intencion: 'reservar',
@@ -135,10 +142,18 @@
   }
 
   function agendarCitaUrl(u) {
+    var id = perfilId(u);
+    if (global.CariHubHomeIntenciones && CariHubHomeIntenciones.guardar && CariHubHomeIntenciones.KEYS) {
+      CariHubHomeIntenciones.guardar(CariHubHomeIntenciones.KEYS.agendar, {
+        perfil: id,
+        ts: Date.now(),
+        reanudar: true
+      });
+    }
     return indexHref({
       abrir: 'registro',
       intencion: 'agendar_cita',
-      perfil: perfilId(u)
+      perfil: id
     });
   }
 

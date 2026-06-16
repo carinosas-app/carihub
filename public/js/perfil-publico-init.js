@@ -100,6 +100,9 @@
     };
     global.firebase.initializeApp(cfg);
     global.CariHubDB = global.firebase.firestore();
+    if (typeof global.firebase.auth === 'function') {
+      global.CariHubAuth = global.firebase.auth();
+    }
   }
 
   global.CariHubPerfilPublico = {

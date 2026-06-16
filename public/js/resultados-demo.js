@@ -744,7 +744,7 @@
     var verificada = u.verificada === true || u.verificado === true;
     var respRapida = u.respuestaRapida !== false;
     var perfilId = u.__id || '';
-    var favBtn = (u.__registrado && perfilId)
+    var favBtn = perfilId
       ? '<button type="button" class="res-fav" data-fav-perfil="' + safeTxt(perfilId) + '" aria-label="Guardar en favoritos" aria-pressed="false" onclick="toggleFav(this, event)">♡</button>'
       : '';
     var mods = chipModalidadHTML(set);
