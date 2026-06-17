@@ -49,6 +49,62 @@
     'img/home/sectores/adultos-rotate-07.png'
   ];
 
+  var adultosCardRotateIdx = 0;
+  var geoPicker = null;
+
+  function prefersLiteMotion() {
+    return window.matchMedia('(prefers-reduced-motion: reduce)').matches ||
+      window.matchMedia('(max-width: 768px)').matches;
+  }
+
+  function sectorMobPath(pngPath) {
+    return String(pngPath)
+      .replace('/sectores/', '/sectores/mob/')
+      .replace(/\.png$/i, '.jpg');
+  }
+
+  function pickImageSrc(pngPath) {
+    if (window.matchMedia('(max-width: 768px)').matches) {
+      return sectorMobPath(pngPath);
+    }
+    return pngPath;
+  }
+
+  function buildSectorImageHtml(pngPath) {
+    return (
+      '<img src="' + esc(pngPath) + '" alt="" loading="lazy" decoding="async" width="320" height="240">'
+    );
+  }
+
+  function initGeoPicker() {
+    if (geoPicker || !global.CariHubGeoPicker) return;
+    geoPicker = global.CariHubGeoPicker.mount({
+      prefix: 'rp',
+      container: '#rpGeoPicker',
+      hidden: { pais: 'fldPais', estado: 'fldEstado', ciudad: 'fldCiudad' }
+    });
+  }
+
+  function ensureGeoReady(cb) {
+    initGeoPicker();
+    if (!geoPicker) {
+      if (cb) cb();
+      return;
+    }
+    geoPicker.ensureReady(function () {
+      if (cb) cb();
+    });
+  }
+
+  function ensureLazyImgLoaded(img) {
+    if (!img) return;
+    var lazy = img.getAttribute('data-src');
+    if (lazy && !img.getAttribute('src')) {
+      img.src = lazy;
+      img.removeAttribute('data-src');
+    }
+  }
+
   var SECTOR_AMBIENCE = {
     adultos: { glow: '#ff4081', flash: 'rgba(255, 64, 129, 0.35)' },
     bienestar: { glow: '#b388ff', flash: 'rgba(179, 136, 255, 0.28)' },
@@ -67,15 +123,7 @@
     industria: { glow: '#bcaaa4', flash: 'rgba(188, 170, 164, 0.22)' }
   };
 
-  var SECTOR_TITLE_LINES = {
-    adultos: ['Adultos y', 'entretenimiento', 'para adultos']
-  };
-
   function sectorNameHtml(sector) {
-    var lines = SECTOR_TITLE_LINES[sector.id];
-    if (lines) {
-      return lines.map(function (line) { return esc(line); }).join('<br>');
-    }
     return esc(sector.nombre);
   }
 
@@ -101,6 +149,7 @@
     document.body.classList.toggle('rp-adultos-subcats', state.screen === 'screen0b-adultos');
     document.body.classList.toggle('rp-subcat-screen', isSubcat);
     document.body.classList.toggle('rp-screen0-cats', state.screen === 'screen0');
+    document.body.classList.toggle('rp-lite-motion', prefersLiteMotion());
   }
 
   function showScreen(id) {
@@ -115,6 +164,10 @@
     } else if (id === 'screen0') {
       stopAdultosAnuncioRotation();
       startAdultosCardRotation();
+    } else if (id === 'screen1') {
+      stopAdultosAnuncioRotation();
+      stopAdultosCardRotation();
+      ensureGeoReady();
     } else {
       stopAdultosAnuncioRotation();
       stopAdultosCardRotation();
@@ -139,8 +192,7 @@
       dot.classList.toggle('is-on', i < step);
     });
     var lbl = $('rpProgressLabel');
-    if (lbl && state.screen !== 'screen0') lbl.textContent = label;
-
+    if (lbl) lbl.textContent = label;
   }
 
   function applySectorAmbience(sector) {
@@ -163,7 +215,9 @@
     var primary = $('rpBtnPrimary');
     if (primary && (primary.disabled || primary.classList.contains('rp-hidden'))) return;
 
-    if (state.screen === 'screen1') {
+    if (state.screen === 'screen0') {
+      onContinueFromSectors();
+    } else if (state.screen === 'screen1') {
       saveDraft();
     }
   }
@@ -245,13 +299,16 @@
     if (!bar) return;
     var primary = $('rpBtnPrimary');
     var progressFoot = $('rpActionsProgress');
-    bar.classList.remove('rp-actions--nav-only', 'rp-actions--adultos-subcats', 'rp-actions--screen0');
+    bar.classList.remove('rp-actions--nav-only', 'rp-actions--adultos-subcats', 'rp-actions--screen0', 'rp-actions--single');
 
     if (state.screen === 'screen0') {
-      primary.classList.add('rp-hidden');
-      setSecondaryButton('fucsia', 'Volver al inicio');
+      primary.textContent = 'Continuar';
+      primary.classList.remove('rp-hidden');
+      primary.disabled = !state.sector;
+      var secondary = $('rpBtnSecondary');
+      if (secondary) secondary.classList.add('rp-hidden');
       if (progressFoot) progressFoot.classList.add('rp-hidden');
-      bar.classList.add('rp-actions--nav-only', 'rp-actions--screen0');
+      bar.classList.add('rp-actions--screen0', 'rp-actions--single');
     } else if (state.screen === 'screen0b-adultos') {
       primary.classList.add('rp-hidden');
       setSecondaryButton('fucsia', 'Volver a categorías');
@@ -278,9 +335,6 @@
     if (selectedBtn) selectedBtn.classList.add('is-selected');
     applySectorAmbience(sector);
     syncActionsBar();
-    setTimeout(function () {
-      onContinueFromSectors();
-    }, TAP_ADVANCE_MS);
   }
 
   function selectSubcategoria(cat) {
@@ -299,17 +353,15 @@
   }
 
   function buildAdultosVisualHtml() {
-    var slides = ADULTOS_CARD_IMAGES.map(function (src, i) {
-      return (
-        '<span class="rp-sector-visual-slide' + (i === 0 ? ' is-active' : '') +
-        '" aria-hidden="' + (i === 0 ? 'false' : 'true') + '">' +
-        '<img src="' + esc(src) + '" alt="" loading="lazy" decoding="async">' +
-        '</span>'
-      );
-    }).join('');
+    var src = ADULTOS_CARD_IMAGES[0];
+    adultosCardRotateIdx = 0;
     return (
       '<span class="rp-sector-card__visual rp-sector-card__visual--rotate">' +
-        '<span class="rp-sector-visual-stage" id="rpAdultosCardStage">' + slides + '</span>' +
+        '<span class="rp-sector-visual-stage" id="rpAdultosCardStage">' +
+          '<span class="rp-sector-visual-slide is-active" aria-hidden="false">' +
+            '<img src="' + esc(src) + '" alt="" decoding="async" fetchpriority="high" width="320" height="240">' +
+          '</span>' +
+        '</span>' +
       '</span>'
     );
   }
@@ -328,16 +380,13 @@
     var visualHtml = opts.adultosFixed
       ? buildAdultosVisualHtml()
       : '<span class="rp-sector-card__visual">' +
-          '<img src="' + esc(img) + '" alt="" loading="lazy" decoding="async">' +
+          buildSectorImageHtml(img) +
         '</span>';
-    var metaText = opts.adultosFixed
-      ? 'Registrarme en Adultos y Entretenimiento para Adultos'
-      : subs.length + ' subcategorías';
+    var metaText = subs.length + ' subcategorías';
     btn.innerHTML =
       visualHtml +
-      '<span class="rp-sector-card__body ' +
-        (opts.adultosFixed ? 'rp-sector-card__body--fucsia' : 'rp-sector-card__body--blanco') +
-      '">' +
+      '<span class="rp-sector-card__body rp-sector-card__body--fucsia">' +
+        buildSparkfieldHtml({ durBase: 2.6, durStep: 0.5, delayStep: 0.38 }) +
         '<span class="rp-sector-card__copy">' +
           '<span class="rp-sector-card__name">' + sectorNameHtml(sector) + '</span>' +
           '<span class="rp-sector-card__meta">' + esc(metaText) + '</span>' +
@@ -349,20 +398,24 @@
     return btn;
   }
 
-  function renderSectorCards() {
+  function filterSectorList(text) {
+    text = String(text || '').trim().toLowerCase();
+    if (!global.CARIHUB_SECTORES) return [];
+    if (!text) return global.CARIHUB_SECTORES;
+    return global.CARIHUB_SECTORES.filter(function (sector) {
+      return String(sector.nombre || '').toLowerCase().indexOf(text) >= 0;
+    });
+  }
+
+  function renderSectorCards(filterText) {
     var list = $('rpSectorGrid');
-    var adultosSlot = $('rpSectorAdultosFixed');
     if (!list || !global.CARIHUB_SECTORES) return;
     list.innerHTML = '';
-    if (adultosSlot) adultosSlot.innerHTML = '';
+    var sectors = filterText != null ? filterSectorList(filterText) : global.CARIHUB_SECTORES;
 
-    global.CARIHUB_SECTORES.forEach(function (sector) {
-      if (sector.id === 'adultos') {
-        if (adultosSlot) adultosSlot.appendChild(buildSectorCardButton(sector, { adultosFixed: true }));
-        return;
-      }
+    sectors.forEach(function (sector) {
       var li = document.createElement('li');
-      li.appendChild(buildSectorCardButton(sector));
+      li.appendChild(buildSectorCardButton(sector, { adultosFixed: sector.id === 'adultos' }));
       list.appendChild(li);
     });
     if (state.screen === 'screen0') startAdultosCardRotation();
@@ -389,6 +442,8 @@
     var dots = dotsWrap ? dotsWrap.querySelectorAll('span') : [];
     if (!slides.length) return 0;
     var idx = ((nextIdx % slides.length) + slides.length) % slides.length;
+    var activeSlide = slides[idx];
+    if (activeSlide) ensureLazyImgLoaded(activeSlide.querySelector('img'));
     slides.forEach(function (sl, i) {
       var on = i === idx;
       sl.classList.toggle('is-active', on);
@@ -400,16 +455,27 @@
     return idx;
   }
 
-  function startAdultosCardRotation() {
-    stopAdultosCardRotation();
+  function advanceAdultosCardImage() {
     var stage = $('rpAdultosCardStage');
     if (!stage) return;
-    var slides = stage.querySelectorAll('.rp-sector-visual-slide');
-    if (slides.length < 2) return;
-    var rot = { idx: 0 };
-    adultosCardRotateTimer = setInterval(function () {
-      rot.idx = goVisualSlide(stage, rot.idx + 1, '.rp-sector-visual-slide');
-    }, ADULTOS_CARD_ROTATE_MS);
+    var img = stage.querySelector('img');
+    if (!img) return;
+    var nextIdx = (adultosCardRotateIdx + 1) % ADULTOS_CARD_IMAGES.length;
+    var nextSrc = ADULTOS_CARD_IMAGES[nextIdx];
+    var preload = new Image();
+    preload.onload = function () {
+      adultosCardRotateIdx = nextIdx;
+      img.src = nextSrc;
+    };
+    preload.src = nextSrc;
+  }
+
+  function startAdultosCardRotation() {
+    stopAdultosCardRotation();
+    if (prefersLiteMotion()) return;
+    var stage = $('rpAdultosCardStage');
+    if (!stage) return;
+    adultosCardRotateTimer = setInterval(advanceAdultosCardImage, ADULTOS_CARD_ROTATE_MS);
   }
 
   function stopAdultosCardRotation() {
@@ -421,13 +487,14 @@
 
   function startAdultosAnuncioRotation() {
     stopAdultosAnuncioRotation();
+    if (prefersLiteMotion()) return;
     var stage = $('rpAdultosAnuncioStage');
     if (!stage) return;
     var slides = stage.querySelectorAll('.rp-anuncio-slide');
     if (slides.length < 2) return;
-    var state = { idx: 0 };
+    var rot = { idx: 0 };
     anuncioRotateTimer = setInterval(function () {
-      state.idx = goAnuncioSlide(stage, state.idx + 1);
+      rot.idx = goAnuncioSlide(stage, rot.idx + 1);
     }, ANUNCIO_ROTATE_MS);
   }
 
@@ -481,11 +548,13 @@
 
   function onContinueFromAdultos() {
     if (!state.subcategoria) return;
-    fillScreen1();
-    showScreen('screen1');
-    if (global.CariHubBannerRegistro && global.CariHubBannerRegistro.remount) {
-      global.CariHubBannerRegistro.remount();
-    }
+    ensureGeoReady(function () {
+      fillScreen1();
+      showScreen('screen1');
+      if (global.CariHubBannerRegistro && global.CariHubBannerRegistro.remount) {
+        global.CariHubBannerRegistro.remount();
+      }
+    });
   }
 
   function fillScreen1() {
@@ -498,51 +567,6 @@
     if (edadWrap) edadWrap.classList.toggle('rp-hidden', isNegocio);
     if (modWrap) modWrap.classList.toggle('rp-hidden', isNegocio);
     restoreDraftFields();
-  }
-
-  function initGeoSelects() {
-    var pais = $('fldPais');
-    var estado = $('fldEstado');
-    var ciudad = $('fldCiudad');
-    if (!pais || typeof PAISES_PRINCIPALES === 'undefined') return;
-
-    PAISES_PRINCIPALES.forEach(function (p) {
-      var opt = document.createElement('option');
-      opt.value = p;
-      opt.textContent = p;
-      pais.appendChild(opt);
-    });
-
-    pais.addEventListener('change', function () {
-      fillEstados(pais.value);
-    });
-
-    estado.addEventListener('change', function () {
-      fillCiudades(pais.value, estado.value);
-    });
-
-    function fillEstados(p) {
-      estado.innerHTML = '<option value="">Estado</option>';
-      ciudad.innerHTML = '<option value="">Ciudad</option>';
-      var list = typeof ESTADOS !== 'undefined' && ESTADOS[p] ? ESTADOS[p] : [];
-      list.forEach(function (e) {
-        var opt = document.createElement('option');
-        opt.value = e;
-        opt.textContent = e;
-        estado.appendChild(opt);
-      });
-    }
-
-    function fillCiudades(p, e) {
-      ciudad.innerHTML = '<option value="">Ciudad</option>';
-      var list = typeof CIUDADES !== 'undefined' && CIUDADES[p] && CIUDADES[p][e] ? CIUDADES[p][e] : [];
-      list.forEach(function (c) {
-        var opt = document.createElement('option');
-        opt.value = c;
-        opt.textContent = c;
-        ciudad.appendChild(opt);
-      });
-    }
   }
 
   function compressImage(file, maxW, quality, cb) {
@@ -685,17 +709,9 @@
       var c = data.camposPublicos;
       $('fldAlias').value = c.alias || '';
       if ($('fldEdad')) $('fldEdad').value = c.edad || '';
-      if (c.pais) {
-        $('fldPais').value = c.pais;
-        $('fldPais').dispatchEvent(new Event('change'));
+      if (geoPicker && (c.pais || c.estado || c.ciudad)) {
+        geoPicker.setValues({ pais: c.pais || '', estado: c.estado || '', ciudad: c.ciudad || '' });
       }
-      setTimeout(function () {
-        if (c.estado) $('fldEstado').value = c.estado;
-        $('fldEstado').dispatchEvent(new Event('change'));
-        setTimeout(function () {
-          if (c.ciudad) $('fldCiudad').value = c.ciudad;
-        }, 50);
-      }, 50);
       $('fldZona').value = c.zona || '';
       $('fldDescripcion').value = c.descripcionCorta || '';
       $('fldPrecio').value = c.precioDesde || '';
@@ -733,14 +749,22 @@
     syncScreenFromDom();
     applyBodyScreenClasses();
     bindActionButtons();
-    if (global.CariHubPinkSheen && global.CariHubPinkSheen.mountPage) {
+    if (!prefersLiteMotion() && global.CariHubPinkSheen && global.CariHubPinkSheen.mountPage) {
       global.CariHubPinkSheen.mountPage(document.body);
     }
     renderSectorCards();
-    initGeoSelects();
+    initGeoPicker();
     bindUploads();
     updateProgress();
     syncActionsBar();
+
+    var catSearch = $('rpCatSearch');
+    if (catSearch && catSearch.dataset.rpBound !== '1') {
+      catSearch.dataset.rpBound = '1';
+      catSearch.addEventListener('input', function () {
+        renderSectorCards(this.value);
+      });
+    }
 
     var closeBtn = $('rpClose');
     if (closeBtn) closeBtn.addEventListener('click', function () {
