@@ -1,6 +1,101 @@
 (function () {
   'use strict';
 
+  var homeGeoPicker = null;
+
+  function readHiddenGeo(id) {
+    var el = document.getElementById(id);
+    return el ? String(el.textContent || '').trim() : '';
+  }
+
+  function syncHomeGeoGlobals(values) {
+    values = values || {};
+    if (typeof paisSeleccionado !== 'undefined') paisSeleccionado = values.pais || '';
+    if (typeof estadoSeleccionado !== 'undefined') estadoSeleccionado = values.estado || '';
+    if (typeof ciudadSeleccionada !== 'undefined') ciudadSeleccionada = values.ciudad || '';
+
+    if (typeof mostrarTextoSeleccionado === 'function' && typeof limpiarTextoSeleccionado === 'function') {
+      if (values.pais) mostrarTextoSeleccionado('textoPais', values.pais);
+      else limpiarTextoSeleccionado('textoPais');
+      if (values.estado) mostrarTextoSeleccionado('textoEstado', values.estado);
+      else limpiarTextoSeleccionado('textoEstado');
+      if (values.ciudad) mostrarTextoSeleccionado('textoCiudad', values.ciudad);
+      else limpiarTextoSeleccionado('textoCiudad');
+    }
+  }
+
+  function initHomeGeoPicker() {
+    window.syncHomeGeoFromPicker = syncHomeGeoGlobals;
+    if (homeGeoPicker) {
+      homeGeoPicker.onChange = syncHomeGeoGlobals;
+      return homeGeoPicker;
+    }
+    if (window.__homeGeoPicker) {
+      homeGeoPicker = window.__homeGeoPicker;
+      homeGeoPicker.onChange = syncHomeGeoGlobals;
+    } else if (window.CariHubGeoPicker && typeof CariHubGeoPicker.bootHome === 'function') {
+      homeGeoPicker = window.CariHubGeoPicker.bootHome(syncHomeGeoGlobals);
+    }
+    if (!homeGeoPicker) return homeGeoPicker;
+    homeGeoPicker.setValues({
+      pais: readHiddenGeo('textoPais'),
+      estado: readHiddenGeo('textoEstado'),
+      ciudad: readHiddenGeo('textoCiudad')
+    });
+    window.__homeGeoPicker = homeGeoPicker;
+    window.openHomeGeoPicker = function (tipo) {
+      if (homeGeoPicker) homeGeoPicker.open(tipo);
+    };
+    return homeGeoPicker;
+  }
+
+  window.openHomeGeoPicker = function (tipo) {
+    var picker = initHomeGeoPicker();
+    if (picker) picker.open(tipo);
+  };
+
+  window.homeGeoClick = function (tipo, e) {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    if (typeof window.openHomeGeoPicker === 'function') {
+      window.openHomeGeoPicker(tipo);
+      return;
+    }
+    if (typeof window.abrirSelector === 'function') {
+      window.abrirSelector(tipo);
+    }
+  };
+
+  function bindHomeGeoFields() {
+    initHomeGeoPicker();
+    document.querySelectorAll('[data-home-geo-trigger]').forEach(function (el) {
+      if (el.dataset.bridgeGeoBound === '1') return;
+      el.dataset.bridgeGeoBound = '1';
+      var tipo = el.getAttribute('data-home-geo-trigger');
+      if (!tipo) return;
+      el.addEventListener('click', function (e) {
+        window.homeGeoClick(tipo, e);
+      });
+      el.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+          window.homeGeoClick(tipo, e);
+        }
+      });
+    });
+  }
+
+  window.syncHomeGeoPickerFromGlobals = function () {
+    var picker = initHomeGeoPicker();
+    if (!picker) return;
+    picker.setValues({
+      pais: readHiddenGeo('textoPais'),
+      estado: readHiddenGeo('textoEstado'),
+      ciudad: readHiddenGeo('textoCiudad')
+    });
+  };
+
   function syncFieldLabels() {
     var map = [
       ['textoCategoria', 'fieldCategoriaLabel', 'fieldCategoria'],
@@ -21,6 +116,24 @@
   }
 
   window.ensureUbicacionHome = function () {
+    if (typeof openHomeGeoPicker === 'function') {
+      var pais = readHiddenGeo('textoPais');
+      var estado = readHiddenGeo('textoEstado');
+      var ciudad = readHiddenGeo('textoCiudad');
+      if (!pais) {
+        openHomeGeoPicker('pais');
+        return false;
+      }
+      if (!estado) {
+        openHomeGeoPicker('estado');
+        return false;
+      }
+      if (!ciudad) {
+        openHomeGeoPicker('ciudad');
+        return false;
+      }
+      return true;
+    }
     if (typeof abrirSelector !== 'function') return true;
     var pais = document.getElementById('textoPais');
     var estado = document.getElementById('textoEstado');
@@ -112,12 +225,16 @@
   function bindFieldClick(el, tipo) {
     if (!el || el.dataset.bridgeBound) return;
     el.dataset.bridgeBound = '1';
-    function open() {
+    function open(e) {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
       if (typeof abrirSelector === 'function') abrirSelector(tipo);
     }
     el.addEventListener('click', open);
     el.addEventListener('keydown', function (e) {
-      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); }
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(e); }
     });
   }
 
@@ -135,6 +252,7 @@
       });
     }
     syncFieldLabels();
+    bindHomeGeoFields();
 
     var menuBtn = document.querySelector('.home-header__btn[aria-label="Menú"]');
     if (menuBtn && !menuBtn.dataset.bridgeBound) {
@@ -182,9 +300,6 @@
       el.addEventListener('click', function (e) { e.preventDefault(); abrirFavoritos(); });
     });
 
-    bindFieldClick(document.getElementById('fieldPais'), 'pais');
-    bindFieldClick(document.getElementById('fieldEstado'), 'estado');
-    bindFieldClick(document.getElementById('fieldCiudad'), 'ciudad');
   }
 
   if (document.readyState === 'loading') {
