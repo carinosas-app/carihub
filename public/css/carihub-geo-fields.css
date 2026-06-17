@@ -1,0 +1,681 @@
+/* Selector geo CariHub — mismos botones que Home (país / estado / ciudad) */
+
+.ch-geo-picker {
+  --geo-rosa: #e91e63;
+  --geo-radio: 10px;
+  --geo-grad: linear-gradient(180deg, #ff2d6f 0%, #ec1458 45%, #c8004a 100%);
+  --geo-shadow: 0 5px 16px rgba(220, 0, 82, 0.35), 0 0 0 0.5px rgba(255, 50, 110, 0.22);
+}
+
+.ch-geo-picker__label {
+  display: block;
+  margin: 0 0 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #8b5a72;
+}
+
+.ch-geo-picker__field {
+  margin-bottom: 12px;
+}
+
+.ch-geo-picker__row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.ch-geo-picker .home-field {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 42px;
+  border-radius: var(--geo-radio);
+  padding: 0;
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+  overflow: hidden;
+  border: none;
+  background: var(--geo-grad);
+  box-shadow: var(--geo-shadow);
+}
+
+.ch-geo-picker .home-field__display {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  overflow: hidden;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.ch-geo-picker .home-field.is-selected .home-field__display {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.ch-geo-picker .home-field__display-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: transparent;
+}
+
+.ch-geo-picker .home-field__display-bg--carinosas::after,
+.ch-geo-picker .home-field__display-bg--pais::before,
+.ch-geo-picker .home-field__display-bg--estado::before,
+.ch-geo-picker .home-field__display-bg--ciudad::before {
+  opacity: 0;
+}
+
+.ch-geo-picker .home-field__dropzone {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.ch-geo-picker .home-field__drop-text {
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.28);
+  white-space: nowrap;
+}
+
+.ch-geo-picker .home-field--pais .home-field__drop-text { animation-delay: 0.35s; }
+.ch-geo-picker .home-field--estado .home-field__drop-text { animation-delay: 0.7s; }
+.ch-geo-picker .home-field--ciudad .home-field__drop-text { animation-delay: 1.05s; }
+
+.ch-geo-picker .home-field__value,
+.ch-geo-picker .home-field__label {
+  display: none;
+  position: relative;
+  z-index: 3;
+  flex: 1;
+  min-width: 0;
+  padding: 8px 22px 8px 10px;
+  color: #fff;
+  font-weight: 800;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.15;
+  text-align: center;
+}
+
+.ch-geo-picker .home-field.is-selected .home-field__value,
+.ch-geo-picker .home-field.is-selected .home-field__label {
+  display: block;
+}
+
+.ch-geo-picker .home-field__arrow {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 5;
+  color: #fff;
+  font-size: 8px;
+  opacity: 0.92;
+  pointer-events: none;
+}
+
+.ch-geo-picker .home-field__glow {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  z-index: 4;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  pointer-events: none;
+  opacity: 0.75;
+}
+
+/* ── Modal geo — pantalla país (referencia registro-perfil) ── */
+.ch-geo-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 20000;
+  background: #fde8f0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 0;
+}
+
+.ch-geo-modal.is-open {
+  display: block;
+}
+
+body.ch-geo-modal-open {
+  overflow: hidden;
+}
+
+.ch-geo-sheet {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 430px;
+  margin: 0 auto;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: transparent;
+  font-family: 'Poppins', Montserrat, system-ui, sans-serif;
+}
+
+/* Primer fondo rosa — visible arriba (fuera del panel interior) */
+.ch-geo-sheet__crest {
+  position: relative;
+  flex-shrink: 0;
+  height: max(46px, calc(env(safe-area-inset-top, 0px) + 40px));
+  background: transparent;
+}
+
+.ch-geo-modal--estado .ch-geo-sheet__crest,
+.ch-geo-modal--ciudad .ch-geo-sheet__crest {
+  height: max(52px, calc(env(safe-area-inset-top, 0px) + 46px));
+}
+
+/* Segundo fondo rosa — empieza debajo del crest, no llega hasta arriba */
+.ch-geo-sheet__panel {
+  box-sizing: border-box;
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 10px 10px max(14px, env(safe-area-inset-bottom, 0px));
+  background: linear-gradient(180deg, #fff8fb 0%, #ffedf5 55%, #ffe8f2 100%);
+  border-radius: 22px 22px 0 0;
+}
+
+.ch-geo-modal--pais .ch-geo-sheet__panel {
+  padding-top: 0;
+}
+
+.ch-geo-modal--pais .ch-geo-sheet__head {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  padding: 10px 8px 6px;
+  margin: 0;
+}
+
+.ch-geo-sheet__handle {
+  display: none;
+}
+
+.ch-geo-sheet__topbar {
+  position: absolute;
+  top: max(6px, env(safe-area-inset-top, 0px));
+  right: 10px;
+  left: 10px;
+  height: 34px;
+  margin: 0;
+}
+
+.ch-geo-modal--pais .ch-geo-sheet__topbar {
+  right: 10px;
+  left: auto;
+  width: auto;
+}
+
+.ch-geo-sheet__nav {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 36px;
+  height: 36px;
+  border: 1px solid rgba(233, 30, 99, 0.16);
+  border-radius: 50%;
+  background: #fff;
+  color: #e91e63;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(233, 30, 99, 0.12);
+}
+
+.ch-geo-modal--pais .ch-geo-sheet__nav {
+  display: none;
+}
+
+.ch-geo-sheet__close {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 34px;
+  height: 34px;
+  border: 1px solid rgba(233, 30, 99, 0.14);
+  border-radius: 50%;
+  background: #fff;
+  color: #e91e63;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(233, 30, 99, 0.1);
+}
+
+.ch-geo-sheet__head {
+  flex-shrink: 0;
+  text-align: center;
+  padding: 0 34px 6px;
+}
+
+.ch-geo-sheet__heading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 0 0 4px;
+}
+
+.ch-geo-modal--pais .ch-geo-sheet__heading {
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 4px;
+}
+
+.ch-geo-sheet__icon--globe {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  margin: 0;
+  line-height: 0;
+}
+
+.ch-geo-sheet__globe-svg {
+  display: block;
+  width: 40px;
+  height: 40px;
+}
+
+.ch-geo-sheet__head--pais .ch-geo-sheet__title {
+  font-size: 22px;
+  line-height: 1.05;
+  padding-top: 2px;
+}
+
+.ch-geo-sheet__head--estado .ch-geo-sheet__heading {
+  gap: 10px;
+}
+
+.ch-geo-sheet__head--estado .ch-geo-sheet__title {
+  font-size: 28px;
+}
+
+.ch-geo-sheet__head--ciudad .ch-geo-sheet__heading {
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ch-geo-sheet__head--ciudad .ch-geo-sheet__title {
+  font-size: 28px;
+}
+
+.ch-geo-sheet__icon {
+  font-size: 32px;
+  line-height: 1;
+  margin: 0;
+}
+
+.ch-geo-sheet__icon--pin {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin: 0 auto 6px;
+  border-radius: 50%;
+  background: linear-gradient(180deg, #ff4081 0%, #e91e63 55%, #d81b7a 100%);
+  font-size: 22px;
+  line-height: 1;
+  box-shadow: 0 6px 18px rgba(233, 30, 99, 0.28);
+}
+
+.ch-geo-sheet__icon--flag {
+  font-size: 28px;
+  line-height: 1;
+}
+
+.ch-geo-sheet__title {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 800;
+  color: #1a1a1a;
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+}
+
+.ch-geo-sheet__subtitle {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: #666;
+  line-height: 1.25;
+}
+
+.ch-geo-modal--pais .ch-geo-sheet__subtitle {
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.ch-geo-sheet__banner {
+  flex-shrink: 0;
+  display: block;
+  position: relative;
+  width: calc(100% + 20px);
+  margin-left: -10px;
+  margin-right: -10px;
+  height: 88px;
+  margin-top: 8px;
+  margin-bottom: 12px;
+  border-radius: 14px;
+  overflow: hidden;
+  text-decoration: none;
+  box-shadow: 0 8px 24px rgba(60, 0, 35, 0.24);
+}
+
+.ch-geo-sheet__banner img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+
+.ch-geo-sheet__banner-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: linear-gradient(180deg, rgba(15, 0, 25, 0.12), rgba(35, 0, 45, 0.58));
+  color: #fff;
+  text-align: center;
+  padding: 6px;
+}
+
+.ch-geo-sheet__banner-title {
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+}
+
+.ch-geo-sheet__banner-cta {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #ff5c9a, #e91e63);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.ch-geo-sheet__search {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  height: 58px;
+  margin: 0 0 14px;
+  padding: 0 18px;
+  border-radius: 29px;
+  background: #fff;
+  border: 1.5px solid rgba(233, 30, 99, 0.32);
+  box-shadow: 0 4px 16px rgba(233, 30, 99, 0.08);
+  box-sizing: border-box;
+}
+
+.ch-geo-sheet__search-icon {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  color: #e91e63;
+}
+
+.ch-geo-sheet__search input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  font-size: 18px;
+  font-weight: 500;
+  color: #3d2030;
+  outline: none;
+}
+
+.ch-geo-sheet__search input::placeholder {
+  color: #c9a0b0;
+}
+
+.ch-geo-sheet__scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 0 0 16px;
+}
+
+.ch-geo-sheet__section-title {
+  margin: 0 0 12px;
+  font-size: 17px;
+  font-weight: 800;
+  color: #e91e63;
+  line-height: 1.2;
+}
+
+.ch-geo-sheet__list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ch-geo-card {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 128px;
+  padding: 12px;
+  border: none;
+  border-radius: 24px;
+  background: #fff;
+  box-shadow: 0 6px 22px rgba(233, 30, 99, 0.11);
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  gap: 10px;
+  box-sizing: border-box;
+}
+
+.ch-geo-card__thumb {
+  flex: 0 0 38%;
+  width: 38%;
+  max-width: 138px;
+  height: 104px;
+  min-height: 104px;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #ffe4ef;
+  flex-shrink: 0;
+}
+
+.ch-geo-card__thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+
+.ch-geo-card__body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  padding: 0;
+}
+
+.ch-geo-card__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 22px;
+  font-weight: 800;
+  color: #e91e63;
+  line-height: 1.12;
+}
+
+.ch-geo-card__flag {
+  flex-shrink: 0;
+  font-size: 20px;
+  line-height: 1;
+}
+
+.ch-geo-card__meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  font-size: 16px;
+  font-weight: 500;
+  color: #4a4048;
+  line-height: 1.25;
+}
+
+.ch-geo-card__meta svg {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  color: #e91e63;
+}
+
+.ch-geo-card__go {
+  flex: 0 0 54px;
+  align-self: center;
+  width: 54px;
+  height: 54px;
+  margin: 0 2px 0 0;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(180deg, #ff5c9a 0%, #e91e63 52%, #d81b7a 100%);
+  color: #fff;
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1;
+  box-shadow: 0 6px 18px rgba(233, 30, 99, 0.34);
+  flex-shrink: 0;
+}
+
+.ch-geo-sheet__more {
+  margin-top: 4px;
+  width: 100%;
+  min-height: 52px;
+  padding: 14px;
+  border: 1px dashed rgba(233, 30, 99, 0.35);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.72);
+  color: #c2185b;
+  font-size: 16px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.ch-geo-sheet__empty {
+  padding: 22px 18px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.88);
+  color: #7a4a5d;
+  font-size: 15px;
+  text-align: center;
+  line-height: 1.45;
+}
+
+.ch-geo-sheet__footer {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 54px;
+  margin-top: 12px;
+  padding: 14px 18px;
+  border: none;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #ff5c9a 0%, #e91e63 52%, #d81b7a 100%);
+  color: #fff;
+  font-size: 17px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(233, 30, 99, 0.38);
+  font-family: inherit;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ch-geo-picker .home-field__drop-text {
+    animation: none !important;
+  }
+}
+
+.ch-geo-modal--estado .ch-geo-sheet__topbar,
+.ch-geo-modal--ciudad .ch-geo-sheet__topbar {
+  position: absolute;
+  top: max(8px, env(safe-area-inset-top, 0px));
+  right: 10px;
+  left: 10px;
+  height: 36px;
+}
+
+.ch-geo-modal--estado .ch-geo-sheet__panel,
+.ch-geo-modal--ciudad .ch-geo-sheet__panel {
+  border-radius: 22px 22px 0 0;
+}
+
+.ch-geo-modal--estado .ch-geo-sheet__banner,
+.ch-geo-modal--ciudad .ch-geo-sheet__banner {
+  width: 100%;
+  margin-left: 0;
+  margin-right: 0;
+  border-radius: 20px;
+}
+
+@media (max-width: 480px) {
+  .ch-geo-picker .home-field {
+    min-height: 40px;
+  }
+}
+
+@media (max-width: 360px) {
+  .ch-geo-modal--pais .ch-geo-sheet__title {
+    font-size: 20px;
+  }
+
+  .ch-geo-modal--pais .ch-geo-sheet__subtitle {
+    font-size: 11.5px;
+  }
+}

@@ -9,13 +9,13 @@
 <link rel="stylesheet" href="css/carihub-pink-sheen.css">
 <link rel="stylesheet" href="css/banner-registro.css">
 <link rel="stylesheet" href="css/home-adultos-cat-picker.css">
+<link rel="stylesheet" href="css/carihub-geo-fields.css">
 <link rel="stylesheet" href="css/registro-perfil.css">
-<script src="paises.js"></script>
-<script src="estados.js"></script>
-<script src="ciudades.js"></script>
 <script src="js/catalogos-carihub.js"></script>
 <script src="js/sectores-carihub.js"></script>
 <script src="js/adultos-cat-picker.js"></script>
+<script src="js/carihub-geo-picker-data.js"></script>
+<script src="js/carihub-geo-picker.js"></script>
 </head>
 <body class="rp-page">
 
@@ -32,21 +32,21 @@
 
 <div class="rp-shell">
 
-  <!-- PANTALLA 0 — Categorías principales -->
+  <!-- PANTALLA 0 — Categorías -->
   <section class="rp-screen is-active" id="screen0">
-    <div class="rp-screen0-sticky-top">
-      <div class="registro-banner-shell registro-banner-shell--page rp-banner-screen0 rp-banner-screen0--bleed">
-        <div class="registro-banner-top registro-banner-top--page registro-banner-top--bleed" data-registro-banner-slot="registro_superior"></div>
+    <div class="rp-cat0-top">
+      <div class="registro-banner-shell registro-banner-shell--page rp-banner-screen0">
+        <div class="registro-banner-top registro-banner-top--page" data-registro-banner-slot="registro_superior"></div>
       </div>
-      <header class="rp-head rp-head--screen0">
-        <p class="rp-head__brand">Directorio Cariñosas</p>
-        <h1 class="rp-head__title">¿En qué categoría te quieres anunciar?</h1>
+      <header class="rp-cat0-head">
+        <h1 class="rp-cat0-head__title">¿En qué categoría te quieres anunciar?</h1>
+        <label class="rp-cat0-search">
+          <svg class="rp-cat0-search__icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2.5"/><path d="M20 20l-4-4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+          <input type="search" id="rpCatSearch" placeholder="Buscar categoría..." autocomplete="off">
+        </label>
       </header>
     </div>
-    <div class="rp-sector0-cats-wrap">
-      <div class="rp-sector-adultos-fixed" id="rpSectorAdultosFixed"></div>
-      <ul class="rp-sector-grid" id="rpSectorGrid"></ul>
-    </div>
+    <ul class="rp-sector-grid" id="rpSectorGrid"></ul>
   </section>
 
   <!-- PANTALLA 0B — Subcategorías adultos (mismo picker que Home) -->
@@ -74,13 +74,13 @@
           <a class="home-adultos-picker__anuncio rp-anuncio-rotator" id="rpAdultosAnuncio" href="registro-banner.html?slot=home_categorias" aria-label="Anúnciate aquí — espacio publicitario en subcategorías adultos">
             <div class="rp-anuncio-stage" id="rpAdultosAnuncioStage">
               <div class="rp-anuncio-slide is-active" aria-hidden="false">
-                <img src="img/home/banners/ad-banner-pink-01.png" alt="" loading="lazy" decoding="async">
+                <img src="img/home/banners/ad-banner-pink-01.png" alt="" decoding="async" fetchpriority="low">
               </div>
               <div class="rp-anuncio-slide" aria-hidden="true">
-                <img src="img/home/banners/ad-banner-pink-02.png" alt="" loading="lazy" decoding="async">
+                <img data-src="img/home/banners/ad-banner-pink-02.png" alt="" decoding="async">
               </div>
               <div class="rp-anuncio-slide" aria-hidden="true">
-                <img src="img/home/banners/ad-banner-pink-03.png" alt="" loading="lazy" decoding="async">
+                <img data-src="img/home/banners/ad-banner-pink-03.png" alt="" decoding="async">
               </div>
             </div>
             <span class="home-adultos-picker__anuncio-text" aria-hidden="true">Anúnciate aquí</span>
@@ -148,20 +148,10 @@
 
     <div class="rp-card">
       <h2 class="rp-card__title">Ubicación pública</h2>
-      <div class="rp-field">
-        <label for="fldPais">País</label>
-        <select id="fldPais"><option value="">Selecciona país</option></select>
-      </div>
-      <div class="rp-row">
-        <div class="rp-field">
-          <label for="fldEstado">Estado</label>
-          <select id="fldEstado"><option value="">Estado</option></select>
-        </div>
-        <div class="rp-field">
-          <label for="fldCiudad">Ciudad</label>
-          <select id="fldCiudad"><option value="">Ciudad</option></select>
-        </div>
-      </div>
+      <div id="rpGeoPicker"></div>
+      <input type="hidden" id="fldPais" value="">
+      <input type="hidden" id="fldEstado" value="">
+      <input type="hidden" id="fldCiudad" value="">
       <div class="rp-field">
         <label for="fldZona">Zona o colonia</label>
         <input type="text" id="fldZona" placeholder="Zona visible en el directorio">
