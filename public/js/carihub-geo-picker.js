@@ -29,6 +29,10 @@
   var activePicker = null;
   var selectorTipo = null;
   var showAllPaises = false;
+  var geoScrollLockY = 0;
+  var lastGeoFieldId = null;
+  var homePickerInstance = null;
+  var geoModalOpenedAt = 0;
 
   var DATA = global.CariHubGeoPickerData || {};
 
@@ -54,7 +58,10 @@
   }
 
   function loadGeoScripts() {
-    if (scriptsLoaded) return Promise.resolve();
+    if (scriptsLoaded || typeof PAISES_PRINCIPALES !== 'undefined') {
+      scriptsLoaded = true;
+      return Promise.resolve();
+    }
     if (scriptsLoading) return scriptsLoading;
     scriptsLoading = Promise.all([
       loadScript('paises.js'),
@@ -66,6 +73,58 @@
     return scriptsLoading;
   }
 
+  function getGeoModalRoot() {
+    return document.documentElement || document.body;
+  }
+
+  function raiseGeoModal(modal) {
+    if (!modal) return;
+    var root = getGeoModalRoot();
+    if (modal.parentNode !== root) root.appendChild(modal);
+    else root.appendChild(modal);
+    modal.style.setProperty('z-index', '100001', 'important');
+  }
+
+  function onGeoCloseClick(e) {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    if (Date.now() - geoModalOpenedAt < 320) return;
+    closeModal();
+  }
+
+  function wireModalListeners() {
+    var closeBtn = document.getElementById('chGeoClose');
+    var backBtn = document.getElementById('chGeoModalBack');
+    var navBtn = document.getElementById('chGeoNavBack');
+    var input = document.getElementById('chGeoModalInput');
+    if (closeBtn && closeBtn.dataset.chGeoWired !== '1') {
+      closeBtn.dataset.chGeoWired = '1';
+      closeBtn.addEventListener('click', onGeoCloseClick);
+    }
+    if (backBtn && backBtn.dataset.chGeoWired !== '1') {
+      backBtn.dataset.chGeoWired = '1';
+      backBtn.addEventListener('click', onGeoCloseClick);
+    }
+    if (navBtn && navBtn.dataset.chGeoWired !== '1') {
+      navBtn.dataset.chGeoWired = '1';
+      navBtn.addEventListener('click', onGeoCloseClick);
+    }
+    if (input && input.dataset.chGeoWired !== '1') {
+      input.dataset.chGeoWired = '1';
+      input.addEventListener('input', function () {
+        if (activePicker) activePicker.renderList(filterOptions(activePicker, this.value));
+      });
+      input.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') {
+          var val = this.value.trim();
+          if (val && activePicker) activePicker.selectValue(selectorTipo, val);
+        }
+      });
+    }
+  }
+
   function ensureModal() {
     var stale = document.getElementById('chGeoModal');
     if (stale && !stale.querySelector('.ch-geo-sheet__crest')) {
@@ -74,6 +133,8 @@
     }
     if (modalReady) return;
     if (document.getElementById('chGeoModal')) {
+      raiseGeoModal(document.getElementById('chGeoModal'));
+      wireModalListeners();
       modalReady = true;
       return;
     }
@@ -116,31 +177,73 @@
         '</div>' +
       '</div>';
 
-    document.body.appendChild(wrap);
+    getGeoModalRoot().appendChild(wrap);
+    raiseGeoModal(wrap);
 
-    document.getElementById('chGeoClose').addEventListener('click', closeModal);
-    document.getElementById('chGeoModalBack').addEventListener('click', closeModal);
-    document.getElementById('chGeoNavBack').addEventListener('click', closeModal);
-    document.getElementById('chGeoModalInput').addEventListener('input', function () {
-      if (activePicker) activePicker.renderList(filterOptions(activePicker, this.value));
-    });
-    document.getElementById('chGeoModalInput').addEventListener('keydown', function (e) {
-      if (e.key === 'Enter') {
-        var val = this.value.trim();
-        if (val && activePicker) activePicker.selectValue(selectorTipo, val);
-      }
-    });
+    wireModalListeners();
 
     modalReady = true;
+  }
+
+  function readPageScrollY() {
+    if (document.body.classList.contains('proto-active')) {
+      return document.body.scrollTop || 0;
+    }
+    return window.scrollY || document.documentElement.scrollTop || 0;
+  }
+
+  function restorePageScrollY(y) {
+    if (document.body.classList.contains('proto-active')) {
+      document.body.scrollTop = y;
+      return;
+    }
+    window.scrollTo(0, y);
+  }
+
+  function lockPageScroll() {
+    var docEl = document.documentElement;
+    geoScrollLockY = readPageScrollY();
+    document.body.classList.add('ch-geo-modal-open');
+    docEl.style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden';
+  }
+
+  function unlockPageScroll() {
+    var docEl = document.documentElement;
+    var y = geoScrollLockY;
+    document.body.classList.remove('ch-geo-modal-open');
+    docEl.style.overflow = '';
+    if (!document.querySelector('.home-modal.is-open')) {
+      document.body.style.overflow = '';
+    }
+    restorePageScrollY(y);
+  }
+
+  function focusGeoField(fieldId) {
+    if (!fieldId) return;
+    var field = document.getElementById(fieldId);
+    if (!field || !field.focus) return;
+    try {
+      field.focus({ preventScroll: true });
+    } catch (e) {
+      field.focus();
+    }
   }
 
   function closeModal() {
     var modal = document.getElementById('chGeoModal');
     if (!modal) return;
+    var restoreField = lastGeoFieldId;
+    var active = document.activeElement;
+    if (active && modal.contains(active) && typeof active.blur === 'function') {
+      active.blur();
+    }
     modal.classList.remove('is-open');
-    document.body.classList.remove('ch-geo-modal-open');
+    unlockPageScroll();
     selectorTipo = null;
     showAllPaises = false;
+    lastGeoFieldId = null;
+    focusGeoField(restoreField);
   }
 
   function updateSheetHeader(picker, tipo) {
@@ -215,12 +318,20 @@
     showAllPaises = false;
     var modal = document.getElementById('chGeoModal');
     var input = document.getElementById('chGeoModalInput');
+    var ids = picker.ids(tipo);
+    lastGeoFieldId = ids.field;
     updateSheetHeader(picker, tipo);
     if (input) input.value = '';
     picker.renderList();
+    raiseGeoModal(modal);
+    lockPageScroll();
+    geoModalOpenedAt = Date.now();
     modal.classList.add('is-open');
-    document.body.classList.add('ch-geo-modal-open');
-    setTimeout(function () { if (input) input.focus(); }, 220);
+    setTimeout(function () {
+      if (input) {
+        try { input.focus({ preventScroll: true }); } catch (e) { input.focus(); }
+      }
+    }, 180);
   }
 
   function getOptions(picker, tipo) {
@@ -352,14 +463,22 @@
   }
 
   function GeoPicker(config) {
+    config = config || {};
     this.prefix = config.prefix || 'geo';
     this.hidden = config.hidden || {};
+    this.externalFields = config.externalFields || null;
     this.onChange = config.onChange || null;
     this.state = { pais: '', estado: '', ciudad: '' };
     this.mounted = false;
   }
 
   GeoPicker.prototype.ids = function (tipo) {
+    if (this.externalFields && this.externalFields[tipo]) {
+      return {
+        field: this.externalFields[tipo].field,
+        label: this.externalFields[tipo].label
+      };
+    }
     var p = this.prefix;
     return {
       field: p + 'Field' + tipo.charAt(0).toUpperCase() + tipo.slice(1),
@@ -388,6 +507,9 @@
 
   GeoPicker.prototype.mount = function (container) {
     var self = this;
+    if (this.externalFields) {
+      return this.bindExternalFields();
+    }
     if (typeof container === 'string') container = document.querySelector(container);
     if (!container) return this;
 
@@ -420,6 +542,34 @@
       });
     });
 
+    this.mounted = true;
+    return this;
+  };
+
+  function bindGeoFieldClick(picker, field, tipo) {
+    if (!field || !picker || field.dataset.chGeoBound === '1') return;
+    if (field.dataset.bridgeGeoBound === '1') return;
+    field.dataset.chGeoBound = '1';
+    field.addEventListener('click', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      picker.open(tipo);
+    });
+    field.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        picker.open(tipo);
+      }
+    });
+  }
+
+  GeoPicker.prototype.bindExternalFields = function () {
+    var self = this;
+    if (!this.externalFields) return this;
+    ['pais', 'estado', 'ciudad'].forEach(function (tipo) {
+      var ids = self.ids(tipo);
+      bindGeoFieldClick(self, document.getElementById(ids.field), tipo);
+    });
     this.mounted = true;
     return this;
   };
@@ -535,6 +685,8 @@
 
   GeoPicker.prototype.open = function (tipo) {
     var self = this;
+    var modal = document.getElementById('chGeoModal');
+    if (modal && modal.classList.contains('is-open') && selectorTipo === tipo) return;
     if (tipo === 'estado' && !this.state.pais) {
       alert('Primero selecciona país.');
       return;
@@ -559,14 +711,62 @@
   };
 
   function mount(config) {
+    config = config || {};
     ensureModal();
-    var picker = new GeoPicker(config || {});
-    if (config.container) picker.mount(config.container);
+    var picker = new GeoPicker(config);
+    if (config.externalFields) {
+      picker.externalFields = config.externalFields;
+      picker.bindExternalFields();
+    } else if (config.container) {
+      picker.mount(config.container);
+    }
     return picker;
+  }
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape') return;
+    var modal = document.getElementById('chGeoModal');
+    if (!modal || !modal.classList.contains('is-open')) return;
+    e.preventDefault();
+    closeModal();
+  });
+
+  function bootHomeGeoPicker(onChange) {
+    if (homePickerInstance) return homePickerInstance;
+    if (!document.getElementById('fieldPais')) return null;
+    ensureModal();
+    homePickerInstance = new GeoPicker({
+      externalFields: {
+        pais: { field: 'fieldPais', label: 'fieldPaisLabel' },
+        estado: { field: 'fieldEstado', label: 'fieldEstadoLabel' },
+        ciudad: { field: 'fieldCiudad', label: 'fieldCiudadLabel' }
+      },
+      onChange: onChange || null
+    });
+    homePickerInstance.mounted = true;
+    global.__homeGeoPicker = homePickerInstance;
+    global.openHomeGeoPicker = function (tipo) {
+      if (homePickerInstance) homePickerInstance.open(tipo);
+    };
+    return homePickerInstance;
+  }
+
+  function initHomePageGeo() {
+    if (!document.getElementById('fieldPais')) return;
+    if (!homePickerInstance) {
+      bootHomeGeoPicker(global.syncHomeGeoFromPicker || null);
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initHomePageGeo);
+  } else {
+    initHomePageGeo();
   }
 
   global.CariHubGeoPicker = {
     mount: mount,
-    loadGeoScripts: loadGeoScripts
+    loadGeoScripts: loadGeoScripts,
+    bootHome: bootHomeGeoPicker
   };
 })(typeof window !== 'undefined' ? window : globalThis);
