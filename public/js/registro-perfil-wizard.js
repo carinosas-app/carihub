@@ -301,14 +301,14 @@
     var progressFoot = $('rpActionsProgress');
     bar.classList.remove('rp-actions--nav-only', 'rp-actions--adultos-subcats', 'rp-actions--screen0', 'rp-actions--single');
 
+    bar.classList.remove('rp-hidden');
+
     if (state.screen === 'screen0') {
-      primary.textContent = 'Continuar';
-      primary.classList.remove('rp-hidden');
-      primary.disabled = !state.sector;
+      primary.classList.add('rp-hidden');
       var secondary = $('rpBtnSecondary');
       if (secondary) secondary.classList.add('rp-hidden');
       if (progressFoot) progressFoot.classList.add('rp-hidden');
-      bar.classList.add('rp-actions--screen0', 'rp-actions--single');
+      bar.classList.add('rp-hidden');
     } else if (state.screen === 'screen0b-adultos') {
       primary.classList.add('rp-hidden');
       setSecondaryButton('fucsia', 'Volver a categorías');
@@ -335,6 +335,9 @@
     if (selectedBtn) selectedBtn.classList.add('is-selected');
     applySectorAmbience(sector);
     syncActionsBar();
+    setTimeout(function () {
+      onContinueFromSectors();
+    }, TAP_ADVANCE_MS);
   }
 
   function selectSubcategoria(cat) {
