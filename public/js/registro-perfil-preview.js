@@ -191,7 +191,7 @@
       html = global.CariHubPublicRenderLite.cardHTML(data.perfil, data.query || {});
     }
     mount.innerHTML = sanitizePreviewCard(html) ||
-      '<p class="rp-preview-empty">No se pudo generar la vista previa de la tarjeta.</p>';
+      '<p class="rp-preview-empty">No se pudo generar la tarjeta de resultados.</p>';
   }
 
   function postToIframe(frame) {
