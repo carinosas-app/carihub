@@ -26,13 +26,14 @@
         vista: p.get('vista') || '',
         resVista: p.get('resVista') || '',
         from: p.get('from') || '',
+        previewSource: p.get('previewSource') || '',
         categoria: p.get('categoria') || '',
         pais: p.get('pais') || '',
         estado: p.get('estado') || '',
         ciudad: p.get('ciudad') || ''
       };
     } catch (e) {
-      return { id: '', vista: '', resVista: '', from: '', categoria: '', pais: '', estado: '', ciudad: '' };
+      return { id: '', vista: '', resVista: '', from: '', previewSource: '', categoria: '', pais: '', estado: '', ciudad: '' };
     }
   }
 
@@ -105,6 +106,16 @@
     }
   }
 
+  function leerPreviewRegistro() {
+    try {
+      var raw = global.sessionStorage.getItem('carihub_rp_public_preview');
+      if (!raw) return null;
+      return JSON.parse(raw);
+    } catch (e) {
+      return null;
+    }
+  }
+
   global.CariHubPerfilPublico = {
     queryPerfilPublico: queryPerfilPublico,
     resultadosVolverHref: resultadosVolverHref,
@@ -113,6 +124,7 @@
     cargarPerfilFirestore: cargarPerfilFirestore,
     initFirebaseIfNeeded: initFirebaseIfNeeded,
     isPreviewPath: isPreviewPath,
-    assetBase: assetBase
+    assetBase: assetBase,
+    leerPreviewRegistro: leerPreviewRegistro
   };
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Referencia — Geo picker headers y tarjetas país</title>
+<link rel="stylesheet" href="../fonts/fonts.css">
+<link rel="stylesheet" href="../css/carihub-geo-fields.css">
+<link rel="stylesheet" href="../css/registro-perfil-geo-modal.css">
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: Poppins, system-ui, sans-serif;
+    background: #f5f0f2;
+    color: #1a1a1a;
+  }
+  .ref-page {
+    max-width: 430px;
+    margin: 0 auto;
+    padding: 16px 12px 40px;
+  }
+  .ref-page h1 {
+    font-size: 15px;
+    font-weight: 800;
+    margin: 0 0 16px;
+    text-align: center;
+  }
+  .ref-block {
+    margin-bottom: 28px;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.08);
+  }
+  .ref-block__label {
+    margin: 0;
+    padding: 8px 12px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    background: #1e293b;
+    color: #fff;
+  }
+  .ref-sheet {
+    background: #fde8f0;
+    padding: 0 10px 14px;
+  }
+  .ref-sheet--estado {
+    background: linear-gradient(180deg, #fff5f8 0%, #fde8f0 100%);
+  }
+  .ref-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 0 2px;
+  }
+  /* Forzar modo registro en esta demo */
+  /* Tarjetas demo (mismas reglas que registro-perfil-geo-modal) */
+  .ch-geo-modal--registro-demo .ch-geo-card {
+    position: relative;
+    min-height: 104px;
+    height: 104px;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+    cursor: default;
+    text-align: left;
+    font-family: inherit;
+  }
+  .ch-geo-modal--registro-demo .ch-geo-card__thumb {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 2;
+    width: clamp(122px, 43%, 152px);
+    height: 104px;
+    border-radius: 14px;
+    overflow: hidden;
+    background: #e8edf2;
+  }
+  .ch-geo-modal--registro-demo .ch-geo-card__thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .ch-geo-modal--registro-demo .ch-geo-card__body {
+    position: relative;
+    z-index: 1;
+    height: 104px;
+    display: flex;
+    align-items: center;
+    padding: 7px 38px 7px clamp(106px, 37%, 132px);
+    border-radius: 14px;
+    background: #fff;
+    box-shadow: 0 6px 22px rgba(233, 30, 99, 0.11);
+  }
+  .ch-geo-modal--registro-demo .ch-geo-card__text {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding-left: 10px;
+  }
+  .ch-geo-modal--registro-demo .ch-geo-card__title {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 800;
+    color: #e91e63;
+    line-height: 1.15;
+  }
+  .ch-geo-modal--registro-demo .ch-geo-card__meta {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin: 0;
+    font-size: 9px;
+    color: #666;
+  }
+  .ch-geo-modal--registro-demo .ch-geo-card__meta svg {
+    width: 9px;
+    height: 9px;
+    color: #e91e63;
+    flex-shrink: 0;
+  }
+  .ch-geo-modal--registro-demo .ch-geo-card__go {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 3;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(180deg, #ff5c9a, #e91e63, #d81b7a);
+    color: #fff;
+    font-size: 18px;
+    font-weight: 700;
+    box-shadow: 0 3px 10px rgba(233, 30, 99, 0.24);
+  }
+  .ch-geo-modal--registro-demo .ch-geo-sheet__search {
+    margin-bottom: 12px;
+  }
+  .ch-geo-modal--registro-demo .ch-geo-sheet__head--pais .ch-geo-sheet__title,
+  .ch-geo-modal--registro-demo .ch-geo-sheet__head--estado .ch-geo-sheet__title,
+  .ch-geo-modal--registro-demo .ch-geo-sheet__head--ciudad .ch-geo-sheet__title {
+    color: #000;
+  }
+</style>
+<script src="../js/carihub-geo-images.js"></script>
+<script src="../js/carihub-geo-picker-data.js"></script>
+</head>
+<body>
+<div class="ref-page">
+  <h1>Referencia geo picker — registro perfil</h1>
+
+  <!-- PAÍS -->
+  <section class="ref-block">
+    <p class="ref-block__label">Paso país</p>
+    <div class="ref-sheet ch-geo-modal--registro-demo" data-rp-sector="adultos">
+      <header class="ch-geo-sheet__head ch-geo-sheet__head--pais">
+        <div class="ch-geo-sheet__heading">
+          <span class="ch-geo-sheet__icon ch-geo-sheet__icon--globe" aria-hidden="true">
+            <svg class="ch-geo-sheet__globe-svg" viewBox="0 0 52 52" aria-hidden="true">
+              <circle cx="21" cy="21" r="16.5" fill="#8ecae6" stroke="#1a1a1a" stroke-width="1.1"/>
+              <ellipse cx="21" cy="21" rx="16.5" ry="5.5" fill="none" stroke="#1a1a1a" stroke-width="0.85"/>
+              <ellipse cx="21" cy="21" rx="5.5" ry="16.5" fill="none" stroke="#1a1a1a" stroke-width="0.85"/>
+              <line x1="4.5" y1="21" x2="37.5" y2="21" stroke="#1a1a1a" stroke-width="0.75"/>
+              <g class="ch-geo-sheet__globe-pin">
+                <path d="M34 24c0 0 5.5 5 5.5 10.2a5.5 5.5 0 1 1-11 0C28.5 29 34 24 34 24z" fill="#e91e63"/>
+                <circle cx="34" cy="34.2" r="2.2" fill="#fff"/>
+              </g>
+            </svg>
+          </span>
+          <h2 class="ch-geo-sheet__title">Selecciona tu país</h2>
+        </div>
+        <p class="ch-geo-sheet__subtitle">Explora perfiles, negocios, experiencias cerca de ti</p>
+      </header>
+      <label class="ch-geo-sheet__search">
+        <svg class="ch-geo-sheet__search-icon" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2.5"/><path d="M20 20l-4-4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+        <input type="search" placeholder="Buscar país..." autocomplete="off">
+      </label>
+      <div class="ref-cards" id="refCardsPais"></div>
+    </div>
+  </section>
+
+  <!-- ESTADO -->
+  <section class="ref-block">
+    <p class="ref-block__label">Paso estado (México)</p>
+    <div class="ref-sheet ref-sheet--estado ch-geo-modal--registro-demo" data-rp-sector="adultos">
+      <header class="ch-geo-sheet__head ch-geo-sheet__head--estado">
+        <div class="ch-geo-sheet__heading">
+          <span class="ch-geo-sheet__icon ch-geo-sheet__icon--flag-img">
+            <img src="https://flagcdn.com/w320/mx.png" alt="">
+          </span>
+          <h2 class="ch-geo-sheet__title">México</h2>
+        </div>
+        <p class="ch-geo-sheet__subtitle">Selecciona un estado</p>
+      </header>
+      <label class="ch-geo-sheet__search">
+        <svg class="ch-geo-sheet__search-icon" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2.5"/><path d="M20 20l-4-4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+        <input type="search" placeholder="Buscar estado..." autocomplete="off">
+      </label>
+    </div>
+  </section>
+
+  <!-- CIUDAD -->
+  <section class="ref-block">
+    <p class="ref-block__label">Paso ciudad (Nuevo León)</p>
+    <div class="ref-sheet ch-geo-modal--registro-demo" data-rp-sector="adultos">
+      <header class="ch-geo-sheet__head ch-geo-sheet__head--ciudad">
+        <div class="ch-geo-sheet__heading">
+          <span class="ch-geo-sheet__icon ch-geo-sheet__icon--pin" aria-hidden="true">
+            <svg class="ch-geo-sheet__pin-svg" viewBox="0 0 32 42" aria-hidden="true">
+              <defs><linearGradient id="pinGradRef" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#ff4f9a"/><stop offset="55%" stop-color="#e91e63"/><stop offset="100%" stop-color="#c2185b"/>
+              </linearGradient></defs>
+              <path d="M16 2C9.4 2 4 7.2 4 13.8c0 8.2 12 26.2 12 26.2s12-18 12-26.2C28 7.2 22.6 2 16 2z" fill="url(#pinGradRef)"/>
+              <circle cx="16" cy="14" r="5.5" fill="#fff"/>
+            </svg>
+          </span>
+          <h2 class="ch-geo-sheet__title">Nuevo León</h2>
+        </div>
+        <p class="ch-geo-sheet__subtitle">Selecciona una ciudad</p>
+      </header>
+      <label class="ch-geo-sheet__search">
+        <svg class="ch-geo-sheet__search-icon" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2.5"/><path d="M20 20l-4-4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+        <input type="search" placeholder="Buscar ciudad..." autocomplete="off">
+      </label>
+    </div>
+  </section>
+</div>
+
+<script>
+(function () {
+  var ICON_PIN = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 21s-7-5.4-7-11a7 7 0 1 1 14 0c0 5.6-7 11-7 11z" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="10" r="2.5" stroke="currentColor" stroke-width="2"/></svg>';
+  var ICON_USER = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="2"/><circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="2"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" stroke="currentColor" stroke-width="2"/></svg>';
+  var DATA = window.CariHubGeoPickerData || {};
+  var paises = ['México', 'Estados Unidos', 'Colombia', 'Canadá', 'España'];
+  var mount = document.getElementById('refCardsPais');
+  if (!mount || !DATA.imageFor) return;
+
+  mount.innerHTML = paises.map(function (name) {
+    var estCount = DATA.divisionCount ? DATA.divisionCount(name, 32) : 32;
+    var pop = DATA.formatPerfiles(DATA.stubPerfiles(name), true);
+    var thumbClass = DATA.thumbClassFor ? DATA.thumbClassFor('pais', name) : 'ch-geo-card__thumb--flag-real';
+    return (
+      '<button type="button" class="ch-geo-card ch-geo-card--pais">' +
+        '<span class="ch-geo-card__thumb ' + thumbClass + '">' +
+          '<img src="' + DATA.imageFor('pais', name) + '" alt="">' +
+        '</span>' +
+        '<span class="ch-geo-card__body">' +
+          '<span class="ch-geo-card__text">' +
+            '<p class="ch-geo-card__title">' + name + '</p>' +
+            '<p class="ch-geo-card__meta">' + ICON_PIN + '<span>' + estCount + ' estados</span></p>' +
+            '<p class="ch-geo-card__meta">' + ICON_USER + '<span>' + pop + '</span></p>' +
+          '</span>' +
+        '</span>' +
+        '<span class="ch-geo-card__go" aria-hidden="true">›</span>' +
+      '</button>'
+    );
+  }).join('');
+
+  document.querySelectorAll('.ch-geo-modal--registro-demo').forEach(function (el) {
+    el.classList.add('ch-geo-modal--registro');
+    el.setAttribute('data-rp-sector', 'adultos');
+  });
+})();
+</script>
+</body>
+</html>

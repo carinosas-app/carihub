@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Registro perfil · Datos privados</title>
+<link rel="stylesheet" href="../fonts/fonts.css">
+<link rel="stylesheet" href="../css/carihub-premium-theme.css">
+<link rel="stylesheet" href="../css/carihub-pink-sheen.css">
+<link rel="stylesheet" href="../css/banner-registro.css">
+<link rel="stylesheet" href="../css/registro-perfil.css">
+<link rel="stylesheet" href="../css/registro-perfil-subcat-themes.css">
+<link rel="stylesheet" href="../css/registro-perfil-form-themes.css">
+<style>
+body.rp-preview-privados .rp-close{display:none;}
+body.rp-preview-privados #screen4{display:block !important;}
+body.rp-preview-privados .rp-screen:not(#screen4){display:none !important;}
+</style>
+<script src="../js/catalogos-carihub.js"></script>
+<script src="../js/sectores-carihub.js"></script>
+<script src="../js/carihub-pink-sheen.js"></script>
+<script src="../js/banner-registro.js"></script>
+<script src="../js/data/registro-schema-index.js"></script>
+<script src="../js/data/registro-ui-index.js"></script>
+<script src="../js/carihub-field-engine-lite.js"></script>
+<script src="../js/carihub-terminos-registro.js"></script>
+<script src="../js/carihub-private-fields-lite.js"></script>
+</head>
+<body class="rp-page rp-preview-privados rp-screen4-form">
+
+<div class="rp-ambient-flashes" aria-hidden="true">
+  <span class="rp-ambient-flash rp-ambient-flash--1"></span>
+  <span class="rp-ambient-flash rp-ambient-flash--2"></span>
+  <span class="rp-ambient-flash rp-ambient-flash--3"></span>
+  <span class="rp-ambient-flash rp-ambient-flash--4"></span>
+  <span class="rp-ambient-flash rp-ambient-flash--5"></span>
+  <span class="rp-ambient-flash rp-ambient-flash--6"></span>
+</div>
+
+<div class="rp-shell">
+  <section class="rp-screen is-active" id="screen4">
+    <div class="rp-form-sticky-top">
+      <button type="button" class="rp-back" id="rpBackPrivado" disabled aria-disabled="true">← Datos públicos</button>
+      <div class="registro-banner-shell registro-banner-shell--page rp-banner-form">
+        <div class="registro-banner-top registro-banner-top--page" data-registro-banner-slot="registro_superior"></div>
+      </div>
+      <p class="rp-notice">Esta información no se muestra al público. Aquí defines tu acceso a tu cuenta (correo, teléfono y contraseña) y datos de verificación.</p>
+    </div>
+    <div class="rp-form-scroll">
+      <p class="rp-form-step-badge">Datos privados</p>
+      <div class="rp-profile-chip">
+        <span class="rp-profile-chip__label">Tu registro</span>
+        <strong class="rp-profile-chip__value" id="rpPrivateChipValue">—</strong>
+        <span class="rp-profile-chip__sub rp-hidden" id="rpPrivateChipSub" aria-hidden="true"></span>
+      </div>
+      <p class="rp-policy-note rp-hidden" id="rpPrivatePolicy" aria-hidden="true"></p>
+      <p class="rp-notice rp-notice--schema rp-hidden" id="rpPrivateUiFormNotice" aria-hidden="true"></p>
+      <div id="rpPrivateDynamicHost"></div>
+      <div class="rp-form-actions-host" id="rpFormActionsHost4">
+        <div class="rp-actions rp-actions--in-form" id="rpActionsBar">
+          <div class="rp-actions__inner">
+            <button type="button" class="rp-btn rp-btn--primary" id="rpBtnPrimary" disabled>Enviar solicitud (solo wizard)</button>
+            <button type="button" class="rp-btn rp-btn--ghost" id="rpBtnSecondary" disabled>Volver a datos públicos</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div class="rp-terminos-modal rp-hidden" id="rpTerminosModal" role="dialog" aria-modal="true" aria-labelledby="rpTerminosModalTitle">
+  <div class="rp-terminos-modal__backdrop" id="rpTerminosModalBackdrop"></div>
+  <div class="rp-terminos-modal__panel">
+    <div class="rp-terminos-modal__head">
+      <h3 id="rpTerminosModalTitle">Términos y condiciones completos</h3>
+      <button type="button" class="rp-terminos-modal__close" id="rpTerminosModalClose" aria-label="Cerrar">&times;</button>
+    </div>
+    <div class="rp-terminos-modal__body" id="rpTerminosModalBody"></div>
+    <label class="rp-terminos-modal__accept">
+      <input type="checkbox" id="rpTerminosModalCheck">
+      <span>He leído y acepto los términos, condiciones, privacidad y normas de publicación.</span>
+    </label>
+    <button type="button" class="rp-btn rp-btn--primary" id="rpTerminosModalAccept" disabled>Acepto para continuar</button>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  var SECTOR_AMBIENCE = {
+    adultos: { glow: '#ff4081', flash: 'rgba(255, 64, 129, 0.35)' },
+    bienestar: { glow: '#b388ff', flash: 'rgba(179, 136, 255, 0.28)' },
+    salud: { glow: '#4dd0e1', flash: 'rgba(77, 208, 225, 0.28)' },
+    profesionales: { glow: '#ffd54f', flash: 'rgba(255, 213, 79, 0.22)' },
+    automotriz: { glow: '#64b5f6', flash: 'rgba(100, 181, 246, 0.28)' },
+    hogar: { glow: '#ff8a65', flash: 'rgba(255, 138, 101, 0.25)' },
+    comercio: { glow: '#f48fb1', flash: 'rgba(244, 143, 177, 0.3)' },
+    'bienes-raices': { glow: '#ce93d8', flash: 'rgba(206, 147, 216, 0.28)' },
+    eventos: { glow: '#ff80ab', flash: 'rgba(255, 128, 171, 0.3)' },
+    transporte: { glow: '#81d4fa', flash: 'rgba(129, 212, 250, 0.28)' },
+    educacion: { glow: '#80cbc4', flash: 'rgba(128, 203, 196, 0.25)' },
+    tecnologia: { glow: '#90caf9', flash: 'rgba(144, 202, 249, 0.28)' },
+    restaurantes: { glow: '#ffab91', flash: 'rgba(255, 171, 145, 0.25)' },
+    mascotas: { glow: '#a5d6a7', flash: 'rgba(165, 214, 167, 0.22)' },
+    industria: { glow: '#bcaaa4', flash: 'rgba(188, 170, 164, 0.22)' }
+  };
+
+  var EJEMPLOS = [
+    { key: 'escort', label: 'Adultos · Escort', sectorId: 'adultos', subId: 'escort' },
+    { key: 'medico', label: 'Salud · Médicos generales', sectorId: 'salud', subId: 'medicos-generales' },
+    { key: 'enfermeria', label: 'Salud · Enfermería a domicilio', sectorId: 'salud', subId: 'enfermeria-a-domicilio' },
+    { key: 'restaurante', label: 'Restaurantes · Restaurante', sectorId: 'restaurantes', subId: 'restaurantes' },
+    { key: 'plomero', label: 'Hogar · Plomero', sectorId: 'hogar', subId: 'plomeros' },
+    { key: 'sex-shop', label: 'Adultos · Sex shop', sectorId: 'adultos', subId: 'sex shop' },
+    { key: 'club-sw', label: 'Adultos · Club swinger', sectorId: 'adultos', subId: 'club sw' }
+  ];
+
+  var previewCtx = null;
+
+  function $(id) { return document.getElementById(id); }
+
+  function findSub(sectorId, subId) {
+    var subs = window.CariHubSectores && CariHubSectores.subcategoriasDeSector
+      ? CariHubSectores.subcategoriasDeSector(sectorId)
+      : [];
+    for (var i = 0; i < subs.length; i++) {
+      if (subs[i].id === subId) return subs[i];
+    }
+    return { id: subId, nombre: subId };
+  }
+
+  function buildContexto(sector, sub) {
+    return {
+      categoriaPrincipal: sector ? sector.nombre : '',
+      sectorId: sector ? sector.id : '',
+      subcategoria: sub ? sub.nombre : '',
+      subcategoriaId: sub ? sub.id : '',
+      estadoCatalogo: 'aprobado',
+      schemaVersion: '2026-06-10-fase1'
+    };
+  }
+
+  function applySectorTheme(sector) {
+    var page = document.body;
+    if (!page || !sector) return;
+    page.setAttribute('data-rp-sector', sector.id);
+    page.classList.toggle('rp-screen4-form', true);
+    var amb = SECTOR_AMBIENCE[sector.id] || SECTOR_AMBIENCE.adultos;
+    page.style.setProperty('--rp-sector-glow', amb.glow);
+    page.style.setProperty('--rp-sector-flash', amb.flash);
+    page.classList.add('rp-has-sector-glow');
+    if (sector.id === 'adultos') {
+      if (window.CariHubPinkSheen && CariHubPinkSheen.mountPage) {
+        CariHubPinkSheen.mountPage(page);
+      }
+    } else if (window.CariHubPinkSheen && CariHubPinkSheen.unmountPage) {
+      CariHubPinkSheen.unmountPage(page);
+    }
+  }
+
+  function syncChip(ctx) {
+    var resolved = window.CariHubFieldEngineLite && CariHubFieldEngineLite.resolveRegistrationSchema
+      ? CariHubFieldEngineLite.resolveRegistrationSchema(ctx)
+      : null;
+    var subName = ctx.subcategoria || '—';
+    var titulo = resolved && resolved.tituloExperiencia ? resolved.tituloExperiencia : '';
+    var privVal = $('rpPrivateChipValue');
+    var privSub = $('rpPrivateChipSub');
+    if (privVal) privVal.textContent = subName;
+    if (privSub) {
+      if (titulo) {
+        privSub.textContent = titulo;
+        privSub.classList.remove('rp-hidden');
+        privSub.removeAttribute('aria-hidden');
+      } else {
+        privSub.textContent = '';
+        privSub.classList.add('rp-hidden');
+        privSub.setAttribute('aria-hidden', 'true');
+      }
+    }
+    var notice = resolved && resolved.ui && resolved.ui.notaPublica ? resolved.ui.notaPublica : '';
+    var noticeEl = $('rpPrivateUiFormNotice');
+    if (noticeEl) {
+      if (notice) {
+        noticeEl.textContent = notice;
+        noticeEl.classList.remove('rp-hidden');
+        noticeEl.removeAttribute('aria-hidden');
+      } else {
+        noticeEl.textContent = '';
+        noticeEl.classList.add('rp-hidden');
+        noticeEl.setAttribute('aria-hidden', 'true');
+      }
+    }
+    var mode = (!ctx.sectorId || ctx.sectorId === 'adultos') ? 'fucsia' : 'primary';
+    var primary = $('rpBtnPrimary');
+    if (primary) primary.className = 'rp-btn rp-btn--' + (mode === 'fucsia' ? 'primary' : mode);
+  }
+
+  function renderExample(ejemplo) {
+    var sector = window.CariHubSectores && CariHubSectores.sectorPorId
+      ? CariHubSectores.sectorPorId(ejemplo.sectorId)
+      : null;
+    var sub = findSub(ejemplo.sectorId, ejemplo.subId);
+    previewCtx = buildContexto(sector, sub);
+    applySectorTheme(sector);
+    syncChip(previewCtx);
+    if (window.CariHubPrivateFieldsLite && CariHubPrivateFieldsLite.renderPrivateForm) {
+      CariHubPrivateFieldsLite.renderPrivateForm($('rpPrivateDynamicHost'), previewCtx, null);
+    }
+    if (window.CariHubBannerRegistro && CariHubBannerRegistro.refreshFormPageBanners) {
+      CariHubBannerRegistro.refreshFormPageBanners(
+        ejemplo.sectorId,
+        sub.id,
+        sub.nombre
+      );
+    }
+  }
+
+  function getEjemploFromQuery() {
+    var params = new URLSearchParams(window.location.search);
+    var key = params.get('ejemplo') || params.get('sub') || 'escort';
+    for (var i = 0; i < EJEMPLOS.length; i++) {
+      if (EJEMPLOS[i].key === key || EJEMPLOS[i].subId === key) return EJEMPLOS[i];
+    }
+    return EJEMPLOS[0];
+  }
+
+  function init() {
+    renderExample(getEjemploFromQuery());
+    if (window.CariHubTerminosRegistro && CariHubTerminosRegistro.bindTerminosModal) {
+      CariHubTerminosRegistro.bindTerminosModal();
+    }
+  }
+
+  window.CariHubRegistroPerfil = {
+    getContext: function () { return previewCtx; }
+  };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+</script>
+</body>
+</html>

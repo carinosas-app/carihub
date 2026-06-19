@@ -7,13 +7,73 @@
 
   function splitTitle(nombre) {
     var n = String(nombre || '').trim();
-    if (n.length <= 14) return [n];
-    if (n.indexOf(' / ') > 0) return n.split(' / ');
+    if (n.length <= 11) return [n];
+    if (n.indexOf(' / ') > 0) return n.split(' / ').map(function (s) { return s.trim(); });
     if (n.indexOf('/') > 0) return n.split('/').map(function (s) { return s.trim(); });
     var words = n.split(/\s+/);
     if (words.length <= 2) return [n];
     var mid = Math.ceil(words.length / 2);
     return [words.slice(0, mid).join(' '), words.slice(mid).join(' ')];
+  }
+
+  /** Saltos de línea óptimos para la cuadrícula de 6 tarjetas en Home */
+  var CAT_GRID_LINES = {
+    'escort gay': ['Escort', 'Gay'],
+    'escort vip': ['Escort', 'VIP'],
+    'antro restaurant bar': ['Antros', 'y bares'],
+    'antro restaurant bar lgbt': ['Antro', 'LGBT'],
+    'hotel motel': ['Hotel', 'y Motel'],
+    'cabinas glory holes': ['Cabinas', 'Glory Holes'],
+    'club sw': ['Club', 'Swinger'],
+    'swinger': ['Club', 'Swinger'],
+    'contenido': ['Creadores', 'de contenido'],
+    'cuckold hotwife': ['Cuckold', 'Hotwife'],
+    'sex shop': ['Sex', 'Shop'],
+    'cine xxx': ['Cine', 'XXX'],
+    'tom boy': ['Tom', 'Boy'],
+    'tom fem': ['Tom', 'Fem'],
+    'acompanante': ['Acompañante'],
+    'dominatrix': ['Dominatrix'],
+    'stripper': ['Stripper'],
+    'modelos': ['Modelos'],
+    'gigolo': ['Gigoló'],
+    'femboy': ['Femboy'],
+    'tabledance': ['Table', 'Dance']
+  };
+
+  function gridTitleLines(cat, ov) {
+    var id = (cat.id || '').toLowerCase();
+    if (CAT_GRID_LINES[id]) return CAT_GRID_LINES[id].slice();
+    if (ov.titleLines && ov.titleLines.length) return ov.titleLines.slice();
+    var base = String(cat.nombre || '').trim();
+    if (base.length <= 12) return [base];
+    return splitTitle(base);
+  }
+
+  function fitGridFoot(vcard) {
+    if (!vcard) return;
+    var foot = vcard.querySelector('.home-vcard__foot');
+    if (!foot) return;
+    var sizes = [10.5, 10, 9.5, 9, 8.5, 8, 7.5, 7, 6.5, 6, 5.5];
+    for (var i = 0; i < sizes.length; i++) {
+      var s = sizes[i];
+      foot.style.setProperty('--vc-grid-lead', (s * 0.88).toFixed(2) + 'px');
+      foot.style.setProperty('--vc-grid-title', (s * 0.98).toFixed(2) + 'px');
+      foot.style.setProperty('--vc-grid-cerca', (s * 0.84).toFixed(2) + 'px');
+      if (foot.scrollHeight <= foot.clientHeight + 1) return;
+    }
+  }
+
+  function scheduleGridFootFit(layer) {
+    if (!layer || !layer.closest('.home-categorias')) return;
+    function run() {
+      var vcard = layer.querySelector('.home-vcard');
+      if (vcard) fitGridFoot(vcard);
+    }
+    run();
+    if (typeof requestAnimationFrame === 'function') requestAnimationFrame(run);
+    setTimeout(run, 60);
+    setTimeout(run, 500);
   }
 
   function buildVCard(opts) {
@@ -46,11 +106,22 @@
     var title = document.createElement('span');
     title.className = 'home-vcard__title home-cat-card__name';
     var lines = o.titleLines || splitTitle(o.title || '');
-    title.textContent = lines.join(' ');
+    if (o.stackTitle && lines.length > 1) {
+      lines.forEach(function (line, i) {
+        if (i) title.appendChild(document.createElement('br'));
+        title.appendChild(document.createTextNode(line));
+      });
+    } else {
+      title.textContent = lines.join(' ');
+    }
 
     var cerca = document.createElement('span');
     cerca.className = 'home-vcard__cerca';
-    cerca.innerHTML = PIN_SVG + '<span>Cerca de ti</span>';
+    if (o.hideCercaPin || o.gridCompact) {
+      cerca.innerHTML = '<span>cerca de ti</span>';
+    } else {
+      cerca.innerHTML = PIN_SVG + '<span>Cerca de ti</span>';
+    }
 
     foot.appendChild(lead);
     foot.appendChild(title);
@@ -63,39 +134,39 @@
 
   var CAT_OVERRIDES = {
     'escort': { template: 'bloom', accent: '#e91e98', photo: 'img/home/promo-perfil.jpg', icon: '💃' },
-    'escort gay': { template: 'neon', accent: '#9b5de5', accent2: '#00bbf9', photo: 'img/home/hero-escort-gay.png', icon: '🏳️‍🌈' },
+    'escort gay': { template: 'neon', accent: '#9b5de5', accent2: '#00bbf9', photo: 'img/home/hero-escort-gay.png', icon: '🏳️‍🌈', titleLines: ['Escort', 'Gay'] },
     'escort vip': { template: 'pulse', accent: '#ffd700', accent2: '#ff8c00', photo: 'img/home/hero-carinosa-motel-spa-runway.png', icon: '👑' },
     'edecan': { template: 'sunset', accent: '#ff6b9d', photo: 'img/home/hero-carinosa-motel-spa-runway.png', icon: '✨' },
-    'stripper': { template: 'neon', accent: '#c77dff', accent2: '#ff4d9d', photo: 'img/home/nightclub.jpg', icon: '🔥' },
-    'modelos': { template: 'bloom', accent: '#f72585', photo: 'img/home/promo-destaca.jpg', icon: '📸' },
-    'gigolo': { template: 'noir', accent: '#4cc9f0', photo: 'img/home/escort-gay.jpg', icon: '🤵' },
+    'stripper': { template: 'neon', accent: '#c77dff', accent2: '#ff4d9d', photo: 'img/home/cat-cards/stripper.png', icon: '🔥', titleLines: ['Stripper'] },
+    'modelos': { template: 'bloom', accent: '#f72585', photo: 'img/home/cat-cards/modelos.png', icon: '📸', titleLines: ['Modelos'] },
+    'gigolo': { template: 'noir', accent: '#4cc9f0', photo: 'img/home/cat-cards/gigolo.png', icon: '🤵', titleLines: ['Gigoló'] },
     'acompanante': { template: 'classic', accent: '#ec2d7a', photo: 'img/home/motel-spa-model.jpg', icon: '🌹' },
     'petit': { template: 'bloom', accent: '#ff85a1', photo: 'img/home/spa-entrada.jpg', icon: '🎀' },
-    'contenido': { template: 'pulse', accent: '#ff006e', photo: 'img/home/hero-bar-neon.png', icon: '🎬' },
-    'tabledance': { template: 'neon', accent: '#b5179e', accent2: '#7209b7', photo: 'img/home/nightclub.jpg', icon: '🍸' },
+    'contenido': { template: 'pulse', accent: '#ff006e', photo: 'img/home/cat-cards/creadora-contenido.png', icon: '🎬', titleLines: ['Creadores', 'de contenido'] },
+    'tabledance': { template: 'neon', accent: '#b5179e', accent2: '#7209b7', photo: 'img/home/cat-cards/tabledance.png', icon: '🍸' },
     'sex shop': { template: 'classic', accent: '#d000ff', photo: 'img/home/sexshop.jpg', icon: '🛍️' },
     'spa': { template: 'sunset', accent: '#06d6a0', photo: 'img/home/hero-spa-interior.png', icon: '🧖' },
     'masajes': { template: 'bloom', accent: '#2ec4b6', photo: 'img/home/spa-entrada.jpg', icon: '💆' },
-    'club sw': { template: 'noir', accent: '#9d4edd', photo: 'img/home/lounge-swinger.jpg', icon: '🍍', titleLines: ['Club SW', 'Parejas'] },
-    'antro restaurant bar': { template: 'neon', accent: '#ff4d6d', photo: 'img/home/hero-antro-restaurante.png', icon: '🍾', titleLines: ['Antros', 'Para todos'] },
-    'antro restaurant bar lgbt': { template: 'pulse', accent: '#7b2ff7', accent2: '#f107a3', photo: 'img/home/hero-bar-neon.png', icon: '🌈', titleLines: ['Antros', 'LGBT'] },
-    'hotel motel': { template: 'classic', accent: '#e63946', photo: 'img/home/motel-noche.jpg', icon: '🏩', titleLines: ['Hotel /', 'Motel'] },
-    'cabinas glory holes': { template: 'noir', accent: '#6c757d', photo: 'img/home/hero-motel-noche-rojo.png', icon: '🚪', titleLines: ['Cabinas /', 'Glory Holes'] },
+    'club sw': { template: 'noir', accent: '#9d4edd', photo: 'img/home/lounge-swinger.jpg', icon: '🍍', titleLines: ['Club', 'Swinger'] },
+    'antro restaurant bar': { template: 'neon', accent: '#ff4d6d', photo: 'img/home/hero-antro-restaurante.png', icon: '🍾', titleLines: ['Antros', 'y bares'] },
+    'antro restaurant bar lgbt': { template: 'pulse', accent: '#7b2ff7', accent2: '#f107a3', photo: 'img/home/cat-cards/antro-lgbt.png', icon: '🌈', titleLines: ['Antro', 'LGBT'] },
+    'hotel motel': { template: 'classic', accent: '#e63946', photo: 'img/home/motel-noche.jpg', icon: '🏩', titleLines: ['Hotel', 'y Motel'] },
+    'cabinas glory holes': { template: 'noir', accent: '#6c757d', photo: 'img/home/hero-motel-noche-rojo.png', icon: '🚪', titleLines: ['Cabinas', 'Glory Holes'] },
     'trans': { template: 'bloom', accent: '#5fa8d3', photo: 'img/home/hero-01-escort-gay.png', icon: '⚧️' },
-    'femboy': { template: 'sunset', accent: '#ff99c8', photo: 'img/home/hero-spa-interior.png', icon: '🌸' },
+    'femboy': { template: 'sunset', accent: '#ff99c8', photo: 'img/home/cat-cards/femboy.png', icon: '🌸', titleLines: ['Femboy'] },
     'swinger': { template: 'neon', accent: '#ff0054', photo: 'img/home/hero-club-swinger.png', icon: '🍍', titleLines: ['Club', 'Swinger'] },
     'unicorns': { template: 'pulse', accent: '#9b5de5', accent2: '#00f5d4', photo: 'img/home/lounge-swinger.jpg', icon: '🦄' },
     'cuckold hotwife': { template: 'sunset', accent: '#ff4500', photo: 'img/home/motel-spa-model.jpg', icon: '🔥', titleLines: ['Cuckold /', 'Hotwife'] },
     'singles': { template: 'classic', accent: '#fb5607', photo: 'img/home/nightclub.jpg', icon: '💫' },
     'hotwife': { template: 'bloom', accent: '#ff006e', photo: 'img/home/promo-perfil.jpg', icon: '🔥' },
-    'lesbians': { template: 'pulse', accent: '#e91e98', accent2: '#9b5de5', photo: 'img/home/hero-lesbianas.png', icon: '👩‍❤️‍👩' },
-    'tom boy': { template: 'noir', accent: '#4ea8de', photo: 'img/home/escort-gay.jpg', icon: '🧢' },
+    'lesbians': { template: 'pulse', accent: '#e91e98', accent2: '#9b5de5', photo: 'img/home/hero-lesbianas.png', icon: '👩‍❤️‍👩', titleLines: ['Lesbian'] },
+    'tom boy': { template: 'noir', accent: '#4ea8de', photo: 'img/home/escort-gay.jpg', icon: '🧢', titleLines: ['Tomboy'] },
     'tom fem': { template: 'bloom', accent: '#ff85a1', photo: 'img/home/hero-carinosa-motel-spa-runway.png', icon: '💄' },
     'dotados': { template: 'classic', accent: '#d62828', photo: 'img/home/motel-noche.jpg', icon: '🍆' },
     'fetiche': { template: 'noir', accent: '#212529', accent2: '#e5383b', photo: 'img/home/hero-motel-noche-rojo.png', icon: '🖤' },
     'sado': { template: 'neon', accent: '#8b0000', photo: 'img/home/hero-motel-noche-rojo.png', icon: '⛓️' },
-    'dominatrix': { template: 'noir', accent: '#720026', photo: 'img/home/hero-negocios-grid-noche.png', icon: '🖤' },
-    'cine xxx': { template: 'pulse', accent: '#ff006e', accent2: '#8338ec', photo: 'img/home/hero-bar-neon.png', icon: '🎥' }
+    'dominatrix': { template: 'noir', accent: '#720026', photo: 'img/home/hero-motel-noche-rojo.png', icon: '🖤', titleLines: ['Dominatrix'] },
+    'cine xxx': { template: 'pulse', accent: '#ff006e', accent2: '#8338ec', photo: 'img/home/cat-cards/cine-xxx.png', icon: '🎥' }
   };
 
   var GRADIENTS = [
@@ -111,6 +182,7 @@
     var id = (cat.id || '').toLowerCase();
     var ov = CAT_OVERRIDES[id] || {};
     var tpl = ov.template || TEMPLATES[index % TEMPLATES.length];
+    var titleLines = gridTitleLines(cat, ov);
     return {
       template: tpl,
       accent: ov.accent || '#ec2d7a',
@@ -118,8 +190,11 @@
       photo: ov.photo,
       gradient: ov.photo ? null : GRADIENTS[index % GRADIENTS.length],
       icon: ov.icon || cat.emoji || '✨',
-      title: cat.nombre,
-      titleLines: ov.titleLines,
+      title: titleLines.join(' '),
+      titleLines: titleLines,
+      stackTitle: titleLines.length > 1,
+      gridCompact: true,
+      hideCercaPin: true,
       catId: id,
       catName: cat.nombre
     };
@@ -234,6 +309,7 @@
       return;
     }
     layer.appendChild(buildVCard(opts));
+    if (opts.gridCompact) scheduleGridFootFit(layer);
   }
 
   window.CariHubVCard = {
@@ -241,6 +317,8 @@
     mount: mountVCard,
     catVisual: catVisual,
     sectorVisual: sectorVisual,
-    splitTitle: splitTitle
+    splitTitle: splitTitle,
+    fitGridFoot: fitGridFoot,
+    scheduleGridFootFit: scheduleGridFootFit
   };
 })();

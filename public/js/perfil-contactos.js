@@ -62,6 +62,9 @@
   }
 
   function msgTexto(u) {
+    var c = cp(u);
+    var custom = String(c.mensajeContactoPublicidad || u.mensajeContactoPublicidad || '').trim();
+    if (custom) return encodeURIComponent(custom);
     var n = (u && u.nombre) ? u.nombre : 'tu perfil';
     return encodeURIComponent('Hola ' + n + ', vi tu perfil en Cariñosas y me gustaría contactarte.');
   }

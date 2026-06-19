@@ -14,6 +14,9 @@
 <script src="../js/carihub-pink-sheen.js"></script>
 <script src="../js/carihub-nav-quick.js"></script>
 <script src="../js/registro-negocio-adulto.js"></script>
+<script src="../js/data/registro-schema-index.js"></script>
+<script src="../js/carihub-field-engine-lite.js"></script>
+<script src="../js/carihub-public-render-lite.js"></script>
 <script src="../js/resultados-demo.js"></script>
 <script src="../js/perfil-publico-init.js"></script>
 <script src="../js/perfil-contactos.js"></script>
@@ -5955,16 +5958,26 @@ function normalizarVistaPreview(vista){
 }
 function resolverPerfilDesdeQuery(q){
   q=q||queryPerfilPreview();
-  var vista=normalizarVistaPreview(q.vista)||"negocio";
+  var vista=normalizarVistaPreview(q.vista)||"";
   var perfil=null;
   if(q.id&&window.CariHubResultadosDemo&&CariHubResultadosDemo.perfilPorId){
     perfil=CariHubResultadosDemo.perfilPorId(q.id,{
       categoria:q.categoria,pais:q.pais,estado:q.estado,ciudad:q.ciudad
     });
     if(perfil&&perfil.__vista) vista=perfil.__vista;
-  }else if(q.categoria&&window.CariHubResultadosDemo&&CariHubResultadosDemo.vistaDeCategoria){
-    vista=CariHubResultadosDemo.vistaDeCategoria(q.categoria);
   }
+  if(!vista&&q.categoria){
+    if(window.CariHubFieldEngineLite&&CariHubFieldEngineLite.resolvePublicPresentation){
+      var pres=CariHubFieldEngineLite.resolvePublicPresentation({
+        categoria:q.categoria,
+        subcategoriaId:CariHubFieldEngineLite.lookupSubcategoriaId(q.categoria)
+      });
+      if(pres&&pres.vistaPerfil) vista=pres.vistaPerfil;
+    }else if(window.CariHubResultadosDemo&&CariHubResultadosDemo.vistaDeCategoria){
+      vista=CariHubResultadosDemo.vistaDeCategoria(q.categoria);
+    }
+  }
+  if(!vista) vista="adult";
   return{vista:vista,perfil:perfil};
 }
 function demoAssetDesdeResultados(src){

@@ -17,6 +17,7 @@
 <link rel="stylesheet" href="css/home-adultos-cat-picker.css">
 <link rel="stylesheet" href="css/ch-slot-dock.css">
 <link rel="stylesheet" href="css/carihub-geo-fields.css">
+<link rel="stylesheet" href="css/registro-perfil-geo-modal.css">
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
@@ -358,9 +359,6 @@ const CATEGORIAS_BUSCADOR = [
           <span class="home-ad-bottom__dot is-on" data-bottom-dot="0"></span>
           <span class="home-ad-bottom__dot" data-bottom-dot="1"></span>
           <span class="home-ad-bottom__dot" data-bottom-dot="2"></span>
-          <span class="home-ad-bottom__dot" data-bottom-dot="3"></span>
-          <span class="home-ad-bottom__dot" data-bottom-dot="4"></span>
-          <span class="home-ad-bottom__dot" data-bottom-dot="5"></span>
         </div>
         <div class="home-ad-bottom__slide is-active" data-bottom-slide="0" aria-hidden="false">
           <img class="home-ad-bottom__art" src="img/home/banners/ad-banner-pink-01.png" alt="¡Anúnciate aquí! Impulsa tu negocio y llega a más personas" decoding="async">
@@ -370,15 +368,6 @@ const CATEGORIAS_BUSCADOR = [
         </div>
         <div class="home-ad-bottom__slide" data-bottom-slide="2" aria-hidden="true">
           <img class="home-ad-bottom__art" src="img/home/banners/ad-banner-pink-02.png" alt="¡Anúnciate aquí! Más visibilidad, más clientes" decoding="async">
-        </div>
-        <div class="home-ad-bottom__slide" data-bottom-slide="3" aria-hidden="true">
-          <img class="home-ad-bottom__art" src="img/home/banners/ad-banner-black-02.png" alt="Haz crecer tu negocio — anuncia aquí" decoding="async">
-        </div>
-        <div class="home-ad-bottom__slide" data-bottom-slide="4" aria-hidden="true">
-          <img class="home-ad-bottom__art" src="img/home/banners/ad-banner-pink-03.png" alt="¡Anúnciate aquí! Más información" decoding="async">
-        </div>
-        <div class="home-ad-bottom__slide" data-bottom-slide="5" aria-hidden="true">
-          <img class="home-ad-bottom__art" src="img/home/banners/ad-banner-black-03.png" alt="Haz crecer tu negocio — anuncia ahora" decoding="async">
         </div>
       </div>
     </a>
@@ -598,10 +587,10 @@ const CATEGORIAS_BUSCADOR = [
 <div class="modal" id="modalAntiBot">
   <div class="form-box">
     <h2>🔞 Acceso para mayores de edad</h2>
-    <p class="subtitulo">Confirma que eres mayor de 18 años y que no eres un bot.</p>
+    <p class="subtitulo">Confirma que eres mayor de 18 años para continuar.</p>
     <label><input type="checkbox" id="checkEdad"> Confirmo que soy mayor de 18 años</label>
-    <label><input type="checkbox" id="checkBot"> Confirmo que no soy un robot</label>
-    <button class="btn btn-continuar" style="width:100%;margin-top:12px;" onclick="validarAcceso()">Entrar al sitio</button>
+    <label><input type="checkbox" id="checkPromo"> Registra un perfil y obtén gratis un mes de prueba</label>
+    <button class="btn btn-continuar antibot-continuar" id="btnAntiBotContinuar" style="width:100%;margin-top:12px;" disabled onclick="validarAcceso()">Continuar</button>
   </div>
 </div>
 
@@ -712,9 +701,9 @@ const CATEGORIAS_BUSCADOR = [
     <h2 id="modalCuentaTitulo">Iniciar sesión</h2>
 
     <div id="vistaCuentaEntrar">
-      <p class="subtitulo">Entra con tu correo y contraseña. Administra tu cuenta social, mensajes, favoritos y gratificaciones.</p>
-      <input id="loginEmail" type="email" placeholder="Correo">
-      <input id="loginPassword" type="password" placeholder="Contraseña">
+      <p class="subtitulo">Entra con tu correo o teléfono y tu contraseña. Administra tu cuenta social, mensajes, favoritos y gratificaciones.</p>
+      <input id="loginEmail" type="text" placeholder="Correo o teléfono" autocomplete="username">
+      <input id="loginPassword" type="password" placeholder="Contraseña" autocomplete="current-password">
       <button class="btn btn-continuar" style="width:100%;margin-top:10px;" onclick="loginMiPerfil()">Entrar</button>
       <button class="btn btn-atras" style="width:100%;margin-top:10px;" onclick="mostrarVistaCuenta('crear')">Crear cuenta</button>
     </div>
@@ -1582,16 +1571,66 @@ async function eliminarFavoritoDesdeModal(perfilId){
   abrirFavoritos();
 }
 
+function normalizarTelefonoLogin(val){
+  return String(val||"").replace(/\D/g,"");
+}
+
+function pareceCorreoLogin(val){
+  return String(val||"").indexOf("@")>=0;
+}
+
+async function resolverEmailAccesoLogin(identificador){
+  identificador=String(identificador||"").trim();
+  if(!identificador) return null;
+  if(pareceCorreoLogin(identificador)){
+    return identificador.toLowerCase();
+  }
+  const tel=normalizarTelefonoLogin(identificador);
+  if(tel.length<10) return null;
+
+  try{
+    const raw=localStorage.getItem("solicitudPerfilPaso1");
+    if(raw){
+      const draft=JSON.parse(raw);
+      const cp=draft&&draft.camposPrivados?draft.camposPrivados:{};
+      const tDraft=normalizarTelefonoLogin(cp.telefonoPrivado||cp.telefonoContacto||"");
+      const mail=String(cp.correoAcceso||cp.correoPrivado||"").trim().toLowerCase();
+      if(mail&&tDraft===tel) return mail;
+    }
+  }catch(e){}
+
+  try{
+    const snaps=await db.collection("usuarios")
+      .where("acceso.telefonoNormalizado","==",tel)
+      .limit(1)
+      .get();
+    if(!snaps.empty){
+      const u=snaps.docs[0].data();
+      const mail=String((u.acceso&&u.acceso.email)||u.email||"").trim().toLowerCase();
+      if(mail) return mail;
+    }
+  }catch(e){
+    console.warn("Login teléfono: índice acceso.telefonoNormalizado pendiente",e);
+  }
+
+  return null;
+}
+
 async function loginMiPerfil(){
-  const email=document.getElementById("loginEmail").value.trim().toLowerCase();
+  const identificador=document.getElementById("loginEmail").value.trim();
   const password=document.getElementById("loginPassword").value;
 
-  if(!email||!password){
-    alert("Escribe correo y contraseña.");
+  if(!identificador||!password){
+    alert("Escribe correo o teléfono y contraseña.");
     return;
   }
 
   try{
+    const email=await resolverEmailAccesoLogin(identificador);
+    if(!email){
+      alert("No encontramos una cuenta con ese teléfono. Usa el correo con el que registraste tu perfil o completa el registro.");
+      return;
+    }
     const cred=await auth.signInWithEmailAndPassword(email,password);
     cerrarMiPerfil();
     if(window.CariHubHomeIntenciones&&CariHubHomeIntenciones.retomarPostAuth&&CariHubHomeIntenciones.retomarPostAuth()){
@@ -2177,13 +2216,21 @@ async function plantillaCardPerfil(id,u){
 }
 
 function validarAcceso(){
-  if(!document.getElementById("checkEdad").checked||!document.getElementById("checkBot").checked){
-    alert("Debes confirmar ambas opciones para entrar.");
+  if(!document.getElementById("checkEdad").checked||!document.getElementById("checkPromo").checked){
+    alert("Debes confirmar ambas opciones para continuar.");
     return;
   }
 
   localStorage.setItem("carihub_acceso_ok","1");
   cerrarModal("modalAntiBot");
+}
+
+function syncAntiBotContinuar(){
+  var edad=document.getElementById("checkEdad");
+  var promo=document.getElementById("checkPromo");
+  var btn=document.getElementById("btnAntiBotContinuar");
+  if(!btn)return;
+  btn.disabled=!(edad&&edad.checked&&promo&&promo.checked);
 }
 
 async function registrarVisita(){
@@ -2236,8 +2283,14 @@ const params = new URLSearchParams(window.location.search);
   if(localStorage.getItem("carihub_acceso_ok")!=="1"){
     setTimeout(function(){
       document.getElementById("modalAntiBot").style.display="block";
+      syncAntiBotContinuar();
     },500);
   }
+
+  var chkEdad=document.getElementById("checkEdad");
+  var chkPromo=document.getElementById("checkPromo");
+  if(chkEdad)chkEdad.addEventListener("change",syncAntiBotContinuar);
+  if(chkPromo)chkPromo.addEventListener("change",syncAntiBotContinuar);
 
   if(abrir === "anuncio"){
     setTimeout(function(){
@@ -2285,6 +2338,7 @@ const params = new URLSearchParams(window.location.search);
 <script src="js/home-sector-scroll.js"></script>
 <script src="js/home-vcards.js"></script>
 <script src="js/adultos-cat-picker.js"></script>
+<script src="js/carihub-geo-images.js"></script>
 <script src="js/carihub-geo-picker-data.js"></script>
 <script src="js/carihub-geo-picker.js"></script>
 <script src="js/ch-slot-dock.js"></script>

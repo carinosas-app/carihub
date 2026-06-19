@@ -308,7 +308,21 @@
       btn.setAttribute('aria-label', seo);
       btn.setAttribute('title', seo);
     });
+    refitAllCategoryCards();
   }
+
+  function refitAllCategoryCards() {
+    if (!window.CariHubVCard || !CariHubVCard.scheduleGridFootFit) return;
+    document.querySelectorAll('.home-categorias .home-cat-card__layer').forEach(function (layer) {
+      CariHubVCard.scheduleGridFootFit(layer);
+    });
+  }
+
+  var catRefitTimer = null;
+  window.addEventListener('resize', function () {
+    if (catRefitTimer) clearTimeout(catRefitTimer);
+    catRefitTimer = setTimeout(refitAllCategoryCards, 120);
+  });
 
   function rotateSlot(slot) {
     var btn = document.querySelector('.home-cat-card[data-slot="' + slot + '"]');
@@ -335,23 +349,19 @@
       hide.classList.add('is-visible');
       show.classList.remove('is-visible');
       state.index = nextIndex;
+      refitAllCategoryCards();
     }, 480);
   }
 
-  /* Cada celda rota a su ritmo (no en cascada): intervalos y arranque distintos */
-  var CAT_ROTATE_MS = [3000, 4800, 2500, 4200, 3200, 5500];
-  var CAT_ROTATE_DELAY = [0, 1400, 700, 2100, 350, 1750];
+  /* Categorías, sectores y banners rotan juntos cada 5 s */
+  var HOME_ROTATE_MS = 5000;
+  var BANNER_SLIDE_COUNT = 3;
+  var homeRotateTimer = null;
+  var homeBannerSlideIdx = 0;
 
-  function startCategoryRotation() {
-    for (var slot = 0; slot < NUM_CAT_SLOTS; slot++) {
-      (function (s) {
-        var every = CAT_ROTATE_MS[s] || 4000;
-        var wait = CAT_ROTATE_DELAY[s] || 0;
-        setTimeout(function () {
-          rotateSlot(s);
-          setInterval(function () { rotateSlot(s); }, every);
-        }, wait);
-      })(slot);
+  function rotateAllCategorySlots() {
+    for (var s = 0; s < NUM_CAT_SLOTS; s++) {
+      rotateSlot(s);
     }
   }
 
@@ -416,13 +426,6 @@
   var sectorSlotState = [];
   for (var ssi = 0; ssi < NUM_SECTOR_SLOTS; ssi++) {
     sectorSlotState.push({ index: Math.floor((ssi * SECTORES.length) / NUM_SECTOR_SLOTS) || ssi });
-  }
-
-  function sectorRotateMs(sector) {
-    if (window.CariHubSectorScroll && window.CariHubSectorScroll.durationMs) {
-      return window.CariHubSectorScroll.durationMs(sector);
-    }
-    return 6000;
   }
 
   function fillSectorLayer(layer, sector, sectorIndex, autoplay) {
@@ -498,7 +501,6 @@
         state.index = nextIndex;
         btn.setAttribute('aria-label', sectorAriaLabel(nextSector));
         btn.dataset.sectorId = nextSector.id;
-        scheduleSectorRotation(slot);
       }, 420);
       return;
     }
@@ -517,39 +519,20 @@
       hide.classList.add('is-visible');
       show.classList.remove('is-visible');
       state.index = nextIndex;
-      scheduleSectorRotation(slot);
     }, 480);
   }
 
-  var SECTOR_ROTATE_DELAY = [0, 1000, 2000, 3000, 4000, 5000];
-  var sectorRotateTimers = [];
-
-  function scheduleSectorRotation(slot) {
+  function rotateAllSectorSlots() {
     if (!SECTORES.length) return;
-    if (sectorRotateTimers[slot]) {
-      clearTimeout(sectorRotateTimers[slot]);
-    }
-    var sector = sectorAt(sectorSlotState[slot].index);
-    var every = sectorRotateMs(sector);
-    sectorRotateTimers[slot] = setTimeout(function () {
-      rotateSectorSlot(slot);
-    }, every);
-  }
-
-  function startSectorRotation() {
-    if (!SECTORES.length) return;
-    for (var slot = 0; slot < NUM_SECTOR_SLOTS; slot++) {
-      (function (s) {
-        var wait = SECTOR_ROTATE_DELAY[s] || 0;
-        setTimeout(function () {
-          scheduleSectorRotation(s);
-        }, wait);
-      })(slot);
+    for (var s = 0; s < NUM_SECTOR_SLOTS; s++) {
+      rotateSectorSlot(s);
     }
   }
 
   var OTROS_SECTORES_IDS = [
     'bienestar',
+    'eventos',
+    'restaurantes',
     'salud',
     'profesionales',
     'automotriz',
@@ -818,7 +801,7 @@
   window.openAdultosCatPicker = openAdultosCatPicker;
   window.openCatPicker = openCatPicker;
 
-  /* ── Rotación banners centrales (imágenes, cada slot a su ritmo) ── */
+  /* ── Rotación banners (izquierda, derecha e inferior — 3 slides sincronizados) ── */
   function goAdSlotSlide(stage, nextIdx) {
     if (!stage) return 0;
     var slides = stage.querySelectorAll('.home-ad-slot__slide');
@@ -836,14 +819,14 @@
     return idx;
   }
 
-  /* ── Rotación banner inferior (3 diseños) ── */
   function goBottomBannerSlide(nextIdx) {
     var stage = document.getElementById('bottomBannerStage');
     if (!stage) return;
     var slides = stage.querySelectorAll('.home-ad-bottom__slide');
     var dots = stage.querySelectorAll('.home-ad-bottom__dot');
     if (!slides.length) return;
-    var idx = ((nextIdx % slides.length) + slides.length) % slides.length;
+    var count = Math.min(BANNER_SLIDE_COUNT, slides.length);
+    var idx = ((nextIdx % count) + count) % count;
     slides.forEach(function (slide, i) {
       var on = i === idx;
       slide.classList.toggle('is-active', on);
@@ -855,35 +838,33 @@
     return idx;
   }
 
-  function startBottomBannerRotation() {
-    var stage = document.getElementById('bottomBannerStage');
-    if (!stage) return;
-    var slides = stage.querySelectorAll('.home-ad-bottom__slide');
-    if (slides.length < 2) return;
-    var bottomIdx = 0;
-    var ROT_MS = 4000;
-    setInterval(function () {
-      bottomIdx = goBottomBannerSlide(bottomIdx + 1);
-    }, ROT_MS);
-    setTimeout(function () {
-      bottomIdx = goBottomBannerSlide(1);
-    }, 2500);
+  function rotateAllHomeBanners() {
+    homeBannerSlideIdx = (homeBannerSlideIdx + 1) % BANNER_SLIDE_COUNT;
+    document.querySelectorAll('[data-ad-stage]').forEach(function (stage) {
+      var anchor = stage.closest('[data-slot-id]');
+      if (anchor && anchor.classList.contains('home-ad-slot--rented')) return;
+      var slides = stage.querySelectorAll('.home-ad-slot__slide');
+      if (slides.length < 2) return;
+      goAdSlotSlide(stage, homeBannerSlideIdx);
+    });
+    var bottomAnchor = document.getElementById('bannerInferior');
+    if (bottomAnchor && bottomAnchor.classList.contains('home-ad-slot--rented')) return;
+    var bottomStage = document.getElementById('bottomBannerStage');
+    if (!bottomStage) return;
+    var bottomSlides = bottomStage.querySelectorAll('.home-ad-bottom__slide');
+    if (bottomSlides.length < 2) return;
+    goBottomBannerSlide(homeBannerSlideIdx);
   }
 
-  function startAdRotation() {
-    var AD_ROTATE_MS = [5200, 7100];
-    var AD_ROTATE_DELAY = [600, 3400];
-    document.querySelectorAll('[data-ad-stage]').forEach(function (stage, slot) {
-      var state = { idx: 0 };
-      var every = AD_ROTATE_MS[slot] || 5500;
-      var wait = AD_ROTATE_DELAY[slot] || 0;
-      setTimeout(function () {
-        state.idx = goAdSlotSlide(stage, state.idx + 1);
-        setInterval(function () {
-          state.idx = goAdSlotSlide(stage, state.idx + 1);
-        }, every);
-      }, wait);
-    });
+  function rotateAllHomeVisuals() {
+    rotateAllCategorySlots();
+    rotateAllSectorSlots();
+    rotateAllHomeBanners();
+  }
+
+  function startHomeVisualRotation() {
+    if (homeRotateTimer) clearInterval(homeRotateTimer);
+    homeRotateTimer = setInterval(rotateAllHomeVisuals, HOME_ROTATE_MS);
   }
 
 
@@ -988,9 +969,6 @@
       });
     }
   });
-
-  /* ── Toggle visitante / registrado (demo) ── */
-  startBottomBannerRotation();
 
   function applyViewportClass() {
     var w = window.innerWidth;
@@ -1123,11 +1101,9 @@
 
   initHeroCarousel();
   initCategorySlots();
-  startCategoryRotation();
   initSectorCards();
-  startSectorRotation();
   buildOtrosSectoresModal();
   bindSectoresExpandToggle();
-  startAdRotation();
+  startHomeVisualRotation();
 
 })();

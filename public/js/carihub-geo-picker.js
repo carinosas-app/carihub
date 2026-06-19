@@ -11,6 +11,15 @@
   var ICON_PIN = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 21s-7-5.4-7-11a7 7 0 1 1 14 0c0 5.6-7 11-7 11z" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="10" r="2.5" stroke="currentColor" stroke-width="2"/></svg>';
   var ICON_USER = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="2"/><circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="2"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" stroke="currentColor" stroke-width="2"/></svg>';
   var ICON_SEARCH = '<svg class="ch-geo-sheet__search-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2.5"/><path d="M20 20l-4-4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>';
+  var ICON_GO = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  var ICON_PIN_HEADER =
+    '<svg class="ch-geo-sheet__pin-svg" viewBox="0 0 32 42" aria-hidden="true">' +
+      '<defs><linearGradient id="chGeoPinGrad" x1="0%" y1="0%" x2="0%" y2="100%">' +
+        '<stop offset="0%" stop-color="#ff4f9a"/><stop offset="55%" stop-color="#e91e63"/><stop offset="100%" stop-color="#c2185b"/>' +
+      '</linearGradient></defs>' +
+      '<path d="M16 2C9.4 2 4 7.2 4 13.8c0 8.2 12 26.2 12 26.2s12-18 12-26.2C28 7.2 22.6 2 16 2z" fill="url(#chGeoPinGrad)"/>' +
+      '<circle cx="16" cy="14" r="5.5" fill="#fff"/>' +
+    '</svg>';
   var ICON_GLOBE =
     '<svg class="ch-geo-sheet__globe-svg" viewBox="0 0 52 52" aria-hidden="true">' +
       '<circle cx="21" cy="21" r="16.5" fill="#8ecae6" stroke="#1a1a1a" stroke-width="1.1"/>' +
@@ -282,8 +291,14 @@
       if (closeBtn) closeBtn.style.visibility = 'visible';
     } else if (tipo === 'estado') {
       if (icon) {
-        icon.className = 'ch-geo-sheet__icon ch-geo-sheet__icon--flag';
-        icon.textContent = DATA.flagFor ? DATA.flagFor(picker.state.pais) : '🌎';
+        var flagUrl = DATA.flagImageUrl ? DATA.flagImageUrl(picker.state.pais) : '';
+        icon.className = 'ch-geo-sheet__icon ch-geo-sheet__icon--flag-img';
+        if (flagUrl) {
+          icon.innerHTML = '<img src="' + esc(flagUrl) + '" alt="">';
+        } else {
+          icon.innerHTML = '';
+          icon.textContent = DATA.flagFor ? DATA.flagFor(picker.state.pais) : '🌎';
+        }
       }
       if (title) title.textContent = picker.state.pais || 'País';
       if (subtitle) {
@@ -297,9 +312,13 @@
     } else if (tipo === 'ciudad') {
       if (icon) {
         icon.className = 'ch-geo-sheet__icon ch-geo-sheet__icon--pin';
-        icon.textContent = '📍';
+        icon.innerHTML = ICON_PIN_HEADER;
       }
-      if (title) title.textContent = picker.state.estado || 'Estado';
+      if (title) {
+        title.textContent = DATA.displayName
+          ? DATA.displayName(picker.state.estado)
+          : (picker.state.estado || 'Estado');
+      }
       if (subtitle) {
         subtitle.textContent = 'Selecciona una ciudad';
         subtitle.style.display = '';
@@ -323,6 +342,7 @@
     updateSheetHeader(picker, tipo);
     if (input) input.value = '';
     picker.renderList();
+    syncRegistroGeoTheme(modal);
     raiseGeoModal(modal);
     lockPageScroll();
     geoModalOpenedAt = Date.now();
@@ -401,21 +421,88 @@
     });
   }
 
+  function usesRegistroGeoShell() {
+    return document.body.classList.contains('rp-screen1-form') ||
+      document.body.classList.contains('rp-screen4-form') ||
+      document.body.getAttribute('data-page') === 'home';
+  }
+
+  function syncRegistroGeoTheme(modal) {
+    if (!modal) return;
+    var isRegistro = usesRegistroGeoShell();
+    modal.classList.toggle('ch-geo-modal--registro', isRegistro);
+    if (!isRegistro) {
+      modal.removeAttribute('data-rp-sector');
+      modal.style.removeProperty('--rp-form-accent');
+      modal.style.removeProperty('--geo-grad');
+      modal.style.removeProperty('--geo-shadow');
+      return;
+    }
+    var sector = document.body.getAttribute('data-rp-sector') || 'adultos';
+    if (document.body.getAttribute('data-page') === 'home') {
+      sector = 'adultos';
+    }
+    modal.setAttribute('data-rp-sector', sector);
+    var cs = window.getComputedStyle(document.body);
+    var accent = cs.getPropertyValue('--rp-form-accent').trim();
+    var geoEl = document.getElementById('rpGeoPicker');
+    var grad = '';
+    if (geoEl) {
+      grad = window.getComputedStyle(geoEl).getPropertyValue('--geo-grad').trim();
+    }
+    if (!grad && sector === 'adultos') {
+      grad = 'linear-gradient(180deg, #ff2d6f 0%, #ec1458 45%, #c8004a 100%)';
+    }
+    if (!grad && accent && sector !== 'adultos') {
+      grad = 'linear-gradient(180deg, color-mix(in srgb, ' + accent + ' 70%, #fff) 0%, ' +
+        accent + ' 52%, color-mix(in srgb, ' + accent + ' 88%, #000) 100%)';
+    }
+    if (accent) modal.style.setProperty('--rp-form-accent', accent);
+    if (grad) modal.style.setProperty('--geo-grad', grad);
+    var shadow = '';
+    if (geoEl) {
+      shadow = window.getComputedStyle(geoEl).getPropertyValue('--geo-shadow').trim();
+    }
+    if (!shadow && accent && sector !== 'adultos') {
+      shadow = '0 8px 24px color-mix(in srgb, ' + accent + ' 38%, transparent)';
+    } else if (!shadow && sector === 'adultos') {
+      shadow = '0 8px 24px rgba(233, 30, 99, 0.38)';
+    }
+    if (shadow) modal.style.setProperty('--geo-shadow', shadow);
+  }
+
   function buildCardHtml(opts) {
-    var titleHtml = opts.flag
-      ? '<p class="ch-geo-card__title"><span class="ch-geo-card__flag">' + esc(opts.flag) + '</span><span>' + esc(opts.title) + '</span></p>'
-      : '<p class="ch-geo-card__title">' + esc(opts.title) + '</p>';
+    var thumbExtra = (DATA.thumbClassFor && opts.tipo)
+      ? DATA.thumbClassFor(opts.tipo, opts.value || opts.title)
+      : '';
+    var thumbClass = 'ch-geo-card__thumb' + (thumbExtra ? ' ' + thumbExtra : '');
+    var textBlock =
+      '<span class="ch-geo-card__text">' +
+        '<p class="ch-geo-card__title">' + esc(opts.title) + '</p>' +
+        (opts.meta1 ? '<p class="ch-geo-card__meta">' + ICON_PIN + '<span>' + esc(opts.meta1) + '</span></p>' : '') +
+        (opts.meta2 ? '<p class="ch-geo-card__meta">' + ICON_USER + '<span>' + esc(opts.meta2) + '</span></p>' : '') +
+      '</span>';
+    var tipoClass = opts.tipo ? ' ch-geo-card--' + opts.tipo : '';
+    var thumbInner;
+    if (opts.tipo === 'pais' && !opts.image) {
+      thumbClass += ' ch-geo-card__thumb--flag-emoji';
+      thumbInner = '<span class="ch-geo-card__flag-emoji" aria-hidden="true">' + esc(opts.flag || '🌎') + '</span>';
+    } else {
+      var imgErr = opts.tipo === 'pais'
+        ? 'onerror="if(!this.dataset.fb){this.dataset.fb=1;var p=this.parentElement;if(p){p.classList.add(\'ch-geo-card__thumb--flag-emoji\');this.style.display=\'none\';var e=document.createElement(\'span\');e.className=\'ch-geo-card__flag-emoji\';e.setAttribute(\'aria-hidden\',\'true\');e.textContent=\'\\uD83C\\uDF0E\';p.appendChild(e);}}"'
+        : 'onerror="if(!this.dataset.fb){this.dataset.fb=1;this.src=\'img/home/promo-perfil.jpg\';}"';
+      thumbInner =
+        '<img src="' + esc(opts.image) + '" alt="" loading="lazy" decoding="async" ' + imgErr + '>';
+    }
     return (
-      '<button type="button" class="ch-geo-card" data-value="' + esc(opts.value) + '">' +
-        '<span class="ch-geo-card__thumb">' +
-          '<img src="' + esc(opts.image) + '" alt="" loading="lazy" decoding="async">' +
+      '<button type="button" class="ch-geo-card' + tipoClass + '" data-value="' + esc(opts.value) + '">' +
+        '<span class="' + thumbClass + '">' +
+          thumbInner +
         '</span>' +
         '<span class="ch-geo-card__body">' +
-          titleHtml +
-          (opts.meta1 ? '<p class="ch-geo-card__meta">' + ICON_PIN + esc(opts.meta1) + '</p>' : '') +
-          (opts.meta2 ? '<p class="ch-geo-card__meta">' + ICON_USER + esc(opts.meta2) + '</p>' : '') +
+          textBlock +
+          '<span class="ch-geo-card__go" aria-hidden="true">' + ICON_GO + '</span>' +
         '</span>' +
-        '<span class="ch-geo-card__go" aria-hidden="true">›</span>' +
       '</button>'
     );
   }
@@ -435,7 +522,8 @@
       var pop = stubFn(name);
       return {
         value: name,
-        image: imgFn('pais', name),
+        tipo: 'pais',
+        image: imgFn('pais', name, ''),
         flag: flagFn(name),
         title: name,
         meta1: estCount + ' ' + divFn(name),
@@ -447,7 +535,8 @@
       var label = labelFn(name);
       return {
         value: name,
-        image: imgFn('estado', name),
+        tipo: 'estado',
+        image: imgFn('estado', name, picker.state.pais),
         title: label,
         meta1: cap,
         meta2: fmtFn(stubFn(name, 3200), false)
@@ -455,7 +544,8 @@
     }
     return {
       value: name,
-      image: imgFn('ciudad', name),
+      tipo: 'ciudad',
+      image: imgFn('ciudad', name, picker.state.pais),
       title: labelFn(name),
       meta1: labelFn(name),
       meta2: fmtFn(stubFn(name, 1200), false)
@@ -648,7 +738,13 @@
     var inputEl = document.getElementById('chGeoModalInput');
     var hasQuery = inputEl && String(inputEl.value || '').trim();
     if (!listaPersonalizada && !hasQuery) {
-      opciones = sortPopular(opciones, getPopularOrder(this, selectorTipo));
+      if (selectorTipo === 'estado' || selectorTipo === 'ciudad') {
+        opciones = opciones.slice().sort(function (a, b) {
+          return String(a).localeCompare(String(b), 'es');
+        });
+      } else {
+        opciones = sortPopular(opciones, getPopularOrder(this, selectorTipo));
+      }
     }
     list.innerHTML = '';
 

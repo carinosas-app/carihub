@@ -196,6 +196,48 @@
     { nombre: 'Anuncio local', edad: 27, precio: '1,800', tagline: 'Disponible en tu zona con reservación previa.', modalidades: ['domicilio'] }
   ];
 
+  var DEMO_POR_COMPONENTE = {
+    ResultCardNegocio: {
+      'sex shop': [
+        { nombreComercial: 'Sensual Shop MTY', precio: '199', tagline: 'Productos premium, envío discreto y asesoría.', horario: 'Lun–Sáb 10:00–22:00', categoriaPublica: 'Sex Shop', verificada: true }
+      ],
+      spa: [
+        { nombreComercial: 'Spa Sensual Monterrey', precio: '800', tagline: 'Masajes, jacuzzi y habitaciones privadas.', horario: 'Lun–Dom 10:00–22:00', categoriaPublica: 'Spa', verificada: true }
+      ],
+      'hotel motel': [
+        { nombreComercial: 'Hotel & Suites Valle', precio: '890', tagline: 'Habitaciones temáticas y total discreción.', horario: '24 horas', categoriaPublica: 'Hotel / Motel', verificada: true }
+      ],
+      restaurante: [
+        { nombreComercial: 'La Cocina de Monterrey', precio: '180', tagline: 'Cocina regional, terraza y reservaciones.', horario: 'Mar–Dom 13:00–23:00', categoriaPublica: 'Restaurante', verificada: true }
+      ],
+      default: [
+        { nombreComercial: 'Negocio demo local', precio: 'Consultar', tagline: 'Anuncio de demostración para negocios.', horario: 'Horario público en perfil', verificada: true }
+      ]
+    },
+    ResultCardServicio: {
+      plomeros: [
+        { nombre: 'Carlos Ramírez', precio: '300', tagline: 'Plomería residencial y comercial con garantía.', especialidad: 'Plomería general', horario: 'Lun–Dom 7:00–22:00', zonaCobertura: 'Monterrey y área metropolitana', verificada: true }
+      ],
+      'cirugia-plastica-y-estetica': [
+        { nombre: 'Dr. Andrés Meza', precio: 'Consultar', tagline: 'Cirugía estética y reconstructiva con valoración previa.', especialidad: 'Cirugía plástica', horario: 'Con cita previa', verificada: true }
+      ],
+      default: [
+        { nombre: 'Profesional demo', precio: '500', tagline: 'Servicio independiente de demostración en tu zona.', especialidad: 'Servicio profesional', horario: 'Lun–Sáb', verificada: true }
+      ]
+    },
+    ResultCardProfesional: {
+      'medicos-generales': [
+        { nombre: 'Dra. Ana Lucía Méndez', precio: '800', tagline: 'Medicina general, check-ups y seguimiento.', especialidad: 'Medicina General', cedulaVerificada: true, horario: 'Lun–Vie 9:00–19:00', verificada: true }
+      ],
+      abogados: [
+        { nombre: 'Lic. Roberto Vega', precio: '1,200', tagline: 'Asesoría laboral, civil y contratos.', especialidad: 'Derecho laboral', verificada: true, horario: 'Lun–Vie 9:00–18:00' }
+      ],
+      default: [
+        { nombre: 'Prof. demo certificado', precio: '700', tagline: 'Profesionista con cédula verificada (demo).', especialidad: 'Consulta profesional', cedulaVerificada: true, verificada: true }
+      ]
+    }
+  };
+
   function norm(t) {
     if (global.CHUI && CHUI.chNorm) return CHUI.chNorm(t);
     return String(t || '')
@@ -216,9 +258,41 @@
     return String(valor || '').trim() || 'Escort';
   }
 
-  function vistaDeCategoria(valor) {
+  function vistaDeCategoriaLegacy(valor) {
     var id = idCategoria(valor);
     return VISTA_POR_CATEGORIA[id] || 'adult';
+  }
+
+  function vistaDeCategoria(valor) {
+    if (global.CariHubFieldEngineLite && CariHubFieldEngineLite.resolvePublicPresentation) {
+      var pres = CariHubFieldEngineLite.resolvePublicPresentation({
+        categoria: valor,
+        subcategoriaId: CariHubFieldEngineLite.lookupSubcategoriaId(valor)
+      });
+      if (pres && pres.vistaPerfil) return pres.vistaPerfil;
+    }
+    return vistaDeCategoriaLegacy(valor);
+  }
+
+  function presentacionDeCategoria(valor) {
+    if (global.CariHubFieldEngineLite && CariHubFieldEngineLite.resolvePublicPresentation) {
+      return CariHubFieldEngineLite.resolvePublicPresentation({
+        categoria: valor,
+        subcategoriaId: CariHubFieldEngineLite.lookupSubcategoriaId(valor)
+      });
+    }
+    return { componenteResultados: 'ResultCardAdultos', vistaPerfil: vistaDeCategoriaLegacy(valor), esAdultoPersona: true };
+  }
+
+  function enriquecerPerfil(u, Q) {
+    if (global.CariHubFieldEngineLite && CariHubFieldEngineLite.enriquecerPerfilPublico) {
+      return CariHubFieldEngineLite.enriquecerPerfilPublico(u, {
+        categoria: (Q && Q.categoria) || u.categoria || u.categoriaPublica,
+        subcategoriaId: u.subcategoriaId
+      });
+    }
+    u.__vista = u.__vista || vistaDeCategoria((Q && Q.categoria) || u.categoria);
+    return u;
   }
 
   function slug(s) {
@@ -247,7 +321,7 @@
     if (u.fotosCount) {
       u.fotosExtraURL = new Array(Math.max(0, u.fotosCount - 1)).fill('demo');
     }
-    return u;
+    return enriquecerPerfil(u, Q);
   }
 
   function perfilesCanonicos(Q) {
@@ -308,8 +382,24 @@
       if (base.edad != null) u.edad = base.edad;
       u.modalidades = base.modalidades || ['recibe', 'hotel'];
     }
+    if (base.especialidad) u.especialidad = base.especialidad;
+    if (base.horario) u.horario = base.horario;
+    if (base.cedulaVerificada) u.cedulaVerificada = true;
+    if (base.zonaCobertura) u.zonaCobertura = base.zonaCobertura;
 
-    return u;
+    return enriquecerPerfil(u, Q);
+  }
+
+  function plantillaDemoSchema(Q, pres) {
+    pres = pres || presentacionDeCategoria(Q.categoria);
+    var comp = pres.componenteResultados || 'ResultCardAdultos';
+    var subId = pres.subcategoriaId || idCategoria(Q.categoria);
+    var pool = (DEMO_POR_COMPONENTE[comp] && (DEMO_POR_COMPONENTE[comp][subId] || DEMO_POR_COMPONENTE[comp].default)) || [];
+    var catLabel = labelCategoria(Q.categoria);
+    var vistaDef = pres.vistaPerfil || vistaDeCategoria(Q.categoria);
+    return pool.map(function (base, idx) {
+      return armarPerfil(base, idx, Q, catLabel, subId, vistaDef);
+    });
   }
 
   function plantillaDe(catId) {
@@ -419,10 +509,45 @@
     var totalEnSitio = (global.CariHubResultadosRegistrados && typeof CariHubResultadosRegistrados.totalPublicos === 'function')
       ? CariHubResultadosRegistrados.totalPublicos()
       : registrados.length;
+    if (registrados.length > 0) {
+      registrados.forEach(function (u) { enriquecerPerfil(u, Q); });
+      return {
+        perfiles: registrados.slice(),
+        meta: {
+          vacio: false,
+          totalRegistrados: totalEnSitio,
+          modoVista: vistaPreviaModo() || 'produccion'
+        }
+      };
+    }
+    var pres = presentacionDeCategoria(Q.categoria);
+    var demo = [];
+    if (pres.esAdultoPersona !== false) {
+      demo = perfilesCanonicosCuatro(Q).filter(function (u) {
+        return coincideBusqueda(u, Q);
+      });
+    }
+    if (!demo.length) {
+      demo = plantillaDemoSchema(Q, pres).filter(function (u) {
+        return coincideBusqueda(u, Q);
+      });
+    }
+    if (demo.length) {
+      return {
+        perfiles: demo,
+        meta: {
+          vacio: false,
+          totalRegistrados: totalEnSitio,
+          demoFallback: true,
+          presentacion: pres.componenteResultados,
+          modoVista: 'produccion-demo'
+        }
+      };
+    }
     return {
-      perfiles: registrados.slice(),
+      perfiles: [],
       meta: {
-        vacio: registrados.length === 0,
+        vacio: true,
         totalRegistrados: totalEnSitio,
         modoVista: vistaPreviaModo() || 'produccion'
       }
@@ -538,7 +663,7 @@
     if (PERFIL_CANON_CUARTO) todos.push(PERFIL_CANON_CUARTO);
     if (PERFIL_CANON_QUINTO) todos.push(PERFIL_CANON_QUINTO);
     var base = todos.find(function (p) { return p.__id === id; });
-    return base ? clonarPerfil(base, Q) : null;
+    return base ? enriquecerPerfil(clonarPerfil(base, Q), Q) : null;
   }
 
   function safeTxt(t) {
@@ -733,6 +858,9 @@
   }
 
   function cardHTML(u, Q) {
+    if (global.CariHubPublicRenderLite && CariHubPublicRenderLite.cardHTML) {
+      return CariHubPublicRenderLite.cardHTML(u, Q);
+    }
     Q = Q || {};
     var nombre = u.nombre || u.alias || 'Perfil';
     var edad = u.edad != null ? String(u.edad).trim() + ' años' : '';
@@ -880,6 +1008,9 @@
     queryFromLocation: queryFromLocation,
     queryExplicitFromLocation: queryExplicitFromLocation,
     vistaDeCategoria: vistaDeCategoria,
+    vistaDeCategoriaLegacy: vistaDeCategoriaLegacy,
+    presentacionDeCategoria: presentacionDeCategoria,
+    enriquecerPerfil: enriquecerPerfil,
     labelCategoria: labelCategoria,
     idCategoria: idCategoria,
     nivelBusqueda: nivelBusqueda,

@@ -363,13 +363,11 @@
       subcategorias: subs([
         'Restaurantes',
         'Cafeterías',
-        'Antros y Bares',
         'Food Trucks',
         'Comida a Domicilio',
         'Panaderías',
         'Taquerías',
-        'Marisquerías',
-        'Vida Nocturna'
+        'Marisquerías'
       ]),
       panelClass: 'home-field__sector-panel--restaurantes',
       bgWords: ['Restaurante', 'Bar', 'Café', 'Antro']

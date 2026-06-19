@@ -48,6 +48,33 @@
     });
   }
 
+  function fitScrollItems(root) {
+    if (!root) return;
+    var viewport = root.querySelector('.home-sector-scroll__viewport');
+    if (!viewport) return;
+    var maxW = Math.max(24, viewport.clientWidth - 6);
+    var baseEm = parseFloat(getComputedStyle(root).fontSize) || 9;
+    var scales = [1.02, 0.96, 0.9, 0.84, 0.78, 0.72, 0.66, 0.6, 0.55, 0.5];
+    root.querySelectorAll('.home-sector-scroll__item').forEach(function (item) {
+      item.style.fontSize = '';
+      for (var i = 0; i < scales.length; i++) {
+        item.style.fontSize = (baseEm * scales[i]).toFixed(2) + 'px';
+        if (item.scrollWidth <= maxW) break;
+      }
+    });
+  }
+
+  function scheduleFitScrollItems(layer) {
+    if (!layer) return;
+    var root = layer.querySelector('.home-sector-scroll');
+    if (!root) return;
+    function run() { fitScrollItems(root); }
+    run();
+    if (typeof requestAnimationFrame === 'function') requestAnimationFrame(run);
+    setTimeout(run, 80);
+    setTimeout(run, 450);
+  }
+
   function runAnimation(layer) {
     clearLayerTimer(layer);
     if (!layer.classList.contains('is-visible')) return;
@@ -71,6 +98,32 @@
     timers.set(layer, state);
   }
 
+  /** Etiquetas más cortas solo cuando no caben legibles en el ancho de la tarjeta */
+  var ITEM_DISPLAY = {
+    'Técnicos en aire acondicionado automotriz': 'Técnicos A/C auto',
+    'Artistas de entretenimiento para adultos': 'Artistas adultos',
+    'Cosplayers para eventos privados': 'Cosplayers privados',
+    'Presentadores para eventos exclusivos': 'Presentadores VIP',
+    'Acompañantes para adultos mayores': 'Cuidadores mayores',
+    'Administradores de propiedades': 'Admin. inmobiliario',
+    'Instaladores de paneles solares': 'Paneles solares',
+    'Técnicos en cámaras de seguridad': 'Técnicos CCTV',
+    'Distribuidores independientes': 'Distribuidores',
+    'Representantes comerciales': 'Representantes',
+    'Consultores empresariales': 'Consultores',
+    'Reclutadores independientes': 'Reclutadores',
+    'Masajistas terapéuticos': 'Masajistas',
+    'Terapeutas ocupacionales': 'Terapeutas',
+    'Instructores deportivos': 'Instructores',
+    'Desarrolladores móviles': 'Devs móviles',
+    'Técnicos en computación': 'Técnicos PC',
+    'Paseadores especializados': 'Paseadores'
+  };
+
+  function displayLabel(nombre) {
+    return ITEM_DISPLAY[nombre] || nombre;
+  }
+
   function build(sector) {
     var items = itemsFor(sector);
     var root = document.createElement('div');
@@ -91,7 +144,7 @@
     items.forEach(function (nombre) {
       var item = document.createElement('span');
       item.className = 'home-sector-scroll__item';
-      item.textContent = nombre;
+      item.textContent = displayLabel(nombre);
       track.appendChild(item);
     });
     var spacer = document.createElement('span');
@@ -104,7 +157,7 @@
     foot.className = 'home-sector-scroll__foot';
     var cerca = document.createElement('span');
     cerca.className = 'home-sector-scroll__cerca';
-    cerca.innerHTML = '<svg class="home-sector-scroll__pin" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5S10.62 6.5 12 6.5s2.5 1.12 2.5 2.5S13.38 11.5 12 11.5z"/></svg>Cerca de ti';
+    cerca.innerHTML = '<span>cerca de ti</span>';
     foot.appendChild(cerca);
 
     root.appendChild(top);
@@ -123,6 +176,7 @@
       layer.innerHTML = '';
       layer.dataset.sectorId = sector.id;
       layer.appendChild(build(sector));
+      scheduleFitScrollItems(layer);
       if (autoplay !== false && layer.classList.contains('is-visible')) {
         runAnimation(layer);
       }
@@ -132,6 +186,18 @@
     },
     stop: function (layer) {
       clearLayerTimer(layer);
-    }
+    },
+    fitScrollItems: fitScrollItems,
+    scheduleFitScrollItems: scheduleFitScrollItems
   };
+
+  var sectorResizeTimer = null;
+  window.addEventListener('resize', function () {
+    if (sectorResizeTimer) clearTimeout(sectorResizeTimer);
+    sectorResizeTimer = setTimeout(function () {
+      document.querySelectorAll('.home-otros-sectores .home-sector-card__layer').forEach(function (layer) {
+        scheduleFitScrollItems(layer);
+      });
+    }, 120);
+  });
 })();

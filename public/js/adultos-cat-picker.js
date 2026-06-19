@@ -58,6 +58,30 @@
     );
   }
 
+  var SECTOR_POS = ['top center', 'center 22%', 'center 55%', 'top 18%', 'center 40%', 'center 68%'];
+
+  function sectorScenePhoto(sectorImage, index) {
+    if (!sectorImage) {
+      return '<div class="ap-scene ap-scene--fallback ap-scene--sector" aria-hidden="true"></div>';
+    }
+    var pos = SECTOR_POS[(index || 0) % SECTOR_POS.length];
+    return (
+      '<div class="ap-scene ap-scene--photo ap-scene--sector" aria-hidden="true">' +
+        '<img class="ap-card__photo" src="' + sectorImage + '" alt="" ' +
+        'loading="lazy" decoding="async" style="object-position:' + pos + '">' +
+        '<span class="ap-scene__sheen" aria-hidden="true"></span>' +
+      '</div>'
+    );
+  }
+
+  function cardVisual(cat, opts, index) {
+    opts = opts || {};
+    if (!opts.sectorId || opts.sectorId === 'adultos') {
+      return scenePhoto(cat.id);
+    }
+    return sectorScenePhoto(opts.sectorImage, index);
+  }
+
   function sparksHtml() {
     return (
       '<span class="ap-card__name-sparks" aria-hidden="true">' +
@@ -70,13 +94,13 @@
     );
   }
 
-  function cardHtml(cat, selectedId) {
+  function cardHtml(cat, selectedId, opts, index) {
     var selected = toKey(cat.id) === toKey(selectedId);
     return (
       '<li role="presentation">' +
         '<button type="button" class="ap-card' + (selected ? ' is-selected' : '') + '" ' +
           'role="option" data-cat-id="' + cat.id + '" aria-selected="' + (selected ? 'true' : 'false') + '">' +
-          '<span class="ap-card__visual">' + scenePhoto(cat.id) + '</span>' +
+          '<span class="ap-card__visual">' + cardVisual(cat, opts, index) + '</span>' +
           '<span class="ap-card__name">' +
             sparksHtml() +
             '<span class="ap-card__name-text">' + cat.nombre + '</span>' +
@@ -89,8 +113,8 @@
   function renderList(container, items, opts) {
     opts = opts || {};
     if (!container || !items) return;
-    container.innerHTML = items.map(function (cat) {
-      return cardHtml(cat, opts.selectedId);
+    container.innerHTML = items.map(function (cat, index) {
+      return cardHtml(cat, opts.selectedId, opts, index);
     }).join('');
 
     container.querySelectorAll('.ap-card').forEach(function (btn) {

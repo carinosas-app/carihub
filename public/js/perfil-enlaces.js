@@ -58,14 +58,17 @@
     }
     if (u.ubicacionPublica) return String(u.ubicacionPublica).trim();
     if (u.ubicacion) return String(u.ubicacion).trim();
-    return [u.zona, u.ciudad, u.estado, u.pais].filter(Boolean).join(', ');
+    return [u.ciudad, u.estado, u.pais].filter(Boolean).join(', ');
   }
 
   function mapsUrl(u, queryOverride) {
     u = u || {};
+    var cp = u.contactoPublico || {};
+    if (cp.googleMapsActivo === false) return '';
+    if (cp.googleMaps) return String(cp.googleMaps).trim();
+    if (u.googleMapsPublico) return String(u.googleMapsPublico).trim();
     var directo = u.mapsUrl || u.googleMapsUrl || u.mapaUrl;
     if (directo) return String(directo).trim();
-    var cp = u.contactoPublico || {};
     if (cp.mapsUrl) return String(cp.mapsUrl).trim();
     if (u.lat != null && u.lng != null) {
       return 'https://www.google.com/maps/search/?api=1&query=' +
@@ -213,8 +216,28 @@
   }
 
   function wireMapas(root, u) {
+    var url = mapsUrl(u);
+    if (!url) return;
     root.querySelectorAll('.negocio-gmaps__cta, .negocio-ubic__cta').forEach(function (a) {
-      aplicarEnlace(a, mapsUrl(u), { blank: true, ariaLabel: 'Cómo llegar en Google Maps' });
+      aplicarEnlace(a, url, { blank: true, ariaLabel: 'Cómo llegar en Google Maps' });
+    });
+    root.querySelectorAll('.negocio-gmaps__map').forEach(function (mapEl) {
+      if (mapEl.dataset.rpMapBound === '1') return;
+      mapEl.dataset.rpMapBound = '1';
+      mapEl.style.cursor = 'pointer';
+      mapEl.setAttribute('role', 'link');
+      mapEl.setAttribute('tabindex', '0');
+      mapEl.setAttribute('aria-label', 'Abrir ubicación en Google Maps');
+      function openMap() {
+        global.open(url, '_blank', 'noopener');
+      }
+      mapEl.addEventListener('click', openMap);
+      mapEl.addEventListener('keydown', function (ev) {
+        if (ev.key === 'Enter' || ev.key === ' ') {
+          ev.preventDefault();
+          openMap();
+        }
+      });
     });
   }
 

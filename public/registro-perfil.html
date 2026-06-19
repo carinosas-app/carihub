@@ -11,9 +11,16 @@
 <link rel="stylesheet" href="css/home-adultos-cat-picker.css">
 <link rel="stylesheet" href="css/carihub-geo-fields.css">
 <link rel="stylesheet" href="css/registro-perfil.css">
+<link rel="stylesheet" href="css/registro-perfil-subcat-themes.css">
+<link rel="stylesheet" href="css/registro-perfil-form-themes.css">
+<link rel="stylesheet" href="css/registro-perfil-preview.css">
+<link rel="stylesheet" href="css/registro-perfil-geo-modal.css">
+<link rel="stylesheet" href="css/resultados.css">
 <script src="js/catalogos-carihub.js"></script>
 <script src="js/sectores-carihub.js"></script>
 <script src="js/adultos-cat-picker.js"></script>
+<script src="js/sector-subcat-picker.js"></script>
+<script src="js/carihub-geo-images.js"></script>
 <script src="js/carihub-geo-picker-data.js"></script>
 <script src="js/carihub-geo-picker.js"></script>
 </head>
@@ -34,25 +41,52 @@
 
   <!-- PANTALLA 0 — Categorías -->
   <section class="rp-screen is-active" id="screen0">
-    <div class="rp-cat0-top">
+    <div class="rp-cat0-scroll">
+      <div class="rp-cat0-topbar">
+        <button type="button" class="rp-cat0-back" id="rpCatBack" aria-label="Volver al inicio">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M15 6l-6 6 6 6" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+      <header class="rp-cat0-head">
+        <div class="rp-cat0-head__row">
+          <span class="rp-cat0-head__grid" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none"><circle cx="7" cy="7" r="2.7" fill="currentColor"/><circle cx="17" cy="7" r="2.7" fill="currentColor"/><circle cx="7" cy="17" r="2.7" fill="currentColor"/><circle cx="17" cy="17" r="2.7" fill="currentColor"/></svg>
+          </span>
+          <h1 class="rp-cat0-head__title">Categorías</h1>
+        </div>
+        <p class="rp-cat0-head__subtitle">Selecciona una categoría</p>
+      </header>
       <div class="registro-banner-shell registro-banner-shell--page rp-banner-screen0">
         <div class="registro-banner-top registro-banner-top--page" data-registro-banner-slot="registro_superior"></div>
       </div>
-      <header class="rp-cat0-head">
-        <h1 class="rp-cat0-head__title">¿En qué categoría te quieres anunciar?</h1>
-        <label class="rp-cat0-search">
-          <svg class="rp-cat0-search__icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2.5"/><path d="M20 20l-4-4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
-          <input type="search" id="rpCatSearch" placeholder="Buscar categoría..." autocomplete="off">
+      <div class="rp-cat0-search-wrap">
+        <label class="rp-cat0-search" id="rpCatSearchBar">
+          <span class="rp-cat0-search__lead" aria-hidden="true">
+            <svg class="rp-cat0-search__icon" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2.5"/><path d="M20 20l-4-4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+          </span>
+          <input type="text" id="rpCatSearch" placeholder="Busca tu negocio o subcategoría…" autocomplete="off" enterkeyhint="search">
+          <button type="button" class="rp-cat0-search__submit rp-hidden" id="rpCatSearchSubmit" aria-label="Buscar y registrar">
+            <svg class="rp-cat0-search__icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2.5"/><path d="M20 20l-4-4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+          </button>
         </label>
-      </header>
+        <p class="rp-cat0-search-hint" id="rpCatSearchHint">Publicar perfil · sugerencias mientras escribes</p>
+      </div>
+      <div class="rp-cat0-search-suggest rp-hidden" id="rpCatSearchSuggest" aria-live="polite"></div>
+      <div class="rp-cat0-search-panel rp-hidden" id="rpCatSearchPanel" aria-live="polite"></div>
+      <div class="rp-cat0-catalog" id="rpCat0Catalog">
+        <p class="rp-cat0-section" id="rpCatSection"><span class="rp-cat0-section__star" aria-hidden="true">★</span> Categorías destacadas</p>
+        <ul class="rp-sector-grid" id="rpSectorGrid"></ul>
+      </div>
+      <div class="rp-cat0-foot" id="rpCat0Foot">
+        <button type="button" class="rp-cat0-foot__btn" id="rpCatVolver">← Volver</button>
+      </div>
     </div>
-    <ul class="rp-sector-grid" id="rpSectorGrid"></ul>
   </section>
 
-  <!-- PANTALLA 0B — Subcategorías adultos (mismo picker que Home) -->
-  <section class="rp-screen" id="screen0b-adultos">
+  <!-- PANTALLA 0B — Subcategorías (todos los sectores) -->
+  <section class="rp-screen" id="screen0b-adultos" data-sector="">
     <p class="rp-subcat-selected rp-hidden" id="rpSubcatSelected"></p>
-    <div class="rp-adultos-wrap home-modal--adultos-premium">
+    <div class="rp-adultos-wrap home-modal--adultos-premium" id="rpSubcatWrap">
       <div class="home-adultos-picker">
         <div class="home-adultos-picker__flashes" aria-hidden="true">
           <span class="ap-bg-flash ap-bg-flash--pink ap-bg-flash--p1"></span>
@@ -68,10 +102,10 @@
         </div>
         <div class="rp-adultos-sticky-top">
           <header class="home-adultos-picker__head">
-            <h3 class="home-adultos-picker__title">Adultos y Entretenimiento para Adultos</h3>
+            <h3 class="home-adultos-picker__title" id="rpSubcatSectorTitle">Subcategorías</h3>
             <p class="home-adultos-picker__hint" id="rpAdultosHint"></p>
           </header>
-          <a class="home-adultos-picker__anuncio rp-anuncio-rotator" id="rpAdultosAnuncio" href="registro-banner.html?slot=home_categorias" aria-label="Anúnciate aquí — espacio publicitario en subcategorías adultos">
+          <a class="home-adultos-picker__anuncio rp-anuncio-rotator" id="rpAdultosAnuncio" href="registro-banner.html?slot=home_categorias" aria-label="Anúnciate aquí — espacio publicitario en subcategorías">
             <div class="rp-anuncio-stage" id="rpAdultosAnuncioStage">
               <div class="rp-anuncio-slide is-active" aria-hidden="false">
                 <img src="img/home/banners/ad-banner-pink-01.png" alt="" decoding="async" fetchpriority="low">
@@ -102,128 +136,276 @@
     </div>
   </section>
 
-  <!-- PANTALLA 1 — Datos públicos -->
+  <!-- PANTALLA 1 — Datos públicos (Paso 3) -->
   <section class="rp-screen" id="screen1">
-    <button type="button" class="rp-back" id="rpBackPublico">← Subcategorías</button>
-    <div class="rp-progress" aria-hidden="true">
-      <span class="rp-progress__dot is-on"></span>
-      <span class="rp-progress__dot is-on"></span>
-      <span class="rp-progress__dot is-on"></span>
-    </div>
-    <p class="rp-progress__label">Paso 3 · Datos públicos</p>
+    <div class="rp-form-sticky-top">
+      <button type="button" class="rp-back" id="rpBackPublico">← Subcategorías</button>
 
-    <div class="registro-banner-shell registro-banner-shell--page">
-      <div class="registro-banner-top registro-banner-top--page" data-registro-banner-slot="registro_superior"></div>
-    </div>
-
-    <p class="rp-notice">Estos datos aparecerán en tu tarjeta y perfil público.</p>
-
-    <div class="rp-card">
-      <h2 class="rp-card__title">Tu anuncio</h2>
-      <div class="rp-field rp-field--readonly">
-        <label for="fldCategoria">Categoría</label>
-        <input type="text" id="fldCategoria" readonly tabindex="-1">
+      <div class="registro-banner-shell registro-banner-shell--page rp-banner-form">
+        <div class="registro-banner-top registro-banner-top--page" data-registro-banner-slot="registro_superior"></div>
       </div>
-      <div class="rp-field rp-field--readonly">
-        <label for="fldSubcategoria">Subcategoría</label>
-        <input type="text" id="fldSubcategoria" readonly tabindex="-1">
-      </div>
+
+      <p class="rp-notice">Estos datos aparecerán en tu tarjeta y perfil público. Podrás actualizar horarios, tarifas, contacto y ubicación después desde tu administrador.</p>
+      <p class="rp-notice rp-notice--pending rp-hidden" id="rpCatalogPendingNotice">
+        Tu subcategoría será revisada por el equipo. Puedes completar tu perfil; la publicación queda pendiente hasta aprobación.
+      </p>
     </div>
 
-    <div class="rp-card">
-      <h2 class="rp-card__title">Identidad pública</h2>
-      <div class="rp-field">
-        <label for="fldAlias">Alias / nombre público</label>
-        <input type="text" id="fldAlias" placeholder="Nombre visible en resultados" autocomplete="off">
+    <div class="rp-form-scroll">
+      <p class="rp-form-step-badge">Datos públicos</p>
+      <div class="rp-profile-chip" id="rpProfileChip">
+        <span class="rp-profile-chip__label">Tu categoría</span>
+        <strong class="rp-profile-chip__value" id="rpProfileChipValue">—</strong>
+        <span class="rp-profile-chip__sub rp-hidden" id="rpProfileChipSub" aria-hidden="true"></span>
       </div>
-      <div class="rp-field" id="wrapEdad">
-        <label for="fldEdad">Edad</label>
-        <input type="number" id="fldEdad" min="18" max="99" placeholder="18+" inputmode="numeric">
-      </div>
-      <div class="rp-field">
-        <label for="fldDescripcion">Descripción corta</label>
-        <textarea id="fldDescripcion" placeholder="Frase breve para tu tarjeta"></textarea>
-      </div>
-    </div>
+      <p class="rp-notice rp-notice--schema rp-hidden" id="rpUiFormNotice" aria-hidden="true"></p>
 
-    <div class="rp-card">
-      <h2 class="rp-card__title">Ubicación pública</h2>
-      <div id="rpGeoPicker"></div>
-      <input type="hidden" id="fldPais" value="">
-      <input type="hidden" id="fldEstado" value="">
-      <input type="hidden" id="fldCiudad" value="">
-      <div class="rp-field">
-        <label for="fldZona">Zona o colonia</label>
-        <input type="text" id="fldZona" placeholder="Zona visible en el directorio">
+      <div class="rp-card rp-hidden" id="rpLegacyCatFields" aria-hidden="true">
+        <input type="hidden" id="fldCategoria">
+        <input type="hidden" id="fldSubcategoria">
       </div>
-    </div>
 
-    <div class="rp-card">
-      <h2 class="rp-card__title">Servicio y tarifas</h2>
-      <div class="rp-field">
-        <label for="fldPrecio">Precio desde</label>
-        <input type="text" id="fldPrecio" placeholder="Ej. $1,500 MXN">
-      </div>
-      <div class="rp-field" id="wrapModalidad">
-        <label for="fldModalidad">Modalidad</label>
-        <select id="fldModalidad">
-          <option value="">Selecciona modalidad</option>
-          <option value="con_lugar">Con lugar</option>
-          <option value="hotel">Hotel</option>
-          <option value="domicilio">Domicilio</option>
-          <option value="mixto">Mixto</option>
-        </select>
-      </div>
-      <div class="rp-field">
-        <label for="fldHorario">Horario público</label>
-        <input type="text" id="fldHorario" placeholder="Ej. Lun–Sáb 10:00–22:00">
-      </div>
-      <div class="rp-field">
-        <label for="fldServicios">Servicios principales</label>
-        <textarea id="fldServicios" placeholder="Resume los servicios que ofreces"></textarea>
-      </div>
-    </div>
-
-    <div class="rp-card">
-      <h2 class="rp-card__title">Contacto público</h2>
-      <div class="rp-field">
-        <label for="fldWhatsapp">WhatsApp público</label>
-        <input type="tel" id="fldWhatsapp" placeholder="Solo números" inputmode="numeric">
-      </div>
-      <div class="rp-field">
-        <label for="fldTelegram">Telegram público</label>
-        <input type="text" id="fldTelegram" placeholder="@usuario o enlace">
-      </div>
-    </div>
-
-    <div class="rp-card">
-      <h2 class="rp-card__title">Imágenes públicas</h2>
-      <p class="rp-head__lead" style="margin-bottom:10px;text-align:left">Se verán en resultados y perfil público.</p>
-      <div class="rp-field">
-        <label>Foto principal</label>
-        <div class="rp-upload-main" id="uploadPrincipalBox">
-          <span class="rp-upload-main__hint">Toca para subir foto principal</span>
+      <div class="rp-card">
+        <h2 class="rp-card__title">Identidad pública</h2>
+        <div class="rp-field">
+          <label for="fldAlias">Alias / nombre público</label>
+          <input type="text" id="fldAlias" placeholder="Nombre visible en resultados" autocomplete="off">
         </div>
-        <input type="file" id="uploadPrincipal" accept="image/*" class="rp-hidden">
-      </div>
-      <div class="rp-field">
-        <label>Galería pública</label>
-        <div class="rp-gallery" id="rpGalleryGrid">
-          <div class="rp-gallery__slot" data-index="0">+ Foto</div>
-          <div class="rp-gallery__slot" data-index="1">+ Foto</div>
-          <div class="rp-gallery__slot" data-index="2">+ Foto</div>
+        <div class="rp-field" id="wrapEdad">
+          <label for="fldEdad">Edad</label>
+          <input type="number" id="fldEdad" min="18" max="99" placeholder="18+" inputmode="numeric">
         </div>
-        <input type="file" id="uploadGaleria" accept="image/*" class="rp-hidden">
+        <div class="rp-field">
+          <label for="fldDescripcion">Descripción corta</label>
+          <textarea id="fldDescripcion" placeholder="Frase breve para tu tarjeta"></textarea>
+        </div>
       </div>
-    </div>
 
-    <p style="text-align:center;margin:12px 0 80px;font-size:12px;color:#8b5a72">
-      <a href="registro-perfil2.html" id="rpLinkFase2" style="color:#c2185b;font-weight:700">Datos privados</a> · Fase 2 (próximamente)
-      ·
-      <a href="registro-perfil-paso3.html" style="color:#c2185b;font-weight:700">Confirmación</a> · Fase 3 (próximamente)
-    </p>
+      <div class="rp-card">
+        <h2 class="rp-card__title">Ubicación pública</h2>
+        <div id="rpGeoPicker"></div>
+        <input type="hidden" id="fldPais" value="">
+        <input type="hidden" id="fldEstado" value="">
+        <input type="hidden" id="fldCiudad" value="">
+        <div class="rp-field">
+          <label for="fldZona">Zona o colonia</label>
+          <input type="text" id="fldZona" placeholder="Zona visible en el directorio">
+        </div>
+      </div>
+
+      <div class="rp-card">
+        <h2 class="rp-card__title">Servicio y tarifas</h2>
+        <div class="rp-field">
+          <label for="fldPrecio">Tarifa desde</label>
+          <input type="text" id="fldPrecio" placeholder="Ej. $1,500 MXN / mes">
+        </div>
+        <div class="rp-field" id="wrapModalidad">
+          <label for="fldModalidad">Modalidad</label>
+          <select id="fldModalidad">
+            <option value="">Selecciona modalidad</option>
+            <option value="con_lugar">Con lugar</option>
+            <option value="hotel">Hotel</option>
+            <option value="domicilio">Domicilio</option>
+            <option value="mixto">Mixto</option>
+          </select>
+        </div>
+        <div class="rp-field">
+          <label for="fldHorario">Horario público</label>
+          <input type="text" id="fldHorario" placeholder="Ej. Lun–Sáb 10:00–22:00">
+        </div>
+        <div class="rp-field">
+          <label for="fldServicios">Servicios u ofertas</label>
+          <textarea id="fldServicios" placeholder="Cuéntanos qué ofreces: servicios, productos, especialidades, amenidades o detalles de tu negocio…" rows="4"></textarea>
+        </div>
+      </div>
+
+      <div class="rp-card" id="rpContactCard">
+        <h2 class="rp-card__title">Métodos de contacto</h2>
+        <p class="rp-contact-hint">Marca los que quieras mostrar en tu perfil. Podrás activarlos o desactivarlos después desde tu administrador.</p>
+        <div class="rp-contact-toggles" id="rpContactToggles">
+          <label class="rp-contact-toggle"><input type="checkbox" id="ctWhatsapp" data-contact="whatsapp" checked> WhatsApp</label>
+          <label class="rp-contact-toggle"><input type="checkbox" id="ctTelegram" data-contact="telegram"> Telegram</label>
+          <label class="rp-contact-toggle"><input type="checkbox" id="ctInstagram" data-contact="instagram"> Instagram</label>
+          <label class="rp-contact-toggle"><input type="checkbox" id="ctTwitter" data-contact="twitter"> X / Twitter</label>
+          <label class="rp-contact-toggle"><input type="checkbox" id="ctFacebook" data-contact="facebook"> Facebook</label>
+          <label class="rp-contact-toggle"><input type="checkbox" id="ctGmail" data-contact="gmail"> Gmail</label>
+          <label class="rp-contact-toggle"><input type="checkbox" id="ctTelefono" data-contact="telefono"> Llamada</label>
+          <label class="rp-contact-toggle rp-contact-toggle--adultos" id="wrapCtOnlyfansToggle"><input type="checkbox" id="ctOnlyfans" data-contact="onlyfans"> OnlyFans</label>
+          <label class="rp-contact-toggle"><input type="checkbox" id="ctUbicacion" data-contact="ubicacion"> Ubicación en mapa</label>
+          <label class="rp-contact-toggle rp-contact-toggle--full"><input type="checkbox" id="ctMensajesInternos" data-contact="mensajes" checked> Mensajes internos</label>
+        </div>
+      </div>
+
+      <div class="rp-card">
+        <h2 class="rp-card__title">Imágenes públicas</h2>
+        <p class="rp-contact-hint">Foto principal y hasta 3 fotos extra para galería.</p>
+        <div class="rp-field">
+          <label>Foto principal</label>
+          <div class="rp-upload-main" id="uploadPrincipalBox">
+            <span class="rp-upload-main__hint">Toca para subir foto principal</span>
+          </div>
+          <input type="file" id="uploadPrincipal" accept="image/*" class="rp-hidden">
+        </div>
+        <div class="rp-field">
+          <label>Galería (3 fotos extra)</label>
+          <div class="rp-gallery" id="rpGalleryGrid">
+            <div class="rp-gallery__slot" data-index="0">+ Foto</div>
+            <div class="rp-gallery__slot" data-index="1">+ Foto</div>
+            <div class="rp-gallery__slot" data-index="2">+ Foto</div>
+          </div>
+          <input type="file" id="uploadGaleria" accept="image/*" class="rp-hidden">
+        </div>
+      </div>
+
+      <div class="rp-card rp-hidden" id="rpContactLinksCard">
+        <h2 class="rp-card__title">Enlaces de contacto</h2>
+        <p class="rp-contact-hint">Escribe el número, usuario o enlace de cada método que activaste.</p>
+        <div class="rp-contact-fields" id="rpContactLinkFields">
+          <div class="rp-field" id="wrapCtWhatsapp">
+            <label for="fldWhatsapp">WhatsApp</label>
+            <input type="tel" id="fldWhatsapp" placeholder="10–15 dígitos" inputmode="numeric">
+          </div>
+          <div class="rp-field rp-hidden" id="wrapCtTelegram">
+            <label for="fldTelegram">Telegram</label>
+            <input type="text" id="fldTelegram" placeholder="@usuario o enlace t.me/…">
+          </div>
+          <div class="rp-field rp-hidden" id="wrapCtInstagram">
+            <label for="fldInstagram">Instagram</label>
+            <input type="text" id="fldInstagram" placeholder="@usuario">
+          </div>
+          <div class="rp-field rp-hidden" id="wrapCtTwitter">
+            <label for="fldTwitter">X / Twitter</label>
+            <input type="text" id="fldTwitter" placeholder="@usuario">
+          </div>
+          <div class="rp-field rp-hidden" id="wrapCtFacebook">
+            <label for="fldFacebook">Facebook</label>
+            <input type="text" id="fldFacebook" placeholder="Usuario, página o enlace">
+          </div>
+          <div class="rp-field rp-hidden" id="wrapCtGmail">
+            <label for="fldGmail">Gmail</label>
+            <input type="email" id="fldGmail" placeholder="correo@gmail.com">
+          </div>
+          <div class="rp-field rp-hidden" id="wrapCtTelefono">
+            <label for="fldTelefonoPublico">Teléfono para llamadas</label>
+            <input type="tel" id="fldTelefonoPublico" placeholder="10–15 dígitos" inputmode="numeric">
+          </div>
+          <div class="rp-field rp-hidden" id="wrapCtOnlyfans">
+            <label for="fldOnlyfans">OnlyFans</label>
+            <input type="text" id="fldOnlyfans" placeholder="@usuario o enlace">
+          </div>
+          <div class="rp-field rp-hidden" id="wrapCtUbicacion">
+            <label for="fldGoogleMaps">Enlace Google Maps (opcional)</label>
+            <input type="url" id="fldGoogleMaps" placeholder="https://maps.google.com/… (opcional)">
+            <p class="rp-contact-hint" style="margin:6px 0 0">Si lo dejas vacío, en tu perfil el mapa usará la ciudad, estado y país que elegiste arriba. Podrás editar todo después desde tu administrador.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="rp-card rp-mensaje-contacto-card" id="rpMensajeContactoCard">
+        <h2 class="rp-card__title">Mensaje al contactarte</h2>
+        <p class="rp-contact-hint" id="rpMensajeContactoHint">
+          Prepara el mensaje que recibirá quien toque tu contacto. Te sugerimos un texto con la marca de la plataforma — puedes editarlo como quieras.
+        </p>
+        <div class="rp-field">
+          <label for="fldMensajeContacto">Mensaje sugerido</label>
+          <textarea id="fldMensajeContacto" data-auto="1" rows="3" placeholder="Hola, vi tu publicación en CariHub: Nombre público."></textarea>
+        </div>
+        <div class="rp-mensaje-contacto-preview">
+          <span class="rp-mensaje-contacto-preview__label">Vista previa del mensaje</span>
+          <p class="rp-mensaje-contacto-preview__text" id="rpPreviewMensajeContacto">—</p>
+        </div>
+      </div>
+
+      <div class="rp-card rp-public-previews" id="rpPublicPreviews">
+        <h2 class="rp-card__title">Así te verán</h2>
+        <p class="rp-public-previews__intro">Vista previa con los datos públicos que llevas hasta ahora. Toca <strong>Ver en grande</strong> o la miniatura para revisar cómo quedarán tu tarjeta en resultados y tu perfil publicado.</p>
+        <div class="rp-public-previews__grid">
+          <article class="rp-public-preview">
+            <header class="rp-public-preview__head">
+              <span>Tarjeta en resultados</span>
+              <button type="button" class="rp-public-preview__zoom" data-preview-expand="resultados">Ver en grande</button>
+            </header>
+            <div class="rp-public-preview__frame rp-public-preview__frame--card" data-preview-expand="resultados">
+              <div class="rp-preview-res-mount" id="rpPreviewResultadosMount" aria-live="polite"></div>
+            </div>
+          </article>
+          <article class="rp-public-preview">
+            <header class="rp-public-preview__head">
+              <span>Tu perfil público</span>
+              <button type="button" class="rp-public-preview__zoom" data-preview-expand="perfil">Ver en grande</button>
+            </header>
+            <div class="rp-public-preview__frame rp-public-preview__frame--perfil" data-preview-expand="perfil">
+              <iframe id="rpPreviewPerfilFrame" title="Vista previa de perfil público" loading="lazy"></iframe>
+            </div>
+          </article>
+        </div>
+      </div>
+
+      <div class="rp-form-actions-host" id="rpFormActionsHost1"></div>
+    </div>
   </section>
 
+  <!-- PANTALLA 4 — Datos privados (Paso 4) -->
+  <section class="rp-screen" id="screen4">
+    <div class="rp-form-sticky-top">
+      <button type="button" class="rp-back" id="rpBackPrivado">← Datos públicos</button>
+      <div class="registro-banner-shell registro-banner-shell--page rp-banner-form">
+        <div class="registro-banner-top registro-banner-top--page" data-registro-banner-slot="registro_superior"></div>
+      </div>
+      <p class="rp-notice">Esta información no se muestra al público. Aquí defines tu acceso a tu cuenta (correo, teléfono y contraseña) y datos de verificación.</p>
+    </div>
+    <div class="rp-form-scroll">
+      <p class="rp-form-step-badge">Datos privados</p>
+      <div class="rp-profile-chip">
+        <span class="rp-profile-chip__label">Tu registro</span>
+        <strong class="rp-profile-chip__value" id="rpPrivateChipValue">—</strong>
+        <span class="rp-profile-chip__sub rp-hidden" id="rpPrivateChipSub" aria-hidden="true"></span>
+      </div>
+      <p class="rp-policy-note rp-hidden" id="rpPrivatePolicy" aria-hidden="true"></p>
+      <p class="rp-notice rp-notice--schema rp-hidden" id="rpPrivateUiFormNotice" aria-hidden="true"></p>
+      <div id="rpPrivateDynamicHost"></div>
+      <div class="rp-form-actions-host" id="rpFormActionsHost4"></div>
+    </div>
+  </section>
+
+</div>
+
+<div class="rp-val-modal rp-hidden" id="rpValModal" role="dialog" aria-modal="true" aria-labelledby="rpValModalTitle">
+  <div class="rp-val-modal__backdrop" id="rpValModalBackdrop"></div>
+  <div class="rp-val-modal__panel">
+    <h3 class="rp-val-modal__title" id="rpValModalTitle">Faltan datos para continuar</h3>
+    <p class="rp-val-modal__hint" id="rpValModalHint">Completa lo siguiente antes de continuar:</p>
+    <ul class="rp-val-modal__list" id="rpValModalList"></ul>
+    <button type="button" class="rp-btn rp-btn--primary" id="rpValModalOk">Entendido</button>
+  </div>
+</div>
+
+<div class="rp-preview-modal rp-hidden" id="rpPreviewModal" role="dialog" aria-modal="true" aria-labelledby="rpPreviewModalTitle">
+  <div class="rp-preview-modal__backdrop" id="rpPreviewModalBackdrop"></div>
+  <div class="rp-preview-modal__panel">
+    <div class="rp-preview-modal__head">
+      <h3 id="rpPreviewModalTitle">Vista previa</h3>
+      <button type="button" class="rp-preview-modal__close" id="rpPreviewModalClose" aria-label="Cerrar">&times;</button>
+    </div>
+    <div class="rp-preview-modal__body" id="rpPreviewModalBody"></div>
+    <p class="rp-preview-modal__hint">Así se verá con la información pública que has capturado. Podrás ajustar fotos, tarifas y contacto después desde tu administrador.</p>
+  </div>
+</div>
+
+<div class="rp-terminos-modal rp-hidden" id="rpTerminosModal" role="dialog" aria-modal="true" aria-labelledby="rpTerminosModalTitle">
+  <div class="rp-terminos-modal__backdrop" id="rpTerminosModalBackdrop"></div>
+  <div class="rp-terminos-modal__panel">
+    <div class="rp-terminos-modal__head">
+      <h3 id="rpTerminosModalTitle">Términos y condiciones completos</h3>
+      <button type="button" class="rp-terminos-modal__close" id="rpTerminosModalClose" aria-label="Cerrar">&times;</button>
+    </div>
+    <div class="rp-terminos-modal__body" id="rpTerminosModalBody"></div>
+    <label class="rp-terminos-modal__accept">
+      <input type="checkbox" id="rpTerminosModalCheck">
+      <span>He leído y acepto los términos, condiciones, privacidad y normas de publicación.</span>
+    </label>
+    <button type="button" class="rp-btn rp-btn--primary" id="rpTerminosModalAccept" disabled>Acepto para continuar</button>
+  </div>
 </div>
 
 <div class="rp-actions" id="rpActionsBar">
@@ -238,12 +420,46 @@
   </div>
 </div>
 
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage-compat.js"></script>
+<script>
+if (!firebase.apps.length) {
+  firebase.initializeApp({
+    apiKey: "AIzaSyCp68DynjT63T9wHorCLxwBGkSEo_mYPUI",
+    authDomain: "carihub-app.firebaseapp.com",
+    projectId: "carihub-app",
+    storageBucket: "carihub-app.firebasestorage.app",
+    messagingSenderId: "236894758884",
+    appId: "1:236894758884:web:5713e39a26c71f025a49f1"
+  });
+}
+</script>
 <script src="js/carihub-pink-sheen.js"></script>
 <script src="js/banner-registro.js"></script>
+<script src="js/data/registro-schema-index.js"></script>
+<script src="js/data/registro-ui-index.js"></script>
+<script src="js/carihub-field-engine-lite.js"></script>
+<script src="js/carihub-terminos-registro.js"></script>
+<script src="js/carihub-private-fields-lite.js"></script>
+<script src="js/registro-perfil-submit.js"></script>
+<script src="js/carihub-public-render-lite.js"></script>
+<script src="js/resultados-demo.js"></script>
+<script src="js/registro-perfil-preview.js"></script>
 <script src="js/registro-perfil-wizard.js"></script>
 <script>
 document.getElementById('rpBackPublico').addEventListener('click', function () {
-  CariHubRegistroPerfil.showScreen('screen0b-adultos');
+  if (window.CariHubRegistroPerfil && CariHubRegistroPerfil.goBackFromScreen1) {
+    CariHubRegistroPerfil.goBackFromScreen1();
+  } else {
+    CariHubRegistroPerfil.showScreen('screen0');
+  }
+});
+document.getElementById('rpBackPrivado').addEventListener('click', function () {
+  if (window.CariHubRegistroPerfil && CariHubRegistroPerfil.showScreen) {
+    CariHubRegistroPerfil.showScreen('screen1');
+  }
 });
 </script>
 </body>

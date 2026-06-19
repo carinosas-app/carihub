@@ -74,8 +74,22 @@
     target.dataset.carihubPageSheen = "1";
   }
 
+  function unmountPage(target) {
+    target = target || document.body;
+    if (!target || target.dataset.carihubPageSheen !== "1") return;
+    var layer = target.querySelector(":scope > .carihub-page-sheen");
+    if (layer) layer.remove();
+    if (target === document.body) {
+      document.body.classList.remove("carihub-page-sheen-active");
+    } else {
+      target.classList.remove("carihub-pink-sheen");
+    }
+    delete target.dataset.carihubPageSheen;
+  }
+
   global.CariHubPinkSheen = {
     mountPage: mountPage,
+    unmountPage: unmountPage,
     htmlDestellosRosaCarihub: htmlDestellosRosaCarihub,
     crearCapaBrilloRosa: crearCapaBrilloRosa
   };

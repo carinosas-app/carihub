@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tarjeta — vista previa registro</title>
+<link rel="stylesheet" href="../fonts/fonts.css">
+<link rel="stylesheet" href="../css/resultados.css">
+<style>
+  html, body { margin: 0; padding: 0; min-height: 100%; overflow: hidden; background: var(--bg, #fff7fa); }
+  body[data-tema="pro"] { --bg: #eef2f8; }
+  #fitOuter { width: 100%; min-height: 100%; display: flex; justify-content: center; padding: 10px 8px 16px; box-sizing: border-box; }
+  #fitRoot { width: 1120px; max-width: 1120px; transform-origin: top center; }
+  #mount { width: 100%; max-width: 520px; margin: 0 auto; }
+  #mount .res-card { pointer-events: none; }
+  #mount .res-card__ver-btn { display: none; }
+  .rp-embed-empty { font: 600 13px/1.45 Poppins, system-ui, sans-serif; color: #7b7280; text-align: center; padding: 28px 16px; }
+</style>
+<script src="../js/data/registro-schema-index.js"></script>
+<script src="../js/carihub-field-engine-lite.js"></script>
+<script src="../js/catalogos-carihub.js"></script>
+<script src="../js/carihub-public-render-lite.js"></script>
+<script src="../js/resultados-demo.js"></script>
+</head>
+<body data-tema="adult">
+<div id="fitOuter"><div id="fitRoot"><div id="mount"></div></div></div>
+<script>
+(function () {
+  'use strict';
+  var STORAGE_KEY = 'carihub_rp_public_preview';
+
+  function readPayload() {
+    try {
+      var raw = sessionStorage.getItem(STORAGE_KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function applyScale() {
+    var outer = document.getElementById('fitOuter');
+    var root = document.getElementById('fitRoot');
+    if (!outer || !root) return;
+    var designW = 1120;
+    var avail = outer.clientWidth || window.innerWidth || 320;
+    var scale = Math.min(1, avail / designW);
+    root.style.transform = 'scale(' + scale + ')';
+    root.style.width = designW + 'px';
+    outer.style.height = Math.ceil((root.offsetHeight || 0) * scale) + 'px';
+  }
+
+  function render() {
+    var mount = document.getElementById('mount');
+    if (!mount) return;
+    var data = readPayload();
+    if (!data || !data.perfil) {
+      mount.innerHTML = '<p class="rp-embed-empty">Completa tu nombre y datos públicos para ver la tarjeta.</p>';
+      applyScale();
+      return;
+    }
+    document.body.setAttribute('data-tema', data.tema || 'adult');
+    var html = '';
+    if (window.CariHubPublicRenderLite && CariHubPublicRenderLite.cardHTML) {
+      html = CariHubPublicRenderLite.cardHTML(data.perfil, data.query || {});
+    }
+    mount.innerHTML = html || '<p class="rp-embed-empty">No se pudo generar la vista previa.</p>';
+    applyScale();
+  }
+
+  window.addEventListener('message', function (ev) {
+    if (!ev.data || ev.data.type !== 'carihub-rp-preview-update') return;
+    render();
+  });
+  window.addEventListener('resize', applyScale);
+  render();
+})();
+</script>
+</body>
+</html>
