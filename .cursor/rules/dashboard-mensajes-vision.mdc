@@ -1,0 +1,97 @@
+---
+description: Visión producto — mensajes, columna izquierda y activos del anunciante en dashboard rentero (base aprobada)
+globs: public/dashboard-rentero.html,public/js/dashboard-rentero*.js,public/css/dashboard-rentero*.css,public/preview/dashboard-cuenta*.html
+alwaysApply: true
+---
+
+# Dashboard rentero — base aprobada + visión mensajes
+
+## Base congelada (UX aprobada)
+
+La versión actual de `dashboard-rentero.html` (3 columnas, tema pro) es **la base**. Cambios futuros = acoples en columna izquierda y módulos, no rediseño total.
+
+## Multi-perfil (ya permitido)
+
+- Una cuenta/correo puede tener **múltiples perfiles** (distintas categorías).
+- Mismo correo y mismo teléfono pueden repetirse entre perfiles de la misma persona.
+- Lo crítico: **validación de datos privados** por perfil/categoría.
+- Todo se gestiona desde el dashboard.
+
+## Columna izquierda = centro rápido de activos del anunciante
+
+Sin entrar a menús profundos, la izquierda muestra **todo lo publicado**:
+
+- **Perfiles** del anunciante (miniaturas circulares; 1, 2, 3, 4…).
+- **Banners contratados** (miniatura = banner activo: home, resultados, etc.).
+- Botón **+ Nuevo perfil** (acción rápida crear perfil) — mantener salvo mejor uso.
+- Botón **agregar más** (banners u otros activos).
+- **Lives activos** encaja aquí como activo rápido.
+- Si banners/perfiles ya están arriba en la izquierda, **no duplicar** entradas de menú (ej. “Anuncios” redundante).
+
+## Mensajes: regla de oro — NUNCA mezclar hilos
+
+Los mensajes son **internos y separados por contexto de publicación**:
+
+| Contexto activo | Conversaciones que se muestran |
+|-----------------|--------------------------------|
+| Perfil A (ej. enfermero) | Solo mensajes recibidos/enviados **en nombre de Perfil A** |
+| Perfil B (ej. doctor) | Solo mensajes de **Perfil B** — otra pantalla/hilo |
+| Banner 1 (ej. cabañas) | Solo mensajes ligados a **ese banner contratado** |
+| Banner 2 (ej. hoteles) | Solo mensajes de **ese otro banner** |
+
+Misma persona física, servicios distintos → **conversaciones distintas**, no un inbox único revuelto.
+
+## Comportamiento al tocar perfil o banner (columna izquierda)
+
+1. **Tap en miniatura de perfil** (estando en Mensajes): cambia el **contexto de mensajes** al otro perfil; la lista de chats se actualiza a los de ese perfil.
+2. **Tap en miniatura de banner**: abre conversaciones **de ese banner** (contactos que escribieron por ese anuncio).
+3. **Badge/notificación** en la miniatura si hay mensajes o avisos **no leídos** en un perfil/banner que **no** es el contexto abierto.
+4. **Tap en zona del banner** (cerca o mismo tile): puede desplegar también **métricas** — clics, impresiones, renovar, editar — además del hilo de mensajes.
+
+## Layout pantalla Mensajes (centro)
+
+Cuando el módulo activo es Mensajes (columna central, no página aparte):
+
+- **Arriba (horizontal, centro):** strip de **anuncios-estados del canal mensajes** — arriba del primer chat, NO en columna izquierda.
+- **Centro-abajo:** lista de chats del **perfil o banner seleccionado**.
+- **Columna izquierda (vertical):** círculos perfiles + banners + lives; selector de **contexto**.
+- **Modo expandido:** botón amplía mensajes a pantalla casi completa; oculta columnas laterales del dashboard.
+
+Anuncios canal **mensajes** ≠ anuncios canal **perfil** (sets independientes).
+
+## Rail context-aware (depende del módulo activo)
+
+| Módulo | Tap perfil en rail | Tap banner en rail |
+|--------|-------------------|-------------------|
+| **Inicio** | Centro = vista previa iframe de ese perfil | Centro = info/métricas banner (v1) |
+| **Mensajes** | Centro = chats de ese perfil | Centro = chats de ese banner |
+
+Laterales izq/der del dashboard permanecen salvo modo mensajes expandido.
+
+## Privacidad
+
+- NO mostrar "estados activos", "en línea" ni presencia del anunciante.
+- Lives en rail = promo/oferta, no indicador de conexión.
+
+## Banner impago
+
+Si banner no está pagado/vigente → conversaciones de ese banner **bloqueadas** + CTA renovar.
+
+## Cuenta hub vs publicador
+
+- Perfil principal: acceso mensajes/favoritos/avisos sin publicar.
+- Perfiles publicadores: publicar perfil, banners, lives.
+- Métodos de contacto interior pueden compartirse entre perfiles; mensajes NO se mezclan.
+
+## Implicaciones técnicas (cuando se implemente)
+
+- Modelo de datos: conversaciones keyed por `(cuentaUid, perfilId | bannerId, …)` — no un solo `inbox` plano.
+- Nav dashboard: sidebar “Mensajes” entra al módulo; **el filtro real** lo hace la columna izquierda (activo seleccionado).
+- Reemplazar `MOCK_*` en `dashboard-rentero-nav.js` respetando esta separación por publicación.
+- Notificaciones/avisos: scoped al mismo `perfilId` / `bannerId` que el hilo.
+
+## No hacer (anti-patrones)
+
+- Inbox único mezclando todos los perfiles y banners.
+- Lista “Tus banners publicitarios activos” desconectada del contexto de mensajes.
+- Rediseñar la shell 3 columnas; solo acoplar izquierda + módulo mensajes.
