@@ -943,8 +943,7 @@ function cerrarMiPerfil(){
 
 function abrirPanel(uid){
   UID_PANEL=uid;
-  document.getElementById("modalPanel").style.display="block";
-  cargarPanel(uid);
+  window.location.href="dashboard-rentero.html";
 }
 
 function cerrarPanel(){
@@ -1636,7 +1635,7 @@ async function loginMiPerfil(){
     if(window.CariHubHomeIntenciones&&CariHubHomeIntenciones.retomarPostAuth&&CariHubHomeIntenciones.retomarPostAuth()){
       return;
     }
-    abrirPanel(cred.user.uid);
+    window.location.href="dashboard-rentero.html";
   }catch(error){
     alert("Error: "+error.message);
   }
@@ -2166,6 +2165,11 @@ async function registrar(){
       btn.innerText="Enviar registro";
       return;
     }
+    try{
+      sessionStorage.setItem("carihub_dashboard_aviso","solicitud_enviada");
+    }catch(e){}
+    window.location.href="dashboard-rentero.html";
+    return;
   }catch(error){
     if(error.message!=="validacion"){
       alert("Error: "+error.message);
@@ -2296,6 +2300,12 @@ const params = new URLSearchParams(window.location.search);
     setTimeout(function(){
       window.location.href="registro-banner.html";
     },700);
+  }
+
+  if(abrir === "login"){
+    setTimeout(function(){
+      abrirMiPerfil();
+    },500);
   }
 
   if(abrir === "registro"){

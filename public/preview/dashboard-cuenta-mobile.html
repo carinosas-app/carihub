@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Dashboard cuenta · Vista móvil · CariHub</title>
+<link rel="stylesheet" href="../fonts/fonts.css">
+<link rel="stylesheet" href="../css/carihub-premium-theme.css">
+<style>
+:root{
+  --accent:#E91E63;--accent-2:#FF4081;--accent-soft:#FFE4EF;
+  --ink:#1a0f14;--muted:#7a5c68;--line:#F8DCE8;
+  --ok:#0d9f5f;--warn:#c98a00;--danger:#d41445;
+  --top:56px;--bottom:64px;--radius:16px;
+  --safe-b:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;font-family:'Poppins',system-ui,sans-serif;color:var(--ink)}
+button{font:inherit;cursor:pointer}
+
+/* En PC: marco de teléfono centrado — una sola pantalla visible */
+body{
+  background:#111;
+  display:flex;justify-content:center;align-items:flex-start;
+  min-height:100%;padding:16px 12px 24px;
+}
+.phone{
+  width:390px;max-width:100%;
+  height:min(844px,calc(100vh - 32px));
+  background:linear-gradient(180deg,#FFF7FA,#FFF0F6);
+  border-radius:36px;overflow:hidden;position:relative;
+  box-shadow:0 30px 80px rgba(0,0,0,.45),inset 0 0 0 2px #333;
+  display:flex;flex-direction:column;
+}
+.phone::before{
+  content:"";position:absolute;top:0;left:50%;transform:translateX(-50%);
+  width:120px;height:28px;background:#111;border-radius:0 0 18px 18px;z-index:200;
+}
+.phone-label{
+  position:fixed;top:8px;left:50%;transform:translateX(-50%);
+  color:#888;font-size:11px;font-weight:700;z-index:300;white-space:nowrap;
+}
+@media (max-width:420px){
+  body{padding:0;background:linear-gradient(180deg,#FFF7FA,#FFF0F6)}
+  .phone{width:100%;height:100%;border-radius:0;box-shadow:none}
+  .phone::before{display:none}
+  .phone-label{display:none}
+}
+
+.app{flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden}
+
+/* Top */
+.m-top{
+  flex:0 0 var(--top);display:flex;align-items:center;gap:8px;
+  padding:8px 12px;padding-top:max(8px,env(safe-area-inset-top));
+  background:rgba(255,247,250,.95);backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--line);z-index:50;
+}
+.m-top__logo{
+  font-family:'Dancing Script',cursive;font-size:22px;color:var(--accent);font-weight:700;
+  flex:1;white-space:nowrap;
+}
+.m-top__btn{
+  width:40px;height:40px;border:1px solid var(--line);background:#fff;
+  border-radius:12px;display:grid;place-items:center;font-size:18px;position:relative;
+}
+.m-top__btn .n{
+  position:absolute;top:4px;right:4px;min-width:14px;height:14px;padding:0 3px;
+  border-radius:999px;background:var(--accent);color:#fff;font-size:9px;font-weight:900;
+  display:grid;place-items:center;
+}
+.m-top__ava{width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid var(--accent)}
+
+/* Scroll */
+.m-scroll{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding:12px 12px calc(var(--bottom) + var(--safe-b) + 12px)}
+
+.toast{
+  padding:10px 12px;border-radius:12px;margin-bottom:10px;font-size:12px;font-weight:700;
+  background:#e8fff3;border:1px solid #9ee8c0;color:#0a5c36;line-height:1.35;
+}
+.card{
+  background:#fff;border:1px solid var(--line);border-radius:var(--radius);
+  box-shadow:0 4px 16px rgba(233,30,99,.06);margin-bottom:10px;overflow:hidden;
+}
+.card.pad{padding:12px}
+.badge{
+  display:inline-flex;padding:3px 8px;border-radius:999px;font-size:10px;font-weight:900;
+}
+.badge.ok{color:var(--ok);background:#e8fff3}
+.badge.warn{color:var(--warn);background:#fff6df}
+
+.profile-mini{
+  display:flex;gap:10px;align-items:center;padding:12px;
+}
+.profile-mini img{width:52px;height:52px;border-radius:14px;object-fit:cover}
+.profile-mini b{display:block;font-size:15px}
+.profile-mini span{display:block;font-size:11px;color:var(--muted);margin-top:2px}
+
+.kpi-scroll{
+  display:flex;gap:8px;overflow-x:auto;padding:0 12px 12px;
+  scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;
+}
+.kpi-scroll::-webkit-scrollbar{display:none}
+.kpi{
+  flex:0 0 120px;scroll-snap-align:start;padding:10px;border-radius:14px;
+  background:#fff;border:1px solid var(--line);
+}
+.kpi small{display:block;font-size:9px;font-weight:900;text-transform:uppercase;color:var(--muted)}
+.kpi b{display:block;font-size:18px;margin-top:2px}
+
+.preview-wrap{position:relative}
+.preview-wrap iframe{width:100%;height:340px;border:0;display:block;background:#fff}
+.preview-label{
+  position:absolute;top:8px;left:8px;z-index:2;padding:4px 8px;border-radius:999px;
+  font-size:10px;font-weight:900;color:#fff;background:rgba(0,0,0,.55);
+}
+
+.btn-row{display:flex;gap:6px;flex-wrap:wrap;padding:0 12px 12px}
+.btn{
+  flex:1;min-width:calc(50% - 3px);border:0;border-radius:12px;padding:10px 8px;
+  font-size:11px;font-weight:900;color:#fff;
+  background:linear-gradient(135deg,var(--accent),var(--accent-2));
+}
+.btn.sec{color:var(--accent);background:#fff;border:1px solid var(--line)}
+
+.section-title{
+  padding:12px 12px 6px;font-size:13px;font-weight:900;display:flex;
+  justify-content:space-between;align-items:center;
+}
+.section-title span{font-size:11px;color:var(--muted);font-weight:600}
+
+.checklist{padding:0 12px 12px;display:grid;gap:6px}
+.check{
+  display:flex;align-items:center;gap:8px;font-size:11px;font-weight:700;
+  padding:8px 10px;border-radius:10px;background:#fff9fc;border:1px solid var(--line);
+}
+.check.done{color:var(--ok)}
+.check.pending{color:var(--warn)}
+
+.contact{
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+  padding:10px 12px;border-top:1px solid var(--line);font-size:12px;
+}
+.contact b{font-size:12px}
+.contact span{color:var(--muted);font-size:11px}
+.dot-on{width:8px;height:8px;border-radius:50%;background:var(--ok);flex-shrink:0}
+.dot-off{width:8px;height:8px;border-radius:50%;background:#ddd;flex-shrink:0}
+
+.feed-item{
+  display:flex;gap:10px;padding:10px 12px;border-top:1px solid var(--line);
+}
+.feed-item img{width:44px;height:44px;border-radius:12px;object-fit:cover}
+.feed-item b{font-size:12px}
+.feed-item p{margin:3px 0 0;font-size:11px;color:var(--muted);line-height:1.35}
+.feed-actions{display:flex;gap:4px;margin-top:6px;flex-wrap:wrap}
+.feed-actions button{
+  border:1px solid var(--line);background:#fff;border-radius:999px;
+  padding:5px 8px;font-size:10px;font-weight:800;
+}
+
+/* Bottom nav */
+.m-bottom{
+  flex:0 0 calc(var(--bottom) + var(--safe-b));
+  display:flex;align-items:flex-start;justify-content:space-around;
+  padding:6px 4px calc(6px + var(--safe-b));
+  background:rgba(255,255,255,.96);backdrop-filter:blur(12px);
+  border-top:1px solid var(--line);z-index:50;
+}
+.m-nav{
+  flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;
+  border:0;background:transparent;padding:4px 2px;font-size:9px;font-weight:800;color:var(--muted);
+}
+.m-nav .ic{font-size:20px;line-height:1}
+.m-nav.on{color:var(--accent)}
+
+/* Panels */
+.panel{display:none}
+.panel.on{display:block}
+
+/* Sheet menú */
+.sheet{position:absolute;inset:0;z-index:100;display:none}
+.sheet.open{display:block}
+.sheet__bg{position:absolute;inset:0;background:rgba(0,0,0,.4)}
+.sheet__panel{
+  position:absolute;bottom:0;left:0;right:0;max-height:75%;
+  background:#fff;border-radius:20px 20px 0 0;padding:16px;overflow-y:auto;
+  padding-bottom:calc(16px + var(--safe-b));
+}
+.sheet__panel h3{margin:0 0 12px;font-size:16px}
+.sheet__panel button{
+  width:100%;text-align:left;border:1px solid var(--line);background:#fff;
+  border-radius:12px;padding:12px;margin-bottom:8px;font-size:13px;font-weight:700;
+}
+.sheet__handle{width:40px;height:4px;background:#ddd;border-radius:999px;margin:0 auto 12px}
+</style>
+</head>
+<body>
+<p class="phone-label">Vista móvil · iPhone 390×844 · desliza para ver todo · <a href="dashboard-cuenta-maestro-v3.html" style="color:#ccc">Ver escritorio</a></p>
+<div class="phone" id="phone">
+  <div class="app">
+    <header class="m-top">
+      <div class="m-top__logo">Cariñosas</div>
+      <button class="m-top__btn" type="button" aria-label="Mensajes">💬<span class="n">5</span></button>
+      <button class="m-top__btn" type="button" aria-label="Notificaciones">🔔<span class="n">3</span></button>
+      <img class="m-top__ava" src="https://images.unsplash.com/photo-1512310604669-443f26c35f52?auto=format&fit=crop&w=120&q=80" alt="Valentina">
+    </header>
+
+    <div class="m-scroll">
+      <div class="toast">✅ Solicitud enviada. Tu perfil está en revisión.</div>
+
+      <div id="panel-inicio" class="panel on">
+        <div class="card profile-mini">
+          <img src="https://images.unsplash.com/photo-1512310604669-443f26c35f52?auto=format&fit=crop&w=120&q=80" alt="">
+          <div>
+            <b>Valentina</b>
+            <span>Escort VIP · Monterrey, NL</span>
+            <span class="badge ok">Activo · mes gratis</span>
+          </div>
+        </div>
+
+        <div class="card" style="padding-bottom:0">
+          <div class="kpi-scroll">
+            <div class="kpi"><small>Visitas</small><b>1,248</b></div>
+            <div class="kpi"><small>Favoritos</small><b>86</b></div>
+            <div class="kpi"><small>Clics WA</small><b>112</b></div>
+            <div class="kpi"><small>Red</small><b>14</b></div>
+          </div>
+        </div>
+
+        <div class="card preview-wrap">
+          <div class="preview-label">Vista previa perfil</div>
+          <iframe src="../perfil-publico.html?previewSource=registro&from=resultados" title="Perfil Valentina"></iframe>
+        </div>
+        <div class="btn-row">
+          <button class="btn sec" type="button">✏️ Editar</button>
+          <button class="btn sec" type="button">🖼️ Fotos</button>
+          <button class="btn" type="button" style="flex:1 1 100%">🌐 Ver público</button>
+        </div>
+
+        <div class="card">
+          <div class="section-title">Onboarding <span>PDM-02</span></div>
+          <div class="checklist">
+            <div class="check done">✓ Datos públicos enviados</div>
+            <div class="check done">✓ Datos privados</div>
+            <div class="check pending">◐ Revisión admin</div>
+            <div class="check done">✓ Verificación OK</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="section-title">Plan <span>DM-04</span></div>
+          <div class="pad" style="padding-top:0;font-size:12px;line-height:1.5">
+            <b>Básico · primer mes gratis</b><br>
+            <span style="color:var(--muted)">Vence 15 jul 2026 · 27 días</span>
+          </div>
+          <div class="btn-row" style="padding-top:0">
+            <button class="btn" type="button">Renovar plan</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="panel-perfil" class="panel">
+        <div class="card pad">
+          <div class="section-title" style="padding:0 0 8px">Información pública <span>DM-01</span></div>
+          <p style="margin:0 0 10px;font-size:11px;color:var(--muted)">Edición en registro-perfil</p>
+          <div style="display:grid;gap:8px;font-size:12px">
+            <div><span style="color:var(--muted);font-size:10px;font-weight:800">NOMBRE</span><br><b>Valentina</b></div>
+            <div><span style="color:var(--muted);font-size:10px;font-weight:800">CATEGORÍA</span><br><b>Escort VIP</b></div>
+            <div><span style="color:var(--muted);font-size:10px;font-weight:800">UBICACIÓN</span><br><b>Monterrey, Nuevo León</b></div>
+            <div><span style="color:var(--muted);font-size:10px;font-weight:800">DESCRIPCIÓN</span><br><b>Perfil premium con atención personalizada.</b></div>
+          </div>
+          <button class="btn" type="button" style="width:100%;margin-top:12px">Editar en registro</button>
+        </div>
+      </div>
+
+      <div id="panel-contactos" class="panel">
+        <div class="card">
+          <div class="section-title">Contactos <span>DM-09</span></div>
+          <div class="contact"><div><b>WhatsApp</b><br><span>528112345678</span></div><span class="dot-on"></span></div>
+          <div class="contact"><div><b>Telegram</b><br><span>@valentina_mty</span></div><span class="dot-on"></span></div>
+          <div class="contact"><div><b>Instagram</b><br><span>@valentina.vip</span></div><span class="dot-on"></span></div>
+          <div class="contact"><div><b>Llamada</b><br><span>528112345678</span></div><span class="dot-on"></span></div>
+          <div class="contact"><div><b>X / Twitter</b><br><span>@valentina_mty</span></div><span class="dot-off"></span></div>
+          <div class="contact"><div><b>Mensaje interno</b><br><span>Activo</span></div><span class="dot-on"></span></div>
+        </div>
+      </div>
+
+      <div id="panel-red" class="panel">
+        <div class="card">
+          <div class="section-title">Red de negocio</div>
+          <div class="feed-item">
+            <img src="https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=120&q=80" alt="">
+            <div>
+              <b>Luna M. · Escort</b>
+              <p>Solicitud: colaboración evento.</p>
+              <div class="feed-actions">
+                <button type="button">Aceptar</button>
+                <button type="button">Rechazar</button>
+              </div>
+            </div>
+          </div>
+          <div class="feed-item">
+            <img src="https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=120&q=80" alt="">
+            <div>
+              <b>Studio Velvet</b>
+              <p>Estado: Noche especial viernes.</p>
+              <div class="feed-actions"><button type="button">Ver</button></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="panel-mas" class="panel">
+        <div class="card pad" style="font-size:12px;line-height:1.5;color:var(--muted)">
+          <b style="color:var(--ink)">Menú de cuenta</b><br>
+          Configuración, pagos, verificación, banners, soporte y cerrar sesión — mismo contenido que el menú ☰ del diseño escritorio.
+        </div>
+        <div class="card">
+          <div class="section-title">Estado · DM-03</div>
+          <div class="pad" style="padding-top:0;font-size:12px">
+            <span class="badge ok">Activo</span> Visible en resultados
+          </div>
+        </div>
+        <div class="card">
+          <div class="section-title">Admin · DM-10</div>
+          <div class="pad" style="padding-top:0;font-size:12px;color:var(--muted)">
+            Sin observaciones pendientes.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <nav class="m-bottom" aria-label="Navegación principal">
+      <button class="m-nav on" type="button" data-panel="inicio"><span class="ic">🏠</span>Inicio</button>
+      <button class="m-nav" type="button" data-panel="perfil"><span class="ic">👤</span>Perfil</button>
+      <button class="m-nav" type="button" data-panel="contactos"><span class="ic">📞</span>Contactos</button>
+      <button class="m-nav" type="button" data-panel="red"><span class="ic">🤝</span>Red</button>
+      <button class="m-nav" type="button" data-panel="mas" id="btnMas"><span class="ic">☰</span>Más</button>
+    </nav>
+  </div>
+
+  <div class="sheet" id="sheet" aria-hidden="true">
+    <div class="sheet__bg" id="sheetBg"></div>
+    <div class="sheet__panel" role="dialog">
+      <div class="sheet__handle"></div>
+      <h3>Menú de cuenta</h3>
+      <button type="button">⚙️ Configuración</button>
+      <button type="button">💳 Pagos y planes</button>
+      <button type="button">🛡️ Verificación</button>
+      <button type="button">📢 Banners</button>
+      <button type="button">🔒 Privacidad</button>
+      <button type="button">🛟 Soporte</button>
+      <button type="button" style="color:var(--danger)">🚪 Cerrar sesión</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var panels=['inicio','perfil','contactos','red','mas'];
+  var scroll=document.querySelector('.m-scroll');
+  document.querySelectorAll('.m-nav').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var id=btn.getAttribute('data-panel');
+      document.querySelectorAll('.m-nav').forEach(function(b){b.classList.toggle('on',b===btn);});
+      panels.forEach(function(p){
+        var el=document.getElementById('panel-'+p);
+        if(el) el.classList.toggle('on',p===id);
+      });
+      if(scroll) scroll.scrollTop=0;
+    });
+  });
+  var sheet=document.getElementById('sheet');
+  var sheetBg=document.getElementById('sheetBg');
+  document.querySelector('.m-top__ava').addEventListener('click',function(){
+    sheet.classList.add('open');sheet.setAttribute('aria-hidden','false');
+  });
+  if(sheetBg) sheetBg.addEventListener('click',function(){
+    sheet.classList.remove('open');sheet.setAttribute('aria-hidden','true');
+  });
+  try{
+    sessionStorage.setItem('carihub_rp_public_preview',JSON.stringify({
+      vista:'adult',tema:'adult',
+      perfil:{
+        __id:'preview-mobile',__demo:true,
+        nombre:'Valentina',alias:'Valentina',
+        ciudad:'Monterrey',estado:'Nuevo León',pais:'México',zona:'Centro',
+        ubicacion:'Centro, Monterrey',
+        descripcion:'Complaciente y cariñosa, trato de novia.',
+        categoria:'Escort VIP',categoriaPublica:'Escort VIP',
+        fotoURL:'https://images.unsplash.com/photo-1512310604669-443f26c35f52?auto=format&fit=crop&w=1200&q=80',
+        contactoPublico:{whatsappActivo:true,whatsapp:'528112345678',telegramActivo:true,telegram:'@valentina_mty'}
+      }
+    }));
+  }catch(e){}
+})();
+</script>
+</body>
+</html>
