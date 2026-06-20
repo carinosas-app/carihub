@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard cuenta maestro v3 · CariHub</title>
+<link rel="stylesheet" href="../fonts/fonts.css">
+<link rel="stylesheet" href="../css/carihub-premium-theme.css">
+<style>
+:root{
+  --dash-sidebar:260px;
+  --dash-sidebar-collapsed:72px;
+  --dash-rail:300px;
+  --dash-top:64px;
+  --accent:#E91E63;
+  --accent-2:#FF4081;
+  --accent-soft:#FFE4EF;
+  --ink:#1a0f14;
+  --muted:#7a5c68;
+  --line:#F8DCE8;
+  --ok:#0d9f5f;
+  --warn:#c98a00;
+  --danger:#d41445;
+  --glass:rgba(255,255,255,.82);
+  --shadow:0 18px 50px rgba(233,30,99,.08);
+  --radius:20px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;font-family:'Poppins',system-ui,sans-serif;color:var(--ink);background:
+  radial-gradient(circle at 0% 0%, rgba(255,64,129,.12), transparent 28%),
+  radial-gradient(circle at 100% 10%, rgba(255,182,193,.18), transparent 32%),
+  linear-gradient(180deg,#FFF7FA 0%,#FFF0F6 100%)}
+button,input,select,textarea{font:inherit}
+a{color:var(--accent);text-decoration:none;font-weight:700}
+
+.dash-app{min-height:100vh;display:grid;grid-template-rows:var(--dash-top) 1fr}
+.dash-top{
+  position:sticky;top:0;z-index:100;height:var(--dash-top);
+  display:flex;align-items:center;gap:14px;padding:0 18px;
+  background:rgba(255,247,250,.88);backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--line);
+}
+.dash-brand{display:flex;align-items:center;gap:10px;min-width:var(--dash-sidebar)}
+.dash-brand__mark{
+  width:38px;height:38px;border-radius:14px;display:grid;place-items:center;
+  color:#fff;font-weight:900;background:linear-gradient(135deg,var(--accent),var(--accent-2));
+  box-shadow:0 10px 24px rgba(233,30,99,.25);
+}
+.dash-brand b{font-size:15px}
+.dash-brand small{display:block;color:var(--muted);font-size:11px;font-weight:600}
+.dash-top-search{
+  flex:1;max-width:520px;display:flex;align-items:center;gap:8px;
+  background:#fff;border:1px solid var(--line);border-radius:999px;padding:8px 14px;
+}
+.dash-top-search input{border:0;outline:0;flex:1;background:transparent;font-size:13px}
+.dash-top-actions{margin-left:auto;display:flex;align-items:center;gap:8px}
+.icon-btn{
+  position:relative;border:1px solid var(--line);background:#fff;border-radius:14px;
+  min-width:42px;height:42px;display:grid;place-items:center;cursor:pointer;font-size:17px;
+}
+.icon-btn .dot{
+  position:absolute;top:6px;right:6px;min-width:16px;height:16px;padding:0 4px;
+  border-radius:999px;background:var(--accent);color:#fff;font-size:10px;font-weight:900;
+  display:grid;place-items:center;
+}
+.avatar-btn{
+  display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:#fff;
+  border-radius:999px;padding:4px 10px 4px 4px;cursor:pointer;
+}
+.avatar-btn img{width:34px;height:34px;border-radius:50%;object-fit:cover}
+
+.dash-body{display:grid;grid-template-columns:var(--dash-sidebar) minmax(0,1fr) var(--dash-rail);min-height:calc(100vh - var(--dash-top))}
+
+/* Sidebar */
+.dash-sidebar{
+  border-right:1px solid var(--line);padding:16px 12px 24px;
+  background:rgba(255,255,255,.45);overflow:auto;
+}
+.nav-group{margin-bottom:18px}
+.nav-group__title{
+  font-size:10px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--muted);padding:0 10px 8px;
+}
+.nav-item{
+  width:100%;display:flex;align-items:center;gap:10px;
+  border:0;background:transparent;border-radius:14px;padding:10px 12px;
+  cursor:pointer;font-size:13px;font-weight:700;color:var(--ink);text-align:left;
+}
+.nav-item:hover{background:rgba(255,228,239,.55)}
+.nav-item.is-active{
+  background:linear-gradient(135deg,rgba(233,30,99,.14),rgba(255,64,129,.08));
+  color:var(--accent);box-shadow:inset 0 0 0 1px rgba(233,30,99,.12);
+}
+.nav-item .ico{width:22px;text-align:center}
+.pub-switch{margin-top:8px;display:grid;gap:8px}
+.pub-card{
+  display:flex;gap:10px;align-items:center;width:100%;text-align:left;
+  border:1px solid var(--line);background:#fff;border-radius:16px;padding:8px;cursor:pointer;
+}
+.pub-card.is-active{border-color:var(--accent);box-shadow:0 8px 24px rgba(233,30,99,.12)}
+.pub-card img{width:44px;height:44px;border-radius:12px;object-fit:cover}
+.pub-card b{display:block;font-size:13px}
+.pub-card span{display:block;font-size:11px;color:var(--muted);margin-top:2px}
+.badge{
+  display:inline-flex;align-items:center;padding:3px 8px;border-radius:999px;
+  font-size:10px;font-weight:900;margin-top:4px;
+}
+.badge.ok{color:var(--ok);background:#e8fff3}
+.badge.warn{color:var(--warn);background:#fff6df}
+.badge.danger{color:var(--danger);background:#ffe8ee}
+
+/* Main */
+.dash-main{padding:18px;overflow:auto}
+.section{margin-bottom:16px}
+.section-head{
+  display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:10px;
+}
+.section-head h2{margin:0;font-size:17px}
+.section-head p{margin:4px 0 0;font-size:12px;color:var(--muted);line-height:1.4}
+.card{
+  background:var(--glass);border:1px solid var(--line);border-radius:var(--radius);
+  box-shadow:var(--shadow);backdrop-filter:blur(12px);
+}
+.card.pad{padding:14px}
+
+.toolbar{display:flex;flex-wrap:wrap;gap:8px}
+.btn{
+  border:0;border-radius:14px;padding:10px 14px;font-size:12px;font-weight:900;cursor:pointer;
+  color:#fff;background:linear-gradient(135deg,var(--accent),var(--accent-2));
+  box-shadow:0 10px 22px rgba(233,30,99,.2);
+}
+.btn.secondary{
+  color:var(--accent);background:#fff;border:1px solid var(--line);box-shadow:none;
+}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line);box-shadow:none}
+
+.preview-shell{
+  display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:14px;align-items:start;
+}
+.preview-frame{
+  position:relative;border-radius:22px;overflow:hidden;border:1px solid var(--line);
+  background:#111;min-height:520px;box-shadow:var(--shadow);
+}
+.preview-frame iframe{width:100%;height:min(68vh,620px);border:0;display:block;background:#fff}
+.preview-frame__label{
+  position:absolute;top:12px;left:12px;z-index:2;
+  padding:6px 10px;border-radius:999px;font-size:11px;font-weight:900;
+  color:#fff;background:rgba(0,0,0,.55);backdrop-filter:blur(6px);
+}
+.preview-side{display:grid;gap:10px}
+.stat-pill{
+  padding:12px;border-radius:16px;background:#fff;border:1px solid var(--line);
+}
+.stat-pill span{display:block;font-size:11px;color:var(--muted);font-weight:700}
+.stat-pill b{display:block;font-size:22px;margin-top:4px}
+
+.info-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.field{
+  padding:10px 12px;border-radius:14px;background:#fff;border:1px solid var(--line);min-height:72px;
+}
+.field.wide{grid-column:1/-1}
+.field small{display:block;color:var(--muted);font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em}
+.field b{display:block;margin-top:4px;font-size:14px;line-height:1.35}
+
+.contacts{display:grid;gap:8px}
+.contact{
+  display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;
+  padding:10px 12px;border-radius:16px;background:#fff;border:1px solid var(--line);
+}
+.contact__meta b{display:block;font-size:13px}
+.contact__meta input{
+  width:100%;margin-top:6px;border:1px solid var(--line);border-radius:10px;
+  padding:8px 10px;font-size:12px;
+}
+.switch{position:relative;width:46px;height:28px}
+.switch input{opacity:0;position:absolute}
+.switch i{
+  position:absolute;inset:0;border-radius:999px;background:#ddd;cursor:pointer;transition:.2s;
+}
+.switch i::after{
+  content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;
+  background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.15);transition:.2s;
+}
+.switch input:checked + i{background:linear-gradient(135deg,var(--accent),var(--accent-2))}
+.switch input:checked + i::after{transform:translateX(18px)}
+
+.geo-bar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.chip{
+  border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 12px;
+  font-size:12px;font-weight:700;cursor:pointer;
+}
+.chip span{color:var(--muted);font-weight:600}
+
+.feed{display:grid;gap:10px}
+.feed-item{
+  display:flex;gap:12px;padding:12px;border-radius:16px;background:#fff;border:1px solid var(--line);
+}
+.feed-item img{width:52px;height:52px;border-radius:14px;object-fit:cover}
+.feed-item b{font-size:13px}
+.feed-item p{margin:4px 0 0;font-size:12px;color:var(--muted);line-height:1.4}
+.feed-actions{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.feed-actions button{
+  border:1px solid var(--line);background:#fff;border-radius:999px;padding:6px 10px;
+  font-size:11px;font-weight:800;cursor:pointer;
+}
+
+/* Right rail */
+.dash-rail{
+  border-left:1px solid var(--line);padding:16px 14px 24px;
+  background:rgba(255,255,255,.35);overflow:auto;
+}
+.widget{margin-bottom:12px;padding:14px;border-radius:var(--radius);background:var(--glass);border:1px solid var(--line);box-shadow:var(--shadow)}
+.widget h3{margin:0 0 8px;font-size:14px}
+.widget p{margin:0;font-size:12px;color:var(--muted);line-height:1.45}
+.widget .row{display:flex;justify-content:space-between;gap:8px;padding:8px 0;border-bottom:1px dashed var(--line);font-size:12px}
+.widget .row:last-child{border-bottom:0}
+.widget .row b{font-size:13px}
+.alert{
+  margin-top:10px;padding:10px 12px;border-radius:12px;font-size:12px;line-height:1.4;
+  background:#fff8e8;border:1px solid #f6d78d;color:#7a5a00;
+}
+.story-row{display:flex;gap:8px;overflow:auto;padding-bottom:4px}
+.story{
+  flex:0 0 auto;width:74px;text-align:center;font-size:10px;font-weight:700;color:var(--muted);
+}
+.story img{width:74px;height:74px;border-radius:18px;object-fit:cover;border:2px solid var(--accent);margin-bottom:4px}
+.pay-list{margin-top:8px;display:grid;gap:6px}
+.pay-item{
+  display:flex;justify-content:space-between;gap:8px;padding:8px 10px;border-radius:12px;
+  background:#fff;border:1px solid var(--line);font-size:12px;
+}
+
+.menu-sheet{
+  position:fixed;inset:0;z-index:200;display:none;
+}
+.menu-sheet.open{display:block}
+.menu-sheet__backdrop{position:absolute;inset:0;background:rgba(20,10,15,.35)}
+.menu-sheet__panel{
+  position:absolute;top:0;right:0;width:min(360px,92vw);height:100%;
+  background:#fff;border-left:1px solid var(--line);padding:18px;overflow:auto;
+  box-shadow:-20px 0 60px rgba(0,0,0,.12);
+}
+.menu-sheet__panel h3{margin:0 0 12px}
+.menu-sheet__panel button{
+  width:100%;text-align:left;border:1px solid var(--line);background:#fff;
+  border-radius:12px;padding:11px 12px;margin-bottom:8px;font-size:13px;font-weight:700;cursor:pointer;
+}
+.design-note{
+  margin:0 0 14px;padding:12px 14px;border-radius:14px;
+  background:#fff;border:1px dashed #f0b8d0;font-size:12px;color:var(--muted);line-height:1.45;
+}
+.arch-banner{
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:14px;
+}
+.arch-card{
+  padding:12px 14px;border-radius:16px;background:#fff;border:1px solid var(--line);
+  font-size:12px;line-height:1.45;
+}
+.arch-card strong{display:block;font-size:13px;margin-bottom:4px}
+.arch-card span{color:var(--muted)}
+.onboard{
+  display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;
+  padding:14px;border-radius:var(--radius);margin-bottom:14px;
+  background:linear-gradient(135deg,rgba(233,30,99,.08),rgba(255,64,129,.04));
+  border:1px solid rgba(233,30,99,.18);
+}
+.onboard h3{margin:0 0 6px;font-size:15px}
+.onboard p{margin:0;font-size:12px;color:var(--muted);line-height:1.4}
+.checklist{display:grid;gap:6px;margin-top:10px}
+.check-item{
+  display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;
+  padding:8px 10px;border-radius:12px;background:#fff;border:1px solid var(--line);
+}
+.check-item.done{color:var(--ok)}
+.check-item.pending{color:var(--warn)}
+.kpi-row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:14px}
+.kpi{
+  padding:12px 14px;border-radius:16px;background:#fff;border:1px solid var(--line);
+}
+.kpi small{display:block;font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.kpi b{display:block;font-size:22px;margin-top:4px}
+.kpi em{display:block;font-size:11px;color:var(--muted);font-style:normal;margin-top:2px}
+.spec-tag{
+  display:inline-flex;align-items:center;padding:2px 7px;border-radius:6px;
+  font-size:9px;font-weight:900;letter-spacing:.04em;text-transform:uppercase;
+  background:var(--accent-soft);color:var(--accent);margin-right:6px;vertical-align:middle;
+}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.tab{
+  border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 14px;
+  font-size:12px;font-weight:800;cursor:pointer;color:var(--muted);
+}
+.tab.is-on{color:var(--accent);border-color:rgba(233,30,99,.35);background:rgba(255,228,239,.5)}
+.tab-panel{display:none}
+.tab-panel.is-on{display:block}
+.account-pill{
+  display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:999px;
+  font-size:11px;font-weight:900;background:#fff;border:1px solid var(--line);
+}
+.account-pill.tipo-b{color:#7a3d00;background:#fff6df;border-color:#f6d78d}
+.timeline{display:grid;gap:8px}
+.timeline-item{
+  display:grid;grid-template-columns:auto 1fr;gap:10px;padding:10px 12px;
+  border-radius:14px;background:#fff;border:1px solid var(--line);font-size:12px;
+}
+.timeline-item time{color:var(--muted);font-size:11px;font-weight:700;white-space:nowrap}
+.messenger-preview{
+  display:grid;grid-template-columns:220px minmax(0,1fr);gap:0;min-height:280px;
+  border-radius:18px;overflow:hidden;border:1px solid var(--line);background:#fff;
+}
+.messenger-preview aside{border-right:1px solid var(--line);padding:10px;background:#fff9fc}
+.messenger-preview aside b{display:block;font-size:12px;margin-bottom:8px}
+.msg-thread{
+  padding:8px 10px;border-radius:12px;margin-bottom:6px;font-size:11px;font-weight:700;
+  background:#fff;border:1px solid var(--line);cursor:pointer;
+}
+.msg-thread.is-on{border-color:var(--accent);background:rgba(255,228,239,.45)}
+.messenger-preview main{padding:12px;display:flex;flex-direction:column;gap:8px}
+.bubble{max-width:78%;padding:10px 12px;border-radius:14px;font-size:12px;line-height:1.4}
+.bubble.them{align-self:flex-start;background:#f5f0f2}
+.bubble.me{align-self:flex-end;background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#fff}
+.spec-legend{
+  margin-top:18px;padding:14px;border-radius:var(--radius);background:rgba(255,255,255,.6);
+  border:1px solid var(--line);font-size:11px;color:var(--muted);line-height:1.5;
+}
+.spec-legend code{font-size:10px;background:#fff;padding:2px 5px;border-radius:6px}
+.dash-app.is-collapsed{--dash-sidebar:var(--dash-sidebar-collapsed)}
+.dash-app.is-collapsed .nav-item span:not(.ico),
+.dash-app.is-collapsed .nav-group__title,
+.dash-app.is-collapsed .pub-switch,
+.dash-app.is-collapsed .dash-brand small,
+.dash-app.is-collapsed .dash-brand b{display:none}
+.dash-app.is-collapsed .dash-brand{justify-content:center;min-width:var(--dash-sidebar-collapsed)}
+.dash-app.is-collapsed .nav-item{justify-content:center;padding:10px}
+.toast-entry{
+  margin-bottom:14px;padding:12px 14px;border-radius:14px;
+  background:#e8fff3;border:1px solid #9ee8c0;color:#0a5c36;font-size:13px;font-weight:700;
+}
+
+@media (max-width:1200px){
+  .dash-body{grid-template-columns:var(--dash-sidebar) minmax(0,1fr)}
+  .dash-rail{display:none}
+  .preview-shell{grid-template-columns:1fr}
+  .kpi-row{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .arch-banner{grid-template-columns:1fr}
+}
+@media (max-width:860px){
+  .dash-body{grid-template-columns:1fr}
+  .dash-sidebar{display:none}
+  .dash-brand{min-width:auto}
+  .kpi-row{grid-template-columns:1fr}
+  .onboard{grid-template-columns:1fr}
+  .messenger-preview{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<a href="dashboard-cuenta-mobile.html" style="position:fixed;bottom:12px;left:50%;transform:translateX(-50%);z-index:999;padding:10px 16px;border-radius:999px;background:#E91E63;color:#fff;font-size:12px;font-weight:900;text-decoration:none;box-shadow:0 8px 24px rgba(233,30,99,.35);font-family:Poppins,sans-serif">📱 Ver en celular</a>
+<div class="dash-app" id="dashApp">
+  <header class="dash-top">
+    <button class="icon-btn" type="button" id="btnToggleSidebar" title="Colapsar menú" aria-label="Colapsar menú">☰</button>
+    <div class="dash-brand">
+      <div class="dash-brand__mark">C</div>
+      <div>
+        <b class="pbrand__name" style="font-family:'Dancing Script',cursive;font-size:22px;color:var(--accent)">Cariñosas</b>
+        <small>/cuenta/perfil · PDM-02 activo</small>
+      </div>
+    </div>
+    <label class="dash-top-search">
+      <span aria-hidden="true">🔎</span>
+      <input type="search" placeholder="Buscar en cuenta, mensajes o red de negocio (no amistades)…" disabled>
+    </label>
+    <div class="dash-top-actions">
+      <span class="account-pill tipo-b" title="Tipo B — perfil en directorio">🏢 Perfil negocio</span>
+      <button class="icon-btn" type="button" title="Mensajes · cuenta social vinculada">💬<span class="dot">5</span></button>
+      <button class="icon-btn" type="button" title="Notificaciones">🔔<span class="dot">3</span></button>
+      <button class="avatar-btn" type="button" id="btnOpenMenu">
+        <img src="https://images.unsplash.com/photo-1512310604669-443f26c35f52?auto=format&fit=crop&w=120&q=80" alt="">
+        <span style="font-size:12px;font-weight:800">Valentina</span>
+      </button>
+    </div>
+  </header>
+
+  <div class="dash-body">
+    <aside class="dash-sidebar">
+      <nav class="nav-group">
+        <div class="nav-group__title">Mi cuenta</div>
+        <button class="nav-item is-active" type="button"><span class="ico">📊</span> Resumen</button>
+        <button class="nav-item" type="button"><span class="ico">👤</span> Perfil público</button>
+        <button class="nav-item" type="button"><span class="ico">🖼️</span> Fotos</button>
+        <button class="nav-item" type="button"><span class="ico">🛡️</span> Verificación</button>
+        <button class="nav-item" type="button"><span class="ico">📈</span> Estadísticas</button>
+        <button class="nav-item" type="button"><span class="ico">💳</span> Pagos y planes</button>
+        <button class="nav-item" type="button"><span class="ico">📢</span> Banners y anuncios</button>
+        <button class="nav-item" type="button"><span class="ico">❤️</span> Favoritos</button>
+      </nav>
+      <nav class="nav-group">
+        <div class="nav-group__title">Red y actividad</div>
+        <button class="nav-item" type="button"><span class="ico">🤝</span> Solicitudes de negocio</button>
+        <button class="nav-item" type="button"><span class="ico">📱</span> Estados y lives</button>
+        <button class="nav-item" type="button"><span class="ico">💬</span> Mensajería</button>
+      </nav>
+      <nav class="nav-group">
+        <div class="nav-group__title">Configuración</div>
+        <button class="nav-item" type="button"><span class="ico">⚙️</span> Cuenta</button>
+        <button class="nav-item" type="button"><span class="ico">🔒</span> Privacidad</button>
+        <button class="nav-item" type="button"><span class="ico">🔔</span> Notificaciones</button>
+        <button class="nav-item" type="button"><span class="ico">🎨</span> Apariencia</button>
+        <button class="nav-item" type="button"><span class="ico">🛟</span> Soporte</button>
+      </nav>
+
+      <div class="nav-group">
+        <div class="nav-group__title">Mis publicaciones</div>
+        <div class="pub-switch">
+          <button class="pub-card is-active" type="button">
+            <img src="https://images.unsplash.com/photo-1512310604669-443f26c35f52?auto=format&fit=crop&w=120&q=80" alt="">
+            <span>
+              <b>Valentina</b>
+              <span>Perfil activo · Monterrey</span>
+              <span class="badge ok">Activo</span>
+            </span>
+          </button>
+          <button class="pub-card" type="button">
+            <img src="../img/home/banners/ad-banner-pink-02.png" alt="">
+            <span>
+              <b>Banner resultados</b>
+              <span>Publicidad · Nuevo León</span>
+              <span class="badge warn">Pendiente</span>
+            </span>
+          </button>
+        </div>
+        <button class="btn secondary" type="button" style="width:100%;margin-top:10px">+ Nueva publicación</button>
+      </div>
+    </aside>
+
+    <main class="dash-main">
+      <div class="toast-entry" role="status">✅ Solicitud enviada. Tu perfil está en revisión; puedes seguir completando datos mientras administración valida.</div>
+
+      <p class="design-note">
+        <strong>Maestro v3 — vista previa de diseño definitivo.</strong> Sintetiza SPEC-PANEL-DASHBOARD v1.0.1 (DM-03..10, DP-01..09), fixtures PDM-01..10, SISTEMA-VISUAL-CARIHUB, red de negocio (conexiones tipadas, no amistades), separación Tipo A social vs Tipo B directorio, y decisiones de conversaciones Cursor (funnel registro→dashboard, delegación edición→Registro, cobros→Pagos). Patrones UI 2025–26: sidebar colapsable ~256px, KPIs en F-pattern, settings por ámbito, cards modulares.
+      </p>
+
+      <div class="arch-banner" aria-label="Tres capas CariHub">
+        <div class="arch-card"><strong>① Directorio público</strong><span>Home, resultados, perfil público. Solo perfiles Tipo B activos y con contrato vigente.</span></div>
+        <div class="arch-card"><strong>② Red de negocios</strong><span>Solicitudes, estados, lives, mensajes. Relaciones profesionales — no red social de amigos.</span></div>
+        <div class="arch-card"><strong>③ Publicidad</strong><span>Banners y slots. Flujo separado: «Anúnciate aquí» → <code>/registro/banner</code> → <code>/cuenta/banners</code>.</span></div>
+      </div>
+
+      <div class="onboard card pad">
+        <div>
+          <h3>Onboarding operativo · checklist PDM-02</h3>
+          <p>Progreso hacia perfil activo con primer mes gratis aplicado.</p>
+          <div class="checklist">
+            <div class="check-item done">✓ Cuenta creada y sesión iniciada</div>
+            <div class="check-item done">✓ Datos públicos enviados (registro-perfil)</div>
+            <div class="check-item done">✓ Datos privados y consentimientos</div>
+            <div class="check-item pending">◐ Revisión administración (DM-03)</div>
+            <div class="check-item done">✓ Verificación documental (DM-08)</div>
+            <div class="check-item done">✓ Plan básico · mes gratis (DM-04)</div>
+          </div>
+        </div>
+        <div class="toolbar" style="flex-direction:column;align-items:stretch">
+          <button class="btn" type="button">Completar lo pendiente</button>
+          <button class="btn secondary" type="button">Ver guía de publicación</button>
+        </div>
+      </div>
+
+      <div class="kpi-row" aria-label="Métricas rápidas DM-07">
+        <div class="kpi"><small>DM-07 · Visitas</small><b>1,248</b><em>+12% vs mes anterior</em></div>
+        <div class="kpi"><small>DM-07 · Favoritos</small><b>86</b><em>Desde resultados</em></div>
+        <div class="kpi"><small>DM-09 · Clics WA</small><b>112</b><em>Contacto activo</em></div>
+        <div class="kpi"><small>Red negocio</small><b>14</b><em>Conexiones aceptadas</em></div>
+      </div>
+
+      <div class="tabs" role="tablist" aria-label="Secciones principales">
+        <button class="tab is-on" type="button" data-tab="resumen">Resumen</button>
+        <button class="tab" type="button" data-tab="perfil">Perfil público</button>
+        <button class="tab" type="button" data-tab="contactos">Contactos</button>
+        <button class="tab" type="button" data-tab="red">Red y lives</button>
+        <button class="tab" type="button" data-tab="mensajes">Mensajería</button>
+        <button class="tab" type="button" data-tab="pagos">Pagos</button>
+      </div>
+
+      <div class="tab-panel is-on" id="panel-resumen">
+      <section class="section">
+        <div class="section-head">
+          <div>
+            <h2><span class="spec-tag">DP-02</span>Vista previa del perfil publicado</h2>
+            <p>Así te ven en resultados y en tu página pública · edición delega a DM-01/DM-02</p>
+          </div>
+          <div class="toolbar">
+            <button class="btn secondary" type="button" title="PDM-08 → /registro/editar/{id}">✏️ Editar perfil</button>
+            <button class="btn secondary" type="button">🖼️ Editar fotos</button>
+            <button class="btn secondary" type="button">👁 Ver en grande</button>
+            <button class="btn" type="button">🌐 Abrir perfil público</button>
+          </div>
+        </div>
+        <div class="preview-shell">
+          <div class="preview-frame card">
+            <span class="preview-frame__label">Vista previa en vivo · RenderEngine</span>
+            <iframe src="../perfil-publico.html?previewSource=registro&from=resultados" title="Vista previa perfil Valentina"></iframe>
+          </div>
+          <div class="preview-side">
+            <div class="stat-pill"><span>Visitas del mes</span><b>1,248</b></div>
+            <div class="stat-pill"><span>Favoritos recibidos</span><b>86</b></div>
+            <div class="stat-pill"><span>Clics en WhatsApp</span><b>112</b></div>
+            <div class="stat-pill"><span>Mensajes internos</span><b>36</b></div>
+            <button class="btn secondary" type="button" style="width:100%">Ver estadísticas completas</button>
+          </div>
+        </div>
+      </section>
+      <section class="section card pad">
+        <div class="section-head"><div><h2>Actividad reciente</h2><p>Timeline operativo — no feed social</p></div></div>
+        <div class="timeline">
+          <div class="timeline-item"><time>Hoy 14:32</time><div><b>Nueva solicitud de negocio</b> — Luna M. quiere colaborar en evento privado.</div></div>
+          <div class="timeline-item"><time>Hoy 11:05</time><div><b>+24 visitas</b> desde resultados Monterrey · Escort VIP.</div></div>
+          <div class="timeline-item"><time>Ayer</time><div><b>Verificación aprobada</b> — DM-08 selfie e INE confirmados por admin.</div></div>
+          <div class="timeline-item"><time>12 jun</time><div><b>Solicitud enviada</b> — registro-perfil completado; estado <em>registro_pendiente</em>.</div></div>
+        </div>
+      </section>
+      </div>
+
+      <div class="tab-panel" id="panel-perfil">
+      <section class="section card pad">
+        <div class="section-head">
+          <div>
+            <h2>Información pública</h2>
+            <p>DP-02 lectura · La edición se hace en Registro (DM-01)</p>
+          </div>
+          <button class="btn secondary" type="button">Editar en registro</button>
+        </div>
+        <div class="info-grid">
+          <div class="field"><small>Nombre público</small><b>Valentina</b></div>
+          <div class="field"><small>Categoría</small><b>Escort VIP</b></div>
+          <div class="field"><small>País</small><b>México</b></div>
+          <div class="field"><small>Estado</small><b>Nuevo León</b></div>
+          <div class="field"><small>Ciudad</small><b>Monterrey</b></div>
+          <div class="field"><small>Zona</small><b>Centro · San Pedro</b></div>
+          <div class="field wide"><small>Descripción</small><b>Perfil premium con atención personalizada, horarios flexibles y verificación completa en CariHub.</b></div>
+          <div class="field"><small>Horario</small><b>Lun–Dom · 10:00–02:00</b></div>
+          <div class="field"><small>Tarifas desde</small><b>$2,500 MXN</b></div>
+        </div>
+      </section>
+      </div>
+
+      <div class="tab-panel" id="panel-contactos">
+      <section class="section card pad">
+        <div class="section-head">
+          <div>
+            <h2><span class="spec-tag">DM-09</span>Medios de contacto activos</h2>
+            <p>Lectura en panel; edición recomendada vía Registro · 9 canales canónicos</p>
+          </div>
+          <button class="btn secondary" type="button">Guardar cambios</button>
+        </div>
+        <div class="contacts">
+          <div class="contact"><div class="contact__meta"><b>WhatsApp</b><input value="528112345678" readonly></div><label class="switch"><input type="checkbox" checked><i></i></label></div>
+          <div class="contact"><div class="contact__meta"><b>Telegram</b><input value="@valentina_mty" readonly></div><label class="switch"><input type="checkbox" checked><i></i></label></div>
+          <div class="contact"><div class="contact__meta"><b>Instagram</b><input value="@valentina.vip" readonly></div><label class="switch"><input type="checkbox" checked><i></i></label></div>
+          <div class="contact"><div class="contact__meta"><b>X / Twitter</b><input value="@valentina_mty" readonly></div><label class="switch"><input type="checkbox"><i></i></label></div>
+          <div class="contact"><div class="contact__meta"><b>Facebook</b><input value="valentina.mty" readonly></div><label class="switch"><input type="checkbox"><i></i></label></div>
+          <div class="contact"><div class="contact__meta"><b>OnlyFans</b><input value="@valentina" readonly></div><label class="switch"><input type="checkbox"><i></i></label></div>
+          <div class="contact"><div class="contact__meta"><b>Gmail</b><input value="contacto@valentina.app" readonly></div><label class="switch"><input type="checkbox"><i></i></label></div>
+          <div class="contact"><div class="contact__meta"><b>Llamada</b><input value="528112345678" readonly></div><label class="switch"><input type="checkbox" checked><i></i></label></div>
+          <div class="contact"><div class="contact__meta"><b>Google Maps</b><input value="San Pedro Garza García, NL" readonly></div><label class="switch"><input type="checkbox" checked><i></i></label></div>
+          <div class="contact"><div class="contact__meta"><b>Mensaje interno Cariñosas</b><input value="Activo · mensaje personalizado" readonly></div><label class="switch"><input type="checkbox" checked><i></i></label></div>
+        </div>
+      </section>
+      </div>
+
+      <div class="tab-panel" id="panel-red">
+      <section class="section card pad">
+        <div class="section-head">
+          <div>
+            <h2>Red de negocio · Estados y lives</h2>
+            <p>Busca perfiles para enviar solicitudes tipadas y revisa actividad de tu red profesional</p>
+          </div>
+        </div>
+        <div class="geo-bar">
+          <button class="chip" type="button">Categoría <span>Escort VIP</span></button>
+          <button class="chip" type="button">País <span>México</span></button>
+          <button class="chip" type="button">Estado <span>Nuevo León</span></button>
+          <button class="chip" type="button">Ciudad <span>Monterrey</span></button>
+          <button class="btn" type="button">Buscar personas</button>
+        </div>
+        <div class="feed">
+          <article class="feed-item">
+            <img src="https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=120&q=80" alt="">
+            <div>
+              <b>Luna M. · Escort · Monterrey</b>
+              <p>Solicitud de negocio: colaboración para evento privado.</p>
+              <div class="feed-actions">
+                <button type="button">Aceptar</button>
+                <button type="button">Rechazar</button>
+                <button type="button">Ver perfil</button>
+              </div>
+            </div>
+          </article>
+          <article class="feed-item">
+            <img src="https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=120&q=80" alt="">
+            <div>
+              <b>Studio Velvet · Table Dance · San Pedro</b>
+              <p>Publicó un estado: Noche especial este viernes.</p>
+              <div class="feed-actions"><button type="button">Ver estado</button><button type="button">Enviar solicitud</button></div>
+            </div>
+          </article>
+          <article class="feed-item">
+            <img src="https://images.unsplash.com/photo-1509967419530-da38b4704bc6?auto=format&fit=crop&w=120&q=80" alt="">
+            <div>
+              <b>Andrea VIP · En vivo ahora</b>
+              <p>Live activo · Promoción fin de semana en Monterrey.</p>
+              <div class="feed-actions"><button type="button">Unirme al live</button><button type="button">Mensaje</button></div>
+            </div>
+          </article>
+        </div>
+      </section>
+      </div>
+
+      <div class="tab-panel" id="panel-mensajes">
+      <section class="section card pad">
+        <div class="section-head">
+          <div>
+            <h2><span class="spec-tag">Post-MVP</span>Mensajería interna</h2>
+            <p>MVP: WhatsApp externo. V1.1: inbox in-app vinculado a cuenta social Tipo A.</p>
+          </div>
+          <button class="btn secondary" type="button">Abrir messenger completo</button>
+        </div>
+        <div class="messenger-preview">
+          <aside>
+            <b>Conversaciones</b>
+            <div class="msg-thread is-on">Carlos · consulta horario</div>
+            <div class="msg-thread">Luna M. · negocio</div>
+            <div class="msg-thread">Soporte CariHub</div>
+          </aside>
+          <main>
+            <div class="bubble them">Hola Valentina, ¿tienes disponibilidad el viernes por la noche?</div>
+            <div class="bubble me">¡Hola! Sí, tengo horario después de las 20:00. Te paso detalles por WhatsApp si prefieres.</div>
+            <div class="bubble them">Perfecto, gracias 🙏</div>
+          </main>
+        </div>
+      </section>
+      </div>
+
+      <div class="tab-panel" id="panel-pagos">
+      <section class="section card pad">
+        <div class="section-head">
+          <div>
+            <h2><span class="spec-tag">DM-04..06</span>Pagos y renovación</h2>
+            <p>El panel informa; el cobro ejecuta en <code>/cuenta/pagos</code></p>
+          </div>
+          <button class="btn" type="button">Renovar plan</button>
+        </div>
+        <div class="info-grid">
+          <div class="field"><small>Plan actual</small><b>Básico · primer mes gratis</b></div>
+          <div class="field"><small>Vigencia</small><b>15 jul 2026 · 27 días</b></div>
+          <div class="field"><small>Último pago</small><b>12 jun · $0 promo</b></div>
+          <div class="field"><small>Próximo cargo</small><b>$299 MXN / mes</b></div>
+          <div class="field wide"><small>Regla PDM-03</small><b>Si vence el contrato, el perfil deja de renderizarse en directorio hasta renovar en Pagos.</b></div>
+        </div>
+        <div class="pay-list" style="margin-top:12px">
+          <div class="pay-item"><span>12 jun 2026 · Stripe</span><b>$0 · Promo mes gratis</b></div>
+          <div class="pay-item"><span>—</span><b>Sin pagos anteriores</b></div>
+        </div>
+      </section>
+      </div>
+
+      <div class="spec-legend">
+        <strong>Leyenda de implementación</strong> — Módulos dashboard: DM-01/02 edición en <code>/registro/editar/{perfilId}</code>; DM-03 estado; DM-04 vigencia; DM-05 historial; DM-06 CTA renovar → <code>/cuenta/pagos/renovar</code>; DM-07 stats; DM-08 verificación; DM-09 contactos visibles; DM-10 observaciones admin. Estados PDM: borrador, registro_pendiente, activo, vencido, correccion_solicitada, pago_pendiente. Cuenta Tipo A (social) no aparece en directorio; Tipo B (perfil/negocio) sí. Red: solicitudes tipadas aceptar/rechazar — no «agregar amigo».
+      </div>
+    </main>
+
+    <aside class="dash-rail">
+      <div class="widget">
+        <h3>Renovación · DM-06</h3>
+        <p>El panel no cobra. Delega a Pagos.</p>
+        <button class="btn" type="button" style="width:100%">Ir a /cuenta/pagos/renovar</button>
+      </div>
+
+      <div class="widget">
+        <h3>Estado del perfil · DM-03</h3>
+        <p>Tu perfil está visible en resultados.</p>
+        <div class="row"><span>Estado revisión</span><b class="badge ok">Activo</b></div>
+        <div class="row"><span>Publicación</span><b>Visible</b></div>
+        <div class="row"><span>Actualización pendiente</span><b>No</b></div>
+      </div>
+
+      <div class="widget">
+        <h3>Plan y vigencia · DM-04</h3>
+        <div class="row"><span>Plan</span><b>Básico · mes gratis</b></div>
+        <div class="row"><span>Vence</span><b>15 jul 2026</b></div>
+        <div class="row"><span>Días restantes</span><b>27</b></div>
+        <button class="btn secondary" type="button" style="width:100%;margin-top:8px">Renovar plan</button>
+      </div>
+
+      <div class="widget">
+        <h3>Últimos pagos · DM-05</h3>
+        <div class="pay-list">
+          <div class="pay-item"><span>12 jun · Stripe</span><b>$0 · Promo</b></div>
+          <div class="pay-item"><span>—</span><b>Sin más pagos</b></div>
+        </div>
+        <button class="btn ghost" type="button" style="width:100%;margin-top:8px">Ver historial</button>
+      </div>
+
+      <div class="widget">
+        <h3>Verificación · DM-08</h3>
+        <div class="row"><span>Correo</span><b>✅ Verificado</b></div>
+        <div class="row"><span>INE</span><b>✅ Aprobado</b></div>
+        <div class="row"><span>Selfie</span><b>✅ Aprobado</b></div>
+        <div class="row"><span>Mayor de edad</span><b>✅ Confirmado</b></div>
+      </div>
+
+      <div class="widget">
+        <h3>Observaciones admin · DM-10</h3>
+        <div class="alert">Sin observaciones pendientes. Si administración solicita corrección, aparecerá aquí.</div>
+      </div>
+
+      <div class="widget">
+        <h3>Mis estados y lives</h3>
+        <div class="story-row">
+          <div class="story"><img src="https://images.unsplash.com/photo-1512310604669-443f26c35f52?auto=format&fit=crop&w=160&q=80" alt=""><span>Disponible hoy</span></div>
+          <div class="story"><img src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=160&q=80" alt=""><span>Live Q&A</span></div>
+          <div class="story" style="display:grid;place-items:center;width:74px;height:74px;border:2px dashed var(--line);border-radius:18px;font-size:22px;color:var(--accent)">+</div>
+        </div>
+        <div class="toolbar" style="margin-top:10px">
+          <button class="btn secondary" type="button">Publicar estado</button>
+          <button class="btn secondary" type="button">Iniciar live</button>
+        </div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<div class="menu-sheet" id="menuSheet" aria-hidden="true">
+  <div class="menu-sheet__backdrop" id="menuBackdrop"></div>
+  <div class="menu-sheet__panel" role="dialog" aria-label="Menú de cuenta">
+    <h3>Menú de cuenta</h3>
+    <button type="button">⚙️ Configuración de cuenta</button>
+    <button type="button">🔒 Privacidad y seguridad</button>
+    <button type="button">🔔 Notificaciones y alertas</button>
+    <button type="button">💳 Pagos, planes y contratos</button>
+    <button type="button">📢 Mis banners y publicidad</button>
+    <button type="button">🛡️ Verificación y documentos</button>
+    <button type="button">🤝 Red y solicitudes de negocio</button>
+    <button type="button">🎨 Apariencia del perfil</button>
+    <button type="button">🌐 Idioma y zona horaria</button>
+    <button type="button">⏸️ Pausar o eliminar perfil</button>
+    <button type="button">🛟 Ayuda y soporte</button>
+    <button type="button" style="color:var(--danger)">🚪 Cerrar sesión</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  var sheet=document.getElementById('menuSheet');
+  var open=document.getElementById('btnOpenMenu');
+  var close=document.getElementById('menuBackdrop');
+  var app=document.getElementById('dashApp');
+  var toggle=document.getElementById('btnToggleSidebar');
+  function toggleMenu(on){sheet.classList.toggle('open',on);sheet.setAttribute('aria-hidden',on?'false':'true');}
+  if(open) open.addEventListener('click',function(){toggleMenu(true);});
+  if(close) close.addEventListener('click',function(){toggleMenu(false);});
+  if(toggle&&app) toggle.addEventListener('click',function(){app.classList.toggle('is-collapsed');});
+  document.querySelectorAll('.tab').forEach(function(tab){
+    tab.addEventListener('click',function(){
+      var id=tab.getAttribute('data-tab');
+      document.querySelectorAll('.tab').forEach(function(t){t.classList.toggle('is-on',t===tab);});
+      document.querySelectorAll('.tab-panel').forEach(function(p){p.classList.toggle('is-on',p.id==='panel-'+id);});
+    });
+  });
+  try{
+    var payload={
+      vista:'adult',tema:'adult',
+      perfil:{
+        __id:'preview-dashboard',__demo:true,
+        nombre:'Valentina',alias:'Valentina',
+        ciudad:'Monterrey',estado:'Nuevo León',pais:'México',zona:'Centro',
+        ubicacion:'Centro, Monterrey',
+        descripcion:'Perfil premium con atención personalizada.',
+        categoria:'Escort VIP',categoriaPublica:'Escort VIP',
+        fotoURL:'https://images.unsplash.com/photo-1512310604669-443f26c35f52?auto=format&fit=crop&w=1200&q=80',
+        fotosExtraURL:[
+          'https://images.unsplash.com/photo-1509967419530-da38b4704bc6?auto=format&fit=crop&w=600&q=80',
+          'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=600&q=80'
+        ],
+        contactoPublico:{whatsappActivo:true,whatsapp:'528112345678',telegramActivo:true,telegram:'@valentina_mty',instagramActivo:true,instagram:'@valentina.vip',mensajeInternoActivo:true}
+      },
+      query:{categoria:'Escort VIP',pais:'México',estado:'Nuevo León',ciudad:'Monterrey'}
+    };
+    sessionStorage.setItem('carihub_rp_public_preview',JSON.stringify(payload));
+  }catch(e){}
+})();
+</script>
+</body>
+</html>

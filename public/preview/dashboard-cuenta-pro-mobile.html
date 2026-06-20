@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Cariñosas · Panel móvil profesional</title>
+<link rel="stylesheet" href="../fonts/fonts.css">
+<style>
+:root{
+  --bg:#0c0c0f;--surface:#141418;--surface2:#1c1c22;--surface3:#24242c;
+  --border:#2a2a34;--text:#f4f4f6;--muted:#8b8b9a;
+  --pink:#E91E63;--pink2:#FF4081;--green:#22c55e;
+  --top:52px;--bottom:68px;--radius:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:'Poppins',system-ui,sans-serif}
+button{font:inherit;cursor:pointer;color:inherit;border:0;background:transparent}
+
+body{
+  background:#000;display:flex;justify-content:center;align-items:flex-start;
+  min-height:100%;padding:20px 12px;
+}
+.frame-label{
+  position:fixed;top:6px;left:50%;transform:translateX(-50%);
+  color:#666;font-size:11px;font-weight:700;z-index:999;
+}
+.frame-label a{color:#aaa}
+.phone{
+  width:390px;max-width:100%;height:min(844px,calc(100vh - 40px));
+  background:var(--bg);border-radius:40px;overflow:hidden;position:relative;
+  box-shadow:0 40px 100px rgba(0,0,0,.6),inset 0 0 0 2px #2a2a34;
+  display:flex;flex-direction:column;color:var(--text);
+}
+.phone::before{
+  content:"";position:absolute;top:0;left:50%;transform:translateX(-50%);
+  width:110px;height:26px;background:#000;border-radius:0 0 16px 16px;z-index:200;
+}
+@media(max-width:420px){
+  body{padding:0;background:var(--bg)}
+  .phone{width:100%;height:100%;border-radius:0;box-shadow:none}
+  .phone::before,.frame-label{display:none}
+}
+
+.app{flex:1;display:flex;flex-direction:column;min-height:0}
+
+.top{
+  flex:0 0 var(--top);display:flex;align-items:center;gap:8px;
+  padding:8px 14px;padding-top:max(10px,env(safe-area-inset-top));
+  background:rgba(12,12,15,.95);border-bottom:1px solid var(--border);z-index:50;
+}
+.top__logo{font-weight:800;font-size:16px;flex:1;display:flex;align-items:center;gap:6px}
+.top__logo i{
+  width:28px;height:28px;border-radius:8px;display:grid;place-items:center;
+  background:linear-gradient(135deg,var(--pink),var(--pink2));font-size:14px;
+}
+.ic{
+  width:38px;height:38px;border-radius:10px;background:var(--surface2);
+  border:1px solid var(--border);display:grid;place-items:center;font-size:17px;position:relative;
+}
+.ic .b{
+  position:absolute;top:2px;right:2px;min-width:14px;height:14px;padding:0 3px;
+  border-radius:999px;background:var(--pink);color:#fff;font-size:9px;font-weight:900;
+  display:grid;place-items:center;
+}
+.top img{width:34px;height:34px;border-radius:50%;object-fit:cover;border:2px solid var(--pink)}
+
+.scroll{
+  flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;
+  padding:12px 14px calc(var(--bottom) + env(safe-area-inset-bottom) + 12px);
+}
+
+.quick{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.q{
+  padding:12px 6px;border-radius:var(--radius);background:var(--surface2);
+  border:1px solid var(--border);text-align:center;
+}
+.q .qi{font-size:20px;margin-bottom:4px}
+.q span{font-size:9px;font-weight:700;color:var(--muted)}
+
+.card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:12px;overflow:hidden}
+.card-h{padding:12px 14px;border-bottom:1px solid var(--border);font-size:13px;font-weight:800}
+
+.banner{height:100px;position:relative}
+.banner img{width:100%;height:100%;object-fit:cover;opacity:.75}
+.body-p{padding:0 14px 14px}
+.ava{width:60px;height:60px;border-radius:14px;object-fit:cover;margin-top:-30px;border:3px solid var(--surface2)}
+.name{font-size:16px;font-weight:800;margin-top:6px}
+.meta{font-size:11px;color:var(--muted);margin-top:2px}
+.price{display:inline-block;margin-top:8px;padding:5px 10px;border-radius:8px;background:rgba(233,30,99,.15);color:var(--pink2);font-size:12px;font-weight:800}
+
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:12px 14px}
+.st{text-align:center;padding:8px 4px;border-radius:10px;background:var(--surface3)}
+.st small{display:block;font-size:8px;color:var(--muted);font-weight:700;text-transform:uppercase}
+.st b{display:block;font-size:15px;margin-top:2px}
+
+.stories{display:flex;gap:10px;overflow-x:auto;padding:12px 14px;scrollbar-width:none}
+.stories::-webkit-scrollbar{display:none}
+.story{flex:0 0 auto;text-align:center;width:60px}
+.story img{width:56px;height:56px;border-radius:50%;object-fit:cover;border:2px solid var(--pink);padding:2px}
+.story span{display:block;font-size:9px;color:var(--muted);margin-top:3px}
+
+.post{padding:12px 14px;border-top:1px solid var(--border)}
+.post-h{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+.post-h img{width:36px;height:36px;border-radius:50%;object-fit:cover}
+.post-h b{font-size:12px}
+.post-h time{margin-left:auto;font-size:10px;color:var(--muted)}
+.post p{font-size:12px;color:#ccc;line-height:1.45}
+
+.bottom{
+  flex:0 0 calc(var(--bottom) + env(safe-area-inset-bottom));
+  display:flex;align-items:flex-start;justify-content:space-around;
+  padding:6px 4px calc(6px + env(safe-area-inset-bottom));
+  background:rgba(20,20,24,.97);border-top:1px solid var(--border);z-index:50;
+}
+.bottom button{
+  flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;
+  font-size:9px;font-weight:700;color:var(--muted);padding:4px;
+}
+.bottom button .ic{font-size:20px}
+.bottom button.on{color:var(--pink)}
+.fab{
+  width:46px;height:46px;border-radius:50%;margin-top:-18px;
+  background:linear-gradient(135deg,var(--pink),var(--pink2));color:#fff;
+  font-size:22px;display:grid;place-items:center;
+  box-shadow:0 4px 20px rgba(233,30,99,.4);
+}
+</style>
+</head>
+<body>
+<p class="frame-label">Panel móvil profesional · 390×844 · <a href="dashboard-cuenta-pro.html">Ver escritorio</a></p>
+<div class="phone">
+  <div class="app">
+    <header class="top">
+      <div class="top__logo"><i>♥</i> Cariñosas</div>
+      <button class="ic" type="button">🔔<span class="b">8</span></button>
+      <button class="ic" type="button">💬<span class="b">12</span></button>
+      <img src="https://images.unsplash.com/photo-1512310604669-443f26c35f52?auto=format&fit=crop&w=120&q=80" alt="">
+    </header>
+
+    <div class="scroll">
+      <div class="quick">
+        <div class="q"><div class="qi">👤</div><span>Perfil</span></div>
+        <div class="q"><div class="qi">📞</div><span>Contacto</span></div>
+        <div class="q"><div class="qi">📊</div><span>Stats</span></div>
+        <div class="q"><div class="qi">🖼️</div><span>Banner</span></div>
+        <div class="q"><div class="qi">🤝</div><span>Red</span></div>
+        <div class="q"><div class="qi">⚙️</div><span>Ajustes</span></div>
+      </div>
+
+      <div class="card">
+        <div class="card-h">Tu perfil público</div>
+        <div class="banner"><img src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=800&q=80" alt=""></div>
+        <div class="body-p">
+          <img class="ava" src="https://images.unsplash.com/photo-1512310604669-443f26c35f52?auto=format&fit=crop&w=200&q=80" alt="">
+          <div class="name">Valentina <span style="font-size:10px;color:var(--green)">✓</span></div>
+          <div class="meta">Monterrey · Premium · ★ 5.0</div>
+          <div class="price">Desde $2,000</div>
+        </div>
+        <div class="stats">
+          <div class="st"><small>Vistas</small><b>1.2k</b></div>
+          <div class="st"><small>Contactos</small><b>256</b></div>
+          <div class="st"><small>Favs</small><b>128</b></div>
+          <div class="st"><small>Msgs</small><b>42</b></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-h">Tu red</div>
+        <div class="stories">
+          <div class="story"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56'%3E%3Crect fill='%2324242c' width='56' height='56' rx='28'/%3E%3Ctext x='28' y='34' text-anchor='middle' fill='%23E91E63' font-size='24'%3E%2B%3C/text%3E%3C/svg%3E" alt=""><span>Estado</span></div>
+          <div class="story"><img src="https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=120&q=80" alt=""><span>Sofía</span></div>
+          <div class="story"><img src="https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=120&q=80" alt=""><span>Andrea</span></div>
+          <div class="story"><img src="https://images.unsplash.com/photo-1509967419530-da38b4704bc6?auto=format&fit=crop&w=120&q=80" alt=""><span>Luna</span></div>
+        </div>
+        <article class="post">
+          <div class="post-h">
+            <img src="https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=80&q=80" alt="">
+            <b>Sofía M.</b><time>2 h</time>
+          </div>
+          <p>Disponible esta noche en San Pedro ✨</p>
+        </article>
+        <article class="post">
+          <div class="post-h">
+            <img src="https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=80&q=80" alt="">
+            <b>Studio Velvet</b><time>5 h</time>
+          </div>
+          <p>Noche especial este viernes.</p>
+        </article>
+      </div>
+    </div>
+
+    <nav class="bottom">
+      <button class="on" type="button"><span class="ic">🏠</span>Inicio</button>
+      <button type="button"><span class="ic">🔍</span>Buscar</button>
+      <button class="fab" type="button">+</button>
+      <button type="button"><span class="ic">💬</span>Msgs</button>
+      <button type="button"><span class="ic">👤</span>Perfil</button>
+    </nav>
+  </div>
+</div>
+</body>
+</html>

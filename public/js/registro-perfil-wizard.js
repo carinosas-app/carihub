@@ -1976,8 +1976,10 @@
     CariHubRegistroPerfilSubmit.submitRegistroPerfil(draft, priv, function () {})
       .then(function () {
         try { global.localStorage.removeItem(STORAGE_KEY); } catch (e) { /* ignore */ }
-        alert('Solicitud enviada correctamente. Pendiente de aprobación por administración. Si se aprueba, recibirás tu mes de prueba gratis.');
-        global.location.href = 'index.html';
+        try {
+          global.sessionStorage.setItem('carihub_dashboard_aviso', 'solicitud_enviada');
+        } catch (e) { /* ignore */ }
+        global.location.href = 'dashboard-rentero.html';
       })
       .catch(function (err) {
         var msg = err && err.message ? err.message : String(err);

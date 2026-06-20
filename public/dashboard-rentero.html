@@ -2,861 +2,799 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=3, user-scalable=yes">
   <title>Dashboard rentero | Cariñosas</title>
-  <style>
-    :root{
-      --bg-a:#fff3f9;
-      --bg-b:#ffe1ef;
-      --accent:#e60072;
-      --accent-2:#ff4fa3;
-      --ink:#311021;
-      --muted:#7b5066;
-      --card:rgba(255,255,255,.72);
-      --card-strong:rgba(255,255,255,.9);
-      --line:rgba(230,0,114,.18);
-      --shadow:0 22px 55px rgba(184,0,88,.16);
-      --glow:0 0 0 1px rgba(255,255,255,.55),0 18px 40px rgba(230,0,114,.14);
-    }
-
-    *{box-sizing:border-box}
-
-    body{
-      margin:0;
-      min-height:100vh;
-      font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-      color:var(--ink);
-      background:
-        radial-gradient(circle at 12% 8%, rgba(255,88,170,.2), transparent 26%),
-        radial-gradient(circle at 90% 18%, rgba(255,191,221,.28), transparent 30%),
-        linear-gradient(135deg,var(--bg-a),var(--bg-b));
-    }
-
-    body.tema-rojo{--bg-a:#fff0f2;--bg-b:#ffd4dc;--accent:#d41445;--accent-2:#ff567a;--line:rgba(212,20,69,.2)}
-    body.tema-morado{--bg-a:#f8f0ff;--bg-b:#ead6ff;--accent:#8d37d1;--accent-2:#c26dff;--line:rgba(141,55,209,.2)}
-    body.tema-negro{--bg-a:#151019;--bg-b:#261327;--accent:#ff1493;--accent-2:#00f0ff;--ink:#fff4fb;--muted:#d7b9cb;--card:rgba(37,20,38,.72);--card-strong:rgba(44,25,45,.92);--line:rgba(255,20,147,.28);--shadow:0 24px 60px rgba(0,0,0,.38)}
-    body.tema-dorado{--bg-a:#fff8e5;--bg-b:#f9df9a;--accent:#b98510;--accent-2:#f5c542;--line:rgba(185,133,16,.22)}
-    body.tema-azul{--bg-a:#eef5ff;--bg-b:#cfe0ff;--accent:#2457d6;--accent-2:#62a1ff;--line:rgba(36,87,214,.18)}
-    body.tema-verde{--bg-a:#effff5;--bg-b:#c7f2d6;--accent:#148a55;--accent-2:#42c985;--line:rgba(20,138,85,.2)}
-    body.tema-arcoiris{--bg-a:#fff6fb;--bg-b:#dff3ff;--accent:#e60072;--accent-2:#6b5cff;--line:rgba(230,0,114,.2)}
-    body.tema-trans{--bg-a:#effbff;--bg-b:#ffd7e8;--accent:#4aa6d9;--accent-2:#ff75ae;--line:rgba(74,166,217,.22)}
-    body.tema-femboy{--bg-a:#fff2fb;--bg-b:#e9ddff;--accent:#e35bb7;--accent-2:#9d7cff;--line:rgba(227,91,183,.22)}
-    body.tema-hotel{--bg-a:#fff7f1;--bg-b:#ead0b5;--accent:#9b5b35;--accent-2:#d39c62;--line:rgba(155,91,53,.2)}
-    body.tema-spa{--bg-a:#f4fff9;--bg-b:#d7efe2;--accent:#40866b;--accent-2:#91d6ba;--line:rgba(64,134,107,.2)}
-    body.tema-sexshop{--bg-a:#fff0fa;--bg-b:#221025;--accent:#ff007f;--accent-2:#9c27ff;--ink:#fff5fb;--muted:#eec8dc;--card:rgba(42,18,44,.72);--card-strong:rgba(54,24,58,.9);--line:rgba(255,0,127,.25)}
-
-    button,input,textarea{font:inherit}
-
-    .page{
-      width:min(1480px,100%);
-      margin:0 auto;
-      padding:16px;
-    }
-
-    .dashboard-rentero{
-      display:grid;
-      grid-template-columns:240px minmax(520px,1fr) 270px;
-      gap:14px;
-      align-items:start;
-    }
-
-    .dashboard-col{
-      min-width:0;
-      display:flex;
-      flex-direction:column;
-      gap:11px;
-    }
-
-    .glass{
-      background:var(--card);
-      border:1px solid var(--line);
-      border-radius:22px;
-      box-shadow:var(--shadow);
-      backdrop-filter:blur(18px);
-      -webkit-backdrop-filter:blur(18px);
-    }
-
-    .panel{padding:12px}
-
-    .brand{
-      padding:13px 12px;
-      display:flex;
-      align-items:center;
-      gap:10px;
-    }
-
-    .brand-mark{
-      width:38px;
-      height:38px;
-      border-radius:50%;
-      display:grid;
-      place-items:center;
-      color:white;
-      font-weight:900;
-      background:linear-gradient(135deg,var(--accent),var(--accent-2));
-      box-shadow:0 12px 24px rgba(230,0,114,.28);
-    }
-
-    .brand h1{
-      margin:0;
-      font-size:20px;
-      line-height:1;
-      color:var(--accent);
-    }
-
-    .brand p,.section-title p,.quick-summary p{
-      margin:4px 0 0;
-      color:var(--muted);
-      font-size:12px;
-    }
-
-    .section-title{
-      display:flex;
-      justify-content:space-between;
-      align-items:flex-end;
-      gap:10px;
-      margin-bottom:9px;
-    }
-
-    .section-title h2,.section-title h3{
-      margin:0;
-      font-size:16px;
-    }
-
-    .metric-grid{
-      display:grid;
-      gap:7px;
-    }
-
-    .metric{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:8px;
-      padding:8px 10px;
-      background:rgba(255,255,255,.58);
-      border:1px solid var(--line);
-      border-radius:16px;
-    }
-
-    .metric b{font-size:17px}
-    .metric span{color:var(--muted);font-size:11px}
-
-    .publication-list{
-      display:flex;
-      flex-direction:column;
-      gap:7px;
-    }
-
-    .publication-card{
-      width:100%;
-      border:1px solid transparent;
-      border-radius:15px;
-      padding:7px;
-      display:grid;
-      grid-template-columns:50px 1fr;
-      gap:8px;
-      text-align:left;
-      color:var(--ink);
-      background:rgba(255,255,255,.55);
-      cursor:pointer;
-      transition:transform .2s ease,border-color .2s ease,box-shadow .2s ease;
-    }
-
-    .publication-card:hover,.publication-card.active{
-      transform:translateY(-1px);
-      border-color:rgba(230,0,114,.38);
-      box-shadow:var(--glow);
-    }
-
-    .publication-card img{
-      width:50px;
-      height:50px;
-      border-radius:12px;
-      object-fit:cover;
-    }
-
-    .publication-card h3{
-      margin:1px 0 3px;
-      font-size:13px;
-    }
-
-    .publication-card p{
-      margin:0;
-      color:var(--muted);
-      font-size:11px;
-    }
-
-    .badge{
-      display:inline-flex;
-      align-items:center;
-      width:max-content;
-      gap:5px;
-      margin-top:6px;
-      padding:3px 7px;
-      border-radius:999px;
-      font-size:11px;
-      font-weight:800;
-      color:#7a0048;
-      background:rgba(255,220,238,.9);
-    }
-
-    .badge.ok{color:#0a6b38;background:rgba(210,255,229,.9)}
-    .badge.warn{color:#9a6200;background:rgba(255,239,201,.92)}
-    .badge.off{color:#8a1b2b;background:rgba(255,217,224,.92)}
-
-    .action-stack{
-      display:grid;
-      gap:8px;
-    }
-
-    .btn{
-      border:0;
-      border-radius:16px;
-      padding:10px 12px;
-      cursor:pointer;
-      font-weight:900;
-      color:white;
-      background:linear-gradient(135deg,var(--accent),var(--accent-2));
-      box-shadow:0 14px 26px rgba(230,0,114,.22);
-      transition:transform .2s ease,filter .2s ease;
-    }
-
-    .btn:hover{transform:translateY(-1px);filter:saturate(1.08)}
-    .btn.secondary{
-      color:var(--accent);
-      background:rgba(255,255,255,.72);
-      border:1px solid var(--line);
-      box-shadow:none;
-    }
-
-    .hero-media{
-      overflow:hidden;
-      padding:0;
-    }
-
-    .main-media{
-      position:relative;
-      height:340px;
-      border-radius:22px;
-      overflow:hidden;
-      background:linear-gradient(135deg,rgba(230,0,114,.16),rgba(255,255,255,.78));
-    }
-
-    .main-media img{
-      width:100%;
-      height:100%;
-      object-fit:cover;
-      display:block;
-    }
-
-    .media-overlay{
-      position:absolute;
-      inset:auto 18px 18px 18px;
-      padding:12px;
-      border-radius:18px;
-      color:white;
-      background:linear-gradient(135deg,rgba(49,16,33,.78),rgba(230,0,114,.46));
-      backdrop-filter:blur(8px);
-      display:flex;
-      justify-content:space-between;
-      gap:12px;
-      align-items:center;
-    }
-
-    .media-overlay h2{
-      margin:0;
-      font-size:21px;
-    }
-
-    .media-overlay p{
-      margin:4px 0 0;
-      color:rgba(255,255,255,.82);
-      font-size:13px;
-    }
-
-    .edit-btn,.theme-btn{
-      border:0;
-      width:38px;
-      height:38px;
-      border-radius:50%;
-      display:grid;
-      place-items:center;
-      cursor:pointer;
-      color:white;
-      background:linear-gradient(135deg,var(--accent),var(--accent-2));
-      box-shadow:0 10px 22px rgba(0,0,0,.18);
-      flex:0 0 auto;
-    }
-
-    .thumb-grid{
-      display:grid;
-      grid-template-columns:repeat(3,1fr);
-      gap:10px;
-    }
-
-    .thumb{
-      position:relative;
-      min-height:104px;
-      border-radius:18px;
-      overflow:hidden;
-      background:rgba(255,255,255,.6);
-      border:1px solid var(--line);
-    }
-
-    .thumb img{
-      width:100%;
-      height:100%;
-      min-height:104px;
-      object-fit:cover;
-      display:block;
-    }
-
-    .thumb .edit-btn{
-      position:absolute;
-      right:10px;
-      bottom:10px;
-      width:34px;
-      height:34px;
-    }
-
-    .info-grid{
-      display:grid;
-      grid-template-columns:repeat(2,minmax(0,1fr));
-      gap:8px;
-    }
-
-    .field-card{
-      position:relative;
-      min-height:70px;
-      padding:10px 40px 10px 10px;
-      border:1px solid var(--line);
-      border-radius:16px;
-      background:rgba(255,255,255,.58);
-    }
-
-    .field-card.wide{grid-column:1/-1}
-
-    .field-card small{
-      display:block;
-      color:var(--muted);
-      font-weight:800;
-      margin-bottom:5px;
-    }
-
-    .field-card b{
-      display:block;
-      font-size:15px;
-      line-height:1.35;
-    }
-
-    .field-card .edit-btn{
-      position:absolute;
-      top:10px;
-      right:10px;
-      width:30px;
-      height:30px;
-      font-size:13px;
-    }
-
-    .contacts{
-      display:grid;
-      grid-template-columns:repeat(2,minmax(0,1fr));
-      gap:8px;
-    }
-
-    .contact-row{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:8px;
-      min-height:54px;
-      padding:9px;
-      border:1px solid var(--line);
-      border-radius:16px;
-      background:rgba(255,255,255,.58);
-    }
-
-    .contact-row b{
-      display:block;
-      font-size:14px;
-    }
-
-    .contact-row small{
-      display:block;
-      max-width:170px;
-      color:var(--muted);
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
-
-    .switch{
-      position:relative;
-      width:48px;
-      height:28px;
-      flex:0 0 auto;
-    }
-
-    .switch input{
-      position:absolute;
-      opacity:0;
-      pointer-events:none;
-    }
-
-    .switch span{
-      position:absolute;
-      inset:0;
-      border-radius:999px;
-      background:#ded1d8;
-      cursor:pointer;
-      transition:background .2s ease;
-    }
-
-    .switch span::after{
-      content:"";
-      position:absolute;
-      top:4px;
-      left:4px;
-      width:20px;
-      height:20px;
-      border-radius:50%;
-      background:white;
-      box-shadow:0 3px 8px rgba(0,0,0,.22);
-      transition:transform .2s ease;
-    }
-
-    .switch input:checked + span{
-      background:linear-gradient(135deg,#1dbb67,#43e891);
-    }
-
-    .switch input:checked + span::after{
-      transform:translateX(20px);
-    }
-
-    .profile-mini{
-      display:flex;
-      align-items:center;
-      gap:12px;
-      position:relative;
-    }
-
-    .avatar{
-      width:66px;
-      height:56px;
-      width:56px;
-      border-radius:50%;
-      object-fit:cover;
-      border:3px solid rgba(255,255,255,.8);
-      box-shadow:var(--glow);
-    }
-
-    .profile-mini h2{
-      margin:0;
-      font-size:16px;
-    }
-
-    .theme-btn{
-      margin-left:auto;
-      background:conic-gradient(from 90deg,#e60072,#ffcb3d,#2bd66f,#47a4ff,#bb5cff,#e60072);
-    }
-
-    .theme-picker{
-      display:none;
-      margin-top:14px;
-      grid-template-columns:1fr;
-      gap:8px;
-    }
-
-    .theme-picker.open{display:grid}
-
-    .theme-option{
-      border:1px solid var(--line);
-      border-radius:14px;
-      padding:10px 12px;
-      text-align:left;
-      color:var(--ink);
-      background:rgba(255,255,255,.58);
-      cursor:pointer;
-      font-weight:800;
-    }
-
-    .theme-option.active{
-      color:white;
-      background:linear-gradient(135deg,var(--accent),var(--accent-2));
-    }
-
-    .quick-summary{
-      display:grid;
-      gap:7px;
-    }
-
-    .quick-item{
-      padding:9px 10px;
-      border-radius:16px;
-      border:1px solid var(--line);
-      background:rgba(255,255,255,.56);
-    }
-
-    .quick-item span{
-      display:block;
-      color:var(--muted);
-      font-size:12px;
-      font-weight:800;
-    }
-
-    .quick-item b{
-      display:block;
-      margin-top:4px;
-      font-size:14px;
-    }
-
-    .security-list{
-      display:grid;
-      gap:7px;
-    }
-
-    .security-line{
-      display:flex;
-      align-items:center;
-      gap:7px;
-      color:var(--muted);
-      font-size:12px;
-    }
-
-    @media(max-width:1180px){
-      .dashboard-rentero{
-        grid-template-columns:220px minmax(440px,1fr) 250px;
+  <script>
+    (function () {
+      var q = new URLSearchParams(location.search);
+      var inEmbed = window.self !== window.top;
+      if (q.get("preview") === "1" || q.get("desktop") === "1" || inEmbed) {
+        document.documentElement.classList.add("dash-force-3col");
       }
-    }
-
-    @media(max-width:960px){
-      .dashboard-rentero{
-        grid-template-columns:1fr;
+      function syncLayout() {
+        var w = window.innerWidth;
+        document.documentElement.classList.toggle("dash-compact", w < 1200);
       }
-
-      .dashboard-center{order:1}
-      .dashboard-right{order:2}
-      .dashboard-left{order:3}
-    }
-
-    @media(max-width:768px){
-      .page{padding:4px}
-      .dashboard-rentero{
-        grid-template-columns:minmax(0,1fr) 194px minmax(0,1fr);
-        grid-template-areas:
-          "left hero right"
-          "left thumbs right"
-          "left contacts right"
-          "left info right";
-        column-gap:4px;
-        row-gap:1px;
-        align-items:stretch;
-      }
-      .dashboard-col{gap:4px}
-      .dashboard-center{display:contents}
-      .dashboard-left,
-      .dashboard-right{
-        width:100%;
-        max-width:178px;
-        height:100%;
-        margin:0 auto;
-        align-self:stretch;
-        justify-content:space-between;
-      }
-      .dashboard-left{grid-area:left}
-      .dashboard-right{grid-area:right}
-      .dashboard-center .hero-media{grid-area:hero}
-      .dashboard-center .thumb-grid{grid-area:thumbs}
-      .dashboard-center > .panel.glass:nth-of-type(4){grid-area:contacts;width:100%;margin:0 auto}
-      .dashboard-center > .panel.glass:nth-of-type(3){grid-area:info;width:100%;margin:0 auto}
-      .dashboard-left .panel{padding:4px}
-      .dashboard-right .panel{padding:4px}
-      .dashboard-left .section-title{margin-bottom:2px}
-      .dashboard-right .section-title{margin-bottom:2px}
-      .dashboard-left .section-title h2,
-      .dashboard-left .section-title h3,
-      .dashboard-right .section-title h2,
-      .dashboard-right .section-title h3{font-size:10px}
-      .dashboard-left .section-title p,
-      .dashboard-right .section-title p{font-size:8px}
-      .panel{padding:5px}
-      .brand{padding:5px 6px;gap:5px}
-      .brand-mark{width:24px;height:24px;font-size:11px}
-      .brand h1{font-size:13px}
-      .brand p,.section-title p,.quick-summary p{font-size:9px}
-      .section-title{margin-bottom:3px;gap:4px}
-      .section-title h2,.section-title h3{font-size:12px}
-      .main-media{width:min(200px,100%);height:120px;margin:0 auto;border-radius:13px}
-      .media-overlay{
-        inset:auto 5px 5px 5px;
-        align-items:flex-start;
-        padding:5px;
-        border-radius:10px;
-      }
-      .media-overlay h2{font-size:13px}
-      .media-overlay p{font-size:9px}
-      .edit-btn,.theme-btn{width:24px;height:24px;font-size:10px}
-      .thumb-grid{
-        display:flex;
-        grid-template-columns:none;
-        gap:6px;
-        justify-content:center;
-        padding-bottom:2px;
-        scroll-snap-type:x proximity;
-      }
-      .thumb{
-        flex:0 0 calc((100% - 12px)/3);
-        min-height:68px;
-        border-radius:11px;
-        scroll-snap-align:start;
-      }
-      .thumb img{min-height:68px}
-      .thumb .edit-btn{width:24px;height:24px;right:4px;bottom:4px}
-      .info-grid,.contacts{
-        grid-template-columns:1fr;
-      }
-      .info-grid,.contacts,.metric-grid,.publication-list,.quick-summary,.security-list{gap:1px}
-      .dashboard-center > .panel.glass:nth-of-type(3),
-      .dashboard-center > .panel.glass:nth-of-type(4){padding:2px 3px}
-      .dashboard-center > .panel.glass:nth-of-type(3) .section-title,
-      .dashboard-center > .panel.glass:nth-of-type(4) .section-title{margin-bottom:1px}
-      .dashboard-center > .panel.glass:nth-of-type(3) .section-title h2,
-      .dashboard-center > .panel.glass:nth-of-type(4) .section-title h2{font-size:9px}
-      .dashboard-center > .panel.glass:nth-of-type(3) .section-title p,
-      .dashboard-center > .panel.glass:nth-of-type(4) .section-title p{font-size:6px}
-      .field-card{
-        min-height:0;
-        padding:1px 3px;
-        border-radius:6px;
-        display:grid;
-        grid-template-columns:62px minmax(0,1fr) 18px;
-        gap:2px;
-        align-items:center;
-      }
-      .field-card.wide{grid-column:auto}
-      .field-card small{font-size:7px;margin:0}
-      .field-card b{font-size:8px;line-height:1.05;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-      .field-card .edit-btn{position:static;width:17px;height:17px;font-size:8px}
-      .metric{padding:4px 6px;border-radius:8px}
-      .metric b{font-size:12px}
-      .metric span{font-size:9px}
-      .publication-card{grid-template-columns:30px 1fr;padding:3px;gap:4px;border-radius:8px}
-      .publication-card img{width:30px;height:30px;border-radius:8px}
-      .publication-card h3{font-size:10px;margin:0}
-      .publication-card p{display:none}
-      .badge{margin-top:2px;padding:1px 5px;font-size:9px}
-      .btn{padding:5px 7px;border-radius:9px;font-size:10px}
-      .dashboard-left .brand{padding:4px 5px}
-      .dashboard-left .brand-mark{width:20px;height:20px;font-size:9px}
-      .dashboard-left .brand h1{font-size:11px}
-      .dashboard-left .brand p{font-size:8px}
-      .dashboard-left .metric{padding:3px 5px}
-      .dashboard-left .metric b{font-size:10px}
-      .dashboard-left .metric span{font-size:8px}
-      .dashboard-left .publication-card{grid-template-columns:24px 1fr;padding:3px;gap:4px}
-      .dashboard-left .publication-card img{width:24px;height:24px;border-radius:7px}
-      .dashboard-left .publication-card h3{font-size:9px}
-      .dashboard-left .badge{font-size:8px;padding:1px 4px}
-      .dashboard-left .btn{padding:4px 5px;font-size:9px;border-radius:8px}
-      .profile-mini{gap:5px}
-      .avatar{width:38px;height:38px}
-      .profile-mini h2{font-size:12px}
-      .dashboard-right .profile-mini{gap:4px}
-      .dashboard-right .avatar{width:32px;height:32px;border-width:2px}
-      .dashboard-right .profile-mini h2{font-size:10px}
-      .dashboard-right .profile-mini p{font-size:8px}
-      .dashboard-right .theme-btn{width:22px;height:22px}
-      .theme-picker{gap:3px;margin-top:4px}
-      .theme-option{padding:5px 7px;border-radius:8px;font-size:10px}
-      .dashboard-right .theme-option{padding:4px 5px;font-size:9px}
-      .quick-item{
-        padding:2px 0;
-        border:0;
-        border-bottom:1px solid var(--line);
-        border-radius:0;
-        background:transparent;
-        display:flex;
-        justify-content:space-between;
-        gap:8px;
-      }
-      .quick-item span{font-size:9px}
-      .quick-item b{font-size:10px;margin-top:0;text-align:right}
-      .dashboard-right .quick-item span{font-size:8px}
-      .dashboard-right .quick-item b{font-size:9px}
-      .contact-row{
-        min-height:18px;
-        padding:1px 3px;
-        border-radius:6px;
-        display:grid;
-        grid-template-columns:minmax(0,1fr) auto 18px;
-        align-items:center;
-      }
-      .contact-row::after{
-        content:"✏️";
-        width:16px;
-        height:16px;
-        display:grid;
-        place-items:center;
-        border-radius:50%;
-        color:white;
-        background:linear-gradient(135deg,var(--accent),var(--accent-2));
-        font-size:7px;
-      }
-      .contact-row b{font-size:8px}
-      .contact-row small{display:none}
-      .switch{width:24px;height:14px}
-      .switch span::after{top:2px;left:2px;width:10px;height:10px}
-      .switch input:checked + span::after{transform:translateX(10px)}
-      .security-line{font-size:10px;gap:4px}
-      .dashboard-right .security-line{font-size:8px;gap:3px}
-      .dashboard-right .btn{padding:4px 5px;font-size:9px;border-radius:8px}
-    }
-  </style>
+      syncLayout();
+      window.addEventListener("resize", syncLayout);
+    })();
+  </script>
+  <link rel="stylesheet" href="fonts/fonts.css">
+  <link rel="stylesheet" href="css/carihub-premium-theme.css">
+  <link rel="stylesheet" href="css/resultados.css">
+  <link rel="stylesheet" href="css/registro-perfil-preview.css">
+  <link rel="stylesheet" href="css/dashboard-rentero-pro.css">
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
+  <script src="js/carihub-public-render-lite.js"></script>
 </head>
-<body>
-  <div class="page">
-    <main class="dashboard-rentero">
-      <aside class="dashboard-col dashboard-left">
-        <section class="brand glass">
-          <div class="brand-mark">C</div>
-          <div>
-            <h1>Cariñosas</h1>
-            <p>Dashboard rentero</p>
-          </div>
-        </section>
+<body class="dash-pro" data-tema="adult">
+<div class="dashboard-shell">
 
-        <section class="panel glass">
-          <div class="section-title">
-            <div>
-              <h2>Resumen</h2>
-              <p>Actividad mock de tus publicaciones</p>
-            </div>
-          </div>
-          <div class="metric-grid">
-            <div class="metric"><span>Corazones recibidos ❤️</span><b id="metricCorazones">248</b></div>
-            <div class="metric"><span>Mensajes 💬</span><b id="metricMensajes">36</b></div>
-            <div class="metric"><span>Clics en WhatsApp 🟢</span><b id="metricWhatsapp">112</b></div>
-          </div>
-        </section>
-
-        <section class="panel glass">
-          <div class="section-title">
-            <div>
-              <h3>Mis perfiles / banners / destacados / publicidad rentada</h3>
-              <p>Selecciona una publicación mock</p>
-            </div>
-          </div>
-          <div class="publication-list" id="publicationList"></div>
-        </section>
-
-        <section class="panel glass action-stack">
-          <button class="btn" type="button">Publicar nuevo perfil</button>
-          <button class="btn secondary" type="button">Publicar nuevo banner</button>
-        </section>
-      </aside>
-
-      <section class="dashboard-col dashboard-center">
-        <section class="hero-media glass">
-          <div class="main-media">
-            <img id="mainImage" src="" alt="Imagen principal mock">
-            <div class="media-overlay">
-              <div>
-                <h2 id="mainTitle">Valentina</h2>
-                <p id="mainSubtitle">Perfil activo en Monterrey</p>
-              </div>
-              <button class="edit-btn" type="button" aria-label="Editar imagen principal">✏️</button>
-            </div>
-          </div>
-        </section>
-
-        <section class="thumb-grid" id="thumbGrid"></section>
-
-        <section class="panel glass">
-          <div class="section-title">
-            <div>
-              <h2>Información pública</h2>
-              <p>Datos editables mock del perfil/anuncio seleccionado</p>
-            </div>
-          </div>
-          <div class="info-grid" id="infoGrid"></div>
-        </section>
-
-        <section class="panel glass">
-          <div class="section-title">
-            <div>
-              <h2>Medios de contacto</h2>
-              <p>Switches visuales mock, sin guardar datos</p>
-            </div>
-          </div>
-          <div class="contacts" id="contactsGrid"></div>
-        </section>
-      </section>
-
-      <aside class="dashboard-col dashboard-right">
-        <section class="panel glass">
-          <div class="profile-mini">
-            <img class="avatar" id="avatarImage" src="" alt="Avatar mock">
-            <div>
-              <h2 id="sideName">Valentina</h2>
-              <p>Cuenta verificada mock</p>
-            </div>
-            <button class="theme-btn" id="themeToggle" type="button" aria-label="Cambiar tema visual"></button>
-          </div>
-          <div class="theme-picker" id="themePicker" aria-label="Selector mock de temas">
-            <button class="theme-option active" type="button" data-theme="">Rosa premium</button>
-            <button class="theme-option" type="button" data-theme="tema-rojo">Rojo pasión</button>
-            <button class="theme-option" type="button" data-theme="tema-morado">Morado elegante</button>
-            <button class="theme-option" type="button" data-theme="tema-negro">Negro neón</button>
-            <button class="theme-option" type="button" data-theme="tema-dorado">Dorado VIP</button>
-            <button class="theme-option" type="button" data-theme="tema-azul">Azul noche</button>
-            <button class="theme-option" type="button" data-theme="tema-verde">Verde swinger</button>
-            <button class="theme-option" type="button" data-theme="tema-arcoiris">Arcoíris LGBT</button>
-            <button class="theme-option" type="button" data-theme="tema-trans">Trans Pride</button>
-            <button class="theme-option" type="button" data-theme="tema-femboy">Femboy pastel</button>
-            <button class="theme-option" type="button" data-theme="tema-hotel">Hotel/Motel lujo</button>
-            <button class="theme-option" type="button" data-theme="tema-spa">Spa relajante</button>
-            <button class="theme-option" type="button" data-theme="tema-sexshop">Sex Shop neón</button>
-          </div>
-        </section>
-
-        <section class="panel glass">
-          <div class="section-title">
-            <div>
-              <h2>Resumen rápido</h2>
-              <p>Estado general mock</p>
-            </div>
-          </div>
-          <div class="quick-summary" id="quickSummary"></div>
-        </section>
-
-        <section class="panel glass">
-          <div class="section-title">
-            <div>
-              <h2>Seguridad y verificación</h2>
-              <p>Controles informativos mock</p>
-            </div>
-          </div>
-          <div class="security-list">
-            <div class="security-line">✅ Cuenta con acceso seguro</div>
-            <div class="security-line">🛡️ Cambios públicos sujetos a revisión</div>
-            <div class="security-line">🔒 Datos privados no visibles al público</div>
-          </div>
-        </section>
-
-        <section class="panel glass">
-          <div class="section-title">
-            <div>
-              <h2>Estado de revisión</h2>
-              <p id="reviewStatus">Activo y aprobado</p>
-            </div>
-          </div>
-          <button class="btn secondary" type="button">Contactar soporte</button>
-        </section>
-      </aside>
-    </main>
+<header class="pro-hdr pro-hdr--hidden" hidden aria-hidden="true">
+  <label class="pro-hdr__search">
+    <span aria-hidden="true">🔍</span>
+    <input type="search" placeholder="Buscar negocios, servicios, categorías…" disabled>
+  </label>
+  <div class="pro-hdr__actions">
+    <button class="pro-btn-pub" type="button" onclick="location.href='registro-perfil.html'">+ Nueva publicación</button>
   </div>
+</header>
 
+<div class="dash-aviso dash-aviso--ok hidden" id="dashAvisoEntrada" role="status" aria-live="polite"></div>
+
+<main class="pro-body dashboard-rentero app-shell">
+
+  <aside class="pro-left sidebar-left dashboard-col dashboard-left left-column">
+    <a class="dash-sidebar-brand dash-brand" href="index.html" aria-label="Cariñosas">
+      <span class="carinosas-luna-wrap" aria-hidden="true">
+        <img class="carinosas-luna" src="img/dashboard/logo-luna-carinosas.png" alt="" width="32" height="36" decoding="async">
+      </span>
+      <span class="dash-brand__name">Cariñosas</span>
+    </a>
+
+    <div class="profile-picker" id="profilePicker">
+      <p class="profile-picker__label">Tus perfiles</p>
+      <p class="dash-login-hint hidden" id="dashLoginHint">Demo. <a href="index.html?abrir=login">Inicia sesión</a> · <a href="?preview=1">preview</a></p>
+      <div class="profile-picker__list" id="publicationList"></div>
+    </div>
+
+    <div class="action-stack dash-nav-actions dash-nav-actions--perfil">
+      <button class="btn dash-action-btn" type="button" onclick="location.href='registro-perfil.html'">+ Nuevo perfil</button>
+    </div>
+
+    <div class="side-banners" id="sideBannersBlock">
+      <p class="profile-picker__label">Tus banners</p>
+      <div class="side-banners__list profile-picker__list" id="bannersListSide"></div>
+    </div>
+
+    <div class="action-stack dash-nav-actions dash-nav-actions--banner">
+      <button class="btn dash-action-btn" type="button" onclick="location.href='registro-banner.html'">+ Nuevo banner</button>
+    </div>
+
+    <div class="pro-sep"></div>
+
+    <section class="dash-right-slot dash-right-slot--anuncios panel glass" aria-labelledby="dashRightAnunciosTitle">
+      <header class="dash-right-slot__head">
+        <span class="dash-right-slot__mark" aria-hidden="true"><i data-lucide="megaphone"></i></span>
+        <h3 class="dash-right-slot__title" id="dashRightAnunciosTitle">Mis anuncios</h3>
+      </header>
+      <div class="dash-right-slot__row">
+        <div class="dash-right-slot__info">
+          <p class="dash-right-slot__nombre" id="rightAnuncioNombre" title="Disponible hoy">Disponible hoy</p>
+          <p class="dash-right-slot__hora" id="rightAnuncioHora">Hace 4 h</p>
+          <button type="button" class="dash-right-slot__cta" id="btnRightAnunciar" data-quick-module="anunciar">
+            <i data-lucide="megaphone" aria-hidden="true"></i> Anunciar
+          </button>
+        </div>
+        <figure class="dash-right-slot__thumb dash-right-slot__thumb--sm">
+          <img src="img/resultados-demo/violeta-1.png" alt="Anuncio activo" id="rightAnuncioThumb">
+          <span class="dash-right-slot__pill dash-right-slot__pill--ok" id="rightAnuncioPill">ON</span>
+        </figure>
+      </div>
+    </section>
+
+    <section class="dash-right-slot dash-right-slot--live panel glass" aria-label="Transmitir en vivo">
+      <header class="dash-right-slot__head dash-right-slot__head--action">
+        <button type="button" class="dash-right-slot__head-btn" id="btnRightTransmitirLive" data-quick-module="transmitir-live">
+          <span class="dash-live-signal" aria-hidden="true">
+            <svg viewBox="0 0 24 24" focusable="false">
+              <circle class="dash-live-signal__dot" cx="12" cy="12" r="2.1"/>
+              <path class="dash-live-signal__arc dash-live-signal__arc--in dash-live-signal__arc--l" d="M9.1 8.4Q6.2 12 9.1 15.6"/>
+              <path class="dash-live-signal__arc dash-live-signal__arc--out dash-live-signal__arc--l" d="M6.6 5.6Q2.4 12 6.6 18.4"/>
+              <path class="dash-live-signal__arc dash-live-signal__arc--in dash-live-signal__arc--r" d="M14.9 8.4Q17.8 12 14.9 15.6"/>
+              <path class="dash-live-signal__arc dash-live-signal__arc--out dash-live-signal__arc--r" d="M17.4 5.6Q21.6 12 17.4 18.4"/>
+            </svg>
+          </span>
+          Transmitir en vivo
+        </button>
+      </header>
+      <div class="dash-right-slot__row">
+        <div class="dash-right-slot__info dash-right-slot__info--live">
+          <p class="dash-right-slot__nombre" id="rightLiveNombre" title="Noche exclusiva">Noche exclusiva</p>
+          <p class="dash-right-slot__hora" id="rightLiveHora">Sáb 24 · 10 PM</p>
+          <button type="button" class="dash-right-slot__cta dash-right-slot__cta--solo dash-right-slot__cta--programar" id="btnRightProgramarLive">
+            <i data-lucide="calendar-plus" aria-hidden="true"></i> Programar
+          </button>
+        </div>
+        <figure class="dash-right-slot__thumb dash-right-slot__thumb--sm">
+          <img src="img/dashboard/right-live-preview.png" alt="" decoding="async" id="rightLiveThumb">
+          <span class="dash-right-slot__pill dash-right-slot__pill--prox" id="rightLivePill">PRÓX</span>
+        </figure>
+      </div>
+    </section>
+
+    <section class="dash-right-contactos" id="dashRightContactos">
+      <button type="button" class="dash-right-contactos__toggle" id="btnRightContactosToggle" aria-expanded="false" aria-controls="dashRightContactosPanel">
+        <span class="dash-right-contactos__toggle-label" id="dashRightContactosTitle">Métodos de contacto</span>
+        <svg class="dash-right-contactos__toggle-ic" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 10l5 5 5-5z"/></svg>
+      </button>
+      <div class="dash-right-contactos__panel hidden" id="dashRightContactosPanel" role="region" aria-labelledby="dashRightContactosTitle">
+        <ul class="dash-right-contactos__list" id="rightContactosList" role="list"></ul>
+        <button type="button" class="dash-rc-add-btn" id="btnRightAgregarContacto">+ Agregar método</button>
+      </div>
+    </section>
+
+    <span class="visually-hidden" id="rightPlanName">VIP mensual</span>
+    <span class="visually-hidden" id="rightPlanVence">18 días restantes</span>
+
+    <ul class="dash-right-metrics panel glass" aria-label="Métricas del perfil">
+      <li class="dash-right-metrics__row">
+        <span class="dash-right-metrics__label">Vistas</span>
+        <b class="dash-right-metrics__val" id="metricVisitas">248</b>
+      </li>
+      <li class="dash-right-metrics__row">
+        <span class="dash-right-metrics__label">Contactos</span>
+        <b class="dash-right-metrics__val" id="metricContactos">112</b>
+      </li>
+      <li class="dash-right-metrics__row">
+        <span class="dash-right-metrics__label">Favoritos</span>
+        <b class="dash-right-metrics__val" id="metricFavoritos">128</b>
+      </li>
+      <li class="dash-right-metrics__row">
+        <span class="dash-right-metrics__label">Mensajes</span>
+        <b class="dash-right-metrics__val" id="metricMensajes">36</b>
+      </li>
+    </ul>
+  </aside>
+
+  <section class="pro-main center-content dashboard-col dashboard-center center-column">
+    <div class="dash-center-expand-bar" id="dashCenterExpandBar" aria-label="Vista del panel central">
+      <button class="btn secondary btn--sm" type="button" id="btnAmpliarVista">Ampliar vista</button>
+      <button class="btn secondary btn--sm hidden" type="button" id="btnVerColumnas">Ver columnas</button>
+    </div>
+    <header class="dash-module-header">
+      <div>
+        <h1 id="dashModuleTitle">Inicio</h1>
+        <p id="dashModuleSubtitle">Vista en tiempo real · así se ve tu perfil publicado ahora</p>
+      </div>
+    </header>
+
+    <div class="dash-module-viewport" id="dashModuleViewport">
+
+      <!-- INICIO: mini vista perfil (2 columnas) + resumen pendientes -->
+      <div class="dash-module is-active" data-module="inicio" id="modulo-inicio">
+        <div class="dash-inicio-stack" id="dashInicioStack">
+          <section class="dash-inicio-preview panel glass" id="dashPreviewWrap" aria-label="Vista previa del perfil publicado">
+            <div class="dash-inicio-preview__viewport" id="dashPreviewViewport">
+              <iframe id="dashPerfilPreviewFrame" class="dash-inicio-preview__frame" title="Vista previa del perfil (embed)" loading="lazy" scrolling="no"></iframe>
+              <p class="dash-inicio-preview__placeholder hidden" id="dashPreviewPlaceholder" aria-live="polite"></p>
+            </div>
+            <div class="dash-inicio-preview__actions dash-toolbar-actions">
+              <button class="btn secondary btn--sm" type="button" id="btnDashVerResultados">Ver en resultados</button>
+              <button class="btn secondary btn--sm" type="button" id="btnDashVerGrande">Ver perfil completo</button>
+              <button class="btn btn--sm" type="button" id="btnEditarPerfilModulo">Editar perfil</button>
+            </div>
+          </section>
+
+          <div class="dash-inicio-lower" id="dashInicioLower">
+          <section class="dash-inicio-red panel glass" aria-label="Estados y lives de socios">
+            <div class="dash-inicio-red__col dash-inicio-red__col--estados">
+              <header class="dash-inicio-red__head">
+                <h3>Estados de socios</h3>
+                <button type="button" class="dash-inicio-red__link" data-goto-module="estados">Ver todos</button>
+              </header>
+              <div class="dash-inicio-red__grid" id="dashInicioEstados"></div>
+            </div>
+            <div class="dash-inicio-red__col dash-inicio-red__col--lives">
+              <header class="dash-inicio-red__head">
+                <h3>En vivo ahora</h3>
+                <button type="button" class="dash-inicio-red__link" data-goto-module="lives">Ver lives</button>
+              </header>
+              <div class="dash-inicio-red__grid dash-inicio-red__grid--lives" id="dashInicioLives"></div>
+            </div>
+          </section>
+
+          <section class="dash-inicio-resumen" aria-label="Resumen y pendientes">
+            <header class="dash-inicio-resumen__head">
+              <h2 class="dash-inicio-resumen__title">Mensajes, avisos y solicitudes</h2>
+            </header>
+            <div class="dash-inicio-resumen__grid" id="dashInicioResumen"></div>
+          </section>
+
+          <section class="dash-inicio-cuenta" aria-label="Alertas, accesos y resumen de cuenta">
+            <div class="dash-inicio-cuenta__grid">
+              <div class="dash-inicio-cuenta__card dash-right-alerts panel glass">
+                <div class="section-title"><h3>Alertas</h3></div>
+                <div class="dash-alert-item"><span>💬</span><div><b>12 mensajes nuevos</b><button type="button" data-quick-module="mensajes">Ver</button></div></div>
+                <div class="dash-alert-item"><span>🤝</span><div><b>3 solicitudes pendientes</b><button type="button" data-quick-module="solicitudes">Ver</button></div></div>
+                <div class="dash-alert-item"><span>🔔</span><div><b>Revisión aprobada</b></div></div>
+              </div>
+
+              <div class="dash-inicio-cuenta__card dash-right-quick panel glass">
+                <div class="section-title"><h3>Acceso rápido</h3></div>
+                <div class="action-stack">
+                  <button class="btn secondary" type="button" data-quick-module="inicio">Ver perfil</button>
+                  <button class="btn secondary" type="button" data-quick-module="mensajes">Mensajes</button>
+                  <button class="btn secondary" type="button" data-quick-module="anunciar">Anunciar</button>
+                  <button class="btn secondary" type="button" data-quick-module="tarjeta">Vista resultados</button>
+                </div>
+              </div>
+
+              <section class="dash-inicio-cuenta__card panel glass">
+                <div class="section-title"><h3>Resumen</h3></div>
+                <div class="quick-summary" id="quickSummary"></div>
+              </section>
+
+              <section class="dash-inicio-cuenta__card panel glass dash-right-pago">
+                <small>Próximo pago</small>
+                <b id="rightProxPago">—</b>
+                <p id="reviewStatus">Activo y aprobado</p>
+              </section>
+            </div>
+          </section>
+          </div>
+        </div>
+
+        <div class="dash-live-preview dash-live-preview--legacy hidden" id="dashPreviewLegacy" aria-hidden="true">
+
+          <!-- Respaldo oculto para JS (métricas / datos) -->
+          <div class="dash-preview-native hidden" id="dashPreviewNative" aria-hidden="true">
+            <div class="mod-perfil-gallery">
+              <div class="mod-perfil-gallery__main" id="modPerfilGalleryMain">
+                <img id="pcardBanner" src="" alt="">
+              </div>
+              <div class="mod-perfil-gallery__thumbs thumb-grid" id="thumbGrid"></div>
+            </div>
+            <div class="pcard" id="pcardRoot">
+              <div class="pcard__body mod-perfil-body">
+                <img class="pcard__ava" id="pcardAva" src="" alt="">
+                <div class="pcard__head">
+                  <div class="pcard__name" id="pcardName">Valentina</div>
+                  <span class="pcard__badge" id="pcardBadge">Verificado</span>
+                </div>
+                <div class="pcard__meta" id="pcardMeta">Perfil activo en Monterrey</div>
+                <div class="pcard__price" id="pcardPrice"></div>
+                <div class="pcard__desc" id="pcardDesc"></div>
+              </div>
+              <div class="pcard__stats">
+                <div class="pcard__stat"><span class="pcard__stat-ic">👁</span><b id="pcardStatViews">0</b><small>Vistas</small></div>
+                <div class="pcard__stat"><span class="pcard__stat-ic">📞</span><b id="pcardStatContacts">0</b><small>Contactos</small></div>
+                <div class="pcard__stat"><span class="pcard__stat-ic">❤️</span><b id="pcardStatFavs">0</b><small>Favoritos</small></div>
+                <div class="pcard__stat"><span class="pcard__stat-ic">💬</span><b id="pcardStatMsgs">0</b><small>Mensajes</small></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Buscar: filtros + tarjetas de resultados -->
+      <div class="dash-module" data-module="buscar" id="modulo-buscar">
+        <div class="dash-buscar-panel panel glass">
+          <form class="dash-buscar-filters" id="dashBuscarForm">
+            <label class="dash-buscar-field">
+              <span>Categoría</span>
+              <select id="dashFiltroCategoria" name="categoria">
+                <option value="Todas">Todas</option>
+                <option value="Antro">Antro</option>
+                <option value="Escort">Escort</option>
+                <option value="Escort VIP">Escort VIP</option>
+                <option value="Spa">Spa</option>
+                <option value="Table Dance">Table Dance</option>
+                <option value="Sex shop">Sex shop</option>
+              </select>
+            </label>
+            <label class="dash-buscar-field">
+              <span>País</span>
+              <select id="dashFiltroPais" name="pais">
+                <option value="México">México</option>
+                <option value="Estados Unidos">Estados Unidos</option>
+                <option value="Colombia">Colombia</option>
+              </select>
+            </label>
+            <label class="dash-buscar-field">
+              <span>Estado</span>
+              <select id="dashFiltroEstado" name="estado">
+                <option value="Todos">Todos</option>
+                <option value="Nuevo León">Nuevo León</option>
+                <option value="Jalisco">Jalisco</option>
+                <option value="Ciudad de México">Ciudad de México</option>
+              </select>
+            </label>
+            <label class="dash-buscar-field">
+              <span>Ciudad</span>
+              <select id="dashFiltroCiudad" name="ciudad">
+                <option value="Todas">Todas</option>
+                <option value="Monterrey">Monterrey</option>
+                <option value="San Pedro">San Pedro</option>
+                <option value="Guadalajara">Guadalajara</option>
+                <option value="CDMX">CDMX</option>
+              </select>
+            </label>
+            <button class="btn dash-buscar-submit" type="submit" id="btnBuscarRed">Buscar</button>
+          </form>
+          <p class="dash-buscar-hint" id="dashBuscarHint">Elige categoría y ubicación, luego presiona Buscar.</p>
+          <div class="dir-results dash-buscar-results" id="buscarResults"></div>
+        </div>
+      </div>
+
+      <!-- Vista previa de resultados -->
+      <div class="dash-module" data-module="tarjeta" id="modulo-tarjeta">
+        <p class="dash-hint">Así aparece tu tarjeta en la pantalla de resultados. Puedes editar desde aquí.</p>
+        <div class="result-card-preview panel glass" id="resultCardPreview">
+          <div class="result-card-preview__img"><img id="resultCardImg" src="" alt=""></div>
+          <div class="result-card-preview__body">
+            <b id="resultCardName">Valentina</b>
+            <span class="pcard__badge" id="resultCardBadge">Verificado</span>
+            <p id="resultCardMeta">Escort VIP · Monterrey</p>
+            <p id="resultCardDesc"></p>
+            <span class="pcard__price" id="resultCardPrice"></span>
+          </div>
+        </div>
+        <div class="dash-module-toolbar">
+          <button class="btn secondary" type="button" id="btnVerComoResultados">Abrir resultados</button>
+          <button class="btn" type="button" id="btnEditarInfoPublica">Editar tarjeta</button>
+        </div>
+      </div>
+
+      <!-- Avisos de negocio -->
+      <div class="dash-module" data-module="avisos" id="modulo-avisos">
+        <div class="avisos-list" id="avisosList"></div>
+      </div>
+
+      <!-- Favoritos -->
+      <div class="dash-module" data-module="favoritos" id="modulo-favoritos">
+        <div class="dir-results" id="favoritosList"></div>
+      </div>
+
+      <!-- Anunciar — estudio en columna central (laterales siguen visibles) -->
+      <div class="dash-module" data-module="anunciar" id="modulo-anunciar">
+        <p class="dash-studio__note">Crea tu anuncio aquí. Mensajes, alertas y métricas siguen visibles en las columnas laterales.</p>
+        <div class="dash-studio__grid">
+          <div class="dash-studio__stage panel glass">
+            <div class="dash-studio__preview" id="anuncioPreviewWrap">
+              <img id="anuncioPreviewImg" src="" alt="Vista previa del anuncio" hidden>
+              <span class="dash-studio__placeholder" id="anuncioPreviewEmpty">Sube una imagen para tu anuncio</span>
+            </div>
+            <div class="dash-studio__filters" id="anuncioFiltros">
+              <button type="button" class="dash-studio__filter on" data-filter="normal">Normal</button>
+              <button type="button" class="dash-studio__filter" data-filter="rosa">Rosa</button>
+              <button type="button" class="dash-studio__filter" data-filter="vivid">Vivid</button>
+              <button type="button" class="dash-studio__filter" data-filter="suave">Suave</button>
+            </div>
+          </div>
+          <aside class="dash-studio__sidebar panel glass">
+            <label class="dash-studio__field">
+              <span>Nombre del anuncio</span>
+              <input type="text" id="anuncioNombreInput" maxlength="48" placeholder="Ej. Disponible hoy" autocomplete="off">
+            </label>
+            <label class="btn secondary dash-studio__upload">
+              <input type="file" id="anuncioFileInput" accept="image/*" hidden>
+              Cargar imagen
+            </label>
+            <button class="btn" type="button" id="btnConfirmarAnuncio">Anunciar ahora</button>
+          </aside>
+        </div>
+      </div>
+
+      <!-- Transmitir en vivo — cámara en columna central -->
+      <div class="dash-module" data-module="transmitir-live" id="modulo-transmitir-live">
+        <p class="dash-studio__note">Transmite desde el centro. Vistas, contactos, mensajes y alertas siguen en la columna derecha.</p>
+        <div class="dash-studio__grid dash-studio__grid--live">
+          <div class="dash-live-studio__stage panel glass">
+            <video id="liveCameraPreview" class="dash-live-studio__video" autoplay playsinline muted hidden></video>
+            <div class="dash-live-studio__fallback" id="liveCameraFallback">
+              <i data-lucide="video" aria-hidden="true"></i>
+              <p>La cámara se activará al iniciar. En preview local puede pedir permiso del navegador.</p>
+            </div>
+          </div>
+          <aside class="dash-studio__sidebar panel glass">
+            <label class="dash-studio__field">
+              <span>Título de la transmisión</span>
+              <input type="text" id="liveTituloInput" maxlength="48" placeholder="Ej. Noche exclusiva" autocomplete="off">
+            </label>
+            <button class="btn" type="button" id="btnIniciarTransmision">Iniciar transmisión</button>
+            <button class="btn secondary" type="button" id="btnProgramarDesdeLive">Programar en vivo</button>
+          </aside>
+        </div>
+      </div>
+
+      <!-- Anuncios: tuyos arriba + red abajo -->
+      <div class="dash-module" data-module="estados" id="modulo-estados">
+        <section class="estados-mios panel glass">
+          <div class="section-title">
+            <div><h2>Mis anuncios</h2><p>Se ven en Cariñosas, resultados y dashboards de socios</p></div>
+            <button class="btn secondary" type="button" id="btnPublicarEstado" data-goto-module="anunciar">+ Anunciar</button>
+          </div>
+          <div class="estados-mios-row pro-stories" id="estadosMiosRow"></div>
+        </section>
+        <section class="estados-socios">
+          <h2 class="estados-socios__title">Anuncios de socios y amistades</h2>
+          <div class="dash-feed-scroll" id="estadosSociosFeed"></div>
+        </section>
+        <div class="pro-stories hidden" id="dashMisEstados" aria-hidden="true"></div>
+        <div class="pro-stories hidden" id="dashMisEstadosEstados" aria-hidden="true"></div>
+      </div>
+
+      <!-- En vivos — socios transmitiendo -->
+      <div class="dash-module" data-module="lives" id="modulo-lives">
+        <div class="lives-socios-head">
+          <p class="dash-hint">Transmisiones en vivo de tus socios y amistades de la red.</p>
+        </div>
+        <div class="lives-grid" id="livesSociosFeed"></div>
+        <p class="dash-empty hidden" id="livesSociosEmpty">Ningún socio está en vivo en este momento.</p>
+      </div>
+
+      <!-- Vista previa de perfil -->
+      <div class="dash-module" data-module="vista-perfil" id="modulo-vista-perfil">
+        <div class="dash-live-preview panel glass">
+          <div class="dash-live-preview__head">
+            <div class="dash-live-preview__title">
+              <strong>Vista previa de tu perfil</strong>
+              <p>Así te ven en Cariñosas en este momento</p>
+            </div>
+            <div class="dash-toolbar-actions">
+              <button class="btn secondary" type="button" id="btnVistaPerfilGrande">Ver perfil completo</button>
+              <button class="btn" type="button" id="btnVistaPerfilEditar">Editar perfil</button>
+            </div>
+          </div>
+          <iframe id="dashVistaPerfilFrame" class="dash-live-preview__frame" title="Vista previa del perfil público" loading="lazy"></iframe>
+        </div>
+      </div>
+
+      <!-- Feed red (legacy, oculto en menú) -->
+      <div class="dash-module" data-module="feed-red" id="modulo-feed-red">
+        <div class="pro-tabs" data-feed-tabs>
+          <button class="pro-tab on" type="button" data-tab="todos">Todos</button>
+          <button class="pro-tab" type="button" data-tab="estado">Estados</button>
+          <button class="pro-tab" type="button" data-tab="live">Lives</button>
+          <button class="pro-tab" type="button" data-tab="promoción">Promociones</button>
+          <button class="pro-tab" type="button" data-tab="evento">Eventos</button>
+          <button class="pro-tab" type="button" data-tab="servicio">Servicios</button>
+        </div>
+        <div class="dash-feed-scroll" id="dashFeedPosts"></div>
+        <div class="dash-feed-list hidden" id="dashRedFeed" aria-hidden="true"></div>
+      </div>
+
+      <!-- Módulo C: Mensajes -->
+      <div class="dash-module" data-module="mensajes" id="modulo-mensajes">
+        <div class="chat-layout panel glass">
+          <aside class="chat-sidebar">
+            <label class="chat-search">
+              <span>🔍</span>
+              <input type="search" placeholder="Buscar conversaciones…" disabled>
+            </label>
+            <div class="chat-conv-list" id="chatConvList"></div>
+          </aside>
+          <div class="chat-main">
+            <header class="chat-thread-header" id="chatThreadHeader"></header>
+            <div class="chat-thread" id="chatThread"></div>
+            <footer class="chat-composer">
+              <button type="button" class="chat-tool" id="chatPlusBtn" title="Más opciones">+</button>
+              <div class="chat-plus-menu hidden" id="chatPlusMenu">
+                <button type="button">📷 Imagen</button>
+                <button type="button">📎 Archivo</button>
+                <button type="button">📍 Ubicación</button>
+                <button type="button">🔗 Enlace</button>
+                <button type="button">💰 Cotización</button>
+                <button type="button">⚠️ Reportar</button>
+                <button type="button">🚫 Bloquear</button>
+              </div>
+              <button type="button" class="chat-tool">😊</button>
+              <input type="text" placeholder="Escribe un mensaje…" disabled>
+              <button type="button" class="chat-tool">🎤</button>
+              <button type="button" class="btn chat-send">Enviar</button>
+            </footer>
+          </div>
+        </div>
+      </div>
+
+      <!-- Módulo D: Medios de contacto -->
+      <div class="dash-module" data-module="medios-contacto" id="modulo-medios-contacto">
+        <div class="dash-module-card">
+          <div class="section-title">
+            <div><h2>Medios de contacto</h2><p>Si un medio está OFF no se muestra en tu perfil público</p></div>
+            <button class="btn" type="button" id="btnGuardarContactos">Guardar</button>
+          </div>
+          <div class="contacts contacts--stack" id="contactsGrid"></div>
+          <button class="btn secondary mod-add-contact" type="button">+ Agregar nuevo método de contacto</button>
+        </div>
+      </div>
+
+      <!-- Módulo E: Información pública -->
+      <div class="dash-module" data-module="info-publica" id="modulo-info-publica">
+        <div class="dash-module-card">
+          <div class="section-title">
+            <div><h2>Información pública</h2><p>Campos visibles en el directorio</p></div>
+            <div class="dash-toolbar-actions">
+              <button class="btn secondary" type="button" id="btnCancelarInfo">Cancelar</button>
+              <button class="btn secondary" type="button" data-quick-module="vista-perfil">Vista previa</button>
+              <button class="btn" type="button" id="btnGuardarInfo">Guardar cambios</button>
+            </div>
+          </div>
+          <div class="info-grid info-grid--editable" id="infoGrid"></div>
+        </div>
+      </div>
+
+      <!-- Módulo F: Solicitudes de negocio -->
+      <div class="dash-module" data-module="solicitudes" id="modulo-solicitudes">
+        <div class="pro-tabs" data-sol-tabs>
+          <button class="pro-tab on" type="button" data-tab="recibidas">Recibidas</button>
+          <button class="pro-tab" type="button" data-tab="enviadas">Enviadas</button>
+          <button class="pro-tab" type="button" data-tab="socios">Socios</button>
+          <button class="pro-tab" type="button" data-tab="pendientes">Pendientes</button>
+          <button class="pro-tab" type="button" data-tab="bloqueados">Bloqueados</button>
+        </div>
+        <div class="sol-list" id="solicitudesList"></div>
+      </div>
+
+      <!-- Directorio legacy (oculto; usar módulo buscar) -->
+      <div class="dash-module hidden" data-module="directorio" id="modulo-directorio" aria-hidden="true">
+        <div class="dir-results" id="directorioResults"></div>
+      </div>
+
+      <!-- Módulo H: Publicaciones / Estados / Lives -->
+      <div class="dash-module" data-module="publicaciones" id="modulo-publicaciones">
+        <div class="pro-tabs" data-pub-tabs>
+          <button class="pro-tab on" type="button" data-tab="estados">Mis anuncios</button>
+          <button class="pro-tab" type="button" data-tab="lives">Mis lives</button>
+          <button class="pro-tab" type="button" data-tab="promos">Mis promociones</button>
+          <button class="pro-tab" type="button" data-tab="eventos">Mis eventos</button>
+          <button class="pro-tab" type="button" data-tab="programados">Programados</button>
+          <button class="pro-tab" type="button" data-tab="finalizados">Finalizados</button>
+        </div>
+        <div class="pub-admin-list" id="pubAdminList"></div>
+        <div class="dash-module-toolbar">
+          <button class="btn secondary" type="button" data-goto-module="anunciar">Anunciar</button>
+          <button class="btn secondary" type="button" data-goto-module="transmitir-live">Transmitir en vivo</button>
+        </div>
+      </div>
+
+      <!-- Módulo I: Banners (legacy, oculto) -->
+      <div class="dash-module" data-module="banners" id="modulo-banners">
+        <div class="banner-admin-list" id="bannersList"></div>
+        <button class="btn" type="button" onclick="location.href='registro-banner.html'">Contratar nuevo banner</button>
+      </div>
+
+      <!-- Módulo: Estadísticas -->
+      <div class="dash-module" data-module="estadisticas" id="modulo-estadisticas">
+        <div class="stat-grid mod-stats-full">
+          <div class="stat"><small>Vistas totales</small><b id="statModVisitas">0</b></div>
+          <div class="stat"><small>Contactos</small><b id="statModContactos">0</b></div>
+          <div class="stat"><small>Favoritos</small><b id="statModFavoritos">0</b></div>
+          <div class="stat"><small>Mensajes</small><b id="statModMensajes">0</b></div>
+          <div class="stat"><small>Clicks WhatsApp</small><b id="statModWa">0</b></div>
+          <div class="stat"><small>Vistas perfil</small><b id="statModPerfil">0</b></div>
+        </div>
+      </div>
+
+      <!-- Módulo: Configuración -->
+      <div class="dash-module" data-module="configuracion" id="modulo-configuracion">
+        <div class="dash-menu-panel" id="dashMenuPanel" aria-label="Menú de cuenta">
+          <button type="button" data-menu="config">⚙️ Configuración de cuenta</button>
+          <button type="button" data-menu="apariencia">🎨 Apariencia del perfil</button>
+          <button type="button" data-menu="notificaciones">🔔 Notificaciones</button>
+          <button type="button" data-menu="privacidad">🔒 Privacidad y seguridad</button>
+          <button type="button" data-menu="pagos">💳 Pagos y planes</button>
+        </div>
+        <div class="theme-picker" id="themePicker" aria-hidden="true">
+          <button class="theme-option active" type="button" data-theme="">Rosa pastel Cariñosas</button>
+        </div>
+      </div>
+
+      <!-- Módulo: Soporte -->
+      <div class="dash-module" data-module="soporte" id="modulo-soporte">
+        <div class="dash-module-card">
+          <h2>Ayuda y soporte</h2>
+          <p class="dash-hint">Contacta a administración o revisa las guías de publicación.</p>
+          <button class="btn" type="button" id="btnContactarSoporte">Contactar soporte</button>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <aside class="pro-right sidebar-right dashboard-col dashboard-right right-column">
+    <div class="dash-right-profile profile-mini">
+      <img id="rightProfileAvatar" src="img/resultados-demo/violeta-1.png" alt="Valentina">
+      <div class="dash-right-profile__meta">
+        <div class="dash-right-profile__name-row">
+          <h2 id="rightProfileName">Valentina</h2>
+          <span class="dash-verified-badge" id="rightVerifiedBadge" aria-label="Perfil verificado" title="Verificado">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path fill="#1D9BF0" d="M12 2.2l2.1 1.05 2.3-.28 1.35 1.95 2.2.7-.26 2.3 1.65 1.75-1.65 1.75.26 2.3-2.2.7-1.35 1.95-2.3-.28L12 21.8l-2.1-1.05-2.3.28-1.35-1.95-2.2-.7.26-2.3L3.7 12l-1.65-1.75 1.65-1.75-.26-2.3 2.2-.7 1.35-1.95 2.3.28L12 2.2z"/>
+              <path fill="#070A10" d="M10.4 12.1l1.35 1.35 3.1-3.25 1 .95-4.1 4.3-2.3-2.3-1-1z"/>
+            </svg>
+          </span>
+        </div>
+        <div class="dash-right-profile__status-row" id="rightProfileStatusRow">
+          <span class="dash-status-ok" id="rightStatusIcon" aria-hidden="true">
+            <svg viewBox="0 0 16 16" aria-hidden="true">
+              <rect x="1.2" y="1.2" width="13.6" height="13.6" rx="3.2" fill="none" stroke="#22C55E" stroke-width="1.35"/>
+              <path d="M4.6 8.1 7 10.5 11.4 5.6" fill="none" stroke="#22C55E" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+          <small id="rightProfileStatus" class="is-verified">Cuenta verificada</small>
+        </div>
+      </div>
+    </div>
+
+    <div class="pro-sep dash-right-nav-sep"></div>
+
+    <nav class="dash-nav-menu dash-nav-simple" id="dashNavMenu" aria-label="Menú principal">
+      <button class="dash-nav-item dash-nav-item--nav-top dash-nav-item--search" type="button" data-module-nav="buscar">
+        <span class="dash-nav-item__ic"><i data-lucide="search" class="dash-nav-item__icon" aria-hidden="true"></i></span>
+        <span class="dash-nav-item__body"><span class="dash-nav-item__label">Buscar</span></span>
+      </button>
+      <button class="dash-nav-item dash-nav-item--nav-top on" type="button" data-module-nav="inicio">
+        <span class="dash-nav-item__ic"><i data-lucide="home" class="dash-nav-item__icon" aria-hidden="true"></i></span>
+        <span class="dash-nav-item__body"><span class="dash-nav-item__label">Inicio</span></span>
+      </button>
+      <button class="dash-nav-item dash-nav-item--has-badge" type="button" data-module-nav="mensajes" id="btnNavMensajes">
+        <span class="dash-nav-item__ic"><i data-lucide="message-square-more" class="dash-nav-item__icon" aria-hidden="true"></i></span>
+        <span class="dash-nav-item__body">
+          <span class="dash-nav-item__label">Mensajes</span>
+          <span class="nb">12</span>
+        </span>
+      </button>
+      <button class="dash-nav-item dash-nav-item--has-badge dash-nav-item--stack-label" type="button" data-module-nav="solicitudes">
+        <span class="dash-nav-item__ic"><i data-lucide="clipboard-check" class="dash-nav-item__icon" aria-hidden="true"></i></span>
+        <span class="dash-nav-item__body">
+          <span class="dash-nav-item__label dash-nav-item__label--stack">
+            <span>Solicitudes</span><span>de negocio</span>
+          </span>
+          <span class="nb">8</span>
+        </span>
+      </button>
+      <button class="dash-nav-item dash-nav-item--has-badge dash-nav-item--nav-sm" type="button" data-module-nav="avisos">
+        <span class="dash-nav-item__ic"><i data-lucide="bell-ring" class="dash-nav-item__icon" aria-hidden="true"></i></span>
+        <span class="dash-nav-item__body">
+          <span class="dash-nav-item__label">Avisos</span>
+          <span class="nb">5</span>
+        </span>
+      </button>
+      <button class="dash-nav-item" type="button" data-module-nav="favoritos">
+        <span class="dash-nav-item__ic"><i data-lucide="heart" class="dash-nav-item__icon" aria-hidden="true"></i></span>
+        <span class="dash-nav-item__body"><span class="dash-nav-item__label">Favoritos</span></span>
+      </button>
+      <button class="dash-nav-item dash-nav-item--nav-sm" type="button" data-module-nav="estadisticas">
+        <span class="dash-nav-item__ic"><i data-lucide="bar-chart-3" class="dash-nav-item__icon" aria-hidden="true"></i></span>
+        <span class="dash-nav-item__body"><span class="dash-nav-item__label">Estadísticas</span></span>
+      </button>
+      <button class="dash-nav-item dash-nav-item--nav-sm dash-nav-item--stack-label" type="button" data-module-nav="banners">
+        <span class="dash-nav-item__ic"><i data-lucide="messages-square" class="dash-nav-item__icon" aria-hidden="true"></i></span>
+        <span class="dash-nav-item__body">
+          <span class="dash-nav-item__label dash-nav-item__label--stack">
+            <span>Banners y</span><span>destacados</span>
+          </span>
+        </span>
+      </button>
+      <button class="dash-nav-item dash-nav-item--nav-sm" type="button" data-module-nav="estados">
+        <span class="dash-nav-item__ic"><i data-lucide="circle-check" class="dash-nav-item__icon" aria-hidden="true"></i></span>
+        <span class="dash-nav-item__body"><span class="dash-nav-item__label">Anuncios</span></span>
+      </button>
+      <button class="dash-nav-item dash-nav-item--nav-sm dash-nav-item--has-badge dash-nav-item--stack-label" type="button" data-module-nav="lives">
+        <span class="dash-nav-item__ic"><i data-lucide="video" class="dash-nav-item__icon" aria-hidden="true"></i></span>
+        <span class="dash-nav-item__body">
+          <span class="dash-nav-item__label dash-nav-item__label--stack">
+            <span>En</span><span>vivos</span>
+          </span>
+          <span class="nb nb--live" id="navLiveBadge">2</span>
+        </span>
+      </button>
+      <button class="dash-nav-item dash-nav-item--nav-sm dash-nav-item--stack-label dash-nav-item--personalizar" type="button" id="btnPersonalizarPantalla" aria-pressed="false">
+        <span class="dash-nav-item__ic"><i data-lucide="palette" class="dash-nav-item__icon" aria-hidden="true"></i></span>
+        <span class="dash-nav-item__body">
+          <span class="dash-nav-item__label dash-nav-item__label--stack">
+            <span>Personalizar</span><span>pantalla</span>
+          </span>
+        </span>
+      </button>
+      <button class="dash-nav-item dash-nav-item--stack-label" type="button" data-module-nav="tarjeta">
+        <span class="dash-nav-item__ic"><i data-lucide="layout-grid" class="dash-nav-item__icon" aria-hidden="true"></i></span>
+        <span class="dash-nav-item__body">
+          <span class="dash-nav-item__label dash-nav-item__label--stack">
+            <span>Vista previa</span><span>de</span><span>resultados</span>
+          </span>
+        </span>
+      </button>
+      <button class="dash-nav-item dash-nav-item--stack-label dash-nav-item--nav-sm" type="button" data-module-nav="vista-perfil">
+        <span class="dash-nav-item__ic"><i data-lucide="scan-eye" class="dash-nav-item__icon" aria-hidden="true"></i></span>
+        <span class="dash-nav-item__body">
+          <span class="dash-nav-item__label dash-nav-item__label--stack">
+            <span>Vista previa</span><span>de perfil</span>
+          </span>
+        </span>
+      </button>
+      <button class="dash-nav-item dash-nav-item--nav-sm" type="button" data-module-nav="configuracion">
+        <span class="dash-nav-item__ic"><i data-lucide="settings" class="dash-nav-item__icon" aria-hidden="true"></i></span>
+        <span class="dash-nav-item__body"><span class="dash-nav-item__label">Configuración</span></span>
+      </button>
+      <button class="dash-nav-item dash-nav-item--nav-sm" type="button" data-module-nav="soporte">
+        <span class="dash-nav-item__ic"><i data-lucide="life-buoy" class="dash-nav-item__icon" aria-hidden="true"></i></span>
+        <span class="dash-nav-item__body"><span class="dash-nav-item__label">Soporte</span></span>
+      </button>
+      <div class="dash-nav-sep" role="separator"></div>
+      <button class="dash-nav-item dash-nav-item--logout" type="button" data-module-nav="cerrar-sesion">
+        <span class="dash-nav-item__ic"><i data-lucide="log-out" class="dash-nav-item__icon" aria-hidden="true"></i></span>
+        <span class="dash-nav-item__body"><span class="dash-nav-item__label">Cerrar sesión</span></span>
+      </button>
+    </nav>
+  </aside>
+
+</main>
+</div>
+
+<aside class="dash-personalize-panel hidden" id="dashPersonalizePanel" aria-label="Personalizar colores y tipografía">
+  <header class="dash-personalize-panel__head">
+    <div>
+      <strong>Personalizar pantalla</strong>
+      <p>Solo colores, fondos y formatos · el texto no cambia</p>
+    </div>
+    <span class="dash-personalize-panel__sel" id="pzSelectedLabel">Precio y acentos</span>
+  </header>
+  <div class="dash-personalize-panel__chips">
+    <button type="button" class="dash-pz-chip" data-pz-pick="heading">Títulos</button>
+    <button type="button" class="dash-pz-chip" data-pz-pick="body-text">Texto</button>
+    <button type="button" class="dash-pz-chip" data-pz-pick="accent">Acentos</button>
+    <button type="button" class="dash-pz-chip" data-pz-pick="card-bg">Tarjetas</button>
+    <button type="button" class="dash-pz-chip" data-pz-pick="page-bg">Fondo perfil</button>
+  </div>
+  <div class="dash-personalize-panel__grid">
+    <label>Fondo perfil<input type="color" id="pzPageBg" data-pz-field="pageBg" value="#FFF7FA"></label>
+    <label>Fondo tarjetas<input type="color" id="pzCardBg" data-pz-field="cardBg" value="#FFFFFF"></label>
+    <label>Color títulos<input type="color" id="pzHeading" data-pz-field="headingColor" value="#23202b"></label>
+    <label>Color texto<input type="color" id="pzBody" data-pz-field="bodyColor" value="#7b7280"></label>
+    <label>Color acento<input type="color" id="pzAccent" data-pz-field="accentColor" value="#ec2d7a"></label>
+    <label>Tamaño título<input type="range" id="pzHeadingScale" data-pz-field="headingScale" min="90" max="110" value="100"></label>
+    <label>Tipografía<select id="pzFont" data-pz-field="fontFamily">
+      <option value="Poppins">Poppins</option>
+      <option value="Inter">Inter</option>
+      <option value="Georgia">Georgia</option>
+    </select></label>
+    <label>Efecto perfil<select id="pzSheen" data-pz-field="sheen">
+      <option value="pink">Destello rosa</option>
+      <option value="gold">Destello dorado</option>
+      <option value="none">Sin destello</option>
+    </select></label>
+    <label>Fondo dashboard<input type="color" id="pzDashBg" data-pz-field="dashboard.pageBg" value="#FFF5F8"></label>
+    <label>Efecto dashboard<select id="pzDashSheen" data-pz-field="dashboard.sheen">
+      <option value="pink">Destello rosa</option>
+      <option value="gold">Destello dorado</option>
+      <option value="none">Sin destello</option>
+    </select></label>
+  </div>
+  <p class="dash-personalize-panel__note">Toca palabras en la vista previa del perfil para elegir qué estilo editar. Cambios de precio, fotos o datos públicos importantes requieren revisión.</p>
+</aside>
+
+<div class="dash-rc-modal hidden" id="dashRcEditModal" role="dialog" aria-modal="true" aria-labelledby="dashRcEditTitle" hidden>
+  <div class="dash-rc-modal__backdrop" data-rc-modal-close></div>
+  <div class="dash-rc-modal__panel">
+    <h4 class="dash-rc-modal__title" id="dashRcEditTitle">Editar contacto</h4>
+    <p class="dash-rc-modal__hint" id="dashRcEditHint"></p>
+    <label class="dash-rc-modal__field hidden" id="dashRcEditTipoWrap" hidden>
+      <span>Método</span>
+      <select class="dash-rc-modal__select" id="dashRcEditTipo" aria-label="Tipo de contacto"></select>
+    </label>
+    <input class="dash-rc-modal__input" type="text" id="dashRcEditInput" autocomplete="off">
+    <div class="dash-rc-modal__actions">
+      <button type="button" class="btn secondary dash-rc-modal__btn" data-rc-modal-close>Cancelar</button>
+      <button type="button" class="btn dash-rc-modal__btn" id="dashRcEditSave">Guardar</button>
+    </div>
+  </div>
+</div>
+
+  <script src="js/dashboard-rentero-nav.js"></script>
+  <script src="js/dashboard-rentero-personalize.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
@@ -875,6 +813,200 @@
   </script>
 
   <script>
+    const MEDIOS_CONTACTO=[
+      {id:"whatsapp",label:"WhatsApp",activoKey:"whatsappActivo",placeholder:"5218123456789"},
+      {id:"telegram",label:"Telegram",activoKey:"telegramActivo",placeholder:"@usuario o enlace"},
+      {id:"instagram",label:"Instagram",activoKey:"instagramActivo",placeholder:"@usuario"},
+      {id:"twitter",label:"X / Twitter",activoKey:"twitterActivo",placeholder:"@usuario"},
+      {id:"facebook",label:"Facebook",activoKey:"facebookActivo",placeholder:"usuario o URL"},
+      {id:"onlyfans",label:"OnlyFans",activoKey:"onlyFansActivo",placeholder:"@usuario"},
+      {id:"correo",label:"Gmail",activoKey:"correoActivo",placeholder:"correo@ejemplo.com"},
+      {id:"telefono",label:"Llamada",activoKey:"llamadaActivo",placeholder:"5218123456789"},
+      {id:"googleMaps",label:"Google Maps",activoKey:"googleMapsActivo",placeholder:"Enlace o dirección"},
+      {id:"linkInterno",label:"Link interno",activoKey:"linkInternoActivo",placeholder:"cariñosas.com/tu-perfil"},
+      {id:"mensajeInterno",label:"Mensaje interno",activoKey:"mensajeInternoActivo",placeholder:"Mensajes en Cariñosas",soloActivo:true}
+    ];
+
+    const RIGHT_MEDIOS_ORDER=[
+      {id:"whatsapp",short:"WhatsApp",icon:"message-circle"},
+      {id:"telegram",short:"Telegram",icon:"send"},
+      {id:"instagram",short:"Instagram",icon:"instagram"},
+      {id:"facebook",short:"Facebook",icon:"facebook"},
+      {id:"twitter",short:"X",icon:"twitter"},
+      {id:"onlyfans",short:"OnlyFans",icon:"heart"},
+      {id:"correo",short:"Gmail",icon:"mail"},
+      {id:"telefono",short:"Llamada",icon:"phone"},
+      {id:"googleMaps",short:"Google Maps",icon:"map-pin"},
+      {id:"linkInterno",short:"Link interno",icon:"link-2"},
+      {id:"mensajeInterno",short:"Mensaje interno",icon:"message-square"}
+    ];
+
+    const CONTACTOS_MOCK_DEFAULTS={
+      whatsapp:{on:true,val:"+52 55 1234 5678"},
+      telegram:{on:true,val:"@usuario_telegram"},
+      instagram:{on:true,val:"@usuario_instagram"},
+      facebook:{on:false,val:""},
+      twitter:{on:false,val:"@usuario_x"},
+      onlyfans:{on:false,val:"@usuario_of"},
+      correo:{on:false,val:"contacto@ejemplo.com"},
+      telefono:{on:true,val:"+52 81 0000 0000"},
+      googleMaps:{on:false,val:"Monterrey, NL"},
+      linkInterno:{on:false,val:"cariñosas.com/tu-perfil"},
+      mensajeInterno:{on:true,val:"@mensaje_interno"}
+    };
+
+    const RC_BRAND_ICONS={
+      whatsapp:'<svg class="dash-rc-brand" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="16" fill="#25D366"/><path fill="#fff" d="M16 7.2c-4.86 0-8.8 3.94-8.8 8.8 0 1.55.41 3 1.12 4.26L7.2 24.8l4.55-1.2a8.76 8.76 0 004.25 1.09c4.86 0 8.8-3.94 8.8-8.8S20.86 7.2 16 7.2zm4.84 12.36c-.22.62-1.07 1.2-1.47 1.28-.38.07-.87.11-1.43-.09-.32-.1-.74-.35-1.28-.69-.45-.29-.95-.61-1.33-.94-1.12-.95-1.87-2.13-2.08-2.5-.2-.35-.18-.54.13-.8.1-.09.24-.24.36-.36.12-.12.16-.2.24-.33.08-.13.04-.24-.02-.33-.07-.09-.32-.75-.43-1.03-.12-.28-.24-.25-.32-.25h-.28c-.1 0-.24.03-.36.16-.12.13-.47.46-.47 1.13 0 .67.49 1.32.56 1.41.07.09.96 1.47 2.33 2.07.82.35 1.15.38 1.57.32.5-.08 1.53-.63 1.75-1.23.22-.6.22-1.12.15-1.23-.07-.1-.24-.16-.5-.28z"/></svg>',
+      telegram:'<svg class="dash-rc-brand" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="16" fill="#229ED9"/><path fill="#fff" d="M22.8 10.2 8.9 15.4c-.9.35-.88.85-.15 1.07l3.5 1.09 1.34 4.1c.17.52.31.72.63.72.25 0 .36-.11.56-.36l1.35-1.7 2.8 2.07c.52.29.89.14 1.02-.49l1.85-8.7c.19-.86-.31-1.25-.9-1.01z"/></svg>',
+      instagram:'<svg class="dash-rc-brand dash-rc-brand--ig" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="16" fill="#fff" stroke="#F8C8DC" stroke-width="1"/><defs><linearGradient id="rcIg" x1="6" y1="26" x2="26" y2="6"><stop stop-color="#FD5949"/><stop offset=".5" stop-color="#D6249F"/><stop offset="1" stop-color="#285AEB"/></linearGradient></defs><rect x="8" y="8" width="16" height="16" rx="4.5" fill="url(#rcIg)"/><circle cx="16" cy="16" r="3.6" fill="none" stroke="#fff" stroke-width="1.4"/><circle cx="20.2" cy="11.8" r="1.1" fill="#fff"/></svg>',
+      onlyfans:'<svg class="dash-rc-brand" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="16" fill="#00AFF0"/><text x="16" y="20.5" text-anchor="middle" fill="#fff" font-size="11" font-weight="800" font-family="Arial,sans-serif">OF</text></svg>',
+      twitter:'<svg class="dash-rc-brand" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="16" fill="#111"/><path fill="#fff" d="M18.2 14.7 23.5 8.8h-1.9l-4.3 5.1-3.4-5.1H9.8l5.6 8-5.6 6.5h1.9l4.6-5.4 3.7 5.4h4.1l-5.9-8.6zm-1.8 2.1-.9-1.2-4.4-5.8h1.5l3.6 4.7.9 1.2 4.6 6h-1.5l-3.8-4.9z"/></svg>',
+      mensajeInterno:'<svg class="dash-rc-brand" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="16" fill="#FFE4EE"/><path fill="#E91E63" d="M10.5 10.5h11a2.2 2.2 0 012.2 2.2v5.6a2.2 2.2 0 01-2.2 2.2h-7.2l-3.3 2.5v-2.5h-1.7a2.2 2.2 0 01-2.2-2.2v-5.6a2.2 2.2 0 012.2-2.2z"/><circle cx="13.2" cy="15.4" r="1.1" fill="#fff"/><circle cx="16" cy="15.4" r="1.1" fill="#fff"/><circle cx="18.8" cy="15.4" r="1.1" fill="#fff"/></svg>',
+      telefono:'<svg class="dash-rc-brand" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="16" fill="#34C759"/><path fill="#fff" d="M21.8 19.4c-1-.5-1.9-.8-2.7-.8-.4 0-.8.1-1.1.3l-1.2.9c-.8-.5-1.8-1.2-2.7-2.1-.9-.9-1.6-1.9-2.1-2.7l.9-1.2c.2-.3.3-.7.3-1.1 0-.8-.3-1.7-.8-2.7l-.7-1.3c-.3-.5-.8-.8-1.4-.8-.5 0-1 .2-1.4.5l-1 1c-.4.4-.6 1-.5 1.6.2 1.2.8 2.8 2.2 4.9 1.4 2.1 2.5 3.3 3.5 4.1 1 .8 2.1 1.2 3.1 1.1.6-.1 1.1-.4 1.5-.8l1-1c.3-.4.5-.9.5-1.4 0-.6-.3-1.1-.8-1.4l-1.3-.7z"/></svg>',
+      googleMaps:'<svg class="dash-rc-brand" viewBox="0 0 32 32" aria-hidden="true"><path fill="#EA4335" d="M16 2C11.03 2 7 6.03 7 11c0 6.75 9 19 9 19s9-12.25 9-19c0-4.97-4.03-9-9-9z"/><circle cx="16" cy="11" r="3.5" fill="#fff"/></svg>',
+      facebook:'<svg class="dash-rc-brand" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="16" fill="#1877F2"/><path fill="#fff" d="M18.8 17.2l.5-3.2h-3.1V12c0-.9.4-1.5 1.5-1.5h1.7V7.4s-1.5-.2-3-.2c-3 0-5 1.8-5 5v1.8H8v3.2h2.4V25h3.2v-7.8h2.8z"/></svg>',
+      correo:'<svg class="dash-rc-brand" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="16" fill="#EA4335"/><path fill="#fff" d="M8 11.5v9a1.5 1.5 0 001.5 1.5h13A1.5 1.5 0 0024 20.5v-9l-8 5-8-5z"/><path fill="#fff" d="M8 10.5l8 5 8-5"/></svg>',
+      linkInterno:'<svg class="dash-rc-brand" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="16" fill="#FFE4EE"/><path fill="none" stroke="#E91E63" stroke-width="2" stroke-linecap="round" d="M12 16h8"/><path fill="none" stroke="#E91E63" stroke-width="2" stroke-linecap="round" d="M14.5 12.5 11 16l3.5 3.5"/><path fill="none" stroke="#E91E63" stroke-width="2" stroke-linecap="round" d="M17.5 12.5 21 16l-3.5 3.5"/></svg>'
+    };
+
+    function htmlTarjetaContacto(meta,row,info,on,subtitulo){
+      const icon=RC_BRAND_ICONS[meta.id]||RC_BRAND_ICONS.linkInterno;
+      const visTxt=on?"Visible":"Oculto";
+      return '<li class="dash-rc-card'+(on?" is-visible":"")+'" data-contact-id="'+textoSeguro(meta.id)+'">'+
+        '<span class="dash-rc-card__icon dash-rc-card__icon--'+textoSeguro(meta.id)+'">'+icon+'</span>'+
+        '<div class="dash-rc-card__text">'+
+          '<b class="dash-rc-card__name">'+textoSeguro(row.short)+'</b>'+
+          '<span class="dash-rc-card__val" title="'+textoSeguro(subtitulo)+'">'+textoSeguro(subtitulo)+'</span>'+
+        '</div>'+
+        '<label class="dash-rc-card__vis" aria-label="'+textoSeguro(visTxt+" "+row.short)+'">'+
+          '<span class="dash-rc-card__vis-txt">'+visTxt+'</span>'+
+          '<span class="dash-rc-card__switch">'+
+            '<input type="checkbox" data-right-contact-toggle="'+textoSeguro(meta.id)+'"'+(on?' checked="checked"':"")+'>'+
+            '<span class="dash-rc-card__switch-ui"></span>'+
+          '</span>'+
+        '</label>'+
+        '<button type="button" class="dash-rc-card__edit" data-right-contact-edit="'+textoSeguro(meta.id)+'" aria-label="Editar '+textoSeguro(row.short)+'">'+
+          '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="M12 20h9"/><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="M16.5 3.5a2.12 2.12 0 113 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>'+
+        '</button>'+
+      '</li>';
+    }
+
+    function filasContactoRight(mapper){
+      return RIGHT_MEDIOS_ORDER.map(mapper).join("");
+    }
+
+    function subtituloContactoTarjeta(meta,info,on){
+      const raw=formatoContactoSubtitulo(meta,info);
+      if(raw&&raw!==(meta.placeholder||"Sin configurar")) return raw;
+      return meta.placeholder||"Sin configurar";
+    }
+
+    function pintarRightContactosFallback(){
+      const list=document.getElementById("rightContactosList");
+      if(!list) return;
+      list.innerHTML=filasContactoRight(function(row){
+        const meta=MEDIOS_CONTACTO.find(function(m){return m.id===row.id;});
+        if(!meta) return "";
+        const d=CONTACTOS_MOCK_DEFAULTS[row.id]||{on:false,val:meta.placeholder||""};
+        const subt=subtituloContactoTarjeta(meta,{valor:d.val},d.on);
+        return htmlTarjetaContacto(meta,row,{valor:d.val},d.on,subt);
+      });
+    }
+
+    function formatoContactoSubtitulo(meta,info){
+      const v=String(info&&info.valor||"").trim();
+      if(meta.soloActivo){
+        if(!v||v==="Activo en Cariñosas"||v===meta.placeholder) return "@mensaje_interno";
+        return v.startsWith("@")?v:"@"+v.replace(/\s+/g,"_").toLowerCase();
+      }
+      if(!v) return meta.placeholder||"Sin configurar";
+      if(meta.id==="instagram"||meta.id==="telegram"||meta.id==="twitter"||meta.id==="onlyfans"){
+        return v.startsWith("@")?v:"@"+v.replace(/^@/,"");
+      }
+      return v;
+    }
+
+    let rcEditContactoId=null;
+    let rcEditModo="edit";
+
+    function asegurarPublicacionActual(){
+      if(!publicacionActual){
+        publicacionActual=publicacionesMock[0]||null;
+      }
+      return publicacionActual;
+    }
+
+    function subtituloGeoPicker(item){
+      const cat=String(item.categoria||"").trim();
+      const geo=[item.pais,item.estado,item.ciudad].filter(Boolean).join(" · ");
+      if(cat&&geo) return cat+" · "+geo;
+      return cat||geo||item.slot||"Publicación activa";
+    }
+
+    function publicacionEstaActiva(pub){
+      if(!pub) return false;
+      if(pub.estadoPublicacion) return !!pub.estadoPublicacion.publicoActivo;
+      if(typeof pub.activo==="boolean") return pub.activo;
+      return String(pub.estado||"").toLowerCase()==="activo";
+    }
+
+    function htmlPickerCard(opts){
+      const activo=!!opts.activo;
+      const tag=opts.tag||"button";
+      const typeAttr=tag==="button"?' type="button"':"";
+      const extra=opts.extraAttrs||"";
+      const classes=["profile-picker-card","picker-card"];
+      if(opts.extraClass) classes.push(String(opts.extraClass).trim());
+      if(activo) classes.push("is-live");
+      return "<"+tag+typeAttr+' class="'+textoSeguro(classes.join(" "))+'"'+extra+">"+
+        '<img class="profile-picker-card__ava picker-card__ava" src="'+textoSeguro(opts.foto)+'" alt="">'+
+        '<div class="profile-picker-card__body picker-card__body">'+
+          '<b class="profile-picker-card__name picker-card__name">'+textoSeguro(opts.nombre)+'</b>'+
+          '<span class="profile-picker-card__val picker-card__val" title="'+textoSeguro(opts.subtitulo)+'">'+textoSeguro(opts.subtitulo)+'</span>'+
+        '</div>'+
+        '<span class="profile-picker-card__dot picker-card__dot'+(activo?" picker-card__dot--on":"")+'" aria-hidden="true" title="'+(activo?"Activo":"Inactivo")+'"></span>'+
+      "</"+tag+">";
+    }
+
+    const MOCK_ESTADOS_PROPIOS=[
+      {tipo:"anuncio",titulo:"Disponible hoy",cuando:"Hace 4 h",vistas:124,reacciones:18,activo:true,img:"https://images.unsplash.com/photo-1512310604669-443f26c35f52?auto=format&fit=crop&w=200&q=80"},
+      {tipo:"live",titulo:"Sesión en vivo · Q&A",cuando:"Ayer 21:30",img:"https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=200&q=80"}
+    ];
+
+    /** Anuncio activo del perfil (mock — mismo dato irá a perfil/resultados). */
+    const MOCK_ANUNCIO_ACTIVO={
+      activo:true,
+      nombre:"Disponible hoy",
+      hora:"Hace 4 h",
+      vistas:124,
+      reacciones:18,
+      img:"https://images.unsplash.com/photo-1512310604669-443f26c35f52?auto=format&fit=crop&w=200&q=80"
+    };
+    const MOCK_ESTADO_ACTIVO=MOCK_ANUNCIO_ACTIVO;
+
+    /** Próximo en vivo programado (mock — visitantes ven Recordar en perfil). */
+    const MOCK_LIVE_PROXIMO={
+      dia:"Sáb 24",
+      hora:"10 PM",
+      nombre:"Noche exclusiva",
+      tema:"Noche exclusiva",
+      edad:"18+",
+      img:"img/dashboard/right-live-preview.png"
+    };
+
+    /** null = sin transmisión activa ahora. */
+    const MOCK_LIVE_ACTIVO=null;
+
+    const MOCK_RED_FEED=[
+      {tipo:"solicitud",nombre:"Luna M.",categoria:"Escort",ciudad:"Monterrey",texto:"Te envió solicitud de negocio para colaboración.",img:"https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=200&q=80"},
+      {tipo:"estado",nombre:"Studio Velvet",categoria:"Table Dance",ciudad:"San Pedro",texto:"Publicó un estado: Noche especial este viernes.",img:"https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=200&q=80"},
+      {tipo:"live",nombre:"Andrea VIP",categoria:"Escort VIP",ciudad:"Monterrey",texto:"Está en vivo ahora · Promoción fin de semana.",img:"https://images.unsplash.com/photo-1509967419530-da38b4704bc6?auto=format&fit=crop&w=200&q=80"}
+    ];
+
+    const PREVIEW_STORAGE_KEY="carihub_rp_public_preview";
+    let geoRedFiltros={categoria:"Todas",pais:"México",estado:"Nuevo León",ciudad:"Monterrey"};
+    window.geoRedFiltros=geoRedFiltros;
+
     const documentosMockDashboard=[
       {
         id:"perfil-valentina",
@@ -883,12 +1015,12 @@
         estado:"Activo",
         estadoClase:"ok",
         ubicacion:"Monterrey, Nuevo León",
-        imagen:"https://images.unsplash.com/photo-1512310604669-443f26c35f52?auto=format&fit=crop&w=1200&q=80",
-        avatar:"https://images.unsplash.com/photo-1512310604669-443f26c35f52?auto=format&fit=crop&w=240&q=80",
+        imagen:"img/resultados-demo/violeta-1.png",
+        avatar:"img/resultados-demo/violeta-1.png",
         secundarias:[
-          "https://images.unsplash.com/photo-1509967419530-da38b4704bc6?auto=format&fit=crop&w=600&q=80",
-          "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=600&q=80",
-          "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=600&q=80"
+          "img/resultados-demo/violeta-2.png",
+          "img/resultados-demo/violeta-3.png",
+          "img/resultados-demo/violeta-4.png"
         ],
         resumen:{corazones:248,mensajes:36,whatsapp:112},
         datos:{
@@ -905,9 +1037,9 @@
           "Zona":"San Pedro / Valle"
         },
         contactos:{
-          "WhatsApp":{valor:"+52 81 0000 0000",activo:true},
-          "Telegram":{valor:"@valentina_mock",activo:true},
-          "Instagram":{valor:"@valentina.carihub",activo:true},
+          "WhatsApp":{valor:"+52 55 1234 5678",activo:true},
+          "Telegram":{valor:"@usuario_telegram",activo:true},
+          "Instagram":{valor:"@usuario_instagram",activo:true},
           "X/Twitter":{valor:"",activo:false},
           "Sitio web":{valor:"",activo:false},
           "Teléfono":{valor:"+52 81 0000 0000",activo:true},
@@ -920,6 +1052,49 @@
           "Días restantes del plan":"18 días",
           "Anuncio destacado":"Resultados centro",
           "Última actualización":"Hoy, 09:20"
+        },
+        revision:"Activo y aprobado"
+      },
+      {
+        id:"perfil-luna",
+        nombre:"Luna M.",
+        tipo:"perfil",
+        estado:"Activo",
+        estadoClase:"ok",
+        ubicacion:"San Pedro, Nuevo León",
+        imagen:"https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=1200&q=80",
+        avatar:"https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=240&q=80",
+        secundarias:[],
+        resumen:{corazones:86,mensajes:12,whatsapp:34},
+        datos:{
+          "Nombre público":"Luna M.",
+          "Categoría":"Escort",
+          "País":"México",
+          "Estado":"Nuevo León",
+          "Ciudad":"San Pedro",
+          "Descripción":"Segundo perfil de ejemplo para cambiar en el dashboard.",
+          "Servicios":"Compañía, eventos",
+          "Horario":"Bajo cita",
+          "Tarifas":"Desde $2,000 MXN",
+          "Modalidad":"Presencial",
+          "Zona":"San Pedro"
+        },
+        contactos:{
+          "WhatsApp":{valor:"+52 81 1111 1111",activo:true},
+          "Telegram":{valor:"@luna_mock",activo:true},
+          "Instagram":{valor:"@luna.carihub",activo:false},
+          "X/Twitter":{valor:"",activo:false},
+          "Sitio web":{valor:"",activo:false},
+          "Teléfono":{valor:"",activo:false},
+          "Mensaje interno":{valor:"Activo",activo:true},
+          "Maps/Ubicación":{valor:"San Pedro",activo:true}
+        },
+        quick:{
+          "Plan actual":"Básico",
+          "Perfiles activos":"2 perfiles",
+          "Días restantes del plan":"30 días",
+          "Anuncio destacado":"—",
+          "Última actualización":"Hoy"
         },
         revision:"Activo y aprobado"
       },
@@ -1029,19 +1204,39 @@
     }
 
     function normalizarContactosPerfil(u){
-      const contactos=u.contactos||{};
-      const legacy=nombre=>contactos[nombre]||{};
-      const telefono=u.telefono||contactos.whatsapp?.valor||"";
-      return {
-        "WhatsApp":{valor:telefono||legacy("WhatsApp").valor||"",activo:Boolean(telefono||contactos.whatsapp?.activo||legacy("WhatsApp").activo),visiblePublico:true,actualizadoEn:contactos.whatsapp?.actualizadoEn||null},
-        "Telegram":{valor:contactos.telegram?.valor||legacy("Telegram").valor||"",activo:Boolean(contactos.telegram?.activo||legacy("Telegram").activo),visiblePublico:Boolean(contactos.telegram?.visiblePublico||legacy("Telegram").visiblePublico),actualizadoEn:contactos.telegram?.actualizadoEn||null},
-        "Instagram":{valor:contactos.instagram?.valor||legacy("Instagram").valor||"",activo:Boolean(contactos.instagram?.activo||legacy("Instagram").activo),visiblePublico:Boolean(contactos.instagram?.visiblePublico||legacy("Instagram").visiblePublico),actualizadoEn:contactos.instagram?.actualizadoEn||null},
-        "X/Twitter":{valor:contactos.twitter?.valor||legacy("X/Twitter").valor||"",activo:Boolean(contactos.twitter?.activo||legacy("X/Twitter").activo),visiblePublico:Boolean(contactos.twitter?.visiblePublico||legacy("X/Twitter").visiblePublico),actualizadoEn:contactos.twitter?.actualizadoEn||null},
-        "Sitio web":{valor:contactos.sitioWeb?.valor||legacy("Sitio web").valor||"",activo:Boolean(contactos.sitioWeb?.activo||legacy("Sitio web").activo),visiblePublico:Boolean(contactos.sitioWeb?.visiblePublico||legacy("Sitio web").visiblePublico),actualizadoEn:contactos.sitioWeb?.actualizadoEn||null},
-        "Teléfono":{valor:telefono||legacy("Teléfono").valor||"",activo:Boolean(telefono||legacy("Teléfono").activo),visiblePublico:true,actualizadoEn:contactos.telefono?.actualizadoEn||null},
-        "Mensaje interno":{valor:contactos.interno?.valor||legacy("Mensaje interno").valor||"Activo en Cariñosas",activo:contactos.interno?.activo!==false&&legacy("Mensaje interno").activo!==false,visiblePublico:true,actualizadoEn:contactos.interno?.actualizadoEn||null},
-        "Maps/Ubicación":{valor:contactos.maps?.valor||legacy("Maps/Ubicación").valor||u.zona||"",activo:Boolean(contactos.maps?.activo||legacy("Maps/Ubicación").activo),visiblePublico:Boolean(contactos.maps?.visiblePublico||legacy("Maps/Ubicación").visiblePublico),actualizadoEn:contactos.maps?.actualizadoEn||null}
-      };
+      const cp=u.contactoPublico||{};
+      const legacy=u.contactos||{};
+      const telefono=u.telefono||cp.whatsapp||legacy["WhatsApp"]?.valor||"";
+      const out={};
+      MEDIOS_CONTACTO.forEach(function(m){
+        let valor=cp[m.id]||"";
+        if(m.id==="whatsapp"&&!valor) valor=telefono;
+        if(m.id==="telefono"&&!valor) valor=telefono;
+        if(m.id==="correo"&&!valor) valor=cp.correo||"";
+        let activo;
+        if(m.soloActivo){
+          activo=cp[m.activoKey]!==false;
+          if(!valor) valor=m.placeholder;
+        }else if(m.id==="whatsapp"){
+          activo=cp[m.activoKey]!==false&&!!valor;
+        }else{
+          activo=cp[m.activoKey]===true&&!!valor;
+        }
+        const leg=legacy[m.label];
+        if(leg){
+          if(!valor&&leg.valor) valor=leg.valor;
+          if(leg.activo) activo=true;
+        }
+        out[m.label]={
+          id:m.id,
+          activoKey:m.activoKey,
+          valor:valor||"",
+          activo:!!activo,
+          placeholder:m.placeholder,
+          soloActivo:!!m.soloActivo
+        };
+      });
+      return out;
     }
 
     function normalizarContactosPublicidad(s){
@@ -1061,7 +1256,7 @@
 
     function normalizarMediaPerfil(u){
       return {
-        mediaPrincipal:{url:u.fotoURL||u.imagen||"",path:u.fotoPath||"",tipo:"image/jpeg",mediaKind:"imagen"},
+        mediaPrincipal:{url:u.fotoURL||u.avatar||u.imagen||"",path:u.fotoPath||"",tipo:"image/jpeg",mediaKind:"imagen"},
         mediaSecundaria:Array.isArray(u.fotosExtraURL)?u.fotosExtraURL:(u.secundarias||[])
       };
     }
@@ -1099,7 +1294,13 @@
       const activo=data.activo===true||estadoVisual==="Activo";
       const vencido=data.vencido===true||estadoVisual==="Vencido";
       const autorizadoParaPago=Boolean(data.autorizadoParaPago);
-      const etiqueta=estadoVisual||revision;
+      const mapaRevision={
+        registro_pendiente:"Pendiente de aprobación",
+        actualizacion_pendiente:"Cambios en revisión",
+        aprobado:"Aprobado",
+        rechazado:"Rechazado"
+      };
+      const etiqueta=estadoVisual||mapaRevision[revision]||revision;
       const estadoClase=activo?"ok":(revision.includes("pendiente")||revision.includes("revision")||etiqueta==="Pendiente"?"warn":"off");
       return {publicoActivo:activo,revision,pago,admin:data.estadoAdmin||"",vencido,autorizadoParaPago,etiqueta,estadoClase};
     }
@@ -1159,6 +1360,9 @@
         mediaPrincipal:media.mediaPrincipal,
         mediaSecundaria:media.mediaSecundaria,
         contactos:normalizarContactosPerfil(u),
+        contactoPublico:u.contactoPublico||{},
+        _raw:u,
+        mensajeContactoPublicidad:u.mensajeContactoPublicidad||"",
         estadoPublicacion:normalizarEstadoPublicacion(u),
         plan:normalizarPlanPublicacion(u),
         publicidad:{pantalla:"",espacio:"",slotId:"",periodo:"",tipoContenido:"",precio:""},
@@ -1273,25 +1477,69 @@
       return pubs;
     }
 
+    function etiquetaRevision(rev){
+      const mapa={
+        registro_pendiente:"Pendiente de aprobación",
+        actualizacion_pendiente:"Cambios en revisión",
+        aprobado:"Aprobado",
+        rechazado:"Rechazado",
+        sin_estado:"Sin estado"
+      };
+      return mapa[rev]||rev;
+    }
+
+    function mostrarAvisoEntrada(){
+      const el=document.getElementById("dashAvisoEntrada");
+      if(!el) return;
+      const params=new URLSearchParams(location.search);
+      let tipo="";
+      try{
+        tipo=sessionStorage.getItem("carihub_dashboard_aviso")||"";
+        if(tipo) sessionStorage.removeItem("carihub_dashboard_aviso");
+      }catch(e){}
+      if(params.get("solicitud")==="ok") tipo="solicitud_enviada";
+      if(tipo!=="solicitud_enviada") return;
+      el.textContent="Solicitud enviada correctamente. Está pendiente de aprobación por administración. Si se aprueba, recibirás tu mes de prueba gratis.";
+      el.classList.remove("hidden");
+      if(params.get("solicitud")){
+        params.delete("solicitud");
+        const qs=params.toString();
+        history.replaceState(null,"",location.pathname+(qs?"?"+qs:""));
+      }
+    }
+
     async function initDashboard(){
       const lista=document.getElementById("publicationList");
       const user=auth.currentUser;
+      const preview=new URLSearchParams(location.search).get("preview")==="1";
+      if(!user&&!preview){
+        publicacionActual=publicacionesMock[0];
+        renderDashboard();
+        const hint=document.getElementById("dashLoginHint");
+        if(hint) hint.classList.remove("hidden");
+        return;
+      }
       if(!user){
-        if(lista) lista.innerHTML='<p style="padding:12px;">Inicia sesión en <a href="index.html">Cariñosas</a> con la cuenta de tu registro para ver tu dashboard.</p>';
+        publicacionesReales=publicacionesMock.slice();
+        publicacionActual=publicacionesReales[0];
+        renderDashboard();
         return;
       }
       publicacionesReales=await cargarPublicacionesDesdeFirebase(user);
       if(!publicacionesReales.length){
-        const preview=new URLSearchParams(location.search).get("preview")==="1";
         if(preview){
           publicacionesReales=publicacionesMock.slice();
         }else if(lista){
-          lista.innerHTML='<p style="padding:12px;">Aún no tienes perfil ni anuncios. <a href="index.html?abrir=registro">Registra tu perfil</a> o <a href="registro-banner.html">renta un banner</a>.</p>';
+          lista.innerHTML='<p class="dash-login-hint">Aún no tienes perfil ni anuncios. <a href="index.html?abrir=registro">Registra tu perfil</a> o <a href="registro-banner.html">renta un banner</a>.</p>';
+          publicacionActual=publicacionesMock[0];
+          renderDashboard();
           return;
         }
       }
       publicacionActual=publicacionesReales[0] || publicacionesMock[0];
       renderDashboard();
+      const hint=document.getElementById("dashLoginHint");
+      if(hint) hint.classList.toggle("hidden",!!user);
     }
 
     function textoSeguro(valor){
@@ -1303,106 +1551,1111 @@
         .replaceAll("'","&#039;");
     }
 
+    function subtituloPublicacion(pub){
+      const ciudad=pub.ciudad||ubicacionPublicacion(pub)||"tu ciudad";
+      const activo=pub.estadoPublicacion&&pub.estadoPublicacion.publicoActivo;
+      const estadoTxt=activo?"activo":"pendiente";
+      return pub.tipo+" "+estadoTxt+" en "+ciudad;
+    }
+
+    function publicacionToPreviewPayload(pub){
+      const cp={};
+      Object.values(pub.contactos||{}).forEach(function(info){
+        if(!info||!info.id) return;
+        cp[info.id]=info.valor||"";
+        cp[info.activoKey]=!!info.activo;
+        if(info.id==="correo") cp.gmailActivo=!!info.activo;
+        if(info.id==="whatsapp") cp.telefono=info.valor||"";
+      });
+      if(pub.mensajeContactoPublicidad) cp.mensajeContactoPublicidad=pub.mensajeContactoPublicidad;
+      const precioTxt=precioDesdeTarifas(pub.tarifas||"");
+      const desc=pub.descripcion||"";
+      return {
+        vista:"adult",
+        tema:"adult",
+        perfil:{
+          __id:pub.ownerUid||pub.id,
+          __demo:!pub.ownerUid,
+          nombre:pub.nombrePublico,
+          alias:pub.nombrePublico,
+          edad:25,
+          zona:pub.zona,
+          ciudad:pub.ciudad,
+          estado:pub.estado,
+          pais:pub.pais,
+          ubicacion:[pub.zona,pub.ciudad,pub.estado].filter(Boolean).join(", ")||pub.ciudad,
+          descripcion:desc,
+          descripcionPublica:desc,
+          tagline:desc?String(desc).slice(0,120):"Complaciente y cariñosa, trato de novia.",
+          serviciosPrincipales:pub.servicios,
+          horario:pub.horario||"24 horas",
+          horarioPublico:pub.horario||"24 horas",
+          precio:precioTxt,
+          precioDesde:precioTxt,
+          categoria:pub.categoria,
+          categoriaPublica:pub.categoria,
+          modalidad:pub.modalidad,
+          modalidades:modalidadesDesdePub(pub),
+          fotoURL:pub.mediaPrincipal.url,
+          fotosExtraURL:pub.mediaSecundaria||[],
+          fotosCount:Math.max(4,(pub.mediaPrincipal.url?1:0)+(pub.mediaSecundaria?pub.mediaSecundaria.length:0)),
+          disponibilidad:pub.disponibilidad||"Disponible ahora",
+          verificada:!!(pub.estadoPublicacion&&pub.estadoPublicacion.publicoActivo),
+          contactoPublico:cp,
+          mensajeContactoPublicidad:pub.mensajeContactoPublicidad||""
+        },
+        query:{
+          categoria:pub.categoria||"",
+          pais:pub.pais||"México",
+          estado:pub.estado||"",
+          ciudad:pub.ciudad||""
+        }
+      };
+    }
+
+    function subtituloPerfilPicker(pub){
+      return subtituloGeoPicker(pub);
+    }
+
+    function fotoPerfilPicker(pub){
+      const url=pub&&pub.mediaPrincipal&&pub.mediaPrincipal.url;
+      const raw=pub&&pub._raw;
+      return url||raw&&raw.avatar||raw&&raw.imagen||"img/home/banners/ad-banner-pink-02.png";
+    }
+
     function pintarPublicaciones(){
       const lista=document.getElementById("publicationList");
-      const pubs=listaPublicaciones();
-      lista.innerHTML=pubs.map(pub=>`
-        <button type="button" class="publication-card ${pub.id===publicacionActual.id?"active":""}" data-id="${pub.id}">
-          <img src="${pub.mediaPrincipal.url||"img/home/banners/ad-banner-pink-02.png"}" alt="${textoSeguro(pub.nombrePublico)}">
-          <span>
-            <h3>${textoSeguro(pub.nombrePublico)}</h3>
-            <p>${textoSeguro(pub.tipo)} · ${textoSeguro(ubicacionPublicacion(pub))}</p>
-            <span class="badge ${pub.estadoPublicacion.estadoClase}">${textoSeguro(pub.estadoPublicacion.etiqueta)}</span>
-          </span>
-        </button>
-      `).join("");
-
-      lista.querySelectorAll(".publication-card").forEach(card=>{
+      const pubs=listaPublicaciones().filter(function(p){ return p.tipo==="perfil"; });
+      const allPubs=listaPublicaciones();
+      const html=(pubs.length?pubs:allPubs).map(pub=>{
+        const esActivo=!!(publicacionActual&&pub.id===publicacionActual.id);
+        const subt=subtituloPerfilPicker(pub);
+        const live=publicacionEstaActiva(pub);
+        return htmlPickerCard({
+          tag:"button",
+          foto:fotoPerfilPicker(pub),
+          nombre:pub.nombrePublico||pub.nombre||"Sin nombre",
+          subtitulo:subt,
+          activo:live,
+          extraClass:esActivo?" active":"",
+          extraAttrs:' data-id="'+textoSeguro(pub.id)+'"'
+        });
+      }).join("");
+      if(lista) lista.innerHTML=html;
+      if(lista) lista.querySelectorAll(".profile-picker-card").forEach(card=>{
         card.addEventListener("click",()=>{
-          const seleccion=pubs.find(pub=>pub.id===card.dataset.id);
+          const pool=pubs.length?pubs:allPubs;
+          const seleccion=pool.find(pub=>pub.id===card.dataset.id);
           if(seleccion){
             publicacionActual=seleccion;
             renderDashboard();
+            if(window.DashModuleNav) DashModuleNav.setModule("inicio");
           }
         });
       });
     }
 
+    function pintarTarjetaResultados(){
+      if(!publicacionActual) return;
+      const datos=datosPublicosPublicacion(publicacionActual);
+      const set=function(id,v){const el=document.getElementById(id);if(el)el.textContent=v;};
+      const img=document.getElementById("resultCardImg");
+      if(img) img.src=publicacionActual.mediaPrincipal.url||"";
+      set("resultCardName",publicacionActual.nombrePublico);
+      set("resultCardMeta",(publicacionActual.categoria||"")+" · "+(publicacionActual.ciudad||""));
+      set("resultCardDesc",datos["Descripción"]||"");
+      set("resultCardPrice",datos["Tarifas"]?("Desde "+datos["Tarifas"]):"");
+      const badge=document.getElementById("resultCardBadge");
+      if(badge) badge.textContent=publicacionActual.estadoPublicacion.publicoActivo?"Verificado":"En revisión";
+    }
+
+    function pintarBannersSide(){
+      const cont=document.getElementById("bannersListSide");
+      if(!cont||!window.DashModuleNav) return;
+      const banners=DashModuleNav.MOCK_BANNERS||[];
+      cont.innerHTML=banners.length?banners.map(function(b){
+        const activo=b.activo===true||String(b.estado||"").toLowerCase()==="activo";
+        return htmlPickerCard({
+          tag:"div",
+          foto:b.img||"img/home/banners/ad-banner-pink-01.png",
+          nombre:b.nombre||"Banner",
+          subtitulo:subtituloGeoPicker(b),
+          activo:activo,
+          extraClass:" side-banner-card",
+          extraAttrs:' data-banner-id="'+textoSeguro(b.id||b.nombre)+'" title="'+textoSeguro(b.slot||"")+'"'
+        });
+      }).join(""):'<p class="dash-hint dash-hint--compact">Sin banners activos</p>';
+    }
+
     function pintarMetricas(){
-      document.getElementById("metricCorazones").textContent=publicacionActual.metricas.favoritos;
-      document.getElementById("metricMensajes").textContent=publicacionActual.metricas.mensajes;
-      document.getElementById("metricWhatsapp").textContent=publicacionActual.metricas.clicksWhatsApp;
+      if(!publicacionActual) return;
+      const m=publicacionActual.metricas||{};
+      const set=function(id,val){const el=document.getElementById(id);if(el)el.textContent=val;};
+      set("metricVisitas",m.visitas||1248);
+      set("metricContactos",m.clicksWhatsApp||0);
+      set("metricFavoritos",m.favoritos||0);
+      set("metricMensajes",m.mensajes||0);
+      set("pcardStatViews",m.visitas||1248);
+      set("pcardStatContacts",m.clicksWhatsApp||0);
+      set("pcardStatFavs",m.favoritos||0);
+      set("pcardStatMsgs",m.mensajes||0);
+      set("modHomeViews",m.visitas||1248);
+      set("modHomeContacts",m.clicksWhatsApp||0);
+      set("modHomeFavs",m.favoritos||0);
+      set("modHomeMsgs",m.mensajes||0);
+      set("statModVisitas",m.visitas||1248);
+      set("statModContactos",m.clicksWhatsApp||0);
+      set("statModFavoritos",m.favoritos||0);
+      set("statModMensajes",m.mensajes||0);
+      set("statModWa",m.clicksWhatsApp||0);
+      set("statModPerfil",m.vistasPerfil||m.visitas||0);
+    }
+
+    function pintarModuloInicio(){
+      pintarInicioRed();
+      pintarInicioResumen();
+    }
+
+    const DEMO_FOTOS_RESULTADOS=[
+      "img/resultados-demo/violeta-1.png",
+      "img/resultados-demo/violeta-2.png",
+      "img/resultados-demo/violeta-3.png",
+      "img/resultados-demo/violeta-4.png"
+    ];
+
+    function fotosParaVistaPrevia(pub){
+      if(!pub||!pub.ownerUid){
+        return {
+          fotoURL:DEMO_FOTOS_RESULTADOS[0],
+          fotosExtraURL:DEMO_FOTOS_RESULTADOS.slice(1,4),
+          fotosCount:4
+        };
+      }
+      const main=pub.mediaPrincipal&&pub.mediaPrincipal.url;
+      const extras=(pub.mediaSecundaria||[]).filter(Boolean);
+      return {
+        fotoURL:main||DEMO_FOTOS_RESULTADOS[0],
+        fotosExtraURL:extras.length?extras.slice(0,3):DEMO_FOTOS_RESULTADOS.slice(1,4),
+        fotosCount:(main?1:0)+extras.length||4
+      };
+    }
+
+    function precioDesdeTarifas(tarifas){
+      const raw=String(tarifas||"").trim();
+      if(!raw) return "Consultar";
+      const m=raw.match(/[\d][\d.,]*/);
+      return m?m[0].replace(/,/g,""):"Consultar";
+    }
+
+    function modalidadesDesdePub(pub){
+      const mod=String(pub.modalidad||"").toLowerCase();
+      const list=[];
+      if(/recibe|presencial|local/.test(mod)) list.push("recibe");
+      if(/hotel/.test(mod)) list.push("hotel");
+      if(/domicilio|dom/.test(mod)) list.push("domicilio");
+      if(!list.length) return ["recibe","hotel"];
+      return list;
+    }
+
+    function publicacionToResultadosPerfil(pub){
+      const payload=publicacionToPreviewPayload(pub);
+      const p=Object.assign({},payload.perfil||{});
+      const fotos=fotosParaVistaPrevia(pub);
+      p.fotoURL=fotos.fotoURL;
+      p.fotosExtraURL=fotos.fotosExtraURL;
+      p.fotosCount=fotos.fotosCount;
+      if(!p.disponibilidad) p.disponibilidad="Disponible ahora";
+      if(!p.descripcionPublica&&pub.descripcion) p.descripcionPublica=pub.descripcion;
+      if(!p.tagline&&p.descripcionPublica) p.tagline=String(p.descripcionPublica).slice(0,80);
+      p.verificada=!!(pub.estadoPublicacion&&pub.estadoPublicacion.publicoActivo);
+      p.respuestaRapida=true;
+      p.nueva=!pub.ownerUid;
+      p.edad=p.edad||25;
+      p.precio=precioDesdeTarifas(pub.tarifas||p.precio);
+      p.modalidades=modalidadesDesdePub(pub);
+      p.__vista="adult";
+      p.__demo=!pub.ownerUid;
+      return {perfil:p,query:payload.query||{}};
+    }
+
+    function syncInicioPreviewFrame(){
+      const vp=document.getElementById("dashPreviewViewport");
+      const frame=document.getElementById("dashPerfilPreviewFrame");
+      if(!vp||!frame||frame.classList.contains("hidden")) return;
+      const maxH=Math.max(120,vp.clientHeight);
+      frame.style.height=maxH+"px";
+      try{
+        frame.contentWindow.postMessage({type:"carihub-embed-reflow",maxHeight:maxH},"*");
+      }catch(e){}
+    }
+
+    function refrescarVistaPreviaInicio(){
+      const pub=asegurarPublicacionActual();
+      const frame=document.getElementById("dashPerfilPreviewFrame");
+      const placeholder=document.getElementById("dashPreviewPlaceholder");
+      if(!frame) return;
+      if(!pub||pub.tipo!=="perfil"){
+        frame.classList.add("hidden");
+        frame.removeAttribute("src");
+        if(placeholder){
+          placeholder.textContent=pub
+            ? "Vista previa disponible solo para publicaciones tipo perfil."
+            : "Selecciona una publicación para ver la vista previa.";
+          placeholder.classList.remove("hidden");
+        }
+        return;
+      }
+      if(placeholder) placeholder.classList.add("hidden");
+      try{
+        sessionStorage.setItem(PREVIEW_STORAGE_KEY,JSON.stringify(publicacionToPreviewPayload(pub)));
+      }catch(e){}
+      frame.classList.remove("hidden");
+      frame.style.height="120px";
+      frame.onload=function(){ syncInicioPreviewFrame(); };
+      frame.src="perfil-publico.html?embed=dashboard-inicio&previewSource=registro&t="+Date.now();
+      window.requestAnimationFrame(function(){
+        window.requestAnimationFrame(syncInicioPreviewFrame);
+      });
+    }
+
+    function syncDashPreviewChrome(opts){
+      const placeholder=document.getElementById("dashPreviewPlaceholder");
+      const frame=document.getElementById("dashPerfilPreviewFrame");
+      const msg=opts.message||"";
+      if(placeholder){
+        placeholder.textContent=msg;
+        placeholder.classList.toggle("hidden",!msg);
+      }
+      if(frame&&msg){
+        frame.classList.add("hidden");
+        frame.removeAttribute("src");
+      }
+    }
+
+    function pintarVistaPreviaPerfil(){
+      pintarModuloInicio();
+      const pub=asegurarPublicacionActual();
+      const root=document.getElementById("pcardRoot");
+      if(!pub){
+        refrescarVistaPreviaInicio();
+        return;
+      }
+      if(pub.tipo!=="perfil"){
+        if(root) root.innerHTML='<p class="dash-preview-empty">Vista previa completa para perfiles. Selecciona una publicación tipo perfil.</p>';
+        refrescarVistaPreviaInicio();
+        return;
+      }
+      refrescarVistaPreviaInicio();
+      const datos=datosPublicosPublicacion(pub);
+      const banner=document.getElementById("pcardBanner");
+      const ava=document.getElementById("pcardAva");
+      const mainGal=document.getElementById("modPerfilGalleryMain");
+      const mainImgLegacy=mainGal?mainGal.querySelector("img"):null;
+      const bannerSrc=(pub.mediaSecundaria&&pub.mediaSecundaria[0])||pub.mediaPrincipal.url||"";
+      if(banner) banner.src=bannerSrc;
+      if(mainImgLegacy) mainImgLegacy.src=bannerSrc||pub.mediaPrincipal.url||"";
+      if(ava) ava.src=pub.mediaPrincipal.url||"";
+      const name=document.getElementById("pcardName");
+      const meta=document.getElementById("pcardMeta");
+      const desc=document.getElementById("pcardDesc");
+      const price=document.getElementById("pcardPrice");
+      if(name) name.textContent=pub.nombrePublico||"";
+      if(meta) meta.textContent="Perfil activo en "+(pub.ciudad||"Monterrey");
+      if(desc) desc.textContent=datos["Descripción"]||"";
+      if(price) price.textContent=datos["Tarifas"]?("Desde "+datos["Tarifas"]):"";
+      const badge=document.getElementById("pcardBadge");
+      if(badge) badge.textContent=pub.estadoPublicacion.publicoActivo?"Verificado":"En revisión";
+      const servInc=document.getElementById("modPerfilServiciosInc");
+      if(servInc) servInc.textContent=datos["Servicios"]||"—";
+      const ubi=document.getElementById("modPerfilUbicacion");
+      if(ubi) ubi.textContent=[pub.zona,pub.ciudad,pub.estado].filter(Boolean).join(", ")||"—";
+      const lives=document.getElementById("modPerfilLives");
+      if(lives) lives.textContent="Último live: Sesión Q&A · Ayer 21:30 (mock)";
+      const contactsPreview=document.getElementById("modPerfilContactsPreview");
+      if(contactsPreview){
+        const activos=Object.entries(pub.contactos||{}).filter(([,i])=>i&&i.activo);
+        contactsPreview.innerHTML=activos.length
+          ? activos.map(([n])=>'<span class="mod-contact-chip">'+textoSeguro(n)+"</span>").join("")
+          : '<span class="mod-perfil-muted">Sin medios públicos activos</span>';
+      }
+      try{
+        sessionStorage.setItem(PREVIEW_STORAGE_KEY,JSON.stringify(publicacionToPreviewPayload(pub)));
+      }catch(e){}
+      if(window.DashPersonalize&&DashPersonalize.applyAll) DashPersonalize.applyAll();
+    }
+
+    function pintarInicioRed(){
+      const estadosEl=document.getElementById("dashInicioEstados");
+      const livesEl=document.getElementById("dashInicioLives");
+      if(!estadosEl&&!livesEl) return;
+      const nav=window.DashModuleNav||{};
+      const posts=(nav.MOCK_FEED_POSTS||[]).filter(function(p){
+        return p.tipo==="Estado"||p.tipo==="Promoción";
+      });
+      const sociosExtra=((nav.MOCK_SOLICITUDES||{}).socios||[]).map(function(s){
+        return {nombre:s.nombre,avatar:s.img,hora:"Nuevo",tipo:"Estado"};
+      });
+      const estadosItems=posts.concat(sociosExtra).slice(0,4);
+      while(estadosItems.length<4){
+        estadosItems.push({
+          nombre:["Luna M.","Andrea VIP","Spa Aurora","Studio Velvet"][estadosItems.length],
+          avatar:"https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=120&q=80",
+          hora:"Hace "+((estadosItems.length+1)*2)+" h",
+          tipo:"Estado"
+        });
+      }
+      if(estadosEl){
+        estadosEl.innerHTML=estadosItems.map(function(e,i){
+          return '<button type="button" class="dash-inicio-story" data-goto-module="estados" title="'+textoSeguro(e.nombre)+'">'+
+            '<span class="dash-inicio-story__ring'+(i===0?" is-new":"")+'">'+
+              '<img src="'+textoSeguro(e.avatar||e.img||"")+'" alt="" decoding="async">'+
+            '</span>'+
+            '<span class="dash-inicio-story__name">'+textoSeguro((e.nombre||"").split(" ")[0])+'</span>'+
+            '<span class="dash-inicio-story__time">'+textoSeguro(e.hora||"Reciente")+'</span>'+
+          '</button>';
+        }).join("");
+      }
+      const lives=(nav.MOCK_LIVES_SOCIOS||[]).slice(0,4);
+      const livesFill=lives.length?lives:[
+        {nombre:"Andrea VIP",categoria:"Escort VIP",viewers:124,img:"https://images.unsplash.com/photo-1509967419530-da38b4704bc6?auto=format&fit=crop&w=400&q=80",avatar:"https://images.unsplash.com/photo-1509967419530-da38b4704bc6?w=80&q=80"},
+        {nombre:"Studio Velvet",categoria:"Table Dance",viewers:89,img:"https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=400&q=80",avatar:"https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=80&q=80"},
+        {nombre:"Luna M.",categoria:"Escort",viewers:56,img:"https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=400&q=80",avatar:"https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=80&q=80"}
+      ];
+      while(livesFill.length<4){
+        livesFill.push(livesFill[livesFill.length-1]||livesFill[0]);
+      }
+      if(livesEl){
+        livesEl.innerHTML=livesFill.slice(0,4).map(function(l){
+          return '<button type="button" class="dash-inicio-live" data-goto-module="lives">'+
+            '<div class="dash-inicio-live__thumb">'+
+              '<img class="dash-inicio-live__cover" src="'+textoSeguro(l.img||"")+'" alt="" decoding="async">'+
+              '<img class="dash-inicio-live__ava" src="'+textoSeguro(l.avatar||l.img||"")+'" alt="" decoding="async">'+
+              '<span class="dash-inicio-live__badge"><span class="dash-inicio-live__dot"></span> EN VIVO</span>'+
+            '</div>'+
+            '<span class="dash-inicio-live__name">'+textoSeguro(l.nombre)+'</span>'+
+            '<span class="dash-inicio-live__meta">'+textoSeguro(l.categoria||"Live")+' · '+textoSeguro(String(l.viewers||0))+' viendo</span>'+
+          '</button>';
+        }).join("");
+      }
+      document.querySelectorAll(".dash-inicio-red [data-goto-module]").forEach(function(btn){
+        btn.addEventListener("click",function(){
+          if(window.DashModuleNav) DashModuleNav.setModule(btn.getAttribute("data-goto-module"));
+        });
+      });
+    }
+
+    function htmlInicioPanel(tipo,titulo,contador,linkMod,linkText,inner){
+      return '<article class="dash-inicio-panel dash-inicio-panel--'+textoSeguro(tipo)+' panel glass">'+
+        '<header class="dash-inicio-panel__head">'+
+          '<div class="dash-inicio-panel__title-wrap">'+
+            '<span class="dash-inicio-panel__icon" aria-hidden="true"></span>'+
+            '<div><h3>'+textoSeguro(titulo)+'</h3><span class="dash-inicio-panel__count">'+textoSeguro(contador)+'</span></div>'+
+          '</div>'+
+          '<button type="button" class="dash-inicio-panel__link" data-goto-module="'+textoSeguro(linkMod)+'">'+textoSeguro(linkText)+'</button>'+
+        '</header>'+
+        inner+
+      '</article>';
+    }
+
+    function pintarInicioResumen(){
+      const cont=document.getElementById("dashInicioResumen");
+      if(!cont) return;
+      const nav=window.DashModuleNav||{};
+      const conv=(nav.MOCK_CONVERSACIONES||[]).slice(0,3);
+      const recibidas=((nav.MOCK_SOLICITUDES||{}).recibidas||[]).slice(0,2);
+      const avisos=(nav.MOCK_AVISOS||[]).slice(0,3);
+      const sugerencias=(nav.MOCK_DIRECTORIO||[]).slice(0,3);
+      const msgsInner=conv.length?('<ul class="dash-inicio-feed">'+conv.map(function(c){
+        return '<li class="dash-inicio-feed__item">'+
+          '<img class="dash-inicio-feed__ava" src="'+textoSeguro(c.avatar||"")+'" alt="" decoding="async">'+
+          '<div class="dash-inicio-feed__body">'+
+            '<div class="dash-inicio-feed__row"><b>'+textoSeguro(c.nombre)+'</b><time>'+textoSeguro(c.hora)+'</time></div>'+
+            '<p>'+textoSeguro(c.ultimo)+'</p>'+
+          '</div>'+
+          (c.unread?('<span class="dash-inicio-feed__badge">'+c.unread+'</span>'):"")+
+        '</li>';
+      }).join("")+'</ul>'):'<p class="dash-inicio-empty">Sin mensajes nuevos</p>';
+      const solInner=recibidas.length?('<ul class="dash-inicio-feed">'+recibidas.map(function(s){
+        return '<li class="dash-inicio-feed__item">'+
+          '<img class="dash-inicio-feed__ava" src="'+textoSeguro(s.img||"")+'" alt="" decoding="async">'+
+          '<div class="dash-inicio-feed__body">'+
+            '<div class="dash-inicio-feed__row"><b>'+textoSeguro(s.nombre)+'</b><span class="dash-inicio-feed__tag">'+textoSeguro(s.categoria)+'</span></div>'+
+            '<p>'+textoSeguro(s.ciudad)+' · solicitud pendiente</p>'+
+          '</div>'+
+        '</li>';
+      }).join("")+'</ul>'):'<p class="dash-inicio-empty">Sin solicitudes pendientes</p>';
+      const avisosInner=avisos.length?('<ul class="dash-inicio-feed dash-inicio-feed--avisos">'+avisos.map(function(a){
+        return '<li class="dash-inicio-feed__item dash-inicio-feed__item--compact">'+
+          '<span class="dash-inicio-feed__dot dash-inicio-feed__dot--'+textoSeguro(a.tipo||"negocio")+'"></span>'+
+          '<div class="dash-inicio-feed__body">'+
+            '<div class="dash-inicio-feed__row"><b>'+textoSeguro(a.titulo)+'</b><time>'+textoSeguro(a.hora)+'</time></div>'+
+            '<p>'+textoSeguro(a.texto)+'</p>'+
+          '</div>'+
+        '</li>';
+      }).join("")+'</ul>'):'<p class="dash-inicio-empty">Sin avisos</p>';
+      const sociosInner=sugerencias.length?('<ul class="dash-inicio-feed">'+sugerencias.map(function(s){
+        return '<li class="dash-inicio-feed__item dash-inicio-feed__item--socio">'+
+          '<img class="dash-inicio-feed__ava dash-inicio-feed__ava--sq" src="'+textoSeguro(s.img||"")+'" alt="" decoding="async">'+
+          '<div class="dash-inicio-feed__body">'+
+            '<div class="dash-inicio-feed__row"><b>'+textoSeguro(s.nombre)+'</b>'+(s.verificado?'<span class="dash-inicio-feed__ok">✓</span>':"")+'</div>'+
+            '<p>'+textoSeguro(s.categoria)+' · '+textoSeguro(s.ciudad)+'</p>'+
+          '</div>'+
+          '<button type="button" class="dash-inicio-feed__cta" data-goto-module="buscar">Ver</button>'+
+        '</li>';
+      }).join("")+'</ul>'):'<p class="dash-inicio-empty">Explora el directorio</p>';
+      cont.innerHTML=[
+        htmlInicioPanel("mensajes","Mensajes","12 sin leer","mensajes","Ver todos",msgsInner),
+        htmlInicioPanel("avisos","Notificaciones","5 nuevas","avisos","Ver avisos",avisosInner),
+        htmlInicioPanel("solicitudes","Solicitudes","8 pendientes","solicitudes","Gestionar",solInner),
+        htmlInicioPanel("socios","Socios sugeridos","Para ti","buscar","Explorar",sociosInner)
+      ].join("");
+      cont.querySelectorAll("[data-goto-module]").forEach(function(btn){
+        btn.addEventListener("click",function(){
+          if(window.DashModuleNav) DashModuleNav.setModule(btn.getAttribute("data-goto-module"));
+        });
+      });
+    }
+
+    function pintarGaleria(){
+      const grid=document.getElementById("thumbGrid");
+      if(!grid||!publicacionActual) return;
+      const imgs=[publicacionActual.mediaPrincipal.url].concat(publicacionActual.mediaSecundaria||[]).filter(Boolean);
+      if(imgs.length<=1){
+        grid.innerHTML="";
+        return;
+      }
+      grid.innerHTML=imgs.map((src,index)=>`
+        <div class="thumb">
+          <img src="${src}" alt="Imagen ${index+1}">
+        </div>
+      `).join("");
     }
 
     function pintarMedios(){
       const cont=document.getElementById("contactsGrid");
-      cont.innerHTML=Object.entries(publicacionActual.contactos).map(([nombre,info])=>`
-        <div class="contact-row">
-          <div>
-            <b>${textoSeguro(nombre)}</b>
-            <small>${textoSeguro(info.valor||"Listo para llenar")}</small>
+      if(cont){
+        cont.innerHTML=Object.entries(publicacionActual.contactos).map(([nombre,info])=>`
+          <div class="contact-row contact-row--editable" data-contact-label="${textoSeguro(nombre)}">
+            <div class="contact-row__head">
+              <b>${textoSeguro(nombre)}</b>
+              <label class="switch" aria-label="Activar ${textoSeguro(nombre)}">
+                <input type="checkbox" data-contact-activo="${textoSeguro(info.id)}" ${info.activo?"checked":""}>
+                <span></span>
+              </label>
+            </div>
+            <input class="contact-input" type="text" data-contact-valor="${textoSeguro(info.id)}" value="${textoSeguro(info.valor||"")}" placeholder="${textoSeguro(info.placeholder||"")}" ${info.soloActivo?"readonly":""}>
           </div>
-          <label class="switch" aria-label="Activar ${textoSeguro(nombre)}">
-            <input type="checkbox" ${info.activo?"checked":""}>
-            <span></span>
-          </label>
-        </div>
-      `).join("");
+        `).join("");
+      }
+      pintarRightContactos();
+    }
+
+    function pintarRightContactos(){
+      const list=document.getElementById("rightContactosList");
+      if(!list) return;
+      if(!publicacionActual){
+        pintarRightContactosFallback();
+        return;
+      }
+      const contactos=publicacionActual.contactos||{};
+      list.innerHTML=filasContactoRight(function(row){
+        const meta=MEDIOS_CONTACTO.find(function(m){return m.id===row.id;});
+        if(!meta) return "";
+        const info=contactos[meta.label]||{id:meta.id,activo:false,valor:""};
+        const on=!!info.activo;
+        const subtitulo=subtituloContactoTarjeta(meta,info,on);
+        return htmlTarjetaContacto(meta,row,info,on,subtitulo);
+      });
+    }
+
+    function toggleRightContacto(id,activo){
+      const meta=MEDIOS_CONTACTO.find(function(m){return m.id===id;});
+      const pub=asegurarPublicacionActual();
+      if(!meta||!pub) return;
+      const cp=Object.assign({},pub.contactoPublico||{});
+      cp[meta.activoKey]=activo;
+      if(meta.soloActivo&&!cp[meta.id]) cp[meta.id]=meta.placeholder;
+      if(!activo&&meta.soloActivo) cp[meta.activoKey]=false;
+      pub.contactoPublico=cp;
+      pub.contactos=normalizarContactosPerfil(Object.assign({},pub._raw||{},{
+        contactoPublico:cp,
+        telefono:cp.whatsapp||cp.telefono||""
+      }));
+      pintarMedios();
+      pintarVistaPreviaPerfil();
+    }
+
+    function syncModalEditContactoCampos(id){
+      const meta=MEDIOS_CONTACTO.find(function(m){return m.id===id;});
+      const pub=asegurarPublicacionActual();
+      const hint=document.getElementById("dashRcEditHint");
+      const input=document.getElementById("dashRcEditInput");
+      if(!meta||!input) return;
+      const info=pub&&pub.contactos?pub.contactos[meta.label]:null;
+      if(hint) hint.textContent=meta.placeholder||"Escribe el dato que verán en tu perfil público.";
+      input.placeholder=meta.placeholder||"";
+      input.value=(rcEditModo==="edit"&&info)?(info.valor||""):"";
+    }
+
+    function abrirModalEditContacto(id){
+      const meta=MEDIOS_CONTACTO.find(function(m){return m.id===id;});
+      const modal=document.getElementById("dashRcEditModal");
+      const title=document.getElementById("dashRcEditTitle");
+      const tipoWrap=document.getElementById("dashRcEditTipoWrap");
+      if(!meta||!modal) return;
+      asegurarPublicacionActual();
+      rcEditModo="edit";
+      rcEditContactoId=id;
+      if(title) title.textContent="Editar "+meta.label;
+      if(tipoWrap){ tipoWrap.classList.add("hidden"); tipoWrap.hidden=true; }
+      syncModalEditContactoCampos(id);
+      modal.classList.remove("hidden");
+      modal.hidden=false;
+      const input=document.getElementById("dashRcEditInput");
+      setTimeout(function(){ if(input){ input.focus(); input.select(); } },40);
+    }
+
+    function abrirModalAgregarContacto(){
+      const modal=document.getElementById("dashRcEditModal");
+      const title=document.getElementById("dashRcEditTitle");
+      const tipoWrap=document.getElementById("dashRcEditTipoWrap");
+      const select=document.getElementById("dashRcEditTipo");
+      if(!modal||!select) return;
+      asegurarPublicacionActual();
+      rcEditModo="add";
+      select.innerHTML=MEDIOS_CONTACTO.map(function(m){
+        return '<option value="'+textoSeguro(m.id)+'">'+textoSeguro(m.label)+'</option>';
+      }).join("");
+      rcEditContactoId=select.value||MEDIOS_CONTACTO[0].id;
+      if(title) title.textContent="Agregar método de contacto";
+      if(tipoWrap){ tipoWrap.classList.remove("hidden"); tipoWrap.hidden=false; }
+      syncModalEditContactoCampos(rcEditContactoId);
+      modal.classList.remove("hidden");
+      modal.hidden=false;
+      const input=document.getElementById("dashRcEditInput");
+      setTimeout(function(){ if(input){ input.focus(); } },40);
+    }
+
+    function cerrarModalEditContacto(){
+      const modal=document.getElementById("dashRcEditModal");
+      const tipoWrap=document.getElementById("dashRcEditTipoWrap");
+      rcEditContactoId=null;
+      rcEditModo="edit";
+      if(tipoWrap){ tipoWrap.classList.add("hidden"); tipoWrap.hidden=true; }
+      if(!modal) return;
+      modal.classList.add("hidden");
+      modal.hidden=true;
+    }
+
+    function guardarModalEditContacto(){
+      const select=document.getElementById("dashRcEditTipo");
+      const id=(rcEditModo==="add"&&select)?select.value:rcEditContactoId;
+      const meta=MEDIOS_CONTACTO.find(function(m){return m.id===id;});
+      const pub=asegurarPublicacionActual();
+      const input=document.getElementById("dashRcEditInput");
+      if(!meta||!pub||!input) return;
+      const val=input.value.trim();
+      const cp=Object.assign({},pub.contactoPublico||{});
+      if(meta.soloActivo){
+        cp[meta.activoKey]=!!val;
+        if(val) cp[meta.id]=val;
+      }else{
+        cp[meta.id]=val;
+        cp[meta.activoKey]=!!val;
+      }
+      pub.contactoPublico=cp;
+      pub.contactos=normalizarContactosPerfil(Object.assign({},pub._raw||{},{
+        contactoPublico:cp,
+        telefono:cp.whatsapp||cp.telefono||""
+      }));
+      cerrarModalEditContacto();
+      pintarMedios();
+      pintarVistaPreviaPerfil();
+    }
+
+    function editarRightContacto(id){
+      abrirModalEditContacto(id);
+    }
+
+    function inicializarModalEditContacto(){
+      const modal=document.getElementById("dashRcEditModal");
+      const save=document.getElementById("dashRcEditSave");
+      const input=document.getElementById("dashRcEditInput");
+      const select=document.getElementById("dashRcEditTipo");
+      const addBtn=document.getElementById("btnRightAgregarContacto");
+      if(!modal||modal.dataset.bound==="1") return;
+      modal.dataset.bound="1";
+      modal.querySelectorAll("[data-rc-modal-close]").forEach(function(btn){
+        btn.addEventListener("click",cerrarModalEditContacto);
+      });
+      if(save) save.addEventListener("click",guardarModalEditContacto);
+      if(select){
+        select.addEventListener("change",function(){
+          rcEditContactoId=select.value;
+          syncModalEditContactoCampos(select.value);
+        });
+      }
+      if(addBtn) addBtn.addEventListener("click",abrirModalAgregarContacto);
+      if(input){
+        input.addEventListener("keydown",function(e){
+          if(e.key==="Enter"){ e.preventDefault(); guardarModalEditContacto(); }
+          if(e.key==="Escape"){ e.preventDefault(); cerrarModalEditContacto(); }
+        });
+      }
+    }
+
+    function inicializarRightContactosPanel(){
+      const section=document.getElementById("dashRightContactos");
+      const btn=document.getElementById("btnRightContactosToggle");
+      const panel=document.getElementById("dashRightContactosPanel");
+      if(!section||!btn||!panel||section.dataset.panelBound==="1") return;
+      section.dataset.panelBound="1";
+
+      function setOpen(open){
+        section.classList.toggle("is-open",open);
+        btn.setAttribute("aria-expanded",open?"true":"false");
+        panel.classList.toggle("hidden",!open);
+      }
+
+      btn.addEventListener("click",function(e){
+        e.stopPropagation();
+        setOpen(!section.classList.contains("is-open"));
+      });
+
+      panel.addEventListener("click",function(e){
+        e.stopPropagation();
+      });
+
+      document.addEventListener("click",function(){
+        if(section.classList.contains("is-open")) setOpen(false);
+      });
+
+      document.addEventListener("keydown",function(e){
+        if(e.key==="Escape"&&section.classList.contains("is-open")) setOpen(false);
+      });
+    }
+
+    function inicializarRightContactos(){
+      const list=document.getElementById("rightContactosList");
+      if(!list||list.dataset.bound==="1") return;
+      list.dataset.bound="1";
+      list.addEventListener("change",function(e){
+        const sw=e.target.closest("[data-right-contact-toggle]");
+        if(!sw||sw.type!=="checkbox") return;
+        toggleRightContacto(sw.getAttribute("data-right-contact-toggle"),sw.checked);
+      });
+      list.addEventListener("click",function(e){
+        const edit=e.target.closest("[data-right-contact-edit]");
+        if(edit){
+          e.preventDefault();
+          editarRightContacto(edit.getAttribute("data-right-contact-edit"));
+        }
+      });
+    }
+
+    function leerContactosDesdeFormulario(){
+      const cp=Object.assign({},publicacionActual.contactoPublico||{});
+      document.querySelectorAll("#contactsGrid [data-contact-valor]").forEach(function(input){
+        const key=input.getAttribute("data-contact-valor");
+        cp[key]=input.value.trim();
+      });
+      document.querySelectorAll("#contactsGrid [data-contact-activo]").forEach(function(input){
+        const key=input.getAttribute("data-contact-activo");
+        const meta=MEDIOS_CONTACTO.find(function(m){return m.id===key;});
+        if(meta) cp[meta.activoKey]=input.checked;
+      });
+      return cp;
+    }
+
+    async function guardarContactosDashboard(){
+      const user=auth.currentUser;
+      const cp=leerContactosDesdeFormulario();
+      publicacionActual.contactoPublico=cp;
+      publicacionActual.contactos=normalizarContactosPerfil(Object.assign({},publicacionActual._raw||{},{
+        contactoPublico:cp,
+        telefono:cp.whatsapp||cp.telefono||""
+      }));
+      if(user&&publicacionActual.origen==="usuarios"){
+        try{
+          await db.collection("usuarios").doc(user.uid).update({
+            contactoPublico:cp,
+            telefono:cp.whatsapp||cp.telefono||"",
+            estadoRevision:"actualizacion_pendiente",
+            actualizacionPendiente:true
+          });
+          alert("Contactos guardados. Los cambios quedan pendientes de revisión.");
+        }catch(e){
+          alert("No se pudieron guardar los contactos: "+(e.message||e));
+        }
+      }else{
+        alert("Contactos actualizados en esta vista.");
+      }
+      pintarMedios();
+      pintarVistaPreviaPerfil();
     }
 
     function pintarInformacion(){
       const cont=document.getElementById("infoGrid");
+      if(!cont) return;
       cont.innerHTML=Object.entries(datosPublicosPublicacion(publicacionActual)).map(([campo,valor])=>`
-        <div class="field-card ${campo==="Descripción"||campo==="Servicios"?"wide":""}">
+        <label class="field-card field-card--edit ${campo==="Descripción"||campo==="Servicios"?"wide":""}">
           <small>${textoSeguro(campo)}</small>
-          <b>${textoSeguro(valor)}</b>
-          <button class="edit-btn" type="button" aria-label="Editar ${textoSeguro(campo)}">✏️</button>
-        </div>
+          <input type="text" class="field-input" data-field="${textoSeguro(campo)}" value="${textoSeguro(valor)}" ${campo==="Descripción"||campo==="Servicios"?"":"readonly"}>
+        </label>
       `).join("");
     }
 
-    function pintarImagenes(){
-      document.getElementById("mainImage").src=publicacionActual.mediaPrincipal.url;
-      document.getElementById("mainTitle").textContent=publicacionActual.nombrePublico;
-      document.getElementById("mainSubtitle").textContent=publicacionActual.tipo+" · "+ubicacionPublicacion(publicacionActual);
-      document.getElementById("avatarImage").src=publicacionActual.mediaPrincipal.url;
-      document.getElementById("sideName").textContent=publicacionActual.nombrePublico;
-      document.getElementById("thumbGrid").innerHTML=publicacionActual.mediaSecundaria.map((src,index)=>`
-        <div class="thumb">
-          <img src="${src}" alt="Imagen secundaria ${index+1}">
-          <button class="edit-btn" type="button" aria-label="Editar imagen secundaria ${index+1}">✏️</button>
-        </div>
-      `).join("");
+    function pintarCabeceraCuenta(){
+      if(!publicacionActual) return;
+      const url=publicacionActual.mediaPrincipal.url||publicacionActual.avatar||"img/home/banners/ad-banner-pink-02.png";
+      const setImg=function(id){const el=document.getElementById(id);if(el)el.src=url;};
+      const setTxt=function(id,val){const el=document.getElementById(id);if(el)el.textContent=val;};
+      setImg("rightProfileAvatar");
+      setTxt("rightProfileName",publicacionActual.nombrePublico);
+      const rev=publicacionActual.estadoPublicacion;
+      const verified=Boolean(rev.publicoActivo);
+      const statusTxt=verified?"Cuenta verificada":etiquetaRevision(rev.revision);
+      setTxt("rightProfileStatus",statusTxt);
+      const rightStatus=document.getElementById("rightProfileStatus");
+      if(rightStatus){
+        rightStatus.classList.toggle("is-verified",verified);
+        rightStatus.classList.toggle("is-pending",!verified);
+      }
+      const verifiedBadge=document.getElementById("rightVerifiedBadge");
+      const statusRow=document.getElementById("rightProfileStatusRow");
+      const statusIcon=document.getElementById("rightStatusIcon");
+      if(verifiedBadge) verifiedBadge.hidden=!verified;
+      if(statusIcon) statusIcon.hidden=!verified;
+      if(statusRow) statusRow.classList.toggle("is-pending",!verified);
+      setTxt("rightPlanVence",publicacionActual.plan?.diasRestantes||"—");
+      setTxt("rightProxPago",publicacionActual.plan?.diasRestantes?"Renovación en "+publicacionActual.plan.diasRestantes:"Sin pago pendiente");
+      geoRedFiltros={
+        categoria:publicacionActual.categoria||"Todas",
+        pais:publicacionActual.pais||"México",
+        estado:publicacionActual.estado||"Nuevo León",
+        ciudad:publicacionActual.ciudad||"Monterrey"
+      };
+      window.geoRedFiltros=geoRedFiltros;
+      syncFiltrosBuscarUI();
+    }
+
+    function syncFiltrosBuscarUI(){
+      const map={categoria:"dashFiltroCategoria",pais:"dashFiltroPais",estado:"dashFiltroEstado",ciudad:"dashFiltroCiudad"};
+      Object.keys(map).forEach(function(k){
+        const el=document.getElementById(map[k]);
+        const v=geoRedFiltros[k];
+        if(!el||v==null) return;
+        const has=[].some.call(el.options,function(o){return o.value===v;});
+        if(has) el.value=v;
+      });
+    }
+
+    function refrescarVistaPerfilModulo(){
+      if(!publicacionActual||publicacionActual.tipo!=="perfil") return;
+      const frame=document.getElementById("dashVistaPerfilFrame");
+      if(!frame) return;
+      try{
+        sessionStorage.setItem(PREVIEW_STORAGE_KEY,JSON.stringify(publicacionToPreviewPayload(publicacionActual)));
+      }catch(e){}
+      frame.src="perfil-publico.html?embed=dashboard-inicio&previewSource=registro&t="+Date.now();
+    }
+    window.refrescarVistaPerfilModulo=refrescarVistaPerfilModulo;
+
+    function pintarMisEstados(){
+      const html=MOCK_ESTADOS_PROPIOS.map(function(item){
+        return '<div class="dash-estado-chip"><img src="'+item.img+'" alt=""><div><b>'+
+          textoSeguro(item.titulo)+'</b><p>'+textoSeguro(item.tipo==="live"?"Live · ":"Anuncio · ")+
+          textoSeguro(item.cuando)+'</p></div></div>';
+      }).join("")+'<button type="button" class="dash-estado-add" id="btnAddEstado" title="Agregar estado">+</button>';
+      ["dashMisEstados","dashMisEstadosEstados","estadosMiosRow"].forEach(function(id){
+        const cont=document.getElementById(id);
+        if(cont) cont.innerHTML=html;
+      });
+      document.getElementById("btnAddEstado")?.addEventListener("click",function(){
+        if(window.DashModuleNav) DashModuleNav.setModule("anunciar");
+      });
+      pintarRightColumnSlots();
+      if(window.DashModuleNav) DashModuleNav.renderEstadosSocios();
+    }
+
+    function pintarRightColumnSlots(){
+      const an=MOCK_ANUNCIO_ACTIVO;
+      const setTxt=function(id,val){const el=document.getElementById(id);if(el)el.textContent=val;};
+      const setHtml=function(id,val){const el=document.getElementById(id);if(el)el.innerHTML=val;};
+      const thumbAn=document.getElementById("rightAnuncioThumb");
+      const pillAn=document.getElementById("rightAnuncioPill");
+      const nombreEl=document.getElementById("rightAnuncioNombre");
+      if(an&&an.activo){
+        if(thumbAn) thumbAn.src=an.img||publicacionActual.mediaPrincipal?.url||thumbAn.src;
+        const nombre=an.nombre||an.titulo||"Anuncio activo";
+        if(nombreEl){
+          nombreEl.textContent=nombre;
+          nombreEl.title=nombre;
+        }
+        setTxt("rightAnuncioHora",an.hora||an.cuando||"Recién publicado");
+        if(pillAn){pillAn.textContent="ON";pillAn.hidden=false;}
+      }else{
+        if(nombreEl){nombreEl.textContent="Sin anuncio activo";nombreEl.title="";}
+        setTxt("rightAnuncioHora","Anuncia para perfil y resultados");
+        if(pillAn) pillAn.hidden=true;
+      }
+
+      const liveNow=MOCK_LIVE_ACTIVO;
+      const prox=MOCK_LIVE_PROXIMO;
+      const nombreLiveEl=document.getElementById("rightLiveNombre");
+      const thumbLive=document.getElementById("rightLiveThumb");
+      const pillLive=document.getElementById("rightLivePill");
+      const btnProg=document.getElementById("btnRightProgramarLive");
+      const fmtProxHora=function(p){
+        if(!p) return "";
+        if(p.dia&&p.hora) return p.dia+" · "+p.hora;
+        return p.fecha||"";
+      };
+      if(liveNow){
+        const nombre=liveNow.nombre||liveNow.tema||"Transmisión en vivo";
+        if(nombreLiveEl){nombreLiveEl.textContent=nombre;nombreLiveEl.title=nombre;}
+        setTxt("rightLiveHora","En curso · "+(liveNow.espectadores||0)+" viendo");
+        if(thumbLive) thumbLive.src=liveNow.img||prox?.img||thumbLive.src;
+        if(pillLive){pillLive.textContent="LIVE";pillLive.className="dash-right-slot__pill dash-right-slot__pill--live";pillLive.hidden=false;}
+        if(btnProg) btnProg.hidden=true;
+      }else if(prox){
+        const nombre=prox.nombre||prox.tema||"Próximo en vivo";
+        if(nombreLiveEl){nombreLiveEl.textContent=nombre;nombreLiveEl.title=nombre;}
+        setTxt("rightLiveHora",fmtProxHora(prox));
+        if(thumbLive) thumbLive.src=prox.img||thumbLive.src;
+        if(pillLive){pillLive.textContent="PRÓX";pillLive.className="dash-right-slot__pill dash-right-slot__pill--prox";pillLive.hidden=false;}
+        if(btnProg) btnProg.hidden=false;
+      }else{
+        if(nombreLiveEl){nombreLiveEl.textContent="Sin en vivo programado";nombreLiveEl.title="";}
+        setTxt("rightLiveHora","Programa fecha, hora y nombre");
+        if(pillLive) pillLive.hidden=true;
+        if(btnProg) btnProg.hidden=false;
+      }
+      if(window.lucide&&typeof window.lucide.createIcons==="function"){
+        window.lucide.createIcons();
+      }
+    }
+
+    function pintarRedFeed(){
+      const cont=document.getElementById("dashRedFeed");
+      if(!cont) return;
+      cont.innerHTML=MOCK_RED_FEED.map(function(item){
+        const acciones=item.tipo==="solicitud"
+          ?'<div class="feed-actions"><button type="button">Aceptar</button><button type="button">Rechazar</button><button type="button">Ver perfil</button></div>'
+          :'<div class="feed-actions"><button type="button">Ver '+textoSeguro(item.tipo)+'</button><button type="button">Enviar solicitud</button></div>';
+        return '<article class="dash-feed-card"><img src="'+item.img+'" alt=""><div><b>'+
+          textoSeguro(item.nombre)+' · '+textoSeguro(item.categoria)+'</b><p>'+textoSeguro(item.texto)+
+          '</p><p>'+textoSeguro(item.ciudad)+'</p>'+acciones+'</div></article>';
+      }).join("");
+    }
+
+    function abrirPerfilGrande(){
+      if(publicacionActual.tipo!=="perfil"){
+        alert("La vista en grande aplica a perfiles.");
+        return;
+      }
+      window.open("perfil-publico.html?previewSource=registro&from=resultados","_blank");
+    }
+
+    let liveCameraStream=null;
+
+    function detenerCamaraLive(){
+      if(!liveCameraStream) return;
+      liveCameraStream.getTracks().forEach(function(t){t.stop();});
+      liveCameraStream=null;
+      const video=document.getElementById("liveCameraPreview");
+      if(video){video.srcObject=null;video.hidden=true;}
+      const fb=document.getElementById("liveCameraFallback");
+      if(fb) fb.hidden=false;
+    }
+
+    function iniciarCamaraLive(){
+      const video=document.getElementById("liveCameraPreview");
+      const fb=document.getElementById("liveCameraFallback");
+      if(!video||!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){
+        if(fb) fb.hidden=false;
+        return;
+      }
+      detenerCamaraLive();
+      navigator.mediaDevices.getUserMedia({video:{facingMode:"user"},audio:false}).then(function(stream){
+        liveCameraStream=stream;
+        video.srcObject=stream;
+        video.hidden=false;
+        if(fb) fb.hidden=true;
+      }).catch(function(){
+        if(fb) fb.hidden=false;
+      });
+    }
+
+    function inicializarStudios(){
+      const fileInput=document.getElementById("anuncioFileInput");
+      const previewImg=document.getElementById("anuncioPreviewImg");
+      const previewEmpty=document.getElementById("anuncioPreviewEmpty");
+      const nombreInput=document.getElementById("anuncioNombreInput");
+      const filtros=document.getElementById("anuncioFiltros");
+      const aplicarFiltro=function(f){
+        if(!previewImg||previewImg.hidden) return;
+        previewImg.className="dash-studio__img dash-studio__img--"+f;
+      };
+      if(fileInput&&previewImg){
+        fileInput.addEventListener("change",function(){
+          const file=fileInput.files&&fileInput.files[0];
+          if(!file) return;
+          const url=URL.createObjectURL(file);
+          previewImg.src=url;
+          previewImg.hidden=false;
+          if(previewEmpty) previewEmpty.hidden=true;
+          const onFilter=document.querySelector("#anuncioFiltros .dash-studio__filter.on");
+          aplicarFiltro(onFilter?onFilter.dataset.filter:"normal");
+        });
+      }
+      if(filtros){
+        filtros.querySelectorAll(".dash-studio__filter").forEach(function(btn){
+          btn.addEventListener("click",function(){
+            filtros.querySelectorAll(".dash-studio__filter").forEach(function(b){b.classList.remove("on");});
+            btn.classList.add("on");
+            aplicarFiltro(btn.dataset.filter||"normal");
+          });
+        });
+      }
+      const btnConfirmar=document.getElementById("btnConfirmarAnuncio");
+      if(btnConfirmar) btnConfirmar.addEventListener("click",function(){
+        const nombre=(nombreInput&&nombreInput.value.trim())||"Anuncio sin nombre";
+        MOCK_ANUNCIO_ACTIVO.activo=true;
+        MOCK_ANUNCIO_ACTIVO.nombre=nombre;
+        MOCK_ANUNCIO_ACTIVO.hora="Recién publicado";
+        if(previewImg&&!previewImg.hidden) MOCK_ANUNCIO_ACTIVO.img=previewImg.src;
+        pintarRightColumnSlots();
+        alert("Anuncio publicado (mock). Aparecerá en perfil, resultados y dashboards de socios en la siguiente fase.");
+      });
+      const btnIniciar=document.getElementById("btnIniciarTransmision");
+      if(btnIniciar) btnIniciar.addEventListener("click",function(){
+        iniciarCamaraLive();
+        alert("Transmisión iniciada (mock). Socios recibirán aviso en la siguiente fase.");
+      });
+      const btnProgDesdeLive=document.getElementById("btnProgramarDesdeLive");
+      if(btnProgDesdeLive) btnProgDesdeLive.addEventListener("click",function(){
+        const prox=MOCK_LIVE_PROXIMO;
+        alert("Programar en vivo: fecha, hora y tema. Visitantes verán Recordar en tu perfil.\n\nMock: "+
+          (prox?(prox.nombre||prox.tema)+" · "+(prox.dia&&prox.hora?prox.dia+" "+prox.hora:prox.fecha||""):"sin programación"));
+      });
+      document.addEventListener("dash:module-change",function(e){
+        const mod=e.detail&&e.detail.module;
+        if(mod==="transmitir-live") iniciarCamaraLive();
+        else detenerCamaraLive();
+      });
+    }
+
+    function inicializarAccionesDashboard(){
+      const btnMsg=document.getElementById("btnDashMensajes");
+      const btnNotif=document.getElementById("btnDashNotificaciones");
+      const btnGrande=document.getElementById("btnDashVerGrande");
+      const btnVerResultados=document.getElementById("btnDashVerResultados");
+      const btnGuardar=document.getElementById("btnGuardarContactos");
+      const btnEditar=document.getElementById("btnEditarInfoPublica");
+      const btnEditarMod=document.getElementById("btnEditarPerfilModulo");
+      const btnVistaGrande=document.getElementById("btnVistaPerfilGrande");
+      const btnVistaEditar=document.getElementById("btnVistaPerfilEditar");
+      const btnEstado=document.getElementById("btnPublicarEstado");
+      const btnLive=document.getElementById("btnIniciarLive");
+      const btnLiveMod=document.getElementById("btnIniciarLiveMod");
+      const btnSoporte=document.getElementById("btnContactarSoporte");
+      const btnVerRes=document.getElementById("btnVerComoResultados");
+      const btnGuardarInfo=document.getElementById("btnGuardarInfo");
+      const goMod=function(id){if(window.DashModuleNav)DashModuleNav.setModule(id);};
+      if(btnMsg) btnMsg.addEventListener("click",function(){goMod("mensajes");});
+      if(btnNotif) btnNotif.addEventListener("click",function(){goMod("avisos");});
+      if(btnGrande) btnGrande.addEventListener("click",abrirPerfilGrande);
+      if(btnVerResultados) btnVerResultados.addEventListener("click",function(){goMod("tarjeta");});
+      if(btnVerRes) btnVerRes.addEventListener("click",function(){window.open("resultados.html","_blank");});
+      if(btnGuardar) btnGuardar.addEventListener("click",guardarContactosDashboard);
+      if(btnEditar) btnEditar.addEventListener("click",function(){window.location.href="registro-perfil.html";});
+      if(btnEditarMod) btnEditarMod.addEventListener("click",function(){window.location.href="registro-perfil.html";});
+      if(btnVistaGrande) btnVistaGrande.addEventListener("click",abrirPerfilGrande);
+      if(btnVistaEditar) btnVistaEditar.addEventListener("click",function(){window.location.href="registro-perfil.html";});
+      if(btnGuardarInfo) btnGuardarInfo.addEventListener("click",function(){
+        alert("Cambios guardados en vista (conexión Firebase en fase posterior).");
+        pintarVistaPreviaPerfil();
+      });
+      if(btnEstado) btnEstado.addEventListener("click",function(){ goMod("anunciar"); });
+      if(btnLive) btnLive.addEventListener("click",function(){ goMod("transmitir-live"); });
+      if(btnLiveMod) btnLiveMod.addEventListener("click",function(){ goMod("transmitir-live"); });
+      if(btnSoporte) btnSoporte.addEventListener("click",function(){ alert("Soporte: escribe a administración desde tu correo de registro."); });
+      const btnProgLive=document.getElementById("btnRightProgramarLive");
+      if(btnProgLive) btnProgLive.addEventListener("click",function(){
+        const prox=MOCK_LIVE_PROXIMO;
+        alert("Programar en vivo: elige fecha, hora y nombre. Tus socios y visitantes verán la programación en tu perfil y recibirán aviso (próxima fase).\n\nPróximo mock: "+
+          (prox?(prox.nombre||prox.tema)+" · "+(prox.dia&&prox.hora?prox.dia+" "+prox.hora:prox.fecha||""):"sin programación"));
+      });
+    }
+
+    function inicializarMenu(){
+      const btn=document.getElementById("dashMenuBtn");
+      const panel=document.getElementById("dashMenuPanel");
+      if(btn) btn.addEventListener("click",function(){
+        if(window.DashModuleNav) DashModuleNav.setModule("configuracion");
+      });
+      if(!panel) return;
+      panel.querySelectorAll("button[data-menu]").forEach(function(item){
+        item.addEventListener("click",function(){
+          const accion=item.getAttribute("data-menu");
+          if(accion==="config") alert("Configuración de cuenta: correo, contraseña y datos de acceso.");
+          else if(accion==="apariencia") document.getElementById("themePicker").classList.toggle("open");
+          else if(accion==="notificaciones") { if(window.DashModuleNav) DashModuleNav.setModule("mensajes"); }
+          else if(accion==="privacidad") alert("Privacidad: controla qué datos son públicos y quién puede contactarte.");
+          else if(accion==="pagos") alert("Pagos y planes: renovación, mes gratis y contratos.");
+        });
+      });
+      document.addEventListener("dash:logout-request",function(){
+        auth.signOut().then(function(){ window.location.href="index.html"; });
+      });
     }
 
     function pintarResumenRapido(){
-      document.getElementById("quickSummary").innerHTML=Object.entries(resumenRapidoPublicacion(publicacionActual)).map(([campo,valor])=>`
+      const quick=document.getElementById("quickSummary");
+      const review=document.getElementById("reviewStatus");
+      if(!publicacionActual||!quick||!review) return;
+      quick.innerHTML=Object.entries(resumenRapidoPublicacion(publicacionActual)).map(([campo,valor])=>`
         <div class="quick-item">
           <span>${textoSeguro(campo)}</span>
           <b>${textoSeguro(valor)}</b>
         </div>
       `).join("");
-      document.getElementById("reviewStatus").textContent=publicacionActual.estadoPublicacion.revision;
+      review.textContent=etiquetaRevision(publicacionActual.estadoPublicacion.revision);
+    }
+
+    function inicializarUIPro(){
+      if(window.lucide&&typeof window.lucide.createIcons==="function"){
+        window.lucide.createIcons();
+      }
     }
 
     function renderDashboard(){
       pintarPublicaciones();
+      pintarBannersSide();
       pintarMetricas();
-      pintarImagenes();
+      pintarCabeceraCuenta();
+      pintarVistaPreviaPerfil();
+      pintarGaleria();
       pintarInformacion();
       pintarMedios();
+      pintarTarjetaResultados();
+      pintarMisEstados();
       pintarResumenRapido();
+      if(window.DashModuleNav){
+        DashModuleNav.renderLivesSocios();
+        DashModuleNav.renderAvisos();
+        DashModuleNav.renderFavoritos();
+      }
     }
 
     function inicializarTemas(){
       const picker=document.getElementById("themePicker");
-      document.getElementById("themeToggle").addEventListener("click",()=>{
-        picker.classList.toggle("open");
-      });
+      if(!picker) return;
 
       document.querySelectorAll(".theme-option").forEach(button=>{
         button.addEventListener("click",()=>{
-          document.body.className=button.dataset.theme||"";
+          document.body.classList.add("dash-pro");
           document.querySelectorAll(".theme-option").forEach(option=>option.classList.remove("active"));
           button.classList.add("active");
           picker.classList.remove("open");
@@ -1410,11 +2663,67 @@
       });
     }
 
+    function inicializarAmpliarVista(){
+      const shell=document.querySelector(".dashboard-shell");
+      const btnAmp=document.getElementById("btnAmpliarVista");
+      const btnCol=document.getElementById("btnVerColumnas");
+      if(!shell||!btnAmp||!btnCol) return;
+      function reflowPreview(){
+        if(typeof syncInicioPreviewFrame==="function") syncInicioPreviewFrame();
+        window.dispatchEvent(new Event("resize"));
+      }
+      btnAmp.addEventListener("click",function(){
+        shell.classList.add("center-expanded");
+        btnAmp.classList.add("hidden");
+        btnCol.classList.remove("hidden");
+        reflowPreview();
+      });
+      btnCol.addEventListener("click",function(){
+        shell.classList.remove("center-expanded");
+        btnCol.classList.add("hidden");
+        btnAmp.classList.remove("hidden");
+        reflowPreview();
+      });
+    }
+
     document.addEventListener("DOMContentLoaded",()=>{
+      mostrarAvisoEntrada();
+      inicializarUIPro();
+      inicializarAmpliarVista();
+      window.addEventListener("message",function(ev){
+        if(!ev.data||ev.data.type!=="carihub-embed-resize") return;
+        if(ev.data.scope&&ev.data.scope!=="inicio") return;
+        var frame=document.getElementById("dashPerfilPreviewFrame");
+        var vp=document.getElementById("dashPreviewViewport");
+        if(!frame||!vp||frame.classList.contains("hidden")) return;
+        var maxH=Math.max(120,vp.clientHeight);
+        var h=Number(ev.data.height);
+        if(!isFinite(h)||h<=0) h=maxH;
+        frame.style.height=Math.min(maxH,Math.ceil(h))+"px";
+      });
+      window.addEventListener("resize",function(){
+        syncInicioPreviewFrame();
+        var frame=document.getElementById("dashPerfilPreviewFrame");
+        if(!frame||!frame.contentWindow) return;
+        try{frame.contentWindow.postMessage({type:"carihub-embed-reflow"},"*");}catch(e){}
+      });
+      var previewVp=document.getElementById("dashPreviewViewport");
+      if(previewVp&&window.ResizeObserver){
+        new ResizeObserver(function(){ syncInicioPreviewFrame(); }).observe(previewVp);
+      }
+      inicializarAccionesDashboard();
+      inicializarStudios();
+      inicializarRightContactosPanel();
+      inicializarRightContactos();
+      inicializarModalEditContacto();
+      pintarRightContactosFallback();
+      inicializarMenu();
+      inicializarTemas();
+      asegurarPublicacionActual();
+      renderDashboard();
       auth.onAuthStateChanged(function(){
         initDashboard();
       });
-      inicializarTemas();
     });
   </script>
 </body>
