@@ -23,10 +23,13 @@ const PLAN_FILES = {
   dashboard: "github-issues-dashboard-plan.json",
   messenger: "github-issues-messenger-master-plan.json",
   "messenger-sprint-1": "github-issues-messenger-sprint-1.json",
+  "master-v2.2": "github-issues-master-v2.2.json",
+  "master-v2": "github-issues-master-v2.json",
 };
 
 const args = process.argv.slice(2);
 const dryRun = args.includes("--dry-run");
+const launchOnly = args.includes("--launch-only");
 const fromIdx = args.indexOf("--from");
 const fromId = fromIdx >= 0 ? args[fromIdx + 1] : null;
 const planIdx = args.indexOf("--plan");
@@ -101,6 +104,23 @@ function sleep(ms) {
 
 async function main() {
   let issues = plan.issues;
+
+  if (launchOnly) {
+    const launchIds = new Set(
+      plan.launchFreeze?.tickets ||
+        plan.issues.filter((i) => i.launchPhase === "launch").map((i) => i.id)
+    );
+    issues = issues.filter(
+      (i) =>
+        launchIds.has(i.id) &&
+        i.status !== "merged" &&
+        i.status !== "done" &&
+        i.status !== "reference" &&
+        !i.duplicateOf
+    );
+    console.log(`Filtro --launch-only: ${issues.length} issues LAUNCH-6D pendientes`);
+  }
+
   if (fromId) {
     const i = issues.findIndex((x) => x.id === fromId);
     if (i < 0) throw new Error(`No encontrado: ${fromId}`);
@@ -110,7 +130,10 @@ async function main() {
   const planLabel = plan.planId || planKey;
   console.log(`Plan: ${planLabel} (${planFile})`);
   console.log(`Repo: ${plan.repo} | Issues: ${issues.length} | dry-run: ${dryRun}\n`);
-  if (plan.ordenRecomendado) {
+  if (plan.ordenRecomendadoLaunch6D) {
+    console.log("Orden LAUNCH-6D:", plan.ordenRecomendadoLaunch6D.join(" → "));
+    console.log("");
+  } else if (plan.ordenRecomendado) {
     console.log("Orden recomendado:", plan.ordenRecomendado.join(" → "));
     console.log("");
   }
