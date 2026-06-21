@@ -1726,9 +1726,10 @@ async function loginMiPerfil(){
       alert("No encontramos una cuenta con ese teléfono. Usa el correo con el que registraste tu perfil o completa el registro.");
       return;
     }
-    const cred=await auth.signInWithEmailAndPassword(email,password);
+    await auth.signInWithEmailAndPassword(email,password);
     cerrarMiPerfil();
-    if(window.CariHubHomeIntenciones&&CariHubHomeIntenciones.retomarPostAuth&&CariHubHomeIntenciones.retomarPostAuth()){
+    const retomar=!!(window.CariHubHomeIntenciones&&CariHubHomeIntenciones.retomarPostAuth&&CariHubHomeIntenciones.retomarPostAuth());
+    if(retomar){
       return;
     }
     window.location.href="dashboard-rentero.html";

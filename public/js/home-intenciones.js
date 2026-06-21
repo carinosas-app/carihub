@@ -142,13 +142,10 @@
 
   function retomarAgendar() {
     var data = leer(KEYS.agendar);
+    if (!data || !data.reanudar) return false;
     limpiar(KEYS.agendar);
-    if (data && data.perfil) {
+    if (data.perfil) {
       global.location.href = perfilHref(data.perfil, { accion: 'agendar', from: 'intencion' });
-      return true;
-    }
-    if (typeof global.abrirMiPerfil === 'function') {
-      global.abrirMiPerfil();
       return true;
     }
     return false;
