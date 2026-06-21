@@ -997,8 +997,9 @@
   <script src="js/dashboard-mensajes-strip.js"></script>
   <script src="js/carihub-favoritos.js"></script>
   <script>
-    const db = CariHubCore.db;
-    const auth = CariHubCore.auth;
+    var carihubCoreReady = CariHubCore.assertReady({ page: 'dashboard' });
+    var db = carihubCoreReady ? CariHubCore.db : null;
+    var auth = carihubCoreReady ? CariHubCore.auth : null;
   </script>
 
   <script>
@@ -4477,9 +4478,11 @@
       }
       asegurarPublicacionActual();
       renderDashboard();
-      auth.onAuthStateChanged(function(){
-        initDashboard();
-      });
+      if (carihubCoreReady && auth) {
+        auth.onAuthStateChanged(function(){
+          initDashboard();
+        });
+      }
     });
   </script>
 

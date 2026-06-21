@@ -29,12 +29,7 @@
         storage: global.CariHubCore.storage
       };
     }
-    if (!global.firebase || !global.firebase.apps || !global.firebase.apps.length) return null;
-    return {
-      auth: global.firebase.auth(),
-      db: global.firebase.firestore(),
-      storage: global.firebase.storage()
-    };
+    return null;
   }
 
   function generarPerfilId() {
