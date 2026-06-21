@@ -1,0 +1,80 @@
+{
+  "id": "config-anuncios-mensajes",
+  "ticket": "TICKET-048",
+  "descripcion": "Canal dual — anuncios perfil público vs anuncios mensajes (strip interno dashboard)",
+  "regla": "Nunca mezclar sets: perfil público solo canal perfil; strip Mensajes solo canal mensajes",
+  "canales": {
+    "perfil": {
+      "visibilidad": "perfil público, resultados, dashboard Anunciar",
+      "colecciones": [
+        "publicaciones_perfil",
+        "solicitudes_anuncios (canal=perfil, aprobado/admin)"
+      ],
+      "modulos": [
+        "dashboard-publicaciones.js",
+        "dashboard-solicitudes-contenido.js",
+        "perfil-publico-contenido.js"
+      ]
+    },
+    "mensajes": {
+      "visibilidad": "solo strip horizontal módulo Mensajes (dashboard rentero)",
+      "coleccion": "usuarios/{cuentaUid}/anuncios_mensajes",
+      "modulos": [
+        "dashboard-anuncios-mensajes.js",
+        "dashboard-mensajes-strip.js"
+      ],
+      "nuncaEn": ["perfil-publico.html", "resultados.html", "perfil público render"]
+    }
+  },
+  "coleccionAnunciosMensajes": {
+    "ruta": "usuarios/{cuentaUid}/anuncios_mensajes/{anuncioId}",
+    "lectura": "solo owner (isOwner)",
+    "campos": {
+      "cuentaUid": { "tipo": "string", "ref": "usuarios/{uid}", "obligatorio": true },
+      "canal": { "tipo": "string", "valorFijo": "mensajes", "obligatorio": true },
+      "contextoTipo": { "tipo": "string", "enum": ["perfil", "banner"], "obligatorio": true },
+      "contextoId": { "tipo": "string", "max": 120, "obligatorio": true },
+      "titulo": { "tipo": "string", "max": 80, "obligatorio": true },
+      "subtitulo": { "tipo": "string", "max": 120, "opcional": true },
+      "imgUrl": { "tipo": "string", "max": 500, "opcional": true },
+      "conversacionId": { "tipo": "string|null", "max": 120, "opcional": true },
+      "activo": { "tipo": "boolean", "create": true, "obligatorio": true },
+      "creadoEn": { "tipo": "timestamp", "server": true },
+      "actualizadoEn": { "tipo": "timestamp", "server": true }
+    },
+    "indices": [
+      {
+        "collectionGroup": "anuncios_mensajes",
+        "fields": ["contextoTipo", "contextoId", "activo"]
+      }
+    ]
+  },
+  "scopedPorContexto": {
+    "clave": "(cuentaUid, contextoTipo, contextoId)",
+    "strip": "DashAnunciosMensajes.listarActivos(filter)",
+    "admin": "DashAnunciosMensajes.listarAdmin(filter)"
+  },
+  "ui": {
+    "dashboard": {
+      "anunciar": "canal perfil — estudio Anunciar",
+      "anunciarMensajes": "módulo Publicar en mensajes — no toca perfil público",
+      "mensajesStrip": "solo DashAnunciosMensajes, arriba del chat list"
+    },
+    "preview": {
+      "valentinaStrip": "3 promos msg-am-v1..v3 scoped perfil-valentina",
+      "publicarAnunciar": "MOCK_ANUNCIO_ACTIVO / estadosMiosRow — no aparece en strip"
+    }
+  },
+  "guards": {
+    "perfilPublico": "CariHubPerfilPublicoContenido.esContenidoCanalPerfil — rechaza canal=mensajes",
+    "publicacionesListar": "DashPublicaciones.listar filtra solo canal perfil",
+    "firestoreRules": "anuncioMensajesCreateValido exige canal=mensajes; publicacionPerfil exige canal=perfil"
+  },
+  "antiPatrones": [
+    "Importar DashAnunciosMensajes en perfil-publico.html",
+    "Query anuncios_mensajes para render público",
+    "Un solo inbox o strip que mezcle anuncios perfil y mensajes",
+    "Publicar en mensajes y esperar verlo en perfil público"
+  ],
+  "dependencias": ["TICKET-003", "TICKET-047"]
+}

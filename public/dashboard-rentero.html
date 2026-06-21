@@ -52,31 +52,49 @@
       <span class="dash-brand__name">Cariñosas</span>
     </a>
 
-    <div class="profile-picker" id="profilePicker">
-      <p class="profile-picker__label">Tus perfiles</p>
-      <p class="dash-login-hint hidden" id="dashLoginHint">Demo. <a href="index.html?abrir=login">Inicia sesión</a> · <a href="?preview=1">preview</a></p>
-      <div class="profile-picker__list" id="publicationList"></div>
+    <nav class="dash-activos-rail" id="dashActivosRail" aria-label="Tus activos publicados">
+
+    <div class="profile-picker dash-activos-section dash-activos-section--perfiles" id="profilePicker">
+      <p class="profile-picker__label" id="dashPerfilesRailLabel">Tus perfiles</p>
+      <p class="dash-login-hint hidden" id="dashLoginHint">Demo. <a href="index.html?abrir=login">Inicia sesión</a> · <a href="?preview=1">preview</a> · <a href="?preview=1&amp;hub=1">cuenta hub</a></p>
+      <div class="dash-hub-notice hidden panel glass" id="dashHubAccountNotice" role="status">
+        <p class="dash-hub-notice__title">Cuenta de acceso</p>
+        <p class="dash-hub-notice__text">Mensajes, favoritos y avisos sin publicar perfil ni banner.</p>
+        <a class="btn btn--sm" href="registro-perfil.html">Crear perfil publicador</a>
+      </div>
+      <div class="profile-picker__list dash-activos-tiles-host" id="publicationList"></div>
     </div>
 
-    <div class="action-stack dash-nav-actions dash-nav-actions--perfil">
+    <div class="action-stack dash-nav-actions dash-nav-actions--perfil" data-dash-cap="publish">
       <button class="btn dash-action-btn" type="button" onclick="location.href='registro-perfil.html'">+ Nuevo perfil</button>
     </div>
 
-    <div class="side-banners" id="sideBannersBlock">
+    <div class="side-banners dash-activos-section dash-activos-section--banners" id="sideBannersBlock" data-dash-cap="banner">
       <p class="profile-picker__label">Tus banners</p>
-      <div class="side-banners__list profile-picker__list" id="bannersListSide"></div>
+      <div class="side-banners__list profile-picker__list dash-activos-tiles-host" id="bannersListSide"></div>
     </div>
 
-    <div class="action-stack dash-nav-actions dash-nav-actions--banner">
-      <button class="btn dash-action-btn" type="button" onclick="location.href='registro-banner.html'">+ Nuevo banner</button>
+    <div class="action-stack dash-nav-actions dash-nav-actions--banner" data-dash-cap="banner">
+      <button class="btn dash-action-btn" type="button" onclick="location.href='registro-banner.html'">+ Agregar banner</button>
     </div>
+
+    <div class="dash-activos-section dash-activos-section--lives" id="livesPickerBlock" data-dash-cap="live">
+      <p class="profile-picker__label">Lives</p>
+      <div class="dash-activos-tiles-host" id="livesListSide"></div>
+    </div>
+
+    <div class="action-stack dash-nav-actions dash-nav-actions--live" data-dash-cap="live">
+      <button class="btn dash-action-btn" type="button" data-quick-module="transmitir-live">+ Nuevo live</button>
+    </div>
+
+    </nav>
 
     <div class="pro-sep"></div>
 
-    <section class="dash-right-slot dash-right-slot--anuncios panel glass" aria-labelledby="dashRightAnunciosTitle">
+    <section class="dash-right-slot dash-right-slot--anuncios panel glass" aria-labelledby="dashRightAnunciosTitle" data-dash-cap="publish">
       <header class="dash-right-slot__head">
         <span class="dash-right-slot__mark" aria-hidden="true"><i data-lucide="megaphone"></i></span>
-        <h3 class="dash-right-slot__title" id="dashRightAnunciosTitle">Mis anuncios</h3>
+        <h3 class="dash-right-slot__title" id="dashRightAnunciosTitle">Anuncio publicado</h3>
       </header>
       <div class="dash-right-slot__row">
         <div class="dash-right-slot__info">
@@ -87,16 +105,16 @@
           </button>
         </div>
         <figure class="dash-right-slot__thumb dash-right-slot__thumb--sm">
-          <img src="img/resultados-demo/violeta-1.png" alt="Anuncio activo" id="rightAnuncioThumb">
-          <span class="dash-right-slot__pill dash-right-slot__pill--ok" id="rightAnuncioPill">ON</span>
+          <img src="img/resultados-demo/violeta-1.png" alt="Anuncio publicado" id="rightAnuncioThumb">
+          <span class="dash-right-slot__pill dash-right-slot__pill--ok" id="rightAnuncioPill">PUB</span>
         </figure>
       </div>
     </section>
 
-    <section class="dash-right-slot dash-right-slot--live panel glass" aria-label="Transmitir en vivo">
+    <section class="dash-right-slot dash-right-slot--live panel glass" aria-label="Transmitir en vivo" data-dash-cap="live">
       <header class="dash-right-slot__head dash-right-slot__head--action">
         <button type="button" class="dash-right-slot__head-btn" id="btnRightTransmitirLive" data-quick-module="transmitir-live">
-          <span class="dash-live-signal" aria-hidden="true">
+          <span class="dash-live-signal dash-live-signal--static" aria-hidden="true">
             <svg viewBox="0 0 24 24" focusable="false">
               <circle class="dash-live-signal__dot" cx="12" cy="12" r="2.1"/>
               <path class="dash-live-signal__arc dash-live-signal__arc--in dash-live-signal__arc--l" d="M9.1 8.4Q6.2 12 9.1 15.6"/>
@@ -131,6 +149,7 @@
       <div class="dash-right-contactos__panel hidden" id="dashRightContactosPanel" role="region" aria-labelledby="dashRightContactosTitle">
         <ul class="dash-right-contactos__list" id="rightContactosList" role="list"></ul>
         <button type="button" class="dash-rc-add-btn" id="btnRightAgregarContacto">+ Agregar método</button>
+        <button type="button" class="dash-rc-module-link" data-goto-module="medios-contacto">Editar en módulo completo</button>
       </div>
     </section>
 
@@ -179,10 +198,16 @@
               <iframe id="dashPerfilPreviewFrame" class="dash-inicio-preview__frame" title="Vista previa del perfil (embed)" loading="lazy" scrolling="no"></iframe>
               <p class="dash-inicio-preview__placeholder hidden" id="dashPreviewPlaceholder" aria-live="polite"></p>
             </div>
-            <div class="dash-inicio-preview__actions dash-toolbar-actions">
+            <div class="dash-inicio-preview__actions dash-toolbar-actions" id="dashPreviewActionsPerfil">
               <button class="btn secondary btn--sm" type="button" id="btnDashVerResultados">Ver en resultados</button>
               <button class="btn secondary btn--sm" type="button" id="btnDashVerGrande">Ver perfil completo</button>
               <button class="btn btn--sm" type="button" id="btnEditarPerfilModulo">Editar perfil</button>
+            </div>
+            <div class="dash-inicio-preview__actions dash-toolbar-actions hidden" id="dashPreviewActionsBanner">
+              <button class="btn btn--sm" type="button" id="btnDashBannerMensajes">Mensajes del banner</button>
+              <button class="btn secondary btn--sm" type="button" id="btnDashBannerMetricas">Métricas</button>
+              <a class="btn secondary btn--sm" id="btnDashBannerRenovar" href="registro-banner.html">Renovar</a>
+              <a class="btn secondary btn--sm" id="btnDashBannerEditar" href="registro-banner.html">Editar campaña</a>
             </div>
           </section>
 
@@ -197,7 +222,7 @@
             </div>
             <div class="dash-inicio-red__col dash-inicio-red__col--lives">
               <header class="dash-inicio-red__head">
-                <h3>En vivo ahora</h3>
+                <h3>Lives promocionales</h3>
                 <button type="button" class="dash-inicio-red__link" data-goto-module="lives">Ver lives</button>
               </header>
               <div class="dash-inicio-red__grid dash-inicio-red__grid--lives" id="dashInicioLives"></div>
@@ -238,7 +263,7 @@
               <section class="dash-inicio-cuenta__card panel glass dash-right-pago">
                 <small>Próximo pago</small>
                 <b id="rightProxPago">—</b>
-                <p id="reviewStatus">Activo y aprobado</p>
+                <p id="reviewStatus">Aprobado</p>
               </section>
             </div>
           </section>
@@ -262,7 +287,7 @@
                   <div class="pcard__name" id="pcardName">Valentina</div>
                   <span class="pcard__badge" id="pcardBadge">Verificado</span>
                 </div>
-                <div class="pcard__meta" id="pcardMeta">Perfil activo en Monterrey</div>
+                <div class="pcard__meta" id="pcardMeta">Publicado en Monterrey</div>
                 <div class="pcard__price" id="pcardPrice"></div>
                 <div class="pcard__desc" id="pcardDesc"></div>
               </div>
@@ -323,6 +348,7 @@
             <button class="btn dash-buscar-submit" type="submit" id="btnBuscarRed">Buscar</button>
           </form>
           <p class="dash-buscar-hint" id="dashBuscarHint">Elige categoría y ubicación, luego presiona Buscar.</p>
+          <div class="dash-buscar-pagination hidden" id="dashBuscarPagination" aria-label="Paginación de resultados"></div>
           <div class="dir-results dash-buscar-results" id="buscarResults"></div>
         </div>
       </div>
@@ -356,9 +382,10 @@
         <div class="dir-results" id="favoritosList"></div>
       </div>
 
-      <!-- Anunciar — estudio en columna central (laterales siguen visibles) -->
+      <!-- Anunciar — estudio en columna central (canal perfil público) -->
       <div class="dash-module" data-module="anunciar" id="modulo-anunciar">
-        <p class="dash-studio__note">Crea tu anuncio aquí. Mensajes, alertas y métricas siguen visibles en las columnas laterales.</p>
+        <p class="dash-studio__note">Canal <b>perfil</b>: visible en tu perfil público y resultados. No aparece en el strip de Mensajes.</p>
+        <p class="dash-studio__notice hidden" id="anuncioStudioFeedback" aria-live="polite"></p>
         <div class="dash-studio__grid">
           <div class="dash-studio__stage panel glass">
             <div class="dash-studio__preview" id="anuncioPreviewWrap">
@@ -386,9 +413,58 @@
         </div>
       </div>
 
+      <!-- Anuncios canal mensajes — CRUD (TICKET-048) -->
+      <div class="dash-module" data-module="anuncios-mensajes" id="modulo-anuncios-mensajes">
+        <div class="dash-module-card">
+          <div class="section-title">
+            <div>
+              <h2>Anuncios en mensajes</h2>
+              <p>Solo visibles en el strip de Mensajes del perfil o banner activo · no aparecen en tu perfil público</p>
+            </div>
+            <button class="btn" type="button" data-goto-module="anunciar-mensajes">+ Publicar en mensajes</button>
+          </div>
+          <div class="pub-admin-list" id="anunciosMensajesAdminList"></div>
+        </div>
+      </div>
+
+      <!-- Estudio — publicar anuncio canal mensajes -->
+      <div class="dash-module" data-module="anunciar-mensajes" id="modulo-anunciar-mensajes">
+        <p class="dash-studio__note">Canal <b>mensajes</b>: solo en el strip horizontal de Mensajes. No se publica en tu perfil ni en resultados.</p>
+        <div class="dash-studio__grid">
+          <div class="dash-studio__stage panel glass">
+            <div class="dash-studio__preview" id="msgAnuncioPreviewWrap">
+              <img id="msgAnuncioPreviewImg" src="" alt="Vista previa del anuncio en mensajes" hidden>
+              <span class="dash-studio__placeholder" id="msgAnuncioPreviewEmpty">Sube una imagen para tu promo en Mensajes</span>
+            </div>
+            <div class="dash-studio__filters" id="msgAnuncioFiltros">
+              <button type="button" class="dash-studio__filter on" data-filter="normal">Normal</button>
+              <button type="button" class="dash-studio__filter" data-filter="rosa">Rosa</button>
+              <button type="button" class="dash-studio__filter" data-filter="vivid">Vivid</button>
+              <button type="button" class="dash-studio__filter" data-filter="suave">Suave</button>
+            </div>
+          </div>
+          <aside class="dash-studio__sidebar panel glass">
+            <label class="dash-studio__field">
+              <span>Título del anuncio</span>
+              <input type="text" id="msgAnuncioTituloInput" maxlength="48" placeholder="Ej. Consultas VIP" autocomplete="off">
+            </label>
+            <label class="dash-studio__field">
+              <span>Texto breve (opcional)</span>
+              <input type="text" id="msgAnuncioSubtituloInput" maxlength="80" placeholder="Ej. Responde en menos de 2 h" autocomplete="off">
+            </label>
+            <label class="btn secondary dash-studio__upload">
+              <input type="file" id="msgAnuncioFileInput" accept="image/*" hidden>
+              Cargar imagen
+            </label>
+            <button class="btn" type="button" id="btnConfirmarAnuncioMensajes">Publicar en mensajes</button>
+          </aside>
+        </div>
+      </div>
+
       <!-- Transmitir en vivo — cámara en columna central -->
       <div class="dash-module" data-module="transmitir-live" id="modulo-transmitir-live">
         <p class="dash-studio__note">Transmite desde el centro. Vistas, contactos, mensajes y alertas siguen en la columna derecha.</p>
+        <p class="dash-studio__notice hidden" id="liveStudioFeedback" aria-live="polite"></p>
         <div class="dash-studio__grid dash-studio__grid--live">
           <div class="dash-live-studio__stage panel glass">
             <video id="liveCameraPreview" class="dash-live-studio__video" autoplay playsinline muted hidden></video>
@@ -402,27 +478,41 @@
               <span>Título de la transmisión</span>
               <input type="text" id="liveTituloInput" maxlength="48" placeholder="Ej. Noche exclusiva" autocomplete="off">
             </label>
+            <label class="dash-studio__field">
+              <span>Programar — fecha</span>
+              <input type="date" id="liveProgramaFecha" autocomplete="off">
+            </label>
+            <label class="dash-studio__field">
+              <span>Programar — hora</span>
+              <input type="time" id="liveProgramaHora" autocomplete="off">
+            </label>
             <button class="btn" type="button" id="btnIniciarTransmision">Iniciar transmisión</button>
             <button class="btn secondary" type="button" id="btnProgramarDesdeLive">Programar en vivo</button>
           </aside>
         </div>
       </div>
 
-      <!-- Anuncios: tuyos arriba + red abajo -->
+      <!-- Anuncios: tuyos arriba + red abajo (feed-red fusionado aquí, TICKET-026) -->
       <div class="dash-module" data-module="estados" id="modulo-estados">
         <section class="estados-mios panel glass">
           <div class="section-title">
-            <div><h2>Mis anuncios</h2><p>Se ven en Cariñosas, resultados y dashboards de socios</p></div>
+            <div><h2>Mis anuncios</h2><p>Canal perfil — se ven en Cariñosas, resultados y dashboards de socios</p></div>
             <button class="btn secondary" type="button" id="btnPublicarEstado" data-goto-module="anunciar">+ Anunciar</button>
           </div>
           <div class="estados-mios-row pro-stories" id="estadosMiosRow"></div>
         </section>
         <section class="estados-socios">
-          <h2 class="estados-socios__title">Anuncios de socios y amistades</h2>
+          <h2 class="estados-socios__title">Actividad de socios y amistades</h2>
+          <div class="pro-tabs" data-feed-tabs>
+            <button class="pro-tab on" type="button" data-tab="todos">Todos</button>
+            <button class="pro-tab" type="button" data-tab="estado">Estados</button>
+            <button class="pro-tab" type="button" data-tab="live">Lives</button>
+            <button class="pro-tab" type="button" data-tab="promoción">Promociones</button>
+            <button class="pro-tab" type="button" data-tab="evento">Eventos</button>
+            <button class="pro-tab" type="button" data-tab="servicio">Servicios</button>
+          </div>
           <div class="dash-feed-scroll" id="estadosSociosFeed"></div>
         </section>
-        <div class="pro-stories hidden" id="dashMisEstados" aria-hidden="true"></div>
-        <div class="pro-stories hidden" id="dashMisEstadosEstados" aria-hidden="true"></div>
       </div>
 
       <!-- En vivos — socios transmitiendo -->
@@ -431,7 +521,7 @@
           <p class="dash-hint">Transmisiones en vivo de tus socios y amistades de la red.</p>
         </div>
         <div class="lives-grid" id="livesSociosFeed"></div>
-        <p class="dash-empty hidden" id="livesSociosEmpty">Ningún socio está en vivo en este momento.</p>
+        <p class="dash-empty hidden" id="livesSociosEmpty">No hay transmisiones promocionales de socios en este momento.</p>
       </div>
 
       <!-- Vista previa de perfil -->
@@ -451,23 +541,36 @@
         </div>
       </div>
 
-      <!-- Feed red (legacy, oculto en menú) -->
-      <div class="dash-module" data-module="feed-red" id="modulo-feed-red">
-        <div class="pro-tabs" data-feed-tabs>
-          <button class="pro-tab on" type="button" data-tab="todos">Todos</button>
-          <button class="pro-tab" type="button" data-tab="estado">Estados</button>
-          <button class="pro-tab" type="button" data-tab="live">Lives</button>
-          <button class="pro-tab" type="button" data-tab="promoción">Promociones</button>
-          <button class="pro-tab" type="button" data-tab="evento">Eventos</button>
-          <button class="pro-tab" type="button" data-tab="servicio">Servicios</button>
-        </div>
-        <div class="dash-feed-scroll" id="dashFeedPosts"></div>
-        <div class="dash-feed-list hidden" id="dashRedFeed" aria-hidden="true"></div>
-      </div>
-
       <!-- Módulo C: Mensajes -->
       <div class="dash-module" data-module="mensajes" id="modulo-mensajes">
-        <div class="chat-layout panel glass">
+        <div class="dash-msg-expand-bar" id="dashMsgExpandBar" aria-label="Vista de mensajes">
+          <button class="btn secondary btn--sm" type="button" id="btnAmpliarMensajes" aria-pressed="false">Ampliar mensajes</button>
+          <button class="btn secondary btn--sm hidden" type="button" id="btnRestaurarMensajes" aria-pressed="false">Ver columnas</button>
+          <button class="btn secondary btn--sm" type="button" data-goto-module="anuncios-mensajes">Anuncios en mensajes</button>
+        </div>
+        <div class="chat-layout panel glass" id="chatLayout">
+          <div class="chat-banner-lock hidden" id="chatBannerLock" role="alert" aria-live="polite">
+            <div class="chat-banner-lock__inner">
+              <div class="chat-banner-lock__card">
+                <img class="chat-banner-lock__thumb" id="chatBannerLockThumb" alt="" decoding="async" hidden>
+                <span class="chat-banner-lock__badge" id="chatBannerLockBadge"></span>
+              </div>
+              <span class="chat-banner-lock__icon" aria-hidden="true">🔒</span>
+              <h3 class="chat-banner-lock__title">Conversaciones bloqueadas</h3>
+              <p class="chat-banner-lock__text" id="chatBannerLockText"></p>
+              <p class="chat-banner-lock__meta" id="chatBannerLockMeta"></p>
+              <p class="chat-banner-lock__hint">Los mensajes de este banner están aislados. Otros perfiles y banners siguen con sus hilos propios.</p>
+              <div class="chat-banner-lock__actions">
+                <a class="btn" id="chatBannerLockRenovar" href="registro-banner.html">Renovar / pagar banner</a>
+                <button type="button" class="btn secondary" data-goto-module="inicio">Ver métricas</button>
+              </div>
+            </div>
+          </div>
+          <div class="chat-msg-anuncios-strip" id="chatMsgAnunciosStrip" aria-label="Anuncios del canal mensajes" hidden>
+            <p class="chat-msg-anuncios-strip__head">Promos del canal mensajes</p>
+            <div class="chat-msg-anuncios-strip__scroll" id="chatMsgAnunciosStripScroll" role="list"></div>
+            <p class="chat-msg-anuncios-strip__detail hidden" id="chatMsgAnunciosDetail" role="status" aria-live="polite"></p>
+          </div>
           <aside class="chat-sidebar">
             <label class="chat-search">
               <span>🔍</span>
@@ -486,13 +589,13 @@
                 <button type="button">📍 Ubicación</button>
                 <button type="button">🔗 Enlace</button>
                 <button type="button">💰 Cotización</button>
-                <button type="button">⚠️ Reportar</button>
-                <button type="button">🚫 Bloquear</button>
+                <button type="button" id="chatReportBtn">⚠️ Reportar</button>
+                <button type="button" id="chatBlockBtn">🚫 Bloquear</button>
               </div>
               <button type="button" class="chat-tool">😊</button>
-              <input type="text" placeholder="Escribe un mensaje…" disabled>
+              <input type="text" id="chatInput" placeholder="Escribe un mensaje…" disabled>
               <button type="button" class="chat-tool">🎤</button>
-              <button type="button" class="btn chat-send">Enviar</button>
+              <button type="button" class="btn chat-send" id="chatSendBtn" disabled>Enviar</button>
             </footer>
           </div>
         </div>
@@ -504,6 +607,14 @@
           <div class="section-title">
             <div><h2>Medios de contacto</h2><p>Si un medio está OFF no se muestra en tu perfil público</p></div>
             <button class="btn" type="button" id="btnGuardarContactos">Guardar</button>
+          </div>
+          <div class="dash-contactos-hereda" id="dashContactosHeredaBar" hidden>
+            <p class="dash-contactos-hereda__hint" id="dashContactosHeredaHint">Los mismos WhatsApp y teléfono pueden usarse en varios perfiles. Los mensajes internos siguen separados por perfil.</p>
+            <label class="dash-contactos-hereda__toggle">
+              <input type="checkbox" id="dashContactoHeredaCheck" checked>
+              <span>Usar contactos compartidos de la cuenta</span>
+            </label>
+            <span class="dash-contactos-hereda__badge" id="dashContactoHeredaBadge">Compartido</span>
           </div>
           <div class="contacts contacts--stack" id="contactsGrid"></div>
           <button class="btn secondary mod-add-contact" type="button">+ Agregar nuevo método de contacto</button>
@@ -525,8 +636,12 @@
         </div>
       </div>
 
-      <!-- Módulo F: Solicitudes de negocio -->
+      <!-- Solicitudes de negocio -->
       <div class="dash-module" data-module="solicitudes" id="modulo-solicitudes">
+        <div class="dash-sol-head" id="dashSolHead">
+          <p class="dash-sol-head__hint" id="dashSolContextHint">Conexiones tipadas por perfil o banner activo — no es lista de amigos.</p>
+          <div class="dash-sol-stats" id="dashSolStats" aria-label="Resumen solicitudes"></div>
+        </div>
         <div class="pro-tabs" data-sol-tabs>
           <button class="pro-tab on" type="button" data-tab="recibidas">Recibidas</button>
           <button class="pro-tab" type="button" data-tab="enviadas">Enviadas</button>
@@ -534,15 +649,17 @@
           <button class="pro-tab" type="button" data-tab="pendientes">Pendientes</button>
           <button class="pro-tab" type="button" data-tab="bloqueados">Bloqueados</button>
         </div>
+        <div class="dash-sol-bulk hidden" id="dashSolBulk" aria-live="polite">
+          <label class="dash-sol-bulk__check"><input type="checkbox" id="dashSolSelectAll"> Seleccionar todas</label>
+          <button type="button" class="btn" id="dashSolBulkAccept">Aceptar seleccionadas</button>
+          <button type="button" class="btn secondary" id="dashSolBulkReject">Rechazar</button>
+        </div>
         <div class="sol-list" id="solicitudesList"></div>
       </div>
 
-      <!-- Directorio legacy (oculto; usar módulo buscar) -->
-      <div class="dash-module hidden" data-module="directorio" id="modulo-directorio" aria-hidden="true">
-        <div class="dir-results" id="directorioResults"></div>
-      </div>
+      <!-- Directorio legacy eliminado — usar módulo buscar (TICKET-026) -->
 
-      <!-- Módulo H: Publicaciones / Estados / Lives -->
+      <!-- Publicaciones / estados / lives admin -->
       <div class="dash-module" data-module="publicaciones" id="modulo-publicaciones">
         <div class="pro-tabs" data-pub-tabs>
           <button class="pro-tab on" type="button" data-tab="estados">Mis anuncios</button>
@@ -554,15 +671,17 @@
         </div>
         <div class="pub-admin-list" id="pubAdminList"></div>
         <div class="dash-module-toolbar">
-          <button class="btn secondary" type="button" data-goto-module="anunciar">Anunciar</button>
+          <button class="btn secondary" type="button" data-goto-module="anunciar">Anunciar (perfil)</button>
+          <button class="btn secondary" type="button" data-goto-module="anuncios-mensajes">Anuncios en mensajes</button>
           <button class="btn secondary" type="button" data-goto-module="transmitir-live">Transmitir en vivo</button>
         </div>
       </div>
 
-      <!-- Módulo I: Banners (legacy, oculto) -->
-      <div class="dash-module" data-module="banners" id="modulo-banners">
-        <div class="banner-admin-list" id="bannersList"></div>
-        <button class="btn" type="button" onclick="location.href='registro-banner.html'">Contratar nuevo banner</button>
+      <!-- Módulo banners (legacy): lista movida al rail izq.; chats → nav «Mensajes por banner» -->
+      <div class="dash-module hidden" data-module="banners" id="modulo-banners" aria-hidden="true">
+        <p class="dash-hint dash-hint--compact">Tus banners están en la columna izquierda. Para conversaciones de un banner usa <b>Mensajes por banner</b> en el menú.</p>
+        <div class="banner-admin-list hidden" id="bannersList" aria-hidden="true"></div>
+        <a class="btn secondary" href="registro-banner.html">Contratar banner</a>
       </div>
 
       <!-- Módulo: Estadísticas -->
@@ -577,13 +696,29 @@
         </div>
       </div>
 
+      <!-- Módulo: Privacidad de Mensajes -->
+      <div class="dash-module" data-module="privacidad-mensajes" id="modulo-privacidad-mensajes">
+        <div class="dash-module-card">
+          <div class="section-title">
+            <div>
+              <h2>Privacidad de Mensajes</h2>
+              <p>Lecturas, quién puede contactarte y ubicación en Messenger</p>
+            </div>
+            <button class="btn" type="button" id="btnGuardarPrivacidadMensajes">Guardar</button>
+          </div>
+          <p class="dash-hint dash-hint--compact" id="dashPrivMsgHint">Configura cómo otros interactúan contigo por mensajes internos.</p>
+          <div id="dashPrivMsgResumen" class="dash-priv-msg__resumen-host" aria-live="polite"></div>
+          <div id="dashPrivMsgForm" class="dash-priv-msg" aria-live="polite"></div>
+        </div>
+      </div>
+
       <!-- Módulo: Configuración -->
       <div class="dash-module" data-module="configuracion" id="modulo-configuracion">
         <div class="dash-menu-panel" id="dashMenuPanel" aria-label="Menú de cuenta">
           <button type="button" data-menu="config">⚙️ Configuración de cuenta</button>
           <button type="button" data-menu="apariencia">🎨 Apariencia del perfil</button>
           <button type="button" data-menu="notificaciones">🔔 Notificaciones</button>
-          <button type="button" data-menu="privacidad">🔒 Privacidad y seguridad</button>
+          <button type="button" data-menu="privacidad">🔒 Privacidad de mensajes</button>
           <button type="button" data-menu="pagos">💳 Pagos y planes</button>
         </div>
         <div class="theme-picker" id="themePicker" aria-hidden="true">
@@ -643,7 +778,7 @@
         <span class="dash-nav-item__ic"><i data-lucide="message-square-more" class="dash-nav-item__icon" aria-hidden="true"></i></span>
         <span class="dash-nav-item__body">
           <span class="dash-nav-item__label">Mensajes</span>
-          <span class="nb">12</span>
+          <span class="nb hidden" id="navMensajesBadge"></span>
         </span>
       </button>
       <button class="dash-nav-item dash-nav-item--has-badge dash-nav-item--stack-label" type="button" data-module-nav="solicitudes">
@@ -652,43 +787,47 @@
           <span class="dash-nav-item__label dash-nav-item__label--stack">
             <span>Solicitudes</span><span>de negocio</span>
           </span>
-          <span class="nb">8</span>
+          <span class="nb hidden" id="navSolicitudesBadge"></span>
         </span>
       </button>
       <button class="dash-nav-item dash-nav-item--has-badge dash-nav-item--nav-sm" type="button" data-module-nav="avisos">
         <span class="dash-nav-item__ic"><i data-lucide="bell-ring" class="dash-nav-item__icon" aria-hidden="true"></i></span>
         <span class="dash-nav-item__body">
           <span class="dash-nav-item__label">Avisos</span>
-          <span class="nb">5</span>
+          <span class="nb hidden" id="navAvisosBadge"></span>
         </span>
       </button>
       <button class="dash-nav-item" type="button" data-module-nav="favoritos">
         <span class="dash-nav-item__ic"><i data-lucide="heart" class="dash-nav-item__icon" aria-hidden="true"></i></span>
         <span class="dash-nav-item__body"><span class="dash-nav-item__label">Favoritos</span></span>
       </button>
-      <button class="dash-nav-item dash-nav-item--nav-sm" type="button" data-module-nav="estadisticas">
+      <button class="dash-nav-item dash-nav-item--nav-sm" type="button" data-module-nav="estadisticas" data-dash-cap="publish">
         <span class="dash-nav-item__ic"><i data-lucide="bar-chart-3" class="dash-nav-item__icon" aria-hidden="true"></i></span>
         <span class="dash-nav-item__body"><span class="dash-nav-item__label">Estadísticas</span></span>
       </button>
-      <button class="dash-nav-item dash-nav-item--nav-sm dash-nav-item--stack-label" type="button" data-module-nav="banners">
+      <button class="dash-nav-item dash-nav-item--nav-sm dash-nav-item--stack-label" type="button" data-module-nav="mensajes" data-msg-scope="banner" id="btnNavBannerMensajes" data-dash-cap="banner">
         <span class="dash-nav-item__ic"><i data-lucide="messages-square" class="dash-nav-item__icon" aria-hidden="true"></i></span>
         <span class="dash-nav-item__body">
           <span class="dash-nav-item__label dash-nav-item__label--stack">
-            <span>Banners y</span><span>destacados</span>
+            <span>Mensajes</span><span>por banner</span>
           </span>
         </span>
       </button>
-      <button class="dash-nav-item dash-nav-item--nav-sm" type="button" data-module-nav="estados">
-        <span class="dash-nav-item__ic"><i data-lucide="circle-check" class="dash-nav-item__icon" aria-hidden="true"></i></span>
-        <span class="dash-nav-item__body"><span class="dash-nav-item__label">Anuncios</span></span>
+      <button class="dash-nav-item dash-nav-item--nav-sm dash-nav-item--stack-label" type="button" data-module-nav="publicaciones" data-dash-cap="publish">
+        <span class="dash-nav-item__ic"><i data-lucide="megaphone" class="dash-nav-item__icon" aria-hidden="true"></i></span>
+        <span class="dash-nav-item__body">
+          <span class="dash-nav-item__label dash-nav-item__label--stack">
+            <span>Mis</span><span>publicaciones</span>
+          </span>
+        </span>
       </button>
-      <button class="dash-nav-item dash-nav-item--nav-sm dash-nav-item--has-badge dash-nav-item--stack-label" type="button" data-module-nav="lives">
+      <button class="dash-nav-item dash-nav-item--nav-sm dash-nav-item--has-badge dash-nav-item--stack-label" type="button" data-module-nav="lives" data-dash-cap="live">
         <span class="dash-nav-item__ic"><i data-lucide="video" class="dash-nav-item__icon" aria-hidden="true"></i></span>
         <span class="dash-nav-item__body">
           <span class="dash-nav-item__label dash-nav-item__label--stack">
             <span>En</span><span>vivos</span>
           </span>
-          <span class="nb nb--live" id="navLiveBadge">2</span>
+          <span class="nb" id="navLiveBadge">2</span>
         </span>
       </button>
       <button class="dash-nav-item dash-nav-item--nav-sm dash-nav-item--stack-label dash-nav-item--personalizar" type="button" id="btnPersonalizarPantalla" aria-pressed="false">
@@ -696,6 +835,30 @@
         <span class="dash-nav-item__body">
           <span class="dash-nav-item__label dash-nav-item__label--stack">
             <span>Personalizar</span><span>pantalla</span>
+          </span>
+        </span>
+      </button>
+      <button class="dash-nav-item dash-nav-item--nav-sm dash-nav-item--stack-label" type="button" data-module-nav="estados">
+        <span class="dash-nav-item__ic"><i data-lucide="users" class="dash-nav-item__icon" aria-hidden="true"></i></span>
+        <span class="dash-nav-item__body">
+          <span class="dash-nav-item__label dash-nav-item__label--stack">
+            <span>Red de</span><span>socios</span>
+          </span>
+        </span>
+      </button>
+      <button class="dash-nav-item dash-nav-item--nav-sm dash-nav-item--stack-label" type="button" data-module-nav="info-publica" data-dash-cap="publish">
+        <span class="dash-nav-item__ic"><i data-lucide="file-text" class="dash-nav-item__icon" aria-hidden="true"></i></span>
+        <span class="dash-nav-item__body">
+          <span class="dash-nav-item__label dash-nav-item__label--stack">
+            <span>Info</span><span>pública</span>
+          </span>
+        </span>
+      </button>
+      <button class="dash-nav-item dash-nav-item--nav-sm dash-nav-item--stack-label" type="button" data-module-nav="medios-contacto">
+        <span class="dash-nav-item__ic"><i data-lucide="phone" class="dash-nav-item__icon" aria-hidden="true"></i></span>
+        <span class="dash-nav-item__body">
+          <span class="dash-nav-item__label dash-nav-item__label--stack">
+            <span>Medios</span><span>contacto</span>
           </span>
         </span>
       </button>
@@ -707,11 +870,19 @@
           </span>
         </span>
       </button>
-      <button class="dash-nav-item dash-nav-item--stack-label dash-nav-item--nav-sm" type="button" data-module-nav="vista-perfil">
+      <button class="dash-nav-item dash-nav-item--stack-label dash-nav-item--nav-sm" type="button" data-module-nav="vista-perfil" data-dash-cap="publish">
         <span class="dash-nav-item__ic"><i data-lucide="scan-eye" class="dash-nav-item__icon" aria-hidden="true"></i></span>
         <span class="dash-nav-item__body">
           <span class="dash-nav-item__label dash-nav-item__label--stack">
             <span>Vista previa</span><span>de perfil</span>
+          </span>
+        </span>
+      </button>
+      <button class="dash-nav-item dash-nav-item--nav-sm dash-nav-item--stack-label" type="button" data-module-nav="privacidad-mensajes">
+        <span class="dash-nav-item__ic"><i data-lucide="shield" class="dash-nav-item__icon" aria-hidden="true"></i></span>
+        <span class="dash-nav-item__body">
+          <span class="dash-nav-item__label dash-nav-item__label--stack">
+            <span>Privacidad</span><span>mensajes</span>
           </span>
         </span>
       </button>
@@ -793,23 +964,41 @@
   </div>
 </div>
 
+  <script src="js/resultados-registrados.js"></script>
+  <script src="js/dashboard-buscar.js"></script>
+  <script src="js/dashboard-publicaciones.js"></script>
   <script src="js/dashboard-rentero-nav.js"></script>
+  <script src="js/dashboard-activos-rail.js"></script>
+  <script src="js/dashboard-context.js"></script>
+  <script src="js/dashboard-account-capabilities.js"></script>
   <script src="js/dashboard-rentero-personalize.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+  <script src="js/carihub-core.js"></script>
+  <script src="js/carihub-messenger-privacidad-ui.js"></script>
+  <script src="js/carihub-messenger-privacidad-schema.js"></script>
+  <script src="js/carihub-messenger-privacidad-enforcement.js"></script>
+  <script src="js/carihub-messenger-schema.js"></script>
+  <script src="js/carihub-messenger-reportes-schema.js"></script>
+  <script src="js/carihub-messenger-reportes.js"></script>
+  <script src="js/carihub-messenger-reportes-ui.js"></script>
+  <script src="js/carihub-messenger-bloqueos-schema.js"></script>
+  <script src="js/carihub-messenger-bloqueos.js"></script>
+  <script src="js/dashboard-messenger.js"></script>
+  <script src="js/dashboard-privacidad-mensajes.js"></script>
+  <script src="js/dashboard-anuncios-mensajes.js"></script>
+  <script src="js/dashboard-contactos-cuenta.js"></script>
+  <script src="js/dashboard-avisos.js"></script>
+  <script src="js/dashboard-solicitudes-negocio.js"></script>
+  <script src="js/dashboard-banner-mensajes.js"></script>
+  <script src="js/dashboard-banner-metrics.js"></script>
+  <script src="js/dashboard-solicitudes-contenido.js"></script>
+  <script src="js/dashboard-mensajes-strip.js"></script>
+  <script src="js/carihub-favoritos.js"></script>
   <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyCp68DynjT63T9wHorCLxwBGkSEo_mYPUI",
-      authDomain: "carihub-app.firebaseapp.com",
-      projectId: "carihub-app",
-      storageBucket: "carihub-app.firebasestorage.app",
-      messagingSenderId: "236894758884",
-      appId: "1:236894758884:web:5713e39a26c71f025a49f1"
-    };
-    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-    const auth = firebase.auth();
+    const db = CariHubCore.db;
+    const auth = CariHubCore.auth;
   </script>
 
   <script>
@@ -916,7 +1105,7 @@
     function formatoContactoSubtitulo(meta,info){
       const v=String(info&&info.valor||"").trim();
       if(meta.soloActivo){
-        if(!v||v==="Activo en Cariñosas"||v===meta.placeholder) return "@mensaje_interno";
+        if(!v||v==="Mensaje interno habilitado"||v==="Activo en Cariñosas"||v===meta.placeholder) return "@mensaje_interno";
         return v.startsWith("@")?v:"@"+v.replace(/\s+/g,"_").toLowerCase();
       }
       if(!v) return meta.placeholder||"Sin configurar";
@@ -957,14 +1146,14 @@
       const extra=opts.extraAttrs||"";
       const classes=["profile-picker-card","picker-card"];
       if(opts.extraClass) classes.push(String(opts.extraClass).trim());
-      if(activo) classes.push("is-live");
+      if(activo) classes.push("is-published");
       return "<"+tag+typeAttr+' class="'+textoSeguro(classes.join(" "))+'"'+extra+">"+
         '<img class="profile-picker-card__ava picker-card__ava" src="'+textoSeguro(opts.foto)+'" alt="">'+
         '<div class="profile-picker-card__body picker-card__body">'+
           '<b class="profile-picker-card__name picker-card__name">'+textoSeguro(opts.nombre)+'</b>'+
           '<span class="profile-picker-card__val picker-card__val" title="'+textoSeguro(opts.subtitulo)+'">'+textoSeguro(opts.subtitulo)+'</span>'+
         '</div>'+
-        '<span class="profile-picker-card__dot picker-card__dot'+(activo?" picker-card__dot--on":"")+'" aria-hidden="true" title="'+(activo?"Activo":"Inactivo")+'"></span>'+
+        '<span class="profile-picker-card__dot picker-card__dot'+(activo?" picker-card__dot--on":"")+'" aria-hidden="true" title="'+(activo?"Publicado":"No publicado")+'"></span>'+
       "</"+tag+">";
     }
 
@@ -995,13 +1184,40 @@
     };
 
     /** null = sin transmisión activa ahora. */
-    const MOCK_LIVE_ACTIVO=null;
+    let MOCK_LIVE_ACTIVO=null;
 
-    const MOCK_RED_FEED=[
-      {tipo:"solicitud",nombre:"Luna M.",categoria:"Escort",ciudad:"Monterrey",texto:"Te envió solicitud de negocio para colaboración.",img:"https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=200&q=80"},
-      {tipo:"estado",nombre:"Studio Velvet",categoria:"Table Dance",ciudad:"San Pedro",texto:"Publicó un estado: Noche especial este viernes.",img:"https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=200&q=80"},
-      {tipo:"live",nombre:"Andrea VIP",categoria:"Escort VIP",ciudad:"Monterrey",texto:"Está en vivo ahora · Promoción fin de semana.",img:"https://images.unsplash.com/photo-1509967419530-da38b4704bc6?auto=format&fit=crop&w=200&q=80"}
-    ];
+    window.DashSolicitudesContenidoPreview={
+      onSolicitud:function(extra){
+        extra=extra||{};
+        if(extra.tipoSolicitud==="dashboard_estado_perfil"){
+          MOCK_ANUNCIO_ACTIVO.activo=true;
+          MOCK_ANUNCIO_ACTIVO.nombre=extra.titulo||"Anuncio";
+          MOCK_ANUNCIO_ACTIVO.hora="Recién enviado (preview)";
+          if(extra.imagenURL) MOCK_ANUNCIO_ACTIVO.img=extra.imagenURL;
+        }
+        if(extra.tipoSolicitud==="dashboard_live_activo"){
+          MOCK_LIVE_ACTIVO={
+            nombre:extra.titulo||"Live",
+            tema:extra.titulo||"Live",
+            img:MOCK_LIVE_PROXIMO.img||"img/dashboard/right-live-preview.png"
+          };
+        }
+        if(extra.tipoSolicitud==="dashboard_live_programado"){
+          MOCK_LIVE_ACTIVO=null;
+          var p=extra.programadoPara;
+          var d=p;
+          if(p&&typeof p.toDate==="function") d=p.toDate();
+          else if(!(d instanceof Date)) d=new Date(p);
+          if(d&&!isNaN(d.getTime())){
+            MOCK_LIVE_PROXIMO.nombre=extra.titulo||MOCK_LIVE_PROXIMO.nombre;
+            MOCK_LIVE_PROXIMO.tema=extra.titulo||MOCK_LIVE_PROXIMO.tema;
+            MOCK_LIVE_PROXIMO.dia=d.toLocaleDateString("es-MX",{weekday:"short",day:"numeric"});
+            MOCK_LIVE_PROXIMO.hora=d.toLocaleTimeString("es-MX",{hour:"2-digit",minute:"2-digit"});
+          }
+        }
+        if(typeof pintarRightColumnSlots==="function") pintarRightColumnSlots();
+      }
+    };
 
     const PREVIEW_STORAGE_KEY="carihub_rp_public_preview";
     let geoRedFiltros={categoria:"Todas",pais:"México",estado:"Nuevo León",ciudad:"Monterrey"};
@@ -1043,7 +1259,7 @@
           "X/Twitter":{valor:"",activo:false},
           "Sitio web":{valor:"",activo:false},
           "Teléfono":{valor:"+52 81 0000 0000",activo:true},
-          "Mensaje interno":{valor:"Activo en Cariñosas",activo:true},
+          "Mensaje interno":{valor:"Mensaje interno habilitado",activo:true},
           "Maps/Ubicación":{valor:"Zona aproximada",activo:false}
         },
         quick:{
@@ -1053,7 +1269,7 @@
           "Anuncio destacado":"Resultados centro",
           "Última actualización":"Hoy, 09:20"
         },
-        revision:"Activo y aprobado"
+        revision:"Aprobado"
       },
       {
         id:"perfil-luna",
@@ -1086,8 +1302,18 @@
           "X/Twitter":{valor:"",activo:false},
           "Sitio web":{valor:"",activo:false},
           "Teléfono":{valor:"",activo:false},
-          "Mensaje interno":{valor:"Activo",activo:true},
+          "Mensaje interno":{valor:"Mensaje interno habilitado",activo:true},
           "Maps/Ubicación":{valor:"San Pedro",activo:true}
+        },
+        contactoHeredaCuenta:false,
+        contactoPublico:{
+          whatsapp:"+52 81 1111 1111",
+          whatsappActivo:true,
+          telegram:"@luna_mock",
+          telegramActivo:true,
+          instagram:"@luna.carihub",
+          instagramActivo:false,
+          mensajeInternoActivo:true
         },
         quick:{
           "Plan actual":"Básico",
@@ -1096,7 +1322,7 @@
           "Anuncio destacado":"—",
           "Última actualización":"Hoy"
         },
-        revision:"Activo y aprobado"
+        revision:"Aprobado"
       },
       {
         id:"banner-spa",
@@ -1112,7 +1338,7 @@
           "https://images.unsplash.com/photo-1515377905703-c4788e51af15?auto=format&fit=crop&w=600&q=80",
           "https://images.unsplash.com/photo-1600334129128-685c5582fd35?auto=format&fit=crop&w=600&q=80"
         ],
-        resumen:{corazones:82,mensajes:14,whatsapp:49},
+        resumen:{corazones:82,mensajes:14,whatsapp:49,impresiones:3200,clics:49},
         datos:{
           "Nombre público":"Spa Aurora",
           "Categoría":"Spa",
@@ -1143,7 +1369,35 @@
           "Anuncio destacado":"Home inferior",
           "Última actualización":"Ayer, 18:45"
         },
-        revision:"Pendiente de revisión"
+        revision:"Pendiente de revisión",
+        estadoPago:"Por pagar",
+        activo:false
+      },
+      {
+        id:"banner-home-mty",
+        nombre:"Banner Home MTY",
+        tipo:"banner",
+        estado:"Activo",
+        estadoClase:"ok",
+        ubicacion:"Monterrey, Nuevo León",
+        imagen:"img/home/banners/ad-banner-pink-01.png",
+        avatar:"img/home/banners/ad-banner-pink-01.png",
+        resumen:{corazones:40,mensajes:3,whatsapp:12,impresiones:12480,clics:312},
+        datos:{
+          "Nombre público":"Banner Home MTY",
+          "Categoría":"Escort VIP",
+          "País":"México",
+          "Estado":"Nuevo León",
+          "Ciudad":"Monterrey"
+        },
+        quick:{
+          "Plan actual":"Banner mensual",
+          "Días restantes del plan":"18 días",
+          "Última actualización":"Hoy"
+        },
+        revision:"Aprobado",
+        estadoPago:"Pagado",
+        activo:true
       },
       {
         id:"destacado-club",
@@ -1180,7 +1434,7 @@
           "X/Twitter":{valor:"@clubvelvet",activo:true},
           "Sitio web":{valor:"clubvelvet.example",activo:true},
           "Teléfono":{valor:"+52 55 0000 0000",activo:true},
-          "Mensaje interno":{valor:"Activo",activo:true},
+          "Mensaje interno":{valor:"Mensaje interno habilitado",activo:true},
           "Maps/Ubicación":{valor:"Roma Norte",activo:true}
         },
         quick:{
@@ -1249,7 +1503,7 @@
         "X/Twitter":{valor:c.twitter||c.twitter?.valor||legacy("X/Twitter").valor||"",activo:Boolean(c.twitterActivo||c.twitter?.activo||legacy("X/Twitter").activo),visiblePublico:true,actualizadoEn:c.twitter?.actualizadoEn||null},
         "Sitio web":{valor:c.sitioWeb||c.sitioWeb?.valor||legacy("Sitio web").valor||"",activo:Boolean(c.sitioWebActivo||c.sitioWeb?.activo||legacy("Sitio web").activo),visiblePublico:true,actualizadoEn:c.sitioWeb?.actualizadoEn||null},
         "Teléfono":{valor:c.telefono||legacy("Teléfono").valor||"",activo:Boolean(c.telefonoActivo||legacy("Teléfono").activo),visiblePublico:true,actualizadoEn:c.telefono?.actualizadoEn||null},
-        "Mensaje interno":{valor:c.mensajeInternoActivo||legacy("Mensaje interno").activo?"Activo en Cariñosas":"",activo:Boolean(c.mensajeInternoActivo||legacy("Mensaje interno").activo),visiblePublico:true,actualizadoEn:c.mensajeInterno?.actualizadoEn||null},
+        "Mensaje interno":{valor:c.mensajeInternoActivo||legacy("Mensaje interno").activo?"Mensaje interno habilitado":"",activo:Boolean(c.mensajeInternoActivo||legacy("Mensaje interno").activo),visiblePublico:true,actualizadoEn:c.mensajeInterno?.actualizadoEn||null},
         "Maps/Ubicación":{valor:c.googleMaps||c.maps?.valor||legacy("Maps/Ubicación").valor||"",activo:Boolean(c.googleMapsActivo||c.maps?.activo||legacy("Maps/Ubicación").activo),visiblePublico:true,actualizadoEn:c.maps?.actualizadoEn||null}
       };
     }
@@ -1277,21 +1531,23 @@
     }
 
     function normalizarEstadoPublicacion(data){
-      const estadosVisuales=["Activo","Pendiente","Corrección solicitada","Vencido","Inactivo"];
+      const estadosVisuales=["Publicado","Pendiente","Corrección solicitada","Vencido","No publicado","Activo","Inactivo"];
       const estadoCampo=String(data.estado||data.estadoSolicitud||"").trim();
       const mapaEstado={
-        activo:"Activo",
+        activo:"Publicado",
         pendiente:"Pendiente",
         en_revision:"Pendiente",
         requiere_correccion:"Corrección solicitada",
         autorizado_pago:"Pendiente",
-        rechazado:"Inactivo",
+        rechazado:"No publicado",
         vencido:"Vencido"
       };
-      const estadoVisual=estadosVisuales.includes(data.estado)?data.estado:(mapaEstado[estadoCampo]||"");
+      const legacyEtiqueta={Activo:"Publicado",Inactivo:"No publicado"};
+      let estadoVisual=estadosVisuales.includes(data.estado)?data.estado:(mapaEstado[estadoCampo.toLowerCase()]||"");
+      if(legacyEtiqueta[estadoVisual]) estadoVisual=legacyEtiqueta[estadoVisual];
       const revision=data.estadoRevision||data.estadoAdmin||data.revision||estadoVisual||"sin_estado";
       const pago=data.estadoPago||"";
-      const activo=data.activo===true||estadoVisual==="Activo";
+      const activo=data.activo===true||estadoVisual==="Publicado"||estadoVisual==="Activo";
       const vencido=data.vencido===true||estadoVisual==="Vencido";
       const autorizadoParaPago=Boolean(data.autorizadoParaPago);
       const mapaRevision={
@@ -1339,10 +1595,12 @@
       const u=datosDocumento(doc);
       const media=normalizarMediaPerfil(u);
       return {
-        id:u.id||u.uid||"perfil-mock",
+        id:u.perfilId||u.id||u.uid||"perfil-mock",
+        perfilId:u.perfilId||u.id||"",
+        cuentaUid:u.cuentaUid||u.uid||u.ownerUid||"",
         origen:"usuarios",
         tipo:"perfil",
-        ownerUid:u.uid||u.ownerUid||"",
+        ownerUid:u.cuentaUid||u.uid||u.ownerUid||"",
         nombrePublico:valorDatoPublico(u,"Nombre público",u.nombrePublico||u.nombre||""),
         categoria:valorDatoPublico(u,"Categoría",u.categoria||""),
         pais:valorDatoPublico(u,"País",u.pais||""),
@@ -1361,6 +1619,8 @@
         mediaSecundaria:media.mediaSecundaria,
         contactos:normalizarContactosPerfil(u),
         contactoPublico:u.contactoPublico||{},
+        contactoHeredaCuenta:u.contactoHeredaCuenta!==false,
+        contactoPublicoOverride:u.contactoPublico||{},
         _raw:u,
         mensajeContactoPublicidad:u.mensajeContactoPublicidad||"",
         estadoPublicacion:normalizarEstadoPublicacion(u),
@@ -1441,6 +1701,149 @@
       };
     }
 
+    function leerInfoDesdeFormulario(){
+      const valores={};
+      document.querySelectorAll("#infoGrid [data-field]").forEach(function(input){
+        const campo=input.getAttribute("data-field");
+        if(campo) valores[campo]=input.value.trim();
+      });
+      return valores;
+    }
+
+    function buildPatchInfoPerfil(valores){
+      const nombre=valores["Nombre público"]||"";
+      const datos={};
+      Object.keys(valores).forEach(function(k){ datos[k]=valores[k]||""; });
+      return {
+        nombre:nombre,
+        alias:nombre,
+        categoria:valores["Categoría"]||"",
+        pais:valores["País"]||"",
+        estado:valores["Estado"]||"",
+        ciudad:valores["Ciudad"]||"",
+        zona:valores["Zona"]||"",
+        descripcion:valores["Descripción"]||"",
+        descripcionCompleta:valores["Descripción"]||"",
+        servicios:valores["Servicios"]||"",
+        horario:valores["Horario"]||"",
+        precio:valores["Tarifas"]||"",
+        tarifas:valores["Tarifas"]||"",
+        modalidad:valores["Modalidad"]||"",
+        datos:datos,
+        camposPublicos:{
+          alias:nombre,
+          pais:valores["País"]||"",
+          estado:valores["Estado"]||"",
+          ciudad:valores["Ciudad"]||"",
+          zona:valores["Zona"]||"",
+          descripcionCorta:valores["Descripción"]||"",
+          serviciosPrincipales:valores["Servicios"]||"",
+          horarioPublico:valores["Horario"]||"",
+          precioDesde:valores["Tarifas"]||"",
+          modalidad:valores["Modalidad"]||""
+        }
+      };
+    }
+
+    function aplicarInfoPublicacion(pub,valores){
+      if(!pub||!valores) return;
+      pub.nombrePublico=valores["Nombre público"]||pub.nombrePublico||"";
+      pub.categoria=valores["Categoría"]||pub.categoria||"";
+      pub.pais=valores["País"]||pub.pais||"";
+      pub.estado=valores["Estado"]||pub.estado||"";
+      pub.ciudad=valores["Ciudad"]||pub.ciudad||"";
+      pub.zona=valores["Zona"]||pub.zona||"";
+      pub.descripcion=valores["Descripción"]||pub.descripcion||"";
+      pub.descripcionCompleta=pub.descripcion;
+      pub.servicios=valores["Servicios"]||pub.servicios||"";
+      pub.horario=valores["Horario"]||pub.horario||"";
+      pub.tarifas=valores["Tarifas"]||pub.tarifas||"";
+      pub.modalidad=valores["Modalidad"]||pub.modalidad||"";
+      pub._raw=Object.assign({},pub._raw||{},buildPatchInfoPerfil(valores),{
+        estadoRevision:"actualizacion_pendiente",
+        actualizacionPendiente:true
+      });
+      pub.estadoPublicacion=normalizarEstadoPublicacion(pub._raw);
+    }
+
+    async function guardarInfoPublicaDashboard(){
+      const user=auth.currentUser;
+      if(!publicacionActual){
+        alert("No hay perfil seleccionado para guardar.");
+        return;
+      }
+      if(publicacionActual.tipo!=="perfil"){
+        alert("La información pública solo aplica a perfiles. Selecciona un perfil en la columna izquierda.");
+        return;
+      }
+      const valores=leerInfoDesdeFormulario();
+      const patch=buildPatchInfoPerfil(valores);
+      aplicarInfoPublicacion(publicacionActual,valores);
+      const idx=publicacionesReales.findIndex(function(p){ return p.id===publicacionActual.id; });
+      if(idx>=0) publicacionesReales[idx]=publicacionActual;
+
+      if(!user||publicacionActual.origen!=="usuarios"){
+        alert("Información actualizada en esta vista.");
+        pintarVistaPreviaPerfil();
+        pintarTarjetaResultados();
+        pintarResumenRapido();
+        syncActivosRail();
+        return;
+      }
+
+      const btn=document.getElementById("btnGuardarInfo");
+      if(btn) btn.disabled=true;
+      try{
+        const perfilId=publicacionActual.perfilId||publicacionActual.id;
+        const hubRef=db.collection("usuarios").doc(user.uid);
+        const hubSnap=await hubRef.get();
+        const hub=hubSnap.exists?(hubSnap.data()||{}):{};
+        const detalle=hub.perfilesDetalle;
+        const revisionFlags={
+          estadoRevision:"actualizacion_pendiente",
+          actualizacionPendiente:true,
+          aprobado:false,
+          activo:false
+        };
+
+        if(detalle&&typeof detalle==="object"&&detalle[perfilId]){
+          const nextDetalle=Object.assign({},detalle);
+          nextDetalle[perfilId]=Object.assign({},nextDetalle[perfilId],patch,revisionFlags);
+          let vinculados=Array.isArray(hub.perfilesVinculados)?hub.perfilesVinculados.slice():[];
+          vinculados=vinculados.map(function(v){
+            if(v&&v.perfilId===perfilId){
+              return Object.assign({},v,{
+                nombre:patch.nombre,
+                categoria:patch.categoria
+              });
+            }
+            return v;
+          });
+          const update=Object.assign({
+            perfilesDetalle:nextDetalle,
+            perfilesVinculados:vinculados
+          },revisionFlags);
+          if(hub.perfilActivoId===perfilId){
+            Object.assign(update,patch);
+          }
+          await hubRef.update(update);
+        }else{
+          await hubRef.update(Object.assign({},patch,revisionFlags));
+        }
+        alert("Información guardada. Los cambios quedan pendientes de revisión.");
+      }catch(e){
+        alert("No se pudo guardar la información: "+(e.message||e));
+      }finally{
+        if(btn) btn.disabled=false;
+      }
+      pintarInformacion();
+      pintarVistaPreviaPerfil();
+      pintarTarjetaResultados();
+      pintarResumenRapido();
+      pintarCabeceraCuenta();
+      syncActivosRail();
+    }
+
     function resumenRapidoPublicacion(pub){
       return {
         "Plan actual":pub.plan.nombre||"Sin plan",
@@ -1454,16 +1857,377 @@
     const publicacionesMock=documentosMockDashboard.map(normalizarDocumentoDashboard);
     let publicacionesReales=[];
     let publicacionActual=null;
+    let bannerActivo=null;
+    let dashHubDoc=null;
+    let contactoEditScope=null;
+
+    function initDashContactosCuenta(hubData){
+      if(!window.DashContactosCuenta) return;
+      const user=auth.currentUser;
+      DashContactosCuenta.initFromHub(hubData||dashHubDoc||{},{
+        cuentaUid:user?user.uid:""
+      });
+    }
+
+    function aplicarContactoResuelto(pub){
+      if(!pub||pub.tipo!=="perfil"||!window.DashContactosCuenta) return pub;
+      DashContactosCuenta.applyToPerfil(pub);
+      pub.contactos=normalizarContactosPerfil(Object.assign({},pub._raw||{},{
+        contactoPublico:pub.contactoPublico,
+        contactoHeredaCuenta:pub.contactoHeredaCuenta,
+        telefono:pub.contactoPublico&&pub.contactoPublico.whatsapp||""
+      }));
+      return pub;
+    }
+
+    function refrescarContactosTodosPerfiles(){
+      const lista=publicacionesReales.length?publicacionesReales:publicacionesMock;
+      lista.forEach(function(p){
+        if(p&&p.tipo==="perfil") aplicarContactoResuelto(p);
+      });
+      if(publicacionActual&&publicacionActual.tipo==="perfil"){
+        aplicarContactoResuelto(publicacionActual);
+      }
+    }
+
+    function perfilHeredaContactoCuenta(pub){
+      if(!pub) return true;
+      if(typeof pub.contactoHeredaCuenta==="boolean") return pub.contactoHeredaCuenta;
+      return pub._raw&&pub._raw.contactoHeredaCuenta!==false;
+    }
+
+    function contactosGridEsSoloLectura(){
+      if(!publicacionActual||publicacionActual.tipo!=="perfil") return false;
+      return perfilHeredaContactoCuenta(publicacionActual)&&contactoEditScope!=="cuenta";
+    }
+
+    function syncContactosGuardarBtn(){
+      const btn=document.getElementById("btnGuardarContactos");
+      if(!btn) return;
+      if(!publicacionActual||publicacionActual.tipo!=="perfil"){
+        btn.textContent="Guardar";
+        return;
+      }
+      const hereda=perfilHeredaContactoCuenta(publicacionActual);
+      if(hereda&&contactoEditScope!=="cuenta"){
+        btn.textContent="Editar contactos de cuenta";
+        btn.classList.add("secondary");
+      }else if(hereda&&contactoEditScope==="cuenta"){
+        btn.textContent="Guardar contactos de cuenta";
+        btn.classList.remove("secondary");
+      }else{
+        btn.textContent="Guardar contactos de este perfil";
+        btn.classList.remove("secondary");
+      }
+    }
+
+    function pintarContactosHeredaBar(){
+      const bar=document.getElementById("dashContactosHeredaBar");
+      const check=document.getElementById("dashContactoHeredaCheck");
+      const badge=document.getElementById("dashContactoHeredaBadge");
+      if(!bar||!check) return;
+      const esPerfil=publicacionActual&&publicacionActual.tipo==="perfil";
+      bar.hidden=!esPerfil;
+      if(!esPerfil) return;
+      const hereda=perfilHeredaContactoCuenta(publicacionActual);
+      check.checked=hereda;
+      if(badge){
+        badge.textContent=hereda?"Compartido":"Personalizado";
+        badge.classList.toggle("is-custom",!hereda);
+      }
+      if(!check.dataset.bound){
+        check.dataset.bound="1";
+        check.addEventListener("change",async function(){
+          if(!publicacionActual||publicacionActual.tipo!=="perfil") return;
+          const nextHereda=check.checked;
+          publicacionActual.contactoHeredaCuenta=nextHereda;
+          publicacionActual._raw=Object.assign({},publicacionActual._raw||{},{
+            contactoHeredaCuenta:nextHereda
+          });
+          contactoEditScope=nextHereda?null:"perfil";
+          const user=auth.currentUser;
+          const perfilId=publicacionActual.perfilId||publicacionActual.id;
+          if(user&&publicacionActual.origen==="usuarios"&&!isPreviewMode()){
+            try{
+              await DashContactosCuenta.guardarPerfilOverride(perfilId,{
+                contactoHeredaCuenta:nextHereda
+              });
+            }catch(e){
+              console.warn("[Dashboard] contacto hereda:",e);
+            }
+          }
+          aplicarContactoResuelto(publicacionActual);
+          pintarMedios();
+        });
+      }
+    }
+
+    function isPreviewMode(){
+      return new URLSearchParams(location.search).get("preview")==="1";
+    }
+
+    function syncAccountCapabilities(){
+      if(!window.DashAccountCapabilities) return;
+      const perfiles=listaPerfilesDelUid().length;
+      const banners=listaBannersTodos().length;
+      DashAccountCapabilities.sync({
+        perfilCount:perfiles,
+        bannerCount:banners,
+        hubData:dashHubDoc||{}
+      });
+      DashAccountCapabilities.applyUI();
+    }
+
+    function getDashContext(){
+      return window.DashContext?DashContext.get():{ tipo:"perfil", id:null };
+    }
+
+    function resolvePerfilPorId(perfilId){
+      if(!perfilId) return null;
+      return listaPerfilesDelUid().find(function(p){ return p.id===perfilId; })||null;
+    }
+
+    function resolveBannerPorId(bannerId){
+      if(!bannerId) return null;
+      return buildBannersRailData().find(b=>b.id===bannerId)||null;
+    }
+
+    function applyDashContext(ctx,opts){
+      opts=opts||{};
+      ctx=ctx||getDashContext();
+      if(!ctx||!ctx.id) return;
+
+      if(ctx.tipo==="perfil"){
+        const seleccion=resolvePerfilPorId(ctx.perfilId||ctx.id);
+        if(seleccion){
+          publicacionActual=seleccion;
+          contactoEditScope=null;
+          if(!opts.skipFirestore) guardarPerfilActivoId(seleccion.id);
+        }
+      }else if(ctx.tipo==="banner"){
+        const b=resolveBannerPorId(ctx.bannerId||ctx.id);
+        if(b) bannerActivo=b;
+      }
+
+      syncActivosRail();
+      if(!opts.light){
+        pintarMetricas();
+        pintarCabeceraCuenta();
+        pintarVistaPreviaPerfil();
+        pintarGaleria();
+        pintarInformacion();
+        pintarMedios();
+        pintarTarjetaResultados();
+        pintarMisEstados();
+        pintarResumenRapido();
+        if(window.DashModuleNav&&DashModuleNav.getActive()==="publicaciones"){
+          DashModuleNav.renderPublicacionesAdmin();
+        }
+        if(window.DashModuleNav&&DashModuleNav.getActive()==="anuncios-mensajes"){
+          DashModuleNav.renderAnunciosMensajesAdmin();
+        }
+      }else{
+        pintarVistaPreviaPerfil();
+      }
+    }
+
+    function seedDashContextFromPublicacion(pub){
+      if(!window.DashContext||!pub||!pub.id) return;
+      if(pub.tipo==="perfil"){
+        DashContext.init({
+          tipo:"perfil",
+          id:pub.id,
+          perfilId:pub.perfilId||pub.id
+        });
+      }
+    }
+
+    function aplicarDeepLinkContexto(){
+      if(!window.DashContext) return;
+      const q=DashContext.readQuery();
+      if(!q||!q.id) return;
+      if(q.tipo==="perfil"){
+        const found=resolvePerfilPorId(q.perfilId);
+        if(found) publicacionActual=found;
+      }else if(q.tipo==="banner"){
+        const found=listaBannersContratados().find(p=>p.id===q.bannerId);
+        if(found) bannerActivo=solicitudToRailTile(found,0);
+        else{
+          const b=resolveBannerPorId(q.bannerId);
+          if(b) bannerActivo=b;
+        }
+      }
+      DashContext.init(q);
+    }
 
     function listaPublicaciones(){
       return publicacionesReales.length ? publicacionesReales : publicacionesMock;
     }
 
+    function timestampPerfil(pub){
+      const raw=(pub&&pub._raw)||{};
+      const f=raw.fechaSolicitud||raw.fecha;
+      if(!f) return 0;
+      if(typeof f==="string") return Date.parse(f)||0;
+      if(typeof f.toDate==="function") return f.toDate().getTime();
+      if(f instanceof Date) return f.getTime();
+      return 0;
+    }
+
+    function listaPerfilesDelUid(){
+      const user=auth.currentUser;
+      const preview=new URLSearchParams(location.search).get("preview")==="1";
+      if(user){
+        return publicacionesReales.filter(function(p){ return p.tipo==="perfil"; });
+      }
+      if(preview){
+        const fuente=publicacionesReales.length?publicacionesReales:publicacionesMock;
+        return fuente.filter(function(p){ return p.tipo==="perfil"; });
+      }
+      return publicacionesMock.filter(function(p){ return p.tipo==="perfil"; });
+    }
+
+    function seleccionarPerfilInicial(perfiles,perfilActivoId){
+      perfiles=perfiles||[];
+      if(!perfiles.length) return null;
+      if(perfilActivoId){
+        const porId=perfiles.find(function(p){ return p.id===perfilActivoId; });
+        if(porId) return porId;
+      }
+      return perfiles.slice().sort(function(a,b){
+        return timestampPerfil(b)-timestampPerfil(a);
+      })[0];
+    }
+
+    window.getDashboardPerfilesForModule=listaPerfilesDelUid;
+
+    window.refreshDashInfoPublica=function(){ pintarInformacion(); };
+    window.refreshDashMediosContacto=function(){ pintarMedios(); };
+
+    window.getDashboardPublicacionesContext=function(){
+      const user=auth.currentUser;
+      const dashCtx=getDashContext();
+      if(dashCtx.tipo==="perfil"&&dashCtx.id){
+        return {
+          cuentaUid:user?user.uid:(publicacionActual&&(publicacionActual.cuentaUid||publicacionActual.ownerUid)||null),
+          perfilId:dashCtx.perfilId||dashCtx.id
+        };
+      }
+      if(!publicacionActual||publicacionActual.tipo!=="perfil"){
+        return { cuentaUid:user?user.uid:null, perfilId:null };
+      }
+      return {
+        cuentaUid:user?user.uid:(publicacionActual.cuentaUid||publicacionActual.ownerUid||null),
+        perfilId:publicacionActual.perfilId||publicacionActual.id||null
+      };
+    };
+
+    window.getDashboardAnunciosMensajesContext=function(){
+      const user=auth.currentUser;
+      const ctx=getDashContext();
+      if(!ctx||!ctx.id){
+        return { cuentaUid:user?user.uid:null, contextoTipo:"perfil", contextoId:null };
+      }
+      const filter=window.DashContext?DashContext.toMensajesFilter(ctx):{ contextoTipo:"perfil", contextoId:ctx.id };
+      return {
+        cuentaUid:user?user.uid:null,
+        contextoTipo:filter.contextoTipo,
+        contextoId:filter.contextoId
+      };
+    };
+
+    window.refrescarAnunciosMensajes=function(){
+      if(window.DashModuleNav&&DashModuleNav.getActive()==="anuncios-mensajes"){
+        DashModuleNav.renderAnunciosMensajesAdmin();
+      }
+      if(window.DashModuleNav&&DashModuleNav.getActive()==="mensajes"){
+        DashModuleNav.renderMensajes();
+      }
+    };
+
+    window.ensureDashBannerContext=function(){
+      if(!window.DashContext) return null;
+      const ctx=getDashContext();
+      if(ctx.tipo==="banner"&&ctx.bannerId) return ctx;
+      const banners=listaBannersContratados();
+      if(!banners.length) return null;
+      const accesibles=banners.filter(function(b){
+        return window.DashBannerMensajes&&DashBannerMensajes.accesible(b);
+      });
+      const pick=accesibles[0]||banners[0];
+      DashContext.set({
+        tipo:"banner",
+        id:pick.id,
+        bannerId:pick.id,
+        solicitudId:pick.solicitudId||pick.id
+      });
+      return getDashContext();
+    };
+
+    async function resolveAnuncioActivoPerfil(){
+      const ctx=getDashboardPublicacionesContext();
+      const user=auth.currentUser;
+      const preview=new URLSearchParams(location.search).get("preview")==="1";
+      if(user&&ctx.perfilId&&window.DashPublicaciones){
+        try{
+          let items=DashPublicaciones.getCached(ctx.cuentaUid,ctx.perfilId);
+          if(!items.length) items=await DashPublicaciones.listar(ctx.cuentaUid,ctx.perfilId);
+          const activo=DashPublicaciones.filtrarTab("estados",items).find(function(p){
+            return p.estado==="activo";
+          });
+          if(activo){
+            return {
+              activo:true,
+              nombre:activo.titulo,
+              titulo:activo.titulo,
+              hora:activo.fecha,
+              cuando:activo.fecha,
+              img:activo.imgUrl||publicacionActual?.mediaPrincipal?.url||"",
+              vistas:activo.vistas,
+              reacciones:activo.interacciones
+            };
+          }
+        }catch(e){}
+      }
+      if(preview&&MOCK_ANUNCIO_ACTIVO.activo) return Object.assign({},MOCK_ANUNCIO_ACTIVO);
+      return null;
+    }
+
+    window.refrescarPublicacionesDashboard=function(){
+      pintarMisEstados();
+      if(window.DashModuleNav&&DashModuleNav.getActive()=== "publicaciones"){
+        DashModuleNav.renderPublicacionesAdmin();
+      }
+    };
+
     async function cargarPublicacionesDesdeFirebase(user){
       const pubs=[];
-      const perfil=await db.collection("usuarios").doc(user.uid).get();
-      if(perfil.exists){
-        pubs.push(normalizarPerfilUsuario({ id: perfil.id, ...perfil.data() }));
+      const hub=await db.collection("usuarios").doc(user.uid).get();
+      if(hub.exists){
+        const data=hub.data()||{};
+        const detalle=data.perfilesDetalle;
+        if(detalle&&typeof detalle==="object"&&Object.keys(detalle).length){
+          const orden=Array.isArray(data.perfilesVinculados)
+            ? data.perfilesVinculados.map(function(v){ return v.perfilId; }).filter(Boolean)
+            : [];
+          const visto=new Set();
+          function pushPerfil(perfilId){
+            if(!perfilId||visto.has(perfilId)) return;
+            const p=detalle[perfilId];
+            if(!p||typeof p!=="object") return;
+            visto.add(perfilId);
+            pubs.push(normalizarPerfilUsuario({
+              id:perfilId,
+              perfilId:perfilId,
+              cuentaUid:data.uid||user.uid,
+              ...p
+            }));
+          }
+          orden.forEach(pushPerfil);
+          Object.keys(detalle).forEach(pushPerfil);
+        }else{
+          pubs.push(normalizarPerfilUsuario({ id:hub.id, perfilId:data.perfilId||hub.id, ...data }));
+        }
       }
       let snap;
       try{
@@ -1474,7 +2238,26 @@
       snap.forEach(doc=>{
         pubs.push(normalizarSolicitudAnuncio({ id: doc.id, ...doc.data() }));
       });
-      return pubs;
+      return {
+        pubs,
+        perfilActivoId: hub.exists ? (hub.data().perfilActivoId || null) : null,
+        hubData: hub.exists ? hub.data() : null
+      };
+    }
+
+    function bootDashContactos(hubData){
+      initDashContactosCuenta(hubData||null);
+      refrescarContactosTodosPerfiles();
+    }
+
+    async function guardarPerfilActivoId(perfilId){
+      const user=auth.currentUser;
+      if(!user||!perfilId) return;
+      try{
+        await db.collection("usuarios").doc(user.uid).update({ perfilActivoId: perfilId });
+      }catch(e){
+        console.warn("[Dashboard] No se pudo guardar perfilActivoId:",e);
+      }
     }
 
     function etiquetaRevision(rev){
@@ -1514,29 +2297,65 @@
       const preview=new URLSearchParams(location.search).get("preview")==="1";
       if(!user&&!preview){
         publicacionActual=publicacionesMock[0];
+        bootDashContactos(null);
+        seedDashContextFromPublicacion(publicacionActual);
+        aplicarDeepLinkContexto();
+        syncAccountCapabilities();
         renderDashboard();
         const hint=document.getElementById("dashLoginHint");
         if(hint) hint.classList.remove("hidden");
         return;
       }
       if(!user){
-        publicacionesReales=publicacionesMock.slice();
-        publicacionActual=publicacionesReales[0];
+        const hubPreview=new URLSearchParams(location.search).get("hub")==="1";
+        if(hubPreview){
+          publicacionesReales=[];
+          publicacionActual=null;
+          dashHubDoc={ tipoCuenta:"visitante", isHubAccount:true };
+        }else{
+          publicacionesReales=publicacionesMock.slice();
+          publicacionActual=publicacionesReales[0];
+        }
+        bootDashContactos(dashHubDoc);
+        seedDashContextFromPublicacion(publicacionActual);
+        aplicarDeepLinkContexto();
+        syncAccountCapabilities();
         renderDashboard();
         return;
       }
-      publicacionesReales=await cargarPublicacionesDesdeFirebase(user);
-      if(!publicacionesReales.length){
+      const cargado=await cargarPublicacionesDesdeFirebase(user);
+      publicacionesReales=cargado.pubs;
+      const perfilActivoId=cargado.perfilActivoId;
+      dashHubDoc=cargado.hubData||null;
+      bootDashContactos(dashHubDoc);
+      const perfilesUsuario=publicacionesReales.filter(function(p){ return p.tipo==="perfil"; });
+      if(!perfilesUsuario.length&&!publicacionesReales.some(esBannerSolicitud)){
         if(preview){
           publicacionesReales=publicacionesMock.slice();
-        }else if(lista){
-          lista.innerHTML='<p class="dash-login-hint">Aún no tienes perfil ni anuncios. <a href="index.html?abrir=registro">Registra tu perfil</a> o <a href="registro-banner.html">renta un banner</a>.</p>';
-          publicacionActual=publicacionesMock[0];
+          bootDashContactos(dashHubDoc);
+        }else{
+          publicacionActual=null;
+          aplicarDeepLinkContexto();
+          if(!DashContext||!DashContext.get().id){
+            seedDashContextFromPublicacion(null);
+          }
           renderDashboard();
+          const hint=document.getElementById("dashLoginHint");
+          if(hint) hint.classList.toggle("hidden",!!user);
           return;
         }
       }
-      publicacionActual=publicacionesReales[0] || publicacionesMock[0];
+      publicacionActual=seleccionarPerfilInicial(
+        publicacionesReales.filter(function(p){ return p.tipo==="perfil"; }),
+        perfilActivoId
+      )||publicacionesReales.find(function(p){ return p.tipo==="perfil"; })
+        ||publicacionesReales[0]
+        ||null;
+      aplicarDeepLinkContexto();
+      if(!DashContext||!DashContext.get().id){
+        seedDashContextFromPublicacion(publicacionActual);
+      }
+      syncAccountCapabilities();
       renderDashboard();
       const hint=document.getElementById("dashLoginHint");
       if(hint) hint.classList.toggle("hidden",!!user);
@@ -1554,7 +2373,7 @@
     function subtituloPublicacion(pub){
       const ciudad=pub.ciudad||ubicacionPublicacion(pub)||"tu ciudad";
       const activo=pub.estadoPublicacion&&pub.estadoPublicacion.publicoActivo;
-      const estadoTxt=activo?"activo":"pendiente";
+      const estadoTxt=activo?"publicado":"pendiente";
       return pub.tipo+" "+estadoTxt+" en "+ciudad;
     }
 
@@ -1599,7 +2418,7 @@
           fotoURL:pub.mediaPrincipal.url,
           fotosExtraURL:pub.mediaSecundaria||[],
           fotosCount:Math.max(4,(pub.mediaPrincipal.url?1:0)+(pub.mediaSecundaria?pub.mediaSecundaria.length:0)),
-          disponibilidad:pub.disponibilidad||"Disponible ahora",
+          disponibilidad:pub.disponibilidad||"Consultar disponibilidad",
           verificada:!!(pub.estadoPublicacion&&pub.estadoPublicacion.publicoActivo),
           contactoPublico:cp,
           mensajeContactoPublicidad:pub.mensajeContactoPublicidad||""
@@ -1623,36 +2442,454 @@
       return url||raw&&raw.avatar||raw&&raw.imagen||"img/home/banners/ad-banner-pink-02.png";
     }
 
-    function pintarPublicaciones(){
-      const lista=document.getElementById("publicationList");
-      const pubs=listaPublicaciones().filter(function(p){ return p.tipo==="perfil"; });
-      const allPubs=listaPublicaciones();
-      const html=(pubs.length?pubs:allPubs).map(pub=>{
-        const esActivo=!!(publicacionActual&&pub.id===publicacionActual.id);
-        const subt=subtituloPerfilPicker(pub);
-        const live=publicacionEstaActiva(pub);
-        return htmlPickerCard({
-          tag:"button",
-          foto:fotoPerfilPicker(pub),
+    function computeMockUnreadMaps(){
+      if(window.DashModuleNav&&DashModuleNav.usesMockMensajes&&!DashModuleNav.usesMockMensajes()){
+        return { perfil:{}, banner:{} };
+      }
+      const perfil={}, banner={};
+      (window.DashModuleNav&&DashModuleNav.MOCK_CONVERSACIONES||[]).forEach(function(c){
+        const n=Number(c.unread||0);
+        if(n<=0) return;
+        const id=c.contextoId;
+        if(!id) return;
+        if(c.contextoTipo==="banner"){
+          if(window.DashBannerMensajes&&DashBannerMensajes.isContextoBloqueado({ contextoTipo:"banner", contextoId:id })) return;
+          banner[id]=(banner[id]||0)+n;
+        }else perfil[id]=(perfil[id]||0)+n;
+      });
+      return { perfil, banner };
+    }
+
+    function updateBannerMensajesNavState(){
+      const btn=document.getElementById("btnNavBannerMensajes");
+      if(!btn||!window.DashBannerMensajes) return;
+      const ctx=getDashContext();
+      let blocked=false;
+      if(ctx.tipo==="banner"&&ctx.id){
+        blocked=DashBannerMensajes.isContextoBloqueado({ contextoTipo:"banner", contextoId:ctx.id });
+      }
+      btn.classList.toggle("dash-nav-item--blocked",blocked);
+      btn.setAttribute("aria-disabled",blocked?"true":"false");
+    }
+
+    function teardownDashUnreadRailSub(){
+      if(window._dashUnreadRailUnsub){
+        window._dashUnreadRailUnsub();
+        window._dashUnreadRailUnsub=null;
+      }
+      window._dashUnreadRailLive=false;
+    }
+
+    function applyDashUnreadMaps(counts,live){
+      counts=counts||{};
+      if(window.DashBannerMensajes&&counts.banner){
+        counts.banner=DashBannerMensajes.filterUnreadBannerMap(counts.banner);
+      }
+      window._dashUnreadPerfil=counts.perfil||{};
+      window._dashUnreadBanner=counts.banner||{};
+      window._dashUnreadRailLive=!!live;
+      window._dashUnreadMapsReady=true;
+      syncActivosRail();
+      updateBannerMensajesNavState();
+      updateMensajesNavBadge();
+    }
+
+    function totalUnreadMensajes(){
+      let total=0;
+      Object.values(window._dashUnreadPerfil||{}).forEach(function(n){ total+=Number(n)||0; });
+      Object.values(window._dashUnreadBanner||{}).forEach(function(n){ total+=Number(n)||0; });
+      return total;
+    }
+
+    function updateMensajesNavBadge(){
+      const badge=document.getElementById("navMensajesBadge");
+      if(!badge) return;
+      const total=totalUnreadMensajes();
+      badge.textContent=total>99?"99+":(total>0?String(total):"");
+      badge.classList.toggle("hidden",total<=0);
+    }
+
+    function startDashUnreadRailSub(){
+      teardownDashUnreadRailSub();
+      const user=auth.currentUser;
+      if(!user||!window.DashboardMessenger) return;
+      window._dashUnreadRailUnsub=DashboardMessenger.subscribeUnreadRail(user.uid,function(counts){
+        applyDashUnreadMaps(counts,true);
+      });
+    }
+
+    function unreadConversacionesContexto(contextoTipo,contextoId){
+      if(contextoTipo==="banner"&&window.DashBannerMensajes&&DashBannerMensajes.isContextoBloqueado({ contextoTipo, contextoId })){
+        return 0;
+      }
+      if(window._dashUnreadMapsReady||window._dashUnreadRailLive){
+        const map=contextoTipo==="banner"?window._dashUnreadBanner:window._dashUnreadPerfil;
+        return Math.min(99,Number((map&&map[contextoId])||0));
+      }
+      if(window.DashModuleNav&&DashModuleNav.usesMockMensajes&&DashModuleNav.usesMockMensajes()){
+        const convs=DashModuleNav.MOCK_CONVERSACIONES||[];
+        return convs.filter(function(c){
+          return c.contextoTipo===contextoTipo&&c.contextoId===contextoId;
+        }).reduce(function(sum,c){ return sum+(Number(c.unread)||0); },0);
+      }
+      return 0;
+    }
+
+    window._dashUnreadPerfil={};
+    window._dashUnreadBanner={};
+    window._dashUnreadRailLive=false;
+    window._dashUnreadMapsReady=false;
+
+    async function refreshDashUnreadRail(){
+      const mockMsgs=window.DashModuleNav&&DashModuleNav.usesMockMensajes&&DashModuleNav.usesMockMensajes();
+      if(mockMsgs){
+        teardownDashUnreadRailSub();
+        applyDashUnreadMaps(computeMockUnreadMaps(),false);
+        return;
+      }
+      const user=auth.currentUser;
+      if(!user||!window.DashboardMessenger){
+        teardownDashUnreadRailSub();
+        applyDashUnreadMaps({ perfil:{}, banner:{} },false);
+        return;
+      }
+      if(!window._dashUnreadRailUnsub) startDashUnreadRailSub();
+      try{
+        const counts=await DashboardMessenger.getAllUnreadCountsByContexto(user.uid);
+        applyDashUnreadMaps(counts,true);
+      }catch(e){
+        console.warn("[Dashboard] unread rail:",e);
+      }
+    }
+    window.refreshDashUnreadRail=refreshDashUnreadRail;
+
+    function teardownDashAvisosRailSub(){
+      if(window._dashAvisosRailUnsub){
+        window._dashAvisosRailUnsub();
+        window._dashAvisosRailUnsub=null;
+      }
+    }
+
+    function updateAvisosNavBadge(){
+      const badge=document.getElementById("navAvisosBadge");
+      if(!badge||!window.DashAvisos) return;
+      const total=DashAvisos.totalUnreadFromMaps({
+        perfil:window._dashAvisosPerfil||{},
+        banner:window._dashAvisosBanner||{}
+      });
+      badge.textContent=total>99?"99+":(total>0?String(total):"");
+      badge.classList.toggle("hidden",total<=0);
+    }
+
+    function applyDashAvisosMaps(counts,live){
+      counts=counts||{};
+      window._dashAvisosPerfil=counts.perfil||{};
+      window._dashAvisosBanner=counts.banner||{};
+      window._dashAvisosRailLive=!!live;
+      syncActivosRail();
+      updateAvisosNavBadge();
+    }
+
+    function startDashAvisosRailSub(){
+      teardownDashAvisosRailSub();
+      const user=auth.currentUser;
+      if(!user||!window.DashAvisos) return;
+      window._dashAvisosRailUnsub=DashAvisos.subscribeUnreadRail(user.uid,function(counts){
+        applyDashAvisosMaps(counts,true);
+      });
+    }
+
+    function avisosContexto(contextoTipo,contextoId){
+      if(window._dashAvisosRailLive){
+        const map=contextoTipo==="banner"?window._dashAvisosBanner:window._dashAvisosPerfil;
+        return Math.min(99,Number((map&&map[contextoId])||0));
+      }
+      if(window.DashAvisos){
+        const maps=DashAvisos.computeMockUnreadMaps();
+        const map=contextoTipo==="banner"?maps.banner:maps.perfil;
+        return Math.min(99,Number((map&&map[contextoId])||0));
+      }
+      return 0;
+    }
+
+    window._dashAvisosPerfil={};
+    window._dashAvisosBanner={};
+    window._dashAvisosRailLive=false;
+
+    async function refreshDashAvisosRail(){
+      const user=auth.currentUser;
+      if(!user||!window.DashAvisos){
+        teardownDashAvisosRailSub();
+        applyDashAvisosMaps(DashAvisos?DashAvisos.computeMockUnreadMaps():{ perfil:{}, banner:{} },false);
+        return;
+      }
+      if(!window._dashAvisosRailUnsub) startDashAvisosRailSub();
+      try{
+        const counts=await DashAvisos.getAllUnreadCountsByContexto(user.uid);
+        applyDashAvisosMaps(counts,true);
+      }catch(e){
+        console.warn("[Dashboard] avisos rail:",e);
+      }
+    }
+    window.refreshDashAvisosRail=refreshDashAvisosRail;
+
+    function teardownDashSolicitudesRailSub(){
+      if(window._dashSolRailUnsub){
+        window._dashSolRailUnsub();
+        window._dashSolRailUnsub=null;
+      }
+    }
+
+    function updateSolicitudesNavBadge(){
+      const badge=document.getElementById("navSolicitudesBadge");
+      if(!badge||!window.DashSolicitudesNegocio) return;
+      const total=DashSolicitudesNegocio.totalPendingFromMaps({
+        perfil:window._dashSolPerfil||{},
+        banner:window._dashSolBanner||{}
+      });
+      badge.textContent=total>99?"99+":(total>0?String(total):"");
+      badge.classList.toggle("hidden",total<=0);
+    }
+
+    function applyDashSolicitudesMaps(counts,live){
+      counts=counts||{};
+      window._dashSolPerfil=counts.perfil||{};
+      window._dashSolBanner=counts.banner||{};
+      window._dashSolRailLive=!!live;
+      syncActivosRail();
+      updateSolicitudesNavBadge();
+    }
+
+    function startDashSolicitudesRailSub(){
+      teardownDashSolicitudesRailSub();
+      const user=auth.currentUser;
+      if(!user||!window.DashSolicitudesNegocio) return;
+      window._dashSolRailUnsub=DashSolicitudesNegocio.subscribePendingRail(user.uid,function(counts){
+        applyDashSolicitudesMaps(counts,true);
+      });
+    }
+
+    function solPendientesContexto(contextoTipo,contextoId){
+      if(window._dashSolRailLive){
+        const map=contextoTipo==="banner"?window._dashSolBanner:window._dashSolPerfil;
+        return Math.min(99,Number((map&&map[contextoId])||0));
+      }
+      if(window.DashSolicitudesNegocio){
+        const maps=DashSolicitudesNegocio.computeMockPendingMaps();
+        const map=contextoTipo==="banner"?maps.banner:maps.perfil;
+        return Math.min(99,Number((map&&map[contextoId])||0));
+      }
+      return 0;
+    }
+
+    window._dashSolPerfil={};
+    window._dashSolBanner={};
+    window._dashSolRailLive=false;
+
+    async function refreshDashSolicitudesRail(){
+      const user=auth.currentUser;
+      if(!user||!window.DashSolicitudesNegocio){
+        teardownDashSolicitudesRailSub();
+        applyDashSolicitudesMaps(DashSolicitudesNegocio?DashSolicitudesNegocio.computeMockPendingMaps():{ perfil:{}, banner:{} },false);
+        return;
+      }
+      if(!window._dashSolRailUnsub) startDashSolicitudesRailSub();
+      try{
+        const counts=await DashSolicitudesNegocio.getAllPendingCountsByContexto(user.uid);
+        applyDashSolicitudesMaps(counts,true);
+      }catch(e){
+        console.warn("[Dashboard] solicitudes rail:",e);
+      }
+    }
+    window.refreshDashSolicitudesRail=refreshDashSolicitudesRail;
+
+    function solPerfilRail(pub){
+      const pid=pub.perfilId||pub.id;
+      return solPendientesContexto("perfil",pid);
+    }
+
+    function solBannerRail(b){
+      const id=b.id||(b.solicitudId);
+      if(!id) return 0;
+      return solPendientesContexto("banner",id);
+    }
+
+    function avisosPerfilRail(pub){
+      const pid=pub.perfilId||pub.id;
+      return avisosContexto("perfil",pid);
+    }
+
+    function avisosBannerRail(b){
+      const id=b.id||(b.solicitudId);
+      if(!id) return 0;
+      return avisosContexto("banner",id);
+    }
+
+    function unreadPerfilRail(pub){
+      const pid=pub.perfilId||pub.id;
+      return Math.min(99,unreadConversacionesContexto("perfil",pid));
+    }
+
+    function unreadBannerRail(b){
+      const id=b.id||(b.solicitudId);
+      if(!id) return 0;
+      return Math.min(99,unreadConversacionesContexto("banner",id));
+    }
+
+    function buildPerfilesRailData(){
+      return listaPerfilesDelUid().map(function(pub){
+        return {
+          tipo:"perfil",
+          id:pub.id,
+          perfilId:pub.perfilId||pub.id,
           nombre:pub.nombrePublico||pub.nombre||"Sin nombre",
-          subtitulo:subt,
-          activo:live,
-          extraClass:esActivo?" active":"",
-          extraAttrs:' data-id="'+textoSeguro(pub.id)+'"'
+          foto:fotoPerfilPicker(pub),
+          subtitulo:subtituloPerfilPicker(pub),
+          publicado:publicacionEstaActiva(pub),
+          unread:unreadPerfilRail(pub),
+          avisosUnread:avisosPerfilRail(pub),
+          solPending:solPerfilRail(pub)
+        };
+      });
+    }
+
+    function esBannerSolicitud(pub){
+      if(!pub) return false;
+      if(pub.origen==="solicitudes_anuncios") return true;
+      const t=String(pub.tipo||"").toLowerCase();
+      return t==="banner"||t==="destacado"||t==="publicidad";
+    }
+
+    function listaBannersTodos(){
+      return listaPublicaciones().filter(esBannerSolicitud);
+    }
+
+    function listaBannersContratados(){
+      const user=auth.currentUser;
+      const preview=new URLSearchParams(location.search).get("preview")==="1";
+      const solicitudes=listaBannersTodos();
+      if(user||preview) return solicitudes;
+      return [];
+    }
+
+    window.getDashboardBannerById=function(bannerId){
+      if(!bannerId) return null;
+      return listaBannersTodos().find(function(p){ return p.id===bannerId; })||null;
+    };
+
+    function fotoBannerRail(pub){
+      return (pub&&pub.mediaPrincipal&&pub.mediaPrincipal.url)
+        ||(pub&&pub._raw&&(pub._raw.imagenURL||pub._raw.imagen))
+        ||"img/home/banners/ad-banner-pink-01.png";
+    }
+
+    function solicitudToRailTile(pub,idx){
+      var bloqueado=window.DashBannerMensajes&&!DashBannerMensajes.accesible(pub);
+      return {
+        tipo:"banner",
+        id:pub.id,
+        solicitudId:pub.id,
+        nombre:pub.nombrePublico||pub.nombre||"Banner",
+        foto:fotoBannerRail(pub),
+        subtitulo:subtituloGeoPicker(pub),
+        publicado:publicacionEstaActiva(pub),
+        unread:bloqueado?0:unreadBannerRail(pub),
+        avisosUnread:bloqueado?0:avisosBannerRail(pub),
+        solPending:bloqueado?0:solBannerRail(pub),
+        mensajesBloqueado:!!bloqueado,
+        bloqueoEtiqueta:bloqueado&&DashBannerMensajes.etiquetaRail?DashBannerMensajes.etiquetaRail(pub):null
+      };
+    }
+
+    function buildBannersRailData(){
+      return listaBannersContratados().map(solicitudToRailTile);
+    }
+
+    window.getDashboardBannersForModule=listaBannersContratados;
+
+    function buildLivesRailData(){
+      const items=[];
+      if(MOCK_LIVE_PROXIMO&&MOCK_LIVE_PROXIMO.nombre){
+        items.push({
+          tipo:"live",
+          id:"live-proximo",
+          nombre:MOCK_LIVE_PROXIMO.nombre||"Próximo live",
+          foto:MOCK_LIVE_PROXIMO.img||"img/dashboard/right-live-preview.png",
+          subtitulo:(MOCK_LIVE_PROXIMO.dia||"")+" "+(MOCK_LIVE_PROXIMO.hora||"Programado"),
+          publicado:false,
+          unread:0
         });
-      }).join("");
-      if(lista) lista.innerHTML=html;
-      if(lista) lista.querySelectorAll(".profile-picker-card").forEach(card=>{
-        card.addEventListener("click",()=>{
-          const pool=pubs.length?pubs:allPubs;
-          const seleccion=pool.find(pub=>pub.id===card.dataset.id);
-          if(seleccion){
-            publicacionActual=seleccion;
-            renderDashboard();
-            if(window.DashModuleNav) DashModuleNav.setModule("inicio");
-          }
+      }
+      const socios=(window.DashModuleNav&&DashModuleNav.MOCK_LIVES_SOCIOS)||[];
+      socios.slice(0,4).forEach(function(l,i){
+        items.push({
+          tipo:"live",
+          id:"live-socio-"+i,
+          nombre:l.nombre||"Live",
+          foto:l.avatar||l.img||"img/dashboard/right-live-preview.png",
+          subtitulo:(l.categoria||"Promo")+" · "+(l.ciudad||""),
+          publicado:false,
+          unread:0
         });
       });
+      return items;
+    }
+
+    function syncActivosRail(){
+      if(!window.DashActivosRail) return;
+      const perfiles=buildPerfilesRailData();
+      const banners=buildBannersRailData();
+      const lives=buildLivesRailData();
+      if(!bannerActivo&&banners.length) bannerActivo=banners[0];
+      const dashCtx=getDashContext();
+      const selTipo=dashCtx.id?dashCtx.tipo
+        :(publicacionActual&&publicacionActual.tipo==="perfil"?"perfil":(bannerActivo?"banner":"perfil"));
+      const selId=dashCtx.id
+        ||(selTipo==="perfil"
+          ?((publicacionActual&&publicacionActual.id)||(perfiles[0]&&perfiles[0].id))
+          :((bannerActivo&&bannerActivo.id)||(banners[0]&&banners[0].id)));
+      DashActivosRail.setData({
+        perfiles:perfiles,
+        banners:banners,
+        lives:lives,
+        seleccion:{ tipo:selTipo, id:selId }
+      });
+    }
+
+    function onActivosRailSelect(detail){
+      if(!detail||!detail.id) return;
+      if(detail.tipo==="live"){
+        if(window.DashModuleNav) DashModuleNav.setModule("transmitir-live");
+        return;
+      }
+      if(window.DashContext){
+        DashContext.set({
+          tipo:detail.tipo,
+          id:detail.id,
+          perfilId:detail.tipo==="perfil"?detail.id:null,
+          bannerId:detail.tipo==="banner"?detail.id:null
+        });
+      }else{
+        applyDashContext({ tipo:detail.tipo, id:detail.id, perfilId:detail.id, bannerId:detail.id });
+      }
+      const mod=window.DashModuleNav?DashModuleNav.getActive():null;
+      if(mod==="mensajes"&&window.DashModuleNav){
+        DashModuleNav.syncMensajesFromContext();
+        DashModuleNav.renderMensajes();
+      }
+      if(mod==="inicio"){
+        refrescarVistaPreviaInicio();
+        syncInicioPreviewActions();
+        pintarInicioResumen();
+      }
+    }
+
+    function pintarPublicaciones(){
+      syncActivosRail();
+    }
+
+    function pintarBannersSide(){
+      syncActivosRail();
     }
 
     function pintarTarjetaResultados(){
@@ -1667,24 +2904,6 @@
       set("resultCardPrice",datos["Tarifas"]?("Desde "+datos["Tarifas"]):"");
       const badge=document.getElementById("resultCardBadge");
       if(badge) badge.textContent=publicacionActual.estadoPublicacion.publicoActivo?"Verificado":"En revisión";
-    }
-
-    function pintarBannersSide(){
-      const cont=document.getElementById("bannersListSide");
-      if(!cont||!window.DashModuleNav) return;
-      const banners=DashModuleNav.MOCK_BANNERS||[];
-      cont.innerHTML=banners.length?banners.map(function(b){
-        const activo=b.activo===true||String(b.estado||"").toLowerCase()==="activo";
-        return htmlPickerCard({
-          tag:"div",
-          foto:b.img||"img/home/banners/ad-banner-pink-01.png",
-          nombre:b.nombre||"Banner",
-          subtitulo:subtituloGeoPicker(b),
-          activo:activo,
-          extraClass:" side-banner-card",
-          extraAttrs:' data-banner-id="'+textoSeguro(b.id||b.nombre)+'" title="'+textoSeguro(b.slot||"")+'"'
-        });
-      }).join(""):'<p class="dash-hint dash-hint--compact">Sin banners activos</p>';
     }
 
     function pintarMetricas(){
@@ -1764,7 +2983,7 @@
       p.fotoURL=fotos.fotoURL;
       p.fotosExtraURL=fotos.fotosExtraURL;
       p.fotosCount=fotos.fotosCount;
-      if(!p.disponibilidad) p.disponibilidad="Disponible ahora";
+      if(!p.disponibilidad) p.disponibilidad="Consultar disponibilidad";
       if(!p.descripcionPublica&&pub.descripcion) p.descripcionPublica=pub.descripcion;
       if(!p.tagline&&p.descripcionPublica) p.tagline=String(p.descripcionPublica).slice(0,80);
       p.verificada=!!(pub.estadoPublicacion&&pub.estadoPublicacion.publicoActivo);
@@ -1789,11 +3008,52 @@
       }catch(e){}
     }
 
+    function syncInicioPreviewActions(){
+      const ctx=getDashContext();
+      const isBanner=ctx.tipo==="banner"&&ctx.id;
+      const perfilActs=document.getElementById("dashPreviewActionsPerfil");
+      const bannerActs=document.getElementById("dashPreviewActionsBanner");
+      if(perfilActs) perfilActs.classList.toggle("hidden",isBanner);
+      if(bannerActs) bannerActs.classList.toggle("hidden",!isBanner);
+      if(!isBanner) return;
+      const pub=window.getDashboardBannerById?getDashboardBannerById(ctx.id):null;
+      const snap=window.DashBannerMetrics&&pub?DashBannerMetrics.snapshot(pub):null;
+      const renovar=document.getElementById("btnDashBannerRenovar");
+      const editar=document.getElementById("btnDashBannerEditar");
+      const msgBtn=document.getElementById("btnDashBannerMensajes");
+      if(snap&&renovar) renovar.href=snap.renovarUrl;
+      if(snap&&editar) editar.href=snap.editarUrl;
+      if(msgBtn){
+        msgBtn.disabled=!snap||!snap.accesible;
+        msgBtn.textContent=snap&&snap.mensajesUnread>0
+          ? "Mensajes ("+snap.mensajesUnread+" nuevos)"
+          : "Mensajes del banner";
+      }
+    }
+
     function refrescarVistaPreviaInicio(){
-      const pub=asegurarPublicacionActual();
+      const ctx=getDashContext();
+      const pub=ctx.tipo==="perfil"?asegurarPublicacionActual():null;
       const frame=document.getElementById("dashPerfilPreviewFrame");
       const placeholder=document.getElementById("dashPreviewPlaceholder");
       if(!frame) return;
+      if(ctx.tipo==="banner"){
+        const bannerId=ctx.bannerId||ctx.id;
+        const pub=window.getDashboardBannerById?getDashboardBannerById(bannerId):null;
+        frame.classList.add("hidden");
+        frame.removeAttribute("src");
+        if(placeholder){
+          if(pub&&window.DashBannerMetrics){
+            placeholder.innerHTML=DashBannerMetrics.htmlInicioPanel(pub);
+            placeholder.classList.remove("hidden");
+          }else{
+            placeholder.textContent="Selecciona un banner en la columna izquierda.";
+            placeholder.classList.remove("hidden");
+          }
+        }
+        syncInicioPreviewActions();
+        return;
+      }
       if(!pub||pub.tipo!=="perfil"){
         frame.classList.add("hidden");
         frame.removeAttribute("src");
@@ -1838,14 +3098,17 @@
       const root=document.getElementById("pcardRoot");
       if(!pub){
         refrescarVistaPreviaInicio();
+        syncInicioPreviewActions();
         return;
       }
       if(pub.tipo!=="perfil"){
         if(root) root.innerHTML='<p class="dash-preview-empty">Vista previa completa para perfiles. Selecciona una publicación tipo perfil.</p>';
         refrescarVistaPreviaInicio();
+        syncInicioPreviewActions();
         return;
       }
       refrescarVistaPreviaInicio();
+      syncInicioPreviewActions();
       const datos=datosPublicosPublicacion(pub);
       const banner=document.getElementById("pcardBanner");
       const ava=document.getElementById("pcardAva");
@@ -1860,7 +3123,7 @@
       const desc=document.getElementById("pcardDesc");
       const price=document.getElementById("pcardPrice");
       if(name) name.textContent=pub.nombrePublico||"";
-      if(meta) meta.textContent="Perfil activo en "+(pub.ciudad||"Monterrey");
+      if(meta) meta.textContent="Publicado en "+(pub.ciudad||"Monterrey");
       if(desc) desc.textContent=datos["Descripción"]||"";
       if(price) price.textContent=datos["Tarifas"]?("Desde "+datos["Tarifas"]):"";
       const badge=document.getElementById("pcardBadge");
@@ -1876,7 +3139,7 @@
         const activos=Object.entries(pub.contactos||{}).filter(([,i])=>i&&i.activo);
         contactsPreview.innerHTML=activos.length
           ? activos.map(([n])=>'<span class="mod-contact-chip">'+textoSeguro(n)+"</span>").join("")
-          : '<span class="mod-perfil-muted">Sin medios públicos activos</span>';
+          : '<span class="mod-perfil-muted">Sin medios públicos habilitados</span>';
       }
       try{
         sessionStorage.setItem(PREVIEW_STORAGE_KEY,JSON.stringify(publicacionToPreviewPayload(pub)));
@@ -1892,9 +3155,7 @@
       const posts=(nav.MOCK_FEED_POSTS||[]).filter(function(p){
         return p.tipo==="Estado"||p.tipo==="Promoción";
       });
-      const sociosExtra=((nav.MOCK_SOLICITUDES||{}).socios||[]).map(function(s){
-        return {nombre:s.nombre,avatar:s.img,hora:"Nuevo",tipo:"Estado"};
-      });
+      const sociosExtra=[];
       const estadosItems=posts.concat(sociosExtra).slice(0,4);
       while(estadosItems.length<4){
         estadosItems.push({
@@ -1930,10 +3191,10 @@
             '<div class="dash-inicio-live__thumb">'+
               '<img class="dash-inicio-live__cover" src="'+textoSeguro(l.img||"")+'" alt="" decoding="async">'+
               '<img class="dash-inicio-live__ava" src="'+textoSeguro(l.avatar||l.img||"")+'" alt="" decoding="async">'+
-              '<span class="dash-inicio-live__badge"><span class="dash-inicio-live__dot"></span> EN VIVO</span>'+
+              '<span class="dash-inicio-live__badge">LIVE · Promo</span>'+
             '</div>'+
             '<span class="dash-inicio-live__name">'+textoSeguro(l.nombre)+'</span>'+
-            '<span class="dash-inicio-live__meta">'+textoSeguro(l.categoria||"Live")+' · '+textoSeguro(String(l.viewers||0))+' viendo</span>'+
+            '<span class="dash-inicio-live__meta">'+textoSeguro(l.categoria||"Live")+' · Promo</span>'+
           '</button>';
         }).join("");
       }
@@ -1945,7 +3206,7 @@
     }
 
     function htmlInicioPanel(tipo,titulo,contador,linkMod,linkText,inner){
-      return '<article class="dash-inicio-panel dash-inicio-panel--'+textoSeguro(tipo)+' panel glass">'+
+      return '<article class="dash-inicio-panel dash-inicio-panel--'+textoSeguro(tipo)+' panel glass" data-inicio-panel="'+textoSeguro(tipo)+'">'+
         '<header class="dash-inicio-panel__head">'+
           '<div class="dash-inicio-panel__title-wrap">'+
             '<span class="dash-inicio-panel__icon" aria-hidden="true"></span>'+
@@ -1953,7 +3214,7 @@
           '</div>'+
           '<button type="button" class="dash-inicio-panel__link" data-goto-module="'+textoSeguro(linkMod)+'">'+textoSeguro(linkText)+'</button>'+
         '</header>'+
-        inner+
+        '<div class="dash-inicio-panel__content">'+inner+'</div>'+
       '</article>';
     }
 
@@ -1961,54 +3222,122 @@
       const cont=document.getElementById("dashInicioResumen");
       if(!cont) return;
       const nav=window.DashModuleNav||{};
-      const conv=(nav.MOCK_CONVERSACIONES||[]).slice(0,3);
-      const recibidas=((nav.MOCK_SOLICITUDES||{}).recibidas||[]).slice(0,2);
-      const avisos=(nav.MOCK_AVISOS||[]).slice(0,3);
-      const sugerencias=(nav.MOCK_DIRECTORIO||[]).slice(0,3);
-      const msgsInner=conv.length?('<ul class="dash-inicio-feed">'+conv.map(function(c){
-        return '<li class="dash-inicio-feed__item">'+
-          '<img class="dash-inicio-feed__ava" src="'+textoSeguro(c.avatar||"")+'" alt="" decoding="async">'+
-          '<div class="dash-inicio-feed__body">'+
-            '<div class="dash-inicio-feed__row"><b>'+textoSeguro(c.nombre)+'</b><time>'+textoSeguro(c.hora)+'</time></div>'+
-            '<p>'+textoSeguro(c.ultimo)+'</p>'+
-          '</div>'+
-          (c.unread?('<span class="dash-inicio-feed__badge">'+c.unread+'</span>'):"")+
-        '</li>';
-      }).join("")+'</ul>'):'<p class="dash-inicio-empty">Sin mensajes nuevos</p>';
-      const solInner=recibidas.length?('<ul class="dash-inicio-feed">'+recibidas.map(function(s){
-        return '<li class="dash-inicio-feed__item">'+
-          '<img class="dash-inicio-feed__ava" src="'+textoSeguro(s.img||"")+'" alt="" decoding="async">'+
-          '<div class="dash-inicio-feed__body">'+
-            '<div class="dash-inicio-feed__row"><b>'+textoSeguro(s.nombre)+'</b><span class="dash-inicio-feed__tag">'+textoSeguro(s.categoria)+'</span></div>'+
-            '<p>'+textoSeguro(s.ciudad)+' · solicitud pendiente</p>'+
-          '</div>'+
-        '</li>';
-      }).join("")+'</ul>'):'<p class="dash-inicio-empty">Sin solicitudes pendientes</p>';
-      const avisosInner=avisos.length?('<ul class="dash-inicio-feed dash-inicio-feed--avisos">'+avisos.map(function(a){
-        return '<li class="dash-inicio-feed__item dash-inicio-feed__item--compact">'+
-          '<span class="dash-inicio-feed__dot dash-inicio-feed__dot--'+textoSeguro(a.tipo||"negocio")+'"></span>'+
-          '<div class="dash-inicio-feed__body">'+
-            '<div class="dash-inicio-feed__row"><b>'+textoSeguro(a.titulo)+'</b><time>'+textoSeguro(a.hora)+'</time></div>'+
-            '<p>'+textoSeguro(a.texto)+'</p>'+
-          '</div>'+
-        '</li>';
-      }).join("")+'</ul>'):'<p class="dash-inicio-empty">Sin avisos</p>';
-      const sociosInner=sugerencias.length?('<ul class="dash-inicio-feed">'+sugerencias.map(function(s){
-        return '<li class="dash-inicio-feed__item dash-inicio-feed__item--socio">'+
-          '<img class="dash-inicio-feed__ava dash-inicio-feed__ava--sq" src="'+textoSeguro(s.img||"")+'" alt="" decoding="async">'+
-          '<div class="dash-inicio-feed__body">'+
-            '<div class="dash-inicio-feed__row"><b>'+textoSeguro(s.nombre)+'</b>'+(s.verificado?'<span class="dash-inicio-feed__ok">✓</span>':"")+'</div>'+
-            '<p>'+textoSeguro(s.categoria)+' · '+textoSeguro(s.ciudad)+'</p>'+
-          '</div>'+
-          '<button type="button" class="dash-inicio-feed__cta" data-goto-module="buscar">Ver</button>'+
-        '</li>';
-      }).join("")+'</ul>'):'<p class="dash-inicio-empty">Explora el directorio</p>';
+      const filter=window.DashContext?DashContext.toMensajesFilter(getDashContext()):{ contextoTipo:"perfil", contextoId:null };
+      const msgsInner='<p class="dash-inicio-empty">Sin mensajes nuevos</p>';
+      const solInner='<p class="dash-inicio-empty">Sin solicitudes pendientes</p>';
+      const avisosInner='<p class="dash-inicio-empty">Sin avisos</p>';
+      const sociosInner='<p class="dash-inicio-empty">Cargando sugerencias…</p>';
       cont.innerHTML=[
-        htmlInicioPanel("mensajes","Mensajes","12 sin leer","mensajes","Ver todos",msgsInner),
-        htmlInicioPanel("avisos","Notificaciones","5 nuevas","avisos","Ver avisos",avisosInner),
-        htmlInicioPanel("solicitudes","Solicitudes","8 pendientes","solicitudes","Gestionar",solInner),
+        htmlInicioPanel("mensajes","Mensajes","Sin nuevas","mensajes","Ver todos",msgsInner),
+        htmlInicioPanel("avisos","Notificaciones","Sin nuevas","avisos","Ver avisos",avisosInner),
+        htmlInicioPanel("solicitudes","Solicitudes","Sin pendientes","solicitudes","Gestionar",solInner),
         htmlInicioPanel("socios","Socios sugeridos","Para ti","buscar","Explorar",sociosInner)
       ].join("");
+      function pintarInicioMensajesPanel(conversaciones){
+        const panel=cont.querySelector("[data-inicio-panel=\"mensajes\"]");
+        if(!panel) return;
+        const slice=(conversaciones||[]).slice(0,3);
+        const unread=(conversaciones||[]).reduce(function(sum,c){ return sum+(Number(c.unread)||0); },0);
+        const countEl=panel.querySelector(".dash-inicio-panel__count");
+        if(countEl){
+          countEl.textContent=unread?(unread+" sin leer"):"Sin nuevas";
+        }
+        const body=panel.querySelector(".dash-inicio-panel__content");
+        if(!body) return;
+        body.innerHTML=slice.length?('<ul class="dash-inicio-feed">'+slice.map(function(c){
+          return '<li class="dash-inicio-feed__item">'+
+            '<img class="dash-inicio-feed__ava" src="'+textoSeguro(c.avatar||"")+'" alt="" decoding="async">'+
+            '<div class="dash-inicio-feed__body">'+
+              '<div class="dash-inicio-feed__row"><b>'+textoSeguro(c.nombre)+'</b><time>'+textoSeguro(c.hora)+'</time></div>'+
+              '<p>'+textoSeguro(c.ultimo)+'</p>'+
+            '</div>'+
+            (c.unread?('<span class="dash-inicio-feed__badge">'+c.unread+'</span>'):"")+
+          '</li>';
+        }).join("")+'</ul>'):'<p class="dash-inicio-empty">Sin mensajes nuevos</p>';
+      }
+      const usesMockMsgs=window.DashModuleNav&&DashModuleNav.usesMockMensajes&&DashModuleNav.usesMockMensajes();
+      if(usesMockMsgs){
+        const mockConv=(nav.MOCK_CONVERSACIONES||[]).filter(function(c){
+          return c.contextoTipo===filter.contextoTipo&&c.contextoId===filter.contextoId;
+        });
+        pintarInicioMensajesPanel(mockConv);
+      }else if(window.DashboardMessenger&&filter.contextoId&&auth.currentUser){
+        DashboardMessenger.listConversacionesUi(filter).then(function(convs){
+          pintarInicioMensajesPanel(convs);
+        }).catch(function(){
+          pintarInicioMensajesPanel([]);
+        });
+      }
+      if(window.DashAvisos&&filter.contextoId){
+        DashAvisos.listar(filter).then(function(avisos){
+          const slice=avisos.slice(0,3);
+          const unread=avisos.filter(function(a){ return !a.leido; }).length;
+          const panel=cont.querySelector("[data-inicio-panel=\"avisos\"]");
+          if(panel){
+            const countEl=panel.querySelector(".dash-inicio-panel__count");
+            if(countEl) countEl.textContent=unread?(unread+" nueva"+(unread>1?"s":"")):"Sin nuevas";
+            const body=panel.querySelector(".dash-inicio-panel__content");
+            if(body){
+              body.innerHTML=slice.length?('<ul class="dash-inicio-feed dash-inicio-feed--avisos">'+slice.map(function(a){
+                return '<li class="dash-inicio-feed__item dash-inicio-feed__item--compact">'+
+                  '<span class="dash-inicio-feed__dot dash-inicio-feed__dot--'+textoSeguro(a.tipo||"negocio")+'"></span>'+
+                  '<div class="dash-inicio-feed__body">'+
+                    '<div class="dash-inicio-feed__row"><b>'+textoSeguro(a.titulo)+'</b><time>'+textoSeguro(a.hora)+'</time></div>'+
+                    '<p>'+textoSeguro(a.texto)+'</p>'+
+                  '</div>'+
+                '</li>';
+              }).join("")+'</ul>'):'<p class="dash-inicio-empty">Sin avisos</p>';
+            }
+          }
+        });
+      }
+      if(window.DashSolicitudesNegocio&&filter.contextoId){
+        DashSolicitudesNegocio.listar(filter,"recibidas").then(function(res){
+          res=res||{ items:[], stats:{} };
+          const slice=(res.items||[]).slice(0,2);
+          const panel=cont.querySelector("[data-inicio-panel=\"solicitudes\"]");
+          if(panel){
+            const countEl=panel.querySelector(".dash-inicio-panel__count");
+            const pend=res.stats.recibidasPendientes||0;
+            if(countEl) countEl.textContent=pend?(pend+" pendiente"+(pend>1?"s":"")):"Sin pendientes";
+            const body=panel.querySelector(".dash-inicio-panel__content");
+            if(body){
+              body.innerHTML=slice.length?('<ul class="dash-inicio-feed">'+slice.map(function(s){
+                return '<li class="dash-inicio-feed__item">'+
+                  '<img class="dash-inicio-feed__ava" src="'+textoSeguro(s.contraparteImg||"")+'" alt="" decoding="async">'+
+                  '<div class="dash-inicio-feed__body">'+
+                    '<div class="dash-inicio-feed__row"><b>'+textoSeguro(s.contraparteNombre)+'</b><span class="dash-inicio-feed__tag">'+textoSeguro(s.tipoAristaLabel||"")+'</span></div>'+
+                    '<p>'+textoSeguro(s.contraparteCiudad||"")+' · '+textoSeguro(s.mensaje||"Solicitud pendiente").slice(0,72)+'</p>'+
+                  '</div>'+
+                '</li>';
+              }).join("")+'</ul>'):'<p class="dash-inicio-empty">Sin solicitudes pendientes</p>';
+            }
+          }
+        });
+      }
+      if(window.DashBuscar){
+        DashBuscar.sugerencias(3,{}).then(function(sugerencias){
+          const panel=cont.querySelector("[data-inicio-panel=\"socios\"]");
+          if(!panel) return;
+          const body=panel.querySelector(".dash-inicio-panel__content");
+          if(!body) return;
+          body.innerHTML=sugerencias.length?('<ul class="dash-inicio-feed">'+sugerencias.map(function(s){
+            return '<li class="dash-inicio-feed__item dash-inicio-feed__item--socio">'+
+              '<img class="dash-inicio-feed__ava dash-inicio-feed__ava--sq" src="'+textoSeguro(s.img||"")+'" alt="" decoding="async">'+
+              '<div class="dash-inicio-feed__body">'+
+                '<div class="dash-inicio-feed__row"><b>'+textoSeguro(s.nombre)+'</b>'+(s.verificado?'<span class="dash-inicio-feed__ok">✓</span>':"")+'</div>'+
+                '<p>'+textoSeguro(s.categoria)+' · '+textoSeguro(s.ciudad)+'</p>'+
+              '</div>'+
+              '<button type="button" class="dash-inicio-feed__cta" data-goto-module="buscar">Ver</button>'+
+            '</li>';
+          }).join("")+'</ul>'):'<p class="dash-inicio-empty">Explora el directorio</p>';
+          body.querySelectorAll("[data-goto-module]").forEach(function(btn){
+            btn.addEventListener("click",function(){
+              if(window.DashModuleNav) DashModuleNav.setModule(btn.getAttribute("data-goto-module"));
+            });
+          });
+        });
+      }
       cont.querySelectorAll("[data-goto-module]").forEach(function(btn){
         btn.addEventListener("click",function(){
           if(window.DashModuleNav) DashModuleNav.setModule(btn.getAttribute("data-goto-module"));
@@ -2032,20 +3361,35 @@
     }
 
     function pintarMedios(){
+      pintarContactosHeredaBar();
+      syncContactosGuardarBtn();
       const cont=document.getElementById("contactsGrid");
+      const soloLectura=contactosGridEsSoloLectura();
       if(cont){
-        cont.innerHTML=Object.entries(publicacionActual.contactos).map(([nombre,info])=>`
-          <div class="contact-row contact-row--editable" data-contact-label="${textoSeguro(nombre)}">
-            <div class="contact-row__head">
-              <b>${textoSeguro(nombre)}</b>
-              <label class="switch" aria-label="Activar ${textoSeguro(nombre)}">
-                <input type="checkbox" data-contact-activo="${textoSeguro(info.id)}" ${info.activo?"checked":""}>
-                <span></span>
-              </label>
+        cont.classList.toggle("contacts--readonly",soloLectura);
+        if(!publicacionActual||publicacionActual.tipo!=="perfil"){
+          cont.innerHTML='<p class="dash-hint dash-hint--compact">Selecciona un perfil en la columna izquierda para editar contactos.</p>';
+        }else{
+          let contactosMap=publicacionActual.contactos||{};
+          if(contactoEditScope==="cuenta"&&window.DashContactosCuenta){
+            contactosMap=normalizarContactosPerfil({
+              contactoPublico:DashContactosCuenta.getCuentaContacto(),
+              telefono:DashContactosCuenta.getCuentaContacto().whatsapp||""
+            });
+          }
+          cont.innerHTML=Object.entries(contactosMap).map(([nombre,info])=>`
+            <div class="contact-row contact-row--editable" data-contact-label="${textoSeguro(nombre)}">
+              <div class="contact-row__head">
+                <b>${textoSeguro(nombre)}</b>
+                <label class="switch" aria-label="Activar ${textoSeguro(nombre)}">
+                  <input type="checkbox" data-contact-activo="${textoSeguro(info.id)}" ${info.activo?"checked":""} ${soloLectura?"disabled":""}>
+                  <span></span>
+                </label>
+              </div>
+              <input class="contact-input" type="text" data-contact-valor="${textoSeguro(info.id)}" value="${textoSeguro(info.valor||"")}" placeholder="${textoSeguro(info.placeholder||"")}" ${info.soloActivo||soloLectura?"readonly":""}>
             </div>
-            <input class="contact-input" type="text" data-contact-valor="${textoSeguro(info.id)}" value="${textoSeguro(info.valor||"")}" placeholder="${textoSeguro(info.placeholder||"")}" ${info.soloActivo?"readonly":""}>
-          </div>
-        `).join("");
+          `).join("");
+        }
       }
       pintarRightContactos();
     }
@@ -2068,19 +3412,53 @@
       });
     }
 
+    function getContactoPublicoEditable(){
+      const pub=asegurarPublicacionActual();
+      if(!pub||pub.tipo!=="perfil"||!window.DashContactosCuenta) return { scope:"none", cp:{} };
+      const hereda=perfilHeredaContactoCuenta(pub);
+      if(hereda&&contactoEditScope==="cuenta"){
+        return { scope:"cuenta", cp:Object.assign({},DashContactosCuenta.getCuentaContacto()) };
+      }
+      if(!hereda){
+        return { scope:"perfil", cp:Object.assign({},pub.contactoPublicoOverride||pub.contactoPublico||{}) };
+      }
+      return { scope:"hereda", cp:Object.assign({},pub.contactoPublico||{}) };
+    }
+
+    function aplicarContactoPublicoEditable(cp,scope){
+      const pub=asegurarPublicacionActual();
+      if(!pub||pub.tipo!=="perfil") return;
+      cp=cp||{};
+      if(scope==="cuenta"){
+        DashContactosCuenta.setCuentaContactoLocal(cp);
+        refrescarContactosTodosPerfiles();
+        return;
+      }
+      pub.contactoPublicoOverride=Object.assign({},cp);
+      pub.contactoPublico=Object.assign({},cp);
+      pub._raw=Object.assign({},pub._raw||{},{
+        contactoPublico:cp,
+        contactoHeredaCuenta:false
+      });
+      pub.contactoHeredaCuenta=false;
+      aplicarContactoResuelto(pub);
+    }
+
     function toggleRightContacto(id,activo){
+      if(contactosGridEsSoloLectura()){
+        contactoEditScope="cuenta";
+      }
       const meta=MEDIOS_CONTACTO.find(function(m){return m.id===id;});
       const pub=asegurarPublicacionActual();
       if(!meta||!pub) return;
-      const cp=Object.assign({},pub.contactoPublico||{});
+      if(!window.DashContactosCuenta) return;
+      const edit=getContactoPublicoEditable();
+      const cp=Object.assign({},edit.cp||{});
       cp[meta.activoKey]=activo;
       if(meta.soloActivo&&!cp[meta.id]) cp[meta.id]=meta.placeholder;
       if(!activo&&meta.soloActivo) cp[meta.activoKey]=false;
-      pub.contactoPublico=cp;
-      pub.contactos=normalizarContactosPerfil(Object.assign({},pub._raw||{},{
-        contactoPublico:cp,
-        telefono:cp.whatsapp||cp.telefono||""
-      }));
+      if(!activo&&!meta.soloActivo) cp[meta.activoKey]=false;
+      aplicarContactoPublicoEditable(cp,edit.scope==="hereda"?"perfil":edit.scope);
       pintarMedios();
       pintarVistaPreviaPerfil();
     }
@@ -2091,7 +3469,16 @@
       const hint=document.getElementById("dashRcEditHint");
       const input=document.getElementById("dashRcEditInput");
       if(!meta||!input) return;
-      const info=pub&&pub.contactos?pub.contactos[meta.label]:null;
+      let info=pub&&pub.contactos?pub.contactos[meta.label]:null;
+      const edit=getContactoPublicoEditable();
+      if(edit.scope==="cuenta"&&window.DashContactosCuenta){
+        const cpMap=normalizarContactosPerfil({
+          contactoPublico:edit.cp,
+          telefono:edit.cp.whatsapp||""
+        });
+        const cuentaInfo=cpMap[meta.label];
+        if(cuentaInfo) info=cuentaInfo;
+      }
       if(hint) hint.textContent=meta.placeholder||"Escribe el dato que verán en tu perfil público.";
       input.placeholder=meta.placeholder||"";
       input.value=(rcEditModo==="edit"&&info)?(info.valor||""):"";
@@ -2154,8 +3541,12 @@
       const pub=asegurarPublicacionActual();
       const input=document.getElementById("dashRcEditInput");
       if(!meta||!pub||!input) return;
+      if(contactosGridEsSoloLectura()){
+        contactoEditScope="cuenta";
+      }
       const val=input.value.trim();
-      const cp=Object.assign({},pub.contactoPublico||{});
+      const edit=getContactoPublicoEditable();
+      const cp=Object.assign({},edit.cp||{});
       if(meta.soloActivo){
         cp[meta.activoKey]=!!val;
         if(val) cp[meta.id]=val;
@@ -2163,17 +3554,17 @@
         cp[meta.id]=val;
         cp[meta.activoKey]=!!val;
       }
-      pub.contactoPublico=cp;
-      pub.contactos=normalizarContactosPerfil(Object.assign({},pub._raw||{},{
-        contactoPublico:cp,
-        telefono:cp.whatsapp||cp.telefono||""
-      }));
+      aplicarContactoPublicoEditable(cp,edit.scope==="hereda"?"perfil":edit.scope);
       cerrarModalEditContacto();
       pintarMedios();
       pintarVistaPreviaPerfil();
     }
 
     function editarRightContacto(id){
+      if(contactosGridEsSoloLectura()){
+        contactoEditScope="cuenta";
+        pintarMedios();
+      }
       abrirModalEditContacto(id);
     }
 
@@ -2269,26 +3660,66 @@
 
     async function guardarContactosDashboard(){
       const user=auth.currentUser;
+      if(!publicacionActual||publicacionActual.tipo!=="perfil"){
+        alert("Selecciona un perfil en la columna izquierda.");
+        return;
+      }
+      const hereda=perfilHeredaContactoCuenta(publicacionActual);
+      if(hereda&&contactoEditScope!=="cuenta"){
+        contactoEditScope="cuenta";
+        pintarMedios();
+        return;
+      }
       const cp=leerContactosDesdeFormulario();
-      publicacionActual.contactoPublico=cp;
-      publicacionActual.contactos=normalizarContactosPerfil(Object.assign({},publicacionActual._raw||{},{
-        contactoPublico:cp,
-        telefono:cp.whatsapp||cp.telefono||""
-      }));
-      if(user&&publicacionActual.origen==="usuarios"){
-        try{
-          await db.collection("usuarios").doc(user.uid).update({
+      const perfilId=publicacionActual.perfilId||publicacionActual.id;
+      const btn=document.getElementById("btnGuardarContactos");
+      if(btn) btn.disabled=true;
+      try{
+        if(hereda&&contactoEditScope==="cuenta"){
+          await DashContactosCuenta.guardarCuenta(cp);
+          dashHubDoc=Object.assign({},dashHubDoc||{},{ contactoPublico:cp });
+          refrescarContactosTodosPerfiles();
+          contactoEditScope=null;
+          alert(user&&!isPreviewMode()
+            ? "Contactos de cuenta guardados. Se aplican a los perfiles que heredan."
+            : "Contactos de cuenta actualizados en esta vista.");
+        }else{
+          publicacionActual.contactoPublicoOverride=Object.assign({},cp);
+          publicacionActual.contactoHeredaCuenta=false;
+          publicacionActual._raw=Object.assign({},publicacionActual._raw||{},{
             contactoPublico:cp,
-            telefono:cp.whatsapp||cp.telefono||"",
-            estadoRevision:"actualizacion_pendiente",
-            actualizacionPendiente:true
+            contactoHeredaCuenta:false
           });
-          alert("Contactos guardados. Los cambios quedan pendientes de revisión.");
-        }catch(e){
-          alert("No se pudieron guardar los contactos: "+(e.message||e));
+          aplicarContactoResuelto(publicacionActual);
+          const idx=publicacionesReales.findIndex(function(p){ return p.id===publicacionActual.id; });
+          if(idx>=0) publicacionesReales[idx]=publicacionActual;
+          if(user&&publicacionActual.origen==="usuarios"&&!isPreviewMode()){
+            const hubSnap=await db.collection("usuarios").doc(user.uid).get();
+            const hub=hubSnap.exists?(hubSnap.data()||{}):{};
+            const detalle=hub.perfilesDetalle;
+            if(detalle&&typeof detalle==="object"&&detalle[perfilId]){
+              await DashContactosCuenta.guardarPerfilOverride(perfilId,{
+                contactoHeredaCuenta:false,
+                contactoPublico:cp
+              });
+            }else{
+              await db.collection("usuarios").doc(user.uid).update({
+                contactoPublico:cp,
+                contactoHeredaCuenta:false,
+                telefono:cp.whatsapp||cp.telefono||"",
+                estadoRevision:"actualizacion_pendiente",
+                actualizacionPendiente:true
+              });
+            }
+            alert("Contactos de este perfil guardados. Los mensajes internos siguen separados por perfil.");
+          }else{
+            alert("Contactos de este perfil actualizados en esta vista.");
+          }
         }
-      }else{
-        alert("Contactos actualizados en esta vista.");
+      }catch(e){
+        alert("No se pudieron guardar los contactos: "+(e.message||e));
+      }finally{
+        if(btn) btn.disabled=false;
       }
       pintarMedios();
       pintarVistaPreviaPerfil();
@@ -2361,25 +3792,47 @@
     }
     window.refrescarVistaPerfilModulo=refrescarVistaPerfilModulo;
 
-    function pintarMisEstados(){
-      const html=MOCK_ESTADOS_PROPIOS.map(function(item){
-        return '<div class="dash-estado-chip"><img src="'+item.img+'" alt=""><div><b>'+
+    async function pintarMisEstados(){
+      const ctx=getDashboardPublicacionesContext();
+      const user=auth.currentUser;
+      const preview=new URLSearchParams(location.search).get("preview")==="1";
+      let chips=[];
+      if(user&&ctx.perfilId&&window.DashPublicaciones){
+        try{
+          let items=DashPublicaciones.getCached(ctx.cuentaUid,ctx.perfilId);
+          if(!items.length) items=await DashPublicaciones.listar(ctx.cuentaUid,ctx.perfilId);
+          chips=DashPublicaciones.filtrarTab("estados",items)
+            .filter(function(p){ return p.estado==="activo"||p.estado==="programado"; })
+            .slice(0,8)
+            .map(function(item){
+              return {
+                tipo:item.tipo==="live"?"live":"anuncio",
+                titulo:item.titulo,
+                cuando:item.fecha,
+                img:item.imgUrl||publicacionActual?.mediaPrincipal?.url||"img/home/banners/ad-banner-pink-02.png"
+              };
+            });
+        }catch(e){}
+      }
+      if(!chips.length&&preview){
+        chips=MOCK_ESTADOS_PROPIOS.slice();
+      }
+      const html=chips.map(function(item){
+        return '<div class="dash-estado-chip"><img src="'+textoSeguro(item.img)+'" alt=""><div><b>'+
           textoSeguro(item.titulo)+'</b><p>'+textoSeguro(item.tipo==="live"?"Live · ":"Anuncio · ")+
           textoSeguro(item.cuando)+'</p></div></div>';
       }).join("")+'<button type="button" class="dash-estado-add" id="btnAddEstado" title="Agregar estado">+</button>';
-      ["dashMisEstados","dashMisEstadosEstados","estadosMiosRow"].forEach(function(id){
-        const cont=document.getElementById(id);
-        if(cont) cont.innerHTML=html;
-      });
+      const cont=document.getElementById("estadosMiosRow");
+      if(cont) cont.innerHTML=html;
       document.getElementById("btnAddEstado")?.addEventListener("click",function(){
         if(window.DashModuleNav) DashModuleNav.setModule("anunciar");
       });
-      pintarRightColumnSlots();
+      await pintarRightColumnSlots();
       if(window.DashModuleNav) DashModuleNav.renderEstadosSocios();
     }
 
-    function pintarRightColumnSlots(){
-      const an=MOCK_ANUNCIO_ACTIVO;
+    async function pintarRightColumnSlots(){
+      const an=await resolveAnuncioActivoPerfil();
       const setTxt=function(id,val){const el=document.getElementById(id);if(el)el.textContent=val;};
       const setHtml=function(id,val){const el=document.getElementById(id);if(el)el.innerHTML=val;};
       const thumbAn=document.getElementById("rightAnuncioThumb");
@@ -2387,15 +3840,15 @@
       const nombreEl=document.getElementById("rightAnuncioNombre");
       if(an&&an.activo){
         if(thumbAn) thumbAn.src=an.img||publicacionActual.mediaPrincipal?.url||thumbAn.src;
-        const nombre=an.nombre||an.titulo||"Anuncio activo";
+        const nombre=an.nombre||an.titulo||"Anuncio publicado";
         if(nombreEl){
           nombreEl.textContent=nombre;
           nombreEl.title=nombre;
         }
         setTxt("rightAnuncioHora",an.hora||an.cuando||"Recién publicado");
-        if(pillAn){pillAn.textContent="ON";pillAn.hidden=false;}
+        if(pillAn){pillAn.textContent="PUB";pillAn.hidden=false;}
       }else{
-        if(nombreEl){nombreEl.textContent="Sin anuncio activo";nombreEl.title="";}
+        if(nombreEl){nombreEl.textContent="Sin anuncio publicado";nombreEl.title="";}
         setTxt("rightAnuncioHora","Anuncia para perfil y resultados");
         if(pillAn) pillAn.hidden=true;
       }
@@ -2412,11 +3865,11 @@
         return p.fecha||"";
       };
       if(liveNow){
-        const nombre=liveNow.nombre||liveNow.tema||"Transmisión en vivo";
+        const nombre=liveNow.nombre||liveNow.tema||"Promo en vivo";
         if(nombreLiveEl){nombreLiveEl.textContent=nombre;nombreLiveEl.title=nombre;}
-        setTxt("rightLiveHora","En curso · "+(liveNow.espectadores||0)+" viendo");
+        setTxt("rightLiveHora","Promo en vivo programada");
         if(thumbLive) thumbLive.src=liveNow.img||prox?.img||thumbLive.src;
-        if(pillLive){pillLive.textContent="LIVE";pillLive.className="dash-right-slot__pill dash-right-slot__pill--live";pillLive.hidden=false;}
+        if(pillLive){pillLive.textContent="PROMO";pillLive.className="dash-right-slot__pill dash-right-slot__pill--live";pillLive.hidden=false;}
         if(btnProg) btnProg.hidden=true;
       }else if(prox){
         const nombre=prox.nombre||prox.tema||"Próximo en vivo";
@@ -2434,19 +3887,6 @@
       if(window.lucide&&typeof window.lucide.createIcons==="function"){
         window.lucide.createIcons();
       }
-    }
-
-    function pintarRedFeed(){
-      const cont=document.getElementById("dashRedFeed");
-      if(!cont) return;
-      cont.innerHTML=MOCK_RED_FEED.map(function(item){
-        const acciones=item.tipo==="solicitud"
-          ?'<div class="feed-actions"><button type="button">Aceptar</button><button type="button">Rechazar</button><button type="button">Ver perfil</button></div>'
-          :'<div class="feed-actions"><button type="button">Ver '+textoSeguro(item.tipo)+'</button><button type="button">Enviar solicitud</button></div>';
-        return '<article class="dash-feed-card"><img src="'+item.img+'" alt=""><div><b>'+
-          textoSeguro(item.nombre)+' · '+textoSeguro(item.categoria)+'</b><p>'+textoSeguro(item.texto)+
-          '</p><p>'+textoSeguro(item.ciudad)+'</p>'+acciones+'</div></article>';
-      }).join("");
     }
 
     function abrirPerfilGrande(){
@@ -2487,6 +3927,57 @@
       });
     }
 
+    function programarLiveDesdeDashboard(noticeId){
+      noticeId=noticeId||"liveStudioFeedback";
+      if(!window.DashSolicitudesContenido) return Promise.resolve();
+      const tituloInput=document.getElementById("liveTituloInput");
+      const fechaInput=document.getElementById("liveProgramaFecha");
+      const horaInput=document.getElementById("liveProgramaHora");
+      const titulo=(tituloInput&&tituloInput.value.trim())||MOCK_LIVE_PROXIMO.nombre||"Próximo live";
+      const fechaStr=fechaInput&&fechaInput.value;
+      const horaStr=horaInput&&horaInput.value;
+      if(!fechaStr||!horaStr){
+        if(window.DashSolicitudesContenido){
+          DashSolicitudesContenido.showNotice(noticeId,"Indica fecha y hora para programar el live.","error");
+        }
+        return Promise.resolve();
+      }
+      const ctx=window.DashSolicitudesContenido
+        ? DashSolicitudesContenido.resolvePerfilContext()
+        : getDashboardPublicacionesContext();
+      if(!ctx.perfilId){
+        if(window.DashSolicitudesContenido){
+          DashSolicitudesContenido.showNotice(noticeId,"Selecciona un perfil para programar.","error");
+        }
+        return Promise.resolve();
+      }
+      const programadoPara=new Date(fechaStr+"T"+horaStr);
+      if(isNaN(programadoPara.getTime())){
+        if(window.DashSolicitudesContenido){
+          DashSolicitudesContenido.showNotice(noticeId,"Fecha u hora no válida.","error");
+        }
+        return Promise.resolve();
+      }
+      const tsVal=firebase.firestore.Timestamp.fromDate(programadoPara);
+      return window.DashSolicitudesContenido.crearLiveProgramado({
+        cuentaUid:ctx.cuentaUid,
+        perfilId:ctx.perfilId,
+        titulo:titulo,
+        programadoPara:auth.currentUser?tsVal:programadoPara
+      }).then(function(){
+        DashSolicitudesContenido.showNotice(
+          noticeId,
+          auth.currentUser
+            ? "Live programado. La solicitud está en revisión; visitantes verán «Recordar» tras aprobación."
+            : "Live programado en preview: "+programadoPara.toLocaleString("es-MX"),
+          "ok"
+        );
+        if(typeof pintarRightColumnSlots==="function") pintarRightColumnSlots();
+      }).catch(function(e){
+        DashSolicitudesContenido.showNotice(noticeId,"No se pudo programar: "+(e.message||e),"error");
+      });
+    }
+
     function inicializarStudios(){
       const fileInput=document.getElementById("anuncioFileInput");
       const previewImg=document.getElementById("anuncioPreviewImg");
@@ -2519,30 +4010,206 @@
         });
       }
       const btnConfirmar=document.getElementById("btnConfirmarAnuncio");
-      if(btnConfirmar) btnConfirmar.addEventListener("click",function(){
+      if(btnConfirmar) btnConfirmar.addEventListener("click",async function(){
         const nombre=(nombreInput&&nombreInput.value.trim())||"Anuncio sin nombre";
-        MOCK_ANUNCIO_ACTIVO.activo=true;
-        MOCK_ANUNCIO_ACTIVO.nombre=nombre;
-        MOCK_ANUNCIO_ACTIVO.hora="Recién publicado";
-        if(previewImg&&!previewImg.hidden) MOCK_ANUNCIO_ACTIVO.img=previewImg.src;
-        pintarRightColumnSlots();
-        alert("Anuncio publicado (mock). Aparecerá en perfil, resultados y dashboards de socios en la siguiente fase.");
+        const user=auth.currentUser;
+        const ctx=window.DashSolicitudesContenido
+          ? DashSolicitudesContenido.resolvePerfilContext()
+          : getDashboardPublicacionesContext();
+        const btn=btnConfirmar;
+        const noticeId="anuncioStudioFeedback";
+        if(btn) btn.disabled=true;
+        if(window.DashSolicitudesContenido) DashSolicitudesContenido.showNotice(noticeId,"","ok");
+        try{
+          if(!ctx.perfilId){
+            if(window.DashSolicitudesContenido){
+              DashSolicitudesContenido.showNotice(noticeId,"Selecciona un perfil en la columna izquierda.","error");
+            }
+            return;
+          }
+          const file=fileInput&&fileInput.files&&fileInput.files[0];
+          let imgUrl="";
+          if(file&&user&&window.DashPublicaciones){
+            imgUrl=await DashPublicaciones.subirImagen(user.uid,file);
+          }else if(previewImg&&!previewImg.hidden&&!String(previewImg.src).startsWith("blob:")){
+            imgUrl=previewImg.src;
+          }
+          const pub=publicacionActual&&publicacionActual.tipo==="perfil"?publicacionActual:null;
+          if(window.DashSolicitudesContenido){
+            await DashSolicitudesContenido.crearEstadoPerfil({
+              cuentaUid:ctx.cuentaUid,
+              perfilId:ctx.perfilId,
+              titulo:nombre,
+              file:file&&!imgUrl?file:null,
+              imagenURL:imgUrl,
+              nombrePublico:pub&&pub.nombrePublico,
+              categoria:pub&&pub.categoria,
+              ciudad:pub&&pub.ciudad
+            });
+          }
+          if(user&&ctx.perfilId&&ctx.cuentaUid&&window.DashPublicaciones){
+            await DashPublicaciones.crear({
+              cuentaUid:ctx.cuentaUid,
+              perfilId:ctx.perfilId,
+              tipo:"estado",
+              titulo:nombre,
+              estado:"activo",
+              imgUrl:imgUrl
+            });
+            if(typeof refrescarPublicacionesDashboard==="function") refrescarPublicacionesDashboard();
+          }
+          if(window.DashSolicitudesContenido){
+            DashSolicitudesContenido.showNotice(
+              noticeId,
+              user
+                ? "Solicitud enviada a revisión. Aparece en Mis publicaciones mientras administración aprueba."
+                : "Anuncio guardado en vista previa (sin sesión).",
+              "ok"
+            );
+          }
+          if(window.DashModuleNav&&user) DashModuleNav.setModule("publicaciones");
+          if(!user){
+            MOCK_ANUNCIO_ACTIVO.activo=true;
+            MOCK_ANUNCIO_ACTIVO.nombre=nombre;
+            MOCK_ANUNCIO_ACTIVO.hora="Recién publicado";
+            if(previewImg&&!previewImg.hidden) MOCK_ANUNCIO_ACTIVO.img=previewImg.src;
+            await pintarRightColumnSlots();
+          }
+        }catch(e){
+          if(window.DashSolicitudesContenido){
+            DashSolicitudesContenido.showNotice(noticeId,"No se pudo publicar: "+(e.message||e),"error");
+          }
+        }finally{
+          if(btn) btn.disabled=false;
+        }
       });
       const btnIniciar=document.getElementById("btnIniciarTransmision");
-      if(btnIniciar) btnIniciar.addEventListener("click",function(){
+      if(btnIniciar) btnIniciar.addEventListener("click",async function(){
+        const tituloInput=document.getElementById("liveTituloInput");
+        const titulo=(tituloInput&&tituloInput.value.trim())||"Transmisión en vivo";
+        const ctx=window.DashSolicitudesContenido
+          ? DashSolicitudesContenido.resolvePerfilContext()
+          : getDashboardPublicacionesContext();
+        const noticeId="liveStudioFeedback";
+        if(!ctx.perfilId){
+          if(window.DashSolicitudesContenido){
+            DashSolicitudesContenido.showNotice(noticeId,"Selecciona un perfil para transmitir.","error");
+          }
+          return;
+        }
+        btnIniciar.disabled=true;
         iniciarCamaraLive();
-        alert("Transmisión iniciada (mock). Socios recibirán aviso en la siguiente fase.");
+        try{
+          if(window.DashSolicitudesContenido){
+            await DashSolicitudesContenido.crearLiveActivo({
+              cuentaUid:ctx.cuentaUid,
+              perfilId:ctx.perfilId,
+              titulo:titulo
+            });
+            DashSolicitudesContenido.showNotice(
+              noticeId,
+              auth.currentUser
+                ? "Solicitud de live enviada. La transmisión queda pendiente de revisión administrativa."
+                : "Live iniciado en preview local. Socios verán aviso en la siguiente fase.",
+              "ok"
+            );
+          }
+          if(typeof pintarRightColumnSlots==="function") pintarRightColumnSlots();
+        }catch(e){
+          if(window.DashSolicitudesContenido){
+            DashSolicitudesContenido.showNotice(noticeId,"No se pudo registrar el live: "+(e.message||e),"error");
+          }
+        }finally{
+          btnIniciar.disabled=false;
+        }
       });
       const btnProgDesdeLive=document.getElementById("btnProgramarDesdeLive");
-      if(btnProgDesdeLive) btnProgDesdeLive.addEventListener("click",function(){
-        const prox=MOCK_LIVE_PROXIMO;
-        alert("Programar en vivo: fecha, hora y tema. Visitantes verán Recordar en tu perfil.\n\nMock: "+
-          (prox?(prox.nombre||prox.tema)+" · "+(prox.dia&&prox.hora?prox.dia+" "+prox.hora:prox.fecha||""):"sin programación"));
+      if(btnProgDesdeLive) btnProgDesdeLive.addEventListener("click",async function(){
+        await programarLiveDesdeDashboard("liveStudioFeedback");
       });
       document.addEventListener("dash:module-change",function(e){
         const mod=e.detail&&e.detail.module;
         if(mod==="transmitir-live") iniciarCamaraLive();
         else detenerCamaraLive();
+      });
+
+      const chatLock=document.getElementById("chatBannerLock");
+      if(chatLock&&!chatLock.dataset.bound){
+        chatLock.dataset.bound="1";
+        chatLock.querySelectorAll("[data-goto-module]").forEach(function(btn){
+          btn.addEventListener("click",function(){
+            if(window.DashModuleNav) DashModuleNav.setModule(btn.getAttribute("data-goto-module"));
+          });
+        });
+      }
+
+      const msgFileInput=document.getElementById("msgAnuncioFileInput");
+      const msgPreviewImg=document.getElementById("msgAnuncioPreviewImg");
+      const msgPreviewEmpty=document.getElementById("msgAnuncioPreviewEmpty");
+      const msgTituloInput=document.getElementById("msgAnuncioTituloInput");
+      const msgSubtituloInput=document.getElementById("msgAnuncioSubtituloInput");
+      const msgFiltros=document.getElementById("msgAnuncioFiltros");
+      const aplicarFiltroMsg=function(f){
+        if(!msgPreviewImg||msgPreviewImg.hidden) return;
+        msgPreviewImg.className="dash-studio__img dash-studio__img--"+f;
+      };
+      if(msgFileInput&&msgPreviewImg){
+        msgFileInput.addEventListener("change",function(){
+          const file=msgFileInput.files&&msgFileInput.files[0];
+          if(!file) return;
+          msgPreviewImg.src=URL.createObjectURL(file);
+          msgPreviewImg.hidden=false;
+          if(msgPreviewEmpty) msgPreviewEmpty.hidden=true;
+          const onFilter=document.querySelector("#msgAnuncioFiltros .dash-studio__filter.on");
+          aplicarFiltroMsg(onFilter?onFilter.dataset.filter:"normal");
+        });
+      }
+      if(msgFiltros){
+        msgFiltros.querySelectorAll(".dash-studio__filter").forEach(function(btn){
+          btn.addEventListener("click",function(){
+            msgFiltros.querySelectorAll(".dash-studio__filter").forEach(function(b){b.classList.remove("on");});
+            btn.classList.add("on");
+            aplicarFiltroMsg(btn.dataset.filter||"normal");
+          });
+        });
+      }
+      const btnConfirmarMsg=document.getElementById("btnConfirmarAnuncioMensajes");
+      if(btnConfirmarMsg) btnConfirmarMsg.addEventListener("click",async function(){
+        const titulo=(msgTituloInput&&msgTituloInput.value.trim())||"Promo en mensajes";
+        const subtitulo=(msgSubtituloInput&&msgSubtituloInput.value.trim())||"";
+        const user=auth.currentUser;
+        const ctx=getDashboardAnunciosMensajesContext();
+        const btn=btnConfirmarMsg;
+        if(btn) btn.disabled=true;
+        try{
+          let imgUrl="";
+          const file=msgFileInput&&msgFileInput.files&&msgFileInput.files[0];
+          if(file&&user&&window.DashPublicaciones){
+            imgUrl=await DashPublicaciones.subirImagen(user.uid,file);
+          }else if(msgPreviewImg&&!msgPreviewImg.hidden&&!String(msgPreviewImg.src).startsWith("blob:")){
+            imgUrl=msgPreviewImg.src;
+          }
+          if(!ctx.contextoId){
+            alert("Selecciona un perfil o banner en la columna izquierda.");
+            return;
+          }
+          if(window.DashAnunciosMensajes){
+            await DashAnunciosMensajes.crear({
+              contextoTipo:ctx.contextoTipo,
+              contextoId:ctx.contextoId,
+              titulo:titulo,
+              subtitulo:subtitulo,
+              imgUrl:imgUrl
+            });
+            if(window.DashModuleNav) DashModuleNav.setModule("anuncios-mensajes");
+            if(typeof refrescarAnunciosMensajes==="function") refrescarAnunciosMensajes();
+            alert("Anuncio publicado en canal Mensajes. Solo aparece en el strip de Mensajes, no en tu perfil público.");
+          }
+        }catch(e){
+          alert("No se pudo publicar en mensajes: "+(e.message||e));
+        }finally{
+          if(btn) btn.disabled=false;
+        }
       });
     }
 
@@ -2569,23 +4236,34 @@
       if(btnVerResultados) btnVerResultados.addEventListener("click",function(){goMod("tarjeta");});
       if(btnVerRes) btnVerRes.addEventListener("click",function(){window.open("resultados.html","_blank");});
       if(btnGuardar) btnGuardar.addEventListener("click",guardarContactosDashboard);
-      if(btnEditar) btnEditar.addEventListener("click",function(){window.location.href="registro-perfil.html";});
+      if(btnEditar) btnEditar.addEventListener("click",function(){ goMod("info-publica"); });
       if(btnEditarMod) btnEditarMod.addEventListener("click",function(){window.location.href="registro-perfil.html";});
+      const btnBannerMsg=document.getElementById("btnDashBannerMensajes");
+      const btnBannerMet=document.getElementById("btnDashBannerMetricas");
+      if(btnBannerMsg) btnBannerMsg.addEventListener("click",function(){
+        const ctx=getDashContext();
+        if(ctx.tipo==="banner"&&ctx.id&&window.DashContext){
+          DashContext.set({ tipo:"banner", id:ctx.id, bannerId:ctx.id });
+        }
+        goMod("mensajes");
+      });
+      if(btnBannerMet) btnBannerMet.addEventListener("click",function(){
+        const ctx=getDashContext();
+        if(ctx.id&&window.DashBannerMetrics) DashBannerMetrics.openSheet(ctx.bannerId||ctx.id);
+      });
       if(btnVistaGrande) btnVistaGrande.addEventListener("click",abrirPerfilGrande);
       if(btnVistaEditar) btnVistaEditar.addEventListener("click",function(){window.location.href="registro-perfil.html";});
-      if(btnGuardarInfo) btnGuardarInfo.addEventListener("click",function(){
-        alert("Cambios guardados en vista (conexión Firebase en fase posterior).");
-        pintarVistaPreviaPerfil();
-      });
+      if(btnGuardarInfo) btnGuardarInfo.addEventListener("click",guardarInfoPublicaDashboard);
+      const btnCancelarInfo=document.getElementById("btnCancelarInfo");
+      if(btnCancelarInfo) btnCancelarInfo.addEventListener("click",function(){ pintarInformacion(); });
       if(btnEstado) btnEstado.addEventListener("click",function(){ goMod("anunciar"); });
       if(btnLive) btnLive.addEventListener("click",function(){ goMod("transmitir-live"); });
       if(btnLiveMod) btnLiveMod.addEventListener("click",function(){ goMod("transmitir-live"); });
       if(btnSoporte) btnSoporte.addEventListener("click",function(){ alert("Soporte: escribe a administración desde tu correo de registro."); });
       const btnProgLive=document.getElementById("btnRightProgramarLive");
       if(btnProgLive) btnProgLive.addEventListener("click",function(){
-        const prox=MOCK_LIVE_PROXIMO;
-        alert("Programar en vivo: elige fecha, hora y nombre. Tus socios y visitantes verán la programación en tu perfil y recibirán aviso (próxima fase).\n\nPróximo mock: "+
-          (prox?(prox.nombre||prox.tema)+" · "+(prox.dia&&prox.hora?prox.dia+" "+prox.hora:prox.fecha||""):"sin programación"));
+        if(window.DashModuleNav) DashModuleNav.setModule("transmitir-live");
+        programarLiveDesdeDashboard("liveStudioFeedback");
       });
     }
 
@@ -2602,7 +4280,7 @@
           if(accion==="config") alert("Configuración de cuenta: correo, contraseña y datos de acceso.");
           else if(accion==="apariencia") document.getElementById("themePicker").classList.toggle("open");
           else if(accion==="notificaciones") { if(window.DashModuleNav) DashModuleNav.setModule("mensajes"); }
-          else if(accion==="privacidad") alert("Privacidad: controla qué datos son públicos y quién puede contactarte.");
+          else if(accion==="privacidad") { if(window.DashModuleNav) DashModuleNav.setModule("privacidad-mensajes"); }
           else if(accion==="pagos") alert("Pagos y planes: renovación, mes gratis y contratos.");
         });
       });
@@ -2631,8 +4309,12 @@
     }
 
     function renderDashboard(){
-      pintarPublicaciones();
-      pintarBannersSide();
+      syncAccountCapabilities();
+      syncActivosRail();
+      refreshDashUnreadRail();
+      refreshDashAvisosRail();
+      refreshDashSolicitudesRail();
+      updateBannerMensajesNavState();
       pintarMetricas();
       pintarCabeceraCuenta();
       pintarVistaPreviaPerfil();
@@ -2646,6 +4328,7 @@
         DashModuleNav.renderLivesSocios();
         DashModuleNav.renderAvisos();
         DashModuleNav.renderFavoritos();
+        DashModuleNav.renderPublicacionesAdmin();
       }
     }
 
@@ -2673,12 +4356,28 @@
         window.dispatchEvent(new Event("resize"));
       }
       btnAmp.addEventListener("click",function(){
+        if(window.DashModuleNav&&typeof DashModuleNav.getActive==="function"&&DashModuleNav.getActive()==="mensajes"&&typeof DashModuleNav.setMensajesExpanded==="function"){
+          DashModuleNav.setMensajesExpanded(true);
+          btnAmp.classList.add("hidden");
+          btnCol.classList.remove("hidden");
+          return;
+        }
         shell.classList.add("center-expanded");
         btnAmp.classList.add("hidden");
         btnCol.classList.remove("hidden");
         reflowPreview();
       });
       btnCol.addEventListener("click",function(){
+        if(window.DashModuleNav&&typeof DashModuleNav.isMensajesExpanded==="function"&&DashModuleNav.isMensajesExpanded()){
+          DashModuleNav.setMensajesExpanded(false);
+          btnCol.classList.add("hidden");
+          btnAmp.classList.remove("hidden");
+          reflowPreview();
+          return;
+        }
+        if(window.DashModuleNav&&typeof DashModuleNav.setMensajesExpanded==="function"){
+          DashModuleNav.setMensajesExpanded(false);
+        }
         shell.classList.remove("center-expanded");
         btnCol.classList.add("hidden");
         btnAmp.classList.remove("hidden");
@@ -2719,6 +4418,63 @@
       pintarRightContactosFallback();
       inicializarMenu();
       inicializarTemas();
+      if(window.DashActivosRail){
+        DashActivosRail.init({ onSelect:onActivosRailSelect });
+      }
+      if(window.DashContext){
+        document.addEventListener(DashContext.EVENT,function(ev){
+          const ctx=ev.detail&&ev.detail.context;
+          const mod=window.DashModuleNav?DashModuleNav.getActive():null;
+          if(mod==="mensajes"){
+            applyDashContext(ctx,{ light:true, skipFirestore:true });
+            if(window.DashModuleNav){
+              DashModuleNav.syncMensajesFromContext();
+              DashModuleNav.renderMensajes();
+            }
+            syncActivosRail();
+            return;
+          }
+          if(mod==="avisos"&&window.DashModuleNav){
+            applyDashContext(ctx,{ light:true, skipFirestore:true });
+            DashModuleNav.renderAvisos();
+            syncActivosRail();
+            return;
+          }
+          if(mod==="solicitudes"&&window.DashModuleNav){
+            applyDashContext(ctx,{ light:true, skipFirestore:true });
+            DashModuleNav.renderSolicitudes();
+            syncActivosRail();
+            return;
+          }
+          const previewMods=["inicio","vista-perfil"];
+          applyDashContext(ctx,{
+            light:!previewMods.includes(mod),
+            skipFirestore:previewMods.includes(mod)
+          });
+          if(mod==="vista-perfil"&&typeof refrescarVistaPerfilModulo==="function"){
+            refrescarVistaPerfilModulo();
+          }
+          if(mod==="inicio"){
+            pintarInicioResumen();
+            refrescarVistaPreviaInicio();
+            syncInicioPreviewActions();
+          }
+          updateBannerMensajesNavState();
+        });
+        document.addEventListener("dash:module-change",function(ev){
+          const mod=ev.detail&&ev.detail.module;
+          if(mod==="inicio"||mod==="vista-perfil"){
+            applyDashContext(getDashContext(),{ light:true, skipFirestore:true });
+            if(mod==="vista-perfil"&&typeof refrescarVistaPerfilModulo==="function"){
+              refrescarVistaPerfilModulo();
+            }
+            if(mod==="inicio"){
+              refrescarVistaPreviaInicio();
+              syncInicioPreviewActions();
+            }
+          }
+        });
+      }
       asegurarPublicacionActual();
       renderDashboard();
       auth.onAuthStateChanged(function(){
@@ -2726,5 +4482,16 @@
       });
     });
   </script>
+
+  <div class="dash-banner-sheet hidden" id="dashBannerMetricsSheet" aria-hidden="true" role="presentation">
+    <div class="dash-banner-sheet__backdrop" data-banner-sheet-close tabindex="-1" aria-hidden="true"></div>
+    <div class="dash-banner-sheet__panel" role="dialog" aria-modal="true" aria-labelledby="dashBannerSheetTitle">
+      <header class="dash-banner-sheet__head">
+        <h2>Métricas del banner</h2>
+        <button type="button" class="dash-banner-sheet__close" data-banner-sheet-close aria-label="Cerrar">×</button>
+      </header>
+      <div id="dashBannerSheetBody"></div>
+    </div>
+  </div>
 </body>
 </html>

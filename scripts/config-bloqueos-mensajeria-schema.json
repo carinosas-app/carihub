@@ -1,0 +1,52 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "id": "config-bloqueos-mensajeria",
+  "modulo": "bloqueos",
+  "version": "1.0.0",
+  "schemaVersion": "v1",
+  "fecha": "2026-06-20",
+  "ticket": "MSG-022",
+  "descripcion": "Bloqueos Messenger scoped — usuario bloquea contraparte; sin mensajes bidireccionales (MSG-081).",
+  "referencias": [
+    "scripts/SPEC-MESSENGER.json",
+    "scripts/config-seguridad-mvp-schema.json",
+    "scripts/ANALISIS-MESSENGER-IA-SEGURIDAD.json"
+  ],
+  "firestore": {
+    "ruta": "usuarios/{cuentaUid}/bloqueos/{bloqueadoUid}",
+    "docId": "bloqueadoUid",
+    "lectura": "isOwner(cuentaUid) || isAdmin()",
+    "create": "isOwner(cuentaUid) && bloqueoMessengerCreateValido()",
+    "delete": "isOwner(cuentaUid)",
+    "update": false
+  },
+  "efecto": [
+    "Sin mensajes bidireccionales entre cuentaUid y bloqueadoUid",
+    "Enforcement en rules mensaje/conversación + cliente messenger",
+    "Bloqueo ≠ sanción admin permanente"
+  ],
+  "enums": {
+    "iniciadoPor": ["usuario", "admin", "sistema"],
+    "contextoTipo": ["perfil", "banner", "cuenta"]
+  },
+  "campos": {
+    "schemaVersion": { "tipo": "string", "valorFijo": "v1" },
+    "cuentaUid": { "tipo": "string", "regla": "igual path cuentaUid" },
+    "bloqueadoUid": { "tipo": "string", "regla": "igual doc id; distinto de cuentaUid" },
+    "contextoTipo": { "tipo": "string", "enum": "contextoTipo", "opcional": true },
+    "contextoId": { "tipo": "string", "max": 120, "opcional": true },
+    "conversacionId": { "tipo": "string", "max": 128, "opcional": true },
+    "iniciadoPor": { "tipo": "string", "enum": "iniciadoPor", "default": "usuario" },
+    "motivo": { "tipo": "string", "max": 500, "opcional": true },
+    "creadoEn": { "tipo": "timestamp", "server": true },
+    "actualizadoEn": { "tipo": "timestamp", "server": true }
+  },
+  "runtime": {
+    "ticketUI": "MSG-081",
+    "schema": "public/js/carihub-messenger-bloqueos-schema.js",
+    "api": "public/js/carihub-messenger-bloqueos.js",
+    "global": "CariHubMessengerBloqueos"
+  },
+  "dependencias": ["MSG-010", "TICKET-031"],
+  "siguiente": ["MSG-081"]
+}

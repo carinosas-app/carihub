@@ -80,12 +80,14 @@
   }
 
   function disponibilidadDe(u) {
-    var d = normTxt(u.disponibilidad || u.estatus || u.horario || '');
-    if (d.indexOf('ocup') !== -1 || d.indexOf('cerr') !== -1) return { clase: 'busy', txt: 'Ocupada', busy: true };
-    if (d.indexOf('dispon') !== -1 || d.indexOf('abiert') !== -1 || d.indexOf('agenda') !== -1) {
-      return { clase: 'on', txt: u.disponibilidad || 'Disponible', busy: false };
+    if (global.CariHubMessengerPrivacidadUi && CariHubMessengerPrivacidadUi.disponibilidadCard) {
+      return CariHubMessengerPrivacidadUi.disponibilidadCard(u);
     }
-    return { clase: 'on', txt: u.disponibilidad || 'Disponible', busy: false };
+    var d = normTxt(u.disponibilidad || u.estatus || u.horario || '');
+    if (d.indexOf('ocup') !== -1 || d.indexOf('cerr') !== -1) {
+      return { clase: 'neutral', txt: 'Consultar disponibilidad', busy: true };
+    }
+    return { clase: 'neutral', txt: 'Consultar disponibilidad', busy: false };
   }
 
   function descripcionCompactHTML(u, label) {

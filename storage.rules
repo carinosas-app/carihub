@@ -1,0 +1,52 @@
+rules_version = '2';
+
+// MVP E0 — uploads de registro (monolito usuarios/{uid}).
+// KYC privado: verificaciones/{uid}/**
+// Fotos públicas de perfil: perfiles/{uid}/** (lectura abierta para URLs en el sitio)
+// Futuro BLK-05: migrar KYC a perfiles/{perfilId}/private/kyc/ (ver scripts/blk05-storage-rules-draft.rules)
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn()
+        && request.auth.token.email == 'carinosas.anuncios@gmail.com';
+    }
+
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    function isValidImage() {
+      return request.resource.contentType in ['image/jpeg', 'image/png', 'image/webp'];
+    }
+
+    function isUnderMb(maxMb) {
+      return request.resource.size != null
+        && request.resource.size <= maxMb * 1024 * 1024;
+    }
+
+    // INE, selfie y documentos de verificación — nunca lectura pública
+    match /verificaciones/{uid}/{allPaths=**} {
+      allow read: if isOwner(uid) || isAdmin();
+      allow create: if isOwner(uid) && isValidImage() && isUnderMb(10);
+      allow update: if false;
+      allow delete: if isAdmin();
+    }
+
+    // Fotos de perfil en registro/edición (registro-perfil-submit.js, index.html)
+    match /perfiles/{uid}/{fileName} {
+      allow read: if true;
+      allow create, update: if isOwner(uid) && isValidImage() && isUnderMb(8);
+      allow delete: if isOwner(uid) || isAdmin();
+    }
+
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

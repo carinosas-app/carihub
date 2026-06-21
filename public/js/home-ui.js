@@ -892,6 +892,10 @@
   }
 
   function updateMensajesModal() {
+    if (window.CariHubHomeMensajes && CariHubHomeMensajes.abrirInbox) {
+      CariHubHomeMensajes.abrirInbox();
+      return;
+    }
     if (window.CariHubHomeMensajes && CariHubHomeMensajes.abrir) {
       CariHubHomeMensajes.abrir({});
       return;

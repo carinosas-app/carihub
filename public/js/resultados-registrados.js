@@ -92,7 +92,7 @@
       descripcion: desc,
       verificada: data.aprobado === true,
       verificado: data.aprobado === true,
-      disponibilidad: data.horario ? String(data.horario).slice(0, 48) : 'Disponible ahora',
+      disponibilidad: data.horario ? String(data.horario).slice(0, 48) : 'Consultar disponibilidad',
       respuestaRapida: true,
       nueva: false,
       fotoURL: foto,
@@ -168,12 +168,98 @@
     return 'perfil-publico.html?' + p.toString();
   }
 
+  function filtrarPerfiles(items, filtros) {
+    filtros = filtros || {};
+    items = items || [];
+    return items.filter(function (p) {
+      if (filtros.categoria && filtros.categoria !== 'Todas') {
+        if (normTxt(p.categoria) !== normTxt(filtros.categoria)) return false;
+      }
+      if (filtros.pais) {
+        if (normTxt(p.pais) !== normTxt(filtros.pais)) return false;
+      }
+      if (filtros.estado && filtros.estado !== 'Todos') {
+        if (normTxt(p.estado) !== normTxt(filtros.estado)) return false;
+      }
+      if (filtros.ciudad && filtros.ciudad !== 'Todas') {
+        var pc = normTxt(p.ciudad);
+        var fc = normTxt(filtros.ciudad);
+        if (pc !== fc && pc.indexOf(fc) < 0 && fc.indexOf(pc) < 0) return false;
+      }
+      return true;
+    });
+  }
+
+  function paginar(items, page, pageSize) {
+    page = Math.max(1, Number(page) || 1);
+    pageSize = Math.max(1, Number(pageSize) || 12);
+    var total = items.length;
+    var pages = Math.max(1, Math.ceil(total / pageSize));
+    if (page > pages) page = pages;
+    var start = (page - 1) * pageSize;
+    return {
+      items: items.slice(start, start + pageSize),
+      page: page,
+      pageSize: pageSize,
+      total: total,
+      pages: pages,
+      hasPrev: page > 1,
+      hasNext: page < pages
+    };
+  }
+
+  /**
+   * Busca en caché de perfiles públicos con filtros y paginación (TICKET-024).
+   * @returns Promise<{ items, page, pages, total, hasPrev, hasNext, allFiltered }>
+   */
+  function buscar(filtros, opts) {
+    opts = opts || {};
+    var page = opts.page || 1;
+    var pageSize = opts.pageSize || 12;
+    return cargar(opts.force).then(function (all) {
+      var filtered = filtrarPerfiles(all, filtros);
+      var paged = paginar(filtered, page, pageSize);
+      paged.allFiltered = filtered;
+      paged.filtros = filtros;
+      return paged;
+    });
+  }
+
+  function toTarjetaDirectorio(perfil, filtros) {
+    filtros = filtros || {};
+    var uid = perfil.uid || perfil.__id || '';
+    return {
+      id: uid,
+      perfilId: uid,
+      nombre: perfil.nombre || 'Sin nombre',
+      categoria: perfil.categoria || '',
+      pais: perfil.pais || '',
+      estado: perfil.estado || '',
+      ciudad: perfil.ciudad || '',
+      verificado: !!(perfil.verificada || perfil.verificado),
+      img: perfil.fotoURL || '',
+      ubicacion: perfil.ubicacion || '',
+      precio: perfil.precio || '',
+      tagline: perfil.tagline || '',
+      url: urlPerfil(uid, {
+        categoria: filtros.categoria,
+        pais: filtros.pais,
+        estado: filtros.estado,
+        ciudad: filtros.ciudad
+      })
+    };
+  }
+
   global.CariHubResultadosRegistrados = {
     cargar: cargar,
     listar: listar,
     totalPublicos: totalPublicos,
     normalizar: normalizarPerfilFirestore,
     urlPerfil: urlPerfil,
+    filtrar: filtrarPerfiles,
+    paginar: paginar,
+    buscar: buscar,
+    toTarjetaDirectorio: toTarjetaDirectorio,
     get error() { return _error; },
     get loaded() { return _loaded; }
   };

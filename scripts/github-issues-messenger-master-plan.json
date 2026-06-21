@@ -1,0 +1,439 @@
+{
+  "repo": "carinosas-app/carihub",
+  "planId": "messenger-master-v1",
+  "descripcion": "Backlog completo messenger — privacidad, permisos, moderación, integraciones. Complementa TICKET-001–056.",
+  "labels": [
+    "messenger",
+    "dashboard",
+    "backend",
+    "ux",
+    "admin",
+    "security",
+    "p0-blocker",
+    "p1-next",
+    "p2-later",
+    "p3-future"
+  ],
+  "issues": [
+    {
+      "id": "MSG-000",
+      "title": "[P0] Acta arquitectura messenger v2 — dashboard embebido vs SPEC",
+      "labels": ["messenger", "backend", "p0-blocker"],
+      "body": "## Objetivo\nReconciliar SPEC Messenger congelado (`scripts/SPEC-MESSENGER*`) con runtime actual (dashboard embebido, contexto scoped perfil/banner).\n\n## Entregables\n- [ ] Decisión: messenger en `dashboard-rentero` vs app `/messenger` separada\n- [ ] Mapa colecciones runtime vs SPEC propuesto\n- [ ] Qué NO rehacer (shell 3 columnas, inbox scoped)\n\n## Dep\nTICKET-030, TICKET-040\n\n## Épica\nMSG-F0 Mapa"
+    },
+    {
+      "id": "MSG-001",
+      "title": "[P0] Mapa rutas + dependencias cruzadas ecosistema",
+      "labels": ["messenger", "backend", "p0-blocker"],
+      "body": "## Objetivo\nDiagrama mensajes ↔ estados ↔ lives ↔ banners ↔ solicitudes negocio ↔ perfil ↔ admin.\n\n## Entregables\n- [ ] Rutas públicas/dashboard/admin propuestas\n- [ ] Eventos sistema faltantes\n- [ ] Functions faltantes\n\n## Dep\nMSG-000\n\n## Épica\nMSG-F0"
+    },
+    {
+      "id": "MSG-010",
+      "title": "[P1] Colecciones Firestore messenger faltantes",
+      "labels": ["messenger", "backend", "p1-next"],
+      "body": "## Colecciones\n- `reportes_mensajeria/{id}`\n- `usuarios/{uid}/bloqueos/{bloqueadoUid}`\n- `usuarios/{uid}/privacidad_mensajes` (doc o subcolección)\n- `moderation_alerts/{id}` (diseño)\n- `admin_review_cases/{id}` (diseño)\n\n## Archivos\n- `scripts/config-*-schema.json`\n- `firestore.rules` (stub)\n\n## Dep\nMSG-000, TICKET-030\n\n## Épica\nMSG-F1 Arquitectura"
+    },
+    {
+      "id": "MSG-011",
+      "title": "[P1] Storage adjuntos mensajes + rules",
+      "labels": ["messenger", "backend", "p1-next"],
+      "body": "## Paths\n`mensajes/{conversacionId}/{mensajeId}/` o `usuarios/{uid}/mensajes_adjuntos/`\n\n## Criterios\n- [ ] Solo participantes de conversación leen/escriben\n- [ ] Límites tamaño en rules o Function\n\n## Dep\nMSG-010, TICKET-002\n\n## Épica\nMSG-F1"
+    },
+    {
+      "id": "MSG-012",
+      "title": "[P1] Firestore rules messenger v2 (reportes, bloqueos, privacidad)",
+      "labels": ["messenger", "backend", "security", "p1-next"],
+      "body": "## Alcance\nExtender rules: reportes, bloqueos, privacidad_mensajes, visitanteUid queries.\n\n## Criterios\n- [ ] Sin cross-cuenta\n- [ ] Tests emulador (`@firebase/rules-unit-testing`)\n\n## Dep\nMSG-010, TICKET-031\n\n## Épica\nMSG-F1"
+    },
+    {
+      "id": "MSG-013",
+      "title": "[P1] Índices Firestore messenger adicionales",
+      "labels": ["messenger", "backend", "p1-next"],
+      "body": "## Índices sugeridos\n- `conversaciones`: visitanteUid + updatedAt\n- `reportes_mensajeria`: estado + createdAt\n- `moderation_alerts`: nivel + createdAt\n\n## Dep\nMSG-010\n\n## Épica\nMSG-F1"
+    },
+    {
+      "id": "MSG-014",
+      "title": "[P2] Eventos sistema messenger (analytics / bus)",
+      "labels": ["messenger", "backend", "p2-later"],
+      "body": "## Eventos\nmensaje_enviado, mensaje_leido, conversacion_iniciada, bloqueo, reporte, cambio_privacidad.\n\n## Destino\n`analytics_eventos` o colección dedicada.\n\n## Dep\nMSG-010\n\n## Épica\nMSG-F1"
+    },
+    {
+      "id": "MSG-015",
+      "title": "[P2] Cloud Functions skeleton functions/messages/",
+      "labels": ["messenger", "backend", "p2-later"],
+      "body": "## Funciones placeholder\n- onMensajeCreate (notificación interna)\n- rateLimitCheck\n- moderationSignal (fase posterior)\n\n## Dep\nMSG-012\n\n## Épica\nMSG-F1"
+    },
+    {
+      "id": "MSG-020",
+      "title": "[P1] Schema privacidad_mensajes (Firestore + JSON)",
+      "labels": ["messenger", "backend", "p1-next"],
+      "body": "## Campos\nestadoEnLinea, ultimaConexion, confirmacionVisto, disponibilidad, mensajesDe, llamadasDe, videollamadasDe, archivosDe, estadosDe, livesDe, ubicacionPolitica.\n\n## Default producto\nTodo oculto / preguntar / nadie — opt-in explícito rentero.\n\n## Archivos\n- `scripts/config-privacidad-mensajes-schema.json`\n\n## Dep\nMSG-010\n\n## Épica\nMSG-F2 Datos"
+    },
+    {
+      "id": "MSG-021",
+      "title": "[P1] Schema reportes_mensajeria",
+      "labels": ["messenger", "backend", "security", "p1-next"],
+      "body": "## Campos\nreportanteUid, reportadoUid, conversacionId, mensajeId?, motivo, categoria, estado, evidenciaRef?, contextoTipo, contextoId.\n\n## Dep\nMSG-010\n\n## Épica\nMSG-F2"
+    },
+    {
+      "id": "MSG-022",
+      "title": "[P1] Schema bloqueos usuario",
+      "labels": ["messenger", "backend", "security", "p1-next"],
+      "body": "## Ruta\n`usuarios/{uid}/bloqueos/{bloqueadoUid}`\n\n## Efecto\nNo mensajes, ocultar estados, rechazar llamadas.\n\n## Dep\nMSG-010\n\n## Épica\nMSG-F2"
+    },
+    {
+      "id": "MSG-023",
+      "title": "[P2] Schema adjuntos en mensaje (ref Storage)",
+      "labels": ["messenger", "backend", "p2-later"],
+      "body": "## Campos en mensaje\ntipo, storagePath, mime, sizeBytes, thumbUrl?, duracion?\n\n## Dep\nMSG-011\n\n## Épica\nMSG-F2"
+    },
+    {
+      "id": "MSG-024",
+      "title": "[P2] Schema solicitud_conversacion en conversación",
+      "labels": ["messenger", "backend", "p2-later"],
+      "body": "## Alineación SPEC\n`conversacion_iniciar_solicitud`, estados solicitud_enviada/aceptada/rechazada.\n\n## Dep\nMSG-010, scripts/SPEC-MESSENGER\n\n## Épica\nMSG-F2"
+    },
+    {
+      "id": "MSG-025",
+      "title": "[P2] Schema shared_locations (puntual / timed / live)",
+      "labels": ["messenger", "backend", "p2-later"],
+      "body": "## Modos\n- Una vez\n- X minutos\n- Tiempo real hasta detener\n\n## Regla\nNunca automático; confirmación explícita.\n\n## Dep\nMSG-010\n\n## Épica\nMSG-F2"
+    },
+    {
+      "id": "MSG-026",
+      "title": "[P2] Schema moderation_alerts + admin_review_cases",
+      "labels": ["messenger", "backend", "security", "p2-later"],
+      "body": "## Nivel 1\nAlerta sin contenido completo: tipo, score, uids, modulo, estado.\n\n## Nivel 3\nCaso con evidencia acotada y motivo legal.\n\n## Dep\nMSG-010\n\n## Épica\nMSG-F2"
+    },
+    {
+      "id": "MSG-027",
+      "title": "[P2] Schema audit_logs messenger",
+      "labels": ["messenger", "backend", "security", "p2-later"],
+      "body": "## Logs\nprivacidad, permisos, reportes, bloqueos, acceso evidencia admin.\n\n## Dep\nMSG-010\n\n## Épica\nMSG-F2"
+    },
+    {
+      "id": "MSG-030",
+      "title": "[P2] Módulo carihub-device-permissions.js central",
+      "labels": ["messenger", "ux", "p2-later"],
+      "body": "## API\nrequest(kind), getStatus(kind), onStatusChange.\n\n## Kinds\nmicrophone, camera, gallery, files, location, notifications.\n\n## Regla\nSolo on-demand al usar función.\n\n## Épica\nMSG-F3 Permisos dispositivo"
+    },
+    {
+      "id": "MSG-031",
+      "title": "[P2] Permiso micrófono — audio, calls, lives",
+      "labels": ["messenger", "ux", "p2-later"],
+      "body": "## Mensaje UX\n\"Permite acceso al micrófono para enviar audios, realizar llamadas y participar en transmisiones en vivo.\"\n\n## Si rechaza\nOcultar audio/calls/lives con audio.\n\n## Dep\nMSG-030\n\n## Épica\nMSG-F3"
+    },
+    {
+      "id": "MSG-032",
+      "title": "[P2] Permiso cámara — foto, video, videollamada",
+      "labels": ["messenger", "ux", "p2-later"],
+      "body": "## Dep\nMSG-030\n\n## Épica\nMSG-F3"
+    },
+    {
+      "id": "MSG-033",
+      "title": "[P2] Permiso galería — adjuntos, estados, banners",
+      "labels": ["messenger", "ux", "p2-later"],
+      "body": "## Dep\nMSG-030\n\n## Épica\nMSG-F3"
+    },
+    {
+      "id": "MSG-034",
+      "title": "[P2] Permiso archivos — PDF/documentos",
+      "labels": ["messenger", "ux", "p2-later"],
+      "body": "## Dep\nMSG-030\n\n## Épica\nMSG-F3"
+    },
+    {
+      "id": "MSG-035",
+      "title": "[P2] Permiso ubicación — 3 modos + confirmación",
+      "labels": ["messenger", "ux", "p2-later"],
+      "body": "## Regla\nNunca compartir ubicación automáticamente.\n\n## Dep\nMSG-030, MSG-025\n\n## Épica\nMSG-F3"
+    },
+    {
+      "id": "MSG-036",
+      "title": "[P2] Permiso notificaciones push/in-app",
+      "labels": ["messenger", "ux", "p2-later"],
+      "body": "## Usos\nMensajes, solicitudes, favoritos, estados, lives, avisos admin, pagos.\n\n## Dep\nMSG-030\n\n## Épica\nMSG-F3"
+    },
+    {
+      "id": "MSG-037",
+      "title": "[P2] Panel dashboard Privacidad y Permisos dispositivo",
+      "labels": ["messenger", "dashboard", "ux", "p2-later"],
+      "body": "## UI\nEstado: Permitido / Denegado / No solicitado + reconfigurar.\n\n## Dep\nMSG-030\n\n## Épica\nMSG-F3"
+    },
+    {
+      "id": "MSG-040",
+      "title": "[P1] Visitante — inbox y ver hilo propio",
+      "labels": ["messenger", "ux", "p1-next"],
+      "body": "## Objetivo\nCuenta visitante/hub ve conversaciones donde es `visitanteUid`.\n\n## Archivos\n- `home-messenger.js` o módulo inbox visitante\n- `index.html` o dashboard cuenta\n\n## Dep\nTICKET-041, MSG-013\n\n## Épica\nMSG-F4 Mensajería"
+    },
+    {
+      "id": "MSG-041",
+      "title": "[P2] Buscador de conversaciones",
+      "labels": ["messenger", "dashboard", "ux", "p2-later"],
+      "body": "## Alcance\nBuscar por nombre contacto / último mensaje en contexto activo.\n\n## Dep\nTICKET-040\n\n## Épica\nMSG-F4"
+    },
+    {
+      "id": "MSG-042",
+      "title": "[P2] Archivar / silenciar / fijar / ocultar conversación",
+      "labels": ["messenger", "dashboard", "p2-later"],
+      "body": "## Alineación\nSPEC Messenger acciones conversacion_archivar, silenciar, fijar.\n\n## Dep\nTICKET-032\n\n## Épica\nMSG-F4"
+    },
+    {
+      "id": "MSG-043",
+      "title": "[P2] Solicitudes de mensaje — aceptar/rechazar",
+      "labels": ["messenger", "dashboard", "p2-later"],
+      "body": "## Flujo\nVisitante solicita → rentero acepta/rechaza antes de chat libre.\n\n## Dep\nMSG-024, MSG-020\n\n## Épica\nMSG-F4"
+    },
+    {
+      "id": "MSG-044",
+      "title": "[P2] Adjunto imagen en mensaje",
+      "labels": ["messenger", "backend", "p2-later"],
+      "body": "## Dep\nMSG-011, MSG-033, MSG-023\n\n## Épica\nMSG-F4"
+    },
+    {
+      "id": "MSG-045",
+      "title": "[P3] Adjunto audio / nota de voz",
+      "labels": ["messenger", "p3-future"],
+      "body": "## Dep\nMSG-031, MSG-044\n\n## Épica\nMSG-F4"
+    },
+    {
+      "id": "MSG-046",
+      "title": "[P3] Adjunto video",
+      "labels": ["messenger", "p3-future"],
+      "body": "## Dep\nMSG-032, MSG-044\n\n## Épica\nMSG-F4"
+    },
+    {
+      "id": "MSG-047",
+      "title": "[P3] Adjunto archivo PDF/documento",
+      "labels": ["messenger", "p3-future"],
+      "body": "## Dep\nMSG-034, MSG-044\n\n## Épica\nMSG-F4"
+    },
+    {
+      "id": "MSG-048",
+      "title": "[P2] Compartir ubicación en chat (3 modos)",
+      "labels": ["messenger", "ux", "p2-later"],
+      "body": "## Modos\nPuntual, X minutos, tiempo real hasta detener.\n\n## Dep\nMSG-025, MSG-035, MSG-076\n\n## Épica\nMSG-F4"
+    },
+    {
+      "id": "MSG-049",
+      "title": "[P2] Eliminar/ocultar conversación (local vs global)",
+      "labels": ["messenger", "dashboard", "p2-later"],
+      "body": "## Dep\nMSG-042\n\n## Épica\nMSG-F4"
+    },
+    {
+      "id": "MSG-050",
+      "title": "[P1] Producción — eliminar MOCK conversaciones/mensajes",
+      "labels": ["messenger", "dashboard", "p1-next"],
+      "body": "## Archivos\n- `dashboard-rentero-nav.js` MOCK_CONVERSACIONES, usesMockMensajes\n- `dashboard-rentero.html` preview gate\n\n## Criterios\n- [ ] Sin MOCK en prod sin `?preview=1`\n- [ ] Firestore-only en cuenta real\n\n## Dep\nTICKET-040, TICKET-050-plan\n\n## Épica\nMSG-F4 / E5"
+    },
+    {
+      "id": "MSG-060",
+      "title": "[P3] Llamadas de voz",
+      "labels": ["messenger", "p3-future"],
+      "body": "## Dep\nMSG-031, MSG-075, MSG-015\n\n## Épica\nMSG-F5 Llamadas"
+    },
+    {
+      "id": "MSG-061",
+      "title": "[P3] Videollamadas + mensaje permisos faltantes",
+      "labels": ["messenger", "p3-future"],
+      "body": "## Mensaje\n\"Debes habilitar cámara y micrófono para realizar videollamadas.\"\n\n## Dep\nMSG-060, MSG-032\n\n## Épica\nMSG-F5"
+    },
+    {
+      "id": "MSG-062",
+      "title": "[P3] Historial de llamadas",
+      "labels": ["messenger", "p3-future"],
+      "body": "## Dep\nMSG-060\n\n## Épica\nMSG-F5"
+    },
+    {
+      "id": "MSG-070",
+      "title": "[P1] Pantalla Privacidad de Mensajes (dashboard)",
+      "labels": ["messenger", "dashboard", "ux", "p1-next"],
+      "body": "## Ubicación\nMódulo o sección en dashboard rentero.\n\n## Opciones\nVer MSG-071–076.\n\n## Dep\nMSG-020, TICKET-049\n\n## Épica\nMSG-F6 Privacidad"
+    },
+    {
+      "id": "MSG-071",
+      "title": "[P1] Privacidad — estado en línea (opt-in, default oculto)",
+      "labels": ["messenger", "dashboard", "ux", "p1-next"],
+      "body": "## Regla producto\nDefault: ocultar. Rentero opt-in explícito.\n\n## Dep\nMSG-070, MSG-020\n\n## Épica\nMSG-F6"
+    },
+    {
+      "id": "MSG-072",
+      "title": "[P1] Privacidad — última conexión (opt-in)",
+      "labels": ["messenger", "dashboard", "ux", "p1-next"],
+      "body": "## Dep\nMSG-070\n\n## Épica\nMSG-F6"
+    },
+    {
+      "id": "MSG-073",
+      "title": "[P1] Privacidad — confirmación \"Visto\" (mostrar/ocultar)",
+      "labels": ["messenger", "dashboard", "ux", "p1-next"],
+      "body": "## Regla\nSi oculto: no mostrar Visto, hora lectura ni confirmación al otro.\n\n## Dep\nMSG-070\n\n## Épica\nMSG-F6"
+    },
+    {
+      "id": "MSG-074",
+      "title": "[P2] Privacidad — disponibilidad (disponible/ocupado/invisible)",
+      "labels": ["messenger", "dashboard", "p2-later"],
+      "body": "## Nota\nSin presencia real obligatoria; etiqueta de disponibilidad opcional.\n\n## Dep\nMSG-070\n\n## Épica\nMSG-F6"
+    },
+    {
+      "id": "MSG-075",
+      "title": "[P1] Privacidad — quién puede mensaje/llamar/videollamada/archivos/estados/lives",
+      "labels": ["messenger", "dashboard", "p1-next"],
+      "body": "## Opciones\ntodos, registrados, contactos, favoritos, nadie.\n\n## Dep\nMSG-070, MSG-020\n\n## Épica\nMSG-F6"
+    },
+    {
+      "id": "MSG-076",
+      "title": "[P1] Privacidad ubicación rentero (nunca/manual/tiempo real/preguntar)",
+      "labels": ["messenger", "dashboard", "p1-next"],
+      "body": "## Dep\nMSG-070, MSG-025\n\n## Épica\nMSG-F6"
+    },
+    {
+      "id": "MSG-077",
+      "title": "[P1] Enforcement privacidad en API + UI visitante",
+      "labels": ["messenger", "backend", "security", "p1-next"],
+      "body": "## Alcance\n`sendMensaje`, `createConversacion`, perfil público, home-messenger.\n\n## Dep\nMSG-075, MSG-012, TICKET-041\n\n## Épica\nMSG-F6"
+    },
+    {
+      "id": "MSG-080",
+      "title": "[P1] Reportar mensaje / conversación / media",
+      "labels": ["messenger", "security", "p1-next"],
+      "body": "## UI\nDashboard + visitante.\n\n## Dep\nMSG-021, MSG-012\n\n## Épica\nMSG-F7 Seguridad"
+    },
+    {
+      "id": "MSG-081",
+      "title": "[P1] Bloquear / desbloquear usuario",
+      "labels": ["messenger", "security", "p1-next"],
+      "body": "## Dep\nMSG-022, MSG-077\n\n## Épica\nMSG-F7"
+    },
+    {
+      "id": "MSG-082",
+      "title": "[P2] Lista negra — ocultar estados de bloqueados",
+      "labels": ["messenger", "security", "p2-later"],
+      "body": "## Dep\nMSG-081\n\n## Épica\nMSG-F7"
+    },
+    {
+      "id": "MSG-083",
+      "title": "[P2] Rate limiting + antispam (Function)",
+      "labels": ["messenger", "backend", "security", "p2-later"],
+      "body": "## Alineación\nSPEC Messenger límites anti-spam.\n\n## Dep\nMSG-015\n\n## Épica\nMSG-F7"
+    },
+    {
+      "id": "MSG-090",
+      "title": "[P2] Detección preventiva Nivel 1 — alertas automáticas",
+      "labels": ["messenger", "admin", "security", "p2-later"],
+      "body": "## Señales\nTexto/patrón → score, categoría, uids. Sin dump conversación completa.\n\n## Dep\nMSG-026, MSG-015\n\n## Épica\nMSG-F8 Moderación"
+    },
+    {
+      "id": "MSG-091",
+      "title": "[P2] Cola admin Nivel 2 — sin contenido inicial",
+      "labels": ["messenger", "admin", "security", "p2-later"],
+      "body": "## Panel\nFecha, usuarios, categoría, nivel, estado.\n\n## Dep\nMSG-090\n\n## Épica\nMSG-F8"
+    },
+    {
+      "id": "MSG-092",
+      "title": "[P2] Revisión Nivel 3 — evidencia acotada autorizada",
+      "labels": ["messenger", "admin", "security", "p2-later"],
+      "body": "## Solo si\ndenuncia, alerta crítica, ilegal aparente, orden legal, investigación documentada.\n\n## Dep\nMSG-091\n\n## Épica\nMSG-F8"
+    },
+    {
+      "id": "MSG-093",
+      "title": "[P3] Listas palabras clave — revisión legal",
+      "labels": ["messenger", "admin", "security", "p3-future"],
+      "body": "## Categorías\ngrooming, menores, trata, secuestro, extorsión, etc.\n\n## Dep\nMSG-090\n\n## Épica\nMSG-F8"
+    },
+    {
+      "id": "MSG-094",
+      "title": "[P3] Scan media (CSAM/fraude) — Function + proveedor",
+      "labels": ["messenger", "admin", "security", "p3-future"],
+      "body": "## Dep\nMSG-011, MSG-092\n\n## Épica\nMSG-F8"
+    },
+    {
+      "id": "MSG-100",
+      "title": "[P2] Admin — panel alertas preventivas",
+      "labels": ["messenger", "admin", "p2-later"],
+      "body": "## Archivos\n`admin.html` módulo nuevo.\n\n## Dep\nMSG-091\n\n## Épica\nMSG-F9 Admin"
+    },
+    {
+      "id": "MSG-101",
+      "title": "[P2] Admin — denuncias messenger",
+      "labels": ["messenger", "admin", "p2-later"],
+      "body": "## Dep\nMSG-080, MSG-021\n\n## Épica\nMSG-F9"
+    },
+    {
+      "id": "MSG-102",
+      "title": "[P2] Admin — casos revisión + notas + escalamiento",
+      "labels": ["messenger", "admin", "p2-later"],
+      "body": "## Dep\nMSG-092\n\n## Épica\nMSG-F9"
+    },
+    {
+      "id": "MSG-103",
+      "title": "[P2] Admin — acciones (cerrar conv, suspender messenger)",
+      "labels": ["messenger", "admin", "p2-later"],
+      "body": "## Alineación\nSPEC admin_messenger_* acciones.\n\n## Dep\nMSG-102\n\n## Épica\nMSG-F9"
+    },
+    {
+      "id": "MSG-110",
+      "title": "[P2] Auditoría — logs privacidad, permisos, reportes, evidencia",
+      "labels": ["messenger", "admin", "security", "p2-later"],
+      "body": "## Dep\nMSG-027\n\n## Épica\nMSG-F10 Auditoría"
+    },
+    {
+      "id": "MSG-111",
+      "title": "[P2] Historial admin por usuario y conversación",
+      "labels": ["messenger", "admin", "p2-later"],
+      "body": "## Dep\nMSG-110\n\n## Épica\nMSG-F10"
+    },
+    {
+      "id": "MSG-120",
+      "title": "[P2] Compartir estado / live / banner / perfil en chat",
+      "labels": ["messenger", "dashboard", "p2-later"],
+      "body": "## Dep\nTICKET-048, MSG-040\n\n## Épica\nMSG-F11 Integraciones"
+    },
+    {
+      "id": "MSG-121",
+      "title": "[P2] Responder estado desde mensaje",
+      "labels": ["messenger", "dashboard", "p2-later"],
+      "body": "## Dep\nMSG-120\n\n## Épica\nMSG-F11"
+    },
+    {
+      "id": "MSG-122",
+      "title": "[P2] Lives — invitación, notificación, acceso privado desde chat",
+      "labels": ["messenger", "dashboard", "p2-later"],
+      "body": "## Dep\nMSG-120\n\n## Épica\nMSG-F11"
+    },
+    {
+      "id": "MSG-123",
+      "title": "[P2] Solicitudes negocio desde chat + conversión socio",
+      "labels": ["messenger", "dashboard", "p2-later"],
+      "body": "## Dep\nTICKET-043, MSG-040\n\n## Épica\nMSG-F11"
+    },
+    {
+      "id": "MSG-124",
+      "title": "[P3] Cotizaciones / presupuestos en hilo",
+      "labels": ["messenger", "p3-future"],
+      "body": "## Dep\nMSG-123\n\n## Épica\nMSG-F11"
+    },
+    {
+      "id": "MSG-125",
+      "title": "[P2] Centro notificaciones dashboard (categorías)",
+      "labels": ["messenger", "dashboard", "p2-later"],
+      "body": "## Categorías\nmensajes, solicitudes, favoritos, estados, lives, admin, pagos.\n\n## Dep\nMSG-036, TICKET-042\n\n## Épica\nMSG-F11"
+    },
+    {
+      "id": "MSG-126",
+      "title": "[P3] Privacidad avanzada — capturas, reenvíos, descargas",
+      "labels": ["messenger", "security", "p3-future"],
+      "body": "## Opciones configurables por rentero.\n\n## Dep\nMSG-070\n\n## Épica\nMSG-F11"
+    },
+    {
+      "id": "MSG-127",
+      "title": "[P2] Métricas messenger (respuesta, conversión socio)",
+      "labels": ["messenger", "dashboard", "p2-later"],
+      "body": "## Dep\nMSG-014, MSG-123\n\n## Épica\nMSG-F11"
+    },
+    {
+      "id": "MSG-056",
+      "title": "[P1] Deprecar outbox localStorage home-mensajes",
+      "labels": ["messenger", "p1-next"],
+      "body": "## Objetivo\nEliminar fallback `chMensajesOutbox` tras messenger real.\n\n## Archivos\n- `home-mensajes.js`\n\n## Dep\nTICKET-041, MSG-040\n\n## Épica\nE5 / MSG-F4"
+    }
+  ]
+}

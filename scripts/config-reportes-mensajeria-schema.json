@@ -1,0 +1,263 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "id": "config-reportes-mensajeria",
+  "modulo": "reportes_mensajeria",
+  "version": "1.0.0",
+  "schemaVersion": "v1",
+  "fecha": "2026-06-20",
+  "ticket": "MSG-021",
+  "descripcion": "Reportes de mensajería scoped — usuario reporta mensaje, conversación o contraparte en un contexto de publicación (perfil/banner). Cola admin para MSG-080; sin mezclar hilos.",
+  "referencias": [
+    "scripts/SPEC-MESSENGER.json",
+    "scripts/ANALISIS-MESSENGER-IA-SEGURIDAD.json",
+    "scripts/fixtures-messenger-golden.json",
+    "firestore.rules",
+    ".cursor/rules/dashboard-mensajes-vision.mdc"
+  ],
+  "principios": [
+    "Solo participantes de la conversación pueden crear reporte ligado a conversacionId",
+    "reportadoId debe ser la contraparte (cuentaUid o visitanteUid), nunca el reportante",
+    "Estado inicial siempre pendiente; transiciones posteriores solo admin (MSG-080)",
+    "Mensaje reportado mantiene mensajeId aunque UI muestre [mensaje eliminado]",
+    "Contexto (contextoTipo, contextoId) debe coincidir con la conversación scoped",
+    "No duplicar denuncias globales — reportes_mensajeria es canal Messenger"
+  ],
+  "firestore": {
+    "ruta": "reportes_mensajeria/{reporteId}",
+    "lectura": "reportanteId == auth.uid || isAdmin()",
+    "create": "isNonAnonymous() && reporteMensajeriaCreateValida()",
+    "update": "isAdmin() && reporteMensajeriaUpdateAdminValida()",
+    "delete": "false (solo admin futuro archivado)"
+  },
+  "enums": {
+    "tipo": {
+      "valores": ["reportar_usuario", "reportar_conversacion", "reportar_mensaje"],
+      "labelsUI": {
+        "reportar_usuario": "Reportar usuario",
+        "reportar_conversacion": "Reportar conversación",
+        "reportar_mensaje": "Reportar mensaje"
+      }
+    },
+    "estado": {
+      "valores": ["pendiente", "en_revision", "resuelto", "rechazado"],
+      "default": "pendiente",
+      "transicionesAdmin": {
+        "pendiente": ["en_revision", "resuelto", "rechazado"],
+        "en_revision": ["resuelto", "rechazado"],
+        "resuelto": [],
+        "rechazado": []
+      }
+    },
+    "motivo": {
+      "valores": [
+        "acoso",
+        "contenido_inapropiado",
+        "spam",
+        "fraude",
+        "suplantacion",
+        "menor_edad",
+        "extorsion",
+        "phishing",
+        "otro"
+      ],
+      "labelsUI": {
+        "acoso": "Acoso o amenazas",
+        "contenido_inapropiado": "Contenido inapropiado",
+        "spam": "Spam o publicidad",
+        "fraude": "Fraude o estafa",
+        "suplantacion": "Suplantación de identidad",
+        "menor_edad": "Menor de edad",
+        "extorsion": "Extorsión",
+        "phishing": "Phishing o enlaces peligrosos",
+        "otro": "Otro"
+      }
+    },
+    "contextoTipo": {
+      "valores": ["perfil", "banner"],
+      "default": "perfil"
+    }
+  },
+  "campos": {
+    "schemaVersion": {
+      "tipo": "string",
+      "valorFijo": "v1",
+      "obligatorio": true
+    },
+    "reportanteId": {
+      "tipo": "string",
+      "max": 128,
+      "obligatorio": true,
+      "regla": "debe igualar request.auth.uid en create"
+    },
+    "reportadoId": {
+      "tipo": "string",
+      "max": 128,
+      "obligatorio": true,
+      "regla": "contraparte en conversacionId; distinto de reportanteId"
+    },
+    "tipo": {
+      "tipo": "string",
+      "enum": "tipo",
+      "obligatorio": true
+    },
+    "conversacionId": {
+      "tipo": "string",
+      "max": 128,
+      "obligatorio": true,
+      "ref": "conversaciones/{conversacionId}"
+    },
+    "mensajeId": {
+      "tipo": "string",
+      "max": 128,
+      "opcional": true,
+      "obligatorioSi": "tipo == reportar_mensaje",
+      "ref": "conversaciones/{conversacionId}/mensajes/{mensajeId}"
+    },
+    "contextoTipo": {
+      "tipo": "string",
+      "enum": "contextoTipo",
+      "obligatorio": true,
+      "regla": "debe coincidir con conversación"
+    },
+    "contextoId": {
+      "tipo": "string",
+      "max": 120,
+      "obligatorio": true,
+      "regla": "perfilId o bannerId scoped"
+    },
+    "cuentaUid": {
+      "tipo": "string",
+      "max": 128,
+      "obligatorio": true,
+      "regla": "anunciante dueño del contexto (conv.cuentaUid)"
+    },
+    "motivo": {
+      "tipo": "string",
+      "enum": "motivo",
+      "obligatorio": true
+    },
+    "categoria": {
+      "tipo": "string",
+      "max": 64,
+      "opcional": true,
+      "nota": "Alias UI futuro; runtime usa motivo"
+    },
+    "detalle": {
+      "tipo": "string",
+      "max": 2000,
+      "opcional": true,
+      "nota": "Texto libre del reportante; sin PII obligatorio"
+    },
+    "estado": {
+      "tipo": "string",
+      "enum": "estado",
+      "default": "pendiente",
+      "createOnly": "pendiente"
+    },
+    "senalIAId": {
+      "tipo": "string",
+      "max": 128,
+      "opcional": true,
+      "nota": "Vínculo señal IA si el reporte nace de detección automática"
+    },
+    "evidenciaRef": {
+      "tipo": "string",
+      "max": 500,
+      "opcional": true,
+      "nota": "Storage path acotado — futuro adjunto screenshot"
+    },
+    "adminAsignadoId": {
+      "tipo": "string",
+      "max": 128,
+      "opcional": true,
+      "escritura": "solo admin update"
+    },
+    "notaAdmin": {
+      "tipo": "string",
+      "max": 2000,
+      "opcional": true,
+      "escritura": "solo admin update"
+    },
+    "reportesCountSnapshot": {
+      "tipo": "number",
+      "opcional": true,
+      "nota": "Futuro: contador al crear para umbralRevisionAdmin"
+    },
+    "creadoEn": {
+      "tipo": "timestamp",
+      "server": true,
+      "createOnly": true
+    },
+    "actualizadoEn": {
+      "tipo": "timestamp",
+      "server": true
+    },
+    "resueltoEn": {
+      "tipo": "timestamp",
+      "opcional": true,
+      "escritura": "solo admin al resolver"
+    }
+  },
+  "validacionCreate": {
+    "participanteConversacion": "conversacionEsParticipante(conv)",
+    "reportadoEsContraparte": "reportadoId in [conv.cuentaUid, conv.visitanteUid] && reportadoId != reportanteId",
+    "contextoCoincide": "contextoTipo/contextoId == conv",
+    "cuentaUid": "igual conv.cuentaUid",
+    "mensajeIdSiTipoMensaje": "tipo reportar_mensaje requiere mensajeId"
+  },
+  "indices": [
+    {
+      "collectionGroup": "reportes_mensajeria",
+      "fields": ["estado", "creadoEn"],
+      "orden": "DESC",
+      "uso": "cola admin MSG-080"
+    },
+    {
+      "collectionGroup": "reportes_mensajeria",
+      "fields": ["reportanteId", "creadoEn"],
+      "orden": "DESC",
+      "uso": "mis reportes visitante"
+    },
+    {
+      "collectionGroup": "reportes_mensajeria",
+      "fields": ["conversacionId", "creadoEn"],
+      "orden": "DESC",
+      "uso": "reportes por hilo"
+    }
+  ],
+  "moderacion": {
+    "umbralRevisionAdmin": 3,
+    "efecto": "incrementa usuarios.mensajeria.reportesCount, spamScore, riesgoScore según validez (futuro VE)",
+    "mensajeReportadoNoEliminable": "estado pendiente|en_revision bloquea eliminar para todos (SPEC)"
+  },
+  "runtime": {
+    "ticketUI": "MSG-080",
+    "modulo": "public/js/carihub-messenger-reportes-schema.js",
+    "global": "CariHubMessengerReportesSchema",
+    "api": "public/js/carihub-messenger-reportes.js",
+    "apiGlobal": "CariHubMessengerReportes",
+    "ui": "public/js/carihub-messenger-reportes-ui.js",
+    "uiGlobal": "CariHubMessengerReportesUI"
+  },
+  "rules": {
+    "ticket": "MSG-021",
+    "funciones": [
+      "reporteMensajeriaTipoValido",
+      "reporteMensajeriaEstadoValido",
+      "reporteMensajeriaMotivoValido",
+      "reporteMensajeriaParticipanteConversacion",
+      "reporteMensajeriaCreateValida",
+      "reporteMensajeriaUpdateAdminValida"
+    ],
+    "testsFuturos": "scripts/messenger-rules.test.mjs — suite reportes"
+  },
+  "antiPatrones": [
+    "Reporte sin conversacionId (inbox mezclado)",
+    "Reportante reportándose a sí mismo",
+    "Visitante creando reporte sobre conversación donde no es participante",
+    "Usuario actualizando estado de su propio reporte",
+    "Reutilizar colección denuncias para hilos Messenger"
+  ],
+  "dependencias": ["MSG-010", "TICKET-031", "TICKET-030"],
+  "siguiente": ["MSG-080", "MSG-081"]
+}

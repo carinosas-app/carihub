@@ -80,6 +80,27 @@ service cloud.firestore {
         && !('actualizadoEn' in data);
     }
 
+    function solicitudDashboardCreateValida() {
+      let data = request.resource.data;
+      return data.uidAnunciante == request.auth.uid
+        && data.correoSolicitante == request.auth.token.email
+        && data.estado == 'pendiente'
+        && data.fecha is timestamp
+        && data.vinculadoEn is timestamp
+        && data.cuentaUid == request.auth.uid
+        && data.perfilId is string
+        && data.perfilId.size() > 0
+        && data.perfilId.size() <= 128
+        && data.tipoSolicitud in [
+          'dashboard_estado_perfil',
+          'dashboard_live_activo',
+          'dashboard_live_programado'
+        ]
+        && !('notaAdmin' in data)
+        && !('actualizadoPor' in data)
+        && !('actualizadoEn' in data);
+    }
+
     function visitaCreateValida() {
       let data = request.resource.data;
       return data.keys().hasOnly([
@@ -107,12 +128,452 @@ service cloud.firestore {
         && (!('referrer' in data) || (data.referrer is string && data.referrer.size() <= 500));
     }
 
+    function usuarioPerfilActivoValido() {
+      let diff = request.resource.data.diff(resource.data);
+      let next = request.resource.data;
+      return diff.affectedKeys().hasOnly(['perfilActivoId'])
+        && next.perfilActivoId is string
+        && next.perfilActivoId.size() > 0
+        && ('perfilesDetalle' in next)
+        && (next.perfilActivoId in next.perfilesDetalle);
+    }
+
+    function usuarioAgregarPerfilValido() {
+      let diff = request.resource.data.diff(resource.data);
+      let next = request.resource.data;
+      let prev = resource.data;
+      let prevCount = ('perfilesVinculados' in prev && prev.perfilesVinculados is list)
+        ? prev.perfilesVinculados.size()
+        : 0;
+      return diff.affectedKeys().hasOnly(['perfilesVinculados', 'perfilesDetalle', 'perfilActivoId'])
+        && next.perfilActivoId is string
+        && next.perfilesVinculados is list
+        && next.perfilesDetalle is map
+        && next.perfilesVinculados.size() > prevCount;
+    }
+
+    function publicacionPerfilCreateValida() {
+      let d = request.resource.data;
+      return d.cuentaUid == request.auth.uid
+        && d.perfilId is string
+        && d.perfilId.size() > 0
+        && d.perfilId.size() <= 80
+        && d.tipo in ['estado', 'live', 'promocion', 'evento', 'anuncio']
+        && d.titulo is string
+        && d.titulo.size() > 0
+        && d.titulo.size() <= 80
+        && d.estado in ['activo', 'programado', 'finalizado', 'borrador']
+        && d.vistas == 0
+        && d.interacciones == 0
+        && (!('canal' in d) || d.canal == 'perfil')
+        && (!('imgUrl' in d) || (d.imgUrl is string && d.imgUrl.size() <= 500));
+    }
+
+    function publicacionPerfilUpdateDuenoValida() {
+      let diff = request.resource.data.diff(resource.data);
+      return resource.data.cuentaUid == request.auth.uid
+        && request.resource.data.cuentaUid == resource.data.cuentaUid
+        && request.resource.data.perfilId == resource.data.perfilId
+        && !diff.affectedKeys().hasAny(['cuentaUid', 'perfilId', 'creadoEn'])
+        && request.resource.data.estado in ['activo', 'programado', 'finalizado', 'borrador']
+        && (!('canal' in request.resource.data) || request.resource.data.canal == 'perfil');
+    }
+
+    function anuncioMensajesCreateValido() {
+      let d = request.resource.data;
+      return d.cuentaUid == request.auth.uid
+        && d.canal == 'mensajes'
+        && d.contextoTipo in ['perfil', 'banner']
+        && d.contextoId is string
+        && d.contextoId.size() > 0
+        && d.contextoId.size() <= 120
+        && d.titulo is string
+        && d.titulo.size() > 0
+        && d.titulo.size() <= 80
+        && d.activo == true
+        && (!('subtitulo' in d) || (d.subtitulo is string && d.subtitulo.size() <= 120))
+        && (!('imgUrl' in d) || (d.imgUrl is string && d.imgUrl.size() <= 500))
+        && (!('conversacionId' in d) || d.conversacionId == null
+            || (d.conversacionId is string && d.conversacionId.size() <= 120));
+    }
+
+    function anuncioMensajesUpdateDuenoValido() {
+      let diff = request.resource.data.diff(resource.data);
+      return resource.data.cuentaUid == request.auth.uid
+        && request.resource.data.cuentaUid == resource.data.cuentaUid
+        && request.resource.data.canal == 'mensajes'
+        && resource.data.canal == 'mensajes'
+        && request.resource.data.contextoTipo == resource.data.contextoTipo
+        && request.resource.data.contextoId == resource.data.contextoId
+        && !diff.affectedKeys().hasAny(['cuentaUid', 'canal', 'contextoTipo', 'contextoId', 'creadoEn']);
+    }
+
+    function notificacionUpdateDuenoValido() {
+      let diff = request.resource.data.diff(resource.data);
+      return diff.affectedKeys().hasOnly(['leido'])
+        && request.resource.data.leido == true
+        && resource.data.leido != true;
+    }
+
+    function solicitudNegocioUpdateDuenoValido() {
+      let diff = request.resource.data.diff(resource.data);
+      let estadoOk = request.resource.data.estado in ['pendiente', 'aceptada', 'rechazada', 'bloqueada'];
+      return resource.data.cuentaUid == request.auth.uid
+        && request.resource.data.cuentaUid == resource.data.cuentaUid
+        && estadoOk
+        && diff.affectedKeys().hasOnly(['estado', 'leido', 'bloqueado', 'actualizadoEn']);
+    }
+
+    function conversacionEsParticipante(data) {
+      return data.cuentaUid == request.auth.uid
+        || data.visitanteUid == request.auth.uid;
+    }
+
+    function conversacionCreateValida() {
+      let d = request.resource.data;
+      return d.cuentaUid is string
+        && d.cuentaUid.size() > 0
+        && d.cuentaUid.size() <= 128
+        && d.contextoTipo in ['perfil', 'banner']
+        && d.contextoId is string
+        && d.contextoId.size() > 0
+        && d.contextoId.size() <= 120
+        && d.visitanteUid is string
+        && d.visitanteUid.size() > 0
+        && d.visitanteUid.size() <= 128
+        && d.participantes is list
+        && d.participantes.size() >= 2
+        && d.participantes.size() <= 8
+        && d.unreadByUid is map
+        && d.ultimoMensaje is string
+        && d.ultimoMensaje.size() <= 240
+        && d.estadoConversacion is string
+        && d.estadoConversacion in ['activa', 'solicitud_enviada', 'solicitud_rechazada', 'bloqueada', 'reportada', 'en_investigacion', 'cerrada_admin']
+        && d.creadoEn is timestamp
+        && d.updatedAt is timestamp
+        && (request.auth.uid == d.cuentaUid || request.auth.uid == d.visitanteUid)
+        && !bloqueoMessengerEntre(d.cuentaUid, d.visitanteUid);
+    }
+
+    function conversacionUpdateParticipanteValida() {
+      let diff = request.resource.data.diff(resource.data);
+      let keys = diff.affectedKeys();
+      return conversacionEsParticipante(resource.data)
+        && request.resource.data.cuentaUid == resource.data.cuentaUid
+        && request.resource.data.contextoTipo == resource.data.contextoTipo
+        && request.resource.data.contextoId == resource.data.contextoId
+        && request.resource.data.visitanteUid == resource.data.visitanteUid
+        && request.resource.data.participantes == resource.data.participantes
+        && request.resource.data.creadoEn == resource.data.creadoEn
+        && request.resource.data.estadoConversacion == resource.data.estadoConversacion
+        && request.resource.data.unreadByUid is map
+        && (
+          (keys.hasOnly(['unreadByUid']))
+          || (
+            keys.hasOnly(['ultimoMensaje', 'unreadByUid', 'updatedAt'])
+            && request.resource.data.ultimoMensaje is string
+            && request.resource.data.ultimoMensaje.size() <= 240
+            && request.resource.data.updatedAt is timestamp
+          )
+        );
+    }
+
+    function lectorMuestraVisto(uid) {
+      let path = /databases/$(database)/documents/usuarios/$(uid)/privacidad_mensajes/config;
+      return exists(path)
+        && get(path).data.presencia.confirmacionVisto == 'visible';
+    }
+
+    function mensajeMarcarVistoValido(conversacionId) {
+      let d = request.resource.data;
+      let prev = resource.data;
+      let conv = get(/databases/$(database)/documents/conversaciones/$(conversacionId)).data;
+      let diff = request.resource.data.diff(resource.data);
+      return conversacionEsParticipante(conv)
+        && lectorMuestraVisto(request.auth.uid)
+        && prev.emisorUid != request.auth.uid
+        && diff.affectedKeys().hasOnly(['estadoEntrega', 'leidoEn'])
+        && d.conversacionId == prev.conversacionId
+        && d.emisorUid == prev.emisorUid
+        && d.texto == prev.texto
+        && d.tipo == prev.tipo
+        && d.schemaVersion == prev.schemaVersion
+        && d.createdAt == prev.createdAt
+        && d.estadoEntrega == 'visto'
+        && d.leidoEn is timestamp
+        && prev.estadoEntrega in ['enviado', 'entregado'];
+    }
+
+    function bloqueoMessengerEntre(uid1, uid2) {
+      return exists(/databases/$(database)/documents/usuarios/$(uid1)/bloqueos/$(uid2))
+        || exists(/databases/$(database)/documents/usuarios/$(uid2)/bloqueos/$(uid1));
+    }
+
+    function mensajeCreateValido(conversacionId) {
+      let d = request.resource.data;
+      let conv = get(/databases/$(database)/documents/conversaciones/$(conversacionId)).data;
+      return d.emisorUid == request.auth.uid
+        && conversacionEsParticipante(conv)
+        && !bloqueoMessengerEntre(conv.cuentaUid, conv.visitanteUid)
+        && d.texto is string
+        && d.texto.size() > 0
+        && d.texto.size() <= 4000
+        && d.tipo is string
+        && d.tipo in ['texto', 'sistema', 'automatizado']
+        && d.estadoEntrega is string
+        && d.estadoEntrega in ['enviado', 'entregado', 'visto']
+        && d.createdAt is timestamp
+        && d.conversacionId == conversacionId;
+    }
+
+    function reporteMensajeriaTipoValido(val) {
+      return val in ['reportar_usuario', 'reportar_conversacion', 'reportar_mensaje'];
+    }
+
+    function reporteMensajeriaEstadoValido(val) {
+      return val in ['pendiente', 'en_revision', 'resuelto', 'rechazado'];
+    }
+
+    function reporteMensajeriaMotivoValido(val) {
+      return val in [
+        'acoso',
+        'contenido_inapropiado',
+        'spam',
+        'fraude',
+        'suplantacion',
+        'menor_edad',
+        'extorsion',
+        'phishing',
+        'otro'
+      ];
+    }
+
+    function reporteMensajeriaConvPath(conversacionId) {
+      return /databases/$(database)/documents/conversaciones/$(conversacionId);
+    }
+
+    function reporteMensajeriaParticipanteConversacion(conversacionId) {
+      let path = reporteMensajeriaConvPath(conversacionId);
+      return exists(path) && conversacionEsParticipante(get(path).data);
+    }
+
+    function reporteMensajeriaCreateValida() {
+      let d = request.resource.data;
+      let convPath = reporteMensajeriaConvPath(d.conversacionId);
+      let conv = get(convPath).data;
+      return isNonAnonymous()
+        && d.schemaVersion == 'v1'
+        && d.reportanteId == request.auth.uid
+        && d.reportanteId is string
+        && d.reportanteId.size() > 0
+        && d.reportanteId.size() <= 128
+        && d.reportadoId is string
+        && d.reportadoId.size() > 0
+        && d.reportadoId.size() <= 128
+        && d.reportadoId != d.reportanteId
+        && (d.reportadoId == conv.cuentaUid || d.reportadoId == conv.visitanteUid)
+        && reporteMensajeriaTipoValido(d.tipo)
+        && reporteMensajeriaEstadoValido(d.estado)
+        && d.estado == 'pendiente'
+        && reporteMensajeriaMotivoValido(d.motivo)
+        && d.conversacionId is string
+        && d.conversacionId.size() > 0
+        && d.conversacionId.size() <= 128
+        && reporteMensajeriaParticipanteConversacion(d.conversacionId)
+        && d.contextoTipo in ['perfil', 'banner']
+        && d.contextoId is string
+        && d.contextoId.size() > 0
+        && d.contextoId.size() <= 120
+        && d.contextoTipo == conv.contextoTipo
+        && d.contextoId == conv.contextoId
+        && d.cuentaUid == conv.cuentaUid
+        && d.cuentaUid is string
+        && d.cuentaUid.size() > 0
+        && d.cuentaUid.size() <= 128
+        && (
+          d.tipo != 'reportar_mensaje'
+          || (
+            'mensajeId' in d
+            && d.mensajeId is string
+            && d.mensajeId.size() > 0
+            && d.mensajeId.size() <= 128
+          )
+        )
+        && (!('detalle' in d) || (d.detalle is string && d.detalle.size() <= 2000))
+        && (!('categoria' in d) || (d.categoria is string && d.categoria.size() <= 64))
+        && (!('senalIAId' in d) || (d.senalIAId is string && d.senalIAId.size() <= 128))
+        && (!('evidenciaRef' in d) || (d.evidenciaRef is string && d.evidenciaRef.size() <= 500))
+        && d.creadoEn is timestamp
+        && d.actualizadoEn is timestamp;
+    }
+
+    function reporteMensajeriaUpdateAdminValida() {
+      let diff = request.resource.data.diff(resource.data);
+      let keys = diff.affectedKeys();
+      return request.resource.data.schemaVersion == resource.data.schemaVersion
+        && request.resource.data.reportanteId == resource.data.reportanteId
+        && request.resource.data.reportadoId == resource.data.reportadoId
+        && request.resource.data.tipo == resource.data.tipo
+        && request.resource.data.conversacionId == resource.data.conversacionId
+        && (
+          (!('mensajeId' in resource.data) && !('mensajeId' in request.resource.data))
+          || request.resource.data.mensajeId == resource.data.mensajeId
+        )
+        && request.resource.data.contextoTipo == resource.data.contextoTipo
+        && request.resource.data.contextoId == resource.data.contextoId
+        && request.resource.data.cuentaUid == resource.data.cuentaUid
+        && request.resource.data.motivo == resource.data.motivo
+        && request.resource.data.creadoEn == resource.data.creadoEn
+        && (
+          (!('mensajeId' in resource.data) && !('mensajeId' in request.resource.data))
+          || request.resource.data.mensajeId == resource.data.mensajeId
+        )
+        && reporteMensajeriaEstadoValido(request.resource.data.estado)
+        && keys.hasOnly([
+          'estado',
+          'adminAsignadoId',
+          'notaAdmin',
+          'resueltoEn',
+          'actualizadoEn'
+        ])
+        && (
+          !('adminAsignadoId' in request.resource.data)
+          || (
+            request.resource.data.adminAsignadoId is string
+            && request.resource.data.adminAsignadoId.size() <= 128
+          )
+        )
+        && (
+          !('notaAdmin' in request.resource.data)
+          || (
+            request.resource.data.notaAdmin is string
+            && request.resource.data.notaAdmin.size() <= 2000
+          )
+        )
+        && (
+          !('resueltoEn' in request.resource.data)
+          || request.resource.data.resueltoEn is timestamp
+        )
+        && request.resource.data.actualizadoEn is timestamp;
+    }
+
+    function bloqueoMessengerCreateValido(userId, bloqueadoUid) {
+      let d = request.resource.data;
+      return isNonAnonymous()
+        && bloqueadoUid == d.bloqueadoUid
+        && d.bloqueadoUid is string
+        && d.bloqueadoUid.size() > 0
+        && d.bloqueadoUid.size() <= 128
+        && d.bloqueadoUid != userId
+        && d.cuentaUid == userId
+        && d.schemaVersion == 'v1'
+        && d.iniciadoPor in ['usuario', 'admin', 'sistema']
+        && d.creadoEn is timestamp
+        && d.actualizadoEn is timestamp
+        && (
+          !('contextoTipo' in d)
+          || d.contextoTipo in ['perfil', 'banner', 'cuenta']
+        )
+        && (
+          !('contextoId' in d)
+          || (d.contextoId is string && d.contextoId.size() <= 120)
+        )
+        && (
+          !('conversacionId' in d)
+          || (d.conversacionId is string && d.conversacionId.size() <= 128)
+        )
+        && (
+          !('motivo' in d)
+          || (d.motivo is string && d.motivo.size() <= 500)
+        );
+    }
+
+    function privacidadMensajesDocIdValido(docId) {
+      return docId == 'config';
+    }
+
+    function privacidadMensajesAudienciaValida(val) {
+      return val in ['todos', 'registrados', 'contactos', 'favoritos', 'nadie'];
+    }
+
+    function privacidadMensajesPresenciaValida(val) {
+      return val in ['oculto', 'visible_contactos', 'visible_todos'];
+    }
+
+    function privacidadMensajesUbicacionMapValida(map) {
+      return map is map
+        && privacidadMensajesAudienciaValida(map.compartirCon)
+        && map.modoDefault in ['oculta', 'preguntar', 'una_vez', 'temporizada', 'en_vivo_hasta_detener']
+        && map.permitirEnVivo is bool
+        && (
+          !('duracionMaxMinutos' in map)
+          || (map.duracionMaxMinutos is int && map.duracionMaxMinutos >= 1 && map.duracionMaxMinutos <= 1440)
+        );
+    }
+
+    function privacidadMensajesCreateValida(userId) {
+      let d = request.resource.data;
+      return d.schemaVersion == 'v1'
+        && d.cuentaUid == userId
+        && d.cuentaUid == request.auth.uid
+        && d.presencia is map
+        && privacidadMensajesPresenciaValida(d.presencia.estadoEnLinea)
+        && privacidadMensajesPresenciaValida(d.presencia.ultimaConexion)
+        && d.presencia.confirmacionVisto in ['oculto', 'visible']
+        && d.disponibilidad in ['oculto', 'horario_negocio', 'preguntar']
+        && privacidadMensajesAudienciaValida(d.mensajesDe)
+        && privacidadMensajesAudienciaValida(d.llamadasDe)
+        && privacidadMensajesAudienciaValida(d.videollamadasDe)
+        && privacidadMensajesAudienciaValida(d.archivosDe)
+        && privacidadMensajesAudienciaValida(d.estadosDe)
+        && privacidadMensajesAudienciaValida(d.livesDe)
+        && privacidadMensajesUbicacionMapValida(d.ubicacionPolitica)
+        && d.creadoEn is timestamp
+        && d.actualizadoEn is timestamp;
+    }
+
+    function privacidadMensajesUpdateDuenoValida(userId) {
+      let diff = request.resource.data.diff(resource.data);
+      let keys = diff.affectedKeys();
+      return request.resource.data.cuentaUid == userId
+        && request.resource.data.cuentaUid == resource.data.cuentaUid
+        && request.resource.data.schemaVersion == resource.data.schemaVersion
+        && request.resource.data.creadoEn == resource.data.creadoEn
+        && keys.hasOnly([
+          'presencia',
+          'disponibilidad',
+          'mensajesDe',
+          'llamadasDe',
+          'videollamadasDe',
+          'archivosDe',
+          'estadosDe',
+          'livesDe',
+          'ubicacionPolitica',
+          'actualizadoEn'
+        ])
+        && privacidadMensajesPresenciaValida(request.resource.data.presencia.estadoEnLinea)
+        && privacidadMensajesPresenciaValida(request.resource.data.presencia.ultimaConexion)
+        && request.resource.data.presencia.confirmacionVisto in ['oculto', 'visible']
+        && request.resource.data.disponibilidad in ['oculto', 'horario_negocio', 'preguntar']
+        && privacidadMensajesAudienciaValida(request.resource.data.mensajesDe)
+        && privacidadMensajesAudienciaValida(request.resource.data.llamadasDe)
+        && privacidadMensajesAudienciaValida(request.resource.data.videollamadasDe)
+        && privacidadMensajesAudienciaValida(request.resource.data.archivosDe)
+        && privacidadMensajesAudienciaValida(request.resource.data.estadosDe)
+        && privacidadMensajesAudienciaValida(request.resource.data.livesDe)
+        && privacidadMensajesUbicacionMapValida(request.resource.data.ubicacionPolitica)
+        && request.resource.data.actualizadoEn is timestamp;
+    }
+
     // ── Colecciones raíz ──────────────────────────────────────────────
 
     match /usuarios/{userId} {
       allow read: if isPublicProfile() || isOwner(userId) || isAdmin();
       allow create: if isOwner(userId) && usuarioCreateValido(userId);
-      allow update: if (isOwner(userId) && usuarioUpdateDuenoValido()) || isAdmin();
+      allow update: if (isOwner(userId) && usuarioUpdateDuenoValido())
+        || (isOwner(userId) && usuarioAgregarPerfilValido())
+        || (isOwner(userId) && usuarioPerfilActivoValido())
+        || isAdmin();
       allow delete: if isAdmin();
     }
 
@@ -120,7 +581,8 @@ service cloud.firestore {
       allow read: if (isNonAnonymous()
           && resource.data.uidAnunciante == request.auth.uid)
         || isAdmin();
-      allow create: if isNonAnonymous() && solicitudCreateValida();
+      allow create: if isNonAnonymous()
+        && (solicitudCreateValida() || solicitudDashboardCreateValida());
       allow update: if isAdmin();
       allow delete: if false;
     }
@@ -207,6 +669,84 @@ service cloud.firestore {
       allow create: if isOwner(userId);
       allow update: if isOwner(userId);
       allow delete: if isOwner(userId);
+    }
+
+    match /usuarios/{userId}/bloqueos/{bloqueadoUid} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId) && bloqueoMessengerCreateValido(userId, bloqueadoUid);
+      allow delete: if isOwner(userId);
+      allow update: if false;
+    }
+
+    match /usuarios/{userId}/anuncios_mensajes/{anuncioId} {
+      allow read: if isOwner(userId);
+      allow create: if isOwner(userId) && anuncioMensajesCreateValido();
+      allow update: if isOwner(userId) && anuncioMensajesUpdateDuenoValido();
+      allow delete: if isOwner(userId);
+    }
+
+    match /usuarios/{userId}/notificaciones/{notificacionId} {
+      allow read: if isOwner(userId);
+      allow create: if false;
+      allow update: if isOwner(userId) && notificacionUpdateDuenoValido();
+      allow delete: if false;
+    }
+
+    match /usuarios/{userId}/solicitudes_negocio/{solicitudId} {
+      allow read: if isOwner(userId)
+        || isAdmin()
+        || (isNonAnonymous() && resource.data.contraparteCuentaUid == request.auth.uid);
+      allow create: if false;
+      allow update: if isOwner(userId) && solicitudNegocioUpdateDuenoValido();
+      allow delete: if false;
+    }
+
+    match /usuarios/{userId}/privacidad_mensajes/{docId} {
+      allow read: if isOwner(userId) || isAdmin() || isNonAnonymous();
+      allow create: if isOwner(userId)
+        && privacidadMensajesDocIdValido(docId)
+        && privacidadMensajesCreateValida(userId);
+      allow update: if isOwner(userId)
+        && privacidadMensajesDocIdValido(docId)
+        && privacidadMensajesUpdateDuenoValida(userId);
+      allow delete: if isAdmin();
+    }
+
+    match /publicaciones_perfil/{pubId} {
+      allow read: if (isNonAnonymous()
+          && resource.data.cuentaUid == request.auth.uid)
+        || isAdmin();
+      allow create: if isNonAnonymous() && publicacionPerfilCreateValida();
+      allow update: if isNonAnonymous() && publicacionPerfilUpdateDuenoValida();
+      allow delete: if isNonAnonymous()
+        && resource.data.cuentaUid == request.auth.uid;
+    }
+
+    match /conversaciones/{conversacionId} {
+      allow read: if isNonAnonymous()
+        && (conversacionEsParticipante(resource.data) || isAdmin());
+      allow create: if isNonAnonymous() && conversacionCreateValida();
+      allow update: if isNonAnonymous()
+        && (conversacionUpdateParticipanteValida() || isAdmin());
+      allow delete: if isAdmin();
+
+      match /mensajes/{mensajeId} {
+        allow read: if isNonAnonymous()
+          && (conversacionEsParticipante(
+                get(/databases/$(database)/documents/conversaciones/$(conversacionId)).data
+              ) || isAdmin());
+        allow create: if isNonAnonymous() && mensajeCreateValido(conversacionId);
+        allow update: if isNonAnonymous() && mensajeMarcarVistoValido(conversacionId);
+        allow delete: if false;
+      }
+    }
+
+    match /reportes_mensajeria/{reporteId} {
+      allow read: if isNonAnonymous()
+        && (resource.data.reportanteId == request.auth.uid || isAdmin());
+      allow create: if isNonAnonymous() && reporteMensajeriaCreateValida();
+      allow update: if isAdmin() && reporteMensajeriaUpdateAdminValida();
+      allow delete: if false;
     }
 
     // ── Denegar todo lo demás ─────────────────────────────────────────

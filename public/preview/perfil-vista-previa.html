@@ -19,6 +19,7 @@
 <script src="../js/carihub-public-render-lite.js"></script>
 <script src="../js/resultados-demo.js"></script>
 <script src="../js/perfil-publico-init.js"></script>
+<script src="../js/carihub-messenger-privacidad-ui.js"></script>
 <script src="../js/perfil-contactos.js"></script>
 <script src="../js/perfil-gratificar.js"></script>
 <script src="../js/perfil-enlaces.js"></script>
@@ -2472,7 +2473,7 @@ DEMO.masajesLocal={
   actividadWhen:"Hoy, 11:00 AM",
   actividadAvatar:"assets/adultos-user/img-08.jpg",
   liveTitulo:"En vivo: recorrido por cabinas y menú de masajes",
-  liveFecha:"Hoy", liveHora:"En curso",
+  liveFecha:"Hoy", liveHora:"Promo programada",
   liveEspectadores:9,
   rating:"4.9", opiniones:186,
   reviews:[
@@ -2928,14 +2929,29 @@ function idlocPinIcon(){
     '<path d="M12 21c4.5-5 7-8.3 7-11a7 7 0 1 0-14 0c0 2.7 2.5 6 7 11z" fill="#E91E63"/>'+
     '<circle cx="12" cy="10" r="2.5" fill="#fff"/></svg></span>';
 }
+function idlocHorarioIcon(){
+  return '<span class="idloc__ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>';
+}
+function dispPublica(text){
+  if(window.CariHubMessengerPrivacidadUi&&CariHubMessengerPrivacidadUi.sanitizeDisponibilidad){
+    return CariHubMessengerPrivacidadUi.sanitizeDisponibilidad(text);
+  }
+  return text||"Consultar disponibilidad";
+}
+function idlocUbicacionHTML(u,loc){
+  var horario=window.CariHubMessengerPrivacidadUi&&CariHubMessengerPrivacidadUi.idlocHorarioHtml
+    ? CariHubMessengerPrivacidadUi.idlocHorarioHtml(u.disponibilidad)
+    : '<span class="idloc__horario">'+safe(dispPublica(u.disponibilidad))+'</span>';
+  return '<div class="idloc">'+S.chShield(u.estado)+' '+safe(loc)+' '+horario+'</div>';
+}
 function idlocAvailIcon(){
-  return '<span class="idloc__ic" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true">'+
-    '<circle cx="12" cy="12" r="10" fill="#22c55e"/>'+
-    '<path d="M7.5 12.2 10.5 15.2 16.5 9.2" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg></span>';
+  return idlocHorarioIcon();
 }
 function idlocRow(kind, text){
-  var ic = kind==="av" ? idlocAvailIcon() : idlocPinIcon();
-  return '<div class="idloc'+(kind==="av"?" av":"")+'">'+ic+'<span>'+safe(text)+'</span></div>';
+  if(kind==="av"){
+    return '<div class="idloc idloc--horario">'+idlocHorarioIcon()+'<span>'+safe(dispPublica(text))+'</span></div>';
+  }
+  return '<div class="idloc">'+idlocPinIcon()+'<span>'+safe(text)+'</span></div>';
 }
 // Íconos del trío inferior: rayo y barras rellenos, calendario en contorno (rosa)
 function t3icon(n){
@@ -3542,7 +3558,7 @@ function panelLive(u, esEmpresa){
     ? "Transmisión en vivo · presentación y preguntas"
     : "Cómo prevenir fugas de agua y ahorrar en tu consumo.");
   return '<div class="pcard"><div class="pcard__h">📡 En vivo / Transmisión <a class="lnk" href="#">Ver todas</a></div>'+
-    '<div class="feed"><div class="thumb">'+livePreviewImgHTML(u.nombre+" en vivo")+'<span class="live">● LIVE</span>'+
+    '<div class="feed"><div class="thumb">'+livePreviewImgHTML(u.nombre+" en vivo")+'<span class="live">LIVE · Promo</span>'+
       liverainHTML()+'</div>'+
     '<div class="livebox"><b>PRÓXIMO LIVE</b><br>📅 Sábado 25 de mayo · 🕕 6:00 PM<br>'+safe(titulo)+'<br><span class="lbtn">🔔 Activar recordatorio</span>'+
       '<div class="donrow">'+S.chCoin({size:"sm"})+'<span>Donaciones en vivo: <b>128 monedas</b></span></div>'+
@@ -3660,14 +3676,18 @@ function panelActividadCompact(u, esEmpresa){
 function panelLiveCompact(u){
   var titulo = u.liveTitulo || "Transmisión en vivo: presentación y preguntas";
   var fecha = u.liveFecha || "Sábado 25 de mayo";
-  var hora = u.liveHora || "6:00 PM";
+  var horaRaw = u.liveHora || "6:00 PM";
+  var hora = (window.CariHubMessengerPrivacidadUi && CariHubMessengerPrivacidadUi.sanitizeLiveHora)
+    ? CariHubMessengerPrivacidadUi.sanitizeLiveHora(horaRaw) : horaRaw;
+  var liveBadge = (window.CariHubMessengerPrivacidadUi && CariHubMessengerPrivacidadUi.livePromoLabel)
+    ? CariHubMessengerPrivacidadUi.livePromoLabel() : "LIVE · Promo";
   var thumbHtml = livePreviewImgHTML(titulo);
   return '<div class="pcard live-card playout__live">'+
-    '<div class="live-card__head">'+liveBroadcastIcon()+'<span>EN VIVO / TRANSMISIÓN</span></div>'+
+    '<div class="live-card__head">'+liveBroadcastIcon()+'<span>PROMO EN VIVO</span></div>'+
     '<div class="live-card__inner">'+
       '<div class="live-card__thumb">'+thumbHtml+
         '<span class="live-card__coin">'+S.chCoin({size:"sm"})+'</span>'+
-        '<span class="live-card__badge">'+liveBadgeIcon()+' LIVE</span></div>'+
+        '<span class="live-card__badge">'+liveBadgeIcon()+' '+safe(liveBadge)+'</span></div>'+
       '<div class="live-card__body">'+
         '<div class="live-card__title">'+liveCalIcon()+'<span>PRÓXIMO LIVE</span></div>'+
         '<div class="live-card__when">'+
@@ -3693,19 +3713,18 @@ function panelLiveNegocio(u,solo){
   var thumbHtml=livePreviewImgHTML(desc);
   return '<div class="pcard live-neg playout__live">'+
     '<div class="live-neg__head">'+
-      '<div class="live-neg__head-left">'+liveBroadcastIcon()+'<span>En vivo / Transmisión</span></div>'+
+      '<div class="live-neg__head-left">'+liveBroadcastIcon()+'<span>Promo en vivo</span></div>'+
     '</div>'+
     '<div class="live-neg__inner">'+
       '<div class="live-neg__body">'+
         '<div class="live-neg__status">'+
-          '<span class="live-neg__now">'+liveBroadcastIcon()+' En vivo</span>'+
-          '<span class="live-neg__viewers">'+liveViewersIcon()+' '+safe(String(viewers))+' espectadores</span>'+
+          '<span class="live-neg__now">'+liveBroadcastIcon()+' Promo programada</span>'+
         '</div>'+
         '<p class="live-neg__desc">'+safe(desc)+'</p>'+
-        '<a class="live-neg__cta" href="#">Ver transmisión</a>'+
+        '<a class="live-neg__cta" href="#">Ver promo</a>'+
       '</div>'+
       '<div class="live-neg__thumb">'+thumbHtml+
-        '<span class="live-neg__badge">'+liveBadgeIcon()+' LIVE</span></div>'+
+        '<span class="live-neg__badge">'+liveBadgeIcon()+' LIVE · Promo</span></div>'+
     '</div></div>';
 }
 
@@ -4450,7 +4469,7 @@ DEMO.pareja={
   actividadWhen:"Hoy, 11:20 AM",
   actividadAvatar:"assets/adultos-user/img-02.jpg",
   liveTitulo:"En vivo: recorrido por nuestro espacio privado",
-  liveFecha:"Hoy", liveHora:"En curso",
+  liveFecha:"Hoy", liveHora:"Promo programada",
   liveEspectadores:8,
   donacionesHoy:5,
   rating:"4.8", opiniones:176,
@@ -4526,7 +4545,7 @@ DEMO.unicorn={
   actividadWhen:"Hoy, 3:15 PM",
   actividadAvatar:"assets/adultos-user/img-17.jpg",
   liveTitulo:"En vivo: preguntas sobre dinámica unicorn",
-  liveFecha:"Hoy", liveHora:"En curso",
+  liveFecha:"Hoy", liveHora:"Promo programada",
   liveEspectadores:6,
   rating:"4.9", opiniones:48,
   reviews:[
@@ -4671,7 +4690,7 @@ DEMO.stripper={
   actividadWhen:"Hoy, 9:15 AM",
   actividadAvatar:"assets/adultos-user/img-22.jpg",
   liveTitulo:"En vivo: show exclusivo desde el escenario",
-  liveFecha:"Hoy", liveHora:"En curso",
+  liveFecha:"Hoy", liveHora:"Promo programada",
   liveEspectadores:15,
   liveDesc:"Disfruta shows en vivo exclusivos · Interacción privada disponible · Solo por tiempo limitado",
   donacionesHoy:7,
@@ -4715,7 +4734,7 @@ DEMO.tableDance={
   actividad:"Nuevo show de table dance disponible este fin de semana en antro centro.",
   actividadWhen:"Hoy, 8:30 AM",
   liveTitulo:"En vivo: show exclusivo desde el escenario",
-  liveFecha:"Hoy", liveHora:"En curso",
+  liveFecha:"Hoy", liveHora:"Promo programada",
   direccionLineas:["Centro / San Pedro, Monterrey","Zona segura · se confirma al reservar"],
   ubicacionPerks:["Zona céntrica","Cerca de antros","Discreción garantizada"],
   ubicacionImg:HOTEL_IMGS.ubicacion
@@ -4860,7 +4879,7 @@ DEMO.creador={
   tagline:"Contenido exclusivo, suscripciones y lives privados. Verificada.",
   precio:"299", moneda:"MXN", tiempoMinimo:"Suscripción mensual",
   metodosPago:["Pago en línea","Transferencia"],
-  modalidades:["recibe"], disponibilidad:"Activa en línea",
+  modalidades:["recibe"], disponibilidad:"Consultar horario",
   respuesta:"Responde en menos de 1 hora", nivelActividad:"Muy activa", miembroDesde:"Febrero 2023",
   sobreMi:"Creadora de contenido adulto verificada. Publico diario, lives semanales y contenido personalizado bajo pedido. Discreción y respeto siempre.",
   estatura:"1.66 m", peso:"52 kg", complexion:"Delgada", cabello:"Rubio", ojos:"Verdes", tatuajes:"Sí", piercings:"No",
@@ -5337,7 +5356,7 @@ function negocioPerfilTagsHTML(u){
   return html;
 }
 function idlocRowDotAvail(text){
-  return '<div class="idloc av idloc--dot"><span class="idloc__ic">'+disponibleStatusIcon()+'</span><span>'+safe(text)+'</span></div>';
+  return '<div class="idloc idloc--horario">'+idlocHorarioIcon()+'<span>'+safe(dispPublica(text||"Consultar disponibilidad"))+'</span></div>';
 }
 function negocioIdCardHTML(u){
   var loc=[u.ciudad,u.estado].filter(Boolean).join(", ");
@@ -5812,7 +5831,7 @@ function renderMedicoProfesional(u){
     '<div class="pcard">'+
       '<div class="idhead"><h1>'+safe(nombre)+'</h1>'+verificadoBadge("Cédula verificada")+'</div>'+
       '<div class="idsub">'+safe(u.titulo||u.especialidad)+'</div>'+
-      '<div class="idloc">'+S.chShield(u.estado)+' '+safe(loc)+' <span class="av">● '+safe(u.disponibilidad)+'</span></div>'+
+      idlocUbicacionHTML(u, loc)+
       '<div class="pro-cedula-badge" style="margin-top:10px">🎓 Profesionista verificado · CariHub</div>'+
       '<div class="dlist" style="margin-top:14px">'+datosHTML+'</div>'+
     '</div>'+
@@ -5895,7 +5914,7 @@ function renderProEmpresa(u, esEmpresa){
     '<div class="pcard">'+
       '<div class="idhead"><h1>'+safe(u.nombre)+'</h1>'+verificadoBadge(verLabel)+(u.edad?'<span class="age">'+u.edad+' años</span>':'')+'</div>'+
       '<div class="idsub">'+safe(u.titulo)+'</div>'+
-      '<div class="idloc">'+S.chShield(u.estado)+' '+safe(loc)+' <span class="av">● '+safe(u.disponibilidad)+'</span></div>'+
+      idlocUbicacionHTML(u, loc)+
       '<div class="tabs">'+tabsHTML+'</div>'+
       '<div class="dlist" style="margin-top:14px">'+datosHTML+'</div>'+
     '</div>'+

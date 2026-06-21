@@ -7,6 +7,8 @@
  *   node scripts/create-github-issues.mjs
  *   node scripts/create-github-issues.mjs --dry-run
  *   node scripts/create-github-issues.mjs --from TICKET-030
+ *   node scripts/create-github-issues.mjs --plan messenger --dry-run
+ *   node scripts/create-github-issues.mjs --plan messenger-sprint-1
  *
  * Token: GitHub → Settings → Developer settings → Personal access tokens
  * Scopes: repo (o public_repo si repo público)
@@ -16,13 +18,22 @@ import { dirname, join } from "path";
 import { fileURLToPath } from "url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const planPath = join(__dirname, "github-issues-dashboard-plan.json");
-const plan = JSON.parse(readFileSync(planPath, "utf8"));
+
+const PLAN_FILES = {
+  dashboard: "github-issues-dashboard-plan.json",
+  messenger: "github-issues-messenger-master-plan.json",
+  "messenger-sprint-1": "github-issues-messenger-sprint-1.json",
+};
 
 const args = process.argv.slice(2);
 const dryRun = args.includes("--dry-run");
 const fromIdx = args.indexOf("--from");
 const fromId = fromIdx >= 0 ? args[fromIdx + 1] : null;
+const planIdx = args.indexOf("--plan");
+const planKey = planIdx >= 0 ? args[planIdx + 1] : "dashboard";
+const planFile = PLAN_FILES[planKey] || planKey;
+const planPath = join(__dirname, planFile);
+const plan = JSON.parse(readFileSync(planPath, "utf8"));
 
 const token = process.env.GITHUB_TOKEN || process.env.GH_TOKEN;
 if (!token && !dryRun) {
@@ -96,7 +107,13 @@ async function main() {
     issues = issues.slice(i);
   }
 
+  const planLabel = plan.planId || planKey;
+  console.log(`Plan: ${planLabel} (${planFile})`);
   console.log(`Repo: ${plan.repo} | Issues: ${issues.length} | dry-run: ${dryRun}\n`);
+  if (plan.ordenRecomendado) {
+    console.log("Orden recomendado:", plan.ordenRecomendado.join(" → "));
+    console.log("");
+  }
 
   if (!dryRun) await ensureLabels();
 

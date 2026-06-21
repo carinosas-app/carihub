@@ -1,0 +1,68 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "modulo": "solicitudes_negocio",
+  "version": "1.0.0",
+  "fecha": "2026-06-20",
+  "ticket": "TICKET-043",
+  "descripcion": "Solicitudes de conexión de negocio scoped por publicación activa (perfil/banner). No es red de amigos — solicitudes tipadas con aceptar/rechazar.",
+  "referencias": [
+    "scripts/ANEXO-RED-CONTACTOS-CONEXIONES-NEGOCIO.json",
+    ".cursor/rules/dashboard-mensajes-vision.mdc"
+  ],
+  "coleccion": {
+    "ruta": "usuarios/{cuentaUid}/solicitudes_negocio/{solicitudId}",
+    "scopedKey": ["cuentaUid", "contextoTipo", "contextoId"],
+    "nota": "Lista del dashboard filtra por contexto del rail izquierdo; mensajes internos siguen en Messenger scoped."
+  },
+  "campos": {
+    "cuentaUid": "string — dueño del dashboard que ve la solicitud",
+    "contextoTipo": "perfil | banner | cuenta",
+    "contextoId": "perfilId, bannerId o uid hub",
+    "direccion": "recibida | enviada — perspectiva del contexto activo",
+    "estado": "pendiente | aceptada | rechazada | bloqueada",
+    "tipoArista": "colaboracion | alianza_b2b | patrocinio | contacto_profesional | hospedaje | evento | referido",
+    "tipoEntidadOrigen": "perfil | negocio | anunciante",
+    "tipoEntidadDestino": "perfil | negocio | anunciante",
+    "contraparteId": "perfilId o negocioId del otro actor",
+    "contraparteCuentaUid": "uid cuenta contraparte",
+    "contraparteNombre": "string",
+    "contraparteCategoria": "string",
+    "contraparteCiudad": "string",
+    "contraparteEstado": "string",
+    "contraparteImg": "url",
+    "contraparteVerificado": "boolean",
+    "mensaje": "string — intro opcional al solicitar",
+    "propuesta": "string — términos breves (evento, fechas, %)",
+    "leido": "boolean — badge rail si pendiente no leída",
+    "bloqueado": "boolean — tab bloqueados",
+    "creadoEn": "timestamp",
+    "actualizadoEn": "timestamp"
+  },
+  "tabsDashboard": {
+    "recibidas": "direccion=recibida AND estado=pendiente",
+    "enviadas": "direccion=enviada",
+    "socios": "estado=aceptada",
+    "pendientes": "estado=pendiente (ambas direcciones)",
+    "bloqueados": "estado=bloqueada OR (estado=rechazada AND bloqueado)"
+  },
+  "tiposAristaUI": [
+    { "id": "colaboracion", "label": "Colaboración", "icon": "handshake" },
+    { "id": "alianza_b2b", "label": "Alianza B2B", "icon": "building" },
+    { "id": "patrocinio", "label": "Patrocinio", "icon": "megaphone" },
+    { "id": "contacto_profesional", "label": "Contacto profesional", "icon": "briefcase" },
+    { "id": "hospedaje", "label": "Hospedaje / venue", "icon": "bed" },
+    { "id": "evento", "label": "Evento privado", "icon": "calendar" },
+    { "id": "referido", "label": "Referido", "icon": "user-plus" }
+  ],
+  "acciones": {
+    "aceptar": "estado → aceptada; notificación al emisor (futuro EventBus)",
+    "rechazar": "estado → rechazada",
+    "bloquear": "estado → bloqueada + bloqueado true; sin re-solicitud 30d (futuro)",
+    "mensaje": "abre Messenger scoped al contexto activo (no mezcla hilos)"
+  },
+  "antiPatrones": [
+    "Inbox único de solicitudes sin contexto",
+    "Botón agregar amigo",
+    "Mezclar solicitudes de perfil A con perfil B"
+  ]
+}

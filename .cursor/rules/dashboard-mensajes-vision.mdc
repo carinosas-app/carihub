@@ -95,3 +95,26 @@ Si banner no está pagado/vigente → conversaciones de ese banner **bloqueadas*
 - Inbox único mezclando todos los perfiles y banners.
 - Lista “Tus banners publicitarios activos” desconectada del contexto de mensajes.
 - Rediseñar la shell 3 columnas; solo acoplar izquierda + módulo mensajes.
+
+## Mapa nav derecho vs rail izquierdo (TICKET-025)
+
+| Zona | Qué muestra | No duplicar en nav derecho |
+|------|-------------|----------------------------|
+| **Rail izq. — Perfiles** | Selector de perfil activo (+ Nuevo perfil) | No hay ítem “Perfiles” en nav; el contexto filtra mensajes, inicio, publicaciones |
+| **Rail izq. — Banners** | Tiles de banners contratados (+ Agregar banner) | ~~Banners y destacados~~ → **Mensajes por banner** (entra a módulo Mensajes con contexto banner) |
+| **Rail izq. — Lives** | Lives propios (+ Nuevo live) | Nav **En vivos** = feed de socios (distinto) |
+| **Nav — Mensajes** | Inbox del contexto rail (perfil o banner según tile) | Filtro real = rail, no un inbox plano |
+| **Nav — Mis publicaciones** | Admin estados/lives/promos del **perfil activo** | Distinto del widget izq. “Anuncio activo” (atajo rápido) |
+| **Nav — Anunciar / Transmitir** | Estudios de creación | Acciones, no listados de activos |
+
+**Regla:** listados de activos (perfiles, banners, lives propios) viven en el **rail izquierdo**. El nav derecho abre **módulos de acción o bandejas** scoped al tile seleccionado.
+
+## Resolución módulos huérfanos (TICKET-026)
+
+| Módulo | Decisión | Acceso |
+|--------|----------|--------|
+| `feed-red` | **Fusionado** en `estados` | Nav **Red de socios** + Inicio «Ver todos» |
+| `directorio` | **Eliminado** (DOM) | Alias → módulo **Buscar** |
+| `medios-contacto` | **Nav nuevo** | Nav **Medios contacto** |
+| `info-publica` | **Nav nuevo** | Nav **Info pública** + tarjeta «Editar tarjeta» |
+| `banners` (lista) | Oculto | Rail izq. + nav **Mensajes por banner** |
