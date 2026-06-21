@@ -689,15 +689,21 @@ const CATEGORIAS_BUSCADOR = [
     <div id="vistaCuentaEntrar">
       <p class="subtitulo">Entra con tu correo o teléfono y tu contraseña. Administra tu cuenta social, mensajes, favoritos y gratificaciones.</p>
       <input id="loginEmail" type="text" placeholder="Correo o teléfono" autocomplete="username">
-      <input id="loginPassword" type="password" placeholder="Contraseña" autocomplete="current-password">
-      <button class="btn btn-continuar" style="width:100%;margin-top:10px;" onclick="loginMiPerfil()">Entrar</button>
+      <span class="password-toggle-wrap">
+        <input id="loginPassword" type="password" placeholder="Contraseña" autocomplete="current-password">
+        <button type="button" class="password-toggle-btn" data-toggle-for="loginPassword" title="Mostrar contraseña" aria-label="Mostrar contraseña">🙈</button>
+      </span>
+      <button type="button" class="btn btn-continuar" id="btnLoginEntrar" style="width:100%;margin-top:10px;" disabled onclick="loginMiPerfil()">Entrar</button>
       <button class="btn btn-atras" style="width:100%;margin-top:10px;" onclick="mostrarVistaCuenta('crear')">Crear cuenta</button>
     </div>
 
     <div id="vistaCuentaCrear" style="display:none;">
       <p class="subtitulo">Crea tu cuenta social para mensajes, favoritos, seguir perfiles, gratificaciones y participar en la red de negocios. No aparece en el directorio.</p>
       <input id="cuentaEmail" type="email" placeholder="Correo">
-      <input id="cuentaPassword" type="password" placeholder="Contraseña (mín. 6 caracteres)">
+      <span class="password-toggle-wrap">
+        <input id="cuentaPassword" type="password" placeholder="Contraseña (mín. 6 caracteres)">
+        <button type="button" class="password-toggle-btn" data-toggle-for="cuentaPassword" title="Mostrar contraseña" aria-label="Mostrar contraseña">🙈</button>
+      </span>
       <button class="btn btn-continuar" style="width:100%;margin-top:10px;" onclick="crearCuentaMinima()">Crear cuenta</button>
       <button class="btn btn-atras" style="width:100%;margin-top:10px;" onclick="mostrarVistaCuenta('entrar')">Ya tengo cuenta</button>
     </div>
@@ -874,6 +880,7 @@ function abrirMiPerfil(){
   cerrarMenu();
   mostrarVistaCuenta("entrar");
   document.getElementById("modalMiPerfil").style.display="block";
+  syncLoginEntrar();
 }
 
 function abrirCuentaPersonal(){
@@ -890,6 +897,30 @@ function mostrarVistaCuenta(modo){
   crear.style.display=modo==="crear"?"block":"none";
   const titulo=document.getElementById("modalCuentaTitulo");
   if(titulo) titulo.textContent=modo==="crear"?"Crear cuenta social":"Iniciar sesión";
+  if(modo==="entrar") syncLoginEntrar();
+}
+
+function syncLoginEntrar(){
+  const identificador=document.getElementById("loginEmail");
+  const password=document.getElementById("loginPassword");
+  const btn=document.getElementById("btnLoginEntrar");
+  if(!identificador||!password||!btn)return;
+  const listo=!!identificador.value.trim()&&!!password.value;
+  btn.disabled=!listo;
+}
+
+function initLoginSocialForm(){
+  const emailEl=document.getElementById("loginEmail");
+  const passEl=document.getElementById("loginPassword");
+  if(!emailEl||!passEl)return;
+  ["input","change"].forEach(function(evt){
+    emailEl.addEventListener(evt,syncLoginEntrar);
+    passEl.addEventListener(evt,syncLoginEntrar);
+  });
+  syncLoginEntrar();
+  if(window.CariHubPasswordToggle&&CariHubPasswordToggle.init){
+    CariHubPasswordToggle.init(document.getElementById("modalMiPerfil"));
+  }
 }
 
 function usuarioCuentaAutenticada(){
@@ -919,7 +950,14 @@ async function crearCuentaMinima(){
     }
     alert("Cuenta social creada. Ya puedes usar mensajes, favoritos y gratificaciones.");
   }catch(error){
-    alert("Error: "+error.message);
+    if(error&&error.code==="auth/email-already-in-use"){
+      alert("Este correo ya está registrado. Usa «Ya tengo cuenta» e inicia sesión con tu contraseña.");
+      const loginEmail=document.getElementById("loginEmail");
+      if(loginEmail) loginEmail.value=email;
+      mostrarVistaCuenta("entrar");
+      return;
+    }
+    alert("Error: "+(error&&error.message?error.message:"No se pudo crear la cuenta."));
   }
 }
 
@@ -1623,7 +1661,11 @@ async function loginMiPerfil(){
     }
     window.location.href="dashboard-rentero.html";
   }catch(error){
-    alert("Error: "+error.message);
+    if(error&&error.code==="auth/invalid-login-credentials"){
+      alert("Contraseña incorrecta o datos no válidos. Revisa tu contraseña e inténtalo de nuevo.");
+      return;
+    }
+    alert("Error: "+(error&&error.message?error.message:"No se pudo iniciar sesión."));
   }
 }
 
@@ -2282,6 +2324,8 @@ const params = new URLSearchParams(window.location.search);
   if(chkEdad)chkEdad.addEventListener("change",syncAntiBotContinuar);
   if(chkPromo)chkPromo.addEventListener("change",syncAntiBotContinuar);
 
+  initLoginSocialForm();
+
   if(abrir === "anuncio"){
     setTimeout(function(){
       window.location.href="registro-banner.html";
@@ -2328,6 +2372,7 @@ const params = new URLSearchParams(window.location.search);
 
 });
 </script>
+<script src="js/carihub-password-toggle.js"></script>
 <script src="js/carihub-pink-sheen.js"></script>
 <script src="js/hero-home.js"></script>
 <script src="js/sector-scroll-data.js"></script>
