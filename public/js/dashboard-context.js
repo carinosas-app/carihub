@@ -8,13 +8,15 @@
   var EVENT = 'carihub:dash-context-change';
   var STORAGE_KEY = 'carihub_dash_context';
 
-  var ctx = {
+  var emptyCtx = {
     tipo: 'perfil',
     id: null,
     perfilId: null,
     bannerId: null,
     solicitudId: null
   };
+
+  var ctx = Object.assign({}, emptyCtx);
 
   function normalize(input) {
     input = input || {};
@@ -104,10 +106,17 @@
     return get();
   }
 
-  function init(seed) {
+  function init(seed, opts) {
+    opts = opts || {};
     var fromQuery = readQueryContext();
     var fromStorage = restore();
-    var base = fromQuery || fromStorage || seed || null;
+    var preferSeed = opts.preferSeed === true;
+    var base = fromQuery
+      || (preferSeed && seed && seed.id ? seed : null)
+      || (!preferSeed && fromStorage)
+      || (preferSeed && fromStorage)
+      || seed
+      || null;
     if (base && base.id) {
       ctx = normalize(base);
       persist(ctx);
@@ -119,11 +128,19 @@
     return get();
   }
 
+  function clear() {
+    try {
+      global.sessionStorage.removeItem(STORAGE_KEY);
+    } catch (e) { /* ignore */ }
+    ctx = Object.assign({}, emptyCtx);
+  }
+
   global.DashContext = {
     EVENT: EVENT,
     init: init,
     get: get,
     set: set,
+    clear: clear,
     readQuery: readQueryContext,
     restore: restore,
     syncUrl: function () { syncUrl(ctx); },

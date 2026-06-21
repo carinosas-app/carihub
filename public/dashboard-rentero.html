@@ -2003,7 +2003,7 @@
         if(seleccion){
           publicacionActual=seleccion;
           contactoEditScope=null;
-          if(!opts.skipFirestore) guardarPerfilActivoId(seleccion.id);
+          guardarPerfilActivoId(seleccion.id);
         }
       }else if(ctx.tipo==="banner"){
         const b=resolveBannerPorId(ctx.bannerId||ctx.id);
@@ -2032,15 +2032,13 @@
       }
     }
 
-    function seedDashContextFromPublicacion(pub){
-      if(!window.DashContext||!pub||!pub.id) return;
-      if(pub.tipo==="perfil"){
-        DashContext.init({
-          tipo:"perfil",
-          id:pub.id,
-          perfilId:pub.perfilId||pub.id
-        });
-      }
+    function syncDashContextFromPublicacion(pub){
+      if(!window.DashContext||!pub||!pub.id||pub.tipo!=="perfil") return;
+      DashContext.set({
+        tipo:"perfil",
+        id:pub.id,
+        perfilId:pub.perfilId||pub.id
+      },{ force:true });
     }
 
     function aplicarDeepLinkContexto(){
@@ -2058,7 +2056,7 @@
           if(b) bannerActivo=b;
         }
       }
-      DashContext.init(q);
+      DashContext.set(q,{ force:true });
     }
 
     function listaPublicaciones(){
@@ -2254,8 +2252,10 @@
     async function guardarPerfilActivoId(perfilId){
       const user=auth.currentUser;
       if(!user||!perfilId) return;
+      if(dashHubDoc&&dashHubDoc.perfilActivoId===perfilId) return;
       try{
         await db.collection("usuarios").doc(user.uid).update({ perfilActivoId: perfilId });
+        if(dashHubDoc) dashHubDoc.perfilActivoId=perfilId;
       }catch(e){
         console.warn("[Dashboard] No se pudo guardar perfilActivoId:",e);
       }
@@ -2299,8 +2299,8 @@
       if(!user&&!preview){
         publicacionActual=publicacionesMock[0];
         bootDashContactos(null);
-        seedDashContextFromPublicacion(publicacionActual);
         aplicarDeepLinkContexto();
+        syncDashContextFromPublicacion(publicacionActual);
         syncAccountCapabilities();
         renderDashboard();
         const hint=document.getElementById("dashLoginHint");
@@ -2318,8 +2318,8 @@
           publicacionActual=publicacionesReales[0];
         }
         bootDashContactos(dashHubDoc);
-        seedDashContextFromPublicacion(publicacionActual);
         aplicarDeepLinkContexto();
+        syncDashContextFromPublicacion(publicacionActual);
         syncAccountCapabilities();
         renderDashboard();
         return;
@@ -2338,7 +2338,7 @@
           publicacionActual=null;
           aplicarDeepLinkContexto();
           if(!DashContext||!DashContext.get().id){
-            seedDashContextFromPublicacion(null);
+            syncDashContextFromPublicacion(null);
           }
           renderDashboard();
           const hint=document.getElementById("dashLoginHint");
@@ -2353,9 +2353,7 @@
         ||publicacionesReales[0]
         ||null;
       aplicarDeepLinkContexto();
-      if(!DashContext||!DashContext.get().id){
-        seedDashContextFromPublicacion(publicacionActual);
-      }
+      syncDashContextFromPublicacion(publicacionActual);
       syncAccountCapabilities();
       renderDashboard();
       const hint=document.getElementById("dashLoginHint");
@@ -4286,6 +4284,7 @@
         });
       });
       document.addEventListener("dash:logout-request",function(){
+        if(window.DashContext&&typeof DashContext.clear==="function") DashContext.clear();
         auth.signOut().then(function(){ window.location.href="index.html"; });
       });
     }
@@ -4427,7 +4426,7 @@
           const ctx=ev.detail&&ev.detail.context;
           const mod=window.DashModuleNav?DashModuleNav.getActive():null;
           if(mod==="mensajes"){
-            applyDashContext(ctx,{ light:true, skipFirestore:true });
+            applyDashContext(ctx,{ light:true });
             if(window.DashModuleNav){
               DashModuleNav.syncMensajesFromContext();
               DashModuleNav.renderMensajes();
@@ -4436,21 +4435,20 @@
             return;
           }
           if(mod==="avisos"&&window.DashModuleNav){
-            applyDashContext(ctx,{ light:true, skipFirestore:true });
+            applyDashContext(ctx,{ light:true });
             DashModuleNav.renderAvisos();
             syncActivosRail();
             return;
           }
           if(mod==="solicitudes"&&window.DashModuleNav){
-            applyDashContext(ctx,{ light:true, skipFirestore:true });
+            applyDashContext(ctx,{ light:true });
             DashModuleNav.renderSolicitudes();
             syncActivosRail();
             return;
           }
           const previewMods=["inicio","vista-perfil"];
           applyDashContext(ctx,{
-            light:!previewMods.includes(mod),
-            skipFirestore:previewMods.includes(mod)
+            light:!previewMods.includes(mod)
           });
           if(mod==="vista-perfil"&&typeof refrescarVistaPerfilModulo==="function"){
             refrescarVistaPerfilModulo();
@@ -4465,7 +4463,7 @@
         document.addEventListener("dash:module-change",function(ev){
           const mod=ev.detail&&ev.detail.module;
           if(mod==="inicio"||mod==="vista-perfil"){
-            applyDashContext(getDashContext(),{ light:true, skipFirestore:true });
+            applyDashContext(getDashContext(),{ light:true });
             if(mod==="vista-perfil"&&typeof refrescarVistaPerfilModulo==="function"){
               refrescarVistaPerfilModulo();
             }
