@@ -1,0 +1,134 @@
+{
+  "repo": "carinosas-app/carihub",
+  "planId": "messenger-sprint-1",
+  "sprintName": "Messenger Sprint 1 — Privacidad + prod + seguridad MVP",
+  "descripcion": "15 tickets priorizados para cerrar épica E3/E4 P1 y abrir privacidad rentero + seguridad MVP.",
+  "ordenRecomendado": [
+    "TICKET-049",
+    "TICKET-031",
+    "MSG-050",
+    "MSG-020",
+    "MSG-070",
+    "MSG-073",
+    "MSG-075",
+    "MSG-077",
+    "MSG-040",
+    "MSG-021",
+    "MSG-080",
+    "MSG-081",
+    "TICKET-042",
+    "TICKET-043",
+    "MSG-056"
+  ],
+  "notasSprint": [
+    "Semana 1: TICKET-049, TICKET-031, MSG-050 (UI limpia + rules testadas + sin MOCK prod).",
+    "Semana 2: MSG-020, MSG-070, MSG-073, MSG-075, MSG-077 (privacidad rentero end-to-end).",
+    "Semana 3: MSG-040, MSG-021, MSG-080, MSG-081 (visitante inbox + reportar/bloquear).",
+    "Paralelo si hay capacidad: TICKET-042, TICKET-043 (scoped avisos/solicitudes).",
+    "Cierre: MSG-056 (sin outbox localStorage)."
+  ],
+  "labels": [
+    "messenger",
+    "dashboard",
+    "backend",
+    "ux",
+    "security",
+    "p0-blocker",
+    "p1-next",
+    "p2-later",
+    "p3-future",
+    "sprint-1"
+  ],
+  "issues": [
+    {
+      "id": "TICKET-049",
+      "title": "[P1] Privacidad — eliminar estados activos / en línea",
+      "labels": ["dashboard", "ux", "p1-next", "sprint-1"],
+      "body": "## Anti-patrón\nNO mostrar: Estados activos, En línea, Conectado ahora, presencia.\n\n## Archivos\n- `dashboard-rentero.html`, `dashboard-rentero-nav.js`\n- `perfil-publico.html` (`.pro-online`, demo \"En línea\")\n- `dashboard-rentero-pro.css`\n\n## Criterios\n- [ ] 0 copy presencia en UI anunciante/visitante\n- [ ] Lives = promo, no online indicator\n\n## Épica\nE1/E4 | Sprint 1 #1"
+    },
+    {
+      "id": "TICKET-031",
+      "title": "[P1] Firestore rules Messenger v1 + tests emulador",
+      "labels": ["messenger", "backend", "security", "p1-next", "sprint-1"],
+      "body": "## Alcance\n`conversaciones`, `mensajes` subcolección.\n\n## Criterios\n- [ ] Owner/participante sin cross-cuenta\n- [ ] Suite emulador en repo\n- [ ] `firebase deploy --only firestore:rules` documentado\n\n## Dep\nTICKET-030\n\n## Épica\nE3 | Sprint 1 #2"
+    },
+    {
+      "id": "MSG-050",
+      "title": "[P1] Producción — eliminar MOCK conversaciones/mensajes",
+      "labels": ["messenger", "dashboard", "p1-next", "sprint-1"],
+      "body": "## Archivos\n`dashboard-rentero-nav.js`, `dashboard-rentero.html`\n\n## Criterios\n- [ ] `usesMockMensajes()` solo con `?preview=1`\n- [ ] Cuenta real → solo DashboardMessenger + Firestore\n\n## Dep\nTICKET-040\n\n## Épica\nMSG-F4 | Sprint 1 #3"
+    },
+    {
+      "id": "MSG-020",
+      "title": "[P1] Schema privacidad_mensajes (Firestore + JSON)",
+      "labels": ["messenger", "backend", "p1-next", "sprint-1"],
+      "body": "## Default\nTodo oculto / opt-in rentero.\n\n## Entregable\n`scripts/config-privacidad-mensajes-schema.json`\n\n## Campos clave\nconfirmacionVisto, estadoEnLinea, ultimaConexion, mensajesDe, llamadasDe, ubicacionPolitica.\n\n## Dep\nMSG-010 (diseño) — puede implementarse como doc en usuarios/{uid}\n\n## Épica\nMSG-F2 | Sprint 1 #4"
+    },
+    {
+      "id": "MSG-070",
+      "title": "[P1] Pantalla Privacidad de Mensajes (dashboard)",
+      "labels": ["messenger", "dashboard", "ux", "p1-next", "sprint-1"],
+      "body": "## UI\nMódulo o panel en dashboard rentero: \"Privacidad de Mensajes\".\n\n## Dep\nMSG-020, TICKET-049\n\n## Épica\nMSG-F6 | Sprint 1 #5"
+    },
+    {
+      "id": "MSG-073",
+      "title": "[P1] Privacidad — confirmación \"Visto\" (mostrar/ocultar)",
+      "labels": ["messenger", "dashboard", "ux", "p1-next", "sprint-1"],
+      "body": "## Regla\nSi oculto: no Visto, hora lectura ni confirmación al otro.\n\n## UI\nToggle en MSG-070.\n\n## Dep\nMSG-070\n\n## Épica\nMSG-F6 | Sprint 1 #6"
+    },
+    {
+      "id": "MSG-075",
+      "title": "[P1] Privacidad — quién puede mensaje/llamar/archivos/estados/lives",
+      "labels": ["messenger", "dashboard", "p1-next", "sprint-1"],
+      "body": "## Opciones\ntodos | registrados | contactos | favoritos | nadie\n\n## Dep\nMSG-070, MSG-020\n\n## Épica\nMSG-F6 | Sprint 1 #7"
+    },
+    {
+      "id": "MSG-077",
+      "title": "[P1] Enforcement privacidad en API + UI visitante",
+      "labels": ["messenger", "backend", "security", "p1-next", "sprint-1"],
+      "body": "## Alcance\n`dashboard-messenger.js`, `home-messenger.js`, `perfil-contactos.js`\n\n## Criterios\n- [ ] Rechazo si política no permite mensaje\n- [ ] No filtrar datos privados (tel/email) en chat\n\n## Dep\nMSG-075, TICKET-031\n\n## Épica\nMSG-F6 | Sprint 1 #8"
+    },
+    {
+      "id": "MSG-040",
+      "title": "[P1] Visitante — inbox y ver hilo propio",
+      "labels": ["messenger", "ux", "p1-next", "sprint-1"],
+      "body": "## Objetivo\nVisitante autenticado ve chats donde es visitanteUid.\n\n## Dep\nTICKET-041, índice visitanteUid\n\n## Épica\nMSG-F4 | Sprint 1 #9"
+    },
+    {
+      "id": "MSG-021",
+      "title": "[P1] Schema reportes_mensajeria",
+      "labels": ["messenger", "backend", "security", "p1-next", "sprint-1"],
+      "body": "## Entregable\n`scripts/config-reportes-mensajeria-schema.json` + rules stub\n\n## Dep\nMSG-010\n\n## Épica\nMSG-F2 | Sprint 1 #10"
+    },
+    {
+      "id": "MSG-080",
+      "title": "[P1] Reportar mensaje / conversación",
+      "labels": ["messenger", "security", "p1-next", "sprint-1"],
+      "body": "## UI\nBotón en hilo dashboard + flujo visitante.\n\n## Dep\nMSG-021\n\n## Épica\nMSG-F7 | Sprint 1 #11"
+    },
+    {
+      "id": "MSG-081",
+      "title": "[P1] Bloquear / desbloquear usuario",
+      "labels": ["messenger", "security", "p1-next", "sprint-1"],
+      "body": "## Ruta\n`usuarios/{uid}/bloqueos/{bloqueadoUid}`\n\n## Dep\nMSG-022 schema, MSG-077\n\n## Épica\nMSG-F7 | Sprint 1 #12"
+    },
+    {
+      "id": "TICKET-042",
+      "title": "[P2] Avisos scoped por contexto perfil/banner",
+      "labels": ["messenger", "dashboard", "p2-later", "sprint-1"],
+      "body": "## Criterios\n- [ ] Reemplazar MOCK_AVISOS\n- [ ] Badge rail del perfil/banner afectado\n\n## Dep\nTICKET-030, TICKET-033\n\n## Épica\nE4 | Sprint 1 #13"
+    },
+    {
+      "id": "TICKET-043",
+      "title": "[P2] Solicitudes negocio scoped por contexto",
+      "labels": ["dashboard", "p2-later", "sprint-1"],
+      "body": "## Criterios\n- [ ] Reemplazar MOCK_SOLICITUDES\n- [ ] Filtrar por contexto activo rail\n\n## Dep\nTICKET-030\n\n## Épica\nE4 | Sprint 1 #14"
+    },
+    {
+      "id": "MSG-056",
+      "title": "[P1] Deprecar outbox localStorage home-mensajes",
+      "labels": ["messenger", "p1-next", "sprint-1"],
+      "body": "## Archivos\n`home-mensajes.js` — eliminar `chMensajesOutbox` fallback.\n\n## Dep\nMSG-040, TICKET-041\n\n## Épica\nE5 | Sprint 1 #15"
+    }
+  ]
+}

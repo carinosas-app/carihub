@@ -56,7 +56,11 @@
     if (key === 'of') return (c.onlyFansActivo === true || c.onlyfansActivo === true) && !!rawValor(u, key);
     if (key === 'x') return c.twitterActivo === true && !!rawValor(u, key);
     if (key === 'gmail') return c.correoActivo === true && !!rawValor(u, key);
-    if (key === 'msg') return c.mensajeInternoActivo === true;
+    if (key === 'msg') {
+      if (c.mensajeInternoActivo !== true) return false;
+      if (u.__mensajePrivacidadOk === false) return false;
+      return true;
+    }
     if (key === 'fb') return !!rawValor(u, key);
     return !!rawValor(u, key);
   }
@@ -141,6 +145,27 @@
     return '';
   }
 
+  function refrescarMsgEnDom(u) {
+    var ok = activo(u, 'msg');
+    if (!global.document) return;
+    global.document.querySelectorAll('a[href*="abrir=mensajes"]').forEach(function (el) {
+      el.style.display = ok ? '' : 'none';
+      el.setAttribute('aria-hidden', ok ? 'false' : 'true');
+      if (!ok) el.removeAttribute('href');
+    });
+  }
+
+  function evaluarMensajeInterno(u) {
+    u = u || {};
+    if (!global.CariHubMessengerPrivacidadEnforcement) {
+      return Promise.resolve(activo(u, 'msg'));
+    }
+    return global.CariHubMessengerPrivacidadEnforcement.precargarMensajeInterno(u).then(function (ok) {
+      refrescarMsgEnDom(u);
+      return ok;
+    });
+  }
+
   function lista(u) {
     u = u || {};
     var keys = Array.isArray(u.contactos) && u.contactos.length ? u.contactos.slice() : CANON.slice();
@@ -163,6 +188,9 @@
     lista: lista,
     contactLinks: contactLinks,
     buildHref: buildHref,
-    esDemo: esDemo
+    esDemo: esDemo,
+    activo: activo,
+    evaluarMensajeInterno: evaluarMensajeInterno,
+    refrescarMsgEnDom: refrescarMsgEnDom
   };
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -149,6 +149,55 @@
     await Promise.all(tareas);
   }
 
+  async function eliminarFavorito(perfilId) {
+    if (!cuentaReal()) return false;
+    try {
+      var user = auth().currentUser;
+      var firestore = db();
+      if (!firestore || !user || !perfilId) return false;
+      await firestore.collection('usuarios').doc(user.uid).collection('favoritos').doc(perfilId).delete();
+      return true;
+    } catch (error) {
+      console.warn('[CariHubFavoritos] eliminar', error);
+      return false;
+    }
+  }
+
+  async function listarFavoritos() {
+    if (!cuentaReal()) return [];
+    try {
+      var user = auth().currentUser;
+      var firestore = db();
+      if (!firestore || !user) return [];
+      var snap;
+      try {
+        snap = await firestore
+          .collection('usuarios')
+          .doc(user.uid)
+          .collection('favoritos')
+          .orderBy('fechaGuardado', 'desc')
+          .get();
+      } catch (orderErr) {
+        snap = await firestore.collection('usuarios').doc(user.uid).collection('favoritos').get();
+      }
+      return snap.docs.map(function (doc) {
+        var d = doc.data() || {};
+        return {
+          perfilId: doc.id,
+          nombre: d.nombre || '',
+          ciudad: d.ciudad || '',
+          estado: d.estado || '',
+          categoria: d.categoria || '',
+          fotoURL: d.fotoURL || '',
+          esDemo: d.esDemo === true
+        };
+      });
+    } catch (error) {
+      console.warn('[CariHubFavoritos] listar', error);
+      return [];
+    }
+  }
+
   async function prepararUsuario() {
     if (!cuentaReal()) return null;
     return auth().currentUser;
@@ -159,6 +208,8 @@
     toggleFavorito: toggleFavorito,
     sincronizarBotones: sincronizarBotones,
     prepararUsuario: prepararUsuario,
-    cuentaReal: cuentaReal
+    cuentaReal: cuentaReal,
+    listarFavoritos: listarFavoritos,
+    eliminarFavorito: eliminarFavorito
   };
 })(typeof window !== 'undefined' ? window : globalThis);

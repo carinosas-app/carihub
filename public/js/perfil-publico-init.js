@@ -90,20 +90,12 @@
   }
 
   function initFirebaseIfNeeded() {
-    if (!global.firebase || global.firebase.apps.length) return;
-    var cfg = {
-      apiKey: 'AIzaSyCp68DynjT63T9wHorCLxwBGkSEo_mYPUI',
-      authDomain: 'carihub-app.firebaseapp.com',
-      projectId: 'carihub-app',
-      storageBucket: 'carihub-app.firebasestorage.app',
-      messagingSenderId: '236894758884',
-      appId: '1:236894758884:web:5713e39a26c71f025a49f1'
-    };
-    global.firebase.initializeApp(cfg);
-    global.CariHubDB = global.firebase.firestore();
-    if (typeof global.firebase.auth === 'function') {
-      global.CariHubAuth = global.firebase.auth();
+    if (global.CariHubCore && typeof global.CariHubCore.initFirebase === 'function') {
+      global.CariHubCore.initFirebase();
+      return;
     }
+    if (!global.firebase || global.firebase.apps.length) return;
+    console.error('[CariHub] perfil-publico-init: falta carihub-core.js');
   }
 
   function leerPreviewRegistro() {

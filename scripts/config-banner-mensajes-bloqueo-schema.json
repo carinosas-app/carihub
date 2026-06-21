@@ -1,0 +1,36 @@
+{
+  "id": "config-banner-mensajes-bloqueo",
+  "ticket": "TICKET-052",
+  "descripcion": "Banners impago/vencido/no activo — conversaciones bloqueadas por contexto",
+  "modulo": "dashboard-banner-mensajes.js",
+  "regla": "Si banner no pagado/activo/vigente → sin acceso a conversaciones de ese banner",
+  "criteriosBloqueo": {
+    "estadoPublicacion.vencido": true,
+    "estadoPago": ["por pagar", "pendiente de pago", "pendiente", "impago", "vencido", "sin pagar"],
+    "activo": false,
+    "estadoPublicacion.publicoActivo": false,
+    "estadoSolicitud": ["vencido", "cancelado", "rechazado"]
+  },
+  "ui": {
+    "rail": "tile is-blocked-mensajes, etiqueta Impago|Vencido|Bloqueado, sin badge unread",
+    "mensajes": "chat-banner-lock oculta lista/hilos/composer; CTA renovar",
+    "metricas": "botón mensajes deshabilitado en inicio si bloqueado",
+    "nav": "btnNavBannerMensajes con indicador 🔒 si contexto bloqueado"
+  },
+  "api": {
+    "DashBannerMensajes.accesible(pub)": "boolean",
+    "DashBannerMensajes.isContextoBloqueado(filter)": "boolean",
+    "DashBannerMensajes.filterUnreadBannerMap(map)": "excluye banners bloqueados de badges"
+  },
+  "messengerGuards": [
+    "listConversaciones",
+    "subscribeConversaciones",
+    "sendMensaje",
+    "aggregateUnreadMaps"
+  ],
+  "antiPatrones": [
+    "Mezclar chats de banner impago con inbox de perfil",
+    "Mostrar unread en rail para banner bloqueado",
+    "Permitir enviar mensajes si banner no vigente"
+  ]
+}

@@ -1,0 +1,209 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "id": "config-privacidad-mensajes",
+  "modulo": "privacidad_mensajes",
+  "version": "1.0.0",
+  "schemaVersion": "v1",
+  "fecha": "2026-06-20",
+  "ticket": "MSG-020",
+  "descripcion": "Políticas de privacidad del rentero para Messenger — presencia, lecturas, quién puede contactar y ubicación. Default producto: todo oculto / nadie; opt-in explícito desde dashboard (MSG-070).",
+  "referencias": [
+    "scripts/SPEC-MESSENGER.json",
+    "scripts/config-privacidad-presencia-ui-schema.json",
+    "public/js/carihub-messenger-privacidad-schema.js",
+    ".cursor/rules/dashboard-mensajes-vision.mdc"
+  ],
+  "principios": [
+    "Presencia del anunciante NUNCA por defecto (alineado TICKET-049)",
+    "Confirmación Visto opt-in; si oculto → sin hora lectura ni visto al otro",
+    "Quién puede mensaje/llamar/archivos/estados/lives = audiencia explícita",
+    "Ubicación nunca automática; siempre confirmación humana",
+    "Doc scoped a cuenta (cuentaUid), no mezclar perfiles en un solo inbox de políticas globales MVP",
+    "Visitantes leen política efectiva vía API enforcement (MSG-077), no lectura directa del doc privado"
+  ],
+  "firestore": {
+    "ruta": "usuarios/{cuentaUid}/privacidad_mensajes/{docId}",
+    "docIdFijo": "config",
+    "alternativaFutura": "usuarios/{cuentaUid}.privacidadMensajes — solo si se migra a campo embebido",
+    "lectura": "isOwner(cuentaUid) || isAdmin()",
+    "escritura": "isOwner(cuentaUid) — create/update validados",
+    "indices": "ninguno (1 doc por cuenta)"
+  },
+  "enums": {
+    "visibilidadPresencia": {
+      "valores": ["oculto", "visible_contactos", "visible_todos"],
+      "default": "oculto",
+      "nota": "visible_* reservado fases posteriores; MVP UI no muestra presencia (TICKET-049)"
+    },
+    "confirmacionVisto": {
+      "valores": ["oculto", "visible"],
+      "default": "oculto"
+    },
+    "disponibilidadNegocio": {
+      "valores": ["oculto", "horario_negocio", "preguntar"],
+      "default": "oculto",
+      "nota": "Horario de negocio ≠ presencia en línea"
+    },
+    "audiencia": {
+      "valores": ["todos", "registrados", "contactos", "favoritos", "nadie"],
+      "default": "nadie",
+      "ordenRestrictivo": ["todos", "registrados", "contactos", "favoritos", "nadie"],
+      "labelsUI": {
+        "todos": "Todos",
+        "registrados": "Solo usuarios registrados",
+        "contactos": "Solo contactos / socios aceptados",
+        "favoritos": "Solo favoritos",
+        "nadie": "Nadie"
+      }
+    },
+    "ubicacionModo": {
+      "valores": ["oculta", "preguntar", "una_vez", "temporizada", "en_vivo_hasta_detener"],
+      "default": "preguntar"
+    }
+  },
+  "campos": {
+    "schemaVersion": {
+      "tipo": "string",
+      "valorFijo": "v1",
+      "obligatorio": true
+    },
+    "cuentaUid": {
+      "tipo": "string",
+      "max": 128,
+      "obligatorio": true,
+      "ref": "usuarios/{cuentaUid}",
+      "regla": "debe igualar userId del path"
+    },
+    "presencia": {
+      "tipo": "map",
+      "obligatorio": true,
+      "campos": {
+        "estadoEnLinea": { "tipo": "string", "enum": "visibilidadPresencia", "default": "oculto" },
+        "ultimaConexion": { "tipo": "string", "enum": "visibilidadPresencia", "default": "oculto" },
+        "confirmacionVisto": { "tipo": "string", "enum": "confirmacionVisto", "default": "oculto" }
+      }
+    },
+    "disponibilidad": {
+      "tipo": "string",
+      "enum": "disponibilidadNegocio",
+      "default": "oculto",
+      "nota": "Campo plano legacy-friendly; horario detallado en perfil público"
+    },
+    "mensajesDe": { "tipo": "string", "enum": "audiencia", "default": "nadie" },
+    "llamadasDe": { "tipo": "string", "enum": "audiencia", "default": "nadie" },
+    "videollamadasDe": { "tipo": "string", "enum": "audiencia", "default": "nadie" },
+    "archivosDe": { "tipo": "string", "enum": "audiencia", "default": "nadie" },
+    "estadosDe": {
+      "tipo": "string",
+      "enum": "audiencia",
+      "default": "nadie",
+      "nota": "Estados/stories visibles en contexto messenger"
+    },
+    "livesDe": {
+      "tipo": "string",
+      "enum": "audiencia",
+      "default": "nadie",
+      "nota": "Promo lives — no indicador de conexión"
+    },
+    "ubicacionPolitica": {
+      "tipo": "map",
+      "obligatorio": true,
+      "campos": {
+        "compartirCon": { "tipo": "string", "enum": "audiencia", "default": "nadie" },
+        "modoDefault": { "tipo": "string", "enum": "ubicacionModo", "default": "preguntar" },
+        "permitirEnVivo": { "tipo": "boolean", "default": false },
+        "duracionMaxMinutos": {
+          "tipo": "number",
+          "min": 1,
+          "max": 1440,
+          "opcional": true,
+          "nota": "Solo modo temporizada"
+        }
+      }
+    },
+    "creadoEn": { "tipo": "timestamp", "server": true, "createOnly": true },
+    "actualizadoEn": { "tipo": "timestamp", "server": true }
+  },
+  "defaultsProducto": {
+    "schemaVersion": "v1",
+    "presencia": {
+      "estadoEnLinea": "oculto",
+      "ultimaConexion": "oculto",
+      "confirmacionVisto": "oculto"
+    },
+    "disponibilidad": "oculto",
+    "mensajesDe": "nadie",
+    "llamadasDe": "nadie",
+    "videollamadasDe": "nadie",
+    "archivosDe": "nadie",
+    "estadosDe": "nadie",
+    "livesDe": "nadie",
+    "ubicacionPolitica": {
+      "compartirCon": "nadie",
+      "modoDefault": "preguntar",
+      "permitirEnVivo": false
+    }
+  },
+  "runtime": {
+    "modulo": "public/js/carihub-messenger-privacidad-schema.js",
+    "global": "CariHubMessengerPrivacidadSchema",
+    "api": [
+      "DEFAULTS",
+      "DOC_ID",
+      "POLITICAS_CONTACTO",
+      "AUDIENCIA_LABELS",
+      "normalize",
+      "mergeWithDefaults",
+      "buildPayload",
+      "labelAudiencia",
+      "isAudienciaPermitida",
+      "permiteAccion",
+      "resumenPoliticas",
+      "muestraConfirmacionVisto",
+      "muestraPresencia"
+    ]
+  },
+  "enforcement": {
+    "ticket": "MSG-077",
+    "modulos": [
+      "dashboard-messenger.js",
+      "home-messenger.js",
+      "perfil-contactos.js"
+    ],
+    "reglas": [
+      "Rechazar create conversación/mensaje si mensajesDe no permite al actor",
+      "No emitir read receipts si confirmacionVisto=oculto",
+      "No exponer tel/email en burbujas de chat",
+      "Ubicación solo tras confirmación explícita según ubicacionPolitica"
+    ]
+  },
+  "ui": {
+    "ticket": "MSG-070",
+    "audienciaTicket": "MSG-075",
+    "moduloDashboard": "privacidad-mensajes",
+    "moduloJs": "dashboard-privacidad-mensajes.js",
+    "global": "DashPrivacidadMensajes",
+    "toggles": [
+      "presencia.confirmacionVisto",
+      "presencia.estadoEnLinea",
+      "presencia.ultimaConexion",
+      "disponibilidad",
+      "mensajesDe",
+      "llamadasDe",
+      "videollamadasDe",
+      "archivosDe",
+      "estadosDe",
+      "livesDe",
+      "ubicacionPolitica"
+    ]
+  },
+  "antiPatrones": [
+    "Mostrar en línea / última conexión por defecto",
+    "Read receipts sin opt-in del rentero",
+    "Ubicación compartida automáticamente al abrir chat",
+    "Política global mezclando perfiles distintos del mismo uid",
+    "Visitante leyendo usuarios/{uid}/privacidad_mensajes directamente"
+  ],
+  "dependencias": ["MSG-010", "TICKET-049", "TICKET-031"],
+  "siguiente": ["MSG-077"]
+}

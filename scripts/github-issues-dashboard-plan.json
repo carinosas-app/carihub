@@ -1,0 +1,225 @@
+{
+  "repo": "carinosas-app/carihub",
+  "labels": [
+    "dashboard",
+    "messenger",
+    "backend",
+    "ux",
+    "p0-blocker",
+    "p1-next",
+    "p2-later",
+    "p3-future"
+  ],
+  "issues": [
+    {
+      "id": "TICKET-001",
+      "title": "[P0] Shared/Core — init Firebase único",
+      "labels": ["dashboard", "backend", "p0-blocker"],
+      "body": "## Objetivo\nUn solo módulo Firebase para todo el sitio.\n\n## Archivos\n- Nuevo: `public/js/carihub-core.js`\n- Tocar: `index.html`, `dashboard-rentero.html`, `resultados.html`, `perfil-publico.html`, `registro-perfil.html`, `registro-banner*.html`, `admin.html`\n\n## Tareas\n- [ ] `initFirebase()` + exports `core.auth`, `core.db`, `core.storage`\n- [ ] Eliminar `firebaseConfig` duplicados\n- [ ] Helpers `requireAuth` / `onAuthStateChanged`\n\n## Criterios de aceptación\n- [ ] 0 inits duplicados en producción\n- [ ] Dashboard y registro usan el mismo core\n- [ ] Errores de init visibles (no silenciosos)\n\n## Épica\nE0 Fundación"
+    },
+    {
+      "id": "TICKET-002",
+      "title": "[P0] Storage rules — verificaciones/{uid}",
+      "labels": ["backend", "p0-blocker"],
+      "body": "## Objetivo\nDesplegar reglas Storage para uploads de registro.\n\n## Archivos\n- Nuevo: `storage.rules`\n- `firebase.json`\n- Ref: `scripts/blk05-storage-rules-draft.rules`\n\n## Criterios\n- [ ] Upload registro-perfil OK\n- [ ] Usuario ajeno no lee carpeta ajena\n\n## Épica\nE0 Fundación"
+    },
+    {
+      "id": "TICKET-003",
+      "title": "[P0] Modelo multi-perfil en runtime (usuarios/{uid})",
+      "labels": ["dashboard", "backend", "p0-blocker"],
+      "body": "## Objetivo\nSoportar N perfiles por cuenta/correo en Firestore.\n\n## Shape mínimo\n```js\nperfilesVinculados: [{ perfilId, nombre, categoria, fotoThumb, activo }]\nperfilActivoId: string\n```\n\n## Archivos\n- `registro-perfil-submit.js`\n- `dashboard-rentero.html`\n\n## Criterios\n- [ ] Segundo perfil no sobrescribe el primero\n- [ ] Dashboard lista N perfiles\n- [ ] `perfilActivoId` persiste en Firestore\n\n## Fuera de alcance\nMigración BLK-01 a colección `perfiles/`\n\n## Dep\nTICKET-001\n\n## Épica\nE0 Fundación"
+    },
+    {
+      "id": "TICKET-010",
+      "title": "[P1] UI dash-activos-rail — columna izquierda unificada",
+      "labels": ["dashboard", "ux", "p1-next"],
+      "body": "## Objetivo\nColumna izquierda = centro rápido de activos del anunciante.\n\n## Secciones\n- Perfiles (círculos + badge unread)\n- Banners contratados (círculos + badge unread)\n- Lives (círculos, sin estado online)\n- Botones: **+ Nuevo perfil**, **+ Agregar banner**\n\n## Archivos\n- `dashboard-rentero.html`\n- `dashboard-rentero-pro.css`\n- Nuevo: `public/js/dashboard-activos-rail.js`\n\n## Criterios\n- [ ] Render desde datos (no HTML fijo)\n- [ ] Tap perfil/banner cambia selección visual\n- [ ] Badge numérico si unread > 0\n- [ ] No duplicar entradas de menú si ya están en rail\n\n## Dep\nTICKET-003\n\n## Épica\nE1 Columna izquierda"
+    },
+    {
+      "id": "TICKET-011",
+      "title": "[P1] dashboard-context.js — contexto global perfil/banner",
+      "labels": ["dashboard", "p1-next"],
+      "body": "## Objetivo\nSingleton de contexto de publicación activa.\n\n```js\n{ tipo: 'perfil'|'banner', id, perfilId?, bannerId?, solicitudId? }\n```\n\n## Comportamiento\n- Evento `carihub:dash-context-change`\n- Módulos escuchan y recargan\n- Deep link opcional: `?perfilId=` / `?bannerId=`\n\n## Criterios\n- [ ] Cambio en rail actualiza preview Inicio\n- [ ] Contexto sobrevive cambio de módulo\n\n## Dep\nTICKET-010\n\n## Épica\nE1"
+    },
+    {
+      "id": "TICKET-012",
+      "title": "[P1] Banners reales en rail desde solicitudes_anuncios",
+      "labels": ["dashboard", "backend", "p1-next"],
+      "body": "## Query\n`solicitudes_anuncios` where `uidAnunciante == uid` AND estado in (aprobado, activo)\n\n## Criterios\n- [ ] Tiles reales en rail\n- [ ] Empty state → CTA registro-banner\n- [ ] Eliminar MOCK_BANNERS hardcodeado\n\n## Dep\nTICKET-001, TICKET-010\n\n## Épica\nE1"
+    },
+    {
+      "id": "TICKET-013",
+      "title": "[P1] Perfiles reales en rail + botón Nuevo perfil",
+      "labels": ["dashboard", "p1-next"],
+      "body": "## Criterios\n- [ ] Círculos = perfiles reales del uid\n- [ ] Primer load selecciona perfilActivoId o más reciente\n- [ ] + Nuevo perfil → registro-perfil.html\n\n## Dep\nTICKET-003, TICKET-010\n\n## Épica\nE1"
+    },
+    {
+      "id": "TICKET-045",
+      "title": "[P1] Rail context-aware — centro reacciona según módulo activo",
+      "labels": ["dashboard", "messenger", "ux", "p1-next"],
+      "body": "## Regla de producto (aprobada)\nMisma columna izquierda; **centro cambia según módulo + activo**:\n\n| Módulo activo | Tap perfil en rail | Tap banner en rail |\n|---------------|-------------------|-------------------|\n| **Inicio** | Centro = vista previa iframe de ese perfil | Centro = preview/métricas banner (v1) |\n| **Mensajes** | Centro = lista chats **solo de ese perfil** | Centro = chats **solo de ese banner** |\n| Otros | Definir por ticket hijo | Definir por ticket hijo |\n\n## Ejemplo\nPerfil VIP vs perfil Pareja → conversaciones distintas al cambiar círculo.\n\n## Archivos\n- `dashboard-activos-rail.js`\n- `dashboard-rentero-nav.js`\n- `dashboard-context.js`\n\n## Criterios\n- [ ] En Inicio, tap perfil NO abre mensajes\n- [ ] En Mensajes, tap perfil SÍ filtra conversaciones\n- [ ] Laterales izq/der permanecen visibles (salvo modo expandido)\n\n## Dep\nTICKET-011, TICKET-040\n\n## Épica\nE4 Mensajes UX"
+    },
+    {
+      "id": "TICKET-046",
+      "title": "[P1] Modo mensajes expandido — pantalla completa",
+      "labels": ["dashboard", "messenger", "ux", "p1-next"],
+      "body": "## Objetivo\nBotón **Ampliar mensajes** / **Pantalla completa**:\n- Oculta columna derecha del dashboard\n- Oculta bloque lateral izquierdo del dashboard (nav/métricas)\n- Mantiene UI de mensajes + rail de contexto (perfiles/banners) mínimo\n\n## Relacionado\nReutilizar patrón `center-expanded` existente pero scoped al módulo mensajes.\n\n## Criterios\n- [ ] Toggle expandir / restaurar 3 columnas\n- [ ] Contexto perfil/banner no se pierde al expandir\n\n## Dep\nTICKET-040\n\n## Épica\nE4"
+    },
+    {
+      "id": "TICKET-047",
+      "title": "[P1] Strip horizontal anuncios-estados en Mensajes (arriba de chats)",
+      "labels": ["dashboard", "messenger", "ux", "p1-next"],
+      "body": "## Ubicación exacta (producto)\n- **NO** en columna izquierda\n- **SÍ** horizontal, arriba del primer mensaje/conversación\n- Debajo del header del módulo; arriba de `#chatConvList`\n\n## Contenido\nCírculos/chips promocionales = **anuncios del canal mensajes** (no indicador online).\n\n## Criterios\n- [ ] Al cambiar perfil activo, strip muestra anuncios de ESE perfil\n- [ ] Tap anuncio → detalle o conversación vinculada\n- [ ] No mostrar si está conectado/en línea\n\n## Dep\nTICKET-048, TICKET-040\n\n## Épica\nE4"
+    },
+    {
+      "id": "TICKET-048",
+      "title": "[P1] Canal dual anuncios — perfil vs mensajes",
+      "labels": ["dashboard", "messenger", "backend", "p1-next"],
+      "body": "## Regla\n- Anuncios publicados en **perfil/dashboard perfil** → visibles en perfil público\n- Anuncios publicados en **canal mensajes** → visibles solo en strip de Mensajes\n- Sets independientes; mismo usuario puede tener ambos\n\n## Modelo sugerido\n```js\nanunciosPerfil: []   // o subcolección\nanunciosMensajes: []\n```\n\n## Dashboard\nSección **Anuncios en mensajes** (CRUD) además de estados/anuncios de perfil.\n\n## Criterios\n- [ ] Publicar en mensajes no aparece en perfil público\n- [ ] Publicar en perfil no aparece en strip mensajes\n\n## Dep\nTICKET-003\n\n## Épica\nE4"
+    },
+    {
+      "id": "TICKET-049",
+      "title": "[P1] Privacidad — eliminar estados activos / en línea",
+      "labels": ["dashboard", "ux", "p1-next"],
+      "body": "## Anti-patrón explícito\nNO mostrar al visitante ni en dashboard:\n- \"Estados activos\"\n- \"En línea\" / \"Conectado ahora\"\n- Indicadores de presencia del anunciante\n\n## Sí permitido\n- Promo/oferta en vivo (thumbnail, título)\n- Live 1, Live 2 en rail sin badge online\n\n## Archivos\n- `dashboard-rentero.html` (copy + UI)\n- `dashboard-rentero-nav.js` (MOCK_LIVES, labels)\n- CSS badges online\n\n## Criterios\n- [ ] 0 copy \"activo/en línea\" en UI anunciante\n- [ ] Lives muestran promoción, no presencia\n\n## Épica\nE1/E4"
+    },
+    {
+      "id": "TICKET-020",
+      "title": "[P1] Favoritos dashboard → Firestore real",
+      "labels": ["dashboard", "backend", "p1-next"],
+      "body": "## Tareas\n- Reemplazar `MOCK_FAVORITOS` en `dashboard-rentero-nav.js`\n- Reutilizar `carihub-favoritos.js`\n\n## Criterios\n- [ ] Lista real desde `usuarios/{uid}/favoritos`\n- [ ] Empty state\n\n## Dep\nTICKET-001\n\n## Épica\nE2 Dashboard real"
+    },
+    {
+      "id": "TICKET-021",
+      "title": "[P1] Módulo publicaciones — cablear y quitar MOCK",
+      "labels": ["dashboard", "p1-next"],
+      "body": "## Tareas\n- Registrar `publicaciones` en MODULES + nav\n- Conectar DOM huérfano `data-module=\"publicaciones\"`\n- Datos Firestore\n\n## Dep\nTICKET-003, TICKET-011\n\n## Épica\nE2"
+    },
+    {
+      "id": "TICKET-022",
+      "title": "[P1] Info pública — guardar Firestore (quitar alert mock)",
+      "labels": ["dashboard", "backend", "p1-next"],
+      "body": "## Tareas\n- `btnGuardarInfo` persiste campos del perfil activo\n- Quitar alert \"Firebase en fase posterior\"\n\n## Dep\nTICKET-011\n\n## Épica\nE2"
+    },
+    {
+      "id": "TICKET-025",
+      "title": "[P2] Limpieza nav derecho — sin duplicar rail",
+      "labels": ["dashboard", "ux", "p2-later"],
+      "body": "## Tareas\n- Si banners/perfiles están en rail izquierdo, ocultar o renombrar ítems duplicados (Anuncios, Banners nav confuso)\n- Alinear label módulo `banners` con \"conversaciones por banner\"\n- Documentar mapa nav vs rail\n\n## Dep\nTICKET-010\n\n## Épica\nE2"
+    },
+    {
+      "id": "TICKET-026",
+      "title": "[P2] Módulos huérfanos — feed-red, directorio, medios-contacto",
+      "labels": ["dashboard", "p2-later"],
+      "body": "## Por cada módulo\n(A) nav, (B) fusionar, o (C) eliminar DOM\n\n## Criterio\n0 módulos con DOM sin acceso\n\n## Épica\nE2"
+    },
+    {
+      "id": "TICKET-030",
+      "title": "[P1] Esquema Firestore conversaciones v1 (scoped perfil/banner)",
+      "labels": ["messenger", "backend", "p1-next"],
+      "body": "## Regla de oro\nNUNCA inbox plano. Key: `(cuentaUid, contextoTipo, contextoId)`\n\n## Colecciones\n```\nconversaciones/{convId}\n  cuentaUid, contextoTipo: perfil|banner\n  contextoId, participantes[], ultimoMensaje, unreadByUid{}, updatedAt\nconversaciones/{convId}/mensajes/{msgId}\n```\n\n## Índices\n`(cuentaUid, contextoTipo, contextoId, updatedAt desc)`\n\n## Dep\nTICKET-003\n\n## Épica\nE3 Messenger backend"
+    },
+    {
+      "id": "TICKET-031",
+      "title": "[P1] Firestore rules Messenger v1",
+      "labels": ["messenger", "backend", "p1-next"],
+      "body": "## Criterios\n- Owner cuenta lee/escribe sus conversaciones\n- No cross-cuenta\n- Tests emulador\n\n## Dep\nTICKET-030\n\n## Épica\nE3"
+    },
+    {
+      "id": "TICKET-032",
+      "title": "[P1] API dashboard-messenger.js",
+      "labels": ["messenger", "backend", "p1-next"],
+      "body": "## Funciones\n- listConversaciones({ contextoTipo, contextoId })\n- listMensajes / sendMensaje / markRead\n- subscribeConversaciones\n- getUnreadCountsByContexto() → badges rail\n\n## Dep\nTICKET-030, TICKET-001\n\n## Épica\nE3"
+    },
+    {
+      "id": "TICKET-033",
+      "title": "[P1] Badges unread en rail perfiles/banners",
+      "labels": ["messenger", "dashboard", "p1-next"],
+      "body": "## Criterios\n- Mensaje en perfil B incrementa badge círculo B, no A\n- Visible aunque contexto activo sea otro\n\n## Dep\nTICKET-032, TICKET-010\n\n## Épica\nE3"
+    },
+    {
+      "id": "TICKET-040",
+      "title": "[P1] Layout módulo Mensajes en columna central",
+      "labels": ["messenger", "dashboard", "ux", "p1-next"],
+      "body": "## Layout centro (módulo mensajes)\n1. Strip anuncios-estados horizontal (TICKET-047)\n2. Lista conversaciones\n3. Hilo + composer habilitado\n\n## Columna izquierda dashboard\nRail perfiles/banners = selector contexto\n\n## Anti-patrones\n- No inbox mezclado\n- No MOCK_CONVERSACIONES / MOCK_MENSAJES en prod\n\n## Dep\nTICKET-011, TICKET-032\n\n## Épica\nE4"
+    },
+    {
+      "id": "TICKET-041",
+      "title": "[P2] Crear conversación desde perfil público / resultados",
+      "labels": ["messenger", "p2-later"],
+      "body": "## Flujo\nVisitante → botón Mensaje → conversación bajo contextoId del perfil anunciante correcto\n\n## Dep\nTICKET-040\n\n## Épica\nE4"
+    },
+    {
+      "id": "TICKET-042",
+      "title": "[P2] Avisos scoped por contexto perfil/banner",
+      "labels": ["messenger", "dashboard", "p2-later"],
+      "body": "## Criterios\n- Reemplazar MOCK_AVISOS\n- Badge en rail del perfil/banner afectado\n\n## Dep\nTICKET-030, TICKET-033\n\n## Épica\nE4"
+    },
+    {
+      "id": "TICKET-043",
+      "title": "[P2] Solicitudes negocio scoped por contexto",
+      "labels": ["dashboard", "p2-later"],
+      "body": "## Criterios\n- Reemplazar MOCK_SOLICITUDES\n- Filtrar por contexto activo\n\n## Dep\nTICKET-030\n\n## Épica\nE4"
+    },
+    {
+      "id": "TICKET-044",
+      "title": "[P2] Tap banner — centro = conversaciones; métricas secundarias",
+      "labels": ["dashboard", "messenger", "ux", "p2-later"],
+      "body": "## Prioridad producto\n1. **Tap banner** → columna central muestra conversaciones de ESE banner\n2. Secundario: sheet métricas (clics, impresiones, renovar, editar) vía long-press o icono\n\n## Ejemplo\nBanner cabañas vs banner hoteles = hilos distintos\n\n## Dep\nTICKET-012, TICKET-040\n\n## Épica\nE4"
+    },
+    {
+      "id": "TICKET-052",
+      "title": "[P1] Banner impago/vencido — conversaciones bloqueadas",
+      "labels": ["messenger", "dashboard", "backend", "p1-next"],
+      "body": "## Regla\nSi banner no está pagado/activo/vigente → **no acceso** a conversaciones de ese banner.\n\n## UI\n- Estado bloqueado en rail\n- CTA Renovar / pagar\n- Lista chats oculta o read-only con lock\n\n## Dep\nTICKET-012, TICKET-032\n\n## Épica\nE4"
+    },
+    {
+      "id": "TICKET-053",
+      "title": "[P2] Perfil principal — cuenta acceso vs cuenta publicadora",
+      "labels": ["dashboard", "backend", "p2-later"],
+      "body": "## Concepto\n- **Perfil principal**: acceso a mensajes, favoritos, avisos — sin publicar perfil/banner\n- **Perfiles publicadores**: publicar, banners, lives\n- Mismo dashboard; permisos por rol/flags\n\n## Flags sugeridos\n`canPublishProfile`, `canRentBanner`, `isHubAccount`\n\n## Dep\nTICKET-003\n\n## Épica\nE0/E2"
+    },
+    {
+      "id": "TICKET-054",
+      "title": "[P2] Métodos de contacto — compartidos vs por perfil",
+      "labels": ["dashboard", "p2-later"],
+      "body": "## Decisión producto\nMétodos de contacto **interior** pueden ser iguales entre perfiles (mismo WhatsApp/tel).\nMensajes siguen separados por contexto.\n\n## Tareas\n- Documentar en schema\n- UI: editar contacto a nivel cuenta o heredar en perfil hijo\n\n## Dep\nTICKET-022\n\n## Épica\nE2"
+    },
+    {
+      "id": "TICKET-023",
+      "title": "[P2] Anunciar / Live — solicitud Firestore real",
+      "labels": ["dashboard", "backend", "p2-later"],
+      "body": "## Tareas\n- Quitar alert() mock\n- Create en solicitudes_anuncios\n\n## Dep\nTICKET-012\n\n## Épica\nE2"
+    },
+    {
+      "id": "TICKET-024",
+      "title": "[P2] Buscar directorio — query real indexada",
+      "labels": ["dashboard", "backend", "p2-later"],
+      "body": "## Tareas\n- Reemplazar MOCK_DIRECTORIO\n- Reutilizar resultados-registrados con paginación\n\n## Dep\nTICKET-001\n\n## Épica\nE2"
+    },
+    {
+      "id": "TICKET-050",
+      "title": "[P1] Demo data solo preview/dev",
+      "labels": ["dashboard", "p1-next"],
+      "body": "## Tareas\n- resultados-demo.js no inyectar en prod sin ?preview=1\n- Dashboard MOCK solo con flag explícito\n\n## Épica\nE5 Producción"
+    },
+    {
+      "id": "TICKET-051",
+      "title": "[P1] Regresión responsive móvil 3 columnas + rail",
+      "labels": ["dashboard", "ux", "p1-next"],
+      "body": "## Verificar\n- ≤768px grid 25/50/25\n- Ampliar vista\n- Rail + mensajes no rompen layout\n\n## Dep\nTICKET-010\n\n## Épica\nE5"
+    },
+    {
+      "id": "TICKET-055",
+      "title": "[P3] Rewrites hosting /cuenta/*",
+      "labels": ["dashboard", "p3-future"],
+      "body": "## Tareas\nfirebase.json rewrites según MATRIZ-RUTAS-NAV-CANONICA\n\n## Épica\nE5"
+    },
+    {
+      "id": "TICKET-056",
+      "title": "[P3] Deprecar home-mensajes localStorage",
+      "labels": ["messenger", "p3-future"],
+      "body": "## Tareas\nRedirigir intención mensaje de home a Messenger real / dashboard deep link\n\n## Dep\nTICKET-040\n\n## Épica\nE5"
+    }
+  ]
+}

@@ -68,7 +68,7 @@
       categoriaPublica: 'Escort VIP',
       verificada: true,
       nueva: true,
-      disponibilidad: 'Disponible ahora',
+      disponibilidad: 'Consultar disponibilidad',
       respuestaRapida: true,
       fotoURL: FOTOS[0],
       fotosCount: 15
@@ -89,7 +89,7 @@
       categoriaPublica: 'Acompañante',
       verificada: true,
       nueva: false,
-      disponibilidad: 'Disponible ahora',
+      disponibilidad: 'Consultar disponibilidad',
       respuestaRapida: true,
       fotoURL: FOTOS[1],
       fotosCount: 12
@@ -158,7 +158,7 @@
     categoriaPublica: 'Escort',
     verificada: false,
     nueva: true,
-    disponibilidad: 'Disponible ahora',
+    disponibilidad: 'Consultar disponibilidad',
     respuestaRapida: true,
     fotoURL: FOTOS[1],
     fotosCount: 10
@@ -363,7 +363,7 @@
       tagline: base.tagline || '',
       verificada: base.verificada !== false,
       verificado: base.verificada !== false,
-      disponibilidad: base.disponibilidad || 'Disponible ahora',
+      disponibilidad: base.disponibilidad || 'Consultar disponibilidad',
       respuestaRapida: base.respuestaRapida !== false,
       nueva: !!base.nueva,
       fotoURL: foto(idx),
@@ -767,10 +767,12 @@
   }
 
   function disponibilidadDe(u) {
+    if (global.CariHubMessengerPrivacidadUi && CariHubMessengerPrivacidadUi.disponibilidadCard) {
+      return CariHubMessengerPrivacidadUi.disponibilidadCard(u);
+    }
     var d = normTxt(u.disponibilidad || u.estatus || '');
-    if (d.indexOf('ocup') !== -1) return { clase: 'busy', txt: 'Ocupada', busy: true };
-    if (d.indexOf('dispon') !== -1) return { clase: 'on', txt: 'Disponible', busy: false };
-    return { clase: 'on', txt: 'Disponible', busy: false };
+    if (d.indexOf('ocup') !== -1) return { clase: 'neutral', txt: 'Consultar disponibilidad', busy: true };
+    return { clase: 'neutral', txt: 'Consultar disponibilidad', busy: false };
   }
 
   function esSegmentoBusquedaExplicito(val, vacios) {
