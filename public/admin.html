@@ -1019,13 +1019,57 @@ async function cargarUsuariosCache(){
     usuariosCache = [];
 
     snap.forEach(doc => {
-      const u = doc.data();
-      u.id = doc.id;
-      usuariosCache.push(u);
+      const hub = doc.data();
+      const det = hub.perfilesDetalle;
+      if(det && typeof det === "object" && Object.keys(det).length){
+        Object.keys(det).forEach(function(perfilId){
+          const p = det[perfilId] || {};
+          usuariosCache.push(Object.assign({}, p, {
+            id: doc.id + "__" + perfilId,
+            cuentaUid: doc.id,
+            perfilId: perfilId,
+            _hubNested: true
+          }));
+        });
+      }else{
+        hub.id = doc.id;
+        usuariosCache.push(hub);
+      }
     });
   }catch(error){
     alert("Error cargando usuarios: " + error.message);
   }
+}
+
+function resolvePerfilRef(cacheId){
+  if(String(cacheId).indexOf("__") >= 0){
+    const parts = String(cacheId).split("__");
+    return { cuentaUid: parts[0], perfilId: parts.slice(1).join("__"), nested: true };
+  }
+  return { cuentaUid: cacheId, perfilId: null, nested: false };
+}
+
+async function updatePerfilDoc(cacheId, patch){
+  const ref = resolvePerfilRef(cacheId);
+  if(ref.nested && ref.perfilId){
+    const updates = {};
+    Object.keys(patch).forEach(function(k){
+      updates["perfilesDetalle." + ref.perfilId + "." + k] = patch[k];
+    });
+    if(patch.activo === true){
+      const snap = await db.collection("usuarios").doc(ref.cuentaUid).get();
+      const data = snap.exists ? (snap.data() || {}) : {};
+      const vinc = Array.isArray(data.perfilesVinculados) ? data.perfilesVinculados.slice() : [];
+      const idx = vinc.findIndex(function(v){ return v && v.perfilId === ref.perfilId; });
+      if(idx >= 0){
+        vinc[idx] = Object.assign({}, vinc[idx], { activo: true, nombre: patch.nombre || vinc[idx].nombre });
+        updates.perfilesVinculados = vinc;
+      }
+    }
+    await db.collection("usuarios").doc(ref.cuentaUid).update(updates);
+    return;
+  }
+  await db.collection("usuarios").doc(ref.cuentaUid).update(patch);
 }
 
 async function contarColeccion(nombre,whereCampo,whereValor){
@@ -1332,6 +1376,8 @@ function abrirDetallePerfil(id){
       <p class="dato"><b>Activo:</b> ${u.activo ? "Sí" : "No"}</p>
       <p class="dato"><b>Vencido:</b> ${u.vencido ? "Sí" : "No"}</p>
       <p class="dato"><b>Primer mes gratis:</b> ${u.primerMesGratis ? "Sí" : "No"}</p>
+      <p class="dato"><b>Perfil adicional:</b> ${u.perfilAdicional ? "Sí" : "No"}</p>
+      <p class="dato"><b>Autorizado para pago:</b> ${u.autorizadoParaPago ? "Sí" : "No"}</p>
       <p class="dato"><b>Pago:</b> ${u.pagado ? "PAGADO ✅" : "NO PAGADO / GRATIS o pendiente"}</p>
       <p class="dato"><b>Estado pago:</b> ${textoSeguro(u.estadoPago || "sin_estado")}</p>
       <p class="dato"><b>Fecha publicación:</b> ${formatearFecha(u.fechaPublicacion)}</p>
@@ -1359,6 +1405,7 @@ function abrirDetallePerfil(id){
 
       <div class="actions-row">
         <button class="btn btn-aprobar" onclick="aprobarGratis('${id}')">🟢 Aprobar + 30 días gratis</button>
+        <button class="btn btn-pago" onclick="aprobarPendientePago('${id}')">💳 Aprobar (requiere pago 50%)</button>
         <button class="btn btn-cambios" onclick="aprobarCambios('${id}')">🔵 Aprobar cambios</button>
         <button class="btn btn-pago" onclick="activarRenovacionPagada('${id}')">💳 Activar renovación pagada</button>
         <button class="btn btn-mensaje" onclick="crearMensajeAdmin('${id}')">📩 Mensaje soporte</button>
@@ -1895,12 +1942,14 @@ async function aprobarGratis(id) {
     const vencimiento = new Date();
     vencimiento.setDate(hoy.getDate() + 30);
 
-    await db.collection("usuarios").doc(id).update({
+    await updatePerfilDoc(id, {
       aprobado: true,
       activo: true,
       vencido: false,
       primerMesGratis: true,
+      perfilAdicional: false,
       pagado: false,
+      autorizadoParaPago: false,
       estadoPago: "gratis_30_dias",
       actualizacionPendiente:false,
       estadoRevision:"aprobado",
@@ -1920,6 +1969,39 @@ async function aprobarGratis(id) {
   bloquearAcciones(false);
 }
 
+async function aprobarPendientePago(id) {
+  if(procesando) return;
+  if(!confirm("¿Aprobar este perfil adicional? El anunciante deberá pagar (50% primer periodo) antes de publicarse.")) return;
+
+  bloquearAcciones(true);
+
+  try{
+    await updatePerfilDoc(id, {
+      aprobado: true,
+      activo: false,
+      vencido: false,
+      primerMesGratis: false,
+      perfilAdicional: true,
+      descuentoPrimerPeriodo: 0.5,
+      pagado: false,
+      autorizadoParaPago: true,
+      estadoPago: "pendiente",
+      actualizacionPendiente: false,
+      estadoRevision: "aprobado"
+    });
+
+    await registrarLogAdmin("aprobar_pendiente_pago", id, "Perfil aprobado — pendiente de pago (50% OFF)");
+
+    alert("Perfil aprobado. El anunciante verá el botón Continuar al pago en su dashboard.");
+    await cargarUsuariosCache();
+    abrirDetallePerfil(id);
+  }catch(e){
+    alert("Error: " + e.message);
+  }
+
+  bloquearAcciones(false);
+}
+
 async function aprobarCambios(id) {
   if(procesando) return;
   if(!confirm("¿Aprobar los cambios de este perfil?")) return;
@@ -1927,7 +2009,7 @@ async function aprobarCambios(id) {
   bloquearAcciones(true);
 
   try{
-    await db.collection("usuarios").doc(id).update({
+    await updatePerfilDoc(id, {
       aprobado: true,
       activo: true,
       vencido: false,
@@ -1958,11 +2040,12 @@ async function activarRenovacionPagada(id) {
     const vencimiento = new Date();
     vencimiento.setDate(hoy.getDate() + 30);
 
-    await db.collection("usuarios").doc(id).update({
+    await updatePerfilDoc(id, {
       aprobado: true,
       activo: true,
       vencido: false,
       pagado: true,
+      autorizadoParaPago: false,
       estadoPago: "pagado",
       actualizacionPendiente:false,
       estadoRevision:"aprobado",

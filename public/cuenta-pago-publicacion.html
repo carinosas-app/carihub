@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pago de publicación — CariHub</title>
+  <link rel="stylesheet" href="css/cuenta-pago-publicacion.css">
+</head>
+<body class="pago-page">
+  <header class="pago-header">
+    <a class="pago-header__back" href="dashboard-rentero.html">← Volver al dashboard</a>
+    <h1>Pago de publicación</h1>
+  </header>
+
+  <main class="pago-main">
+    <section class="pago-card" id="pagoCard">
+      <p class="pago-loading" id="pagoLoading">Cargando…</p>
+      <div class="pago-content hidden" id="pagoContent">
+        <p class="pago-badge" id="pagoBadge">Perfil adicional</p>
+        <h2 id="pagoTitulo">—</h2>
+        <p class="pago-sub" id="pagoSub">Completa el pago para publicar.</p>
+
+        <div class="pago-price-box">
+          <div class="pago-price-row pago-price-row--list hidden" id="pagoRowLista">
+            <span>Precio lista</span>
+            <s id="pagoPrecioLista">—</s>
+          </div>
+          <div class="pago-price-row pago-price-row--final">
+            <span>Total a pagar</span>
+            <strong id="pagoPrecioFinal">—</strong>
+          </div>
+          <p class="pago-discount hidden" id="pagoDescuento">50% de descuento en tu primer periodo</p>
+        </div>
+
+        <fieldset class="pago-periodo">
+          <legend>Periodo</legend>
+          <label><input type="radio" name="periodo" value="mes" checked> 1 mes</label>
+          <label><input type="radio" name="periodo" value="quincena"> 15 días</label>
+          <label><input type="radio" name="periodo" value="semana"> 7 días</label>
+        </fieldset>
+
+        <div class="pago-methods">
+          <button type="button" class="pago-btn pago-btn--stripe" id="btnPagarStripe">Pagar con Stripe</button>
+          <button type="button" class="pago-btn pago-btn--mp" id="btnPagarMp">Pagar con Mercado Pago</button>
+          <p class="pago-note">Los botones registran el pago en modo demo hasta conectar pasarela real.</p>
+        </div>
+      </div>
+      <div class="pago-error hidden" id="pagoError"></div>
+      <div class="pago-success hidden" id="pagoSuccess">
+        <h2>¡Pago registrado!</h2>
+        <p id="pagoSuccessMsg">Tu publicación quedará activa en unos momentos.</p>
+        <a class="pago-btn pago-btn--primary" href="dashboard-rentero.html">Ir al dashboard</a>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+  <script src="js/carihub-core.js"></script>
+  <script src="js/carihub-publicacion-pagos.js"></script>
+  <script>
+  (function () {
+    var Pagos = window.CariHubPublicacionPagos;
+    var params = new URLSearchParams(location.search);
+    var tipo = params.get('tipo') || 'perfil';
+    var perfilId = params.get('perfilId') || '';
+    var bannerId = params.get('bannerId') || '';
+    var pubData = null;
+    var cotizacion = null;
+
+    function $(id) { return document.getElementById(id); }
+
+    function showError(msg) {
+      $('pagoLoading').classList.add('hidden');
+      $('pagoContent').classList.add('hidden');
+      $('pagoError').textContent = msg;
+      $('pagoError').classList.remove('hidden');
+    }
+
+    function renderCotizacion() {
+      if (!Pagos || !pubData) return;
+      var periodo = document.querySelector('input[name="periodo"]:checked');
+      cotizacion = Pagos.cotizar({
+        tipo: tipo,
+        periodo: periodo ? periodo.value : 'mes',
+        esAdicional: pubData.esAdicional,
+        primerMesGratis: pubData.primerMesGratis
+      });
+      $('pagoPrecioFinal').textContent = cotizacion.precioFinalFmt;
+      if (cotizacion.descuentoPct > 0) {
+        $('pagoRowLista').classList.remove('hidden');
+        $('pagoPrecioLista').textContent = cotizacion.precioListaFmt;
+        $('pagoDescuento').textContent = cotizacion.descuentoPct + '% de descuento en tu primer periodo';
+        $('pagoDescuento').classList.remove('hidden');
+      } else {
+        $('pagoRowLista').classList.add('hidden');
+        $('pagoDescuento').classList.add('hidden');
+      }
+    }
+
+    function bindPeriodo() {
+      document.querySelectorAll('input[name="periodo"]').forEach(function (el) {
+        el.addEventListener('change', renderCotizacion);
+      });
+    }
+
+    async function cargarPublicacion(user) {
+      var db = window.CariHubDB;
+      if (!db) throw new Error('Firebase no disponible.');
+      if (tipo === 'banner' && bannerId) {
+        var snapB = await db.collection('solicitudes_anuncios').doc(bannerId).get();
+        if (!snapB.exists) throw new Error('No encontramos ese banner.');
+        var b = snapB.data();
+        if (b.uidAnunciante && b.uidAnunciante !== user.uid) throw new Error('No tienes permiso para pagar este banner.');
+        pubData = {
+          titulo: b.nombreNegocio || b.nombre || 'Banner',
+          esAdicional: b.bannerAdicional === true || b.primerPeriodoDescuento === true,
+          primerMesGratis: false,
+          raw: b
+        };
+        $('pagoTitulo').textContent = pubData.titulo;
+        $('pagoSub').textContent = 'Paga para activar tu banner en la plataforma.';
+        $('pagoBadge').textContent = 'Banner';
+        return;
+      }
+      if (!perfilId) throw new Error('Falta el identificador del perfil.');
+      var snap = await db.collection('usuarios').doc(user.uid).get();
+      if (!snap.exists) throw new Error('No encontramos tu cuenta.');
+      var hub = snap.data() || {};
+      var det = hub.perfilesDetalle || {};
+      var p = det[perfilId];
+      if (!p) throw new Error('No encontramos ese perfil en tu cuenta.');
+      pubData = {
+        titulo: p.nombre || p.alias || 'Tu perfil',
+        esAdicional: p.perfilAdicional === true || p.primerMesGratis === false,
+        primerMesGratis: p.primerMesGratis !== false,
+        raw: p
+      };
+      $('pagoTitulo').textContent = pubData.titulo;
+      $('pagoSub').textContent = pubData.esAdicional
+        ? 'Perfil adicional aprobado. Completa el pago para publicarlo.'
+        : 'Completa el pago para activar tu publicación.';
+      $('pagoBadge').textContent = pubData.esAdicional ? 'Perfil adicional · 50% OFF' : 'Perfil';
+    }
+
+    async function procesarPago(metodo) {
+      var user = window.CariHubAuth && window.CariHubAuth.currentUser;
+      if (!user) {
+        location.href = 'index.html?abrir=login';
+        return;
+      }
+      renderCotizacion();
+      var btnS = $('btnPagarStripe');
+      var btnM = $('btnPagarMp');
+      btnS.disabled = true;
+      btnM.disabled = true;
+      try {
+        if (tipo === 'banner' && bannerId) {
+          await Pagos.completarPagoBanner(user.uid, bannerId, cotizacion, metodo);
+        } else {
+          await Pagos.completarPagoPerfil(user.uid, perfilId, cotizacion, metodo);
+        }
+        try {
+          localStorage.removeItem('carihub_dashboard_avisos_pendientes');
+        } catch (e) {}
+        var destId = (tipo === 'banner' && bannerId) ? bannerId : perfilId;
+        location.href = 'dashboard-rentero.html?pago=ok&perfilId=' + encodeURIComponent(destId || '');
+      } catch (err) {
+        alert('Error al registrar pago: ' + (err.message || err));
+      } finally {
+        btnS.disabled = false;
+        btnM.disabled = false;
+      }
+    }
+
+    async function boot() {
+      if (!window.CariHubCore || !CariHubCore.assertReady({ page: 'dashboard' })) {
+        showError('Servicio no disponible. Recarga la página.');
+        return;
+      }
+      var user = window.CariHubAuth.currentUser;
+      if (!user) {
+        location.href = 'index.html?abrir=login&next=' + encodeURIComponent(location.pathname + location.search);
+        return;
+      }
+      try {
+        await cargarPublicacion(user);
+        $('pagoLoading').classList.add('hidden');
+        $('pagoContent').classList.remove('hidden');
+        bindPeriodo();
+        renderCotizacion();
+        $('btnPagarStripe').addEventListener('click', function () { procesarPago('stripe_demo'); });
+        $('btnPagarMp').addEventListener('click', function () { procesarPago('mercadopago_demo'); });
+      } catch (err) {
+        showError(err.message || 'No se pudo cargar el pago.');
+      }
+    }
+
+    boot();
+  })();
+  </script>
+</body>
+</html>

@@ -294,12 +294,66 @@
     if (tipo === "pago") return "💳";
     if (tipo === "live") return "📡";
     if (tipo === "mensaje") return "💬";
-    return "✅";
+    if (tipo === "revision") return "✅";
+    return "🔔";
+  }
+
+  async function crear(cuentaUid, data) {
+    data = data || {};
+    if (!data.contextoId || !data.titulo) return null;
+    cuentaUid = String(cuentaUid || (auth() && auth().currentUser && auth().currentUser.uid) || "");
+    if (!cuentaUid) return null;
+
+    var payload = {
+      contextoTipo: data.contextoTipo || "perfil",
+      contextoId: String(data.contextoId),
+      tipo: data.tipo || "revision",
+      titulo: String(data.titulo),
+      texto: String(data.texto || ""),
+      leido: false,
+      creadoEn: new Date()
+    };
+    if (data.dedupeKey) payload.dedupeKey = String(data.dedupeKey);
+
+    if (isPreviewMode() || !auth() || !auth().currentUser) {
+      var exists = MOCK_NOTIFICACIONES.some(function (n) {
+        return n.dedupeKey && n.dedupeKey === payload.dedupeKey;
+      });
+      if (payload.dedupeKey && exists) return null;
+      var mock = Object.assign({ id: "av-m-" + Date.now(), hora: "Ahora" }, payload);
+      MOCK_NOTIFICACIONES.unshift(mock);
+      return mock.id;
+    }
+
+    var firestore = db();
+    if (!firestore) return null;
+    try {
+      if (payload.dedupeKey) {
+        var dup = await firestore
+          .collection("usuarios")
+          .doc(cuentaUid)
+          .collection("notificaciones")
+          .where("dedupeKey", "==", payload.dedupeKey)
+          .limit(1)
+          .get();
+        if (!dup.empty) return dup.docs[0].id;
+      }
+      var ref = await firestore
+        .collection("usuarios")
+        .doc(cuentaUid)
+        .collection("notificaciones")
+        .add(payload);
+      return ref.id;
+    } catch (err) {
+      console.warn("[DashAvisos] crear", err);
+      return null;
+    }
   }
 
   global.DashAvisos = {
     MOCK_NOTIFICACIONES: MOCK_NOTIFICACIONES,
     listar: listar,
+    crear: crear,
     marcarLeido: marcarLeido,
     normalizeFilter: normalizeFilter,
     computeMockUnreadMaps: computeMockUnreadMaps,

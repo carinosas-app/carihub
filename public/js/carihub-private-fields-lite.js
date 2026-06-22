@@ -690,7 +690,9 @@
     if (tone) el.classList.add('rp-password-hint--' + tone);
   }
 
-  function syncPasswordAccessHints() {
+  function syncPasswordAccessHints(opts) {
+    opts = getAccessOptions(opts);
+    var confirmMode = isAccessConfirmMode(opts);
     var passEl = $(fieldId('contrasenaAcceso'));
     var confEl = $(fieldId('confirmarContrasenaAcceso'));
     var passHint = $(fieldId('contrasenaAcceso') + '_hint');
@@ -698,11 +700,16 @@
     var pass = passEl ? passEl.value : '';
     var conf = confEl ? confEl.value : '';
     if (passHint) {
+      if (confirmMode) {
+        if (!pass) setPasswordHint(passHint, 'Escribe tu contraseña actual para verificar que eres tú.', 'muted');
+        else setPasswordHint(passHint, 'Listo. Al enviar verificaremos tu acceso.', 'ok');
+        return;
+      }
       if (!pass) setPasswordHint(passHint, PASSWORD_REQUIREMENT_MSG, 'muted');
       else if (validarPasswordSegura(pass)) setPasswordHint(passHint, 'Contraseña segura.', 'ok');
       else setPasswordHint(passHint, PASSWORD_REQUIREMENT_MSG, 'err');
     }
-    if (confHint) {
+    if (confHint && !confirmMode) {
       if (!conf) setPasswordHint(confHint, 'Confirma tu contraseña.', 'muted');
       else if (pass && pass === conf) setPasswordHint(confHint, 'Las contraseñas coinciden.', 'ok');
       else setPasswordHint(confHint, 'Las contraseñas no coinciden.', 'err');
@@ -725,7 +732,42 @@
     });
   }
 
-  function bindTerminosTriggers(host) {
+  function getAccessOptions(opts) {
+    if (opts && opts.accessMode) return opts;
+    if (global.CariHubRegistroPerfil && typeof global.CariHubRegistroPerfil.getAccessOptions === 'function') {
+      return global.CariHubRegistroPerfil.getAccessOptions() || {};
+    }
+    return {};
+  }
+
+  function isAccessConfirmMode(opts) {
+    return getAccessOptions(opts).accessMode === 'confirm';
+  }
+
+  function renderAccessConfirmBlock(authEmail) {
+    var email = esc(String(authEmail || '').trim() || '—');
+    return (
+      '<p class="rp-private-subsection">Confirma tu acceso</p>' +
+      '<p class="rp-notice rp-notice--acceso">Ya tienes cuenta en CariHub. ' +
+      'Solo confirma tu <strong>contraseña</strong> para enviar este perfil adicional. ' +
+      'Los datos fiscales pueden ser distintos si lo necesitas.</p>' +
+      '<div class="rp-field rp-field--readonly" data-campo="correoAcceso">' +
+      '<label>Correo de tu cuenta</label>' +
+      '<p class="rp-access-confirm-email" id="' + fieldId('correoAcceso') + '_display">' + email + '</p>' +
+      '<input type="hidden" id="' + fieldId('correoAcceso') + '" name="' + fieldId('correoAcceso') + '" value="' + email + '">' +
+      '</div>' +
+      '<div class="rp-field" data-campo="contrasenaAcceso">' +
+      '<label for="' + fieldId('contrasenaAcceso') + '">Confirma tu contraseña</label>' +
+      '<span class="rp-password-toggle-wrap">' +
+      '<input type="password" id="' + fieldId('contrasenaAcceso') + '" name="' + fieldId('contrasenaAcceso') + '" ' +
+      'autocomplete="current-password" placeholder="La misma con la que entras al dashboard">' +
+      '<button type="button" class="rp-password-toggle-btn" data-toggle-for="' + fieldId('contrasenaAcceso') + '" ' +
+      'title="Mostrar contraseña" aria-label="Mostrar contraseña">🙈</button></span>' +
+      '<p class="rp-password-hint rp-password-hint--muted" id="' + fieldId('contrasenaAcceso') + '_hint" aria-live="polite">' +
+      'Escribe tu contraseña actual para verificar que eres tú.</p></div>'
+    );
+  }
+
     if (!host) return;
     host.querySelectorAll('[data-terminos-trigger]').forEach(function (btn) {
       if (btn.dataset.rpBound === '1') return;
@@ -743,7 +785,7 @@
     });
   }
 
-  function bindPasswordAccessFields(host) {
+  function bindPasswordAccessFields(host, opts) {
     if (!host) return;
     host.querySelectorAll('.rp-password-toggle-btn').forEach(bindPasswordToggleBtn);
     var passEl = $(fieldId('contrasenaAcceso'));
@@ -751,9 +793,9 @@
     [passEl, confEl].forEach(function (el) {
       if (!el || el.dataset.rpPassListen === '1') return;
       el.dataset.rpPassListen = '1';
-      el.addEventListener('input', syncPasswordAccessHints);
+      el.addEventListener('input', function () { syncPasswordAccessHints(opts); });
     });
-    syncPasswordAccessHints();
+    syncPasswordAccessHints(opts);
   }
 
   function syncCfdiVisibility(host) {
@@ -766,7 +808,7 @@
     });
   }
 
-  function bindPrivateForm(host, spec) {
+  function bindPrivateForm(host, spec, opts) {
     if (!host) return;
     host.querySelectorAll('.rp-private-file-btn').forEach(function (btn) {
       bindFileField($(btn.getAttribute('data-input')), btn);
@@ -776,15 +818,18 @@
       facturaToggle.addEventListener('change', function () { syncCfdiVisibility(host); });
       syncCfdiVisibility(host);
     }
-    bindPasswordAccessFields(host);
+    bindPasswordAccessFields(host, opts);
     bindTerminosTriggers(host);
   }
 
-  function renderPrivateForm(host, ctx, saved) {
+  function renderPrivateForm(host, ctx, saved, opts) {
     host = host || $('rpPrivateDynamicHost');
     if (!host) return null;
+    opts = getAccessOptions(opts);
     var spec = resolvePrivateSpec(ctx);
     saved = saved || {};
+    var accessConfirm = isAccessConfirmMode(opts);
+    var authEmail = opts.authEmail || '';
 
     if (!spec.supported) {
       host.innerHTML =
@@ -805,14 +850,23 @@
       html += '<h2 class="rp-card__title">' + esc(BLOQUE_TITLES[bloqueId] || bloqueId) + '</h2>';
       if (bloqueId === 'cuenta') {
         html += '<p class="rp-notice rp-notice--cuenta">Tu <strong>alias público</strong> puede ser distinto. ' +
-          'Con estos datos validamos tu identidad, te contactamos si hace falta y creamos tu acceso. ' +
-          'Nada de esto se publica en tu perfil.</p>';
+          'Con estos datos validamos tu identidad, te contactamos si hace falta' +
+          (accessConfirm ? ' y verificamos tu acceso.' : ' y creamos tu acceso.') +
+          ' Nada de esto se publica en tu perfil.</p>';
       }
       if (bloqueId === 'representante') {
         html += '<p class="rp-notice">Documento del representante legal para validación interna.</p>';
       }
       var accessDivider = false;
+      var accessConfirmRendered = false;
       fields.forEach(function (field) {
+        if (bloqueId === 'cuenta' && accessConfirm && ACCESS_FIELDS.indexOf(field.id) >= 0) {
+          if (!accessConfirmRendered) {
+            html += renderAccessConfirmBlock(authEmail);
+            accessConfirmRendered = true;
+          }
+          return;
+        }
         if (bloqueId === 'cuenta' && field.id === 'correoAcceso' && !accessDivider) {
           html += '<p class="rp-private-subsection">Acceso a tu cuenta</p>';
           html += '<p class="rp-notice rp-notice--acceso">Entrarás con tu <strong>correo</strong> ' +
@@ -825,7 +879,7 @@
     });
 
     host.innerHTML = html;
-    bindPrivateForm(host, spec);
+    bindPrivateForm(host, spec, opts);
     restorePrivateValues(saved);
     if (global.CariHubTerminosRegistro && CariHubTerminosRegistro.bindTerminosModal) {
       CariHubTerminosRegistro.bindTerminosModal();
@@ -869,7 +923,9 @@
     }
   }
 
-  function collectPrivateFormData(includePasswords) {
+  function collectPrivateFormData(includePasswords, opts) {
+    opts = getAccessOptions(opts);
+    var accessConfirm = isAccessConfirmMode(opts);
     var spec = resolvePrivateSpec(
       global.CariHubRegistroPerfil && global.CariHubRegistroPerfil.getContext
         ? global.CariHubRegistroPerfil.getContext() : {}
@@ -880,6 +936,7 @@
     var deseoFacturar = false;
 
     spec.fieldIds.forEach(function (campo) {
+      if (accessConfirm && campo === 'confirmarContrasenaAcceso') return;
       var el = $(fieldId(campo));
       if (!el) return;
       var meta = FIELD_META[campo] || {};
@@ -919,6 +976,10 @@
       }
     });
 
+    if (accessConfirm && opts.authEmail && !out.correoAcceso) {
+      out.correoAcceso = String(opts.authEmail).trim().toLowerCase();
+    }
+
     if (deseoFacturar && out._fiscal) out.facturacion = Object.assign({}, out._fiscal);
     if (deseoFacturar && spec.formularioId === 'negocio_empresa') {
       out.facturacion = out.facturacion || {};
@@ -946,12 +1007,14 @@
     else if (pass && pass !== confirm) missing.push('Las contraseñas no coinciden');
   }
 
-  function validatePrivateForm(ctx) {
+  function validatePrivateForm(ctx, opts) {
+    opts = getAccessOptions(opts);
+    var accessConfirm = isAccessConfirmMode(opts);
     var spec = resolvePrivateSpec(ctx);
     if (!spec.supported) return { ok: true, missing: [], spec: spec };
 
     var missing = [];
-    var data = collectPrivateFormData(true);
+    var data = collectPrivateFormData(true, opts);
 
     if (data.nombrePersonal && !nombrePersonalValido(data.nombrePersonal)) {
       missing.push('Nombre personal completo (nombre y apellido)');
@@ -964,6 +1027,7 @@
     }
 
     spec.fields.forEach(function (field) {
+      if (accessConfirm && ACCESS_FIELDS.indexOf(field.id) >= 0) return;
       if (PASSWORD_FIELDS.indexOf(field.id) >= 0) return;
       if (!field.obligatorio) return;
       if (field.condicionalFactura && !data.deseoFacturar) return;
@@ -997,7 +1061,11 @@
       }
     });
 
-    validatePasswordFields(data, missing);
+    if (accessConfirm) {
+      if (!data.contrasenaAcceso) missing.push('Confirma tu contraseña');
+    } else {
+      validatePasswordFields(data, missing);
+    }
 
     if (data.deseoFacturar && CFDI_FORMS[spec.formularioId]) {
       var reqCfdi = ['rfc', 'razonSocial', 'domicilioFiscal', 'codigoPostalFiscal', 'nombreFiscal'];

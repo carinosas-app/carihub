@@ -31,7 +31,10 @@
     screen: 'screen0',
     sector: null,
     subcategoria: null,
-    contexto: null
+    contexto: null,
+    accessMode: 'create',
+    authUser: null,
+    perfilCount: 0
   };
 
   var SECTOR_DISPLAY_ORDER = [
@@ -354,8 +357,10 @@
     } else if (id === 'screen4') {
       stopAdultosAnuncioRotation();
       stopAdultosCardRotation();
-      fillScreen4();
-      applyFormScreenTheme();
+      refreshAccessMode(function () {
+        fillScreen4();
+        applyFormScreenTheme();
+      });
     } else {
       stopAdultosAnuncioRotation();
       stopAdultosCardRotation();
@@ -1668,10 +1673,87 @@
     /* Delegado a CariHubPrivateFieldsLite.renderPrivateForm */
   }
 
+  function refreshAccessMode(cb) {
+    var authSvc = global.CariHubAuth;
+    if (!authSvc) {
+      state.accessMode = 'create';
+      state.authUser = null;
+      state.perfilCount = 0;
+      if (cb) cb();
+      return;
+    }
+
+    function applyUser(user) {
+      if (!user || !user.email) {
+        state.accessMode = 'create';
+        state.authUser = null;
+        state.perfilCount = 0;
+        if (cb) cb();
+        return;
+      }
+      state.authUser = user;
+      var db = global.CariHubCore && global.CariHubCore.db;
+      if (!db) {
+        state.accessMode = 'confirm';
+        state.perfilCount = 1;
+        if (cb) cb();
+        return;
+      }
+      db.collection('usuarios').doc(user.uid).get().then(function (snap) {
+        var count = 0;
+        if (snap.exists) {
+          var d = snap.data() || {};
+          var det = d.perfilesDetalle;
+          if (det && typeof det === 'object') count = Object.keys(det).length;
+          else if (d.perfilId || d.nombrePublico || d.aliasPublico) count = 1;
+        }
+        state.perfilCount = count;
+        state.accessMode = 'confirm';
+        if (cb) cb();
+      }).catch(function () {
+        state.accessMode = 'confirm';
+        state.perfilCount = 1;
+        if (cb) cb();
+      });
+    }
+
+    var current = authSvc.currentUser;
+    if (current) {
+      applyUser(current);
+      return;
+    }
+    authSvc.onAuthStateChanged(function (user) {
+      applyUser(user);
+    });
+  }
+
+  function getAccessOptions() {
+    return {
+      accessMode: state.accessMode,
+      authEmail: state.authUser && state.authUser.email ? state.authUser.email : ''
+    };
+  }
+
+  function syncScreen4Notice() {
+    var notice = $('rpPrivateUiFormNotice');
+    if (!notice) return;
+    if (state.accessMode === 'confirm') {
+      notice.textContent = state.perfilCount > 0
+        ? 'Perfil adicional: confirma tu contraseña al final. Los datos fiscales pueden ser distintos si lo necesitas.'
+        : 'Confirma tu contraseña al final para verificar tu acceso.';
+      notice.classList.remove('rp-hidden');
+      notice.removeAttribute('aria-hidden');
+    } else {
+      notice.classList.add('rp-hidden');
+      notice.setAttribute('aria-hidden', 'true');
+    }
+  }
+
   function fillScreen4() {
     var ctx = state.contexto || buildContexto(state.sector, state.subcategoria);
     syncProfileExperienceChip(null, ctx);
     syncUiFormNotice(ctx);
+    syncScreen4Notice();
     var saved = null;
     try {
       var raw = global.localStorage.getItem(STORAGE_KEY);
@@ -1684,7 +1766,7 @@
       }
     } catch (e) { /* ignore */ }
     if (global.CariHubPrivateFieldsLite && CariHubPrivateFieldsLite.renderPrivateForm) {
-      CariHubPrivateFieldsLite.renderPrivateForm($('rpPrivateDynamicHost'), ctx, saved);
+      CariHubPrivateFieldsLite.renderPrivateForm($('rpPrivateDynamicHost'), ctx, saved, getAccessOptions());
     }
     applyFormScreenTheme();
   }
@@ -1974,17 +2056,24 @@
       primary.textContent = 'Enviando solicitud…';
     }
     CariHubRegistroPerfilSubmit.submitRegistroPerfil(draft, priv, function () {})
-      .then(function () {
+      .then(function (result) {
         try { global.localStorage.removeItem(STORAGE_KEY); } catch (e) { /* ignore */ }
         try {
-          global.sessionStorage.setItem('carihub_dashboard_aviso', 'solicitud_enviada');
+          global.sessionStorage.setItem('carihub_dashboard_aviso', JSON.stringify({
+            tipo: 'solicitud_enviada',
+            perfilId: result && result.perfilId ? result.perfilId : null,
+            esPerfilAdicional: result && result.esPerfilAdicional === true
+          }));
         } catch (e) { /* ignore */ }
         global.location.href = 'dashboard-rentero.html';
       })
       .catch(function (err) {
         var msg = err && err.message ? err.message : String(err);
+        var code = err && err.code ? err.code : '';
         if (/email-already-in-use/i.test(msg)) {
           msg = 'Ese correo de acceso ya está registrado. Usa otro correo o inicia sesión con tu cuenta.';
+        } else if (code === 'auth/wrong-password' || code === 'auth/invalid-credential' || code === 'auth/invalid-login-credentials') {
+          msg = 'Contraseña incorrecta. Confirma la misma con la que entras al dashboard.';
         }
         alert('No se pudo enviar la solicitud: ' + msg);
       })
@@ -2177,6 +2266,8 @@
       return;
     }
 
+    refreshAccessMode();
+
     var closeBtn = $('rpClose');
     if (closeBtn) closeBtn.addEventListener('click', goHomeFromRegistro);
 
@@ -2203,6 +2294,8 @@
     saveDraft: saveDraft,
     submitSolicitudPerfil: submitSolicitudPerfil,
     goBackFromScreen1: goBackFromScreen1,
+    getAccessOptions: getAccessOptions,
+    refreshAccessMode: refreshAccessMode,
     getContext: function () {
       return state.contexto || buildContexto(state.sector, state.subcategoria);
     }

@@ -574,8 +574,11 @@ const CATEGORIAS_BUSCADOR = [
   <div class="form-box">
     <h2>🔞 Acceso para mayores de edad</h2>
     <p class="subtitulo">Confirma que eres mayor de 18 años para continuar.</p>
+    <p class="antibot-promo-notice" role="note">
+      <strong>Registra tu primer perfil y obtén 1 mes gratis de prueba.</strong>
+      Aplica solo al primer perfil aprobado de tu cuenta. Los perfiles adicionales no incluyen promoción automática.
+    </p>
     <label><input type="checkbox" id="checkEdad"> Confirmo que soy mayor de 18 años</label>
-    <label><input type="checkbox" id="checkPromo"> Registra un perfil y obtén gratis un mes de prueba</label>
     <button class="btn btn-continuar antibot-continuar" id="btnAntiBotContinuar" style="width:100%;margin-top:12px;" disabled onclick="validarAcceso()">Continuar</button>
   </div>
 </div>
@@ -689,10 +692,18 @@ const CATEGORIAS_BUSCADOR = [
     <div id="vistaCuentaEntrar">
       <p class="subtitulo">Entra con tu correo o teléfono y tu contraseña. Administra tu cuenta social, mensajes, favoritos y gratificaciones.</p>
       <input id="loginEmail" type="text" placeholder="Correo o teléfono" autocomplete="username">
+      <div class="login-inline-alert hidden" id="loginEmailAlert" role="alert" aria-live="polite">
+        <button type="button" class="login-inline-alert__close" aria-label="Cerrar aviso" onclick="closeModalAlert('loginEmail', event)">×</button>
+        <div class="login-inline-alert__content"></div>
+      </div>
       <span class="password-toggle-wrap">
         <input id="loginPassword" type="password" placeholder="Contraseña" autocomplete="current-password">
         <button type="button" class="password-toggle-btn" data-toggle-for="loginPassword" title="Mostrar contraseña" aria-label="Mostrar contraseña">🙈</button>
       </span>
+      <div class="login-inline-alert hidden" id="loginPasswordAlert" role="alert" aria-live="polite">
+        <button type="button" class="login-inline-alert__close" aria-label="Cerrar aviso" onclick="closeModalAlert('loginPassword', event)">×</button>
+        <div class="login-inline-alert__content"></div>
+      </div>
       <p class="login-forgot-wrap">
         <button type="button" class="login-forgot-link" id="btnRecuperarContrasena" onclick="recuperarContrasenaSocial()">¿Olvidaste tu contraseña?</button>
       </p>
@@ -703,10 +714,18 @@ const CATEGORIAS_BUSCADOR = [
     <div id="vistaCuentaCrear" style="display:none;">
       <p class="subtitulo">Crea tu cuenta social para mensajes, favoritos, seguir perfiles, gratificaciones y participar en la red de negocios. No aparece en el directorio.</p>
       <input id="cuentaEmail" type="email" placeholder="Correo">
+      <div class="login-inline-alert hidden" id="cuentaEmailAlert" role="alert" aria-live="polite">
+        <button type="button" class="login-inline-alert__close" aria-label="Cerrar aviso" onclick="closeModalAlert('cuentaEmail', event)">×</button>
+        <div class="login-inline-alert__content"></div>
+      </div>
       <span class="password-toggle-wrap">
         <input id="cuentaPassword" type="password" placeholder="Contraseña (mín. 6 caracteres)">
         <button type="button" class="password-toggle-btn" data-toggle-for="cuentaPassword" title="Mostrar contraseña" aria-label="Mostrar contraseña">🙈</button>
       </span>
+      <div class="login-inline-alert hidden" id="cuentaPasswordAlert" role="alert" aria-live="polite">
+        <button type="button" class="login-inline-alert__close" aria-label="Cerrar aviso" onclick="closeModalAlert('cuentaPassword', event)">×</button>
+        <div class="login-inline-alert__content"></div>
+      </div>
       <button class="btn btn-continuar" style="width:100%;margin-top:10px;" onclick="crearCuentaMinima()">Crear cuenta</button>
       <button class="btn btn-atras" style="width:100%;margin-top:10px;" onclick="mostrarVistaCuenta('entrar')">Ya tengo cuenta</button>
     </div>
@@ -883,6 +902,7 @@ function abrirMiPerfil(){
   cerrarMenu();
   mostrarVistaCuenta("entrar");
   document.getElementById("modalMiPerfil").style.display="block";
+  clearAllLoginModalAlerts();
   syncLoginEntrar();
 }
 
@@ -890,6 +910,7 @@ function abrirCuentaPersonal(){
   cerrarMenu();
   mostrarVistaCuenta("crear");
   document.getElementById("modalMiPerfil").style.display="block";
+  clearAllLoginModalAlerts();
 }
 
 function mostrarVistaCuenta(modo){
@@ -900,7 +921,98 @@ function mostrarVistaCuenta(modo){
   crear.style.display=modo==="crear"?"block":"none";
   const titulo=document.getElementById("modalCuentaTitulo");
   if(titulo) titulo.textContent=modo==="crear"?"Crear cuenta social":"Iniciar sesión";
-  if(modo==="entrar") syncLoginEntrar();
+  if(modo==="entrar"){
+    clearAllLoginModalAlerts();
+    syncLoginEntrar();
+  }else{
+    clearAllLoginModalAlerts();
+  }
+}
+
+var MODAL_ALERT_TARGETS={
+  loginEmail:{ boxId:"loginEmailAlert", inputId:"loginEmail" },
+  loginPassword:{ boxId:"loginPasswordAlert", inputId:"loginPassword", wrapSelector:"#vistaCuentaEntrar .password-toggle-wrap" },
+  cuentaEmail:{ boxId:"cuentaEmailAlert", inputId:"cuentaEmail" },
+  cuentaPassword:{ boxId:"cuentaPasswordAlert", inputId:"cuentaPassword", wrapSelector:"#vistaCuentaCrear .password-toggle-wrap" }
+};
+
+function clearModalAlert(targetKey){
+  const t=MODAL_ALERT_TARGETS[targetKey];
+  if(!t) return;
+  const box=document.getElementById(t.boxId);
+  if(box){
+    box.classList.add("hidden");
+    box.classList.remove("login-inline-alert--ok");
+    const content=box.querySelector(".login-inline-alert__content");
+    if(content) content.innerHTML="";
+  }
+  const input=document.getElementById(t.inputId);
+  if(input){
+    input.classList.remove("input-error");
+    input.removeAttribute("aria-invalid");
+  }
+  if(t.wrapSelector){
+    const wrap=document.querySelector(t.wrapSelector);
+    if(wrap) wrap.classList.remove("input-error");
+  }
+}
+
+function clearAllLoginModalAlerts(){
+  Object.keys(MODAL_ALERT_TARGETS).forEach(clearModalAlert);
+}
+
+function closeModalAlert(targetKey,ev){
+  if(ev) ev.preventDefault();
+  clearModalAlert(targetKey);
+  const t=MODAL_ALERT_TARGETS[targetKey];
+  if(!t) return;
+  const input=document.getElementById(t.inputId);
+  if(input){
+    try{ input.focus({ preventScroll:true }); }catch(e){ input.focus(); }
+  }
+}
+
+function showModalAlert(targetKey,title,hint,opts){
+  opts=opts||{};
+  clearAllLoginModalAlerts();
+  const t=MODAL_ALERT_TARGETS[targetKey];
+  if(!t) return;
+  const box=document.getElementById(t.boxId);
+  if(!box) return;
+  const content=box.querySelector(".login-inline-alert__content");
+  if(content){
+    content.innerHTML="<strong>"+textoSeguro(title)+"</strong>"+
+      (hint?"<span>"+textoSeguro(hint)+"</span>":"");
+  }
+  box.classList.toggle("login-inline-alert--ok",!!opts.ok);
+  box.classList.remove("hidden");
+  if(opts.highlight!==false&&!opts.ok){
+    const input=document.getElementById(t.inputId);
+    if(input){
+      input.classList.add("input-error");
+      input.setAttribute("aria-invalid","true");
+    }
+    if(t.wrapSelector){
+      const wrap=document.querySelector(t.wrapSelector);
+      if(wrap) wrap.classList.add("input-error");
+    }
+  }
+  const focusId=opts.focus||t.inputId;
+  const focusEl=document.getElementById(focusId);
+  if(focusEl){
+    try{ focusEl.focus({ preventScroll:true }); }catch(e){ focusEl.focus(); }
+  }
+  try{
+    box.scrollIntoView({ block:"nearest", behavior:"smooth" });
+  }catch(e){
+    box.scrollIntoView(true);
+  }
+}
+
+function isLoginCredentialError(code){
+  return code==="auth/invalid-login-credentials"
+    ||code==="auth/wrong-password"
+    ||code==="auth/user-not-found";
 }
 
 function syncLoginEntrar(){
@@ -917,9 +1029,23 @@ function initLoginSocialForm(){
   const passEl=document.getElementById("loginPassword");
   if(!emailEl||!passEl)return;
   ["input","change"].forEach(function(evt){
-    emailEl.addEventListener(evt,syncLoginEntrar);
-    passEl.addEventListener(evt,syncLoginEntrar);
+    emailEl.addEventListener(evt,function(){
+      clearAllLoginModalAlerts();
+      syncLoginEntrar();
+    });
+    passEl.addEventListener(evt,function(){
+      clearAllLoginModalAlerts();
+      syncLoginEntrar();
+    });
   });
+  const cuentaEmailEl=document.getElementById("cuentaEmail");
+  const cuentaPassEl=document.getElementById("cuentaPassword");
+  if(cuentaEmailEl&&cuentaPassEl){
+    ["input","change"].forEach(function(evt){
+      cuentaEmailEl.addEventListener(evt,function(){ clearAllLoginModalAlerts(); });
+      cuentaPassEl.addEventListener(evt,function(){ clearAllLoginModalAlerts(); });
+    });
+  }
   syncLoginEntrar();
   if(window.CariHubPasswordToggle&&CariHubPasswordToggle.init){
     CariHubPasswordToggle.init(document.getElementById("modalMiPerfil"));
@@ -935,15 +1061,21 @@ async function crearCuentaMinima(){
   const email=document.getElementById("cuentaEmail").value.trim().toLowerCase();
   const password=document.getElementById("cuentaPassword").value;
 
-  if(!email||!password){
-    alert("Escribe correo y contraseña.");
+  if(!email){
+    showModalAlert("cuentaEmail","❌ Escribe tu correo.","Necesitamos un correo válido para crear tu cuenta.");
+    return;
+  }
+  if(!password){
+    showModalAlert("cuentaPassword","❌ Escribe una contraseña.","Mínimo 6 caracteres para proteger tu cuenta.");
     return;
   }
 
   if(password.length<6){
-    alert("La contraseña debe tener al menos 6 caracteres.");
+    showModalAlert("cuentaPassword","❌ Contraseña muy corta.","Debe tener al menos 6 caracteres.");
     return;
   }
+
+  clearAllLoginModalAlerts();
 
   try{
     const cred=await auth.createUserWithEmailAndPassword(email,password);
@@ -954,18 +1086,28 @@ async function crearCuentaMinima(){
     alert("Cuenta social creada. Ya puedes usar mensajes, favoritos y gratificaciones.");
   }catch(error){
     if(error&&error.code==="auth/email-already-in-use"){
-      alert("Este correo ya está registrado. Usa «Ya tengo cuenta» e inicia sesión con tu contraseña.");
       const loginEmail=document.getElementById("loginEmail");
       if(loginEmail) loginEmail.value=email;
       mostrarVistaCuenta("entrar");
+      showModalAlert(
+        "loginEmail",
+        "❌ Este correo ya está registrado.",
+        "Inicia sesión con tu contraseña o usa «¿Olvidaste tu contraseña?».",
+        { focus:"loginPassword" }
+      );
       return;
     }
-    alert("Error: "+(error&&error.message?error.message:"No se pudo crear la cuenta."));
+    showModalAlert(
+      "cuentaEmail",
+      "❌ No se pudo crear la cuenta.",
+      (error&&error.message)?error.message:"Inténtalo de nuevo en unos momentos."
+    );
   }
 }
 
 function cerrarMiPerfil(){
   document.getElementById("modalMiPerfil").style.display="none";
+  clearAllLoginModalAlerts();
 }
 
 function abrirPanel(uid){
@@ -1613,16 +1755,16 @@ async function recuperarContrasenaSocial(){
   const btn=document.getElementById("btnRecuperarContrasena");
   const identificador=document.getElementById("loginEmail");
   if(!identificador){
-    alert("No se pudo acceder al formulario de login.");
+    showModalAlert("loginEmail","❌ No se pudo abrir recuperación.","Recarga la página e inténtalo de nuevo.");
     return;
   }
   const raw=identificador.value.trim();
   if(!raw){
-    alert("Escribe tu correo arriba para enviarte el enlace de recuperación.");
+    showModalAlert("loginEmail","❌ Escribe tu correo arriba.","Lo usamos para enviarte el enlace de recuperación.");
     return;
   }
   if(!auth){
-    alert("El servicio de acceso no está disponible. Recarga la página e inténtalo de nuevo.");
+    showModalAlert("loginEmail","❌ Servicio no disponible.","Recarga la página e inténtalo de nuevo.");
     return;
   }
 
@@ -1630,20 +1772,26 @@ async function recuperarContrasenaSocial(){
   if(pareceCorreoLogin(raw)){
     email=raw.toLowerCase();
     if(!correoValidoBasicoLogin(email)){
-      alert("Revisa que el correo esté bien escrito.");
+      showModalAlert("loginEmail","❌ Revisa tu correo.","Parece incompleto o mal escrito.");
       return;
     }
   }else{
     email=await resolverEmailAccesoLogin(raw);
     if(!email){
-      alert("Para recuperar tu contraseña necesitamos el correo con el que registraste tu cuenta. Si solo tienes teléfono, usa ese correo o contacta soporte.");
+      showModalAlert(
+        "loginEmail",
+        "❌ No encontramos cuenta con ese teléfono.",
+        "Usa el correo con el que registraste o contacta soporte."
+      );
       return;
     }
     if(!correoValidoBasicoLogin(email)){
-      alert("Revisa que el correo esté bien escrito.");
+      showModalAlert("loginEmail","❌ Revisa tu correo.","Parece incompleto o mal escrito.");
       return;
     }
   }
+
+  clearAllLoginModalAlerts();
 
   const labelOriginal=btn?btn.textContent:"";
   if(btn){
@@ -1653,17 +1801,22 @@ async function recuperarContrasenaSocial(){
 
   try{
     await auth.sendPasswordResetEmail(email);
-    alert("Si hay una cuenta con ese correo, te enviamos un enlace para restablecer tu contraseña. Revisa bandeja y spam.");
+    showModalAlert(
+      "loginEmail",
+      "✅ Revisa tu correo.",
+      "Si hay una cuenta con ese correo, te enviamos un enlace. Revisa bandeja y spam.",
+      { ok:true, highlight:false }
+    );
   }catch(error){
     const code=error&&error.code?error.code:"";
     if(code==="auth/invalid-email"){
-      alert("El correo no es válido. Revísalo e inténtalo de nuevo.");
+      showModalAlert("loginEmail","❌ Correo no válido.","Revísalo e inténtalo de nuevo.");
     }else if(code==="auth/too-many-requests"){
-      alert("Demasiados intentos. Espera unos minutos e inténtalo de nuevo.");
+      showModalAlert("loginEmail","❌ Demasiados intentos.","Espera unos minutos e inténtalo de nuevo.");
     }else if(code==="auth/network-request-failed"){
-      alert("Sin conexión. Revisa tu internet e inténtalo de nuevo.");
+      showModalAlert("loginEmail","❌ Sin conexión.","Revisa tu internet e inténtalo de nuevo.");
     }else{
-      alert("No pudimos enviar el correo. Inténtalo más tarde.");
+      showModalAlert("loginEmail","❌ No pudimos enviar el correo.","Inténtalo más tarde.");
       console.warn("Recuperar contraseña:",error);
     }
   }finally{
@@ -1714,16 +1867,31 @@ async function resolverEmailAccesoLogin(identificador){
 async function loginMiPerfil(){
   const identificador=document.getElementById("loginEmail").value.trim();
   const password=document.getElementById("loginPassword").value;
+  const btn=document.getElementById("btnLoginEntrar");
 
-  if(!identificador||!password){
-    alert("Escribe correo o teléfono y contraseña.");
+  if(!identificador){
+    showModalAlert("loginEmail","❌ Escribe tu correo o teléfono.","Es el identificador con el que te registraste.");
     return;
+  }
+  if(!password){
+    showModalAlert("loginPassword","❌ Escribe tu contraseña.","Es la misma que usaste al crear tu cuenta.");
+    return;
+  }
+
+  clearAllLoginModalAlerts();
+  if(btn){
+    btn.disabled=true;
+    btn.textContent="Entrando…";
   }
 
   try{
     const email=await resolverEmailAccesoLogin(identificador);
     if(!email){
-      alert("No encontramos una cuenta con ese teléfono. Usa el correo con el que registraste tu perfil o completa el registro.");
+      showModalAlert(
+        "loginEmail",
+        "❌ No encontramos esa cuenta.",
+        "Usa el correo con el que registraste o completa el registro."
+      );
       return;
     }
     await auth.signInWithEmailAndPassword(email,password);
@@ -1734,11 +1902,24 @@ async function loginMiPerfil(){
     }
     window.location.href="dashboard-rentero.html";
   }catch(error){
-    if(error&&error.code==="auth/invalid-login-credentials"){
-      alert("Contraseña incorrecta o datos no válidos. Revisa tu contraseña e inténtalo de nuevo.");
+    const code=error&&error.code;
+    if(isLoginCredentialError(code)){
+      showModalAlert(
+        "loginPassword",
+        "❌ Correo o contraseña incorrectos.",
+        "Verifica tus datos o utiliza «¿Olvidaste tu contraseña?».",
+        { focus:"loginPassword" }
+      );
       return;
     }
-    alert("Error: "+(error&&error.message?error.message:"No se pudo iniciar sesión."));
+    showModalAlert(
+      "loginPassword",
+      "❌ No se pudo iniciar sesión.",
+      (error&&error.message)?error.message:"Inténtalo de nuevo en unos momentos."
+    );
+  }finally{
+    if(btn) btn.textContent="Entrar";
+    syncLoginEntrar();
   }
 }
 
@@ -2321,8 +2502,8 @@ async function plantillaCardPerfil(id,u){
 }
 
 function validarAcceso(){
-  if(!document.getElementById("checkEdad").checked||!document.getElementById("checkPromo").checked){
-    alert("Debes confirmar ambas opciones para continuar.");
+  if(!document.getElementById("checkEdad").checked){
+    alert("Debes confirmar que eres mayor de 18 años para continuar.");
     return;
   }
 
@@ -2332,10 +2513,9 @@ function validarAcceso(){
 
 function syncAntiBotContinuar(){
   var edad=document.getElementById("checkEdad");
-  var promo=document.getElementById("checkPromo");
   var btn=document.getElementById("btnAntiBotContinuar");
   if(!btn)return;
-  btn.disabled=!(edad&&edad.checked&&promo&&promo.checked);
+  btn.disabled=!(edad&&edad.checked);
 }
 
 async function registrarVisita(){
@@ -2393,9 +2573,7 @@ const params = new URLSearchParams(window.location.search);
   }
 
   var chkEdad=document.getElementById("checkEdad");
-  var chkPromo=document.getElementById("checkPromo");
   if(chkEdad)chkEdad.addEventListener("change",syncAntiBotContinuar);
-  if(chkPromo)chkPromo.addEventListener("change",syncAntiBotContinuar);
 
   initLoginSocialForm();
 

@@ -26,6 +26,7 @@
   <link rel="stylesheet" href="css/dashboard-rentero-pro.css">
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
   <script src="js/carihub-public-render-lite.js"></script>
+  <script src="js/registro-perfil-preview.js"></script>
 </head>
 <body class="dash-pro" data-tema="adult">
 <div class="dashboard-shell">
@@ -40,7 +41,16 @@
   </div>
 </header>
 
-<div class="dash-aviso dash-aviso--ok hidden" id="dashAvisoEntrada" role="status" aria-live="polite"></div>
+<div class="dash-aviso dash-aviso--ok hidden" id="dashAvisoEntrada" role="status" aria-live="polite">
+  <div class="dash-aviso__inner">
+    <p class="dash-aviso__text" id="dashAvisoEntradaText"></p>
+    <button type="button" class="dash-aviso__action hidden" id="dashAvisoEntradaBtn">Continuar al pago</button>
+  </div>
+  <button type="button" class="dash-aviso__close hidden" id="dashAvisoEntradaClose" aria-label="Cerrar aviso">×</button>
+</div>
+<div class="dash-nuevo-perfil-hint hidden" id="dashNuevoPerfilHint" role="note">
+  Ya tienes un perfil. Los adicionales aplican <strong>50% de descuento</strong> el primer periodo (requieren pago tras aprobación).
+</div>
 
 <main class="pro-body dashboard-rentero app-shell">
 
@@ -66,7 +76,7 @@
     </div>
 
     <div class="action-stack dash-nav-actions dash-nav-actions--perfil" data-dash-cap="publish">
-      <button class="btn dash-action-btn" type="button" onclick="location.href='registro-perfil.html'">+ Nuevo perfil</button>
+      <button class="btn dash-action-btn dash-action-btn--nuevo-perfil" type="button" id="btnDashNuevoPerfil">+ Nuevo perfil</button>
     </div>
 
     <div class="side-banners dash-activos-section dash-activos-section--banners" id="sideBannersBlock" data-dash-cap="banner">
@@ -194,8 +204,16 @@
       <div class="dash-module is-active" data-module="inicio" id="modulo-inicio">
         <div class="dash-inicio-stack" id="dashInicioStack">
           <section class="dash-inicio-preview panel glass" id="dashPreviewWrap" aria-label="Vista previa del perfil publicado">
-            <div class="dash-inicio-preview__viewport" id="dashPreviewViewport">
-              <iframe id="dashPerfilPreviewFrame" class="dash-inicio-preview__frame" title="Vista previa del perfil (embed)" loading="lazy" scrolling="no"></iframe>
+            <div class="dash-inicio-preview__banner hidden" id="dashPreviewBannerPanel" aria-live="polite"></div>
+            <div class="dash-inicio-preview__scroll dash-preview-stack-wrap" id="dashInicioPreviewPerfil">
+              <div class="dash-preview-stack">
+                <div class="dash-preview-stack__card rp-public-preview__frame rp-public-preview__frame--card">
+                  <div class="rp-preview-res-mount" id="dashPreviewResultadosMount" aria-live="polite"></div>
+                </div>
+                <div class="dash-preview-stack__perfil rp-public-preview__frame rp-public-preview__frame--perfil">
+                  <iframe id="dashPerfilPreviewFrame" title="Vista previa del perfil" loading="lazy" scrolling="yes"></iframe>
+                </div>
+              </div>
               <p class="dash-inicio-preview__placeholder hidden" id="dashPreviewPlaceholder" aria-live="polite"></p>
             </div>
             <div class="dash-inicio-preview__actions dash-toolbar-actions" id="dashPreviewActionsPerfil">
@@ -526,7 +544,7 @@
 
       <!-- Vista previa de perfil -->
       <div class="dash-module" data-module="vista-perfil" id="modulo-vista-perfil">
-        <div class="dash-live-preview panel glass">
+        <div class="dash-live-preview panel glass dash-vista-perfil-rp">
           <div class="dash-live-preview__head">
             <div class="dash-live-preview__title">
               <strong>Vista previa de tu perfil</strong>
@@ -537,7 +555,16 @@
               <button class="btn" type="button" id="btnVistaPerfilEditar">Editar perfil</button>
             </div>
           </div>
-          <iframe id="dashVistaPerfilFrame" class="dash-live-preview__frame" title="Vista previa del perfil público" loading="lazy"></iframe>
+          <div class="dash-preview-stack-wrap dash-vista-perfil-rp__scroll">
+            <div class="dash-preview-stack">
+              <div class="dash-preview-stack__card rp-public-preview__frame rp-public-preview__frame--card">
+                <div class="rp-preview-res-mount" id="dashVistaPerfilResultadosMount" aria-live="polite"></div>
+              </div>
+              <div class="dash-preview-stack__perfil rp-public-preview__frame rp-public-preview__frame--perfil">
+                <iframe id="dashVistaPerfilFrame" title="Vista previa del perfil" loading="lazy" scrolling="yes"></iframe>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -947,6 +974,18 @@
   <p class="dash-personalize-panel__note">Toca palabras en la vista previa del perfil para elegir qué estilo editar. Cambios de precio, fotos o datos públicos importantes requieren revisión.</p>
 </aside>
 
+<div class="rp-preview-modal hidden" id="dashPreviewModal" role="dialog" aria-modal="true" aria-labelledby="dashPreviewModalTitle">
+  <div class="rp-preview-modal__backdrop" id="dashPreviewModalBackdrop"></div>
+  <div class="rp-preview-modal__panel">
+    <div class="rp-preview-modal__head">
+      <h3 id="dashPreviewModalTitle">Así te verán</h3>
+      <button type="button" class="rp-preview-modal__close" id="dashPreviewModalClose" aria-label="Cerrar">&times;</button>
+    </div>
+    <div class="rp-preview-modal__body" id="dashPreviewModalBody"></div>
+    <p class="rp-preview-modal__hint">Vista previa con los datos públicos de tu publicación activa.</p>
+  </div>
+</div>
+
 <div class="dash-rc-modal hidden" id="dashRcEditModal" role="dialog" aria-modal="true" aria-labelledby="dashRcEditTitle" hidden>
   <div class="dash-rc-modal__backdrop" data-rc-modal-close></div>
   <div class="dash-rc-modal__panel">
@@ -976,6 +1015,8 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
   <script src="js/carihub-core.js"></script>
+  <script src="js/carihub-publicacion-pagos.js"></script>
+  <script src="js/dashboard-aviso-publicacion.js"></script>
   <script src="js/carihub-messenger-privacidad-ui.js"></script>
   <script src="js/carihub-messenger-privacidad-schema.js"></script>
   <script src="js/carihub-messenger-privacidad-enforcement.js"></script>
@@ -1603,6 +1644,8 @@
         tipo:"perfil",
         ownerUid:u.cuentaUid||u.uid||u.ownerUid||"",
         nombrePublico:valorDatoPublico(u,"Nombre público",u.nombrePublico||u.nombre||""),
+        sectorId:u.sectorId||u.sector||"",
+        subcategoria:u.subcategoria||u.subcategoriaId||"",
         categoria:valorDatoPublico(u,"Categoría",u.categoria||""),
         pais:valorDatoPublico(u,"País",u.pais||""),
         estado:valorDatoPublico(u,"Estado",u.estado||""),
@@ -2030,6 +2073,7 @@
       }else{
         pintarVistaPreviaPerfil();
       }
+      syncAvisoEntradaPerfil();
     }
 
     function syncDashContextFromPublicacion(pub){
@@ -2272,19 +2316,234 @@
       return mapa[rev]||rev;
     }
 
+    let dashAvisoPendiente=null;
+    const DASH_AVISO_STORAGE_KEY="carihub_dashboard_avisos_pendientes";
+
+    function loadDashboardAvisosStore(){
+      try{
+        const raw=localStorage.getItem(DASH_AVISO_STORAGE_KEY);
+        if(!raw) return {};
+        const parsed=JSON.parse(raw);
+        return parsed&&typeof parsed==="object"?parsed:{};
+      }catch(e){
+        return {};
+      }
+    }
+
+    function saveDashboardAviso(aviso){
+      if(!aviso) return;
+      var id=aviso.contextoId||aviso.perfilId||aviso.bannerId;
+      if(!id) return;
+      try{
+        const store=loadDashboardAvisosStore();
+        store[aviso.perfilId||id]=aviso;
+        localStorage.setItem(DASH_AVISO_STORAGE_KEY,JSON.stringify(store));
+      }catch(e){}
+    }
+
+    function clearDashboardAviso(perfilId){
+      if(!perfilId) return;
+      try{
+        const store=loadDashboardAvisosStore();
+        if(!store[perfilId]) return;
+        delete store[perfilId];
+        localStorage.setItem(DASH_AVISO_STORAGE_KEY,JSON.stringify(store));
+      }catch(e){}
+    }
+
+    function pickDashboardAvisoForPerfil(pub){
+      const store=loadDashboardAvisosStore();
+      const ids=Object.keys(store);
+      if(!ids.length) return null;
+      if(pub&&pub.tipo==="perfil"){
+        const pubId=pub.perfilId||pub.id;
+        if(pubId&&store[pubId]) return store[pubId];
+      }
+      return store[ids[0]]||null;
+    }
+
+    function perfilEstaAprobado(pub){
+      if(!pub||pub.tipo!=="perfil") return false;
+      if(pub.estadoPublicacion&&pub.estadoPublicacion.publicoActivo) return true;
+      const rev=String((pub.estadoPublicacion&&pub.estadoPublicacion.revision)||
+        (pub._raw&&(pub._raw.estadoRevision||pub._raw.estadoAdmin||""))).toLowerCase();
+      return rev==="aprobado"||rev.includes("publicado");
+    }
+
+    function parseDashboardAviso(raw){
+      if(!raw) return null;
+      try{
+        const parsed=JSON.parse(raw);
+        if(parsed&&parsed.tipo) return parsed;
+      }catch(e){}
+      if(raw==="solicitud_enviada") return { tipo:"solicitud_enviada", perfilId:null, esPerfilAdicional:false };
+      return null;
+    }
+
+    function perfilEstaPendiente(pub){
+      if(!pub||pub.tipo!=="perfil") return false;
+      const rev=(pub.estadoPublicacion&&pub.estadoPublicacion.revision)||
+        (pub._raw&&(pub._raw.estadoRevision||pub._raw.estadoAdmin||""));
+      const txt=String(rev||"").toLowerCase();
+      return txt.includes("pendiente")||txt.includes("revision")||txt==="registro_pendiente"||txt==="actualizacion_pendiente";
+    }
+
+    function textoAvisoSolicitud(aviso){
+      if(window.DashAvisoPublicacion&&DashAvisoPublicacion.textoAviso){
+        return DashAvisoPublicacion.textoAviso(aviso);
+      }
+      return "";
+    }
+
+    function resolverAvisoDesdePublicacion(pub){
+      if(window.DashAvisoPublicacion&&DashAvisoPublicacion.resolverAvisoPublicacion){
+        return DashAvisoPublicacion.resolverAvisoPublicacion(pub,window.CariHubPublicacionPagos);
+      }
+      return null;
+    }
+
+    function aplicarAvisoEntradaUI(aviso,visible,pub){
+      const wrap=document.getElementById("dashAvisoEntrada");
+      const textEl=document.getElementById("dashAvisoEntradaText");
+      const btnEl=document.getElementById("dashAvisoEntradaBtn");
+      const closeEl=document.getElementById("dashAvisoEntradaClose");
+      if(!wrap||!textEl) return;
+      if(!visible||!aviso){
+        wrap.classList.add("hidden");
+        if(btnEl) btnEl.classList.add("hidden");
+        if(closeEl) closeEl.classList.add("hidden");
+        if(window.DashAvisoPublicacion) DashAvisoPublicacion.aplicarTemaAviso(wrap,btnEl,null);
+        return;
+      }
+      textEl.textContent=textoAvisoSolicitud(aviso);
+      wrap.classList.remove("hidden");
+      if(window.DashAvisoPublicacion){
+        DashAvisoPublicacion.aplicarTemaAviso(wrap,btnEl,aviso);
+      }
+      const btnLabel=window.DashAvisoPublicacion?DashAvisoPublicacion.etiquetaBoton(aviso):"";
+      const btnUrl=window.DashAvisoPublicacion?DashAvisoPublicacion.urlBotonAviso(aviso):null;
+      if(btnEl){
+        if(btnLabel&&btnUrl){
+          btnEl.textContent=btnLabel;
+          btnEl.classList.remove("hidden");
+          btnEl.onclick=function(){ location.href=btnUrl; };
+        }else if(aviso.tipo==="publicacion_activa"){
+          btnEl.textContent="Ver publicación";
+          btnEl.classList.remove("hidden");
+          btnEl.onclick=function(){
+            if(window.DashModuleNav) DashModuleNav.setModule("inicio");
+            if(window.DashAvisoPublicacion) DashAvisoPublicacion.marcarAvisoVisto(aviso.contextoId,"activado");
+            aplicarAvisoEntradaUI(null,false);
+          };
+        }else{
+          btnEl.classList.add("hidden");
+          btnEl.onclick=null;
+        }
+      }
+      if(closeEl){
+        closeEl.classList.remove("hidden");
+        closeEl.onclick=function(){
+          if(aviso.contextoId&&window.DashAvisoPublicacion){
+            if(aviso.tipo==="publicacion_activa") DashAvisoPublicacion.marcarAvisoVisto(aviso.contextoId,"activado");
+            else clearDashboardAviso(aviso.contextoId);
+          }
+          dashAvisoPendiente=null;
+          aplicarAvisoEntradaUI(null,false);
+        };
+      }
+      const user=auth&&auth.currentUser;
+      if(aviso.tipo==="publicacion_activa"&&user&&window.DashAvisoPublicacion){
+        DashAvisoPublicacion.asegurarNotificacionActivacion(user.uid,pub||publicacionActual,aviso);
+      }
+    }
+
+    function avisoVisibleParaPublicacion(pub,aviso){
+      if(!pub||!aviso) return false;
+      const ctx=aviso.contextoId||aviso.perfilId||aviso.bannerId;
+      const pubId=pub.perfilId||pub.id;
+      if(!ctx||pubId!==ctx) return false;
+      if(aviso.tipo==="pago_pendiente") return true;
+      if(aviso.tipo==="publicacion_activa") return true;
+      if(aviso.tipo==="solicitud_enviada"&&perfilEstaPendiente(pub)) return true;
+      return false;
+    }
+
+    function syncAvisoEntradaPerfil(){
+      const pub=publicacionActual;
+      var avisoDesdePub=resolverAvisoDesdePublicacion(pub);
+
+      if(avisoDesdePub){
+        dashAvisoPendiente=avisoDesdePub;
+        if(avisoDesdePub.tipo==="solicitud_enviada"||avisoDesdePub.tipo==="pago_pendiente"){
+          if(avisoDesdePub.contextoId) saveDashboardAviso(avisoDesdePub);
+        }
+        if(avisoDesdePub.tipo==="publicacion_activa"&&avisoDesdePub.contextoId){
+          clearDashboardAviso(avisoDesdePub.contextoId);
+        }
+      }else if(!dashAvisoPendiente){
+        dashAvisoPendiente=pickDashboardAvisoForPerfil(pub);
+      }
+
+      if(!dashAvisoPendiente){
+        aplicarAvisoEntradaUI(null,false,pub);
+        return;
+      }
+
+      const visible=avisoVisibleParaPublicacion(pub,dashAvisoPendiente);
+      aplicarAvisoEntradaUI(dashAvisoPendiente,visible,pub);
+    }
+
+    function syncNuevoPerfilHint(){
+      const hint=document.getElementById("dashNuevoPerfilHint");
+      if(!hint) return;
+      const perfiles=publicacionesReales.filter(function(p){ return p.tipo==="perfil"; });
+      hint.classList.toggle("hidden",perfiles.length<1);
+    }
+
+    function irNuevoPerfil(){
+      const perfiles=publicacionesReales.filter(function(p){ return p.tipo==="perfil"; });
+      if(perfiles.length>=1){
+        const ok=confirm(
+          "Vas a registrar un perfil adicional.\n\n"+
+          "• No incluye mes gratis.\n"+
+          "• Tras aprobación del admin deberás pagar.\n"+
+          "• 50% de descuento en el primer periodo.\n\n"+
+          "¿Continuar?"
+        );
+        if(!ok) return;
+      }
+      location.href="registro-perfil.html";
+    }
+
     function mostrarAvisoEntrada(){
       const el=document.getElementById("dashAvisoEntrada");
       if(!el) return;
       const params=new URLSearchParams(location.search);
-      let tipo="";
+      let raw="";
       try{
-        tipo=sessionStorage.getItem("carihub_dashboard_aviso")||"";
-        if(tipo) sessionStorage.removeItem("carihub_dashboard_aviso");
+        raw=sessionStorage.getItem("carihub_dashboard_aviso")||"";
+        if(raw) sessionStorage.removeItem("carihub_dashboard_aviso");
       }catch(e){}
-      if(params.get("solicitud")==="ok") tipo="solicitud_enviada";
-      if(tipo!=="solicitud_enviada") return;
-      el.textContent="Solicitud enviada correctamente. Está pendiente de aprobación por administración. Si se aprueba, recibirás tu mes de prueba gratis.";
-      el.classList.remove("hidden");
+      if(params.get("solicitud")==="ok"){
+        raw=JSON.stringify({ tipo:"solicitud_enviada", perfilId:null, esPerfilAdicional:false });
+      }
+      try{
+        var pagoOk=params.get("pago")==="ok";
+        var pagoPerfil=params.get("perfilId");
+        if(pagoOk&&pagoPerfil){
+          raw=JSON.stringify({ tipo:"publicacion_activa", contextoId:pagoPerfil, perfilId:pagoPerfil, recienPagado:true });
+          params.delete("pago");
+          params.delete("perfilId");
+        }
+      }catch(e){}
+      const incoming=parseDashboardAviso(raw);
+      if(incoming){
+        dashAvisoPendiente=incoming;
+        if(incoming.perfilId&&incoming.tipo==="solicitud_enviada") saveDashboardAviso(incoming);
+      }else{
+        dashAvisoPendiente=pickDashboardAvisoForPerfil(publicacionActual);
+      }
+      syncAvisoEntradaPerfil();
       if(params.get("solicitud")){
         params.delete("solicitud");
         const qs=params.toString();
@@ -2356,6 +2615,8 @@
       syncDashContextFromPublicacion(publicacionActual);
       syncAccountCapabilities();
       renderDashboard();
+      syncAvisoEntradaPerfil();
+      syncNuevoPerfilHint();
       const hint=document.getElementById("dashLoginHint");
       if(hint) hint.classList.toggle("hidden",!!user);
     }
@@ -2881,6 +3142,7 @@
         syncInicioPreviewActions();
         pintarInicioResumen();
       }
+      syncAvisoEntradaPerfil();
     }
 
     function pintarPublicaciones(){
@@ -2996,15 +3258,163 @@
       return {perfil:p,query:payload.query||{}};
     }
 
-    function syncInicioPreviewFrame(){
-      const vp=document.getElementById("dashPreviewViewport");
-      const frame=document.getElementById("dashPerfilPreviewFrame");
-      if(!vp||!frame||frame.classList.contains("hidden")) return;
-      const maxH=Math.max(120,vp.clientHeight);
-      frame.style.height=maxH+"px";
+    function renderDashPreviewResultadosCard(mount,payload,emptyMsg){
+      if(!mount) return;
+      if(window.CariHubRegistroPerfilPreview&&CariHubRegistroPerfilPreview.renderResultadosCard){
+        CariHubRegistroPerfilPreview.renderResultadosCard(mount,payload,emptyMsg);
+        return;
+      }
+      mount.setAttribute("data-tema",(payload&&payload.tema)||"adult");
+      if(!payload||!payload.perfil){
+        mount.innerHTML='<p class="rp-preview-empty">'+(emptyMsg||"Sin datos de vista previa.")+"</p>";
+        return;
+      }
+      var html=window.CariHubPublicRenderLite&&CariHubPublicRenderLite.cardHTML
+        ?CariHubPublicRenderLite.cardHTML(payload.perfil,payload.query||{}): "";
+      mount.innerHTML=html||'<p class="rp-preview-empty">No se pudo generar la tarjeta.</p>';
+    }
+
+    function dashPerfilPreviewIframeSrc(payload){
+      const params=new URLSearchParams();
+      params.set("previewSource","registro");
+      params.set("embed","dashboard-inicio");
+      if(payload&&payload.vista) params.set("vista",payload.vista);
+      const q=(payload&&payload.query)||{};
+      if(q.categoria) params.set("categoria",q.categoria);
+      if(q.pais) params.set("pais",q.pais);
+      if(q.estado) params.set("estado",q.estado);
+      if(q.ciudad) params.set("ciudad",q.ciudad);
+      return "perfil-publico.html?"+params.toString();
+    }
+
+    function postDashPreviewIframe(frame){
+      if(!frame||!frame.contentWindow) return;
       try{
-        frame.contentWindow.postMessage({type:"carihub-embed-reflow",maxHeight:maxH},"*");
+        frame.contentWindow.postMessage({type:"carihub-rp-preview-update"},"*");
       }catch(e){}
+    }
+
+    function applyDashEmbedFrameHeight(h){
+      const height=Math.max(220,Math.round(Number(h)||0));
+      if(!height) return;
+      ["dashPerfilPreviewFrame","dashVistaPerfilFrame"].forEach(function(id){
+        const frame=document.getElementById(id);
+        if(!frame||frame.classList.contains("hidden")||!frame.getAttribute("src")) return;
+        frame.style.height=height+"px";
+        frame.style.minHeight=height+"px";
+      });
+    }
+
+    function postDashEmbedReflow(frame){
+      if(!frame||!frame.contentWindow) return;
+      try{
+        frame.contentWindow.postMessage({type:"carihub-embed-reflow"},"*");
+      }catch(e){}
+    }
+
+
+    function syncDashPreviewPanels(payload,opts){
+      opts=opts||{};
+      const perfilPanel=document.getElementById("dashInicioPreviewPerfil");
+      const bannerPanel=document.getElementById("dashPreviewBannerPanel");
+      const mountInicio=document.getElementById("dashPreviewResultadosMount");
+      const mountModulo=document.getElementById("dashVistaPerfilResultadosMount");
+      const frameInicio=document.getElementById("dashPerfilPreviewFrame");
+      const frameModulo=document.getElementById("dashVistaPerfilFrame");
+      const emptyMsg=opts.emptyMsg||"Selecciona un perfil en la columna izquierda.";
+      if(opts.isBanner){
+        if(perfilPanel) perfilPanel.classList.add("hidden");
+        if(bannerPanel){
+          bannerPanel.innerHTML=opts.bannerHtml||"";
+          bannerPanel.classList.remove("hidden");
+        }
+        if(frameInicio){
+          frameInicio.removeAttribute("src");
+          frameInicio.classList.add("hidden");
+          frameInicio.removeAttribute("data-preview-src");
+        }
+        if(frameModulo){
+          frameModulo.removeAttribute("src");
+          frameModulo.classList.add("hidden");
+          frameModulo.removeAttribute("data-preview-src");
+        }
+        return;
+      }
+      if(perfilPanel) perfilPanel.classList.remove("hidden");
+      if(bannerPanel) bannerPanel.classList.add("hidden");
+      if(!payload||!payload.perfil){
+        renderDashPreviewResultadosCard(mountInicio,null,emptyMsg);
+        renderDashPreviewResultadosCard(mountModulo,null,emptyMsg);
+        if(frameInicio){
+          frameInicio.classList.add("hidden");
+          frameInicio.removeAttribute("src");
+          frameInicio.removeAttribute("data-preview-src");
+        }
+        if(frameModulo){
+          frameModulo.classList.add("hidden");
+          frameModulo.removeAttribute("src");
+          frameModulo.removeAttribute("data-preview-src");
+        }
+        return;
+      }
+      renderDashPreviewResultadosCard(mountInicio,payload);
+      renderDashPreviewResultadosCard(mountModulo,payload);
+      const src=dashPerfilPreviewIframeSrc(payload);
+      [frameInicio,frameModulo].forEach(function(frame){
+        if(!frame) return;
+        frame.classList.remove("hidden");
+        const prev=frame.getAttribute("data-preview-src")||"";
+        if(prev!==src){
+          frame.setAttribute("data-preview-src",src);
+          frame.onload=function(){
+            frame.onload=null;
+            postDashPreviewIframe(frame);
+            postDashEmbedReflow(frame);
+            window.setTimeout(function(){ postDashEmbedReflow(frame); },120);
+          };
+          frame.src=src+(src.indexOf("?")>=0?"&":"?")+"t="+Date.now();
+        }else{
+          postDashPreviewIframe(frame);
+        }
+      });
+    }
+
+    function openDashPreviewModal(kind){
+      const pub=asegurarPublicacionActual();
+      if(!pub||pub.tipo!=="perfil") return;
+      const modal=document.getElementById("dashPreviewModal");
+      const body=document.getElementById("dashPreviewModalBody");
+      const title=document.getElementById("dashPreviewModalTitle");
+      if(!modal||!body) return;
+      const payload=publicacionToPreviewPayload(pub);
+      try{
+        sessionStorage.setItem(PREVIEW_STORAGE_KEY,JSON.stringify(payload));
+      }catch(e){}
+      if(kind==="resultados"){
+        if(title) title.textContent="Tarjeta en resultados";
+        body.innerHTML='<div class="rp-preview-res-mount rp-preview-res-mount--modal" id="dashPreviewModalCard"></div>';
+        renderDashPreviewResultadosCard(document.getElementById("dashPreviewModalCard"),payload);
+      }else{
+        if(title) title.textContent="Tu perfil público";
+        body.innerHTML='<iframe title="Perfil público" src="'+dashPerfilPreviewIframeSrc(payload)+'"></iframe>';
+      }
+      modal.classList.remove("hidden");
+      document.body.style.overflow="hidden";
+    }
+
+    function closeDashPreviewModal(){
+      const modal=document.getElementById("dashPreviewModal");
+      const body=document.getElementById("dashPreviewModalBody");
+      if(!modal) return;
+      modal.classList.add("hidden");
+      if(body) body.innerHTML="";
+      document.body.style.overflow="";
+    }
+
+    function syncInicioPreviewFrame(){
+      ["dashPerfilPreviewFrame","dashVistaPerfilFrame"].forEach(function(id){
+        postDashEmbedReflow(document.getElementById(id));
+      });
     }
 
     function syncInicioPreviewActions(){
@@ -3033,62 +3443,57 @@
     function refrescarVistaPreviaInicio(){
       const ctx=getDashContext();
       const pub=ctx.tipo==="perfil"?asegurarPublicacionActual():null;
-      const frame=document.getElementById("dashPerfilPreviewFrame");
       const placeholder=document.getElementById("dashPreviewPlaceholder");
-      if(!frame) return;
       if(ctx.tipo==="banner"){
         const bannerId=ctx.bannerId||ctx.id;
-        const pub=window.getDashboardBannerById?getDashboardBannerById(bannerId):null;
-        frame.classList.add("hidden");
-        frame.removeAttribute("src");
+        const bannerPub=window.getDashboardBannerById?getDashboardBannerById(bannerId):null;
+        let bannerHtml="";
+        if(bannerPub&&window.DashBannerMetrics){
+          bannerHtml=DashBannerMetrics.htmlInicioPanel(bannerPub);
+        }else{
+          bannerHtml='<p class="dash-inicio-preview__placeholder">Selecciona un banner en la columna izquierda.</p>';
+        }
+        syncDashPreviewPanels(null,{isBanner:true,bannerHtml:bannerHtml});
         if(placeholder){
-          if(pub&&window.DashBannerMetrics){
-            placeholder.innerHTML=DashBannerMetrics.htmlInicioPanel(pub);
-            placeholder.classList.remove("hidden");
-          }else{
-            placeholder.textContent="Selecciona un banner en la columna izquierda.";
-            placeholder.classList.remove("hidden");
-          }
+          placeholder.textContent="";
+          placeholder.classList.add("hidden");
         }
         syncInicioPreviewActions();
         return;
       }
       if(!pub||pub.tipo!=="perfil"){
-        frame.classList.add("hidden");
-        frame.removeAttribute("src");
+        syncDashPreviewPanels(null,{
+          emptyMsg:pub
+            ? "Vista previa disponible solo para publicaciones tipo perfil."
+            : "Selecciona una publicación para ver la vista previa."
+        });
         if(placeholder){
           placeholder.textContent=pub
             ? "Vista previa disponible solo para publicaciones tipo perfil."
             : "Selecciona una publicación para ver la vista previa.";
-          placeholder.classList.remove("hidden");
+          placeholder.classList.toggle("hidden",!!pub);
         }
+        syncInicioPreviewActions();
         return;
       }
       if(placeholder) placeholder.classList.add("hidden");
+      const payload=publicacionToPreviewPayload(pub);
       try{
-        sessionStorage.setItem(PREVIEW_STORAGE_KEY,JSON.stringify(publicacionToPreviewPayload(pub)));
+        sessionStorage.setItem(PREVIEW_STORAGE_KEY,JSON.stringify(payload));
       }catch(e){}
-      frame.classList.remove("hidden");
-      frame.style.height="120px";
-      frame.onload=function(){ syncInicioPreviewFrame(); };
-      frame.src="perfil-publico.html?embed=dashboard-inicio&previewSource=registro&t="+Date.now();
-      window.requestAnimationFrame(function(){
-        window.requestAnimationFrame(syncInicioPreviewFrame);
-      });
+      syncDashPreviewPanels(payload);
+      syncInicioPreviewActions();
     }
 
     function syncDashPreviewChrome(opts){
       const placeholder=document.getElementById("dashPreviewPlaceholder");
-      const frame=document.getElementById("dashPerfilPreviewFrame");
+      const perfilPanel=document.getElementById("dashInicioPreviewPerfil");
       const msg=opts.message||"";
       if(placeholder){
         placeholder.textContent=msg;
         placeholder.classList.toggle("hidden",!msg);
       }
-      if(frame&&msg){
-        frame.classList.add("hidden");
-        frame.removeAttribute("src");
-      }
+      if(perfilPanel&&msg) perfilPanel.classList.add("hidden");
     }
 
     function pintarVistaPreviaPerfil(){
@@ -3782,12 +4187,11 @@
 
     function refrescarVistaPerfilModulo(){
       if(!publicacionActual||publicacionActual.tipo!=="perfil") return;
-      const frame=document.getElementById("dashVistaPerfilFrame");
-      if(!frame) return;
+      const payload=publicacionToPreviewPayload(publicacionActual);
       try{
-        sessionStorage.setItem(PREVIEW_STORAGE_KEY,JSON.stringify(publicacionToPreviewPayload(publicacionActual)));
+        sessionStorage.setItem(PREVIEW_STORAGE_KEY,JSON.stringify(payload));
       }catch(e){}
-      frame.src="perfil-publico.html?embed=dashboard-inicio&previewSource=registro&t="+Date.now();
+      syncDashPreviewPanels(payload);
     }
     window.refrescarVistaPerfilModulo=refrescarVistaPerfilModulo;
 
@@ -4232,7 +4636,7 @@
       if(btnMsg) btnMsg.addEventListener("click",function(){goMod("mensajes");});
       if(btnNotif) btnNotif.addEventListener("click",function(){goMod("avisos");});
       if(btnGrande) btnGrande.addEventListener("click",abrirPerfilGrande);
-      if(btnVerResultados) btnVerResultados.addEventListener("click",function(){goMod("tarjeta");});
+      if(btnVerResultados) btnVerResultados.addEventListener("click",function(){ openDashPreviewModal("resultados"); });
       if(btnVerRes) btnVerRes.addEventListener("click",function(){window.open("resultados.html","_blank");});
       if(btnGuardar) btnGuardar.addEventListener("click",guardarContactosDashboard);
       if(btnEditar) btnEditar.addEventListener("click",function(){ goMod("info-publica"); });
@@ -4259,11 +4663,27 @@
       if(btnLive) btnLive.addEventListener("click",function(){ goMod("transmitir-live"); });
       if(btnLiveMod) btnLiveMod.addEventListener("click",function(){ goMod("transmitir-live"); });
       if(btnSoporte) btnSoporte.addEventListener("click",function(){ alert("Soporte: escribe a administración desde tu correo de registro."); });
+      document.querySelectorAll("[data-dash-preview-expand]").forEach(function(el){
+        el.addEventListener("click",function(ev){
+          ev.preventDefault();
+          openDashPreviewModal(el.getAttribute("data-dash-preview-expand"));
+        });
+      });
+      document.getElementById("dashPreviewModalClose")?.addEventListener("click",closeDashPreviewModal);
+      document.getElementById("dashPreviewModalBackdrop")?.addEventListener("click",closeDashPreviewModal);
+      document.addEventListener("keydown",function(ev){
+        if(ev.key==="Escape") closeDashPreviewModal();
+      });
       const btnProgLive=document.getElementById("btnRightProgramarLive");
       if(btnProgLive) btnProgLive.addEventListener("click",function(){
         if(window.DashModuleNav) DashModuleNav.setModule("transmitir-live");
         programarLiveDesdeDashboard("liveStudioFeedback");
       });
+    }
+
+    function inicializarNuevoPerfil(){
+      const btn=document.getElementById("btnDashNuevoPerfil");
+      if(btn) btn.addEventListener("click",irNuevoPerfil);
     }
 
     function inicializarMenu(){
@@ -4330,6 +4750,7 @@
         DashModuleNav.renderFavoritos();
         DashModuleNav.renderPublicacionesAdmin();
       }
+      syncAvisoEntradaPerfil();
     }
 
     function inicializarTemas(){
@@ -4392,24 +4813,11 @@
       window.addEventListener("message",function(ev){
         if(!ev.data||ev.data.type!=="carihub-embed-resize") return;
         if(ev.data.scope&&ev.data.scope!=="inicio") return;
-        var frame=document.getElementById("dashPerfilPreviewFrame");
-        var vp=document.getElementById("dashPreviewViewport");
-        if(!frame||!vp||frame.classList.contains("hidden")) return;
-        var maxH=Math.max(120,vp.clientHeight);
-        var h=Number(ev.data.height);
-        if(!isFinite(h)||h<=0) h=maxH;
-        frame.style.height=Math.min(maxH,Math.ceil(h))+"px";
+        applyDashEmbedFrameHeight(ev.data.height);
       });
       window.addEventListener("resize",function(){
         syncInicioPreviewFrame();
-        var frame=document.getElementById("dashPerfilPreviewFrame");
-        if(!frame||!frame.contentWindow) return;
-        try{frame.contentWindow.postMessage({type:"carihub-embed-reflow"},"*");}catch(e){}
       });
-      var previewVp=document.getElementById("dashPreviewViewport");
-      if(previewVp&&window.ResizeObserver){
-        new ResizeObserver(function(){ syncInicioPreviewFrame(); }).observe(previewVp);
-      }
       inicializarAccionesDashboard();
       inicializarStudios();
       inicializarRightContactosPanel();
@@ -4417,6 +4825,7 @@
       inicializarModalEditContacto();
       pintarRightContactosFallback();
       inicializarMenu();
+      inicializarNuevoPerfil();
       inicializarTemas();
       if(window.DashActivosRail){
         DashActivosRail.init({ onSelect:onActivosRailSelect });
