@@ -6419,7 +6419,16 @@ function openExternal(){
 var FIT_DESIGN_W = 1100;
 var FIT_DESIGN_W_EMBED = 720;
 function readFitDesignW(availW){
-  if(document.body.classList.contains("perfil-embed-dashboard-inicio")) return FIT_DESIGN_W_EMBED;
+  availW=availW||800;
+  if(document.body.classList.contains("perfil-embed-dashboard-inicio")){
+    if(window.__dashEmbedDesignW&&window.__dashEmbedDesignW>0){
+      return Math.max(240,Math.min(window.__dashEmbedDesignW,FIT_DESIGN_W_EMBED));
+    }
+    if(availW<400){
+      return Math.max(260,Math.min(340,Math.round(availW*1.65)));
+    }
+    return FIT_DESIGN_W_EMBED;
+  }
   if(document.body.classList.contains("perfil-embed-dashboard")) return FIT_DESIGN_W_EMBED;
   return FIT_DESIGN_W;
 }
@@ -6636,6 +6645,10 @@ window.addEventListener("message",function(ev){
     return;
   }
   if(ev.data.type==="carihub-embed-reflow"){
+    if(ev.data.designWidth != null){
+      var dw=Number(ev.data.designWidth);
+      window.__dashEmbedDesignW=(isFinite(dw)&&dw>0)?dw:null;
+    }
     if(ev.data.maxHeight != null){
       var mh=Number(ev.data.maxHeight);
       window.__dashEmbedMaxH=(isFinite(mh)&&mh>0)?mh:null;
