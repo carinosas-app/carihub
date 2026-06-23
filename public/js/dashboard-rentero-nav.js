@@ -12,8 +12,7 @@
     avisos: { title: "Avisos", subtitle: "Alertas de negocio, pagos y revisiones" },
     favoritos: { title: "Favoritos", subtitle: "Perfiles y negocios que guardaste" },
     estadisticas: { title: "Estadísticas", subtitle: "Vistas, contactos, favoritos y mensajes de tu perfil" },
-    /** Alias nav → abre mensajes con contexto banner (lista de banners solo en rail izq.) */
-    banners: { title: "Mensajes del banner", subtitle: "Chats de quien escribió por tu banner — elige banner en la columna izquierda" },
+    banners: { title: "Banners", subtitle: "Tus banners contratados, estado de pago y renovación" },
     estados: { title: "Red de socios", subtitle: "Tus anuncios y el feed de estados, lives y promos de socios" },
     "feed-red": { title: "Red de socios", subtitle: "Feed de actividad de tu red (ver módulo Anuncios / estados)" },
     publicaciones: { title: "Mis publicaciones", subtitle: "Anuncios, lives, promociones y eventos del perfil seleccionado" },
@@ -445,8 +444,8 @@
   function mensajesContextLabel(filter) {
     if (!filter || !filter.contextoId) return "Selecciona un perfil o banner en la columna izquierda";
     if (filter.contextoTipo === "banner") {
-      var banners = global.getDashboardBannersForModule ? global.getDashboardBannersForModule() : MOCK_BANNERS;
-      var banner = (banners || []).find(function (b) { return b.id === filter.contextoId; });
+      var banners = getBannersForContext();
+      var banner = banners.find(function (b) { return b.id === filter.contextoId; });
       var label = "Conversaciones del banner · " + (banner && (banner.nombrePublico || banner.nombre) || filter.contextoId);
       if (global.DashBannerMensajes && DashBannerMensajes.isContextoBloqueado(filter)) {
         var tag = banner && DashBannerMensajes.etiquetaRail(banner);
@@ -479,8 +478,9 @@
     const subEl = document.getElementById("dashModuleSubtitle");
     if (!titleEl || !subEl) return;
     if (id === "mensajes" && activeMensajesScope === "banner") {
-      titleEl.textContent = MODULES.banners.title;
-      subEl.textContent = MODULES.banners.subtitle;
+      titleEl.textContent = "Mensajes del banner";
+      subEl.textContent =
+        "Chats de quien escribió por tu banner — elige banner en la columna izquierda";
       return;
     }
     const meta = MODULES[id];
@@ -520,10 +520,6 @@
   }
 
   function setModule(id) {
-    if (id === "banners") {
-      openBannerMensajes();
-      return;
-    }
     if (id === "feed-red" || id === "directorio") {
       if (id === "directorio") {
         global._buscarEjecutado = true;
@@ -578,6 +574,7 @@
       global.refreshDashPrivacidadMensajes();
     }
     if (id === "avisos") renderAvisos();
+    if (id === "banners") renderBanners();
     if (id === "solicitudes") renderSolicitudes(activeSolTab);
     if (id === "vista-perfil" && typeof global.refrescarVistaPerfilModulo === "function") {
       global.refrescarVistaPerfilModulo();
@@ -884,6 +881,13 @@
     const user = global.CariHubAuth && global.CariHubAuth.currentUser;
     if (user) return false;
     return new URLSearchParams(global.location.search).get("preview") === "1";
+  }
+
+  function getBannersForContext() {
+    if (typeof global.getDashboardBannersForModule === "function") {
+      return global.getDashboardBannersForModule() || [];
+    }
+    return usesMockMensajes() ? MOCK_BANNERS : [];
   }
 
   function teardownMensajesSubs() {

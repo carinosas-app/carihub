@@ -704,11 +704,12 @@
         </div>
       </div>
 
-      <!-- Módulo banners (legacy): lista movida al rail izq.; chats → nav «Mensajes por banner» -->
-      <div class="dash-module hidden" data-module="banners" id="modulo-banners" aria-hidden="true">
-        <p class="dash-hint dash-hint--compact">Tus banners están en la columna izquierda. Para conversaciones de un banner usa <b>Mensajes por banner</b> en el menú.</p>
-        <div class="banner-admin-list hidden" id="bannersList" aria-hidden="true"></div>
-        <a class="btn secondary" href="registro-banner.html">Contratar banner</a>
+      <!-- Módulo banners: contratos, pago y renovación (rail izq. = selector rápido) -->
+      <div class="dash-module" data-module="banners" id="modulo-banners">
+        <div class="banner-admin-list" id="bannersList"></div>
+        <div class="dash-module-toolbar">
+          <a class="btn" href="registro-banner.html">+ Rentar banner</a>
+        </div>
       </div>
 
       <!-- Módulo: Estadísticas -->
@@ -797,6 +798,10 @@
         <span class="dash-nav-item__ic"><i data-lucide="search" class="dash-nav-item__icon" aria-hidden="true"></i></span>
         <span class="dash-nav-item__body"><span class="dash-nav-item__label">Buscar</span></span>
       </button>
+      <a class="dash-nav-item dash-nav-item--nav-top dash-nav-item--site-home" href="index.html" title="Ir al inicio de Cariñosas">
+        <span class="dash-nav-item__ic"><i data-lucide="globe" class="dash-nav-item__icon" aria-hidden="true"></i></span>
+        <span class="dash-nav-item__body"><span class="dash-nav-item__label">Home</span></span>
+      </a>
       <button class="dash-nav-item dash-nav-item--nav-top on" type="button" data-module-nav="inicio">
         <span class="dash-nav-item__ic"><i data-lucide="home" class="dash-nav-item__icon" aria-hidden="true"></i></span>
         <span class="dash-nav-item__body"><span class="dash-nav-item__label">Inicio</span></span>
@@ -888,6 +893,10 @@
             <span>Medios</span><span>contacto</span>
           </span>
         </span>
+      </button>
+      <button class="dash-nav-item dash-nav-item--nav-sm" type="button" data-module-nav="banners" id="btnNavBanners">
+        <span class="dash-nav-item__ic"><i data-lucide="images" class="dash-nav-item__icon" aria-hidden="true"></i></span>
+        <span class="dash-nav-item__body"><span class="dash-nav-item__label">Banners</span></span>
       </button>
       <button class="dash-nav-item dash-nav-item--stack-label" type="button" data-module-nav="tarjeta">
         <span class="dash-nav-item__ic"><i data-lucide="layout-grid" class="dash-nav-item__icon" aria-hidden="true"></i></span>
@@ -1716,7 +1725,9 @@
         metricas:normalizarMetricasPublicacion(s),
         temaDashboard:s.temaDashboard||"rosa_premium",
         temaPerfil:s.temaPerfil||"rosa_premium",
-        cambiosPendientes:s.cambiosPendientes||null
+        cambiosPendientes:s.cambiosPendientes||null,
+        activo:s.activo===true,
+        _raw:s
       };
     }
 
@@ -3078,15 +3089,46 @@
       return t==="banner"||t==="destacado"||t==="publicidad";
     }
 
+    function dashUsesPreviewMocks(){
+      return new URLSearchParams(location.search).get("preview")==="1";
+    }
+
+    function bannerWorkflowEstado(pub){
+      const raw=(pub&&pub._raw)||pub||{};
+      return String(raw.estadoSolicitud||raw.estadoAdmin||"").trim().toLowerCase();
+    }
+
+    /** Solicitudes reales visibles en rail (excluye borrador/rechazado/cancelado). */
+    function bannerEstaContratadoEnRail(pub){
+      if(!pub||pub.origen!=="solicitudes_anuncios") return false;
+      const wf=bannerWorkflowEstado(pub);
+      const ocultos=["rechazado","cancelado","eliminado","borrador","descartado"];
+      if(ocultos.some(function(x){ return wf.indexOf(x)>=0; })) return false;
+      const ep=pub.estadoPublicacion||{};
+      if(ep.publicoActivo||pub.activo===true) return true;
+      if(ep.vencido) return true;
+      if(wf.indexOf("aprob")>=0||wf.indexOf("activo")>=0||wf.indexOf("revision")>=0||wf.indexOf("pendiente")>=0) return true;
+      const raw=pub._raw||{};
+      if(raw.autorizadoParaPago||raw.estadoPago) return true;
+      return wf.length>0||!!raw.fechaEnvioRevision||!!raw.fecha;
+    }
+
     function listaBannersTodos(){
       return listaPublicaciones().filter(esBannerSolicitud);
     }
 
     function listaBannersContratados(){
       const user=auth.currentUser;
-      const preview=new URLSearchParams(location.search).get("preview")==="1";
-      const solicitudes=listaBannersTodos();
-      if(user||preview) return solicitudes;
+      const preview=dashUsesPreviewMocks();
+      if(!user&&!preview) return [];
+      if(user){
+        const reales=listaBannersTodos().filter(function(p){
+          return p.origen==="solicitudes_anuncios"&&bannerEstaContratadoEnRail(p);
+        });
+        if(reales.length) return reales;
+        if(!preview) return [];
+      }
+      if(preview) return publicacionesMock.filter(esBannerSolicitud);
       return [];
     }
 
