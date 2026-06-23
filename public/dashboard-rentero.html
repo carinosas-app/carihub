@@ -1009,6 +1009,7 @@
   <script src="js/dashboard-rentero-nav.js"></script>
   <script src="js/dashboard-activos-rail.js"></script>
   <script src="js/dashboard-context.js"></script>
+  <script src="js/carihub-multi-perfil.js"></script>
   <script src="js/dashboard-account-capabilities.js"></script>
   <script src="js/dashboard-rentero-personalize.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
@@ -2028,7 +2029,11 @@
 
     function resolvePerfilPorId(perfilId){
       if(!perfilId) return null;
-      return listaPerfilesDelUid().find(function(p){ return p.id===perfilId; })||null;
+      const perfiles=listaPerfilesDelUid();
+      if(window.CariHubMultiPerfil){
+        return CariHubMultiPerfil.findPerfil(perfiles,perfilId);
+      }
+      return perfiles.find(function(p){ return p.id===perfilId||p.perfilId===perfilId; })||null;
     }
 
     function resolveBannerPorId(bannerId){
@@ -2046,7 +2051,7 @@
         if(seleccion){
           publicacionActual=seleccion;
           contactoEditScope=null;
-          guardarPerfilActivoId(seleccion.id);
+          guardarPerfilActivoId(seleccion.perfilId||seleccion.id);
         }
       }else if(ctx.tipo==="banner"){
         const b=resolveBannerPorId(ctx.bannerId||ctx.id);
@@ -2090,7 +2095,7 @@
       const q=DashContext.readQuery();
       if(!q||!q.id) return;
       if(q.tipo==="perfil"){
-        const found=resolvePerfilPorId(q.perfilId);
+        const found=resolvePerfilPorId(q.perfilId||q.id);
         if(found) publicacionActual=found;
       }else if(q.tipo==="banner"){
         const found=listaBannersContratados().find(p=>p.id===q.bannerId);
@@ -2131,10 +2136,13 @@
     }
 
     function seleccionarPerfilInicial(perfiles,perfilActivoId){
+      if(window.CariHubMultiPerfil){
+        return CariHubMultiPerfil.selectInitialPerfil(perfiles,perfilActivoId,timestampPerfil);
+      }
       perfiles=perfiles||[];
       if(!perfiles.length) return null;
       if(perfilActivoId){
-        const porId=perfiles.find(function(p){ return p.id===perfilActivoId; });
+        const porId=perfiles.find(function(p){ return p.id===perfilActivoId||p.perfilId===perfilActivoId; });
         if(porId) return porId;
       }
       return perfiles.slice().sort(function(a,b){
@@ -2245,31 +2253,59 @@
 
     async function cargarPublicacionesDesdeFirebase(user){
       const pubs=[];
-      const hub=await db.collection("usuarios").doc(user.uid).get();
-      if(hub.exists){
-        const data=hub.data()||{};
-        const detalle=data.perfilesDetalle;
-        if(detalle&&typeof detalle==="object"&&Object.keys(detalle).length){
-          const orden=Array.isArray(data.perfilesVinculados)
-            ? data.perfilesVinculados.map(function(v){ return v.perfilId; }).filter(Boolean)
-            : [];
-          const visto=new Set();
-          function pushPerfil(perfilId){
-            if(!perfilId||visto.has(perfilId)) return;
-            const p=detalle[perfilId];
-            if(!p||typeof p!=="object") return;
-            visto.add(perfilId);
-            pubs.push(normalizarPerfilUsuario({
-              id:perfilId,
-              perfilId:perfilId,
-              cuentaUid:data.uid||user.uid,
-              ...p
-            }));
+      const hubRef=db.collection("usuarios").doc(user.uid);
+      const hub=await hubRef.get();
+      let hubData=hub.exists?(hub.data()||{}):{};
+
+      if(hub.exists&&window.CariHubMultiPerfil&&CariHubMultiPerfil.hasLegacyFlatPerfil(hubData)){
+        const slimLegacy=window.CariHubRegistroPerfilSubmit&&CariHubRegistroPerfilSubmit.slimProfileForFirestore
+          ?function(raw){ return CariHubRegistroPerfilSubmit.slimProfileForFirestore(raw); }
+          :null;
+        const patch=CariHubMultiPerfil.buildLegacyMigrationPatch(hubData,user.uid,slimLegacy);
+        if(patch){
+          try{
+            await hubRef.update(patch);
+            hubData=Object.assign({},hubData,patch);
+          }catch(e){
+            console.warn("[Dashboard] Migración multi-perfil legacy:",e);
           }
-          orden.forEach(pushPerfil);
-          Object.keys(detalle).forEach(pushPerfil);
+        }
+      }
+
+      if(hub.exists){
+        if(window.CariHubMultiPerfil){
+          CariHubMultiPerfil.expandPerfilesFromHub(hubData,user.uid).forEach(function(row){
+            pubs.push(normalizarPerfilUsuario(Object.assign({},row._raw||row,{
+              id:row.id,
+              perfilId:row.perfilId,
+              cuentaUid:row.cuentaUid||user.uid
+            })));
+          });
         }else{
-          pubs.push(normalizarPerfilUsuario({ id:hub.id, perfilId:data.perfilId||hub.id, ...data }));
+          const data=hubData;
+          const detalle=data.perfilesDetalle;
+          if(detalle&&typeof detalle==="object"&&Object.keys(detalle).length){
+            const orden=Array.isArray(data.perfilesVinculados)
+              ? data.perfilesVinculados.map(function(v){ return v.perfilId; }).filter(Boolean)
+              : [];
+            const visto=new Set();
+            function pushPerfil(perfilId){
+              if(!perfilId||visto.has(perfilId)) return;
+              const p=detalle[perfilId];
+              if(!p||typeof p!=="object") return;
+              visto.add(perfilId);
+              pubs.push(normalizarPerfilUsuario({
+                id:perfilId,
+                perfilId:perfilId,
+                cuentaUid:data.uid||user.uid,
+                ...p
+              }));
+            }
+            orden.forEach(pushPerfil);
+            Object.keys(detalle).forEach(pushPerfil);
+          }else{
+            pubs.push(normalizarPerfilUsuario({ id:hub.id, perfilId:data.perfilId||hub.id, ...data }));
+          }
         }
       }
       let snap;
@@ -2283,8 +2319,8 @@
       });
       return {
         pubs,
-        perfilActivoId: hub.exists ? (hub.data().perfilActivoId || null) : null,
-        hubData: hub.exists ? hub.data() : null
+        perfilActivoId: hub.exists ? (hubData.perfilActivoId || null) : null,
+        hubData: hub.exists ? hubData : null
       };
     }
 
@@ -2300,9 +2336,27 @@
       try{
         await db.collection("usuarios").doc(user.uid).update({ perfilActivoId: perfilId });
         if(dashHubDoc) dashHubDoc.perfilActivoId=perfilId;
+        else dashHubDoc={ perfilActivoId: perfilId };
       }catch(e){
         console.warn("[Dashboard] No se pudo guardar perfilActivoId:",e);
       }
+    }
+
+    async function bootPerfilActivoContext(pub){
+      if(!pub||pub.tipo!=="perfil") return;
+      const perfilId=pub.perfilId||pub.id;
+      if(!perfilId) return;
+      if(window.DashContext){
+        DashContext.init({
+          tipo:"perfil",
+          id:perfilId,
+          perfilId:perfilId
+        },{ preferSeed:true });
+      }else{
+        syncDashContextFromPublicacion(pub);
+      }
+      publicacionActual=pub;
+      await guardarPerfilActivoId(perfilId);
     }
 
     function etiquetaRevision(rev){
@@ -2612,7 +2666,11 @@
         ||publicacionesReales[0]
         ||null;
       aplicarDeepLinkContexto();
-      syncDashContextFromPublicacion(publicacionActual);
+      if(publicacionActual&&publicacionActual.tipo==="perfil"){
+        await bootPerfilActivoContext(publicacionActual);
+      }else{
+        syncDashContextFromPublicacion(publicacionActual);
+      }
       syncAccountCapabilities();
       renderDashboard();
       syncAvisoEntradaPerfil();
@@ -3411,10 +3469,27 @@
       document.body.style.overflow="";
     }
 
-    function syncInicioPreviewFrame(){
+    function measurePreviewStackWrap(wrap){
+      if(!wrap||wrap.classList.contains("hidden")) return;
+      const pad=8;
+      const availW=Math.max(100,wrap.clientWidth-pad);
+      const designW=300;
+      const scale=Math.min(1,Math.max(0.38,availW/designW));
+      wrap.style.setProperty("--dash-preview-fit-scale",String(scale));
+      wrap.classList.toggle("dash-preview-stack-wrap--fit",scale<0.97);
+    }
+
+    function syncInicioPreviewLayout(){
+      measurePreviewStackWrap(document.getElementById("dashInicioPreviewPerfil"));
+      const vistaWrap=document.querySelector("#modulo-vista-perfil .dash-preview-stack-wrap");
+      if(vistaWrap) measurePreviewStackWrap(vistaWrap);
       ["dashPerfilPreviewFrame","dashVistaPerfilFrame"].forEach(function(id){
         postDashEmbedReflow(document.getElementById(id));
       });
+    }
+
+    function syncInicioPreviewFrame(){
+      syncInicioPreviewLayout();
     }
 
     function syncInicioPreviewActions(){
@@ -3483,6 +3558,9 @@
       }catch(e){}
       syncDashPreviewPanels(payload);
       syncInicioPreviewActions();
+      syncInicioPreviewLayout();
+      window.setTimeout(syncInicioPreviewLayout,200);
+      window.setTimeout(syncInicioPreviewLayout,600);
     }
 
     function syncDashPreviewChrome(opts){
@@ -4192,6 +4270,8 @@
         sessionStorage.setItem(PREVIEW_STORAGE_KEY,JSON.stringify(payload));
       }catch(e){}
       syncDashPreviewPanels(payload);
+      syncInicioPreviewLayout();
+      window.setTimeout(syncInicioPreviewLayout,250);
     }
     window.refrescarVistaPerfilModulo=refrescarVistaPerfilModulo;
 
@@ -4751,6 +4831,8 @@
         DashModuleNav.renderPublicacionesAdmin();
       }
       syncAvisoEntradaPerfil();
+      syncInicioPreviewLayout();
+      window.setTimeout(syncInicioPreviewLayout,350);
     }
 
     function inicializarTemas(){
@@ -4816,8 +4898,21 @@
         applyDashEmbedFrameHeight(ev.data.height);
       });
       window.addEventListener("resize",function(){
-        syncInicioPreviewFrame();
+        syncInicioPreviewLayout();
       });
+      if(window.ResizeObserver){
+        const previewRo=new ResizeObserver(function(){
+          syncInicioPreviewLayout();
+        });
+        const bindPreviewRo=function(){
+          const inicioWrap=document.getElementById("dashInicioPreviewPerfil");
+          const vistaWrap=document.querySelector("#modulo-vista-perfil .dash-preview-stack-wrap");
+          if(inicioWrap) previewRo.observe(inicioWrap);
+          if(vistaWrap) previewRo.observe(vistaWrap);
+        };
+        bindPreviewRo();
+        window.setTimeout(bindPreviewRo,800);
+      }
       inicializarAccionesDashboard();
       inicializarStudios();
       inicializarRightContactosPanel();

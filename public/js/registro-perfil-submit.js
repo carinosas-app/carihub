@@ -147,6 +147,9 @@
   }
 
   function buildPerfilVinculado(perfilId, doc) {
+    if (global.CariHubMultiPerfil) {
+      return CariHubMultiPerfil.buildPerfilVinculado(perfilId, doc);
+    }
     return {
       perfilId: perfilId,
       nombre: doc.nombre || doc.alias || '',
@@ -259,24 +262,19 @@
 
   function appendPerfilToHub(existingData, perfilId, profileDoc) {
     var cuentaUid = existingData.uid || existingData.cuentaUid || profileDoc.uid;
+    var slimNew = slimProfileForFirestore(profileDoc);
+    if (global.CariHubMultiPerfil) {
+      return CariHubMultiPerfil.appendPerfilToHub(existingData, perfilId, slimNew, {
+        cuentaUid: cuentaUid,
+        slimLegacyFn: slimProfileForFirestore
+      });
+    }
     var vinculados = Array.isArray(existingData.perfilesVinculados)
       ? existingData.perfilesVinculados.slice()
       : [];
     var detalle = slimDetalleMap(existingData.perfilesDetalle, cuentaUid);
-
-    if (!vinculados.length) {
-      var legacyId = existingData.perfilId || ('perfil_' + cuentaUid);
-      var legacySlim = slimProfileForFirestore(
-        Object.assign({ perfilId: legacyId, cuentaUid: cuentaUid }, extractProfilePayload(existingData))
-      );
-      vinculados.push(buildPerfilVinculado(legacyId, legacySlim));
-      detalle[legacyId] = legacySlim;
-    }
-
-    var slimNew = slimProfileForFirestore(profileDoc);
     vinculados.push(buildPerfilVinculado(perfilId, slimNew));
     detalle[perfilId] = Object.assign({ perfilId: perfilId, cuentaUid: cuentaUid }, slimNew);
-
     return {
       perfilesVinculados: vinculados,
       perfilesDetalle: detalle,
@@ -388,6 +386,10 @@
   }
 
   function tienePerfilesExistentes(hubData) {
+    if (global.CariHubMultiPerfil) {
+      return CariHubMultiPerfil.hasNestedPerfiles(hubData) ||
+        CariHubMultiPerfil.hasLegacyFlatPerfil(hubData);
+    }
     var det = hubData.perfilesDetalle;
     if (det && typeof det === 'object' && Object.keys(det).length > 0) return true;
     if (hubData.perfilId || hubData.nombre || hubData.alias) return true;

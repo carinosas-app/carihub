@@ -2065,7 +2065,11 @@
             esPerfilAdicional: result && result.esPerfilAdicional === true
           }));
         } catch (e) { /* ignore */ }
-        global.location.href = 'dashboard-rentero.html';
+        var dashUrl = 'dashboard-rentero.html';
+        if (result && result.perfilId) {
+          dashUrl += '?perfilId=' + encodeURIComponent(result.perfilId);
+        }
+        global.location.href = dashUrl;
       })
       .catch(function (err) {
         var msg = err && err.message ? err.message : String(err);
