@@ -1848,26 +1848,85 @@ async function resolverEmailAccesoLogin(identificador){
   }catch(e){}
 
   try{
-    const snaps=await db.collection("usuarios")
-      .where("acceso.telefonoNormalizado","==",tel)
-      .limit(1)
-      .get();
+    const snaps=await withTimeout(
+      db.collection("usuarios")
+        .where("acceso.telefonoNormalizado","==",tel)
+        .limit(1)
+        .get(),
+      8000,
+      "firestore-timeout"
+    );
     if(!snaps.empty){
       const u=snaps.docs[0].data();
       const mail=String((u.acceso&&u.acceso.email)||u.email||"").trim().toLowerCase();
       if(mail) return mail;
     }
   }catch(e){
+    if(e&&e.code==="firestore-timeout"){
+      throw e;
+    }
     console.warn("Login teléfono: índice acceso.telefonoNormalizado pendiente",e);
   }
 
   return null;
 }
 
+function withTimeout(promise,ms,code){
+  return new Promise(function(resolve,reject){
+    var settled=false;
+    var timer=setTimeout(function(){
+      if(settled) return;
+      settled=true;
+      var err=new Error("La conexión tardó demasiado.");
+      err.code=code||"auth/timeout";
+      reject(err);
+    },ms);
+    Promise.resolve(promise).then(function(value){
+      if(settled) return;
+      settled=true;
+      clearTimeout(timer);
+      resolve(value);
+    },function(err){
+      if(settled) return;
+      settled=true;
+      clearTimeout(timer);
+      reject(err);
+    });
+  });
+}
+
+var authPersistenceReady=null;
+function ensureAuthPersistence(){
+  if(authPersistenceReady) return authPersistenceReady;
+  if(!auth||!firebase||!firebase.auth||!firebase.auth.Auth){
+    authPersistenceReady=Promise.resolve();
+    return authPersistenceReady;
+  }
+  authPersistenceReady=auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(function(){});
+  return authPersistenceReady;
+}
+
+function resetLoginEntrarBtn(btn){
+  if(!btn) return;
+  btn.textContent="Entrar";
+  syncLoginEntrar();
+}
+
+function mensajeErrorLogin(code,error){
+  if(code==="auth/timeout"||code==="firestore-timeout"){
+    return "La conexión tardó demasiado. Revisa tu internet. En iPhone, toca «Reducir protecciones» arriba o prueba Chrome.";
+  }
+  if(code==="auth/network-request-failed"){
+    return "No hubo conexión con el servidor. Revisa tu internet o cambia de red.";
+  }
+  return (error&&error.message)?error.message:"Inténtalo de nuevo en unos momentos.";
+}
+
 async function loginMiPerfil(){
   const identificador=document.getElementById("loginEmail").value.trim();
   const password=document.getElementById("loginPassword").value;
   const btn=document.getElementById("btnLoginEntrar");
+  var navegando=false;
 
   if(!identificador){
     showModalAlert("loginEmail","❌ Escribe tu correo o teléfono.","Es el identificador con el que te registraste.");
@@ -1875,6 +1934,14 @@ async function loginMiPerfil(){
   }
   if(!password){
     showModalAlert("loginPassword","❌ Escribe tu contraseña.","Es la misma que usaste al crear tu cuenta.");
+    return;
+  }
+  if(!auth||!window.CariHubCore||!CariHubCore.ready){
+    showModalAlert(
+      "loginPassword",
+      "❌ Servicio no disponible.",
+      "Recarga la página. Si persiste, revisa tu conexión."
+    );
     return;
   }
 
@@ -1885,7 +1952,16 @@ async function loginMiPerfil(){
   }
 
   try{
-    const email=await resolverEmailAccesoLogin(identificador);
+    let email=null;
+    if(pareceCorreoLogin(identificador)){
+      email=identificador.toLowerCase();
+      if(!correoValidoBasicoLogin(email)){
+        showModalAlert("loginEmail","❌ Revisa tu correo.","Parece incompleto o mal escrito.");
+        return;
+      }
+    }else{
+      email=await resolverEmailAccesoLogin(identificador);
+    }
     if(!email){
       showModalAlert(
         "loginEmail",
@@ -1894,13 +1970,19 @@ async function loginMiPerfil(){
       );
       return;
     }
-    await auth.signInWithEmailAndPassword(email,password);
+    await ensureAuthPersistence();
+    await withTimeout(
+      auth.signInWithEmailAndPassword(email,password),
+      25000,
+      "auth/timeout"
+    );
     cerrarMiPerfil();
     const retomar=!!(window.CariHubHomeIntenciones&&CariHubHomeIntenciones.retomarPostAuth&&CariHubHomeIntenciones.retomarPostAuth());
     if(retomar){
       return;
     }
-    window.location.href="dashboard-rentero.html";
+    navegando=true;
+    window.location.assign("dashboard-rentero.html");
   }catch(error){
     const code=error&&error.code;
     if(isLoginCredentialError(code)){
@@ -1915,11 +1997,10 @@ async function loginMiPerfil(){
     showModalAlert(
       "loginPassword",
       "❌ No se pudo iniciar sesión.",
-      (error&&error.message)?error.message:"Inténtalo de nuevo en unos momentos."
+      mensajeErrorLogin(code,error)
     );
   }finally{
-    if(btn) btn.textContent="Entrar";
-    syncLoginEntrar();
+    if(!navegando) resetLoginEntrarBtn(btn);
   }
 }
 
