@@ -3,11 +3,12 @@
   "$id": "https://carihub.app/schemas/spec-pagos-contratos.json",
   "tipo": "SPEC_TECNICA",
   "nombre": "Pagos-Contratos — Especificación técnica formal",
-  "versionSpec": "1.0.0",
-  "fecha": "2026-06-11",
-  "estado": "DISENO_INICIAL",
-  "implementacionAutorizada": false,
-  "modo": "Solo análisis, especificación, fixtures, auditoría y documentación — sin runtime/carpetas/mover/Firestore/deploy/commit; NO modifica planes/schemas/actas existentes",
+  "versionSpec": "1.1.0",
+  "fecha": "2026-06-20",
+  "estado": "CONGELADO_BLOQUE1",
+  "implementacionAutorizada": true,
+  "implementacionAlcanceBloque1": "Motores locales functions/payments/ + schemas + fixtures + tests. Sin deploy, sin escritura Firestore, sin checkout/webhooks.",
+  "modo": "Acta económica congelada + motores locales ECO-015. Runtime checkout/webhook en tickets ECO-020/030.",
   "proposito": "Convertir PLAN-MAESTRO-PAGOS-CONTRATOS y schemas de contratos/precios en SPEC formal, completa, validable y congelable. Cierra GAP-SPEC-PAY (ACTA-CONGELAMIENTO-P0-RUNTIME-FOUNDATION).",
   "principioRector": "El pago confirma; el contrato congela; el motor activa. Precio y promoción quedan CONGELADOS durante la vigencia (politicaPrecioCongelado). Admin concilia y decide; ninguna IA modifica contratos activos ni auto-aprueba pagos.",
   "cierraGap": "GAP-SPEC-PAY",
@@ -33,7 +34,10 @@
     "scripts/ANEXO-CRIPTOMONEDAS-PAGOS-CONTRATOS.json",
     "scripts/ACTA-CONGELAMIENTO-REGISTRO-CUENTA.json",
     "scripts/ANALISIS-REVISION-MVP-DASHBOARD.json",
-    "scripts/MATRIZ-MVP-CARIHUB.json"
+    "scripts/MATRIZ-MVP-CARIHUB.json",
+    "scripts/PLANES-CARIHUB-DEFINICION-FINAL.md",
+    "scripts/PROGRAMA-REFERIDOS-DEFINICION-FINAL.md",
+    "scripts/config-plan-entitlements-schema.json"
   ],
   "noModifica": [
     "PLAN-MAESTRO-PAGOS-CONTRATOS", "config-contratos-carihub-schema", "config-precios-planes-perfiles-schema",
@@ -72,7 +76,16 @@
     "moneda": "MXN",
     "ivaIncluido": true,
     "redondeo": 50,
-    "planes": ["basico", "destacado", "premium", "vip"],
+    "planes": ["trial_profesional", "basico", "destacado", "premium", "vip"],
+    "trialProfesional": {
+      "planId": "trial_profesional",
+      "duracionDias": 30,
+      "entitlementsPlanId": "destacado",
+      "precio": 0,
+      "renovable": false,
+      "referidoExtraDias": 7,
+      "nota": "Trial = entitlements Profesional; nunca trial Básico. Fuente: PLANES-CARIHUB-DEFINICION-FINAL.md"
+    },
     "periodos": { "semanal": 0.35, "quincenal": 0.65, "mensual": 1.0, "anual": "reservado inactivo MVP" },
     "pricingResolver": {
       "pasos": ["base global", "porFormulario", "override subcategoria>sector>formulario>ciudad>estado>pais>global", "factorPeriodo", "redondeo50", "aplicarPromocion"],
@@ -88,10 +101,48 @@
     "banners": { "fuente": "configuracion_publicidad/precios_banners", "separado": true }
   },
 
+  "ordenesPago": {
+    "coleccion": "ordenes_pago/{ordenId}",
+    "estados": ["pendiente", "pagado", "fallido", "vencido", "cancelado"],
+    "reglaActivacion": "Solo webhook ECO-030/031 puede pasar a pagado y activar servicio. Frontend NUNCA activa.",
+    "camposObligatorios": [
+      "ordenId", "uid", "tipoProducto", "estado", "montoMXN", "moneda", "planId", "periodo",
+      "scopedPerfilId", "scopedBannerId", "precioSnapshot", "promocionSnapshot", "entitlementsSnapshot",
+      "origenPlan", "planMinimoRequerido", "createdAt", "proveedor", "webhookId"
+    ],
+    "tiposProducto": ["perfil", "banner", "estado", "live"],
+    "origenPlan": ["trial", "pago", "referido", "promo_admin"]
+  },
+
+  "motoresBloque1": {
+    "ubicacion": "functions/payments/",
+    "modulos": {
+      "pricing-resolver.js": "resolvePrice(input) → PrecioResuelto",
+      "entitlements-resolver.js": "resolveEntitlements(input) → EntitlementsEffectivos",
+      "promo-resolver.js": "resolvePromo(input) → PromocionAplicada|null",
+      "contract-factory.js": "buildOrdenPagoSnapshot(input) → ordenes_pago payload (memoria)",
+      "plan-minimo.js": "assertPlanMinimo(planId, context) → { ok, planMinimoRequerido }",
+      "upload-gate.js": "validateUpload(input) → { allowed, code } — solo cálculo local, sin enforcement"
+    },
+    "sinDeploy": true,
+    "sinExportsIndex": true,
+    "referidos": {
+      "invitadoExtraTrialDias": 7,
+      "referidorDiasVigencia": 15,
+      "topesAnuales": { "recompensasMax": 6, "diasMax": 90 },
+      "acreditacion": "ECO-030 tras primer pago invitado — fuera Bloque 1"
+    },
+    "msg011": "Cupos chat en entitlements reservados; enforcement real post-launch MSG-011"
+  },
+
   "contratosCapa": {
     "contractFactory": {
       "colecciones": { "perfiles": "contratos_perfiles/{id}", "banners": "contratos_banners/{id}", "renovaciones": "renovaciones/{id}" },
-      "snapshotCongelado": ["precioContratado", "versionPrecio", "promocionAplicada", "versionPromocion", "planContratado", "periodoContratado"],
+      "destinoOrden": "ordenes_pago/{ordenId}",
+      "snapshotCongelado": [
+        "precioContratado", "versionPrecio", "promocionAplicada", "versionPromocion",
+        "planContratado", "periodoContratado", "entitlementsSnapshot", "origenPlan"
+      ],
       "aceptacionDigital": { "campos": ["aceptoTerminos", "versionTerminos", "fechaAceptacion", "hashContrato"], "regla": "Sin aceptación → pendiente_aceptacion; no activa servicio" },
       "estadosContractuales": ["borrador", "pendiente_aceptacion", "activo", "suspendido", "vencido", "cancelado", "renovado", "reemplazado"]
     }

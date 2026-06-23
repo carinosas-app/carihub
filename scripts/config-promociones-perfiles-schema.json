@@ -1,7 +1,7 @@
 {
   "$schema": "./config-registro-schema.meta.json",
-  "versionSchema": "2026-06-10",
-  "version": "2026-06-10",
+  "versionSchema": "2026-06-20",
+  "version": "2026-06-20",
   "schemaId": "promociones_perfiles",
   "nombre": "Promociones de perfiles (separadas de precios base)",
   "descripcion": "Las promociones NO alteran precios base en config_precios_perfiles. Se resuelven en capa aparte y se congelan al contratar.",
@@ -25,20 +25,44 @@
   "tiposPromocion": {
     "primer_mes_gratis": {
       "id": "primer_mes_gratis",
-      "nombre": "Primer mes gratis (lanzamiento)",
+      "nombre": "Trial Profesional 30 días (lanzamiento)",
+      "planEfectivo": "destacado",
+      "planIdContrato": "trial_profesional",
       "aplicaA": ["adultos", "persona_independiente", "profesionista_cedula"],
       "noAplicaA": ["negocio_empresa", "usuario_visitante"],
-      "beneficio": { "diasGratis": 30, "despuesDe": "aprobacion_admin" },
+      "beneficio": { "diasGratis": 30, "despuesDe": "aprobacion_admin", "precioContratado": 0 },
       "flujo": [
         "1. Usuario llena registro",
         "2. estadoRevision = enviado_revision",
         "3. Admin revisa y aprueba",
-        "4. Al aprobar: inicia periodo promocional 30 días (precioContratado = 0, promocionAplicada = primer_mes_gratis)",
-        "5. Al día 30: estadoContrato → vencido o pago_pendiente renovación con precio vigente",
-        "6. Nunca auto-aprobar ni auto-publicar"
+        "4. Al aprobar: trial_profesional 30d (entitlements destacado, precioContratado = 0)",
+        "5. Al día 30: estadoContrato → vencido o checkout plan mínimo categoría",
+        "6. Nunca auto-aprobar ni auto-publicar ni trial Básico"
       ],
       "activo": true,
-      "version": "2026-06-10-lanzamiento-1"
+      "version": "2026-06-20-bloque1-1"
+    },
+    "referido_invitado": {
+      "id": "referido_invitado",
+      "nombre": "Referido — +7 días trial invitado",
+      "tipo": "dias_extra_trial",
+      "diasExtra": 7,
+      "trialTotalDias": 37,
+      "requiereCodigoAntesAprobacion": true,
+      "activo": true,
+      "version": "2026-06-20-bloque1-1"
+    },
+    "referido_referidor": {
+      "id": "referido_referidor",
+      "nombre": "Referido — +15 días vigencia referidor tras primer pago invitado",
+      "tipo": "dias_extra_vigencia",
+      "diasExtra": 15,
+      "topesAnuales": { "recompensasMax": 6, "diasMax": 90 },
+      "ventanaPrimerPagoDias": 90,
+      "estados": ["pendiente", "en_trial", "acreditado", "expirada_sin_pago", "no_convirtio"],
+      "acreditacion": "ECO-030 webhook — fuera Bloque 1",
+      "activo": true,
+      "version": "2026-06-20-bloque1-1"
     },
     "negocio_2x1": {
       "id": "negocio_2x1",

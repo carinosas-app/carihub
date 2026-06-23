@@ -1,7 +1,7 @@
 {
   "$schema": "./config-registro-schema.meta.json",
-  "versionSchema": "2026-06-10",
-  "version": "2026-06-10",
+  "versionSchema": "2026-06-20",
+  "version": "2026-06-20",
   "schemaId": "promociones_banners",
   "nombre": "Promociones de banners (separadas de precios base)",
   "descripcion": "Promociones publicitarias independientes de configuracion_publicidad/precios_banners. Pago adelantado obligatorio.",
@@ -76,6 +76,15 @@
       "requiereRevisionPostPago",
       "datosModificadosDespuesDePago"
     ]
+  },
+  "resolucionPromocionBanner": {
+    "algoritmo": [
+      "1. Filtrar promociones activas en promociones_banners",
+      "2. Elegir promoción más específica por slotId/pantalla/geo",
+      "3. Calcular diasBonificados sin alterar precio base",
+      "4. Congelar promocionAplicada + versionPromocion en contrato/orden"
+    ],
+    "motor": "functions/payments/promo-resolver.js resolvePromoBanner"
   },
   "documentoFirestore": {
     "coleccion": "promociones_banners",

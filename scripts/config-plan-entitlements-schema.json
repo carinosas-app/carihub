@@ -1,0 +1,194 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "versionSchema": "2026-06-20",
+  "version": "2026-06-20",
+  "formularioId": "config_plan_entitlements",
+  "nombre": "PlanEntitlements — límites operativos por plan",
+  "descripcion": "Schema de referencia para enforcement de cupos. Extiende config-precios-planes-perfiles-schema.json (limites parciales) con dimensiones storage, chat, estados, lives y packs. NO auto-aplica; admin + Functions resuelven effective entitlements.",
+  "coleccionFirestore": "config_plan_entitlements",
+  "documentoGlobal": "config_plan_entitlements/global",
+  "subcolecciones": {
+    "overridesCategoria": "config_plan_entitlements/overrides_categoria/{overrideId}",
+    "excepcionesPerfil": "config_plan_entitlements/excepciones_perfil/{perfilId}",
+    "addonsActivos": "perfiles/{perfilId}/media_addons/{addonId}"
+  },
+  "documentoUsoPerfil": {
+    "coleccion": "perfiles/{perfilId}/usage/current",
+    "nota": "Contadores server-side; cliente solo lectura. Alternativa MVP: campos usage en usuarios/{uid} hasta BLK-01.",
+    "campos": {
+      "planIdActivo": "trial_profesional|basico|destacado|premium|vip",
+      "contratoId": "string|null",
+      "fechaVencimiento": "timestamp",
+      "fotosUsadas": "number",
+      "videosUsados": "number",
+      "bytesStorageUsados": "number",
+      "adjuntosChatMes": "number",
+      "estadosActivos": "number",
+      "estadosPublicadosMes": "number",
+      "livesMinutosMes": "number",
+      "livesActivos": "number",
+      "packsBytesUsados": "number",
+      "ultimoRecalculo": "timestamp",
+      "version": "number"
+    }
+  },
+  "contextosUpload": [
+    "perfil_foto_principal",
+    "perfil_galeria",
+    "perfil_video",
+    "chat_adjunto",
+    "estado_media",
+    "live_grabacion",
+    "pack_digital",
+    "banner_creativo",
+    "verificacion_kyc"
+  ],
+  "planesBase": {
+    "basico": {
+      "planId": "basico",
+      "notaComercial": "Básico opción B — post-trial; 6 fotos, 1 estado, 10 imgs chat/mes (reservado MSG-011)",
+      "limites": {
+        "fotosMax": 6,
+        "videosMax": 0,
+        "tamanoMaxArchivoMb": { "foto": 5, "video": 0, "chatImagen": 3, "chatVideo": 0, "pack": 0 },
+        "storageGbMaxPerfil": 0.05,
+        "adjuntosChat": { "imagen": true, "video": false, "audio": false },
+        "adjuntosChatMesMax": 10,
+        "estados": { "habilitado": true, "activosMax": 1, "publicacionesMesMax": 4, "duracionHoras": 24, "retencionDias": 7 },
+        "lives": { "habilitado": false, "activosMax": 0, "minutosDiaMax": 0, "minutosMesMax": 0, "retencionHoras": 48 },
+        "packs": { "habilitado": false, "gbMax": 0, "archivosMax": 0 }
+      }
+    },
+    "trial_profesional": {
+      "planId": "trial_profesional",
+      "heredaDe": "destacado",
+      "notaComercial": "30 días trial; entitlements idénticos a Profesional (destacado)",
+      "limites": {
+        "fotosMax": 6,
+        "videosMax": 1,
+        "tamanoMaxArchivoMb": { "foto": 8, "video": 25, "chatImagen": 3, "chatVideo": 0, "pack": 0 },
+        "storageGbMaxPerfil": 0.15,
+        "adjuntosChat": { "imagen": true, "video": false, "audio": false },
+        "adjuntosChatMesMax": 50,
+        "estados": { "habilitado": true, "activosMax": 2, "publicacionesMesMax": 8, "duracionHoras": 24, "retencionDias": 7 },
+        "lives": { "habilitado": false, "activosMax": 0, "minutosDiaMax": 0, "minutosMesMax": 0, "retencionHoras": 48 },
+        "packs": { "habilitado": false, "gbMax": 0, "archivosMax": 0 }
+      }
+    },
+    "destacado": {
+      "planId": "destacado",
+      "limites": {
+        "fotosMax": 6,
+        "videosMax": 1,
+        "tamanoMaxArchivoMb": { "foto": 8, "video": 25, "chatImagen": 3, "chatVideo": 0, "pack": 0 },
+        "storageGbMaxPerfil": 0.15,
+        "adjuntosChat": { "imagen": true, "video": false, "audio": false },
+        "adjuntosChatMesMax": 50,
+        "estados": { "habilitado": true, "activosMax": 2, "publicacionesMesMax": 8, "duracionHoras": 24, "retencionDias": 7 },
+        "lives": { "habilitado": false, "activosMax": 0, "minutosDiaMax": 0, "minutosMesMax": 0, "retencionHoras": 48 },
+        "packs": { "habilitado": false, "gbMax": 0, "archivosMax": 0 }
+      }
+    },
+    "premium": {
+      "planId": "premium",
+      "limites": {
+        "fotosMax": 10,
+        "videosMax": 3,
+        "tamanoMaxArchivoMb": { "foto": 8, "video": 50, "chatImagen": 5, "chatVideo": 15, "pack": 0 },
+        "storageGbMaxPerfil": 0.5,
+        "adjuntosChat": { "imagen": true, "video": true, "audio": false },
+        "adjuntosChatMesMax": 200,
+        "estados": { "habilitado": true, "activosMax": 5, "publicacionesMesMax": 30, "duracionHoras": 24, "retencionDias": 14 },
+        "lives": { "habilitado": true, "activosMax": 1, "minutosDiaMax": 30, "minutosMesMax": 300, "retencionHoras": 72 },
+        "packs": { "habilitado": false, "gbMax": 0, "archivosMax": 0 }
+      }
+    },
+    "vip": {
+      "planId": "vip",
+      "limites": {
+        "fotosMax": 15,
+        "videosMax": 8,
+        "tamanoMaxArchivoMb": { "foto": 10, "video": 100, "chatImagen": 8, "chatVideo": 50, "pack": 200 },
+        "storageGbMaxPerfil": 2,
+        "adjuntosChat": { "imagen": true, "video": true, "audio": true },
+        "adjuntosChatMesMax": 1000,
+        "estados": { "habilitado": true, "activosMax": 10, "publicacionesMesMax": 999, "duracionHoras": 48, "retencionDias": 30 },
+        "lives": { "habilitado": true, "activosMax": 2, "minutosDiaMax": 60, "minutosMesMax": 900, "retencionHoras": 168 },
+        "packs": { "habilitado": true, "gbMax": 2, "archivosMax": 50 }
+      }
+    }
+  },
+  "overridesCategoriaEjemplos": [
+    {
+      "id": "adultos-alto-consumo",
+      "scope": { "sectorId": "adultos", "consumoMinimo": "Alto" },
+      "planMinimoRequerido": "vip",
+      "limitesDelta": {
+        "adjuntosChat": { "imagen": true, "video": true },
+        "estados": { "habilitado": true },
+        "lives": { "habilitado": true }
+      },
+      "nota": "Auditoría sostenibilidad: 24 subs Premium→Especial; enforcement checkout + upload."
+    },
+    {
+      "id": "persona-creador-packs",
+      "scope": { "arquetipo": "persona_creador" },
+      "planMinimoRequerido": "vip",
+      "limitesDelta": {
+        "packs": { "habilitado": true, "gbMax": 2 },
+        "videosMax": 8
+      }
+    },
+    {
+      "id": "eventos-lives",
+      "scope": { "sectorId": "eventos" },
+      "planMinimoRequerido": "premium",
+      "limitesDelta": {
+        "lives": { "habilitado": true, "minutosMesMax": 600 }
+      }
+    },
+    {
+      "id": "restaurante-bar-venue",
+      "scope": { "subcategoriaId": "restaurante-bar" },
+      "planMinimoRequerido": "vip",
+      "limitesDelta": {
+        "fotosMax": 15,
+        "videosMax": 5,
+        "lives": { "habilitado": true }
+      }
+    },
+    {
+      "id": "produccion-audiovisual",
+      "scope": { "subcategoriaId": "produccion-audiovisual" },
+      "planMinimoRequerido": "vip",
+      "limitesDelta": {
+        "videosMax": 10,
+        "storageGbMaxPerfil": 3,
+        "packs": { "habilitado": true, "gbMax": 3 }
+      }
+    }
+  ],
+  "resolucionEffectiveEntitlements": {
+    "orden": [
+      "1. planId del contrato activo (contratos_perfiles / usuarios.fechaVencimiento)",
+      "2. limites base del plan (config_plan_entitlements/global.planes[planId])",
+      "3. merge overrides por subcategoriaId > sectorId > formularioId > arquetipo",
+      "4. merge excepcionPerfil si activa y no vencida",
+      "5. sumar media_addons activos (gbExtra, fotosExtra, etc.)",
+      "6. clamp: nunca superar techo global hardCap (anti-abuso admin)"
+    ],
+    "funcionSugerida": "resolveEntitlements({ perfilId, uid, subcategoriaId, sectorId, formularioId, arquetipo })",
+    "uploadGate": {
+      "funcion": "validateUpload({ contextoUpload, entitlements, usage, archivoBytes, mimeType })",
+      "enforcement": "Bloque 1: solo cálculo local en functions/payments/upload-gate.js. Enforcement real post MSG-011/ECO-030."
+    }
+  },
+  "referencias": [
+    "scripts/config-precios-planes-perfiles-schema.json",
+    "scripts/auditoria-sostenibilidad-planes-462.csv",
+    "scripts/auditoria-monetizacion-categorias-462.json",
+    "scripts/AUDITORIA-SOSTENIBILIDAD-PLANES-RESUMEN.md",
+    "scripts/PLAN-MAESTRO-ECONOMIA-SOCIAL.json",
+    "scripts/blk05-storage-rules-draft.rules"
+  ]
+}

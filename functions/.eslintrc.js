@@ -17,6 +17,18 @@ module.exports = {
   },
   overrides: [
     {
+      files: ["payments/**/*.js"],
+      rules: {
+        "require-jsdoc": "off",
+        "valid-jsdoc": "off",
+        "linebreak-style": "off",
+        "quotes": "off",
+        "object-curly-spacing": "off",
+        "operator-linebreak": "off",
+        "max-len": ["error", {"code": 120}],
+      },
+    },
+    {
       files: ["**/*.spec.*"],
       env: {
         mocha: true,
