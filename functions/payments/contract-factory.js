@@ -96,6 +96,8 @@ function buildOrdenPagoSnapshot(input) {
     } : null,
     proveedor: null,
     webhookId: null,
+    tipoOperacion: input.tipoOperacion || 'alta',
+    activacionCompleta: false,
     createdAt: new Date().toISOString(),
     _bloque1: { persistido: false, nota: 'Snapshot en memoria — sin Firestore' },
   };

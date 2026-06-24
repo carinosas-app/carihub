@@ -40,9 +40,9 @@
         </fieldset>
 
         <div class="pago-methods">
-          <button type="button" class="pago-btn pago-btn--stripe" id="btnPagarStripe">Pagar con Stripe</button>
-          <button type="button" class="pago-btn pago-btn--mp" id="btnPagarMp">Pagar con Mercado Pago</button>
-          <p class="pago-note">Los botones registran el pago en modo demo hasta conectar pasarela real.</p>
+          <p class="pago-note pago-note--block"><strong>Pago en línea próximamente.</strong> La activación de tu publicación solo ocurre tras confirmación del pago en el servidor (checkout + webhook). No es posible activar desde esta pantalla.</p>
+          <a class="pago-btn pago-btn--primary" id="btnIrCheckout" href="checkout.html">Ir al checkout</a>
+          <a class="pago-btn pago-btn--ghost" href="dashboard-rentero.html">Volver al dashboard</a>
         </div>
       </div>
       <div class="pago-error hidden" id="pagoError"></div>
@@ -144,36 +144,6 @@
       $('pagoBadge').textContent = pubData.esAdicional ? 'Perfil adicional · 50% OFF' : 'Perfil';
     }
 
-    async function procesarPago(metodo) {
-      var user = window.CariHubAuth && window.CariHubAuth.currentUser;
-      if (!user) {
-        location.href = 'index.html?abrir=login';
-        return;
-      }
-      renderCotizacion();
-      var btnS = $('btnPagarStripe');
-      var btnM = $('btnPagarMp');
-      btnS.disabled = true;
-      btnM.disabled = true;
-      try {
-        if (tipo === 'banner' && bannerId) {
-          await Pagos.completarPagoBanner(user.uid, bannerId, cotizacion, metodo);
-        } else {
-          await Pagos.completarPagoPerfil(user.uid, perfilId, cotizacion, metodo);
-        }
-        try {
-          localStorage.removeItem('carihub_dashboard_avisos_pendientes');
-        } catch (e) {}
-        var destId = (tipo === 'banner' && bannerId) ? bannerId : perfilId;
-        location.href = 'dashboard-rentero.html?pago=ok&perfilId=' + encodeURIComponent(destId || '');
-      } catch (err) {
-        alert('Error al registrar pago: ' + (err.message || err));
-      } finally {
-        btnS.disabled = false;
-        btnM.disabled = false;
-      }
-    }
-
     async function boot() {
       if (!window.CariHubCore || !CariHubCore.assertReady({ page: 'dashboard' })) {
         showError('Servicio no disponible. Recarga la página.');
@@ -190,8 +160,27 @@
         $('pagoContent').classList.remove('hidden');
         bindPeriodo();
         renderCotizacion();
-        $('btnPagarStripe').addEventListener('click', function () { procesarPago('stripe_demo'); });
-        $('btnPagarMp').addEventListener('click', function () { procesarPago('mercadopago_demo'); });
+        var checkoutHref = Pagos.buildPagoUrl({
+          tipo: tipo,
+          perfilId: perfilId,
+          bannerId: bannerId,
+          periodo: document.querySelector('input[name="periodo"]:checked')?.value || 'mes'
+        });
+        var btnCheckout = $('btnIrCheckout');
+        if (btnCheckout) btnCheckout.href = checkoutHref;
+        document.querySelectorAll('input[name="periodo"]').forEach(function (el) {
+          el.addEventListener('change', function () {
+            renderCotizacion();
+            if (btnCheckout) {
+              btnCheckout.href = Pagos.buildPagoUrl({
+                tipo: tipo,
+                perfilId: perfilId,
+                bannerId: bannerId,
+                periodo: document.querySelector('input[name="periodo"]:checked')?.value || 'mes'
+              });
+            }
+          });
+        });
       } catch (err) {
         showError(err.message || 'No se pudo cargar el pago.');
       }

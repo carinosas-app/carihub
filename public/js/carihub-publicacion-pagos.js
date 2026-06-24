@@ -1,9 +1,11 @@
 /**
- * Precios, descuentos y checkout de publicaciones (perfil / banner).
- * Stripe / Mercado Pago: placeholders listos para conectar webhook real.
+ * Cotización readonly y navegación a checkout (ECO-020).
+ * Activación económica SOLO vía activation-service (webhook / admin) — B1 Fase 0.
  */
 (function (global) {
   'use strict';
+
+  var ACTIVACION_SOLO_SERVIDOR = true;
 
   var PRECIOS = {
     perfil_mes: 999,
@@ -21,12 +23,6 @@
   function db() {
     if (global.CariHubDB) return global.CariHubDB;
     if (global.firebase && global.firebase.firestore) return global.firebase.firestore();
-    return null;
-  }
-
-  function auth() {
-    if (global.CariHubAuth) return global.CariHubAuth;
-    if (global.firebase && global.firebase.auth) return global.firebase.auth();
     return null;
   }
 
@@ -103,7 +99,32 @@
     if (params.bannerId) qs.set('bannerId', params.bannerId);
     if (params.periodo) qs.set('periodo', params.periodo);
     var s = qs.toString();
+    return 'checkout.html' + (s ? '?' + s : '');
+  }
+
+  function buildLegacyPagoUrl(params) {
+    params = params || {};
+    var qs = new URLSearchParams();
+    if (params.tipo) qs.set('tipo', params.tipo);
+    if (params.perfilId) qs.set('perfilId', params.perfilId);
+    if (params.bannerId) qs.set('bannerId', params.bannerId);
+    if (params.periodo) qs.set('periodo', params.periodo);
+    var s = qs.toString();
     return 'cuenta-pago-publicacion.html' + (s ? '?' + s : '');
+  }
+
+  function rechazarActivacionCliente() {
+    return Promise.reject(new Error(
+      'ACTIVACION_CLIENTE_DESHABILITADA: el pago y la activación solo vía checkout + webhook (ECO-020/030).'
+    ));
+  }
+
+  function completarPagoPerfil() {
+    return rechazarActivacionCliente();
+  }
+
+  function completarPagoBanner() {
+    return rechazarActivacionCliente();
   }
 
   function cotizarDesdePublicacion(pub) {
@@ -122,110 +143,8 @@
     });
   }
 
-  function addDays(date, days) {
-    var d = new Date(date.getTime());
-    d.setDate(d.getDate() + days);
-    return d;
-  }
-
-  function diasPorPeriodo(periodo) {
-    if (periodo === 'semana') return 7;
-    if (periodo === 'quincena') return 15;
-    return DIAS_VIGENCIA;
-  }
-
-  function completarPagoPerfil(cuentaUid, perfilId, cotizacion, metodo) {
-    var firestore = db();
-    if (!firestore || !cuentaUid || !perfilId) {
-      return Promise.reject(new Error('No se pudo registrar el pago.'));
-    }
-    var ahora = new Date();
-    var dias = diasPorPeriodo(cotizacion.periodo);
-    var vence = addDays(ahora, dias);
-    var patch = {
-      pagado: true,
-      activo: true,
-      aprobado: true,
-      vencido: false,
-      autorizadoParaPago: false,
-      estadoPago: 'pagado',
-      estadoRevision: 'aprobado',
-      actualizacionPendiente: false,
-      fechaPublicacion: ahora,
-      fechaVencimiento: vence,
-      ultimoPagoMonto: cotizacion.precioFinal,
-      ultimoPagoMetodo: metodo || 'demo',
-      ultimoPagoFecha: ahora.toISOString()
-    };
-    var updates = {};
-    Object.keys(patch).forEach(function (k) {
-      updates['perfilesDetalle.' + perfilId + '.' + k] = patch[k];
-    });
-    updates.perfilActivoId = perfilId;
-
-    return firestore.collection('usuarios').doc(cuentaUid).get().then(function (snap) {
-      var data = snap.exists ? (snap.data() || {}) : {};
-      var vinc = Array.isArray(data.perfilesVinculados) ? data.perfilesVinculados.slice() : [];
-      var idx = vinc.findIndex(function (v) { return v && v.perfilId === perfilId; });
-      if (idx >= 0) {
-        vinc[idx] = Object.assign({}, vinc[idx], { activo: true });
-        updates.perfilesVinculados = vinc;
-      }
-      return firestore.collection('usuarios').doc(cuentaUid).update(updates);
-    }).then(function () {
-      return firestore.collection('pagos').add({
-        cuentaUid: cuentaUid,
-        perfilId: perfilId,
-        tipo: 'perfil',
-        monto: cotizacion.precioFinal,
-        montoLista: cotizacion.precioLista,
-        descuentoPct: cotizacion.descuentoPct,
-        periodo: cotizacion.periodo,
-        metodo: metodo || 'demo',
-        estado: 'completado',
-        fecha: ahora
-      });
-    });
-  }
-
-  function completarPagoBanner(cuentaUid, bannerId, cotizacion, metodo) {
-    var firestore = db();
-    if (!firestore || !bannerId) {
-      return Promise.reject(new Error('No se pudo registrar el pago del banner.'));
-    }
-    var ahora = new Date();
-    var dias = diasPorPeriodo(cotizacion.periodo);
-    var vence = addDays(ahora, dias);
-    return firestore.collection('solicitudes_anuncios').doc(bannerId).update({
-      pagado: true,
-      activo: true,
-      aprobado: true,
-      autorizadoParaPago: false,
-      estadoPago: 'pagado',
-      estado: 'activo',
-      estadoRevision: 'aprobado',
-      fechaPublicacion: ahora,
-      fechaVencimiento: vence,
-      ultimoPagoMonto: cotizacion.precioFinal,
-      ultimoPagoMetodo: metodo || 'demo',
-      ultimoPagoFecha: ahora.toISOString()
-    }).then(function () {
-      return firestore.collection('pagos').add({
-        cuentaUid: cuentaUid || '',
-        bannerId: bannerId,
-        tipo: 'banner',
-        monto: cotizacion.precioFinal,
-        montoLista: cotizacion.precioLista,
-        descuentoPct: cotizacion.descuentoPct,
-        periodo: cotizacion.periodo,
-        metodo: metodo || 'demo',
-        estado: 'completado',
-        fecha: ahora
-      });
-    });
-  }
-
   global.CariHubPublicacionPagos = {
+    ACTIVACION_SOLO_SERVIDOR: ACTIVACION_SOLO_SERVIDOR,
     PRECIOS: PRECIOS,
     DESCUENTO_PERFIL_ADICIONAL: DESCUENTO_PERFIL_ADICIONAL,
     DESCUENTO_BANNER_ADICIONAL: DESCUENTO_BANNER_ADICIONAL,
@@ -233,6 +152,7 @@
     cotizarDesdePublicacion: cotizarDesdePublicacion,
     formatMxn: formatMxn,
     buildPagoUrl: buildPagoUrl,
+    buildLegacyPagoUrl: buildLegacyPagoUrl,
     perfilRequierePago: perfilRequierePago,
     bannerRequierePago: bannerRequierePago,
     completarPagoPerfil: completarPagoPerfil,
