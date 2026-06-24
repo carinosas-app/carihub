@@ -26,10 +26,11 @@
     trans: { src: 'img-27.jpg', pos: 'top center' },
     femboy: { src: 'img-18.jpg', pos: 'center 35%' },
     swinger: { src: 'img-26.jpg', pos: 'top center' },
+    'parejas-swinger': { src: '../home/cat-cards/parejas-swinger.png', pos: 'center center' },
     unicorns: { src: 'img-17.jpg', pos: 'top center' },
-    'cuckold-hotwife': { src: 'img-31.jpg', pos: 'top center' },
+    'cuckold-hotwife': { src: '../home/cat-cards/queen-of-spades.png', pos: 'center center' },
     singles: { src: 'img-22.jpg', pos: 'top center' },
-    hotwife: { src: 'img-31.jpg', pos: 'center 30%' },
+    hotwife: { src: '../home/cat-cards/queen-of-spades.png', pos: 'center center' },
     lesbians: { src: 'img-18.jpg', pos: 'center 25%' },
     'tom-boy': { src: 'img-19.jpg', pos: 'center 30%' },
     'tom-fem': { src: 'img-18.jpg', pos: 'top center' },
@@ -45,6 +46,18 @@
   }
 
   function scenePhoto(catId) {
+    var official = window.CariHubCategoriaImagenes && CariHubCategoriaImagenes.get(catId);
+    if (official) {
+      var pos = official.pos || 'center';
+      var fit = official.fit || 'cover';
+      return (
+        '<div class="ap-scene ap-scene--photo" aria-hidden="true">' +
+          '<img class="ap-card__photo" src="' + official.src + '" alt="" ' +
+          'loading="lazy" decoding="async" style="object-position:' + pos + ';object-fit:' + fit + '">' +
+          '<span class="ap-scene__sheen" aria-hidden="true"></span>' +
+        '</div>'
+      );
+    }
     var key = toKey(catId);
     var meta = IMAGE_MAP[key];
     if (!meta) return '<div class="ap-scene ap-scene--fallback" aria-hidden="true"></div>';
