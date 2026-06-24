@@ -25,7 +25,8 @@
     'hotel motel': ['Hotel', 'y Motel'],
     'cabinas glory holes': ['Cabinas', 'Glory Holes'],
     'club sw': ['Club', 'Swinger'],
-    'swinger': ['Club', 'Swinger'],
+    'parejas swinger': ['Parejas', 'Swinger'],
+    'swinger': ['Parejas', 'Swinger'],
     'contenido': ['Creadores de', 'contenido'],
     'cuckold hotwife': ['Cuckold', 'Hotwife'],
     'hotwife': ['Hotwife'],
@@ -275,7 +276,22 @@
       titleLines: ['Trans']
     },
     'femboy': { template: 'sunset', accent: '#ff99c8', photo: 'img/home/cat-cards/femboy.png', icon: '🌸', titleLines: ['Femboy'] },
-    'swinger': { template: 'neon', accent: '#ff0054', photo: 'img/home/hero-club-swinger.png', icon: '🍍', titleLines: ['Club', 'Swinger'] },
+    'parejas swinger': {
+      template: 'neon',
+      accent: '#1e88e5',
+      photo: 'img/home/cat-cards/parejas-swinger.png',
+      photoPos: 'center center',
+      icon: '🍍',
+      titleLines: ['Parejas', 'Swinger']
+    },
+    'swinger': {
+      template: 'neon',
+      accent: '#1e88e5',
+      photo: 'img/home/cat-cards/parejas-swinger.png',
+      photoPos: 'center center',
+      icon: '🍍',
+      titleLines: ['Parejas', 'Swinger']
+    },
     'unicorns': {
       template: 'pulse',
       accent: '#9b5de5',
@@ -284,12 +300,21 @@
       icon: '🦄',
       titleLines: ['Unicorns']
     },
-    'cuckold hotwife': { template: 'sunset', accent: '#ff4500', photo: 'img/home/motel-spa-model.jpg', icon: '🔥', titleLines: ['Cuckold /', 'Hotwife'] },
+    'cuckold hotwife': {
+      template: 'sunset',
+      accent: '#ff4500',
+      photo: 'img/home/cat-cards/queen-of-spades.png',
+      photoFit: 'contain',
+      photoPos: 'center center',
+      photoBg: '#ffffff',
+      icon: '🔥',
+      titleLines: ['Cuckold /', 'Hotwife']
+    },
     'singles': { template: 'classic', accent: '#fb5607', photo: 'img/home/nightclub.jpg', icon: '💫' },
     'hotwife': {
       template: 'bloom',
       accent: '#ff006e',
-      photo: 'img/home/cat-cards/hotwife.png',
+      photo: 'img/home/cat-cards/queen-of-spades.png',
       photoFit: 'contain',
       photoPos: 'center center',
       photoBg: '#ffffff',
@@ -377,7 +402,7 @@
     var ov = CAT_OVERRIDES[id] || {};
     var tpl = ov.template || TEMPLATES[index % TEMPLATES.length];
     var titleLines = gridTitleLines(cat, ov);
-    return {
+    var vis = {
       template: tpl,
       accent: ov.accent || '#ec2d7a',
       accent2: ov.accent2,
@@ -396,6 +421,10 @@
       catId: id,
       catName: cat.nombre
     };
+    if (window.CariHubCategoriaImagenes && CariHubCategoriaImagenes.applyCatVisual) {
+      CariHubCategoriaImagenes.applyCatVisual(vis, id);
+    }
+    return vis;
   }
 
   function resolveCatLookupId(slide) {

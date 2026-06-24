@@ -47,6 +47,7 @@
     trans: { kw: 'trans', prefix: 'Encuentra acompañantes ', subtitle: 'Perfiles trans verificados' },
     femboy: { kw: 'femboys', prefix: 'Encuentra ', subtitle: 'Perfiles femboy cerca de ti' },
     swinger: { kw: 'parejas swinger', prefix: 'Encuentra ', subtitle: 'Conexiones para parejas' },
+    'parejas swinger': { kw: 'parejas swinger', prefix: 'Encuentra ', subtitle: 'Conexiones para parejas' },
     unicorns: { kw: 'unicorns', prefix: 'Encuentra ', subtitle: 'Perfiles unicorn cerca de ti' },
     'cuckold hotwife': { kw: 'cuckold y hotwife', prefix: 'Encuentra ', subtitle: 'Comunidad y experiencias' },
     singles: { kw: 'singles', prefix: 'Encuentra ', subtitle: 'Conexiones para solteros' },
@@ -112,11 +113,12 @@
     'cabinas glory holes': U.grid,
     trans: U.promo,
     femboy: U.lgbt,
-    swinger: U.lounge,
+    swinger: 'img/home/cat-cards/parejas-swinger.png',
+    'parejas swinger': 'img/home/cat-cards/parejas-swinger.png',
     unicorns: U.lounge,
-    'cuckold hotwife': U.lounge,
+    'cuckold hotwife': 'img/home/cat-cards/queen-of-spades.png',
     singles: U.lounge,
-    hotwife: U.lounge,
+    hotwife: 'img/home/cat-cards/queen-of-spades.png',
     lesbians: U.lesbianas,
     'tom boy': U.promo,
     'tom fem': U.promo,
@@ -134,7 +136,7 @@
   function heroTema(id) {
     if (id === 'spa' || id === 'masajes') return 'spa';
     if (id === 'hotel motel' || id === 'hotel motel motel') return 'hotel';
-    if (id === 'club sw' || id === 'swinger') return 'swinger';
+    if (id === 'club sw' || id === 'parejas swinger' || id === 'swinger') return 'swinger';
     if (id.indexOf('antro') === 0) return 'bar';
     if (id === 'tabledance') return 'tabledance';
     return 'escort';
