@@ -2147,6 +2147,7 @@ body:not(.fit) #fitOuter{min-height:calc(100vh - 52px);}
   </div>
 </div>
 
+<script src="js/banner-general-slides.js"></script>
 <script>
 const S = window.CHUI;
 const safe = S.chSafe;
@@ -4058,6 +4059,9 @@ function pbRenderSlide(slide,isFirst){
   return '<div class="pb-slot__slide pb-slot__slide--html '+slide.cls+active+'" aria-hidden="'+ah+'">'+slide.html+'</div>';
 }
 function pbRotSlot(cfg){
+  if(window.CariHubBannerGeneral&&window.CariHubBannerGeneral.mixSlideObjects&&cfg.slides){
+    cfg=Object.assign({},cfg,{slides:window.CariHubBannerGeneral.mixSlideObjects(cfg.slides)});
+  }
   var slides=cfg.slides||[];
   var body="";
   for(var i=0;i<slides.length;i++) body+=pbRenderSlide(slides[i],i===0);

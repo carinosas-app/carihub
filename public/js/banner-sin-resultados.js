@@ -60,7 +60,12 @@
   }
 
   function imagenesPlaceholder(slotId) {
-    return (PLACEHOLDERS[slotId] || PLACEHOLDERS.sin_resultados_izquierda).slice();
+    var base = (PLACEHOLDERS[slotId] || PLACEHOLDERS.sin_resultados_izquierda).slice();
+    if (slotId === 'sin_resultados_centro') return base;
+    if (global.CariHubBannerGeneral && global.CariHubBannerGeneral.mixGeneralSlidePaths) {
+      return global.CariHubBannerGeneral.mixGeneralSlidePaths(base);
+    }
+    return base;
   }
 
   function buildDots(count) {
