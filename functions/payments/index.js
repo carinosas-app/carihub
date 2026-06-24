@@ -6,6 +6,8 @@ const promo = require('./promo-resolver');
 const contractFactory = require('./contract-factory');
 const planMinimo = require('./plan-minimo');
 const uploadGate = require('./upload-gate');
+const validateOrden = require('./validate-orden-schema');
+const slotInventory = require('./slot-inventory');
 
 module.exports = {
   ...pricing,
@@ -14,4 +16,6 @@ module.exports = {
   ...contractFactory,
   ...planMinimo,
   validateUpload: uploadGate.validateUpload,
+  ...validateOrden,
+  ...slotInventory,
 };

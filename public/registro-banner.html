@@ -18,6 +18,7 @@
 <script src="/js/modal-carihub.js"></script>
 <script src="/js/catalogos-carihub.js"></script>
 <script src="/js/precios-publicidad.js"></script>
+<script src="/js/slots-catalog.js"></script>
 <script src="/js/banner-inventario-rotacion.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
@@ -7255,6 +7256,13 @@ async function continuarPaso1Publicidad(event){
   }
 
   const slotId = document.getElementById("selectorPublicidad")?.value || "";
+  if(window.CARIHUB_SLOTS_CATALOG){
+    const valSlot = window.CARIHUB_SLOTS_CATALOG.validar(slotId);
+    if(!valSlot.ok){
+      alert("Espacio publicitario no válido: " + (valSlot.error || "slotId"));
+      return;
+    }
+  }
   const division = dividirPantallaEspacio(slotId);
 
   const archivoPrincipal =

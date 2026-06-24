@@ -68,6 +68,25 @@ service cloud.firestore {
         && request.resource.data.activo == false;
     }
 
+    function slotIdPublicidadValido(slotId) {
+      return slotId in [
+        'home_izquierda', 'home_derecha', 'home_inferior', 'home_categorias',
+        'home_hero_1', 'home_hero_2', 'home_hero_3', 'home_hero_4', 'home_hero_5',
+        'sin_resultados_izquierda', 'sin_resultados_centro', 'sin_resultados_derecha', 'sin_resultados_inferior',
+        'resultados_izquierda', 'resultados_centro', 'resultados_derecha', 'resultados_inferior',
+        'perfil_izquierda', 'perfil_centro', 'perfil_derecha', 'perfil_inferior',
+        'registro_superior'
+      ];
+    }
+
+    function solicitudSlotIdValidoSiPresente() {
+      let data = request.resource.data;
+      return !('slotId' in data)
+        || data.slotId == null
+        || data.slotId == ''
+        || (data.slotId is string && slotIdPublicidadValido(data.slotId));
+    }
+
     function solicitudCreateValida() {
       let data = request.resource.data;
       return data.uidAnunciante == request.auth.uid
@@ -75,6 +94,7 @@ service cloud.firestore {
         && data.estado == 'pendiente'
         && data.fecha is timestamp
         && data.vinculadoEn is timestamp
+        && solicitudSlotIdValidoSiPresente()
         && !('notaAdmin' in data)
         && !('actualizadoPor' in data)
         && !('actualizadoEn' in data);
@@ -96,6 +116,7 @@ service cloud.firestore {
           'dashboard_live_activo',
           'dashboard_live_programado'
         ]
+        && solicitudSlotIdValidoSiPresente()
         && !('notaAdmin' in data)
         && !('actualizadoPor' in data)
         && !('actualizadoEn' in data);
@@ -626,6 +647,44 @@ service cloud.firestore {
       allow read: if isAdmin();
       allow create: if false;
       allow update: if false;
+      allow delete: if false;
+    }
+
+    function ordenTipoValido(tipo) {
+      return tipo in ['perfil', 'banner', 'estado', 'live'];
+    }
+
+    function ordenEstadoValido(estado) {
+      return estado in ['pendiente', 'pagado', 'fallido', 'vencido', 'cancelado'];
+    }
+
+    function ordenCreateValida() {
+      let data = request.resource.data;
+      return data.uid == request.auth.uid
+        && data.estado == 'pendiente'
+        && ordenTipoValido(data.tipoProducto)
+        && data.montoMXN is number
+        && data.montoMXN >= 0
+        && data.moneda == 'MXN'
+        && data.createdAt is timestamp
+        && !('webhookId' in data);
+    }
+
+    function ordenUpdateDuenoValida() {
+      let data = request.resource.data;
+      return resource.data.uid == request.auth.uid
+        && resource.data.estado == 'pendiente'
+        && data.uid == resource.data.uid
+        && data.estado == 'pendiente'
+        && ordenTipoValido(data.tipoProducto)
+        && data.montoMXN == resource.data.montoMXN;
+    }
+
+    match /ordenes_pago/{ordenId} {
+      allow read: if isOwner(resource.data.uid) || isAdmin();
+      allow create: if isNonAnonymous() && ordenCreateValida();
+      allow update: if (isOwner(resource.data.uid) && ordenUpdateDuenoValida())
+        || isAdmin();
       allow delete: if false;
     }
 

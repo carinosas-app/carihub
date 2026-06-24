@@ -82,8 +82,10 @@
   }
 
   function calcularApariciones(slotId,capacidad){
+    const capFromCatalog=global.CARIHUB_SLOTS_CATALOG?.capacidadMaxima?.(slotId);
+    const capEfectiva=capFromCatalog||capacidad;
     const base=INVENTARIO_DIARIO_BASE[slotId]||300;
-    const cap=Math.max(1,Number(capacidad)||1);
+    const cap=Math.max(1,Number(capEfectiva)||1);
     const dia=Math.max(1,Math.round(base/cap));
     return {
       dia,

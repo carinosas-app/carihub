@@ -4,6 +4,7 @@ const { resolvePrice } = require('./pricing-resolver');
 const { resolveEntitlements } = require('./entitlements-resolver');
 const { resolvePromo } = require('./promo-resolver');
 const { assertPlanMinimo } = require('./plan-minimo');
+const { validateOrdenSchema } = require('./validate-orden-schema');
 
 function buildOrdenPagoSnapshot(input) {
   input = input || {};
@@ -66,7 +67,8 @@ function buildOrdenPagoSnapshot(input) {
     planId: planId || null,
     periodo: input.periodo || 'mensual',
     scopedPerfilId: input.perfilId || null,
-    scopedBannerId: input.bannerId || null,
+    scopedBannerId: input.bannerId || input.solicitudId || null,
+    scopedSlotId: input.slotId || null,
     origenPlan: (promo && promo.origenPlan) || (planId === 'trial_profesional' ? 'trial' : 'pago'),
     planMinimoRequerido: planMinimo.planMinimoRequerido,
     planMinimoOk: planMinimo.ok,
@@ -103,6 +105,10 @@ function buildOrdenPagoSnapshot(input) {
     snapshot.planMinimoBlocked = true;
     snapshot.planMinimoCode = planMinimo.code;
   }
+
+  const validation = validateOrdenSchema(snapshot);
+  snapshot.schemaValid = validation.ok;
+  if (!validation.ok) snapshot.schemaErrors = validation.errors;
 
   return snapshot;
 }

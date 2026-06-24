@@ -1,0 +1,48 @@
+{
+  "$schema": "./config-registro-schema.meta.json",
+  "versionSchema": "2026-06-20",
+  "version": "2026-06-20-bloque2",
+  "coleccionFirestore": "ordenes_pago",
+  "documento": "ordenes_pago/{ordenId}",
+  "referencia": "scripts/SPEC-PAGOS-CONTRATOS.json#ordenesPago",
+  "estados": ["pendiente", "pagado", "fallido", "vencido", "cancelado"],
+  "estadosTransicion": {
+    "pendiente": ["pagado", "fallido", "cancelado", "vencido"],
+    "pagado": [],
+    "fallido": ["pendiente"],
+    "vencido": [],
+    "cancelado": []
+  },
+  "tiposProducto": ["perfil", "banner", "estado", "live"],
+  "origenPlan": ["trial", "pago", "referido", "promo_admin"],
+  "camposObligatorios": [
+    "uid",
+    "tipoProducto",
+    "estado",
+    "montoMXN",
+    "moneda",
+    "createdAt"
+  ],
+  "camposOpcionales": [
+    "ordenId",
+    "planId",
+    "periodo",
+    "scopedPerfilId",
+    "scopedBannerId",
+    "scopedSlotId",
+    "precioSnapshot",
+    "promocionSnapshot",
+    "entitlementsSnapshot",
+    "origenPlan",
+    "planMinimoRequerido",
+    "planMinimoOk",
+    "proveedor",
+    "webhookId",
+    "notaAdmin"
+  ],
+  "reglasEscritura": {
+    "ownerCreate": "estado=pendiente; uid=auth.uid; no pagado",
+    "ownerUpdate": "solo pendiente; no puede pasar a pagado",
+    "adminUpdate": "puede confirmar pago manual MVP (ADM-000); webhook ECO-030 futuro"
+  }
+}

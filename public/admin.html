@@ -13,6 +13,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage-compat.js"></script>
 
 <script src="js/carihub-core.js"></script>
+<script src="js/admin-revision-cola.js"></script>
 <script>
 const auth = CariHubCore.auth;
 const db = CariHubCore.db;
@@ -801,6 +802,7 @@ pre{
       <button class="side-btn active" onclick="mostrarDashboard()"><span class="side-ico">🏠</span><span class="side-text"><b>Inicio / Resumen</b><small>Panel principal</small></span></button>
       <button class="side-btn" onclick="abrirModulo('usuarios')"><span class="side-ico">👤</span><span class="side-text"><b>Usuarios</b><small>Gestionar usuarios</small></span></button>
       <button class="side-btn" onclick="abrirModulo('pendientes')"><span class="side-ico">👥</span><span class="side-text"><b>Perfiles</b><small>Aprobar / Rechazar</small></span></button>
+      <button class="side-btn" onclick="abrirModulo('cola_revision')"><span class="side-ico">📥</span><span class="side-text"><b>Cola de revisión</b><small>Perfiles y banners unificados</small></span></button>
       <button class="side-btn" onclick="abrirModulo('graficas')"><span class="side-ico">📊</span><span class="side-text"><b>Estadísticas</b><small>Datos del sistema</small></span></button>
       <button class="side-btn" onclick="abrirModulo('mensajes')"><span class="side-ico">✉️</span><span class="side-text"><b>Mensajes</b><small>Buzón de mensajes</small></span></button>
       <button class="side-btn" onclick="abrirModulo('pagos')"><span class="side-ico">💲</span><span class="side-text"><b>Pagos</b><small>Ver pagos realizados</small></span></button>
@@ -1256,6 +1258,14 @@ async function cargarModulo(tipo){
     return;
   }
 
+  if(tipo === "cola_revision"){
+    titulo.innerText = "📥 Cola de revisión";
+    desc.innerText = "Perfiles y banners pendientes de revisión — transiciones guiadas por schema.";
+    buscador.style.display = "none";
+    await cargarColaRevision();
+    return;
+  }
+
   if(tipo === "solicitudes_publicidad"){
     titulo.innerText = "📋 Solicitudes de publicidad";
     desc.innerText = "Revisa solicitudes enviadas desde el sitio y cambia su estado manualmente.";
@@ -1617,9 +1627,8 @@ async function abrirDetalleSolicitudPublicidad(id){
     }
 
     const estado = s.estado || "pendiente";
-    const opcionesEstado = ESTADOS_SOLICITUD_PUBLICIDAD.map(e =>
-      `<option value="${e}" ${e === estado ? "selected" : ""}>${textoSeguro(etiquetaEstadoSolicitudPublicidad(e))}</option>`
-    ).join("");
+    const estadoNorm = AdminRevisionCola.normalizeEstadoBanner(s);
+    const accionesHtml = AdminRevisionCola.renderAccionesBannerHtml(s.id, estadoNorm);
 
     const linkSeguro = enlaceSeguroSolicitud(s.link);
     const linkHTML = linkSeguro
@@ -1650,18 +1659,16 @@ async function abrirDetalleSolicitudPublicidad(id){
         ${linkHTML}
         <p><b>Texto:</b> ${textoSeguro(s.texto || "—")}</p>
         <p><b>Estado actual:</b> <span class="badge ${claseBadgeSolicitudPublicidad(estado)}">${textoSeguro(etiquetaEstadoSolicitudPublicidad(estado))}</span></p>
+        <p><b>Estado schema:</b> ${textoSeguro(AdminRevisionCola.etiquetaEstadoSchema(estadoNorm))}</p>
         <p><b>Fecha solicitud:</b> ${textoSeguro(formatearFecha(s.fecha))}</p>
         ${metaActualizacion}
         ${imagenHTML}
 
         <div class="actions-row" style="margin-top:16px;">
-          <p><b>Cambiar estado</b></p>
-          <select id="selectEstadoSolicitud" style="width:100%;padding:10px;margin-bottom:10px;">
-            ${opcionesEstado}
-          </select>
+          <p><b>Transiciones permitidas</b></p>
+          <div id="accionesTransicionBanner">${accionesHtml}</div>
           <p><b>Nota admin (opcional)</b></p>
           <textarea id="notaAdminSolicitud" placeholder="Comentario interno para el equipo..." style="width:100%;min-height:80px;padding:10px;margin-bottom:10px;">${textoSeguro(s.notaAdmin || "")}</textarea>
-          <button class="btn btn-cambios" onclick="guardarEstadoSolicitudPublicidad('${s.id}')">Guardar estado</button>
         </div>
       </div>
     `;
@@ -1718,6 +1725,99 @@ async function sincronizarBannerActivoPublico(solicitudId, solicitud){
     actualizadoEn: new Date(),
     actualizadoPor: ADMIN_EMAIL
   }, { merge: true });
+}
+
+async function aplicarTransicionSolicitudPublicidad(id, accionId){
+  if(procesando) return;
+  if(!window.AdminRevisionCola) return alert("Módulo de revisión no cargado.");
+
+  let s = solicitudesPublicidadCache.find(x => x.id === id);
+  if(!s){
+    const doc = await db.collection("solicitudes_anuncios").doc(id).get();
+    if(!doc.exists) return alert("Solicitud no encontrada.");
+    s = { id: doc.id, ...doc.data() };
+  }
+
+  const estadoNorm = AdminRevisionCola.normalizeEstadoBanner(s);
+  if(!AdminRevisionCola.puedeTransicionar("banner", estadoNorm, accionId)){
+    alert("Transición no permitida para este estado.");
+    return;
+  }
+
+  const accion = AdminRevisionCola.resolverAccion("banner", estadoNorm, accionId);
+  if(!accion) return;
+
+  if(!confirm("¿Aplicar: " + accion.label + "?")) return;
+
+  const nota = (document.getElementById("notaAdminSolicitud")?.value || "").trim();
+  const payload = AdminRevisionCola.buildPayloadTransicionBanner(accion, ADMIN_EMAIL, nota);
+
+  try{
+    bloquearAcciones(true);
+    await db.collection("solicitudes_anuncios").doc(id).update(payload);
+    await registrarLogAdmin("solicitud_publicidad_transicion", id, accion.id + " → " + (accion.estadoRevision || accion.estadoLegacy));
+
+    const idx = solicitudesPublicidadCache.findIndex(x => x.id === id);
+    let sActualizada = { ...s, ...payload };
+    if(idx >= 0) solicitudesPublicidadCache[idx] = sActualizada;
+
+    await sincronizarBannerActivoPublico(id, sActualizada);
+
+    alert("Transición aplicada correctamente.");
+    await abrirDetalleSolicitudPublicidad(id);
+  }catch(e){
+    alert("Error aplicando transición: " + e.message);
+  }finally{
+    bloquearAcciones(false);
+  }
+}
+
+async function cargarColaRevision(){
+  const cont = document.getElementById("contenidoModulo");
+
+  try{
+    if(!solicitudesPublicidadCache.length){
+      try{
+        const snap = await db.collection("solicitudes_anuncios").orderBy("fecha","desc").limit(100).get();
+        snap.forEach(doc => solicitudesPublicidadCache.push({ id: doc.id, ...doc.data() }));
+      }catch(e){
+        const snap = await db.collection("solicitudes_anuncios").limit(100).get();
+        snap.forEach(doc => solicitudesPublicidadCache.push({ id: doc.id, ...doc.data() }));
+      }
+    }
+
+    if(!usuariosCache.length) await cargarUsuariosCache();
+
+    const items = AdminRevisionCola.buildColaItems(usuariosCache, solicitudesPublicidadCache);
+
+    if(!items.length){
+      cont.innerHTML = `<div class="item"><h3>Cola vacía</h3><p>No hay perfiles ni banners pendientes de revisión.</p></div>`;
+      return;
+    }
+
+    cont.innerHTML = `<div class="cards-list"></div>`;
+    const grid = cont.querySelector(".cards-list");
+
+    items.forEach(item => {
+      const icono = item.tipo === "perfil" ? "👤" : "📋";
+      const badge = item.tipo === "perfil" ? "badge-rosa" : "badge-azul";
+      const onclick = item.tipo === "perfil"
+        ? `abrirDetallePerfil('${item.id}')`
+        : `abrirModulo('solicitudes_publicidad'); abrirDetalleSolicitudPublicidad('${item.id}')`;
+
+      grid.innerHTML += `
+        <div class="item item-filtrable" onclick="${onclick}">
+          <h3>${icono} ${textoSeguro(item.titulo)}</h3>
+          <span class="badge ${badge}">${textoSeguro(item.tipo)}</span>
+          <span class="badge badge-naranja">${textoSeguro(AdminRevisionCola.etiquetaEstadoSchema(item.estadoNormalizado))}</span>
+          <p>${textoSeguro(item.subtitulo)}</p>
+          <button class="btn btn-cambios" type="button">Revisar</button>
+        </div>
+      `;
+    });
+  }catch(e){
+    cont.innerHTML = `<div class="item"><h3>Error cargando cola</h3><p>${textoSeguro(e.message)}</p></div>`;
+  }
 }
 
 async function guardarEstadoSolicitudPublicidad(id){
