@@ -1,5 +1,5 @@
 /**
- * Home — slots home_estados · home_libe (dock provisional, sin mover layout).
+ * Home — slots home_estados · home_libe (columna izquierda del hero).
  */
 (function (global) {
   'use strict';

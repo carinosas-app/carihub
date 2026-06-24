@@ -44,7 +44,7 @@
     'hotel motel': { kw: 'hoteles', prefix: 'Encuentra los mejores ', subtitle: 'Hospedaje y estadías en tu zona', negocio: true, slotKey: 'hotel' },
     'hotel motel motel': { kw: 'moteles', prefix: 'Encuentra los mejores ', subtitle: 'Estadías discretas cerca de ti', negocio: true, slotKey: 'motel', categoriaId: 'hotel motel' },
     'cabinas glory holes': { kw: 'cabinas', prefix: 'Encuentra las mejores ', subtitle: 'Espacios privados en tu ciudad', negocio: true },
-    trans: { kw: 'acompañantes trans', prefix: 'Encuentra ', subtitle: 'Perfiles trans verificados' },
+    trans: { kw: 'trans', prefix: 'Encuentra acompañantes ', subtitle: 'Perfiles trans verificados' },
     femboy: { kw: 'femboys', prefix: 'Encuentra ', subtitle: 'Perfiles femboy cerca de ti' },
     swinger: { kw: 'parejas swinger', prefix: 'Encuentra ', subtitle: 'Conexiones para parejas' },
     unicorns: { kw: 'unicorns', prefix: 'Encuentra ', subtitle: 'Perfiles unicorn cerca de ti' },

@@ -168,7 +168,7 @@
             '<p class="ch-geo-sheet__subtitle" id="chGeoModalSubtitle">Explora perfiles, negocios, experiencias cerca de ti</p>' +
           '</header>' +
           '<a class="ch-geo-sheet__banner" href="registro-banner.html?slot=home_categorias" id="chGeoBanner">' +
-            '<img src="img/home/banners/ad-banner-pink-01.png" alt="" loading="lazy" decoding="async">' +
+            '<img src="' + ((global.CariHubBannerGeneral && global.CariHubBannerGeneral.pickGeneralBanner()) || 'img/home/banners/ad-banner-pink-01.png') + '" alt="" loading="lazy" decoding="async">' +
             '<span class="ch-geo-sheet__banner-overlay">' +
               '<span class="ch-geo-sheet__banner-title">¡ANÚNCIATE AQUÍ!</span>' +
               '<span class="ch-geo-sheet__banner-cta">Conoce más</span>' +
