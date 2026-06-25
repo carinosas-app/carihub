@@ -4359,6 +4359,7 @@ function adultoIdHeadHTML(u){
   if(u.badgeVip) badges+='<span class="vchip vchip--vip">👑 VIP</span>';
   if(u.badgeLgbt) badges+='<span class="vchip vchip--lgbt">🌈 LGBT+</span>';
   if(u.badgeTrans) badges+='<span class="vchip vchip--trans">🏳️‍⚧️ Trans</span>';
+  if(u.badgeHotwife) badges+='<span class="vchip vchip--hotwife">♠ Hotwife</span>';
   return '<div class="idhead"><h1>'+safe(u.nombre)+'</h1>'+badges+
     (u.edad?'<span class="age" data-pub-block="edad">'+u.edad+' años</span>':'')+'</div>';
 }
@@ -4401,6 +4402,15 @@ function adultoFichaHTML(u){
   if(u.areasVenue) html+=row(pico("pin"),"Áreas",safe(u.areasVenue));
   if(u.orientacion) html+=row(pico("gender"),"Orientación",safe(u.orientacion));
   if(u.identidadGenero) html+=row(pico("gender"),"Identidad / presentación",safe(u.identidadGenero));
+  if(u.participacionPareja) html+=row(pico("heart"),"Participación de la pareja",safe(u.participacionPareja));
+  if(u.tipoPublico) html+=row(pico("heart"),"Busco conocer",safe(u.tipoPublico));
+  else if(Array.isArray(u.buscan)&&u.buscan.length) html+=row(pico("heart"),"Participa en",safe(u.buscan.join(", ")));
+  else if(u.buscan) html+=row(pico("heart"),"Participa en",safe(u.buscan));
+  if(Array.isArray(u.disponibilidadAgenda)&&u.disponibilidadAgenda.length) html+=row(pico("clock"),"Disponibilidad",safe(u.disponibilidadAgenda.join(", ")));
+  if(Array.isArray(u.tipoExperiencia)&&u.tipoExperiencia.length) html+=row(pico("briefcase"),"Tipo de experiencia",safe(u.tipoExperiencia.join(", ")));
+  if(u.loQueBuscaConocer) html+=row(pico("chat"),"Lo que busca conocer",safe(u.loQueBuscaConocer));
+  if(u.aficiones) html+=row(pico("heart"),"Aficiones",safe(u.aficiones));
+  if(u.estiloVida) html+=row(pico("gender"),"Estilo de vida",safe(u.estiloVida));
   if(u.estatura) html+=row(pico("user"),"Estatura",safe(u.estatura));
   if(u.nivelPremium) html+=row(pico("heart"),"Nivel premium",safe(u.nivelPremium));
   if(u.eventosDisponibles) html+=row(pico("briefcase"),"Disponible para eventos","Sí");
@@ -6251,6 +6261,14 @@ function aplicarPerfilDesdeRegistro(vista,u){
     sobreMi:u.sobreMi||"",
     orientacion:u.orientacion||"",
     identidadGenero:u.identidadGenero||"",
+    buscan:u.tipoPublico||(Array.isArray(u.buscan)?u.buscan.slice():(u.buscan?String(u.buscan):"")),
+    tipoPublico:u.tipoPublico||"",
+    participacionPareja:u.participacionPareja||"",
+    disponibilidadAgenda:Array.isArray(u.disponibilidadAgenda)?u.disponibilidadAgenda.slice():[],
+    tipoExperiencia:Array.isArray(u.tipoExperiencia)?u.tipoExperiencia.slice():[],
+    loQueBuscaConocer:u.loQueBuscaConocer||"",
+    aficiones:u.aficiones||"",
+    estiloVida:u.estiloVida||"",
     idiomas:u.idiomas||"",
     nivelServicio:u.nivelServicio||"",
     nivelPremium:u.nivelPremium||"",
@@ -6279,7 +6297,8 @@ function aplicarPerfilDesdeRegistro(vista,u){
     nueva:!!u.nueva,
     badgeLgbt:!!u.badgeLgbt,
     badgeVip:!!u.badgeVip,
-    badgeTrans:!!u.badgeTrans
+    badgeTrans:!!u.badgeTrans,
+    badgeHotwife:!!u.badgeHotwife
   };
   if(u.ubicacion){
     clean.ubicacionPublica=u.ubicacion;
@@ -6323,6 +6342,15 @@ function aplicarPerfilResultadosEnDemo(vista,u){
   if(Array.isArray(u.noRealiza)&&u.noRealiza.length) d.noRealiza=u.noRealiza.slice();
   if(u.orientacion) d.orientacion=u.orientacion;
   if(u.identidadGenero) d.identidadGenero=u.identidadGenero;
+  if(u.participacionPareja) d.participacionPareja=u.participacionPareja;
+  if(u.tipoPublico){ d.tipoPublico=u.tipoPublico; d.buscan=u.tipoPublico; }
+  else if(Array.isArray(u.buscan)&&u.buscan.length) d.buscan=u.buscan.slice();
+  else if(u.buscan) d.buscan=u.buscan;
+  if(Array.isArray(u.disponibilidadAgenda)&&u.disponibilidadAgenda.length) d.disponibilidadAgenda=u.disponibilidadAgenda.slice();
+  if(Array.isArray(u.tipoExperiencia)&&u.tipoExperiencia.length) d.tipoExperiencia=u.tipoExperiencia.slice();
+  if(u.loQueBuscaConocer) d.loQueBuscaConocer=u.loQueBuscaConocer;
+  if(u.aficiones) d.aficiones=u.aficiones;
+  if(u.estiloVida) d.estiloVida=u.estiloVida;
   if(u.idiomas) d.idiomas=u.idiomas;
   if(u.nivelServicio) d.nivelServicio=u.nivelServicio;
   if(u.nivelPremium) d.nivelPremium=u.nivelPremium;
@@ -6336,6 +6364,10 @@ function aplicarPerfilResultadosEnDemo(vista,u){
   if(u.tatuajes) d.tatuajes=u.tatuajes;
   if(u.piercings) d.piercings=u.piercings;
   if(u.sobreMi) d.sobreMi=u.sobreMi;
+  if(u.badgeLgbt) d.badgeLgbt=true;
+  if(u.badgeVip) d.badgeVip=true;
+  if(u.badgeTrans) d.badgeTrans=true;
+  if(u.badgeHotwife) d.badgeHotwife=true;
   if(Array.isArray(u.metodosPago)&&u.metodosPago.length) d.metodosPago=u.metodosPago.slice();
   if(u.tiempoMinimo) d.tiempoMinimo=u.tiempoMinimo;
   if(u.modalidad){

@@ -117,6 +117,7 @@
     if (opts.cedula) items.push('<span class="res-badge res-badge--ver">Cédula</span>');
     if (opts.negocio) items.push('<span class="res-badge res-badge--ver">Verificado</span>');
     if (opts.lgbt || u.badgeLgbt) items.push('<span class="res-badge res-badge--lgbt">LGBT+</span>');
+    if (opts.hotwife || u.badgeHotwife) items.push('<span class="res-badge res-badge--hotwife">Hotwife</span>');
     if (opts.respRapida) items.push('<span class="res-badge res-badge--fast">Respuesta rápida</span>');
     else if (u.nueva) items.push('<span class="res-badge res-badge--new">Nueva</span>');
     if (!items.length) return '';
@@ -234,6 +235,7 @@
       badges: badgesCompactHTML(u, {
         vip: vip,
         lgbt: u.badgeLgbt === true,
+        hotwife: u.badgeHotwife === true,
         respRapida: !u.__previewRegistro && u.respuestaRapida === true
       })
     });

@@ -29,12 +29,23 @@
     var over = getSubcategoriaOverride(cfg, ctx);
     var subId = normalizeSubId((ctx && ctx.subcategoriaId) || (ctx && ctx.subcategoria) || '');
     function fieldVisible(field) {
+      if (field.excludeSubcategorias && field.excludeSubcategorias.length) {
+        if (field.excludeSubcategorias.some(function (s) {
+          return normalizeSubId(s) === subId;
+        })) return false;
+      }
       if (!field.onlySubcategorias || !field.onlySubcategorias.length) return true;
       return field.onlySubcategorias.some(function (s) {
         return normalizeSubId(s) === subId;
       });
     }
-    var baseBlocks = cfg.blocks.map(function (block) {
+    function blockVisible(block) {
+      if (!block.onlySubcategorias || !block.onlySubcategorias.length) return true;
+      return block.onlySubcategorias.some(function (s) {
+        return normalizeSubId(s) === subId;
+      });
+    }
+    var baseBlocks = cfg.blocks.filter(blockVisible).map(function (block) {
       return {
         id: block.id,
         title: block.title,
@@ -48,6 +59,8 @@
           return f;
         })
       };
+    }).filter(function (block) {
+      return block.fields.length > 0;
     });
     if (!over) {
       return {
@@ -92,6 +105,7 @@
     if (over.badges.indexOf('lgbt') >= 0) u.badgeLgbt = true;
     if (over.badges.indexOf('vip') >= 0) u.badgeVip = true;
     if (over.badges.indexOf('trans') >= 0) u.badgeTrans = true;
+    if (over.badges.indexOf('hotwife') >= 0) u.badgeHotwife = true;
     return u;
   }
 
@@ -246,6 +260,7 @@
     }
     var html = '';
     cfg.blocks.forEach(function (block) {
+      if (!block.fields.length) return;
       html += '<div class="rp-card rp-pub-block" data-rp-pub-block="' + esc(block.id) + '">';
       html += '<h2 class="rp-card__title">' + esc(block.title) + '</h2>';
       if (block.hint) html += '<p class="rp-contact-hint">' + esc(block.hint) + '</p>';
@@ -418,6 +433,22 @@
     u = u || {};
     if (bloques.orientacion) u.orientacion = bloques.orientacion;
     if (bloques.identidadGenero) u.identidadGenero = bloques.identidadGenero;
+    if (Array.isArray(bloques.buscan) && bloques.buscan.length) u.buscan = bloques.buscan.slice();
+    else if (bloques.buscan) u.buscan = bloques.buscan;
+    if (bloques.tipoPublico) {
+      u.tipoPublico = bloques.tipoPublico;
+      u.buscan = bloques.tipoPublico;
+    }
+    if (bloques.participacionPareja) u.participacionPareja = bloques.participacionPareja;
+    if (Array.isArray(bloques.disponibilidadAgenda) && bloques.disponibilidadAgenda.length) {
+      u.disponibilidadAgenda = bloques.disponibilidadAgenda.slice();
+    }
+    if (Array.isArray(bloques.tipoExperiencia) && bloques.tipoExperiencia.length) {
+      u.tipoExperiencia = bloques.tipoExperiencia.slice();
+    }
+    if (bloques.loQueBuscaConocer) u.loQueBuscaConocer = bloques.loQueBuscaConocer;
+    if (bloques.aficiones) u.aficiones = bloques.aficiones;
+    if (bloques.estiloVida) u.estiloVida = bloques.estiloVida;
     if (bloques.idiomas) u.idiomas = bloques.idiomas;
     if (bloques.nivelServicio) u.nivelServicio = bloques.nivelServicio;
     if (bloques.nivelPremium) u.nivelPremium = bloques.nivelPremium;
