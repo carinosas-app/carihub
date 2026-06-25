@@ -57,7 +57,8 @@
         subcategoriaIds: cfg.subcategoriaIds,
         subcategoriaOverrides: cfg.subcategoriaOverrides,
         obligatorios: (cfg.obligatorios || []).slice(),
-        blocks: baseBlocks
+        blocks: baseBlocks,
+        validaciones: []
       };
     }
     var out = {
@@ -68,7 +69,8 @@
       subcategoriaOverrides: cfg.subcategoriaOverrides,
       obligatorios: (cfg.obligatorios || []).slice(),
       blocks: baseBlocks,
-      fotosMin: over.fotosMin || null
+      fotosMin: over.fotosMin || null,
+      validaciones: (over.validaciones || []).slice()
     };
     (over.obligatoriosExtra || []).forEach(function (key) {
       if (out.obligatorios.indexOf(key) < 0) out.obligatorios.push(key);
@@ -167,6 +169,22 @@
     var s = String(val || '').trim();
     if (!s) return '';
     return /^https?:\/\//i.test(s) ? s : 'https://' + s;
+  }
+
+  function parseEstaturaMetros(val) {
+    var s = String(val || '').trim().toLowerCase().replace(',', '.');
+    if (!s) return null;
+    var m = s.match(/(\d+(?:\.\d+)?)/);
+    if (!m) return null;
+    var n = parseFloat(m[1]);
+    if (!isFinite(n) || n <= 0) return null;
+    if (n > 3) n = n / 100;
+    return n;
+  }
+
+  function pushMissing(missing, label) {
+    if (!label || missing.indexOf(label) >= 0) return;
+    missing.push(label);
   }
 
   function renderField(field, values) {
@@ -332,6 +350,22 @@
             : (Array.isArray(val) ? !val.length : !String(val || '').trim());
         if (empty && missing.indexOf(field.label) < 0) missing.push(field.label);
       });
+    });
+    (cfg.validaciones || []).forEach(function (rule) {
+      if (!rule || !rule.campo) return;
+      var val = values[rule.campo];
+      if (rule.max != null) {
+        var meters = parseEstaturaMetros(val);
+        if (meters == null || meters > rule.max) {
+          pushMissing(missing, rule.mensaje || labelForField(cfg, rule.campo));
+        }
+      }
+      if (rule.min != null) {
+        var minMeters = parseEstaturaMetros(val);
+        if (minMeters == null || minMeters < rule.min) {
+          pushMissing(missing, rule.mensaje || labelForField(cfg, rule.campo));
+        }
+      }
     });
     return missing;
   }

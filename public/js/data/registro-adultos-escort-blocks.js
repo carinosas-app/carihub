@@ -67,6 +67,17 @@
       },
       'gigolo': {
         labels: { alias: 'Alias masculino' }
+      },
+      'petit': {
+        fieldPatches: {
+          estatura: { placeholder: 'Ej. 1.55 m (máx. 1.58 m)' }
+        },
+        fieldHints: {
+          estatura: 'Petit: estatura máxima 1.58 m. Debe coincidir con tu ficha pública.'
+        },
+        validaciones: [
+          { campo: 'estatura', max: 1.58, mensaje: 'Petit: estatura máxima 1.58 m' }
+        ]
       }
     },
     obligatorios: [
