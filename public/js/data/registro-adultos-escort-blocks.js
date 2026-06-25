@@ -87,6 +87,15 @@
         fieldHints: {
           identidadGenero: 'Cómo te presentas en tu perfil (ej. mujer trans, no binaria…).'
         }
+      },
+      femboy: {
+        obligatoriosExtra: ['identidadGenero'],
+        fieldPatches: {
+          identidadGenero: { required: true, placeholder: 'Ej. Femboy, expresión femenina…' }
+        },
+        fieldHints: {
+          identidadGenero: 'Cómo te presentas en tu perfil (ej. femboy, expresión femenina…).'
+        }
       }
     },
     obligatorios: [
@@ -105,7 +114,7 @@
             label: 'Identidad / presentación',
             type: 'text',
             required: false,
-            onlySubcategorias: ['trans'],
+            onlySubcategorias: ['trans', 'femboy'],
             placeholder: 'Ej. Mujer trans, no binaria…'
           },
           { id: 'idiomas', label: 'Idiomas', type: 'text', required: false, placeholder: 'Ej. Español, Inglés' },
