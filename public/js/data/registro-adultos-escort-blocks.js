@@ -5,6 +5,20 @@
 (function (global) {
   'use strict';
 
+  var ESCORT_SERVICIOS_BASE = [
+    'Trato de novia', 'Besos', 'Caricias', 'Relaciones', 'Duplex',
+    'Oral', 'Anal', 'Juguetes', 'Lencería', 'Fetiches', 'Masaje', 'Overnight (consulta)'
+  ];
+
+  var SINGLES_SERVICIOS_EXTRA = [
+    'Tríos con pareja',
+    'Hotwife / esposa compartida',
+    'Pareja swinger',
+    'Solo con la mujer',
+    'Gang bang',
+    'Eventos lifestyle'
+  ];
+
   global.CARIHUB_REGISTRO_ESCORT_BLOCKS = {
     id: 'persona_acompanante',
     formularioId: 'adultos',
@@ -87,6 +101,19 @@
         fieldHints: {
           identidadGenero: 'Cómo te presentas en tu perfil (ej. mujer trans, no binaria…).'
         }
+      },
+      singles: {
+        obligatoriosExtra: ['buscan'],
+        fieldPatches: {
+          buscan: { required: true },
+          serviciosIncluidos: {
+            options: ESCORT_SERVICIOS_BASE.concat(SINGLES_SERVICIOS_EXTRA)
+          }
+        },
+        fieldHints: {
+          buscan: 'Indica con qué dinámicas participas: hotwife, parejas swinger, tríos, solo con la mujer, etc.',
+          serviciosIncluidos: 'Marca lo que sí ofreces. Incluye gang bang si participas en ese tipo de escena.'
+        }
       }
     },
     obligatorios: [
@@ -148,6 +175,20 @@
               { value: 'ocupada', label: 'Ocupada' },
               { value: 'con_cita', label: 'Con cita previa' }
             ]
+          },
+          {
+            id: 'buscan',
+            label: 'Dinámicas en las que participas',
+            type: 'checklist',
+            required: false,
+            onlySubcategorias: ['singles'],
+            options: [
+              'Hotwife / esposa compartida',
+              'Pareja swinger',
+              'Tríos con pareja',
+              'Solo con la mujer',
+              'Eventos lifestyle'
+            ]
           }
         ]
       },
@@ -201,10 +242,7 @@
             label: 'Servicios incluidos',
             type: 'checklist',
             required: true,
-            options: [
-              'Trato de novia', 'Besos', 'Caricias', 'Relaciones', 'Duplex',
-              'Oral', 'Anal', 'Juguetes', 'Lencería', 'Fetiches', 'Masaje', 'Overnight (consulta)'
-            ]
+            options: ESCORT_SERVICIOS_BASE.slice()
           }
         ]
       },

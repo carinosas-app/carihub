@@ -4401,6 +4401,8 @@ function adultoFichaHTML(u){
   if(u.areasVenue) html+=row(pico("pin"),"Áreas",safe(u.areasVenue));
   if(u.orientacion) html+=row(pico("gender"),"Orientación",safe(u.orientacion));
   if(u.identidadGenero) html+=row(pico("gender"),"Identidad / presentación",safe(u.identidadGenero));
+  if(Array.isArray(u.buscan)&&u.buscan.length) html+=row(pico("heart"),"Participa en",safe(u.buscan.join(", ")));
+  else if(u.buscan) html+=row(pico("heart"),"Participa en",safe(u.buscan));
   if(u.estatura) html+=row(pico("user"),"Estatura",safe(u.estatura));
   if(u.nivelPremium) html+=row(pico("heart"),"Nivel premium",safe(u.nivelPremium));
   if(u.eventosDisponibles) html+=row(pico("briefcase"),"Disponible para eventos","Sí");
@@ -6251,6 +6253,7 @@ function aplicarPerfilDesdeRegistro(vista,u){
     sobreMi:u.sobreMi||"",
     orientacion:u.orientacion||"",
     identidadGenero:u.identidadGenero||"",
+    buscan:Array.isArray(u.buscan)?u.buscan.slice():(u.buscan?[String(u.buscan)]:[]),
     idiomas:u.idiomas||"",
     nivelServicio:u.nivelServicio||"",
     nivelPremium:u.nivelPremium||"",
@@ -6323,6 +6326,8 @@ function aplicarPerfilResultadosEnDemo(vista,u){
   if(Array.isArray(u.noRealiza)&&u.noRealiza.length) d.noRealiza=u.noRealiza.slice();
   if(u.orientacion) d.orientacion=u.orientacion;
   if(u.identidadGenero) d.identidadGenero=u.identidadGenero;
+  if(Array.isArray(u.buscan)&&u.buscan.length) d.buscan=u.buscan.slice();
+  else if(u.buscan) d.buscan=[String(u.buscan)];
   if(u.idiomas) d.idiomas=u.idiomas;
   if(u.nivelServicio) d.nivelServicio=u.nivelServicio;
   if(u.nivelPremium) d.nivelPremium=u.nivelPremium;

@@ -214,6 +214,7 @@
       edad: cp.edad || '',
       orientacion: mappedBloques.orientacion || '',
       identidadGenero: mappedBloques.identidadGenero || '',
+      buscan: mappedBloques.buscan || [],
       idiomas: mappedBloques.idiomas || '',
       nivelServicio: mappedBloques.nivelServicio || '',
       nivelPremium: mappedBloques.nivelPremium || '',

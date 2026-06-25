@@ -418,6 +418,7 @@
     u = u || {};
     if (bloques.orientacion) u.orientacion = bloques.orientacion;
     if (bloques.identidadGenero) u.identidadGenero = bloques.identidadGenero;
+    if (Array.isArray(bloques.buscan) && bloques.buscan.length) u.buscan = bloques.buscan.slice();
     if (bloques.idiomas) u.idiomas = bloques.idiomas;
     if (bloques.nivelServicio) u.nivelServicio = bloques.nivelServicio;
     if (bloques.nivelPremium) u.nivelPremium = bloques.nivelPremium;
