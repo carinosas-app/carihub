@@ -18,8 +18,9 @@
 <script src="js/carihub-nav-quick.js"></script>
 <script src="js/registro-negocio-adulto.js"></script>
 <script src="js/data/registro-schema-index.js"></script>
-<script src="js/carihub-field-engine-lite.js"></script>
-<script src="js/carihub-public-render-lite.js"></script>
+<script src="js/data/registro-ui-index.js"></script>
+<script src="js/carihub-field-engine-lite.js?v=20260628c"></script>
+<script src="js/carihub-public-render-lite.js?v=20260629c"></script>
 <script src="js/resultados-demo.js"></script>
 <script src="js/perfil-publico-init.js"></script>
   <script src="js/carihub-messenger-privacidad-ui.js"></script>
@@ -1678,6 +1679,7 @@ body:not(.fit) .wrap{max-width:1100px;}
 [data-tema="adult"] .gal__main{aspect-ratio:3/4;}
 .gal__main img{object-position:center top;}
 .gal__main img,.gal__main .ch-foto-ph{width:100%;height:100%;object-fit:cover;display:block;position:absolute;inset:0;}
+.gal__main .gal__empty{width:100%;height:100%;position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:#e8e8ec;color:#888;font-size:.9rem;font-weight:600;}
 .gal__bdg{position:absolute;top:12px;left:12px;z-index:2;}
 [data-tema="adult"] .gal__bdg .verok{background:rgba(252,238,245,.96);box-shadow:0 1px 4px rgba(233,30,99,.08);}
 .gal__cat{position:absolute;top:12px;left:118px;background:#212121;color:#fff;font-size:12px;font-weight:700;padding:5px 10px;border-radius:999px;z-index:2;}
@@ -2964,9 +2966,10 @@ const THEME = {
 };
 
 /* ---------------- helpers ---------------- */
-function row(icon,label,value){
+function row(icon,label,value,blockKey){
   if(!value) return "";
-  return '<div class="drow"><span class="dk">'+icon+' '+safe(label)+':</span><span class="dv">'+value+'</span></div>';
+  var blockAttr=blockKey?' data-pub-block="'+safe(blockKey)+'"':"";
+  return '<div class="drow"'+blockAttr+'><span class="dk">'+icon+' '+safe(label)+':</span><span class="dv">'+value+'</span></div>';
 }
 /* Íconos de línea (SVG, stroke currentColor) — estilo de la referencia */
 function svgIcon(n){
@@ -3068,6 +3071,7 @@ function idlocAvailIcon(){
   return idlocHorarioIcon();
 }
 function idlocRow(kind, text){
+  if(!text) return "";
   if(kind==="av"){
     return '<div class="idloc idloc--horario">'+idlocHorarioIcon()+'<span>'+safe(dispPublica(text))+'</span></div>';
   }
@@ -3213,6 +3217,7 @@ function pagosMethodKey(label){
   return "default";
 }
 function metodosPagoCard(methods){
+  if(!methods||!methods.length) return "";
   var rows=(methods||[]).map(function(m){
     return '<div class="pagos-row"><span class="pagos-row__ic">'+pagosRowIcon(pagosMethodKey(m))+'</span><span class="pagos-row__txt">'+safe(m)+'</span></div>';
   }).join("");
@@ -3228,6 +3233,7 @@ function horarioAlarmIcon(){
     '</svg>';
 }
 function tiempoMinimoCard(s){
+  if(!s) return "";
   var m=String(s||"").match(/^(\d+)\s*(.+)$/i);
   var clock='<span class="tiempo-card__ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+
     '<path d="M5.5 4.5 4 6"/><path d="M18.5 4.5 20 6"/>'+
@@ -3291,12 +3297,16 @@ function sobreRow(k,lab,val){
   return '<div class="sobre-row">'+sobreAttrIconSVG(k)+'<span class="sobre-row__lab">'+lab+'</span><span class="sobre-row__val">'+safe(val)+'</span></div>';
 }
 function siluetaSobre(estatura){
+  if(!estatura) return "";
   var alt="Silueta de estatura "+safe(estatura||"");
   return '<div class="sobre-sil" aria-hidden="true">'+
     '<img class="sobre-sil__img" src="img/silueta-estatura.png" alt="'+alt+'" decoding="async">'+
   '</div>';
 }
 function sobreMiHTML(u){
+  var hasDesc=!!(u.sobreMi&&String(u.sobreMi).trim());
+  var hasAttrs=!!(u.estatura||u.peso||u.complexion||u.cabello||u.ojos||u.tatuajes||u.piercings);
+  if(!hasDesc&&!hasAttrs) return "";
   return '<div class="sobre-card playout__sobre">'+
     '<div class="sobre-card__grid">'+
       '<div class="sobre-card__left">'+
@@ -3304,7 +3314,7 @@ function sobreMiHTML(u){
           '<svg class="sobre-card__heart" viewBox="0 0 24 24" aria-hidden="true"><path fill="#E91E63" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>'+
           '<h2 class="sobre-card__title">Sobre mí</h2>'+
         '</div>'+
-        '<p class="sobre-card__desc">'+sobreParrafos(u.sobreMi)+'</p>'+
+        (hasDesc?'<p class="sobre-card__desc">'+sobreParrafos(u.sobreMi)+'</p>':"")+
         '<div class="sobre-attrs">'+
           sobreRow("estatura","Estatura:",u.estatura)+
           sobreRow("peso","Peso:",u.peso)+
@@ -3323,6 +3333,7 @@ function imgTag(src){ return '<img class="ch-foto-ph" src="'+src+'" alt="" loadi
 // Foto principal/miniatura: usa imagen real si hay galería; si no, dibujo SVG.
 function fotoOImg(u, tipo, idx, seed){
   if(u && u.galeria && u.galeria.length) return imgTag(u.galeria[idx % u.galeria.length]);
+  if(u && u.__previewRegistro) return '<div class="gal__empty" aria-hidden="true"><span>Sin foto</span></div>';
   return foto(seed, tipo);
 }
 function galCameraIcon(){
@@ -3478,7 +3489,7 @@ function negocioContactCardHTML(u){
     '<div class="negocio-amen">'+negocioAmenidadesHTML(u)+'</div>'+
   '</div>';
 }
-function thumbs(n, seed, tipo, galeria){
+function thumbs(n, seed, tipo, galeria, u){
   var out="";
   if(galeria && galeria.length){
     var extras = galeria.slice(1);                 // la primera es la principal
@@ -3487,6 +3498,7 @@ function thumbs(n, seed, tipo, galeria){
     if(n>shown) out += '<div class="t lock">🔒<span>+'+(n-shown)+'</span></div>';
     return out;
   }
+  if(u && u.__previewRegistro) return "";
   var vis=Math.min(4,n);
   for(var i=0;i<vis;i++) out += '<div class="t">'+foto(seed+"-"+i, tipo)+'</div>';
   if(n>vis) out += '<div class="t lock">🔒<span>+'+(n-vis)+'</span></div>';
@@ -3796,6 +3808,7 @@ function panelActividadNegocio(u){
     '</div></div>';
 }
 function panelActividadCompact(u, esEmpresa){
+  if(u&&u.__previewRegistro&&!u.actividad) return "";
   var txt = u.actividad || (esEmpresa
     ? "Instalación de sistema hidráulico completo en residencia de San Pedro Garza García."
     : "Actualizó su disponibilidad y subió nuevas fotos a su galería.");
@@ -3820,6 +3833,7 @@ function panelActividadCompact(u, esEmpresa){
     '</div></div>';
 }
 function panelLiveCompact(u){
+  if(u&&u.__previewRegistro&&!u.liveTitulo) return "";
   var titulo = u.liveTitulo || "Transmisión en vivo: presentación y preguntas";
   var fecha = u.liveFecha || "Sábado 25 de mayo";
   var horaRaw = u.liveHora || "6:00 PM";
@@ -4177,20 +4191,26 @@ function shell(tipo, inner, u){
 
 /* ---------------- Layout referencia Adulto Cariñosas (todas las categorías) ---------------- */
 function adultoGaleriaHTML(u){
+  var count=u.fotos||(u.galeria&&u.galeria.length)||0;
+  var countHtml=count?('<span class="gal__count">📷 '+count+' fotos</span>'):"";
   return '<div class="pcard gal">'+
       '<div class="gal__main">'+fotoOImg(u,"adult",0,u.nombre)+
       profileGalleryBadgesHTML(u)+
         '<button class="gal__arrow l">‹</button><button class="gal__arrow r">›</button>'+
-        '<span class="gal__count">📷 '+u.fotos+' fotos</span></div>'+
-      '<div class="gal__thumbs">'+thumbs(u.fotos,u.nombre,"adult",u.galeria)+'</div>'+
+        countHtml+'</div>'+
+      '<div class="gal__thumbs">'+thumbs(u.fotos,u.nombre,"adult",u.galeria,u)+'</div>'+
     '</div>';
 }
 function adultoTriPrecioHTML(u){
-  return '<div class="playout__tri">'+
-    '<div class="pcard pcard--mini pcard--precio"><div class="precio-block"><div class="precio-desde">Desde</div><div class="precio-big">$'+safe(u.precio)+'</div><div class="precio-sub">'+safe(u.moneda)+(u.tiempoMinimo?' · '+safe(u.tiempoMinimo):'')+'</div></div></div>'+
-    metodosPagoCard(u.metodosPago)+
-    tiempoMinimoCard(u.tiempoMinimo)+
-  '</div>';
+  var precio=u.precio||u.precioDesde||"";
+  var precioCard="";
+  if(precio){
+    precioCard='<div class="pcard pcard--mini pcard--precio" data-pub-block="precio"><div class="precio-block"><div class="precio-desde" data-pub-label="precio">Desde</div><div class="precio-big">$'+safe(precio)+'</div><div class="precio-sub">'+safe(u.moneda)+(u.tiempoMinimo?' · '+safe(u.tiempoMinimo):'')+'</div></div></div>';
+  }
+  var pagos=metodosPagoCard(u.metodosPago);
+  var tiempo=tiempoMinimoCard(u.tiempoMinimo);
+  if(!precioCard&&!pagos&&!tiempo) return "";
+  return '<div class="playout__tri">'+precioCard+pagos+tiempo+'</div>';
 }
 function adultoContactSimpleHTML(u){
   return '<div class="pcard pcard--contact">'+
@@ -4200,6 +4220,7 @@ function adultoContactSimpleHTML(u){
   '</div>';
 }
 function perfilStatsHTML(u){
+  if(u&&u.__previewRegistro&&!u.respuesta&&!u.nivelActividad&&!u.miembroDesde&&!u.respuestaCorta) return "";
   var items;
   if(u.respuesta||u.nivelActividad||u.miembroDesde){
     items=[
@@ -4220,8 +4241,9 @@ function perfilStatsHTML(u){
     ];
   }
   return '<div class="pcard pcard--stats"><div class="trio3">'+
-    items.map(function(it){
-      return '<div class="t3"><div class="t3ic">'+t3icon(it[2])+'</div><b>'+safe(it[0])+'</b><span>'+safe(it[1])+'</span></div>';
+    items.map(function(it,idx){
+      var horarioBlock=(it[0]==="Horario"||/horario/i.test(it[0]))?' data-pub-block="horario"':"";
+      return '<div class="t3"'+horarioBlock+'><div class="t3ic">'+t3icon(it[2])+'</div><b>'+safe(it[0])+'</b><span>'+safe(it[1])+'</span></div>';
     }).join("")+
   '</div></div>';
 }
@@ -4231,7 +4253,7 @@ function perfilDerstackHTML(u){
   var incl=(u.serviciosIncluidos||[]);
   var no=u.noRealiza||[];
   return '<div class="playout__derstack">'+
-    (incl.length?('<div class="pcard"><div class="pcard__h">'+safe(svcTit)+'</div><div class="svc">'+
+    (incl.length?('<div class="pcard" data-pub-block="servicios"><div class="pcard__h" data-pub-label="servicios">'+safe(svcTit)+'</div><div class="svc">'+
       incl.map(function(s){return '<div><span class="ok">✔</span> '+safe(s)+'</div>';}).join("")+
     '</div></div>'):"")+
     (no.length?('<div class="pcard"><div class="pcard__h">'+safe(noTit)+'</div><div class="svc svc--stack">'+
@@ -4240,7 +4262,8 @@ function perfilDerstackHTML(u){
   '</div>';
 }
 function sobrePerfilHTML(u){
-  if(u.sobreMi&&(u.estatura||u.peso||u.complexion)) return sobreMiHTML(u);
+  var hasFisico=!!(u.estatura||u.peso||u.complexion||u.cabello||u.ojos||u.tatuajes||u.piercings);
+  if(u.sobreMi||hasFisico) return sobreMiHTML(u);
   var txt=u.sobreNosotros||u.sobreMi||"";
   if(!txt) return "";
   var tit=(u.sobreNosotros&&!u.sobreMi)?"Sobre nosotros":"Sobre mí";
@@ -4290,7 +4313,7 @@ function renderPlayoutAdultoRef(u, cfg){
   var ubicIzq=negocioPieUbicCardHTML(u,"izq");
   var izq=galeria+tri+'<div class="playout__izq-stack">'+contact+sobrePersona+ubicIzq+'</div>';
   var der=perfil+(u.donanteUltimo?avisoDonacion(u):"")+feedPair+ficha+stats+derstack;
-  var bannerPie='<div class="playout__banner-adult">'+bottomBannerHTML(layoutKey)+'</div>';
+  var bannerPie=(u&&u.__previewRegistro)?"":('<div class="playout__banner-adult">'+bottomBannerHTML(layoutKey)+'</div>');
 
   return '<div class="playout playout--'+safe(layoutKey).replace(/[^a-z0-9_-]/gi,"-")+extraCls+'" data-cat="'+safe(u.subcategoriaId||layoutKey)+'"'+dataExtra+'>'+
     '<div class="playout__col playout__col--izq">'+izq+'</div>'+
@@ -4324,10 +4347,12 @@ function perfilModchipsHTML(u){
 }
 function perfilIdCardHTML(u){
   var loc=[u.zona,u.ciudad,u.estado].filter(Boolean).join(", ");
+  var quote=u.tagline||u.frase||"";
+  var quoteBlock=quote?('<div class="quote" data-pub-block="descripcion">'+safe(quote)+'</div>'):"";
   return '<div class="pcard">'+adultoIdHeadHTML(u)+
     idlocRow("pin", loc)+idlocRow("av", u.disponibilidad)+
-    '<div class="modchips">'+perfilModchipsHTML(u)+'</div>'+
-    '<div class="quote">'+safe(u.tagline||u.frase)+'</div></div>';
+    '<div class="modchips" data-pub-block="modalidad">'+perfilModchipsHTML(u)+'</div>'+
+    quoteBlock+'</div>';
 }
 function adultoIdHeadHTML(u){
   var badges=(u.verificada?verificadoBadgeGreen(u.etiquetaVerificada||"Verificada"):"");
@@ -4335,7 +4360,7 @@ function adultoIdHeadHTML(u){
   if(u.badgeLgbt) badges+='<span class="vchip vchip--lgbt">🌈 LGBT+</span>';
   if(u.badgeTrans) badges+='<span class="vchip vchip--trans">🏳️‍⚧️ Trans</span>';
   return '<div class="idhead"><h1>'+safe(u.nombre)+'</h1>'+badges+
-    (u.edad?'<span class="age">'+u.edad+' años</span>':'')+'</div>';
+    (u.edad?'<span class="age" data-pub-block="edad">'+u.edad+' años</span>':'')+'</div>';
 }
 function adultoFichaHTML(u){
   if(u.especialidadBdsm){
@@ -4353,33 +4378,41 @@ function adultoFichaHTML(u){
         row(pico("chat"),"Idiomas",safe(u.idiomas))+
     '</div></div>';
   }
-  var modalidad=u.modalidadFicha||((u.modalidades||[]).join(" · ")||"Domicilio");
+  var modalidad=u.modalidadFicha||((u.modalidades||[]).map(function(m){
+    if(m==="recibe") return "Recibe";
+    if(m==="hotel") return "Hotel";
+    if(m==="domicilio") return "Domicilio";
+    return m;
+  }).join(" · ")||"");
   var html=row(pico("user"),"Categoría",safe(u.categoria||u.categoriaPublica))+
     row(pico("globe"),"País",safe(u.pais))+
     row(pico("pin"),"Estado",safe(u.estado))+
-    row(pico("pin"),"Ciudad",safe(u.ciudad))+
-    row(pico("briefcase"),"Modalidad",safe(modalidad));
+    row(pico("pin"),"Ciudad",safe(u.ciudad));
+  if(modalidad) html+=row(pico("briefcase"),"Modalidad",safe(modalidad),"modalidad");
   if(u.tipoNegocio) html+=row(pico("corp"),"Tipo de empresa",safe(u.tipoNegocio));
   if(u.tipoServicio) html+=row(pico("heart"),"Tipo de servicio",safe(u.tipoServicio));
   if(u.tipoShow) html+=row(pico("briefcase"),"Tipo de show",safe(u.tipoShow));
   if(u.disponiblePara) html+=row(pico("chat"),"Disponible para",safe(u.disponiblePara));
   if(u.venueFijo) html+=row(pico("pin"),"Venue / zona",safe(u.venueFijo));
-  if(u.menuServicios) html+=row(pico("heart"),"Menú",safe(u.menuServicios));
-  if(u.horario) html+=row(pico("clock"),"Horario",safe(u.horario));
+  if(u.menuServicios) html+=row(pico("heart"),"Menú",safe(u.menuServicios),"servicios");
+  if(u.horario) html+=row(pico("clock"),"Horario",safe(u.horario),"horario");
   if(u.dressCode) html+=row(pico("gender"),"Dress code",safe(u.dressCode));
   if(u.reglasAcceso) html+=row(pico("shield"),"Acceso",safe(u.reglasAcceso));
   if(u.areasVenue) html+=row(pico("pin"),"Áreas",safe(u.areasVenue));
-  html+=row(pico("gender"),"Orientación",safe(u.orientacion||"—"));
+  if(u.orientacion) html+=row(pico("gender"),"Orientación",safe(u.orientacion));
+  if(u.identidadGenero) html+=row(pico("gender"),"Identidad / presentación",safe(u.identidadGenero));
   if(u.estatura) html+=row(pico("user"),"Estatura",safe(u.estatura));
   if(u.nivelPremium) html+=row(pico("heart"),"Nivel premium",safe(u.nivelPremium));
+  if(u.eventosDisponibles) html+=row(pico("briefcase"),"Disponible para eventos","Sí");
+  if(u.portfolioURL) html+=row(pico("globe"),"Portafolio",'<a href="'+safe(u.portfolioURL)+'" target="_blank" rel="noopener noreferrer">Ver portafolio</a>');
   if(u.tipoMasaje) html+=row(pico("briefcase"),"Tipo de masaje",safe(u.tipoMasaje));
   if(u.tecnicasMasaje) html+=row(pico("heart"),"Técnicas",safe(u.tecnicasMasaje));
   if(u.experienciaAnios) html+=row(pico("calendar"),"Experiencia",safe(u.experienciaAnios));
   if(u.anosJuntos) html+=row(pico("calendar"),"Años juntos",safe(u.anosJuntos));
   if(u.miembrosEdad) html+=row(pico("corp"),"Miembros",safe(u.miembrosEdad));
   if(u.preferencias) html+=row(pico("briefcase"),"Preferencias",safe(u.preferencias));
-  html+=row(pico("heart"),"Servicios",safe(u.nivelServicio||u.tipoServicio||"—"))+
-    row(pico("chat"),"Idiomas",safe(u.idiomas||"—"));
+  if(u.nivelServicio||u.tipoServicio) html+=row(pico("heart"),"Servicios",safe(u.nivelServicio||u.tipoServicio));
+  if(u.idiomas) html+=row(pico("chat"),"Idiomas",safe(u.idiomas));
   (u.fichaExtra||[]).forEach(function(ex){
     html+=row(pico(ex[0]||"chat"),ex[1],safe(ex[2]));
   });
@@ -4729,7 +4762,7 @@ function parejaIdCardHTML(u){
       '</div>'+
       parejaCornerBadge(u)+
     '</div>'+
-    (u.tagline?'<p class="idsub idsub--negocio">'+safe(u.tagline)+'</p>':"")+
+    (u.tagline?'<p class="idsub idsub--negocio" data-pub-block="descripcion">'+safe(u.tagline)+'</p>':"")+
     '<div class="idloc-duo">'+
       idlocRow("pin", loc)+
       idlocRowDotAvail(u.disponibilidad||"Abierto ahora")+
@@ -5087,11 +5120,11 @@ function stripperIdCardHTML(u){
     '<div class="negocio-id__top">'+
       '<div class="idhead idhead--negocio"><h1>'+safe(u.nombre)+'</h1>'+
         (u.verificada?verificadoBadgePinkDot():"")+
-        (u.edad?'<span class="age">'+u.edad+' años</span>':"")+
+        (u.edad?'<span class="age" data-pub-block="edad">'+u.edad+' años</span>':"")+
       '</div>'+
       stripperCornerBadge(u)+
     '</div>'+
-    (u.tagline?'<p class="idsub idsub--negocio">'+safe(u.tagline)+'</p>':"")+
+    (u.tagline?'<p class="idsub idsub--negocio" data-pub-block="descripcion">'+safe(u.tagline)+'</p>':"")+
     '<div class="idloc-duo">'+
       idlocRow("pin", loc)+
       idlocRowDotAvail(u.disponibilidad||"Disponible ahora")+
@@ -5135,7 +5168,7 @@ function tableDanceIdCardHTML(u){
       '</div>'+
       tableDanceCornerBadge(u)+
     '</div>'+
-    (u.tagline?'<p class="idsub idsub--negocio">'+safe(u.tagline)+'</p>':"")+
+    (u.tagline?'<p class="idsub idsub--negocio" data-pub-block="descripcion">'+safe(u.tagline)+'</p>':"")+
     '<div class="idloc-duo">'+
       idlocRow("pin", loc)+
       idlocRowDotAvail(u.disponibilidad||"Abierto ahora")+
@@ -5176,7 +5209,7 @@ function clubSwIdCardHTML(u){
       '</div>'+
       clubSwCornerBadge(u)+
     '</div>'+
-    (u.tagline?'<p class="idsub idsub--negocio">'+safe(u.tagline)+'</p>':"")+
+    (u.tagline?'<p class="idsub idsub--negocio" data-pub-block="descripcion">'+safe(u.tagline)+'</p>':"")+
     '<div class="idloc-duo">'+
       idlocRow("pin", loc)+
       idlocRowDotAvail(u.disponibilidad||"Abierto ahora")+
@@ -5217,7 +5250,7 @@ function antroIdCardHTML(u){
       '</div>'+
       antroCornerBadge(u)+
     '</div>'+
-    (u.tagline?'<p class="idsub idsub--negocio">'+safe(u.tagline)+'</p>':"")+
+    (u.tagline?'<p class="idsub idsub--negocio" data-pub-block="descripcion">'+safe(u.tagline)+'</p>':"")+
     '<div class="idloc-duo">'+
       idlocRow("pin", loc)+
       idlocRowDotAvail(u.disponibilidad||"Abierto ahora")+
@@ -5258,7 +5291,7 @@ function antroLgbtIdCardHTML(u){
       '</div>'+
       antroLgbtCornerBadge(u)+
     '</div>'+
-    (u.tagline?'<p class="idsub idsub--negocio">'+safe(u.tagline)+'</p>':"")+
+    (u.tagline?'<p class="idsub idsub--negocio" data-pub-block="descripcion">'+safe(u.tagline)+'</p>':"")+
     '<div class="idloc-duo">'+
       idlocRow("pin", loc)+
       idlocRowDotAvail(u.disponibilidad||"Abierto ahora")+
@@ -5299,7 +5332,7 @@ function cineXxxIdCardHTML(u){
       '</div>'+
       cineXxxCornerBadge(u)+
     '</div>'+
-    (u.tagline?'<p class="idsub idsub--negocio">'+safe(u.tagline)+'</p>':"")+
+    (u.tagline?'<p class="idsub idsub--negocio" data-pub-block="descripcion">'+safe(u.tagline)+'</p>':"")+
     '<div class="idloc-duo">'+
       idlocRow("pin", loc)+
       idlocRowDotAvail(u.disponibilidad||"Abierto ahora")+
@@ -5337,7 +5370,7 @@ function cabinasIdCardHTML(u){
       '</div>'+
       cabinasCornerBadge(u)+
     '</div>'+
-    (u.tagline?'<p class="idsub idsub--negocio">'+safe(u.tagline)+'</p>':"")+
+    (u.tagline?'<p class="idsub idsub--negocio" data-pub-block="descripcion">'+safe(u.tagline)+'</p>':"")+
     '<div class="idloc-duo">'+
       idlocRow("pin", loc)+
       idlocRowDotAvail(u.disponibilidad||"Abierto ahora")+
@@ -5373,11 +5406,11 @@ function creadorIdCardHTML(u){
     '<div class="negocio-id__top">'+
       '<div class="idhead idhead--negocio"><h1>'+safe(u.nombre)+'</h1>'+
         (u.verificada?verificadoBadgePinkDot():"")+
-        (u.edad?'<span class="age">'+u.edad+' años</span>':"")+
+        (u.edad?'<span class="age" data-pub-block="edad">'+u.edad+' años</span>':"")+
       '</div>'+
       creadorCornerBadge(u)+
     '</div>'+
-    (u.tagline?'<p class="idsub idsub--negocio">'+safe(u.tagline)+'</p>':"")+
+    (u.tagline?'<p class="idsub idsub--negocio" data-pub-block="descripcion">'+safe(u.tagline)+'</p>':"")+
     '<div class="idloc-duo">'+
       idlocRow("pin", loc)+
       idlocRowDotAvail(u.disponibilidad||"Disponible ahora")+
@@ -5418,7 +5451,7 @@ function sexShopIdCardHTML(u){
       '</div>'+
       sexShopCornerBadge(u)+
     '</div>'+
-    (u.tagline?'<p class="idsub idsub--negocio">'+safe(u.tagline)+'</p>':"")+
+    (u.tagline?'<p class="idsub idsub--negocio" data-pub-block="descripcion">'+safe(u.tagline)+'</p>':"")+
     '<div class="idloc-duo">'+
       idlocRow("pin", loc)+
       idlocRowDotAvail(u.disponibilidad||"Abierto ahora")+
@@ -5517,7 +5550,7 @@ function negocioIdCardHTML(u){
       '</div>'+
       negocioCornerBadge(u)+
     '</div>'+
-    (u.tagline?'<p class="idsub idsub--negocio">'+safe(u.tagline)+'</p>':"")+
+    (u.tagline?'<p class="idsub idsub--negocio" data-pub-block="descripcion">'+safe(u.tagline)+'</p>':"")+
     '<div class="idloc-duo">'+
       idlocRow("pin", loc)+
       idlocRowDotAvail(u.disponibilidad||"Abierto ahora")+
@@ -5681,8 +5714,8 @@ function negocioServiciosIncluidosHTML(u){
   var items=incl.map(function(s){
     return '<div class="negocio-svc-2col__item"><span class="negocio-svc-2col__ok">✓</span><span>'+safe(s)+'</span></div>';
   }).join("");
-  return '<div class="negocio-svc-wrap">'+
-    '<h3 class="negocio-svc__title">'+safe(u.svcTitulo||"Servicios incluidos")+'</h3>'+
+  return '<div class="negocio-svc-wrap" data-pub-block="servicios">'+
+    '<h3 class="negocio-svc__title" data-pub-label="servicios">'+safe(u.svcTitulo||"Servicios incluidos")+'</h3>'+
     '<div class="pcard pcard--negocio-svc"><div class="negocio-svc-2col">'+items+'</div></div></div>';
 }
 function negocioReglasHTML(u){
@@ -5945,7 +5978,7 @@ function renderMedicoProfesional(u){
     '</div>'+
     '<div class="pcard">'+
       '<div class="tri">'+
-        '<div><div class="lbl">💲 Consulta desde</div><div class="precio-big">$'+safe(u.precioConsulta||u.precio)+'</div><div class="precio-sub">'+safe(u.moneda)+' · '+safe(u.unidadConsulta||"por consulta")+'</div></div>'+
+        '<div data-pub-block="precio"><div class="lbl" data-pub-label="precio">💲 Consulta desde</div><div class="precio-big">$'+safe(u.precioConsulta||u.precio)+'</div><div class="precio-sub">'+safe(u.moneda)+' · '+safe(u.unidadConsulta||"por consulta")+'</div></div>'+
         '<div><div class="lbl">💳 Métodos de pago</div><div class="mini">'+(u.metodosPago||[]).map(safe).join("<br>")+'</div></div>'+
         '<div><div class="lbl">⏱ Tiempo de respuesta</div><div class="mini">'+safe(u.tiempoRespuesta)+'</div><div class="urg">'+safe(u.urgencias||"Agenda disponible")+'</div></div>'+
       '</div>'+
@@ -5971,7 +6004,7 @@ function renderMedicoProfesional(u){
     row("🩺","Profesión",safe(u.profesion)),
     row("📋","Especialidad",safe(u.especialidad)),
     row("🔬","Subespecialidad",safe(u.subespecialidad)),
-    row("🕐","Horario",safe(u.horarioAtencion||u.horario)),
+    row("🕐","Horario",safe(u.horarioAtencion||u.horario),"horario"),
     row("📍","Atención",safe(u.atencion)),
     row("🗣️","Idiomas",safe(u.idiomas)),
     row("🗺️","Zona",safe(u.zonaCobertura))
@@ -5987,7 +6020,7 @@ function renderMedicoProfesional(u){
     '</div>'+
     '<div class="pcard"><div class="pcard__h">🏥 Consultorios</div>'+medicoConsultoriosHTML(u)+'</div>'+
     '<div class="pcard"><div class="pcard__h">🛡️ Seguros aceptados</div><div class="pro-seguros">'+medicoSegurosHTML(u)+'</div></div>'+
-    '<div class="pcard"><div class="pcard__h">✅ Servicios profesionales</div><div class="svc">'+
+    '<div class="pcard" data-pub-block="servicios"><div class="pcard__h" data-pub-label="servicios">✅ Servicios profesionales</div><div class="svc">'+
       servicios.map(function(s){return '<div><span class="ok">✔</span> '+safe(s)+'</div>';}).join("")+'</div></div>'+
     (u.noIncluidos?'<div class="pcard"><div class="pcard__h">ℹ️ No incluido en consulta base</div><div class="svc">'+
       u.noIncluidos.map(function(s){return '<div><span class="no">✕</span> '+safe(s)+'</div>';}).join("")+'</div></div>':"")+
@@ -6019,7 +6052,10 @@ function renderProEmpresa(u, esEmpresa){
     ["🗺️","Zona de cobertura",u.zonaCobertura],["🕐","Horario",u.horario],["🗣️","Idiomas",u.idiomas],
     ["🚨","Urgencias 24/7",u.urgencias247],["✅","Garantía",u.garantia]
   ];
-  var datosHTML = datos.map(function(d){return row(d[0],d[1],d[2]?safe(d[2]):"");}).join("");
+  var datosHTML = datos.map(function(d){
+    var block=d[1]==="Horario"?"horario":"";
+    return row(d[0],d[1],d[2]?safe(d[2]):"",block);
+  }).join("");
 
   var tabs = esEmpresa
     ? ["Plomería","Mantenimiento","Instalaciones","Residencial","Comercial"]
@@ -6038,7 +6074,7 @@ function renderProEmpresa(u, esEmpresa){
     '</div>'+
     '<div class="pcard">'+
       '<div class="tri">'+
-        '<div><div class="lbl">💲 Desde</div><div class="precio-big">$'+safe(u.precio)+'</div><div class="precio-sub">'+safe(u.moneda)+(esEmpresa?(" · "+safe(u.servicioBasico)):" · Por servicio")+'</div></div>'+
+        '<div data-pub-block="precio"><div class="lbl" data-pub-label="precio">💲 Desde</div><div class="precio-big">$'+safe(u.precio)+'</div><div class="precio-sub">'+safe(u.moneda)+(esEmpresa?(" · "+safe(u.servicioBasico)):" · Por servicio")+'</div></div>'+
         '<div><div class="lbl">💳 Métodos de pago</div><div class="mini">'+pagos.map(safe).join("<br>")+'</div></div>'+
         '<div><div class="lbl">⏱ Tiempo de respuesta</div><div class="mini">'+safe(u.tiempoRespuesta)+'</div><div class="urg">'+safe(u.urgencias)+' · Atención inmediata</div></div>'+
       '</div>'+
@@ -6062,7 +6098,7 @@ function renderProEmpresa(u, esEmpresa){
 
   var right=''+
     '<div class="pcard">'+
-      '<div class="idhead"><h1>'+safe(u.nombre)+'</h1>'+verificadoBadge(verLabel)+(u.edad?'<span class="age">'+u.edad+' años</span>':'')+'</div>'+
+      '<div class="idhead"><h1>'+safe(u.nombre)+'</h1>'+verificadoBadge(verLabel)+(u.edad?'<span class="age" data-pub-block="edad">'+u.edad+' años</span>':'')+'</div>'+
       '<div class="idsub">'+safe(u.titulo)+'</div>'+
       idlocUbicacionHTML(u, loc)+
       '<div class="tabs">'+tabsHTML+'</div>'+
@@ -6071,7 +6107,7 @@ function renderProEmpresa(u, esEmpresa){
     avisoDonacion(u)+
     panelActividad(u, esEmpresa)+
     panelLive(u, esEmpresa)+
-    '<div class="pcard"><div class="pcard__h">✅ '+(esEmpresa?"Servicios principales":"Servicios incluidos")+'</div><div class="svc">'+
+    '<div class="pcard" data-pub-block="servicios"><div class="pcard__h" data-pub-label="servicios">✅ '+(esEmpresa?"Servicios principales":"Servicios incluidos")+'</div><div class="svc">'+
       u.serviciosIncluidos.map(function(s){return '<div><span class="ok">✔</span> '+safe(s)+'</div>';}).join("")+'</div></div>'+
     '<div class="pcard"><div class="pcard__h">⛔ Servicios no incluidos</div><div class="svc">'+
       u.noIncluidos.map(function(s){return '<div><span class="no">✕</span> '+safe(s)+'</div>';}).join("")+'</div></div>'+
@@ -6119,6 +6155,32 @@ function ocultarSwitcherSiResultados(fromResultados){ fromResultados=true;
   sw.hidden=true;
   sw.setAttribute("aria-hidden","true");
 }
+function resolverVistaPerfil(u,q){
+  q=q||{};
+  var vista="";
+  if(u&&window.CariHubFieldEngineLite){
+    if(CariHubFieldEngineLite.enriquecerPerfilPublico){
+      CariHubFieldEngineLite.enriquecerPerfilPublico(u,{
+        subcategoriaId:u.subcategoriaId,
+        categoria:u.categoria||u.categoriaPublica||q.categoria,
+        sectorId:u.sectorId
+      });
+    }
+    if(u.__vista) vista=u.__vista;
+    if(!vista&&CariHubFieldEngineLite.resolvePublicPresentation){
+      var pres=CariHubFieldEngineLite.resolvePublicPresentation({
+        subcategoriaId:u.subcategoriaId,
+        categoria:u.categoria||u.categoriaPublica||q.categoria,
+        sectorId:u.sectorId
+      });
+      if(pres&&pres.vistaPerfil) vista=pres.vistaPerfil;
+    }
+  }
+  if(!vista&&u&&window.CariHubResultadosDemo&&CariHubResultadosDemo.vistaDeCategoria){
+    vista=CariHubResultadosDemo.vistaDeCategoria(u.categoria||u.categoriaPublica||q.categoria);
+  }
+  return normalizarVistaPreview(vista)||"adult";
+}
 function normalizarVistaPreview(vista){
   var v=String(vista||"").trim();
   if(!v) return "";
@@ -6158,6 +6220,74 @@ function demoAssetDesdeResultados(src){
   if(/^(\.\.|\/|https?:)/.test(s)) return s;
   return ""+s.replace(/^\.\//,"");
 }
+function aplicarPerfilDesdeRegistro(vista,u){
+  if(!u||!DEMO[vista]) return;
+  var galeria=[];
+  if(u.fotoURL) galeria.push(demoAssetDesdeResultados(u.fotoURL));
+  if(Array.isArray(u.fotosExtraURL)){
+    u.fotosExtraURL.forEach(function(extra){
+      if(extra) galeria.push(demoAssetDesdeResultados(extra));
+    });
+  }
+  var clean={
+    __id:u.__id||"preview-registro",
+    __demo:true,
+    __previewRegistro:true,
+    nombre:u.nombre||u.alias||"Tu nombre público",
+    alias:u.alias||u.nombre||"",
+    edad:u.edad||"",
+    categoria:u.categoriaPublica||u.categoria||"",
+    categoriaPublica:u.categoriaPublica||u.categoria||"",
+    subcategoriaId:u.subcategoriaId||"",
+    pais:u.pais||"",
+    estado:u.estado||"",
+    ciudad:u.ciudad||"",
+    zona:u.zona||"",
+    precio:u.precio||u.precioDesde||"",
+    precioDesde:u.precioDesde||u.precio||"",
+    moneda:u.moneda||"MXN",
+    tagline:u.tagline||u.descripcion||"",
+    frase:u.tagline||u.descripcion||"",
+    sobreMi:u.sobreMi||"",
+    orientacion:u.orientacion||"",
+    identidadGenero:u.identidadGenero||"",
+    idiomas:u.idiomas||"",
+    nivelServicio:u.nivelServicio||"",
+    nivelPremium:u.nivelPremium||"",
+    eventosDisponibles:!!u.eventosDisponibles,
+    portfolioURL:u.portfolioURL||"",
+    disponibilidad:u.disponibilidad||"",
+    horario:u.horario||u.horarioDetalle||"",
+    horarioDetalle:u.horarioDetalle||u.horario||"",
+    estatura:u.estatura||"",
+    peso:u.peso||"",
+    complexion:u.complexion||"",
+    cabello:u.cabello||"",
+    ojos:u.ojos||"",
+    tatuajes:u.tatuajes||"",
+    piercings:u.piercings||"",
+    serviciosIncluidos:Array.isArray(u.serviciosIncluidos)?u.serviciosIncluidos.slice():[],
+    noRealiza:Array.isArray(u.noRealiza)?u.noRealiza.slice():[],
+    metodosPago:Array.isArray(u.metodosPago)?u.metodosPago.slice():[],
+    modalidades:Array.isArray(u.modalidades)?u.modalidades.slice():[],
+    modalidadFicha:u.modalidadFicha||"",
+    galeria:galeria,
+    fotos:u.fotosCount||galeria.length||0,
+    fotoURL:u.fotoURL||"",
+    contactoPublico:u.contactoPublico||{},
+    verificada:false,
+    nueva:!!u.nueva,
+    badgeLgbt:!!u.badgeLgbt,
+    badgeVip:!!u.badgeVip,
+    badgeTrans:!!u.badgeTrans
+  };
+  if(u.ubicacion){
+    clean.ubicacionPublica=u.ubicacion;
+    var parts=String(u.ubicacion).split(",").map(function(x){return x.trim();}).filter(Boolean);
+    if(parts.length) clean.direccionLineas=parts.length>1?[parts[0],parts.slice(1).join(", ")]:[parts[0]];
+  }
+  DEMO[vista]=clean;
+}
 function aplicarPerfilResultadosEnDemo(vista,u){
   if(!u||!DEMO[vista]) return;
   var d=DEMO[vista];
@@ -6181,6 +6311,40 @@ function aplicarPerfilResultadosEnDemo(vista,u){
   if(u.mapsUrl||u.googleMapsUrl) d.mapsUrl=u.mapsUrl||u.googleMapsUrl;
   if(u.tagline){ d.tagline=u.tagline; d.frase=u.tagline; }
   if(u.descripcion){ d.sobreMi=String(u.descripcion).slice(0,500); }
+  if(u.descripcionCorta){ d.tagline=u.descripcionCorta; d.frase=u.descripcionCorta; if(!d.sobreMi) d.sobreMi=String(u.descripcionCorta).slice(0,500); }
+  if (u.serviciosPrincipales||u.servicios){
+    var svc=String(u.serviciosPrincipales||u.servicios||"").trim();
+    if(svc){
+      d.serviciosIncluidos=svc.split(/[,;\n]+/).map(function(x){return x.trim();}).filter(Boolean);
+      if(!d.serviciosIncluidos.length) d.serviciosIncluidos=[svc];
+    }
+  }
+  if(Array.isArray(u.serviciosIncluidos)&&u.serviciosIncluidos.length) d.serviciosIncluidos=u.serviciosIncluidos.slice();
+  if(Array.isArray(u.noRealiza)&&u.noRealiza.length) d.noRealiza=u.noRealiza.slice();
+  if(u.orientacion) d.orientacion=u.orientacion;
+  if(u.identidadGenero) d.identidadGenero=u.identidadGenero;
+  if(u.idiomas) d.idiomas=u.idiomas;
+  if(u.nivelServicio) d.nivelServicio=u.nivelServicio;
+  if(u.nivelPremium) d.nivelPremium=u.nivelPremium;
+  if(u.eventosDisponibles) d.eventosDisponibles=true;
+  if(u.portfolioURL) d.portfolioURL=u.portfolioURL;
+  if(u.estatura) d.estatura=u.estatura;
+  if(u.peso) d.peso=u.peso;
+  if(u.complexion) d.complexion=u.complexion;
+  if(u.cabello) d.cabello=u.cabello;
+  if(u.ojos) d.ojos=u.ojos;
+  if(u.tatuajes) d.tatuajes=u.tatuajes;
+  if(u.piercings) d.piercings=u.piercings;
+  if(u.sobreMi) d.sobreMi=u.sobreMi;
+  if(Array.isArray(u.metodosPago)&&u.metodosPago.length) d.metodosPago=u.metodosPago.slice();
+  if(u.tiempoMinimo) d.tiempoMinimo=u.tiempoMinimo;
+  if(u.modalidad){
+    var mod=String(u.modalidad).trim().toLowerCase();
+    var mapMod={con_lugar:"recibe",hotel:"hotel",domicilio:"domicilio",mixto:"recibe"};
+    if(mapMod[mod]) d.modalidades=[mapMod[mod]];
+    if(mod==="mixto") d.modalidades=["recibe","hotel","domicilio"];
+  }
+  if(u.horarioPublico) u.horario=u.horarioPublico;
   if(u.horario && !u.disponibilidad) d.disponibilidad=String(u.horario).slice(0,48);
   if(u.ubicacion){
     d.ubicacionPublica=u.ubicacion;
@@ -6325,7 +6489,13 @@ function iniciarPerfilPreview(){
     ocultarSwitcherSiResultados(q.from==="resultados");
   }
   function pintar(resolved){
-    if(resolved.perfil) aplicarPerfilResultadosEnDemo(resolved.vista,resolved.perfil);
+    if(resolved.perfil){
+      if(resolved.perfil.__id==="preview-registro"||resolved.perfil.__previewRegistro){
+        aplicarPerfilDesdeRegistro(resolved.vista,resolved.perfil);
+      }else{
+        aplicarPerfilResultadosEnDemo(resolved.vista,resolved.perfil);
+      }
+    }
     setVista(resolved.vista);
   }
   if(q.previewSource==="registro"&&window.CariHubPerfilPublico&&CariHubPerfilPublico.leerPreviewRegistro){
@@ -6339,10 +6509,7 @@ function iniciarPerfilPreview(){
     if(CariHubPerfilPublico.initFirebaseIfNeeded) CariHubPerfilPublico.initFirebaseIfNeeded();
     CariHubPerfilPublico.cargarPerfilFirestore(q.id,q).then(function(u){
       if(u){
-        var vista=(window.CariHubResultadosDemo&&CariHubResultadosDemo.vistaDeCategoria)
-          ?CariHubResultadosDemo.vistaDeCategoria(u.categoria||u.categoriaPublica||q.categoria)
-          :"adult";
-        pintar({vista:vista,perfil:u});
+        pintar({vista:resolverVistaPerfil(u,q),perfil:u});
       }else{
         pintar(resolverPerfilDesdeQuery(q));
       }
@@ -6377,6 +6544,9 @@ function setVista(tipo){
   else if(tipo==="medico") inner=renderMedicoProfesional(u);
   else inner=renderProEmpresa(u, tipo==="empresa");
   document.getElementById("wrap").innerHTML = shell(tipo, inner, u);
+  if(window.CariHubPublicRenderLite&&CariHubPublicRenderLite.applyPublicProfilePresentation){
+    CariHubPublicRenderLite.applyPublicProfilePresentation(document.getElementById("wrap"), u);
+  }
   if(window.CariHubPerfilEnlaces) CariHubPerfilEnlaces.wire(document.getElementById("wrap"), u);
   if(document.body.classList.contains("perfil-embed-dashboard-inicio")){
     marcarPersonalizableEmbed();

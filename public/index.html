@@ -9,7 +9,7 @@
 <link rel="stylesheet" href="fonts/fonts.css">
 <link rel="stylesheet" href="css/carihub-premium-theme.css">
 <link rel="stylesheet" href="css/carihub-pink-sheen.css">
-<link rel="stylesheet" href="css/home.css?v=20260624d">
+<link rel="stylesheet" href="css/home.css?v=20260624k">
 <script>
 (function () {
   function applyProtoClass() {
@@ -25,14 +25,19 @@
   document.addEventListener('DOMContentLoaded', applyProtoClass);
 })();
 </script>
-<link rel="stylesheet" href="css/home-vcards.css">
+<link rel="stylesheet" href="css/home-vcards.css?v=20260624f">
 <link rel="stylesheet" href="css/home-sector-scroll.css">
+<link rel="stylesheet" href="css/home-otros-sectores.css?v=20260627c">
 <link rel="stylesheet" href="css/home-modals.css">
-<link rel="stylesheet" href="css/banner-registro.css">
+<link rel="stylesheet" href="css/carihub-sector-sparkles.css?v=20260628b">
+<link rel="stylesheet" href="css/home-cat-promo-rail.css?v=20260628b">
 <link rel="stylesheet" href="css/home-adultos-cat-picker.css">
 <link rel="stylesheet" href="css/ch-slot-dock.css">
-<link rel="stylesheet" href="css/carihub-geo-fields.css">
-<link rel="stylesheet" href="css/registro-perfil-geo-modal.css">
+<link rel="stylesheet" href="css/carihub-geo-fields.css?v=20260625c">
+<link rel="stylesheet" href="css/registro-perfil-subcat-themes.css?v=20260627a">
+<link rel="stylesheet" href="css/home-otros-registro-bridge.css?v=20260627a">
+<link rel="stylesheet" href="css/registro-perfil-geo-modal.css?v=20260624j">
+<link rel="stylesheet" href="css/home-geo-pais-premium.css?v=20260625c">
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
@@ -41,7 +46,7 @@
 <script src="estados.js"></script>
 <script src="ciudades.js"></script>
 <script src="js/catalogos-carihub.js"></script>
-<script src="js/categoria-imagenes-oficiales.js"></script>
+<script src="js/categoria-imagenes-oficiales.js?v=20260624m"></script>
 <script src="js/carihub-favoritos.js"></script>
 <script src="js/categoria-iconos.js"></script>
 <script src="js/sectores-carihub.js"></script>
@@ -456,14 +461,53 @@ const CATEGORIAS_BUSCADOR = [
   </div>
 </div>
 
-<div class="home-modal home-modal--sector" id="modal-otros-sectores" role="dialog" aria-modal="true" aria-labelledby="modal-otros-sectores-title">
-  <div class="home-modal__panel home-modal__panel--sector">
+<div class="home-modal home-modal--otros-registro" id="modal-otros-sectores" role="dialog" aria-modal="true" aria-labelledby="homeOtrosCatTitle">
+  <div class="home-otros-registro__panel">
     <button class="home-modal__close" type="button" aria-label="Cerrar">&times;</button>
-    <div class="home-sector-picker__head">
-      <h3 class="home-sector-picker__title" id="modal-otros-sectores-title">Otras categorías</h3>
-      <p class="home-sector-picker__hint" id="otrosSectoresHint">14 sectores · elige uno para ver profesiones</p>
+
+    <header class="home-cat-promo-rail home-otros-registro__promo" aria-label="Espacios publicitarios">
+      <div class="home-cat-promo-rail__slot home-cat-promo-rail__slot--side">
+        <div id="homeOtrosPromoEstados" data-promo-slot="home_estados"></div>
+      </div>
+      <div class="home-cat-promo-rail__slot home-cat-promo-rail__slot--center">
+        <div class="registro-banner-shell registro-banner-shell--rail">
+          <div class="registro-banner-top registro-banner-top--rail" data-registro-banner-slot="home_categorias"></div>
+        </div>
+      </div>
+      <div class="home-cat-promo-rail__slot home-cat-promo-rail__slot--side">
+        <div id="homeOtrosPromoLibe" data-promo-slot="home_libe"></div>
+      </div>
+    </header>
+
+    <div class="home-otros-registro__step home-otros-registro__step--cats" id="homeOtrosStepCats">
+      <div class="home-otros-registro__scroll">
+        <header class="rp-cat0-head home-otros-registro__head">
+          <div class="rp-cat0-head__row">
+            <span class="rp-cat0-head__grid" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none"><circle cx="7" cy="7" r="2.7" fill="currentColor"/><circle cx="17" cy="7" r="2.7" fill="currentColor"/><circle cx="7" cy="17" r="2.7" fill="currentColor"/><circle cx="17" cy="17" r="2.7" fill="currentColor"/></svg>
+            </span>
+            <h3 class="rp-cat0-head__title" id="homeOtrosCatTitle">Categorías</h3>
+          </div>
+          <p class="rp-cat0-head__subtitle">Selecciona una categoría</p>
+        </header>
+        <p class="rp-cat0-section home-otros-registro__section"><span class="rp-cat0-section__star" aria-hidden="true">★</span> Otras categorías</p>
+        <p class="home-otros-registro__hint" id="homeOtrosSectoresHint"></p>
+        <ul class="rp-sector-grid home-otros-registro__grid" id="homeOtrosSectorGrid" role="listbox" aria-label="Categorías"></ul>
+      </div>
     </div>
-    <ul class="home-sector-picker__list" id="otrosSectoresList" role="listbox" aria-label="Otras categorías"></ul>
+
+    <div class="home-otros-registro__step home-otros-registro__step--subcats" id="homeOtrosStepSubcats" hidden>
+      <div class="home-otros-subcats-wrap">
+        <header class="home-adultos-picker__head home-otros-subcats__head">
+          <h3 class="home-adultos-picker__title" id="homeOtrosSubcatTitle">Subcategorías</h3>
+          <p class="home-adultos-picker__hint" id="homeOtrosSubcatHint"></p>
+        </header>
+        <ul class="rp-subcat-geo-list home-otros-subcats__list" id="homeOtrosSubcatList" role="listbox" aria-label="Subcategorías"></ul>
+      </div>
+      <footer class="home-otros-registro__foot">
+        <button type="button" class="rp-btn rp-btn--corporate home-otros-registro__back" id="homeOtrosBackToCats">Volver a categorías</button>
+      </footer>
+    </div>
   </div>
 </div>
 
@@ -481,6 +525,32 @@ const CATEGORIAS_BUSCADOR = [
 <div class="home-modal home-modal--sector home-modal--categorias" id="modal-categorias" role="dialog" aria-modal="true" aria-labelledby="modal-categorias-title">
   <div class="home-modal__panel home-modal__panel--sector home-modal__panel--categorias">
     <button class="home-modal__close" type="button" aria-label="Cerrar categorías">&times;</button>
+
+    <div class="home-sector-subcat-screen" id="homeSectorSubcatScreen" hidden>
+      <header class="home-cat-promo-rail home-sector-subcat-screen__promo" aria-label="Espacios publicitarios">
+        <div class="home-cat-promo-rail__slot home-cat-promo-rail__slot--side">
+          <div id="homeSectorPromoEstados" data-promo-slot="home_estados"></div>
+        </div>
+        <div class="home-cat-promo-rail__slot home-cat-promo-rail__slot--center">
+          <div class="registro-banner-shell registro-banner-shell--rail">
+            <div class="registro-banner-top registro-banner-top--rail" data-registro-banner-slot="home_categorias"></div>
+          </div>
+        </div>
+        <div class="home-cat-promo-rail__slot home-cat-promo-rail__slot--side">
+          <div id="homeSectorPromoLibe" data-promo-slot="home_libe"></div>
+        </div>
+      </header>
+      <header class="home-sector-subcat-hero" id="homeSectorSubcatHero">
+        <div class="home-sector-subcat-hero__visual" id="homeSectorSubcatHeroVisual">
+          <img id="homeSectorSubcatHeroImg" alt="" decoding="async">
+        </div>
+        <span class="home-sector-subcat-hero__fade" aria-hidden="true"></span>
+      </header>
+      <div class="home-sector-subcat-body">
+        <p class="home-sector-subcat-body__hint" id="homeSectorSubcatHint"></p>
+        <ul class="home-sector-subcat-grid" id="homeSectorSubcatGrid" role="listbox" aria-label="Subcategorías del sector"></ul>
+      </div>
+    </div>
 
     <div class="home-cat-picker-classic" id="catPickerClassic">
       <div class="home-cat-picker__head">
@@ -510,10 +580,19 @@ const CATEGORIAS_BUSCADOR = [
         <h3 class="home-adultos-picker__title" id="modal-categorias-title-adultos">Adultos y Entretenimiento para Adultos</h3>
         <p class="home-adultos-picker__hint" id="catPickerCountAdultos"></p>
       </header>
-      <a class="home-adultos-picker__anuncio" href="registro-banner.html?slot=home_categorias" aria-label="Anúnciate aquí — registro de banner publicitario">
-        <img src="img/adultos-cat/img-04.jpg" alt="" aria-hidden="true" loading="lazy" decoding="async">
-        <span class="home-adultos-picker__anuncio-text" aria-hidden="true">Anúnciate aquí</span>
-      </a>
+      <header class="home-cat-promo-rail home-adultos-picker__promo" aria-label="Espacios publicitarios">
+        <div class="home-cat-promo-rail__slot home-cat-promo-rail__slot--side">
+          <div id="homeAdultosPromoEstados" data-promo-slot="home_estados"></div>
+        </div>
+        <div class="home-cat-promo-rail__slot home-cat-promo-rail__slot--center">
+          <div class="registro-banner-shell registro-banner-shell--rail">
+            <div class="registro-banner-top registro-banner-top--rail" data-registro-banner-slot="home_categorias"></div>
+          </div>
+        </div>
+        <div class="home-cat-promo-rail__slot home-cat-promo-rail__slot--side">
+          <div id="homeAdultosPromoLibe" data-promo-slot="home_libe"></div>
+        </div>
+      </header>
       <ul class="home-adultos-picker__grid" id="catPickerListAdultos" role="listbox" aria-label="Categorías Adultos"></ul>
     </div>
   </div>
@@ -2719,23 +2798,29 @@ const params = new URLSearchParams(window.location.search);
 <script src="js/carihub-pink-sheen.js"></script>
 <script src="js/hero-home.js"></script>
 <script src="js/sector-scroll-data.js"></script>
-<script src="js/sector-card-images.js"></script>
+<script src="js/sector-card-images.js?v=20260624q"></script>
 <script src="js/sector-card-templates.js"></script>
+<script src="js/sector-subcat-picker.js?v=20260627e"></script>
+<script src="js/sector-category-watermarks.js?v=20260627d"></script>
+<script src="js/home-otros-sectores-picker.js?v=20260628b"></script>
 <script src="js/home-sector-cards.js"></script>
 <script src="js/home-sector-scroll.js"></script>
-<script src="js/home-vcards.js"></script>
-<script src="js/adultos-cat-picker.js"></script>
-<script src="js/carihub-geo-images.js"></script>
-<script src="js/carihub-geo-picker-data.js"></script>
+<script src="js/home-vcards.js?v=20260624q"></script>
+<script src="js/adultos-cat-picker.js?v=20260624m"></script>
+<script src="js/carihub-geo-images.js?v=20260625c"></script>
+<script src="js/carihub-geo-catalog.js?v=20260625c"></script>
+<script src="js/carihub-geo-picker-data.js?v=20260625c"></script>
 <script src="js/banner-general-slides.js"></script>
-<script src="js/carihub-geo-picker.js"></script>
-<script src="js/ch-slot-dock.js"></script>
+<script src="js/carihub-slot-preview-images.js?v=20260628b"></script>
+<script src="js/carihub-sector-sparkles.js?v=20260628b"></script>
+<script src="js/carihub-geo-picker.js?v=20260628b"></script>
+<script src="js/ch-slot-dock.js?v=20260628b"></script>
 <script src="js/banner-home-laterales.js"></script>
 <script src="js/resultados-demo.js"></script>
 <script src="js/carihub-cuenta-social.js"></script>
 <script src="js/carihub-gratificaciones.js"></script>
 <script src="js/home-bridge.js"></script>
-<script src="js/home-ui.js"></script>
+<script src="js/home-ui.js?v=20260627b"></script>
 <script src="js/home-intenciones.js"></script>
 <script src="js/carihub-messenger-schema.js"></script>
 <script src="js/carihub-messenger-privacidad-schema.js"></script>
@@ -2749,6 +2834,7 @@ const params = new URLSearchParams(window.location.search);
 <script src="js/home-mensajes.js"></script>
 <script src="js/publicidad-activa.js"></script>
 <script src="js/banner-registro.js"></script>
+<script src="js/home-cat-promo-rail.js?v=20260628b"></script>
 <script>
 if(window.CariHubPinkSheen&&CariHubPinkSheen.mountPage){CariHubPinkSheen.mountPage(document.body);}
 </script>

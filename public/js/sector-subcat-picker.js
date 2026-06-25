@@ -131,23 +131,31 @@
     PREFIX + 'industria/ind-08-limpieza.png'
   ];
 
-  var SECTOR_PNG = {
-    adultos: 'img/home/sectores/sector-01-adultos.png',
-    bienestar: 'img/home/sectores/sector-02-bienestar.png',
-    salud: 'img/home/sectores/sector-03-salud.png',
-    profesionales: 'img/home/sectores/sector-04-profesionales.png',
-    automotriz: 'img/home/sectores/sector-05-automotriz.png',
-    hogar: 'img/home/sectores/sector-06-hogar.png',
-    comercio: 'img/home/sectores/sector-07-comercio.png',
-    'bienes-raices': 'img/home/sectores/sector-08-bienes-raices.png',
-    eventos: 'img/home/sectores/sector-09-eventos.png',
-    transporte: 'img/home/sectores/sector-10-transporte.png',
-    educacion: 'img/home/sectores/sector-11-educacion.png',
-    tecnologia: 'img/home/sectores/sector-12-tecnologia.png',
-    restaurantes: 'img/home/sectores/sector-13-restaurantes.png',
-    mascotas: 'img/home/sectores/sector-14-mascotas.png',
-    industria: 'img/home/sectores/sector-15-industria.png'
-  };
+  var REST_IMAGES = [
+    'img/home/sector-cards/restaurantes.png',
+    'img/home/sectores/sector-13-restaurantes.png',
+    PREFIX + 'eventos/evt-05-catering.png',
+    PREFIX + 'eventos/evt-01-salon.png',
+    PREFIX + 'comercio/com-06-conveniencia.png',
+    PREFIX + 'comercio/com-01-abarrotes.png',
+    PREFIX + 'eventos/evt-03-dj.png'
+  ];
+
+  var EDU_IMAGES = [
+    'img/home/sector-cards/educacion.png',
+    'img/home/sectores/sector-11-educacion.png',
+    'img/home/sectores-card/11-educacion.png',
+    PREFIX + 'transporte/trans-05-escolar.png',
+    PREFIX + 'profesionales/prof-08-recursos-humanos.png',
+    PREFIX + 'eventos/evt-07-decoracion.png'
+  ];
+
+  function officialSectorSrc(sectorId) {
+    if (global.CariHubSectorCardImages && global.CariHubSectorCardImages.getSrc) {
+      return global.CariHubSectorCardImages.getSrc(sectorId);
+    }
+    return null;
+  }
 
   var SECTOR_EXCLUSIVE_POOL = {
     salud: SALUD_IMAGES,
@@ -161,23 +169,16 @@
     bienestar: BIEN_IMAGES,
     industria: IND_IMAGES,
     tecnologia: [
-      'img/home/sectores/sector-12-tecnologia.png',
+      'img/home/sector-cards/tecnologia.png',
       'img/home/hero-negocios-grid-noche.png',
       'img/registro-subcats/profesionales/prof-10-diseno.png',
       'img/registro-subcats/profesionales/prof-04-consultoria.png'
     ],
     mascotas: [
-      'img/home/sectores/sector-14-mascotas.png'
+      'img/home/sector-cards/mascotas.png'
     ],
-    educacion: [
-      'img/home/sectores/sector-11-educacion.png',
-      'img/registro-subcats/profesionales/prof-04-consultoria.png',
-      'img/home/hero-calle-negocios-dia.png'
-    ],
-    restaurantes: [
-      'img/home/sectores/sector-13-restaurantes.png',
-      'img/home/hero-antro-restaurante.png'
-    ]
+    educacion: EDU_IMAGES,
+    restaurantes: REST_IMAGES
   };
 
   var SALUD_KEYWORD_RULES = [
@@ -307,6 +308,25 @@
     { re: /limpieza-industrial/, img: 7 }
   ];
 
+  var REST_KEYWORD_RULES = [
+    { re: /restaurantes/, img: 0 },
+    { re: /cafeter/, img: 2 },
+    { re: /food-truck/, img: 4 },
+    { re: /comida-a-domicilio|domicilio/, img: 2 },
+    { re: /panader/, img: 5 },
+    { re: /taquer/, img: 0 },
+    { re: /marisquer/, img: 2 },
+    { re: /bar|antro|nocturn|discoteca|cantina/, img: 6 }
+  ];
+
+  var EDU_KEYWORD_RULES = [
+    { re: /escuelas|preparatoria|guarderias/, img: 0 },
+    { re: /universidades/, img: 1 },
+    { re: /cursos-en-linea|clases-particulares|idiomas/, img: 2 },
+    { re: /capacitacion-tecnica/, img: 4 },
+    { re: /talleres-creativos/, img: 5 }
+  ];
+
   var SECTOR_KEYWORD_RULES = {
     salud: SALUD_KEYWORD_RULES,
     profesionales: PROF_KEYWORD_RULES,
@@ -317,7 +337,9 @@
     hogar: HOG_KEYWORD_RULES,
     automotriz: AUTO_KEYWORD_RULES,
     bienestar: BIEN_KEYWORD_RULES,
-    industria: IND_KEYWORD_RULES
+    industria: IND_KEYWORD_RULES,
+    restaurantes: REST_KEYWORD_RULES,
+    educacion: EDU_KEYWORD_RULES
   };
 
   var POS_VARIANTS = [
@@ -333,6 +355,7 @@
 
   function mobPath(src) {
     if (/registro-subcats\//.test(src)) return src;
+    if (/\/sector-cards\//.test(src)) return src;
     return String(src).replace('/sectores/', '/sectores/mob/').replace(/\.png$/i, '.jpg');
   }
 
@@ -363,8 +386,10 @@
       return SECTOR_EXCLUSIVE_POOL[sectorId].slice();
     }
     var pool = [];
-    if (SECTOR_PNG[sectorId]) pool.push(SECTOR_PNG[sectorId]);
-    return pool.length ? pool : [SECTOR_PNG.salud];
+    var src = officialSectorSrc(sectorId);
+    if (sectorId === 'adultos') src = src || 'img/home/sectores/sector-01-adultos.png';
+    if (src) pool.push(src);
+    return pool.length ? pool : [officialSectorSrc('salud') || 'img/home/sector-cards/salud.png'];
   }
 
   function imageForSubcat(sectorId, subcatId, index) {
@@ -393,6 +418,19 @@
     );
   }
 
+  function watermarkHtml(src, subcatId) {
+    if (!src) return '';
+    if (global.CariHubSectorCategoryWatermarks && global.CariHubSectorCategoryWatermarks.buildFromSrc) {
+      var pos = POS_VARIANTS[hashStr(subcatId) % POS_VARIANTS.length];
+      return global.CariHubSectorCategoryWatermarks.buildFromSrc(src, {
+        pos: pos,
+        opacity: 0.2,
+        subcat: true
+      });
+    }
+    return '';
+  }
+
   function cardHtml(cat, selectedId, sectorId, index) {
     var selected = String(cat.id) === String(selectedId);
     var img = imageForSubcat(sectorId, cat.id, index);
@@ -402,6 +440,7 @@
           'role="option" data-cat-id="' + esc(cat.id) + '" aria-selected="' + (selected ? 'true' : 'false') + '">' +
           '<span class="ch-geo-card__thumb">' + thumbHtml(img, cat.id) + '</span>' +
           '<span class="ch-geo-card__body">' +
+            watermarkHtml(img, cat.id) +
             '<span class="ch-geo-card__text">' +
               '<p class="ch-geo-card__title">' + esc(cat.nombre) + '</p>' +
             '</span>' +

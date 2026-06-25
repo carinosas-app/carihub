@@ -47,13 +47,34 @@
   "México": "img/geo/mx/ciudad-de-mexico.jpg",
   "Colombia": "img/geo/ciudades/ciudad-03.jpg",
   "Estados Unidos": "img/geo/ciudades/ciudad-04.jpg",
-  "España": "img/geo/ciudades/ciudad-05.jpg",
-  "Canadá": "img/geo/ciudades/ciudad-06.jpg",
-  "Perú": "img/geo/mx/oaxaca.jpg",
-  "Chile": "img/geo/ciudades/ciudad-07.jpg",
+  "España": "img/geo/ciudades/ciudad-08.jpg",
+  "Canadá": "img/geo/ciudades/ciudad-14.jpg",
+  "Perú": "img/geo/ciudades/ciudad-03.jpg",
+  "Chile": "img/geo/ciudades/ciudad-04.jpg",
   "Argentina": "img/geo/ciudades/ciudad-08.jpg",
-  "Brasil": "img/geo/ciudades/ciudad-09.jpg"
+  "Brasil": "img/geo/ciudades/ciudad-02.jpg",
+  "Uruguay": "img/geo/ciudades/ciudad-14.jpg"
 };
+
+  /** Sin banderas ni rutas /mx/ — pool para países distintos de México */
+  var GEO_DECOR_SVGS = [
+    "img/geo/ciudad-plaza.svg",
+    "img/geo/ciudad-parque.svg",
+    "img/geo/ciudad-centro.svg",
+    "img/geo/ciudad-calle.svg",
+    "img/geo/estado-costa.svg",
+    "img/geo/estado-colonial.svg",
+    "img/geo/estado-urbano.svg",
+    "img/geo/estado-norte.svg"
+  ];
+
+  var INTERNATIONAL_JPG_WHITELIST = [
+    "img/geo/ciudades/ciudad-02.jpg",
+    "img/geo/ciudades/ciudad-03.jpg",
+    "img/geo/ciudades/ciudad-04.jpg",
+    "img/geo/ciudades/ciudad-08.jpg",
+    "img/geo/ciudades/ciudad-14.jpg"
+  ];
 
   var CITY_PHOTOS = [
   "img/geo/ciudades/ciudad-01.jpg",
@@ -138,11 +159,14 @@
 
   var FALLBACK_IMG = 'img/home/promo-perfil.jpg';
 
-  function hashName(name) {
-    var n = 0;
-    var s = String(name || '');
-    for (var i = 0; i < s.length; i++) n += s.charCodeAt(i);
-    return n;
+  function fnv1a(str) {
+    var h = 2166136261;
+    var s = String(str || '');
+    for (var i = 0; i < s.length; i++) {
+      h ^= s.charCodeAt(i);
+      h = Math.imul(h, 16777619);
+    }
+    return h >>> 0;
   }
 
   function normalizeState(estado) {
@@ -150,22 +174,50 @@
     return STATE_ALIASES[estado] || estado;
   }
 
-  function stateImage(pais, estado) {
-    if (!estado) return COUNTRY_FALLBACK[pais] || FALLBACK_IMG;
-    var key = normalizeState(estado);
-    var map = STATE_BY_COUNTRY[pais];
-    if (map) {
-      if (map[estado]) return map[estado];
-      if (map[key]) return map[key];
+  function internationalImagePool() {
+    if (internationalImagePool._cache) {
+      return internationalImagePool._cache;
     }
-    if (COUNTRY_FALLBACK[pais]) return COUNTRY_FALLBACK[pais];
-    return CITY_PHOTOS[hashName(pais + '|' + key) % CITY_PHOTOS.length] || FALLBACK_IMG;
+    internationalImagePool._cache = GEO_DECOR_SVGS.concat(INTERNATIONAL_JPG_WHITELIST);
+    return internationalImagePool._cache;
   }
 
-  function cityImage(pais, ciudad) {
-    if (!ciudad) return CITY_PHOTOS[0] || FALLBACK_IMG;
-    if (CITY_OVERRIDES[ciudad]) return CITY_OVERRIDES[ciudad];
-    return CITY_PHOTOS[hashName(pais + '|' + ciudad) % CITY_PHOTOS.length] || FALLBACK_IMG;
+  function pickFromPool(pool, key) {
+    if (!pool || !pool.length) return FALLBACK_IMG;
+    return pool[fnv1a(key) % pool.length] || FALLBACK_IMG;
+  }
+
+  function countryFallback(pais) {
+    var fb = COUNTRY_FALLBACK[pais];
+    if (pais === 'México' && fb) return fb;
+    if (fb && fb.indexOf('/mx/') === -1) return fb;
+    return pickFromPool(internationalImagePool(), pais || 'country');
+  }
+
+  function stateImage(pais, estado) {
+    if (!estado) return countryFallback(pais);
+    var key = normalizeState(estado);
+    if (pais === 'México') {
+      var map = STATE_BY_COUNTRY[pais];
+      if (map) {
+        if (map[estado]) return map[estado];
+        if (map[key]) return map[key];
+      }
+      return countryFallback(pais);
+    }
+    return pickFromPool(internationalImagePool(), (pais || '') + '|' + key);
+  }
+
+  function cityImage(pais, ciudad, estado) {
+    if (!ciudad) return pickFromPool(internationalImagePool(), pais || 'city');
+    if (pais === 'México') {
+      if (CITY_OVERRIDES[ciudad]) return CITY_OVERRIDES[ciudad];
+      return CITY_PHOTOS[fnv1a((pais || '') + '|' + (estado || '') + '|' + ciudad) % CITY_PHOTOS.length] || FALLBACK_IMG;
+    }
+    return pickFromPool(
+      internationalImagePool(),
+      (pais || '') + '|' + (estado || '') + '|' + ciudad
+    );
   }
 
   function flagImage(pais) {
@@ -176,8 +228,10 @@
     stateImage: stateImage,
     cityImage: cityImage,
     flagImage: flagImage,
+    internationalImagePool: internationalImagePool,
     STATE_BY_COUNTRY: STATE_BY_COUNTRY,
     CITY_PHOTOS: CITY_PHOTOS,
+    GEO_DECOR_SVGS: GEO_DECOR_SVGS,
     FLAG_IMAGES: FLAG_IMAGES,
     CITY_OVERRIDES: CITY_OVERRIDES
   };

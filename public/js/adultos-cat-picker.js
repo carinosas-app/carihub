@@ -1,71 +1,30 @@
 (function () {
   'use strict';
 
-  var IMG_BASE = 'img/adultos-cat/';
-
-  var IMAGE_MAP = {
-    escort: { src: 'img-01.jpg', pos: 'top center' },
-    'escort-gay': { src: 'img-05.jpg', pos: 'center 20%' },
-    'escort-vip': { src: 'img-02.jpg', pos: 'top center' },
-    edecan: { src: 'img-15.jpg', pos: 'top center' },
-    stripper: { src: 'img-22.jpg', pos: 'top center' },
-    modelos: { src: 'img-15.jpg', pos: 'center 15%' },
-    gigolo: { src: 'img-22.jpg', pos: 'top center' },
-    acompanante: { src: 'img-18.jpg', pos: 'center 30%' },
-    petit: { src: 'img-02.jpg', pos: 'top center' },
-    contenido: { src: 'img-06.jpg', pos: 'center 35%' },
-    tabledance: { src: 'img-06.jpg', pos: 'center 35%' },
-    'sex-shop': { src: 'img-24.jpg', pos: 'top center' },
-    spa: { src: 'img-11.jpg', pos: 'center 40%' },
-    masajes: { src: 'img-11.jpg', pos: 'center 55%' },
-    'club-sw': { src: 'img-30.jpg', pos: 'top center' },
-    'antro-restaurant-bar': { src: 'img-28.jpg', pos: 'top center' },
-    'antro-restaurant-bar-lgbt': { src: 'img-29.jpg', pos: 'top center' },
-    'hotel-motel': { src: 'img-23.jpg', pos: 'top center' },
-    'cabinas-glory-holes': { src: 'img-08.jpg', pos: 'center 45%' },
-    trans: { src: 'img-27.jpg', pos: 'top center' },
-    femboy: { src: 'img-18.jpg', pos: 'center 35%' },
-    swinger: { src: 'img-26.jpg', pos: 'top center' },
-    'parejas-swinger': { src: '../home/cat-cards/parejas-swinger.png', pos: 'center center' },
-    unicorns: { src: 'img-17.jpg', pos: 'top center' },
-    'cuckold-hotwife': { src: '../home/cat-cards/queen-of-spades.png', pos: 'center center' },
-    singles: { src: 'img-22.jpg', pos: 'top center' },
-    hotwife: { src: '../home/cat-cards/queen-of-spades.png', pos: 'center center' },
-    lesbians: { src: 'img-18.jpg', pos: 'center 25%' },
-    'tom-boy': { src: 'img-19.jpg', pos: 'center 30%' },
-    'tom-fem': { src: 'img-18.jpg', pos: 'top center' },
-    dotados: { src: 'img-22.jpg', pos: 'top center' },
-    fetiche: { src: 'img-08.jpg', pos: 'center 50%' },
-    sado: { src: 'img-08.jpg', pos: 'center 60%' },
-    dominatrix: { src: 'img-01.jpg', pos: 'center 35%' },
-    'cine-xxx': { src: 'img-10.jpg', pos: 'center 30%' }
-  };
-
   function toKey(id) {
     return String(id || '').toLowerCase().trim().replace(/\s+/g, '-').replace(/\//g, '');
   }
 
-  function scenePhoto(catId) {
-    var official = window.CariHubCategoriaImagenes && CariHubCategoriaImagenes.get(catId);
-    if (official) {
-      var pos = official.pos || 'center';
-      var fit = official.fit || 'cover';
-      return (
-        '<div class="ap-scene ap-scene--photo" aria-hidden="true">' +
-          '<img class="ap-card__photo" src="' + official.src + '" alt="" ' +
-          'loading="lazy" decoding="async" style="object-position:' + pos + ';object-fit:' + fit + '">' +
-          '<span class="ap-scene__sheen" aria-hidden="true"></span>' +
-        '</div>'
-      );
+  function catImageMeta(catId) {
+    if (window.CariHubCategoriaImagenes && CariHubCategoriaImagenes.get) {
+      return CariHubCategoriaImagenes.get(catId);
     }
-    var key = toKey(catId);
-    var meta = IMAGE_MAP[key];
-    if (!meta) return '<div class="ap-scene ap-scene--fallback" aria-hidden="true"></div>';
+    return null;
+  }
+
+  function scenePhoto(catId) {
+    var meta = catImageMeta(catId);
+    if (!meta || !meta.src) {
+      return '<div class="ap-scene ap-scene--fallback" aria-hidden="true"></div>';
+    }
     var pos = meta.pos || 'center';
+    var fit = meta.fit || 'cover';
+    var bgStyle = meta.bg ? 'background-color:' + meta.bg + ';' : '';
     return (
-      '<div class="ap-scene ap-scene--photo" aria-hidden="true">' +
-        '<img class="ap-card__photo" src="' + IMG_BASE + meta.src + '" alt="" ' +
-        'loading="lazy" decoding="async" style="object-position:' + pos + '">' +
+      '<div class="ap-scene ap-scene--photo" aria-hidden="true"' +
+        (bgStyle ? ' style="' + bgStyle + '"' : '') + '>' +
+        '<img class="ap-card__photo" src="' + meta.src + '" alt="" ' +
+        'loading="lazy" decoding="async" style="object-position:' + pos + ';object-fit:' + fit + '">' +
         '<span class="ap-scene__sheen" aria-hidden="true"></span>' +
       '</div>'
     );
@@ -107,6 +66,19 @@
     );
   }
 
+  function watermarkForCat(catId) {
+    var meta = catImageMeta(catId);
+    if (!meta || !meta.src) return '';
+    if (window.CariHubSectorCategoryWatermarks && CariHubSectorCategoryWatermarks.buildFromSrc) {
+      return CariHubSectorCategoryWatermarks.buildFromSrc(meta.src, {
+        pos: meta.pos || 'center center',
+        opacity: 0.18,
+        subcat: true
+      });
+    }
+    return '';
+  }
+
   function cardHtml(cat, selectedId, opts, index) {
     var selected = toKey(cat.id) === toKey(selectedId);
     return (
@@ -115,6 +87,7 @@
           'role="option" data-cat-id="' + cat.id + '" aria-selected="' + (selected ? 'true' : 'false') + '">' +
           '<span class="ap-card__visual">' + cardVisual(cat, opts, index) + '</span>' +
           '<span class="ap-card__name">' +
+            watermarkForCat(cat.id) +
             sparksHtml() +
             '<span class="ap-card__name-text">' + cat.nombre + '</span>' +
           '</span>' +
@@ -124,16 +97,15 @@
   }
 
   function renderList(container, items, opts) {
+    if (!container) return;
     opts = opts || {};
-    if (!container || !items) return;
-    container.innerHTML = items.map(function (cat, index) {
-      return cardHtml(cat, opts.selectedId, opts, index);
+    container.innerHTML = (items || []).map(function (cat, i) {
+      return cardHtml(cat, opts.selectedId, opts, i);
     }).join('');
-
     container.querySelectorAll('.ap-card').forEach(function (btn) {
       btn.addEventListener('click', function () {
-        var catId = btn.getAttribute('data-cat-id');
-        var cat = items.find(function (c) { return c.id === catId; });
+        var id = btn.getAttribute('data-cat-id');
+        var cat = (items || []).find(function (c) { return c.id === id; });
         if (cat && typeof opts.onSelect === 'function') opts.onSelect(cat);
       });
     });
@@ -141,6 +113,7 @@
 
   window.CariHubAdultosCatPicker = {
     renderList: renderList,
-    imageMap: IMAGE_MAP
+    scenePhoto: scenePhoto,
+    cardVisual: cardVisual
   };
 })();

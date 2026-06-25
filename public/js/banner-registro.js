@@ -217,7 +217,11 @@
         imgs.push(picker.imageForSubcat(sectorId, subcatId || sectorId, i));
       }
     }
-    if (!imgs.length) imgs = ['img/home/sectores/sector-03-salud.png'];
+    if (!imgs.length) {
+      imgs = [global.CariHubSectorCardImages && CariHubSectorCardImages.getSrc
+        ? (CariHubSectorCardImages.getSrc(sectorId) || CariHubSectorCardImages.getSrc('salud'))
+        : 'img/home/sector-cards/salud.png'];
+    }
     var subLabel = truncateBannerText(subcatName || 'Tu perfil', forForm ? 28 : 42);
     var titles = forForm
       ? [subLabel, 'Directorio CariHub', 'Completa tu registro']
@@ -282,6 +286,9 @@
 
   function boot() {
     document.querySelectorAll('[data-registro-banner-slot]').forEach(function (el) {
+      var slotId = el.getAttribute('data-registro-banner-slot');
+      if (slotId && slotId !== SLOT_ID) return;
+      if (el.closest('.home-cat-promo-rail')) return;
       delete el.dataset.registroBannerMounted;
       mount(el);
     });

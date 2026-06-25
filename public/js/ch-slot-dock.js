@@ -4,16 +4,21 @@
 (function (global) {
   'use strict';
 
+  var PREVIEW = global.CariHubSlotPreviewImages || {};
   var MOCKS = {
     estados: {
-      src: 'img/resultados-demo/estado-publicado-libe.png',
-      alt: 'Estado publicado',
-      label: 'Estado'
+      src: PREVIEW.estados || 'img/estado-publicado-libe.png',
+      alt: 'Estados — renta espacio publicitario',
+      label: 'Estado',
+      vacantMsg: 'Anúnciate aquí',
+      vacantHint: 'Estados y zonas'
     },
     libe: {
-      src: 'img/resultados-demo/live-en-vivo-libe.png',
-      alt: 'En vivo LIBE',
-      label: 'LIBE'
+      src: PREVIEW.libe || 'img/live-en-vivo-libe.png',
+      alt: 'En vivo — transmisión LIBE',
+      label: 'LIBE',
+      vacantMsg: 'Anúnciate aquí',
+      vacantHint: 'Transmite en vivo'
     }
   };
 
@@ -31,12 +36,15 @@
     return /_libe$/.test(String(slotId || '')) ? 'libe' : 'estados';
   }
 
-  function buildBannerHTML(slotId, rental) {
+  function buildBannerHTML(slotId, rental, opts) {
+    opts = opts || {};
     var kind = mockKind(slotId);
     var mock = MOCKS[kind];
     var href = linkRegistro(slotId);
     var vacantClass = ' ch-slot-dock__banner--vacant';
     var slide = '';
+    var isRail = opts.layout === 'rail';
+    var ariaLabel = rental && rental.titulo ? rental.titulo : (mock.alt + ' — Anúnciate aquí');
 
     if (rental && rental.imagen) {
       href = rental.url || href;
@@ -48,14 +56,17 @@
     } else {
       slide =
         '<div class="ch-slot-dock__slide is-active ch-slot-dock__mock ch-slot-dock__mock--' + kind + '" aria-hidden="false">' +
-          '<img class="ch-slot-dock__img" src="' + esc(mock.src) + '" alt="' + esc(mock.alt) + '" decoding="async">' +
-          '<span class="ch-slot-dock__vacant">Anúnciate</span>' +
+          '<span class="ch-slot-dock__mock-bg ch-slot-dock__mock-bg--' + kind + '" aria-hidden="true"></span>' +
+          '<img class="ch-slot-dock__img ch-slot-dock__img--mock" src="' + esc(mock.src) + '" alt="' + esc(mock.alt) + '" decoding="async">' +
+          '<span class="ch-slot-dock__slot-kind">' + esc(mock.label) + '</span>' +
+          '<span class="ch-slot-dock__vacant">' + esc(mock.vacantMsg) + '</span>' +
+          (isRail ? '<span class="ch-slot-dock__vacant-hint">' + esc(mock.vacantHint) + '</span>' : '') +
         '</div>';
     }
 
     return (
-      '<a class="ch-slot-dock__banner' + vacantClass + '" href="' + esc(href) + '" data-ch-slot="' + esc(slotId) + '" aria-label="' + esc(mock.alt) + '">' +
-        '<span class="ch-slot-dock__label">' + esc(mock.label) + '</span>' +
+      '<a class="ch-slot-dock__banner' + vacantClass + (isRail ? ' ch-slot-dock__banner--rail' : '') + '" href="' + esc(href) + '" data-ch-slot="' + esc(slotId) + '" aria-label="' + esc(ariaLabel) + '">' +
+        (!isRail ? '<span class="ch-slot-dock__label">' + esc(mock.label) + '</span>' : '') +
         '<div class="ch-slot-dock__stage">' + slide + '</div>' +
       '</a>'
     );
@@ -65,13 +76,14 @@
     config = config || {};
     var rentals = config.rentals || {};
     var map = config.map || {};
+    var layout = config.layout || '';
 
     Object.keys(map).forEach(function (elId) {
       var slotId = map[elId];
       var el = document.getElementById(elId);
       if (!el) return;
-      el.className = 'ch-slot-dock__item';
-      el.innerHTML = buildBannerHTML(slotId, rentals[slotId] || null);
+      el.className = 'ch-slot-dock__item' + (layout === 'rail' ? ' ch-slot-dock__item--rail' : '');
+      el.innerHTML = buildBannerHTML(slotId, rentals[slotId] || null, { layout: layout });
     });
   }
 

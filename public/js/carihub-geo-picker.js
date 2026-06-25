@@ -21,15 +21,17 @@
       '<circle cx="16" cy="14" r="5.5" fill="#fff"/>' +
     '</svg>';
   var ICON_GLOBE =
-    '<svg class="ch-geo-sheet__globe-svg" viewBox="0 0 52 52" aria-hidden="true">' +
-      '<circle cx="21" cy="21" r="16.5" fill="#8ecae6" stroke="#1a1a1a" stroke-width="1.1"/>' +
-      '<ellipse cx="21" cy="21" rx="16.5" ry="5.5" fill="none" stroke="#1a1a1a" stroke-width="0.85"/>' +
-      '<ellipse cx="21" cy="21" rx="5.5" ry="16.5" fill="none" stroke="#1a1a1a" stroke-width="0.85"/>' +
-      '<line x1="4.5" y1="21" x2="37.5" y2="21" stroke="#1a1a1a" stroke-width="0.75"/>' +
-      '<g class="ch-geo-sheet__globe-pin">' +
-        '<path d="M34 24c0 0 5.5 5 5.5 10.2a5.5 5.5 0 1 1-11 0C28.5 29 34 24 34 24z" fill="#e91e63"/>' +
-        '<circle cx="34" cy="34.2" r="2.2" fill="#fff"/>' +
-      '</g>' +
+    '<svg class="ch-geo-sheet__globe-svg" viewBox="0 0 48 48" aria-hidden="true">' +
+      '<defs><linearGradient id="chGeoGlobeGrad" x1="0%" y1="0%" x2="100%" y2="100%">' +
+        '<stop offset="0%" stop-color="#fff"/><stop offset="42%" stop-color="#ffe4f0"/><stop offset="100%" stop-color="#ffc2dc"/>' +
+      '</linearGradient></defs>' +
+      '<circle cx="24" cy="24" r="17" fill="none" stroke="url(#chGeoGlobeGrad)" stroke-width="2.4"/>' +
+      '<ellipse cx="24" cy="24" rx="17" ry="6" fill="none" stroke="rgba(255,255,255,.88)" stroke-width="1.35"/>' +
+      '<ellipse cx="24" cy="24" rx="6" ry="17" fill="none" stroke="rgba(255,255,255,.78)" stroke-width="1.2"/>' +
+      '<path d="M8 24h32" stroke="rgba(255,255,255,.65)" stroke-width="1.1" stroke-linecap="round"/>' +
+      '<path d="M24 7c-4.2 4.8-6.4 10.2-6.4 17s2.2 12.2 6.4 17c4.2-4.8 6.4-10.2 6.4-17S28.2 11.8 24 7z" fill="none" stroke="rgba(255,255,255,.55)" stroke-width="1"/>' +
+      '<circle cx="24" cy="21" r="3.2" fill="#fff" opacity=".95"/>' +
+      '<circle cx="24" cy="21" r="1.4" fill="#e91e63"/>' +
     '</svg>';
 
   var scriptsLoaded = false;
@@ -44,6 +46,10 @@
   var geoModalOpenedAt = 0;
 
   var DATA = global.CariHubGeoPickerData || {};
+  var CATALOG = global.CariHubGeoCatalog || null;
+
+  var LIST_BATCH = 40;
+  var listState = { version: 0, options: [], rendered: 0 };
 
   function esc(t) {
     return String(t == null ? '' : t)
@@ -123,7 +129,7 @@
     if (input && input.dataset.chGeoWired !== '1') {
       input.dataset.chGeoWired = '1';
       input.addEventListener('input', function () {
-        if (activePicker) activePicker.renderList(filterOptions(activePicker, this.value));
+        if (activePicker) activePicker.renderList();
       });
       input.addEventListener('keydown', function (e) {
         if (e.key === 'Enter') {
@@ -134,9 +140,13 @@
     }
   }
 
+  function usesHomePaisPremium() {
+    return document.body.getAttribute('data-page') === 'home';
+  }
+
   function ensureModal() {
     var stale = document.getElementById('chGeoModal');
-    if (stale && !stale.querySelector('.ch-geo-sheet__crest')) {
+    if (stale && (!stale.querySelector('.ch-geo-sheet__crest') || !stale.querySelector('.ch-geo-glow-divider'))) {
       stale.remove();
       modalReady = false;
     }
@@ -160,12 +170,29 @@
           '</div>' +
         '</div>' +
         '<div class="ch-geo-sheet__panel">' +
+          '<div class="ch-geo-bg-sparkles" id="chGeoBgSparkles" aria-hidden="true"></div>' +
           '<header class="ch-geo-sheet__head ch-geo-sheet__head--pais">' +
+            '<div class="ch-geo-head-deco" id="chGeoHeadDeco" aria-hidden="true" hidden>' +
+              '<span class="ch-geo-head-deco__landmark" id="chGeoHeadLandmark" aria-hidden="true"></span>' +
+              '<span class="ch-geo-head-deco__wash" aria-hidden="true"></span>' +
+              '<span class="ch-geo-sparkle ch-geo-sparkle--tl ch-geo-sparkle--1"></span>' +
+              '<span class="ch-geo-sparkle ch-geo-sparkle--tl ch-geo-sparkle--2"></span>' +
+              '<span class="ch-geo-sparkle ch-geo-sparkle--tl ch-geo-sparkle--3"></span>' +
+              '<span class="ch-geo-sparkle ch-geo-sparkle--tr ch-geo-sparkle--4"></span>' +
+              '<span class="ch-geo-sparkle ch-geo-sparkle--tr ch-geo-sparkle--5"></span>' +
+              '<span class="ch-geo-sparkle ch-geo-sparkle--tr ch-geo-sparkle--6"></span>' +
+              '<span class="ch-geo-world-map" aria-hidden="true"></span>' +
+            '</div>' +
             '<div class="ch-geo-sheet__heading" id="chGeoHeadingRow">' +
-              '<span class="ch-geo-sheet__icon ch-geo-sheet__icon--globe" id="chGeoHeadIcon" aria-hidden="true">' + ICON_GLOBE + '</span>' +
+              '<span class="ch-geo-sheet__icon" id="chGeoHeadIcon" aria-hidden="true" hidden></span>' +
               '<h2 class="ch-geo-sheet__title" id="chGeoModalTitle">Selecciona tu país</h2>' +
             '</div>' +
-            '<p class="ch-geo-sheet__subtitle" id="chGeoModalSubtitle">Explora perfiles, negocios, experiencias cerca de ti</p>' +
+            '<div class="ch-geo-glow-divider" id="chGeoGlowDivider" aria-hidden="true" hidden>' +
+              '<span class="ch-geo-glow-divider__line"></span>' +
+              '<span class="ch-geo-glow-divider__gem">✦</span>' +
+              '<span class="ch-geo-glow-divider__line"></span>' +
+            '</div>' +
+            '<p class="ch-geo-sheet__subtitle" id="chGeoModalSubtitle">Explora perfiles, negocios y experiencias cerca de ti</p>' +
           '</header>' +
           '<a class="ch-geo-sheet__banner" href="registro-banner.html?slot=home_categorias" id="chGeoBanner">' +
             '<img src="' + ((global.CariHubBannerGeneral && global.CariHubBannerGeneral.pickGeneralBanner()) || 'img/home/banners/ad-banner-pink-01.png') + '" alt="" loading="lazy" decoding="async">' +
@@ -255,6 +282,55 @@
     focusGeoField(restoreField);
   }
 
+  function applyHeadLandmark(picker, tipo) {
+    var el = document.getElementById('chGeoHeadLandmark');
+    if (!el) return;
+    if (!usesHomePaisPremium()) {
+      el.style.backgroundImage = '';
+      el.hidden = true;
+      return;
+    }
+    var src = DATA.headerLandmarkImage ? DATA.headerLandmarkImage(tipo, picker) : '';
+    var pais = picker && picker.state ? picker.state.pais : '';
+    if (src && DATA.sanitizeGeoCardImage && tipo !== 'pais') {
+      src = DATA.sanitizeGeoCardImage(src, pais, tipo) || src;
+    }
+    if (src) {
+      el.style.backgroundImage = 'url(\'' + String(src).replace(/'/g, '\\\'') + '\')';
+      el.hidden = false;
+    } else {
+      el.style.backgroundImage = '';
+      el.hidden = true;
+    }
+  }
+
+  function shouldShowGeoDeco() {
+    if (usesHomePaisPremium()) return true;
+    if (usesRegistroGeoShell()) {
+      var sector = document.body.getAttribute('data-rp-sector') || 'adultos';
+      return sector !== 'adultos';
+    }
+    return false;
+  }
+
+  function syncGeoSparkles(modal) {
+    if (!modal) modal = document.getElementById('chGeoModal');
+    if (!modal) return;
+    var S = global.CariHubSectorSparkles;
+    if (!S) return;
+    var panel = modal.querySelector('.ch-geo-sheet__panel');
+    var sector = modal.getAttribute('data-rp-sector') || document.body.getAttribute('data-rp-sector') || '';
+    if (usesRegistroGeoShell() && sector && sector !== 'adultos') {
+      S.syncBody(sector);
+      if (panel) S.ensureLayer(panel, sector);
+    } else if (usesHomePaisPremium()) {
+      S.syncBody('');
+      if (panel) S.ensureLayer(panel, '');
+    } else if (panel) {
+      S.ensureLayer(panel, 'adultos');
+    }
+  }
+
   function updateSheetHeader(picker, tipo) {
     var icon = document.getElementById('chGeoHeadIcon');
     var title = document.getElementById('chGeoModalTitle');
@@ -265,6 +341,10 @@
     var closeBtn = document.getElementById('chGeoClose');
     var modal = document.getElementById('chGeoModal');
     var head = document.querySelector('.ch-geo-sheet__head');
+    var deco = document.getElementById('chGeoHeadDeco');
+    var divider = document.getElementById('chGeoGlowDivider');
+    var isHome = usesHomePaisPremium();
+    var showDeco = shouldShowGeoDeco();
 
     if (modal) {
       modal.classList.remove('ch-geo-modal--pais', 'ch-geo-modal--estado', 'ch-geo-modal--ciudad');
@@ -277,12 +357,35 @@
 
     if (tipo === 'pais') {
       if (icon) {
-        icon.className = 'ch-geo-sheet__icon ch-geo-sheet__icon--globe';
-        icon.innerHTML = ICON_GLOBE;
+        if (isHome) {
+          icon.hidden = true;
+          icon.innerHTML = '';
+          icon.className = 'ch-geo-sheet__icon';
+        } else {
+          icon.hidden = false;
+          icon.className = 'ch-geo-sheet__icon ch-geo-sheet__icon--globe';
+          icon.innerHTML = ICON_GLOBE;
+        }
       }
-      if (title) title.textContent = 'Selecciona tu país';
+      if (deco) {
+        deco.hidden = !showDeco;
+        if (showDeco) {
+          deco.classList.remove('ch-geo-head-deco--pais', 'ch-geo-head-deco--estado', 'ch-geo-head-deco--ciudad');
+          deco.classList.add('ch-geo-head-deco--pais');
+        }
+      }
+      if (divider) divider.hidden = !showDeco;
+      if (title) {
+        title.textContent = 'Selecciona tu país';
+        title.classList.toggle('ch-geo-sheet__title--gradient', isHome);
+      }
       if (subtitle) {
-        subtitle.textContent = 'Explora perfiles, negocios, experiencias cerca de ti';
+        if (document.body.getAttribute('data-page') === 'home' && global.__homeGeoPaisHint) {
+          global.__homeGeoPaisHint = false;
+          subtitle.textContent = 'Categoría seleccionada. Elige un país para seguir (× arriba para cerrar).';
+        } else {
+          subtitle.textContent = 'Explora perfiles, negocios, experiencias cerca de ti';
+        }
         subtitle.style.display = '';
       }
       if (section) section.textContent = '🔥 Más populares';
@@ -290,7 +393,17 @@
       if (nav) nav.style.visibility = 'hidden';
       if (closeBtn) closeBtn.style.visibility = 'visible';
     } else if (tipo === 'estado') {
+      if (deco) {
+        deco.hidden = !showDeco;
+        if (showDeco) {
+          deco.classList.remove('ch-geo-head-deco--pais', 'ch-geo-head-deco--estado', 'ch-geo-head-deco--ciudad');
+          deco.classList.add('ch-geo-head-deco--estado');
+        }
+      }
+      if (divider) divider.hidden = !showDeco;
+      if (title) title.classList.remove('ch-geo-sheet__title--gradient');
       if (icon) {
+        icon.hidden = false;
         var flagUrl = DATA.flagImageUrl ? DATA.flagImageUrl(picker.state.pais) : '';
         icon.className = 'ch-geo-sheet__icon ch-geo-sheet__icon--flag-img';
         if (flagUrl) {
@@ -302,7 +415,12 @@
       }
       if (title) title.textContent = picker.state.pais || 'País';
       if (subtitle) {
-        subtitle.textContent = 'Selecciona un estado';
+        if (document.body.getAttribute('data-page') === 'home' && !localStorage.getItem('carihub_home_geo_estado_hint')) {
+          subtitle.textContent = 'Opcional: elige un estado para afinar tu búsqueda';
+          localStorage.setItem('carihub_home_geo_estado_hint', '1');
+        } else {
+          subtitle.textContent = 'Selecciona un estado';
+        }
         subtitle.style.display = '';
       }
       if (section) section.textContent = '🔥 Más populares';
@@ -310,7 +428,17 @@
       if (nav) nav.style.visibility = 'visible';
       if (closeBtn) closeBtn.style.visibility = 'hidden';
     } else if (tipo === 'ciudad') {
+      if (deco) {
+        deco.hidden = !showDeco;
+        if (showDeco) {
+          deco.classList.remove('ch-geo-head-deco--pais', 'ch-geo-head-deco--estado', 'ch-geo-head-deco--ciudad');
+          deco.classList.add('ch-geo-head-deco--ciudad');
+        }
+      }
+      if (divider) divider.hidden = !showDeco;
+      if (title) title.classList.remove('ch-geo-sheet__title--gradient');
       if (icon) {
+        icon.hidden = false;
         icon.className = 'ch-geo-sheet__icon ch-geo-sheet__icon--pin';
         icon.innerHTML = ICON_PIN_HEADER;
       }
@@ -320,7 +448,12 @@
           : (picker.state.estado || 'Estado');
       }
       if (subtitle) {
-        subtitle.textContent = 'Selecciona una ciudad';
+        if (document.body.getAttribute('data-page') === 'home' && !localStorage.getItem('carihub_home_geo_ciudad_hint')) {
+          subtitle.textContent = 'Opcional: elige una ciudad para mayor precisión';
+          localStorage.setItem('carihub_home_geo_ciudad_hint', '1');
+        } else {
+          subtitle.textContent = 'Selecciona una ciudad';
+        }
         subtitle.style.display = '';
       }
       if (section) section.textContent = '🔥 Más populares';
@@ -328,6 +461,7 @@
       if (nav) nav.style.visibility = 'visible';
       if (closeBtn) closeBtn.style.visibility = 'hidden';
     }
+    applyHeadLandmark(picker, tipo);
   }
 
   function openModal(picker, tipo) {
@@ -340,9 +474,9 @@
     var ids = picker.ids(tipo);
     lastGeoFieldId = ids.field;
     updateSheetHeader(picker, tipo);
+    syncRegistroGeoTheme(modal);
     if (input) input.value = '';
     picker.renderList();
-    syncRegistroGeoTheme(modal);
     raiseGeoModal(modal);
     lockPageScroll();
     geoModalOpenedAt = Date.now();
@@ -354,30 +488,69 @@
     }, 180);
   }
 
+  function resolveCiudadesOptions(picker) {
+    if (!picker.state.pais || !picker.state.estado) return [];
+    var pais = picker.state.pais;
+    var estado = picker.state.estado;
+    if (CATALOG && CATALOG.usesLazyCatalog(pais)) {
+      return CATALOG.getCiudades(pais, estado);
+    }
+    if (
+      typeof CIUDADES !== 'undefined' &&
+      CIUDADES[pais] &&
+      CIUDADES[pais][estado]
+    ) {
+      return CIUDADES[pais][estado];
+    }
+    if (pais === 'México' && typeof municipiosDeEstadoMexico === 'function') {
+      return municipiosDeEstadoMexico(estado);
+    }
+    return [];
+  }
+
+  function resolveEstadosOptions(picker) {
+    if (!picker.state.pais) return [];
+    var pais = picker.state.pais;
+    if (CATALOG && CATALOG.usesLazyCatalog(pais)) {
+      return CATALOG.getEstados(pais);
+    }
+    if (typeof ESTADOS !== 'undefined' && ESTADOS[pais]) {
+      return ESTADOS[pais].slice();
+    }
+    return [];
+  }
+
   function getOptions(picker, tipo) {
     if (tipo === 'pais') {
       if (showAllPaises && typeof TODOS_LOS_PAISES !== 'undefined') return TODOS_LOS_PAISES;
       return typeof PAISES_PRINCIPALES !== 'undefined' ? PAISES_PRINCIPALES : [];
     }
     if (tipo === 'estado') {
-      return typeof ESTADOS !== 'undefined' && ESTADOS[picker.state.pais]
-        ? ESTADOS[picker.state.pais] : [];
+      return resolveEstadosOptions(picker);
     }
     if (tipo === 'ciudad') {
-      if (
-        typeof CIUDADES !== 'undefined' &&
-        CIUDADES[picker.state.pais] &&
-        CIUDADES[picker.state.pais][picker.state.estado]
-      ) {
-        return CIUDADES[picker.state.pais][picker.state.estado];
-      }
-      return [];
+      return resolveCiudadesOptions(picker);
     }
     return [];
   }
 
-  var POPULAR_PAISES = ['México', 'Estados Unidos', 'Colombia', 'Canadá', 'España'];
-  var POPULAR_ESTADOS_MX = ['Nuevo León', 'CDMX', 'Jalisco', 'Baja California', 'Puebla'];
+  var POPULAR_PAISES = [
+    'México', 'Estados Unidos', 'Colombia', 'Chile', 'Uruguay',
+    'Argentina', 'Brasil', 'Canadá', 'España'
+  ];
+  var POPULAR_ESTADOS_MX = ['Nuevo León', 'Ciudad de México', 'Jalisco', 'Baja California', 'Puebla'];
+  var POPULAR_ESTADOS_UY = ['Montevideo', 'Maldonado', 'Canelones', 'Colonia', 'Salto'];
+  var POPULAR_ESTADOS_CL = [
+    'Región Metropolitana de Santiago',
+    'Valparaíso',
+    'Biobío',
+    'Antofagasta',
+    'Maule'
+  ];
+  var POPULAR_ESTADOS_CO = ['Antioquia', 'Bogotá D.C.', 'Valle del Cauca', 'Atlántico', 'Santander'];
+  var POPULAR_ESTADOS_PE = ['Lima', 'Arequipa', 'La Libertad', 'Piura', 'Cusco'];
+  var POPULAR_ESTADOS_AR = ['Buenos Aires', 'Córdoba', 'Santa Fe', 'Mendoza', 'Ciudad Autónoma de Buenos Aires'];
+  var POPULAR_ESTADOS_BR = ['São Paulo', 'Rio de Janeiro', 'Minas Gerais', 'Bahia', 'Paraná'];
   var POPULAR_CIUDADES_NL = [
     'Monterrey',
     'San Nicolás',
@@ -387,6 +560,25 @@
     'García',
     'Juárez'
   ];
+  var POPULAR_CIUDADES_MONTEVIDEO = [
+    'Montevideo',
+    'Pocitos',
+    'Carrasco',
+    'Punta Carretas',
+    'Tres Cruces',
+    'Malvín'
+  ];
+  var POPULAR_CIUDADES_MALDONADO = ['Punta del Este', 'Maldonado', 'Piriápolis', 'San Carlos'];
+  var POPULAR_CIUDADES_RM = [
+    'Santiago',
+    'Providencia',
+    'Las Condes',
+    'Maipú',
+    'Puente Alto',
+    'La Florida',
+    'Ñuñoa'
+  ];
+  var POPULAR_CIUDADES_VALPO = ['Viña del Mar', 'Valparaíso', 'Quilpué', 'Concón', 'San Antonio'];
 
   function sortPopular(list, order) {
     if (!order || !order.length) return list;
@@ -404,11 +596,121 @@
 
   function getPopularOrder(picker, tipo) {
     if (tipo === 'pais') return POPULAR_PAISES;
-    if (tipo === 'estado' && picker.state.pais === 'México') return POPULAR_ESTADOS_MX;
-    if (tipo === 'ciudad' && picker.state.estado === 'Nuevo León') return POPULAR_CIUDADES_NL;
+    if (tipo === 'estado') {
+      var pais = picker.state.pais;
+      if (pais === 'México') return POPULAR_ESTADOS_MX;
+      if (pais === 'Uruguay') return POPULAR_ESTADOS_UY;
+      if (pais === 'Chile') return POPULAR_ESTADOS_CL;
+      if (pais === 'Colombia') return POPULAR_ESTADOS_CO;
+      if (pais === 'Perú') return POPULAR_ESTADOS_PE;
+      if (pais === 'Argentina') return POPULAR_ESTADOS_AR;
+      if (pais === 'Brasil') return POPULAR_ESTADOS_BR;
+      return null;
+    }
+    if (tipo === 'ciudad') {
+      var estado = picker.state.estado;
+      if (estado === 'Nuevo León') return POPULAR_CIUDADES_NL;
+      if (estado === 'Montevideo') return POPULAR_CIUDADES_MONTEVIDEO;
+      if (estado === 'Maldonado') return POPULAR_CIUDADES_MALDONADO;
+      if (estado === 'Región Metropolitana de Santiago') return POPULAR_CIUDADES_RM;
+      if (estado === 'Valparaíso') return POPULAR_CIUDADES_VALPO;
+      return null;
+    }
     return null;
   }
 
+  function needsCatalogLoad(picker, tipo) {
+    return CATALOG &&
+      CATALOG.usesLazyCatalog(picker.state.pais) &&
+      (tipo === 'estado' || tipo === 'ciudad');
+  }
+
+  function prepareOptions(picker, listaPersonalizada) {
+    if (listaPersonalizada) {
+      return Promise.resolve(listaPersonalizada);
+    }
+    var tipo = selectorTipo;
+    var loadPromise = needsCatalogLoad(picker, tipo)
+      ? CATALOG.ensureLoaded(picker.state.pais)
+      : Promise.resolve();
+    return loadPromise.then(function () {
+      var opciones = getOptions(picker, tipo);
+      var inputEl = document.getElementById('chGeoModalInput');
+      var hasQuery = inputEl && String(inputEl.value || '').trim();
+      if (!hasQuery) {
+        if (tipo === 'estado' || tipo === 'ciudad') {
+          var popularOrder = getPopularOrder(picker, tipo);
+          if (popularOrder && popularOrder.length) {
+            opciones = sortPopular(opciones, popularOrder);
+          } else {
+            opciones = opciones.slice().sort(function (a, b) {
+              return String(a).localeCompare(String(b), 'es');
+            });
+          }
+        } else if (tipo === 'pais' && showAllPaises) {
+          opciones = opciones.slice().sort(function (a, b) {
+            return String(a).localeCompare(String(b), 'es');
+          });
+        } else {
+          opciones = sortPopular(opciones, getPopularOrder(picker, tipo));
+        }
+      }
+      return opciones;
+    });
+  }
+
+  function wireListCardClicks(self, list, root) {
+    var scope = root || list;
+    scope.querySelectorAll('.ch-geo-card:not([data-ch-wired])').forEach(function (btn) {
+      btn.setAttribute('data-ch-wired', '1');
+      btn.addEventListener('click', function () {
+        self.selectValue(selectorTipo, btn.getAttribute('data-value'));
+      });
+    });
+  }
+
+  function appendListBatch(self, list) {
+    var from = listState.rendered;
+    var to = Math.min(from + LIST_BATCH, listState.options.length);
+    if (from >= to) return false;
+    var html = '';
+    for (var i = from; i < to; i++) {
+      html += buildCardHtml(cardDataForOption(self, selectorTipo, listState.options[i]));
+    }
+    list.insertAdjacentHTML('beforeend', html);
+    wireListCardClicks(self, list, list);
+    listState.rendered = to;
+    return to < listState.options.length;
+  }
+
+  function ensureListScrollWatcher(self) {
+    var scroll = document.querySelector('.ch-geo-sheet__scroll');
+    if (!scroll) return;
+    if (scroll.dataset.chGeoListScroll === '1') return;
+    scroll.dataset.chGeoListScroll = '1';
+    scroll.addEventListener('scroll', function () {
+      if (listState.rendered >= listState.options.length) return;
+      if (scroll.scrollTop + scroll.clientHeight >= scroll.scrollHeight - 140) {
+        var list = document.getElementById('chGeoModalList');
+        if (!list) return;
+        appendListBatch(self, list);
+        var sentinel = list.querySelector('.ch-geo-sheet__list-sentinel');
+        if (sentinel && listState.rendered >= listState.options.length) {
+          sentinel.remove();
+        }
+      }
+    }, { passive: true });
+  }
+
+  function renderMoreList(self, list) {
+    var hasMore = appendListBatch(self, list);
+    if (hasMore && !list.querySelector('.ch-geo-sheet__list-sentinel')) {
+      var sentinel = document.createElement('div');
+      sentinel.className = 'ch-geo-sheet__list-sentinel';
+      sentinel.setAttribute('aria-hidden', 'true');
+      list.appendChild(sentinel);
+    }
+  }
   function filterOptions(picker, text) {
     var base = getOptions(picker, selectorTipo);
     if (selectorTipo === 'pais' && showAllPaises && typeof TODOS_LOS_PAISES !== 'undefined') {
@@ -430,6 +732,8 @@
   function syncRegistroGeoTheme(modal) {
     if (!modal) return;
     var isRegistro = usesRegistroGeoShell();
+    var isHome = document.body.getAttribute('data-page') === 'home';
+    modal.classList.toggle('ch-geo-modal--home', isHome);
     modal.classList.toggle('ch-geo-modal--registro', isRegistro);
     if (!isRegistro) {
       modal.removeAttribute('data-rp-sector');
@@ -463,6 +767,7 @@
     if (geoEl) {
       shadow = window.getComputedStyle(geoEl).getPropertyValue('--geo-shadow').trim();
     }
+    syncGeoSparkles(modal);
     if (!shadow && accent && sector !== 'adultos') {
       shadow = '0 8px 24px color-mix(in srgb, ' + accent + ' 38%, transparent)';
     } else if (!shadow && sector === 'adultos') {
@@ -471,7 +776,70 @@
     if (shadow) modal.style.setProperty('--geo-shadow', shadow);
   }
 
+  function isFlagLandmarkUrl(url) {
+    if (!url) return false;
+    return /flagcdn\.com/i.test(url) || /\/flags\//i.test(url);
+  }
+
+  function buildHomeGeoPremiumCardHtml(opts) {
+    var paisCtx = opts.pais || '';
+    var cardImg = DATA.sanitizeGeoCardImage
+      ? DATA.sanitizeGeoCardImage(opts.image, paisCtx, opts.tipo)
+      : opts.image;
+    var textBlock =
+      '<span class="ch-geo-card__text">' +
+        '<p class="ch-geo-card__title">' + esc(opts.title) + '</p>' +
+        (opts.meta1 ? '<p class="ch-geo-card__meta">' + ICON_PIN + '<span>' + esc(opts.meta1) + '</span></p>' : '') +
+        (opts.meta2 ? '<p class="ch-geo-card__meta">' + ICON_USER + '<span>' + esc(opts.meta2) + '</span></p>' : '') +
+      '</span>';
+    var landmarkSrc = opts.tipo === 'pais'
+      ? (opts.landmark || '')
+      : (opts.landmark || cardImg || '');
+    if (opts.tipo === 'pais' && isFlagLandmarkUrl(landmarkSrc)) {
+      landmarkSrc = DATA.landmarkImage ? DATA.landmarkImage(opts.value || opts.title) : '';
+    }
+    if (opts.tipo !== 'pais' && DATA.sanitizeGeoCardImage) {
+      landmarkSrc = DATA.sanitizeGeoCardImage(landmarkSrc, paisCtx, opts.tipo) || landmarkSrc;
+    }
+    var landmarkHtml = landmarkSrc
+      ? '<span class="ch-geo-card__landmark" style="background-image:url(\'' + esc(landmarkSrc) + '\')" aria-hidden="true"></span>'
+      : '';
+    var leftFloatHtml;
+    if (opts.tipo === 'pais') {
+      var flagCoin;
+      if (!opts.image) {
+        flagCoin =
+          '<span class="ch-geo-card__flag-coin ch-geo-card__flag-coin--emoji" aria-hidden="true">' +
+            esc(opts.flag || '🌎') +
+          '</span>';
+      } else {
+        flagCoin =
+          '<span class="ch-geo-card__flag-coin" style="background-image:url(\'' + esc(opts.image) + '\')" aria-hidden="true"></span>';
+      }
+      leftFloatHtml = '<span class="ch-geo-card__flag-float">' + flagCoin + '</span>';
+    } else {
+      var photoCoin = cardImg
+        ? '<span class="ch-geo-card__photo-coin" style="background-image:url(\'' + esc(cardImg) + '\')" aria-hidden="true"></span>'
+        : '<span class="ch-geo-card__photo-coin ch-geo-card__photo-coin--fallback" aria-hidden="true"></span>';
+      leftFloatHtml = '<span class="ch-geo-card__photo-float">' + photoCoin + '</span>';
+    }
+    var tipoClass = opts.tipo ? ' ch-geo-card--' + opts.tipo : '';
+    return (
+      '<button type="button" class="ch-geo-card ch-geo-card--glass' + tipoClass + '" data-value="' + esc(opts.value) + '">' +
+        landmarkHtml +
+        leftFloatHtml +
+        '<span class="ch-geo-card__body">' +
+          textBlock +
+          '<span class="ch-geo-card__go ch-geo-card__go--float" aria-hidden="true">' + ICON_GO + '</span>' +
+        '</span>' +
+      '</button>'
+    );
+  }
+
   function buildCardHtml(opts) {
+    if (usesHomePaisPremium() && (opts.tipo === 'pais' || opts.tipo === 'estado' || opts.tipo === 'ciudad')) {
+      return buildHomeGeoPremiumCardHtml(opts);
+    }
     var thumbExtra = (DATA.thumbClassFor && opts.tipo)
       ? DATA.thumbClassFor(opts.tipo, opts.value || opts.title)
       : '';
@@ -525,6 +893,7 @@
         tipo: 'pais',
         image: imgFn('pais', name, ''),
         flag: flagFn(name),
+        landmark: DATA.landmarkImage ? DATA.landmarkImage(name) : '',
         title: name,
         meta1: estCount + ' ' + divFn(name),
         meta2: fmtFn(pop, true)
@@ -533,19 +902,25 @@
     if (tipo === 'estado') {
       var cap = capFn(name);
       var label = labelFn(name);
+      var estadoImg = imgFn('estado', name, picker.state.pais);
       return {
         value: name,
         tipo: 'estado',
-        image: imgFn('estado', name, picker.state.pais),
+        pais: picker.state.pais,
+        image: estadoImg,
+        landmark: estadoImg,
         title: label,
         meta1: cap,
         meta2: fmtFn(stubFn(name, 3200), false)
       };
     }
+    var ciudadImg = imgFn('ciudad', name, picker.state.pais, picker.state.estado);
     return {
       value: name,
       tipo: 'ciudad',
-      image: imgFn('ciudad', name, picker.state.pais),
+      pais: picker.state.pais,
+      image: ciudadImg,
+      landmark: ciudadImg,
       title: labelFn(name),
       meta1: labelFn(name),
       meta2: fmtFn(stubFn(name, 1200), false)
@@ -715,6 +1090,9 @@
       this.updateFieldUi('pais', valor);
       this.updateFieldUi('estado', '');
       this.updateFieldUi('ciudad', '');
+      if (CATALOG && CATALOG.usesLazyCatalog(valor)) {
+        CATALOG.ensureLoaded(valor).catch(function () { /* prefetch best-effort */ });
+      }
     } else if (tipo === 'estado') {
       this.state.estado = valor;
       this.state.ciudad = '';
@@ -734,49 +1112,62 @@
     var list = document.getElementById('chGeoModalList');
     if (!list || !selectorTipo) return;
 
-    var opciones = listaPersonalizada || getOptions(this, selectorTipo);
+    var version = ++listState.version;
+    listState.options = [];
+    listState.rendered = 0;
+    list.innerHTML = '<div class="ch-geo-sheet__loading">Cargando ubicaciones…</div>';
+
     var inputEl = document.getElementById('chGeoModalInput');
     var hasQuery = inputEl && String(inputEl.value || '').trim();
-    if (!listaPersonalizada && !hasQuery) {
-      if (selectorTipo === 'estado' || selectorTipo === 'ciudad') {
-        opciones = opciones.slice().sort(function (a, b) {
-          return String(a).localeCompare(String(b), 'es');
-        });
-      } else {
-        opciones = sortPopular(opciones, getPopularOrder(this, selectorTipo));
+    var prepPromise = hasQuery
+      ? (needsCatalogLoad(self, selectorTipo)
+          ? CATALOG.ensureLoaded(self.state.pais).then(function () {
+              return filterOptions(self, inputEl.value);
+            })
+          : Promise.resolve(filterOptions(self, inputEl.value)))
+      : prepareOptions(self, listaPersonalizada);
+
+    prepPromise.then(function (opciones) {
+      if (version !== listState.version) return;
+      list.innerHTML = '';
+      listState.options = opciones || [];
+
+      if (!listState.options.length) {
+        list.innerHTML = '<div class="ch-geo-sheet__empty">No hay resultados. Escribe el nombre arriba y presiona Enter.</div>';
+        return;
       }
-    }
-    list.innerHTML = '';
 
-    if (!opciones.length) {
-      list.innerHTML = '<div class="ch-geo-sheet__empty">No hay resultados. Escribe el nombre arriba y presiona Enter.</div>';
-      return;
-    }
+      var useBatches = listState.options.length > LIST_BATCH &&
+        (selectorTipo === 'estado' || selectorTipo === 'ciudad') &&
+        !hasQuery;
 
-    opciones.forEach(function (name) {
-      var data = cardDataForOption(self, selectorTipo, name);
-      list.insertAdjacentHTML('beforeend', buildCardHtml(data));
+      if (useBatches) {
+        renderMoreList(self, list);
+        ensureListScrollWatcher(self);
+      } else {
+        listState.options.forEach(function (name) {
+          list.insertAdjacentHTML('beforeend', buildCardHtml(cardDataForOption(self, selectorTipo, name)));
+        });
+        wireListCardClicks(self, list);
+      }
+
+      if (selectorTipo === 'pais' && !listaPersonalizada && !showAllPaises && !hasQuery) {
+        var more = document.createElement('button');
+        more.type = 'button';
+        more.className = 'ch-geo-sheet__more';
+        more.textContent = '🌍 Ver más países';
+        more.addEventListener('click', function () {
+          showAllPaises = true;
+          var section = document.getElementById('chGeoSectionTitle');
+          if (section) section.textContent = '🌎 Todos los países';
+          self.renderList();
+        });
+        list.appendChild(more);
+      }
+    }).catch(function () {
+      if (version !== listState.version) return;
+      list.innerHTML = '<div class="ch-geo-sheet__empty">No se pudo cargar la lista. Revisa tu conexión e intenta de nuevo.</div>';
     });
-
-    list.querySelectorAll('.ch-geo-card').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        self.selectValue(selectorTipo, btn.getAttribute('data-value'));
-      });
-    });
-
-    if (selectorTipo === 'pais' && !listaPersonalizada && !showAllPaises) {
-      var more = document.createElement('button');
-      more.type = 'button';
-      more.className = 'ch-geo-sheet__more';
-      more.textContent = '🌍 Ver más países';
-      more.addEventListener('click', function () {
-        showAllPaises = true;
-        var section = document.getElementById('chGeoSectionTitle');
-        if (section) section.textContent = '🌎 Todos los países';
-        self.renderList();
-      });
-      list.appendChild(more);
-    }
   };
 
   GeoPicker.prototype.open = function (tipo) {

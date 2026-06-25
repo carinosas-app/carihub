@@ -108,39 +108,55 @@
     }
     var esNegocio = pres && pres.componenteResultados === 'ResultCardNegocio';
 
+    var escortBlocksActive = $('rpDynamicPublicHost') && !$('rpDynamicPublicHost').classList.contains('rp-hidden');
+
     var u = {
       __id: 'preview-registro',
       __demo: true,
+      __previewRegistro: true,
+      verificada: false,
       nombre: alias || 'Tu nombre público',
       alias: alias || 'Tu nombre público',
       edad: $('fldEdad') ? $('fldEdad').value.trim() : '',
       zona: zona,
       ciudad: ciudad,
       estado: estado,
-      pais: pais || 'México',
+      pais: pais,
       ubicacion: ubicacion,
       descripcion: $('fldDescripcion') ? $('fldDescripcion').value.trim() : '',
       tagline: $('fldDescripcion') ? $('fldDescripcion').value.trim() : '',
       descripcionPublica: $('fldDescripcion') ? $('fldDescripcion').value.trim() : '',
-      serviciosPrincipales: $('fldServicios') ? $('fldServicios').value.trim() : '',
-      horario: $('fldHorario') ? $('fldHorario').value.trim() : '',
-      horarioPublico: $('fldHorario') ? $('fldHorario').value.trim() : '',
       precio: $('fldPrecio') ? $('fldPrecio').value.trim() : '',
       precioDesde: $('fldPrecio') ? $('fldPrecio').value.trim() : '',
+      moneda: 'MXN',
       categoria: subName || catName,
       categoriaPublica: subName || catName,
       subcategoriaId: subId,
-      modalidades: modalidadesFromForm($('fldModalidad') ? $('fldModalidad').value : ''),
-      fotoURL: foto || 'img/resultados-demo/violeta-1.png',
       fotosExtraURL: gallery,
       fotosCount: fotosCount || (foto ? 1 : 0),
       nueva: true,
-      disponibilidad: 'Disponible',
       contactoPublico: collectContactPublico(),
       mensajeContactoPublicidad: $('fldMensajeContacto') ? $('fldMensajeContacto').value.trim() : ''
     };
 
+    if (foto) u.fotoURL = foto;
+
+    if (!escortBlocksActive) {
+      u.serviciosPrincipales = $('fldServicios') ? $('fldServicios').value.trim() : '';
+      u.horario = $('fldHorario') ? $('fldHorario').value.trim() : '';
+      u.horarioPublico = $('fldHorario') ? $('fldHorario').value.trim() : '';
+      u.modalidades = modalidadesFromForm($('fldModalidad') ? $('fldModalidad').value : '');
+    } else {
+      u.modalidades = [];
+    }
+
     if (esNegocio) u.nombreComercial = u.nombre;
+
+    var bloques = global.CariHubRegistroPublicBlocks && CariHubRegistroPublicBlocks.collectForPreview
+      ? CariHubRegistroPublicBlocks.collectForPreview(ctx) : null;
+    if (bloques && global.CariHubRegistroPublicBlocks.mapToPerfil) {
+      u = global.CariHubRegistroPublicBlocks.mapToPerfil(u, bloques, ctx);
+    }
 
     if (global.CariHubFieldEngineLite && CariHubFieldEngineLite.enriquecerPerfilPublico) {
       global.CariHubFieldEngineLite.enriquecerPerfilPublico(u, {
@@ -155,7 +171,7 @@
       perfil: u,
       query: {
         categoria: subName || catName,
-        pais: pais || 'México',
+        pais: pais,
         estado: estado,
         ciudad: ciudad
       }

@@ -16,15 +16,20 @@
   };
 
   var UI_BLOCKS = {
-    edad: { wrapId: 'wrapEdad', inputId: 'fldEdad' },
-    modalidad: { wrapId: 'wrapModalidad', inputId: 'fldModalidad' },
-    alias: { inputId: 'fldAlias', defaultLabel: 'Alias / nombre público' },
-    descripcion: { inputId: 'fldDescripcion', defaultLabel: 'Descripción corta' },
-    precio: { inputId: 'fldPrecio', defaultLabel: 'Precio desde' },
-    horario: { inputId: 'fldHorario', defaultLabel: 'Horario público' },
-    servicios: { inputId: 'fldServicios', defaultLabel: 'Servicios u ofertas' },
-    whatsapp: { inputId: 'fldWhatsapp' },
-    telegram: { inputId: 'fldTelegram' }
+    edad: { wrapId: 'wrapEdad', inputId: 'fldEdad', defaultLabel: 'Edad', defaultPlaceholder: '18+' },
+    modalidad: { wrapId: 'wrapModalidad', inputId: 'fldModalidad', defaultLabel: 'Modalidad' },
+    alias: { wrapId: 'wrapAlias', inputId: 'fldAlias', defaultLabel: 'Alias / nombre público', defaultPlaceholder: 'Nombre visible en resultados' },
+    descripcion: { wrapId: 'wrapDescripcion', inputId: 'fldDescripcion', defaultLabel: 'Descripción corta', defaultPlaceholder: 'Frase breve para tu tarjeta' },
+    precio: { wrapId: 'wrapPrecio', inputId: 'fldPrecio', defaultLabel: 'Tarifa desde', defaultPlaceholder: 'Ej. $1,500 MXN / mes' },
+    horario: { wrapId: 'wrapHorario', inputId: 'fldHorario', defaultLabel: 'Horario público', defaultPlaceholder: 'Ej. Lun–Sáb 10:00–22:00' },
+    servicios: { wrapId: 'wrapServicios', inputId: 'fldServicios', defaultLabel: 'Servicios u ofertas', defaultPlaceholder: 'Servicios, productos o especialidades…' },
+    whatsapp: { wrapId: 'wrapCtWhatsapp', inputId: 'fldWhatsapp' },
+    telegram: { wrapId: 'wrapCtTelegram', inputId: 'fldTelegram' }
+  };
+
+  var CARD_FIELD_GROUPS = {
+    rpCardIdentidad: ['alias', 'edad', 'descripcion'],
+    rpCardServicio: ['precio', 'modalidad', 'horario', 'servicios']
   };
 
   /** Perfiles UI derivados de plantillasArquetipo en schemas congelados */
@@ -368,18 +373,96 @@
     };
   }
 
-  function setFieldVisible(blockKey, visible, labels) {
+  function stripRequiredMarker(text) {
+    return String(text || '').replace(/\s*\*$/, '');
+  }
+
+  function resolveCardTitles(resolved) {
+    var ident = resolved.identidad || {};
+    var arq = ident.arquetipo || resolved.uiProfileKey || '';
+    var fid = ident.formularioId || '';
+    var identidad = 'Identidad pública';
+    var servicio = 'Servicio y tarifas';
+    var isNegocio = fid === 'negocio_empresa' ||
+      (fid === 'adultos' && arq.indexOf('negocio') >= 0);
+    if (isNegocio) identidad = 'Datos del negocio';
+    if (arq.indexOf('profesional') >= 0 || fid === 'profesionista_cedula') {
+      identidad = 'Identidad profesional';
+      servicio = 'Especialidad y tarifas';
+    }
+    if (arq === 'negocio_inmobiliario') {
+      identidad = 'Datos del anuncio';
+      servicio = 'Propiedad y tarifas';
+    }
+    if (arq === 'negocio_bienestar' || arq === 'negocio_alimentos') servicio = 'Menú y tarifas';
+    if (arq === 'negocio_retail' || arq === 'negocio_comercio') servicio = 'Oferta y tarifas';
+    if (arq === 'persona_creador') servicio = 'Suscripción y disponibilidad';
+    if (arq === 'persona_espectaculo') servicio = 'Show y tarifas';
+    return { identidad: identidad, servicio: servicio };
+  }
+
+  function fieldIsVisible(key, show, hide) {
+    return show.indexOf(key) >= 0 && hide.indexOf(key) < 0;
+  }
+
+  function syncCardVisibility(show, hide) {
+    Object.keys(CARD_FIELD_GROUPS).forEach(function (cardId) {
+      var card = $(cardId);
+      if (!card) return;
+      var keys = CARD_FIELD_GROUPS[cardId];
+      var anyVisible = keys.some(function (key) {
+        return fieldIsVisible(key, show, hide);
+      });
+      card.classList.toggle('rp-hidden', !anyVisible);
+      card.setAttribute('aria-hidden', anyVisible ? 'false' : 'true');
+    });
+  }
+
+  function getPendingPhase2Items(resolved) {
+    var ui = resolved.ui || {};
+    var extra = ui.obligatoriosExtra || [];
+    var spec = getSpecOnlyFields(resolved);
+    var isEscort = resolved && resolved.identidad &&
+      resolved.identidad.arquetipo === 'persona_acompanante';
+    var skipIfPublic = isEscort ? {
+      serviciosIncluidos: true, serviciosNoRealizo: true, fisico: true,
+      'fisico.estatura': true, 'fisico.peso': true, horarioMinimo: true,
+      modalidades: true, edad: true, precioDesde: true
+    } : {};
+    var all = extra.concat(spec).filter(function (item) {
+      return !skipIfPublic[item];
+    });
+    var seen = {};
+    return all.filter(function (item) {
+      if (!item || seen[item]) return false;
+      seen[item] = true;
+      return true;
+    });
+  }
+
+  function setFieldVisible(blockKey, visible, labels, obligSet) {
     var block = UI_BLOCKS[blockKey];
     if (!block) return;
     if (block.wrapId) {
       var wrap = $(block.wrapId);
-      if (wrap) wrap.classList.toggle('rp-hidden', !visible);
+      if (wrap) {
+        wrap.classList.toggle('rp-hidden', !visible);
+        wrap.setAttribute('aria-hidden', visible ? 'false' : 'true');
+        wrap.classList.toggle('rp-field--required', !!(obligSet && obligSet[blockKey]));
+      }
     }
-    if (block.inputId && labels && labels[blockKey]) {
+    if (block.inputId) {
       var input = $(block.inputId);
-      if (input) {
-        var lbl = document.querySelector('label[for="' + block.inputId + '"]');
-        if (lbl) lbl.textContent = labels[blockKey];
+      if (input && !visible) input.value = '';
+      var lbl = block.inputId ? document.querySelector('label[for="' + block.inputId + '"]') : null;
+      if (lbl) {
+        var labelText = (labels && labels[blockKey]) || block.defaultLabel || lbl.textContent;
+        lbl.textContent = stripRequiredMarker(labelText) +
+          (obligSet && obligSet[blockKey] && visible ? ' *' : '');
+      }
+      if (input && block.defaultPlaceholder) {
+        input.placeholder = (labels && labels[blockKey + 'Placeholder']) ||
+          block.defaultPlaceholder;
       }
     }
   }
@@ -390,22 +473,50 @@
     var show = ui.show || [];
     var hide = ui.hide || [];
     var labels = ui.labels || {};
+    var oblig = ui.obligatoriosUi || ['alias'];
+    var obligSet = {};
+    oblig.forEach(function (key) { obligSet[key] = true; });
 
     Object.keys(UI_BLOCKS).forEach(function (key) {
-      var visible = show.indexOf(key) >= 0 && hide.indexOf(key) < 0;
-      setFieldVisible(key, visible, labels);
+      var visible = fieldIsVisible(key, show, hide);
+      setFieldVisible(key, visible, labels, obligSet);
     });
+
+    syncCardVisibility(show, hide);
+
+    var cardTitles = resolveCardTitles(resolved);
+    var identTitle = $('rpCardIdentidadTitle');
+    var servTitle = $('rpCardServicioTitle');
+    if (identTitle) identTitle.textContent = cardTitles.identidad;
+    if (servTitle) servTitle.textContent = cardTitles.servicio;
 
     var notice = $('rpSchemaProfileNotice');
     if (notice) {
-      notice.textContent = '';
-      notice.classList.add('rp-hidden');
+      if (resolved.tituloExperiencia) {
+        notice.textContent = resolved.tituloExperiencia;
+        notice.classList.remove('rp-hidden');
+        notice.removeAttribute('aria-hidden');
+      } else {
+        notice.textContent = '';
+        notice.classList.add('rp-hidden');
+        notice.setAttribute('aria-hidden', 'true');
+      }
     }
 
     var faltantes = $('rpSchemaFaltantesNotice');
     if (faltantes) {
-      faltantes.innerHTML = '';
-      faltantes.classList.add('rp-hidden');
+      var pending = getPendingPhase2Items(resolved);
+      if (pending.length) {
+        faltantes.innerHTML = 'En el paso de datos privados también pediremos: <strong>' +
+          pending.slice(0, 6).join('</strong>, <strong>') + '</strong>' +
+          (pending.length > 6 ? '…' : '') + '.';
+        faltantes.classList.remove('rp-hidden');
+        faltantes.removeAttribute('aria-hidden');
+      } else {
+        faltantes.innerHTML = '';
+        faltantes.classList.add('rp-hidden');
+        faltantes.setAttribute('aria-hidden', 'true');
+      }
     }
 
     var uiNotice = $('rpUiFormNotice');
@@ -419,6 +530,15 @@
         uiNotice.classList.add('rp-hidden');
         uiNotice.setAttribute('aria-hidden', 'true');
       }
+    }
+
+    var ident = resolved.identidad || {};
+    var body = document.body;
+    if (body) {
+      body.setAttribute('data-rp-formulario-id', ident.formularioId || '');
+      body.setAttribute('data-rp-arquetipo', ident.arquetipo || '');
+      body.setAttribute('data-rp-ui-id', resolved.formularioUiId || ident.formularioUiId || '');
+      body.setAttribute('data-rp-ui-profile', resolved.uiProfileKey || '');
     }
 
     return resolved;
@@ -574,7 +694,9 @@
       var block = UI_BLOCKS[key];
       if (!block || !block.inputId) return;
       var val = campos[block.inputId] != null ? String(campos[block.inputId]).trim() : '';
-      if (!val) missing.push(block.defaultLabel || key);
+      if (!val) {
+        missing.push((ui.labels && ui.labels[key]) || block.defaultLabel || key);
+      }
     });
     if (!campos.pais || !campos.estado || !campos.ciudad) {
       missing.push('ubicación (país, estado, ciudad)');

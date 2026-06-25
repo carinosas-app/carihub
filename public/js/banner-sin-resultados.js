@@ -16,6 +16,12 @@
   var TEXTO_COBERTURA =
     'Tu anuncio aparece en todas las pantallas del sitio donde un usuario busque y no encuentre resultados (cualquier categoría, país, estado, ciudad u otro filtro).';
 
+  function previewImg(kind) {
+    var p = global.CariHubSlotPreviewImages;
+    if (p && p.get) return p.get(kind);
+    return kind === 'libe' ? 'img/live-en-vivo-libe.png' : 'img/estado-publicado-libe.png';
+  }
+
   var PLACEHOLDERS = {
     sin_resultados_izquierda: [
       'img/home/banners/ad-banner-pink-01.png',
@@ -143,14 +149,14 @@
 
   function buildEstadoLateralMock() {
     return (
-      '<img src="img/resultados-demo/estado-publicado-libe.png" alt="Estado publicado — Mi estado" width="160" height="320" decoding="async">' +
+      '<img src="' + esc(previewImg('estados')) + '" alt="Estado publicado — Mi estado" width="160" height="320" decoding="async">' +
       '<span class="res-sr-vacant-msg res-sr-vacant-msg--lateral">Anúnciate aquí</span>'
     );
   }
 
   function buildLiveLateralMock() {
     return (
-      '<img src="img/resultados-demo/live-en-vivo-libe.png" alt="Transmisión en vivo — valeria.music" width="160" height="320" decoding="async">' +
+      '<img src="' + esc(previewImg('libe')) + '" alt="Transmisión en vivo — valeria.music" width="160" height="320" decoding="async">' +
       '<span class="res-sr-vacant-msg res-sr-vacant-msg--lateral">Anúnciate aquí</span>'
     );
   }
@@ -259,13 +265,13 @@
     } else if (slotId === 'sin_resultados_libe') {
       slides =
         '<div class="pb-slot__slide is-active res-midband__mock res-midband__mock--live" aria-hidden="false">' +
-          '<img class="res-midband__mock-live-photo" src="img/resultados-demo/live-en-vivo-libe.png" alt="Transmisión en vivo — LIBE" width="' + w + '" height="' + h + '" decoding="async">' +
+          '<img class="res-midband__mock-live-photo" src="' + esc(previewImg('libe')) + '" alt="Transmisión en vivo — LIBE" width="' + w + '" height="' + h + '" decoding="async">' +
           '<span class="res-sr-vacant-msg">Anúnciate aquí</span>' +
         '</div>';
     } else {
       slides =
         '<div class="pb-slot__slide is-active res-midband__mock res-midband__mock--estado" aria-hidden="false">' +
-          '<img class="res-midband__mock-estado-photo" src="img/resultados-demo/estado-publicado-libe.png" alt="Estado publicado — Mi estado" width="' + w + '" height="' + h + '" decoding="async">' +
+          '<img class="res-midband__mock-estado-photo" src="' + esc(previewImg('estados')) + '" alt="Estado publicado — Mi estado" width="' + w + '" height="' + h + '" decoding="async">' +
           '<span class="res-sr-vacant-msg">Anúnciate aquí</span>' +
         '</div>';
     }
@@ -310,13 +316,13 @@
       slides = buildLiveLateralMock().replace('res-vacio-side__banner', 'res-midband__mock').replace(/width="160" height="320"/, 'width="' + w + '" height="' + h + '"');
       slides =
         '<div class="pb-slot__slide is-active res-midband__mock res-midband__mock--live" aria-hidden="false">' +
-          '<img class="res-midband__mock-live-photo" src="img/resultados-demo/live-en-vivo-libe.png" alt="Transmisión en vivo — valeria.music" width="' + w + '" height="' + h + '" decoding="async">' +
+          '<img class="res-midband__mock-live-photo" src="' + esc(previewImg('libe')) + '" alt="Transmisión en vivo — valeria.music" width="' + w + '" height="' + h + '" decoding="async">' +
           '<span class="res-sr-vacant-msg">Anúnciate aquí</span>' +
         '</div>';
     } else {
       slides =
         '<div class="pb-slot__slide is-active res-midband__mock res-midband__mock--estado" aria-hidden="false">' +
-          '<img class="res-midband__mock-estado-photo" src="img/resultados-demo/estado-publicado-libe.png" alt="Estado publicado — Mi estado" width="' + w + '" height="' + h + '" decoding="async">' +
+          '<img class="res-midband__mock-estado-photo" src="' + esc(previewImg('estados')) + '" alt="Estado publicado — Mi estado" width="' + w + '" height="' + h + '" decoding="async">' +
           '<span class="res-sr-vacant-msg">Anúnciate aquí</span>' +
         '</div>';
     }

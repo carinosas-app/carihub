@@ -1,6 +1,8 @@
 (function (global) {
   'use strict';
 
+  var PUB_BLOCKS = ['edad', 'modalidad', 'descripcion', 'precio', 'horario', 'servicios'];
+
   function safeTxt(t) {
     return String(t == null ? '' : t)
       .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
@@ -69,7 +71,9 @@
   function precioTexto(u, opts) {
     opts = opts || {};
     var p = u.precio || u.precioDesde;
-    if (p == null || String(p).trim() === '') return 'Consultar';
+    if (p == null || String(p).trim() === '') {
+      return u.__previewRegistro ? '' : 'Consultar';
+    }
     var s = String(p).trim();
     return /^\$|mxn|usd|consult/i.test(s) ? s : '$' + s;
   }
@@ -83,11 +87,17 @@
     if (global.CariHubMessengerPrivacidadUi && CariHubMessengerPrivacidadUi.disponibilidadCard) {
       return CariHubMessengerPrivacidadUi.disponibilidadCard(u);
     }
-    var d = normTxt(u.disponibilidad || u.estatus || u.horario || '');
+    var d = normTxt(u.disponibilidad || u.estatus || '');
+    if (!d && u.__previewRegistro) {
+      return { clase: 'neutral', txt: '', busy: false, hidden: true };
+    }
     if (d.indexOf('ocup') !== -1 || d.indexOf('cerr') !== -1) {
       return { clase: 'neutral', txt: 'Consultar disponibilidad', busy: true };
     }
-    return { clase: 'neutral', txt: 'Consultar disponibilidad', busy: false };
+    if (d.indexOf('dispon') !== -1 || d.indexOf('cita') !== -1) {
+      return { clase: 'ok', txt: u.disponibilidad || 'Disponible', busy: false };
+    }
+    return { clase: 'neutral', txt: d || 'Consultar disponibilidad', busy: false };
   }
 
   function descripcionCompactHTML(u, label) {
@@ -106,6 +116,7 @@
     if (opts.vip) items.push('<span class="res-badge res-badge--vip">VIP</span>');
     if (opts.cedula) items.push('<span class="res-badge res-badge--ver">Cédula</span>');
     if (opts.negocio) items.push('<span class="res-badge res-badge--ver">Verificado</span>');
+    if (opts.lgbt || u.badgeLgbt) items.push('<span class="res-badge res-badge--lgbt">LGBT+</span>');
     if (opts.respRapida) items.push('<span class="res-badge res-badge--fast">Respuesta rápida</span>');
     else if (u.nueva) items.push('<span class="res-badge res-badge--new">Nueva</span>');
     if (!items.length) return '';
@@ -143,12 +154,20 @@
     var metaRight = opts.metaRight || '';
     var descBlock = opts.descBlock != null ? opts.descBlock : descripcionCompactHTML(u);
     var priceLabel = opts.priceLabel || 'Desde';
-    var priceBlock =
-      '<div class="res-card__price">' +
-        '<span class="res-card__price-ic" aria-hidden="true">' + svgIco('money', 'res-card__price-ic') + '</span>' +
-        '<span class="res-card__price-desde">' + safeTxt(priceLabel) + '</span>' +
-        '<span class="res-card__price-val">' + safeTxt(precioTexto(u)) + '</span>' +
-      '</div>';
+    var precioVal = precioTexto(u);
+    var priceBlock = precioVal
+      ? '<div class="res-card__price">' +
+          '<span class="res-card__price-ic" aria-hidden="true">' + svgIco('money', 'res-card__price-ic') + '</span>' +
+          '<span class="res-card__price-desde">' + safeTxt(priceLabel) + '</span>' +
+          '<span class="res-card__price-val">' + safeTxt(precioVal) + '</span>' +
+        '</div>'
+      : '';
+    var availBlock = disp.hidden
+      ? ''
+      : '<span class="res-card__avail res-card__avail--' + disp.clase + '">' +
+          '<span class="res-dot res-dot--' + disp.clase + '" aria-hidden="true"></span>' +
+          safeTxt(disp.txt) +
+        '</span>';
     var metaRow = '';
     if (loc || metaRight) {
       metaRow = '<div class="res-card__row res-card__row--meta">' +
@@ -164,11 +183,15 @@
         (badges ? '<div class="res-card__badges">' + badges + '</div>' : '') +
         '</div>';
     }
+    var imgSrc = u.fotoURL || (u.__previewRegistro ? '' : 'img/resultados-demo/violeta-1.png');
+    var mediaInner = imgSrc
+      ? '<img src="' + safeTxt(imgSrc) + '" alt="Foto de ' + safeTxt(nombre) + '" width="360" height="210" loading="lazy" decoding="async">'
+      : '<div class="res-card__media-placeholder" aria-hidden="true">Sin foto</div>';
     return '' +
       '<article class="pcard res-card res-card--compact ' + extraClass + '">' +
         '<div class="res-card__media">' +
           (u.nueva ? '<span class="res-nueva">NUEVA</span>' : '') +
-          '<img src="' + safeTxt(u.fotoURL || 'img/resultados-demo/violeta-1.png') + '" alt="Foto de ' + safeTxt(nombre) + '" width="360" height="210" loading="lazy" decoding="async">' +
+          mediaInner +
           (fotos > 0 ? '<span class="gal__count">' + svgIco('camera', 'res-fotos-ic') + fotos + '</span>' : '') +
         '</div>' +
         '<div class="res-card__body">' +
@@ -180,10 +203,7 @@
                 headExtra +
               '</div>' +
               favBtn +
-              '<span class="res-card__avail res-card__avail--' + disp.clase + '">' +
-                '<span class="res-dot res-dot--' + disp.clase + '" aria-hidden="true"></span>' +
-                safeTxt(disp.txt) +
-              '</span>' +
+              availBlock +
               priceBlock +
             '</div>' +
             descBlock +
@@ -205,13 +225,17 @@
     var catLabel = (global.CariHubResultadosDemo && CariHubResultadosDemo.labelCategoria)
       ? CariHubResultadosDemo.labelCategoria(u.categoriaPublica || u.categoria || Q.categoria || '')
       : (u.categoriaPublica || u.categoria || Q.categoria || '');
-    var vip = u.vip === true || u.esVip === true || /vip/i.test(String(catLabel || ''));
+    var vip = u.vip === true || u.esVip === true || u.badgeVip === true || /vip/i.test(String(catLabel || ''));
     return cardShell(u, Q, {
       cardClass: 'res-card--adult',
       headExtra: edad ? '<span class="age">' + safeTxt(edad) + '</span>' : '',
       metaRight: mods,
       catLabel: catLabel,
-      badges: badgesCompactHTML(u, { vip: vip, respRapida: u.respuestaRapida !== false })
+      badges: badgesCompactHTML(u, {
+        vip: vip,
+        lgbt: u.badgeLgbt === true,
+        respRapida: !u.__previewRegistro && u.respuestaRapida === true
+      })
     });
   }
 
@@ -280,12 +304,101 @@
     return cardHTMLAdultos(u, Q);
   }
 
+  function setBlockVisibility(el, vis) {
+    if (!el) return;
+    if (vis) {
+      el.style.display = '';
+      el.removeAttribute('aria-hidden');
+      el.classList.remove('pub-block--hidden');
+    } else {
+      el.style.display = 'none';
+      el.setAttribute('aria-hidden', 'true');
+      el.classList.add('pub-block--hidden');
+    }
+  }
+
+  function formatPrecioLabel(text) {
+    text = String(text || '').trim();
+    if (!text) return '';
+    if (/^💲/.test(text)) return text;
+    if (/desde/i.test(text)) return '💲 ' + text;
+    return '💲 ' + text + (/\//.test(text) ? '' : ' desde');
+  }
+
+  function applyPublicProfileLabels(container, labels) {
+    labels = labels || {};
+    if (labels.precio) {
+      container.querySelectorAll('[data-pub-label="precio"]').forEach(function (el) {
+        var txt = String(labels.precio);
+        if (el.classList.contains('lbl')) {
+          el.textContent = formatPrecioLabel(txt);
+        } else if (el.classList.contains('precio-desde')) {
+          el.textContent = /desde/i.test(txt) ? txt.replace(/^💲\s*/, '') : txt;
+        }
+      });
+    }
+    if (labels.servicios) {
+      container.querySelectorAll('[data-pub-label="servicios"]').forEach(function (el) {
+        el.textContent = String(labels.servicios);
+      });
+    }
+  }
+
+  function applyPublicProfilePresentation(container, u) {
+    if (!container) return null;
+    u = u || {};
+    if (global.CariHubFieldEngineLite && CariHubFieldEngineLite.enriquecerPerfilPublico) {
+      CariHubFieldEngineLite.enriquecerPerfilPublico(u, {
+        subcategoriaId: u.subcategoriaId,
+        categoria: u.categoria || u.categoriaPublica,
+        sectorId: u.sectorId
+      });
+    }
+    var pres = null;
+    if (global.CariHubFieldEngineLite && CariHubFieldEngineLite.resolvePublicPresentation) {
+      pres = CariHubFieldEngineLite.resolvePublicPresentation({
+        subcategoriaId: u.subcategoriaId,
+        categoria: u.categoria || u.categoriaPublica,
+        sectorId: u.sectorId
+      });
+    }
+    if (!pres || !pres.registro || !pres.registro.ui) return pres;
+    var ui = pres.registro.ui;
+    var show = ui.show || [];
+    var hide = ui.hide || [];
+    var labels = ui.labels || {};
+
+    function visible(key) {
+      return show.indexOf(key) >= 0 && hide.indexOf(key) < 0;
+    }
+
+    PUB_BLOCKS.forEach(function (key) {
+      var vis = visible(key);
+      container.querySelectorAll('[data-pub-block="' + key + '"]').forEach(function (el) {
+        setBlockVisibility(el, vis);
+      });
+    });
+
+    applyPublicProfileLabels(container, labels);
+
+    var body = document.body;
+    if (body) {
+      body.setAttribute('data-ch-formulario-id', pres.formularioId || '');
+      body.setAttribute('data-ch-arquetipo', pres.arquetipo || '');
+      body.setAttribute('data-ch-ui-id', (pres.registro && pres.registro.formularioUiId) || '');
+    }
+
+    return pres;
+  }
+
   global.CariHubPublicRenderLite = {
     cardHTML: cardHTML,
     cardHTMLAdultos: cardHTMLAdultos,
     cardHTMLNegocio: cardHTMLNegocio,
     cardHTMLServicio: cardHTMLServicio,
     cardHTMLProfesional: cardHTMLProfesional,
-    resolveComponente: resolveComponente
+    resolveComponente: resolveComponente,
+    applyPublicProfilePresentation: applyPublicProfilePresentation,
+    PUB_BLOCKS: PUB_BLOCKS
   };
 })(typeof window !== 'undefined' ? window : globalThis);

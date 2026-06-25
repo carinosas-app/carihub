@@ -177,6 +177,14 @@
     if (global.CariHubBannerRegistro && global.CariHubBannerRegistro.remount) {
       global.CariHubBannerRegistro.remount();
     }
+    if (global.CariHubHomeCatPromoRail && document.querySelector('.home-cat-promo-rail')) {
+      var sectorId = document.body.getAttribute('data-rp-sector') || '';
+      if (sectorId && document.body.classList.contains('rp-subcat-screen')) {
+        global.CariHubHomeCatPromoRail.refreshForSector(sectorId, '');
+      } else {
+        global.CariHubHomeCatPromoRail.refreshGeneric();
+      }
+    }
   }
 
   function remontarPagina() {
