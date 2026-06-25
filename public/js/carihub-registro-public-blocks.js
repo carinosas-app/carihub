@@ -40,6 +40,11 @@
       });
     }
     function blockVisible(block) {
+      if (block.excludeSubcategorias && block.excludeSubcategorias.length) {
+        if (block.excludeSubcategorias.some(function (s) {
+          return normalizeSubId(s) === subId;
+        })) return false;
+      }
       if (!block.onlySubcategorias || !block.onlySubcategorias.length) return true;
       return block.onlySubcategorias.some(function (s) {
         return normalizeSubId(s) === subId;
@@ -87,6 +92,10 @@
     };
     (over.obligatoriosExtra || []).forEach(function (key) {
       if (out.obligatorios.indexOf(key) < 0) out.obligatorios.push(key);
+    });
+    (over.obligatoriosRemove || []).forEach(function (key) {
+      var idx = out.obligatorios.indexOf(key);
+      if (idx >= 0) out.obligatorios.splice(idx, 1);
     });
     return out;
   }
@@ -433,6 +442,18 @@
     u = u || {};
     if (bloques.orientacion) u.orientacion = bloques.orientacion;
     if (bloques.identidadGenero) u.identidadGenero = bloques.identidadGenero;
+    if (bloques.presentacionFemboy) {
+      u.presentacionFemboy = bloques.presentacionFemboy;
+      u.identidadGenero = bloques.presentacionFemboy;
+    }
+    if (bloques.estiloPredominante) u.estiloPredominante = bloques.estiloPredominante;
+    if (Array.isArray(bloques.disponiblePara) && bloques.disponiblePara.length) {
+      u.disponiblePara = bloques.disponiblePara.slice();
+    }
+    if (bloques.largoCabello) u.largoCabello = bloques.largoCabello;
+    if (bloques.tonoPiel) u.tonoPiel = bloques.tonoPiel;
+    if (bloques.videoPresentacion) u.videoPresentacion = normalizeUrl(bloques.videoPresentacion);
+    if (bloques.promociones) u.promociones = bloques.promociones;
     if (Array.isArray(bloques.buscan) && bloques.buscan.length) u.buscan = bloques.buscan.slice();
     else if (bloques.buscan) u.buscan = bloques.buscan;
     if (bloques.tipoPublico) {

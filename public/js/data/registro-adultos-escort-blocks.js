@@ -137,6 +137,28 @@
           estiloVida: 'Cómo vives el lifestyle: discreto, social, viajero, etc.',
           sobreMi: 'Presentación personal: quién eres, tu estilo y qué te hace diferente como hotwife.'
         }
+      },
+      femboy: {
+        badges: ['lgbt'],
+        obligatoriosRemove: ['modalidades', 'serviciosIncluidos', 'serviciosNoRealizo'],
+        obligatoriosExtra: [
+          'presentacionFemboy', 'estiloPredominante', 'disponibilidadAgenda', 'disponiblePara'
+        ],
+        fieldPatches: {
+          presentacionFemboy: { required: true },
+          estiloPredominante: { required: true },
+          disponibilidadAgenda: { required: true },
+          disponiblePara: { required: true }
+        },
+        fieldHints: {
+          presentacionFemboy: 'Cómo te presentas en tu perfil público.',
+          estiloPredominante: 'Tu estética principal — aparece en tu ficha.',
+          disponibilidadAgenda: 'Marca cuándo sueles estar disponible.',
+          disponiblePara: 'Eventos, citas o viajes — elige todo lo que aplique.',
+          videoPresentacion: 'Enlace a un video corto de presentación (YouTube, Drive, etc.).',
+          promociones: 'Tarifas especiales o promos activas (opcional).',
+          sobreMi: 'Cuéntanos quién eres, tu estilo y qué te hace diferente.'
+        }
       }
     },
     obligatorios: [
@@ -149,7 +171,7 @@
         title: 'Tu ficha pública',
         hint: 'Estos datos aparecen en la columna derecha de tu perfil (categoría, idiomas, orientación).',
         fields: [
-          { id: 'orientacion', label: 'Orientación sexual', type: 'select', required: false, options: ['Heterosexual', 'Bisexual', 'Pansexual', 'Gay', 'Lesbiana', 'Queer'] },
+          { id: 'orientacion', label: 'Orientación sexual', type: 'select', required: false, excludeSubcategorias: ['femboy'], options: ['Heterosexual', 'Bisexual', 'Pansexual', 'Gay', 'Lesbiana', 'Queer'] },
           {
             id: 'identidadGenero',
             label: 'Identidad / presentación',
@@ -159,7 +181,7 @@
             placeholder: 'Ej. Mujer trans, no binaria…'
           },
           { id: 'idiomas', label: 'Idiomas', type: 'text', required: false, placeholder: 'Ej. Español, Inglés' },
-          { id: 'nivelServicio', label: 'Nivel de servicios', type: 'select', required: false, options: ['Básico', 'Completo', 'Premium'], helpKey: 'nivelServicio' },
+          { id: 'nivelServicio', label: 'Nivel de servicios', type: 'select', required: false, excludeSubcategorias: ['femboy'], options: ['Básico', 'Completo', 'Premium'], helpKey: 'nivelServicio' },
           {
             id: 'nivelPremium',
             label: 'Nivel premium',
@@ -193,7 +215,7 @@
             label: 'Disponibilidad',
             type: 'select',
             required: false,
-            excludeSubcategorias: ['hotwife'],
+            excludeSubcategorias: ['hotwife', 'femboy'],
             options: [
               { value: 'disponible', label: 'Disponible' },
               { value: 'ocupada', label: 'Ocupada' },
@@ -213,6 +235,62 @@
               'Solo con la mujer',
               'Eventos lifestyle'
             ]
+          }
+        ]
+      },
+      {
+        id: 'femboyPerfil',
+        title: 'Perfil femboy',
+        hint: 'Presentación, estética y disponibilidad — sin datos explícitos.',
+        onlySubcategorias: ['femboy'],
+        fields: [
+          {
+            id: 'presentacionFemboy',
+            label: 'Presentación',
+            type: 'select',
+            required: true,
+            options: ['Muy femenino', 'Andrógino', 'Estilo propio']
+          },
+          {
+            id: 'estiloPredominante',
+            label: 'Estilo predominante',
+            type: 'select',
+            required: true,
+            options: ['Kawaii', 'Elegante', 'Glamour', 'Gótico', 'Cosplay', 'Casual', 'Urbano']
+          },
+          {
+            id: 'disponibilidadAgenda',
+            label: 'Disponibilidad',
+            type: 'checklist',
+            required: true,
+            options: [
+              'Disponible ahora',
+              'Solo con cita',
+              'Entre semana',
+              'Fines de semana',
+              'Viajes'
+            ]
+          },
+          {
+            id: 'disponiblePara',
+            label: 'Disponible para',
+            type: 'checklist',
+            required: true,
+            options: ['Eventos', 'Citas', 'Viajes']
+          },
+          {
+            id: 'videoPresentacion',
+            label: 'Video de presentación',
+            type: 'url',
+            required: false,
+            placeholder: 'https://… (opcional)'
+          },
+          {
+            id: 'promociones',
+            label: 'Promociones',
+            type: 'text',
+            required: false,
+            placeholder: 'Ej. 10% primer encuentro (opcional)'
           }
         ]
       },
@@ -284,6 +362,7 @@
         id: 'modalidades',
         title: 'Modalidad de atención',
         hint: 'Marca dónde atiendes (puedes elegir más de una).',
+        excludeSubcategorias: ['femboy'],
         fields: [
           {
             id: 'modalidades',
@@ -315,7 +394,23 @@
           { id: 'peso', label: 'Peso', type: 'text', required: true, placeholder: 'Ej. 55 kg' },
           { id: 'complexion', label: 'Complexión', type: 'select', required: false, options: ['Delgada', 'Atlética', 'Curvy', 'Robusta', 'Promedio'] },
           { id: 'cabello', label: 'Color de cabello', type: 'text', required: false, placeholder: 'Ej. Castaño oscuro' },
+          {
+            id: 'largoCabello',
+            label: 'Largo del cabello',
+            type: 'select',
+            required: false,
+            onlySubcategorias: ['femboy'],
+            options: ['Corto', 'Medio', 'Largo', 'Muy largo']
+          },
           { id: 'ojos', label: 'Color de ojos', type: 'text', required: false, placeholder: 'Ej. Café oscuro' },
+          {
+            id: 'tonoPiel',
+            label: 'Tono de piel',
+            type: 'select',
+            required: false,
+            onlySubcategorias: ['femboy'],
+            options: ['Claro', 'Medio', 'Moreno', 'Oscuro']
+          },
           { id: 'tatuajes', label: 'Tatuajes', type: 'select', required: false, options: ['Sí', 'No'] },
           { id: 'piercings', label: 'Piercings', type: 'select', required: false, options: ['Sí', 'No'] }
         ]
@@ -324,6 +419,7 @@
         id: 'serviciosIncluidos',
         title: 'Servicios incluidos',
         hint: 'Marca todo lo que sí ofreces en tu servicio base.',
+        excludeSubcategorias: ['femboy'],
         fields: [
           {
             id: 'serviciosIncluidos',
@@ -338,6 +434,7 @@
         id: 'serviciosNoRealizo',
         title: 'No realizo / límites',
         hint: 'Marca lo que no ofreces — aparece en tu perfil y evita malentendidos.',
+        excludeSubcategorias: ['femboy'],
         fields: [
           {
             id: 'serviciosNoRealizo',

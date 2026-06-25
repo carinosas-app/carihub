@@ -4393,7 +4393,8 @@ function adultoFichaHTML(u){
   if(u.tipoNegocio) html+=row(pico("corp"),"Tipo de empresa",safe(u.tipoNegocio));
   if(u.tipoServicio) html+=row(pico("heart"),"Tipo de servicio",safe(u.tipoServicio));
   if(u.tipoShow) html+=row(pico("briefcase"),"Tipo de show",safe(u.tipoShow));
-  if(u.disponiblePara) html+=row(pico("chat"),"Disponible para",safe(u.disponiblePara));
+  if(Array.isArray(u.disponiblePara)&&u.disponiblePara.length) html+=row(pico("chat"),"Disponible para",safe(u.disponiblePara.join(", ")));
+  else if(u.disponiblePara) html+=row(pico("chat"),"Disponible para",safe(u.disponiblePara));
   if(u.venueFijo) html+=row(pico("pin"),"Venue / zona",safe(u.venueFijo));
   if(u.menuServicios) html+=row(pico("heart"),"Menú",safe(u.menuServicios),"servicios");
   if(u.horario) html+=row(pico("clock"),"Horario",safe(u.horario),"horario");
@@ -4401,12 +4402,20 @@ function adultoFichaHTML(u){
   if(u.reglasAcceso) html+=row(pico("shield"),"Acceso",safe(u.reglasAcceso));
   if(u.areasVenue) html+=row(pico("pin"),"Áreas",safe(u.areasVenue));
   if(u.orientacion) html+=row(pico("gender"),"Orientación",safe(u.orientacion));
-  if(u.identidadGenero) html+=row(pico("gender"),"Identidad / presentación",safe(u.identidadGenero));
+  if(u.presentacionFemboy) html+=row(pico("gender"),"Presentación",safe(u.presentacionFemboy));
+  else if(u.identidadGenero) html+=row(pico("gender"),"Identidad / presentación",safe(u.identidadGenero));
+  if(u.estiloPredominante) html+=row(pico("heart"),"Estilo predominante",safe(u.estiloPredominante));
+  if(Array.isArray(u.disponibilidadAgenda)&&u.disponibilidadAgenda.length&&!u.participacionPareja) html+=row(pico("clock"),"Disponibilidad",safe(u.disponibilidadAgenda.join(", ")));
+  if(Array.isArray(u.disponiblePara)&&u.disponiblePara.length&&u.presentacionFemboy) html+=row(pico("briefcase"),"Disponible para",safe(u.disponiblePara.join(", ")));
+  if(u.largoCabello) html+=row(pico("user"),"Largo del cabello",safe(u.largoCabello));
+  if(u.tonoPiel) html+=row(pico("user"),"Tono de piel",safe(u.tonoPiel));
+  if(u.videoPresentacion) html+=row(pico("camera"),"Video",'<a href="'+safe(u.videoPresentacion)+'" target="_blank" rel="noopener noreferrer">Ver presentación</a>');
+  if(u.promociones) html+=row(pico("money"),"Promociones",safe(u.promociones));
   if(u.participacionPareja) html+=row(pico("heart"),"Participación de la pareja",safe(u.participacionPareja));
   if(u.tipoPublico) html+=row(pico("heart"),"Busco conocer",safe(u.tipoPublico));
   else if(Array.isArray(u.buscan)&&u.buscan.length) html+=row(pico("heart"),"Participa en",safe(u.buscan.join(", ")));
   else if(u.buscan) html+=row(pico("heart"),"Participa en",safe(u.buscan));
-  if(Array.isArray(u.disponibilidadAgenda)&&u.disponibilidadAgenda.length) html+=row(pico("clock"),"Disponibilidad",safe(u.disponibilidadAgenda.join(", ")));
+  if(Array.isArray(u.disponibilidadAgenda)&&u.disponibilidadAgenda.length&&u.participacionPareja) html+=row(pico("clock"),"Disponibilidad",safe(u.disponibilidadAgenda.join(", ")));
   if(Array.isArray(u.tipoExperiencia)&&u.tipoExperiencia.length) html+=row(pico("briefcase"),"Tipo de experiencia",safe(u.tipoExperiencia.join(", ")));
   if(u.loQueBuscaConocer) html+=row(pico("chat"),"Lo que busca conocer",safe(u.loQueBuscaConocer));
   if(u.aficiones) html+=row(pico("heart"),"Aficiones",safe(u.aficiones));
@@ -6260,7 +6269,15 @@ function aplicarPerfilDesdeRegistro(vista,u){
     frase:u.tagline||u.descripcion||"",
     sobreMi:u.sobreMi||"",
     orientacion:u.orientacion||"",
-    identidadGenero:u.identidadGenero||"",
+    identidadGenero:u.presentacionFemboy||u.identidadGenero||"",
+    presentacionFemboy:u.presentacionFemboy||"",
+    estiloPredominante:u.estiloPredominante||"",
+    disponibilidadAgenda:Array.isArray(u.disponibilidadAgenda)?u.disponibilidadAgenda.slice():[],
+    disponiblePara:Array.isArray(u.disponiblePara)?u.disponiblePara.slice():[],
+    largoCabello:u.largoCabello||"",
+    tonoPiel:u.tonoPiel||"",
+    videoPresentacion:u.videoPresentacion||"",
+    promociones:u.promociones||"",
     buscan:u.tipoPublico||(Array.isArray(u.buscan)?u.buscan.slice():(u.buscan?String(u.buscan):"")),
     tipoPublico:u.tipoPublico||"",
     participacionPareja:u.participacionPareja||"",
@@ -6342,6 +6359,13 @@ function aplicarPerfilResultadosEnDemo(vista,u){
   if(Array.isArray(u.noRealiza)&&u.noRealiza.length) d.noRealiza=u.noRealiza.slice();
   if(u.orientacion) d.orientacion=u.orientacion;
   if(u.identidadGenero) d.identidadGenero=u.identidadGenero;
+  if(u.presentacionFemboy){ d.presentacionFemboy=u.presentacionFemboy; d.identidadGenero=u.presentacionFemboy; }
+  if(u.estiloPredominante) d.estiloPredominante=u.estiloPredominante;
+  if(Array.isArray(u.disponiblePara)&&u.disponiblePara.length) d.disponiblePara=u.disponiblePara.slice();
+  if(u.largoCabello) d.largoCabello=u.largoCabello;
+  if(u.tonoPiel) d.tonoPiel=u.tonoPiel;
+  if(u.videoPresentacion) d.videoPresentacion=u.videoPresentacion;
+  if(u.promociones) d.promociones=u.promociones;
   if(u.participacionPareja) d.participacionPareja=u.participacionPareja;
   if(u.tipoPublico){ d.tipoPublico=u.tipoPublico; d.buscan=u.tipoPublico; }
   else if(Array.isArray(u.buscan)&&u.buscan.length) d.buscan=u.buscan.slice();
