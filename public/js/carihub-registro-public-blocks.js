@@ -152,6 +152,23 @@
     return s === 'true' || s === '1' || s === 'si' || s === 'sí';
   }
 
+  function isValidUrl(val) {
+    var s = String(val || '').trim();
+    if (!s) return false;
+    try {
+      var u = new URL(/^https?:\/\//i.test(s) ? s : 'https://' + s);
+      return !!u.hostname && u.hostname.indexOf('.') >= 0;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function normalizeUrl(val) {
+    var s = String(val || '').trim();
+    if (!s) return '';
+    return /^https?:\/\//i.test(s) ? s : 'https://' + s;
+  }
+
   function renderField(field, values) {
     values = values || {};
     var val = values[field.id] != null ? values[field.id] : '';
@@ -187,11 +204,17 @@
       if (field.hint) {
         wrap += '<p class="rp-contact-hint rp-pub-field-hint">' + esc(field.hint) + '</p>';
       }
+    } else if (field.type === 'url') {
+      wrap += '<label for="' + fieldDomId(field.id) + '">' + esc(field.label) + req + '</label>' +
+        '<input type="url" id="' + fieldDomId(field.id) + '" value="' + esc(val) + '" placeholder="' + esc(field.placeholder || 'https://') + '" inputmode="url" autocomplete="url">';
+      if (field.hint) {
+        wrap += '<p class="rp-contact-hint rp-pub-field-hint">' + esc(field.hint) + '</p>';
+      }
     } else {
       wrap += '<label for="' + fieldDomId(field.id) + '">' + esc(field.label) + req + '</label>' +
         '<input type="text" id="' + fieldDomId(field.id) + '" value="' + esc(val) + '" placeholder="' + esc(field.placeholder || '') + '">';
     }
-    if (field.hint && field.type !== 'select' && field.type !== 'checklist' && field.type !== 'boolean') {
+    if (field.hint && field.type !== 'select' && field.type !== 'checklist' && field.type !== 'boolean' && field.type !== 'url') {
       wrap += '<p class="rp-contact-hint rp-pub-field-hint">' + esc(field.hint) + '</p>';
     }
     wrap += '</div>';
@@ -288,6 +311,10 @@
         if (!isTruthyFieldValue(val)) missing.push(labelForField(cfg, key));
         return;
       }
+      if (fieldType === 'url') {
+        if (!isValidUrl(val)) missing.push(labelForField(cfg, key));
+        return;
+      }
       if (Array.isArray(val)) {
         if (!val.length) missing.push(labelForField(cfg, key));
       } else if (!String(val || '').trim()) {
@@ -300,7 +327,9 @@
         var val = values[field.id];
         var empty = field.type === 'boolean'
           ? !isTruthyFieldValue(val)
-          : (Array.isArray(val) ? !val.length : !String(val || '').trim());
+          : field.type === 'url'
+            ? !isValidUrl(val)
+            : (Array.isArray(val) ? !val.length : !String(val || '').trim());
         if (empty && missing.indexOf(field.label) < 0) missing.push(field.label);
       });
     });
@@ -358,6 +387,7 @@
     if (bloques.nivelServicio) u.nivelServicio = bloques.nivelServicio;
     if (bloques.nivelPremium) u.nivelPremium = bloques.nivelPremium;
     if (isTruthyFieldValue(bloques.eventosDisponibles)) u.eventosDisponibles = true;
+    if (bloques.portfolioURL) u.portfolioURL = normalizeUrl(bloques.portfolioURL);
     if (bloques.disponibilidad) {
       u.disponibilidad = DISPONIBILIDAD_LABELS[bloques.disponibilidad] || bloques.disponibilidad;
     }

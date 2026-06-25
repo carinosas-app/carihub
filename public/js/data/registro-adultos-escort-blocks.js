@@ -54,6 +54,16 @@
         fieldHints: {
           eventosDisponibles: 'Confirma que aceptas contratación para eventos, expos y promociones.'
         }
+      },
+      'modelos': {
+        obligatoriosExtra: ['portfolioURL'],
+        fotosMin: 6,
+        fieldPatches: {
+          portfolioURL: { required: true }
+        },
+        fieldHints: {
+          portfolioURL: 'Enlace público a tu book o portafolio (Instagram, Behance, sitio propio, etc.).'
+        }
       }
     },
     obligatorios: [
@@ -88,6 +98,14 @@
             type: 'boolean',
             required: false,
             onlySubcategorias: ['edecan']
+          },
+          {
+            id: 'portfolioURL',
+            label: 'Portafolio',
+            type: 'url',
+            required: false,
+            onlySubcategorias: ['modelos'],
+            placeholder: 'https://…'
           },
           {
             id: 'disponibilidad',

@@ -1589,19 +1589,27 @@
     ctx = ctx || state.contexto || buildContexto(state.sector, state.subcategoria);
     var fotosMin = global.CariHubRegistroPublicBlocks && CariHubRegistroPublicBlocks.getFotosMin
       ? CariHubRegistroPublicBlocks.getFotosMin(ctx) : null;
-    var extraSlots = fotosMin === 5 ? 4 : 3;
+    var extraSlots = fotosMin && fotosMin > 1 ? fotosMin - 1 : 3;
     var hint = $('rpGalleryHint');
     var label = $('rpGalleryLabel');
     var grid = $('rpGalleryGrid');
     if (hint) {
-      hint.textContent = fotosMin === 5
-        ? 'Escort VIP: foto principal y mínimo 4 fotos más (5 en total).'
-        : 'Foto principal y hasta 3 fotos extra para galería.';
+      if (fotosMin === 5) {
+        hint.textContent = 'Escort VIP: foto principal y mínimo 4 fotos más (5 en total).';
+      } else if (fotosMin === 6) {
+        hint.textContent = 'Modelos: foto principal y mínimo 5 fotos más (6 en total).';
+      } else {
+        hint.textContent = 'Foto principal y hasta 3 fotos extra para galería.';
+      }
     }
     if (label) {
-      label.textContent = fotosMin === 5
-        ? 'Galería (mínimo 4 fotos extra)'
-        : 'Galería (3 fotos extra)';
+      if (fotosMin === 5) {
+        label.textContent = 'Galería (mínimo 4 fotos extra)';
+      } else if (fotosMin === 6) {
+        label.textContent = 'Galería (mínimo 5 fotos extra)';
+      } else {
+        label.textContent = 'Galería (3 fotos extra)';
+      }
     }
     if (!grid) return;
     var existing = grid.querySelectorAll('.rp-gallery__slot').length;
@@ -1626,6 +1634,7 @@
     });
     if (document.body) {
       document.body.classList.toggle('rp-fotos-vip', fotosMin === 5);
+      document.body.classList.toggle('rp-fotos-modelos', fotosMin === 6);
     }
   }
 

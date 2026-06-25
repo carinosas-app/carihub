@@ -217,6 +217,7 @@
       nivelServicio: mappedBloques.nivelServicio || '',
       nivelPremium: mappedBloques.nivelPremium || '',
       eventosDisponibles: mappedBloques.eventosDisponibles === true,
+      portfolioURL: mappedBloques.portfolioURL || '',
       disponibilidad: mappedBloques.disponibilidad || '',
       estatura: mappedBloques.estatura || '',
       peso: mappedBloques.peso || '',
