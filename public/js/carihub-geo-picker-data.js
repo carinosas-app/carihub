@@ -124,7 +124,8 @@
     'Perú': 1800,
     'Chile': 1600,
     'Argentina': 2100,
-    'Brasil': 2900
+    'Brasil': 2900,
+    'Uruguay': 900
   };
 
   var STATE_PERFILES = {
@@ -183,13 +184,46 @@
     'Texas': 'Austin',
     'California': 'Sacramento',
     'Florida': 'Tallahassee',
-    'New York': 'Albany'
+    'New York': 'Albany',
+    'Montevideo': 'Montevideo',
+    'Maldonado': 'Maldonado',
+    'Canelones': 'Canelones',
+    'Colonia': 'Colonia del Sacramento',
+    'Salto': 'Salto',
+    'Paysandú': 'Paysandú',
+    'Región Metropolitana de Santiago': 'Santiago',
+    'Valparaíso': 'Valparaíso',
+    'Biobío': 'Concepción',
+    'Antofagasta': 'Antofagasta',
+    'Maule': 'Talca',
+    'La Araucanía': 'Temuco',
+    'Los Lagos': 'Puerto Montt',
+    'Los Ríos': 'Valdivia',
+    'Antioquia': 'Medellín',
+    'Bogotá D.C.': 'Bogotá',
+    'Valle del Cauca': 'Cali',
+    'Lima': 'Lima',
+    'Arequipa': 'Arequipa',
+    'Buenos Aires': 'La Plata',
+    'Ciudad Autónoma de Buenos Aires': 'Buenos Aires',
+    'Córdoba': 'Córdoba',
+    'Santa Fe': 'Santa Fe',
+    'São Paulo': 'São Paulo',
+    'Rio de Janeiro': 'Rio de Janeiro',
+    'Minas Gerais': 'Belo Horizonte',
+    'Bahia': 'Salvador',
+    'Paraná': 'Curitiba'
   };
 
   var IMAGES = global.CariHubGeoImages || null;
 
   var DISPLAY_NAMES = {
-    'CDMX': 'Ciudad de México'
+    'CDMX': 'Ciudad de México',
+    'Región Metropolitana de Santiago': 'Región Metropolitana',
+    'Libertador General Bernardo O\'Higgins': 'O\'Higgins',
+    'Aisén del General Carlos Ibañez del Campo': 'Aisén',
+    'Magallanes y de la Antártica Chilena': 'Magallanes',
+    'Ciudad Autónoma de Buenos Aires': 'CABA'
   };
 
   function hashName(name) {
@@ -208,14 +242,13 @@
   }
 
   function flagImageUrl(name) {
+    var iso = FLAG_ISO[name];
+    if (iso) return 'https://flagcdn.com/w160/' + iso + '.png';
     if (IMAGES && IMAGES.flagImage) {
       var localNamed = IMAGES.flagImage(name);
       if (localNamed) return localNamed;
     }
-    var iso = FLAG_ISO[name];
-    if (!iso) return '';
-    if (LOCAL_FLAG_FILES[iso]) return LOCAL_FLAG_FILES[iso];
-    return 'https://flagcdn.com/w80/' + iso + '.png';
+    return '';
   }
 
   function formatPerfiles(n, plus) {
@@ -236,9 +269,14 @@
   var COUNTRY_DIVISION_COUNTS = {
     'México': 32,
     'Estados Unidos': 50,
-    'Colombia': 32,
+    'Colombia': 33,
     'Canadá': 13,
-    'España': 17
+    'España': 17,
+    'Uruguay': 19,
+    'Chile': 16,
+    'Perú': 25,
+    'Argentina': 24,
+    'Brasil': 27
   };
 
   function divisionCount(pais, fallback) {
@@ -247,13 +285,15 @@
   }
 
   function divisionWord(pais) {
-    if (pais === 'Colombia') return 'departamentos';
+    if (pais === 'Colombia' || pais === 'Uruguay' || pais === 'Perú') return 'departamentos';
+    if (pais === 'Chile') return 'regiones';
+    if (pais === 'Argentina') return 'provincias';
     if (pais === 'Canadá') return 'provincias';
     if (pais === 'España') return 'comunidades';
     return 'estados';
   }
 
-  function imageFor(tipo, name, pais) {
+  function imageFor(tipo, name, pais, estado) {
     if (tipo === 'pais') {
       var flagImg = flagImageUrl(name);
       if (flagImg) return flagImg;
@@ -263,9 +303,16 @@
       return IMAGES.stateImage(pais || '', name);
     }
     if (tipo === 'ciudad' && IMAGES && IMAGES.cityImage) {
-      return IMAGES.cityImage(pais || '', name);
+      return IMAGES.cityImage(pais || '', name, estado || '');
     }
     return 'img/home/promo-perfil.jpg';
+  }
+
+  function sanitizeGeoCardImage(url, pais, tipo) {
+    if (!url || tipo === 'pais') return url;
+    if (/flagcdn\.com/i.test(url) || /\/flags\//i.test(url)) return '';
+    if (pais !== 'México' && /\/mx\//i.test(url)) return '';
+    return url;
   }
 
   function thumbClassFor(tipo, name) {
@@ -277,14 +324,122 @@
     return STATE_CAPITAL[estado] || estado;
   }
 
+  var LANDMARK_IMAGES = {
+    'México': 'img/geo/mx/ciudad-de-mexico.jpg',
+    'Estados Unidos': 'img/geo/ciudades/ciudad-04.jpg',
+    'Colombia': 'img/geo/ciudades/ciudad-03.jpg',
+    'Canadá': 'img/geo/ciudades/ciudad-06.jpg',
+    'España': 'img/geo/ciudades/ciudad-05.jpg',
+    'Perú': 'img/geo/ciudades/ciudad-15.jpg',
+    'Chile': 'img/geo/ciudades/ciudad-07.jpg',
+    'Argentina': 'img/geo/ciudades/ciudad-08.jpg',
+    'Brasil': 'img/geo/ciudades/ciudad-09.jpg',
+    'Reino Unido': 'img/geo/ciudades/ciudad-02.jpg',
+    'Francia': 'img/geo/ciudades/ciudad-10.jpg',
+    'Alemania': 'img/geo/ciudades/ciudad-11.jpg',
+    'Italia': 'img/geo/ciudades/ciudad-12.jpg',
+    'Portugal': 'img/geo/ciudades/ciudad-13.jpg',
+    'Australia': 'img/geo/ciudades/ciudad-14.jpg',
+    'Uruguay': 'img/geo/ciudades/ciudad-16.jpg'
+  };
+
+  var WORLD_LANDMARK_DECOR = [
+    'img/geo/ciudad-plaza.svg',
+    'img/geo/ciudad-parque.svg',
+    'img/geo/ciudad-centro.svg',
+    'img/geo/ciudad-calle.svg',
+    'img/geo/estado-costa.svg',
+    'img/geo/estado-colonial.svg',
+    'img/geo/estado-urbano.svg',
+    'img/geo/estado-norte.svg'
+  ];
+
+  function hashGeoNameSpread(name) {
+    var h = 2166136261;
+    var s = String(name || '');
+    for (var i = 0; i < s.length; i++) {
+      h ^= s.charCodeAt(i);
+      h = Math.imul(h, 16777619);
+    }
+    return h >>> 0;
+  }
+
+  function hashGeoName(name) {
+    return hashGeoNameSpread(name);
+  }
+
+  function isFlagOrMexicoLandmark(url, country) {
+    if (!url) return true;
+    if (/flagcdn\.com/i.test(url) || /\/flags\//i.test(url)) return true;
+    if (country !== 'México' && /\/mx\//i.test(url)) return true;
+    return false;
+  }
+
+  function buildWorldLandmarkPool() {
+    if (buildWorldLandmarkPool._cache) return buildWorldLandmarkPool._cache;
+    var pool = WORLD_LANDMARK_DECOR.slice();
+    if (IMAGES && IMAGES.CITY_PHOTOS) {
+      for (var i = 0; i < IMAGES.CITY_PHOTOS.length; i++) {
+        var src = IMAGES.CITY_PHOTOS[i];
+        if (src.indexOf('/mx/') === -1 && src.indexOf('/flags/') === -1) pool.push(src);
+      }
+    }
+    buildWorldLandmarkPool._cache = pool;
+    return pool;
+  }
+
+  function ensureLandmarkCatalog() {
+    if (ensureLandmarkCatalog._done) return;
+    ensureLandmarkCatalog._done = true;
+    var pool = buildWorldLandmarkPool();
+    if (!pool.length) return;
+    if (typeof TODOS_LOS_PAISES !== 'undefined' && TODOS_LOS_PAISES.length) {
+      for (var i = 0; i < TODOS_LOS_PAISES.length; i++) {
+        var pais = TODOS_LOS_PAISES[i];
+        if (pais === 'México') continue;
+        var mapped = LANDMARK_IMAGES[pais];
+        if (mapped && !isFlagOrMexicoLandmark(mapped, pais)) continue;
+        LANDMARK_IMAGES[pais] = pool[(hashGeoNameSpread(pais) + i) % pool.length];
+      }
+    }
+  }
+
+  function landmarkImage(name) {
+    ensureLandmarkCatalog();
+    if (name === 'México') return 'img/geo/mx/ciudad-de-mexico.jpg';
+    if (LANDMARK_IMAGES[name] && !isFlagOrMexicoLandmark(LANDMARK_IMAGES[name], name)) {
+      return LANDMARK_IMAGES[name];
+    }
+    var pool = buildWorldLandmarkPool();
+    if (!pool.length) return 'img/geo/ciudades/ciudad-08.jpg';
+    return pool[hashGeoNameSpread(name) % pool.length];
+  }
+
+  var HEADER_LANDMARK_PAIS = 'img/geo/ciudades/ciudad-08.jpg';
+
+  function headerLandmarkImage(tipo, picker) {
+    picker = picker || { state: {} };
+    if (tipo === 'pais') return HEADER_LANDMARK_PAIS;
+    if (tipo === 'estado' && picker.state.pais) {
+      return landmarkImage(picker.state.pais);
+    }
+    if (tipo === 'ciudad' && picker.state.pais && picker.state.estado) {
+      return imageFor('estado', picker.state.estado, picker.state.pais);
+    }
+    return HEADER_LANDMARK_PAIS;
+  }
+
   global.CariHubGeoPickerData = {
     flagFor: flagFor,
     flagImageUrl: flagImageUrl,
+    landmarkImage: landmarkImage,
+    headerLandmarkImage: headerLandmarkImage,
     thumbClassFor: thumbClassFor,
     formatPerfiles: formatPerfiles,
     stubPerfiles: stubPerfiles,
     divisionWord: divisionWord,
     imageFor: imageFor,
+    sanitizeGeoCardImage: sanitizeGeoCardImage,
     capitalFor: capitalFor,
     divisionCount: divisionCount,
     displayName: displayName,
