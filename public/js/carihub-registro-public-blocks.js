@@ -15,6 +15,84 @@
     return global.CARIHUB_REGISTRO_ESCORT_BLOCKS || null;
   }
 
+  function normalizeSubId(id) {
+    return String(id || '').trim().toLowerCase().replace(/_/g, ' ');
+  }
+
+  function getSubcategoriaOverride(cfg, ctx) {
+    if (!cfg || !cfg.subcategoriaOverrides) return null;
+    var subId = normalizeSubId((ctx && ctx.subcategoriaId) || (ctx && ctx.subcategoria) || '');
+    return cfg.subcategoriaOverrides[subId] || null;
+  }
+
+  function mergedConfig(cfg, ctx) {
+    var over = getSubcategoriaOverride(cfg, ctx);
+    var subId = normalizeSubId((ctx && ctx.subcategoriaId) || (ctx && ctx.subcategoria) || '');
+    function fieldVisible(field) {
+      if (!field.onlySubcategorias || !field.onlySubcategorias.length) return true;
+      return field.onlySubcategorias.some(function (s) {
+        return normalizeSubId(s) === subId;
+      });
+    }
+    var baseBlocks = cfg.blocks.map(function (block) {
+      return {
+        id: block.id,
+        title: block.title,
+        hint: block.hint,
+        fields: block.fields.filter(fieldVisible).map(function (field) {
+          var patch = over && over.fieldPatches ? over.fieldPatches[field.id] : null;
+          var hint = over && over.fieldHints ? over.fieldHints[field.id] : null;
+          var f = Object.assign({}, field);
+          if (patch) Object.assign(f, patch);
+          if (hint) f.hint = hint;
+          return f;
+        })
+      };
+    });
+    if (!over) {
+      return {
+        id: cfg.id,
+        formularioId: cfg.formularioId,
+        uiIds: cfg.uiIds,
+        subcategoriaIds: cfg.subcategoriaIds,
+        subcategoriaOverrides: cfg.subcategoriaOverrides,
+        obligatorios: (cfg.obligatorios || []).slice(),
+        blocks: baseBlocks
+      };
+    }
+    var out = {
+      id: cfg.id,
+      formularioId: cfg.formularioId,
+      uiIds: cfg.uiIds,
+      subcategoriaIds: cfg.subcategoriaIds,
+      subcategoriaOverrides: cfg.subcategoriaOverrides,
+      obligatorios: (cfg.obligatorios || []).slice(),
+      blocks: baseBlocks,
+      fotosMin: over.fotosMin || null
+    };
+    (over.obligatoriosExtra || []).forEach(function (key) {
+      if (out.obligatorios.indexOf(key) < 0) out.obligatorios.push(key);
+    });
+    return out;
+  }
+
+  function getFotosMin(ctx) {
+    var cfg = resolveEscortConfig();
+    if (!cfg || !matchesEscort(ctx || {}, null)) return null;
+    var merged = mergedConfig(cfg, ctx || {});
+    return merged.fotosMin || null;
+  }
+
+  function applyBadges(u, ctx) {
+    var cfg = resolveEscortConfig();
+    var over = getSubcategoriaOverride(cfg, ctx || { subcategoriaId: u && u.subcategoriaId });
+    if (!over || !over.badges) return u;
+    if (over.badges.indexOf('lgbt') >= 0) u.badgeLgbt = true;
+    if (over.badges.indexOf('vip') >= 0) u.badgeVip = true;
+    if (over.badges.indexOf('trans') >= 0) u.badgeTrans = true;
+    return u;
+  }
+
   var NIVEL_SERVICIO_AYUDA = {
     'Básico': 'Trato estándar: servicios esenciales de tu listado base.',
     'Completo': 'Experiencia amplia: incluye la mayoría de servicios que marques.',
@@ -88,12 +166,18 @@
         wrap += '<p class="rp-nivel-servicio-help" id="rpPub_nivelServicio_help" role="note">' +
           'Elige un nivel para ver qué significa para quien visita tu perfil.</p>';
       }
+      if (field.hint) {
+        wrap += '<p class="rp-contact-hint rp-pub-field-hint">' + esc(field.hint) + '</p>';
+      }
     } else if (field.type === 'textarea') {
       wrap += '<label for="' + fieldDomId(field.id) + '">' + esc(field.label) + req + '</label>' +
         '<textarea id="' + fieldDomId(field.id) + '" rows="' + (field.rows || 3) + '" placeholder="' + esc(field.placeholder || '') + '">' + esc(val) + '</textarea>';
     } else {
       wrap += '<label for="' + fieldDomId(field.id) + '">' + esc(field.label) + req + '</label>' +
         '<input type="text" id="' + fieldDomId(field.id) + '" value="' + esc(val) + '" placeholder="' + esc(field.placeholder || '') + '">';
+    }
+    if (field.hint && field.type !== 'select' && field.type !== 'checklist') {
+      wrap += '<p class="rp-contact-hint rp-pub-field-hint">' + esc(field.hint) + '</p>';
     }
     wrap += '</div>';
     return wrap;
@@ -173,9 +257,10 @@
     return values;
   }
 
-  function validateValues(cfg, values) {
+  function validateValues(cfg, values, ctx) {
     var missing = [];
     if (!cfg) return missing;
+    cfg = mergedConfig(cfg, ctx);
     (cfg.obligatorios || []).forEach(function (key) {
       var val = values[key];
       if (Array.isArray(val)) {
@@ -218,23 +303,24 @@
       return null;
     }
     savedValues = savedValues || {};
-    renderBlocks(host, cfg, savedValues);
+    renderBlocks(host, mergedConfig(cfg, ctx), savedValues);
     syncLegacyFields(cfg, true);
     return cfg;
   }
 
-  function collectForPreview() {
+  function collectForPreview(ctx) {
     var cfg = resolveEscortConfig();
     if (!$('rpDynamicPublicHost') || $('rpDynamicPublicHost').classList.contains('rp-hidden')) return null;
-    return collectValues(cfg);
+    return collectValues(mergedConfig(cfg, ctx || {}));
   }
 
-  function mapToPerfil(u, bloques) {
+  function mapToPerfil(u, bloques, ctx) {
     if (!bloques) return u;
     u = u || {};
     if (bloques.orientacion) u.orientacion = bloques.orientacion;
     if (bloques.idiomas) u.idiomas = bloques.idiomas;
     if (bloques.nivelServicio) u.nivelServicio = bloques.nivelServicio;
+    if (bloques.nivelPremium) u.nivelPremium = bloques.nivelPremium;
     if (bloques.disponibilidad) {
       u.disponibilidad = DISPONIBILIDAD_LABELS[bloques.disponibilidad] || bloques.disponibilidad;
     }
@@ -270,13 +356,13 @@
       u.horario = bloques.horarioDetalle;
       u.horarioDetalle = bloques.horarioDetalle;
     }
-    return u;
+    return applyBadges(u, ctx);
   }
 
   function collect(ctx, resolved) {
     var cfg = resolveConfig(ctx, resolved);
     if (!cfg) return null;
-    return collectValues(cfg);
+    return collectValues(mergedConfig(cfg, ctx));
   }
 
   function bindChange(onChange) {
@@ -300,6 +386,8 @@
     collect: collect,
     collectForPreview: collectForPreview,
     mapToPerfil: mapToPerfil,
+    getFotosMin: getFotosMin,
+    mergedConfig: mergedConfig,
     bindChange: bindChange
   };
 })(typeof window !== 'undefined' ? window : globalThis);

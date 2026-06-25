@@ -121,7 +121,7 @@
       zona: zona,
       ciudad: ciudad,
       estado: estado,
-      pais: pais || 'México',
+      pais: pais,
       ubicacion: ubicacion,
       descripcion: $('fldDescripcion') ? $('fldDescripcion').value.trim() : '',
       tagline: $('fldDescripcion') ? $('fldDescripcion').value.trim() : '',
@@ -153,9 +153,9 @@
     if (esNegocio) u.nombreComercial = u.nombre;
 
     var bloques = global.CariHubRegistroPublicBlocks && CariHubRegistroPublicBlocks.collectForPreview
-      ? CariHubRegistroPublicBlocks.collectForPreview() : null;
+      ? CariHubRegistroPublicBlocks.collectForPreview(ctx) : null;
     if (bloques && global.CariHubRegistroPublicBlocks.mapToPerfil) {
-      u = global.CariHubRegistroPublicBlocks.mapToPerfil(u, bloques);
+      u = global.CariHubRegistroPublicBlocks.mapToPerfil(u, bloques, ctx);
     }
 
     if (global.CariHubFieldEngineLite && CariHubFieldEngineLite.enriquecerPerfilPublico) {
@@ -171,7 +171,7 @@
       perfil: u,
       query: {
         categoria: subName || catName,
-        pais: pais || 'México',
+        pais: pais,
         estado: estado,
         ciudad: ciudad
       }

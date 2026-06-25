@@ -14,6 +14,39 @@
       'acompanante', 'petit', 'trans', 'femboy', 'singles', 'hotwife',
       'lesbians', 'tom boy', 'tom fem', 'dotados'
     ],
+    subcategoriaOverrides: {
+      'escort gay': {
+        obligatoriosExtra: ['orientacion'],
+        badges: ['lgbt'],
+        fieldPatches: {
+          orientacion: { required: true }
+        },
+        fieldHints: {
+          orientacion: 'Indica orientación y tipo de clientela.'
+        }
+      },
+      'lesbians': {
+        obligatoriosExtra: ['orientacion'],
+        badges: ['lgbt'],
+        fieldPatches: {
+          orientacion: { required: true }
+        },
+        fieldHints: {
+          orientacion: 'Indica orientación y tipo de clientela.'
+        }
+      },
+      'escort vip': {
+        obligatoriosExtra: ['nivelPremium'],
+        badges: ['vip'],
+        fotosMin: 5,
+        fieldPatches: {
+          nivelPremium: { required: true }
+        },
+        fieldHints: {
+          nivelPremium: 'Aparece en tu tarjeta y ficha como distintivo premium.'
+        }
+      }
+    },
     obligatorios: [
       'modalidades', 'serviciosIncluidos', 'serviciosNoRealizo',
       'estatura', 'peso', 'metodosPago'
@@ -27,6 +60,19 @@
           { id: 'orientacion', label: 'Orientación sexual', type: 'select', required: false, options: ['Heterosexual', 'Bisexual', 'Pansexual', 'Gay', 'Lesbiana', 'Queer'] },
           { id: 'idiomas', label: 'Idiomas', type: 'text', required: false, placeholder: 'Ej. Español, Inglés' },
           { id: 'nivelServicio', label: 'Nivel de servicios', type: 'select', required: false, options: ['Básico', 'Completo', 'Premium'], helpKey: 'nivelServicio' },
+          {
+            id: 'nivelPremium',
+            label: 'Nivel premium',
+            type: 'select',
+            required: false,
+            onlySubcategorias: ['escort vip'],
+            options: [
+              'VIP · Alto nivel · Clientes selectos',
+              'Premium · Experiencia exclusiva',
+              'Exclusivo · Solo con cita y verificación previa',
+              'Alto nivel · Hoteles 5★ y suite privada'
+            ]
+          },
           {
             id: 'disponibilidad',
             label: 'Disponibilidad',

@@ -20,7 +20,7 @@
 <script src="js/data/registro-schema-index.js"></script>
 <script src="js/data/registro-ui-index.js"></script>
 <script src="js/carihub-field-engine-lite.js?v=20260628c"></script>
-<script src="js/carihub-public-render-lite.js?v=20260628d"></script>
+<script src="js/carihub-public-render-lite.js?v=20260629c"></script>
 <script src="js/resultados-demo.js"></script>
 <script src="js/perfil-publico-init.js"></script>
   <script src="js/carihub-messenger-privacidad-ui.js"></script>
@@ -1679,6 +1679,7 @@ body:not(.fit) .wrap{max-width:1100px;}
 [data-tema="adult"] .gal__main{aspect-ratio:3/4;}
 .gal__main img{object-position:center top;}
 .gal__main img,.gal__main .ch-foto-ph{width:100%;height:100%;object-fit:cover;display:block;position:absolute;inset:0;}
+.gal__main .gal__empty{width:100%;height:100%;position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:#e8e8ec;color:#888;font-size:.9rem;font-weight:600;}
 .gal__bdg{position:absolute;top:12px;left:12px;z-index:2;}
 [data-tema="adult"] .gal__bdg .verok{background:rgba(252,238,245,.96);box-shadow:0 1px 4px rgba(233,30,99,.08);}
 .gal__cat{position:absolute;top:12px;left:118px;background:#212121;color:#fff;font-size:12px;font-weight:700;padding:5px 10px;border-radius:999px;z-index:2;}
@@ -3296,12 +3297,16 @@ function sobreRow(k,lab,val){
   return '<div class="sobre-row">'+sobreAttrIconSVG(k)+'<span class="sobre-row__lab">'+lab+'</span><span class="sobre-row__val">'+safe(val)+'</span></div>';
 }
 function siluetaSobre(estatura){
+  if(!estatura) return "";
   var alt="Silueta de estatura "+safe(estatura||"");
   return '<div class="sobre-sil" aria-hidden="true">'+
     '<img class="sobre-sil__img" src="img/silueta-estatura.png" alt="'+alt+'" decoding="async">'+
   '</div>';
 }
 function sobreMiHTML(u){
+  var hasDesc=!!(u.sobreMi&&String(u.sobreMi).trim());
+  var hasAttrs=!!(u.estatura||u.peso||u.complexion||u.cabello||u.ojos||u.tatuajes||u.piercings);
+  if(!hasDesc&&!hasAttrs) return "";
   return '<div class="sobre-card playout__sobre">'+
     '<div class="sobre-card__grid">'+
       '<div class="sobre-card__left">'+
@@ -3309,7 +3314,7 @@ function sobreMiHTML(u){
           '<svg class="sobre-card__heart" viewBox="0 0 24 24" aria-hidden="true"><path fill="#E91E63" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>'+
           '<h2 class="sobre-card__title">Sobre mí</h2>'+
         '</div>'+
-        '<p class="sobre-card__desc">'+sobreParrafos(u.sobreMi)+'</p>'+
+        (hasDesc?'<p class="sobre-card__desc">'+sobreParrafos(u.sobreMi)+'</p>':"")+
         '<div class="sobre-attrs">'+
           sobreRow("estatura","Estatura:",u.estatura)+
           sobreRow("peso","Peso:",u.peso)+
@@ -3328,6 +3333,7 @@ function imgTag(src){ return '<img class="ch-foto-ph" src="'+src+'" alt="" loadi
 // Foto principal/miniatura: usa imagen real si hay galería; si no, dibujo SVG.
 function fotoOImg(u, tipo, idx, seed){
   if(u && u.galeria && u.galeria.length) return imgTag(u.galeria[idx % u.galeria.length]);
+  if(u && u.__previewRegistro) return '<div class="gal__empty" aria-hidden="true"><span>Sin foto</span></div>';
   return foto(seed, tipo);
 }
 function galCameraIcon(){
@@ -3483,7 +3489,7 @@ function negocioContactCardHTML(u){
     '<div class="negocio-amen">'+negocioAmenidadesHTML(u)+'</div>'+
   '</div>';
 }
-function thumbs(n, seed, tipo, galeria){
+function thumbs(n, seed, tipo, galeria, u){
   var out="";
   if(galeria && galeria.length){
     var extras = galeria.slice(1);                 // la primera es la principal
@@ -3492,6 +3498,7 @@ function thumbs(n, seed, tipo, galeria){
     if(n>shown) out += '<div class="t lock">🔒<span>+'+(n-shown)+'</span></div>';
     return out;
   }
+  if(u && u.__previewRegistro) return "";
   var vis=Math.min(4,n);
   for(var i=0;i<vis;i++) out += '<div class="t">'+foto(seed+"-"+i, tipo)+'</div>';
   if(n>vis) out += '<div class="t lock">🔒<span>+'+(n-vis)+'</span></div>';
@@ -4184,20 +4191,26 @@ function shell(tipo, inner, u){
 
 /* ---------------- Layout referencia Adulto Cariñosas (todas las categorías) ---------------- */
 function adultoGaleriaHTML(u){
+  var count=u.fotos||(u.galeria&&u.galeria.length)||0;
+  var countHtml=count?('<span class="gal__count">📷 '+count+' fotos</span>'):"";
   return '<div class="pcard gal">'+
       '<div class="gal__main">'+fotoOImg(u,"adult",0,u.nombre)+
       profileGalleryBadgesHTML(u)+
         '<button class="gal__arrow l">‹</button><button class="gal__arrow r">›</button>'+
-        '<span class="gal__count">📷 '+u.fotos+' fotos</span></div>'+
-      '<div class="gal__thumbs">'+thumbs(u.fotos,u.nombre,"adult",u.galeria)+'</div>'+
+        countHtml+'</div>'+
+      '<div class="gal__thumbs">'+thumbs(u.fotos,u.nombre,"adult",u.galeria,u)+'</div>'+
     '</div>';
 }
 function adultoTriPrecioHTML(u){
-  return '<div class="playout__tri">'+
-    '<div class="pcard pcard--mini pcard--precio" data-pub-block="precio"><div class="precio-block"><div class="precio-desde" data-pub-label="precio">Desde</div><div class="precio-big">$'+safe(u.precio)+'</div><div class="precio-sub">'+safe(u.moneda)+(u.tiempoMinimo?' · '+safe(u.tiempoMinimo):'')+'</div></div></div>'+
-    metodosPagoCard(u.metodosPago)+
-    tiempoMinimoCard(u.tiempoMinimo)+
-  '</div>';
+  var precio=u.precio||u.precioDesde||"";
+  var precioCard="";
+  if(precio){
+    precioCard='<div class="pcard pcard--mini pcard--precio" data-pub-block="precio"><div class="precio-block"><div class="precio-desde" data-pub-label="precio">Desde</div><div class="precio-big">$'+safe(precio)+'</div><div class="precio-sub">'+safe(u.moneda)+(u.tiempoMinimo?' · '+safe(u.tiempoMinimo):'')+'</div></div></div>';
+  }
+  var pagos=metodosPagoCard(u.metodosPago);
+  var tiempo=tiempoMinimoCard(u.tiempoMinimo);
+  if(!precioCard&&!pagos&&!tiempo) return "";
+  return '<div class="playout__tri">'+precioCard+pagos+tiempo+'</div>';
 }
 function adultoContactSimpleHTML(u){
   return '<div class="pcard pcard--contact">'+
@@ -4249,7 +4262,8 @@ function perfilDerstackHTML(u){
   '</div>';
 }
 function sobrePerfilHTML(u){
-  if(u.sobreMi&&(u.estatura||u.peso||u.complexion)) return sobreMiHTML(u);
+  var hasFisico=!!(u.estatura||u.peso||u.complexion||u.cabello||u.ojos||u.tatuajes||u.piercings);
+  if(u.sobreMi||hasFisico) return sobreMiHTML(u);
   var txt=u.sobreNosotros||u.sobreMi||"";
   if(!txt) return "";
   var tit=(u.sobreNosotros&&!u.sobreMi)?"Sobre nosotros":"Sobre mí";
@@ -4299,7 +4313,7 @@ function renderPlayoutAdultoRef(u, cfg){
   var ubicIzq=negocioPieUbicCardHTML(u,"izq");
   var izq=galeria+tri+'<div class="playout__izq-stack">'+contact+sobrePersona+ubicIzq+'</div>';
   var der=perfil+(u.donanteUltimo?avisoDonacion(u):"")+feedPair+ficha+stats+derstack;
-  var bannerPie='<div class="playout__banner-adult">'+bottomBannerHTML(layoutKey)+'</div>';
+  var bannerPie=(u&&u.__previewRegistro)?"":('<div class="playout__banner-adult">'+bottomBannerHTML(layoutKey)+'</div>');
 
   return '<div class="playout playout--'+safe(layoutKey).replace(/[^a-z0-9_-]/gi,"-")+extraCls+'" data-cat="'+safe(u.subcategoriaId||layoutKey)+'"'+dataExtra+'>'+
     '<div class="playout__col playout__col--izq">'+izq+'</div>'+
@@ -4333,10 +4347,12 @@ function perfilModchipsHTML(u){
 }
 function perfilIdCardHTML(u){
   var loc=[u.zona,u.ciudad,u.estado].filter(Boolean).join(", ");
+  var quote=u.tagline||u.frase||"";
+  var quoteBlock=quote?('<div class="quote" data-pub-block="descripcion">'+safe(quote)+'</div>'):"";
   return '<div class="pcard">'+adultoIdHeadHTML(u)+
     idlocRow("pin", loc)+idlocRow("av", u.disponibilidad)+
     '<div class="modchips" data-pub-block="modalidad">'+perfilModchipsHTML(u)+'</div>'+
-    '<div class="quote" data-pub-block="descripcion">'+safe(u.tagline||u.frase)+'</div></div>';
+    quoteBlock+'</div>';
 }
 function adultoIdHeadHTML(u){
   var badges=(u.verificada?verificadoBadgeGreen(u.etiquetaVerificada||"Verificada"):"");
@@ -6233,6 +6249,7 @@ function aplicarPerfilDesdeRegistro(vista,u){
     orientacion:u.orientacion||"",
     idiomas:u.idiomas||"",
     nivelServicio:u.nivelServicio||"",
+    nivelPremium:u.nivelPremium||"",
     disponibilidad:u.disponibilidad||"",
     horario:u.horario||u.horarioDetalle||"",
     horarioDetalle:u.horarioDetalle||u.horario||"",
@@ -6253,7 +6270,10 @@ function aplicarPerfilDesdeRegistro(vista,u){
     fotoURL:u.fotoURL||"",
     contactoPublico:u.contactoPublico||{},
     verificada:false,
-    nueva:!!u.nueva
+    nueva:!!u.nueva,
+    badgeLgbt:!!u.badgeLgbt,
+    badgeVip:!!u.badgeVip,
+    badgeTrans:!!u.badgeTrans
   };
   if(u.ubicacion){
     clean.ubicacionPublica=u.ubicacion;

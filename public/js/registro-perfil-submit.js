@@ -178,7 +178,7 @@
     var bloques = cp.bloquesPublicos || null;
     var mappedBloques = {};
     if (bloques && global.CariHubRegistroPublicBlocks && CariHubRegistroPublicBlocks.mapToPerfil) {
-      mappedBloques = CariHubRegistroPublicBlocks.mapToPerfil({}, bloques);
+      mappedBloques = CariHubRegistroPublicBlocks.mapToPerfil({}, bloques, ctx);
     }
 
     return {

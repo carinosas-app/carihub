@@ -1574,6 +1574,61 @@
     return missing;
   }
 
+  function countPublicPhotos() {
+    var n = 0;
+    var mainBox = $('uploadPrincipalBox');
+    if (mainBox && mainBox.dataset.preview) n++;
+    document.querySelectorAll('#rpGalleryGrid .rp-gallery__slot').forEach(function (slot) {
+      if (slot.classList.contains('rp-hidden')) return;
+      if (slot.dataset.preview) n++;
+    });
+    return n;
+  }
+
+  function syncGalleryForSubcategoria(ctx) {
+    ctx = ctx || state.contexto || buildContexto(state.sector, state.subcategoria);
+    var fotosMin = global.CariHubRegistroPublicBlocks && CariHubRegistroPublicBlocks.getFotosMin
+      ? CariHubRegistroPublicBlocks.getFotosMin(ctx) : null;
+    var extraSlots = fotosMin === 5 ? 4 : 3;
+    var hint = $('rpGalleryHint');
+    var label = $('rpGalleryLabel');
+    var grid = $('rpGalleryGrid');
+    if (hint) {
+      hint.textContent = fotosMin === 5
+        ? 'Escort VIP: foto principal y mínimo 4 fotos más (5 en total).'
+        : 'Foto principal y hasta 3 fotos extra para galería.';
+    }
+    if (label) {
+      label.textContent = fotosMin === 5
+        ? 'Galería (mínimo 4 fotos extra)'
+        : 'Galería (3 fotos extra)';
+    }
+    if (!grid) return;
+    var existing = grid.querySelectorAll('.rp-gallery__slot').length;
+    var i;
+    for (i = existing; i < extraSlots; i++) {
+      var slot = document.createElement('div');
+      slot.className = 'rp-gallery__slot';
+      slot.setAttribute('data-index', String(i));
+      slot.textContent = '+ Foto';
+      grid.appendChild(slot);
+    }
+    grid.querySelectorAll('.rp-gallery__slot').forEach(function (slot, idx) {
+      if (idx >= extraSlots) {
+        slot.classList.add('rp-hidden');
+        slot.removeAttribute('data-preview');
+        var img = slot.querySelector('img');
+        if (img) img.remove();
+        slot.classList.remove('has-image');
+      } else {
+        slot.classList.remove('rp-hidden');
+      }
+    });
+    if (document.body) {
+      document.body.classList.toggle('rp-fotos-vip', fotosMin === 5);
+    }
+  }
+
   function fillScreen1() {
     var ctx = state.contexto || buildContexto(state.sector, state.subcategoria);
     var catLabel = ctx.sectorSolicitado || ctx.categoriaPrincipal || ctx.categoriaSolicitada ||
@@ -1598,6 +1653,7 @@
     }
     syncProfileExperienceChip(resolved, ctx);
     syncUiFormNotice(ctx);
+    syncGalleryForSubcategoria(ctx);
     var bloquesSaved = null;
     try {
       var draftRaw = global.localStorage.getItem(STORAGE_KEY);
@@ -1790,12 +1846,15 @@
     }
 
     if (galInput && galGrid) {
-      galGrid.querySelectorAll('.rp-gallery__slot').forEach(function (slot) {
-        slot.addEventListener('click', function () {
+      if (galGrid.dataset.rpGalBound !== '1') {
+        galGrid.dataset.rpGalBound = '1';
+        galGrid.addEventListener('click', function (e) {
+          var slot = e.target.closest('.rp-gallery__slot');
+          if (!slot || slot.classList.contains('rp-hidden')) return;
           galInput.dataset.slotIndex = slot.getAttribute('data-index');
           galInput.click();
         });
-      });
+      }
       galInput.addEventListener('change', function () {
         var f = galInput.files && galInput.files[0];
         var idx = galInput.dataset.slotIndex;
@@ -1963,7 +2022,7 @@
       if (bloquesVals && CariHubRegistroPublicBlocks.validateValues) {
         var cfgBlocks = CariHubRegistroPublicBlocks.resolveConfig(ctx, schemaForBlocks);
         if (cfgBlocks) {
-          var blockMissing = CariHubRegistroPublicBlocks.validateValues(cfgBlocks, bloquesVals);
+          var blockMissing = CariHubRegistroPublicBlocks.validateValues(cfgBlocks, bloquesVals, ctx);
           missing = missing.concat(blockMissing);
         }
       }
@@ -1971,6 +2030,11 @@
     var mainBox = $('uploadPrincipalBox');
     if (!mainBox || !mainBox.dataset.preview) {
       missing.push('Foto principal');
+    }
+    var fotosMin = global.CariHubRegistroPublicBlocks && CariHubRegistroPublicBlocks.getFotosMin
+      ? CariHubRegistroPublicBlocks.getFotosMin(ctx) : null;
+    if (fotosMin && countPublicPhotos() < fotosMin) {
+      missing.push('Mínimo ' + fotosMin + ' fotos (principal + galería)');
     }
     var contactMissing = validateContactSelection(collectContactConfig());
     if (contactMissing.length) {

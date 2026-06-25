@@ -71,7 +71,9 @@
   function precioTexto(u, opts) {
     opts = opts || {};
     var p = u.precio || u.precioDesde;
-    if (p == null || String(p).trim() === '') return 'Consultar';
+    if (p == null || String(p).trim() === '') {
+      return u.__previewRegistro ? '' : 'Consultar';
+    }
     var s = String(p).trim();
     return /^\$|mxn|usd|consult/i.test(s) ? s : '$' + s;
   }
@@ -85,11 +87,17 @@
     if (global.CariHubMessengerPrivacidadUi && CariHubMessengerPrivacidadUi.disponibilidadCard) {
       return CariHubMessengerPrivacidadUi.disponibilidadCard(u);
     }
-    var d = normTxt(u.disponibilidad || u.estatus || u.horario || '');
+    var d = normTxt(u.disponibilidad || u.estatus || '');
+    if (!d && u.__previewRegistro) {
+      return { clase: 'neutral', txt: '', busy: false, hidden: true };
+    }
     if (d.indexOf('ocup') !== -1 || d.indexOf('cerr') !== -1) {
       return { clase: 'neutral', txt: 'Consultar disponibilidad', busy: true };
     }
-    return { clase: 'neutral', txt: 'Consultar disponibilidad', busy: false };
+    if (d.indexOf('dispon') !== -1 || d.indexOf('cita') !== -1) {
+      return { clase: 'ok', txt: u.disponibilidad || 'Disponible', busy: false };
+    }
+    return { clase: 'neutral', txt: d || 'Consultar disponibilidad', busy: false };
   }
 
   function descripcionCompactHTML(u, label) {
@@ -108,6 +116,7 @@
     if (opts.vip) items.push('<span class="res-badge res-badge--vip">VIP</span>');
     if (opts.cedula) items.push('<span class="res-badge res-badge--ver">Cédula</span>');
     if (opts.negocio) items.push('<span class="res-badge res-badge--ver">Verificado</span>');
+    if (opts.lgbt || u.badgeLgbt) items.push('<span class="res-badge res-badge--lgbt">LGBT+</span>');
     if (opts.respRapida) items.push('<span class="res-badge res-badge--fast">Respuesta rápida</span>');
     else if (u.nueva) items.push('<span class="res-badge res-badge--new">Nueva</span>');
     if (!items.length) return '';
@@ -145,12 +154,20 @@
     var metaRight = opts.metaRight || '';
     var descBlock = opts.descBlock != null ? opts.descBlock : descripcionCompactHTML(u);
     var priceLabel = opts.priceLabel || 'Desde';
-    var priceBlock =
-      '<div class="res-card__price">' +
-        '<span class="res-card__price-ic" aria-hidden="true">' + svgIco('money', 'res-card__price-ic') + '</span>' +
-        '<span class="res-card__price-desde">' + safeTxt(priceLabel) + '</span>' +
-        '<span class="res-card__price-val">' + safeTxt(precioTexto(u)) + '</span>' +
-      '</div>';
+    var precioVal = precioTexto(u);
+    var priceBlock = precioVal
+      ? '<div class="res-card__price">' +
+          '<span class="res-card__price-ic" aria-hidden="true">' + svgIco('money', 'res-card__price-ic') + '</span>' +
+          '<span class="res-card__price-desde">' + safeTxt(priceLabel) + '</span>' +
+          '<span class="res-card__price-val">' + safeTxt(precioVal) + '</span>' +
+        '</div>'
+      : '';
+    var availBlock = disp.hidden
+      ? ''
+      : '<span class="res-card__avail res-card__avail--' + disp.clase + '">' +
+          '<span class="res-dot res-dot--' + disp.clase + '" aria-hidden="true"></span>' +
+          safeTxt(disp.txt) +
+        '</span>';
     var metaRow = '';
     if (loc || metaRight) {
       metaRow = '<div class="res-card__row res-card__row--meta">' +
@@ -186,10 +203,7 @@
                 headExtra +
               '</div>' +
               favBtn +
-              '<span class="res-card__avail res-card__avail--' + disp.clase + '">' +
-                '<span class="res-dot res-dot--' + disp.clase + '" aria-hidden="true"></span>' +
-                safeTxt(disp.txt) +
-              '</span>' +
+              availBlock +
               priceBlock +
             '</div>' +
             descBlock +
@@ -211,13 +225,17 @@
     var catLabel = (global.CariHubResultadosDemo && CariHubResultadosDemo.labelCategoria)
       ? CariHubResultadosDemo.labelCategoria(u.categoriaPublica || u.categoria || Q.categoria || '')
       : (u.categoriaPublica || u.categoria || Q.categoria || '');
-    var vip = u.vip === true || u.esVip === true || /vip/i.test(String(catLabel || ''));
+    var vip = u.vip === true || u.esVip === true || u.badgeVip === true || /vip/i.test(String(catLabel || ''));
     return cardShell(u, Q, {
       cardClass: 'res-card--adult',
       headExtra: edad ? '<span class="age">' + safeTxt(edad) + '</span>' : '',
       metaRight: mods,
       catLabel: catLabel,
-      badges: badgesCompactHTML(u, { vip: vip, respRapida: u.respuestaRapida !== false })
+      badges: badgesCompactHTML(u, {
+        vip: vip,
+        lgbt: u.badgeLgbt === true,
+        respRapida: !u.__previewRegistro && u.respuestaRapida === true
+      })
     });
   }
 
