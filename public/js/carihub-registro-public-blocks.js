@@ -40,6 +40,11 @@
       });
     }
     function blockVisible(block) {
+      if (block.excludeSubcategorias && block.excludeSubcategorias.length) {
+        if (block.excludeSubcategorias.some(function (s) {
+          return normalizeSubId(s) === subId;
+        })) return false;
+      }
       if (!block.onlySubcategorias || !block.onlySubcategorias.length) return true;
       return block.onlySubcategorias.some(function (s) {
         return normalizeSubId(s) === subId;
@@ -87,6 +92,10 @@
     };
     (over.obligatoriosExtra || []).forEach(function (key) {
       if (out.obligatorios.indexOf(key) < 0) out.obligatorios.push(key);
+    });
+    (over.obligatoriosRemove || []).forEach(function (key) {
+      var idx = out.obligatorios.indexOf(key);
+      if (idx >= 0) out.obligatorios.splice(idx, 1);
     });
     return out;
   }
@@ -433,6 +442,37 @@
     u = u || {};
     if (bloques.orientacion) u.orientacion = bloques.orientacion;
     if (bloques.identidadGenero) u.identidadGenero = bloques.identidadGenero;
+    if (bloques.presentacionFemboy) {
+      u.presentacionFemboy = bloques.presentacionFemboy;
+      u.identidadGenero = bloques.presentacionFemboy;
+    }
+    if (bloques.estiloPredominante) u.estiloPredominante = bloques.estiloPredominante;
+    if (Array.isArray(bloques.disponiblePara) && bloques.disponiblePara.length) {
+      u.disponiblePara = bloques.disponiblePara.slice();
+    }
+    if (bloques.largoCabello) u.largoCabello = bloques.largoCabello;
+    if (bloques.tonoPiel) u.tonoPiel = bloques.tonoPiel;
+    if (bloques.videoPresentacion) u.videoPresentacion = normalizeUrl(bloques.videoPresentacion);
+    if (bloques.promociones) u.promociones = bloques.promociones;
+    if (Array.isArray(bloques.buscanConocer) && bloques.buscanConocer.length) {
+      u.buscanConocer = bloques.buscanConocer.slice();
+      u.buscan = bloques.buscanConocer.slice();
+    }
+    if (Array.isArray(bloques.tipoCitaPreferida) && bloques.tipoCitaPreferida.length) {
+      u.tipoCitaPreferida = bloques.tipoCitaPreferida.slice();
+    }
+    if (bloques.personalidadPredominante) u.personalidadPredominante = bloques.personalidadPredominante;
+    if (bloques.estiloPersonal) u.estiloPersonal = bloques.estiloPersonal;
+    if (Array.isArray(bloques.dinamicasParticipa) && bloques.dinamicasParticipa.length) {
+      u.dinamicasParticipa = bloques.dinamicasParticipa.slice();
+    }
+    if (bloques.colaboracionContenido) u.colaboracionContenido = bloques.colaboracionContenido;
+    if (bloques.realizaTrios) u.realizaTrios = bloques.realizaTrios;
+    if (Array.isArray(bloques.tiposTrios) && bloques.tiposTrios.length) {
+      u.tiposTrios = bloques.tiposTrios.slice();
+    }
+    if (bloques.esBisexual) u.esBisexual = bloques.esBisexual;
+    if (bloques.realizaGangBang) u.realizaGangBang = bloques.realizaGangBang;
     if (Array.isArray(bloques.buscan) && bloques.buscan.length) u.buscan = bloques.buscan.slice();
     else if (bloques.buscan) u.buscan = bloques.buscan;
     if (bloques.tipoPublico) {
@@ -452,6 +492,12 @@
     if (bloques.idiomas) u.idiomas = bloques.idiomas;
     if (bloques.nivelServicio) u.nivelServicio = bloques.nivelServicio;
     if (bloques.nivelPremium) u.nivelPremium = bloques.nivelPremium;
+    if (Array.isArray(bloques.experienciaVip) && bloques.experienciaVip.length) {
+      u.experienciaVip = bloques.experienciaVip.slice();
+    }
+    if (Array.isArray(bloques.distintivosVip) && bloques.distintivosVip.length) {
+      u.distintivosVip = bloques.distintivosVip.slice();
+    }
     if (isTruthyFieldValue(bloques.eventosDisponibles)) u.eventosDisponibles = true;
     if (bloques.portfolioURL) u.portfolioURL = normalizeUrl(bloques.portfolioURL);
     if (bloques.disponibilidad) {

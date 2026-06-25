@@ -10,13 +10,54 @@
     'Oral', 'Anal', 'Juguetes', 'Lencería', 'Fetiches', 'Masaje', 'Overnight (consulta)'
   ];
 
-  var SINGLES_SERVICIOS_EXTRA = [
-    'Tríos con pareja',
+  var SINGLES_DISPONIBILIDAD = [
+    'Disponible ahora',
+    'Solo con cita',
+    'Entre semana',
+    'Fines de semana',
+    'Viajes'
+  ];
+
+  var SINGLES_DINAMICAS = [
     'Hotwife / esposa compartida',
     'Pareja swinger',
+    'Tríos con pareja',
     'Solo con la mujer',
-    'Gang bang',
-    'Eventos lifestyle'
+    'Eventos lifestyle',
+    'Gang bang'
+  ];
+
+  var OPCIONES_SI_NO_ACUERDO = ['Sí', 'No', 'Bajo acuerdo previo'];
+
+  var TIPOS_TRIOS_COMP = [
+    'MHM (Mujer–Hombre–Mujer)',
+    'HMH (Hombre–Mujer–Hombre)'
+  ];
+
+  var VIP_EXPERIENCIA_OPCIONES = [
+    'Experiencia exclusiva',
+    'Acompañamiento de alto nivel',
+    'Eventos sociales',
+    'Cenas y reuniones',
+    'Viajes',
+    'Hoteles y suites',
+    'Eventos privados',
+    'Citas programadas',
+    'Ejecutivos y empresarios',
+    'Turismo y acompañamiento'
+  ];
+
+  var VIP_DISTINTIVOS_OPCIONES = [
+    'Atención personalizada',
+    'Máxima discreción',
+    'Disponibilidad para viajar',
+    'Solo con cita',
+    'Excelente presentación',
+    'Fotos de alta calidad',
+    'Puntualidad',
+    'Discreción',
+    'Disponibilidad para eventos y viajes',
+    'Comunicación profesional'
   ];
 
   global.CARIHUB_REGISTRO_ESCORT_BLOCKS = {
@@ -57,7 +98,12 @@
           nivelPremium: { required: true }
         },
         fieldHints: {
-          nivelPremium: 'Aparece en tu tarjeta y ficha como distintivo premium.'
+          nivelPremium: 'Distintivo premium — aparece en tu tarjeta y ficha.',
+          experienciaVip: 'Marca las experiencias VIP que sí ofreces (heredas el formulario Escort completo).',
+          distintivosVip: 'Compromisos y cualidades de tu perfil de alto nivel.',
+          realizaTrios: 'Indica si ofreces tríos en tu servicio.',
+          colaboracionContenido: 'Indica si colaboras en contenido para redes o plataformas.',
+          esBisexual: 'Aparece en tu ficha para quien te contacte.'
         }
       },
       'edecan': {
@@ -82,6 +128,13 @@
       'gigolo': {
         labels: { alias: 'Alias masculino' }
       },
+      escort: {
+        fieldHints: {
+          realizaTrios: 'Indica si ofreces tríos en tu servicio.',
+          colaboracionContenido: 'Indica si colaboras en contenido para redes o plataformas.',
+          esBisexual: 'Aparece en tu ficha para quien te contacte.'
+        }
+      },
       'petit': {
         fieldPatches: {
           estatura: { placeholder: 'Ej. 1.55 m (máx. 1.58 m)' }
@@ -103,16 +156,28 @@
         }
       },
       singles: {
-        obligatoriosExtra: ['buscan'],
+        obligatoriosRemove: ['modalidades', 'serviciosIncluidos', 'serviciosNoRealizo'],
+        obligatoriosExtra: [
+          'buscanConocer', 'tipoCitaPreferida', 'personalidadPredominante',
+          'estiloPersonal', 'disponibilidadAgenda'
+        ],
         fieldPatches: {
-          buscan: { required: true },
-          serviciosIncluidos: {
-            options: ESCORT_SERVICIOS_BASE.concat(SINGLES_SERVICIOS_EXTRA)
-          }
+          buscanConocer: { required: true },
+          tipoCitaPreferida: { required: true },
+          personalidadPredominante: { required: true },
+          estiloPersonal: { required: true },
+          disponibilidadAgenda: { required: true }
         },
         fieldHints: {
-          buscan: 'Indica con qué dinámicas participas: hotwife, parejas swinger, tríos, solo con la mujer, etc.',
-          serviciosIncluidos: 'Marca lo que sí ofreces. Incluye gang bang si participas en ese tipo de escena.'
+          buscanConocer: 'Indica a quién te gustaría conocer.',
+          tipoCitaPreferida: 'Marca los tipos de cita que prefieres (puedes elegir más de una).',
+          personalidadPredominante: 'Cómo te describe la gente que te conoce.',
+          estiloPersonal: 'Tu estilo al vestir o presentarte.',
+          disponibilidadAgenda: 'Cuándo sueles estar disponible para citas.',
+          videoPresentacion: 'Enlace a un video corto de presentación (opcional).',
+          dinamicasParticipa: 'Marca las dinámicas lifestyle en las que participas (opcional).',
+          colaboracionContenido: 'Indica si colaboras en contenido para redes o plataformas.',
+          sobreMi: 'Descríbete: quién eres y qué buscas en una cita.'
         }
       },
       hotwife: {
@@ -135,7 +200,34 @@
           loQueBuscaConocer: 'Describe con quién te gustaría conectar y qué tipo de química buscas.',
           aficiones: 'Hobbies o gustos que ayuden a romper el hielo.',
           estiloVida: 'Cómo vives el lifestyle: discreto, social, viajero, etc.',
+          realizaGangBang: 'Indica si participas en gang bang.',
+          colaboracionContenido: 'Indica si colaboras en contenido para redes o plataformas.',
           sobreMi: 'Presentación personal: quién eres, tu estilo y qué te hace diferente como hotwife.'
+        }
+      },
+      femboy: {
+        badges: ['lgbt'],
+        obligatoriosRemove: ['modalidades', 'serviciosIncluidos', 'serviciosNoRealizo'],
+        obligatoriosExtra: [
+          'presentacionFemboy', 'estiloPredominante', 'disponibilidadAgenda', 'disponiblePara'
+        ],
+        fieldPatches: {
+          presentacionFemboy: { required: true },
+          estiloPredominante: { required: true },
+          disponibilidadAgenda: { required: true },
+          disponiblePara: { required: true }
+        },
+        fieldHints: {
+          presentacionFemboy: 'Cómo te presentas en tu perfil público.',
+          estiloPredominante: 'Tu estética principal — aparece en tu ficha.',
+          disponibilidadAgenda: 'Marca cuándo sueles estar disponible.',
+          disponiblePara: 'Eventos, citas o viajes — elige todo lo que aplique.',
+          videoPresentacion: 'Enlace a un video corto de presentación (YouTube, Drive, etc.).',
+          promociones: 'Tarifas especiales o promos activas (opcional).',
+          realizaTrios: 'Indica si ofreces tríos.',
+          tiposTrios: 'Marca los tipos de trío que realizas (puedes elegir más de uno).',
+          colaboracionContenido: 'Indica si colaboras en contenido para redes o plataformas.',
+          sobreMi: 'Cuéntanos quién eres, tu estilo y qué te hace diferente.'
         }
       }
     },
@@ -149,7 +241,7 @@
         title: 'Tu ficha pública',
         hint: 'Estos datos aparecen en la columna derecha de tu perfil (categoría, idiomas, orientación).',
         fields: [
-          { id: 'orientacion', label: 'Orientación sexual', type: 'select', required: false, options: ['Heterosexual', 'Bisexual', 'Pansexual', 'Gay', 'Lesbiana', 'Queer'] },
+          { id: 'orientacion', label: 'Orientación sexual', type: 'select', required: false, excludeSubcategorias: ['femboy', 'singles'], options: ['Heterosexual', 'Bisexual', 'Pansexual', 'Gay', 'Lesbiana', 'Queer'] },
           {
             id: 'identidadGenero',
             label: 'Identidad / presentación',
@@ -159,7 +251,7 @@
             placeholder: 'Ej. Mujer trans, no binaria…'
           },
           { id: 'idiomas', label: 'Idiomas', type: 'text', required: false, placeholder: 'Ej. Español, Inglés' },
-          { id: 'nivelServicio', label: 'Nivel de servicios', type: 'select', required: false, options: ['Básico', 'Completo', 'Premium'], helpKey: 'nivelServicio' },
+          { id: 'nivelServicio', label: 'Nivel de servicios', type: 'select', required: false, excludeSubcategorias: ['femboy', 'singles'], options: ['Básico', 'Completo', 'Premium'], helpKey: 'nivelServicio' },
           {
             id: 'nivelPremium',
             label: 'Nivel premium',
@@ -193,26 +285,153 @@
             label: 'Disponibilidad',
             type: 'select',
             required: false,
-            excludeSubcategorias: ['hotwife'],
+            excludeSubcategorias: ['hotwife', 'femboy', 'singles'],
             options: [
               { value: 'disponible', label: 'Disponible' },
               { value: 'ocupada', label: 'Ocupada' },
               { value: 'con_cita', label: 'Con cita previa' }
             ]
           },
+        ]
+      },
+      {
+        id: 'singlesPerfil',
+        title: 'Perfil single',
+        hint: 'Qué buscas y cómo te gusta conectar.',
+        onlySubcategorias: ['singles'],
+        fields: [
           {
-            id: 'buscan',
+            id: 'buscanConocer',
+            label: 'Busco conocer',
+            type: 'checklist',
+            required: true,
+            options: ['Hombres', 'Mujeres', 'Parejas', 'Cualquiera']
+          },
+          {
+            id: 'tipoCitaPreferida',
+            label: 'Tipo de cita preferida',
+            type: 'checklist',
+            required: true,
+            options: ['Cena', 'Café', 'Eventos', 'Viajes', 'Salidas nocturnas', 'A convenir']
+          },
+          {
+            id: 'personalidadPredominante',
+            label: 'Personalidad predominante',
+            type: 'select',
+            required: true,
+            options: ['Extrovertida', 'Tranquila', 'Romántica', 'Divertida', 'Elegante', 'Aventurera']
+          },
+          {
+            id: 'estiloPersonal',
+            label: 'Estilo',
+            type: 'select',
+            required: true,
+            options: ['Casual', 'Elegante', 'Glamour', 'Deportivo', 'Urbano']
+          },
+          {
+            id: 'disponibilidadAgenda',
+            label: 'Disponibilidad',
+            type: 'checklist',
+            required: true,
+            options: SINGLES_DISPONIBILIDAD.slice()
+          },
+          {
+            id: 'videoPresentacion',
+            label: 'Video de presentación',
+            type: 'url',
+            required: false,
+            placeholder: 'https://… (opcional)'
+          },
+          {
+            id: 'dinamicasParticipa',
             label: 'Dinámicas en las que participas',
             type: 'checklist',
             required: false,
-            onlySubcategorias: ['singles'],
+            options: SINGLES_DINAMICAS.slice()
+          },
+          {
+            id: 'colaboracionContenido',
+            label: 'Colaboración para contenido',
+            type: 'select',
+            required: false,
+            options: ['Sí', 'No', 'Bajo acuerdo previo']
+          }
+        ]
+      },
+      {
+        id: 'femboyPerfil',
+        title: 'Perfil femboy',
+        hint: 'Presentación, estética y disponibilidad — sin datos explícitos.',
+        onlySubcategorias: ['femboy'],
+        fields: [
+          {
+            id: 'presentacionFemboy',
+            label: 'Presentación',
+            type: 'select',
+            required: true,
+            options: ['Muy femenino', 'Andrógino', 'Estilo propio']
+          },
+          {
+            id: 'estiloPredominante',
+            label: 'Estilo predominante',
+            type: 'select',
+            required: true,
+            options: ['Kawaii', 'Elegante', 'Glamour', 'Gótico', 'Cosplay', 'Casual', 'Urbano']
+          },
+          {
+            id: 'disponibilidadAgenda',
+            label: 'Disponibilidad',
+            type: 'checklist',
+            required: true,
             options: [
-              'Hotwife / esposa compartida',
-              'Pareja swinger',
-              'Tríos con pareja',
-              'Solo con la mujer',
-              'Eventos lifestyle'
+              'Disponible ahora',
+              'Solo con cita',
+              'Entre semana',
+              'Fines de semana',
+              'Viajes'
             ]
+          },
+          {
+            id: 'disponiblePara',
+            label: 'Disponible para',
+            type: 'checklist',
+            required: true,
+            options: ['Eventos', 'Citas', 'Viajes']
+          },
+          {
+            id: 'videoPresentacion',
+            label: 'Video de presentación',
+            type: 'url',
+            required: false,
+            placeholder: 'https://… (opcional)'
+          },
+          {
+            id: 'promociones',
+            label: 'Promociones',
+            type: 'text',
+            required: false,
+            placeholder: 'Ej. 10% primer encuentro (opcional)'
+          },
+          {
+            id: 'realizaTrios',
+            label: '¿Realizas tríos?',
+            type: 'select',
+            required: false,
+            options: OPCIONES_SI_NO_ACUERDO.slice()
+          },
+          {
+            id: 'tiposTrios',
+            label: 'Tipo de trío',
+            type: 'checklist',
+            required: false,
+            options: TIPOS_TRIOS_COMP.slice()
+          },
+          {
+            id: 'colaboracionContenido',
+            label: 'Colaboración para contenido',
+            type: 'select',
+            required: false,
+            options: OPCIONES_SI_NO_ACUERDO.slice()
           }
         ]
       },
@@ -277,6 +496,71 @@
             type: 'text',
             required: false,
             placeholder: 'Ej. discreta, social, viajera…'
+          },
+          {
+            id: 'realizaGangBang',
+            label: '¿Realizas gang bang?',
+            type: 'select',
+            required: false,
+            options: OPCIONES_SI_NO_ACUERDO.slice()
+          },
+          {
+            id: 'colaboracionContenido',
+            label: 'Colaboración para contenido',
+            type: 'select',
+            required: false,
+            options: OPCIONES_SI_NO_ACUERDO.slice()
+          }
+        ]
+      },
+      {
+        id: 'vipPerfil',
+        title: 'Perfil VIP',
+        hint: 'Heredas el formulario Escort; aquí marcas experiencia exclusiva y distintivos de alto nivel.',
+        onlySubcategorias: ['escort vip'],
+        fields: [
+          {
+            id: 'experienciaVip',
+            label: 'Experiencia VIP que ofreces',
+            type: 'checklist',
+            required: false,
+            options: VIP_EXPERIENCIA_OPCIONES.slice()
+          },
+          {
+            id: 'distintivosVip',
+            label: 'Distintivos y compromisos de tu perfil',
+            type: 'checklist',
+            required: false,
+            options: VIP_DISTINTIVOS_OPCIONES.slice()
+          }
+        ]
+      },
+      {
+        id: 'serviciosPreferencias',
+        title: 'Preferencias de servicio',
+        hint: 'Opciones adicionales que aparecen en tu ficha.',
+        onlySubcategorias: ['escort', 'escort vip'],
+        fields: [
+          {
+            id: 'realizaTrios',
+            label: '¿Realizas tríos?',
+            type: 'select',
+            required: false,
+            options: OPCIONES_SI_NO_ACUERDO.slice()
+          },
+          {
+            id: 'colaboracionContenido',
+            label: 'Colaboración para contenido',
+            type: 'select',
+            required: false,
+            options: OPCIONES_SI_NO_ACUERDO.slice()
+          },
+          {
+            id: 'esBisexual',
+            label: '¿Eres bisexual?',
+            type: 'select',
+            required: false,
+            options: ['Sí', 'No']
           }
         ]
       },
@@ -284,6 +568,7 @@
         id: 'modalidades',
         title: 'Modalidad de atención',
         hint: 'Marca dónde atiendes (puedes elegir más de una).',
+        excludeSubcategorias: ['femboy', 'singles'],
         fields: [
           {
             id: 'modalidades',
@@ -315,7 +600,23 @@
           { id: 'peso', label: 'Peso', type: 'text', required: true, placeholder: 'Ej. 55 kg' },
           { id: 'complexion', label: 'Complexión', type: 'select', required: false, options: ['Delgada', 'Atlética', 'Curvy', 'Robusta', 'Promedio'] },
           { id: 'cabello', label: 'Color de cabello', type: 'text', required: false, placeholder: 'Ej. Castaño oscuro' },
+          {
+            id: 'largoCabello',
+            label: 'Largo del cabello',
+            type: 'select',
+            required: false,
+            onlySubcategorias: ['femboy'],
+            options: ['Corto', 'Medio', 'Largo', 'Muy largo']
+          },
           { id: 'ojos', label: 'Color de ojos', type: 'text', required: false, placeholder: 'Ej. Café oscuro' },
+          {
+            id: 'tonoPiel',
+            label: 'Tono de piel',
+            type: 'select',
+            required: false,
+            onlySubcategorias: ['femboy'],
+            options: ['Claro', 'Medio', 'Moreno', 'Oscuro']
+          },
           { id: 'tatuajes', label: 'Tatuajes', type: 'select', required: false, options: ['Sí', 'No'] },
           { id: 'piercings', label: 'Piercings', type: 'select', required: false, options: ['Sí', 'No'] }
         ]
@@ -324,6 +625,7 @@
         id: 'serviciosIncluidos',
         title: 'Servicios incluidos',
         hint: 'Marca todo lo que sí ofreces en tu servicio base.',
+        excludeSubcategorias: ['femboy', 'singles'],
         fields: [
           {
             id: 'serviciosIncluidos',
@@ -338,6 +640,7 @@
         id: 'serviciosNoRealizo',
         title: 'No realizo / límites',
         hint: 'Marca lo que no ofreces — aparece en tu perfil y evita malentendidos.',
+        excludeSubcategorias: ['femboy', 'singles'],
         fields: [
           {
             id: 'serviciosNoRealizo',
