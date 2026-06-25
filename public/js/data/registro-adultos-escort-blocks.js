@@ -114,6 +114,29 @@
           buscan: 'Indica con qué dinámicas participas: hotwife, parejas swinger, tríos, solo con la mujer, etc.',
           serviciosIncluidos: 'Marca lo que sí ofreces. Incluye gang bang si participas en ese tipo de escena.'
         }
+      },
+      hotwife: {
+        badges: ['hotwife'],
+        obligatoriosExtra: [
+          'participacionPareja', 'tipoPublico', 'disponibilidadAgenda', 'tipoExperiencia', 'sobreMi'
+        ],
+        fieldPatches: {
+          participacionPareja: { required: true },
+          tipoPublico: { required: true },
+          disponibilidadAgenda: { required: true },
+          tipoExperiencia: { required: true },
+          sobreMi: { required: true }
+        },
+        fieldHints: {
+          participacionPareja: 'Indica si tu pareja participa en las experiencias o solo acuerda por contacto previo.',
+          tipoPublico: 'Singles, parejas o ambos — aparece en tu ficha para quien te contacte.',
+          disponibilidadAgenda: 'Marca cuándo sueles estar disponible (puedes elegir más de una).',
+          tipoExperiencia: 'Qué tipo de experiencias lifestyle buscas o aceptas.',
+          loQueBuscaConocer: 'Describe con quién te gustaría conectar y qué tipo de química buscas.',
+          aficiones: 'Hobbies o gustos que ayuden a romper el hielo.',
+          estiloVida: 'Cómo vives el lifestyle: discreto, social, viajero, etc.',
+          sobreMi: 'Presentación personal: quién eres, tu estilo y qué te hace diferente como hotwife.'
+        }
       }
     },
     obligatorios: [
@@ -170,6 +193,7 @@
             label: 'Disponibilidad',
             type: 'select',
             required: false,
+            excludeSubcategorias: ['hotwife'],
             options: [
               { value: 'disponible', label: 'Disponible' },
               { value: 'ocupada', label: 'Ocupada' },
@@ -189,6 +213,70 @@
               'Solo con la mujer',
               'Eventos lifestyle'
             ]
+          }
+        ]
+      },
+      {
+        id: 'hotwifePerfil',
+        title: 'Perfil hotwife',
+        hint: 'Estos datos diferencian tu perfil en la comunidad lifestyle.',
+        onlySubcategorias: ['hotwife'],
+        fields: [
+          {
+            id: 'participacionPareja',
+            label: 'Participación de la pareja',
+            type: 'select',
+            required: true,
+            options: ['Presente', 'Opcional', 'Solo contacto previo', 'A convenir']
+          },
+          {
+            id: 'tipoPublico',
+            label: 'Busco conocer',
+            type: 'select',
+            required: true,
+            options: ['Singles', 'Parejas', 'Ambos']
+          },
+          {
+            id: 'disponibilidadAgenda',
+            label: 'Disponibilidad',
+            type: 'checklist',
+            required: true,
+            options: ['Entre semana', 'Fines de semana', 'Solo con cita', 'Viajes disponibles']
+          },
+          {
+            id: 'tipoExperiencia',
+            label: 'Tipo de experiencia que busca',
+            type: 'checklist',
+            required: true,
+            options: [
+              'Citas',
+              'Eventos sociales',
+              'Viajes',
+              'Conocer personas',
+              'Experiencias para parejas'
+            ]
+          },
+          {
+            id: 'loQueBuscaConocer',
+            label: 'Lo que busca conocer',
+            type: 'textarea',
+            required: false,
+            rows: 3,
+            placeholder: 'Describe qué tipo de conexiones o experiencias te interesan…'
+          },
+          {
+            id: 'aficiones',
+            label: 'Aficiones',
+            type: 'text',
+            required: false,
+            placeholder: 'Ej. viajes, gastronomía, deporte…'
+          },
+          {
+            id: 'estiloVida',
+            label: 'Estilo de vida',
+            type: 'text',
+            required: false,
+            placeholder: 'Ej. discreta, social, viajera…'
           }
         ]
       },
@@ -285,7 +373,14 @@
         title: 'Sobre mí',
         hint: 'Texto más largo para la sección «Sobre mí» de tu perfil (distinto de la frase corta de arriba).',
         fields: [
-          { id: 'sobreMi', label: 'Descripción personal', type: 'textarea', required: false, placeholder: 'Describe tu estilo, experiencia y qué te hace diferente…', rows: 4 }
+          {
+            id: 'sobreMi',
+            label: 'Descripción personal',
+            type: 'textarea',
+            required: false,
+            placeholder: 'Describe tu estilo, experiencia y qué te hace diferente…',
+            rows: 4
+          }
         ]
       }
     ]
