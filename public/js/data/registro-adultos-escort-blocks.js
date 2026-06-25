@@ -32,7 +32,7 @@
           orientacion: { required: true }
         },
         fieldHints: {
-          orientacion: 'Indica orientación y tipo de clientela.'
+          orientacion: 'Indica orientación y clientela (ej. lesbiana, atención a mujeres).'
         }
       },
       'escort vip': {
