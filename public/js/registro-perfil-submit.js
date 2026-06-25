@@ -175,6 +175,12 @@
     ver.fechaNacimiento = priv.fechaNacimiento || '';
     ver.fecha = new Date();
 
+    var bloques = cp.bloquesPublicos || null;
+    var mappedBloques = {};
+    if (bloques && global.CariHubRegistroPublicBlocks && CariHubRegistroPublicBlocks.mapToPerfil) {
+      mappedBloques = CariHubRegistroPublicBlocks.mapToPerfil({}, bloques);
+    }
+
     return {
       uid: uid,
       cuentaUid: uid,
@@ -191,16 +197,38 @@
       subcategoriaId: ctx.subcategoriaId || '',
       sectorId: ctx.sectorId || '',
       formularioId: (draft.schemaResuelto && draft.schemaResuelto.identidad &&
-        draft.schemaResuelto.identidad.formularioId) || '',
+        draft.schemaResuelto.identidad.formularioId) || ctx.formularioId || '',
       arquetipo: (draft.schemaResuelto && draft.schemaResuelto.identidad &&
-        draft.schemaResuelto.identidad.arquetipo) || '',
+        draft.schemaResuelto.identidad.arquetipo) || ctx.arquetipo || '',
+      formularioUiId: (draft.schemaResuelto && draft.schemaResuelto.formularioUiId) ||
+        ctx.formularioUiId || '',
+      schemaVersion: ctx.schemaVersion || '',
       descripcion: cp.descripcionCorta || '',
-      descripcionCompleta: cp.descripcionCorta || '',
+      descripcionCompleta: mappedBloques.sobreMi || cp.descripcionCorta || '',
       precio: cp.precioDesde || '',
       modalidad: cp.modalidad || '',
-      horario: cp.horarioPublico || '',
-      servicios: cp.serviciosPrincipales || '',
+      horario: mappedBloques.horario || cp.horarioPublico || '',
+      servicios: Array.isArray(mappedBloques.serviciosIncluidos)
+        ? mappedBloques.serviciosIncluidos.join('; ')
+        : (cp.serviciosPrincipales || ''),
       edad: cp.edad || '',
+      orientacion: mappedBloques.orientacion || '',
+      idiomas: mappedBloques.idiomas || '',
+      nivelServicio: mappedBloques.nivelServicio || '',
+      disponibilidad: mappedBloques.disponibilidad || '',
+      estatura: mappedBloques.estatura || '',
+      peso: mappedBloques.peso || '',
+      complexion: mappedBloques.complexion || '',
+      cabello: mappedBloques.cabello || '',
+      ojos: mappedBloques.ojos || '',
+      tatuajes: mappedBloques.tatuajes || '',
+      piercings: mappedBloques.piercings || '',
+      serviciosIncluidos: mappedBloques.serviciosIncluidos || [],
+      noRealiza: mappedBloques.noRealiza || [],
+      metodosPago: mappedBloques.metodosPago || [],
+      modalidades: mappedBloques.modalidades || [],
+      tagline: cp.descripcionCorta || '',
+      sobreMi: mappedBloques.sobreMi || '',
       fotoURL: publicUrls.fotoPrincipal || '',
       fotosExtraURL: publicUrls.fotosExtra || [],
       contactoPublico: draft.contactoPublico || {},

@@ -142,6 +142,12 @@
 
     if (esNegocio) u.nombreComercial = u.nombre;
 
+    var bloques = global.CariHubRegistroPublicBlocks && CariHubRegistroPublicBlocks.collectForPreview
+      ? CariHubRegistroPublicBlocks.collectForPreview() : null;
+    if (bloques && global.CariHubRegistroPublicBlocks.mapToPerfil) {
+      u = global.CariHubRegistroPublicBlocks.mapToPerfil(u, bloques);
+    }
+
     if (global.CariHubFieldEngineLite && CariHubFieldEngineLite.enriquecerPerfilPublico) {
       global.CariHubFieldEngineLite.enriquecerPerfilPublico(u, {
         subcategoriaId: subId,

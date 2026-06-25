@@ -18,8 +18,9 @@
 <script src="js/carihub-nav-quick.js"></script>
 <script src="js/registro-negocio-adulto.js"></script>
 <script src="js/data/registro-schema-index.js"></script>
-<script src="js/carihub-field-engine-lite.js"></script>
-<script src="js/carihub-public-render-lite.js"></script>
+<script src="js/data/registro-ui-index.js"></script>
+<script src="js/carihub-field-engine-lite.js?v=20260628c"></script>
+<script src="js/carihub-public-render-lite.js?v=20260628d"></script>
 <script src="js/resultados-demo.js"></script>
 <script src="js/perfil-publico-init.js"></script>
   <script src="js/carihub-messenger-privacidad-ui.js"></script>
@@ -2964,9 +2965,10 @@ const THEME = {
 };
 
 /* ---------------- helpers ---------------- */
-function row(icon,label,value){
+function row(icon,label,value,blockKey){
   if(!value) return "";
-  return '<div class="drow"><span class="dk">'+icon+' '+safe(label)+':</span><span class="dv">'+value+'</span></div>';
+  var blockAttr=blockKey?' data-pub-block="'+safe(blockKey)+'"':"";
+  return '<div class="drow"'+blockAttr+'><span class="dk">'+icon+' '+safe(label)+':</span><span class="dv">'+value+'</span></div>';
 }
 /* Íconos de línea (SVG, stroke currentColor) — estilo de la referencia */
 function svgIcon(n){
@@ -4187,7 +4189,7 @@ function adultoGaleriaHTML(u){
 }
 function adultoTriPrecioHTML(u){
   return '<div class="playout__tri">'+
-    '<div class="pcard pcard--mini pcard--precio"><div class="precio-block"><div class="precio-desde">Desde</div><div class="precio-big">$'+safe(u.precio)+'</div><div class="precio-sub">'+safe(u.moneda)+(u.tiempoMinimo?' · '+safe(u.tiempoMinimo):'')+'</div></div></div>'+
+    '<div class="pcard pcard--mini pcard--precio" data-pub-block="precio"><div class="precio-block"><div class="precio-desde" data-pub-label="precio">Desde</div><div class="precio-big">$'+safe(u.precio)+'</div><div class="precio-sub">'+safe(u.moneda)+(u.tiempoMinimo?' · '+safe(u.tiempoMinimo):'')+'</div></div></div>'+
     metodosPagoCard(u.metodosPago)+
     tiempoMinimoCard(u.tiempoMinimo)+
   '</div>';
@@ -4220,8 +4222,9 @@ function perfilStatsHTML(u){
     ];
   }
   return '<div class="pcard pcard--stats"><div class="trio3">'+
-    items.map(function(it){
-      return '<div class="t3"><div class="t3ic">'+t3icon(it[2])+'</div><b>'+safe(it[0])+'</b><span>'+safe(it[1])+'</span></div>';
+    items.map(function(it,idx){
+      var horarioBlock=(it[0]==="Horario"||/horario/i.test(it[0]))?' data-pub-block="horario"':"";
+      return '<div class="t3"'+horarioBlock+'><div class="t3ic">'+t3icon(it[2])+'</div><b>'+safe(it[0])+'</b><span>'+safe(it[1])+'</span></div>';
     }).join("")+
   '</div></div>';
 }
@@ -4231,7 +4234,7 @@ function perfilDerstackHTML(u){
   var incl=(u.serviciosIncluidos||[]);
   var no=u.noRealiza||[];
   return '<div class="playout__derstack">'+
-    (incl.length?('<div class="pcard"><div class="pcard__h">'+safe(svcTit)+'</div><div class="svc">'+
+    (incl.length?('<div class="pcard" data-pub-block="servicios"><div class="pcard__h" data-pub-label="servicios">'+safe(svcTit)+'</div><div class="svc">'+
       incl.map(function(s){return '<div><span class="ok">✔</span> '+safe(s)+'</div>';}).join("")+
     '</div></div>'):"")+
     (no.length?('<div class="pcard"><div class="pcard__h">'+safe(noTit)+'</div><div class="svc svc--stack">'+
@@ -4326,8 +4329,8 @@ function perfilIdCardHTML(u){
   var loc=[u.zona,u.ciudad,u.estado].filter(Boolean).join(", ");
   return '<div class="pcard">'+adultoIdHeadHTML(u)+
     idlocRow("pin", loc)+idlocRow("av", u.disponibilidad)+
-    '<div class="modchips">'+perfilModchipsHTML(u)+'</div>'+
-    '<div class="quote">'+safe(u.tagline||u.frase)+'</div></div>';
+    '<div class="modchips" data-pub-block="modalidad">'+perfilModchipsHTML(u)+'</div>'+
+    '<div class="quote" data-pub-block="descripcion">'+safe(u.tagline||u.frase)+'</div></div>';
 }
 function adultoIdHeadHTML(u){
   var badges=(u.verificada?verificadoBadgeGreen(u.etiquetaVerificada||"Verificada"):"");
@@ -4335,7 +4338,7 @@ function adultoIdHeadHTML(u){
   if(u.badgeLgbt) badges+='<span class="vchip vchip--lgbt">🌈 LGBT+</span>';
   if(u.badgeTrans) badges+='<span class="vchip vchip--trans">🏳️‍⚧️ Trans</span>';
   return '<div class="idhead"><h1>'+safe(u.nombre)+'</h1>'+badges+
-    (u.edad?'<span class="age">'+u.edad+' años</span>':'')+'</div>';
+    (u.edad?'<span class="age" data-pub-block="edad">'+u.edad+' años</span>':'')+'</div>';
 }
 function adultoFichaHTML(u){
   if(u.especialidadBdsm){
@@ -4358,14 +4361,14 @@ function adultoFichaHTML(u){
     row(pico("globe"),"País",safe(u.pais))+
     row(pico("pin"),"Estado",safe(u.estado))+
     row(pico("pin"),"Ciudad",safe(u.ciudad))+
-    row(pico("briefcase"),"Modalidad",safe(modalidad));
+    row(pico("briefcase"),"Modalidad",safe(modalidad),"modalidad");
   if(u.tipoNegocio) html+=row(pico("corp"),"Tipo de empresa",safe(u.tipoNegocio));
   if(u.tipoServicio) html+=row(pico("heart"),"Tipo de servicio",safe(u.tipoServicio));
   if(u.tipoShow) html+=row(pico("briefcase"),"Tipo de show",safe(u.tipoShow));
   if(u.disponiblePara) html+=row(pico("chat"),"Disponible para",safe(u.disponiblePara));
   if(u.venueFijo) html+=row(pico("pin"),"Venue / zona",safe(u.venueFijo));
-  if(u.menuServicios) html+=row(pico("heart"),"Menú",safe(u.menuServicios));
-  if(u.horario) html+=row(pico("clock"),"Horario",safe(u.horario));
+  if(u.menuServicios) html+=row(pico("heart"),"Menú",safe(u.menuServicios),"servicios");
+  if(u.horario) html+=row(pico("clock"),"Horario",safe(u.horario),"horario");
   if(u.dressCode) html+=row(pico("gender"),"Dress code",safe(u.dressCode));
   if(u.reglasAcceso) html+=row(pico("shield"),"Acceso",safe(u.reglasAcceso));
   if(u.areasVenue) html+=row(pico("pin"),"Áreas",safe(u.areasVenue));
@@ -4729,7 +4732,7 @@ function parejaIdCardHTML(u){
       '</div>'+
       parejaCornerBadge(u)+
     '</div>'+
-    (u.tagline?'<p class="idsub idsub--negocio">'+safe(u.tagline)+'</p>':"")+
+    (u.tagline?'<p class="idsub idsub--negocio" data-pub-block="descripcion">'+safe(u.tagline)+'</p>':"")+
     '<div class="idloc-duo">'+
       idlocRow("pin", loc)+
       idlocRowDotAvail(u.disponibilidad||"Abierto ahora")+
@@ -5087,11 +5090,11 @@ function stripperIdCardHTML(u){
     '<div class="negocio-id__top">'+
       '<div class="idhead idhead--negocio"><h1>'+safe(u.nombre)+'</h1>'+
         (u.verificada?verificadoBadgePinkDot():"")+
-        (u.edad?'<span class="age">'+u.edad+' años</span>':"")+
+        (u.edad?'<span class="age" data-pub-block="edad">'+u.edad+' años</span>':"")+
       '</div>'+
       stripperCornerBadge(u)+
     '</div>'+
-    (u.tagline?'<p class="idsub idsub--negocio">'+safe(u.tagline)+'</p>':"")+
+    (u.tagline?'<p class="idsub idsub--negocio" data-pub-block="descripcion">'+safe(u.tagline)+'</p>':"")+
     '<div class="idloc-duo">'+
       idlocRow("pin", loc)+
       idlocRowDotAvail(u.disponibilidad||"Disponible ahora")+
@@ -5135,7 +5138,7 @@ function tableDanceIdCardHTML(u){
       '</div>'+
       tableDanceCornerBadge(u)+
     '</div>'+
-    (u.tagline?'<p class="idsub idsub--negocio">'+safe(u.tagline)+'</p>':"")+
+    (u.tagline?'<p class="idsub idsub--negocio" data-pub-block="descripcion">'+safe(u.tagline)+'</p>':"")+
     '<div class="idloc-duo">'+
       idlocRow("pin", loc)+
       idlocRowDotAvail(u.disponibilidad||"Abierto ahora")+
@@ -5176,7 +5179,7 @@ function clubSwIdCardHTML(u){
       '</div>'+
       clubSwCornerBadge(u)+
     '</div>'+
-    (u.tagline?'<p class="idsub idsub--negocio">'+safe(u.tagline)+'</p>':"")+
+    (u.tagline?'<p class="idsub idsub--negocio" data-pub-block="descripcion">'+safe(u.tagline)+'</p>':"")+
     '<div class="idloc-duo">'+
       idlocRow("pin", loc)+
       idlocRowDotAvail(u.disponibilidad||"Abierto ahora")+
@@ -5217,7 +5220,7 @@ function antroIdCardHTML(u){
       '</div>'+
       antroCornerBadge(u)+
     '</div>'+
-    (u.tagline?'<p class="idsub idsub--negocio">'+safe(u.tagline)+'</p>':"")+
+    (u.tagline?'<p class="idsub idsub--negocio" data-pub-block="descripcion">'+safe(u.tagline)+'</p>':"")+
     '<div class="idloc-duo">'+
       idlocRow("pin", loc)+
       idlocRowDotAvail(u.disponibilidad||"Abierto ahora")+
@@ -5258,7 +5261,7 @@ function antroLgbtIdCardHTML(u){
       '</div>'+
       antroLgbtCornerBadge(u)+
     '</div>'+
-    (u.tagline?'<p class="idsub idsub--negocio">'+safe(u.tagline)+'</p>':"")+
+    (u.tagline?'<p class="idsub idsub--negocio" data-pub-block="descripcion">'+safe(u.tagline)+'</p>':"")+
     '<div class="idloc-duo">'+
       idlocRow("pin", loc)+
       idlocRowDotAvail(u.disponibilidad||"Abierto ahora")+
@@ -5299,7 +5302,7 @@ function cineXxxIdCardHTML(u){
       '</div>'+
       cineXxxCornerBadge(u)+
     '</div>'+
-    (u.tagline?'<p class="idsub idsub--negocio">'+safe(u.tagline)+'</p>':"")+
+    (u.tagline?'<p class="idsub idsub--negocio" data-pub-block="descripcion">'+safe(u.tagline)+'</p>':"")+
     '<div class="idloc-duo">'+
       idlocRow("pin", loc)+
       idlocRowDotAvail(u.disponibilidad||"Abierto ahora")+
@@ -5337,7 +5340,7 @@ function cabinasIdCardHTML(u){
       '</div>'+
       cabinasCornerBadge(u)+
     '</div>'+
-    (u.tagline?'<p class="idsub idsub--negocio">'+safe(u.tagline)+'</p>':"")+
+    (u.tagline?'<p class="idsub idsub--negocio" data-pub-block="descripcion">'+safe(u.tagline)+'</p>':"")+
     '<div class="idloc-duo">'+
       idlocRow("pin", loc)+
       idlocRowDotAvail(u.disponibilidad||"Abierto ahora")+
@@ -5373,11 +5376,11 @@ function creadorIdCardHTML(u){
     '<div class="negocio-id__top">'+
       '<div class="idhead idhead--negocio"><h1>'+safe(u.nombre)+'</h1>'+
         (u.verificada?verificadoBadgePinkDot():"")+
-        (u.edad?'<span class="age">'+u.edad+' años</span>':"")+
+        (u.edad?'<span class="age" data-pub-block="edad">'+u.edad+' años</span>':"")+
       '</div>'+
       creadorCornerBadge(u)+
     '</div>'+
-    (u.tagline?'<p class="idsub idsub--negocio">'+safe(u.tagline)+'</p>':"")+
+    (u.tagline?'<p class="idsub idsub--negocio" data-pub-block="descripcion">'+safe(u.tagline)+'</p>':"")+
     '<div class="idloc-duo">'+
       idlocRow("pin", loc)+
       idlocRowDotAvail(u.disponibilidad||"Disponible ahora")+
@@ -5418,7 +5421,7 @@ function sexShopIdCardHTML(u){
       '</div>'+
       sexShopCornerBadge(u)+
     '</div>'+
-    (u.tagline?'<p class="idsub idsub--negocio">'+safe(u.tagline)+'</p>':"")+
+    (u.tagline?'<p class="idsub idsub--negocio" data-pub-block="descripcion">'+safe(u.tagline)+'</p>':"")+
     '<div class="idloc-duo">'+
       idlocRow("pin", loc)+
       idlocRowDotAvail(u.disponibilidad||"Abierto ahora")+
@@ -5517,7 +5520,7 @@ function negocioIdCardHTML(u){
       '</div>'+
       negocioCornerBadge(u)+
     '</div>'+
-    (u.tagline?'<p class="idsub idsub--negocio">'+safe(u.tagline)+'</p>':"")+
+    (u.tagline?'<p class="idsub idsub--negocio" data-pub-block="descripcion">'+safe(u.tagline)+'</p>':"")+
     '<div class="idloc-duo">'+
       idlocRow("pin", loc)+
       idlocRowDotAvail(u.disponibilidad||"Abierto ahora")+
@@ -5681,8 +5684,8 @@ function negocioServiciosIncluidosHTML(u){
   var items=incl.map(function(s){
     return '<div class="negocio-svc-2col__item"><span class="negocio-svc-2col__ok">✓</span><span>'+safe(s)+'</span></div>';
   }).join("");
-  return '<div class="negocio-svc-wrap">'+
-    '<h3 class="negocio-svc__title">'+safe(u.svcTitulo||"Servicios incluidos")+'</h3>'+
+  return '<div class="negocio-svc-wrap" data-pub-block="servicios">'+
+    '<h3 class="negocio-svc__title" data-pub-label="servicios">'+safe(u.svcTitulo||"Servicios incluidos")+'</h3>'+
     '<div class="pcard pcard--negocio-svc"><div class="negocio-svc-2col">'+items+'</div></div></div>';
 }
 function negocioReglasHTML(u){
@@ -5945,7 +5948,7 @@ function renderMedicoProfesional(u){
     '</div>'+
     '<div class="pcard">'+
       '<div class="tri">'+
-        '<div><div class="lbl">💲 Consulta desde</div><div class="precio-big">$'+safe(u.precioConsulta||u.precio)+'</div><div class="precio-sub">'+safe(u.moneda)+' · '+safe(u.unidadConsulta||"por consulta")+'</div></div>'+
+        '<div data-pub-block="precio"><div class="lbl" data-pub-label="precio">💲 Consulta desde</div><div class="precio-big">$'+safe(u.precioConsulta||u.precio)+'</div><div class="precio-sub">'+safe(u.moneda)+' · '+safe(u.unidadConsulta||"por consulta")+'</div></div>'+
         '<div><div class="lbl">💳 Métodos de pago</div><div class="mini">'+(u.metodosPago||[]).map(safe).join("<br>")+'</div></div>'+
         '<div><div class="lbl">⏱ Tiempo de respuesta</div><div class="mini">'+safe(u.tiempoRespuesta)+'</div><div class="urg">'+safe(u.urgencias||"Agenda disponible")+'</div></div>'+
       '</div>'+
@@ -5971,7 +5974,7 @@ function renderMedicoProfesional(u){
     row("🩺","Profesión",safe(u.profesion)),
     row("📋","Especialidad",safe(u.especialidad)),
     row("🔬","Subespecialidad",safe(u.subespecialidad)),
-    row("🕐","Horario",safe(u.horarioAtencion||u.horario)),
+    row("🕐","Horario",safe(u.horarioAtencion||u.horario),"horario"),
     row("📍","Atención",safe(u.atencion)),
     row("🗣️","Idiomas",safe(u.idiomas)),
     row("🗺️","Zona",safe(u.zonaCobertura))
@@ -5987,7 +5990,7 @@ function renderMedicoProfesional(u){
     '</div>'+
     '<div class="pcard"><div class="pcard__h">🏥 Consultorios</div>'+medicoConsultoriosHTML(u)+'</div>'+
     '<div class="pcard"><div class="pcard__h">🛡️ Seguros aceptados</div><div class="pro-seguros">'+medicoSegurosHTML(u)+'</div></div>'+
-    '<div class="pcard"><div class="pcard__h">✅ Servicios profesionales</div><div class="svc">'+
+    '<div class="pcard" data-pub-block="servicios"><div class="pcard__h" data-pub-label="servicios">✅ Servicios profesionales</div><div class="svc">'+
       servicios.map(function(s){return '<div><span class="ok">✔</span> '+safe(s)+'</div>';}).join("")+'</div></div>'+
     (u.noIncluidos?'<div class="pcard"><div class="pcard__h">ℹ️ No incluido en consulta base</div><div class="svc">'+
       u.noIncluidos.map(function(s){return '<div><span class="no">✕</span> '+safe(s)+'</div>';}).join("")+'</div></div>':"")+
@@ -6019,7 +6022,10 @@ function renderProEmpresa(u, esEmpresa){
     ["🗺️","Zona de cobertura",u.zonaCobertura],["🕐","Horario",u.horario],["🗣️","Idiomas",u.idiomas],
     ["🚨","Urgencias 24/7",u.urgencias247],["✅","Garantía",u.garantia]
   ];
-  var datosHTML = datos.map(function(d){return row(d[0],d[1],d[2]?safe(d[2]):"");}).join("");
+  var datosHTML = datos.map(function(d){
+    var block=d[1]==="Horario"?"horario":"";
+    return row(d[0],d[1],d[2]?safe(d[2]):"",block);
+  }).join("");
 
   var tabs = esEmpresa
     ? ["Plomería","Mantenimiento","Instalaciones","Residencial","Comercial"]
@@ -6038,7 +6044,7 @@ function renderProEmpresa(u, esEmpresa){
     '</div>'+
     '<div class="pcard">'+
       '<div class="tri">'+
-        '<div><div class="lbl">💲 Desde</div><div class="precio-big">$'+safe(u.precio)+'</div><div class="precio-sub">'+safe(u.moneda)+(esEmpresa?(" · "+safe(u.servicioBasico)):" · Por servicio")+'</div></div>'+
+        '<div data-pub-block="precio"><div class="lbl" data-pub-label="precio">💲 Desde</div><div class="precio-big">$'+safe(u.precio)+'</div><div class="precio-sub">'+safe(u.moneda)+(esEmpresa?(" · "+safe(u.servicioBasico)):" · Por servicio")+'</div></div>'+
         '<div><div class="lbl">💳 Métodos de pago</div><div class="mini">'+pagos.map(safe).join("<br>")+'</div></div>'+
         '<div><div class="lbl">⏱ Tiempo de respuesta</div><div class="mini">'+safe(u.tiempoRespuesta)+'</div><div class="urg">'+safe(u.urgencias)+' · Atención inmediata</div></div>'+
       '</div>'+
@@ -6062,7 +6068,7 @@ function renderProEmpresa(u, esEmpresa){
 
   var right=''+
     '<div class="pcard">'+
-      '<div class="idhead"><h1>'+safe(u.nombre)+'</h1>'+verificadoBadge(verLabel)+(u.edad?'<span class="age">'+u.edad+' años</span>':'')+'</div>'+
+      '<div class="idhead"><h1>'+safe(u.nombre)+'</h1>'+verificadoBadge(verLabel)+(u.edad?'<span class="age" data-pub-block="edad">'+u.edad+' años</span>':'')+'</div>'+
       '<div class="idsub">'+safe(u.titulo)+'</div>'+
       idlocUbicacionHTML(u, loc)+
       '<div class="tabs">'+tabsHTML+'</div>'+
@@ -6071,7 +6077,7 @@ function renderProEmpresa(u, esEmpresa){
     avisoDonacion(u)+
     panelActividad(u, esEmpresa)+
     panelLive(u, esEmpresa)+
-    '<div class="pcard"><div class="pcard__h">✅ '+(esEmpresa?"Servicios principales":"Servicios incluidos")+'</div><div class="svc">'+
+    '<div class="pcard" data-pub-block="servicios"><div class="pcard__h" data-pub-label="servicios">✅ '+(esEmpresa?"Servicios principales":"Servicios incluidos")+'</div><div class="svc">'+
       u.serviciosIncluidos.map(function(s){return '<div><span class="ok">✔</span> '+safe(s)+'</div>';}).join("")+'</div></div>'+
     '<div class="pcard"><div class="pcard__h">⛔ Servicios no incluidos</div><div class="svc">'+
       u.noIncluidos.map(function(s){return '<div><span class="no">✕</span> '+safe(s)+'</div>';}).join("")+'</div></div>'+
@@ -6118,6 +6124,32 @@ function ocultarSwitcherSiResultados(fromResultados){ fromResultados=true;
   if(!sw) return;
   sw.hidden=true;
   sw.setAttribute("aria-hidden","true");
+}
+function resolverVistaPerfil(u,q){
+  q=q||{};
+  var vista="";
+  if(u&&window.CariHubFieldEngineLite){
+    if(CariHubFieldEngineLite.enriquecerPerfilPublico){
+      CariHubFieldEngineLite.enriquecerPerfilPublico(u,{
+        subcategoriaId:u.subcategoriaId,
+        categoria:u.categoria||u.categoriaPublica||q.categoria,
+        sectorId:u.sectorId
+      });
+    }
+    if(u.__vista) vista=u.__vista;
+    if(!vista&&CariHubFieldEngineLite.resolvePublicPresentation){
+      var pres=CariHubFieldEngineLite.resolvePublicPresentation({
+        subcategoriaId:u.subcategoriaId,
+        categoria:u.categoria||u.categoriaPublica||q.categoria,
+        sectorId:u.sectorId
+      });
+      if(pres&&pres.vistaPerfil) vista=pres.vistaPerfil;
+    }
+  }
+  if(!vista&&u&&window.CariHubResultadosDemo&&CariHubResultadosDemo.vistaDeCategoria){
+    vista=CariHubResultadosDemo.vistaDeCategoria(u.categoria||u.categoriaPublica||q.categoria);
+  }
+  return normalizarVistaPreview(vista)||"adult";
 }
 function normalizarVistaPreview(vista){
   var v=String(vista||"").trim();
@@ -6181,6 +6213,36 @@ function aplicarPerfilResultadosEnDemo(vista,u){
   if(u.mapsUrl||u.googleMapsUrl) d.mapsUrl=u.mapsUrl||u.googleMapsUrl;
   if(u.tagline){ d.tagline=u.tagline; d.frase=u.tagline; }
   if(u.descripcion){ d.sobreMi=String(u.descripcion).slice(0,500); }
+  if(u.descripcionCorta){ d.tagline=u.descripcionCorta; d.frase=u.descripcionCorta; if(!d.sobreMi) d.sobreMi=String(u.descripcionCorta).slice(0,500); }
+  if (u.serviciosPrincipales||u.servicios){
+    var svc=String(u.serviciosPrincipales||u.servicios||"").trim();
+    if(svc){
+      d.serviciosIncluidos=svc.split(/[,;\n]+/).map(function(x){return x.trim();}).filter(Boolean);
+      if(!d.serviciosIncluidos.length) d.serviciosIncluidos=[svc];
+    }
+  }
+  if(Array.isArray(u.serviciosIncluidos)&&u.serviciosIncluidos.length) d.serviciosIncluidos=u.serviciosIncluidos.slice();
+  if(Array.isArray(u.noRealiza)&&u.noRealiza.length) d.noRealiza=u.noRealiza.slice();
+  if(u.orientacion) d.orientacion=u.orientacion;
+  if(u.idiomas) d.idiomas=u.idiomas;
+  if(u.nivelServicio) d.nivelServicio=u.nivelServicio;
+  if(u.estatura) d.estatura=u.estatura;
+  if(u.peso) d.peso=u.peso;
+  if(u.complexion) d.complexion=u.complexion;
+  if(u.cabello) d.cabello=u.cabello;
+  if(u.ojos) d.ojos=u.ojos;
+  if(u.tatuajes) d.tatuajes=u.tatuajes;
+  if(u.piercings) d.piercings=u.piercings;
+  if(u.sobreMi) d.sobreMi=u.sobreMi;
+  if(Array.isArray(u.metodosPago)&&u.metodosPago.length) d.metodosPago=u.metodosPago.slice();
+  if(u.tiempoMinimo) d.tiempoMinimo=u.tiempoMinimo;
+  if(u.modalidad){
+    var mod=String(u.modalidad).trim().toLowerCase();
+    var mapMod={con_lugar:"recibe",hotel:"hotel",domicilio:"domicilio",mixto:"recibe"};
+    if(mapMod[mod]) d.modalidades=[mapMod[mod]];
+    if(mod==="mixto") d.modalidades=["recibe","hotel","domicilio"];
+  }
+  if(u.horarioPublico) u.horario=u.horarioPublico;
   if(u.horario && !u.disponibilidad) d.disponibilidad=String(u.horario).slice(0,48);
   if(u.ubicacion){
     d.ubicacionPublica=u.ubicacion;
@@ -6339,10 +6401,7 @@ function iniciarPerfilPreview(){
     if(CariHubPerfilPublico.initFirebaseIfNeeded) CariHubPerfilPublico.initFirebaseIfNeeded();
     CariHubPerfilPublico.cargarPerfilFirestore(q.id,q).then(function(u){
       if(u){
-        var vista=(window.CariHubResultadosDemo&&CariHubResultadosDemo.vistaDeCategoria)
-          ?CariHubResultadosDemo.vistaDeCategoria(u.categoria||u.categoriaPublica||q.categoria)
-          :"adult";
-        pintar({vista:vista,perfil:u});
+        pintar({vista:resolverVistaPerfil(u,q),perfil:u});
       }else{
         pintar(resolverPerfilDesdeQuery(q));
       }
@@ -6377,6 +6436,9 @@ function setVista(tipo){
   else if(tipo==="medico") inner=renderMedicoProfesional(u);
   else inner=renderProEmpresa(u, tipo==="empresa");
   document.getElementById("wrap").innerHTML = shell(tipo, inner, u);
+  if(window.CariHubPublicRenderLite&&CariHubPublicRenderLite.applyPublicProfilePresentation){
+    CariHubPublicRenderLite.applyPublicProfilePresentation(document.getElementById("wrap"), u);
+  }
   if(window.CariHubPerfilEnlaces) CariHubPerfilEnlaces.wire(document.getElementById("wrap"), u);
   if(document.body.classList.contains("perfil-embed-dashboard-inicio")){
     marcarPersonalizableEmbed();

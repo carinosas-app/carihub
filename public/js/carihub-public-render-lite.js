@@ -1,6 +1,8 @@
 (function (global) {
   'use strict';
 
+  var PUB_BLOCKS = ['edad', 'modalidad', 'descripcion', 'precio', 'horario', 'servicios'];
+
   function safeTxt(t) {
     return String(t == null ? '' : t)
       .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
@@ -280,12 +282,101 @@
     return cardHTMLAdultos(u, Q);
   }
 
+  function setBlockVisibility(el, vis) {
+    if (!el) return;
+    if (vis) {
+      el.style.display = '';
+      el.removeAttribute('aria-hidden');
+      el.classList.remove('pub-block--hidden');
+    } else {
+      el.style.display = 'none';
+      el.setAttribute('aria-hidden', 'true');
+      el.classList.add('pub-block--hidden');
+    }
+  }
+
+  function formatPrecioLabel(text) {
+    text = String(text || '').trim();
+    if (!text) return '';
+    if (/^💲/.test(text)) return text;
+    if (/desde/i.test(text)) return '💲 ' + text;
+    return '💲 ' + text + (/\//.test(text) ? '' : ' desde');
+  }
+
+  function applyPublicProfileLabels(container, labels) {
+    labels = labels || {};
+    if (labels.precio) {
+      container.querySelectorAll('[data-pub-label="precio"]').forEach(function (el) {
+        var txt = String(labels.precio);
+        if (el.classList.contains('lbl')) {
+          el.textContent = formatPrecioLabel(txt);
+        } else if (el.classList.contains('precio-desde')) {
+          el.textContent = /desde/i.test(txt) ? txt.replace(/^💲\s*/, '') : txt;
+        }
+      });
+    }
+    if (labels.servicios) {
+      container.querySelectorAll('[data-pub-label="servicios"]').forEach(function (el) {
+        el.textContent = String(labels.servicios);
+      });
+    }
+  }
+
+  function applyPublicProfilePresentation(container, u) {
+    if (!container) return null;
+    u = u || {};
+    if (global.CariHubFieldEngineLite && CariHubFieldEngineLite.enriquecerPerfilPublico) {
+      CariHubFieldEngineLite.enriquecerPerfilPublico(u, {
+        subcategoriaId: u.subcategoriaId,
+        categoria: u.categoria || u.categoriaPublica,
+        sectorId: u.sectorId
+      });
+    }
+    var pres = null;
+    if (global.CariHubFieldEngineLite && CariHubFieldEngineLite.resolvePublicPresentation) {
+      pres = CariHubFieldEngineLite.resolvePublicPresentation({
+        subcategoriaId: u.subcategoriaId,
+        categoria: u.categoria || u.categoriaPublica,
+        sectorId: u.sectorId
+      });
+    }
+    if (!pres || !pres.registro || !pres.registro.ui) return pres;
+    var ui = pres.registro.ui;
+    var show = ui.show || [];
+    var hide = ui.hide || [];
+    var labels = ui.labels || {};
+
+    function visible(key) {
+      return show.indexOf(key) >= 0 && hide.indexOf(key) < 0;
+    }
+
+    PUB_BLOCKS.forEach(function (key) {
+      var vis = visible(key);
+      container.querySelectorAll('[data-pub-block="' + key + '"]').forEach(function (el) {
+        setBlockVisibility(el, vis);
+      });
+    });
+
+    applyPublicProfileLabels(container, labels);
+
+    var body = document.body;
+    if (body) {
+      body.setAttribute('data-ch-formulario-id', pres.formularioId || '');
+      body.setAttribute('data-ch-arquetipo', pres.arquetipo || '');
+      body.setAttribute('data-ch-ui-id', (pres.registro && pres.registro.formularioUiId) || '');
+    }
+
+    return pres;
+  }
+
   global.CariHubPublicRenderLite = {
     cardHTML: cardHTML,
     cardHTMLAdultos: cardHTMLAdultos,
     cardHTMLNegocio: cardHTMLNegocio,
     cardHTMLServicio: cardHTMLServicio,
     cardHTMLProfesional: cardHTMLProfesional,
-    resolveComponente: resolveComponente
+    resolveComponente: resolveComponente,
+    applyPublicProfilePresentation: applyPublicProfilePresentation,
+    PUB_BLOCKS: PUB_BLOCKS
   };
 })(typeof window !== 'undefined' ? window : globalThis);

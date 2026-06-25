@@ -4,23 +4,16 @@
   var STORAGE_KEY = 'solicitudPerfilPaso1';
   var STORAGE_SOLICITUDES = 'solicitudesCatalogoCarihub';
 
-  var SECTOR_IMAGES = {
-    adultos: 'img/home/sectores/sector-01-adultos.png',
-    bienestar: 'img/home/sectores/sector-02-bienestar.png',
-    salud: 'img/home/sectores/sector-03-salud.png',
-    profesionales: 'img/home/sectores/sector-04-profesionales.png',
-    automotriz: 'img/home/sectores/sector-05-automotriz.png',
-    hogar: 'img/home/sectores/sector-06-hogar.png',
-    comercio: 'img/home/sectores/sector-07-comercio.png',
-    'bienes-raices': 'img/home/sectores/sector-08-bienes-raices.png',
-    eventos: 'img/home/sectores/sector-09-eventos.png',
-    transporte: 'img/home/sectores/sector-10-transporte.png',
-    educacion: 'img/home/sectores/sector-11-educacion.png',
-    tecnologia: 'img/home/sectores/sector-12-tecnologia.png',
-    restaurantes: 'img/home/sectores/sector-13-restaurantes.png',
-    mascotas: 'img/home/sectores/sector-14-mascotas.png',
-    industria: 'img/home/sectores/sector-15-industria.png'
-  };
+  function sectorCardMeta(sectorId) {
+    if (global.CariHubSectorCardImages && global.CariHubSectorCardImages.getSectorCardImage) {
+      return global.CariHubSectorCardImages.getSectorCardImage(sectorId);
+    }
+    return null;
+  }
+
+  function sectorImageMeta(sectorId) {
+    return sectorCardMeta(sectorId) || { src: 'img/home/promo-perfil.jpg' };
+  }
 
   var NEGOCIO_SUBCATS = [
     'spa', 'masajes', 'sex shop', 'club sw', 'antro restaurant bar',
@@ -60,22 +53,6 @@
     });
   }
 
-  var ANUNCIO_ROTATE_MS = 4800;
-  var ADULTOS_CARD_ROTATE_MS = 4200;
-  var anuncioRotateTimer = null;
-  var adultosCardRotateTimer = null;
-
-  var ADULTOS_CARD_IMAGES = [
-    'img/home/sectores/adultos-rotate-01.png',
-    'img/home/sectores/adultos-rotate-02.png',
-    'img/home/sectores/adultos-rotate-03.png',
-    'img/home/sectores/adultos-rotate-04.png',
-    'img/home/sectores/adultos-rotate-05.png',
-    'img/home/sectores/adultos-rotate-06.png',
-    'img/home/sectores/adultos-rotate-07.png'
-  ];
-
-  var adultosCardRotateIdx = 0;
   var geoPicker = null;
   var subcatIndexCache = null;
 
@@ -110,7 +87,9 @@
   }
 
   function sectorMobPath(pngPath) {
-    return String(pngPath)
+    var path = String(pngPath || '');
+    if (path.indexOf('/sector-cards/') >= 0) return path;
+    return path
       .replace('/sectores/', '/sectores/mob/')
       .replace(/\.png$/i, '.jpg');
   }
@@ -122,8 +101,12 @@
     return pngPath;
   }
 
-  function buildSectorImageHtml(pngPath, opts) {
+  function buildSectorImageHtml(pngPathOrMeta, opts) {
     opts = opts || {};
+    var meta = typeof pngPathOrMeta === 'object' && pngPathOrMeta !== null
+      ? pngPathOrMeta
+      : { src: pngPathOrMeta };
+    var pngPath = meta.src;
     var mob = sectorMobPath(pngPath);
     var png = esc(pngPath);
     var mobEsc = esc(mob);
@@ -241,6 +224,13 @@
     syncContactOnlyfansVisibility();
   }
 
+  function syncSectorSparkles(sectorId, container) {
+    var S = global.CariHubSectorSparkles;
+    if (!S) return;
+    S.syncBody(sectorId || '');
+    if (container) S.ensureLayer(container, sectorId || '');
+  }
+
   function applySubcatScreenTheme(sector) {
     if (!sector) return;
     var wrap = $('rpSubcatWrap');
@@ -249,6 +239,7 @@
     }
     if (sector.id === 'adultos') {
       applySectorAmbience(sector);
+      syncSectorSparkles('adultos', $('rpSubcatWrap'));
     } else {
       var page = document.body;
       if (page) {
@@ -256,6 +247,7 @@
         page.style.removeProperty('--rp-sector-glow');
         page.style.removeProperty('--rp-sector-flash');
       }
+      syncSectorSparkles(sector.id, $('rpSubcatWrap'));
     }
   }
 
@@ -344,26 +336,21 @@
     applyBodyScreenClasses();
     applyFormScreenTheme();
     if (id === 'screen0b-adultos') {
-      stopAdultosCardRotation();
-      startAdultosAnuncioRotation();
+      refreshSubcatPromoRail(state.sector);
+      if (state.sector && state.sector.id !== 'adultos') {
+        syncSectorSparkles(state.sector.id, $('rpSubcatWrap'));
+      }
     } else if (id === 'screen0') {
-      stopAdultosAnuncioRotation();
-      startAdultosCardRotation();
+      syncSectorSparkles('', document.querySelector('#screen0 .rp-cat0-scroll'));
     } else if (id === 'screen1') {
-      stopAdultosAnuncioRotation();
-      stopAdultosCardRotation();
       ensureGeoReady();
       applyFormScreenTheme();
     } else if (id === 'screen4') {
-      stopAdultosAnuncioRotation();
-      stopAdultosCardRotation();
       refreshAccessMode(function () {
         fillScreen4();
         applyFormScreenTheme();
       });
     } else {
-      stopAdultosAnuncioRotation();
-      stopAdultosCardRotation();
     }
     updateProgress();
     syncActionsBar();
@@ -584,28 +571,30 @@
     }, TAP_ADVANCE_MS);
   }
 
-  function buildAdultosVisualHtml() {
-    adultosCardRotateIdx = 0;
-    return buildSectorImageHtml(SECTOR_IMAGES.adultos, { id: 'rpAdultosCardImg', priority: true });
+  function buildSectorWatermarkHtml(sectorId) {
+    if (global.CariHubSectorCategoryWatermarks && global.CariHubSectorCategoryWatermarks.buildHtml) {
+      return global.CariHubSectorCategoryWatermarks.buildHtml(sectorId);
+    }
+    return '';
   }
 
-  function buildSectorCardButton(sector, opts) {
-    opts = opts || {};
+  function buildSectorCardButton(sector) {
     var subs = global.CariHubSectores && global.CariHubSectores.subcategoriasDeSector
       ? global.CariHubSectores.subcategoriasDeSector(sector.id)
       : [];
-    var img = SECTOR_IMAGES[sector.id] || 'img/home/promo-perfil.jpg';
+    var imgMeta = sectorImageMeta(sector.id);
+    var metaText = subs.length + ' subcategorías';
     var btn = document.createElement('button');
     btn.type = 'button';
-    btn.className = 'ch-geo-card rp-sector-card' +
+    btn.className = 'ch-geo-card rp-sector-card rp-sector-card--portrait' +
       (state.sector && state.sector.id === sector.id ? ' is-selected' : '');
-    var thumbHtml = opts.adultosFixed
-      ? buildAdultosVisualHtml()
-      : buildSectorImageHtml(img);
-    var metaText = subs.length + ' subcategorías';
+    var thumbStyle = imgMeta.bg ? ' style="background:' + esc(imgMeta.bg) + '"' : '';
     btn.innerHTML =
-      '<span class="ch-geo-card__thumb">' + thumbHtml + '</span>' +
+      '<span class="ch-geo-card__thumb ch-geo-card__thumb--portrait"' + thumbStyle + '>' +
+        buildSectorImageHtml(imgMeta) +
+      '</span>' +
       '<span class="ch-geo-card__body">' +
+        buildSectorWatermarkHtml(sector.id) +
         '<span class="ch-geo-card__text">' +
           '<p class="ch-geo-card__title">' + sectorNameHtml(sector) + '</p>' +
           '<p class="ch-geo-card__meta">' + ICON_GRID + esc(metaText) + '</p>' +
@@ -636,10 +625,9 @@
 
     sectors.forEach(function (sector) {
       var li = document.createElement('li');
-      li.appendChild(buildSectorCardButton(sector, { adultosFixed: sector.id === 'adultos' }));
+      li.appendChild(buildSectorCardButton(sector));
       list.appendChild(li);
     });
-    if (state.screen === 'screen0') startAdultosCardRotation();
   }
 
   function goVisualSlide(stage, nextIdx, slideClass) {
@@ -656,78 +644,18 @@
     return idx;
   }
 
-  function goAnuncioSlide(stage, nextIdx) {
-    if (!stage) return 0;
-    var slides = stage.querySelectorAll('.rp-anuncio-slide');
-    var dotsWrap = stage.parentElement ? stage.parentElement.querySelector('.rp-anuncio-dots') : null;
-    var dots = dotsWrap ? dotsWrap.querySelectorAll('span') : [];
-    if (!slides.length) return 0;
-    var idx = ((nextIdx % slides.length) + slides.length) % slides.length;
-    var activeSlide = slides[idx];
-    if (activeSlide) ensureLazyImgLoaded(activeSlide.querySelector('img'));
-    slides.forEach(function (sl, i) {
-      var on = i === idx;
-      sl.classList.toggle('is-active', on);
-      sl.setAttribute('aria-hidden', on ? 'false' : 'true');
-    });
-    dots.forEach(function (dot, i) {
-      dot.classList.toggle('is-on', i === idx);
-    });
-    return idx;
-  }
-
-  function advanceAdultosCardImage() {
-    var img = $('rpAdultosCardImg');
-    if (!img) return;
-    var nextIdx = (adultosCardRotateIdx + 1) % ADULTOS_CARD_IMAGES.length;
-    var png = ADULTOS_CARD_IMAGES[nextIdx];
-    var mob = sectorMobPath(png);
-    var preload = new Image();
-    preload.onload = function () {
-      adultosCardRotateIdx = nextIdx;
-      img.src = mob;
-      img.setAttribute('data-fallback', png);
-    };
-    preload.onerror = function () {
-      adultosCardRotateIdx = nextIdx;
-      img.src = png;
-      img.removeAttribute('data-fallback');
-    };
-    preload.src = mob;
-  }
-
-  function startAdultosCardRotation() {
-    stopAdultosCardRotation();
-    if (prefersLiteMotion()) return;
-    if (!$('rpAdultosCardImg')) return;
-    if (ADULTOS_CARD_IMAGES.length < 2) return;
-    adultosCardRotateTimer = setInterval(advanceAdultosCardImage, ADULTOS_CARD_ROTATE_MS);
-  }
-
-  function stopAdultosCardRotation() {
-    if (adultosCardRotateTimer) {
-      clearInterval(adultosCardRotateTimer);
-      adultosCardRotateTimer = null;
-    }
-  }
-
-  function startAdultosAnuncioRotation() {
-    stopAdultosAnuncioRotation();
-    if (prefersLiteMotion()) return;
-    var stage = $('rpAdultosAnuncioStage');
-    if (!stage) return;
-    var slides = stage.querySelectorAll('.rp-anuncio-slide');
-    if (slides.length < 2) return;
-    var rot = { idx: 0 };
-    anuncioRotateTimer = setInterval(function () {
-      rot.idx = goAnuncioSlide(stage, rot.idx + 1);
-    }, ANUNCIO_ROTATE_MS);
-  }
-
-  function stopAdultosAnuncioRotation() {
-    if (anuncioRotateTimer) {
-      clearInterval(anuncioRotateTimer);
-      anuncioRotateTimer = null;
+  function refreshSubcatPromoRail(sector) {
+    if (!global.CariHubHomeCatPromoRail) return;
+    var rail = $('rpSubcatPromoRail');
+    if (!rail) return;
+    sector = sector || state.sector;
+    if (sector && sector.id) {
+      global.CariHubHomeCatPromoRail.mountRail(rail, {
+        sectorId: sector.id,
+        sectorName: sector.nombre || ''
+      });
+    } else {
+      global.CariHubHomeCatPromoRail.mountRail(rail, {});
     }
   }
 
@@ -738,7 +666,6 @@
     var hint = $('rpAdultosHint');
     var title = $('rpSubcatSectorTitle');
     var screen = $('screen0b-adultos');
-    var anuncio = $('rpAdultosAnuncio');
     if (!list || !global.CariHubSectores) return;
 
     var items = global.CariHubSectores.subcategoriasDeSector(sector.id) || [];
@@ -751,9 +678,7 @@
         hint.textContent = items.length + ' subcategorías · elige una para continuar';
       }
     }
-    if (anuncio) {
-      anuncio.classList.toggle('rp-hidden', sector.id !== 'adultos');
-    }
+    refreshSubcatPromoRail(sector);
 
     if (sector.id === 'adultos') {
       list.className = 'home-adultos-picker__grid';
@@ -937,7 +862,7 @@
     extras = extras || {};
     var pending = extras.estadoCatalogo === 'pendiente_aprobacion' ||
       (subcat && subcat.id === 'solicitud-pendiente');
-    return {
+    var ctx = {
       categoriaPrincipal: sector ? sector.nombre : '',
       sectorId: sector ? sector.id : '',
       subcategoria: subcat ? subcat.nombre : '',
@@ -947,9 +872,30 @@
       categoriaSolicitada: extras.sectorSolicitado || extras.categoriaSolicitada || '',
       estadoCatalogo: pending ? 'pendiente_aprobacion' : (extras.estadoCatalogo || 'aprobado'),
       solicitudCatalogoId: extras.solicitudCatalogoId || '',
-      tipoPerfilLabel: tipoPerfilLabel(subcat ? subcat.id : ''),
-      schemaVersion: '2026-06-10-fase1'
+      tipoPerfilLabel: tipoPerfilLabel(subcat ? subcat.id : '')
     };
+    return enrichContextSchema(ctx);
+  }
+
+  function enrichContextSchema(ctx) {
+    if (!global.CariHubFieldEngineLite || !CariHubFieldEngineLite.resolveRegistrationSchema) {
+      var uiIdx = global.CARIHUB_REGISTRO_UI_INDEX;
+      ctx.schemaVersion = (uiIdx && uiIdx.version) || '2026-06-15';
+      return ctx;
+    }
+    var resolved = CariHubFieldEngineLite.resolveRegistrationSchema(ctx);
+    var ident = resolved.identidad || {};
+    var uiIdx = global.CARIHUB_REGISTRO_UI_INDEX;
+    return Object.assign({}, ctx, {
+      formularioId: ident.formularioId || '',
+      arquetipo: ident.arquetipo || '',
+      tipoPerfil: ident.tipoPerfil || '',
+      formularioUiId: resolved.formularioUiId || ident.formularioUiId || '',
+      uiProfileKey: resolved.uiProfileKey || '',
+      componenteResultados: ident.componenteResultados || '',
+      componentePerfil: ident.componentePerfil || '',
+      schemaVersion: (uiIdx && uiIdx.version) || '2026-06-15'
+    });
   }
 
   function setCatSearchActive(active) {
@@ -1080,13 +1026,15 @@
   }
 
   function buildSearchHitButton(sector, sub) {
-    var img = SECTOR_IMAGES[sector.id] || 'img/home/promo-perfil.jpg';
+    var imgMeta = sectorImageMeta(sector.id);
     var btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'rp-cat0-search-hit';
+    var hitThumbStyle = imgMeta.bg ? ' style="background:' + esc(imgMeta.bg) + '"' : '';
     btn.innerHTML =
-      '<span class="rp-cat0-search-hit__thumb">' + buildSectorImageHtml(img) + '</span>' +
+      '<span class="rp-cat0-search-hit__thumb"' + hitThumbStyle + '>' + buildSectorImageHtml(imgMeta) + '</span>' +
       '<span class="rp-cat0-search-hit__body">' +
+        buildSectorWatermarkHtml(sector.id) +
         '<span class="rp-cat0-search-hit__text">' +
           '<p class="rp-cat0-search-hit__title">' + esc(sub.nombre) + '</p>' +
           '<p class="rp-cat0-search-hit__sector">' + esc(sector.nombre) + '</p>' +
@@ -1104,13 +1052,15 @@
     var subs = global.CariHubSectores && global.CariHubSectores.subcategoriasDeSector
       ? global.CariHubSectores.subcategoriasDeSector(sector.id)
       : [];
-    var img = SECTOR_IMAGES[sector.id] || 'img/home/promo-perfil.jpg';
+    var imgMeta = sectorImageMeta(sector.id);
     var btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'rp-cat0-search-hit';
+    var sectorHitThumbStyle = imgMeta.bg ? ' style="background:' + esc(imgMeta.bg) + '"' : '';
     btn.innerHTML =
-      '<span class="rp-cat0-search-hit__thumb">' + buildSectorImageHtml(img) + '</span>' +
+      '<span class="rp-cat0-search-hit__thumb"' + sectorHitThumbStyle + '>' + buildSectorImageHtml(imgMeta) + '</span>' +
       '<span class="rp-cat0-search-hit__body">' +
+        buildSectorWatermarkHtml(sector.id) +
         '<span class="rp-cat0-search-hit__text">' +
           '<p class="rp-cat0-search-hit__title">' + sectorNameHtml(sector) + '</p>' +
           '<p class="rp-cat0-search-hit__sector">' + esc(subs.length + ' subcategorías') + '</p>' +
@@ -1648,6 +1598,24 @@
     }
     syncProfileExperienceChip(resolved, ctx);
     syncUiFormNotice(ctx);
+    var bloquesSaved = null;
+    try {
+      var draftRaw = global.localStorage.getItem(STORAGE_KEY);
+      if (draftRaw) {
+        var draftData = JSON.parse(draftRaw);
+        if (draftData && draftData.camposPublicos && draftData.camposPublicos.bloquesPublicos) {
+          bloquesSaved = draftData.camposPublicos.bloquesPublicos;
+        }
+      }
+    } catch (eDraft) { /* ignore */ }
+    if (global.CariHubRegistroPublicBlocks && CariHubRegistroPublicBlocks.apply) {
+      CariHubRegistroPublicBlocks.apply(ctx, resolved, bloquesSaved);
+      CariHubRegistroPublicBlocks.bindChange(function () {
+        if (global.CariHubRegistroPerfilPreview && CariHubRegistroPerfilPreview.refresh) {
+          CariHubRegistroPerfilPreview.refresh();
+        }
+      });
+    }
     var pendingNotice = $('rpCatalogPendingNotice');
     if (pendingNotice) {
       pendingNotice.classList.toggle('rp-hidden', ctx.estadoCatalogo !== 'pendiente_aprobacion');
@@ -1858,9 +1826,19 @@
     document.querySelectorAll('#rpGalleryGrid .rp-gallery__slot').forEach(function (slot) {
       if (slot.dataset.preview) galeria.push(slot.dataset.preview);
     });
+    var ctx = state.contexto || buildContexto(state.sector, state.subcategoria);
+    var schemaResuelto = null;
+    if (global.CariHubFieldEngineLite && CariHubFieldEngineLite.resolveRegistrationSchema) {
+      schemaResuelto = CariHubFieldEngineLite.resolveRegistrationSchema(ctx);
+    }
+    var bloquesPublicos = null;
+    if (global.CariHubRegistroPublicBlocks && CariHubRegistroPublicBlocks.collect) {
+      bloquesPublicos = CariHubRegistroPublicBlocks.collect(ctx, schemaResuelto);
+    }
 
     return {
-      contexto: state.contexto || buildContexto(state.sector, state.subcategoria),
+      contexto: ctx,
+      schemaResuelto: schemaResuelto,
       camposPublicos: {
         categoria: $('fldCategoria').value.trim(),
         subcategoria: $('fldSubcategoria').value.trim(),
@@ -1875,6 +1853,7 @@
         modalidad: $('fldModalidad') ? $('fldModalidad').value.trim() : '',
         horarioPublico: $('fldHorario').value.trim(),
         serviciosPrincipales: $('fldServicios').value.trim(),
+        bloquesPublicos: bloquesPublicos,
         whatsappPublico: $('fldWhatsapp').value.trim(),
         telegramPublico: $('fldTelegram').value.trim(),
         instagramPublico: $('fldInstagram') ? $('fldInstagram').value.trim() : '',
@@ -1976,6 +1955,18 @@
       if (!check.ok) missing = missing.concat(check.missing);
     } else if (!camposValidacion.fldAlias) {
       missing.push('Alias / nombre público');
+    }
+    if (global.CariHubRegistroPublicBlocks && CariHubRegistroPublicBlocks.collect) {
+      var schemaForBlocks = global.CariHubFieldEngineLite && CariHubFieldEngineLite.resolveRegistrationSchema
+        ? CariHubFieldEngineLite.resolveRegistrationSchema(ctx) : null;
+      var bloquesVals = CariHubRegistroPublicBlocks.collect(ctx, schemaForBlocks);
+      if (bloquesVals && CariHubRegistroPublicBlocks.validateValues) {
+        var cfgBlocks = CariHubRegistroPublicBlocks.resolveConfig(ctx, schemaForBlocks);
+        if (cfgBlocks) {
+          var blockMissing = CariHubRegistroPublicBlocks.validateValues(cfgBlocks, bloquesVals);
+          missing = missing.concat(blockMissing);
+        }
+      }
     }
     var mainBox = $('uploadPrincipalBox');
     if (!mainBox || !mainBox.dataset.preview) {
@@ -2117,6 +2108,12 @@
       if ($('fldModalidad')) $('fldModalidad').value = c.modalidad || '';
       $('fldHorario').value = c.horarioPublico || '';
       $('fldServicios').value = c.serviciosPrincipales || '';
+      if (global.CariHubRegistroPublicBlocks && CariHubRegistroPublicBlocks.apply && c.bloquesPublicos) {
+        var ctxRestore = state.contexto || buildContexto(state.sector, state.subcategoria);
+        var resolvedRestore = global.CariHubFieldEngineLite && CariHubFieldEngineLite.resolveRegistrationSchema
+          ? CariHubFieldEngineLite.resolveRegistrationSchema(ctxRestore) : null;
+        CariHubRegistroPublicBlocks.apply(ctxRestore, resolvedRestore, c.bloquesPublicos);
+      }
       $('fldWhatsapp').value = c.whatsappPublico || '';
       $('fldTelegram').value = c.telegramPublico || '';
       if ($('fldInstagram')) $('fldInstagram').value = c.instagramPublico || '';
@@ -2261,6 +2258,7 @@
     syncActionsBar();
     syncCat0Foot();
     syncFormActionsPlacement();
+    syncSectorSparkles('', document.querySelector('#screen0 .rp-cat0-scroll'));
     if (global.CariHubTerminosRegistro && CariHubTerminosRegistro.bindTerminosModal) {
       CariHubTerminosRegistro.bindTerminosModal();
     }
