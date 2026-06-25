@@ -78,6 +78,15 @@
         validaciones: [
           { campo: 'estatura', max: 1.58, mensaje: 'Petit: estatura máxima 1.58 m' }
         ]
+      },
+      trans: {
+        obligatoriosExtra: ['identidadGenero'],
+        fieldPatches: {
+          identidadGenero: { required: true }
+        },
+        fieldHints: {
+          identidadGenero: 'Cómo te presentas en tu perfil (ej. mujer trans, no binaria…).'
+        }
       }
     },
     obligatorios: [
@@ -91,6 +100,14 @@
         hint: 'Estos datos aparecen en la columna derecha de tu perfil (categoría, idiomas, orientación).',
         fields: [
           { id: 'orientacion', label: 'Orientación sexual', type: 'select', required: false, options: ['Heterosexual', 'Bisexual', 'Pansexual', 'Gay', 'Lesbiana', 'Queer'] },
+          {
+            id: 'identidadGenero',
+            label: 'Identidad / presentación',
+            type: 'text',
+            required: false,
+            onlySubcategorias: ['trans'],
+            placeholder: 'Ej. Mujer trans, no binaria…'
+          },
           { id: 'idiomas', label: 'Idiomas', type: 'text', required: false, placeholder: 'Ej. Español, Inglés' },
           { id: 'nivelServicio', label: 'Nivel de servicios', type: 'select', required: false, options: ['Básico', 'Completo', 'Premium'], helpKey: 'nivelServicio' },
           {

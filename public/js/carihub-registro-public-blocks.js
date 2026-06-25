@@ -417,6 +417,7 @@
     if (!bloques) return u;
     u = u || {};
     if (bloques.orientacion) u.orientacion = bloques.orientacion;
+    if (bloques.identidadGenero) u.identidadGenero = bloques.identidadGenero;
     if (bloques.idiomas) u.idiomas = bloques.idiomas;
     if (bloques.nivelServicio) u.nivelServicio = bloques.nivelServicio;
     if (bloques.nivelPremium) u.nivelPremium = bloques.nivelPremium;

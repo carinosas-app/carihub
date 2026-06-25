@@ -213,6 +213,7 @@
         : (cp.serviciosPrincipales || ''),
       edad: cp.edad || '',
       orientacion: mappedBloques.orientacion || '',
+      identidadGenero: mappedBloques.identidadGenero || '',
       idiomas: mappedBloques.idiomas || '',
       nivelServicio: mappedBloques.nivelServicio || '',
       nivelPremium: mappedBloques.nivelPremium || '',
