@@ -215,6 +215,8 @@
       orientacion: mappedBloques.orientacion || '',
       idiomas: mappedBloques.idiomas || '',
       nivelServicio: mappedBloques.nivelServicio || '',
+      nivelPremium: mappedBloques.nivelPremium || '',
+      eventosDisponibles: mappedBloques.eventosDisponibles === true,
       disponibilidad: mappedBloques.disponibilidad || '',
       estatura: mappedBloques.estatura || '',
       peso: mappedBloques.peso || '',

@@ -145,6 +145,13 @@
     return html;
   }
 
+  function isTruthyFieldValue(val) {
+    if (val === true || val === 1) return true;
+    if (val === false || val === 0 || val == null) return false;
+    var s = String(val).trim().toLowerCase();
+    return s === 'true' || s === '1' || s === 'si' || s === 'sí';
+  }
+
   function renderField(field, values) {
     values = values || {};
     var val = values[field.id] != null ? values[field.id] : '';
@@ -172,11 +179,19 @@
     } else if (field.type === 'textarea') {
       wrap += '<label for="' + fieldDomId(field.id) + '">' + esc(field.label) + req + '</label>' +
         '<textarea id="' + fieldDomId(field.id) + '" rows="' + (field.rows || 3) + '" placeholder="' + esc(field.placeholder || '') + '">' + esc(val) + '</textarea>';
+    } else if (field.type === 'boolean') {
+      var checked = isTruthyFieldValue(val);
+      wrap += '<label class="rp-pub-check rp-pub-bool" for="' + fieldDomId(field.id) + '">' +
+        '<input type="checkbox" id="' + fieldDomId(field.id) + '"' + (checked ? ' checked' : '') + '> ' +
+        esc(field.label) + req + '</label>';
+      if (field.hint) {
+        wrap += '<p class="rp-contact-hint rp-pub-field-hint">' + esc(field.hint) + '</p>';
+      }
     } else {
       wrap += '<label for="' + fieldDomId(field.id) + '">' + esc(field.label) + req + '</label>' +
         '<input type="text" id="' + fieldDomId(field.id) + '" value="' + esc(val) + '" placeholder="' + esc(field.placeholder || '') + '">';
     }
-    if (field.hint && field.type !== 'select' && field.type !== 'checklist') {
+    if (field.hint && field.type !== 'select' && field.type !== 'checklist' && field.type !== 'boolean') {
       wrap += '<p class="rp-contact-hint rp-pub-field-hint">' + esc(field.hint) + '</p>';
     }
     wrap += '</div>';
@@ -250,6 +265,11 @@
           values[field.id] = readChecklist(field.id);
           return;
         }
+        if (field.type === 'boolean') {
+          var cb = $(fieldDomId(field.id));
+          values[field.id] = cb ? cb.checked === true : false;
+          return;
+        }
         var el = $(fieldDomId(field.id));
         values[field.id] = el ? String(el.value || '').trim() : '';
       });
@@ -263,6 +283,11 @@
     cfg = mergedConfig(cfg, ctx);
     (cfg.obligatorios || []).forEach(function (key) {
       var val = values[key];
+      var fieldType = fieldTypeForKey(cfg, key);
+      if (fieldType === 'boolean') {
+        if (!isTruthyFieldValue(val)) missing.push(labelForField(cfg, key));
+        return;
+      }
       if (Array.isArray(val)) {
         if (!val.length) missing.push(labelForField(cfg, key));
       } else if (!String(val || '').trim()) {
@@ -273,9 +298,10 @@
       block.fields.forEach(function (field) {
         if (!field.required) return;
         var val = values[field.id];
-        if (Array.isArray(val) ? !val.length : !String(val || '').trim()) {
-          if (missing.indexOf(field.label) < 0) missing.push(field.label);
-        }
+        var empty = field.type === 'boolean'
+          ? !isTruthyFieldValue(val)
+          : (Array.isArray(val) ? !val.length : !String(val || '').trim());
+        if (empty && missing.indexOf(field.label) < 0) missing.push(field.label);
       });
     });
     return missing;
@@ -289,6 +315,16 @@
       });
     });
     return found || key;
+  }
+
+  function fieldTypeForKey(cfg, key) {
+    var found = '';
+    cfg.blocks.forEach(function (block) {
+      block.fields.forEach(function (field) {
+        if (field.id === key) found = field.type;
+      });
+    });
+    return found;
   }
 
   function apply(ctx, resolved, savedValues) {
@@ -321,6 +357,7 @@
     if (bloques.idiomas) u.idiomas = bloques.idiomas;
     if (bloques.nivelServicio) u.nivelServicio = bloques.nivelServicio;
     if (bloques.nivelPremium) u.nivelPremium = bloques.nivelPremium;
+    if (isTruthyFieldValue(bloques.eventosDisponibles)) u.eventosDisponibles = true;
     if (bloques.disponibilidad) {
       u.disponibilidad = DISPONIBILIDAD_LABELS[bloques.disponibilidad] || bloques.disponibilidad;
     }

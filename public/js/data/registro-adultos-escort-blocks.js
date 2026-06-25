@@ -45,6 +45,15 @@
         fieldHints: {
           nivelPremium: 'Aparece en tu tarjeta y ficha como distintivo premium.'
         }
+      },
+      'edecan': {
+        obligatoriosExtra: ['eventosDisponibles'],
+        fieldPatches: {
+          eventosDisponibles: { required: true }
+        },
+        fieldHints: {
+          eventosDisponibles: 'Confirma que aceptas contratación para eventos, expos y promociones.'
+        }
       }
     },
     obligatorios: [
@@ -72,6 +81,13 @@
               'Exclusivo · Solo con cita y verificación previa',
               'Alto nivel · Hoteles 5★ y suite privada'
             ]
+          },
+          {
+            id: 'eventosDisponibles',
+            label: 'Disponible para eventos',
+            type: 'boolean',
+            required: false,
+            onlySubcategorias: ['edecan']
           },
           {
             id: 'disponibilidad',
