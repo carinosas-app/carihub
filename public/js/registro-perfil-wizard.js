@@ -1660,6 +1660,9 @@
       if (edadWrap) edadWrap.classList.toggle('rp-hidden', isNegocio);
       if (modWrap) modWrap.classList.toggle('rp-hidden', isNegocio);
     }
+    if (global.CariHubRegistroPublicBlocks && CariHubRegistroPublicBlocks.applyFieldLabels) {
+      CariHubRegistroPublicBlocks.applyFieldLabels(ctx, resolved);
+    }
     syncProfileExperienceChip(resolved, ctx);
     syncUiFormNotice(ctx);
     syncGalleryForSubcategoria(ctx);
@@ -2020,9 +2023,20 @@
     };
     if (global.CariHubFieldEngineLite && CariHubFieldEngineLite.validatePublicDraft) {
       var check = CariHubFieldEngineLite.validatePublicDraft(ctx, camposValidacion);
-      if (!check.ok) missing = missing.concat(check.missing);
+      if (!check.ok) {
+        var aliasOverride = global.CariHubRegistroPublicBlocks && CariHubRegistroPublicBlocks.getAliasLabel
+          ? CariHubRegistroPublicBlocks.getAliasLabel(ctx, check.resolved) : '';
+        missing = missing.concat(check.missing.map(function (m) {
+          if (aliasOverride && (m === 'Alias profesional' || m === 'Alias / nombre público')) {
+            return aliasOverride;
+          }
+          return m;
+        }));
+      }
     } else if (!camposValidacion.fldAlias) {
-      missing.push('Alias / nombre público');
+      var aliasFallback = global.CariHubRegistroPublicBlocks && CariHubRegistroPublicBlocks.getAliasLabel
+        ? CariHubRegistroPublicBlocks.getAliasLabel(ctx, null) : '';
+      missing.push(aliasFallback || 'Alias / nombre público');
     }
     if (global.CariHubRegistroPublicBlocks && CariHubRegistroPublicBlocks.collect) {
       var schemaForBlocks = global.CariHubFieldEngineLite && CariHubFieldEngineLite.resolveRegistrationSchema

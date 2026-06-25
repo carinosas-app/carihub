@@ -432,6 +432,25 @@
     return collectValues(mergedConfig(cfg, ctx));
   }
 
+  function getFieldLabels(ctx, resolved) {
+    var cfg = resolveConfig(ctx, resolved);
+    if (!cfg) return {};
+    var over = getSubcategoriaOverride(cfg, ctx);
+    return (over && over.labels) ? Object.assign({}, over.labels) : {};
+  }
+
+  function getAliasLabel(ctx, resolved) {
+    return getFieldLabels(ctx, resolved).alias || '';
+  }
+
+  function applyFieldLabels(ctx, resolved) {
+    var labels = getFieldLabels(ctx, resolved);
+    if (labels.alias) {
+      var aliasLbl = document.querySelector('label[for="fldAlias"]');
+      if (aliasLbl) aliasLbl.textContent = labels.alias;
+    }
+  }
+
   function bindChange(onChange) {
     var host = $('rpDynamicPublicHost');
     if (!host || host.dataset.rpPubBound === '1') return;
@@ -455,6 +474,9 @@
     mapToPerfil: mapToPerfil,
     getFotosMin: getFotosMin,
     mergedConfig: mergedConfig,
+    getFieldLabels: getFieldLabels,
+    getAliasLabel: getAliasLabel,
+    applyFieldLabels: applyFieldLabels,
     bindChange: bindChange
   };
 })(typeof window !== 'undefined' ? window : globalThis);

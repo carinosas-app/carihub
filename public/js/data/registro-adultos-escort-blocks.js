@@ -64,6 +64,9 @@
         fieldHints: {
           portfolioURL: 'Enlace público a tu book o portafolio (Instagram, Behance, sitio propio, etc.).'
         }
+      },
+      'gigolo': {
+        labels: { alias: 'Alias masculino' }
       }
     },
     obligatorios: [
