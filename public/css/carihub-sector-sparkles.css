@@ -1,0 +1,173 @@
+/**
+ * Destellos de 4 puntas — pequeños, definidos, color del sector.
+ */
+
+.ch-sector-sparkles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.ch-sector-spark {
+  position: absolute;
+  left: var(--ss-x, 50%);
+  top: var(--ss-y, 50%);
+  width: var(--ss-size, 6px);
+  height: var(--ss-size, 6px);
+  transform: translate(-50%, -50%) rotate(45deg);
+  background: var(--ss-color, var(--ch-sector-spark-color, #e91e63));
+  clip-path: polygon(50% 0%, 65% 35%, 100% 50%, 65% 65%, 50% 100%, 35% 65%, 0% 50%, 35% 35%);
+  box-shadow:
+    0 0 calc(var(--ss-size, 6px) * 0.9) color-mix(in srgb, var(--ss-color, #e91e63) 55%, transparent),
+    0 0 calc(var(--ss-size, 6px) * 1.6) color-mix(in srgb, var(--ss-color, #e91e63) 28%, transparent);
+  opacity: 0;
+  animation: ch-sector-spark-twinkle var(--ss-dur, 3s) ease-in-out infinite;
+  animation-delay: var(--ss-delay, 0s);
+}
+
+@keyframes ch-sector-spark-twinkle {
+  0%, 100% { opacity: 0; transform: translate(-50%, -50%) rotate(45deg) scale(0.65); }
+  45% { opacity: 0.92; transform: translate(-50%, -50%) rotate(45deg) scale(1); }
+  62% { opacity: 0.55; transform: translate(-50%, -50%) rotate(45deg) scale(0.82); }
+}
+
+/* —— Registro: pantalla categorías —— */
+body.rp-screen0-cats .rp-cat0-scroll {
+  position: relative;
+}
+
+body.rp-screen0-cats:not([data-rp-sector]) .ch-sector-sparkles .ch-sector-spark {
+  --ss-color: #e91e63;
+}
+
+body.rp-screen0-cats[data-rp-sector]:not([data-rp-sector="adultos"]) .ch-sector-sparkles .ch-sector-spark {
+  --ss-color: var(--ch-sector-spark-color, #e91e63);
+}
+
+/* —— Registro: subcategorías no adultos —— */
+body.rp-sector-subcats .rp-adultos-wrap {
+  position: relative;
+}
+
+body.rp-sector-subcats .ch-sector-sparkles {
+  border-radius: inherit;
+}
+
+/* —— Home modal otras categorías —— */
+.home-modal--otros-registro .home-otros-registro__panel {
+  position: relative;
+}
+
+.home-modal--otros-registro.is-step-cats .home-otros-registro__scroll {
+  position: relative;
+}
+
+.home-modal--otros-registro.rp-sector-subcats .home-otros-subcats-wrap {
+  position: relative;
+}
+
+.home-modal--otros-registro .ch-sector-sparkles {
+  z-index: 0;
+}
+
+.home-modal--otros-registro .home-otros-registro__scroll,
+.home-modal--otros-registro .home-otros-subcats-wrap {
+  position: relative;
+  z-index: 1;
+}
+
+/* —— Geo: país · estado · ciudad —— */
+.ch-geo-modal .ch-geo-sheet__panel {
+  position: relative;
+}
+
+.ch-geo-modal .ch-geo-sheet__scroll {
+  position: relative;
+}
+
+.ch-geo-modal .ch-geo-bg-sparkles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+  border-radius: inherit;
+}
+
+.ch-geo-modal .ch-geo-sheet__panel > .ch-geo-bg-sparkles {
+  border-radius: 0 0 22px 22px;
+}
+
+.ch-geo-modal .ch-geo-sheet__head,
+.ch-geo-modal .ch-geo-sheet__banner,
+.ch-geo-modal .ch-geo-sheet__search,
+.ch-geo-modal .ch-geo-sheet__scroll,
+.ch-geo-modal .ch-geo-sheet__footer {
+  position: relative;
+  z-index: 1;
+}
+
+/* Header sparkles → 4 puntas sectoriales */
+.ch-geo-modal:not([data-rp-sector="adultos"]) .ch-geo-sparkle {
+  width: var(--ss-size, 7px);
+  height: var(--ss-size, 7px);
+  border-radius: 0;
+  background: var(--ch-sector-spark-color, #e91e63);
+  clip-path: polygon(50% 0%, 65% 35%, 100% 50%, 65% 65%, 50% 100%, 35% 65%, 0% 50%, 35% 35%);
+  filter: none;
+  box-shadow: 0 0 8px color-mix(in srgb, var(--ch-sector-spark-color, #e91e63) 45%, transparent);
+  opacity: 0.72;
+  animation: ch-sector-spark-twinkle 3.2s ease-in-out infinite;
+}
+
+.ch-geo-modal:not([data-rp-sector="adultos"]) .ch-geo-sparkle--tl.ch-geo-sparkle--1 { --ss-size: 5px; animation-delay: 0s; }
+.ch-geo-modal:not([data-rp-sector="adultos"]) .ch-geo-sparkle--tl.ch-geo-sparkle--2 { --ss-size: 8px; animation-delay: 0.4s; }
+.ch-geo-modal:not([data-rp-sector="adultos"]) .ch-geo-sparkle--tl.ch-geo-sparkle--3 { --ss-size: 4px; animation-delay: 0.8s; }
+.ch-geo-modal:not([data-rp-sector="adultos"]) .ch-geo-sparkle--tr.ch-geo-sparkle--4 { --ss-size: 6px; animation-delay: 0.2s; }
+.ch-geo-modal:not([data-rp-sector="adultos"]) .ch-geo-sparkle--tr.ch-geo-sparkle--5 { --ss-size: 9px; animation-delay: 0.6s; }
+.ch-geo-modal:not([data-rp-sector="adultos"]) .ch-geo-sparkle--tr.ch-geo-sparkle--6 { --ss-size: 5px; animation-delay: 1s; }
+
+.ch-geo-modal:not([data-rp-sector="adultos"]) .ch-geo-sparkle--tl.ch-geo-sparkle--2::after,
+.ch-geo-modal:not([data-rp-sector="adultos"]) .ch-geo-sparkle--tr.ch-geo-sparkle--5::after {
+  display: none;
+}
+
+/* Sector spark colors */
+html .ch-geo-modal[data-rp-sector="salud"],
+body[data-rp-sector="salud"] { --ch-sector-spark-color: #1976d2; }
+html .ch-geo-modal[data-rp-sector="profesionales"],
+body[data-rp-sector="profesionales"] { --ch-sector-spark-color: #455a64; }
+html .ch-geo-modal[data-rp-sector="bienes-raices"],
+body[data-rp-sector="bienes-raices"] { --ch-sector-spark-color: #7b1fa2; }
+html .ch-geo-modal[data-rp-sector="transporte"],
+body[data-rp-sector="transporte"] { --ch-sector-spark-color: #0288d1; }
+html .ch-geo-modal[data-rp-sector="educacion"],
+body[data-rp-sector="educacion"] { --ch-sector-spark-color: #00897b; }
+html .ch-geo-modal[data-rp-sector="tecnologia"],
+body[data-rp-sector="tecnologia"] { --ch-sector-spark-color: #1565c0; }
+html .ch-geo-modal[data-rp-sector="mascotas"],
+body[data-rp-sector="mascotas"] { --ch-sector-spark-color: #558b2f; }
+html .ch-geo-modal[data-rp-sector="restaurantes"],
+body[data-rp-sector="restaurantes"] { --ch-sector-spark-color: #e65100; }
+html .ch-geo-modal[data-rp-sector="bienestar"],
+body[data-rp-sector="bienestar"] { --ch-sector-spark-color: #689f38; }
+html .ch-geo-modal[data-rp-sector="eventos"],
+body[data-rp-sector="eventos"] { --ch-sector-spark-color: #c2185b; }
+html .ch-geo-modal[data-rp-sector="comercio"],
+body[data-rp-sector="comercio"] { --ch-sector-spark-color: #6a1b9a; }
+html .ch-geo-modal[data-rp-sector="hogar"],
+body[data-rp-sector="hogar"] { --ch-sector-spark-color: #ef6c00; }
+html .ch-geo-modal[data-rp-sector="automotriz"],
+body[data-rp-sector="automotriz"] { --ch-sector-spark-color: #37474f; }
+html .ch-geo-modal[data-rp-sector="industria"],
+body[data-rp-sector="industria"] { --ch-sector-spark-color: #5d4037; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ch-sector-spark,
+  .ch-geo-modal:not([data-rp-sector="adultos"]) .ch-geo-sparkle {
+    animation: none;
+    opacity: 0.45;
+  }
+}

@@ -280,7 +280,9 @@
       template: 'neon',
       accent: '#1e88e5',
       photo: 'img/home/cat-cards/parejas-swinger.png',
+      photoFit: 'contain',
       photoPos: 'center center',
+      photoBg: '#121018',
       icon: '🍍',
       titleLines: ['Parejas', 'Swinger']
     },
@@ -288,7 +290,9 @@
       template: 'neon',
       accent: '#1e88e5',
       photo: 'img/home/cat-cards/parejas-swinger.png',
+      photoFit: 'contain',
       photoPos: 'center center',
+      photoBg: '#121018',
       icon: '🍍',
       titleLines: ['Parejas', 'Swinger']
     },
@@ -406,12 +410,12 @@
       template: tpl,
       accent: ov.accent || '#ec2d7a',
       accent2: ov.accent2,
-      photo: ov.photo,
+      photo: null,
       photoFit: ov.photoFit,
       photoScale: ov.photoScale,
       photoPos: ov.photoPos,
       photoBg: ov.photoBg,
-      gradient: ov.photo ? null : GRADIENTS[index % GRADIENTS.length],
+      gradient: GRADIENTS[index % GRADIENTS.length],
       icon: ov.icon || cat.emoji || '✨',
       title: titleLines.join(' '),
       titleLines: titleLines,
@@ -423,6 +427,10 @@
     };
     if (window.CariHubCategoriaImagenes && CariHubCategoriaImagenes.applyCatVisual) {
       CariHubCategoriaImagenes.applyCatVisual(vis, id);
+    }
+    if (!vis.photo && ov.photo) {
+      vis.photo = ov.photo;
+      vis.gradient = null;
     }
     return vis;
   }
@@ -466,39 +474,6 @@
     industria: 'Industria'
   };
 
-  var SECTOR_PHOTOS = {
-    adultos: 'img/home/sectores-card/01-adultos.png',
-    bienestar: 'img/home/sectores-card/02-bienestar.png',
-    salud: 'img/home/sectores-card/03-salud.png',
-    profesionales: 'img/home/sectores-card/04-profesionales.png',
-    automotriz: 'img/home/sectores-card/05-automotriz.png',
-    hogar: 'img/home/sectores-card/06-hogar.png',
-    comercio: 'img/home/sectores-card/07-comercio.png',
-    'bienes-raices': 'img/home/sectores-card/08-bienes-raices.png',
-    eventos: 'img/home/sectores/sector-09-eventos.png',
-    transporte: 'img/home/sectores/sector-10-transporte.png',
-    educacion: 'img/home/sectores-card/11-educacion.png',
-    tecnologia: 'img/home/sectores/sector-12-tecnologia.png',
-    restaurantes: 'img/home/sectores-card/13-restaurantes.png',
-    mascotas: 'img/home/sectores-card/14-mascotas.png',
-    industria: 'img/home/sectores-card/15-industria.png'
-  };
-
-  var SECTOR_PHOTO_ALT = {
-    adultos: 'img/home/sectores/sector-01-adultos.png',
-    bienestar: 'img/home/sectores/sector-02-bienestar.png',
-    salud: 'img/home/sectores/sector-03-salud.png',
-    profesionales: 'img/home/sectores/sector-04-profesionales.png',
-    automotriz: 'img/home/sectores/sector-05-automotriz.png',
-    hogar: 'img/home/sectores/sector-06-hogar.png',
-    comercio: 'img/home/sectores/sector-07-comercio.png',
-    'bienes-raices': 'img/home/sectores/sector-08-bienes-raices.png',
-    educacion: 'img/home/sectores/sector-11-educacion.png',
-    restaurantes: 'img/home/sectores/sector-13-restaurantes.png',
-    mascotas: 'img/home/sectores/sector-14-mascotas.png',
-    industria: 'img/home/sectores/sector-15-industria.png'
-  };
-
   var SECTOR_TITLE_LINES = {
     adultos: ['Adultos y', 'Entretenimiento'],
     bienestar: ['Bienestar, Espiritualidad', 'y Terapias Alternativas'],
@@ -517,33 +492,44 @@
     industria: ['Industria y', 'Servicios Empresariales']
   };
 
+  function sectorPhotoMeta(sectorId) {
+    if (window.CariHubSectorCardImages && CariHubSectorCardImages.getSectorCardImage) {
+      return CariHubSectorCardImages.getSectorCardImage(sectorId);
+    }
+    return null;
+  }
+
   function resolveSectorPhoto(sectorId, done) {
-    var primary = SECTOR_PHOTOS[sectorId] || '';
-    var alt = SECTOR_PHOTO_ALT[sectorId] || '';
-    if (!primary) {
-      done(alt || '');
+    var meta = sectorPhotoMeta(sectorId);
+    if (meta && meta.src) {
+      done(meta.src);
       return;
     }
-    var probe = new Image();
-    probe.onload = function () { done(primary); };
-    probe.onerror = function () { done(alt || primary); };
-    probe.src = primary;
+    done('');
   }
 
   function sectorVisual(sector, index, compact) {
-    var photo = SECTOR_PHOTOS[sector.id] || SECTOR_PHOTO_ALT[sector.id] || '';
+    var meta = sectorPhotoMeta(sector.id);
+    var photo = meta && meta.src ? meta.src : '';
     var nombre = sector.nombre || SECTOR_SHORT[sector.id] || '';
     var short = SECTOR_SHORT[sector.id] || nombre.split(',')[0].split(' y ')[0];
-    return {
+    var vis = {
       template: 'classic',
       accent: '#ffffff',
       photo: photo,
+      photoFit: meta && meta.fit,
+      photoPos: meta && meta.pos,
+      photoBg: meta && meta.bg,
       gradient: photo ? null : GRADIENTS[index % GRADIENTS.length],
       title: compact ? short : nombre,
       titleLines: compact ? [short] : (SECTOR_TITLE_LINES[sector.id] || splitTitle(nombre)),
       sectorId: sector.id,
       sectorCard: true
     };
+    if (window.CariHubSectorCardImages && CariHubSectorCardImages.applySectorVisual) {
+      CariHubSectorCardImages.applySectorVisual(vis, sector.id);
+    }
+    return vis;
   }
 
   function mountVCard(layer, opts) {

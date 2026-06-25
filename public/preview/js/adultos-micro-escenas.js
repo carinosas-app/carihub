@@ -26,8 +26,8 @@
     'cabinas-glory-holes': { src: 'img-08.jpg', pos: 'center 45%' },
     trans: { src: 'img-27.jpg', pos: 'top center' },
     femboy: { src: 'img-18.jpg', pos: 'center 35%' },
-    swinger: { src: '../../img/home/cat-cards/parejas-swinger.png', pos: 'center center' },
-    'parejas-swinger': { src: '../../img/home/cat-cards/parejas-swinger.png', pos: 'center center' },
+    swinger: { src: '../../img/home/cat-cards/parejas-swinger.png', pos: 'center center', fit: 'contain', bg: '#121018' },
+    'parejas-swinger': { src: '../../img/home/cat-cards/parejas-swinger.png', pos: 'center center', fit: 'contain', bg: '#121018' },
     unicorns: { src: 'img-17.jpg', pos: 'top center' },
     'cuckold-hotwife': { src: '../../img/home/cat-cards/queen-of-spades.png', pos: 'center center' },
     singles: { src: 'img-22.jpg', pos: 'top center' },
@@ -88,10 +88,15 @@
     var meta = IMAGE_MAP[key];
     if (!meta) return '<div class="ap-scene ap-scene--fallback" aria-hidden="true"></div>';
     var pos = meta.pos || 'center';
+    var fit = meta.fit || 'cover';
+    var src = (meta.src.indexOf('..') === 0 || meta.src.indexOf('img/') === 0)
+      ? meta.src
+      : IMG_BASE + meta.src;
+    var wrapStyle = meta.bg ? ' style="background-color:' + meta.bg + ';"' : '';
     return (
-      '<div class="ap-scene ap-scene--photo" aria-hidden="true">' +
-        '<img class="ap-card__photo" src="' + IMG_BASE + meta.src + '" alt="" ' +
-        'loading="lazy" decoding="async" style="object-position:' + pos + '">' +
+      '<div class="ap-scene ap-scene--photo"' + wrapStyle + ' aria-hidden="true">' +
+        '<img class="ap-card__photo" src="' + src + '" alt="" ' +
+        'loading="lazy" decoding="async" style="object-position:' + pos + ';object-fit:' + fit + '">' +
         '<span class="ap-scene__sheen" aria-hidden="true"></span>' +
       '</div>'
     );

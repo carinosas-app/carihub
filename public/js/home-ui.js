@@ -383,17 +383,21 @@
     }
   }
 
-  function pickVisibleCatFromCard(btn) {
+  function pickVisibleCatMetaFromCard(btn) {
     if (!btn) return null;
     var layer = btn.querySelector('.home-cat-card__layer.is-visible');
     if (!layer) return null;
     var vcard = layer.querySelector('.home-vcard');
     if (vcard) {
-      if (vcard.dataset.catName) return vcard.dataset.catName;
-      if (vcard.dataset.catId) {
-        var byId = CATEGORIAS.find(function (c) { return c.id === vcard.dataset.catId; });
-        if (byId) return byId.nombre;
+      var meta = {
+        id: vcard.dataset.catId || '',
+        nombre: vcard.dataset.catName || ''
+      };
+      if (meta.id) {
+        var byId = CATEGORIAS.find(function (c) { return c.id === meta.id; });
+        if (byId) meta.nombre = byId.nombre;
       }
+      if (meta.nombre) return meta;
     }
     var nameEl = layer.querySelector('.home-cat-card__name');
     if (!nameEl) return null;
@@ -401,7 +405,13 @@
     var found = CATEGORIAS.find(function (c) {
       return (c.nombreCorto || c.nombre) === shortName || c.nombre === shortName;
     });
-    return found ? (found.nombre || shortName) : shortName;
+    if (!found) return { id: '', nombre: shortName };
+    return { id: found.id, nombre: found.nombre || shortName };
+  }
+
+  function pickVisibleCatFromCard(btn) {
+    var meta = pickVisibleCatMetaFromCard(btn);
+    return meta ? meta.nombre : null;
   }
 
   /* ── Sectores + categorías (dos pasos) ── */
@@ -536,10 +546,11 @@
       btn.setAttribute('aria-label', sectorAriaLabel(nextSector));
       btn.dataset.sectorId = nextSector.id;
       setTimeout(function () {
-        fillSectorLayer(imgHide, sectorAt(nextIndex + 1), nextIndex + 1);
+        fillSectorLayer(imgHide, nextSector, nextIndex);
         imgHide.classList.add('is-visible');
         imgShow.classList.remove('is-visible');
         state.index = nextIndex;
+        btn.dataset.sectorId = nextSector.id;
       }, 480);
       return;
     }
@@ -583,67 +594,30 @@
     }
   }
 
-  var OTROS_SECTORES_IDS = [
-    'bienestar',
-    'eventos',
-    'restaurantes',
-    'salud',
-    'profesionales',
-    'automotriz',
-    'hogar',
-    'comercio',
-    'bienes-raices',
-    'eventos',
-    'transporte',
-    'educacion',
-    'tecnologia',
-    'restaurantes',
-    'mascotas',
-    'industria'
-  ];
-
-  function otrosSectoresList() {
-    return OTROS_SECTORES_IDS.map(function (id) {
-      return SECTORES.find(function (s) { return s.id === id; }) || null;
-    }).filter(Boolean);
-  }
-
-  function buildOtrosSectoresModal() {
-    var list = document.getElementById('otrosSectoresList');
-    var hint = document.getElementById('otrosSectoresHint');
-    var sectores = otrosSectoresList();
-    if (!list || !sectores.length) return;
-    if (hint) hint.textContent = sectores.length + ' sectores · elige uno y después tu país';
-    list.innerHTML = '';
-    sectores.forEach(function (sector) {
-      var li = document.createElement('li');
-      var btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'home-sector-picker__item';
-      btn.setAttribute('role', 'option');
-      btn.setAttribute('data-sector-id', sector.id);
-      btn.setAttribute('aria-label', sectorAriaLabel(sector));
-      btn.innerHTML =
-        '<span class="home-sector-picker__emoji" aria-hidden="true">' + sector.emoji + '</span>' +
-        '<span class="home-sector-picker__name">' + sector.nombre + '</span>';
-      btn.addEventListener('click', function () {
-        closeOtrosSectoresModal();
-        iniciarFlujoOtrosSectores(sector.id);
-      });
-      li.appendChild(btn);
-      list.appendChild(li);
-    });
+  function handleOtrosSectoresSubcatSelect(cat, sector) {
+    if (!cat || !sector) return;
+    pendingOtrosSectoresFlow = true;
+    if (window.CariHubHomeOtrosSectoresPicker) {
+      window.CariHubHomeOtrosSectoresPicker.close();
+    }
+    selectSubcategoria(cat, sector);
   }
 
   function openOtrosSectoresModal() {
-    var modal = document.getElementById('modal-otros-sectores');
-    if (!modal) return;
-    buildOtrosSectoresModal();
-    modal.classList.add('is-open');
-    document.body.style.overflow = 'hidden';
+    if (window.CariHubHomeOtrosSectoresPicker) {
+      window.CariHubHomeOtrosSectoresPicker.open({
+        step: 'cats',
+        onSelectSubcat: handleOtrosSectoresSubcatSelect
+      });
+      return;
+    }
   }
 
   function closeOtrosSectoresModal() {
+    if (window.CariHubHomeOtrosSectoresPicker) {
+      window.CariHubHomeOtrosSectoresPicker.close();
+      return;
+    }
     var modal = document.getElementById('modal-otros-sectores');
     if (modal) modal.classList.remove('is-open');
     if (!document.querySelector('.home-modal.is-open')) {
@@ -652,6 +626,25 @@
   }
 
   var pendingOtrosSectoresFlow = false;
+
+  function abrirSelectorGeoHome(tipo, opts) {
+    opts = opts || {};
+    if (opts.fromCategoria) {
+      window.__homeGeoPaisHint = true;
+    }
+    if (window.CariHubGeoPicker && typeof window.CariHubGeoPicker.bootHome === 'function') {
+      window.CariHubGeoPicker.bootHome(window.syncHomeGeoFromPicker || null);
+    }
+    var search = document.querySelector('.home-search');
+    if (search) search.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    window.setTimeout(function () {
+      if (typeof window.openHomeGeoPicker === 'function') {
+        window.openHomeGeoPicker(tipo || 'pais');
+      } else if (typeof window.homeGeoClick === 'function') {
+        window.homeGeoClick(tipo || 'pais');
+      }
+    }, 380);
+  }
 
   function seleccionarSectorParaBusqueda(sectorId) {
     var sector = window.CariHubSectores && window.CariHubSectores.sectorPorId(sectorId);
@@ -673,28 +666,34 @@
     closeSectorModal();
     closeOtrosSectoresModal();
     closeCatPickerModal(document.getElementById('modal-categorias'));
-    var search = document.querySelector('.home-search');
-    if (search) search.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    var fieldPais = document.getElementById('fieldPais');
-    if (fieldPais) {
-      fieldPais.classList.add('is-guide-next');
-      window.setTimeout(function () { fieldPais.classList.remove('is-guide-next'); }, 3200);
-    }
-    window.setTimeout(function () {
-      if (typeof window.openHomeGeoPicker === 'function') {
-        window.openHomeGeoPicker('pais');
-      } else if (typeof window.homeGeoClick === 'function') {
-        window.homeGeoClick('pais');
-      }
-    }, 380);
+    abrirSelectorGeoHome('pais');
   }
 
-  function iniciarFlujoOtrosSectores(sectorId) {
-    seleccionarSectorParaBusqueda(sectorId);
+  function sectorIdFromSectorCard(btn) {
+    if (!btn) return '';
+    var layer = btn.querySelector('.home-sector-card__layer.is-visible');
+    var id = (layer && layer.dataset.sectorId) || btn.dataset.sectorId || '';
+    if (id) btn.dataset.sectorId = id;
+    return id;
   }
 
   function onSectorChosen(sectorId) {
-    seleccionarSectorParaBusqueda(sectorId);
+    if (!sectorId || sectorId === 'adultos') return;
+    pendingOtrosSectoresFlow = true;
+    selectedSectorId = sectorId;
+    if (window.CariHubHomeOtrosSectoresPicker) {
+      window.CariHubHomeOtrosSectoresPicker.open({
+        step: 'subcats',
+        sectorId: sectorId,
+        onSelectSubcat: handleOtrosSectoresSubcatSelect
+      });
+      return;
+    }
+    openSubcatPicker(sectorId, { fromOtrosSectores: true });
+  }
+
+  function iniciarFlujoOtrosSectores(sectorId) {
+    onSectorChosen(sectorId);
   }
 
   function bindSectoresExpandToggle() {
@@ -738,11 +737,13 @@
 
     pickerSubcategorias = items || [];
 
-    if (modal) modal.classList.toggle('home-modal--adultos-premium', isAdultos);
-    if (classic) classic.hidden = isAdultos;
-    if (adultos) adultos.hidden = !isAdultos;
-
     if (isAdultos && window.CariHubAdultosCatPicker) {
+      if (window.CariHubHomeSectorSubcatScreen) {
+        window.CariHubHomeSectorSubcatScreen.hide();
+      }
+      if (modal) modal.classList.toggle('home-modal--adultos-premium', true);
+      if (classic) classic.hidden = true;
+      if (adultos) adultos.hidden = false;
       var titleAdultos = document.getElementById('modal-categorias-title-adultos');
       var countAdultos = document.getElementById('catPickerCountAdultos');
       var listAdultos = document.getElementById('catPickerListAdultos');
@@ -754,8 +755,30 @@
           onSelect: function (cat) { selectSubcategoria(cat, sector); }
         });
       }
+      if (window.CariHubHomeCatPromoRail) {
+        var adultosRail = document.querySelector('#catPickerAdultos .home-cat-promo-rail');
+        if (adultosRail) window.CariHubHomeCatPromoRail.mountRail(adultosRail, {});
+      }
       return;
     }
+
+    if (opts.fromOtrosSectores) {
+      if (window.CariHubHomeOtrosSectoresPicker && sector) {
+        window.CariHubHomeOtrosSectoresPicker.open({
+          step: 'subcats',
+          sectorId: sector.id,
+          onSelectSubcat: handleOtrosSectoresSubcatSelect
+        });
+      }
+      return;
+    }
+
+    if (window.CariHubHomeSectorSubcatScreen) {
+      window.CariHubHomeSectorSubcatScreen.hide();
+    }
+    if (modal) modal.classList.toggle('home-modal--adultos-premium', false);
+    if (classic) classic.hidden = false;
+    if (adultos) adultos.hidden = true;
 
     var list = document.getElementById('catPickerList');
     var count = document.getElementById('catPickerCount');
@@ -763,7 +786,11 @@
     var back = document.getElementById('catPickerBack');
     if (!list) return;
     if (title && sector) title.textContent = sector.emoji + ' ' + sector.nombre;
-    if (count) count.textContent = pickerSubcategorias.length + ' opciones · desliza para ver todas';
+    if (count) {
+      count.textContent = opts.fromOtrosSectores
+        ? pickerSubcategorias.length + ' subcategorías · elige una para continuar'
+        : pickerSubcategorias.length + ' opciones · desliza para ver todas';
+    }
     if (back) back.hidden = !opts.showBack;
     list.innerHTML = '';
     pickerSubcategorias.forEach(function (cat) {
@@ -789,6 +816,12 @@
 
   function syncCatPickerSelection() {
     var modal = document.getElementById('modal-categorias');
+    if (modal && modal.classList.contains('home-modal--sector-subcat-premium')) {
+      if (window.CariHubHomeSectorSubcatScreen) {
+        window.CariHubHomeSectorSubcatScreen.syncSelection(selectedCategoriaId);
+      }
+      return;
+    }
     if (modal && modal.classList.contains('home-modal--adultos-premium')) {
       document.querySelectorAll('#catPickerListAdultos .ap-card').forEach(function (btn) {
         var on = btn.getAttribute('data-cat-id') === selectedCategoriaId;
@@ -824,6 +857,9 @@
     closeSectorModal();
     closeCatPickerModal(document.getElementById('modal-categorias'));
     if (typeof window.setCategoriaHome === 'function') window.setCategoriaHome(displayName);
+    if (fromOtrosSectores) {
+      abrirSelectorGeoHome('pais', { fromCategoria: true });
+    }
   }
 
   function selectCategoria(id) {
@@ -853,6 +889,7 @@
     var modal = document.getElementById('modal-categorias');
     var field = document.getElementById('fieldCategoria');
     if (!modal) return;
+    modal.classList.toggle('home-modal--sector-fullscreen', !!opts.fromOtrosSectores);
     syncCatPickerSelection();
     modal.classList.add('is-open');
     if (field) field.setAttribute('aria-expanded', 'true');
@@ -879,7 +916,14 @@
     var field = document.getElementById('fieldCategoria');
     var back = document.getElementById('catPickerBack');
     if (back) back.hidden = true;
-    if (modal) modal.classList.remove('home-modal--adultos-premium');
+    if (modal) {
+      modal.classList.remove('home-modal--adultos-premium');
+      modal.classList.remove('home-modal--sector-fullscreen');
+      modal.classList.remove('home-modal--sector-subcat-premium');
+    }
+    if (window.CariHubHomeSectorSubcatScreen) {
+      window.CariHubHomeSectorSubcatScreen.hide();
+    }
     if (field) field.setAttribute('aria-expanded', 'false');
     pendingOtrosSectoresFlow = false;
     closeModal(modal);
@@ -1025,19 +1069,29 @@
     });
   });
 
-  function iniciarFlujoExploraCategorias(catName) {
-    if (catName && typeof window.setCategoriaHome === 'function') {
-      window.setCategoriaHome(catName);
-    } else if (catName) {
-      window.categoriaSeleccionada = catName;
+  function iniciarFlujoExploraCategorias(catMeta) {
+    var meta = typeof catMeta === 'string' ? { nombre: catMeta, id: '' } : (catMeta || null);
+    if (!meta || !meta.nombre) return;
+    selectedSectorId = 'adultos';
+    window.sectorSeleccionado = 'adultos';
+    if (meta.id) selectedCategoriaId = meta.id;
+    if (typeof window.setCategoriaHome === 'function') {
+      window.setCategoriaHome(meta.nombre);
+    } else {
+      window.categoriaSeleccionada = meta.nombre;
+      var catLabel = document.getElementById('fieldCategoriaLabel');
+      var catField = document.getElementById('fieldCategoria');
+      if (catLabel) catLabel.textContent = meta.nombre;
+      if (catField) catField.classList.add('is-selected');
     }
+    abrirSelectorGeoHome('pais', { fromCategoria: true });
   }
 
-  document.querySelectorAll('.home-cat-card').forEach(function (btn) {
+  document.querySelectorAll('.home-categorias .home-cat-card').forEach(function (btn) {
     btn.addEventListener('click', function () {
-      var catName = pickVisibleCatFromCard(btn);
-      if (catName) {
-        iniciarFlujoExploraCategorias(catName);
+      var catMeta = pickVisibleCatMetaFromCard(btn);
+      if (catMeta && catMeta.nombre) {
+        iniciarFlujoExploraCategorias(catMeta);
         return;
       }
       openSubcatPicker('adultos');
@@ -1046,8 +1100,7 @@
 
   document.querySelectorAll('.home-sector-card').forEach(function (btn) {
     btn.addEventListener('click', function () {
-      var layer = btn.querySelector('.home-sector-card__layer.is-visible');
-      var id = btn.dataset.sectorId || (layer && layer.dataset.sectorId);
+      var id = sectorIdFromSectorCard(btn);
       if (id) onSectorChosen(id);
     });
   });
@@ -1166,15 +1219,14 @@
 
     var catRental = rentals.home_categorias;
     if (catRental && catRental.imagen) {
-      var catAnuncio = document.querySelector('.home-adultos-picker__anuncio');
-      if (catAnuncio) {
-        catAnuncio.href = catRental.url || 'registro-banner.html?slot=home_categorias';
-        var catImg = catAnuncio.querySelector('img');
-        if (catImg) {
-          catImg.src = catRental.imagen;
-          catImg.alt = catRental.titulo || 'Anúnciate aquí';
+      document.querySelectorAll('.home-cat-promo-rail [data-registro-banner-slot="home_categorias"]').forEach(function (slot) {
+        var wrap = slot.closest('.home-cat-promo-rail');
+        if (!wrap || wrap.closest('[hidden]')) return;
+        var anchor = slot.querySelector('.registro-pb') || slot;
+        if (anchor.tagName === 'A' || anchor.classList.contains('registro-pb')) {
+          anchor.href = catRental.url || 'registro-banner.html?slot=home_categorias';
         }
-      }
+      });
     }
   }
 
@@ -1183,6 +1235,9 @@
     remontarHomeAdSlots();
     if (window.CariHubBannerHomeLaterales && CariHubBannerHomeLaterales.mount) {
       CariHubBannerHomeLaterales.mount();
+    }
+    if (window.CariHubHomeCatPromoRail && CariHubHomeCatPromoRail.mountAll) {
+      CariHubHomeCatPromoRail.mountAll();
     }
   }
 
@@ -1195,7 +1250,6 @@
   initHeroCarousel();
   initCategorySlots();
   initSectorCards();
-  buildOtrosSectoresModal();
   bindSectoresExpandToggle();
   startHomeVisualRotation();
 
