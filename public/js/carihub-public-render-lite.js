@@ -166,11 +166,15 @@
         (badges ? '<div class="res-card__badges">' + badges + '</div>' : '') +
         '</div>';
     }
+    var imgSrc = u.fotoURL || (u.__previewRegistro ? '' : 'img/resultados-demo/violeta-1.png');
+    var mediaInner = imgSrc
+      ? '<img src="' + safeTxt(imgSrc) + '" alt="Foto de ' + safeTxt(nombre) + '" width="360" height="210" loading="lazy" decoding="async">'
+      : '<div class="res-card__media-placeholder" aria-hidden="true">Sin foto</div>';
     return '' +
       '<article class="pcard res-card res-card--compact ' + extraClass + '">' +
         '<div class="res-card__media">' +
           (u.nueva ? '<span class="res-nueva">NUEVA</span>' : '') +
-          '<img src="' + safeTxt(u.fotoURL || 'img/resultados-demo/violeta-1.png') + '" alt="Foto de ' + safeTxt(nombre) + '" width="360" height="210" loading="lazy" decoding="async">' +
+          mediaInner +
           (fotos > 0 ? '<span class="gal__count">' + svgIco('camera', 'res-fotos-ic') + fotos + '</span>' : '') +
         '</div>' +
         '<div class="res-card__body">' +

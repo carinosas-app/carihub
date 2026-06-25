@@ -3070,6 +3070,7 @@ function idlocAvailIcon(){
   return idlocHorarioIcon();
 }
 function idlocRow(kind, text){
+  if(!text) return "";
   if(kind==="av"){
     return '<div class="idloc idloc--horario">'+idlocHorarioIcon()+'<span>'+safe(dispPublica(text))+'</span></div>';
   }
@@ -3215,6 +3216,7 @@ function pagosMethodKey(label){
   return "default";
 }
 function metodosPagoCard(methods){
+  if(!methods||!methods.length) return "";
   var rows=(methods||[]).map(function(m){
     return '<div class="pagos-row"><span class="pagos-row__ic">'+pagosRowIcon(pagosMethodKey(m))+'</span><span class="pagos-row__txt">'+safe(m)+'</span></div>';
   }).join("");
@@ -3230,6 +3232,7 @@ function horarioAlarmIcon(){
     '</svg>';
 }
 function tiempoMinimoCard(s){
+  if(!s) return "";
   var m=String(s||"").match(/^(\d+)\s*(.+)$/i);
   var clock='<span class="tiempo-card__ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+
     '<path d="M5.5 4.5 4 6"/><path d="M18.5 4.5 20 6"/>'+
@@ -3798,6 +3801,7 @@ function panelActividadNegocio(u){
     '</div></div>';
 }
 function panelActividadCompact(u, esEmpresa){
+  if(u&&u.__previewRegistro&&!u.actividad) return "";
   var txt = u.actividad || (esEmpresa
     ? "Instalación de sistema hidráulico completo en residencia de San Pedro Garza García."
     : "Actualizó su disponibilidad y subió nuevas fotos a su galería.");
@@ -3822,6 +3826,7 @@ function panelActividadCompact(u, esEmpresa){
     '</div></div>';
 }
 function panelLiveCompact(u){
+  if(u&&u.__previewRegistro&&!u.liveTitulo) return "";
   var titulo = u.liveTitulo || "Transmisión en vivo: presentación y preguntas";
   var fecha = u.liveFecha || "Sábado 25 de mayo";
   var horaRaw = u.liveHora || "6:00 PM";
@@ -4202,6 +4207,7 @@ function adultoContactSimpleHTML(u){
   '</div>';
 }
 function perfilStatsHTML(u){
+  if(u&&u.__previewRegistro&&!u.respuesta&&!u.nivelActividad&&!u.miembroDesde&&!u.respuestaCorta) return "";
   var items;
   if(u.respuesta||u.nivelActividad||u.miembroDesde){
     items=[
@@ -4356,12 +4362,17 @@ function adultoFichaHTML(u){
         row(pico("chat"),"Idiomas",safe(u.idiomas))+
     '</div></div>';
   }
-  var modalidad=u.modalidadFicha||((u.modalidades||[]).join(" · ")||"Domicilio");
+  var modalidad=u.modalidadFicha||((u.modalidades||[]).map(function(m){
+    if(m==="recibe") return "Recibe";
+    if(m==="hotel") return "Hotel";
+    if(m==="domicilio") return "Domicilio";
+    return m;
+  }).join(" · ")||"");
   var html=row(pico("user"),"Categoría",safe(u.categoria||u.categoriaPublica))+
     row(pico("globe"),"País",safe(u.pais))+
     row(pico("pin"),"Estado",safe(u.estado))+
-    row(pico("pin"),"Ciudad",safe(u.ciudad))+
-    row(pico("briefcase"),"Modalidad",safe(modalidad),"modalidad");
+    row(pico("pin"),"Ciudad",safe(u.ciudad));
+  if(modalidad) html+=row(pico("briefcase"),"Modalidad",safe(modalidad),"modalidad");
   if(u.tipoNegocio) html+=row(pico("corp"),"Tipo de empresa",safe(u.tipoNegocio));
   if(u.tipoServicio) html+=row(pico("heart"),"Tipo de servicio",safe(u.tipoServicio));
   if(u.tipoShow) html+=row(pico("briefcase"),"Tipo de show",safe(u.tipoShow));
@@ -4372,7 +4383,7 @@ function adultoFichaHTML(u){
   if(u.dressCode) html+=row(pico("gender"),"Dress code",safe(u.dressCode));
   if(u.reglasAcceso) html+=row(pico("shield"),"Acceso",safe(u.reglasAcceso));
   if(u.areasVenue) html+=row(pico("pin"),"Áreas",safe(u.areasVenue));
-  html+=row(pico("gender"),"Orientación",safe(u.orientacion||"—"));
+  if(u.orientacion) html+=row(pico("gender"),"Orientación",safe(u.orientacion));
   if(u.estatura) html+=row(pico("user"),"Estatura",safe(u.estatura));
   if(u.nivelPremium) html+=row(pico("heart"),"Nivel premium",safe(u.nivelPremium));
   if(u.tipoMasaje) html+=row(pico("briefcase"),"Tipo de masaje",safe(u.tipoMasaje));
@@ -4381,8 +4392,8 @@ function adultoFichaHTML(u){
   if(u.anosJuntos) html+=row(pico("calendar"),"Años juntos",safe(u.anosJuntos));
   if(u.miembrosEdad) html+=row(pico("corp"),"Miembros",safe(u.miembrosEdad));
   if(u.preferencias) html+=row(pico("briefcase"),"Preferencias",safe(u.preferencias));
-  html+=row(pico("heart"),"Servicios",safe(u.nivelServicio||u.tipoServicio||"—"))+
-    row(pico("chat"),"Idiomas",safe(u.idiomas||"—"));
+  if(u.nivelServicio||u.tipoServicio) html+=row(pico("heart"),"Servicios",safe(u.nivelServicio||u.tipoServicio));
+  if(u.idiomas) html+=row(pico("chat"),"Idiomas",safe(u.idiomas));
   (u.fichaExtra||[]).forEach(function(ex){
     html+=row(pico(ex[0]||"chat"),ex[1],safe(ex[2]));
   });
@@ -6190,6 +6201,67 @@ function demoAssetDesdeResultados(src){
   if(/^(\.\.|\/|https?:)/.test(s)) return s;
   return ""+s.replace(/^\.\//,"");
 }
+function aplicarPerfilDesdeRegistro(vista,u){
+  if(!u||!DEMO[vista]) return;
+  var galeria=[];
+  if(u.fotoURL) galeria.push(demoAssetDesdeResultados(u.fotoURL));
+  if(Array.isArray(u.fotosExtraURL)){
+    u.fotosExtraURL.forEach(function(extra){
+      if(extra) galeria.push(demoAssetDesdeResultados(extra));
+    });
+  }
+  var clean={
+    __id:u.__id||"preview-registro",
+    __demo:true,
+    __previewRegistro:true,
+    nombre:u.nombre||u.alias||"Tu nombre público",
+    alias:u.alias||u.nombre||"",
+    edad:u.edad||"",
+    categoria:u.categoriaPublica||u.categoria||"",
+    categoriaPublica:u.categoriaPublica||u.categoria||"",
+    subcategoriaId:u.subcategoriaId||"",
+    pais:u.pais||"",
+    estado:u.estado||"",
+    ciudad:u.ciudad||"",
+    zona:u.zona||"",
+    precio:u.precio||u.precioDesde||"",
+    precioDesde:u.precioDesde||u.precio||"",
+    moneda:u.moneda||"MXN",
+    tagline:u.tagline||u.descripcion||"",
+    frase:u.tagline||u.descripcion||"",
+    sobreMi:u.sobreMi||"",
+    orientacion:u.orientacion||"",
+    idiomas:u.idiomas||"",
+    nivelServicio:u.nivelServicio||"",
+    disponibilidad:u.disponibilidad||"",
+    horario:u.horario||u.horarioDetalle||"",
+    horarioDetalle:u.horarioDetalle||u.horario||"",
+    estatura:u.estatura||"",
+    peso:u.peso||"",
+    complexion:u.complexion||"",
+    cabello:u.cabello||"",
+    ojos:u.ojos||"",
+    tatuajes:u.tatuajes||"",
+    piercings:u.piercings||"",
+    serviciosIncluidos:Array.isArray(u.serviciosIncluidos)?u.serviciosIncluidos.slice():[],
+    noRealiza:Array.isArray(u.noRealiza)?u.noRealiza.slice():[],
+    metodosPago:Array.isArray(u.metodosPago)?u.metodosPago.slice():[],
+    modalidades:Array.isArray(u.modalidades)?u.modalidades.slice():[],
+    modalidadFicha:u.modalidadFicha||"",
+    galeria:galeria,
+    fotos:u.fotosCount||galeria.length||0,
+    fotoURL:u.fotoURL||"",
+    contactoPublico:u.contactoPublico||{},
+    verificada:false,
+    nueva:!!u.nueva
+  };
+  if(u.ubicacion){
+    clean.ubicacionPublica=u.ubicacion;
+    var parts=String(u.ubicacion).split(",").map(function(x){return x.trim();}).filter(Boolean);
+    if(parts.length) clean.direccionLineas=parts.length>1?[parts[0],parts.slice(1).join(", ")]:[parts[0]];
+  }
+  DEMO[vista]=clean;
+}
 function aplicarPerfilResultadosEnDemo(vista,u){
   if(!u||!DEMO[vista]) return;
   var d=DEMO[vista];
@@ -6387,7 +6459,13 @@ function iniciarPerfilPreview(){
     ocultarSwitcherSiResultados(q.from==="resultados");
   }
   function pintar(resolved){
-    if(resolved.perfil) aplicarPerfilResultadosEnDemo(resolved.vista,resolved.perfil);
+    if(resolved.perfil){
+      if(resolved.perfil.__id==="preview-registro"||resolved.perfil.__previewRegistro){
+        aplicarPerfilDesdeRegistro(resolved.vista,resolved.perfil);
+      }else{
+        aplicarPerfilResultadosEnDemo(resolved.vista,resolved.perfil);
+      }
+    }
     setVista(resolved.vista);
   }
   if(q.previewSource==="registro"&&window.CariHubPerfilPublico&&CariHubPerfilPublico.leerPreviewRegistro){
