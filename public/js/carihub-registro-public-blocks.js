@@ -27,19 +27,40 @@
     return global.CARIHUB_REGISTRO_DOMINATRIX_BLOCKS || null;
   }
 
+  function resolveEspectaculoConfig() {
+    return global.CARIHUB_REGISTRO_ESPECTACULO_BLOCKS || null;
+  }
+
+  function normalizeEspectaculoSubId(raw) {
+    var subId = normalizeSubId(raw);
+    if (subId === 'table dance' || subId === 'tabledance') return 'tabledance';
+    if (subId === 'stripper') return 'stripper';
+    return '';
+  }
+
   function normalizeSubId(id) {
     return String(id || '').trim().toLowerCase().replace(/_/g, ' ');
   }
 
   function getSubcategoriaOverride(cfg, ctx) {
     if (!cfg || !cfg.subcategoriaOverrides) return null;
-    var subId = normalizeSubId((ctx && ctx.subcategoriaId) || (ctx && ctx.subcategoria) || '');
+    var raw = (ctx && ctx.subcategoriaId) || (ctx && ctx.subcategoria) || '';
+    var subId = normalizeSubId(raw);
+    if (cfg.id === 'persona_espectaculo') {
+      var canonEsp = normalizeEspectaculoSubId(raw);
+      if (canonEsp && cfg.subcategoriaOverrides[canonEsp]) return cfg.subcategoriaOverrides[canonEsp];
+    }
     return cfg.subcategoriaOverrides[subId] || null;
   }
 
   function mergedConfig(cfg, ctx) {
     var over = getSubcategoriaOverride(cfg, ctx);
-    var subId = normalizeSubId((ctx && ctx.subcategoriaId) || (ctx && ctx.subcategoria) || '');
+    var rawSub = (ctx && ctx.subcategoriaId) || (ctx && ctx.subcategoria) || '';
+    var subId = normalizeSubId(rawSub);
+    if (cfg && cfg.id === 'persona_espectaculo') {
+      var canonEspSub = normalizeEspectaculoSubId(rawSub);
+      if (canonEspSub) subId = canonEspSub;
+    }
     function fieldVisible(field) {
       if (field.excludeSubcategorias && field.excludeSubcategorias.length) {
         if (field.excludeSubcategorias.some(function (s) {
@@ -232,8 +253,22 @@
     return false;
   }
 
+  function matchesEspectaculo(ctx, resolved) {
+    var cfg = resolveEspectaculoConfig();
+    if (!cfg) return false;
+    ctx = ctx || {};
+    var canon = normalizeEspectaculoSubId((ctx && ctx.subcategoriaId) || (ctx && ctx.subcategoria) || '');
+    if (canon && cfg.subcategoriaIds.indexOf(canon) >= 0) return true;
+    if (ctx.arquetipo === cfg.id) return true;
+    var ident = resolved && resolved.identidad ? resolved.identidad : {};
+    if (ident.formularioId === cfg.formularioId && ident.arquetipo === cfg.id) return true;
+    if (resolved && cfg.uiIds.indexOf(resolved.formularioUiId || '') >= 0) return true;
+    return false;
+  }
+
   function resolveConfig(ctx, resolved) {
     if (matchesDominatrix(ctx, resolved)) return resolveDominatrixConfig();
+    if (matchesEspectaculo(ctx, resolved)) return resolveEspectaculoConfig();
     if (matchesEscort(ctx, resolved)) return resolveEscortConfig();
     if (matchesLifestyle(ctx, resolved)) return resolveLifestyleConfig();
     if (matchesPareja(ctx, resolved)) return resolveParejaConfig();
@@ -1752,6 +1787,7 @@
     matchesPareja: matchesPareja,
     matchesLifestyle: matchesLifestyle,
     matchesDominatrix: matchesDominatrix,
+    matchesEspectaculo: matchesEspectaculo,
     apply: apply,
     collectValues: collectValues,
     validateValues: validateValues,

@@ -77,6 +77,11 @@
       "tipoShow": { "id": "tipoShow", "label": "Tipo de show", "tipo": "tags" },
       "venueFijo": { "id": "venueFijo", "label": "Venue fijo", "tipo": "text" },
       "precioShow": { "id": "precioShow", "label": "Precio show / mínimo consumo", "tipo": "currency" },
+      "anosExperiencia": { "id": "anosExperiencia", "label": "Experiencia en shows", "tipo": "select" },
+      "vestuarioShow": { "id": "vestuarioShow", "label": "Vestuario / estilo escénico", "tipo": "checklist" },
+      "requisitosLugar": { "id": "requisitosLugar", "label": "Requisitos del lugar", "tipo": "textarea" },
+      "desplazamientos": { "id": "desplazamientos", "label": "Desplazamientos del show", "tipo": "select", "notaPublica": "Alcance propio del show; v1 sin módulo viajes transversal." },
+      "espectaculoPerfil": { "id": "espectaculoPerfil", "label": "Perfil espectáculo", "tipo": "group" },
       "estatura": { "id": "estatura", "label": "Estatura (m)", "tipo": "decimal" },
       "identidadGenero": { "id": "identidadGenero", "label": "Identidad / presentación", "tipo": "text" },
       "nivelPremium": { "id": "nivelPremium", "label": "Nivel premium", "tipo": "badge" },
@@ -307,11 +312,11 @@
     "persona_espectaculo": {
       "tipoPerfil": "espectaculo",
       "componentes": { "resultados": "ResultCardEspectaculo", "perfil": "ProfileLayoutEspectaculo" },
-      "camposPublicosResultados": ["tipoShow", "venueFijo", "precioShow", "horarioDetalle", "geo"],
-      "camposPublicosPerfil": ["tipoShow", "venueFijo", "precioShow", "horarioDetalle", "sobreMi"],
+      "camposPublicosResultados": ["tipoShow", "precioShow", "horarioMinimo", "venueFijo", "disponibilidad", "modalidades", "geo"],
+      "camposPublicosPerfil": ["tipoShow", "precioShow", "horarioMinimo", "horarioDetalle", "venueFijo", "modalidades", "desplazamientos", "serviciosIncluidos", "serviciosNoRealizo", "anosExperiencia", "vestuarioShow", "requisitosLugar", "eventosDisponibles", "metodosPago", "disponibilidad", "sobreMi"],
       "camposPrivados": ["telefonoContacto", "ineFrente", "selfieVerificacion"],
-      "obligatoriosExtra": ["tipoShow", "precioShow", "horarioDetalle"],
-      "opcionalesExtra": ["venueFijo"],
+      "obligatoriosExtra": ["tipoShow", "precioShow", "horarioMinimo", "horarioDetalle", "modalidades", "serviciosIncluidos", "serviciosNoRealizo", "metodosPago"],
+      "opcionalesExtra": ["venueFijo", "desplazamientos", "anosExperiencia", "vestuarioShow", "requisitosLugar", "eventosDisponibles"],
       "fotosMin": 4,
       "verificacionTipo": "persona_estandar",
       "keywordsIA": ["stripper", "table dance", "show", "baile", "espectáculo"]
@@ -463,9 +468,9 @@
       "tipoPerfil": "espectaculo",
       "heredaDe": "plantillasArquetipo.persona_espectaculo",
       "delta": {
-        "camposPublicosPerfil": ["modalidades"],
-        "obligatoriosExtra": ["modalidades"],
-        "coherenciaExtra": [{ "id": "STRIPPER_SHOW", "requiere": ["tipoShow", "precioShow"], "severidad": "error" }]
+        "camposPublicosPerfil": ["modalidades", "desplazamientos", "anosExperiencia"],
+        "obligatoriosExtra": ["modalidades", "desplazamientos", "anosExperiencia"],
+        "coherenciaExtra": [{ "id": "STRIPPER_SHOW", "requiere": ["tipoShow", "precioShow", "horarioMinimo"], "severidad": "error" }]
       },
       "keywordsIA": ["stripper", "baile", "show privado", "despedida"]
     },
@@ -522,14 +527,16 @@
       "coherenciaExtra": [{ "id": "CREADOR_REDES", "requiere": ["plataformas", "redesSociales"], "severidad": "error" }]
     },
     {
-      "subcategoriaId": "table_dance",
+      "subcategoriaId": "tabledance",
       "nombre": "Table Dance",
       "arquetipo": "persona_espectaculo",
       "tipoPerfil": "espectaculo",
       "heredaDe": "plantillasArquetipo.persona_espectaculo",
       "delta": {
         "obligatoriosExtra": ["venueFijo"],
-        "textosAyuda": { "venueFijo": "Indica el antro o venue donde trabajas." }
+        "obligatoriosRemove": ["desplazamientos"],
+        "textosAyuda": { "venueFijo": "Indica el antro o venue donde trabajas." },
+        "coherenciaExtra": [{ "id": "TABLEDANCE_VENUE", "requiere": ["venueFijo", "tipoShow", "precioShow"], "severidad": "error" }]
       },
       "keywordsIA": ["table dance", "antro", "bar", "bailar en barra"]
     },
