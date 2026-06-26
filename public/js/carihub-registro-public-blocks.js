@@ -23,6 +23,10 @@
     return global.CARIHUB_REGISTRO_LIFESTYLE_BLOCKS || null;
   }
 
+  function resolveDominatrixConfig() {
+    return global.CARIHUB_REGISTRO_DOMINATRIX_BLOCKS || null;
+  }
+
   function normalizeSubId(id) {
     return String(id || '').trim().toLowerCase().replace(/_/g, ' ');
   }
@@ -213,7 +217,23 @@
     return false;
   }
 
+  function matchesDominatrix(ctx, resolved) {
+    var cfg = resolveDominatrixConfig();
+    if (!cfg) return false;
+    ctx = ctx || {};
+    var subId = subIdFromCtx(ctx);
+    if (cfg.subcategoriaIds.some(function (s) {
+      return normalizeSubId(s) === subId;
+    })) return true;
+    if (ctx.arquetipo === cfg.id) return true;
+    var ident = resolved && resolved.identidad ? resolved.identidad : {};
+    if (ident.formularioId === cfg.formularioId && ident.arquetipo === cfg.id) return true;
+    if (resolved && cfg.uiIds.indexOf(resolved.formularioUiId || '') >= 0) return true;
+    return false;
+  }
+
   function resolveConfig(ctx, resolved) {
+    if (matchesDominatrix(ctx, resolved)) return resolveDominatrixConfig();
     if (matchesEscort(ctx, resolved)) return resolveEscortConfig();
     if (matchesLifestyle(ctx, resolved)) return resolveLifestyleConfig();
     if (matchesPareja(ctx, resolved)) return resolveParejaConfig();
@@ -1571,6 +1591,7 @@
     matchesEscort: matchesEscort,
     matchesPareja: matchesPareja,
     matchesLifestyle: matchesLifestyle,
+    matchesDominatrix: matchesDominatrix,
     apply: apply,
     collectValues: collectValues,
     validateValues: validateValues,
