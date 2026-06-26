@@ -770,6 +770,57 @@
     return subId === 'unicorns' || subId === 'unicorn';
   }
 
+  function isCuckoldHotwifeSubcategoria(ctx) {
+    var subId = subIdFromCtx(ctx);
+    return subId === 'cuckold hotwife' || subId === 'cuckold_hotwife';
+  }
+
+  function dinamicaCuckoldHotwifeLabel(value) {
+    var map = {
+      cuckold: 'Cuckold',
+      hotwife: 'Hotwife',
+      ambos: 'Ambos / pareja flexible'
+    };
+    return map[String(value || '').trim()] || String(value || '').trim();
+  }
+
+  function buildCuckoldHotwifePerfil(values) {
+    values = values || {};
+    var din = String(values.dinamica || '').trim();
+    return {
+      dinamica: din,
+      dinamicaLabel: values.dinamicaLabel || dinamicaCuckoldHotwifeLabel(din),
+      buscan: Array.isArray(values.buscan) ? values.buscan.slice() : [],
+      tipoExperiencia: Array.isArray(values.tipoExperiencia) ? values.tipoExperiencia.slice() : [],
+      participacionPareja: values.participacionPareja || '',
+      aceptanSolteros: values.aceptanSolteros || '',
+      aceptanPrincipiantes: values.aceptanPrincipiantes || '',
+      experienciaEnLifestyle: values.experienciaEnLifestyle || '',
+      haceColaboraciones: values.haceColaboraciones || '',
+      colaboraCon: Array.isArray(values.colaboraCon) ? values.colaboraCon.slice() : [],
+      mostrarBuscan: values.mostrarBuscan || 'Sí',
+      mostrarParticipacion: values.mostrarParticipacion || 'Sí',
+      mostrarColaboraciones: values.mostrarColaboraciones || 'Sí'
+    };
+  }
+
+  function hasCuckoldHotwifeDelta(values) {
+    if (!values) return false;
+    if (values.cuckoldHotwifePerfil) return true;
+    var din = String(values.dinamica || '').trim();
+    if (din === 'cuckold' || din === 'hotwife' || din === 'ambos') return true;
+    if (Array.isArray(values.buscan) && values.buscan.length) return true;
+    if (Array.isArray(values.tipoExperiencia) && values.tipoExperiencia.length) return true;
+    return false;
+  }
+
+  function shouldApplyCuckoldHotwifePipeline(ctx, values) {
+    if (ctx && isSwingerSubcategoria(ctx)) return false;
+    if (ctx && isUnicornSubcategoria(ctx)) return false;
+    if (ctx) return isCuckoldHotwifeSubcategoria(ctx);
+    return hasCuckoldHotwifeDelta(values);
+  }
+
   function buildSwingerPerfil(values) {
     values = values || {};
     return {
@@ -851,14 +902,48 @@
 
   function shouldApplySwingerPipeline(ctx, values) {
     if (ctx && isUnicornSubcategoria(ctx)) return false;
+    if (ctx && isCuckoldHotwifeSubcategoria(ctx)) return false;
     if (ctx) return isSwingerSubcategoria(ctx);
     return hasSwingerDelta(values);
   }
 
   function shouldApplyUnicornPipeline(ctx, values) {
     if (ctx && isSwingerSubcategoria(ctx)) return false;
+    if (ctx && isCuckoldHotwifeSubcategoria(ctx)) return false;
     if (ctx) return isUnicornSubcategoria(ctx);
     return hasUnicornDelta(values);
+  }
+
+  function applyCuckoldHotwifePerfilFields(u, bloques, ctx) {
+    if (!u || !bloques) return u;
+    if (!shouldApplyCuckoldHotwifePipeline(ctx, bloques)) return u;
+    var ch = bloques.cuckoldHotwifePerfil;
+    if (!ch && hasCuckoldHotwifeDelta(bloques)) ch = buildCuckoldHotwifePerfil(bloques);
+    if (!ch || !hasCuckoldHotwifeDelta(ch)) return u;
+    delete u.swingerPerfil;
+    delete u.unicornPerfil;
+    u.cuckoldHotwifePerfil = Object.assign({}, ch);
+    if (ch.dinamica) {
+      u.dinamica = ch.dinamica;
+      u.dinamicaLabel = ch.dinamicaLabel || dinamicaCuckoldHotwifeLabel(ch.dinamica);
+    }
+    if (Array.isArray(ch.buscan) && ch.buscan.length) u.buscan = ch.buscan.slice();
+    if (Array.isArray(ch.tipoExperiencia) && ch.tipoExperiencia.length) {
+      u.tipoExperiencia = ch.tipoExperiencia.slice();
+    }
+    if (ch.participacionPareja) u.participacionPareja = ch.participacionPareja;
+    if (ch.aceptanSolteros) u.aceptanSolteros = ch.aceptanSolteros;
+    if (ch.aceptanPrincipiantes) u.aceptanPrincipiantes = ch.aceptanPrincipiantes;
+    if (ch.experienciaEnLifestyle) u.experienciaEnLifestyle = ch.experienciaEnLifestyle;
+    if (ch.haceColaboraciones) u.haceColaboraciones = ch.haceColaboraciones;
+    if (Array.isArray(ch.colaboraCon) && ch.colaboraCon.length) u.colaboraCon = ch.colaboraCon.slice();
+    if (ch.mostrarBuscan) u.mostrarBuscan = ch.mostrarBuscan;
+    if (ch.mostrarParticipacion) u.mostrarParticipacion = ch.mostrarParticipacion;
+    if (ch.mostrarColaboraciones) u.mostrarColaboraciones = ch.mostrarColaboraciones;
+    u.tipoPerfil = 'pareja_grupo';
+    if (ch.dinamica === 'hotwife' || ch.dinamica === 'ambos') u.badgeHotwife = true;
+    if (ch.dinamica === 'cuckold' || ch.dinamica === 'ambos') u.badgeCuckold = true;
+    return u;
   }
 
   function applySwingerPerfilFields(u, bloques, ctx) {
@@ -868,6 +953,7 @@
     if (!sw && hasSwingerDelta(bloques)) sw = buildSwingerPerfil(bloques);
     if (!sw || !hasSwingerDelta(sw)) return u;
     delete u.unicornPerfil;
+    delete u.cuckoldHotwifePerfil;
     u.swingerPerfil = Object.assign({}, sw);
     if (Array.isArray(sw.objetivosPerfil) && sw.objetivosPerfil.length) {
       u.objetivosPerfil = sw.objetivosPerfil.slice();
@@ -902,6 +988,7 @@
     }
     if (!un) return u;
     delete u.swingerPerfil;
+    delete u.cuckoldHotwifePerfil;
     if (Array.isArray(un.objetivosPerfil) && un.objetivosPerfil.length) {
       u.objetivosPerfil = un.objetivosPerfil.slice();
       u.objetivoPrincipal = un.objetivoPrincipal || buildObjetivoPrincipal(un.objetivosPerfil);
@@ -981,6 +1068,7 @@
       values.objetivoPrincipal = buildObjetivoPrincipal(values.objetivosPerfil);
     }
     delete values.unicornPerfil;
+    delete values.cuckoldHotwifePerfil;
     values.swingerPerfil = buildSwingerPerfil(values);
     delete values.deltaSwinger;
     return values;
@@ -997,7 +1085,25 @@
       values.objetivoPrincipal = buildObjetivoPrincipal(values.objetivosPerfil);
     }
     delete values.swingerPerfil;
+    delete values.cuckoldHotwifePerfil;
     values.unicornPerfil = buildUnicornPerfil(values);
+    return values;
+  }
+
+  function finalizeCuckoldHotwifeValues(values, ctx) {
+    if (!values) return values;
+    if (!shouldApplyCuckoldHotwifePipeline(ctx, values)) return values;
+    if (!String(values.mostrarBuscan || '').trim()) values.mostrarBuscan = 'Sí';
+    if (!String(values.mostrarParticipacion || '').trim()) values.mostrarParticipacion = 'Sí';
+    if (!String(values.mostrarColaboraciones || '').trim()) values.mostrarColaboraciones = 'Sí';
+    var hace = String(values.haceColaboraciones || '').trim();
+    if (hace !== 'Sí') delete values.colaboraCon;
+    if (values.dinamica) {
+      values.dinamicaLabel = dinamicaCuckoldHotwifeLabel(values.dinamica);
+    }
+    delete values.swingerPerfil;
+    delete values.unicornPerfil;
+    values.cuckoldHotwifePerfil = buildCuckoldHotwifePerfil(values);
     return values;
   }
 
@@ -1040,6 +1146,7 @@
     values = finalizeLesbiansValues(values);
     values = finalizeParejaSwingerValues(values, ctx);
     values = finalizeUnicornValues(values, ctx);
+    values = finalizeCuckoldHotwifeValues(values, ctx);
     values = finalizeParejaGrupoValues(values);
     return values;
   }
@@ -1117,7 +1224,33 @@
     if (isUnicornSubcategoria(ctx)) {
       validateUnicornDeltaValues(cfg, values, missing);
     }
+    if (isCuckoldHotwifeSubcategoria(ctx)) {
+      validateCuckoldHotwifeDeltaValues(cfg, values, missing);
+    }
     return missing;
+  }
+
+  function validateCuckoldHotwifeDeltaValues(cfg, values, missing) {
+    if (!String(values.dinamica || '').trim()) {
+      pushMissing(missing, labelForField(cfg, 'dinamica') || 'Dinámica');
+    }
+    var buscan = values.buscan;
+    if (!Array.isArray(buscan) || !buscan.length) {
+      pushMissing(missing, labelForField(cfg, 'buscan') || 'Buscan');
+    }
+    var tipoExp = values.tipoExperiencia;
+    if (!Array.isArray(tipoExp) || !tipoExp.length) {
+      pushMissing(missing, labelForField(cfg, 'tipoExperiencia') || 'Tipo de experiencia');
+    }
+    if (!String(values.participacionPareja || '').trim()) {
+      pushMissing(missing, labelForField(cfg, 'participacionPareja') || 'Participación de la pareja');
+    }
+    if (String(values.haceColaboraciones || '').trim() === 'Sí') {
+      var colabora = values.colaboraCon;
+      if (!Array.isArray(colabora) || !colabora.length) {
+        pushMissing(missing, labelForField(cfg, 'colaboraCon') || 'Colaboran con');
+      }
+    }
   }
 
   function validateUnicornDeltaValues(cfg, values, missing) {
@@ -1340,6 +1473,7 @@
     if (bloques.mostrarColaboraciones) u.mostrarColaboraciones = bloques.mostrarColaboraciones;
     if (bloques.estiloLesbian) u.estiloLesbian = bloques.estiloLesbian;
     u = applySwingerPerfilFields(u, bloques, ctx);
+    u = applyCuckoldHotwifePerfilFields(u, bloques, ctx);
     if (bloques.configuracionGrupo) {
       u.configuracionGrupo = bloques.configuracionGrupo;
       u.configuracionGrupoLabel = bloques.configuracionGrupoLabel || configuracionGrupoLabel(bloques.configuracionGrupo);
@@ -1472,15 +1606,24 @@
     finalizeParejaGrupoValues: finalizeParejaGrupoValues,
     finalizeParejaSwingerValues: finalizeParejaSwingerValues,
     finalizeUnicornValues: finalizeUnicornValues,
+    finalizeCuckoldHotwifeValues: finalizeCuckoldHotwifeValues,
     buildSwingerPerfil: buildSwingerPerfil,
     buildUnicornPerfil: buildUnicornPerfil,
+    buildCuckoldHotwifePerfil: buildCuckoldHotwifePerfil,
     buildDeltaSwinger: buildDeltaSwinger,
     buildObjetivoPrincipal: buildObjetivoPrincipal,
     hasSwingerDelta: hasSwingerDelta,
     hasUnicornDelta: hasUnicornDelta,
+    hasCuckoldHotwifeDelta: hasCuckoldHotwifeDelta,
     isSwingerSubcategoria: isSwingerSubcategoria,
     isUnicornSubcategoria: isUnicornSubcategoria,
+    isCuckoldHotwifeSubcategoria: isCuckoldHotwifeSubcategoria,
+    shouldApplySwingerPipeline: shouldApplySwingerPipeline,
+    shouldApplyUnicornPipeline: shouldApplyUnicornPipeline,
+    shouldApplyCuckoldHotwifePipeline: shouldApplyCuckoldHotwifePipeline,
     applySwingerPerfilFields: applySwingerPerfilFields,
-    applyUnicornPerfilFields: applyUnicornPerfilFields
+    applyUnicornPerfilFields: applyUnicornPerfilFields,
+    applyCuckoldHotwifePerfilFields: applyCuckoldHotwifePerfilFields,
+    dinamicaCuckoldHotwifeLabel: dinamicaCuckoldHotwifeLabel
   };
 })(typeof window !== 'undefined' ? window : globalThis);

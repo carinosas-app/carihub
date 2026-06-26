@@ -1,5 +1,5 @@
 /**
- * Bloques públicos registro — pareja_grupo (shell base + delta swinger).
+ * Bloques públicos registro — pareja_grupo (shell base + deltas swinger / cuckold_hotwife).
  */
 (function (global) {
   'use strict';
@@ -88,11 +88,76 @@
     'Comunidad lifestyle'
   ];
 
+  var CH_DINAMICA = [
+    { value: 'cuckold', label: 'Cuckold' },
+    { value: 'hotwife', label: 'Hotwife' },
+    { value: 'ambos', label: 'Ambos / pareja flexible' }
+  ];
+
+  var CH_BUSCAN = [
+    'Bulls',
+    'Hombres solteros',
+    'Mujeres',
+    'Parejas',
+    'Parejas swinger',
+    'Unicorns',
+    'Hotwife',
+    'Cuckold',
+    'Creadores de contenido',
+    'Eventos privados',
+    'A convenir'
+  ];
+
+  var CH_TIPO_EXPERIENCIA = [
+    'Encuentros privados',
+    'Hotel / motel',
+    'Eventos lifestyle',
+    'Reuniones swinger',
+    'Salidas sociales primero',
+    'Viajes',
+    'Colaboraciones',
+    'Contenido',
+    'A convenir'
+  ];
+
+  var CH_PARTICIPACION_PAREJA = [
+    'Solo observa',
+    'Participa parcialmente',
+    'Participa activamente',
+    'Solo coordina / acuerda',
+    'A convenir'
+  ];
+
+  var CH_ACEPTAN_SOLTEROS = [
+    'Sí',
+    'No',
+    'Solo hombres',
+    'Solo mujeres',
+    'A convenir'
+  ];
+
+  var CH_EXPERIENCIA_LIFESTYLE = [
+    'Primera experiencia',
+    'Intermedio',
+    'Experimentados',
+    'Comunidad lifestyle'
+  ];
+
+  var CH_COLABORA_CON = [
+    'Parejas swinger',
+    'Unicorns',
+    'Hotwife',
+    'Cuckold',
+    'Creadores de contenido',
+    'Modelos',
+    'A convenir'
+  ];
+
   global.CARIHUB_REGISTRO_PAREJA_BLOCKS = {
     id: 'pareja_grupo',
     formularioId: 'adultos',
     uiIds: ['ui_adulto_pareja'],
-    subcategoriaIds: ['swinger'],
+    subcategoriaIds: ['swinger', 'cuckold hotwife', 'cuckold_hotwife'],
     fotosMin: 4,
     subcategoriaOverrides: {
       swinger: {
@@ -119,6 +184,64 @@
           estiloPareja: 'Opcional — estilo general de la pareja.',
           mostrarObjetivosPerfil: 'Controla si el objetivo principal aparece en tarjeta y ficha.',
           mostrarAtiendenA: 'Controla si «Atienden a» aparece en tarjeta y ficha.',
+          mostrarColaboraciones: 'Controla si colaboraciones se ven en tarjeta y ficha.',
+          modalidades: 'Marca dónde se reciben o si viajan. Si marcas «Viaja», completa alcance y condiciones.'
+        },
+        labels: {
+          alias: 'Alias de la pareja / grupo'
+        }
+      },
+      'cuckold hotwife': {
+        obligatoriosExtra: [
+          'dinamica',
+          'buscan',
+          'tipoExperiencia',
+          'participacionPareja'
+        ],
+        fieldHints: {
+          configuracionGrupo: 'Configuración de quienes publican este perfil.',
+          miembros: 'Mínimo 2 integrantes para pareja; 3 o más si eliges «Grupo».',
+          reglasAcceso: 'Reglas de acceso generales (máx. 500 caracteres).',
+          dinamica: 'Indica la dinámica principal de la pareja.',
+          buscan: 'Tipo de personas o entornos con los que buscan conectar (sin prácticas explícitas).',
+          tipoExperiencia: 'Qué tipo de experiencias o contextos les interesan.',
+          participacionPareja: 'Cómo participa el cónyuge no activo en la dinámica.',
+          aceptanSolteros: 'Opcional — ayuda a filtrar contactos.',
+          aceptanPrincipiantes: 'Opcional — si reciben parejas o personas nuevas en el ambiente.',
+          experienciaEnLifestyle: 'Opcional — nivel de experiencia en lifestyle.',
+          haceColaboraciones: 'Si colaboran con otros anunciantes en encuentros o eventos.',
+          colaboraCon: 'Obligatorio si respondiste Sí.',
+          mostrarBuscan: 'Controla si «Buscan» aparece en tarjeta y ficha.',
+          mostrarParticipacion: 'Controla si la participación de la pareja aparece en tarjeta y ficha.',
+          mostrarColaboraciones: 'Controla si colaboraciones se ven en tarjeta y ficha.',
+          modalidades: 'Marca dónde se reciben o si viajan. Si marcas «Viaja», completa alcance y condiciones.'
+        },
+        labels: {
+          alias: 'Alias de la pareja / grupo'
+        }
+      },
+      cuckold_hotwife: {
+        obligatoriosExtra: [
+          'dinamica',
+          'buscan',
+          'tipoExperiencia',
+          'participacionPareja'
+        ],
+        fieldHints: {
+          configuracionGrupo: 'Configuración de quienes publican este perfil.',
+          miembros: 'Mínimo 2 integrantes para pareja; 3 o más si eliges «Grupo».',
+          reglasAcceso: 'Reglas de acceso generales (máx. 500 caracteres).',
+          dinamica: 'Indica la dinámica principal de la pareja.',
+          buscan: 'Tipo de personas o entornos con los que buscan conectar (sin prácticas explícitas).',
+          tipoExperiencia: 'Qué tipo de experiencias o contextos les interesan.',
+          participacionPareja: 'Cómo participa el cónyuge no activo en la dinámica.',
+          aceptanSolteros: 'Opcional — ayuda a filtrar contactos.',
+          aceptanPrincipiantes: 'Opcional — si reciben parejas o personas nuevas en el ambiente.',
+          experienciaEnLifestyle: 'Opcional — nivel de experiencia en lifestyle.',
+          haceColaboraciones: 'Si colaboran con otros anunciantes en encuentros o eventos.',
+          colaboraCon: 'Obligatorio si respondiste Sí.',
+          mostrarBuscan: 'Controla si «Buscan» aparece en tarjeta y ficha.',
+          mostrarParticipacion: 'Controla si la participación de la pareja aparece en tarjeta y ficha.',
           mostrarColaboraciones: 'Controla si colaboraciones se ven en tarjeta y ficha.',
           modalidades: 'Marca dónde se reciben o si viajan. Si marcas «Viaja», completa alcance y condiciones.'
         },
@@ -297,6 +420,102 @@
           {
             id: 'mostrarObjetivosPerfil',
             label: '¿Mostrar objetivo del perfil en tarjeta y perfil?',
+            type: 'select',
+            required: false,
+            defaultValue: 'Sí',
+            options: OPCIONES_SI_NO.slice()
+          }
+        ]
+      },
+      {
+        id: 'cuckoldHotwifePerfil',
+        title: 'Perfil Cuckold / Hotwife',
+        hint: 'Datos específicos de la dinámica. Usa categorías generales, no prácticas explícitas.',
+        onlySubcategorias: ['cuckold hotwife', 'cuckold_hotwife'],
+        fields: [
+          {
+            id: 'dinamica',
+            label: 'Dinámica',
+            type: 'select',
+            required: true,
+            options: CH_DINAMICA.slice()
+          },
+          {
+            id: 'buscan',
+            label: 'Buscan',
+            type: 'checklist',
+            required: true,
+            options: CH_BUSCAN.slice()
+          },
+          {
+            id: 'mostrarBuscan',
+            label: '¿Mostrar «Buscan» en tarjeta y perfil?',
+            type: 'select',
+            required: false,
+            defaultValue: 'Sí',
+            options: OPCIONES_SI_NO.slice()
+          },
+          {
+            id: 'tipoExperiencia',
+            label: 'Tipo de experiencia',
+            type: 'checklist',
+            required: true,
+            options: CH_TIPO_EXPERIENCIA.slice()
+          },
+          {
+            id: 'participacionPareja',
+            label: 'Participación de la pareja',
+            type: 'select',
+            required: true,
+            options: CH_PARTICIPACION_PAREJA.slice()
+          },
+          {
+            id: 'mostrarParticipacion',
+            label: '¿Mostrar participación de la pareja en tarjeta y perfil?',
+            type: 'select',
+            required: false,
+            defaultValue: 'Sí',
+            options: OPCIONES_SI_NO.slice()
+          },
+          {
+            id: 'aceptanSolteros',
+            label: '¿Aceptan personas solteras?',
+            type: 'select',
+            required: false,
+            options: CH_ACEPTAN_SOLTEROS.slice()
+          },
+          {
+            id: 'aceptanPrincipiantes',
+            label: '¿Reciben principiantes?',
+            type: 'select',
+            required: false,
+            options: OPCIONES_SI_NO_CONVENIR.slice()
+          },
+          {
+            id: 'experienciaEnLifestyle',
+            label: 'Experiencia en el ambiente lifestyle',
+            type: 'select',
+            required: false,
+            options: CH_EXPERIENCIA_LIFESTYLE.slice()
+          },
+          {
+            id: 'haceColaboraciones',
+            label: '¿Realizan colaboraciones?',
+            type: 'select',
+            required: false,
+            options: OPCIONES_SI_NO_CONVENIR.slice()
+          },
+          {
+            id: 'colaboraCon',
+            label: 'Colaboran con',
+            type: 'checklist',
+            required: false,
+            showWhen: { field: 'haceColaboraciones', values: ['Sí'] },
+            options: CH_COLABORA_CON.slice()
+          },
+          {
+            id: 'mostrarColaboraciones',
+            label: '¿Mostrar colaboraciones en tarjeta y perfil?',
             type: 'select',
             required: false,
             defaultValue: 'Sí',
