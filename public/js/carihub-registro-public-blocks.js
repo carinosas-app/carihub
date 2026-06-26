@@ -794,6 +794,159 @@
     return subId === 'cuckold hotwife' || subId === 'cuckold_hotwife';
   }
 
+  function isDominatrixSubcategoria(ctx) {
+    var subId = subIdFromCtx(ctx);
+    return subId === 'dominatrix' || subId === 'fetiche' || subId === 'sado';
+  }
+
+  function joinTagsList(list) {
+    if (!Array.isArray(list) || !list.length) return '';
+    return list.join(' · ');
+  }
+
+  function buildEspecialidadBdsmMirror(estilo, fetiches, subId) {
+    var parts = [];
+    if (estilo) parts.push(String(estilo).trim());
+    if (Array.isArray(fetiches) && fetiches.length &&
+        (subId === 'fetiche' || subId === 'sado' || subId === 'dominatrix')) {
+      parts.push(fetiches.slice(0, 4).join(' · '));
+    }
+    return parts.filter(Boolean).join(' · ');
+  }
+
+  function buildDominatrixPerfil(values) {
+    values = values || {};
+    return {
+      estiloDominacion: values.estiloDominacion || '',
+      experienciaBdsm: values.experienciaBdsm || '',
+      listaFetiches: Array.isArray(values.listaFetiches) ? values.listaFetiches.slice() : [],
+      limitesSesion: values.limitesSesion || '',
+      equipamiento: Array.isArray(values.equipamiento) ? values.equipamiento.slice() : [],
+      protocolo: Array.isArray(values.protocolo) ? values.protocolo.slice() : [],
+      rolesAtendidos: Array.isArray(values.rolesAtendidos) ? values.rolesAtendidos.slice() : [],
+      modalidadSesion: values.modalidadSesion || '',
+      espacioSesion: values.espacioSesion || '',
+      dressCodeCliente: values.dressCodeCliente || '',
+      mostrarEquipamientoPublico: values.mostrarEquipamientoPublico || 'Sí',
+      mostrarFetichesPublico: values.mostrarFetichesPublico || 'Sí',
+      serviciosIncluidos: Array.isArray(values.serviciosIncluidos) ? values.serviciosIncluidos.slice() : [],
+      serviciosNoRealizo: Array.isArray(values.serviciosNoRealizo) ? values.serviciosNoRealizo.slice() : [],
+      modalidades: Array.isArray(values.modalidades) ? values.modalidades.slice() : [],
+      metodosPago: Array.isArray(values.metodosPago) ? values.metodosPago.slice() : [],
+      horarioDetalle: values.horarioDetalle || '',
+      sobreMi: values.sobreMi || '',
+      idiomas: values.idiomas || '',
+      disponibilidad: values.disponibilidad || ''
+    };
+  }
+
+  function finalizeDominatrixValues(values, ctx) {
+    if (!values || !isDominatrixSubcategoria(ctx || {})) return values;
+    delete values.swingerPerfil;
+    delete values.unicornPerfil;
+    delete values.cuckoldHotwifePerfil;
+    values.dominatrixPerfil = buildDominatrixPerfil(values);
+    return values;
+  }
+
+  function mapDominatrixToPerfil(u, bloques, ctx) {
+    u = u || {};
+    ctx = ctx || {};
+    var subId = subIdFromCtx(ctx);
+    var dom = bloques.dominatrixPerfil || buildDominatrixPerfil(bloques);
+    delete u.swingerPerfil;
+    delete u.unicornPerfil;
+    delete u.cuckoldHotwifePerfil;
+    u.dominatrixPerfil = Object.assign({}, dom);
+    u.arquetipo = 'persona_dominatrix';
+    u.tipoPerfil = 'persona';
+    u.subcategoriaId = u.subcategoriaId || subId;
+    if (dom.estiloDominacion) u.estiloDominacion = dom.estiloDominacion;
+    u.especialidadBdsm = buildEspecialidadBdsmMirror(dom.estiloDominacion, dom.listaFetiches, subId);
+    if (dom.experienciaBdsm) u.experienciaBdsm = dom.experienciaBdsm;
+    if (dom.limitesSesion) u.limitesSesion = dom.limitesSesion;
+    if (dom.espacioSesion) u.espacioSesion = dom.espacioSesion;
+    if (dom.modalidadSesion) u.modalidadSesion = dom.modalidadSesion;
+    if (dom.dressCodeCliente) u.dressCodeCliente = dom.dressCodeCliente;
+    if (Array.isArray(dom.rolesAtendidos) && dom.rolesAtendidos.length) {
+      u.rolesAtendidos = dom.rolesAtendidos.slice();
+    }
+    if (String(dom.mostrarFetichesPublico || 'Sí') !== 'No' &&
+        Array.isArray(dom.listaFetiches) && dom.listaFetiches.length) {
+      u.listaFetiches = dom.listaFetiches.slice();
+    }
+    if (String(dom.mostrarEquipamientoPublico || 'Sí') !== 'No' &&
+        Array.isArray(dom.equipamiento) && dom.equipamiento.length) {
+      u.equipamiento = joinTagsList(dom.equipamiento);
+    }
+    if (Array.isArray(dom.protocolo) && dom.protocolo.length) {
+      u.protocolo = joinTagsList(dom.protocolo);
+    }
+    if (Array.isArray(dom.serviciosIncluidos) && dom.serviciosIncluidos.length) {
+      u.serviciosIncluidos = dom.serviciosIncluidos.slice();
+    }
+    if (Array.isArray(dom.serviciosNoRealizo) && dom.serviciosNoRealizo.length) {
+      u.noRealiza = dom.serviciosNoRealizo.slice();
+    }
+    if (Array.isArray(dom.metodosPago) && dom.metodosPago.length) {
+      u.metodosPago = dom.metodosPago.slice();
+    }
+    if (Array.isArray(dom.modalidades) && dom.modalidades.length) {
+      u.modalidades = dom.modalidades.slice();
+      u.modalidadFicha = dom.modalidades.map(function (m) {
+        if (m === 'recibe') return 'Recibe';
+        if (m === 'hotel') return 'Hotel';
+        return m;
+      }).join(' · ');
+    }
+    if (dom.horarioDetalle) {
+      u.horarioDetalle = dom.horarioDetalle;
+      u.horario = dom.horarioDetalle;
+    }
+    if (dom.sobreMi) u.sobreMi = dom.sobreMi;
+    if (dom.idiomas) u.idiomas = dom.idiomas;
+    if (dom.disponibilidad) {
+      u.disponibilidad = DISPONIBILIDAD_LABELS[dom.disponibilidad] || dom.disponibilidad;
+    }
+    return u;
+  }
+
+  function validateDominatrixDeltaValues(cfg, values, missing) {
+    if (!String(values.estiloDominacion || '').trim()) {
+      pushMissing(missing, labelForField(cfg, 'estiloDominacion') || 'Estilo (pro/dom)');
+    }
+    if (!String(values.limitesSesion || '').trim()) {
+      pushMissing(missing, labelForField(cfg, 'limitesSesion') || 'Límites y reglas de sesión');
+    }
+    var equip = values.equipamiento;
+    if (!Array.isArray(equip) || !equip.length) {
+      pushMissing(missing, labelForField(cfg, 'equipamiento') || 'Equipamiento');
+    }
+    if (!String(values.modalidadSesion || '').trim()) {
+      pushMissing(missing, labelForField(cfg, 'modalidadSesion') || 'Modalidad de sesión');
+    }
+    var mods = values.modalidades;
+    if (!Array.isArray(mods) || !mods.length) {
+      pushMissing(missing, labelForField(cfg, 'modalidades') || 'Modalidades presenciales');
+    }
+    var subId = subIdFromCtx({ subcategoriaId: values.subcategoriaId });
+    if (subId === 'fetiche' || subId === 'sado') {
+      var fet = values.listaFetiches;
+      if (!Array.isArray(fet) || !fet.length) {
+        pushMissing(missing, labelForField(cfg, 'listaFetiches') || 'Fetiches ofrecidos');
+      }
+    }
+    if (subId === 'sado') {
+      var prot = values.protocolo;
+      if (!Array.isArray(prot) || !prot.length) {
+        pushMissing(missing, labelForField(cfg, 'protocolo') || 'Protocolo de seguridad');
+      }
+      if (!String(values.experienciaBdsm || '').trim()) {
+        pushMissing(missing, labelForField(cfg, 'experienciaBdsm') || 'Experiencia BDSM');
+      }
+    }
+  }
+
   function dinamicaCuckoldHotwifeLabel(value) {
     var map = {
       cuckold: 'Cuckold',
@@ -1163,6 +1316,7 @@
     values = finalizeParejaSwingerValues(values, ctx);
     values = finalizeUnicornValues(values, ctx);
     values = finalizeCuckoldHotwifeValues(values, ctx);
+    values = finalizeDominatrixValues(values, ctx);
     values = finalizeParejaGrupoValues(values);
     return values;
   }
@@ -1242,6 +1396,9 @@
     }
     if (isCuckoldHotwifeSubcategoria(ctx)) {
       validateCuckoldHotwifeDeltaValues(cfg, values, missing);
+    }
+    if (isDominatrixSubcategoria(ctx)) {
+      validateDominatrixDeltaValues(cfg, values, missing);
     }
     return missing;
   }
@@ -1415,6 +1572,9 @@
   function mapToPerfil(u, bloques, ctx) {
     if (!bloques) return u;
     u = u || {};
+    if (isDominatrixSubcategoria(ctx)) {
+      return mapDominatrixToPerfil(u, bloques, ctx);
+    }
     if (bloques.orientacion) u.orientacion = bloques.orientacion;
     if (bloques.identidadGenero) u.identidadGenero = bloques.identidadGenero;
     if (bloques.presentacionFemboy) {
@@ -1611,6 +1771,9 @@
     finalizeParejaSwingerValues: finalizeParejaSwingerValues,
     finalizeUnicornValues: finalizeUnicornValues,
     finalizeCuckoldHotwifeValues: finalizeCuckoldHotwifeValues,
+    finalizeDominatrixValues: finalizeDominatrixValues,
+    buildDominatrixPerfil: buildDominatrixPerfil,
+    mapDominatrixToPerfil: mapDominatrixToPerfil,
     buildSwingerPerfil: buildSwingerPerfil,
     buildUnicornPerfil: buildUnicornPerfil,
     buildCuckoldHotwifePerfil: buildCuckoldHotwifePerfil,
@@ -1622,6 +1785,7 @@
     isSwingerSubcategoria: isSwingerSubcategoria,
     isUnicornSubcategoria: isUnicornSubcategoria,
     isCuckoldHotwifeSubcategoria: isCuckoldHotwifeSubcategoria,
+    isDominatrixSubcategoria: isDominatrixSubcategoria,
     shouldApplySwingerPipeline: shouldApplySwingerPipeline,
     shouldApplyUnicornPipeline: shouldApplyUnicornPipeline,
     shouldApplyCuckoldHotwifePipeline: shouldApplyCuckoldHotwifePipeline,
