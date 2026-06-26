@@ -216,6 +216,30 @@
       mappedBloques.arquetipo === 'persona_lifestyle' ||
       (ctx.subcategoriaId === 'unicorns');
 
+    var esCuckoldHotwife = global.CariHubRegistroPublicBlocks &&
+      global.CariHubRegistroPublicBlocks.isCuckoldHotwifeSubcategoria &&
+      global.CariHubRegistroPublicBlocks.isCuckoldHotwifeSubcategoria(ctx);
+
+    var cuckoldHotwifePerfil = mappedBloques.cuckoldHotwifePerfil
+      ? Object.assign({}, mappedBloques.cuckoldHotwifePerfil)
+      : null;
+
+    if (esCuckoldHotwife || cuckoldHotwifePerfil) {
+      swingerPerfil = null;
+      unicornPerfil = null;
+    }
+
+    var subcategoriaIdCanon = esCuckoldHotwife
+      ? 'cuckold_hotwife'
+      : (ctx.subcategoriaId || '');
+
+    var buscanPersist = (Array.isArray(mappedBloques.buscan) && mappedBloques.buscan.length)
+      ? mappedBloques.buscan.slice()
+      : (mappedBloques.buscoConocer
+        || mappedBloques.buscanConocer
+        || mappedBloques.tipoPublico
+        || (Array.isArray(mappedBloques.buscan) ? mappedBloques.buscan : (mappedBloques.buscan || '')));
+
     return {
       uid: uid,
       cuentaUid: uid,
@@ -230,12 +254,12 @@
       zona: cp.zona || '',
       categoria: ctx.categoriaPrincipal || ctx.categoriaSolicitada || '',
       subcategoria: ctx.subcategoria || ctx.subcategoriaSolicitada || '',
-      subcategoriaId: ctx.subcategoriaId || '',
+      subcategoriaId: subcategoriaIdCanon,
       sectorId: ctx.sectorId || '',
       formularioId: (draft.schemaResuelto && draft.schemaResuelto.identidad &&
         draft.schemaResuelto.identidad.formularioId) || ctx.formularioId || '',
-      arquetipo: esUnicornLifestyle ? 'persona_lifestyle' : ((draft.schemaResuelto && draft.schemaResuelto.identidad &&
-        draft.schemaResuelto.identidad.arquetipo) || ctx.arquetipo || ''),
+      arquetipo: esUnicornLifestyle ? 'persona_lifestyle' : (esCuckoldHotwife ? 'pareja_grupo' : ((draft.schemaResuelto && draft.schemaResuelto.identidad &&
+        draft.schemaResuelto.identidad.arquetipo) || ctx.arquetipo || '')),
       tipoPerfil: esParejaGrupo ? 'pareja_grupo' : (esUnicornLifestyle ? 'persona' : ((draft.schemaResuelto && draft.schemaResuelto.identidad &&
         draft.schemaResuelto.identidad.tipoPerfil) || ctx.tipoPerfil || '')),
       configuracionGrupo: mappedBloques.configuracionGrupo || '',
@@ -246,6 +270,11 @@
       parejaGrupoPerfil: parejaGrupoPerfil,
       swingerPerfil: swingerPerfil,
       unicornPerfil: unicornPerfil,
+      cuckoldHotwifePerfil: cuckoldHotwifePerfil,
+      dinamica: mappedBloques.dinamica || '',
+      dinamicaLabel: mappedBloques.dinamicaLabel || '',
+      mostrarBuscan: mappedBloques.mostrarBuscan || 'Sí',
+      mostrarParticipacion: mappedBloques.mostrarParticipacion || 'Sí',
       objetivosPerfil: mappedBloques.objetivosPerfil || [],
       objetivoPrincipal: mappedBloques.objetivoPrincipal || '',
       tipoUnicornio: mappedBloques.tipoUnicornio || '',
@@ -263,6 +292,7 @@
       atiendenA: mappedBloques.atiendenA || '',
       aceptanSolteros: mappedBloques.aceptanSolteros || '',
       aceptanParejasPrincipiantes: mappedBloques.aceptanParejasPrincipiantes || '',
+      aceptanPrincipiantes: mappedBloques.aceptanPrincipiantes || '',
       experienciaEnLifestyle: mappedBloques.experienciaEnLifestyle || '',
       estiloPareja: mappedBloques.estiloPareja || [],
       mostrarObjetivosPerfil: mappedBloques.mostrarObjetivosPerfil || 'Sí',
@@ -289,10 +319,7 @@
       tonoPiel: mappedBloques.tonoPiel || '',
       videoPresentacion: mappedBloques.videoPresentacion || '',
       promociones: mappedBloques.promociones || '',
-      buscan: mappedBloques.buscoConocer
-        || mappedBloques.buscanConocer
-        || mappedBloques.tipoPublico
-        || (Array.isArray(mappedBloques.buscan) ? mappedBloques.buscan : (mappedBloques.buscan || '')),
+      buscan: buscanPersist,
       buscanConocer: mappedBloques.buscanConocer || [],
       tipoCitaPreferida: mappedBloques.tipoCitaPreferida || [],
       personalidadPredominante: mappedBloques.personalidadPredominante || '',
@@ -357,6 +384,7 @@
       badgeVip: mappedBloques.badgeVip === true,
       badgeTrans: mappedBloques.badgeTrans === true,
       badgeHotwife: mappedBloques.badgeHotwife === true,
+      badgeCuckold: mappedBloques.badgeCuckold === true,
       badgeUnicorn: mappedBloques.badgeUnicorn === true,
       fotoURL: publicUrls.fotoPrincipal || '',
       fotosExtraURL: publicUrls.fotosExtra || [],

@@ -160,10 +160,26 @@
     if (global.CariHubRegistroPublicBlocks && CariHubRegistroPublicBlocks.applySwingerPerfilFields) {
       u = CariHubRegistroPublicBlocks.applySwingerPerfilFields(u, bloques || {}, ctx);
     }
+    if (global.CariHubRegistroPublicBlocks && CariHubRegistroPublicBlocks.applyCuckoldHotwifePerfilFields) {
+      u = CariHubRegistroPublicBlocks.applyCuckoldHotwifePerfilFields(u, bloques || {}, ctx);
+    }
     if (global.CariHubRegistroPublicBlocks && CariHubRegistroPublicBlocks.applyUnicornPerfilFields) {
       u = CariHubRegistroPublicBlocks.applyUnicornPerfilFields(u, bloques || {}, ctx);
     }
-    if (global.CariHubRegistroPublicBlocks && CariHubRegistroPublicBlocks.matchesPareja(ctx, null)) {
+    if (global.CariHubRegistroPublicBlocks &&
+      CariHubRegistroPublicBlocks.isCuckoldHotwifeSubcategoria &&
+      CariHubRegistroPublicBlocks.isCuckoldHotwifeSubcategoria(ctx)) {
+      u.aliasPareja = u.aliasPareja || alias;
+      u.tipoPerfil = 'pareja_grupo';
+      u.arquetipo = 'pareja_grupo';
+      u.subcategoriaId = 'cuckold_hotwife';
+      delete u.swingerPerfil;
+      delete u.unicornPerfil;
+      if (u.aliasPareja) {
+        u.nombre = u.aliasPareja;
+        u.alias = u.aliasPareja;
+      }
+    } else if (global.CariHubRegistroPublicBlocks && CariHubRegistroPublicBlocks.matchesPareja(ctx, null)) {
       u.aliasPareja = u.aliasPareja || alias;
       u.tipoPerfil = 'pareja_grupo';
       if (u.aliasPareja) {
