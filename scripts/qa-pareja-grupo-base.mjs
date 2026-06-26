@@ -194,11 +194,12 @@ try {
 
   const card = ctx.CariHubPublicRenderLite.cardHTMLPareja({
     ...perf,
-    subcategoriaId: 'cuckold_hotwife',
+    subcategoriaId: 'cuckold',
     subcategoria: 'Cuckold',
     tagline: 'Pareja abierta',
     precio: 'Consultar',
     modalidades: ['recibe'],
+    miembrosResumen: collected.miembrosResumen,
   }, {});
   ok('tarjeta aliasPareja', card.includes('Pareja QA'), 'nombre tarjeta');
   ok('tarjeta chip config', card.includes('Hombre + Mujer'), 'config chip');

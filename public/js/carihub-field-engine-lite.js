@@ -227,7 +227,15 @@
   function resolveMapaRow(subcategoriaId) {
     var idx = global.CARIHUB_REGISTRO_SCHEMA_INDEX;
     if (!idx || !idx.byId || !subcategoriaId) return null;
-    return idx.byId[subcategoriaId] || null;
+    if (idx.byId[subcategoriaId]) return idx.byId[subcategoriaId];
+    var norm = normId(subcategoriaId).replace(/_/g, ' ');
+    var keys = Object.keys(idx.byId);
+    for (var i = 0; i < keys.length; i++) {
+      var row = idx.byId[keys[i]];
+      if (!row) continue;
+      if (normId(row.subcategoriaId).replace(/_/g, ' ') === norm) return row;
+    }
+    return null;
   }
 
   function resolveFormularioUi(ctx) {
@@ -566,7 +574,9 @@
     var raw = String(input || '').trim();
     if (!raw) return '';
     var id = normId(raw);
-    if (resolveMapaRow(id)) return id;
+    var row = resolveMapaRow(raw);
+    if (row) return row.subcategoriaId;
+    if (resolveMapaRow(id)) return resolveMapaRow(id).subcategoriaId;
     if (global.CariHubCatalogos && CariHubCatalogos.idCategoria) {
       var catId = CariHubCatalogos.idCategoria(raw);
       if (catId && resolveMapaRow(catId)) return catId;

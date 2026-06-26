@@ -105,6 +105,69 @@
     return id === 'swinger' || id === 'parejas swinger';
   }
 
+  function isCuckoldHotwifePerfil(u) {
+    var id = normTxt(u.subcategoriaId || u.subcategoria || '').replace(/_/g, ' ');
+    return id === 'cuckold hotwife' || id === 'cuckold_hotwife';
+  }
+
+  function cuckoldHotwifeMostrarPublico(u, visibilityKey, contentVal) {
+    return lesbiansMostrarPublico(u, visibilityKey, contentVal);
+  }
+
+  function cuckoldHotwifeDinamicaLabel(u) {
+    if (u.dinamicaLabel) return String(u.dinamicaLabel).trim();
+    var din = String(u.dinamica || '').trim();
+    if (din === 'hotwife') return 'Hotwife';
+    if (din === 'cuckold') return 'Cuckold';
+    if (din === 'ambos') return 'Ambos / pareja flexible';
+    return din;
+  }
+
+  function cuckoldHotwifeCardBadgesHTML(u, opts) {
+    opts = opts || {};
+    return badgesCompactHTML(u, {
+      pareja: true,
+      hotwife: u.badgeHotwife === true,
+      cuckold: u.badgeCuckold === true,
+      respRapida: opts.respRapida
+    });
+  }
+
+  function cardHTMLCuckoldHotwife(u, Q) {
+    Q = Q || {};
+    var set = modalidadesSet(u);
+    var metaRight = set.viaja ? chipModalidadHTML({ viaja: true }) : '';
+    var lines = [];
+    var dinLabel = cuckoldHotwifeDinamicaLabel(u);
+    if (dinLabel) lines.push(dinLabel);
+    var buscanArr = Array.isArray(u.buscan) ? u.buscan : [];
+    if (cuckoldHotwifeMostrarPublico(u, 'mostrarBuscan', buscanArr) && buscanArr.length) {
+      lines.push('Buscan: ' + buscanArr.join(', '));
+    }
+    var descBlock = lines.length
+      ? '<p class="res-card__desc res-card__desc--compact"><span class="res-card__desc-txt">' +
+        safeTxt(lines.join(' · ')) + '</span></p>'
+      : descripcionCompactHTML(u, 'Presentación');
+    var viajesLine = set.viaja ? cardViajesExtraHTML(u) : '';
+    var configLabel = u.configuracionGrupoLabel || u.tipoPareja || '';
+    var headExtra = configLabel
+      ? '<span class="age">' + safeTxt(String(configLabel)) + '</span>'
+      : '';
+    var catLabel = (global.CariHubResultadosDemo && CariHubResultadosDemo.labelCategoria)
+      ? CariHubResultadosDemo.labelCategoria(u.categoriaPublica || u.categoria || Q.categoria || '')
+      : (u.categoriaPublica || u.categoria || Q.categoria || 'Cuckold / Hotwife');
+    return cardShell(u, Q, {
+      cardClass: 'res-card--pareja res-card--cuckold-hotwife',
+      nombre: u.aliasPareja || u.nombre || u.alias,
+      headExtra: headExtra,
+      metaRight: metaRight,
+      descBlock: descBlock + viajesLine,
+      catLabel: catLabel,
+      catIcon: 'heart',
+      badges: cuckoldHotwifeCardBadgesHTML(u, { respRapida: !u.__previewRegistro && u.respuestaRapida === true })
+    });
+  }
+
   function swingerObjetivoPrincipal(u) {
     if (!swingerMostrarPublico(u, 'mostrarObjetivosPerfil', u.objetivosPerfil)) return '';
     if (u.objetivoPrincipal) return String(u.objetivoPrincipal).trim();
@@ -280,6 +343,7 @@
     if (opts.negocio) items.push('<span class="res-badge res-badge--ver">Verificado</span>');
     if (opts.lgbt || u.badgeLgbt) items.push('<span class="res-badge res-badge--lgbt">LGBT+</span>');
     if (opts.hotwife || u.badgeHotwife) items.push('<span class="res-badge res-badge--hotwife">Hotwife</span>');
+    if (opts.cuckold || u.badgeCuckold) items.push('<span class="res-badge res-badge--cuckold">Cuckold</span>');
     if (opts.unicorn || u.badgeUnicorn) items.push('<span class="res-badge res-badge--unicorn">🦄 Unicornio</span>');
     if (opts.respRapida) items.push('<span class="res-badge res-badge--fast">Respuesta rápida</span>');
     else if (u.nueva) items.push('<span class="res-badge res-badge--new">Nueva</span>');
@@ -458,6 +522,7 @@
   }
 
   function cardHTMLPareja(u, Q) {
+    if (isCuckoldHotwifePerfil(u)) return cardHTMLCuckoldHotwife(u, Q);
     if (isSwingerPerfil(u)) return cardHTMLParejaSwinger(u, Q);
     Q = Q || {};
     var set = modalidadesSet(u);
@@ -493,6 +558,7 @@
     }
     var comp = resolveComponente(u, Q);
     if (comp === 'ResultCardUnicorn' || isUnicornPerfil(u)) return cardHTMLUnicorn(u, Q);
+    if (isCuckoldHotwifePerfil(u)) return cardHTMLCuckoldHotwife(u, Q);
     if (comp === 'ResultCardNegocio') return cardHTMLNegocio(u, Q);
     if (comp === 'ResultCardProfesional') return cardHTMLProfesional(u, Q);
     if (comp === 'ResultCardServicio') return cardHTMLServicio(u, Q);
@@ -595,7 +661,9 @@
     cardHTMLProfesional: cardHTMLProfesional,
     cardHTMLPareja: cardHTMLPareja,
     cardHTMLParejaSwinger: cardHTMLParejaSwinger,
+    cardHTMLCuckoldHotwife: cardHTMLCuckoldHotwife,
     cardHTMLUnicorn: cardHTMLUnicorn,
+    isCuckoldHotwifePerfil: isCuckoldHotwifePerfil,
     resolveComponente: resolveComponente,
     applyPublicProfilePresentation: applyPublicProfilePresentation,
     PUB_BLOCKS: PUB_BLOCKS
