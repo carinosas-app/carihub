@@ -28,6 +28,7 @@ const REGRESSION_SCRIPTS = [
   'validar-schemas-registro.mjs',
   'qa-viajes-desplazamiento.mjs',
   'qa-dotados.mjs',
+  'qa-pareja-swinger-cierre.mjs',
   'qa-unicorn-cierre.mjs',
   'qa-pareja-grupo-base.mjs',
   'qa-cuckold-hotwife-cierre.mjs',
@@ -62,7 +63,7 @@ for (const script of PACK_SCRIPTS) {
   if (status !== 0) fail.push({ name: script, detail: 'exit ' + status });
   else pass.push({ name: script, detail: 'ok' });
 }
-ok('pack checks acumulados', packChecks >= 120, String(packChecks));
+ok('pack checks acumulados', packChecks >= 150, String(packChecks));
 
 console.log('\n=== QA persona_acompanante — regresiones ===');
 for (const script of REGRESSION_SCRIPTS) {
@@ -82,6 +83,8 @@ const required = [
   'public/js/carihub-registro-public-blocks.js',
   'public/js/registro-perfil-submit.js',
   'public/js/carihub-public-render-lite.js',
+  'scripts/qa-dotados.mjs',
+  'scripts/qa-pareja-swinger-cierre.mjs',
   ...PACK_SCRIPTS.map((s) => 'scripts/' + s),
 ];
 ok(
@@ -89,6 +92,19 @@ ok(
   required.every((f) => fs.existsSync(path.join(repoRoot, f))),
   required.filter((f) => !fs.existsSync(path.join(repoRoot, f))).join(', ')
 );
+
+const motorJs = fs.readFileSync(path.join(repoRoot, 'public/js/carihub-registro-public-blocks.js'), 'utf8');
+const packMotor = fs.readFileSync(path.join(repoRoot, 'scripts/qa-persona-acompanante.mjs'), 'utf8');
+ok('H4 dotados en pack SUBS', packMotor.includes("key: 'dotados'"), 'qa-persona-acompanante.mjs');
+ok('H4 dotados en escort blocks', fs.readFileSync(path.join(repoRoot, 'public/js/data/registro-adultos-escort-blocks.js'), 'utf8').includes("'dotados'"), 'escort-blocks');
+
+const antiContam = [
+  ['unicorn finalize separado', motorJs.includes('finalizeUnicornValues'), 'motor'],
+  ['swinger finalize separado', motorJs.includes('finalizeParejaSwingerValues'), 'motor'],
+  ['C/H finalize separado', motorJs.includes('finalizeCuckoldHotwifeValues'), 'motor'],
+  ['C/H build separado', motorJs.includes('buildCuckoldHotwifePerfil'), 'motor'],
+];
+antiContam.forEach(([name, cond, detail]) => ok(name, cond, detail));
 
 console.log('\n=== QA persona_acompanante Cierre (meta) ===');
 console.log('PASS:', pass.length);
