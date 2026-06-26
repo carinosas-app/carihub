@@ -14,8 +14,7 @@
     'Disponible ahora',
     'Solo con cita',
     'Entre semana',
-    'Fines de semana',
-    'Viajes'
+    'Fines de semana'
   ];
 
   var SINGLES_DINAMICAS = [
@@ -28,6 +27,8 @@
   ];
 
   var OPCIONES_SI_NO_ACUERDO = ['Sí', 'No', 'Bajo acuerdo previo'];
+
+  var OPCIONES_SI_NO = ['Sí', 'No'];
 
   var TIPOS_TRIOS_COMP = [
     'MHM (Mujer–Hombre–Mujer)',
@@ -171,7 +172,8 @@
           tipoCitaPreferida: { required: true },
           personalidadPredominante: { required: true },
           estiloPersonal: { required: true },
-          disponibilidadAgenda: { required: true }
+          disponibilidadAgenda: { required: true },
+          modalidades: { required: false }
         },
         fieldHints: {
           buscanConocer: 'Indica a quién te gustaría conocer.',
@@ -220,7 +222,8 @@
           presentacionFemboy: { required: true },
           estiloPredominante: { required: true },
           disponibilidadAgenda: { required: true },
-          disponiblePara: { required: true }
+          disponiblePara: { required: true },
+          modalidades: { required: false }
         },
         fieldHints: {
           presentacionFemboy: 'Cómo te presentas en tu perfil público.',
@@ -261,6 +264,24 @@
           sobreMi: 'Biografía: quién eres y qué te hace diferente.',
           personalidad: 'Cómo te describe la gente que te conoce.',
           pasatiempos: 'Hobbies o gustos que aparecen en tu ficha.'
+        }
+      },
+      dotados: {
+        fieldHints: {
+          longitudCm: 'Medida en centímetros — tono discreto en tu ficha.',
+          mostrarLongitudPublico: 'Si eliges No, la longitud no aparece en tu perfil público.',
+          atencionHombres: 'Indica si atiendes a hombres.',
+          mostrarAtencionHombresPublico: 'Controla si esto se ve en tu ficha pública.',
+          atencionMujeres: 'Indica si atiendes a mujeres.',
+          mostrarAtencionMujeresPublico: 'Controla si esto se ve en tu ficha pública.',
+          atencionParejas: 'Indica si atiendes a parejas.',
+          mostrarAtencionParejasPublico: 'Controla si esto se ve en tu ficha pública.',
+          atencionTrans: 'Indica si atiendes a personas trans.',
+          mostrarAtencionTransPublico: 'Controla si esto se ve en tu ficha pública.',
+          realizaTrios: 'Indica si ofreces tríos.',
+          mostrarRealizaTriosPublico: 'Controla si esto se ve en tu ficha pública.',
+          colaboracionContenido: 'Indica si colaboras en contenido para redes o plataformas.',
+          mostrarColaboracionContenidoPublico: 'Controla si esto se ve en tu ficha pública.'
         }
       }
     },
@@ -420,8 +441,7 @@
               'Disponible ahora',
               'Solo con cita',
               'Entre semana',
-              'Fines de semana',
-              'Viajes'
+              'Fines de semana'
             ]
           },
           {
@@ -429,7 +449,7 @@
             label: 'Disponible para',
             type: 'checklist',
             required: true,
-            options: ['Eventos', 'Citas', 'Viajes']
+            options: ['Eventos', 'Citas']
           },
           {
             id: 'videoPresentacion',
@@ -637,6 +657,120 @@
         ]
       },
       {
+        id: 'dotadosPerfil',
+        title: 'Perfil dotados',
+        hint: 'Todo se guarda en tu cuenta; en la ficha pública solo aparece lo que marques como visible.',
+        onlySubcategorias: ['dotados'],
+        fields: [
+          {
+            id: 'longitudCm',
+            label: 'Longitud (cm)',
+            type: 'text',
+            required: false,
+            placeholder: 'Ej. 18'
+          },
+          {
+            id: 'mostrarLongitudPublico',
+            label: '¿Mostrar longitud en tu perfil público?',
+            type: 'select',
+            required: false,
+            options: OPCIONES_SI_NO.slice()
+          },
+          {
+            id: 'atencionHombres',
+            label: '¿Ofrece atención a hombres?',
+            type: 'select',
+            required: false,
+            options: OPCIONES_SI_NO.slice()
+          },
+          {
+            id: 'mostrarAtencionHombresPublico',
+            label: 'Mostrar atención a hombres en perfil',
+            type: 'select',
+            required: false,
+            options: OPCIONES_SI_NO.slice()
+          },
+          {
+            id: 'atencionMujeres',
+            label: '¿Ofrece atención a mujeres?',
+            type: 'select',
+            required: false,
+            options: OPCIONES_SI_NO.slice()
+          },
+          {
+            id: 'mostrarAtencionMujeresPublico',
+            label: 'Mostrar atención a mujeres en perfil',
+            type: 'select',
+            required: false,
+            options: OPCIONES_SI_NO.slice()
+          },
+          {
+            id: 'atencionParejas',
+            label: '¿Ofrece atención a parejas?',
+            type: 'select',
+            required: false,
+            options: OPCIONES_SI_NO.slice()
+          },
+          {
+            id: 'mostrarAtencionParejasPublico',
+            label: 'Mostrar atención a parejas en perfil',
+            type: 'select',
+            required: false,
+            options: OPCIONES_SI_NO.slice()
+          },
+          {
+            id: 'atencionTrans',
+            label: '¿Ofrece atención a personas trans?',
+            type: 'select',
+            required: false,
+            options: OPCIONES_SI_NO.slice()
+          },
+          {
+            id: 'mostrarAtencionTransPublico',
+            label: 'Mostrar atención a personas trans en perfil',
+            type: 'select',
+            required: false,
+            options: OPCIONES_SI_NO.slice()
+          }
+        ]
+      },
+      {
+        id: 'dotadosPreferencias',
+        title: 'Preferencias adicionales',
+        hint: 'Marca lo que ofreces y decide qué mostrar en tu perfil público.',
+        onlySubcategorias: ['dotados'],
+        fields: [
+          {
+            id: 'realizaTrios',
+            label: '¿Realizas tríos?',
+            type: 'select',
+            required: false,
+            options: OPCIONES_SI_NO_ACUERDO.slice()
+          },
+          {
+            id: 'mostrarRealizaTriosPublico',
+            label: 'Mostrar tríos en perfil',
+            type: 'select',
+            required: false,
+            options: OPCIONES_SI_NO.slice()
+          },
+          {
+            id: 'colaboracionContenido',
+            label: 'Colaboración para contenido',
+            type: 'select',
+            required: false,
+            options: OPCIONES_SI_NO_ACUERDO.slice()
+          },
+          {
+            id: 'mostrarColaboracionContenidoPublico',
+            label: 'Mostrar colaboración para contenido en perfil',
+            type: 'select',
+            required: false,
+            options: OPCIONES_SI_NO.slice()
+          }
+        ]
+      },
+      {
         id: 'serviciosPreferencias',
         title: 'Preferencias de servicio',
         hint: 'Opciones adicionales que aparecen en tu ficha.',
@@ -668,8 +802,7 @@
       {
         id: 'modalidades',
         title: 'Modalidad de atención',
-        hint: 'Marca dónde atiendes (puedes elegir más de una).',
-        excludeSubcategorias: ['femboy', 'singles'],
+        hint: 'Marca dónde atiendes (puedes elegir más de una). Si viajas, marca «Viaja» para indicar alcance y condiciones.',
         fields: [
           {
             id: 'modalidades',
@@ -679,8 +812,70 @@
             options: [
               { value: 'recibe', label: 'Recibe (con lugar)' },
               { value: 'hotel', label: 'Hotel' },
-              { value: 'domicilio', label: 'Domicilio' }
+              { value: 'domicilio', label: 'Domicilio' },
+              { value: 'viaja', label: 'Viaja', onlySubcategoriasViajes: true }
             ]
+          },
+          {
+            id: 'alcanceDesplazamiento',
+            label: 'Alcance de desplazamiento',
+            type: 'select',
+            required: true,
+            showWhenViaja: true,
+            options: [
+              { value: 'solo_zona', label: 'Solo mi zona' },
+              { value: 'toda_ciudad', label: 'Toda mi ciudad' },
+              { value: 'todo_estado', label: 'Todo mi estado / provincia / departamento' },
+              { value: 'cualquier_ciudad_pais', label: 'Cualquier ciudad de mi país' },
+              { value: 'otro_pais', label: 'Otro país' },
+              { value: 'internacional', label: 'Internacional / varios países' }
+            ]
+          },
+          {
+            id: 'viajesProgramados',
+            label: 'Viajes programados',
+            type: 'select',
+            required: true,
+            showWhenViaja: true,
+            options: [
+              { value: 'si', label: 'Sí' },
+              { value: 'no', label: 'No' },
+              { value: 'a_convenir', label: 'A convenir' }
+            ]
+          },
+          {
+            id: 'gastosTraslado',
+            label: 'Gastos de viaje',
+            type: 'select',
+            required: true,
+            showWhenViaja: true,
+            options: [
+              { value: 'cliente', label: 'El cliente' },
+              { value: 'anunciante', label: 'El anunciante' },
+              { value: 'se_acuerda', label: 'Se acuerda' }
+            ]
+          },
+          {
+            id: 'anticipacionViaje',
+            label: 'Anticipación requerida',
+            type: 'select',
+            required: true,
+            showWhenViaja: true,
+            options: [
+              { value: 'mismo_dia', label: 'Mismo día' },
+              { value: '24h', label: '24 horas antes' },
+              { value: '48h', label: '48 horas antes' },
+              { value: '1_semana', label: 'Una semana antes' },
+              { value: 'a_convenir', label: 'A convenir' }
+            ]
+          },
+          {
+            id: 'notasViaje',
+            label: 'Notas de viaje',
+            type: 'text',
+            required: false,
+            showWhenViaja: true,
+            placeholder: 'Opcional — condiciones, destinos frecuentes, etc.'
           }
         ]
       },

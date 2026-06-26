@@ -34,6 +34,7 @@
           return normalizeSubId(s) === subId;
         })) return false;
       }
+      if (field.showWhenViaja && !subcategoriaViajesActiva(ctx)) return false;
       if (!field.onlySubcategorias || !field.onlySubcategorias.length) return true;
       return field.onlySubcategorias.some(function (s) {
         return normalizeSubId(s) === subId;
@@ -130,6 +131,36 @@
     con_cita: 'Con cita previa'
   };
 
+  function categoriaTamañoDesdeCm(val) {
+    var s = String(val || '').trim().replace(',', '.');
+    var m = s.match(/(\d+(?:\.\d+)?)/);
+    if (!m) return '';
+    var n = parseFloat(m[1]);
+    if (!isFinite(n) || n <= 0) return '';
+    if (n < 16) return 'Promedio';
+    if (n < 20) return 'Por encima del promedio';
+    return 'Dotado';
+  }
+
+  function mapDotadosFields(u, bloques) {
+    if (bloques.longitudCm) {
+      u.longitudCm = String(bloques.longitudCm).trim();
+      u.categoriaTamaño = categoriaTamañoDesdeCm(bloques.longitudCm);
+    }
+    var dotadosKeys = [
+      'mostrarLongitudPublico',
+      'atencionHombres', 'mostrarAtencionHombresPublico',
+      'atencionMujeres', 'mostrarAtencionMujeresPublico',
+      'atencionParejas', 'mostrarAtencionParejasPublico',
+      'atencionTrans', 'mostrarAtencionTransPublico',
+      'mostrarRealizaTriosPublico', 'mostrarColaboracionContenidoPublico'
+    ];
+    dotadosKeys.forEach(function (key) {
+      if (bloques[key]) u[key] = bloques[key];
+    });
+    return u;
+  }
+
   function matchesEscort(ctx, resolved) {
     var cfg = resolveEscortConfig();
     if (!cfg) return false;
@@ -151,13 +182,43 @@
     return 'rpPub_' + fieldId;
   }
 
-  function renderChecklist(field, values) {
+  function viajesApi() {
+    return global.CariHubViajesDesplazamiento || null;
+  }
+
+  function subIdFromCtx(ctx) {
+    return normalizeSubId((ctx && ctx.subcategoriaId) || (ctx && ctx.subcategoria) || '');
+  }
+
+  function subcategoriaViajesActiva(ctx) {
+    var api = viajesApi();
+    return api ? api.subcategoriaActivaViajes(subIdFromCtx(ctx)) : false;
+  }
+
+  function filterChecklistOptions(field, ctx) {
+    var active = subcategoriaViajesActiva(ctx);
+    return (field.options || []).filter(function (opt) {
+      if (typeof opt === 'object' && opt.onlySubcategoriasViajes) return active;
+      return true;
+    });
+  }
+
+  function modalidadesIncluyeViaja(values) {
+    var mods = values && values.modalidades;
+    return Array.isArray(mods) && mods.indexOf('viaja') >= 0;
+  }
+
+  function isViajesSubfield(field) {
+    return !!(field && field.showWhenViaja);
+  }
+
+  function renderChecklist(field, values, ctx) {
     values = values || {};
     var selected = values[field.id];
     if (!Array.isArray(selected)) selected = [];
     var selMap = {};
     selected.forEach(function (v) { selMap[String(v)] = true; });
-    var opts = field.options || [];
+    var opts = filterChecklistOptions(field, ctx);
     var html = '<div class="rp-pub-checklist" data-rp-pub-field="' + esc(field.id) + '">';
     opts.forEach(function (opt) {
       var val = typeof opt === 'string' ? opt : opt.value;
@@ -210,13 +271,20 @@
     missing.push(label);
   }
 
-  function renderField(field, values) {
+  function renderField(field, values, ctx) {
     values = values || {};
     var val = values[field.id] != null ? values[field.id] : '';
     var req = field.required ? ' <span class="rp-req">*</span>' : '';
-    var wrap = '<div class="rp-field rp-pub-field" data-rp-pub-field-wrap="' + esc(field.id) + '">';
+    var viajesSub = isViajesSubfield(field);
+    var viajesHidden = viajesSub && !modalidadesIncluyeViaja(values);
+    var wrap = '<div class="rp-field rp-pub-field' +
+      (viajesSub ? ' rp-viajes-subfield' : '') +
+      (viajesHidden ? ' rp-hidden' : '') +
+      '" data-rp-pub-field-wrap="' + esc(field.id) + '"' +
+      (viajesSub ? ' data-rp-viajes-sub="1"' : '') +
+      (viajesHidden ? ' aria-hidden="true"' : '') + '>';
     if (field.type === 'checklist') {
-      wrap += '<span class="rp-pub-field-label">' + esc(field.label) + req + '</span>' + renderChecklist(field, values);
+      wrap += '<span class="rp-pub-field-label">' + esc(field.label) + req + '</span>' + renderChecklist(field, values, ctx);
     } else if (field.type === 'select') {
       var selectCls = field.id === 'nivelServicio' ? ' rp-nivel-servicio-select' : '';
       wrap += '<label for="' + fieldDomId(field.id) + '">' + esc(field.label) + req + '</label><select id="' + fieldDomId(field.id) + '" class="' + selectCls + '">';
@@ -262,7 +330,7 @@
     return wrap;
   }
 
-  function renderBlocks(host, cfg, values) {
+  function renderBlocks(host, cfg, values, ctx) {
     if (!host || !cfg) {
       if (host) host.innerHTML = '';
       return;
@@ -273,15 +341,59 @@
       html += '<div class="rp-card rp-pub-block" data-rp-pub-block="' + esc(block.id) + '">';
       html += '<h2 class="rp-card__title">' + esc(block.title) + '</h2>';
       if (block.hint) html += '<p class="rp-contact-hint">' + esc(block.hint) + '</p>';
+      var subformOpen = false;
       block.fields.forEach(function (field) {
-        html += renderField(field, values);
+        if (field.showWhenViaja && !subformOpen && subcategoriaViajesActiva(ctx)) {
+          html += '<div class="rp-viajes-subform" data-rp-viajes-subform="1">';
+          subformOpen = true;
+        }
+        html += renderField(field, values, ctx);
       });
+      if (subformOpen) html += '</div>';
       html += '</div>';
     });
     host.innerHTML = html;
     host.classList.remove('rp-hidden');
     host.removeAttribute('aria-hidden');
     bindNivelServicioHelp();
+    bindViajaToggle();
+    syncViajesSubformVisibility();
+  }
+
+  function clearViajesSubfieldValues() {
+    var api = viajesApi();
+    var ids = api ? api.viajesFieldIds() : [
+      'alcanceDesplazamiento', 'viajesProgramados', 'gastosTraslado', 'anticipacionViaje', 'notasViaje'
+    ];
+    ids.forEach(function (id) {
+      var el = $(fieldDomId(id));
+      if (el) el.value = '';
+    });
+  }
+
+  function syncViajesSubformVisibility() {
+    var viaja = modalidadesIncluyeViaja({ modalidades: readChecklist('modalidades') });
+    document.querySelectorAll('[data-rp-viajes-subform="1"]').forEach(function (el) {
+      el.classList.toggle('rp-hidden', !viaja);
+      if (viaja) el.removeAttribute('aria-hidden');
+      else el.setAttribute('aria-hidden', 'true');
+    });
+    document.querySelectorAll('[data-rp-viajes-sub="1"]').forEach(function (el) {
+      el.classList.toggle('rp-hidden', !viaja);
+      if (viaja) el.removeAttribute('aria-hidden');
+      else el.setAttribute('aria-hidden', 'true');
+    });
+    if (!viaja) clearViajesSubfieldValues();
+  }
+
+  function bindViajaToggle() {
+    var list = document.querySelector('[data-rp-pub-field="modalidades"]');
+    if (!list || list.dataset.rpViajaBound === '1') return;
+    list.dataset.rpViajaBound = '1';
+    list.addEventListener('change', function (ev) {
+      if (!ev.target || ev.target.type !== 'checkbox') return;
+      syncViajesSubformVisibility();
+    });
   }
 
   function bindNivelServicioHelp() {
@@ -321,6 +433,18 @@
     return out;
   }
 
+  function finalizeViajesValues(values) {
+    var api = viajesApi();
+    if (!api) return values;
+    values.viajesDesplazamiento = api.buildViajesDesplazamiento(values, values.modalidades);
+    if (!values.viajesDesplazamiento.viaja) {
+      api.viajesFieldIds().forEach(function (key) {
+        delete values[key];
+      });
+    }
+    return values;
+  }
+
   function collectValues(cfg) {
     if (!cfg) return {};
     var values = {};
@@ -339,14 +463,16 @@
         values[field.id] = el ? String(el.value || '').trim() : '';
       });
     });
-    return values;
+    return finalizeViajesValues(values);
   }
 
   function validateValues(cfg, values, ctx) {
     var missing = [];
     if (!cfg) return missing;
     cfg = mergedConfig(cfg, ctx);
+    var viajaActivo = modalidadesIncluyeViaja(values);
     (cfg.obligatorios || []).forEach(function (key) {
+      if (!viajaActivo && viajesApi() && viajesApi().viajesFieldIds().indexOf(key) >= 0) return;
       var val = values[key];
       var fieldType = fieldTypeForKey(cfg, key);
       if (fieldType === 'boolean') {
@@ -366,6 +492,7 @@
     cfg.blocks.forEach(function (block) {
       block.fields.forEach(function (field) {
         if (!field.required) return;
+        if (isViajesSubfield(field) && !viajaActivo) return;
         var val = values[field.id];
         var empty = field.type === 'boolean'
           ? !isTruthyFieldValue(val)
@@ -414,6 +541,23 @@
     return found;
   }
 
+  function flattenViajesSaved(savedValues) {
+    if (!savedValues || typeof savedValues !== 'object') return savedValues || {};
+    var out = Object.assign({}, savedValues);
+    var v = savedValues.viajesDesplazamiento;
+    if (v && typeof v === 'object') {
+      var api = viajesApi();
+      var ids = api ? api.viajesFieldIds() : [];
+      ids.forEach(function (key) {
+        if (v[key] != null && out[key] == null) out[key] = v[key];
+      });
+      if (v.viaja === true && Array.isArray(out.modalidades) && out.modalidades.indexOf('viaja') < 0) {
+        out.modalidades = out.modalidades.concat(['viaja']);
+      }
+    }
+    return out;
+  }
+
   function apply(ctx, resolved, savedValues) {
     var host = $('rpDynamicPublicHost');
     if (!host) return null;
@@ -425,8 +569,8 @@
       syncLegacyFields(null, false);
       return null;
     }
-    savedValues = savedValues || {};
-    renderBlocks(host, mergedConfig(cfg, ctx), savedValues);
+    savedValues = flattenViajesSaved(savedValues || {});
+    renderBlocks(host, mergedConfig(cfg, ctx), savedValues, ctx);
     syncLegacyFields(cfg, true);
     return cfg;
   }
@@ -504,6 +648,7 @@
     if (Array.isArray(bloques.distintivosVip) && bloques.distintivosVip.length) {
       u.distintivosVip = bloques.distintivosVip.slice();
     }
+    u = mapDotadosFields(u, bloques);
     if (isTruthyFieldValue(bloques.eventosDisponibles)) u.eventosDisponibles = true;
     if (bloques.portfolioURL) u.portfolioURL = normalizeUrl(bloques.portfolioURL);
     if (bloques.disponibilidad) {
@@ -534,8 +679,14 @@
         if (m === 'recibe') return 'Recibe';
         if (m === 'hotel') return 'Hotel';
         if (m === 'domicilio') return 'Domicilio';
+        if (m === 'viaja') return 'Viaja';
         return m;
       }).join(' · ');
+    }
+    if (bloques.viajesDesplazamiento) {
+      u.viajesDesplazamiento = bloques.viajesDesplazamiento;
+    } else if (viajesApi()) {
+      u.viajesDesplazamiento = viajesApi().buildViajesDesplazamiento(bloques, bloques.modalidades);
     }
     if (bloques.horarioDetalle) {
       u.horario = bloques.horarioDetalle;

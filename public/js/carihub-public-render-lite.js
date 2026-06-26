@@ -26,6 +26,7 @@
       camera: '<path d="M4 8.5h3l1.6-2.2h6.8L17 8.5h3a2 2 0 012 2v7a2 2 0 01-2 2H4a2 2 0 01-2-2v-7a2 2 0 012-2z"/><circle cx="12" cy="13" r="3.2"/>',
       clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
       briefcase: '<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2"/>',
+      plane: '<path d="M16 10l4-2-2 6-2-1-2 3-1-5-5-1 1-3h4l2-3z"/>',
       shield: '<path d="M12 3l8 3v6c0 5-3.5 8.5-8 9-4.5-.5-8-4-8-9V6l8-3z"/>'
     };
     return '<span class="' + cls + '" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + (p[name] || p.briefcase) + '</svg></span>';
@@ -47,8 +48,10 @@
         if (n === 'recibe' || n.indexOf('recib') !== -1 || n.indexOf('lugar') !== -1) set.recibe = true;
         else if (n === 'hotel' || n.indexOf('hotel') !== -1) set.hotel = true;
         else if (n === 'domicilio' || n.indexOf('domicil') !== -1) set.domicilio = true;
+        else if (n === 'viaja' || n.indexOf('viaj') !== -1) set.viaja = true;
       });
     }
+    if (!set.viaja && u.viajesDesplazamiento && u.viajesDesplazamiento.viaja === true) set.viaja = true;
     return set;
   }
 
@@ -57,7 +60,15 @@
     if (set.recibe) items.push('<span class="modchip mc-pink">' + svgIco('home') + 'Recibe</span>');
     if (set.hotel) items.push('<span class="modchip mc-purple">' + svgIco('hotel') + 'Hotel</span>');
     if (set.domicilio) items.push('<span class="modchip mc-orange">' + svgIco('car') + 'Domicilio</span>');
+    if (set.viaja) items.push('<span class="modchip mc-teal">' + svgIco('plane') + 'Viaja</span>');
     return items.join('');
+  }
+
+  function cardViajesExtraHTML(u) {
+    if (!global.CariHubViajesDesplazamiento) return '';
+    var sum = CariHubViajesDesplazamiento.cardViajesSummary(u);
+    if (!sum || sum === 'Viaja: Sí') return '';
+    return '<p class="res-card__viajes-resumen">' + safeTxt(sum) + '</p>';
   }
 
   function ubicacionCorta(u) {
@@ -223,6 +234,7 @@
     var edad = u.edad != null ? String(u.edad).trim() + ' años' : '';
     var set = modalidadesSet(u);
     var mods = chipModalidadHTML(set);
+    var viajesLine = cardViajesExtraHTML(u);
     var catLabel = (global.CariHubResultadosDemo && CariHubResultadosDemo.labelCategoria)
       ? CariHubResultadosDemo.labelCategoria(u.categoriaPublica || u.categoria || Q.categoria || '')
       : (u.categoriaPublica || u.categoria || Q.categoria || '');
@@ -231,6 +243,7 @@
       cardClass: 'res-card--adult',
       headExtra: edad ? '<span class="age">' + safeTxt(edad) + '</span>' : '',
       metaRight: mods,
+      descBlock: descripcionCompactHTML(u) + viajesLine,
       catLabel: catLabel,
       badges: badgesCompactHTML(u, {
         vip: vip,

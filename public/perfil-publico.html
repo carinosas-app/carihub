@@ -20,7 +20,8 @@
 <script src="js/data/registro-schema-index.js"></script>
 <script src="js/data/registro-ui-index.js"></script>
 <script src="js/carihub-field-engine-lite.js?v=20260628c"></script>
-<script src="js/carihub-public-render-lite.js?v=20260629c"></script>
+<script src="js/carihub-viajes-desplazamiento.js?v=20260620t"></script>
+<script src="js/carihub-public-render-lite.js?v=20260620t"></script>
 <script src="js/resultados-demo.js"></script>
 <script src="js/perfil-publico-init.js"></script>
   <script src="js/carihub-messenger-privacidad-ui.js"></script>
@@ -1779,6 +1780,7 @@ body:not(.fit) .wrap{max-width:1100px;}
 .modchip.mc-pink{background:#ffe6f3;} .modchip.mc-pink .mc-ic{color:#FF0099;}
 .modchip.mc-purple{background:#f3e8fb;} .modchip.mc-purple .mc-ic{color:#AB47BC;}
 .modchip.mc-orange{background:#ffe9e0;} .modchip.mc-orange .mc-ic{color:#FF7043;}
+.modchip.mc-teal{background:#e0f2f1;} .modchip.mc-teal .mc-ic{color:#00897B;}
 [data-tema="pro"] .modchip,[data-tema="empresa"] .modchip{background:#eff6ff;color:#1e3a8a;}
 [data-tema="pro"] .modchip .mc-ic,[data-tema="empresa"] .modchip .mc-ic{color:#2563eb;}
 .quote{margin-top:12px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:14px;color:#5d5566;font-weight:600;}
@@ -2993,6 +2995,7 @@ function svgIcon(n){
     calendar:'<rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 9.5h17M8 3v4M16 3v4"/><circle cx="8.2" cy="13.2" r="1"/><circle cx="12" cy="13.2" r="1"/><circle cx="15.8" cy="13.2" r="1"/>',
     clock:'<circle cx="12" cy="12" r="8.5"/><path d="M12 8v4.5l3 2"/>',
     money:'<rect x="3" y="6.5" width="18" height="11" rx="2"/><circle cx="12" cy="12" r="2.2"/><path d="M7 9.5h.01M17 14.5h.01"/>',
+    plane:'<path d="M16 10l4-2-2 6-2-1-2 3-1-5-5-1 1-3h4l2-3z"/>',
     star:'<path d="M12 3.8 14.2 9l5.5.5-4.2 3.6 1.3 5.4L12 16.8 7.2 18.5l1.3-5.4L4.3 9.5 9.8 9z"/>'
   };
   return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+(p[n]||"")+'</svg>';
@@ -4327,6 +4330,7 @@ function perfilModchipsHTML(u){
     recibe:["home","Recibe","mc-pink"],
     hotel:["bell","Hotel","mc-purple"],
     domicilio:["car","Domicilio","mc-orange"],
+    viaja:["plane","Viaja","mc-teal"],
     fiestas:["bolt","Fiestas","mc-pink"],
     despedidas:["heart","Despedidas","mc-purple"],
     hoteles:["bell","Hoteles","mc-orange"],
@@ -4363,6 +4367,33 @@ function adultoIdHeadHTML(u){
   return '<div class="idhead"><h1>'+safe(u.nombre)+'</h1>'+badges+
     (u.edad?'<span class="age" data-pub-block="edad">'+u.edad+' años</span>':'')+'</div>';
 }
+function escortPrefPublico(u, valor, visibilityKey){
+  if(!valor) return false;
+  if(u[visibilityKey]!=null && String(u[visibilityKey]).trim()!=='') return String(u[visibilityKey]).trim()==='Sí';
+  return true;
+}
+function dotadosAtencionPublica(u, valorKey, visibilityKey, label){
+  if(!u[valorKey]) return '';
+  if(String(u[visibilityKey]||'').trim()!=='Sí') return '';
+  return row(pico("heart"), label, safe(u[valorKey]));
+}
+function viajesDesplazamientoFichaHTML(u){
+  var v=u.viajesDesplazamiento;
+  var api=global.CariHubViajesDesplazamiento;
+  if(!api) return '';
+  if(!v||v.viaja!==true){
+    if(v&&v.viaja===false) return row(pico("plane"),"Viaja","No");
+    return '';
+  }
+  var geo={pais:u.pais,estado:u.estado,ciudad:u.ciudad};
+  var html=row(pico("plane"),"Viaja","Sí");
+  if(v.alcanceDesplazamiento) html+=row(pico("globe"),"Alcance de desplazamiento",safe(api.alcanceLabelPublic(v.alcanceDesplazamiento,geo)));
+  if(v.viajesProgramados) html+=row(pico("calendar"),"Viajes programados",safe(api.viajesProgramadosLabel(v.viajesProgramados)));
+  if(v.gastosTraslado) html+=row(pico("money"),"Gastos de viaje",safe(api.gastosTrasladoLabel(v.gastosTraslado)));
+  if(v.anticipacionViaje) html+=row(pico("clock"),"Anticipación requerida",safe(api.anticipacionLabel(v.anticipacionViaje)));
+  if(v.notasViaje) html+=row(pico("chat"),"Notas de viaje",safe(v.notasViaje));
+  return html;
+}
 function adultoFichaHTML(u){
   if(u.especialidadBdsm){
     return '<div class="pcard"><div class="dlist">'+
@@ -4383,6 +4414,7 @@ function adultoFichaHTML(u){
     if(m==="recibe") return "Recibe";
     if(m==="hotel") return "Hotel";
     if(m==="domicilio") return "Domicilio";
+    if(m==="viaja") return "Viaja";
     return m;
   }).join(" · ")||"");
   var html=row(pico("user"),"Categoría",safe(u.categoria||u.categoriaPublica))+
@@ -4390,6 +4422,7 @@ function adultoFichaHTML(u){
     row(pico("pin"),"Estado",safe(u.estado))+
     row(pico("pin"),"Ciudad",safe(u.ciudad));
   if(modalidad) html+=row(pico("briefcase"),"Modalidad",safe(modalidad),"modalidad");
+  html+=viajesDesplazamientoFichaHTML(u);
   if(u.tipoNegocio) html+=row(pico("corp"),"Tipo de empresa",safe(u.tipoNegocio));
   if(u.tipoServicio) html+=row(pico("heart"),"Tipo de servicio",safe(u.tipoServicio));
   if(u.tipoShow) html+=row(pico("briefcase"),"Tipo de show",safe(u.tipoShow));
@@ -4420,8 +4453,8 @@ function adultoFichaHTML(u){
   else if(u.buscan) html+=row(pico("heart"),"Participa en",safe(u.buscan));
   if(Array.isArray(u.tipoCitaPreferida)&&u.tipoCitaPreferida.length) html+=row(pico("briefcase"),"Tipo de cita preferida",safe(u.tipoCitaPreferida.join(", ")));
   if(Array.isArray(u.dinamicasParticipa)&&u.dinamicasParticipa.length) html+=row(pico("heart"),"Dinámicas en las que participas",safe(u.dinamicasParticipa.join(", ")));
-  if(u.colaboracionContenido) html+=row(pico("camera"),"Colaboración para contenido",safe(u.colaboracionContenido));
-  if(u.realizaTrios) html+=row(pico("heart"),"Tríos",safe(u.realizaTrios));
+  if(escortPrefPublico(u, u.colaboracionContenido, 'mostrarColaboracionContenidoPublico')) html+=row(pico("camera"),"Colaboración para contenido",safe(u.colaboracionContenido));
+  if(escortPrefPublico(u, u.realizaTrios, 'mostrarRealizaTriosPublico')) html+=row(pico("heart"),"Tríos",safe(u.realizaTrios));
   if(Array.isArray(u.tiposTrios)&&u.tiposTrios.length) html+=row(pico("heart"),"Tipo de trío",safe(u.tiposTrios.join(", ")));
   if(u.esBisexual) html+=row(pico("gender"),"Bisexual",safe(u.esBisexual));
   if(u.realizaGangBang) html+=row(pico("heart"),"Gang bang",safe(u.realizaGangBang));
@@ -4433,6 +4466,12 @@ function adultoFichaHTML(u){
   if(u.aficiones) html+=row(pico("heart"),"Aficiones",safe(u.aficiones));
   if(u.estiloVida) html+=row(pico("gender"),"Estilo de vida",safe(u.estiloVida));
   if(u.estatura) html+=row(pico("user"),"Estatura",safe(u.estatura));
+  if(String(u.mostrarLongitudPublico||'').trim()==='Sí' && u.longitudCm) html+=row(pico("user"),"Longitud",safe(u.longitudCm+' cm'));
+  if(String(u.mostrarLongitudPublico||'').trim()==='Sí' && u.categoriaTamaño) html+=row(pico("user"),"Categoría de tamaño",safe(u.categoriaTamaño));
+  html+=dotadosAtencionPublica(u,'atencionHombres','mostrarAtencionHombresPublico','Atención a hombres');
+  html+=dotadosAtencionPublica(u,'atencionMujeres','mostrarAtencionMujeresPublico','Atención a mujeres');
+  html+=dotadosAtencionPublica(u,'atencionParejas','mostrarAtencionParejasPublico','Atención a parejas');
+  html+=dotadosAtencionPublica(u,'atencionTrans','mostrarAtencionTransPublico','Atención a personas trans');
   if(u.nivelPremium) html+=row(pico("heart"),"Nivel premium",safe(u.nivelPremium));
   if(Array.isArray(u.experienciaVip)&&u.experienciaVip.length) html+=row(pico("briefcase"),"Experiencia VIP",safe(u.experienciaVip.join(", ")));
   if(Array.isArray(u.distintivosVip)&&u.distintivosVip.length) html+=row(pico("shield"),"Distintivos VIP",safe(u.distintivosVip.join(", ")));
@@ -6318,6 +6357,19 @@ function aplicarPerfilDesdeRegistro(vista,u){
     nivelPremium:u.nivelPremium||"",
     experienciaVip:Array.isArray(u.experienciaVip)?u.experienciaVip.slice():[],
     distintivosVip:Array.isArray(u.distintivosVip)?u.distintivosVip.slice():[],
+    longitudCm:u.longitudCm||"",
+    categoriaTamaño:u.categoriaTamaño||"",
+    mostrarLongitudPublico:u.mostrarLongitudPublico||"",
+    atencionHombres:u.atencionHombres||"",
+    mostrarAtencionHombresPublico:u.mostrarAtencionHombresPublico||"",
+    atencionMujeres:u.atencionMujeres||"",
+    mostrarAtencionMujeresPublico:u.mostrarAtencionMujeresPublico||"",
+    atencionParejas:u.atencionParejas||"",
+    mostrarAtencionParejasPublico:u.mostrarAtencionParejasPublico||"",
+    atencionTrans:u.atencionTrans||"",
+    mostrarAtencionTransPublico:u.mostrarAtencionTransPublico||"",
+    mostrarRealizaTriosPublico:u.mostrarRealizaTriosPublico||"",
+    mostrarColaboracionContenidoPublico:u.mostrarColaboracionContenidoPublico||"",
     eventosDisponibles:!!u.eventosDisponibles,
     portfolioURL:u.portfolioURL||"",
     disponibilidad:u.disponibilidad||"",
@@ -6366,6 +6418,7 @@ function aplicarPerfilResultadosEnDemo(vista,u){
   if(u.categoriaPublica||u.categoria) d.categoria=u.categoriaPublica||u.categoria;
   if(u.disponibilidad) d.disponibilidad=u.disponibilidad;
   if(Array.isArray(u.modalidades)&&u.modalidades.length) d.modalidades=u.modalidades.slice();
+  if(u.viajesDesplazamiento) d.viajesDesplazamiento=u.viajesDesplazamiento;
   if(u.__id) d.__id=u.__id;
   if(u.uid) d.uid=u.uid;
   if(u.__demo!=null) d.__demo=u.__demo;
@@ -6422,6 +6475,19 @@ function aplicarPerfilResultadosEnDemo(vista,u){
   if(u.nivelPremium) d.nivelPremium=u.nivelPremium;
   if(Array.isArray(u.experienciaVip)&&u.experienciaVip.length) d.experienciaVip=u.experienciaVip.slice();
   if(Array.isArray(u.distintivosVip)&&u.distintivosVip.length) d.distintivosVip=u.distintivosVip.slice();
+  if(u.longitudCm) d.longitudCm=u.longitudCm;
+  if(u.categoriaTamaño) d.categoriaTamaño=u.categoriaTamaño;
+  if(u.mostrarLongitudPublico) d.mostrarLongitudPublico=u.mostrarLongitudPublico;
+  if(u.atencionHombres) d.atencionHombres=u.atencionHombres;
+  if(u.mostrarAtencionHombresPublico) d.mostrarAtencionHombresPublico=u.mostrarAtencionHombresPublico;
+  if(u.atencionMujeres) d.atencionMujeres=u.atencionMujeres;
+  if(u.mostrarAtencionMujeresPublico) d.mostrarAtencionMujeresPublico=u.mostrarAtencionMujeresPublico;
+  if(u.atencionParejas) d.atencionParejas=u.atencionParejas;
+  if(u.mostrarAtencionParejasPublico) d.mostrarAtencionParejasPublico=u.mostrarAtencionParejasPublico;
+  if(u.atencionTrans) d.atencionTrans=u.atencionTrans;
+  if(u.mostrarAtencionTransPublico) d.mostrarAtencionTransPublico=u.mostrarAtencionTransPublico;
+  if(u.mostrarRealizaTriosPublico) d.mostrarRealizaTriosPublico=u.mostrarRealizaTriosPublico;
+  if(u.mostrarColaboracionContenidoPublico) d.mostrarColaboracionContenidoPublico=u.mostrarColaboracionContenidoPublico;
   if(u.eventosDisponibles) d.eventosDisponibles=true;
   if(u.portfolioURL) d.portfolioURL=u.portfolioURL;
   if(u.estatura) d.estatura=u.estatura;
