@@ -1,0 +1,60 @@
+---
+description: Registro Unicornio — persona_lifestyle (cerrado A3.1–A3.4)
+globs: public/js/data/registro-adultos-lifestyle-blocks.js, public/js/carihub-registro-public-blocks.js, public/js/registro-perfil-submit.js, public/js/registro-perfil-preview.js, public/js/carihub-public-render-lite.js, scripts/qa-unicorn*.mjs
+alwaysApply: false
+---
+
+# Unicornio — persona_lifestyle (cerrado)
+
+Subcategoría `unicorns` — **persona individual**, NO escort ni pareja_grupo.
+
+## Estado A3 (completo)
+
+| Fase | Commit | Alcance |
+|------|--------|---------|
+| A3.1 | blocks + validación | `registro-adultos-lifestyle-blocks.js`, motor anti-contaminación swinger |
+| A3.2 | persistencia + preview | `unicornPerfil` nested + mirrors top-level, submit, preview |
+| A3.3 | render público | `cardHTMLUnicorn`, DEMO persona, ficha, `ResultCardUnicorn` |
+| A3.4 | QA cierre | Scripts QA ampliados + smoke manual documentado |
+
+## Modelo de datos
+
+- Nested: `unicornPerfil` (patrón `swingerPerfil`)
+- Mirrors top-level: búsquedas, tarjetas, Firestore queries
+- `tipoPerfil: persona` · `arquetipo: persona_lifestyle` · `badgeUnicorn: true`
+- Mensajes **nunca** mezclar con swinger ni pareja_grupo
+
+## Tarjeta pública
+
+Badge 🦄 · edad · objetivo principal · `Busco:` · precio · ciudad · chip Viaja si aplica. Sin colaboraciones en tarjeta.
+
+## QA (headless)
+
+```bash
+node scripts/qa-unicorn.mjs
+node scripts/qa-unicorn-persist.mjs
+node scripts/qa-unicorn-render.mjs
+node scripts/qa-unicorn-cierre.mjs   # meta + legacy copy
+```
+
+Regresión completa: incluir suites pareja/swinger/viajes/dotados (ver A3.4 entrega).
+
+## Smoke manual (browser)
+
+1. **Registro** — wizard unicorns; validar bloques lifestyle y obligatorios.
+2. **Preview tarjeta** — badge, edad, objetivo, Busco, precio, Viaja.
+3. **Preview iframe** — `vista=unicorn`; persona individual, sin copy pareja.
+4. **Perfil público** — `perfil-publico.html` → vista unicorn / DEMO Luna U.
+5. **Anti-contaminación** — perfil swinger no muestra `unicornPerfil` ni badge unicorn.
+
+## Fuera de alcance Unicorn (no mezclar)
+
+- Cuckold / Hotwife deltas
+- Render pareja_grupo
+- Copy “pareja buscando unicornio”
+
+## Pendiente (otros tracks)
+
+- Hotwife persona en lifestyle motor (hoy en escort-blocks)
+- Cuckold pareja_grupo delta
+- `PERFILES_CANON` demo unicorn en resultados-demo.js

@@ -15,6 +15,14 @@
     return global.CARIHUB_REGISTRO_ESCORT_BLOCKS || null;
   }
 
+  function resolveParejaConfig() {
+    return global.CARIHUB_REGISTRO_PAREJA_BLOCKS || null;
+  }
+
+  function resolveLifestyleConfig() {
+    return global.CARIHUB_REGISTRO_LIFESTYLE_BLOCKS || null;
+  }
+
   function normalizeSubId(id) {
     return String(id || '').trim().toLowerCase().replace(/_/g, ' ');
   }
@@ -34,6 +42,7 @@
           return normalizeSubId(s) === subId;
         })) return false;
       }
+      if (field.showWhenViaja && !subcategoriaViajesActiva(ctx)) return false;
       if (!field.onlySubcategorias || !field.onlySubcategorias.length) return true;
       return field.onlySubcategorias.some(function (s) {
         return normalizeSubId(s) === subId;
@@ -101,14 +110,21 @@
   }
 
   function getFotosMin(ctx) {
-    var cfg = resolveEscortConfig();
-    if (!cfg || !matchesEscort(ctx || {}, null)) return null;
+    var cfg = resolveConfig(ctx || {}, null);
+    if (!cfg) return null;
     var merged = mergedConfig(cfg, ctx || {});
-    return merged.fotosMin || null;
+    return merged.fotosMin || cfg.fotosMin || null;
   }
 
   function applyBadges(u, ctx) {
+    ctx = ctx || { subcategoriaId: u && u.subcategoriaId };
+    if (matchesLifestyle(ctx, null)) {
+      var subLife = normalizeSubId(ctx.subcategoriaId || (u && u.subcategoriaId) || '');
+      if (subLife === 'unicorns') u.badgeUnicorn = true;
+      return u;
+    }
     var cfg = resolveEscortConfig();
+    if (!cfg || !matchesEscort(ctx, null)) return u;
     var over = getSubcategoriaOverride(cfg, ctx || { subcategoriaId: u && u.subcategoriaId });
     if (!over || !over.badges) return u;
     if (over.badges.indexOf('lgbt') >= 0) u.badgeLgbt = true;
@@ -130,6 +146,36 @@
     con_cita: 'Con cita previa'
   };
 
+  function categoriaTamañoDesdeCm(val) {
+    var s = String(val || '').trim().replace(',', '.');
+    var m = s.match(/(\d+(?:\.\d+)?)/);
+    if (!m) return '';
+    var n = parseFloat(m[1]);
+    if (!isFinite(n) || n <= 0) return '';
+    if (n < 16) return 'Promedio';
+    if (n < 20) return 'Por encima del promedio';
+    return 'Dotado';
+  }
+
+  function mapDotadosFields(u, bloques) {
+    if (bloques.longitudCm) {
+      u.longitudCm = String(bloques.longitudCm).trim();
+      u.categoriaTamaño = categoriaTamañoDesdeCm(bloques.longitudCm);
+    }
+    var dotadosKeys = [
+      'mostrarLongitudPublico',
+      'atencionHombres', 'mostrarAtencionHombresPublico',
+      'atencionMujeres', 'mostrarAtencionMujeresPublico',
+      'atencionParejas', 'mostrarAtencionParejasPublico',
+      'atencionTrans', 'mostrarAtencionTransPublico',
+      'mostrarRealizaTriosPublico', 'mostrarColaboracionContenidoPublico'
+    ];
+    dotadosKeys.forEach(function (key) {
+      if (bloques[key]) u[key] = bloques[key];
+    });
+    return u;
+  }
+
   function matchesEscort(ctx, resolved) {
     var cfg = resolveEscortConfig();
     if (!cfg) return false;
@@ -142,8 +188,36 @@
     return false;
   }
 
+  function matchesPareja(ctx, resolved) {
+    var cfg = resolveParejaConfig();
+    if (!cfg) return false;
+    ctx = ctx || {};
+    var subId = String(ctx.subcategoriaId || '').trim().toLowerCase();
+    if (cfg.subcategoriaIds.indexOf(subId) >= 0) return true;
+    if (ctx.arquetipo === cfg.id) return true;
+    var ident = resolved && resolved.identidad ? resolved.identidad : {};
+    if (ident.formularioId === cfg.formularioId && ident.arquetipo === cfg.id) return true;
+    if (ident.arquetipo === cfg.id) return true;
+    if (resolved && cfg.uiIds.indexOf(resolved.formularioUiId || '') >= 0) return true;
+    return false;
+  }
+
+  function matchesLifestyle(ctx, resolved) {
+    var cfg = resolveLifestyleConfig();
+    if (!cfg) return false;
+    ctx = ctx || {};
+    var subId = String(ctx.subcategoriaId || '').trim().toLowerCase();
+    if (cfg.subcategoriaIds.indexOf(subId) >= 0) return true;
+    var ident = resolved && resolved.identidad ? resolved.identidad : {};
+    if (ident.formularioId === cfg.formularioId && ident.arquetipo === cfg.id) return true;
+    if (resolved && cfg.uiIds.indexOf(resolved.formularioUiId || '') >= 0) return true;
+    return false;
+  }
+
   function resolveConfig(ctx, resolved) {
     if (matchesEscort(ctx, resolved)) return resolveEscortConfig();
+    if (matchesLifestyle(ctx, resolved)) return resolveLifestyleConfig();
+    if (matchesPareja(ctx, resolved)) return resolveParejaConfig();
     return null;
   }
 
@@ -151,13 +225,71 @@
     return 'rpPub_' + fieldId;
   }
 
-  function renderChecklist(field, values) {
+  function viajesApi() {
+    return global.CariHubViajesDesplazamiento || null;
+  }
+
+  function subIdFromCtx(ctx) {
+    return normalizeSubId((ctx && ctx.subcategoriaId) || (ctx && ctx.subcategoria) || '');
+  }
+
+  function subcategoriaViajesActiva(ctx) {
+    var api = viajesApi();
+    return api ? api.subcategoriaActivaViajes(subIdFromCtx(ctx)) : false;
+  }
+
+  function filterChecklistOptions(field, ctx) {
+    var active = subcategoriaViajesActiva(ctx);
+    return (field.options || []).filter(function (opt) {
+      if (typeof opt === 'object' && opt.onlySubcategoriasViajes) return active;
+      return true;
+    });
+  }
+
+  function modalidadesIncluyeViaja(values) {
+    var mods = values && values.modalidades;
+    return Array.isArray(mods) && mods.indexOf('viaja') >= 0;
+  }
+
+  function isViajesSubfield(field) {
+    return !!(field && field.showWhenViaja);
+  }
+
+  function fieldMatchesShowWhen(field, values) {
+    if (!field || !field.showWhen) return true;
+    values = values || {};
+    var depVal = values[field.showWhen.field];
+    var allowed = field.showWhen.values || [];
+    var current = String(depVal || '').trim();
+    return allowed.indexOf(current) >= 0;
+  }
+
+  function isConditionalSubfield(field) {
+    return isViajesSubfield(field) || !!(field && field.showWhen);
+  }
+
+  function isFieldHiddenByCondition(field, values) {
+    if (isViajesSubfield(field)) return !modalidadesIncluyeViaja(values);
+    if (field.showWhen) return !fieldMatchesShowWhen(field, values);
+    return false;
+  }
+
+  function fieldValueWithDefault(field, values) {
+    values = values || {};
+    var val = values[field.id];
+    if ((val == null || String(val).trim() === '') && field.defaultValue) {
+      return field.defaultValue;
+    }
+    return val != null ? val : '';
+  }
+
+  function renderChecklist(field, values, ctx) {
     values = values || {};
     var selected = values[field.id];
     if (!Array.isArray(selected)) selected = [];
     var selMap = {};
     selected.forEach(function (v) { selMap[String(v)] = true; });
-    var opts = field.options || [];
+    var opts = filterChecklistOptions(field, ctx);
     var html = '<div class="rp-pub-checklist" data-rp-pub-field="' + esc(field.id) + '">';
     opts.forEach(function (opt) {
       var val = typeof opt === 'string' ? opt : opt.value;
@@ -210,13 +342,184 @@
     missing.push(label);
   }
 
-  function renderField(field, values) {
+  var CONFIGURACION_GRUPO_LABELS = {
+    pareja_hm: 'Hombre + Mujer',
+    pareja_mm: 'Mujer + Mujer',
+    pareja_hh: 'Hombre + Hombre',
+    grupo: 'Grupo (3 o más integrantes)',
+    otra: 'Otra configuración'
+  };
+
+  function configuracionGrupoLabel(value) {
+    return CONFIGURACION_GRUPO_LABELS[String(value || '').trim()] || String(value || '').trim();
+  }
+
+  function normalizeMemberRow(row, index) {
+    row = row || {};
+    var edadRaw = row.edad != null ? String(row.edad).trim() : '';
+    var edadNum = edadRaw ? parseInt(edadRaw, 10) : null;
+    return {
+      id: row.id || ('m' + (index + 1)),
+      etiquetaPublica: String(row.etiquetaPublica || '').trim(),
+      generoPresentacion: String(row.generoPresentacion || '').trim(),
+      edad: isFinite(edadNum) ? edadNum : null,
+      franjaEdad: String(row.franjaEdad || '').trim(),
+      orden: index + 1
+    };
+  }
+
+  function buildMiembrosResumen(miembros) {
+    if (!Array.isArray(miembros) || !miembros.length) return '';
+    return miembros.map(function (m) {
+      var parts = [];
+      if (m.etiquetaPublica) parts.push(m.etiquetaPublica);
+      if (m.edad != null && isFinite(m.edad)) parts.push(m.edad + ' años');
+      else if (m.franjaEdad) parts.push(m.franjaEdad);
+      return parts.join(' ').trim();
+    }).filter(Boolean).join(' · ');
+  }
+
+  function memberRowHasAge(member) {
+    if (!member) return false;
+    if (member.edad != null && isFinite(member.edad) && member.edad >= 18) return true;
+    return !!String(member.franjaEdad || '').trim();
+  }
+
+  function renderMemberField(mf, member, rowIndex) {
+    var val = member[mf.id] != null ? member[mf.id] : '';
+    var req = mf.required ? ' <span class="rp-req">*</span>' : '';
+    var fid = fieldDomId('miembros_' + rowIndex + '_' + mf.id);
+    if (mf.type === 'select') {
+      var html = '<label for="' + fid + '">' + esc(mf.label) + req + '</label><select id="' + fid + '" data-member-field="' + esc(mf.id) + '">';
+      html += '<option value="">Selecciona…</option>';
+      (mf.options || []).forEach(function (opt) {
+        var oval = typeof opt === 'string' ? opt : opt.value;
+        var olabel = typeof opt === 'string' ? opt : opt.label;
+        html += '<option value="' + esc(oval) + '"' + (String(val) === String(oval) ? ' selected' : '') + '>' + esc(olabel) + '</option>';
+      });
+      html += '</select>';
+      return html;
+    }
+    if (mf.type === 'number') {
+      return '<label for="' + fid + '">' + esc(mf.label) + req + '</label>' +
+        '<input type="number" id="' + fid + '" data-member-field="' + esc(mf.id) + '" value="' +
+        esc(val != null ? val : '') + '" min="' + esc(mf.min != null ? mf.min : 18) + '"' +
+        (mf.max != null ? ' max="' + esc(mf.max) + '"' : '') +
+        ' placeholder="' + esc(mf.placeholder || '') + '">';
+    }
+    return '<label for="' + fid + '">' + esc(mf.label) + req + '</label>' +
+      '<input type="text" id="' + fid + '" data-member-field="' + esc(mf.id) + '" value="' +
+      esc(val != null ? val : '') + '" placeholder="' + esc(mf.placeholder || '') + '">';
+  }
+
+  function renderMemberList(field, values) {
     values = values || {};
-    var val = values[field.id] != null ? values[field.id] : '';
+    var members = Array.isArray(values[field.id]) ? values[field.id] : [];
+    var minRows = field.minMembers || 2;
+    while (members.length < minRows) members.push({});
+    var html = '<div class="rp-pub-member-list" data-rp-pub-field="' + esc(field.id) + '" data-rp-member-min="' + minRows + '"' +
+      (field.minMembersGrupo ? ' data-rp-member-min-grupo="' + field.minMembersGrupo + '"' : '') + '>';
+    html += '<span class="rp-pub-field-label">' + esc(field.label) + (field.required ? ' <span class="rp-req">*</span>' : '') + '</span>';
+    members.forEach(function (member, idx) {
+      html += '<div class="rp-pub-member-row" data-member-index="' + idx + '">';
+      html += '<div class="rp-pub-member-row__head"><strong>Integrante ' + (idx + 1) + '</strong>';
+      if (idx >= minRows) {
+        html += '<button type="button" class="rp-pub-member-remove" data-rp-member-remove="1">Quitar</button>';
+      }
+      html += '</div><div class="rp-pub-member-row__grid">';
+      (field.memberFields || []).forEach(function (mf) {
+        html += '<div class="rp-field rp-pub-member-field">' + renderMemberField(mf, member, idx) + '</div>';
+      });
+      html += '</div></div>';
+    });
+    html += '<button type="button" class="rp-btn rp-btn--ghost rp-pub-member-add" data-rp-member-add="1">+ Agregar integrante</button>';
+    html += '</div>';
+    return html;
+  }
+
+  function readMemberList(fieldId) {
+    var host = document.querySelector('[data-rp-pub-field="' + fieldId + '"]');
+    if (!host) return [];
+    var rows = host.querySelectorAll('.rp-pub-member-row');
+    var out = [];
+    rows.forEach(function (row, index) {
+      var member = { id: 'm' + (index + 1) };
+      row.querySelectorAll('[data-member-field]').forEach(function (el) {
+        var key = el.getAttribute('data-member-field');
+        if (!key) return;
+        if (el.type === 'number') {
+          var n = parseInt(String(el.value || '').trim(), 10);
+          member[key] = isFinite(n) ? n : null;
+        } else {
+          member[key] = String(el.value || '').trim();
+        }
+      });
+      out.push(normalizeMemberRow(member, index));
+    });
+    return out;
+  }
+
+  function bindMemberListControls(host) {
+    if (!host) return;
+    host.querySelectorAll('[data-rp-member-add]').forEach(function (btn) {
+      if (btn.dataset.rpMemberBound === '1') return;
+      btn.dataset.rpMemberBound = '1';
+      btn.addEventListener('click', function () {
+        var list = btn.closest('[data-rp-pub-field="miembros"]');
+        if (!list) return;
+        var cfg = resolveParejaConfig();
+        var fieldDef = null;
+        if (cfg) {
+          cfg.blocks.forEach(function (block) {
+            block.fields.forEach(function (f) {
+              if (f.id === 'miembros') fieldDef = f;
+            });
+          });
+        }
+        var idx = list.querySelectorAll('.rp-pub-member-row').length;
+        var row = document.createElement('div');
+        row.className = 'rp-pub-member-row';
+        row.setAttribute('data-member-index', String(idx));
+        var minRows = parseInt(list.getAttribute('data-rp-member-min') || '2', 10);
+        var head = '<div class="rp-pub-member-row__head"><strong>Integrante ' + (idx + 1) + '</strong>';
+        if (idx >= minRows) head += '<button type="button" class="rp-pub-member-remove" data-rp-member-remove="1">Quitar</button>';
+        head += '</div><div class="rp-pub-member-row__grid">';
+        var grid = '';
+        (fieldDef && fieldDef.memberFields ? fieldDef.memberFields : []).forEach(function (mf) {
+          grid += '<div class="rp-field rp-pub-member-field">' + renderMemberField(mf, {}, idx) + '</div>';
+        });
+        row.innerHTML = head + grid + '</div>';
+        list.insertBefore(row, btn);
+        bindMemberListControls(list);
+      });
+    });
+    host.querySelectorAll('[data-rp-member-remove]').forEach(function (btn) {
+      if (btn.dataset.rpMemberBound === '1') return;
+      btn.dataset.rpMemberBound = '1';
+      btn.addEventListener('click', function () {
+        var row = btn.closest('.rp-pub-member-row');
+        if (row) row.remove();
+      });
+    });
+  }
+
+  function renderField(field, values, ctx) {
+    values = values || {};
+    var val = fieldValueWithDefault(field, values);
     var req = field.required ? ' <span class="rp-req">*</span>' : '';
-    var wrap = '<div class="rp-field rp-pub-field" data-rp-pub-field-wrap="' + esc(field.id) + '">';
+    var conditionalSub = isConditionalSubfield(field);
+    var hidden = isFieldHiddenByCondition(field, values);
+    var wrap = '<div class="rp-field rp-pub-field' +
+      (conditionalSub ? ' rp-conditional-subfield' : '') +
+      (hidden ? ' rp-hidden' : '') +
+      '" data-rp-pub-field-wrap="' + esc(field.id) + '"' +
+      (isViajesSubfield(field) ? ' data-rp-viajes-sub="1"' : '') +
+      (field.showWhen ? ' data-rp-show-when-field="' + esc(field.showWhen.field) + '"' : '') +
+      (hidden ? ' aria-hidden="true"' : '') + '>';
     if (field.type === 'checklist') {
-      wrap += '<span class="rp-pub-field-label">' + esc(field.label) + req + '</span>' + renderChecklist(field, values);
+      wrap += '<span class="rp-pub-field-label">' + esc(field.label) + req + '</span>' + renderChecklist(field, values, ctx);
+    } else if (field.type === 'memberList') {
+      wrap += renderMemberList(field, values);
     } else if (field.type === 'select') {
       var selectCls = field.id === 'nivelServicio' ? ' rp-nivel-servicio-select' : '';
       wrap += '<label for="' + fieldDomId(field.id) + '">' + esc(field.label) + req + '</label><select id="' + fieldDomId(field.id) + '" class="' + selectCls + '">';
@@ -262,7 +565,7 @@
     return wrap;
   }
 
-  function renderBlocks(host, cfg, values) {
+  function renderBlocks(host, cfg, values, ctx) {
     if (!host || !cfg) {
       if (host) host.innerHTML = '';
       return;
@@ -273,15 +576,99 @@
       html += '<div class="rp-card rp-pub-block" data-rp-pub-block="' + esc(block.id) + '">';
       html += '<h2 class="rp-card__title">' + esc(block.title) + '</h2>';
       if (block.hint) html += '<p class="rp-contact-hint">' + esc(block.hint) + '</p>';
+      var subformOpen = false;
       block.fields.forEach(function (field) {
-        html += renderField(field, values);
+        if (field.showWhenViaja && !subformOpen && subcategoriaViajesActiva(ctx)) {
+          html += '<div class="rp-viajes-subform" data-rp-viajes-subform="1">';
+          subformOpen = true;
+        }
+        html += renderField(field, values, ctx);
       });
+      if (subformOpen) html += '</div>';
       html += '</div>';
     });
     host.innerHTML = html;
     host.classList.remove('rp-hidden');
     host.removeAttribute('aria-hidden');
     bindNivelServicioHelp();
+    bindViajaToggle();
+    bindConditionalFieldToggles();
+    bindMemberListControls(host);
+    syncConditionalSubfieldsVisibility();
+  }
+
+  function readSelectValue(fieldId) {
+    var el = $(fieldDomId(fieldId));
+    return el ? String(el.value || '').trim() : '';
+  }
+
+  function collectCurrentConditionalValues() {
+    return {
+      modalidades: readChecklist('modalidades'),
+      haceColaboraciones: readSelectValue('haceColaboraciones')
+    };
+  }
+
+  function clearColaboraConValues() {
+    document.querySelectorAll('[data-rp-pub-field="colaboraCon"] input[type="checkbox"]').forEach(function (cb) {
+      cb.checked = false;
+    });
+  }
+
+  function syncConditionalSubfieldsVisibility() {
+    syncViajesSubformVisibility();
+    var hace = readSelectValue('haceColaboraciones');
+    var showColabora = hace === 'Sí' || hace === 'A convenir';
+    document.querySelectorAll('[data-rp-show-when-field="haceColaboraciones"]').forEach(function (el) {
+      el.classList.toggle('rp-hidden', !showColabora);
+      if (showColabora) el.removeAttribute('aria-hidden');
+      else el.setAttribute('aria-hidden', 'true');
+    });
+    if (!showColabora) clearColaboraConValues();
+  }
+
+  function bindConditionalFieldToggles() {
+    var sel = $(fieldDomId('haceColaboraciones'));
+    if (sel && sel.dataset.rpColabBound !== '1') {
+      sel.dataset.rpColabBound = '1';
+      sel.addEventListener('change', syncConditionalSubfieldsVisibility);
+    }
+  }
+
+  function clearViajesSubfieldValues() {
+    var api = viajesApi();
+    var ids = api ? api.viajesFieldIds() : [
+      'alcanceDesplazamiento', 'viajesProgramados', 'gastosTraslado', 'anticipacionViaje', 'notasViaje'
+    ];
+    ids.forEach(function (id) {
+      var el = $(fieldDomId(id));
+      if (el) el.value = '';
+    });
+  }
+
+  function syncViajesSubformVisibility() {
+    var viaja = modalidadesIncluyeViaja({ modalidades: readChecklist('modalidades') });
+    document.querySelectorAll('[data-rp-viajes-subform="1"]').forEach(function (el) {
+      el.classList.toggle('rp-hidden', !viaja);
+      if (viaja) el.removeAttribute('aria-hidden');
+      else el.setAttribute('aria-hidden', 'true');
+    });
+    document.querySelectorAll('[data-rp-viajes-sub="1"]').forEach(function (el) {
+      el.classList.toggle('rp-hidden', !viaja);
+      if (viaja) el.removeAttribute('aria-hidden');
+      else el.setAttribute('aria-hidden', 'true');
+    });
+    if (!viaja) clearViajesSubfieldValues();
+  }
+
+  function bindViajaToggle() {
+    var list = document.querySelector('[data-rp-pub-field="modalidades"]');
+    if (!list || list.dataset.rpViajaBound === '1') return;
+    list.dataset.rpViajaBound = '1';
+    list.addEventListener('change', function (ev) {
+      if (!ev.target || ev.target.type !== 'checkbox') return;
+      syncViajesSubformVisibility();
+    });
   }
 
   function bindNivelServicioHelp() {
@@ -321,13 +708,429 @@
     return out;
   }
 
-  function collectValues(cfg) {
+  function finalizeLesbiansValues(values) {
+    if (!values) return values;
+    if (!String(values.mostrarAtiendoA || '').trim()) values.mostrarAtiendoA = 'Sí';
+    if (!String(values.mostrarColaboraciones || '').trim()) values.mostrarColaboraciones = 'Sí';
+    var hace = String(values.haceColaboraciones || '').trim();
+    if (hace === 'No') delete values.colaboraCon;
+    return values;
+  }
+
+  function finalizeParejaGrupoValues(values) {
+    if (!values || (!values.configuracionGrupo && !Array.isArray(values.miembros))) return values;
+    var aliasEl = $('fldAlias');
+    var alias = aliasEl ? String(aliasEl.value || '').trim() : String(values.aliasPareja || values.alias || '').trim();
+    if (alias) {
+      values.aliasPareja = alias;
+      values.alias = alias;
+    }
+    if (values.configuracionGrupo) {
+      values.configuracionGrupoLabel = configuracionGrupoLabel(values.configuracionGrupo);
+      values.tipoPareja = values.configuracionGrupoLabel;
+    }
+    if (Array.isArray(values.miembros)) {
+      values.miembros = values.miembros.map(function (m, i) {
+        return normalizeMemberRow(m, i);
+      }).filter(function (m) {
+        return m.etiquetaPublica || m.generoPresentacion || m.edad || m.franjaEdad;
+      });
+      values.miembrosResumen = buildMiembrosResumen(values.miembros);
+      values.miembrosEdad = values.miembrosResumen;
+    }
+    values.parejaGrupoPerfil = {
+      aliasPareja: values.aliasPareja || alias || '',
+      configuracionGrupo: values.configuracionGrupo || '',
+      configuracionGrupoLabel: values.configuracionGrupoLabel || configuracionGrupoLabel(values.configuracionGrupo),
+      miembros: values.miembros || [],
+      reglasAcceso: values.reglasAcceso || '',
+      sobreMi: values.sobreMi || '',
+      horarioDetalle: values.horarioDetalle || '',
+      modalidades: values.modalidades || [],
+      viajesDesplazamiento: values.viajesDesplazamiento || null,
+      metodosPago: values.metodosPago || []
+    };
+    values.tipoPerfil = 'pareja_grupo';
+    return values;
+  }
+
+  function buildObjetivoPrincipal(objetivos) {
+    if (!Array.isArray(objetivos) || !objetivos.length) return '';
+    if (objetivos.indexOf('Todo lo anterior') >= 0) return 'Todo lo anterior';
+    return String(objetivos[0] || '').trim();
+  }
+
+  function isSwingerSubcategoria(ctx) {
+    var subId = subIdFromCtx(ctx);
+    return subId === 'swinger' || subId === 'parejas swinger';
+  }
+
+  function isUnicornSubcategoria(ctx) {
+    var subId = subIdFromCtx(ctx);
+    return subId === 'unicorns' || subId === 'unicorn';
+  }
+
+  function isCuckoldHotwifeSubcategoria(ctx) {
+    var subId = subIdFromCtx(ctx);
+    return subId === 'cuckold hotwife' || subId === 'cuckold_hotwife';
+  }
+
+  function dinamicaCuckoldHotwifeLabel(value) {
+    var map = {
+      cuckold: 'Cuckold',
+      hotwife: 'Hotwife',
+      ambos: 'Ambos / pareja flexible'
+    };
+    return map[String(value || '').trim()] || String(value || '').trim();
+  }
+
+  function buildCuckoldHotwifePerfil(values) {
+    values = values || {};
+    var din = String(values.dinamica || '').trim();
+    return {
+      dinamica: din,
+      dinamicaLabel: values.dinamicaLabel || dinamicaCuckoldHotwifeLabel(din),
+      buscan: Array.isArray(values.buscan) ? values.buscan.slice() : [],
+      tipoExperiencia: Array.isArray(values.tipoExperiencia) ? values.tipoExperiencia.slice() : [],
+      participacionPareja: values.participacionPareja || '',
+      aceptanSolteros: values.aceptanSolteros || '',
+      aceptanPrincipiantes: values.aceptanPrincipiantes || '',
+      experienciaEnLifestyle: values.experienciaEnLifestyle || '',
+      haceColaboraciones: values.haceColaboraciones || '',
+      colaboraCon: Array.isArray(values.colaboraCon) ? values.colaboraCon.slice() : [],
+      mostrarBuscan: values.mostrarBuscan || 'Sí',
+      mostrarParticipacion: values.mostrarParticipacion || 'Sí',
+      mostrarColaboraciones: values.mostrarColaboraciones || 'Sí'
+    };
+  }
+
+  function hasCuckoldHotwifeDelta(values) {
+    if (!values) return false;
+    if (values.cuckoldHotwifePerfil) return true;
+    var din = String(values.dinamica || '').trim();
+    if (din === 'cuckold' || din === 'hotwife' || din === 'ambos') return true;
+    if (Array.isArray(values.buscan) && values.buscan.length) return true;
+    if (Array.isArray(values.tipoExperiencia) && values.tipoExperiencia.length) return true;
+    return false;
+  }
+
+  function shouldApplyCuckoldHotwifePipeline(ctx, values) {
+    if (ctx && isSwingerSubcategoria(ctx)) return false;
+    if (ctx && isUnicornSubcategoria(ctx)) return false;
+    if (ctx) return isCuckoldHotwifeSubcategoria(ctx);
+    return hasCuckoldHotwifeDelta(values);
+  }
+
+  function buildSwingerPerfil(values) {
+    values = values || {};
+    return {
+      objetivosPerfil: Array.isArray(values.objetivosPerfil) ? values.objetivosPerfil.slice() : [],
+      objetivoPrincipal: values.objetivoPrincipal || buildObjetivoPrincipal(values.objetivosPerfil),
+      intercambioSwinger: values.intercambioSwinger || '',
+      tipoInteraccion: Array.isArray(values.tipoInteraccion) ? values.tipoInteraccion.slice() : [],
+      modalidadInteraccion: Array.isArray(values.modalidadInteraccion) ? values.modalidadInteraccion.slice() : [],
+      atiendenA: values.atiendenA || '',
+      aceptanSolteros: values.aceptanSolteros || '',
+      haceColaboraciones: values.haceColaboraciones || '',
+      colaboraCon: Array.isArray(values.colaboraCon) ? values.colaboraCon.slice() : [],
+      estiloPareja: Array.isArray(values.estiloPareja) ? values.estiloPareja.slice() : [],
+      aceptanParejasPrincipiantes: values.aceptanParejasPrincipiantes || '',
+      experienciaEnLifestyle: values.experienciaEnLifestyle || '',
+      mostrarObjetivosPerfil: values.mostrarObjetivosPerfil || 'Sí',
+      mostrarAtiendenA: values.mostrarAtiendenA || 'Sí',
+      mostrarColaboraciones: values.mostrarColaboraciones || 'Sí'
+    };
+  }
+
+  var buildDeltaSwinger = buildSwingerPerfil;
+
+  function hasSwingerDelta(values) {
+    if (!values) return false;
+    if (values.swingerPerfil) return true;
+    if (values.intercambioSwinger) return true;
+    if (Array.isArray(values.tipoInteraccion) && values.tipoInteraccion.length) return true;
+    if (Array.isArray(values.modalidadInteraccion) && values.modalidadInteraccion.length) return true;
+    if (values.atiendenA) return true;
+    if (values.aceptanSolteros) return true;
+    if (values.aceptanParejasPrincipiantes) return true;
+    if (values.experienciaEnLifestyle) return true;
+    if (Array.isArray(values.estiloPareja) && values.estiloPareja.length) return true;
+    return false;
+  }
+
+  function buildUnicornPerfil(values) {
+    values = values || {};
+    return {
+      objetivosPerfil: Array.isArray(values.objetivosPerfil) ? values.objetivosPerfil.slice() : [],
+      objetivoPrincipal: values.objetivoPrincipal || buildObjetivoPrincipal(values.objetivosPerfil),
+      tipoUnicornio: values.tipoUnicornio || '',
+      buscoConocer: Array.isArray(values.buscoConocer) ? values.buscoConocer.slice() : [],
+      tipoParejaPreferida: Array.isArray(values.tipoParejaPreferida) ? values.tipoParejaPreferida.slice() : [],
+      finalidadEncuentro: Array.isArray(values.finalidadEncuentro) ? values.finalidadEncuentro.slice() : [],
+      estadoPerfil: values.estadoPerfil || '',
+      haceColaboraciones: values.haceColaboraciones || '',
+      colaboraCon: Array.isArray(values.colaboraCon) ? values.colaboraCon.slice() : [],
+      experiencia: values.experiencia || '',
+      ambientePreferido: Array.isArray(values.ambientePreferido) ? values.ambientePreferido.slice() : [],
+      estilo: values.estilo || '',
+      serviciosLifestyle: Array.isArray(values.serviciosLifestyle) ? values.serviciosLifestyle.slice() : [],
+      mostrarObjetivosPerfil: values.mostrarObjetivosPerfil || 'Sí',
+      mostrarColaboraciones: values.mostrarColaboraciones || 'Sí',
+      modalidades: Array.isArray(values.modalidades) ? values.modalidades.slice() : [],
+      viajesDesplazamiento: values.viajesDesplazamiento || null,
+      horarioDetalle: values.horarioDetalle || '',
+      metodosPago: Array.isArray(values.metodosPago) ? values.metodosPago.slice() : [],
+      sobreMi: values.sobreMi || '',
+      idiomas: values.idiomas || ''
+    };
+  }
+
+  function hasUnicornDelta(values) {
+    if (!values) return false;
+    if (values.unicornPerfil) return true;
+    if (values.tipoUnicornio) return true;
+    if (values.estadoPerfil) return true;
+    if (Array.isArray(values.buscoConocer) && values.buscoConocer.length) return true;
+    if (Array.isArray(values.tipoParejaPreferida) && values.tipoParejaPreferida.length) return true;
+    if (Array.isArray(values.finalidadEncuentro) && values.finalidadEncuentro.length) return true;
+    if (values.experiencia) return true;
+    if (Array.isArray(values.ambientePreferido) && values.ambientePreferido.length) return true;
+    if (values.estilo) return true;
+    if (Array.isArray(values.serviciosLifestyle) && values.serviciosLifestyle.length) return true;
+    return false;
+  }
+
+  function shouldApplySwingerPipeline(ctx, values) {
+    if (ctx && isUnicornSubcategoria(ctx)) return false;
+    if (ctx && isCuckoldHotwifeSubcategoria(ctx)) return false;
+    if (ctx) return isSwingerSubcategoria(ctx);
+    return hasSwingerDelta(values);
+  }
+
+  function shouldApplyUnicornPipeline(ctx, values) {
+    if (ctx && isSwingerSubcategoria(ctx)) return false;
+    if (ctx && isCuckoldHotwifeSubcategoria(ctx)) return false;
+    if (ctx) return isUnicornSubcategoria(ctx);
+    return hasUnicornDelta(values);
+  }
+
+  function applyCuckoldHotwifePerfilFields(u, bloques, ctx) {
+    if (!u || !bloques) return u;
+    if (!shouldApplyCuckoldHotwifePipeline(ctx, bloques)) return u;
+    var ch = bloques.cuckoldHotwifePerfil;
+    if (!ch && hasCuckoldHotwifeDelta(bloques)) ch = buildCuckoldHotwifePerfil(bloques);
+    if (!ch || !hasCuckoldHotwifeDelta(ch)) return u;
+    delete u.swingerPerfil;
+    delete u.unicornPerfil;
+    u.cuckoldHotwifePerfil = Object.assign({}, ch);
+    if (ch.dinamica) {
+      u.dinamica = ch.dinamica;
+      u.dinamicaLabel = ch.dinamicaLabel || dinamicaCuckoldHotwifeLabel(ch.dinamica);
+    }
+    if (Array.isArray(ch.buscan) && ch.buscan.length) u.buscan = ch.buscan.slice();
+    if (Array.isArray(ch.tipoExperiencia) && ch.tipoExperiencia.length) {
+      u.tipoExperiencia = ch.tipoExperiencia.slice();
+    }
+    if (ch.participacionPareja) u.participacionPareja = ch.participacionPareja;
+    if (ch.aceptanSolteros) u.aceptanSolteros = ch.aceptanSolteros;
+    if (ch.aceptanPrincipiantes) u.aceptanPrincipiantes = ch.aceptanPrincipiantes;
+    if (ch.experienciaEnLifestyle) u.experienciaEnLifestyle = ch.experienciaEnLifestyle;
+    if (ch.haceColaboraciones) u.haceColaboraciones = ch.haceColaboraciones;
+    if (Array.isArray(ch.colaboraCon) && ch.colaboraCon.length) u.colaboraCon = ch.colaboraCon.slice();
+    if (ch.mostrarBuscan) u.mostrarBuscan = ch.mostrarBuscan;
+    if (ch.mostrarParticipacion) u.mostrarParticipacion = ch.mostrarParticipacion;
+    if (ch.mostrarColaboraciones) u.mostrarColaboraciones = ch.mostrarColaboraciones;
+    u.tipoPerfil = 'pareja_grupo';
+    if (ch.dinamica === 'hotwife' || ch.dinamica === 'ambos') u.badgeHotwife = true;
+    if (ch.dinamica === 'cuckold' || ch.dinamica === 'ambos') u.badgeCuckold = true;
+    return u;
+  }
+
+  function applySwingerPerfilFields(u, bloques, ctx) {
+    if (!u || !bloques) return u;
+    if (!shouldApplySwingerPipeline(ctx, bloques)) return u;
+    var sw = bloques.swingerPerfil;
+    if (!sw && hasSwingerDelta(bloques)) sw = buildSwingerPerfil(bloques);
+    if (!sw || !hasSwingerDelta(sw)) return u;
+    delete u.unicornPerfil;
+    delete u.cuckoldHotwifePerfil;
+    u.swingerPerfil = Object.assign({}, sw);
+    if (Array.isArray(sw.objetivosPerfil) && sw.objetivosPerfil.length) {
+      u.objetivosPerfil = sw.objetivosPerfil.slice();
+      u.objetivoPrincipal = sw.objetivoPrincipal || buildObjetivoPrincipal(sw.objetivosPerfil);
+    }
+    if (sw.intercambioSwinger) u.intercambioSwinger = sw.intercambioSwinger;
+    if (Array.isArray(sw.tipoInteraccion) && sw.tipoInteraccion.length) {
+      u.tipoInteraccion = sw.tipoInteraccion.slice();
+    }
+    if (Array.isArray(sw.modalidadInteraccion) && sw.modalidadInteraccion.length) {
+      u.modalidadInteraccion = sw.modalidadInteraccion.slice();
+    }
+    if (sw.atiendenA) u.atiendenA = sw.atiendenA;
+    if (sw.aceptanSolteros) u.aceptanSolteros = sw.aceptanSolteros;
+    if (sw.haceColaboraciones) u.haceColaboraciones = sw.haceColaboraciones;
+    if (Array.isArray(sw.colaboraCon) && sw.colaboraCon.length) u.colaboraCon = sw.colaboraCon.slice();
+    if (Array.isArray(sw.estiloPareja) && sw.estiloPareja.length) u.estiloPareja = sw.estiloPareja.slice();
+    if (sw.aceptanParejasPrincipiantes) u.aceptanParejasPrincipiantes = sw.aceptanParejasPrincipiantes;
+    if (sw.experienciaEnLifestyle) u.experienciaEnLifestyle = sw.experienciaEnLifestyle;
+    if (sw.mostrarObjetivosPerfil) u.mostrarObjetivosPerfil = sw.mostrarObjetivosPerfil;
+    if (sw.mostrarAtiendenA) u.mostrarAtiendenA = sw.mostrarAtiendenA;
+    if (sw.mostrarColaboraciones) u.mostrarColaboraciones = sw.mostrarColaboraciones;
+    return u;
+  }
+
+  function applyUnicornPerfilFields(u, bloques, ctx) {
+    if (!u || !bloques) return u;
+    if (!shouldApplyUnicornPipeline(ctx, bloques)) return u;
+    var un = bloques.unicornPerfil;
+    if (!un && (hasUnicornDelta(bloques) || (ctx && isUnicornSubcategoria(ctx)))) {
+      un = buildUnicornPerfil(bloques);
+    }
+    if (!un) return u;
+    delete u.swingerPerfil;
+    delete u.cuckoldHotwifePerfil;
+    if (Array.isArray(un.objetivosPerfil) && un.objetivosPerfil.length) {
+      u.objetivosPerfil = un.objetivosPerfil.slice();
+      u.objetivoPrincipal = un.objetivoPrincipal || buildObjetivoPrincipal(un.objetivosPerfil);
+    }
+    if (un.mostrarObjetivosPerfil) u.mostrarObjetivosPerfil = un.mostrarObjetivosPerfil;
+    if (un.tipoUnicornio) u.tipoUnicornio = un.tipoUnicornio;
+    if (Array.isArray(un.buscoConocer) && un.buscoConocer.length) {
+      u.buscoConocer = un.buscoConocer.slice();
+      u.buscan = un.buscoConocer.slice();
+    }
+    if (Array.isArray(un.tipoParejaPreferida) && un.tipoParejaPreferida.length) {
+      u.tipoParejaPreferida = un.tipoParejaPreferida.slice();
+    }
+    if (Array.isArray(un.finalidadEncuentro) && un.finalidadEncuentro.length) {
+      u.finalidadEncuentro = un.finalidadEncuentro.slice();
+    }
+    if (un.estadoPerfil) u.estadoPerfil = un.estadoPerfil;
+    if (un.haceColaboraciones) u.haceColaboraciones = un.haceColaboraciones;
+    if (Array.isArray(un.colaboraCon) && un.colaboraCon.length) u.colaboraCon = un.colaboraCon.slice();
+    if (un.mostrarColaboraciones) u.mostrarColaboraciones = un.mostrarColaboraciones;
+    if (un.experiencia) u.experiencia = un.experiencia;
+    if (Array.isArray(un.ambientePreferido) && un.ambientePreferido.length) {
+      u.ambientePreferido = un.ambientePreferido.slice();
+    }
+    if (un.estilo) u.estilo = un.estilo;
+    if (Array.isArray(un.serviciosLifestyle) && un.serviciosLifestyle.length) {
+      u.serviciosLifestyle = un.serviciosLifestyle.slice();
+      u.serviciosIncluidos = un.serviciosLifestyle.slice();
+    }
+    if (Array.isArray(un.modalidades) && un.modalidades.length) {
+      u.modalidades = un.modalidades.slice();
+      u.modalidadFicha = un.modalidades.map(function (m) {
+        if (m === 'recibe') return 'Recibe';
+        if (m === 'hotel') return 'Hotel';
+        if (m === 'domicilio') return 'Domicilio';
+        if (m === 'viaja') return 'Viaja';
+        return m;
+      }).join(' · ');
+    }
+    if (un.viajesDesplazamiento) {
+      u.viajesDesplazamiento = Object.assign({}, un.viajesDesplazamiento);
+    } else if (viajesApi()) {
+      u.viajesDesplazamiento = viajesApi().buildViajesDesplazamiento(bloques, bloques.modalidades);
+    }
+    if (Array.isArray(un.metodosPago) && un.metodosPago.length) {
+      u.metodosPago = un.metodosPago.slice();
+    }
+    if (un.horarioDetalle) {
+      u.horarioDetalle = un.horarioDetalle;
+      u.horario = un.horarioDetalle;
+    }
+    if (un.sobreMi) u.sobreMi = un.sobreMi;
+    if (un.idiomas) u.idiomas = un.idiomas;
+    u.tipoPerfil = 'persona';
+    u.arquetipo = (ctx && ctx.arquetipo) || 'persona_lifestyle';
+    u.badgeUnicorn = true;
+    u.unicornPerfil = Object.assign({}, un, {
+      modalidades: u.modalidades || un.modalidades || [],
+      viajesDesplazamiento: u.viajesDesplazamiento || un.viajesDesplazamiento || null,
+      metodosPago: u.metodosPago || un.metodosPago || [],
+      horarioDetalle: u.horarioDetalle || un.horarioDetalle || '',
+      sobreMi: u.sobreMi || un.sobreMi || '',
+      idiomas: u.idiomas || un.idiomas || ''
+    });
+    return u;
+  }
+
+  function finalizeParejaSwingerValues(values, ctx) {
+    if (!values) return values;
+    if (!shouldApplySwingerPipeline(ctx, values)) return values;
+    if (!String(values.mostrarAtiendenA || '').trim()) values.mostrarAtiendenA = 'Sí';
+    if (!String(values.mostrarColaboraciones || '').trim()) values.mostrarColaboraciones = 'Sí';
+    if (!String(values.mostrarObjetivosPerfil || '').trim()) values.mostrarObjetivosPerfil = 'Sí';
+    var hace = String(values.haceColaboraciones || '').trim();
+    if (hace === 'No') delete values.colaboraCon;
+    if (Array.isArray(values.objetivosPerfil)) {
+      values.objetivoPrincipal = buildObjetivoPrincipal(values.objetivosPerfil);
+    }
+    delete values.unicornPerfil;
+    delete values.cuckoldHotwifePerfil;
+    values.swingerPerfil = buildSwingerPerfil(values);
+    delete values.deltaSwinger;
+    return values;
+  }
+
+  function finalizeUnicornValues(values, ctx) {
+    if (!values) return values;
+    if (!shouldApplyUnicornPipeline(ctx, values)) return values;
+    if (!String(values.mostrarObjetivosPerfil || '').trim()) values.mostrarObjetivosPerfil = 'Sí';
+    if (!String(values.mostrarColaboraciones || '').trim()) values.mostrarColaboraciones = 'Sí';
+    var hace = String(values.haceColaboraciones || '').trim();
+    if (hace !== 'Sí') delete values.colaboraCon;
+    if (Array.isArray(values.objetivosPerfil)) {
+      values.objetivoPrincipal = buildObjetivoPrincipal(values.objetivosPerfil);
+    }
+    delete values.swingerPerfil;
+    delete values.cuckoldHotwifePerfil;
+    values.unicornPerfil = buildUnicornPerfil(values);
+    return values;
+  }
+
+  function finalizeCuckoldHotwifeValues(values, ctx) {
+    if (!values) return values;
+    if (!shouldApplyCuckoldHotwifePipeline(ctx, values)) return values;
+    if (!String(values.mostrarBuscan || '').trim()) values.mostrarBuscan = 'Sí';
+    if (!String(values.mostrarParticipacion || '').trim()) values.mostrarParticipacion = 'Sí';
+    if (!String(values.mostrarColaboraciones || '').trim()) values.mostrarColaboraciones = 'Sí';
+    var hace = String(values.haceColaboraciones || '').trim();
+    if (hace !== 'Sí') delete values.colaboraCon;
+    if (values.dinamica) {
+      values.dinamicaLabel = dinamicaCuckoldHotwifeLabel(values.dinamica);
+    }
+    delete values.swingerPerfil;
+    delete values.unicornPerfil;
+    values.cuckoldHotwifePerfil = buildCuckoldHotwifePerfil(values);
+    return values;
+  }
+
+  function finalizeViajesValues(values) {
+    var api = viajesApi();
+    if (!api) return values;
+    values.viajesDesplazamiento = api.buildViajesDesplazamiento(values, values.modalidades);
+    if (!values.viajesDesplazamiento.viaja) {
+      api.viajesFieldIds().forEach(function (key) {
+        delete values[key];
+      });
+    }
+    return values;
+  }
+
+  function collectValues(cfg, ctx) {
     if (!cfg) return {};
+    ctx = ctx || {};
     var values = {};
     cfg.blocks.forEach(function (block) {
       block.fields.forEach(function (field) {
         if (field.type === 'checklist') {
           values[field.id] = readChecklist(field.id);
+          return;
+        }
+        if (field.type === 'memberList') {
+          values[field.id] = readMemberList(field.id);
           return;
         }
         if (field.type === 'boolean') {
@@ -339,6 +1142,12 @@
         values[field.id] = el ? String(el.value || '').trim() : '';
       });
     });
+    values = finalizeViajesValues(values);
+    values = finalizeLesbiansValues(values);
+    values = finalizeParejaSwingerValues(values, ctx);
+    values = finalizeUnicornValues(values, ctx);
+    values = finalizeCuckoldHotwifeValues(values, ctx);
+    values = finalizeParejaGrupoValues(values);
     return values;
   }
 
@@ -346,7 +1155,9 @@
     var missing = [];
     if (!cfg) return missing;
     cfg = mergedConfig(cfg, ctx);
+    var viajaActivo = modalidadesIncluyeViaja(values);
     (cfg.obligatorios || []).forEach(function (key) {
+      if (!viajaActivo && viajesApi() && viajesApi().viajesFieldIds().indexOf(key) >= 0) return;
       var val = values[key];
       var fieldType = fieldTypeForKey(cfg, key);
       if (fieldType === 'boolean') {
@@ -359,6 +1170,8 @@
       }
       if (Array.isArray(val)) {
         if (!val.length) missing.push(labelForField(cfg, key));
+      } else if (fieldType === 'memberList') {
+        if (!Array.isArray(val) || !val.length) missing.push(labelForField(cfg, key));
       } else if (!String(val || '').trim()) {
         missing.push(labelForField(cfg, key));
       }
@@ -366,11 +1179,16 @@
     cfg.blocks.forEach(function (block) {
       block.fields.forEach(function (field) {
         if (!field.required) return;
+        if (isFieldHiddenByCondition(field, values)) return;
         var val = values[field.id];
         var empty = field.type === 'boolean'
           ? !isTruthyFieldValue(val)
           : field.type === 'url'
             ? !isValidUrl(val)
+            : field.type === 'memberList'
+              ? (!Array.isArray(val) || !val.filter(function (m) {
+                return String(m.etiquetaPublica || '').trim() && String(m.generoPresentacion || '').trim();
+              }).length)
             : (Array.isArray(val) ? !val.length : !String(val || '').trim());
         if (empty && missing.indexOf(field.label) < 0) missing.push(field.label);
       });
@@ -391,7 +1209,131 @@
         }
       }
     });
+    if (String(values.haceColaboraciones || '').trim() === 'Sí') {
+      var colabora = values.colaboraCon;
+      if (!Array.isArray(colabora) || !colabora.length) {
+        pushMissing(missing, labelForField(cfg, 'colaboraCon') || 'Busco colaborar con');
+      }
+    }
+    if (cfg.id === 'pareja_grupo') {
+      validateParejaGrupoValues(cfg, values, missing);
+    }
+    if (isSwingerSubcategoria(ctx)) {
+      validateSwingerDeltaValues(cfg, values, missing);
+    }
+    if (isUnicornSubcategoria(ctx)) {
+      validateUnicornDeltaValues(cfg, values, missing);
+    }
+    if (isCuckoldHotwifeSubcategoria(ctx)) {
+      validateCuckoldHotwifeDeltaValues(cfg, values, missing);
+    }
     return missing;
+  }
+
+  function validateCuckoldHotwifeDeltaValues(cfg, values, missing) {
+    if (!String(values.dinamica || '').trim()) {
+      pushMissing(missing, labelForField(cfg, 'dinamica') || 'Dinámica');
+    }
+    var buscan = values.buscan;
+    if (!Array.isArray(buscan) || !buscan.length) {
+      pushMissing(missing, labelForField(cfg, 'buscan') || 'Buscan');
+    }
+    var tipoExp = values.tipoExperiencia;
+    if (!Array.isArray(tipoExp) || !tipoExp.length) {
+      pushMissing(missing, labelForField(cfg, 'tipoExperiencia') || 'Tipo de experiencia');
+    }
+    if (!String(values.participacionPareja || '').trim()) {
+      pushMissing(missing, labelForField(cfg, 'participacionPareja') || 'Participación de la pareja');
+    }
+    if (String(values.haceColaboraciones || '').trim() === 'Sí') {
+      var colabora = values.colaboraCon;
+      if (!Array.isArray(colabora) || !colabora.length) {
+        pushMissing(missing, labelForField(cfg, 'colaboraCon') || 'Colaboran con');
+      }
+    }
+  }
+
+  function validateUnicornDeltaValues(cfg, values, missing) {
+    var objetivos = values.objetivosPerfil;
+    if (!Array.isArray(objetivos) || !objetivos.length) {
+      pushMissing(missing, labelForField(cfg, 'objetivosPerfil') || 'Objetivo del perfil');
+    }
+    if (!String(values.tipoUnicornio || '').trim()) {
+      pushMissing(missing, labelForField(cfg, 'tipoUnicornio') || 'Tipo de unicornio');
+    }
+    var busco = values.buscoConocer;
+    if (!Array.isArray(busco) || !busco.length) {
+      pushMissing(missing, labelForField(cfg, 'buscoConocer') || 'Busco conocer');
+    }
+    if (!String(values.estadoPerfil || '').trim()) {
+      pushMissing(missing, labelForField(cfg, 'estadoPerfil') || '¿Qué buscas actualmente?');
+    }
+    if (!String(values.haceColaboraciones || '').trim()) {
+      pushMissing(missing, labelForField(cfg, 'haceColaboraciones') || 'Disponibilidad para colaboraciones');
+    }
+  }
+
+  function validateSwingerDeltaValues(cfg, values, missing) {
+    var hace = String(values.haceColaboraciones || '').trim();
+    if (hace === 'Sí') {
+      var colabora = values.colaboraCon;
+      if (!Array.isArray(colabora) || !colabora.length) {
+        pushMissing(missing, labelForField(cfg, 'colaboraCon') || 'Colaboran con');
+      }
+    }
+  }
+
+  function validateParejaGrupoValues(cfg, values, missing) {
+    var aliasEl = $('fldAlias');
+    var alias = aliasEl ? String(aliasEl.value || '').trim() : String(values.aliasPareja || values.alias || '').trim();
+    if (!alias) {
+      pushMissing(missing, 'Alias de la pareja / grupo');
+    } else if (alias.length < 3) {
+      pushMissing(missing, 'Alias de la pareja / grupo (mínimo 3 caracteres)');
+    }
+
+    var reglas = String(values.reglasAcceso || '').trim();
+    if (reglas.length > 500) {
+      pushMissing(missing, 'Reglas de acceso (máximo 500 caracteres)');
+    }
+
+    var config = String(values.configuracionGrupo || '').trim();
+    var minMembers = 2;
+    var minGrupo = 3;
+    var maxMembers = 2;
+    var maxGrupo = 8;
+    cfg.blocks.forEach(function (block) {
+      block.fields.forEach(function (field) {
+        if (field.id === 'miembros') {
+          if (field.minMembers) minMembers = field.minMembers;
+          if (field.minMembersGrupo) minGrupo = field.minMembersGrupo;
+          if (field.maxMembers) maxMembers = field.maxMembers;
+          if (field.maxMembersGrupo) maxGrupo = field.maxMembersGrupo;
+        }
+      });
+    });
+    if (config === 'grupo') {
+      minMembers = minGrupo;
+      maxMembers = maxGrupo;
+    }
+
+    var members = Array.isArray(values.miembros) ? values.miembros : [];
+    var validMembers = members.filter(function (m) {
+      return String(m.etiquetaPublica || '').trim() && String(m.generoPresentacion || '').trim();
+    });
+    if (validMembers.length < minMembers) {
+      pushMissing(missing, 'Integrantes (mínimo ' + minMembers + ')');
+    }
+    if (validMembers.length > maxMembers) {
+      pushMissing(missing, 'Integrantes (máximo ' + maxMembers + ')');
+    }
+    validMembers.forEach(function (m, i) {
+      if (!memberRowHasAge(m)) {
+        pushMissing(missing, 'Edad o franja de integrante ' + (i + 1) + ' (mayor de 18)');
+      } else if (m.edad != null && isFinite(m.edad) && m.edad < 18) {
+        pushMissing(missing, 'Edad de integrante ' + (i + 1) + ' (mayor de 18)');
+      }
+    });
   }
 
   function labelForField(cfg, key) {
@@ -414,6 +1356,23 @@
     return found;
   }
 
+  function flattenViajesSaved(savedValues) {
+    if (!savedValues || typeof savedValues !== 'object') return savedValues || {};
+    var out = Object.assign({}, savedValues);
+    var v = savedValues.viajesDesplazamiento;
+    if (v && typeof v === 'object') {
+      var api = viajesApi();
+      var ids = api ? api.viajesFieldIds() : [];
+      ids.forEach(function (key) {
+        if (v[key] != null && out[key] == null) out[key] = v[key];
+      });
+      if (v.viaja === true && Array.isArray(out.modalidades) && out.modalidades.indexOf('viaja') < 0) {
+        out.modalidades = out.modalidades.concat(['viaja']);
+      }
+    }
+    return out;
+  }
+
   function apply(ctx, resolved, savedValues) {
     var host = $('rpDynamicPublicHost');
     if (!host) return null;
@@ -425,16 +1384,16 @@
       syncLegacyFields(null, false);
       return null;
     }
-    savedValues = savedValues || {};
-    renderBlocks(host, mergedConfig(cfg, ctx), savedValues);
+    savedValues = flattenViajesSaved(savedValues || {});
+    renderBlocks(host, mergedConfig(cfg, ctx), savedValues, ctx);
     syncLegacyFields(cfg, true);
     return cfg;
   }
 
   function collectForPreview(ctx) {
-    var cfg = resolveEscortConfig();
-    if (!$('rpDynamicPublicHost') || $('rpDynamicPublicHost').classList.contains('rp-hidden')) return null;
-    return collectValues(mergedConfig(cfg, ctx || {}));
+    var cfg = resolveConfig(ctx || {}, null);
+    if (!cfg || !$('rpDynamicPublicHost') || $('rpDynamicPublicHost').classList.contains('rp-hidden')) return null;
+    return collectValues(mergedConfig(cfg, ctx || {}), ctx || {});
   }
 
   function mapToPerfil(u, bloques, ctx) {
@@ -445,6 +1404,10 @@
     if (bloques.presentacionFemboy) {
       u.presentacionFemboy = bloques.presentacionFemboy;
       u.identidadGenero = bloques.presentacionFemboy;
+    }
+    if (bloques.presentacionTom) {
+      u.presentacionTom = bloques.presentacionTom;
+      u.identidadGenero = bloques.presentacionTom;
     }
     if (bloques.estiloPredominante) u.estiloPredominante = bloques.estiloPredominante;
     if (Array.isArray(bloques.disponiblePara) && bloques.disponiblePara.length) {
@@ -489,6 +1452,8 @@
     if (bloques.loQueBuscaConocer) u.loQueBuscaConocer = bloques.loQueBuscaConocer;
     if (bloques.aficiones) u.aficiones = bloques.aficiones;
     if (bloques.estiloVida) u.estiloVida = bloques.estiloVida;
+    if (bloques.personalidad) u.personalidad = bloques.personalidad;
+    if (bloques.pasatiempos) u.pasatiempos = bloques.pasatiempos;
     if (bloques.idiomas) u.idiomas = bloques.idiomas;
     if (bloques.nivelServicio) u.nivelServicio = bloques.nivelServicio;
     if (bloques.nivelPremium) u.nivelPremium = bloques.nivelPremium;
@@ -498,6 +1463,42 @@
     if (Array.isArray(bloques.distintivosVip) && bloques.distintivosVip.length) {
       u.distintivosVip = bloques.distintivosVip.slice();
     }
+    u = mapDotadosFields(u, bloques);
+    if (bloques.atiendoA) u.atiendoA = bloques.atiendoA;
+    if (bloques.mostrarAtiendoA) u.mostrarAtiendoA = bloques.mostrarAtiendoA;
+    if (bloques.haceColaboraciones) u.haceColaboraciones = bloques.haceColaboraciones;
+    if (Array.isArray(bloques.colaboraCon) && bloques.colaboraCon.length) {
+      u.colaboraCon = bloques.colaboraCon.slice();
+    }
+    if (bloques.mostrarColaboraciones) u.mostrarColaboraciones = bloques.mostrarColaboraciones;
+    if (bloques.estiloLesbian) u.estiloLesbian = bloques.estiloLesbian;
+    u = applySwingerPerfilFields(u, bloques, ctx);
+    u = applyCuckoldHotwifePerfilFields(u, bloques, ctx);
+    if (bloques.configuracionGrupo) {
+      u.configuracionGrupo = bloques.configuracionGrupo;
+      u.configuracionGrupoLabel = bloques.configuracionGrupoLabel || configuracionGrupoLabel(bloques.configuracionGrupo);
+      u.tipoPareja = u.configuracionGrupoLabel;
+    } else if (bloques.tipoPareja) u.tipoPareja = bloques.tipoPareja;
+    if (bloques.aliasPareja) {
+      u.aliasPareja = bloques.aliasPareja;
+      u.alias = bloques.aliasPareja;
+      u.nombre = bloques.aliasPareja;
+    }
+    if (Array.isArray(bloques.miembros) && bloques.miembros.length) {
+      u.miembros = bloques.miembros.slice();
+      u.miembrosResumen = bloques.miembrosResumen || buildMiembrosResumen(bloques.miembros);
+      u.miembrosEdad = u.miembrosResumen;
+    }
+    if (bloques.reglasAcceso) u.reglasAcceso = bloques.reglasAcceso;
+    if (bloques.parejaGrupoPerfil) u.parejaGrupoPerfil = Object.assign({}, bloques.parejaGrupoPerfil);
+    if (bloques.tipoPerfil === 'pareja_grupo' || (ctx && matchesPareja(ctx, null))) {
+      u.tipoPerfil = 'pareja_grupo';
+    }
+    if (bloques.tipoPareja && !bloques.configuracionGrupo) u.tipoPareja = bloques.tipoPareja;
+    if (!u.mostrarAtiendoA) u.mostrarAtiendoA = 'Sí';
+    if (!u.mostrarColaboraciones) u.mostrarColaboraciones = 'Sí';
+    if (!u.mostrarAtiendenA) u.mostrarAtiendenA = 'Sí';
+    if (!u.mostrarObjetivosPerfil) u.mostrarObjetivosPerfil = 'Sí';
     if (isTruthyFieldValue(bloques.eventosDisponibles)) u.eventosDisponibles = true;
     if (bloques.portfolioURL) u.portfolioURL = normalizeUrl(bloques.portfolioURL);
     if (bloques.disponibilidad) {
@@ -528,20 +1529,27 @@
         if (m === 'recibe') return 'Recibe';
         if (m === 'hotel') return 'Hotel';
         if (m === 'domicilio') return 'Domicilio';
+        if (m === 'viaja') return 'Viaja';
         return m;
       }).join(' · ');
+    }
+    if (bloques.viajesDesplazamiento) {
+      u.viajesDesplazamiento = bloques.viajesDesplazamiento;
+    } else if (viajesApi()) {
+      u.viajesDesplazamiento = viajesApi().buildViajesDesplazamiento(bloques, bloques.modalidades);
     }
     if (bloques.horarioDetalle) {
       u.horario = bloques.horarioDetalle;
       u.horarioDetalle = bloques.horarioDetalle;
     }
+    u = applyUnicornPerfilFields(u, bloques, ctx);
     return applyBadges(u, ctx);
   }
 
   function collect(ctx, resolved) {
     var cfg = resolveConfig(ctx, resolved);
     if (!cfg) return null;
-    return collectValues(mergedConfig(cfg, ctx));
+    return collectValues(mergedConfig(cfg, ctx), ctx);
   }
 
   function getFieldLabels(ctx, resolved) {
@@ -578,6 +1586,8 @@
   global.CariHubRegistroPublicBlocks = {
     resolveConfig: resolveConfig,
     matchesEscort: matchesEscort,
+    matchesPareja: matchesPareja,
+    matchesLifestyle: matchesLifestyle,
     apply: apply,
     collectValues: collectValues,
     validateValues: validateValues,
@@ -589,6 +1599,31 @@
     getFieldLabels: getFieldLabels,
     getAliasLabel: getAliasLabel,
     applyFieldLabels: applyFieldLabels,
-    bindChange: bindChange
+    bindChange: bindChange,
+    configuracionGrupoLabel: configuracionGrupoLabel,
+    buildMiembrosResumen: buildMiembrosResumen,
+    normalizeMemberRow: normalizeMemberRow,
+    finalizeParejaGrupoValues: finalizeParejaGrupoValues,
+    finalizeParejaSwingerValues: finalizeParejaSwingerValues,
+    finalizeUnicornValues: finalizeUnicornValues,
+    finalizeCuckoldHotwifeValues: finalizeCuckoldHotwifeValues,
+    buildSwingerPerfil: buildSwingerPerfil,
+    buildUnicornPerfil: buildUnicornPerfil,
+    buildCuckoldHotwifePerfil: buildCuckoldHotwifePerfil,
+    buildDeltaSwinger: buildDeltaSwinger,
+    buildObjetivoPrincipal: buildObjetivoPrincipal,
+    hasSwingerDelta: hasSwingerDelta,
+    hasUnicornDelta: hasUnicornDelta,
+    hasCuckoldHotwifeDelta: hasCuckoldHotwifeDelta,
+    isSwingerSubcategoria: isSwingerSubcategoria,
+    isUnicornSubcategoria: isUnicornSubcategoria,
+    isCuckoldHotwifeSubcategoria: isCuckoldHotwifeSubcategoria,
+    shouldApplySwingerPipeline: shouldApplySwingerPipeline,
+    shouldApplyUnicornPipeline: shouldApplyUnicornPipeline,
+    shouldApplyCuckoldHotwifePipeline: shouldApplyCuckoldHotwifePipeline,
+    applySwingerPerfilFields: applySwingerPerfilFields,
+    applyUnicornPerfilFields: applyUnicornPerfilFields,
+    applyCuckoldHotwifePerfilFields: applyCuckoldHotwifePerfilFields,
+    dinamicaCuckoldHotwifeLabel: dinamicaCuckoldHotwifeLabel
   };
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -157,6 +157,42 @@
     if (bloques && global.CariHubRegistroPublicBlocks.mapToPerfil) {
       u = global.CariHubRegistroPublicBlocks.mapToPerfil(u, bloques, ctx);
     }
+    if (global.CariHubRegistroPublicBlocks && CariHubRegistroPublicBlocks.applySwingerPerfilFields) {
+      u = CariHubRegistroPublicBlocks.applySwingerPerfilFields(u, bloques || {}, ctx);
+    }
+    if (global.CariHubRegistroPublicBlocks && CariHubRegistroPublicBlocks.applyCuckoldHotwifePerfilFields) {
+      u = CariHubRegistroPublicBlocks.applyCuckoldHotwifePerfilFields(u, bloques || {}, ctx);
+    }
+    if (global.CariHubRegistroPublicBlocks && CariHubRegistroPublicBlocks.applyUnicornPerfilFields) {
+      u = CariHubRegistroPublicBlocks.applyUnicornPerfilFields(u, bloques || {}, ctx);
+    }
+    if (global.CariHubRegistroPublicBlocks &&
+      CariHubRegistroPublicBlocks.isCuckoldHotwifeSubcategoria &&
+      CariHubRegistroPublicBlocks.isCuckoldHotwifeSubcategoria(ctx)) {
+      u.aliasPareja = u.aliasPareja || alias;
+      u.tipoPerfil = 'pareja_grupo';
+      u.arquetipo = 'pareja_grupo';
+      u.subcategoriaId = 'cuckold_hotwife';
+      delete u.swingerPerfil;
+      delete u.unicornPerfil;
+      if (u.aliasPareja) {
+        u.nombre = u.aliasPareja;
+        u.alias = u.aliasPareja;
+      }
+    } else if (global.CariHubRegistroPublicBlocks && CariHubRegistroPublicBlocks.matchesPareja(ctx, null)) {
+      u.aliasPareja = u.aliasPareja || alias;
+      u.tipoPerfil = 'pareja_grupo';
+      if (u.aliasPareja) {
+        u.nombre = u.aliasPareja;
+        u.alias = u.aliasPareja;
+      }
+    } else if (global.CariHubRegistroPublicBlocks &&
+      CariHubRegistroPublicBlocks.isUnicornSubcategoria &&
+      CariHubRegistroPublicBlocks.isUnicornSubcategoria(ctx)) {
+      u.tipoPerfil = 'persona';
+      u.arquetipo = ctx.arquetipo || 'persona_lifestyle';
+      delete u.swingerPerfil;
+    }
 
     if (global.CariHubFieldEngineLite && CariHubFieldEngineLite.enriquecerPerfilPublico) {
       global.CariHubFieldEngineLite.enriquecerPerfilPublico(u, {
@@ -165,8 +201,15 @@
       });
     }
 
+    var vistaPerfil = (pres && pres.vistaPerfil) || 'adult';
+    if (global.CariHubRegistroPublicBlocks &&
+      CariHubRegistroPublicBlocks.isUnicornSubcategoria &&
+      CariHubRegistroPublicBlocks.isUnicornSubcategoria(ctx)) {
+      vistaPerfil = 'unicorn';
+    }
+
     return {
-      vista: (pres && pres.vistaPerfil) || 'adult',
+      vista: vistaPerfil,
       tema: sectorEsAdultos() ? 'adult' : 'pro',
       perfil: u,
       query: {

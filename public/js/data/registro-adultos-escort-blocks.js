@@ -14,8 +14,7 @@
     'Disponible ahora',
     'Solo con cita',
     'Entre semana',
-    'Fines de semana',
-    'Viajes'
+    'Fines de semana'
   ];
 
   var SINGLES_DINAMICAS = [
@@ -28,6 +27,8 @@
   ];
 
   var OPCIONES_SI_NO_ACUERDO = ['Sí', 'No', 'Bajo acuerdo previo'];
+
+  var OPCIONES_SI_NO = ['Sí', 'No'];
 
   var TIPOS_TRIOS_COMP = [
     'MHM (Mujer–Hombre–Mujer)',
@@ -60,6 +61,22 @@
     'Comunicación profesional'
   ];
 
+  var TOM_BOY_ESTILO = ['Deportivo', 'Urbano', 'Casual', 'Streetwear', 'Rockero', 'Elegante'];
+  var TOM_BOY_PRESENTACION = ['Masculina', 'Andrógina', 'Tomboy clásica'];
+  var TOM_FEM_ESTILO = ['Elegante', 'Glamour', 'Casual', 'Kawaii', 'Gótico', 'Cosplay'];
+  var TOM_FEM_PRESENTACION = ['Muy femenina', 'Femenina', 'Andrógina'];
+
+  var LESBIANS_COLABORA_CON = [
+    'Mujeres', 'Lesbians', 'Bisexuales', 'Trans', 'Femboy', 'Tom Boy', 'Tom Fem',
+    'Parejas', 'Cualquier anunciante'
+  ];
+
+  var LESBIANS_ESTILO = [
+    'Elegante', 'Casual', 'Glamour', 'Deportivo', 'Alternativo', 'Urbano', 'Discreto'
+  ];
+
+  var OPCIONES_SI_NO_CONVENIR = ['Sí', 'No', 'A convenir'];
+
   global.CARIHUB_REGISTRO_ESCORT_BLOCKS = {
     id: 'persona_acompanante',
     formularioId: 'adultos',
@@ -81,13 +98,23 @@
         }
       },
       'lesbians': {
-        obligatoriosExtra: ['orientacion'],
+        obligatoriosExtra: ['orientacion', 'atiendoA', 'haceColaboraciones'],
         badges: ['lgbt'],
         fieldPatches: {
-          orientacion: { required: true }
+          orientacion: { required: true },
+          atiendoA: { required: true },
+          haceColaboraciones: { required: true },
+          mostrarAtiendoA: { defaultValue: 'Sí' },
+          mostrarColaboraciones: { defaultValue: 'Sí' }
         },
         fieldHints: {
-          orientacion: 'Indica orientación y tipo de clientela.'
+          orientacion: 'Indica orientación y tipo de clientela.',
+          atiendoA: 'Define a quién atiendes en tu perfil.',
+          mostrarAtiendoA: 'Controla si «Atiende a» aparece en tarjeta y ficha pública.',
+          haceColaboraciones: 'Indica si colaboras con otras anunciantes (distinto de colaboración para contenido).',
+          colaboraCon: 'Marca con quién te interesa colaborar.',
+          mostrarColaboraciones: 'Controla si colaboraciones se ven en tarjeta y ficha pública.',
+          estiloLesbian: 'Tu estilo o estética principal (opcional).'
         }
       },
       'escort vip': {
@@ -166,7 +193,8 @@
           tipoCitaPreferida: { required: true },
           personalidadPredominante: { required: true },
           estiloPersonal: { required: true },
-          disponibilidadAgenda: { required: true }
+          disponibilidadAgenda: { required: true },
+          modalidades: { required: false }
         },
         fieldHints: {
           buscanConocer: 'Indica a quién te gustaría conocer.',
@@ -215,7 +243,8 @@
           presentacionFemboy: { required: true },
           estiloPredominante: { required: true },
           disponibilidadAgenda: { required: true },
-          disponiblePara: { required: true }
+          disponiblePara: { required: true },
+          modalidades: { required: false }
         },
         fieldHints: {
           presentacionFemboy: 'Cómo te presentas en tu perfil público.',
@@ -228,6 +257,52 @@
           tiposTrios: 'Marca los tipos de trío que realizas (puedes elegir más de uno).',
           colaboracionContenido: 'Indica si colaboras en contenido para redes o plataformas.',
           sobreMi: 'Cuéntanos quién eres, tu estilo y qué te hace diferente.'
+        }
+      },
+      'tom boy': {
+        badges: ['lgbt'],
+        fieldHints: {
+          presentacionTom: 'Cómo te presentas en tu perfil público.',
+          estiloPredominante: 'Tu estilo predominante al vestir.',
+          videoPresentacion: 'Enlace a un video corto de presentación (opcional).',
+          realizaTrios: 'Indica si ofreces tríos.',
+          tiposTrios: 'MHM o HMH — tipos de trío que realizas.',
+          colaboracionContenido: 'Indica si colaboras en contenido para redes o plataformas.',
+          sobreMi: 'Biografía: quién eres y qué te hace diferente.',
+          personalidad: 'Cómo te describe la gente que te conoce.',
+          pasatiempos: 'Hobbies o gustos que aparecen en tu ficha.'
+        }
+      },
+      'tom fem': {
+        badges: ['lgbt'],
+        fieldHints: {
+          presentacionTom: 'Cómo te presentas en tu perfil público.',
+          estiloPredominante: 'Tu estilo predominante al vestir.',
+          videoPresentacion: 'Enlace a un video corto de presentación (opcional).',
+          realizaTrios: 'Indica si ofreces tríos.',
+          tiposTrios: 'MHM o HMH — tipos de trío que realizas.',
+          colaboracionContenido: 'Indica si colaboras en contenido para redes o plataformas.',
+          sobreMi: 'Biografía: quién eres y qué te hace diferente.',
+          personalidad: 'Cómo te describe la gente que te conoce.',
+          pasatiempos: 'Hobbies o gustos que aparecen en tu ficha.'
+        }
+      },
+      dotados: {
+        fieldHints: {
+          longitudCm: 'Medida en centímetros — tono discreto en tu ficha.',
+          mostrarLongitudPublico: 'Si eliges No, la longitud no aparece en tu perfil público.',
+          atencionHombres: 'Indica si atiendes a hombres.',
+          mostrarAtencionHombresPublico: 'Controla si esto se ve en tu ficha pública.',
+          atencionMujeres: 'Indica si atiendes a mujeres.',
+          mostrarAtencionMujeresPublico: 'Controla si esto se ve en tu ficha pública.',
+          atencionParejas: 'Indica si atiendes a parejas.',
+          mostrarAtencionParejasPublico: 'Controla si esto se ve en tu ficha pública.',
+          atencionTrans: 'Indica si atiendes a personas trans.',
+          mostrarAtencionTransPublico: 'Controla si esto se ve en tu ficha pública.',
+          realizaTrios: 'Indica si ofreces tríos.',
+          mostrarRealizaTriosPublico: 'Controla si esto se ve en tu ficha pública.',
+          colaboracionContenido: 'Indica si colaboras en contenido para redes o plataformas.',
+          mostrarColaboracionContenidoPublico: 'Controla si esto se ve en tu ficha pública.'
         }
       }
     },
@@ -387,8 +462,7 @@
               'Disponible ahora',
               'Solo con cita',
               'Entre semana',
-              'Fines de semana',
-              'Viajes'
+              'Fines de semana'
             ]
           },
           {
@@ -396,7 +470,7 @@
             label: 'Disponible para',
             type: 'checklist',
             required: true,
-            options: ['Eventos', 'Citas', 'Viajes']
+            options: ['Eventos', 'Citas']
           },
           {
             id: 'videoPresentacion',
@@ -411,6 +485,74 @@
             type: 'text',
             required: false,
             placeholder: 'Ej. 10% primer encuentro (opcional)'
+          },
+          {
+            id: 'realizaTrios',
+            label: '¿Realizas tríos?',
+            type: 'select',
+            required: false,
+            options: OPCIONES_SI_NO_ACUERDO.slice()
+          },
+          {
+            id: 'tiposTrios',
+            label: 'Tipo de trío',
+            type: 'checklist',
+            required: false,
+            options: TIPOS_TRIOS_COMP.slice()
+          },
+          {
+            id: 'colaboracionContenido',
+            label: 'Colaboración para contenido',
+            type: 'select',
+            required: false,
+            options: OPCIONES_SI_NO_ACUERDO.slice()
+          }
+        ]
+      },
+      {
+        id: 'tomPerfil',
+        title: 'Presentación y estilo',
+        hint: 'Campos distintivos de tu perfil — el resto del formulario es el mismo que Escort.',
+        onlySubcategorias: ['tom boy', 'tom fem'],
+        fields: [
+          {
+            id: 'presentacionTom',
+            label: 'Presentación',
+            type: 'select',
+            required: false,
+            onlySubcategorias: ['tom boy'],
+            options: TOM_BOY_PRESENTACION.slice()
+          },
+          {
+            id: 'presentacionTom',
+            label: 'Presentación',
+            type: 'select',
+            required: false,
+            onlySubcategorias: ['tom fem'],
+            options: TOM_FEM_PRESENTACION.slice()
+          },
+          {
+            id: 'estiloPredominante',
+            label: 'Estilo predominante',
+            type: 'select',
+            required: false,
+            onlySubcategorias: ['tom boy'],
+            options: TOM_BOY_ESTILO.slice()
+          },
+          {
+            id: 'estiloPredominante',
+            label: 'Estilo predominante',
+            type: 'select',
+            required: false,
+            onlySubcategorias: ['tom fem'],
+            options: TOM_FEM_ESTILO.slice()
+          },
+          {
+            id: 'videoPresentacion',
+            label: 'Video de presentación',
+            type: 'url',
+            required: false,
+            placeholder: 'https://… (opcional)'
           },
           {
             id: 'realizaTrios',
@@ -514,6 +656,59 @@
         ]
       },
       {
+        id: 'lesbiansPerfil',
+        title: 'Perfil lesbians',
+        hint: 'Datos específicos de tu perfil. El badge LGBT+ se asigna automáticamente.',
+        onlySubcategorias: ['lesbians'],
+        fields: [
+          {
+            id: 'atiendoA',
+            label: 'Atiende a',
+            type: 'select',
+            required: true,
+            options: ['Mujeres', 'Parejas', 'Ambos']
+          },
+          {
+            id: 'mostrarAtiendoA',
+            label: '¿Mostrar «Atiende a» en tarjeta y perfil?',
+            type: 'select',
+            required: false,
+            defaultValue: 'Sí',
+            options: OPCIONES_SI_NO.slice()
+          },
+          {
+            id: 'haceColaboraciones',
+            label: 'Colaboraciones con otras anunciantes',
+            type: 'select',
+            required: true,
+            options: OPCIONES_SI_NO_CONVENIR.slice()
+          },
+          {
+            id: 'colaboraCon',
+            label: 'Busco colaborar con',
+            type: 'checklist',
+            required: false,
+            showWhen: { field: 'haceColaboraciones', values: ['Sí', 'A convenir'] },
+            options: LESBIANS_COLABORA_CON.slice()
+          },
+          {
+            id: 'mostrarColaboraciones',
+            label: '¿Mostrar colaboraciones en tarjeta y perfil?',
+            type: 'select',
+            required: false,
+            defaultValue: 'Sí',
+            options: OPCIONES_SI_NO.slice()
+          },
+          {
+            id: 'estiloLesbian',
+            label: 'Estilo',
+            type: 'select',
+            required: false,
+            options: LESBIANS_ESTILO.slice()
+          }
+        ]
+      },
+      {
         id: 'vipPerfil',
         title: 'Perfil VIP',
         hint: 'Heredas el formulario Escort; aquí marcas experiencia exclusiva y distintivos de alto nivel.',
@@ -532,6 +727,120 @@
             type: 'checklist',
             required: false,
             options: VIP_DISTINTIVOS_OPCIONES.slice()
+          }
+        ]
+      },
+      {
+        id: 'dotadosPerfil',
+        title: 'Perfil dotados',
+        hint: 'Todo se guarda en tu cuenta; en la ficha pública solo aparece lo que marques como visible.',
+        onlySubcategorias: ['dotados'],
+        fields: [
+          {
+            id: 'longitudCm',
+            label: 'Longitud (cm)',
+            type: 'text',
+            required: false,
+            placeholder: 'Ej. 18'
+          },
+          {
+            id: 'mostrarLongitudPublico',
+            label: '¿Mostrar longitud en tu perfil público?',
+            type: 'select',
+            required: false,
+            options: OPCIONES_SI_NO.slice()
+          },
+          {
+            id: 'atencionHombres',
+            label: '¿Ofrece atención a hombres?',
+            type: 'select',
+            required: false,
+            options: OPCIONES_SI_NO.slice()
+          },
+          {
+            id: 'mostrarAtencionHombresPublico',
+            label: 'Mostrar atención a hombres en perfil',
+            type: 'select',
+            required: false,
+            options: OPCIONES_SI_NO.slice()
+          },
+          {
+            id: 'atencionMujeres',
+            label: '¿Ofrece atención a mujeres?',
+            type: 'select',
+            required: false,
+            options: OPCIONES_SI_NO.slice()
+          },
+          {
+            id: 'mostrarAtencionMujeresPublico',
+            label: 'Mostrar atención a mujeres en perfil',
+            type: 'select',
+            required: false,
+            options: OPCIONES_SI_NO.slice()
+          },
+          {
+            id: 'atencionParejas',
+            label: '¿Ofrece atención a parejas?',
+            type: 'select',
+            required: false,
+            options: OPCIONES_SI_NO.slice()
+          },
+          {
+            id: 'mostrarAtencionParejasPublico',
+            label: 'Mostrar atención a parejas en perfil',
+            type: 'select',
+            required: false,
+            options: OPCIONES_SI_NO.slice()
+          },
+          {
+            id: 'atencionTrans',
+            label: '¿Ofrece atención a personas trans?',
+            type: 'select',
+            required: false,
+            options: OPCIONES_SI_NO.slice()
+          },
+          {
+            id: 'mostrarAtencionTransPublico',
+            label: 'Mostrar atención a personas trans en perfil',
+            type: 'select',
+            required: false,
+            options: OPCIONES_SI_NO.slice()
+          }
+        ]
+      },
+      {
+        id: 'dotadosPreferencias',
+        title: 'Preferencias adicionales',
+        hint: 'Marca lo que ofreces y decide qué mostrar en tu perfil público.',
+        onlySubcategorias: ['dotados'],
+        fields: [
+          {
+            id: 'realizaTrios',
+            label: '¿Realizas tríos?',
+            type: 'select',
+            required: false,
+            options: OPCIONES_SI_NO_ACUERDO.slice()
+          },
+          {
+            id: 'mostrarRealizaTriosPublico',
+            label: 'Mostrar tríos en perfil',
+            type: 'select',
+            required: false,
+            options: OPCIONES_SI_NO.slice()
+          },
+          {
+            id: 'colaboracionContenido',
+            label: 'Colaboración para contenido',
+            type: 'select',
+            required: false,
+            options: OPCIONES_SI_NO_ACUERDO.slice()
+          },
+          {
+            id: 'mostrarColaboracionContenidoPublico',
+            label: 'Mostrar colaboración para contenido en perfil',
+            type: 'select',
+            required: false,
+            options: OPCIONES_SI_NO.slice()
           }
         ]
       },
@@ -567,8 +876,7 @@
       {
         id: 'modalidades',
         title: 'Modalidad de atención',
-        hint: 'Marca dónde atiendes (puedes elegir más de una).',
-        excludeSubcategorias: ['femboy', 'singles'],
+        hint: 'Marca dónde atiendes (puedes elegir más de una). Si viajas, marca «Viaja» para indicar alcance y condiciones.',
         fields: [
           {
             id: 'modalidades',
@@ -578,8 +886,70 @@
             options: [
               { value: 'recibe', label: 'Recibe (con lugar)' },
               { value: 'hotel', label: 'Hotel' },
-              { value: 'domicilio', label: 'Domicilio' }
+              { value: 'domicilio', label: 'Domicilio' },
+              { value: 'viaja', label: 'Viaja', onlySubcategoriasViajes: true }
             ]
+          },
+          {
+            id: 'alcanceDesplazamiento',
+            label: 'Alcance de desplazamiento',
+            type: 'select',
+            required: true,
+            showWhenViaja: true,
+            options: [
+              { value: 'solo_zona', label: 'Solo mi zona' },
+              { value: 'toda_ciudad', label: 'Toda mi ciudad' },
+              { value: 'todo_estado', label: 'Todo mi estado / provincia / departamento' },
+              { value: 'cualquier_ciudad_pais', label: 'Cualquier ciudad de mi país' },
+              { value: 'otro_pais', label: 'Otro país' },
+              { value: 'internacional', label: 'Internacional / varios países' }
+            ]
+          },
+          {
+            id: 'viajesProgramados',
+            label: 'Viajes programados',
+            type: 'select',
+            required: true,
+            showWhenViaja: true,
+            options: [
+              { value: 'si', label: 'Sí' },
+              { value: 'no', label: 'No' },
+              { value: 'a_convenir', label: 'A convenir' }
+            ]
+          },
+          {
+            id: 'gastosTraslado',
+            label: 'Gastos de viaje',
+            type: 'select',
+            required: true,
+            showWhenViaja: true,
+            options: [
+              { value: 'cliente', label: 'El cliente' },
+              { value: 'anunciante', label: 'El anunciante' },
+              { value: 'se_acuerda', label: 'Se acuerda' }
+            ]
+          },
+          {
+            id: 'anticipacionViaje',
+            label: 'Anticipación requerida',
+            type: 'select',
+            required: true,
+            showWhenViaja: true,
+            options: [
+              { value: 'mismo_dia', label: 'Mismo día' },
+              { value: '24h', label: '24 horas antes' },
+              { value: '48h', label: '48 horas antes' },
+              { value: '1_semana', label: 'Una semana antes' },
+              { value: 'a_convenir', label: 'A convenir' }
+            ]
+          },
+          {
+            id: 'notasViaje',
+            label: 'Notas de viaje',
+            type: 'text',
+            required: false,
+            showWhenViaja: true,
+            placeholder: 'Opcional — condiciones, destinos frecuentes, etc.'
           }
         ]
       },
@@ -605,7 +975,7 @@
             label: 'Largo del cabello',
             type: 'select',
             required: false,
-            onlySubcategorias: ['femboy'],
+            onlySubcategorias: ['femboy', 'tom boy', 'tom fem'],
             options: ['Corto', 'Medio', 'Largo', 'Muy largo']
           },
           { id: 'ojos', label: 'Color de ojos', type: 'text', required: false, placeholder: 'Ej. Café oscuro' },
@@ -678,11 +1048,27 @@
         fields: [
           {
             id: 'sobreMi',
-            label: 'Descripción personal',
+            label: 'Biografía',
             type: 'textarea',
             required: false,
             placeholder: 'Describe tu estilo, experiencia y qué te hace diferente…',
             rows: 4
+          },
+          {
+            id: 'personalidad',
+            label: 'Personalidad',
+            type: 'text',
+            required: false,
+            onlySubcategorias: ['tom boy', 'tom fem'],
+            placeholder: 'Ej. extrovertida, tranquila, aventurera…'
+          },
+          {
+            id: 'pasatiempos',
+            label: 'Pasatiempos',
+            type: 'text',
+            required: false,
+            onlySubcategorias: ['tom boy', 'tom fem'],
+            placeholder: 'Ej. deporte, música, viajes…'
           }
         ]
       }

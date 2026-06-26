@@ -1,0 +1,72 @@
+---
+description: Registro Cuckold/Hotwife — pareja_grupo delta (cerrado A4.1–A4.4)
+globs: public/js/data/registro-adultos-pareja-blocks.js, public/js/carihub-registro-public-blocks.js, public/js/registro-perfil-submit.js, public/js/registro-perfil-preview.js, public/js/carihub-public-render-lite.js, public/perfil-publico.html, scripts/qa-cuckold-hotwife*.mjs
+alwaysApply: false
+---
+
+# Cuckold / Hotwife — pareja_grupo (cerrado)
+
+Subcategoría **pareja lifestyle** — delta sobre shell `parejaGrupoBase`. **NO** es la persona escort `hotwife`.
+
+## Estado A4 (completo)
+
+| Fase | Alcance |
+|------|---------|
+| A4.1 | Blocks + motor + validación + guards anti swinger/unicorn |
+| A4.2 | Persistencia + preview (`cuckoldHotwifePerfil` + mirrors top-level) |
+| A4.3 | Render público: tarjeta, ficha, DEMO, badges, field-engine alias |
+| A4.4 | QA cierre + smoke manual documentado |
+
+## IDs canónicos vs mapa
+
+| Contexto | Valor |
+|----------|--------|
+| **Persist / preview submit** | `subcategoriaId: "cuckold_hotwife"` |
+| **Mapa / schema-index / wizard UI** | `"cuckold hotwife"` (espacio) |
+| **Field-engine** | `resolveMapaRow` normaliza `_` → espacio; acepta ambos |
+
+Siempre usar guards por ctx (`isCuckoldHotwifeSubcategoria`) — no inferir C/H solo por campos compartidos (`participacionPareja`, `tipoExperiencia`) que también usa hotwife **persona** escort.
+
+## Modelo de datos
+
+- Nested: `cuckoldHotwifePerfil`
+- Mirrors top-level: `dinamica`, `dinamicaLabel`, `buscan`, `tipoExperiencia`, `participacionPareja`, toggles, badges
+- `tipoPerfil: "pareja_grupo"` · `arquetipo: "pareja_grupo"`
+- `badgeHotwife` / `badgeCuckold` derivados de `dinamica`
+- **Forzar null:** `swingerPerfil`, `unicornPerfil` al persistir/preview C/H
+
+## Tarjeta pública
+
+`cardHTMLCuckoldHotwife` — aliasPareja, config grupo, dinámica, Buscan (toggle), precio, ciudad, Viaja, badges Hotwife/Cuckold. Sin campos swinger.
+
+## Ficha pública
+
+`renderParejaGrupoCuckoldHotwife` — shell pareja + delta C/H con toggles `mostrarBuscan`, `mostrarParticipacion`, `mostrarColaboraciones`.
+
+Preview registro: `vista=pareja` (no vista dedicada tipo unicorn).
+
+## QA (headless)
+
+```bash
+node scripts/qa-cuckold-hotwife.mjs
+node scripts/qa-cuckold-hotwife-persist.mjs
+node scripts/qa-cuckold-hotwife-render.mjs
+node scripts/qa-cuckold-hotwife-cierre.mjs
+```
+
+Regresión: incluir suites pareja/swinger/unicorn/viajes/dotados.
+
+## Smoke manual (browser)
+
+1. **Registro** — wizard C/H; validar obligatorios delta + shell pareja.
+2. **Preview tarjeta** — dinámica, Buscan, badges, Viaja.
+3. **Preview iframe** — `vista=pareja`; ficha C/H, no swinger.
+4. **Perfil público** — DEMO.pareja sin copy swinger legacy.
+5. **Anti-contaminación** — swinger/unicorn/hotwife persona sin `cuckoldHotwifePerfil`.
+
+## Fuera de alcance C/H (no mezclar)
+
+- Inbox mensajes mezclado (regla dashboard aparte)
+- Render swinger (`intercambioSwinger`, badge swinger)
+- Unicorn `persona_lifestyle`
+- Hotwife **persona** escort (subcategoriaId `hotwife`)

@@ -45,6 +45,18 @@
       },
       obligatoriosUi: ['alias', 'descripcion', 'precio', 'modalidad', 'edad']
     },
+    persona_lifestyle: {
+      titulo: 'Perfil lifestyle',
+      show: ['edad', 'alias', 'descripcion', 'precio', 'horario', 'whatsapp', 'telegram'],
+      hide: ['modalidad', 'servicios'],
+      labels: {
+        alias: 'Alias / nombre público',
+        descripcion: 'Frase corta para tu tarjeta',
+        precio: 'Precio desde (opcional)',
+        horario: 'Disponibilidad general (resumen)'
+      },
+      obligatoriosUi: ['alias', 'descripcion', 'edad']
+    },
     persona_dominatrix: {
       titulo: 'Perfil personal · dominación',
       show: ['edad', 'modalidad', 'alias', 'descripcion', 'precio', 'horario', 'servicios', 'whatsapp', 'telegram'],
@@ -100,9 +112,14 @@
     },
     pareja_grupo: {
       titulo: 'Pareja / grupo',
-      show: ['alias', 'descripcion', 'precio', 'horario', 'servicios', 'whatsapp', 'telegram'],
-      hide: ['edad', 'modalidad'],
-      labels: { alias: 'Alias del perfil grupal' },
+      show: ['alias', 'descripcion', 'precio', 'horario', 'whatsapp', 'telegram'],
+      hide: ['edad', 'modalidad', 'servicios'],
+      labels: {
+        alias: 'Alias de la pareja / grupo',
+        descripcion: 'Frase corta del perfil',
+        precio: 'Tarifa / aporte desde',
+        horario: 'Horario público (resumen)'
+      },
       obligatoriosUi: ['alias', 'descripcion']
     },
     persona_servicio_general: {
@@ -210,7 +227,15 @@
   function resolveMapaRow(subcategoriaId) {
     var idx = global.CARIHUB_REGISTRO_SCHEMA_INDEX;
     if (!idx || !idx.byId || !subcategoriaId) return null;
-    return idx.byId[subcategoriaId] || null;
+    if (idx.byId[subcategoriaId]) return idx.byId[subcategoriaId];
+    var norm = normId(subcategoriaId).replace(/_/g, ' ');
+    var keys = Object.keys(idx.byId);
+    for (var i = 0; i < keys.length; i++) {
+      var row = idx.byId[keys[i]];
+      if (!row) continue;
+      if (normId(row.subcategoriaId).replace(/_/g, ' ') === norm) return row;
+    }
+    return null;
   }
 
   function resolveFormularioUi(ctx) {
@@ -260,6 +285,7 @@
     if (arquetipo === 'persona_acompanante' || arquetipo === 'persona_dominatrix') {
       return arquetipo;
     }
+    if (arquetipo === 'persona_lifestyle') return 'persona_lifestyle';
     if (arquetipo === 'persona_creador') return 'persona_creador';
     if (arquetipo === 'persona_espectaculo') return 'persona_espectaculo';
     if (arquetipo === 'pareja_grupo') return 'pareja_grupo';
@@ -548,7 +574,9 @@
     var raw = String(input || '').trim();
     if (!raw) return '';
     var id = normId(raw);
-    if (resolveMapaRow(id)) return id;
+    var row = resolveMapaRow(raw);
+    if (row) return row.subcategoriaId;
+    if (resolveMapaRow(id)) return resolveMapaRow(id).subcategoriaId;
     if (global.CariHubCatalogos && CariHubCatalogos.idCategoria) {
       var catId = CariHubCatalogos.idCategoria(raw);
       if (catId && resolveMapaRow(catId)) return catId;
@@ -591,6 +619,13 @@
       if (row && (row.tipoPerfil === 'negocio' || row.formularioId === 'negocio_empresa')) return 'empresa';
       return 'pro';
     }
+    if (comp === 'ResultCardPareja' || comp === 'ProfileLayoutPareja') {
+      if (subId && global.CariHubResultadosDemo && CariHubResultadosDemo.vistaDeCategoriaLegacy) {
+        return CariHubResultadosDemo.vistaDeCategoriaLegacy(subId);
+      }
+      return 'pareja';
+    }
+    if (comp === 'ResultCardUnicorn') return 'unicorn';
     return 'adult';
   }
 

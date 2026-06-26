@@ -26,6 +26,7 @@
       camera: '<path d="M4 8.5h3l1.6-2.2h6.8L17 8.5h3a2 2 0 012 2v7a2 2 0 01-2 2H4a2 2 0 01-2-2v-7a2 2 0 012-2z"/><circle cx="12" cy="13" r="3.2"/>',
       clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
       briefcase: '<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2"/>',
+      plane: '<path d="M16 10l4-2-2 6-2-1-2 3-1-5-5-1 1-3h4l2-3z"/>',
       shield: '<path d="M12 3l8 3v6c0 5-3.5 8.5-8 9-4.5-.5-8-4-8-9V6l8-3z"/>'
     };
     return '<span class="' + cls + '" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + (p[name] || p.briefcase) + '</svg></span>';
@@ -47,8 +48,10 @@
         if (n === 'recibe' || n.indexOf('recib') !== -1 || n.indexOf('lugar') !== -1) set.recibe = true;
         else if (n === 'hotel' || n.indexOf('hotel') !== -1) set.hotel = true;
         else if (n === 'domicilio' || n.indexOf('domicil') !== -1) set.domicilio = true;
+        else if (n === 'viaja' || n.indexOf('viaj') !== -1) set.viaja = true;
       });
     }
+    if (!set.viaja && u.viajesDesplazamiento && u.viajesDesplazamiento.viaja === true) set.viaja = true;
     return set;
   }
 
@@ -57,7 +60,227 @@
     if (set.recibe) items.push('<span class="modchip mc-pink">' + svgIco('home') + 'Recibe</span>');
     if (set.hotel) items.push('<span class="modchip mc-purple">' + svgIco('hotel') + 'Hotel</span>');
     if (set.domicilio) items.push('<span class="modchip mc-orange">' + svgIco('car') + 'Domicilio</span>');
+    if (set.viaja) items.push('<span class="modchip mc-teal">' + svgIco('plane') + 'Viaja</span>');
     return items.join('');
+  }
+
+  function cardViajesExtraHTML(u) {
+    if (!global.CariHubViajesDesplazamiento) return '';
+    var sum = CariHubViajesDesplazamiento.cardViajesSummary(u);
+    if (!sum || sum === 'Viaja: Sí') return '';
+    return '<p class="res-card__viajes-resumen">' + safeTxt(sum) + '</p>';
+  }
+
+  function lesbiansMostrarPublico(u, visibilityKey, contentVal) {
+    if (!contentVal) return false;
+    var vis = u[visibilityKey];
+    if (vis != null && String(vis).trim() !== '') return String(vis).trim() === 'Sí';
+    return true;
+  }
+
+  function isLesbiansPerfil(u) {
+    var id = normTxt(u.subcategoriaId || u.subcategoria || '');
+    return id === 'lesbians';
+  }
+
+  function lesbiansCardExtraHTML(u) {
+    if (!isLesbiansPerfil(u)) return '';
+    var lines = [];
+    if (lesbiansMostrarPublico(u, 'mostrarAtiendoA', u.atiendoA)) {
+      lines.push('Atiende a: ' + String(u.atiendoA).trim());
+    }
+    if (lesbiansMostrarPublico(u, 'mostrarColaboraciones', u.haceColaboraciones)) {
+      lines.push('Colaboraciones: ' + String(u.haceColaboraciones).trim());
+    }
+    if (!lines.length) return '';
+    return '<p class="res-card__viajes-resumen">' + safeTxt(lines.join(' · ')) + '</p>';
+  }
+
+  function swingerMostrarPublico(u, visibilityKey, contentVal) {
+    return lesbiansMostrarPublico(u, visibilityKey, contentVal);
+  }
+
+  function isSwingerPerfil(u) {
+    var id = normTxt(u.subcategoriaId || u.subcategoria || '');
+    return id === 'swinger' || id === 'parejas swinger';
+  }
+
+  function isCuckoldHotwifePerfil(u) {
+    var id = normTxt(u.subcategoriaId || u.subcategoria || '').replace(/_/g, ' ');
+    return id === 'cuckold hotwife' || id === 'cuckold_hotwife';
+  }
+
+  function cuckoldHotwifeMostrarPublico(u, visibilityKey, contentVal) {
+    return lesbiansMostrarPublico(u, visibilityKey, contentVal);
+  }
+
+  function cuckoldHotwifeDinamicaLabel(u) {
+    if (u.dinamicaLabel) return String(u.dinamicaLabel).trim();
+    var din = String(u.dinamica || '').trim();
+    if (din === 'hotwife') return 'Hotwife';
+    if (din === 'cuckold') return 'Cuckold';
+    if (din === 'ambos') return 'Ambos / pareja flexible';
+    return din;
+  }
+
+  function cuckoldHotwifeCardBadgesHTML(u, opts) {
+    opts = opts || {};
+    return badgesCompactHTML(u, {
+      pareja: true,
+      hotwife: u.badgeHotwife === true,
+      cuckold: u.badgeCuckold === true,
+      respRapida: opts.respRapida
+    });
+  }
+
+  function cardHTMLCuckoldHotwife(u, Q) {
+    Q = Q || {};
+    var set = modalidadesSet(u);
+    var metaRight = set.viaja ? chipModalidadHTML({ viaja: true }) : '';
+    var lines = [];
+    var dinLabel = cuckoldHotwifeDinamicaLabel(u);
+    if (dinLabel) lines.push(dinLabel);
+    var buscanArr = Array.isArray(u.buscan) ? u.buscan : [];
+    if (cuckoldHotwifeMostrarPublico(u, 'mostrarBuscan', buscanArr) && buscanArr.length) {
+      lines.push('Buscan: ' + buscanArr.join(', '));
+    }
+    var descBlock = lines.length
+      ? '<p class="res-card__desc res-card__desc--compact"><span class="res-card__desc-txt">' +
+        safeTxt(lines.join(' · ')) + '</span></p>'
+      : descripcionCompactHTML(u, 'Presentación');
+    var viajesLine = set.viaja ? cardViajesExtraHTML(u) : '';
+    var configLabel = u.configuracionGrupoLabel || u.tipoPareja || '';
+    var headExtra = configLabel
+      ? '<span class="age">' + safeTxt(String(configLabel)) + '</span>'
+      : '';
+    var catLabel = (global.CariHubResultadosDemo && CariHubResultadosDemo.labelCategoria)
+      ? CariHubResultadosDemo.labelCategoria(u.categoriaPublica || u.categoria || Q.categoria || '')
+      : (u.categoriaPublica || u.categoria || Q.categoria || 'Cuckold / Hotwife');
+    return cardShell(u, Q, {
+      cardClass: 'res-card--pareja res-card--cuckold-hotwife',
+      nombre: u.aliasPareja || u.nombre || u.alias,
+      headExtra: headExtra,
+      metaRight: metaRight,
+      descBlock: descBlock + viajesLine,
+      catLabel: catLabel,
+      catIcon: 'heart',
+      badges: cuckoldHotwifeCardBadgesHTML(u, { respRapida: !u.__previewRegistro && u.respuestaRapida === true })
+    });
+  }
+
+  function swingerObjetivoPrincipal(u) {
+    if (!swingerMostrarPublico(u, 'mostrarObjetivosPerfil', u.objetivosPerfil)) return '';
+    if (u.objetivoPrincipal) return String(u.objetivoPrincipal).trim();
+    var arr = u.objetivosPerfil;
+    if (!Array.isArray(arr) || !arr.length) return '';
+    if (arr.indexOf('Todo lo anterior') >= 0) return 'Todo lo anterior';
+    return String(arr[0]).trim();
+  }
+
+  function swingerCardExtraHTML(u) {
+    return '';
+  }
+
+  function swingerCardBadgesHTML(u, opts) {
+    opts = opts || {};
+    var badges = badgesCompactHTML(u, {
+      pareja: true,
+      swinger: true,
+      respRapida: opts.respRapida
+    });
+    if (u.experienciaEnLifestyle) {
+      badges += '<span class="res-badge res-badge--lifestyle">' + safeTxt(u.experienciaEnLifestyle) + '</span>';
+    }
+    if (u.aceptanParejasPrincipiantes && String(u.aceptanParejasPrincipiantes).trim() !== 'No') {
+      badges += '<span class="res-badge res-badge--principiantes">Principiantes: ' +
+        safeTxt(u.aceptanParejasPrincipiantes) + '</span>';
+    }
+    return badges;
+  }
+
+  function cardHTMLParejaSwinger(u, Q) {
+    Q = Q || {};
+    var set = modalidadesSet(u);
+    var metaRight = set.viaja ? chipModalidadHTML({ viaja: true }) : '';
+    var lines = [];
+    var obj = swingerObjetivoPrincipal(u);
+    if (obj) lines.push(obj);
+    var compat = [];
+    if (swingerMostrarPublico(u, 'mostrarAtiendenA', u.atiendenA) && u.atiendenA) {
+      compat.push('Atienden a: ' + String(u.atiendenA).trim());
+    }
+    if (u.intercambioSwinger) {
+      compat.push('Intercambio: ' + String(u.intercambioSwinger).trim());
+    }
+    if (compat.length) lines.push(compat.join(' · '));
+    var descBlock = lines.length
+      ? '<p class="res-card__desc res-card__desc--compact"><span class="res-card__desc-txt">' +
+        safeTxt(lines.join(' · ')) + '</span></p>'
+      : descripcionCompactHTML(u, 'Presentación');
+    var viajesLine = set.viaja ? cardViajesExtraHTML(u) : '';
+    var configLabel = u.configuracionGrupoLabel || u.tipoPareja || '';
+    var headExtra = configLabel
+      ? '<span class="age">' + safeTxt(String(configLabel)) + '</span>'
+      : '';
+    var catLabel = (global.CariHubResultadosDemo && CariHubResultadosDemo.labelCategoria)
+      ? CariHubResultadosDemo.labelCategoria(u.categoriaPublica || u.categoria || Q.categoria || '')
+      : (u.categoriaPublica || u.categoria || Q.categoria || 'Swinger');
+    return cardShell(u, Q, {
+      cardClass: 'res-card--pareja res-card--swinger',
+      nombre: u.aliasPareja || u.nombre || u.alias,
+      headExtra: headExtra,
+      metaRight: metaRight,
+      descBlock: descBlock + viajesLine,
+      catLabel: catLabel,
+      catIcon: 'heart',
+      badges: swingerCardBadgesHTML(u, { respRapida: !u.__previewRegistro && u.respuestaRapida === true })
+    });
+  }
+
+  function isUnicornPerfil(u) {
+    var id = normTxt(u.subcategoriaId || u.subcategoria || '');
+    return id === 'unicorns' || id === 'unicorn';
+  }
+
+  function objetivoPrincipalUnicorn(u) {
+    if (!lesbiansMostrarPublico(u, 'mostrarObjetivosPerfil', u.objetivosPerfil)) return '';
+    var arr = u.objetivosPerfil;
+    if (!Array.isArray(arr) || !arr.length) return '';
+    if (arr.indexOf('Todo lo anterior') >= 0) return 'Todo lo anterior';
+    return String(arr[0]).trim();
+  }
+
+  function cardHTMLUnicorn(u, Q) {
+    Q = Q || {};
+    var edad = u.edad != null ? String(u.edad).trim() + ' años' : '';
+    var set = modalidadesSet(u);
+    var metaRight = set.viaja ? chipModalidadHTML({ viaja: true }) : '';
+    var lines = [];
+    var obj = objetivoPrincipalUnicorn(u);
+    if (obj) lines.push(obj);
+    var busco = Array.isArray(u.buscoConocer) && u.buscoConocer.length
+      ? u.buscoConocer.join(', ')
+      : (Array.isArray(u.buscan) && u.buscan.length ? u.buscan.join(', ') : String(u.buscan || '').trim());
+    if (busco) lines.push('Busco: ' + busco);
+    var descBlock = lines.length
+      ? '<p class="res-card__desc res-card__desc--compact"><span class="res-card__desc-txt">' + safeTxt(lines.join(' · ')) + '</span></p>'
+      : descripcionCompactHTML(u, 'Presentación');
+    var viajesLine = set.viaja ? cardViajesExtraHTML(u) : '';
+    var catLabel = (global.CariHubResultadosDemo && CariHubResultadosDemo.labelCategoria)
+      ? CariHubResultadosDemo.labelCategoria(u.categoriaPublica || u.categoria || Q.categoria || '')
+      : (u.categoriaPublica || u.categoria || Q.categoria || '');
+    return cardShell(u, Q, {
+      cardClass: 'res-card--unicorn',
+      headExtra: edad ? '<span class="age">' + safeTxt(edad) + '</span>' : '',
+      metaRight: metaRight,
+      descBlock: descBlock + viajesLine,
+      catLabel: catLabel,
+      badges: badgesCompactHTML(u, { unicorn: u.badgeUnicorn !== false })
+    });
+  }
+
+  function cardPerfilExtraHTML(u) {
+    return cardViajesExtraHTML(u) + lesbiansCardExtraHTML(u) + swingerCardExtraHTML(u);
   }
 
   function ubicacionCorta(u) {
@@ -113,11 +336,15 @@
   function badgesCompactHTML(u, opts) {
     opts = opts || {};
     var items = [];
+    if (opts.pareja) items.push('<span class="res-badge res-badge--pareja">Pareja</span>');
+    if (opts.swinger) items.push('<span class="res-badge res-badge--swinger">Swinger</span>');
     if (opts.vip) items.push('<span class="res-badge res-badge--vip">VIP</span>');
     if (opts.cedula) items.push('<span class="res-badge res-badge--ver">Cédula</span>');
     if (opts.negocio) items.push('<span class="res-badge res-badge--ver">Verificado</span>');
     if (opts.lgbt || u.badgeLgbt) items.push('<span class="res-badge res-badge--lgbt">LGBT+</span>');
     if (opts.hotwife || u.badgeHotwife) items.push('<span class="res-badge res-badge--hotwife">Hotwife</span>');
+    if (opts.cuckold || u.badgeCuckold) items.push('<span class="res-badge res-badge--cuckold">Cuckold</span>');
+    if (opts.unicorn || u.badgeUnicorn) items.push('<span class="res-badge res-badge--unicorn">🦄 Unicornio</span>');
     if (opts.respRapida) items.push('<span class="res-badge res-badge--fast">Respuesta rápida</span>');
     else if (u.nueva) items.push('<span class="res-badge res-badge--new">Nueva</span>');
     if (!items.length) return '';
@@ -223,6 +450,7 @@
     var edad = u.edad != null ? String(u.edad).trim() + ' años' : '';
     var set = modalidadesSet(u);
     var mods = chipModalidadHTML(set);
+    var viajesLine = cardPerfilExtraHTML(u);
     var catLabel = (global.CariHubResultadosDemo && CariHubResultadosDemo.labelCategoria)
       ? CariHubResultadosDemo.labelCategoria(u.categoriaPublica || u.categoria || Q.categoria || '')
       : (u.categoriaPublica || u.categoria || Q.categoria || '');
@@ -231,6 +459,7 @@
       cardClass: 'res-card--adult',
       headExtra: edad ? '<span class="age">' + safeTxt(edad) + '</span>' : '',
       metaRight: mods,
+      descBlock: descripcionCompactHTML(u) + viajesLine,
       catLabel: catLabel,
       badges: badgesCompactHTML(u, {
         vip: vip,
@@ -292,6 +521,34 @@
     });
   }
 
+  function cardHTMLPareja(u, Q) {
+    if (isCuckoldHotwifePerfil(u)) return cardHTMLCuckoldHotwife(u, Q);
+    if (isSwingerPerfil(u)) return cardHTMLParejaSwinger(u, Q);
+    Q = Q || {};
+    var set = modalidadesSet(u);
+    var mods = chipModalidadHTML(set);
+    var viajesLine = cardPerfilExtraHTML(u);
+    var catLabel = (global.CariHubResultadosDemo && CariHubResultadosDemo.labelCategoria)
+      ? CariHubResultadosDemo.labelCategoria(u.categoriaPublica || u.categoria || Q.categoria || '')
+      : (u.categoriaPublica || u.categoria || Q.categoria || '');
+    var configLabel = u.configuracionGrupoLabel || u.tipoPareja || '';
+    var headExtra = configLabel
+      ? '<span class="age">' + safeTxt(String(configLabel)) + '</span>'
+      : '';
+    var miembrosLine = u.miembrosResumen || u.miembrosEdad
+      ? '<p class="res-card__viajes-resumen">' + safeTxt(String(u.miembrosResumen || u.miembrosEdad)) + '</p>'
+      : '';
+    return cardShell(u, Q, {
+      cardClass: 'res-card--pareja',
+      nombre: u.aliasPareja || u.nombre || u.alias,
+      headExtra: headExtra,
+      metaRight: mods,
+      descBlock: descripcionCompactHTML(u, 'Presentación') + miembrosLine + viajesLine,
+      catLabel: catLabel,
+      badges: badgesCompactHTML(u, { respRapida: !u.__previewRegistro && u.respuestaRapida === true })
+    });
+  }
+
   function cardHTML(u, Q) {
     if (global.CariHubFieldEngineLite && CariHubFieldEngineLite.enriquecerPerfilPublico) {
       CariHubFieldEngineLite.enriquecerPerfilPublico(u, {
@@ -300,9 +557,12 @@
       });
     }
     var comp = resolveComponente(u, Q);
+    if (comp === 'ResultCardUnicorn' || isUnicornPerfil(u)) return cardHTMLUnicorn(u, Q);
+    if (isCuckoldHotwifePerfil(u)) return cardHTMLCuckoldHotwife(u, Q);
     if (comp === 'ResultCardNegocio') return cardHTMLNegocio(u, Q);
     if (comp === 'ResultCardProfesional') return cardHTMLProfesional(u, Q);
     if (comp === 'ResultCardServicio') return cardHTMLServicio(u, Q);
+    if (comp === 'ResultCardPareja') return cardHTMLPareja(u, Q);
     return cardHTMLAdultos(u, Q);
   }
 
@@ -399,6 +659,11 @@
     cardHTMLNegocio: cardHTMLNegocio,
     cardHTMLServicio: cardHTMLServicio,
     cardHTMLProfesional: cardHTMLProfesional,
+    cardHTMLPareja: cardHTMLPareja,
+    cardHTMLParejaSwinger: cardHTMLParejaSwinger,
+    cardHTMLCuckoldHotwife: cardHTMLCuckoldHotwife,
+    cardHTMLUnicorn: cardHTMLUnicorn,
+    isCuckoldHotwifePerfil: isCuckoldHotwifePerfil,
     resolveComponente: resolveComponente,
     applyPublicProfilePresentation: applyPublicProfilePresentation,
     PUB_BLOCKS: PUB_BLOCKS

@@ -15,7 +15,8 @@
       "fotoPrincipal": { "id": "fotoPrincipal", "label": "Foto principal", "tipo": "image" },
       "galeria": { "id": "galeria", "label": "Galería", "tipo": "image[]" },
       "precioDesde": { "id": "precioDesde", "label": "Precio desde (MXN)", "tipo": "currency" },
-      "modalidades": { "id": "modalidades", "label": "Modalidades", "tipo": "checkboxGroup", "opciones": ["recibe", "hotel", "domicilio"] },
+      "modalidades": { "id": "modalidades", "label": "Modalidades", "tipo": "checkboxGroup", "opciones": ["recibe", "hotel", "domicilio", "viaja"] },
+      "viajesDesplazamiento": { "id": "viajesDesplazamiento", "label": "Viajes y desplazamiento", "tipo": "group", "campos": ["viaja", "alcanceDesplazamiento", "viajesProgramados", "gastosTraslado", "anticipacionViaje", "notasViaje"] },
       "disponibilidad": { "id": "disponibilidad", "label": "Disponibilidad", "tipo": "enum", "opciones": ["disponible", "ocupada", "con_cita"] },
       "sobreMi": { "id": "sobreMi", "label": "Sobre mí", "tipo": "richtext", "iaCopy": true, "tonoPublico": "discreto" },
       "serviciosIncluidos": { "id": "serviciosIncluidos", "label": "Servicios incluidos", "tipo": "checklist", "iaCopy": true },
@@ -52,6 +53,15 @@
       "limitesSesion": { "id": "limitesSesion", "label": "Límites y reglas", "tipo": "richtext", "iaCopy": true },
       "listaFetiches": { "id": "listaFetiches", "label": "Fetiches ofrecidos", "tipo": "tags" },
       "aliasPareja": { "id": "aliasPareja", "label": "Alias de pareja / grupo", "tipo": "text" },
+      "configuracionGrupo": {
+        "id": "configuracionGrupo",
+        "label": "Configuración del grupo",
+        "tipo": "enum",
+        "opciones": ["pareja_hm", "pareja_mm", "pareja_hh", "grupo", "otra"]
+      },
+      "intercambioSwinger": { "id": "intercambioSwinger", "label": "Intercambio swinger", "tipo": "enum", "opciones": ["Sí", "No", "A convenir"] },
+      "modalidadInteraccion": { "id": "modalidadInteraccion", "label": "Modalidad de interacción", "tipo": "checklist" },
+      "estiloPareja": { "id": "estiloPareja", "label": "Estilo de pareja", "tipo": "checklist" },
       "dinamica": { "id": "dinamica", "label": "Dinámica", "tipo": "select" },
       "buscan": { "id": "buscan", "label": "Qué buscan", "tipo": "tags", "iaCopy": true },
       "miembros": { "id": "miembros", "label": "Perfiles vinculados", "tipo": "memberList" },
@@ -73,7 +83,67 @@
       "licenciaOperacion": { "id": "licenciaOperacion", "label": "Licencia / permiso", "tipo": "file", "privado": true },
       "consentimientoDual": { "id": "consentimientoDual", "label": "Consentimiento de ambos miembros", "tipo": "boolean", "privado": true },
       "terminosAceptados": { "id": "terminosAceptados", "label": "Términos aceptados", "tipo": "boolean", "privado": true },
-      "mayorEdadConfirmado": { "id": "mayorEdadConfirmado", "label": "Mayor de edad confirmado", "tipo": "boolean", "privado": true }
+      "mayorEdadConfirmado": { "id": "mayorEdadConfirmado", "label": "Mayor de edad confirmado", "tipo": "boolean", "privado": true },
+      "realizaTrios": { "id": "realizaTrios", "label": "¿Realizas tríos?", "tipo": "select", "opciones": ["Sí", "No", "A convenir"] },
+      "colaboracionContenido": { "id": "colaboracionContenido", "label": "Colaboración para contenido", "tipo": "select", "opciones": ["Sí", "No", "A convenir"] },
+      "esBisexual": { "id": "esBisexual", "label": "¿Eres bisexual?", "tipo": "select", "opciones": ["Sí", "No"] },
+      "tiposTrios": { "id": "tiposTrios", "label": "Tipo de trío", "tipo": "checklist" },
+      "experienciaVip": { "id": "experienciaVip", "label": "Experiencia VIP que ofreces", "tipo": "checklist", "iaCopy": true },
+      "distintivosVip": { "id": "distintivosVip", "label": "Distintivos y compromisos VIP", "tipo": "checklist", "iaCopy": true },
+      "buscanConocer": { "id": "buscanConocer", "label": "Busco conocer", "tipo": "checklist", "iaCopy": true },
+      "tipoCitaPreferida": { "id": "tipoCitaPreferida", "label": "Tipo de cita preferida", "tipo": "checklist" },
+      "personalidadPredominante": { "id": "personalidadPredominante", "label": "Personalidad predominante", "tipo": "select" },
+      "estiloPersonal": { "id": "estiloPersonal", "label": "Estilo personal", "tipo": "select" },
+      "disponibilidadAgenda": { "id": "disponibilidadAgenda", "label": "Disponibilidad", "tipo": "checklist" },
+      "dinamicasParticipa": { "id": "dinamicasParticipa", "label": "Dinámicas en las que participas", "tipo": "checklist" },
+      "presentacionTom": { "id": "presentacionTom", "label": "Presentación", "tipo": "select" },
+      "estiloPredominante": { "id": "estiloPredominante", "label": "Estilo predominante", "tipo": "select" },
+      "personalidad": { "id": "personalidad", "label": "Personalidad", "tipo": "text", "maxLength": 120 },
+      "pasatiempos": { "id": "pasatiempos", "label": "Pasatiempos", "tipo": "text", "maxLength": 200 },
+      "atiendoA": { "id": "atiendoA", "label": "Atiendo a", "tipo": "select" },
+      "estiloLesbian": { "id": "estiloLesbian", "label": "Estilo", "tipo": "select" },
+      "participacionPareja": { "id": "participacionPareja", "label": "Participación de la pareja", "tipo": "select" },
+      "tipoPublico": { "id": "tipoPublico", "label": "Busco conocer", "tipo": "select" },
+      "realizaGangBang": { "id": "realizaGangBang", "label": "¿Participas en gang bang?", "tipo": "select", "opciones": ["Sí", "No", "A convenir"] },
+      "longitudCm": { "id": "longitudCm", "label": "Longitud (cm)", "tipo": "text", "maxLength": 4 },
+      "categoriaTamaño": { "id": "categoriaTamaño", "label": "Categoría de tamaño", "tipo": "text", "notaPublica": "Calculada automáticamente desde longitudCm." },
+      "atencionHombres": { "id": "atencionHombres", "label": "Atención a hombres", "tipo": "select", "opciones": ["Sí", "No"] },
+      "atencionMujeres": { "id": "atencionMujeres", "label": "Atención a mujeres", "tipo": "select", "opciones": ["Sí", "No"] },
+      "atencionParejas": { "id": "atencionParejas", "label": "Atención a parejas", "tipo": "select", "opciones": ["Sí", "No"] },
+      "atencionTrans": { "id": "atencionTrans", "label": "Atención a personas trans", "tipo": "select", "opciones": ["Sí", "No"] },
+      "objetivosPerfil": { "id": "objetivosPerfil", "label": "Objetivo del perfil", "tipo": "checklist", "iaCopy": true },
+      "tipoInteraccion": { "id": "tipoInteraccion", "label": "Tipo de interacción", "tipo": "checklist", "iaCopy": true },
+      "atiendenA": { "id": "atiendenA", "label": "Atienden a", "tipo": "select" },
+      "aceptanSolteros": { "id": "aceptanSolteros", "label": "¿Aceptan personas solteras?", "tipo": "select" },
+      "aceptanParejasPrincipiantes": { "id": "aceptanParejasPrincipiantes", "label": "¿Reciben parejas principiantes?", "tipo": "select", "opciones": ["Sí", "No", "A convenir"] },
+      "aceptanPrincipiantes": { "id": "aceptanPrincipiantes", "label": "¿Reciben principiantes?", "tipo": "select", "opciones": ["Sí", "No", "A convenir"] },
+      "experienciaEnLifestyle": { "id": "experienciaEnLifestyle", "label": "Experiencia en lifestyle", "tipo": "select" },
+      "haceColaboraciones": { "id": "haceColaboraciones", "label": "Colaboraciones con otros anunciantes", "tipo": "select", "opciones": ["Sí", "No", "A convenir"] },
+      "colaboraCon": { "id": "colaboraCon", "label": "Colabora con", "tipo": "checklist" },
+      "dinamicaLabel": { "id": "dinamicaLabel", "label": "Etiqueta de dinámica", "tipo": "text", "maxLength": 40, "notaPublica": "Derivada de dinamica para tarjeta y ficha." },
+      "tipoExperiencia": { "id": "tipoExperiencia", "label": "Tipo de experiencia", "tipo": "checklist", "iaCopy": true },
+      "buscoConocer": { "id": "buscoConocer", "label": "Busco conocer", "tipo": "checklist", "iaCopy": true },
+      "tipoUnicornio": { "id": "tipoUnicornio", "label": "Tipo de unicornio", "tipo": "select" },
+      "tipoParejaPreferida": { "id": "tipoParejaPreferida", "label": "Tipo de pareja preferida", "tipo": "checklist" },
+      "finalidadEncuentro": { "id": "finalidadEncuentro", "label": "Finalidad del encuentro", "tipo": "checklist", "iaCopy": true },
+      "estadoPerfil": { "id": "estadoPerfil", "label": "¿Qué buscas actualmente?", "tipo": "select", "iaCopy": true },
+      "experiencia": { "id": "experiencia", "label": "Experiencia lifestyle", "tipo": "select" },
+      "ambientePreferido": { "id": "ambientePreferido", "label": "Ambiente preferido", "tipo": "checklist" },
+      "estilo": { "id": "estilo", "label": "Estilo", "tipo": "select" },
+      "serviciosLifestyle": { "id": "serviciosLifestyle", "label": "Servicios lifestyle", "tipo": "checklist", "iaCopy": true },
+      "mostrarObjetivosPerfil": { "id": "mostrarObjetivosPerfil", "label": "Mostrar objetivos en tarjeta y perfil", "tipo": "select", "opciones": ["Sí", "No"] },
+      "mostrarAtiendenA": { "id": "mostrarAtiendenA", "label": "Mostrar «Atienden a» en tarjeta y perfil", "tipo": "select", "opciones": ["Sí", "No"] },
+      "mostrarColaboraciones": { "id": "mostrarColaboraciones", "label": "Mostrar colaboraciones en tarjeta y perfil", "tipo": "select", "opciones": ["Sí", "No"] },
+      "mostrarBuscan": { "id": "mostrarBuscan", "label": "Mostrar «Buscan» en tarjeta y perfil", "tipo": "select", "opciones": ["Sí", "No"] },
+      "mostrarParticipacion": { "id": "mostrarParticipacion", "label": "Mostrar participación de pareja en tarjeta y perfil", "tipo": "select", "opciones": ["Sí", "No"] },
+      "mostrarAtiendoA": { "id": "mostrarAtiendoA", "label": "Mostrar «Atiendo a» en tarjeta y perfil", "tipo": "select", "opciones": ["Sí", "No"] },
+      "mostrarLongitudPublico": { "id": "mostrarLongitudPublico", "label": "Mostrar longitud en perfil público", "tipo": "select", "opciones": ["Sí", "No"] },
+      "mostrarAtencionHombresPublico": { "id": "mostrarAtencionHombresPublico", "label": "Mostrar atención a hombres en perfil", "tipo": "select", "opciones": ["Sí", "No"] },
+      "mostrarAtencionMujeresPublico": { "id": "mostrarAtencionMujeresPublico", "label": "Mostrar atención a mujeres en perfil", "tipo": "select", "opciones": ["Sí", "No"] },
+      "mostrarAtencionParejasPublico": { "id": "mostrarAtencionParejasPublico", "label": "Mostrar atención a parejas en perfil", "tipo": "select", "opciones": ["Sí", "No"] },
+      "mostrarAtencionTransPublico": { "id": "mostrarAtencionTransPublico", "label": "Mostrar atención trans en perfil", "tipo": "select", "opciones": ["Sí", "No"] },
+      "mostrarRealizaTriosPublico": { "id": "mostrarRealizaTriosPublico", "label": "Mostrar tríos en perfil", "tipo": "select", "opciones": ["Sí", "No"] },
+      "mostrarColaboracionContenidoPublico": { "id": "mostrarColaboracionContenidoPublico", "label": "Mostrar colaboración contenido en perfil", "tipo": "select", "opciones": ["Sí", "No"] }
     },
     "base": {
       "camposPublicosResultados": ["subcategoriaId", "alias", "tagline", "geo", "fotoPrincipal", "galeria"],
@@ -139,6 +209,7 @@
       "ResultCardPersona": "Tarjeta vertical foto + alias + edad + modalidades",
       "ResultCardNegocio": "Tarjeta fachada + horario + precio desde/entrada",
       "ResultCardPareja": "Tarjeta duo + dinámica + qué buscan",
+      "ResultCardUnicorn": "Tarjeta persona lifestyle + objetivo + busco conocer",
       "ResultCardCreador": "Tarjeta preview + badges plataformas",
       "ResultCardEspectaculo": "Tarjeta show + venue + horario",
       "ProfileLayoutPersona": "Hero slider + servicios + físico + contacto",
@@ -171,7 +242,7 @@
       "tipoPerfil": "persona",
       "componentes": { "resultados": "ResultCardPersona", "perfil": "ProfileLayoutPersona" },
       "camposPublicosResultados": ["edad", "precioDesde", "modalidades", "disponibilidad"],
-      "camposPublicosPerfil": ["edad", "precioDesde", "modalidades", "disponibilidad", "serviciosIncluidos", "serviciosNoRealizo", "nivelServicio", "fisico", "idiomas", "orientacion", "horarioMinimo", "horarioDetalle"],
+      "camposPublicosPerfil": ["edad", "precioDesde", "modalidades", "viajesDesplazamiento", "disponibilidad", "serviciosIncluidos", "serviciosNoRealizo", "nivelServicio", "fisico", "idiomas", "orientacion", "horarioMinimo", "horarioDetalle"],
       "camposPrivados": ["whatsappPrivado", "ineFrente", "ineReverso", "selfieVerificacion"],
       "obligatoriosExtra": ["edad", "precioDesde", "modalidades", "serviciosIncluidos", "serviciosNoRealizo", "fisico.estatura", "fisico.peso", "horarioMinimo", "ineFrente", "ineReverso", "selfieVerificacion"],
       "opcionalesExtra": ["orientacion", "horarioDetalle", "disponibilidad", "nivelServicio"],
@@ -183,6 +254,28 @@
         "modalidades": "Indica dónde atiendes: tu espacio, hotel o domicilio del cliente."
       },
       "keywordsIA": ["escort", "acompañante", "citas", "compañía", "atención personal"]
+    },
+    "persona_lifestyle": {
+      "tipoPerfil": "persona",
+      "componentes": { "resultados": "ResultCardUnicorn", "perfil": "ProfileLayoutAdultos" },
+      "camposPublicosResultados": ["alias", "edad", "objetivosPerfil", "buscoConocer", "geo", "precioDesde", "viajesDesplazamiento"],
+      "camposPublicosPerfil": [
+        "edad", "objetivosPerfil", "tipoUnicornio", "buscoConocer", "tipoParejaPreferida",
+        "finalidadEncuentro", "estadoPerfil", "haceColaboraciones", "colaboraCon", "experiencia",
+        "ambientePreferido", "estilo", "modalidades", "viajesDesplazamiento", "idiomas",
+        "metodosPago", "serviciosLifestyle", "horarioDetalle", "sobreMi"
+      ],
+      "camposPrivados": ["whatsappPrivado", "ineFrente", "ineReverso", "selfieVerificacion"],
+      "obligatoriosExtra": ["edad", "objetivosPerfil", "tipoUnicornio", "buscoConocer", "haceColaboraciones", "estadoPerfil", "modalidades"],
+      "opcionalesExtra": ["precioDesde", "tipoParejaPreferida", "finalidadEncuentro", "experiencia", "ambientePreferido", "estilo", "serviciosLifestyle"],
+      "fotosMin": 3,
+      "verificacionTipo": "persona_estandar",
+      "textosAyuda": {
+        "tagline": "Frase corta y clara sobre qué buscas como unicornio.",
+        "estadoPerfil": "Indica qué buscas en este momento — puedes actualizarlo después.",
+        "objetivosPerfil": "Objetivos generales del perfil lifestyle."
+      },
+      "keywordsIA": ["unicorn", "unicornio", "lifestyle", "pareja", "trío"]
     },
     "persona_creador": {
       "tipoPerfil": "creador",
@@ -227,10 +320,10 @@
     "pareja_grupo": {
       "tipoPerfil": "pareja_grupo",
       "componentes": { "resultados": "ResultCardPareja", "perfil": "ProfileLayoutPareja" },
-      "camposPublicosResultados": ["aliasPareja", "dinamica", "buscan", "geo", "disponibilidad"],
-      "camposPublicosPerfil": ["aliasPareja", "dinamica", "buscan", "miembros", "sobreMi", "reglasAcceso"],
+      "camposPublicosResultados": ["aliasPareja", "configuracionGrupo", "dinamica", "buscan", "geo", "disponibilidad"],
+      "camposPublicosPerfil": ["aliasPareja", "configuracionGrupo", "dinamica", "buscan", "miembros", "sobreMi", "reglasAcceso", "modalidades", "viajesDesplazamiento", "metodosPago", "horarioDetalle"],
       "camposPrivados": ["consentimientoDual", "ineFrente", "selfieVerificacion", "whatsappPrivado"],
-      "obligatoriosExtra": ["aliasPareja", "dinamica", "buscan", "miembros", "consentimientoDual"],
+      "obligatoriosExtra": ["aliasPareja", "configuracionGrupo", "miembros", "consentimientoDual", "modalidades", "metodosPago"],
       "opcionalesExtra": ["reglasAcceso"],
       "fotosMin": 4,
       "verificacionTipo": "pareja_dual",
@@ -553,13 +646,32 @@
       "arquetipo": "pareja_grupo",
       "tipoPerfil": "pareja_grupo",
       "heredaDe": "plantillasArquetipo.pareja_grupo",
-      "delta": { "dinamicaOpciones": ["pareja_swinger", "single_swinger"],
-        "pendienteRegistro": {
-          "nota": "Al implementar formulario pareja swinger (arquetipo pareja_grupo), agregar campos públicos: realizaGangBang, colaboracionContenidoEnPareja",
-          "camposSugeridos": [
-            { "id": "realizaGangBang", "label": "¿Realizan gang bang?", "tipo": "select", "opciones": ["Sí", "No", "Bajo acuerdo previo"] },
-            { "id": "colaboracionContenidoEnPareja", "label": "Colaboración para contenido en pareja", "tipo": "select", "opciones": ["Sí", "No", "Bajo acuerdo previo"] }
-          ]
+      "delta": {
+        "dinamicaOpciones": ["pareja_swinger", "single_swinger"],
+        "camposPublicosPerfil": [
+          "objetivosPerfil", "intercambioSwinger", "tipoInteraccion", "modalidadInteraccion",
+          "configuracionGrupo", "atiendenA", "aceptanSolteros", "aceptanParejasPrincipiantes",
+          "experienciaEnLifestyle", "haceColaboraciones", "colaboraCon",
+          "estiloPareja", "modalidades", "viajesDesplazamiento"
+        ],
+        "camposVisibilidadPublica": ["mostrarObjetivosPerfil", "mostrarAtiendenA", "mostrarColaboraciones"],
+        "obligatoriosExtra": [
+          "objetivosPerfil", "intercambioSwinger", "tipoInteraccion", "modalidadInteraccion",
+          "atiendenA", "haceColaboraciones", "modalidades"
+        ],
+        "textosAyuda": {
+          "objetivosPerfil": "Marca uno o varios objetivos del perfil.",
+          "intercambioSwinger": "Indica si realizan intercambio swinger.",
+          "tipoInteraccion": "Qué buscan o qué tipo de experiencia ofrecen.",
+          "modalidadInteraccion": "Cómo prefieren que sea la interacción.",
+          "configuracionGrupo": "Configuración de quienes publican (shell base pareja/grupo).",
+          "atiendenA": "A quién reciben o con quién buscan conectar.",
+          "aceptanSolteros": "Opcional — ayuda a filtrar contactos.",
+          "aceptanParejasPrincipiantes": "Opcional — si reciben parejas nuevas en el ambiente.",
+          "experienciaEnLifestyle": "Opcional — nivel de experiencia en lifestyle (no es verificación de cuenta).",
+          "haceColaboraciones": "Colaboraciones con otros anunciantes.",
+          "colaboraCon": "Obligatorio si respondiste Sí; opcional si es A convenir.",
+          "estiloPareja": "Estilo general de la pareja (opcional)."
         }
       },
       "keywordsIA": ["swinger", "pareja", "lifestyle", "intercambio"]
@@ -567,12 +679,28 @@
     {
       "subcategoriaId": "unicorns",
       "nombre": "Unicorns",
-      "arquetipo": "pareja_grupo",
-      "tipoPerfil": "pareja_grupo",
-      "heredaDe": "plantillasArquetipo.pareja_grupo",
+      "arquetipo": "persona_lifestyle",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_lifestyle",
       "delta": {
-        "obligatoriosExtra": ["buscan"],
-        "textosAyuda": { "buscan": "Indica si buscan pareja, unicorn o dinámica específica." }
+        "badges": ["unicorn"],
+        "camposPublicosPerfil": [
+          "objetivosPerfil", "tipoUnicornio", "buscoConocer", "tipoParejaPreferida",
+          "finalidadEncuentro", "estadoPerfil", "haceColaboraciones", "colaboraCon",
+          "experiencia", "ambientePreferido", "estilo", "modalidades", "viajesDesplazamiento",
+          "serviciosLifestyle"
+        ],
+        "camposVisibilidadPublica": ["mostrarObjetivosPerfil", "mostrarColaboraciones"],
+        "obligatoriosExtra": [
+          "objetivosPerfil", "tipoUnicornio", "buscoConocer", "haceColaboraciones", "estadoPerfil", "modalidades"
+        ],
+        "textosAyuda": {
+          "buscoConocer": "Indica a quién te gustaría conocer.",
+          "estadoPerfil": "Qué buscas actualmente — actualizable con el tiempo.",
+          "tipoUnicornio": "Mujer, hombre o persona no binaria.",
+          "haceColaboraciones": "Disponibilidad para colaborar con otros anunciantes.",
+          "colaboraCon": "Tipos de anunciantes (solo si respondiste Sí)."
+        }
       },
       "keywordsIA": ["unicorn", "unicornio", "trío", "pareja busca"]
     },
@@ -584,7 +712,27 @@
       "heredaDe": "plantillasArquetipo.pareja_grupo",
       "delta": {
         "dinamicaOpciones": ["cuckold", "hotwife", "ambos"],
-        "obligatoriosExtra": ["dinamica", "miembros"]
+        "camposPublicosPerfil": [
+          "dinamica", "dinamicaLabel", "buscan", "tipoExperiencia", "participacionPareja",
+          "aceptanSolteros", "aceptanPrincipiantes", "experienciaEnLifestyle",
+          "haceColaboraciones", "colaboraCon", "configuracionGrupo", "miembros",
+          "reglasAcceso", "modalidades", "viajesDesplazamiento", "metodosPago", "horarioDetalle", "sobreMi"
+        ],
+        "camposVisibilidadPublica": ["mostrarBuscan", "mostrarParticipacion", "mostrarColaboraciones"],
+        "obligatoriosExtra": [
+          "dinamica", "buscan", "tipoExperiencia", "participacionPareja", "miembros", "modalidades"
+        ],
+        "textosAyuda": {
+          "dinamica": "Indica la dinámica principal de la pareja.",
+          "buscan": "Tipo de personas o entornos con los que buscan conectar.",
+          "tipoExperiencia": "Qué tipo de experiencias o contextos les interesan.",
+          "participacionPareja": "Cómo participa el cónyuge no activo en la dinámica.",
+          "aceptanSolteros": "Opcional — ayuda a filtrar contactos.",
+          "aceptanPrincipiantes": "Opcional — si reciben principiantes en el ambiente.",
+          "experienciaEnLifestyle": "Opcional — nivel de experiencia en lifestyle.",
+          "haceColaboraciones": "Colaboraciones con otros anunciantes.",
+          "colaboraCon": "Obligatorio si respondiste Sí."
+        }
       },
       "keywordsIA": ["cuckold", "hotwife", "bull", "pareja"]
     },
@@ -632,7 +780,20 @@
       "arquetipo": "persona_acompanante",
       "tipoPerfil": "persona",
       "heredaDe": "plantillasArquetipo.persona_acompanante",
-      "delta": { "obligatoriosExtra": ["orientacion"], "badges": ["lgbt"] },
+      "delta": {
+        "obligatoriosExtra": ["orientacion", "atiendoA", "haceColaboraciones"],
+        "badges": ["lgbt"],
+        "camposPublicosPerfil": [
+          "atiendoA", "haceColaboraciones", "colaboraCon", "estiloLesbian"
+        ],
+        "camposVisibilidadPublica": ["mostrarAtiendoA", "mostrarColaboraciones"],
+        "heredaFormularioEscort": true,
+        "textosAyuda": {
+          "orientacion": "Indica orientación y tipo de clientela.",
+          "atiendoA": "Mujeres, parejas o ambos.",
+          "haceColaboraciones": "Colaboraciones con otras anunciantes (distinto de colaboración para contenido)."
+        }
+      },
       "keywordsIA": ["lesbiana", "mujer", "lgbt"]
     },
     {
@@ -641,7 +802,19 @@
       "arquetipo": "persona_acompanante",
       "tipoPerfil": "persona",
       "heredaDe": "plantillasArquetipo.persona_acompanante",
-      "delta": { "camposPublicosPerfil": ["identidadGenero"] },
+      "delta": {
+        "camposPublicosPerfil": [
+          "presentacionTom", "estiloPredominante", "realizaTrios", "colaboracionContenido",
+          "personalidad", "pasatiempos"
+        ],
+        "badges": ["lgbt"],
+        "heredaFormularioEscort": true,
+        "textosAyuda": {
+          "presentacionTom": "Masculina, andrógina o tomboy clásica.",
+          "estiloPredominante": "Deportivo, urbano, casual, streetwear, rockero o elegante.",
+          "colaboracionContenido": "Si colaboras en contenido para redes o plataformas."
+        }
+      },
       "keywordsIA": ["tomboy", "andro"]
     },
     {
@@ -650,7 +823,19 @@
       "arquetipo": "persona_acompanante",
       "tipoPerfil": "persona",
       "heredaDe": "plantillasArquetipo.persona_acompanante",
-      "delta": { "camposPublicosPerfil": ["identidadGenero"] },
+      "delta": {
+        "camposPublicosPerfil": [
+          "presentacionTom", "estiloPredominante", "realizaTrios", "colaboracionContenido",
+          "personalidad", "pasatiempos"
+        ],
+        "badges": ["lgbt"],
+        "heredaFormularioEscort": true,
+        "textosAyuda": {
+          "presentacionTom": "Muy femenina, femenina o andrógina.",
+          "estiloPredominante": "Elegante, glamour, casual, kawaii, gótico o cosplay.",
+          "colaboracionContenido": "Si colaboras en contenido para redes o plataformas."
+        }
+      },
       "keywordsIA": ["tom fem", "fem"]
     },
     {
@@ -661,8 +846,23 @@
       "heredaDe": "plantillasArquetipo.persona_acompanante",
       "delta": {
         "camposPublicosResultados": [],
+        "camposPublicosPerfil": [
+          "longitudCm", "categoriaTamaño", "atencionHombres", "atencionMujeres",
+          "atencionParejas", "atencionTrans", "realizaTrios", "colaboracionContenido"
+        ],
+        "camposVisibilidadPublica": [
+          "mostrarLongitudPublico", "mostrarAtencionHombresPublico",
+          "mostrarAtencionMujeresPublico", "mostrarAtencionParejasPublico",
+          "mostrarAtencionTransPublico", "mostrarRealizaTriosPublico",
+          "mostrarColaboracionContenidoPublico"
+        ],
+        "heredaFormularioEscort": true,
         "nota": "Atributo físico solo en perfil detallado, tono discreto, nunca vulgar en tagline.",
-        "textosAyuda": { "tagline": "Usa lenguaje discreto y profesional." }
+        "textosAyuda": {
+          "tagline": "Usa lenguaje discreto y profesional.",
+          "longitudCm": "Medida en cm; la categoría de tamaño se calcula automáticamente.",
+          "mostrarLongitudPublico": "Control de visibilidad en ficha pública."
+        }
       },
       "keywordsIA": ["dotado", "atributo"]
     },

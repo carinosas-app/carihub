@@ -20,7 +20,8 @@
 <script src="js/data/registro-schema-index.js"></script>
 <script src="js/data/registro-ui-index.js"></script>
 <script src="js/carihub-field-engine-lite.js?v=20260628c"></script>
-<script src="js/carihub-public-render-lite.js?v=20260629c"></script>
+<script src="js/carihub-viajes-desplazamiento.js?v=20260620t"></script>
+<script src="js/carihub-public-render-lite.js?v=20260620t"></script>
 <script src="js/resultados-demo.js"></script>
 <script src="js/perfil-publico-init.js"></script>
   <script src="js/carihub-messenger-privacidad-ui.js"></script>
@@ -1779,6 +1780,7 @@ body:not(.fit) .wrap{max-width:1100px;}
 .modchip.mc-pink{background:#ffe6f3;} .modchip.mc-pink .mc-ic{color:#FF0099;}
 .modchip.mc-purple{background:#f3e8fb;} .modchip.mc-purple .mc-ic{color:#AB47BC;}
 .modchip.mc-orange{background:#ffe9e0;} .modchip.mc-orange .mc-ic{color:#FF7043;}
+.modchip.mc-teal{background:#e0f2f1;} .modchip.mc-teal .mc-ic{color:#00897B;}
 [data-tema="pro"] .modchip,[data-tema="empresa"] .modchip{background:#eff6ff;color:#1e3a8a;}
 [data-tema="pro"] .modchip .mc-ic,[data-tema="empresa"] .modchip .mc-ic{color:#2563eb;}
 .quote{margin-top:12px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:14px;color:#5d5566;font-weight:600;}
@@ -2894,14 +2896,14 @@ const THEME = {
     bottom:["t-blue","Llega a más pacientes","Publica tu perfil profesional con cédula verificada","Agendar consulta ›"]
   },
   unicorn:{
-    brand:"Cariñosas", tag:"Parejas unicorn verificadas · encuentros lifestyle", publicar:"Publicar pareja",
+    brand:"Cariñosas", tag:"Unicornios verificados · persona lifestyle", publicar:"Publicar perfil",
     nav:[["results","Resultados",0],["heartOutline","Favoritos",0],["chat","Mensajes",3],["bell","Notificaciones",5]],
     banners:[
-      ["b-pink1","¿Son pareja unicorn?","Publica su perfil y conecten con singles verificados","Regístrate ahora"],
-      ["b-pink2","Más visibilidad","+210% más alcance en su zona lifestyle","Anuncia aquí"],
-      ["b-pink3","Perfiles verificados","Reglas claras, discreción y respeto mutuo",""]
+      ["b-pink1","¿Eres unicornio lifestyle?","Publica tu perfil y conecta con parejas verificadas","Regístrate ahora"],
+      ["b-pink2","Más visibilidad","+210% más alcance en tu zona lifestyle","Anuncia aquí"],
+      ["b-pink3","Perfiles verificados","Discreción, respeto y reglas claras desde el inicio",""]
     ],
-    bottom:["t-pink","¿Buscan su unicornio ideal?","Anuncien su pareja en Cariñosas y reciban más solicitudes","Publicar pareja ›"]
+    bottom:["t-pink","¿Quieres más conexiones?","Anuncia tu perfil unicorn en Cariñosas","Publicar perfil ›"]
   },
   dominatrix:{
     brand:"Cariñosas", tag:"Dominatrix y sesiones BDSM verificadas", publicar:"Publicar perfil",
@@ -2993,6 +2995,7 @@ function svgIcon(n){
     calendar:'<rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 9.5h17M8 3v4M16 3v4"/><circle cx="8.2" cy="13.2" r="1"/><circle cx="12" cy="13.2" r="1"/><circle cx="15.8" cy="13.2" r="1"/>',
     clock:'<circle cx="12" cy="12" r="8.5"/><path d="M12 8v4.5l3 2"/>',
     money:'<rect x="3" y="6.5" width="18" height="11" rx="2"/><circle cx="12" cy="12" r="2.2"/><path d="M7 9.5h.01M17 14.5h.01"/>',
+    plane:'<path d="M16 10l4-2-2 6-2-1-2 3-1-5-5-1 1-3h4l2-3z"/>',
     star:'<path d="M12 3.8 14.2 9l5.5.5-4.2 3.6 1.3 5.4L12 16.8 7.2 18.5l1.3-5.4L4.3 9.5 9.8 9z"/>'
   };
   return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+(p[n]||"")+'</svg>';
@@ -4327,6 +4330,7 @@ function perfilModchipsHTML(u){
     recibe:["home","Recibe","mc-pink"],
     hotel:["bell","Hotel","mc-purple"],
     domicilio:["car","Domicilio","mc-orange"],
+    viaja:["plane","Viaja","mc-teal"],
     fiestas:["bolt","Fiestas","mc-pink"],
     despedidas:["heart","Despedidas","mc-purple"],
     hoteles:["bell","Hoteles","mc-orange"],
@@ -4360,8 +4364,57 @@ function adultoIdHeadHTML(u){
   if(u.badgeLgbt) badges+='<span class="vchip vchip--lgbt">🌈 LGBT+</span>';
   if(u.badgeTrans) badges+='<span class="vchip vchip--trans">🏳️‍⚧️ Trans</span>';
   if(u.badgeHotwife) badges+='<span class="vchip vchip--hotwife">♠ Hotwife</span>';
+  if(u.badgeCuckold) badges+='<span class="vchip vchip--cuckold">Cuckold</span>';
   return '<div class="idhead"><h1>'+safe(u.nombre)+'</h1>'+badges+
     (u.edad?'<span class="age" data-pub-block="edad">'+u.edad+' años</span>':'')+'</div>';
+}
+function escortPrefPublico(u, valor, visibilityKey){
+  if(!valor) return false;
+  if(u[visibilityKey]!=null && String(u[visibilityKey]).trim()!=='') return String(u[visibilityKey]).trim()==='Sí';
+  return true;
+}
+function dotadosAtencionPublica(u, valorKey, visibilityKey, label){
+  if(!u[valorKey]) return '';
+  if(String(u[visibilityKey]||'').trim()!=='Sí') return '';
+  return row(pico("heart"), label, safe(u[valorKey]));
+}
+function viajesDesplazamientoFichaHTML(u){
+  var v=u.viajesDesplazamiento;
+  var api=global.CariHubViajesDesplazamiento;
+  if(!api) return '';
+  if(!v||v.viaja!==true){
+    if(v&&v.viaja===false) return row(pico("plane"),"Viaja","No");
+    return '';
+  }
+  var geo={pais:u.pais,estado:u.estado,ciudad:u.ciudad};
+  var html=row(pico("plane"),"Viaja","Sí");
+  if(v.alcanceDesplazamiento) html+=row(pico("globe"),"Alcance de desplazamiento",safe(api.alcanceLabelPublic(v.alcanceDesplazamiento,geo)));
+  if(v.viajesProgramados) html+=row(pico("calendar"),"Viajes programados",safe(api.viajesProgramadosLabel(v.viajesProgramados)));
+  if(v.gastosTraslado) html+=row(pico("money"),"Gastos de viaje",safe(api.gastosTrasladoLabel(v.gastosTraslado)));
+  if(v.anticipacionViaje) html+=row(pico("clock"),"Anticipación requerida",safe(api.anticipacionLabel(v.anticipacionViaje)));
+  if(v.notasViaje) html+=row(pico("chat"),"Notas de viaje",safe(v.notasViaje));
+  return html;
+}
+function lesbiansMostrarFicha(u, visibilityKey, contentVal){
+  if(!contentVal) return false;
+  if(u[visibilityKey]!=null && String(u[visibilityKey]).trim()!=='') return String(u[visibilityKey]).trim()==='Sí';
+  return true;
+}
+function normSubFicha(u){
+  return String(u.subcategoriaId||u.subcategoria||'').trim().toLowerCase().replace(/_/g,' ');
+}
+function isLesbiansSubFicha(u){ return normSubFicha(u)==='lesbians'; }
+function isSwingerSubFicha(u){
+  var id=normSubFicha(u);
+  return id==='swinger'||id==='parejas swinger';
+}
+function isCuckoldHotwifeSubFicha(u){
+  var id=normSubFicha(u);
+  return id==='cuckold hotwife'||id==='cuckold_hotwife';
+}
+function isUnicornSubFicha(u){
+  var id=normSubFicha(u);
+  return id==='unicorns'||id==='unicorn';
 }
 function adultoFichaHTML(u){
   if(u.especialidadBdsm){
@@ -4383,13 +4436,20 @@ function adultoFichaHTML(u){
     if(m==="recibe") return "Recibe";
     if(m==="hotel") return "Hotel";
     if(m==="domicilio") return "Domicilio";
+    if(m==="viaja") return "Viaja";
     return m;
   }).join(" · ")||"");
   var html=row(pico("user"),"Categoría",safe(u.categoria||u.categoriaPublica))+
     row(pico("globe"),"País",safe(u.pais))+
     row(pico("pin"),"Estado",safe(u.estado))+
     row(pico("pin"),"Ciudad",safe(u.ciudad));
+  if(isParejaGrupoFicha(u)){
+    if(u.configuracionGrupoLabel||u.tipoPareja) html+=row(pico("gender"),"Configuración",safe(u.configuracionGrupoLabel||u.tipoPareja));
+    var miembrosTxt=formatMiembrosFicha(u);
+    if(miembrosTxt) html+=row(pico("corp"),"Integrantes",safe(miembrosTxt));
+  }
   if(modalidad) html+=row(pico("briefcase"),"Modalidad",safe(modalidad),"modalidad");
+  html+=viajesDesplazamientoFichaHTML(u);
   if(u.tipoNegocio) html+=row(pico("corp"),"Tipo de empresa",safe(u.tipoNegocio));
   if(u.tipoServicio) html+=row(pico("heart"),"Tipo de servicio",safe(u.tipoServicio));
   if(u.tipoShow) html+=row(pico("briefcase"),"Tipo de show",safe(u.tipoShow));
@@ -4402,7 +4462,33 @@ function adultoFichaHTML(u){
   if(u.reglasAcceso) html+=row(pico("shield"),"Acceso",safe(u.reglasAcceso));
   if(u.areasVenue) html+=row(pico("pin"),"Áreas",safe(u.areasVenue));
   if(u.orientacion) html+=row(pico("gender"),"Orientación",safe(u.orientacion));
+  if(isLesbiansSubFicha(u)&&lesbiansMostrarFicha(u,'mostrarAtiendoA',u.atiendoA)) html+=row(pico("heart"),"Atiende a",safe(u.atiendoA));
+  if(isLesbiansSubFicha(u)&&lesbiansMostrarFicha(u,'mostrarColaboraciones',u.haceColaboraciones)) html+=row(pico("camera"),"Colaboraciones",safe(u.haceColaboraciones));
+  if(isLesbiansSubFicha(u)&&lesbiansMostrarFicha(u,'mostrarColaboraciones',u.haceColaboraciones) && Array.isArray(u.colaboraCon)&&u.colaboraCon.length) html+=row(pico("heart"),"Busco colaborar con",safe(u.colaboraCon.join(", ")));
+  if(isLesbiansSubFicha(u)&&u.estiloLesbian) html+=row(pico("gender"),"Estilo",safe(u.estiloLesbian));
+  if(isSwingerSubFicha(u)&&Array.isArray(u.objetivosPerfil)&&u.objetivosPerfil.length&&lesbiansMostrarFicha(u,'mostrarObjetivosPerfil',u.objetivosPerfil)) html+=row(pico("heart"),"Objetivos del perfil",safe(u.objetivosPerfil.join(", ")));
+  if(isSwingerSubFicha(u)&&Array.isArray(u.tipoInteraccion)&&u.tipoInteraccion.length) html+=row(pico("briefcase"),"Tipo de interacción",safe(u.tipoInteraccion.join(", ")));
+  if(isSwingerSubFicha(u)&&!u.configuracionGrupoLabel&&u.tipoPareja) html+=row(pico("gender"),"Tipo de pareja",safe(u.tipoPareja));
+  if(isSwingerSubFicha(u)&&lesbiansMostrarFicha(u,'mostrarAtiendenA',u.atiendenA)) html+=row(pico("heart"),"Atienden a",safe(u.atiendenA));
+  if(isSwingerSubFicha(u)&&u.aceptanSolteros) html+=row(pico("chat"),"Aceptan solteros",safe(u.aceptanSolteros));
+  if(isSwingerSubFicha(u)&&lesbiansMostrarFicha(u,'mostrarColaboraciones',u.haceColaboraciones)&&u.haceColaboraciones) html+=row(pico("camera"),"Colaboraciones",safe(u.haceColaboraciones));
+  if(isSwingerSubFicha(u)&&lesbiansMostrarFicha(u,'mostrarColaboraciones',u.haceColaboraciones)&&Array.isArray(u.colaboraCon)&&u.colaboraCon.length) html+=row(pico("heart"),"Colaboran con",safe(u.colaboraCon.join(", ")));
+  if(isUnicornSubFicha(u)&&Array.isArray(u.objetivosPerfil)&&u.objetivosPerfil.length&&lesbiansMostrarFicha(u,'mostrarObjetivosPerfil',u.objetivosPerfil)) html+=row(pico("heart"),"Objetivo del perfil",safe(u.objetivosPerfil.join(", ")));
+  if(isUnicornSubFicha(u)&&u.tipoUnicornio) html+=row(pico("gender"),"Tipo de unicornio",safe(u.tipoUnicornio));
+  if(isUnicornSubFicha(u)&&Array.isArray(u.buscoConocer)&&u.buscoConocer.length) html+=row(pico("heart"),"Busco conocer",safe(u.buscoConocer.join(", ")));
+  else if(isUnicornSubFicha(u)&&Array.isArray(u.buscan)&&u.buscan.length) html+=row(pico("heart"),"Busco conocer",safe(u.buscan.join(", ")));
+  if(isUnicornSubFicha(u)&&Array.isArray(u.tipoParejaPreferida)&&u.tipoParejaPreferida.length) html+=row(pico("briefcase"),"Tipo de pareja preferida",safe(u.tipoParejaPreferida.join(", ")));
+  if(isUnicornSubFicha(u)&&Array.isArray(u.finalidadEncuentro)&&u.finalidadEncuentro.length) html+=row(pico("briefcase"),"Finalidad del encuentro",safe(u.finalidadEncuentro.join(", ")));
+  if(isUnicornSubFicha(u)&&u.estadoPerfil) html+=row(pico("clock"),"Busca actualmente",safe(u.estadoPerfil));
+  if(isUnicornSubFicha(u)&&lesbiansMostrarFicha(u,'mostrarColaboraciones',u.haceColaboraciones)&&u.haceColaboraciones) html+=row(pico("camera"),"Colaboraciones",safe(u.haceColaboraciones));
+  if(isUnicornSubFicha(u)&&lesbiansMostrarFicha(u,'mostrarColaboraciones',u.haceColaboraciones)&&Array.isArray(u.colaboraCon)&&u.colaboraCon.length) html+=row(pico("heart"),"Colaboro con",safe(u.colaboraCon.join(", ")));
+  if(isUnicornSubFicha(u)&&u.experiencia) html+=row(pico("calendar"),"Experiencia",safe(u.experiencia));
+  if(isUnicornSubFicha(u)&&Array.isArray(u.ambientePreferido)&&u.ambientePreferido.length) html+=row(pico("home"),"Ambiente preferido",safe(u.ambientePreferido.join(", ")));
+  if(isUnicornSubFicha(u)&&u.estilo) html+=row(pico("gender"),"Estilo",safe(u.estilo));
+  if(isUnicornSubFicha(u)&&Array.isArray(u.serviciosLifestyle)&&u.serviciosLifestyle.length) html+=row(pico("heart"),"Servicios lifestyle",safe(u.serviciosLifestyle.join(", ")));
+  if(isUnicornSubFicha(u)&&Array.isArray(u.metodosPago)&&u.metodosPago.length) html+=row(pico("wallet"),"Métodos de pago",safe(u.metodosPago.join(", ")));
   if(u.presentacionFemboy) html+=row(pico("gender"),"Presentación",safe(u.presentacionFemboy));
+  else if(u.presentacionTom) html+=row(pico("gender"),"Presentación",safe(u.presentacionTom));
   else if(u.identidadGenero) html+=row(pico("gender"),"Identidad / presentación",safe(u.identidadGenero));
   if(u.estiloPredominante) html+=row(pico("heart"),"Estilo predominante",safe(u.estiloPredominante));
   if(u.estiloPersonal) html+=row(pico("heart"),"Estilo",safe(u.estiloPersonal));
@@ -4413,23 +4499,31 @@ function adultoFichaHTML(u){
   if(u.videoPresentacion) html+=row(pico("camera"),"Video",'<a href="'+safe(u.videoPresentacion)+'" target="_blank" rel="noopener noreferrer">Ver presentación</a>');
   if(u.promociones) html+=row(pico("money"),"Promociones",safe(u.promociones));
   if(u.participacionPareja) html+=row(pico("heart"),"Participación de la pareja",safe(u.participacionPareja));
-  if(Array.isArray(u.buscanConocer)&&u.buscanConocer.length) html+=row(pico("heart"),"Busco conocer",safe(u.buscanConocer.join(", ")));
-  else if(u.tipoPublico) html+=row(pico("heart"),"Busco conocer",safe(u.tipoPublico));
-  else if(Array.isArray(u.buscan)&&u.buscan.length) html+=row(pico("heart"),"Participa en",safe(u.buscan.join(", ")));
-  else if(u.buscan) html+=row(pico("heart"),"Participa en",safe(u.buscan));
+  if(!isUnicornSubFicha(u)&&Array.isArray(u.buscanConocer)&&u.buscanConocer.length) html+=row(pico("heart"),"Busco conocer",safe(u.buscanConocer.join(", ")));
+  else if(!isUnicornSubFicha(u)&&u.tipoPublico) html+=row(pico("heart"),"Busco conocer",safe(u.tipoPublico));
+  else if(!isUnicornSubFicha(u)&&Array.isArray(u.buscan)&&u.buscan.length) html+=row(pico("heart"),"Participa en",safe(u.buscan.join(", ")));
+  else if(!isUnicornSubFicha(u)&&u.buscan) html+=row(pico("heart"),"Participa en",safe(u.buscan));
   if(Array.isArray(u.tipoCitaPreferida)&&u.tipoCitaPreferida.length) html+=row(pico("briefcase"),"Tipo de cita preferida",safe(u.tipoCitaPreferida.join(", ")));
   if(Array.isArray(u.dinamicasParticipa)&&u.dinamicasParticipa.length) html+=row(pico("heart"),"Dinámicas en las que participas",safe(u.dinamicasParticipa.join(", ")));
-  if(u.colaboracionContenido) html+=row(pico("camera"),"Colaboración para contenido",safe(u.colaboracionContenido));
-  if(u.realizaTrios) html+=row(pico("heart"),"Tríos",safe(u.realizaTrios));
+  if(escortPrefPublico(u, u.colaboracionContenido, 'mostrarColaboracionContenidoPublico')) html+=row(pico("camera"),"Colaboración para contenido",safe(u.colaboracionContenido));
+  if(escortPrefPublico(u, u.realizaTrios, 'mostrarRealizaTriosPublico')) html+=row(pico("heart"),"Tríos",safe(u.realizaTrios));
   if(Array.isArray(u.tiposTrios)&&u.tiposTrios.length) html+=row(pico("heart"),"Tipo de trío",safe(u.tiposTrios.join(", ")));
   if(u.esBisexual) html+=row(pico("gender"),"Bisexual",safe(u.esBisexual));
   if(u.realizaGangBang) html+=row(pico("heart"),"Gang bang",safe(u.realizaGangBang));
   if(Array.isArray(u.disponibilidadAgenda)&&u.disponibilidadAgenda.length&&u.participacionPareja) html+=row(pico("clock"),"Disponibilidad",safe(u.disponibilidadAgenda.join(", ")));
   if(Array.isArray(u.tipoExperiencia)&&u.tipoExperiencia.length) html+=row(pico("briefcase"),"Tipo de experiencia",safe(u.tipoExperiencia.join(", ")));
   if(u.loQueBuscaConocer) html+=row(pico("chat"),"Lo que busca conocer",safe(u.loQueBuscaConocer));
+  if(u.personalidad) html+=row(pico("chat"),"Personalidad",safe(u.personalidad));
+  if(u.pasatiempos) html+=row(pico("heart"),"Pasatiempos",safe(u.pasatiempos));
   if(u.aficiones) html+=row(pico("heart"),"Aficiones",safe(u.aficiones));
   if(u.estiloVida) html+=row(pico("gender"),"Estilo de vida",safe(u.estiloVida));
   if(u.estatura) html+=row(pico("user"),"Estatura",safe(u.estatura));
+  if(String(u.mostrarLongitudPublico||'').trim()==='Sí' && u.longitudCm) html+=row(pico("user"),"Longitud",safe(u.longitudCm+' cm'));
+  if(String(u.mostrarLongitudPublico||'').trim()==='Sí' && u.categoriaTamaño) html+=row(pico("user"),"Categoría de tamaño",safe(u.categoriaTamaño));
+  html+=dotadosAtencionPublica(u,'atencionHombres','mostrarAtencionHombresPublico','Atención a hombres');
+  html+=dotadosAtencionPublica(u,'atencionMujeres','mostrarAtencionMujeresPublico','Atención a mujeres');
+  html+=dotadosAtencionPublica(u,'atencionParejas','mostrarAtencionParejasPublico','Atención a parejas');
+  html+=dotadosAtencionPublica(u,'atencionTrans','mostrarAtencionTransPublico','Atención a personas trans');
   if(u.nivelPremium) html+=row(pico("heart"),"Nivel premium",safe(u.nivelPremium));
   if(Array.isArray(u.experienciaVip)&&u.experienciaVip.length) html+=row(pico("briefcase"),"Experiencia VIP",safe(u.experienciaVip.join(", ")));
   if(Array.isArray(u.distintivosVip)&&u.distintivosVip.length) html+=row(pico("shield"),"Distintivos VIP",safe(u.distintivosVip.join(", ")));
@@ -4467,7 +4561,11 @@ function renderEscortVip(u){ return renderPerfilCariñosas(u,"escortVip"); }
 function renderTrans(u){ return renderPerfilCariñosas(u,"trans"); }
 function renderNegocioAdulto(u){ return renderPerfilCariñosas(u,"negocio"); }
 function renderMasajesLocal(u){ return renderPerfilCariñosas(u,"masajesLocal"); }
-function renderParejaLifestyle(u){ return renderPerfilCariñosas(u,"pareja"); }
+function renderParejaLifestyle(u){
+  if(isSwingerSubFicha(u)||(u.tipoPerfil==="pareja_grupo"&&normSubFicha(u)==="swinger")) return renderParejaGrupoSwinger(u);
+  if(isCuckoldHotwifeSubFicha(u)) return renderParejaGrupoCuckoldHotwife(u);
+  return renderPerfilCariñosas(u,"pareja");
+}
 function renderUnicorn(u){ return renderPerfilCariñosas(u,"unicorn"); }
 function renderStripper(u){ return renderPerfilCariñosas(u,"stripper"); }
 function renderTableDance(u){ return renderPerfilCariñosas(u,"tableDance"); }
@@ -4624,157 +4722,211 @@ const NEGOCIO_PACKS={
 DEMO.pareja={
   subcategoriaId:"cuckold_hotwife",
   categoria:"Cuckold / Hotwife",
-  categoriaPublica:"Pareja Swinger",
-  arquetipo:"pareja_lifestyle",
+  categoriaPublica:"Cuckold / Hotwife",
+  arquetipo:"pareja_grupo",
   tipoPerfil:"pareja_grupo",
+  aliasPareja:"Pareja M & R",
   nombre:"Pareja M & R",
-  verificada:true,
-  etiquetaEsquina:"Pareja verificada",
-  pais:"México", estado:"Nuevo León", ciudad:"Monterrey", zona:"Zona privada",
-  tagline:"Pareja real, abierta y respetuosa. Espacio seguro, limpio y discreto.",
-  precio:"1,000", moneda:"MXN", tiempoMinimo:"2 horas (Para la pareja)",
-  promocion:{titulo:"3 HORAS POR",precio:"2,500"},
-  reservaciones:true,
-  reservacionesTexto:"Reservación previa por WhatsApp",
-  metodosPago:["Efectivo","Tarjeta","Transferencia","Pago en línea"],
-  metodosPagoFicha:["Efectivo","Tarjeta","Transferencia","Pago en línea"],
-  disponibilidad:"Abierto ahora",
-  horario:"Abierto 24 horas (con reservación)",
-  respuestaCorta:"Normalmente responden en menos de 10 min",
-  contactos:["wa","tg","ig","fb","of","x","msg","tel","gmail"],
-  fotos:24,
-  galeria:[HOTEL_IMGS.principal,HOTEL_IMGS.extra2,HOTEL_IMGS.extra1,HOTEL_IMGS.live],
-  perfilTags:["Pareja Swinger","Encuentros","Discreción total","Espacio privado","Reservación previa"],
-  tipoServicio:"Encuentros swinger (parejas)",
-  disponiblePara:"Parejas / Parejas + Solteros(as) / Grupos (consulta)",
-  edadVisitantes:"25 a 55 años",
-  anosJuntos:"8+ años",
-  miembrosEdad:"Él 38 años / Ella 36 años",
-  preferencias:"Swinger · Intercambio de parejas · Voyeur",
-  ubicacionFicha:"Monterrey, N.L. (zona privada)",
-  desplazamientos:"No (solo en nuestro espacio)",
-  facturacion:"No disponible (servicio privado)",
-  sobreNosotros:"Somos una pareja real, abierta y respetuosa. Ofrecemos un ambiente seguro, limpio y discreto para parejas que buscan nuevas experiencias sin presiones. Reservación previa y reglas claras desde el primer contacto.",
-  negocioStats:[
-    ["8+","Años de experiencia","calendar"],
-    ["300+","Parejas recibidas","heart"],
-    ["100%","Discreción garantizada","shield"],
-    ["5★","Ambiente y limpieza","bed"]
-  ],
-  amenidadesNegocio:[
-    {k:"door",t:"Discreción total"},{k:"door",t:"Entrada discreta"},
-    {k:"car",t:"Estacionamiento privado"},{k:"bell",t:"Reservación previa"},
-    {k:"bed",t:"Habitaciones temáticas"},{k:"bath",t:"Jacuzzi en habitación"},
-    {k:"ac",t:"Aire acondicionado"},{k:"wifi",t:"WiFi"},
-    {k:"room",t:"Área de fumadores"},{k:"room",t:"Bar lounge privado"},
-    {k:"bath",t:"Regaderas"},{k:"room",t:"Toallas y amenidades"}
-  ],
-  serviciosIncluidos:[
-    "Habitación privada","Jacuzzi","Intercambio de parejas","Lounge / bar privado",
-    "Música ambiental","Juegos / accesorios","Juguetes","Regaderas","Toallas","Y más…"
-  ],
-  noRealiza:[
-    "Servicios sexuales (prostitución)","Consumo de drogas",
-    "Falta de respeto","Grabaciones no autorizadas"
-  ],
-  svcTitulo:"Servicios incluidos", noTitulo:"No incluido / reglas",
-  actividad:"Nueva sesión lifestyle este fin de semana. Reserva con anticipación por WhatsApp.",
-  actividadWhen:"Hoy, 11:20 AM",
-  actividadAvatar:"assets/adultos-user/img-02.jpg",
-  liveTitulo:"En vivo: recorrido por nuestro espacio privado",
-  liveFecha:"Hoy", liveHora:"Promo programada",
-  liveEspectadores:8,
-  donacionesHoy:5,
-  rating:"4.8", opiniones:176,
-  reviews:[
-    ["Pareja M & R",5,"Ambiente impecable, muy respetuosos y la experiencia superó lo esperado.","Hace 1 semana","assets/adultos-user/img-02.jpg"],
-    ["L & P",5,"Lugar limpio, reglas claras y total discreción. Volveremos sin duda.","Hace 2 semanas","assets/adultos-user/img-05.jpg"]
-  ],
-  ubicacionImg:HOTEL_IMGS.ubicacion,
-  ubicacionPerks:["Zona segura","Discreción garantizada","Estacionamiento privado"],
-  direccionLineas:["Zona privada — Monterrey, N.L.","Se envía ubicación exacta al confirmar reservación."],
-  pieTitulo:"Vive una experiencia libre, discreta y sin límites",
-  pieSub:"Conoce nuevas parejas y disfruta sin tabúes.",
-  pieCta:"Reservar ahora",
-  pieImg:"img/motel-extra-1.png",
-  piePerks:["Ambiente exclusivo","Discreción total","Diversión garantizada","Mente abierta y respeto"],
-  refMockup:"img/perfil-pareja-lifestyle-ref.png"
-};
-/* Pareja Unicorn — schema: unicorns (pareja_grupo / ProfileLayoutPareja) */
-DEMO.unicorn={
-  subcategoriaId:"unicorns",
-  categoria:"Unicorn",
-  categoriaPublica:"Pareja Unicorn",
-  arquetipo:"pareja_lifestyle",
-  tipoPerfil:"pareja_grupo",
-  nombre:"Valentina & Marco",
+  alias:"Pareja M & R",
+  badgeHotwife:true,
+  badgeCuckold:false,
   verificada:true,
   etiquetaEsquina:"Pareja verificada",
   pais:"México", estado:"Nuevo León", ciudad:"Monterrey", zona:"San Pedro",
-  tagline:"Pareja estable buscando unicornio para experiencias respetuosas y sin presión.",
-  precio:"A convenir", moneda:"MXN", tiempoMinimo:"Cita previa (mín. 2 h)",
+  tagline:"Pareja hotwife discreta. Buscamos bulls con química y reglas claras.",
+  precio:"2,000", precioDesde:"2000", moneda:"MXN", tiempoMinimo:"Cita previa (mín. 2 h)",
   promocion:null,
   reservaciones:true,
   reservacionesTexto:"Solo con cita previa por WhatsApp",
-  metodosPago:["Efectivo","Transferencia","Pago en línea"],
-  metodosPagoFicha:["Efectivo","Transferencia","Pago en línea"],
-  disponibilidad:"Abierto a solicitudes",
-  horario:"Viernes y sábados (con reservación)",
+  metodosPago:["Efectivo","Transferencia"],
+  metodosPagoFicha:["Efectivo","Transferencia"],
+  disponibilidad:"Disponible con cita",
+  horario:"Vie–Dom 20:00–02:00",
+  horarioDetalle:"Vie–Dom 20:00–02:00",
   respuestaCorta:"Normalmente responden en menos de 20 min",
   contactos:["wa","tg","ig","fb","of","x","msg","tel","gmail"],
   fotos:18,
   galeria:[HOTEL_IMGS.principal,HOTEL_IMGS.extra1,HOTEL_IMGS.extra2,HOTEL_IMGS.live],
-  perfilTags:["Pareja Unicorn","Tríos","Discreción","Singles verificados","Sin presión"],
-  tipoServicio:"Encuentros con unicornio (single H/M)",
-  disponiblePara:"Singles verificados · 25–45 años",
-  edadVisitantes:"25 a 45 años",
-  anosJuntos:"5+ años",
-  miembrosEdad:"Ella 32 años / Él 34 años",
-  preferencias:"Swinger · Trío · Voyeur · Hotwife · Soft swap",
+  perfilTags:["Hotwife","Discreción","Pareja verificada","Hotel","Viajes"],
+  configuracionGrupo:"pareja_hm",
+  configuracionGrupoLabel:"Hombre + Mujer",
+  dinamica:"hotwife",
+  dinamicaLabel:"Hotwife",
+  buscan:["Bulls","Unicorns"],
+  mostrarBuscan:"Sí",
+  tipoExperiencia:["Encuentros privados","Hotel / motel"],
+  participacionPareja:"Solo observa",
+  mostrarParticipacion:"Sí",
+  aceptanSolteros:"Solo hombres",
+  aceptanPrincipiantes:"A convenir",
+  experienciaEnLifestyle:"Experimentados",
+  haceColaboraciones:"Sí",
+  colaboraCon:["Unicorns"],
+  mostrarColaboraciones:"Sí",
+  miembros:[
+    {etiquetaPublica:"Él",generoPresentacion:"Hombre",edad:42},
+    {etiquetaPublica:"Ella",generoPresentacion:"Mujer",edad:39}
+  ],
+  miembrosResumen:"Él 42 años · Ella 39 años",
+  reglasAcceso:"Cita previa · Solo mayores de edad · Respeto mutuo",
+  modalidades:["recibe","viaja"],
+  modalidadFicha:"Recibe · Viaja",
+  viajesDesplazamiento:{
+    viaja:true,
+    alcanceDesplazamiento:"toda_ciudad",
+    viajesProgramados:"a_convenir",
+    gastosTraslado:"se_acuerda",
+    anticipacionViaje:"48h",
+    notasViaje:""
+  },
   ubicacionFicha:"Monterrey, N.L. (hotel o espacio acordado)",
-  desplazamientos:"Hotel discreto o nuestro espacio (según cita)",
+  desplazamientos:"Viaja dentro de la ciudad con 48 h de anticipación",
   facturacion:"No disponible",
-  sobreNosotros:"Somos pareja estable, comunicativos y sin dramas. Buscamos unicornio para tríos donde todos participen con respeto. Primera cita siempre en ambiente neutral y con reglas claras.",
+  sobreMi:"Somos pareja hotwife real: discreta, comunicativa y sin presión. Buscamos bulls respetuosos y química natural. Primera cita siempre en ambiente neutral con reglas claras desde el primer contacto.",
   negocioStats:[
-    ["5+","Años juntos","calendar"],
-    ["40+","Encuentros lifestyle","heart"],
+    ["5+","Años en lifestyle","calendar"],
     ["100%","Discreción","shield"],
-    ["4.9★","Respeto y química","bed"]
+    ["4.9★","Experiencias","heart"],
+    ["Hotel","Ambiente preferido","bed"]
+  ],
+  actividad:"Disponibles este fin de semana para encuentro en hotel. Cita previa obligatoria.",
+  actividadWhen:"Hoy, 11:20 AM",
+  actividadAvatar:"assets/adultos-user/img-02.jpg",
+  liveTitulo:"En vivo: charla sobre dinámica hotwife y reglas",
+  liveFecha:"Hoy", liveHora:"Promo programada",
+  liveEspectadores:6,
+  donacionesHoy:3,
+  rating:"4.9", opiniones:42,
+  reviews:[
+    ["Anónimo",5,"Pareja seria, reglas claras y total discreción. Experiencia impecable.","Hace 1 semana","assets/adultos-user/img-02.jpg"],
+    ["Bull M.",5,"Comunicación excelente y respeto en todo momento. Recomendados.","Hace 2 semanas","assets/adultos-user/img-05.jpg"]
+  ],
+  ubicacionImg:HOTEL_IMGS.ubicacion,
+  ubicacionPerks:["Zona segura","Discreción garantizada","Hotel acordado"],
+  direccionLineas:["Monterrey, N.L.","Ubicación exacta al confirmar cita"],
+  pieTitulo:"Experiencia hotwife con respeto y reglas claras",
+  pieSub:"Discreción, química y comunicación desde el primer mensaje.",
+  pieCta:"Contactar pareja",
+  pieImg:"img/motel-extra-1.png",
+  piePerks:["Discreción total","Cita previa","Reglas claras","Respeto mutuo"],
+  refMockup:"img/perfil-pareja-lifestyle-ref.png"
+};
+/* Unicorn — schema: unicorns (persona_lifestyle / ProfileLayoutAdultos) */
+DEMO.unicorn={
+  subcategoriaId:"unicorns",
+  categoria:"Unicorn",
+  categoriaPublica:"Unicorn",
+  arquetipo:"persona_lifestyle",
+  tipoPerfil:"persona",
+  badgeUnicorn:true,
+  nombre:"Luna U.",
+  alias:"Luna U.",
+  edad:28,
+  verificada:true,
+  etiquetaEsquina:"Unicornio verificada",
+  pais:"México", estado:"Nuevo León", ciudad:"Monterrey", zona:"San Pedro",
+  tagline:"Unicornio lifestyle discreta. Conecto con parejas y mujeres con respeto.",
+  precio:"1,500", precioDesde:"1500", moneda:"MXN", tiempoMinimo:"Cita previa (mín. 2 h)",
+  promocion:null,
+  reservaciones:true,
+  reservacionesTexto:"Solo con cita previa por WhatsApp",
+  metodosPago:["Efectivo","Transferencia"],
+  metodosPagoFicha:["Efectivo","Transferencia"],
+  disponibilidad:"Disponible para encuentros",
+  horario:"Vie–Dom 20:00–02:00",
+  horarioDetalle:"Vie–Dom 20:00–02:00",
+  respuestaCorta:"Normalmente responde en menos de 20 min",
+  contactos:["wa","tg","ig","fb","of","x","msg","tel","gmail"],
+  fotos:12,
+  galeria:[HOTEL_IMGS.principal,HOTEL_IMGS.extra1,HOTEL_IMGS.extra2,HOTEL_IMGS.live],
+  perfilTags:["Unicornio","Lifestyle","Discreción","Viajes","Parejas verificadas"],
+  objetivosPerfil:["Conocer parejas","Viajes compartidos"],
+  objetivoPrincipal:"Conocer parejas",
+  mostrarObjetivosPerfil:"Sí",
+  tipoUnicornio:"Mujer",
+  buscoConocer:["Parejas","Mujeres"],
+  buscan:["Parejas","Mujeres"],
+  tipoParejaPreferida:["Hombre + Mujer"],
+  finalidadEncuentro:["Socializar","Citas"],
+  estadoPerfil:"Disponible para encuentros",
+  haceColaboraciones:"Sí",
+  colaboraCon:["Parejas Swinger","Hotwife"],
+  mostrarColaboraciones:"Sí",
+  experiencia:"Intermedio",
+  ambientePreferido:["Hotel","Evento"],
+  estilo:"Discreto",
+  serviciosLifestyle:["Citas con parejas","Viajes compartidos","Eventos lifestyle"],
+  modalidades:["hotel","viaja"],
+  modalidadFicha:"Hotel · Viaja",
+  viajesDesplazamiento:{
+    viaja:true,
+    alcanceDesplazamiento:"cualquier_ciudad_pais",
+    viajesProgramados:"si",
+    gastosTraslado:"se_acuerda",
+    anticipacionViaje:"48h",
+    notasViaje:""
+  },
+  idiomas:"Español, Inglés",
+  ubicacionFicha:"Monterrey, N.L. (hotel o espacio acordado)",
+  desplazamientos:"Viaja a cualquier ciudad del país (48 h de anticipación)",
+  facturacion:"No disponible",
+  sobreMi:"Soy unicornio lifestyle: discreta, comunicativa y sin presión. Me gustan las parejas respetuosas y la química natural. Primera cita siempre en ambiente neutral con reglas claras.",
+  serviciosIncluidos:["Citas con parejas","Viajes compartidos","Eventos lifestyle","Cita de conocimiento previa"],
+  noRealiza:["Servicios sexuales pagados","Sin verificación previa","Falta de respeto","Grabaciones no autorizadas"],
+  svcTitulo:"Servicios lifestyle", noTitulo:"No acepto",
+  negocioStats:[
+    ["3+","Años en lifestyle","calendar"],
+    ["25+","Encuentros respetuosos","heart"],
+    ["100%","Discreción","shield"],
+    ["4.9★","Química y comunicación","bed"]
   ],
   amenidadesNegocio:[
     {k:"door",t:"Discreción total"},{k:"bell",t:"Cita previa obligatoria"},
-    {k:"chat",t:"Chat de verificación"},{k:"shield",t:"Singles verificados"}
+    {k:"chat",t:"Chat de verificación"},{k:"shield",t:"Perfiles verificados"}
   ],
-  serviciosIncluidos:[
-    "Trío consensuado","Cita de conocimiento previa","Reglas por escrito",
-    "Ambiente hotel discreto","Aftercare y comunicación","Y más…"
-  ],
-  noRealiza:[
-    "Servicios sexuales pagados (prostitución)","Sin verificación previa",
-    "Falta de respeto","Grabaciones no autorizadas","Sustancias"
-  ],
-  svcTitulo:"Qué ofrecemos", noTitulo:"No aceptamos",
-  actividad:"Buscamos unicornio femenino para este fin de semana. Cita de café previa sin compromiso.",
+  actividad:"Disponible para viaje compartido este fin de semana. Cita de café previa sin compromiso.",
   actividadWhen:"Hoy, 3:15 PM",
   actividadAvatar:"assets/adultos-user/img-17.jpg",
-  liveTitulo:"En vivo: preguntas sobre dinámica unicorn",
+  liveTitulo:"En vivo: preguntas sobre dinámica lifestyle",
   liveFecha:"Hoy", liveHora:"Promo programada",
   liveEspectadores:6,
-  rating:"4.9", opiniones:48,
+  rating:"4.9", opiniones:32,
   reviews:[
-    ["Sofía R.",5,"Pareja súper respetuosa, reglas claras desde el inicio. La mejor experiencia unicorn que he tenido.","Hace 2 semanas","assets/adultos-user/img-17.jpg"],
-    ["Diego M.",5,"Comunicación excelente y cero presión. Muy recomendados.","Hace 1 mes","assets/adultos-user/img-22.jpg"]
+    ["Sofía R.",5,"Muy respetuosa y clara desde el primer mensaje. La mejor experiencia lifestyle que he tenido.","Hace 2 semanas","assets/adultos-user/img-17.jpg"],
+    ["Diego M.",5,"Comunicación excelente y cero presión. Muy recomendada.","Hace 1 mes","assets/adultos-user/img-22.jpg"]
   ],
   ubicacionImg:HOTEL_IMGS.ubicacion,
   ubicacionPerks:["Zona segura","Hotel discreto","Verificación previa"],
   direccionLineas:["Monterrey, N.L.","Ubicación exacta al confirmar cita."],
-  pieTitulo:"Encuentra tu unicornio ideal con respeto",
-  pieSub:"Parejas verificadas buscando singles para experiencias lifestyle.",
-  pieCta:"Enviar solicitud",
+  pieTitulo:"Conecta como unicornio lifestyle con respeto",
+  pieSub:"Personas verificadas buscando parejas y encuentros lifestyle auténticos.",
+  pieCta:"Enviar mensaje",
   pieImg:"img/motel-extra-1.png",
   piePerks:["Sin presión","Reglas claras","Discreción total","Verificación previa"],
   refMockup:"img/perfil-pareja-lifestyle-ref.png"
 };
+function formatMiembrosFicha(u){
+  if(Array.isArray(u.miembros)&&u.miembros.length){
+    return u.miembros.map(function(m){
+      var parts=[];
+      if(m.etiquetaPublica) parts.push(m.etiquetaPublica);
+      if(m.generoPresentacion) parts.push(m.generoPresentacion);
+      if(m.edad) parts.push(m.edad+" años");
+      else if(m.franjaEdad) parts.push(m.franjaEdad);
+      return parts.join(" ");
+    }).filter(Boolean).join(" / ");
+  }
+  return u.miembrosResumen||u.miembrosEdad||"";
+}
+function isParejaGrupoFicha(u){
+  return u.tipoPerfil==="pareja_grupo"||u.arquetipo==="pareja_grupo"||isSwingerSubFicha(u)||isCuckoldHotwifeSubFicha(u);
+}
+function parejaLifestyleBadgesHTML(u){
+  var html="";
+  if(u.badgeHotwife) html+='<span class="vchip vchip--hotwife">♠ Hotwife</span>';
+  if(u.badgeCuckold) html+='<span class="vchip vchip--cuckold">Cuckold</span>';
+  return html;
+}
 function parejaCornerBadge(u){
   var txt=u.verificada?(u.etiquetaEsquina||"Pareja verificada"):"Perfil pareja";
   var shield='<svg class="negocio-corner__shield" viewBox="0 0 20 22" aria-hidden="true">'+
@@ -4789,6 +4941,7 @@ function parejaIdCardHTML(u){
     '<div class="negocio-id__top">'+
       '<div class="idhead idhead--negocio"><h1>'+safe(u.nombre)+'</h1>'+
         (u.verificada?verificadoBadgePinkDot():"")+
+        parejaLifestyleBadgesHTML(u)+
       '</div>'+
       parejaCornerBadge(u)+
     '</div>'+
@@ -4807,7 +4960,7 @@ function parejaFichaFilas(u){
     ["chat","Disponible para:",safe(u.disponiblePara||"—")],
     ["user","Edad:",safe(u.edadVisitantes||"—")],
     ["calendar","Años juntos:",safe(u.anosJuntos||"—")],
-    ["corp","Nosotros:",safe(u.miembrosEdad||"—")],
+    ["corp","Nosotros:",safe(formatMiembrosFicha(u)||"—")],
     ["briefcase","Preferencias:",safe(u.preferencias||"—")],
     ["clock","Horario:",safe(u.horario||"—")],
     ["pin","Ubicación:",safe(u.ubicacionFicha||"—"),true],
@@ -4821,6 +4974,196 @@ function parejaFichaHTML(u){
     return negocioFichaRow(r[0],r[1],r[2],r[3]);
   }).join("");
   return '<div class="pcard pcard--negocio-ficha"><div class="negocio-ficha">'+rows+'</div></div>';
+}
+function swingerFichaValor(val){
+  if(val==null||val==="") return "";
+  if(Array.isArray(val)&&!val.length) return "";
+  return Array.isArray(val)?val.join(", "):String(val);
+}
+function swingerFichaRow(icon,label,val){
+  var txt=swingerFichaValor(val);
+  if(!txt) return "";
+  return row(pico(icon),label,safe(txt));
+}
+function modalidadesFichaTxt(u){
+  if(!Array.isArray(u.modalidades)||!u.modalidades.length) return "";
+  return u.modalidades.map(function(m){
+    if(m==="recibe") return "Recibe";
+    if(m==="hotel") return "Hotel";
+    if(m==="domicilio") return "Domicilio";
+    if(m==="viaja") return "Viaja";
+    return m;
+  }).join(" · ");
+}
+function swingerFichaHTML(u){
+  if(!isSwingerSubFicha(u)) return adultoFichaHTML(u);
+  var html="";
+  var miembrosTxt=formatMiembrosFicha(u);
+  if(miembrosTxt) html+=swingerFichaRow("corp","Integrantes",miembrosTxt);
+  if(u.configuracionGrupoLabel||u.tipoPareja) html+=swingerFichaRow("gender","Configuración del grupo",u.configuracionGrupoLabel||u.tipoPareja);
+  if(lesbiansMostrarFicha(u,"mostrarObjetivosPerfil",u.objetivosPerfil)&&Array.isArray(u.objetivosPerfil)&&u.objetivosPerfil.length){
+    if(u.objetivoPrincipal) html+=swingerFichaRow("heart","Objetivo principal",u.objetivoPrincipal);
+    html+=swingerFichaRow("heart","Objetivos",u.objetivosPerfil);
+  }
+  html+=swingerFichaRow("briefcase","Tipo de interacción",u.tipoInteraccion);
+  html+=swingerFichaRow("briefcase","Modalidad de interacción",u.modalidadInteraccion);
+  html+=swingerFichaRow("heart","Intercambio swinger",u.intercambioSwinger);
+  if(lesbiansMostrarFicha(u,"mostrarAtiendenA",u.atiendenA)) html+=swingerFichaRow("heart","Atienden a",u.atiendenA);
+  html+=swingerFichaRow("chat","Solteros",u.aceptanSolteros);
+  html+=swingerFichaRow("heart","Parejas principiantes",u.aceptanParejasPrincipiantes);
+  html+=swingerFichaRow("calendar","Experiencia en lifestyle",u.experienciaEnLifestyle);
+  if(lesbiansMostrarFicha(u,"mostrarColaboraciones",u.haceColaboraciones)){
+    html+=swingerFichaRow("camera","Colaboraciones",u.haceColaboraciones);
+    if(Array.isArray(u.colaboraCon)&&u.colaboraCon.length) html+=swingerFichaRow("heart","Busco colaborar con",u.colaboraCon);
+  }
+  html+=swingerFichaRow("gender","Estilo de pareja",u.estiloPareja);
+  html+=viajesDesplazamientoFichaHTML(u);
+  var mods=modalidadesFichaTxt(u);
+  if(mods) html+=swingerFichaRow("briefcase","Modalidades",mods);
+  var horario=u.horarioDetalle||u.horario||(u.parejaGrupoPerfil&&u.parejaGrupoPerfil.horarioDetalle)||"";
+  if(horario) html+=swingerFichaRow("clock","Horarios",horario);
+  var pagos=Array.isArray(u.metodosPago)&&u.metodosPago.length?u.metodosPago:(u.parejaGrupoPerfil&&u.parejaGrupoPerfil.metodosPago)||[];
+  if(Array.isArray(pagos)&&pagos.length) html+=swingerFichaRow("wallet","Métodos de pago",pagos);
+  var reglas=u.reglasAcceso||(u.parejaGrupoPerfil&&u.parejaGrupoPerfil.reglasAcceso)||"";
+  if(reglas) html+=swingerFichaRow("shield","Reglas de acceso",reglas);
+  if(!html) return "";
+  return '<div class="pcard pcard--swinger-ficha"><div class="dlist">'+html+'</div></div>';
+}
+function sobreParejaGrupoHTML(u){
+  var txt=u.sobreMi||(u.parejaGrupoPerfil&&u.parejaGrupoPerfil.sobreMi)||u.sobreNosotros||"";
+  if(!txt) return "";
+  return '<div class="sobre-card playout__sobre">'+
+    '<div class="sobre-card__head">'+
+      '<svg class="sobre-card__heart" viewBox="0 0 24 24" aria-hidden="true"><path fill="#E91E63" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>'+
+      '<h2 class="sobre-card__title">Sobre nosotros</h2>'+
+    '</div>'+
+    '<p class="sobre-card__desc">'+sobreParrafos(txt)+'</p>'+
+  '</div>';
+}
+function parejaGrupoSwingerHeroHTML(u){
+  var hero=Object.assign({},u);
+  hero.nombre=hero.aliasPareja||hero.nombre||hero.alias||"";
+  if(isParejaGrupoFicha(hero)||isSwingerSubFicha(hero)) return parejaIdCardHTML(hero);
+  return perfilIdCardHTML(hero);
+}
+function renderParejaGrupoSwinger(u){
+  return renderPlayoutAdultoRef(u,{
+    layoutKey:"pareja",
+    extraClass:" playout--pareja-grupo playout--swinger",
+    perfil:parejaGrupoSwingerHeroHTML(u),
+    ficha:swingerFichaHTML(u),
+    sobre:sobreParejaGrupoHTML(u)
+  });
+}
+function cuckoldHotwifeDinamicaLabelFicha(u){
+  if(u.dinamicaLabel) return String(u.dinamicaLabel).trim();
+  var din=String(u.dinamica||"").trim();
+  if(din==="hotwife") return "Hotwife";
+  if(din==="cuckold") return "Cuckold";
+  if(din==="ambos") return "Ambos / pareja flexible";
+  return din;
+}
+function cuckoldHotwifeFichaHTML(u){
+  if(!isCuckoldHotwifeSubFicha(u)) return adultoFichaHTML(u);
+  var html="";
+  var miembrosTxt=formatMiembrosFicha(u);
+  if(miembrosTxt) html+=swingerFichaRow("corp","Integrantes",miembrosTxt);
+  if(u.configuracionGrupoLabel||u.tipoPareja) html+=swingerFichaRow("gender","Configuración del grupo",u.configuracionGrupoLabel||u.tipoPareja);
+  var dinLabel=cuckoldHotwifeDinamicaLabelFicha(u);
+  if(dinLabel) html+=swingerFichaRow("heart","Dinámica",dinLabel);
+  if(lesbiansMostrarFicha(u,"mostrarBuscan",u.buscan)&&Array.isArray(u.buscan)&&u.buscan.length) html+=swingerFichaRow("heart","Buscan",u.buscan);
+  if(Array.isArray(u.tipoExperiencia)&&u.tipoExperiencia.length) html+=swingerFichaRow("briefcase","Tipo de experiencia",u.tipoExperiencia);
+  if(lesbiansMostrarFicha(u,"mostrarParticipacion",u.participacionPareja)&&u.participacionPareja) html+=swingerFichaRow("heart","Participación de la pareja",u.participacionPareja);
+  if(u.aceptanSolteros) html+=swingerFichaRow("chat","Aceptan solteros",u.aceptanSolteros);
+  if(u.aceptanPrincipiantes) html+=swingerFichaRow("heart","Principiantes",u.aceptanPrincipiantes);
+  if(u.experienciaEnLifestyle) html+=swingerFichaRow("calendar","Experiencia en lifestyle",u.experienciaEnLifestyle);
+  if(lesbiansMostrarFicha(u,"mostrarColaboraciones",u.haceColaboraciones)&&u.haceColaboraciones) html+=swingerFichaRow("camera","Colaboraciones",u.haceColaboraciones);
+  if(lesbiansMostrarFicha(u,"mostrarColaboraciones",u.haceColaboraciones)&&Array.isArray(u.colaboraCon)&&u.colaboraCon.length) html+=swingerFichaRow("heart","Colaboran con",u.colaboraCon);
+  var mods=(u.modalidadFicha||((u.modalidades||[]).map(function(m){
+    if(m==="recibe") return "Recibe";
+    if(m==="hotel") return "Hotel";
+    if(m==="domicilio") return "Domicilio";
+    if(m==="viaja") return "Viaja";
+    return m;
+  }).join(" · ")||""));
+  if(mods) html+=swingerFichaRow("briefcase","Modalidades",mods);
+  html+=viajesDesplazamientoFichaHTML(u);
+  var horario=u.horarioDetalle||u.horario||"";
+  if(horario) html+=swingerFichaRow("clock","Horarios",horario);
+  var pagos=u.metodosPagoFicha||u.metodosPago||[];
+  if(Array.isArray(pagos)&&pagos.length) html+=swingerFichaRow("wallet","Métodos de pago",pagos);
+  var reglas=u.reglasAcceso||(u.parejaGrupoPerfil&&u.parejaGrupoPerfil.reglasAcceso)||"";
+  if(reglas) html+=swingerFichaRow("shield","Reglas de acceso",reglas);
+  if(!html) return "";
+  return '<div class="pcard pcard--cuckold-hotwife-ficha"><div class="dlist">'+html+'</div></div>';
+}
+function parejaGrupoCuckoldHotwifeHeroHTML(u){
+  var hero=Object.assign({},u);
+  hero.nombre=hero.aliasPareja||hero.nombre||hero.alias||"";
+  return parejaIdCardHTML(hero);
+}
+function renderParejaGrupoCuckoldHotwife(u){
+  return renderPlayoutAdultoRef(u,{
+    layoutKey:"pareja",
+    extraClass:" playout--pareja-grupo playout--cuckold-hotwife",
+    perfil:parejaGrupoCuckoldHotwifeHeroHTML(u),
+    ficha:cuckoldHotwifeFichaHTML(u),
+    sobre:sobreParejaGrupoHTML(u)
+  });
+}
+function mergeParejaGrupoRegistroFields(clean,u){
+  if(!clean||!u) return clean;
+  var pg=u.parejaGrupoPerfil||{};
+  if(u.tipoPerfil) clean.tipoPerfil=u.tipoPerfil;
+  if(u.arquetipo) clean.arquetipo=u.arquetipo;
+  if(u.aliasPareja||u.alias){
+    clean.aliasPareja=u.aliasPareja||u.alias;
+    clean.nombre=clean.aliasPareja;
+    clean.alias=clean.aliasPareja;
+  }
+  if(u.configuracionGrupo||pg.configuracionGrupo) clean.configuracionGrupo=u.configuracionGrupo||pg.configuracionGrupo;
+  if(u.configuracionGrupoLabel||pg.configuracionGrupoLabel) clean.configuracionGrupoLabel=u.configuracionGrupoLabel||pg.configuracionGrupoLabel;
+  if(u.tipoPareja) clean.tipoPareja=u.tipoPareja;
+  if(Array.isArray(u.miembros)&&u.miembros.length) clean.miembros=u.miembros.slice();
+  else if(Array.isArray(pg.miembros)&&pg.miembros.length) clean.miembros=pg.miembros.slice();
+  if(u.miembrosResumen) clean.miembrosResumen=u.miembrosResumen;
+  if(u.reglasAcceso||pg.reglasAcceso) clean.reglasAcceso=u.reglasAcceso||pg.reglasAcceso;
+  if(u.sobreMi||pg.sobreMi) clean.sobreMi=u.sobreMi||pg.sobreMi;
+  if(u.horarioDetalle||pg.horarioDetalle) clean.horarioDetalle=u.horarioDetalle||pg.horarioDetalle;
+  if(u.horario||clean.horarioDetalle) clean.horario=u.horario||clean.horarioDetalle;
+  if(Array.isArray(u.metodosPago)&&u.metodosPago.length) clean.metodosPago=u.metodosPago.slice();
+  else if(Array.isArray(pg.metodosPago)&&pg.metodosPago.length) clean.metodosPago=pg.metodosPago.slice();
+  if(Array.isArray(u.modalidades)&&u.modalidades.length) clean.modalidades=u.modalidades.slice();
+  else if(Array.isArray(pg.modalidades)&&pg.modalidades.length) clean.modalidades=pg.modalidades.slice();
+  if(u.viajesDesplazamiento||pg.viajesDesplazamiento) clean.viajesDesplazamiento=u.viajesDesplazamiento||pg.viajesDesplazamiento;
+  if(u.parejaGrupoPerfil) clean.parejaGrupoPerfil=Object.assign({},u.parejaGrupoPerfil);
+  if(u.swingerPerfil) clean.swingerPerfil=Object.assign({},u.swingerPerfil);
+  if(Array.isArray(u.objetivosPerfil)&&u.objetivosPerfil.length) clean.objetivosPerfil=u.objetivosPerfil.slice();
+  if(u.objetivoPrincipal) clean.objetivoPrincipal=u.objetivoPrincipal;
+  if(u.intercambioSwinger) clean.intercambioSwinger=u.intercambioSwinger;
+  if(Array.isArray(u.tipoInteraccion)&&u.tipoInteraccion.length) clean.tipoInteraccion=u.tipoInteraccion.slice();
+  if(Array.isArray(u.modalidadInteraccion)&&u.modalidadInteraccion.length) clean.modalidadInteraccion=u.modalidadInteraccion.slice();
+  if(u.atiendenA) clean.atiendenA=u.atiendenA;
+  if(u.aceptanSolteros) clean.aceptanSolteros=u.aceptanSolteros;
+  if(u.aceptanParejasPrincipiantes) clean.aceptanParejasPrincipiantes=u.aceptanParejasPrincipiantes;
+  if(u.experienciaEnLifestyle) clean.experienciaEnLifestyle=u.experienciaEnLifestyle;
+  if(u.haceColaboraciones) clean.haceColaboraciones=u.haceColaboraciones;
+  if(Array.isArray(u.colaboraCon)&&u.colaboraCon.length) clean.colaboraCon=u.colaboraCon.slice();
+  if(Array.isArray(u.estiloPareja)&&u.estiloPareja.length) clean.estiloPareja=u.estiloPareja.slice();
+  if(u.mostrarObjetivosPerfil) clean.mostrarObjetivosPerfil=u.mostrarObjetivosPerfil;
+  if(u.mostrarAtiendenA) clean.mostrarAtiendenA=u.mostrarAtiendenA;
+  if(u.mostrarColaboraciones) clean.mostrarColaboraciones=u.mostrarColaboraciones;
+  if(u.cuckoldHotwifePerfil) clean.cuckoldHotwifePerfil=Object.assign({},u.cuckoldHotwifePerfil);
+  if(u.dinamica) clean.dinamica=u.dinamica;
+  if(u.dinamicaLabel) clean.dinamicaLabel=u.dinamicaLabel;
+  if(u.aceptanPrincipiantes) clean.aceptanPrincipiantes=u.aceptanPrincipiantes;
+  if(u.mostrarBuscan) clean.mostrarBuscan=u.mostrarBuscan;
+  if(u.mostrarParticipacion) clean.mostrarParticipacion=u.mostrarParticipacion;
+  if(u.badgeCuckold) clean.badgeCuckold=u.badgeCuckold;
+  if(Array.isArray(u.tipoExperiencia)&&u.tipoExperiencia.length) clean.tipoExperiencia=u.tipoExperiencia.slice();
+  if(u.participacionPareja) clean.participacionPareja=u.participacionPareja;
+  if(Array.isArray(u.buscan)&&u.buscan.length) clean.buscan=u.buscan.slice();
+  return clean;
 }
 function parejaPieBottomHTML(u){
   var perks=(u.piePerks||[]).map(function(p){
@@ -6280,8 +6623,9 @@ function aplicarPerfilDesdeRegistro(vista,u){
     frase:u.tagline||u.descripcion||"",
     sobreMi:u.sobreMi||"",
     orientacion:u.orientacion||"",
-    identidadGenero:u.presentacionFemboy||u.identidadGenero||"",
+    identidadGenero:u.presentacionFemboy||u.presentacionTom||u.identidadGenero||"",
     presentacionFemboy:u.presentacionFemboy||"",
+    presentacionTom:u.presentacionTom||"",
     estiloPredominante:u.estiloPredominante||"",
     disponibilidadAgenda:Array.isArray(u.disponibilidadAgenda)?u.disponibilidadAgenda.slice():[],
     disponiblePara:Array.isArray(u.disponiblePara)?u.disponiblePara.slice():[],
@@ -6306,12 +6650,27 @@ function aplicarPerfilDesdeRegistro(vista,u){
     tipoExperiencia:Array.isArray(u.tipoExperiencia)?u.tipoExperiencia.slice():[],
     loQueBuscaConocer:u.loQueBuscaConocer||"",
     aficiones:u.aficiones||"",
+    personalidad:u.personalidad||"",
+    pasatiempos:u.pasatiempos||"",
     estiloVida:u.estiloVida||"",
     idiomas:u.idiomas||"",
     nivelServicio:u.nivelServicio||"",
     nivelPremium:u.nivelPremium||"",
     experienciaVip:Array.isArray(u.experienciaVip)?u.experienciaVip.slice():[],
     distintivosVip:Array.isArray(u.distintivosVip)?u.distintivosVip.slice():[],
+    longitudCm:u.longitudCm||"",
+    categoriaTamaño:u.categoriaTamaño||"",
+    mostrarLongitudPublico:u.mostrarLongitudPublico||"",
+    atencionHombres:u.atencionHombres||"",
+    mostrarAtencionHombresPublico:u.mostrarAtencionHombresPublico||"",
+    atencionMujeres:u.atencionMujeres||"",
+    mostrarAtencionMujeresPublico:u.mostrarAtencionMujeresPublico||"",
+    atencionParejas:u.atencionParejas||"",
+    mostrarAtencionParejasPublico:u.mostrarAtencionParejasPublico||"",
+    atencionTrans:u.atencionTrans||"",
+    mostrarAtencionTransPublico:u.mostrarAtencionTransPublico||"",
+    mostrarRealizaTriosPublico:u.mostrarRealizaTriosPublico||"",
+    mostrarColaboracionContenidoPublico:u.mostrarColaboracionContenidoPublico||"",
     eventosDisponibles:!!u.eventosDisponibles,
     portfolioURL:u.portfolioURL||"",
     disponibilidad:u.disponibilidad||"",
@@ -6338,13 +6697,15 @@ function aplicarPerfilDesdeRegistro(vista,u){
     badgeLgbt:!!u.badgeLgbt,
     badgeVip:!!u.badgeVip,
     badgeTrans:!!u.badgeTrans,
-    badgeHotwife:!!u.badgeHotwife
+    badgeHotwife:!!u.badgeHotwife,
+    badgeCuckold:!!u.badgeCuckold
   };
   if(u.ubicacion){
     clean.ubicacionPublica=u.ubicacion;
     var parts=String(u.ubicacion).split(",").map(function(x){return x.trim();}).filter(Boolean);
     if(parts.length) clean.direccionLineas=parts.length>1?[parts[0],parts.slice(1).join(", ")]:[parts[0]];
   }
+  clean=mergeParejaGrupoRegistroFields(clean,u);
   DEMO[vista]=clean;
 }
 function aplicarPerfilResultadosEnDemo(vista,u){
@@ -6360,6 +6721,54 @@ function aplicarPerfilResultadosEnDemo(vista,u){
   if(u.categoriaPublica||u.categoria) d.categoria=u.categoriaPublica||u.categoria;
   if(u.disponibilidad) d.disponibilidad=u.disponibilidad;
   if(Array.isArray(u.modalidades)&&u.modalidades.length) d.modalidades=u.modalidades.slice();
+  if(u.viajesDesplazamiento) d.viajesDesplazamiento=u.viajesDesplazamiento;
+  if(u.atiendoA) d.atiendoA=u.atiendoA;
+  if(u.mostrarAtiendoA) d.mostrarAtiendoA=u.mostrarAtiendoA;
+  if(u.haceColaboraciones) d.haceColaboraciones=u.haceColaboraciones;
+  if(Array.isArray(u.colaboraCon)&&u.colaboraCon.length) d.colaboraCon=u.colaboraCon.slice();
+  if(u.mostrarColaboraciones) d.mostrarColaboraciones=u.mostrarColaboraciones;
+  if(u.estiloLesbian) d.estiloLesbian=u.estiloLesbian;
+  if(Array.isArray(u.objetivosPerfil)&&u.objetivosPerfil.length) d.objetivosPerfil=u.objetivosPerfil.slice();
+  if(Array.isArray(u.tipoInteraccion)&&u.tipoInteraccion.length) d.tipoInteraccion=u.tipoInteraccion.slice();
+  if(u.tipoPareja) d.tipoPareja=u.tipoPareja;
+  if(u.atiendenA) d.atiendenA=u.atiendenA;
+  if(u.mostrarAtiendenA) d.mostrarAtiendenA=u.mostrarAtiendenA;
+  if(u.aceptanSolteros) d.aceptanSolteros=u.aceptanSolteros;
+  if(u.aceptanParejasPrincipiantes) d.aceptanParejasPrincipiantes=u.aceptanParejasPrincipiantes;
+  if(u.experienciaEnLifestyle) d.experienciaEnLifestyle=u.experienciaEnLifestyle;
+  if(u.intercambioSwinger) d.intercambioSwinger=u.intercambioSwinger;
+  if(u.objetivoPrincipal) d.objetivoPrincipal=u.objetivoPrincipal;
+  if(Array.isArray(u.modalidadInteraccion)&&u.modalidadInteraccion.length) d.modalidadInteraccion=u.modalidadInteraccion.slice();
+  if(Array.isArray(u.estiloPareja)&&u.estiloPareja.length) d.estiloPareja=u.estiloPareja.slice();
+  if(u.aliasPareja){ d.aliasPareja=u.aliasPareja; d.nombre=u.aliasPareja; }
+  if(u.configuracionGrupo) d.configuracionGrupo=u.configuracionGrupo;
+  if(u.configuracionGrupoLabel) d.configuracionGrupoLabel=u.configuracionGrupoLabel;
+  if(Array.isArray(u.miembros)&&u.miembros.length) d.miembros=u.miembros.slice();
+  if(u.miembrosResumen) d.miembrosResumen=u.miembrosResumen;
+  if(u.reglasAcceso) d.reglasAcceso=u.reglasAcceso;
+  if(u.horarioDetalle) d.horarioDetalle=u.horarioDetalle;
+  if(u.sobreMi) d.sobreMi=u.sobreMi;
+  if(u.tipoPerfil) d.tipoPerfil=u.tipoPerfil;
+  if(u.parejaGrupoPerfil) d.parejaGrupoPerfil=Object.assign({},u.parejaGrupoPerfil);
+  if(u.swingerPerfil) d.swingerPerfil=Object.assign({},u.swingerPerfil);
+  if(u.mostrarObjetivosPerfil) d.mostrarObjetivosPerfil=u.mostrarObjetivosPerfil;
+  if(u.tipoUnicornio) d.tipoUnicornio=u.tipoUnicornio;
+  if(Array.isArray(u.buscoConocer)&&u.buscoConocer.length){ d.buscoConocer=u.buscoConocer.slice(); d.buscan=u.buscoConocer.slice(); }
+  if(Array.isArray(u.tipoParejaPreferida)&&u.tipoParejaPreferida.length) d.tipoParejaPreferida=u.tipoParejaPreferida.slice();
+  if(Array.isArray(u.finalidadEncuentro)&&u.finalidadEncuentro.length) d.finalidadEncuentro=u.finalidadEncuentro.slice();
+  if(u.estadoPerfil) d.estadoPerfil=u.estadoPerfil;
+  if(u.experiencia) d.experiencia=u.experiencia;
+  if(Array.isArray(u.ambientePreferido)&&u.ambientePreferido.length) d.ambientePreferido=u.ambientePreferido.slice();
+  if(u.estilo) d.estilo=u.estilo;
+  if(u.badgeUnicorn) d.badgeUnicorn=u.badgeUnicorn;
+  if(u.badgeCuckold) d.badgeCuckold=u.badgeCuckold;
+  if(u.dinamica) d.dinamica=u.dinamica;
+  if(u.dinamicaLabel) d.dinamicaLabel=u.dinamicaLabel;
+  if(u.aceptanPrincipiantes) d.aceptanPrincipiantes=u.aceptanPrincipiantes;
+  if(u.mostrarBuscan) d.mostrarBuscan=u.mostrarBuscan;
+  if(u.mostrarParticipacion) d.mostrarParticipacion=u.mostrarParticipacion;
+  if(u.cuckoldHotwifePerfil) d.cuckoldHotwifePerfil=Object.assign({},u.cuckoldHotwifePerfil);
+  if(Array.isArray(u.serviciosLifestyle)&&u.serviciosLifestyle.length) d.serviciosLifestyle=u.serviciosLifestyle.slice();
   if(u.__id) d.__id=u.__id;
   if(u.uid) d.uid=u.uid;
   if(u.__demo!=null) d.__demo=u.__demo;
@@ -6383,6 +6792,7 @@ function aplicarPerfilResultadosEnDemo(vista,u){
   if(u.orientacion) d.orientacion=u.orientacion;
   if(u.identidadGenero) d.identidadGenero=u.identidadGenero;
   if(u.presentacionFemboy){ d.presentacionFemboy=u.presentacionFemboy; d.identidadGenero=u.presentacionFemboy; }
+  else if(u.presentacionTom){ d.presentacionTom=u.presentacionTom; d.identidadGenero=u.presentacionTom; }
   if(u.estiloPredominante) d.estiloPredominante=u.estiloPredominante;
   if(Array.isArray(u.disponiblePara)&&u.disponiblePara.length) d.disponiblePara=u.disponiblePara.slice();
   if(u.largoCabello) d.largoCabello=u.largoCabello;
@@ -6407,12 +6817,27 @@ function aplicarPerfilResultadosEnDemo(vista,u){
   if(Array.isArray(u.tipoExperiencia)&&u.tipoExperiencia.length) d.tipoExperiencia=u.tipoExperiencia.slice();
   if(u.loQueBuscaConocer) d.loQueBuscaConocer=u.loQueBuscaConocer;
   if(u.aficiones) d.aficiones=u.aficiones;
+  if(u.personalidad) d.personalidad=u.personalidad;
+  if(u.pasatiempos) d.pasatiempos=u.pasatiempos;
   if(u.estiloVida) d.estiloVida=u.estiloVida;
   if(u.idiomas) d.idiomas=u.idiomas;
   if(u.nivelServicio) d.nivelServicio=u.nivelServicio;
   if(u.nivelPremium) d.nivelPremium=u.nivelPremium;
   if(Array.isArray(u.experienciaVip)&&u.experienciaVip.length) d.experienciaVip=u.experienciaVip.slice();
   if(Array.isArray(u.distintivosVip)&&u.distintivosVip.length) d.distintivosVip=u.distintivosVip.slice();
+  if(u.longitudCm) d.longitudCm=u.longitudCm;
+  if(u.categoriaTamaño) d.categoriaTamaño=u.categoriaTamaño;
+  if(u.mostrarLongitudPublico) d.mostrarLongitudPublico=u.mostrarLongitudPublico;
+  if(u.atencionHombres) d.atencionHombres=u.atencionHombres;
+  if(u.mostrarAtencionHombresPublico) d.mostrarAtencionHombresPublico=u.mostrarAtencionHombresPublico;
+  if(u.atencionMujeres) d.atencionMujeres=u.atencionMujeres;
+  if(u.mostrarAtencionMujeresPublico) d.mostrarAtencionMujeresPublico=u.mostrarAtencionMujeresPublico;
+  if(u.atencionParejas) d.atencionParejas=u.atencionParejas;
+  if(u.mostrarAtencionParejasPublico) d.mostrarAtencionParejasPublico=u.mostrarAtencionParejasPublico;
+  if(u.atencionTrans) d.atencionTrans=u.atencionTrans;
+  if(u.mostrarAtencionTransPublico) d.mostrarAtencionTransPublico=u.mostrarAtencionTransPublico;
+  if(u.mostrarRealizaTriosPublico) d.mostrarRealizaTriosPublico=u.mostrarRealizaTriosPublico;
+  if(u.mostrarColaboracionContenidoPublico) d.mostrarColaboracionContenidoPublico=u.mostrarColaboracionContenidoPublico;
   if(u.eventosDisponibles) d.eventosDisponibles=true;
   if(u.portfolioURL) d.portfolioURL=u.portfolioURL;
   if(u.estatura) d.estatura=u.estatura;
@@ -6631,7 +7056,7 @@ function setVista(tipo){
   var u=DEMO[tipo];
   window.__perfilActual=u;
   var inner;
-  if(esCari) inner=renderPerfilCariñosas(u, tipo);
+  if(esCari) inner=(tipo==="pareja"?renderParejaLifestyle(u):renderPerfilCariñosas(u, tipo));
   else if(tipo==="medico") inner=renderMedicoProfesional(u);
   else inner=renderProEmpresa(u, tipo==="empresa");
   document.getElementById("wrap").innerHTML = shell(tipo, inner, u);
