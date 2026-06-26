@@ -180,12 +180,31 @@
     if (bloques && global.CariHubRegistroPublicBlocks && CariHubRegistroPublicBlocks.mapToPerfil) {
       mappedBloques = CariHubRegistroPublicBlocks.mapToPerfil({}, bloques, ctx);
     }
+    var identArquetipo = (draft.schemaResuelto && draft.schemaResuelto.identidad &&
+      draft.schemaResuelto.identidad.arquetipo) || ctx.arquetipo || '';
+    var esParejaGrupo = identArquetipo === 'pareja_grupo' || mappedBloques.tipoPerfil === 'pareja_grupo';
+    var aliasPareja = mappedBloques.aliasPareja || cp.aliasPareja || cp.alias || '';
+    var parejaGrupoPerfil = mappedBloques.parejaGrupoPerfil
+      ? Object.assign({}, mappedBloques.parejaGrupoPerfil)
+      : null;
+    if (parejaGrupoPerfil) {
+      parejaGrupoPerfil.tagline = cp.descripcionCorta || parejaGrupoPerfil.tagline || '';
+      parejaGrupoPerfil.precioDesde = cp.precioDesde || parejaGrupoPerfil.precioDesde || '';
+      if (mappedBloques.sobreMi) parejaGrupoPerfil.sobreMi = mappedBloques.sobreMi;
+      if (mappedBloques.horarioDetalle) parejaGrupoPerfil.horarioDetalle = mappedBloques.horarioDetalle;
+      if (mappedBloques.modalidades) parejaGrupoPerfil.modalidades = mappedBloques.modalidades;
+      if (mappedBloques.viajesDesplazamiento) {
+        parejaGrupoPerfil.viajesDesplazamiento = mappedBloques.viajesDesplazamiento;
+      }
+      if (mappedBloques.metodosPago) parejaGrupoPerfil.metodosPago = mappedBloques.metodosPago;
+    }
 
     return {
       uid: uid,
       cuentaUid: uid,
-      nombre: cp.alias || '',
-      alias: cp.alias || '',
+      nombre: esParejaGrupo ? (aliasPareja || cp.alias || '') : (cp.alias || ''),
+      alias: aliasPareja || cp.alias || '',
+      aliasPareja: aliasPareja,
       email: (priv.correoAcceso || '').trim().toLowerCase(),
       telefono: limpiarTelefono(priv.telefonoPrivado || priv.telefonoContacto || priv.whatsappPrivado || ''),
       pais: cp.pais || '',
@@ -200,6 +219,14 @@
         draft.schemaResuelto.identidad.formularioId) || ctx.formularioId || '',
       arquetipo: (draft.schemaResuelto && draft.schemaResuelto.identidad &&
         draft.schemaResuelto.identidad.arquetipo) || ctx.arquetipo || '',
+      tipoPerfil: esParejaGrupo ? 'pareja_grupo' : ((draft.schemaResuelto && draft.schemaResuelto.identidad &&
+        draft.schemaResuelto.identidad.tipoPerfil) || ctx.tipoPerfil || ''),
+      configuracionGrupo: mappedBloques.configuracionGrupo || '',
+      configuracionGrupoLabel: mappedBloques.configuracionGrupoLabel || '',
+      miembros: mappedBloques.miembros || [],
+      miembrosResumen: mappedBloques.miembrosResumen || '',
+      reglasAcceso: mappedBloques.reglasAcceso || '',
+      parejaGrupoPerfil: parejaGrupoPerfil,
       formularioUiId: (draft.schemaResuelto && draft.schemaResuelto.formularioUiId) ||
         ctx.formularioUiId || '',
       schemaVersion: ctx.schemaVersion || '',

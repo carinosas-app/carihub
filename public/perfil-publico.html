@@ -4407,6 +4407,10 @@ function isSwingerSubFicha(u){
   var id=normSubFicha(u);
   return id==='swinger'||id==='parejas swinger';
 }
+function isUnicornSubFicha(u){
+  var id=normSubFicha(u);
+  return id==='unicorns'||id==='unicorn';
+}
 function adultoFichaHTML(u){
   if(u.especialidadBdsm){
     return '<div class="pcard"><div class="dlist">'+
@@ -4434,6 +4438,11 @@ function adultoFichaHTML(u){
     row(pico("globe"),"País",safe(u.pais))+
     row(pico("pin"),"Estado",safe(u.estado))+
     row(pico("pin"),"Ciudad",safe(u.ciudad));
+  if(isParejaGrupoFicha(u)){
+    if(u.configuracionGrupoLabel||u.tipoPareja) html+=row(pico("gender"),"Configuración",safe(u.configuracionGrupoLabel||u.tipoPareja));
+    var miembrosTxt=formatMiembrosFicha(u);
+    if(miembrosTxt) html+=row(pico("corp"),"Integrantes",safe(miembrosTxt));
+  }
   if(modalidad) html+=row(pico("briefcase"),"Modalidad",safe(modalidad),"modalidad");
   html+=viajesDesplazamientoFichaHTML(u);
   if(u.tipoNegocio) html+=row(pico("corp"),"Tipo de empresa",safe(u.tipoNegocio));
@@ -4454,11 +4463,23 @@ function adultoFichaHTML(u){
   if(isLesbiansSubFicha(u)&&u.estiloLesbian) html+=row(pico("gender"),"Estilo",safe(u.estiloLesbian));
   if(isSwingerSubFicha(u)&&Array.isArray(u.objetivosPerfil)&&u.objetivosPerfil.length&&lesbiansMostrarFicha(u,'mostrarObjetivosPerfil',u.objetivosPerfil)) html+=row(pico("heart"),"Objetivos del perfil",safe(u.objetivosPerfil.join(", ")));
   if(isSwingerSubFicha(u)&&Array.isArray(u.tipoInteraccion)&&u.tipoInteraccion.length) html+=row(pico("briefcase"),"Tipo de interacción",safe(u.tipoInteraccion.join(", ")));
-  if(isSwingerSubFicha(u)&&u.tipoPareja) html+=row(pico("gender"),"Tipo de pareja",safe(u.tipoPareja));
+  if(isSwingerSubFicha(u)&&!u.configuracionGrupoLabel&&u.tipoPareja) html+=row(pico("gender"),"Tipo de pareja",safe(u.tipoPareja));
   if(isSwingerSubFicha(u)&&lesbiansMostrarFicha(u,'mostrarAtiendenA',u.atiendenA)) html+=row(pico("heart"),"Atienden a",safe(u.atiendenA));
   if(isSwingerSubFicha(u)&&u.aceptanSolteros) html+=row(pico("chat"),"Aceptan solteros",safe(u.aceptanSolteros));
   if(isSwingerSubFicha(u)&&lesbiansMostrarFicha(u,'mostrarColaboraciones',u.haceColaboraciones)&&u.haceColaboraciones) html+=row(pico("camera"),"Colaboraciones",safe(u.haceColaboraciones));
   if(isSwingerSubFicha(u)&&lesbiansMostrarFicha(u,'mostrarColaboraciones',u.haceColaboraciones)&&Array.isArray(u.colaboraCon)&&u.colaboraCon.length) html+=row(pico("heart"),"Colaboran con",safe(u.colaboraCon.join(", ")));
+  if(isUnicornSubFicha(u)&&Array.isArray(u.objetivosPerfil)&&u.objetivosPerfil.length&&lesbiansMostrarFicha(u,'mostrarObjetivosPerfil',u.objetivosPerfil)) html+=row(pico("heart"),"Objetivo del perfil",safe(u.objetivosPerfil.join(", ")));
+  if(isUnicornSubFicha(u)&&u.tipoUnicornio) html+=row(pico("gender"),"Tipo de unicornio",safe(u.tipoUnicornio));
+  if(isUnicornSubFicha(u)&&Array.isArray(u.buscoConocer)&&u.buscoConocer.length) html+=row(pico("heart"),"Busco conocer",safe(u.buscoConocer.join(", ")));
+  else if(isUnicornSubFicha(u)&&Array.isArray(u.buscan)&&u.buscan.length) html+=row(pico("heart"),"Busco conocer",safe(u.buscan.join(", ")));
+  if(isUnicornSubFicha(u)&&Array.isArray(u.tipoParejaPreferida)&&u.tipoParejaPreferida.length) html+=row(pico("briefcase"),"Tipo de pareja preferida",safe(u.tipoParejaPreferida.join(", ")));
+  if(isUnicornSubFicha(u)&&Array.isArray(u.finalidadEncuentro)&&u.finalidadEncuentro.length) html+=row(pico("briefcase"),"Finalidad del encuentro",safe(u.finalidadEncuentro.join(", ")));
+  if(isUnicornSubFicha(u)&&u.estadoPerfil) html+=row(pico("clock"),"Busca actualmente",safe(u.estadoPerfil));
+  if(isUnicornSubFicha(u)&&lesbiansMostrarFicha(u,'mostrarColaboraciones',u.haceColaboraciones)&&u.haceColaboraciones) html+=row(pico("camera"),"Colaboraciones",safe(u.haceColaboraciones));
+  if(isUnicornSubFicha(u)&&lesbiansMostrarFicha(u,'mostrarColaboraciones',u.haceColaboraciones)&&Array.isArray(u.colaboraCon)&&u.colaboraCon.length) html+=row(pico("heart"),"Colaboro con",safe(u.colaboraCon.join(", ")));
+  if(isUnicornSubFicha(u)&&u.experiencia) html+=row(pico("calendar"),"Experiencia",safe(u.experiencia));
+  if(isUnicornSubFicha(u)&&Array.isArray(u.ambientePreferido)&&u.ambientePreferido.length) html+=row(pico("home"),"Ambiente preferido",safe(u.ambientePreferido.join(", ")));
+  if(isUnicornSubFicha(u)&&u.estilo) html+=row(pico("gender"),"Estilo",safe(u.estilo));
   if(u.presentacionFemboy) html+=row(pico("gender"),"Presentación",safe(u.presentacionFemboy));
   else if(u.presentacionTom) html+=row(pico("gender"),"Presentación",safe(u.presentacionTom));
   else if(u.identidadGenero) html+=row(pico("gender"),"Identidad / presentación",safe(u.identidadGenero));
@@ -4841,6 +4862,22 @@ DEMO.unicorn={
   piePerks:["Sin presión","Reglas claras","Discreción total","Verificación previa"],
   refMockup:"img/perfil-pareja-lifestyle-ref.png"
 };
+function formatMiembrosFicha(u){
+  if(Array.isArray(u.miembros)&&u.miembros.length){
+    return u.miembros.map(function(m){
+      var parts=[];
+      if(m.etiquetaPublica) parts.push(m.etiquetaPublica);
+      if(m.generoPresentacion) parts.push(m.generoPresentacion);
+      if(m.edad) parts.push(m.edad+" años");
+      else if(m.franjaEdad) parts.push(m.franjaEdad);
+      return parts.join(" ");
+    }).filter(Boolean).join(" / ");
+  }
+  return u.miembrosResumen||u.miembrosEdad||"";
+}
+function isParejaGrupoFicha(u){
+  return u.tipoPerfil==="pareja_grupo"||u.arquetipo==="pareja_grupo"||isSwingerSubFicha(u);
+}
 function parejaCornerBadge(u){
   var txt=u.verificada?(u.etiquetaEsquina||"Pareja verificada"):"Perfil pareja";
   var shield='<svg class="negocio-corner__shield" viewBox="0 0 20 22" aria-hidden="true">'+
@@ -4873,7 +4910,7 @@ function parejaFichaFilas(u){
     ["chat","Disponible para:",safe(u.disponiblePara||"—")],
     ["user","Edad:",safe(u.edadVisitantes||"—")],
     ["calendar","Años juntos:",safe(u.anosJuntos||"—")],
-    ["corp","Nosotros:",safe(u.miembrosEdad||"—")],
+    ["corp","Nosotros:",safe(formatMiembrosFicha(u)||"—")],
     ["briefcase","Preferencias:",safe(u.preferencias||"—")],
     ["clock","Horario:",safe(u.horario||"—")],
     ["pin","Ubicación:",safe(u.ubicacionFicha||"—"),true],
@@ -6456,6 +6493,16 @@ function aplicarPerfilResultadosEnDemo(vista,u){
   if(u.mostrarAtiendenA) d.mostrarAtiendenA=u.mostrarAtiendenA;
   if(u.aceptanSolteros) d.aceptanSolteros=u.aceptanSolteros;
   if(u.mostrarObjetivosPerfil) d.mostrarObjetivosPerfil=u.mostrarObjetivosPerfil;
+  if(u.tipoUnicornio) d.tipoUnicornio=u.tipoUnicornio;
+  if(Array.isArray(u.buscoConocer)&&u.buscoConocer.length){ d.buscoConocer=u.buscoConocer.slice(); d.buscan=u.buscoConocer.slice(); }
+  if(Array.isArray(u.tipoParejaPreferida)&&u.tipoParejaPreferida.length) d.tipoParejaPreferida=u.tipoParejaPreferida.slice();
+  if(Array.isArray(u.finalidadEncuentro)&&u.finalidadEncuentro.length) d.finalidadEncuentro=u.finalidadEncuentro.slice();
+  if(u.estadoPerfil) d.estadoPerfil=u.estadoPerfil;
+  if(u.experiencia) d.experiencia=u.experiencia;
+  if(Array.isArray(u.ambientePreferido)&&u.ambientePreferido.length) d.ambientePreferido=u.ambientePreferido.slice();
+  if(u.estilo) d.estilo=u.estilo;
+  if(u.badgeUnicorn) d.badgeUnicorn=u.badgeUnicorn;
+  if(Array.isArray(u.serviciosLifestyle)&&u.serviciosLifestyle.length) d.serviciosLifestyle=u.serviciosLifestyle.slice();
   if(u.__id) d.__id=u.__id;
   if(u.uid) d.uid=u.uid;
   if(u.__demo!=null) d.__demo=u.__demo;

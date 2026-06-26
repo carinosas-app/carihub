@@ -122,6 +122,48 @@
     return '<p class="res-card__viajes-resumen">' + safeTxt(lines.join(' · ')) + '</p>';
   }
 
+  function isUnicornPerfil(u) {
+    var id = normTxt(u.subcategoriaId || u.subcategoria || '');
+    return id === 'unicorns' || id === 'unicorn';
+  }
+
+  function objetivoPrincipalUnicorn(u) {
+    if (!lesbiansMostrarPublico(u, 'mostrarObjetivosPerfil', u.objetivosPerfil)) return '';
+    var arr = u.objetivosPerfil;
+    if (!Array.isArray(arr) || !arr.length) return '';
+    if (arr.indexOf('Todo lo anterior') >= 0) return 'Todo lo anterior';
+    return String(arr[0]).trim();
+  }
+
+  function cardHTMLUnicorn(u, Q) {
+    Q = Q || {};
+    var edad = u.edad != null ? String(u.edad).trim() + ' años' : '';
+    var set = modalidadesSet(u);
+    var metaRight = set.viaja ? chipModalidadHTML({ viaja: true }) : '';
+    var lines = [];
+    var obj = objetivoPrincipalUnicorn(u);
+    if (obj) lines.push(obj);
+    var busco = Array.isArray(u.buscoConocer) && u.buscoConocer.length
+      ? u.buscoConocer.join(', ')
+      : (Array.isArray(u.buscan) && u.buscan.length ? u.buscan.join(', ') : String(u.buscan || '').trim());
+    if (busco) lines.push('Busco: ' + busco);
+    var descBlock = lines.length
+      ? '<p class="res-card__desc res-card__desc--compact"><span class="res-card__desc-txt">' + safeTxt(lines.join(' · ')) + '</span></p>'
+      : descripcionCompactHTML(u, 'Presentación');
+    var viajesLine = set.viaja ? cardViajesExtraHTML(u) : '';
+    var catLabel = (global.CariHubResultadosDemo && CariHubResultadosDemo.labelCategoria)
+      ? CariHubResultadosDemo.labelCategoria(u.categoriaPublica || u.categoria || Q.categoria || '')
+      : (u.categoriaPublica || u.categoria || Q.categoria || '');
+    return cardShell(u, Q, {
+      cardClass: 'res-card--unicorn',
+      headExtra: edad ? '<span class="age">' + safeTxt(edad) + '</span>' : '',
+      metaRight: metaRight,
+      descBlock: descBlock + viajesLine,
+      catLabel: catLabel,
+      badges: badgesCompactHTML(u, { unicorn: u.badgeUnicorn !== false })
+    });
+  }
+
   function cardPerfilExtraHTML(u) {
     return cardViajesExtraHTML(u) + lesbiansCardExtraHTML(u) + swingerCardExtraHTML(u);
   }
@@ -184,6 +226,7 @@
     if (opts.negocio) items.push('<span class="res-badge res-badge--ver">Verificado</span>');
     if (opts.lgbt || u.badgeLgbt) items.push('<span class="res-badge res-badge--lgbt">LGBT+</span>');
     if (opts.hotwife || u.badgeHotwife) items.push('<span class="res-badge res-badge--hotwife">Hotwife</span>');
+    if (opts.unicorn || u.badgeUnicorn) items.push('<span class="res-badge res-badge--unicorn">🦄 Unicornio</span>');
     if (opts.respRapida) items.push('<span class="res-badge res-badge--fast">Respuesta rápida</span>');
     else if (u.nueva) items.push('<span class="res-badge res-badge--new">Nueva</span>');
     if (!items.length) return '';
@@ -368,15 +411,19 @@
     var catLabel = (global.CariHubResultadosDemo && CariHubResultadosDemo.labelCategoria)
       ? CariHubResultadosDemo.labelCategoria(u.categoriaPublica || u.categoria || Q.categoria || '')
       : (u.categoriaPublica || u.categoria || Q.categoria || '');
-    var headExtra = u.tipoPareja
-      ? '<span class="age">' + safeTxt(String(u.tipoPareja)) + '</span>'
+    var configLabel = u.configuracionGrupoLabel || u.tipoPareja || '';
+    var headExtra = configLabel
+      ? '<span class="age">' + safeTxt(String(configLabel)) + '</span>'
+      : '';
+    var miembrosLine = u.miembrosResumen || u.miembrosEdad
+      ? '<p class="res-card__viajes-resumen">' + safeTxt(String(u.miembrosResumen || u.miembrosEdad)) + '</p>'
       : '';
     return cardShell(u, Q, {
       cardClass: 'res-card--pareja',
       nombre: u.aliasPareja || u.nombre || u.alias,
       headExtra: headExtra,
       metaRight: mods,
-      descBlock: descripcionCompactHTML(u, 'Presentación') + viajesLine,
+      descBlock: descripcionCompactHTML(u, 'Presentación') + miembrosLine + viajesLine,
       catLabel: catLabel,
       badges: badgesCompactHTML(u, { respRapida: !u.__previewRegistro && u.respuestaRapida === true })
     });
@@ -390,6 +437,7 @@
       });
     }
     var comp = resolveComponente(u, Q);
+    if (isUnicornPerfil(u)) return cardHTMLUnicorn(u, Q);
     if (comp === 'ResultCardNegocio') return cardHTMLNegocio(u, Q);
     if (comp === 'ResultCardProfesional') return cardHTMLProfesional(u, Q);
     if (comp === 'ResultCardServicio') return cardHTMLServicio(u, Q);
@@ -491,6 +539,7 @@
     cardHTMLServicio: cardHTMLServicio,
     cardHTMLProfesional: cardHTMLProfesional,
     cardHTMLPareja: cardHTMLPareja,
+    cardHTMLUnicorn: cardHTMLUnicorn,
     resolveComponente: resolveComponente,
     applyPublicProfilePresentation: applyPublicProfilePresentation,
     PUB_BLOCKS: PUB_BLOCKS

@@ -45,6 +45,18 @@
       },
       obligatoriosUi: ['alias', 'descripcion', 'precio', 'modalidad', 'edad']
     },
+    persona_lifestyle: {
+      titulo: 'Perfil lifestyle',
+      show: ['edad', 'alias', 'descripcion', 'precio', 'horario', 'whatsapp', 'telegram'],
+      hide: ['modalidad', 'servicios'],
+      labels: {
+        alias: 'Alias / nombre público',
+        descripcion: 'Frase corta para tu tarjeta',
+        precio: 'Precio desde (opcional)',
+        horario: 'Disponibilidad general (resumen)'
+      },
+      obligatoriosUi: ['alias', 'descripcion', 'edad']
+    },
     persona_dominatrix: {
       titulo: 'Perfil personal · dominación',
       show: ['edad', 'modalidad', 'alias', 'descripcion', 'precio', 'horario', 'servicios', 'whatsapp', 'telegram'],
@@ -100,9 +112,14 @@
     },
     pareja_grupo: {
       titulo: 'Pareja / grupo',
-      show: ['alias', 'descripcion', 'precio', 'horario', 'servicios', 'whatsapp', 'telegram'],
-      hide: ['edad', 'modalidad'],
-      labels: { alias: 'Alias del perfil grupal' },
+      show: ['alias', 'descripcion', 'precio', 'horario', 'whatsapp', 'telegram'],
+      hide: ['edad', 'modalidad', 'servicios'],
+      labels: {
+        alias: 'Alias de la pareja / grupo',
+        descripcion: 'Frase corta del perfil',
+        precio: 'Tarifa / aporte desde',
+        horario: 'Horario público (resumen)'
+      },
       obligatoriosUi: ['alias', 'descripcion']
     },
     persona_servicio_general: {
@@ -260,6 +277,7 @@
     if (arquetipo === 'persona_acompanante' || arquetipo === 'persona_dominatrix') {
       return arquetipo;
     }
+    if (arquetipo === 'persona_lifestyle') return 'persona_lifestyle';
     if (arquetipo === 'persona_creador') return 'persona_creador';
     if (arquetipo === 'persona_espectaculo') return 'persona_espectaculo';
     if (arquetipo === 'pareja_grupo') return 'pareja_grupo';

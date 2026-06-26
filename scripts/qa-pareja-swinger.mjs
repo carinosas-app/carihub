@@ -61,9 +61,24 @@ function mergedPareja(vmCtx, userCtx) {
   return vmCtx.CariHubRegistroPublicBlocks.mergedConfig(cfg, userCtx);
 }
 
+function baseShell() {
+  return {
+    aliasPareja: 'Pareja Demo',
+    alias: 'Pareja Demo',
+    configuracionGrupo: 'pareja_hm',
+    miembros: [
+      { etiquetaPublica: 'Él', generoPresentacion: 'Hombre', edad: 38 },
+      { etiquetaPublica: 'Ella', generoPresentacion: 'Mujer', edad: 36 },
+    ],
+    metodosPago: ['Efectivo'],
+  };
+}
+
 function simulateCollect(vmCtx, values) {
   const V = vmCtx.CariHubViajesDesplazamiento;
-  const out = { ...values };
+  const RP = vmCtx.CariHubRegistroPublicBlocks;
+  let out = { ...values };
+  out = RP.finalizeParejaGrupoValues(out);
   out.viajesDesplazamiento = V.buildViajesDesplazamiento(out, out.modalidades || []);
   if (!out.viajesDesplazamiento.viaja) {
     V.viajesFieldIds().forEach((k) => delete out[k]);
@@ -107,9 +122,11 @@ try {
 
   const fieldIds = swBlock.fields.map((f) => f.id);
   ok('campos obligatorios swinger', [
-    'objetivosPerfil', 'tipoInteraccion', 'tipoPareja', 'atiendenA',
+    'objetivosPerfil', 'tipoInteraccion', 'atiendenA',
     'aceptanSolteros', 'haceColaboraciones', 'colaboraCon'
   ].every((id) => fieldIds.includes(id)), fieldIds.join(', '));
+
+  ok('shell base presente', merged.blocks.some((b) => b.id === 'parejaGrupoBase'), 'parejaGrupoBase');
 
   const colabField = swBlock.fields.find((f) => f.id === 'colaboraCon');
   ok('colaboraCon solo si Sí', colabField.showWhen.values.join(',') === 'Sí', JSON.stringify(colabField.showWhen));
@@ -117,9 +134,9 @@ try {
   ok('fotosMin pareja', RP.getFotosMin(userCtx) === 4, String(RP.getFotosMin(userCtx)));
 
   const baseVals = {
+    ...baseShell(),
     objetivosPerfil: ['Conocer otras parejas'],
     tipoInteraccion: ['Intercambio de parejas'],
-    tipoPareja: 'Hombre + Mujer',
     atiendenA: 'Parejas',
     aceptanSolteros: 'No',
     haceColaboraciones: 'No',
@@ -128,8 +145,8 @@ try {
   const missBase = simulateValidate(ctx, userCtx, baseVals);
   ok('validación mínima ok', missBase.length === 0, missBase.join('; '));
 
-  const missReq = simulateValidate(ctx, userCtx, { modalidades: ['recibe'] });
-  ok('faltan obligatorios', missReq.length >= 5, missReq.join('; '));
+  const missReq = simulateValidate(ctx, userCtx, { modalidades: ['recibe'], ...baseShell() });
+  ok('faltan obligatorios swinger', missReq.length >= 5, missReq.join('; '));
 
   const colabSi = simulateCollect(ctx, {
     ...baseVals,
@@ -145,6 +162,8 @@ try {
   });
   ok('colaboraCon limpiado si No', colabNo.colaboraCon == null, JSON.stringify(colabNo));
 
+  ok('shell + swinger compat', colabSi.parejaGrupoPerfil && colabSi.tipoPareja === 'Hombre + Mujer', JSON.stringify(colabSi.parejaGrupoPerfil));
+
   const viajaOn = simulateCollect(ctx, {
     ...baseVals,
     modalidades: ['viaja'],
@@ -156,9 +175,9 @@ try {
   ok('viajes swinger on', viajaOn.viajesDesplazamiento.viaja === true, JSON.stringify(viajaOn.viajesDesplazamiento));
 
   const perf = simulateMapToPerfil(ctx, userCtx, colabSi);
-  ok('mapToPerfil campos', perf.atiendenA === 'Parejas' && perf.tipoPareja === 'Hombre + Mujer', JSON.stringify({
+  ok('mapToPerfil campos', perf.atiendenA === 'Parejas' && perf.configuracionGrupo === 'pareja_hm', JSON.stringify({
     atiendenA: perf.atiendenA,
-    tipoPareja: perf.tipoPareja,
+    configuracionGrupo: perf.configuracionGrupo,
   }));
 
   const cardOn = ctx.CariHubPublicRenderLite.cardHTMLPareja({

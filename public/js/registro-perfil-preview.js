@@ -157,6 +157,14 @@
     if (bloques && global.CariHubRegistroPublicBlocks.mapToPerfil) {
       u = global.CariHubRegistroPublicBlocks.mapToPerfil(u, bloques, ctx);
     }
+    if (global.CariHubRegistroPublicBlocks && CariHubRegistroPublicBlocks.matchesPareja(ctx, null)) {
+      u.aliasPareja = u.aliasPareja || alias;
+      u.tipoPerfil = 'pareja_grupo';
+      if (u.aliasPareja) {
+        u.nombre = u.aliasPareja;
+        u.alias = u.aliasPareja;
+      }
+    }
 
     if (global.CariHubFieldEngineLite && CariHubFieldEngineLite.enriquecerPerfilPublico) {
       global.CariHubFieldEngineLite.enriquecerPerfilPublico(u, {

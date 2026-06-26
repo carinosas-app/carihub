@@ -19,6 +19,10 @@
     return global.CARIHUB_REGISTRO_PAREJA_BLOCKS || null;
   }
 
+  function resolveLifestyleConfig() {
+    return global.CARIHUB_REGISTRO_LIFESTYLE_BLOCKS || null;
+  }
+
   function normalizeSubId(id) {
     return String(id || '').trim().toLowerCase().replace(/_/g, ' ');
   }
@@ -113,8 +117,14 @@
   }
 
   function applyBadges(u, ctx) {
+    ctx = ctx || { subcategoriaId: u && u.subcategoriaId };
+    if (matchesLifestyle(ctx, null)) {
+      var subLife = normalizeSubId(ctx.subcategoriaId || (u && u.subcategoriaId) || '');
+      if (subLife === 'unicorns') u.badgeUnicorn = true;
+      return u;
+    }
     var cfg = resolveEscortConfig();
-    if (!cfg || !matchesEscort(ctx || { subcategoriaId: u && u.subcategoriaId }, null)) return u;
+    if (!cfg || !matchesEscort(ctx, null)) return u;
     var over = getSubcategoriaOverride(cfg, ctx || { subcategoriaId: u && u.subcategoriaId });
     if (!over || !over.badges) return u;
     if (over.badges.indexOf('lgbt') >= 0) u.badgeLgbt = true;
@@ -184,6 +194,20 @@
     ctx = ctx || {};
     var subId = String(ctx.subcategoriaId || '').trim().toLowerCase();
     if (cfg.subcategoriaIds.indexOf(subId) >= 0) return true;
+    if (ctx.arquetipo === cfg.id) return true;
+    var ident = resolved && resolved.identidad ? resolved.identidad : {};
+    if (ident.formularioId === cfg.formularioId && ident.arquetipo === cfg.id) return true;
+    if (ident.arquetipo === cfg.id) return true;
+    if (resolved && cfg.uiIds.indexOf(resolved.formularioUiId || '') >= 0) return true;
+    return false;
+  }
+
+  function matchesLifestyle(ctx, resolved) {
+    var cfg = resolveLifestyleConfig();
+    if (!cfg) return false;
+    ctx = ctx || {};
+    var subId = String(ctx.subcategoriaId || '').trim().toLowerCase();
+    if (cfg.subcategoriaIds.indexOf(subId) >= 0) return true;
     var ident = resolved && resolved.identidad ? resolved.identidad : {};
     if (ident.formularioId === cfg.formularioId && ident.arquetipo === cfg.id) return true;
     if (resolved && cfg.uiIds.indexOf(resolved.formularioUiId || '') >= 0) return true;
@@ -192,6 +216,7 @@
 
   function resolveConfig(ctx, resolved) {
     if (matchesEscort(ctx, resolved)) return resolveEscortConfig();
+    if (matchesLifestyle(ctx, resolved)) return resolveLifestyleConfig();
     if (matchesPareja(ctx, resolved)) return resolveParejaConfig();
     return null;
   }
@@ -317,6 +342,167 @@
     missing.push(label);
   }
 
+  var CONFIGURACION_GRUPO_LABELS = {
+    pareja_hm: 'Hombre + Mujer',
+    pareja_mm: 'Mujer + Mujer',
+    pareja_hh: 'Hombre + Hombre',
+    grupo: 'Grupo (3 o más integrantes)',
+    otra: 'Otra configuración'
+  };
+
+  function configuracionGrupoLabel(value) {
+    return CONFIGURACION_GRUPO_LABELS[String(value || '').trim()] || String(value || '').trim();
+  }
+
+  function normalizeMemberRow(row, index) {
+    row = row || {};
+    var edadRaw = row.edad != null ? String(row.edad).trim() : '';
+    var edadNum = edadRaw ? parseInt(edadRaw, 10) : null;
+    return {
+      id: row.id || ('m' + (index + 1)),
+      etiquetaPublica: String(row.etiquetaPublica || '').trim(),
+      generoPresentacion: String(row.generoPresentacion || '').trim(),
+      edad: isFinite(edadNum) ? edadNum : null,
+      franjaEdad: String(row.franjaEdad || '').trim(),
+      orden: index + 1
+    };
+  }
+
+  function buildMiembrosResumen(miembros) {
+    if (!Array.isArray(miembros) || !miembros.length) return '';
+    return miembros.map(function (m) {
+      var parts = [];
+      if (m.etiquetaPublica) parts.push(m.etiquetaPublica);
+      if (m.edad != null && isFinite(m.edad)) parts.push(m.edad + ' años');
+      else if (m.franjaEdad) parts.push(m.franjaEdad);
+      return parts.join(' ').trim();
+    }).filter(Boolean).join(' · ');
+  }
+
+  function memberRowHasAge(member) {
+    if (!member) return false;
+    if (member.edad != null && isFinite(member.edad) && member.edad >= 18) return true;
+    return !!String(member.franjaEdad || '').trim();
+  }
+
+  function renderMemberField(mf, member, rowIndex) {
+    var val = member[mf.id] != null ? member[mf.id] : '';
+    var req = mf.required ? ' <span class="rp-req">*</span>' : '';
+    var fid = fieldDomId('miembros_' + rowIndex + '_' + mf.id);
+    if (mf.type === 'select') {
+      var html = '<label for="' + fid + '">' + esc(mf.label) + req + '</label><select id="' + fid + '" data-member-field="' + esc(mf.id) + '">';
+      html += '<option value="">Selecciona…</option>';
+      (mf.options || []).forEach(function (opt) {
+        var oval = typeof opt === 'string' ? opt : opt.value;
+        var olabel = typeof opt === 'string' ? opt : opt.label;
+        html += '<option value="' + esc(oval) + '"' + (String(val) === String(oval) ? ' selected' : '') + '>' + esc(olabel) + '</option>';
+      });
+      html += '</select>';
+      return html;
+    }
+    if (mf.type === 'number') {
+      return '<label for="' + fid + '">' + esc(mf.label) + req + '</label>' +
+        '<input type="number" id="' + fid + '" data-member-field="' + esc(mf.id) + '" value="' +
+        esc(val != null ? val : '') + '" min="' + esc(mf.min != null ? mf.min : 18) + '"' +
+        (mf.max != null ? ' max="' + esc(mf.max) + '"' : '') +
+        ' placeholder="' + esc(mf.placeholder || '') + '">';
+    }
+    return '<label for="' + fid + '">' + esc(mf.label) + req + '</label>' +
+      '<input type="text" id="' + fid + '" data-member-field="' + esc(mf.id) + '" value="' +
+      esc(val != null ? val : '') + '" placeholder="' + esc(mf.placeholder || '') + '">';
+  }
+
+  function renderMemberList(field, values) {
+    values = values || {};
+    var members = Array.isArray(values[field.id]) ? values[field.id] : [];
+    var minRows = field.minMembers || 2;
+    while (members.length < minRows) members.push({});
+    var html = '<div class="rp-pub-member-list" data-rp-pub-field="' + esc(field.id) + '" data-rp-member-min="' + minRows + '"' +
+      (field.minMembersGrupo ? ' data-rp-member-min-grupo="' + field.minMembersGrupo + '"' : '') + '>';
+    html += '<span class="rp-pub-field-label">' + esc(field.label) + (field.required ? ' <span class="rp-req">*</span>' : '') + '</span>';
+    members.forEach(function (member, idx) {
+      html += '<div class="rp-pub-member-row" data-member-index="' + idx + '">';
+      html += '<div class="rp-pub-member-row__head"><strong>Integrante ' + (idx + 1) + '</strong>';
+      if (idx >= minRows) {
+        html += '<button type="button" class="rp-pub-member-remove" data-rp-member-remove="1">Quitar</button>';
+      }
+      html += '</div><div class="rp-pub-member-row__grid">';
+      (field.memberFields || []).forEach(function (mf) {
+        html += '<div class="rp-field rp-pub-member-field">' + renderMemberField(mf, member, idx) + '</div>';
+      });
+      html += '</div></div>';
+    });
+    html += '<button type="button" class="rp-btn rp-btn--ghost rp-pub-member-add" data-rp-member-add="1">+ Agregar integrante</button>';
+    html += '</div>';
+    return html;
+  }
+
+  function readMemberList(fieldId) {
+    var host = document.querySelector('[data-rp-pub-field="' + fieldId + '"]');
+    if (!host) return [];
+    var rows = host.querySelectorAll('.rp-pub-member-row');
+    var out = [];
+    rows.forEach(function (row, index) {
+      var member = { id: 'm' + (index + 1) };
+      row.querySelectorAll('[data-member-field]').forEach(function (el) {
+        var key = el.getAttribute('data-member-field');
+        if (!key) return;
+        if (el.type === 'number') {
+          var n = parseInt(String(el.value || '').trim(), 10);
+          member[key] = isFinite(n) ? n : null;
+        } else {
+          member[key] = String(el.value || '').trim();
+        }
+      });
+      out.push(normalizeMemberRow(member, index));
+    });
+    return out;
+  }
+
+  function bindMemberListControls(host) {
+    if (!host) return;
+    host.querySelectorAll('[data-rp-member-add]').forEach(function (btn) {
+      if (btn.dataset.rpMemberBound === '1') return;
+      btn.dataset.rpMemberBound = '1';
+      btn.addEventListener('click', function () {
+        var list = btn.closest('[data-rp-pub-field="miembros"]');
+        if (!list) return;
+        var cfg = resolveParejaConfig();
+        var fieldDef = null;
+        if (cfg) {
+          cfg.blocks.forEach(function (block) {
+            block.fields.forEach(function (f) {
+              if (f.id === 'miembros') fieldDef = f;
+            });
+          });
+        }
+        var idx = list.querySelectorAll('.rp-pub-member-row').length;
+        var row = document.createElement('div');
+        row.className = 'rp-pub-member-row';
+        row.setAttribute('data-member-index', String(idx));
+        var minRows = parseInt(list.getAttribute('data-rp-member-min') || '2', 10);
+        var head = '<div class="rp-pub-member-row__head"><strong>Integrante ' + (idx + 1) + '</strong>';
+        if (idx >= minRows) head += '<button type="button" class="rp-pub-member-remove" data-rp-member-remove="1">Quitar</button>';
+        head += '</div><div class="rp-pub-member-row__grid">';
+        var grid = '';
+        (fieldDef && fieldDef.memberFields ? fieldDef.memberFields : []).forEach(function (mf) {
+          grid += '<div class="rp-field rp-pub-member-field">' + renderMemberField(mf, {}, idx) + '</div>';
+        });
+        row.innerHTML = head + grid + '</div>';
+        list.insertBefore(row, btn);
+        bindMemberListControls(list);
+      });
+    });
+    host.querySelectorAll('[data-rp-member-remove]').forEach(function (btn) {
+      if (btn.dataset.rpMemberBound === '1') return;
+      btn.dataset.rpMemberBound = '1';
+      btn.addEventListener('click', function () {
+        var row = btn.closest('.rp-pub-member-row');
+        if (row) row.remove();
+      });
+    });
+  }
+
   function renderField(field, values, ctx) {
     values = values || {};
     var val = fieldValueWithDefault(field, values);
@@ -332,6 +518,8 @@
       (hidden ? ' aria-hidden="true"' : '') + '>';
     if (field.type === 'checklist') {
       wrap += '<span class="rp-pub-field-label">' + esc(field.label) + req + '</span>' + renderChecklist(field, values, ctx);
+    } else if (field.type === 'memberList') {
+      wrap += renderMemberList(field, values);
     } else if (field.type === 'select') {
       var selectCls = field.id === 'nivelServicio' ? ' rp-nivel-servicio-select' : '';
       wrap += '<label for="' + fieldDomId(field.id) + '">' + esc(field.label) + req + '</label><select id="' + fieldDomId(field.id) + '" class="' + selectCls + '">';
@@ -405,6 +593,7 @@
     bindNivelServicioHelp();
     bindViajaToggle();
     bindConditionalFieldToggles();
+    bindMemberListControls(host);
     syncConditionalSubfieldsVisibility();
   }
 
@@ -528,11 +717,57 @@
     return values;
   }
 
+  function finalizeParejaGrupoValues(values) {
+    if (!values || (!values.configuracionGrupo && !Array.isArray(values.miembros))) return values;
+    var aliasEl = $('fldAlias');
+    var alias = aliasEl ? String(aliasEl.value || '').trim() : String(values.aliasPareja || values.alias || '').trim();
+    if (alias) {
+      values.aliasPareja = alias;
+      values.alias = alias;
+    }
+    if (values.configuracionGrupo) {
+      values.configuracionGrupoLabel = configuracionGrupoLabel(values.configuracionGrupo);
+      values.tipoPareja = values.configuracionGrupoLabel;
+    }
+    if (Array.isArray(values.miembros)) {
+      values.miembros = values.miembros.map(function (m, i) {
+        return normalizeMemberRow(m, i);
+      }).filter(function (m) {
+        return m.etiquetaPublica || m.generoPresentacion || m.edad || m.franjaEdad;
+      });
+      values.miembrosResumen = buildMiembrosResumen(values.miembros);
+      values.miembrosEdad = values.miembrosResumen;
+    }
+    values.parejaGrupoPerfil = {
+      aliasPareja: values.aliasPareja || alias || '',
+      configuracionGrupo: values.configuracionGrupo || '',
+      configuracionGrupoLabel: values.configuracionGrupoLabel || configuracionGrupoLabel(values.configuracionGrupo),
+      miembros: values.miembros || [],
+      reglasAcceso: values.reglasAcceso || '',
+      sobreMi: values.sobreMi || '',
+      horarioDetalle: values.horarioDetalle || '',
+      modalidades: values.modalidades || [],
+      viajesDesplazamiento: values.viajesDesplazamiento || null,
+      metodosPago: values.metodosPago || []
+    };
+    values.tipoPerfil = 'pareja_grupo';
+    return values;
+  }
+
   function finalizeParejaSwingerValues(values) {
     if (!values) return values;
     if (!String(values.mostrarAtiendenA || '').trim()) values.mostrarAtiendenA = 'Sí';
     if (!String(values.mostrarColaboraciones || '').trim()) values.mostrarColaboraciones = 'Sí';
     if (!String(values.mostrarObjetivosPerfil || '').trim()) values.mostrarObjetivosPerfil = 'Sí';
+    var hace = String(values.haceColaboraciones || '').trim();
+    if (hace !== 'Sí') delete values.colaboraCon;
+    return values;
+  }
+
+  function finalizeUnicornValues(values) {
+    if (!values) return values;
+    if (!String(values.mostrarObjetivosPerfil || '').trim()) values.mostrarObjetivosPerfil = 'Sí';
+    if (!String(values.mostrarColaboraciones || '').trim()) values.mostrarColaboraciones = 'Sí';
     var hace = String(values.haceColaboraciones || '').trim();
     if (hace !== 'Sí') delete values.colaboraCon;
     return values;
@@ -559,6 +794,10 @@
           values[field.id] = readChecklist(field.id);
           return;
         }
+        if (field.type === 'memberList') {
+          values[field.id] = readMemberList(field.id);
+          return;
+        }
         if (field.type === 'boolean') {
           var cb = $(fieldDomId(field.id));
           values[field.id] = cb ? cb.checked === true : false;
@@ -568,7 +807,7 @@
         values[field.id] = el ? String(el.value || '').trim() : '';
       });
     });
-    return finalizeParejaSwingerValues(finalizeLesbiansValues(finalizeViajesValues(values)));
+    return finalizeParejaGrupoValues(finalizeUnicornValues(finalizeParejaSwingerValues(finalizeLesbiansValues(finalizeViajesValues(values)))));
   }
 
   function validateValues(cfg, values, ctx) {
@@ -590,6 +829,8 @@
       }
       if (Array.isArray(val)) {
         if (!val.length) missing.push(labelForField(cfg, key));
+      } else if (fieldType === 'memberList') {
+        if (!Array.isArray(val) || !val.length) missing.push(labelForField(cfg, key));
       } else if (!String(val || '').trim()) {
         missing.push(labelForField(cfg, key));
       }
@@ -603,6 +844,10 @@
           ? !isTruthyFieldValue(val)
           : field.type === 'url'
             ? !isValidUrl(val)
+            : field.type === 'memberList'
+              ? (!Array.isArray(val) || !val.filter(function (m) {
+                return String(m.etiquetaPublica || '').trim() && String(m.generoPresentacion || '').trim();
+              }).length)
             : (Array.isArray(val) ? !val.length : !String(val || '').trim());
         if (empty && missing.indexOf(field.label) < 0) missing.push(field.label);
       });
@@ -629,7 +874,44 @@
         pushMissing(missing, labelForField(cfg, 'colaboraCon') || 'Busco colaborar con');
       }
     }
+    if (cfg.id === 'pareja_grupo') {
+      validateParejaGrupoValues(cfg, values, missing);
+    }
     return missing;
+  }
+
+  function validateParejaGrupoValues(cfg, values, missing) {
+    var aliasEl = $('fldAlias');
+    var alias = aliasEl ? String(aliasEl.value || '').trim() : String(values.aliasPareja || values.alias || '').trim();
+    if (!alias) pushMissing(missing, 'Alias de la pareja / grupo');
+
+    var config = String(values.configuracionGrupo || '').trim();
+    var minMembers = 2;
+    var minGrupo = 3;
+    cfg.blocks.forEach(function (block) {
+      block.fields.forEach(function (field) {
+        if (field.id === 'miembros') {
+          if (field.minMembers) minMembers = field.minMembers;
+          if (field.minMembersGrupo) minGrupo = field.minMembersGrupo;
+        }
+      });
+    });
+    if (config === 'grupo') minMembers = minGrupo;
+
+    var members = Array.isArray(values.miembros) ? values.miembros : [];
+    var validMembers = members.filter(function (m) {
+      return String(m.etiquetaPublica || '').trim() && String(m.generoPresentacion || '').trim();
+    });
+    if (validMembers.length < minMembers) {
+      pushMissing(missing, 'Integrantes (mínimo ' + minMembers + ')');
+    }
+    validMembers.forEach(function (m, i) {
+      if (!memberRowHasAge(m)) {
+        pushMissing(missing, 'Edad o franja de integrante ' + (i + 1) + ' (mayor de 18)');
+      } else if (m.edad != null && isFinite(m.edad) && m.edad < 18) {
+        pushMissing(missing, 'Edad de integrante ' + (i + 1) + ' (mayor de 18)');
+      }
+    });
   }
 
   function labelForField(cfg, key) {
@@ -771,14 +1053,55 @@
     if (Array.isArray(bloques.objetivosPerfil) && bloques.objetivosPerfil.length) {
       u.objetivosPerfil = bloques.objetivosPerfil.slice();
     }
+    if (bloques.configuracionGrupo) {
+      u.configuracionGrupo = bloques.configuracionGrupo;
+      u.configuracionGrupoLabel = bloques.configuracionGrupoLabel || configuracionGrupoLabel(bloques.configuracionGrupo);
+      u.tipoPareja = u.configuracionGrupoLabel;
+    } else if (bloques.tipoPareja) u.tipoPareja = bloques.tipoPareja;
+    if (bloques.aliasPareja) {
+      u.aliasPareja = bloques.aliasPareja;
+      u.alias = bloques.aliasPareja;
+      u.nombre = bloques.aliasPareja;
+    }
+    if (Array.isArray(bloques.miembros) && bloques.miembros.length) {
+      u.miembros = bloques.miembros.slice();
+      u.miembrosResumen = bloques.miembrosResumen || buildMiembrosResumen(bloques.miembros);
+      u.miembrosEdad = u.miembrosResumen;
+    }
+    if (bloques.reglasAcceso) u.reglasAcceso = bloques.reglasAcceso;
+    if (bloques.parejaGrupoPerfil) u.parejaGrupoPerfil = Object.assign({}, bloques.parejaGrupoPerfil);
+    if (bloques.tipoPerfil === 'pareja_grupo' || (ctx && matchesPareja(ctx, null))) {
+      u.tipoPerfil = 'pareja_grupo';
+    }
     if (Array.isArray(bloques.tipoInteraccion) && bloques.tipoInteraccion.length) {
       u.tipoInteraccion = bloques.tipoInteraccion.slice();
     }
-    if (bloques.tipoPareja) u.tipoPareja = bloques.tipoPareja;
+    if (bloques.tipoPareja && !bloques.configuracionGrupo) u.tipoPareja = bloques.tipoPareja;
     if (bloques.atiendenA) u.atiendenA = bloques.atiendenA;
     if (bloques.mostrarAtiendenA) u.mostrarAtiendenA = bloques.mostrarAtiendenA;
     if (bloques.aceptanSolteros) u.aceptanSolteros = bloques.aceptanSolteros;
     if (bloques.mostrarObjetivosPerfil) u.mostrarObjetivosPerfil = bloques.mostrarObjetivosPerfil;
+    if (bloques.tipoUnicornio) u.tipoUnicornio = bloques.tipoUnicornio;
+    if (Array.isArray(bloques.buscoConocer) && bloques.buscoConocer.length) {
+      u.buscoConocer = bloques.buscoConocer.slice();
+      u.buscan = bloques.buscoConocer.slice();
+    }
+    if (Array.isArray(bloques.tipoParejaPreferida) && bloques.tipoParejaPreferida.length) {
+      u.tipoParejaPreferida = bloques.tipoParejaPreferida.slice();
+    }
+    if (Array.isArray(bloques.finalidadEncuentro) && bloques.finalidadEncuentro.length) {
+      u.finalidadEncuentro = bloques.finalidadEncuentro.slice();
+    }
+    if (bloques.estadoPerfil) u.estadoPerfil = bloques.estadoPerfil;
+    if (bloques.experiencia) u.experiencia = bloques.experiencia;
+    if (Array.isArray(bloques.ambientePreferido) && bloques.ambientePreferido.length) {
+      u.ambientePreferido = bloques.ambientePreferido.slice();
+    }
+    if (bloques.estilo) u.estilo = bloques.estilo;
+    if (Array.isArray(bloques.serviciosLifestyle) && bloques.serviciosLifestyle.length) {
+      u.serviciosLifestyle = bloques.serviciosLifestyle.slice();
+      u.serviciosIncluidos = bloques.serviciosLifestyle.slice();
+    }
     if (!u.mostrarAtiendoA) u.mostrarAtiendoA = 'Sí';
     if (!u.mostrarColaboraciones) u.mostrarColaboraciones = 'Sí';
     if (!u.mostrarAtiendenA) u.mostrarAtiendenA = 'Sí';
@@ -870,6 +1193,7 @@
     resolveConfig: resolveConfig,
     matchesEscort: matchesEscort,
     matchesPareja: matchesPareja,
+    matchesLifestyle: matchesLifestyle,
     apply: apply,
     collectValues: collectValues,
     validateValues: validateValues,
@@ -881,6 +1205,10 @@
     getFieldLabels: getFieldLabels,
     getAliasLabel: getAliasLabel,
     applyFieldLabels: applyFieldLabels,
-    bindChange: bindChange
+    bindChange: bindChange,
+    configuracionGrupoLabel: configuracionGrupoLabel,
+    buildMiembrosResumen: buildMiembrosResumen,
+    normalizeMemberRow: normalizeMemberRow,
+    finalizeParejaGrupoValues: finalizeParejaGrupoValues
   };
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -53,6 +53,12 @@
       "limitesSesion": { "id": "limitesSesion", "label": "Límites y reglas", "tipo": "richtext", "iaCopy": true },
       "listaFetiches": { "id": "listaFetiches", "label": "Fetiches ofrecidos", "tipo": "tags" },
       "aliasPareja": { "id": "aliasPareja", "label": "Alias de pareja / grupo", "tipo": "text" },
+      "configuracionGrupo": {
+        "id": "configuracionGrupo",
+        "label": "Configuración del grupo",
+        "tipo": "enum",
+        "opciones": ["pareja_hm", "pareja_mm", "pareja_hh", "grupo", "otra"]
+      },
       "dinamica": { "id": "dinamica", "label": "Dinámica", "tipo": "select" },
       "buscan": { "id": "buscan", "label": "Qué buscan", "tipo": "tags", "iaCopy": true },
       "miembros": { "id": "miembros", "label": "Perfiles vinculados", "tipo": "memberList" },
@@ -185,6 +191,28 @@
       },
       "keywordsIA": ["escort", "acompañante", "citas", "compañía", "atención personal"]
     },
+    "persona_lifestyle": {
+      "tipoPerfil": "persona",
+      "componentes": { "resultados": "ResultCardUnicorn", "perfil": "ProfileLayoutAdultos" },
+      "camposPublicosResultados": ["alias", "edad", "objetivosPerfil", "buscoConocer", "geo", "precioDesde", "viajesDesplazamiento"],
+      "camposPublicosPerfil": [
+        "edad", "objetivosPerfil", "tipoUnicornio", "buscoConocer", "tipoParejaPreferida",
+        "finalidadEncuentro", "estadoPerfil", "haceColaboraciones", "colaboraCon", "experiencia",
+        "ambientePreferido", "estilo", "modalidades", "viajesDesplazamiento", "idiomas",
+        "metodosPago", "serviciosLifestyle", "horarioDetalle", "sobreMi"
+      ],
+      "camposPrivados": ["whatsappPrivado", "ineFrente", "ineReverso", "selfieVerificacion"],
+      "obligatoriosExtra": ["edad", "objetivosPerfil", "tipoUnicornio", "buscoConocer", "haceColaboraciones", "estadoPerfil", "modalidades"],
+      "opcionalesExtra": ["precioDesde", "tipoParejaPreferida", "finalidadEncuentro", "experiencia", "ambientePreferido", "estilo", "serviciosLifestyle"],
+      "fotosMin": 3,
+      "verificacionTipo": "persona_estandar",
+      "textosAyuda": {
+        "tagline": "Frase corta y clara sobre qué buscas como unicornio.",
+        "estadoPerfil": "Indica qué buscas en este momento — puedes actualizarlo después.",
+        "objetivosPerfil": "Objetivos generales del perfil lifestyle."
+      },
+      "keywordsIA": ["unicorn", "unicornio", "lifestyle", "pareja", "trío"]
+    },
     "persona_creador": {
       "tipoPerfil": "creador",
       "componentes": { "resultados": "ResultCardCreador", "perfil": "ProfileLayoutCreador" },
@@ -228,10 +256,10 @@
     "pareja_grupo": {
       "tipoPerfil": "pareja_grupo",
       "componentes": { "resultados": "ResultCardPareja", "perfil": "ProfileLayoutPareja" },
-      "camposPublicosResultados": ["aliasPareja", "dinamica", "buscan", "geo", "disponibilidad"],
-      "camposPublicosPerfil": ["aliasPareja", "dinamica", "buscan", "miembros", "sobreMi", "reglasAcceso"],
+      "camposPublicosResultados": ["aliasPareja", "configuracionGrupo", "dinamica", "buscan", "geo", "disponibilidad"],
+      "camposPublicosPerfil": ["aliasPareja", "configuracionGrupo", "dinamica", "buscan", "miembros", "sobreMi", "reglasAcceso", "modalidades", "viajesDesplazamiento", "metodosPago", "horarioDetalle"],
       "camposPrivados": ["consentimientoDual", "ineFrente", "selfieVerificacion", "whatsappPrivado"],
-      "obligatoriosExtra": ["aliasPareja", "dinamica", "buscan", "miembros", "consentimientoDual"],
+      "obligatoriosExtra": ["aliasPareja", "configuracionGrupo", "miembros", "consentimientoDual", "modalidades", "metodosPago"],
       "opcionalesExtra": ["reglasAcceso"],
       "fotosMin": 4,
       "verificacionTipo": "pareja_dual",
@@ -557,17 +585,17 @@
       "delta": {
         "dinamicaOpciones": ["pareja_swinger", "single_swinger"],
         "camposPublicosPerfil": [
-          "objetivosPerfil", "tipoInteraccion", "tipoPareja", "atiendenA", "aceptanSolteros",
+          "objetivosPerfil", "tipoInteraccion", "configuracionGrupo", "atiendenA", "aceptanSolteros",
           "haceColaboraciones", "colaboraCon", "modalidades", "viajesDesplazamiento"
         ],
         "camposVisibilidadPublica": ["mostrarObjetivosPerfil", "mostrarAtiendenA", "mostrarColaboraciones"],
         "obligatoriosExtra": [
-          "objetivosPerfil", "tipoInteraccion", "tipoPareja", "atiendenA", "aceptanSolteros", "haceColaboraciones", "modalidades"
+          "objetivosPerfil", "tipoInteraccion", "atiendenA", "aceptanSolteros", "haceColaboraciones", "modalidades"
         ],
         "textosAyuda": {
           "objetivosPerfil": "Marca uno o varios objetivos del perfil.",
           "tipoInteraccion": "Categorías generales de interacción, sin prácticas explícitas.",
-          "tipoPareja": "Configuración de la pareja.",
+          "configuracionGrupo": "Configuración de quienes publican (shell base pareja/grupo).",
           "atiendenA": "A quién reciben o con quién buscan conectar.",
           "aceptanSolteros": "Si aceptan solteros y bajo qué condiciones.",
           "haceColaboraciones": "Colaboraciones con otros anunciantes.",
@@ -579,12 +607,28 @@
     {
       "subcategoriaId": "unicorns",
       "nombre": "Unicorns",
-      "arquetipo": "pareja_grupo",
-      "tipoPerfil": "pareja_grupo",
-      "heredaDe": "plantillasArquetipo.pareja_grupo",
+      "arquetipo": "persona_lifestyle",
+      "tipoPerfil": "persona",
+      "heredaDe": "plantillasArquetipo.persona_lifestyle",
       "delta": {
-        "obligatoriosExtra": ["buscan"],
-        "textosAyuda": { "buscan": "Indica si buscan pareja, unicorn o dinámica específica." }
+        "badges": ["unicorn"],
+        "camposPublicosPerfil": [
+          "objetivosPerfil", "tipoUnicornio", "buscoConocer", "tipoParejaPreferida",
+          "finalidadEncuentro", "estadoPerfil", "haceColaboraciones", "colaboraCon",
+          "experiencia", "ambientePreferido", "estilo", "modalidades", "viajesDesplazamiento",
+          "serviciosLifestyle"
+        ],
+        "camposVisibilidadPublica": ["mostrarObjetivosPerfil", "mostrarColaboraciones"],
+        "obligatoriosExtra": [
+          "objetivosPerfil", "tipoUnicornio", "buscoConocer", "haceColaboraciones", "estadoPerfil", "modalidades"
+        ],
+        "textosAyuda": {
+          "buscoConocer": "Indica a quién te gustaría conocer.",
+          "estadoPerfil": "Qué buscas actualmente — actualizable con el tiempo.",
+          "tipoUnicornio": "Mujer, hombre o persona no binaria.",
+          "haceColaboraciones": "Disponibilidad para colaborar con otros anunciantes.",
+          "colaboraCon": "Tipos de anunciantes (solo si respondiste Sí)."
+        }
       },
       "keywordsIA": ["unicorn", "unicornio", "trío", "pareja busca"]
     },

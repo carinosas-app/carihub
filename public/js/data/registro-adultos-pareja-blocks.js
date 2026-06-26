@@ -1,11 +1,23 @@
 /**
- * Bloques públicos registro — pareja_grupo (v1: swinger).
+ * Bloques públicos registro — pareja_grupo (shell base + delta swinger).
  */
 (function (global) {
   'use strict';
 
   var OPCIONES_SI_NO = ['Sí', 'No'];
   var OPCIONES_SI_NO_CONVENIR = ['Sí', 'No', 'A convenir'];
+
+  var CONFIGURACION_GRUPO = [
+    { value: 'pareja_hm', label: 'Hombre + Mujer' },
+    { value: 'pareja_mm', label: 'Mujer + Mujer' },
+    { value: 'pareja_hh', label: 'Hombre + Hombre' },
+    { value: 'grupo', label: 'Grupo (3 o más integrantes)' },
+    { value: 'otra', label: 'Otra configuración' }
+  ];
+
+  var GENERO_PRESENTACION = ['Hombre', 'Mujer', 'Otro', 'Prefiero no decir'];
+
+  var FRANJAS_EDAD = ['18-24', '25-34', '35-44', '45-54', '55+'];
 
   var SWINGER_OBJETIVOS = [
     'Ofrecer servicios',
@@ -22,13 +34,6 @@
     'Eventos Swinger',
     'Conocer nuevas parejas',
     'A convenir'
-  ];
-
-  var SWINGER_TIPO_PAREJA = [
-    'Hombre + Mujer',
-    'Mujer + Mujer',
-    'Hombre + Hombre',
-    'Otra configuración'
   ];
 
   var SWINGER_ATIENDEN_A = ['Hombres', 'Mujeres', 'Parejas', 'Todos'];
@@ -66,15 +71,16 @@
         obligatoriosExtra: [
           'objetivosPerfil',
           'tipoInteraccion',
-          'tipoPareja',
           'atiendenA',
           'aceptanSolteros',
           'haceColaboraciones'
         ],
         fieldHints: {
+          configuracionGrupo: 'Configuración de quienes publican este perfil.',
+          miembros: 'Mínimo 2 integrantes para pareja; 3 o más si eliges «Grupo».',
+          reglasAcceso: 'Reglas de acceso, dress code o requisitos para contactar o visitar.',
           objetivosPerfil: 'Marca uno o varios objetivos de tu perfil.',
           tipoInteraccion: 'Categorías de interacción — sin detallar prácticas explícitas.',
-          tipoPareja: 'Configuración de la pareja que publica el perfil.',
           atiendenA: 'A quién reciben o con quién buscan conectar.',
           aceptanSolteros: 'Indica si aceptan personas solteras y bajo qué condiciones.',
           haceColaboraciones: 'Si colaboran con otros anunciantes en encuentros o eventos.',
@@ -83,11 +89,76 @@
           mostrarAtiendenA: 'Controla si «Atienden a» aparece en tarjeta y ficha pública.',
           mostrarColaboraciones: 'Controla si colaboraciones se ven en tarjeta y ficha pública.',
           modalidades: 'Marca dónde se reciben o si viajan. Si marcas «Viaja», completa alcance y condiciones.'
+        },
+        labels: {
+          alias: 'Alias de la pareja / grupo'
         }
       }
     },
-    obligatorios: ['modalidades'],
+    obligatorios: ['configuracionGrupo', 'miembros', 'modalidades', 'metodosPago'],
     blocks: [
+      {
+        id: 'parejaGrupoBase',
+        title: 'Perfil pareja / grupo',
+        hint: 'Datos base del perfil grupal. El alias se toma del campo superior «Alias de la pareja / grupo».',
+        fields: [
+          {
+            id: 'configuracionGrupo',
+            label: 'Configuración del grupo',
+            type: 'select',
+            required: true,
+            options: CONFIGURACION_GRUPO.slice()
+          },
+          {
+            id: 'miembros',
+            label: 'Integrantes',
+            type: 'memberList',
+            required: true,
+            minMembers: 2,
+            minMembersGrupo: 3,
+            memberFields: [
+              {
+                id: 'etiquetaPublica',
+                label: 'Etiqueta pública',
+                type: 'text',
+                placeholder: 'Ej. Él, Ella, M1…',
+                required: true
+              },
+              {
+                id: 'generoPresentacion',
+                label: 'Presentación',
+                type: 'select',
+                required: true,
+                options: GENERO_PRESENTACION.slice()
+              },
+              {
+                id: 'edad',
+                label: 'Edad (años)',
+                type: 'number',
+                min: 18,
+                max: 99,
+                placeholder: '18+'
+              },
+              {
+                id: 'franjaEdad',
+                label: 'O franja de edad',
+                type: 'select',
+                options: [{ value: '', label: '—' }].concat(FRANJAS_EDAD.map(function (f) {
+                  return { value: f, label: f + ' años' };
+                }))
+              }
+            ]
+          },
+          {
+            id: 'reglasAcceso',
+            label: 'Reglas de acceso',
+            type: 'textarea',
+            required: false,
+            placeholder: 'Ej. Solo mayores de edad · cita previa · dress code…',
+            rows: 3
+          }
+        ]
+      },
       {
         id: 'swingerPerfil',
         title: 'Perfil pareja swinger',
@@ -107,13 +178,6 @@
             type: 'checklist',
             required: true,
             options: SWINGER_TIPO_INTERACCION.slice()
-          },
-          {
-            id: 'tipoPareja',
-            label: 'Tipo de pareja',
-            type: 'select',
-            required: true,
-            options: SWINGER_TIPO_PAREJA.slice()
           },
           {
             id: 'atiendenA',
@@ -261,6 +325,24 @@
             type: 'text',
             required: false,
             placeholder: 'Ej. Vie–Dom 20:00–02:00 · Solo con cita previa'
+          }
+        ]
+      },
+      {
+        id: 'metodosPago',
+        title: 'Métodos de pago',
+        hint: 'Indica cómo pueden pagarte o acordar el consumo.',
+        fields: [
+          {
+            id: 'metodosPago',
+            label: 'Métodos de pago',
+            type: 'checklist',
+            required: true,
+            options: [
+              { value: 'Efectivo', label: 'Efectivo' },
+              { value: 'Transferencia', label: 'Transferencia' },
+              { value: 'Tarjeta', label: 'Tarjeta' }
+            ]
           }
         ]
       },

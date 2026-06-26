@@ -1914,6 +1914,13 @@
         categoria: $('fldCategoria').value.trim(),
         subcategoria: $('fldSubcategoria').value.trim(),
         alias: $('fldAlias').value.trim(),
+        aliasPareja: (function () {
+          var aliasVal = $('fldAlias') ? $('fldAlias').value.trim() : '';
+          if (global.CariHubRegistroPublicBlocks && CariHubRegistroPublicBlocks.matchesPareja(ctx, schemaResuelto)) {
+            return aliasVal;
+          }
+          return '';
+        })(),
         edad: $('fldEdad') ? $('fldEdad').value.trim() : '',
         pais: $('fldPais').value.trim(),
         estado: $('fldEstado').value.trim(),
