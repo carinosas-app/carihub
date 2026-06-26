@@ -37,8 +37,7 @@
 
   function normalizeCreadorSubId(raw) {
     var subId = normalizeSubId(raw);
-    if (subId === 'contenido') return 'contenido';
-    if (subId === 'creador contenido') return 'contenido';
+    if (subId === 'contenido' || subId === 'creador contenido') return 'contenido';
     return '';
   }
 
@@ -863,6 +862,12 @@
     return !!normalizeEspectaculoSubId((ctx && ctx.subcategoriaId) || (ctx && ctx.subcategoria) || '');
   }
 
+  function isCreadorSubcategoria(ctx) {
+    ctx = ctx || {};
+    if (ctx.arquetipo === 'persona_creador') return true;
+    return normalizeCreadorSubId((ctx.subcategoriaId) || (ctx.subcategoria) || '') === 'contenido';
+  }
+
   var MODALIDADES_SHOW_LABELS = {
     fiestas: 'Fiestas privadas',
     despedidas: 'Despedidas',
@@ -1015,6 +1020,130 @@
     var noSvc = values.serviciosNoRealizo;
     if (!Array.isArray(noSvc) || !noSvc.length) {
       pushMissing(missing, labelForField(cfg, 'serviciosNoRealizo') || 'No incluido / reglas');
+    }
+  }
+
+  function buildTiposContenidoMirror(list) {
+    if (!Array.isArray(list) || !list.length) return '';
+    return list.join(' · ');
+  }
+
+  function buildCreadorPerfil(values) {
+    values = values || {};
+    return {
+      tiposContenido: Array.isArray(values.tiposContenido) ? values.tiposContenido.slice() : [],
+      plataformas: Array.isArray(values.plataformas) ? values.plataformas.slice() : [],
+      precioSuscripcion: values.precioSuscripcion || '',
+      contenidoPersonalizado: values.contenidoPersonalizado || '',
+      paquetesContenido: Array.isArray(values.paquetesContenido) ? values.paquetesContenido.slice() : [],
+      colaboracionesCreador: values.colaboracionesCreador || '',
+      redesSociales: values.redesSociales || '',
+      mostrarPlataformasPublico: values.mostrarPlataformasPublico || '',
+      serviciosIncluidos: Array.isArray(values.serviciosIncluidos) ? values.serviciosIncluidos.slice() : [],
+      serviciosNoRealizo: Array.isArray(values.serviciosNoRealizo) ? values.serviciosNoRealizo.slice() : [],
+      horarioDetalle: values.horarioDetalle || '',
+      metodosPago: Array.isArray(values.metodosPago) ? values.metodosPago.slice() : [],
+      sobreMi: values.sobreMi || '',
+      idiomas: values.idiomas || '',
+      disponibilidad: values.disponibilidad || ''
+    };
+  }
+
+  function finalizeCreadorValues(values, ctx) {
+    if (!values || !isCreadorSubcategoria(ctx || {})) return values;
+    delete values.dominatrixPerfil;
+    delete values.espectaculoPerfil;
+    delete values.swingerPerfil;
+    delete values.unicornPerfil;
+    delete values.cuckoldHotwifePerfil;
+    values.creadorPerfil = buildCreadorPerfil(values);
+    return values;
+  }
+
+  function mapCreadorToPerfil(u, bloques, ctx) {
+    u = u || {};
+    ctx = ctx || {};
+    var canon = normalizeCreadorSubId((ctx && ctx.subcategoriaId) || u.subcategoriaId || '') || 'contenido';
+    var cre = bloques.creadorPerfil || buildCreadorPerfil(bloques);
+    delete u.dominatrixPerfil;
+    delete u.espectaculoPerfil;
+    delete u.swingerPerfil;
+    delete u.unicornPerfil;
+    delete u.cuckoldHotwifePerfil;
+    u.creadorPerfil = Object.assign({}, cre);
+    u.arquetipo = 'persona_creador';
+    u.tipoPerfil = 'creador';
+    u.subcategoriaId = canon;
+    if (Array.isArray(cre.tiposContenido) && cre.tiposContenido.length) {
+      u.tiposContenido = cre.tiposContenido.slice();
+      u.tipoServicio = buildTiposContenidoMirror(cre.tiposContenido);
+    }
+    if (Array.isArray(cre.plataformas) && cre.plataformas.length) {
+      u.plataformas = cre.plataformas.slice();
+    }
+    if (cre.precioSuscripcion) {
+      u.precioSuscripcion = cre.precioSuscripcion;
+      u.precio = cre.precioSuscripcion;
+      u.precioDesde = cre.precioSuscripcion;
+    }
+    if (cre.contenidoPersonalizado) u.contenidoPersonalizado = cre.contenidoPersonalizado;
+    if (Array.isArray(cre.paquetesContenido) && cre.paquetesContenido.length) {
+      u.paquetesContenido = cre.paquetesContenido.slice();
+    }
+    if (cre.colaboracionesCreador) u.colaboracionesCreador = cre.colaboracionesCreador;
+    if (cre.redesSociales) u.redesSociales = cre.redesSociales;
+    if (Array.isArray(cre.serviciosIncluidos) && cre.serviciosIncluidos.length) {
+      u.serviciosIncluidos = cre.serviciosIncluidos.slice();
+    }
+    if (Array.isArray(cre.serviciosNoRealizo) && cre.serviciosNoRealizo.length) {
+      u.noRealiza = cre.serviciosNoRealizo.slice();
+      u.politicaPerfil = cre.serviciosNoRealizo.slice(0, 3).join(' · ');
+    }
+    if (Array.isArray(cre.metodosPago) && cre.metodosPago.length) {
+      u.metodosPago = cre.metodosPago.slice();
+    }
+    if (cre.horarioDetalle) {
+      u.horarioDetalle = cre.horarioDetalle;
+      u.horario = cre.horarioDetalle;
+      u.tiempoMinimo = cre.horarioDetalle;
+    }
+    if (cre.sobreMi) u.sobreMi = cre.sobreMi;
+    if (cre.idiomas) u.idiomas = cre.idiomas;
+    if (cre.disponibilidad) {
+      u.disponibilidad = DISPONIBILIDAD_LABELS[cre.disponibilidad] || cre.disponibilidad;
+    }
+    return u;
+  }
+
+  function validateCreadorDeltaValues(cfg, values, missing) {
+    var tipos = values.tiposContenido;
+    if (!Array.isArray(tipos) || !tipos.length) {
+      pushMissing(missing, labelForField(cfg, 'tiposContenido') || 'Tipos de contenido');
+    }
+    var plats = values.plataformas;
+    if (!Array.isArray(plats) || !plats.length) {
+      pushMissing(missing, labelForField(cfg, 'plataformas') || 'Plataformas');
+    }
+    if (!String(values.precioSuscripcion || '').trim()) {
+      pushMissing(missing, labelForField(cfg, 'precioSuscripcion') || 'Precio suscripción / desde');
+    }
+    if (!String(values.redesSociales || '').trim()) {
+      pushMissing(missing, labelForField(cfg, 'redesSociales') || 'Enlaces públicos');
+    }
+    var svc = values.serviciosIncluidos;
+    if (!Array.isArray(svc) || !svc.length) {
+      pushMissing(missing, labelForField(cfg, 'serviciosIncluidos') || 'Qué incluye tu suscripción / contenido');
+    }
+    var noSvc = values.serviciosNoRealizo;
+    if (!Array.isArray(noSvc) || !noSvc.length) {
+      pushMissing(missing, labelForField(cfg, 'serviciosNoRealizo') || 'No incluido / reglas');
+    }
+    if (!String(values.horarioDetalle || '').trim()) {
+      pushMissing(missing, labelForField(cfg, 'horarioDetalle') || 'Frecuencia / actualizaciones');
+    }
+    var pagos = values.metodosPago;
+    if (!Array.isArray(pagos) || !pagos.length) {
+      pushMissing(missing, labelForField(cfg, 'metodosPago') || 'Métodos de pago');
     }
   }
 
@@ -1537,6 +1666,7 @@
     values = finalizeCuckoldHotwifeValues(values, ctx);
     values = finalizeDominatrixValues(values, ctx);
     values = finalizeEspectaculoValues(values, ctx);
+    values = finalizeCreadorValues(values, ctx);
     values = finalizeParejaGrupoValues(values);
     return values;
   }
@@ -1622,6 +1752,9 @@
     }
     if (isEspectaculoSubcategoria(ctx)) {
       validateEspectaculoDeltaValues(cfg, values, missing, ctx);
+    }
+    if (isCreadorSubcategoria(ctx)) {
+      validateCreadorDeltaValues(cfg, values, missing);
     }
     return missing;
   }
@@ -1800,6 +1933,9 @@
     }
     if (isEspectaculoSubcategoria(ctx)) {
       return mapEspectaculoToPerfil(u, bloques, ctx);
+    }
+    if (isCreadorSubcategoria(ctx)) {
+      return mapCreadorToPerfil(u, bloques, ctx);
     }
     if (bloques.orientacion) u.orientacion = bloques.orientacion;
     if (bloques.identidadGenero) u.identidadGenero = bloques.identidadGenero;
@@ -2006,6 +2142,10 @@
     buildEspectaculoPerfil: buildEspectaculoPerfil,
     mapEspectaculoToPerfil: mapEspectaculoToPerfil,
     normalizeEspectaculoSubId: normalizeEspectaculoSubId,
+    finalizeCreadorValues: finalizeCreadorValues,
+    buildCreadorPerfil: buildCreadorPerfil,
+    mapCreadorToPerfil: mapCreadorToPerfil,
+    normalizeCreadorSubId: normalizeCreadorSubId,
     buildSwingerPerfil: buildSwingerPerfil,
     buildUnicornPerfil: buildUnicornPerfil,
     buildCuckoldHotwifePerfil: buildCuckoldHotwifePerfil,
@@ -2019,6 +2159,7 @@
     isCuckoldHotwifeSubcategoria: isCuckoldHotwifeSubcategoria,
     isDominatrixSubcategoria: isDominatrixSubcategoria,
     isEspectaculoSubcategoria: isEspectaculoSubcategoria,
+    isCreadorSubcategoria: isCreadorSubcategoria,
     shouldApplySwingerPipeline: shouldApplySwingerPipeline,
     shouldApplyUnicornPipeline: shouldApplyUnicornPipeline,
     shouldApplyCuckoldHotwifePipeline: shouldApplyCuckoldHotwifePipeline,
