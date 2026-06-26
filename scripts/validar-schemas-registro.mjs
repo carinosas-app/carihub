@@ -23,7 +23,7 @@ const SCHEMA_FILES = {
 const PRECIOS_FILE = "config-precios-planes-perfiles-schema.json";
 const COMPONENTES_RESULTADOS = new Set([
   "ResultCardPersona", "ResultCardProfesional", "ResultCardNegocio", "ResultCardAdultos",
-  "ResultCardVenue", "ResultCardServicio", "ResultCardPareja", "ResultCardCreador",
+  "ResultCardVenue", "ResultCardServicio", "ResultCardPareja", "ResultCardUnicorn", "ResultCardCreador",
   "ResultCardEspectaculo", "ResultCardGenerico",
 ]);
 const COMPONENTES_PERFIL = new Set([

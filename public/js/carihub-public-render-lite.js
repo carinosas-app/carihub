@@ -492,7 +492,7 @@
       });
     }
     var comp = resolveComponente(u, Q);
-    if (isUnicornPerfil(u)) return cardHTMLUnicorn(u, Q);
+    if (comp === 'ResultCardUnicorn' || isUnicornPerfil(u)) return cardHTMLUnicorn(u, Q);
     if (comp === 'ResultCardNegocio') return cardHTMLNegocio(u, Q);
     if (comp === 'ResultCardProfesional') return cardHTMLProfesional(u, Q);
     if (comp === 'ResultCardServicio') return cardHTMLServicio(u, Q);

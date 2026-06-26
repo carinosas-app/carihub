@@ -615,6 +615,7 @@
       }
       return 'pareja';
     }
+    if (comp === 'ResultCardUnicorn') return 'unicorn';
     return 'adult';
   }
 
