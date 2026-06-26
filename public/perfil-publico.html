@@ -5489,7 +5489,7 @@ DEMO.stripper={
 };
 /* Table Dance — schema: table_dance (persona_espectaculo) */
 DEMO.tableDance={
-  subcategoriaId:"table_dance", categoria:"Table Dance", categoriaPublica:"Table Dance",
+  subcategoriaId:"tabledance", categoria:"Table Dance", categoriaPublica:"Table Dance",
   arquetipo:"persona_espectaculo", tipoPerfil:"espectaculo",
   nombre:"Camila V.", edad:23, verificada:true, etiquetaEsquina:"Artista verificada",
   pais:"México", estado:"Nuevo León", ciudad:"Monterrey", zona:"Centro",
@@ -5773,16 +5773,16 @@ function tableDanceIdCardHTML(u){
 }
 function tableDanceFichaFilas(u){
   var pagos=(u.metodosPagoFicha||u.metodosPago||[]).join(", ");
+  var loc=[u.ciudad,u.estado].filter(Boolean).join(", ");
   return [
     ["user","Categoría:",safe(u.categoriaPublica||"Table Dance")],
     ["heart","Tipo de servicio:",safe(u.tipoShow||u.tipoServicio||"Table Dance")],
-    ["chat","Disponible para:",safe(u.disponiblePara||"—")],
-    ["user","Edad:",safe(u.edadVisitantes||"—")],
-    ["corp","Nosotros:",safe(u.perfilNosotros||"—")],
-    ["briefcase","Preferencias:",safe(u.preferencias||"—")],
+    ["chat","Disponible para:",safe(Array.isArray(u.disponiblePara)?u.disponiblePara.join(", "):(u.disponiblePara||"—"))],
+    ["user","Edad:",safe(u.edad?(u.edad+" años"):"—")],
+    ["calendar","Años de experiencia:",safe(u.anosExperiencia||"—")],
     ["clock","Horario:",safe(u.horarioDetalle||u.horario||"—")],
-    ["pin","Ubicación:",safe(u.ubicacionFicha||"—"),true],
     ["store","Venue / Antro:",safe(u.venueFijo||"—"),true],
+    ["pin","Ubicación:",safe(u.ubicacionFicha||loc||"—"),true],
     ["globe","Desplazamientos:",safe(u.desplazamientos||"—")],
     ["wallet","Métodos de pago:",safe(pagos||"—")],
     ["invoice","Facturación:",safe(u.facturacion||"—")]
@@ -6779,7 +6779,7 @@ function resolverVistaPerfil(u,q){
 function normalizarVistaPreview(vista){
   var v=String(vista||"").trim();
   if(!v) return "";
-  var alias={escort:"adult",acompanante:"adult",adulto:"adult",edecan:"edecan",modelos:"modelos",dotados:"dotados",femboy:"femboy",singles:"singles",dominatrix:"dominatrix",fetiche:"fetiche",sado:"sado"};
+  var alias={escort:"adult",acompanante:"adult",adulto:"adult",edecan:"edecan",modelos:"modelos",dotados:"dotados",femboy:"femboy",singles:"singles",dominatrix:"dominatrix",fetiche:"fetiche",sado:"sado",stripper:"stripper",tabledance:"tableDance",table_dance:"tableDance","table dance":"tableDance"};
   return alias[v.toLowerCase()]||v;
 }
 function resolverPerfilDesdeQuery(q){
@@ -6893,8 +6893,20 @@ function aplicarPerfilDesdeRegistro(vista,u){
     mostrarAtencionTransPublico:u.mostrarAtencionTransPublico||"",
     mostrarRealizaTriosPublico:u.mostrarRealizaTriosPublico||"",
     mostrarColaboracionContenidoPublico:u.mostrarColaboracionContenidoPublico||"",
-    eventosDisponibles:!!u.eventosDisponibles,
+    eventosDisponibles:u.eventosDisponibles||"",
     portfolioURL:u.portfolioURL||"",
+    tipoShow:u.tipoShow||"",
+    precioShow:u.precioShow||u.precioDesde||u.precio||"",
+    horarioMinimo:u.horarioMinimo||u.tiempoMinimo||"",
+    tiempoMinimo:u.horarioMinimo||u.tiempoMinimo||"",
+    venueFijo:u.venueFijo||"",
+    desplazamientos:u.desplazamientos||"",
+    vestuarioShow:Array.isArray(u.vestuarioShow)?u.vestuarioShow.slice():[],
+    requisitosLugar:u.requisitosLugar||"",
+    anosExperiencia:u.anosExperiencia||"",
+    tipoServicio:u.tipoServicio||u.tipoShow||"",
+    sobreNosotros:u.sobreNosotros||u.sobreMi||"",
+    espectaculoPerfil:u.espectaculoPerfil?Object.assign({},u.espectaculoPerfil):null,
     estiloDominacion:u.estiloDominacion||"",
     especialidadBdsm:u.especialidadBdsm||"",
     experienciaBdsm:u.experienciaBdsm||"",
@@ -6941,6 +6953,11 @@ function aplicarPerfilDesdeRegistro(vista,u){
     if(parts.length) clean.direccionLineas=parts.length>1?[parts[0],parts.slice(1).join(", ")]:[parts[0]];
   }
   clean=mergeParejaGrupoRegistroFields(clean,u);
+  var sidNorm=String(clean.subcategoriaId||"").trim().toLowerCase().replace(/_/g," ");
+  if(sidNorm==="table dance"||sidNorm==="table_dance"||sidNorm==="tabledance") clean.subcategoriaId="tabledance";
+  if(sidNorm==="stripper") clean.subcategoriaId="stripper";
+  if(u.arquetipo) clean.arquetipo=u.arquetipo;
+  if(u.tipoPerfil) clean.tipoPerfil=u.tipoPerfil;
   DEMO[vista]=clean;
 }
 function aplicarPerfilResultadosEnDemo(vista,u){

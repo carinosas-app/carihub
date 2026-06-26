@@ -27,19 +27,40 @@
     return global.CARIHUB_REGISTRO_DOMINATRIX_BLOCKS || null;
   }
 
+  function resolveEspectaculoConfig() {
+    return global.CARIHUB_REGISTRO_ESPECTACULO_BLOCKS || null;
+  }
+
+  function normalizeEspectaculoSubId(raw) {
+    var subId = normalizeSubId(raw);
+    if (subId === 'table dance' || subId === 'tabledance') return 'tabledance';
+    if (subId === 'stripper') return 'stripper';
+    return '';
+  }
+
   function normalizeSubId(id) {
     return String(id || '').trim().toLowerCase().replace(/_/g, ' ');
   }
 
   function getSubcategoriaOverride(cfg, ctx) {
     if (!cfg || !cfg.subcategoriaOverrides) return null;
-    var subId = normalizeSubId((ctx && ctx.subcategoriaId) || (ctx && ctx.subcategoria) || '');
+    var raw = (ctx && ctx.subcategoriaId) || (ctx && ctx.subcategoria) || '';
+    var subId = normalizeSubId(raw);
+    if (cfg.id === 'persona_espectaculo') {
+      var canonEsp = normalizeEspectaculoSubId(raw);
+      if (canonEsp && cfg.subcategoriaOverrides[canonEsp]) return cfg.subcategoriaOverrides[canonEsp];
+    }
     return cfg.subcategoriaOverrides[subId] || null;
   }
 
   function mergedConfig(cfg, ctx) {
     var over = getSubcategoriaOverride(cfg, ctx);
-    var subId = normalizeSubId((ctx && ctx.subcategoriaId) || (ctx && ctx.subcategoria) || '');
+    var rawSub = (ctx && ctx.subcategoriaId) || (ctx && ctx.subcategoria) || '';
+    var subId = normalizeSubId(rawSub);
+    if (cfg && cfg.id === 'persona_espectaculo') {
+      var canonEspSub = normalizeEspectaculoSubId(rawSub);
+      if (canonEspSub) subId = canonEspSub;
+    }
     function fieldVisible(field) {
       if (field.excludeSubcategorias && field.excludeSubcategorias.length) {
         if (field.excludeSubcategorias.some(function (s) {
@@ -232,8 +253,22 @@
     return false;
   }
 
+  function matchesEspectaculo(ctx, resolved) {
+    var cfg = resolveEspectaculoConfig();
+    if (!cfg) return false;
+    ctx = ctx || {};
+    var canon = normalizeEspectaculoSubId((ctx && ctx.subcategoriaId) || (ctx && ctx.subcategoria) || '');
+    if (canon && cfg.subcategoriaIds.indexOf(canon) >= 0) return true;
+    if (ctx.arquetipo === cfg.id) return true;
+    var ident = resolved && resolved.identidad ? resolved.identidad : {};
+    if (ident.formularioId === cfg.formularioId && ident.arquetipo === cfg.id) return true;
+    if (resolved && cfg.uiIds.indexOf(resolved.formularioUiId || '') >= 0) return true;
+    return false;
+  }
+
   function resolveConfig(ctx, resolved) {
     if (matchesDominatrix(ctx, resolved)) return resolveDominatrixConfig();
+    if (matchesEspectaculo(ctx, resolved)) return resolveEspectaculoConfig();
     if (matchesEscort(ctx, resolved)) return resolveEscortConfig();
     if (matchesLifestyle(ctx, resolved)) return resolveLifestyleConfig();
     if (matchesPareja(ctx, resolved)) return resolveParejaConfig();
@@ -799,6 +834,165 @@
     return subId === 'dominatrix' || subId === 'fetiche' || subId === 'sado';
   }
 
+  function isEspectaculoSubcategoria(ctx) {
+    return !!normalizeEspectaculoSubId((ctx && ctx.subcategoriaId) || (ctx && ctx.subcategoria) || '');
+  }
+
+  var MODALIDADES_SHOW_LABELS = {
+    fiestas: 'Fiestas privadas',
+    despedidas: 'Despedidas',
+    hoteles: 'Hoteles / suites',
+    clubes: 'Clubes / antros',
+    eventos_vip: 'Eventos VIP',
+    eventos_privados: 'Eventos privados'
+  };
+
+  function buildTipoShowMirror(list) {
+    if (!Array.isArray(list) || !list.length) return '';
+    return list.join(' · ');
+  }
+
+  function buildDisponibleParaMirror(mods) {
+    if (!Array.isArray(mods) || !mods.length) return [];
+    return mods.map(function (m) {
+      return MODALIDADES_SHOW_LABELS[m] || m;
+    });
+  }
+
+  function buildEspectaculoPerfil(values) {
+    values = values || {};
+    return {
+      tipoShow: Array.isArray(values.tipoShow) ? values.tipoShow.slice() : [],
+      precioShow: values.precioShow || '',
+      horarioMinimo: values.horarioMinimo || '',
+      anosExperiencia: values.anosExperiencia || '',
+      vestuarioShow: Array.isArray(values.vestuarioShow) ? values.vestuarioShow.slice() : [],
+      eventosDisponibles: values.eventosDisponibles || '',
+      venueFijo: values.venueFijo || '',
+      requisitosLugar: values.requisitosLugar || '',
+      modalidades: Array.isArray(values.modalidades) ? values.modalidades.slice() : [],
+      desplazamientos: values.desplazamientos || '',
+      serviciosIncluidos: Array.isArray(values.serviciosIncluidos) ? values.serviciosIncluidos.slice() : [],
+      serviciosNoRealizo: Array.isArray(values.serviciosNoRealizo) ? values.serviciosNoRealizo.slice() : [],
+      horarioDetalle: values.horarioDetalle || '',
+      metodosPago: Array.isArray(values.metodosPago) ? values.metodosPago.slice() : [],
+      sobreMi: values.sobreMi || '',
+      disponibilidad: values.disponibilidad || ''
+    };
+  }
+
+  function finalizeEspectaculoValues(values, ctx) {
+    if (!values || !isEspectaculoSubcategoria(ctx || {})) return values;
+    delete values.dominatrixPerfil;
+    delete values.swingerPerfil;
+    delete values.unicornPerfil;
+    delete values.cuckoldHotwifePerfil;
+    values.espectaculoPerfil = buildEspectaculoPerfil(values);
+    return values;
+  }
+
+  function mapEspectaculoToPerfil(u, bloques, ctx) {
+    u = u || {};
+    ctx = ctx || {};
+    var canon = normalizeEspectaculoSubId((ctx && ctx.subcategoriaId) || u.subcategoriaId || '');
+    var esp = bloques.espectaculoPerfil || buildEspectaculoPerfil(bloques);
+    delete u.dominatrixPerfil;
+    delete u.swingerPerfil;
+    delete u.unicornPerfil;
+    delete u.cuckoldHotwifePerfil;
+    u.espectaculoPerfil = Object.assign({}, esp);
+    u.arquetipo = 'persona_espectaculo';
+    u.tipoPerfil = 'espectaculo';
+    u.subcategoriaId = canon || u.subcategoriaId;
+    if (Array.isArray(esp.tipoShow) && esp.tipoShow.length) {
+      u.tipoShow = buildTipoShowMirror(esp.tipoShow);
+      u.tipoServicio = u.tipoShow;
+    }
+    if (esp.precioShow) {
+      u.precioShow = esp.precioShow;
+      u.precio = esp.precioShow;
+      u.precioDesde = esp.precioShow;
+    }
+    if (esp.horarioMinimo) {
+      u.horarioMinimo = esp.horarioMinimo;
+      u.tiempoMinimo = esp.horarioMinimo;
+    }
+    if (esp.anosExperiencia) u.anosExperiencia = esp.anosExperiencia;
+    if (Array.isArray(esp.vestuarioShow) && esp.vestuarioShow.length) {
+      u.vestuarioShow = esp.vestuarioShow.slice();
+    }
+    if (esp.eventosDisponibles) u.eventosDisponibles = esp.eventosDisponibles;
+    if (esp.venueFijo) {
+      u.venueFijo = esp.venueFijo;
+      u.ubicacionFicha = esp.venueFijo;
+    }
+    if (esp.requisitosLugar) u.requisitosLugar = esp.requisitosLugar;
+    if (Array.isArray(esp.modalidades) && esp.modalidades.length) {
+      u.modalidades = esp.modalidades.slice();
+      u.disponiblePara = buildDisponibleParaMirror(esp.modalidades);
+    }
+    if (esp.desplazamientos) u.desplazamientos = esp.desplazamientos;
+    if (Array.isArray(esp.serviciosIncluidos) && esp.serviciosIncluidos.length) {
+      u.serviciosIncluidos = esp.serviciosIncluidos.slice();
+    }
+    if (Array.isArray(esp.serviciosNoRealizo) && esp.serviciosNoRealizo.length) {
+      u.noRealiza = esp.serviciosNoRealizo.slice();
+    }
+    if (Array.isArray(esp.metodosPago) && esp.metodosPago.length) {
+      u.metodosPago = esp.metodosPago.slice();
+    }
+    if (esp.horarioDetalle) {
+      u.horarioDetalle = esp.horarioDetalle;
+      u.horario = esp.horarioDetalle;
+    }
+    if (esp.sobreMi) {
+      u.sobreMi = esp.sobreMi;
+      u.sobreNosotros = esp.sobreMi;
+    }
+    if (esp.disponibilidad) {
+      u.disponibilidad = DISPONIBILIDAD_LABELS[esp.disponibilidad] || esp.disponibilidad;
+    }
+    return u;
+  }
+
+  function validateEspectaculoDeltaValues(cfg, values, missing, ctx) {
+    ctx = ctx || {};
+    var canon = normalizeEspectaculoSubId((ctx && ctx.subcategoriaId) || values.subcategoriaId || '');
+    var tipoShow = values.tipoShow;
+    if (!Array.isArray(tipoShow) || !tipoShow.length) {
+      pushMissing(missing, labelForField(cfg, 'tipoShow') || 'Tipo de show');
+    }
+    if (!String(values.precioShow || '').trim()) {
+      pushMissing(missing, labelForField(cfg, 'precioShow') || 'Precio show / desde');
+    }
+    if (!String(values.horarioMinimo || '').trim()) {
+      pushMissing(missing, labelForField(cfg, 'horarioMinimo') || 'Duración mínima del show');
+    }
+    var mods = values.modalidades;
+    if (!Array.isArray(mods) || !mods.length) {
+      pushMissing(missing, labelForField(cfg, 'modalidades') || 'Disponible para');
+    }
+    if (canon === 'stripper') {
+      if (!String(values.desplazamientos || '').trim()) {
+        pushMissing(missing, labelForField(cfg, 'desplazamientos') || 'Desplazamientos');
+      }
+      if (!String(values.anosExperiencia || '').trim()) {
+        pushMissing(missing, labelForField(cfg, 'anosExperiencia') || 'Experiencia');
+      }
+    }
+    if (canon === 'tabledance' && !String(values.venueFijo || '').trim()) {
+      pushMissing(missing, labelForField(cfg, 'venueFijo') || 'Venue / zona de trabajo');
+    }
+    var svc = values.serviciosIncluidos;
+    if (!Array.isArray(svc) || !svc.length) {
+      pushMissing(missing, labelForField(cfg, 'serviciosIncluidos') || 'Servicios incluidos en el show');
+    }
+    var noSvc = values.serviciosNoRealizo;
+    if (!Array.isArray(noSvc) || !noSvc.length) {
+      pushMissing(missing, labelForField(cfg, 'serviciosNoRealizo') || 'No incluido / reglas');
+    }
+  }
+
   function joinTagsList(list) {
     if (!Array.isArray(list) || !list.length) return '';
     return list.join(' · ');
@@ -1317,6 +1511,7 @@
     values = finalizeUnicornValues(values, ctx);
     values = finalizeCuckoldHotwifeValues(values, ctx);
     values = finalizeDominatrixValues(values, ctx);
+    values = finalizeEspectaculoValues(values, ctx);
     values = finalizeParejaGrupoValues(values);
     return values;
   }
@@ -1399,6 +1594,9 @@
     }
     if (isDominatrixSubcategoria(ctx)) {
       validateDominatrixDeltaValues(cfg, values, missing);
+    }
+    if (isEspectaculoSubcategoria(ctx)) {
+      validateEspectaculoDeltaValues(cfg, values, missing, ctx);
     }
     return missing;
   }
@@ -1574,6 +1772,9 @@
     u = u || {};
     if (isDominatrixSubcategoria(ctx)) {
       return mapDominatrixToPerfil(u, bloques, ctx);
+    }
+    if (isEspectaculoSubcategoria(ctx)) {
+      return mapEspectaculoToPerfil(u, bloques, ctx);
     }
     if (bloques.orientacion) u.orientacion = bloques.orientacion;
     if (bloques.identidadGenero) u.identidadGenero = bloques.identidadGenero;
@@ -1752,6 +1953,7 @@
     matchesPareja: matchesPareja,
     matchesLifestyle: matchesLifestyle,
     matchesDominatrix: matchesDominatrix,
+    matchesEspectaculo: matchesEspectaculo,
     apply: apply,
     collectValues: collectValues,
     validateValues: validateValues,
@@ -1774,6 +1976,10 @@
     finalizeDominatrixValues: finalizeDominatrixValues,
     buildDominatrixPerfil: buildDominatrixPerfil,
     mapDominatrixToPerfil: mapDominatrixToPerfil,
+    finalizeEspectaculoValues: finalizeEspectaculoValues,
+    buildEspectaculoPerfil: buildEspectaculoPerfil,
+    mapEspectaculoToPerfil: mapEspectaculoToPerfil,
+    normalizeEspectaculoSubId: normalizeEspectaculoSubId,
     buildSwingerPerfil: buildSwingerPerfil,
     buildUnicornPerfil: buildUnicornPerfil,
     buildCuckoldHotwifePerfil: buildCuckoldHotwifePerfil,
@@ -1786,6 +1992,7 @@
     isUnicornSubcategoria: isUnicornSubcategoria,
     isCuckoldHotwifeSubcategoria: isCuckoldHotwifeSubcategoria,
     isDominatrixSubcategoria: isDominatrixSubcategoria,
+    isEspectaculoSubcategoria: isEspectaculoSubcategoria,
     shouldApplySwingerPipeline: shouldApplySwingerPipeline,
     shouldApplyUnicornPipeline: shouldApplyUnicornPipeline,
     shouldApplyCuckoldHotwifePipeline: shouldApplyCuckoldHotwifePipeline,
