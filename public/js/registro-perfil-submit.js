@@ -203,6 +203,19 @@
       ? Object.assign({}, mappedBloques.swingerPerfil)
       : null;
 
+    var unicornPerfil = mappedBloques.unicornPerfil
+      ? Object.assign({}, mappedBloques.unicornPerfil)
+      : null;
+    if (unicornPerfil) {
+      unicornPerfil.tagline = cp.descripcionCorta || unicornPerfil.tagline || '';
+      unicornPerfil.precioDesde = cp.precioDesde || unicornPerfil.precioDesde || '';
+      if (cp.edad) unicornPerfil.edad = cp.edad;
+    }
+
+    var esUnicornLifestyle = identArquetipo === 'persona_lifestyle' ||
+      mappedBloques.arquetipo === 'persona_lifestyle' ||
+      (ctx.subcategoriaId === 'unicorns');
+
     return {
       uid: uid,
       cuentaUid: uid,
@@ -221,10 +234,10 @@
       sectorId: ctx.sectorId || '',
       formularioId: (draft.schemaResuelto && draft.schemaResuelto.identidad &&
         draft.schemaResuelto.identidad.formularioId) || ctx.formularioId || '',
-      arquetipo: (draft.schemaResuelto && draft.schemaResuelto.identidad &&
-        draft.schemaResuelto.identidad.arquetipo) || ctx.arquetipo || '',
-      tipoPerfil: esParejaGrupo ? 'pareja_grupo' : ((draft.schemaResuelto && draft.schemaResuelto.identidad &&
-        draft.schemaResuelto.identidad.tipoPerfil) || ctx.tipoPerfil || ''),
+      arquetipo: esUnicornLifestyle ? 'persona_lifestyle' : ((draft.schemaResuelto && draft.schemaResuelto.identidad &&
+        draft.schemaResuelto.identidad.arquetipo) || ctx.arquetipo || ''),
+      tipoPerfil: esParejaGrupo ? 'pareja_grupo' : (esUnicornLifestyle ? 'persona' : ((draft.schemaResuelto && draft.schemaResuelto.identidad &&
+        draft.schemaResuelto.identidad.tipoPerfil) || ctx.tipoPerfil || '')),
       configuracionGrupo: mappedBloques.configuracionGrupo || '',
       configuracionGrupoLabel: mappedBloques.configuracionGrupoLabel || '',
       miembros: mappedBloques.miembros || [],
@@ -232,8 +245,18 @@
       reglasAcceso: mappedBloques.reglasAcceso || '',
       parejaGrupoPerfil: parejaGrupoPerfil,
       swingerPerfil: swingerPerfil,
+      unicornPerfil: unicornPerfil,
       objetivosPerfil: mappedBloques.objetivosPerfil || [],
       objetivoPrincipal: mappedBloques.objetivoPrincipal || '',
+      tipoUnicornio: mappedBloques.tipoUnicornio || '',
+      buscoConocer: mappedBloques.buscoConocer || [],
+      tipoParejaPreferida: mappedBloques.tipoParejaPreferida || [],
+      finalidadEncuentro: mappedBloques.finalidadEncuentro || [],
+      estadoPerfil: mappedBloques.estadoPerfil || '',
+      experiencia: mappedBloques.experiencia || '',
+      ambientePreferido: mappedBloques.ambientePreferido || [],
+      estilo: mappedBloques.estilo || '',
+      serviciosLifestyle: mappedBloques.serviciosLifestyle || [],
       tipoInteraccion: mappedBloques.tipoInteraccion || [],
       modalidadInteraccion: mappedBloques.modalidadInteraccion || [],
       intercambioSwinger: mappedBloques.intercambioSwinger || '',
@@ -266,7 +289,8 @@
       tonoPiel: mappedBloques.tonoPiel || '',
       videoPresentacion: mappedBloques.videoPresentacion || '',
       promociones: mappedBloques.promociones || '',
-      buscan: mappedBloques.buscanConocer
+      buscan: mappedBloques.buscoConocer
+        || mappedBloques.buscanConocer
         || mappedBloques.tipoPublico
         || (Array.isArray(mappedBloques.buscan) ? mappedBloques.buscan : (mappedBloques.buscan || '')),
       buscanConocer: mappedBloques.buscanConocer || [],
@@ -333,6 +357,7 @@
       badgeVip: mappedBloques.badgeVip === true,
       badgeTrans: mappedBloques.badgeTrans === true,
       badgeHotwife: mappedBloques.badgeHotwife === true,
+      badgeUnicorn: mappedBloques.badgeUnicorn === true,
       fotoURL: publicUrls.fotoPrincipal || '',
       fotosExtraURL: publicUrls.fotosExtra || [],
       contactoPublico: draft.contactoPublico || {},

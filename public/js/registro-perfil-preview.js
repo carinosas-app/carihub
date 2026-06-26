@@ -170,6 +170,12 @@
         u.nombre = u.aliasPareja;
         u.alias = u.aliasPareja;
       }
+    } else if (global.CariHubRegistroPublicBlocks &&
+      CariHubRegistroPublicBlocks.isUnicornSubcategoria &&
+      CariHubRegistroPublicBlocks.isUnicornSubcategoria(ctx)) {
+      u.tipoPerfil = 'persona';
+      u.arquetipo = ctx.arquetipo || 'persona_lifestyle';
+      delete u.swingerPerfil;
     }
 
     if (global.CariHubFieldEngineLite && CariHubFieldEngineLite.enriquecerPerfilPublico) {
@@ -179,8 +185,15 @@
       });
     }
 
+    var vistaPerfil = (pres && pres.vistaPerfil) || 'adult';
+    if (global.CariHubRegistroPublicBlocks &&
+      CariHubRegistroPublicBlocks.isUnicornSubcategoria &&
+      CariHubRegistroPublicBlocks.isUnicornSubcategoria(ctx)) {
+      vistaPerfil = 'unicorn';
+    }
+
     return {
-      vista: (pres && pres.vistaPerfil) || 'adult',
+      vista: vistaPerfil,
       tema: sectorEsAdultos() ? 'adult' : 'pro',
       perfil: u,
       query: {

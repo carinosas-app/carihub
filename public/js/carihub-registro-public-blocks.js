@@ -902,7 +902,6 @@
     }
     if (!un) return u;
     delete u.swingerPerfil;
-    u.unicornPerfil = Object.assign({}, un);
     if (Array.isArray(un.objetivosPerfil) && un.objetivosPerfil.length) {
       u.objetivosPerfil = un.objetivosPerfil.slice();
       u.objetivoPrincipal = un.objetivoPrincipal || buildObjetivoPrincipal(un.objetivosPerfil);
@@ -932,8 +931,41 @@
       u.serviciosLifestyle = un.serviciosLifestyle.slice();
       u.serviciosIncluidos = un.serviciosLifestyle.slice();
     }
+    if (Array.isArray(un.modalidades) && un.modalidades.length) {
+      u.modalidades = un.modalidades.slice();
+      u.modalidadFicha = un.modalidades.map(function (m) {
+        if (m === 'recibe') return 'Recibe';
+        if (m === 'hotel') return 'Hotel';
+        if (m === 'domicilio') return 'Domicilio';
+        if (m === 'viaja') return 'Viaja';
+        return m;
+      }).join(' · ');
+    }
+    if (un.viajesDesplazamiento) {
+      u.viajesDesplazamiento = Object.assign({}, un.viajesDesplazamiento);
+    } else if (viajesApi()) {
+      u.viajesDesplazamiento = viajesApi().buildViajesDesplazamiento(bloques, bloques.modalidades);
+    }
+    if (Array.isArray(un.metodosPago) && un.metodosPago.length) {
+      u.metodosPago = un.metodosPago.slice();
+    }
+    if (un.horarioDetalle) {
+      u.horarioDetalle = un.horarioDetalle;
+      u.horario = un.horarioDetalle;
+    }
+    if (un.sobreMi) u.sobreMi = un.sobreMi;
+    if (un.idiomas) u.idiomas = un.idiomas;
     u.tipoPerfil = 'persona';
+    u.arquetipo = (ctx && ctx.arquetipo) || 'persona_lifestyle';
     u.badgeUnicorn = true;
+    u.unicornPerfil = Object.assign({}, un, {
+      modalidades: u.modalidades || un.modalidades || [],
+      viajesDesplazamiento: u.viajesDesplazamiento || un.viajesDesplazamiento || null,
+      metodosPago: u.metodosPago || un.metodosPago || [],
+      horarioDetalle: u.horarioDetalle || un.horarioDetalle || '',
+      sobreMi: u.sobreMi || un.sobreMi || '',
+      idiomas: u.idiomas || un.idiomas || ''
+    });
     return u;
   }
 
@@ -1329,7 +1361,6 @@
       u.tipoPerfil = 'pareja_grupo';
     }
     if (bloques.tipoPareja && !bloques.configuracionGrupo) u.tipoPareja = bloques.tipoPareja;
-    u = applyUnicornPerfilFields(u, bloques, ctx);
     if (!u.mostrarAtiendoA) u.mostrarAtiendoA = 'Sí';
     if (!u.mostrarColaboraciones) u.mostrarColaboraciones = 'Sí';
     if (!u.mostrarAtiendenA) u.mostrarAtiendenA = 'Sí';
@@ -1377,6 +1408,7 @@
       u.horario = bloques.horarioDetalle;
       u.horarioDetalle = bloques.horarioDetalle;
     }
+    u = applyUnicornPerfilFields(u, bloques, ctx);
     return applyBadges(u, ctx);
   }
 
