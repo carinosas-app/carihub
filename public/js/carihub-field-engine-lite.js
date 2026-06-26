@@ -609,6 +609,12 @@
       if (row && (row.tipoPerfil === 'negocio' || row.formularioId === 'negocio_empresa')) return 'empresa';
       return 'pro';
     }
+    if (comp === 'ResultCardPareja' || comp === 'ProfileLayoutPareja') {
+      if (subId && global.CariHubResultadosDemo && CariHubResultadosDemo.vistaDeCategoriaLegacy) {
+        return CariHubResultadosDemo.vistaDeCategoriaLegacy(subId);
+      }
+      return 'pareja';
+    }
     return 'adult';
   }
 

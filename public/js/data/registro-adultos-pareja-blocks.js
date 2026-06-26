@@ -82,6 +82,12 @@
     'Fiesta'
   ];
 
+  var SWINGER_EXPERIENCIA_LIFESTYLE = [
+    'Primera experiencia',
+    'Experimentados',
+    'Comunidad lifestyle'
+  ];
+
   global.CARIHUB_REGISTRO_PAREJA_BLOCKS = {
     id: 'pareja_grupo',
     formularioId: 'adultos',
@@ -243,6 +249,20 @@
             type: 'select',
             required: false,
             options: SWINGER_ACEPTAN_SOLTEROS.slice()
+          },
+          {
+            id: 'aceptanParejasPrincipiantes',
+            label: '¿Reciben parejas principiantes?',
+            type: 'select',
+            required: false,
+            options: OPCIONES_SI_NO_CONVENIR.slice()
+          },
+          {
+            id: 'experienciaEnLifestyle',
+            label: 'Experiencia en el ambiente lifestyle',
+            type: 'select',
+            required: false,
+            options: SWINGER_EXPERIENCIA_LIFESTYLE.slice()
           },
           {
             id: 'haceColaboraciones',

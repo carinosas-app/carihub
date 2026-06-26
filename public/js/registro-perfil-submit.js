@@ -239,6 +239,8 @@
       intercambioSwinger: mappedBloques.intercambioSwinger || '',
       atiendenA: mappedBloques.atiendenA || '',
       aceptanSolteros: mappedBloques.aceptanSolteros || '',
+      aceptanParejasPrincipiantes: mappedBloques.aceptanParejasPrincipiantes || '',
+      experienciaEnLifestyle: mappedBloques.experienciaEnLifestyle || '',
       estiloPareja: mappedBloques.estiloPareja || [],
       mostrarObjetivosPerfil: mappedBloques.mostrarObjetivosPerfil || 'Sí',
       mostrarAtiendenA: mappedBloques.mostrarAtiendenA || 'Sí',

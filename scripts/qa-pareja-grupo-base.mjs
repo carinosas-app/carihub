@@ -194,6 +194,8 @@ try {
 
   const card = ctx.CariHubPublicRenderLite.cardHTMLPareja({
     ...perf,
+    subcategoriaId: 'cuckold_hotwife',
+    subcategoria: 'Cuckold',
     tagline: 'Pareja abierta',
     precio: 'Consultar',
     modalidades: ['recibe'],

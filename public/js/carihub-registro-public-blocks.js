@@ -778,6 +778,8 @@
       haceColaboraciones: values.haceColaboraciones || '',
       colaboraCon: Array.isArray(values.colaboraCon) ? values.colaboraCon.slice() : [],
       estiloPareja: Array.isArray(values.estiloPareja) ? values.estiloPareja.slice() : [],
+      aceptanParejasPrincipiantes: values.aceptanParejasPrincipiantes || '',
+      experienciaEnLifestyle: values.experienciaEnLifestyle || '',
       mostrarObjetivosPerfil: values.mostrarObjetivosPerfil || 'Sí',
       mostrarAtiendenA: values.mostrarAtiendenA || 'Sí',
       mostrarColaboraciones: values.mostrarColaboraciones || 'Sí'
@@ -817,6 +819,8 @@
     if (sw.haceColaboraciones) u.haceColaboraciones = sw.haceColaboraciones;
     if (Array.isArray(sw.colaboraCon) && sw.colaboraCon.length) u.colaboraCon = sw.colaboraCon.slice();
     if (Array.isArray(sw.estiloPareja) && sw.estiloPareja.length) u.estiloPareja = sw.estiloPareja.slice();
+    if (sw.aceptanParejasPrincipiantes) u.aceptanParejasPrincipiantes = sw.aceptanParejasPrincipiantes;
+    if (sw.experienciaEnLifestyle) u.experienciaEnLifestyle = sw.experienciaEnLifestyle;
     if (sw.mostrarObjetivosPerfil) u.mostrarObjetivosPerfil = sw.mostrarObjetivosPerfil;
     if (sw.mostrarAtiendenA) u.mostrarAtiendenA = sw.mostrarAtiendenA;
     if (sw.mostrarColaboraciones) u.mostrarColaboraciones = sw.mostrarColaboraciones;

@@ -4554,7 +4554,10 @@ function renderEscortVip(u){ return renderPerfilCariñosas(u,"escortVip"); }
 function renderTrans(u){ return renderPerfilCariñosas(u,"trans"); }
 function renderNegocioAdulto(u){ return renderPerfilCariñosas(u,"negocio"); }
 function renderMasajesLocal(u){ return renderPerfilCariñosas(u,"masajesLocal"); }
-function renderParejaLifestyle(u){ return renderPerfilCariñosas(u,"pareja"); }
+function renderParejaLifestyle(u){
+  if(isSwingerSubFicha(u)||(u.tipoPerfil==="pareja_grupo"&&normSubFicha(u)==="swinger")) return renderParejaGrupoSwinger(u);
+  return renderPerfilCariñosas(u,"pareja");
+}
 function renderUnicorn(u){ return renderPerfilCariñosas(u,"unicorn"); }
 function renderStripper(u){ return renderPerfilCariñosas(u,"stripper"); }
 function renderTableDance(u){ return renderPerfilCariñosas(u,"tableDance"); }
@@ -4924,6 +4927,130 @@ function parejaFichaHTML(u){
     return negocioFichaRow(r[0],r[1],r[2],r[3]);
   }).join("");
   return '<div class="pcard pcard--negocio-ficha"><div class="negocio-ficha">'+rows+'</div></div>';
+}
+function swingerFichaValor(val){
+  if(val==null||val==="") return "";
+  if(Array.isArray(val)&&!val.length) return "";
+  return Array.isArray(val)?val.join(", "):String(val);
+}
+function swingerFichaRow(icon,label,val){
+  var txt=swingerFichaValor(val);
+  if(!txt) return "";
+  return row(pico(icon),label,safe(txt));
+}
+function modalidadesFichaTxt(u){
+  if(!Array.isArray(u.modalidades)||!u.modalidades.length) return "";
+  return u.modalidades.map(function(m){
+    if(m==="recibe") return "Recibe";
+    if(m==="hotel") return "Hotel";
+    if(m==="domicilio") return "Domicilio";
+    if(m==="viaja") return "Viaja";
+    return m;
+  }).join(" · ");
+}
+function swingerFichaHTML(u){
+  if(!isSwingerSubFicha(u)) return adultoFichaHTML(u);
+  var html="";
+  var miembrosTxt=formatMiembrosFicha(u);
+  if(miembrosTxt) html+=swingerFichaRow("corp","Integrantes",miembrosTxt);
+  if(u.configuracionGrupoLabel||u.tipoPareja) html+=swingerFichaRow("gender","Configuración del grupo",u.configuracionGrupoLabel||u.tipoPareja);
+  if(lesbiansMostrarFicha(u,"mostrarObjetivosPerfil",u.objetivosPerfil)&&Array.isArray(u.objetivosPerfil)&&u.objetivosPerfil.length){
+    if(u.objetivoPrincipal) html+=swingerFichaRow("heart","Objetivo principal",u.objetivoPrincipal);
+    html+=swingerFichaRow("heart","Objetivos",u.objetivosPerfil);
+  }
+  html+=swingerFichaRow("briefcase","Tipo de interacción",u.tipoInteraccion);
+  html+=swingerFichaRow("briefcase","Modalidad de interacción",u.modalidadInteraccion);
+  html+=swingerFichaRow("heart","Intercambio swinger",u.intercambioSwinger);
+  if(lesbiansMostrarFicha(u,"mostrarAtiendenA",u.atiendenA)) html+=swingerFichaRow("heart","Atienden a",u.atiendenA);
+  html+=swingerFichaRow("chat","Solteros",u.aceptanSolteros);
+  html+=swingerFichaRow("heart","Parejas principiantes",u.aceptanParejasPrincipiantes);
+  html+=swingerFichaRow("calendar","Experiencia en lifestyle",u.experienciaEnLifestyle);
+  if(lesbiansMostrarFicha(u,"mostrarColaboraciones",u.haceColaboraciones)){
+    html+=swingerFichaRow("camera","Colaboraciones",u.haceColaboraciones);
+    if(Array.isArray(u.colaboraCon)&&u.colaboraCon.length) html+=swingerFichaRow("heart","Busco colaborar con",u.colaboraCon);
+  }
+  html+=swingerFichaRow("gender","Estilo de pareja",u.estiloPareja);
+  html+=viajesDesplazamientoFichaHTML(u);
+  var mods=modalidadesFichaTxt(u);
+  if(mods) html+=swingerFichaRow("briefcase","Modalidades",mods);
+  var horario=u.horarioDetalle||u.horario||(u.parejaGrupoPerfil&&u.parejaGrupoPerfil.horarioDetalle)||"";
+  if(horario) html+=swingerFichaRow("clock","Horarios",horario);
+  var pagos=Array.isArray(u.metodosPago)&&u.metodosPago.length?u.metodosPago:(u.parejaGrupoPerfil&&u.parejaGrupoPerfil.metodosPago)||[];
+  if(Array.isArray(pagos)&&pagos.length) html+=swingerFichaRow("wallet","Métodos de pago",pagos);
+  var reglas=u.reglasAcceso||(u.parejaGrupoPerfil&&u.parejaGrupoPerfil.reglasAcceso)||"";
+  if(reglas) html+=swingerFichaRow("shield","Reglas de acceso",reglas);
+  if(!html) return "";
+  return '<div class="pcard pcard--swinger-ficha"><div class="dlist">'+html+'</div></div>';
+}
+function sobreParejaGrupoHTML(u){
+  var txt=u.sobreMi||(u.parejaGrupoPerfil&&u.parejaGrupoPerfil.sobreMi)||u.sobreNosotros||"";
+  if(!txt) return "";
+  return '<div class="sobre-card playout__sobre">'+
+    '<div class="sobre-card__head">'+
+      '<svg class="sobre-card__heart" viewBox="0 0 24 24" aria-hidden="true"><path fill="#E91E63" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>'+
+      '<h2 class="sobre-card__title">Sobre nosotros</h2>'+
+    '</div>'+
+    '<p class="sobre-card__desc">'+sobreParrafos(txt)+'</p>'+
+  '</div>';
+}
+function parejaGrupoSwingerHeroHTML(u){
+  var hero=Object.assign({},u);
+  hero.nombre=hero.aliasPareja||hero.nombre||hero.alias||"";
+  if(isParejaGrupoFicha(hero)||isSwingerSubFicha(hero)) return parejaIdCardHTML(hero);
+  return perfilIdCardHTML(hero);
+}
+function renderParejaGrupoSwinger(u){
+  return renderPlayoutAdultoRef(u,{
+    layoutKey:"pareja",
+    extraClass:" playout--pareja-grupo playout--swinger",
+    perfil:parejaGrupoSwingerHeroHTML(u),
+    ficha:swingerFichaHTML(u),
+    sobre:sobreParejaGrupoHTML(u)
+  });
+}
+function mergeParejaGrupoRegistroFields(clean,u){
+  if(!clean||!u) return clean;
+  var pg=u.parejaGrupoPerfil||{};
+  if(u.tipoPerfil) clean.tipoPerfil=u.tipoPerfil;
+  if(u.arquetipo) clean.arquetipo=u.arquetipo;
+  if(u.aliasPareja||u.alias){
+    clean.aliasPareja=u.aliasPareja||u.alias;
+    clean.nombre=clean.aliasPareja;
+    clean.alias=clean.aliasPareja;
+  }
+  if(u.configuracionGrupo||pg.configuracionGrupo) clean.configuracionGrupo=u.configuracionGrupo||pg.configuracionGrupo;
+  if(u.configuracionGrupoLabel||pg.configuracionGrupoLabel) clean.configuracionGrupoLabel=u.configuracionGrupoLabel||pg.configuracionGrupoLabel;
+  if(u.tipoPareja) clean.tipoPareja=u.tipoPareja;
+  if(Array.isArray(u.miembros)&&u.miembros.length) clean.miembros=u.miembros.slice();
+  else if(Array.isArray(pg.miembros)&&pg.miembros.length) clean.miembros=pg.miembros.slice();
+  if(u.miembrosResumen) clean.miembrosResumen=u.miembrosResumen;
+  if(u.reglasAcceso||pg.reglasAcceso) clean.reglasAcceso=u.reglasAcceso||pg.reglasAcceso;
+  if(u.sobreMi||pg.sobreMi) clean.sobreMi=u.sobreMi||pg.sobreMi;
+  if(u.horarioDetalle||pg.horarioDetalle) clean.horarioDetalle=u.horarioDetalle||pg.horarioDetalle;
+  if(u.horario||clean.horarioDetalle) clean.horario=u.horario||clean.horarioDetalle;
+  if(Array.isArray(u.metodosPago)&&u.metodosPago.length) clean.metodosPago=u.metodosPago.slice();
+  else if(Array.isArray(pg.metodosPago)&&pg.metodosPago.length) clean.metodosPago=pg.metodosPago.slice();
+  if(Array.isArray(u.modalidades)&&u.modalidades.length) clean.modalidades=u.modalidades.slice();
+  else if(Array.isArray(pg.modalidades)&&pg.modalidades.length) clean.modalidades=pg.modalidades.slice();
+  if(u.viajesDesplazamiento||pg.viajesDesplazamiento) clean.viajesDesplazamiento=u.viajesDesplazamiento||pg.viajesDesplazamiento;
+  if(u.parejaGrupoPerfil) clean.parejaGrupoPerfil=Object.assign({},u.parejaGrupoPerfil);
+  if(u.swingerPerfil) clean.swingerPerfil=Object.assign({},u.swingerPerfil);
+  if(Array.isArray(u.objetivosPerfil)&&u.objetivosPerfil.length) clean.objetivosPerfil=u.objetivosPerfil.slice();
+  if(u.objetivoPrincipal) clean.objetivoPrincipal=u.objetivoPrincipal;
+  if(u.intercambioSwinger) clean.intercambioSwinger=u.intercambioSwinger;
+  if(Array.isArray(u.tipoInteraccion)&&u.tipoInteraccion.length) clean.tipoInteraccion=u.tipoInteraccion.slice();
+  if(Array.isArray(u.modalidadInteraccion)&&u.modalidadInteraccion.length) clean.modalidadInteraccion=u.modalidadInteraccion.slice();
+  if(u.atiendenA) clean.atiendenA=u.atiendenA;
+  if(u.aceptanSolteros) clean.aceptanSolteros=u.aceptanSolteros;
+  if(u.aceptanParejasPrincipiantes) clean.aceptanParejasPrincipiantes=u.aceptanParejasPrincipiantes;
+  if(u.experienciaEnLifestyle) clean.experienciaEnLifestyle=u.experienciaEnLifestyle;
+  if(u.haceColaboraciones) clean.haceColaboraciones=u.haceColaboraciones;
+  if(Array.isArray(u.colaboraCon)&&u.colaboraCon.length) clean.colaboraCon=u.colaboraCon.slice();
+  if(Array.isArray(u.estiloPareja)&&u.estiloPareja.length) clean.estiloPareja=u.estiloPareja.slice();
+  if(u.mostrarObjetivosPerfil) clean.mostrarObjetivosPerfil=u.mostrarObjetivosPerfil;
+  if(u.mostrarAtiendenA) clean.mostrarAtiendenA=u.mostrarAtiendenA;
+  if(u.mostrarColaboraciones) clean.mostrarColaboraciones=u.mostrarColaboraciones;
+  return clean;
 }
 function parejaPieBottomHTML(u){
   var perks=(u.piePerks||[]).map(function(p){
@@ -6464,6 +6591,7 @@ function aplicarPerfilDesdeRegistro(vista,u){
     var parts=String(u.ubicacion).split(",").map(function(x){return x.trim();}).filter(Boolean);
     if(parts.length) clean.direccionLineas=parts.length>1?[parts[0],parts.slice(1).join(", ")]:[parts[0]];
   }
+  clean=mergeParejaGrupoRegistroFields(clean,u);
   DEMO[vista]=clean;
 }
 function aplicarPerfilResultadosEnDemo(vista,u){
@@ -6492,6 +6620,23 @@ function aplicarPerfilResultadosEnDemo(vista,u){
   if(u.atiendenA) d.atiendenA=u.atiendenA;
   if(u.mostrarAtiendenA) d.mostrarAtiendenA=u.mostrarAtiendenA;
   if(u.aceptanSolteros) d.aceptanSolteros=u.aceptanSolteros;
+  if(u.aceptanParejasPrincipiantes) d.aceptanParejasPrincipiantes=u.aceptanParejasPrincipiantes;
+  if(u.experienciaEnLifestyle) d.experienciaEnLifestyle=u.experienciaEnLifestyle;
+  if(u.intercambioSwinger) d.intercambioSwinger=u.intercambioSwinger;
+  if(u.objetivoPrincipal) d.objetivoPrincipal=u.objetivoPrincipal;
+  if(Array.isArray(u.modalidadInteraccion)&&u.modalidadInteraccion.length) d.modalidadInteraccion=u.modalidadInteraccion.slice();
+  if(Array.isArray(u.estiloPareja)&&u.estiloPareja.length) d.estiloPareja=u.estiloPareja.slice();
+  if(u.aliasPareja){ d.aliasPareja=u.aliasPareja; d.nombre=u.aliasPareja; }
+  if(u.configuracionGrupo) d.configuracionGrupo=u.configuracionGrupo;
+  if(u.configuracionGrupoLabel) d.configuracionGrupoLabel=u.configuracionGrupoLabel;
+  if(Array.isArray(u.miembros)&&u.miembros.length) d.miembros=u.miembros.slice();
+  if(u.miembrosResumen) d.miembrosResumen=u.miembrosResumen;
+  if(u.reglasAcceso) d.reglasAcceso=u.reglasAcceso;
+  if(u.horarioDetalle) d.horarioDetalle=u.horarioDetalle;
+  if(u.sobreMi) d.sobreMi=u.sobreMi;
+  if(u.tipoPerfil) d.tipoPerfil=u.tipoPerfil;
+  if(u.parejaGrupoPerfil) d.parejaGrupoPerfil=Object.assign({},u.parejaGrupoPerfil);
+  if(u.swingerPerfil) d.swingerPerfil=Object.assign({},u.swingerPerfil);
   if(u.mostrarObjetivosPerfil) d.mostrarObjetivosPerfil=u.mostrarObjetivosPerfil;
   if(u.tipoUnicornio) d.tipoUnicornio=u.tipoUnicornio;
   if(Array.isArray(u.buscoConocer)&&u.buscoConocer.length){ d.buscoConocer=u.buscoConocer.slice(); d.buscan=u.buscoConocer.slice(); }

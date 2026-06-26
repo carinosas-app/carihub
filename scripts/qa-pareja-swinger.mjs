@@ -127,6 +127,7 @@ try {
     'objetivosPerfil', 'intercambioSwinger', 'tipoInteraccion', 'modalidadInteraccion',
     'atiendenA', 'haceColaboraciones', 'colaboraCon', 'estiloPareja',
     'mostrarObjetivosPerfil', 'mostrarAtiendenA', 'mostrarColaboraciones',
+    'aceptanParejasPrincipiantes', 'experienciaEnLifestyle',
   ].every((id) => fieldIds.includes(id)), fieldIds.join(', '));
 
   ok('sin tipoPareja en delta', !fieldIds.includes('tipoPareja'), 'shell A1');

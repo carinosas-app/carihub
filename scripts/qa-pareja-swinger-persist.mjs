@@ -104,6 +104,8 @@ function swingerDelta() {
     haceColaboraciones: 'Sí',
     colaboraCon: ['Parejas'],
     estiloPareja: ['Relajados'],
+    aceptanParejasPrincipiantes: 'Sí',
+    experienciaEnLifestyle: 'Experimentados',
     mostrarObjetivosPerfil: 'Sí',
     mostrarAtiendenA: 'Sí',
     mostrarColaboraciones: 'Sí',
@@ -188,7 +190,7 @@ const SWINGER_TOP = [
   'objetivosPerfil', 'objetivoPrincipal', 'tipoInteraccion', 'modalidadInteraccion',
   'intercambioSwinger', 'atiendenA', 'aceptanSolteros', 'haceColaboraciones',
   'colaboraCon', 'estiloPareja', 'mostrarObjetivosPerfil', 'mostrarAtiendenA',
-  'mostrarColaboraciones', 'swingerPerfil',
+  'mostrarColaboraciones', 'swingerPerfil', 'aceptanParejasPrincipiantes', 'experienciaEnLifestyle',
 ];
 
 let ctx;
@@ -228,6 +230,8 @@ try {
   }));
 
   ok('submit todos los campos A2.2', SWINGER_TOP.every((k) => doc[k] != null && doc[k] !== ''), SWINGER_TOP.filter((k) => doc[k] == null || doc[k] === '').join(', '));
+  ok('submit aceptanParejasPrincipiantes', doc.aceptanParejasPrincipiantes === 'Sí', doc.aceptanParejasPrincipiantes);
+  ok('submit experienciaEnLifestyle', doc.experienciaEnLifestyle === 'Experimentados', doc.experienciaEnLifestyle);
 
   const preview = simulatePreviewPerfil(ctx, bloques, userCtx);
   ok('preview swingerPerfil', preview.swingerPerfil && preview.swingerPerfil.atiendenA === 'Parejas', JSON.stringify(preview.swingerPerfil));

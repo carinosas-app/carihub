@@ -105,21 +105,73 @@
     return id === 'swinger' || id === 'parejas swinger';
   }
 
+  function swingerObjetivoPrincipal(u) {
+    if (!swingerMostrarPublico(u, 'mostrarObjetivosPerfil', u.objetivosPerfil)) return '';
+    if (u.objetivoPrincipal) return String(u.objetivoPrincipal).trim();
+    var arr = u.objetivosPerfil;
+    if (!Array.isArray(arr) || !arr.length) return '';
+    if (arr.indexOf('Todo lo anterior') >= 0) return 'Todo lo anterior';
+    return String(arr[0]).trim();
+  }
+
   function swingerCardExtraHTML(u) {
-    if (!isSwingerPerfil(u)) return '';
+    return '';
+  }
+
+  function swingerCardBadgesHTML(u, opts) {
+    opts = opts || {};
+    var badges = badgesCompactHTML(u, {
+      pareja: true,
+      swinger: true,
+      respRapida: opts.respRapida
+    });
+    if (u.experienciaEnLifestyle) {
+      badges += '<span class="res-badge res-badge--lifestyle">' + safeTxt(u.experienciaEnLifestyle) + '</span>';
+    }
+    if (u.aceptanParejasPrincipiantes && String(u.aceptanParejasPrincipiantes).trim() !== 'No') {
+      badges += '<span class="res-badge res-badge--principiantes">Principiantes: ' +
+        safeTxt(u.aceptanParejasPrincipiantes) + '</span>';
+    }
+    return badges;
+  }
+
+  function cardHTMLParejaSwinger(u, Q) {
+    Q = Q || {};
+    var set = modalidadesSet(u);
+    var metaRight = set.viaja ? chipModalidadHTML({ viaja: true }) : '';
     var lines = [];
-    if (swingerMostrarPublico(u, 'mostrarObjetivosPerfil', u.objetivosPerfil)) {
-      var obj = Array.isArray(u.objetivosPerfil) ? u.objetivosPerfil.join(', ') : String(u.objetivosPerfil || '').trim();
-      if (obj) lines.push('Objetivos: ' + obj);
+    var obj = swingerObjetivoPrincipal(u);
+    if (obj) lines.push(obj);
+    var compat = [];
+    if (swingerMostrarPublico(u, 'mostrarAtiendenA', u.atiendenA) && u.atiendenA) {
+      compat.push('Atienden a: ' + String(u.atiendenA).trim());
     }
-    if (swingerMostrarPublico(u, 'mostrarAtiendenA', u.atiendenA)) {
-      lines.push('Atienden a: ' + String(u.atiendenA).trim());
+    if (u.intercambioSwinger) {
+      compat.push('Intercambio: ' + String(u.intercambioSwinger).trim());
     }
-    if (swingerMostrarPublico(u, 'mostrarColaboraciones', u.haceColaboraciones)) {
-      lines.push('Colaboraciones: ' + String(u.haceColaboraciones).trim());
-    }
-    if (!lines.length) return '';
-    return '<p class="res-card__viajes-resumen">' + safeTxt(lines.join(' · ')) + '</p>';
+    if (compat.length) lines.push(compat.join(' · '));
+    var descBlock = lines.length
+      ? '<p class="res-card__desc res-card__desc--compact"><span class="res-card__desc-txt">' +
+        safeTxt(lines.join(' · ')) + '</span></p>'
+      : descripcionCompactHTML(u, 'Presentación');
+    var viajesLine = set.viaja ? cardViajesExtraHTML(u) : '';
+    var configLabel = u.configuracionGrupoLabel || u.tipoPareja || '';
+    var headExtra = configLabel
+      ? '<span class="age">' + safeTxt(String(configLabel)) + '</span>'
+      : '';
+    var catLabel = (global.CariHubResultadosDemo && CariHubResultadosDemo.labelCategoria)
+      ? CariHubResultadosDemo.labelCategoria(u.categoriaPublica || u.categoria || Q.categoria || '')
+      : (u.categoriaPublica || u.categoria || Q.categoria || 'Swinger');
+    return cardShell(u, Q, {
+      cardClass: 'res-card--pareja res-card--swinger',
+      nombre: u.aliasPareja || u.nombre || u.alias,
+      headExtra: headExtra,
+      metaRight: metaRight,
+      descBlock: descBlock + viajesLine,
+      catLabel: catLabel,
+      catIcon: 'heart',
+      badges: swingerCardBadgesHTML(u, { respRapida: !u.__previewRegistro && u.respuestaRapida === true })
+    });
   }
 
   function isUnicornPerfil(u) {
@@ -221,6 +273,8 @@
   function badgesCompactHTML(u, opts) {
     opts = opts || {};
     var items = [];
+    if (opts.pareja) items.push('<span class="res-badge res-badge--pareja">Pareja</span>');
+    if (opts.swinger) items.push('<span class="res-badge res-badge--swinger">Swinger</span>');
     if (opts.vip) items.push('<span class="res-badge res-badge--vip">VIP</span>');
     if (opts.cedula) items.push('<span class="res-badge res-badge--ver">Cédula</span>');
     if (opts.negocio) items.push('<span class="res-badge res-badge--ver">Verificado</span>');
@@ -404,6 +458,7 @@
   }
 
   function cardHTMLPareja(u, Q) {
+    if (isSwingerPerfil(u)) return cardHTMLParejaSwinger(u, Q);
     Q = Q || {};
     var set = modalidadesSet(u);
     var mods = chipModalidadHTML(set);
@@ -539,6 +594,7 @@
     cardHTMLServicio: cardHTMLServicio,
     cardHTMLProfesional: cardHTMLProfesional,
     cardHTMLPareja: cardHTMLPareja,
+    cardHTMLParejaSwinger: cardHTMLParejaSwinger,
     cardHTMLUnicorn: cardHTMLUnicorn,
     resolveComponente: resolveComponente,
     applyPublicProfilePresentation: applyPublicProfilePresentation,
