@@ -1,22 +1,46 @@
 ---
-description: Campos pendientes al implementar registro Pareja Swinger (pareja_grupo)
-globs: public/js/data/registro-adultos*.js, scripts/config-registro-adultos-schema.json
+description: Registro Pareja Swinger (pareja_grupo / subcategoria swinger)
+globs: public/js/data/registro-adultos-pareja-blocks.js, public/js/carihub-registro-public-blocks.js, scripts/config-registro-adultos-schema.json
 alwaysApply: false
 ---
 
-# Pareja Swinger — campos pendientes
+# Pareja Swinger — delta implementado (v1)
 
-La subcategoría `swinger` (arquetipo `pareja_grupo`) **aún no tiene formulario de registro** en el wizard escort. Cuando se implemente, agregar:
+Subcategoría `swinger` (arquetipo `pareja_grupo`, UI `ui_adulto_pareja`).
 
-## Campos públicos obligatorios a incluir
+## Motor
 
-| Campo | Tipo | Opciones |
-|-------|------|----------|
-| `realizaGangBang` | select | Sí · No · Bajo acuerdo previo |
-| `colaboracionContenidoEnPareja` | select | Sí · No · Bajo acuerdo previo |
+- Bloques: `public/js/data/registro-adultos-pareja-blocks.js` → `CARIHUB_REGISTRO_PAREJA_BLOCKS`
+- Resolución: `CariHubRegistroPublicBlocks.resolveConfig()` escort **o** pareja
+- Viajes: `swinger` en `VIAJES_SUBCATEGORIAS` (chip Viaja en modalidades)
 
-## Notas
+## Campos públicos (bloque `swingerPerfil` + modalidades)
 
-- Referencia en schema: `scripts/config-registro-adultos-schema.json` → subcategoría `swinger` → `delta.pendienteRegistro`.
-- Patrón ya usado en Singles (`colaboracionContenido`), Hotwife (`realizaGangBang` + `colaboracionContenido`) y Escort (`realizaTrios`, etc.).
-- Persistir vía `mapToPerfil`, `registro-perfil-submit.js` y ficha en `perfil-publico.html`.
+| Campo | Tipo | Obligatorio |
+|-------|------|-------------|
+| `objetivosPerfil` | checklist | Sí |
+| `tipoInteraccion` | checklist | Sí |
+| `tipoPareja` | select | Sí |
+| `atiendenA` | select | Sí |
+| `aceptanSolteros` | select | Sí |
+| `haceColaboraciones` | select | Sí |
+| `colaboraCon` | checklist | Solo si `haceColaboraciones === "Sí"` |
+| `mostrarObjetivosPerfil` | select Sí/No | Default Sí |
+| `mostrarAtiendenA` | select Sí/No | Default Sí |
+| `mostrarColaboraciones` | select Sí/No | Default Sí |
+| `modalidades` + `viajesDesplazamiento` | reutilizado | modalidades Sí |
+
+## Regla de producto
+
+- **No** campo público `realizaGangBang` ni prácticas sexuales explícitas.
+- Usar categorías de interacción y objetivos generales para filtros y UX reutilizable.
+
+## Render
+
+- Tarjeta: `ResultCardPareja` → `cardHTMLPareja` + líneas condicionadas por visibilidad
+- Ficha: `adultoFichaHTML` en `perfil-publico.html`
+
+## Pendiente fase 2+
+
+- `unicorns`, `cuckold_hotwife` (otros deltas pareja_grupo)
+- Miembros / alias pareja en wizard (campos base `pareja_grupo` del schema)

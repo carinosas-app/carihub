@@ -15,6 +15,10 @@
     return global.CARIHUB_REGISTRO_ESCORT_BLOCKS || null;
   }
 
+  function resolveParejaConfig() {
+    return global.CARIHUB_REGISTRO_PAREJA_BLOCKS || null;
+  }
+
   function normalizeSubId(id) {
     return String(id || '').trim().toLowerCase().replace(/_/g, ' ');
   }
@@ -102,14 +106,15 @@
   }
 
   function getFotosMin(ctx) {
-    var cfg = resolveEscortConfig();
-    if (!cfg || !matchesEscort(ctx || {}, null)) return null;
+    var cfg = resolveConfig(ctx || {}, null);
+    if (!cfg) return null;
     var merged = mergedConfig(cfg, ctx || {});
-    return merged.fotosMin || null;
+    return merged.fotosMin || cfg.fotosMin || null;
   }
 
   function applyBadges(u, ctx) {
     var cfg = resolveEscortConfig();
+    if (!cfg || !matchesEscort(ctx || { subcategoriaId: u && u.subcategoriaId }, null)) return u;
     var over = getSubcategoriaOverride(cfg, ctx || { subcategoriaId: u && u.subcategoriaId });
     if (!over || !over.badges) return u;
     if (over.badges.indexOf('lgbt') >= 0) u.badgeLgbt = true;
@@ -173,8 +178,21 @@
     return false;
   }
 
+  function matchesPareja(ctx, resolved) {
+    var cfg = resolveParejaConfig();
+    if (!cfg) return false;
+    ctx = ctx || {};
+    var subId = String(ctx.subcategoriaId || '').trim().toLowerCase();
+    if (cfg.subcategoriaIds.indexOf(subId) >= 0) return true;
+    var ident = resolved && resolved.identidad ? resolved.identidad : {};
+    if (ident.formularioId === cfg.formularioId && ident.arquetipo === cfg.id) return true;
+    if (resolved && cfg.uiIds.indexOf(resolved.formularioUiId || '') >= 0) return true;
+    return false;
+  }
+
   function resolveConfig(ctx, resolved) {
     if (matchesEscort(ctx, resolved)) return resolveEscortConfig();
+    if (matchesPareja(ctx, resolved)) return resolveParejaConfig();
     return null;
   }
 
@@ -510,6 +528,16 @@
     return values;
   }
 
+  function finalizeParejaSwingerValues(values) {
+    if (!values) return values;
+    if (!String(values.mostrarAtiendenA || '').trim()) values.mostrarAtiendenA = 'Sí';
+    if (!String(values.mostrarColaboraciones || '').trim()) values.mostrarColaboraciones = 'Sí';
+    if (!String(values.mostrarObjetivosPerfil || '').trim()) values.mostrarObjetivosPerfil = 'Sí';
+    var hace = String(values.haceColaboraciones || '').trim();
+    if (hace !== 'Sí') delete values.colaboraCon;
+    return values;
+  }
+
   function finalizeViajesValues(values) {
     var api = viajesApi();
     if (!api) return values;
@@ -540,7 +568,7 @@
         values[field.id] = el ? String(el.value || '').trim() : '';
       });
     });
-    return finalizeLesbiansValues(finalizeViajesValues(values));
+    return finalizeParejaSwingerValues(finalizeLesbiansValues(finalizeViajesValues(values)));
   }
 
   function validateValues(cfg, values, ctx) {
@@ -659,8 +687,8 @@
   }
 
   function collectForPreview(ctx) {
-    var cfg = resolveEscortConfig();
-    if (!$('rpDynamicPublicHost') || $('rpDynamicPublicHost').classList.contains('rp-hidden')) return null;
+    var cfg = resolveConfig(ctx || {}, null);
+    if (!cfg || !$('rpDynamicPublicHost') || $('rpDynamicPublicHost').classList.contains('rp-hidden')) return null;
     return collectValues(mergedConfig(cfg, ctx || {}));
   }
 
@@ -740,8 +768,21 @@
     }
     if (bloques.mostrarColaboraciones) u.mostrarColaboraciones = bloques.mostrarColaboraciones;
     if (bloques.estiloLesbian) u.estiloLesbian = bloques.estiloLesbian;
+    if (Array.isArray(bloques.objetivosPerfil) && bloques.objetivosPerfil.length) {
+      u.objetivosPerfil = bloques.objetivosPerfil.slice();
+    }
+    if (Array.isArray(bloques.tipoInteraccion) && bloques.tipoInteraccion.length) {
+      u.tipoInteraccion = bloques.tipoInteraccion.slice();
+    }
+    if (bloques.tipoPareja) u.tipoPareja = bloques.tipoPareja;
+    if (bloques.atiendenA) u.atiendenA = bloques.atiendenA;
+    if (bloques.mostrarAtiendenA) u.mostrarAtiendenA = bloques.mostrarAtiendenA;
+    if (bloques.aceptanSolteros) u.aceptanSolteros = bloques.aceptanSolteros;
+    if (bloques.mostrarObjetivosPerfil) u.mostrarObjetivosPerfil = bloques.mostrarObjetivosPerfil;
     if (!u.mostrarAtiendoA) u.mostrarAtiendoA = 'Sí';
     if (!u.mostrarColaboraciones) u.mostrarColaboraciones = 'Sí';
+    if (!u.mostrarAtiendenA) u.mostrarAtiendenA = 'Sí';
+    if (!u.mostrarObjetivosPerfil) u.mostrarObjetivosPerfil = 'Sí';
     if (isTruthyFieldValue(bloques.eventosDisponibles)) u.eventosDisponibles = true;
     if (bloques.portfolioURL) u.portfolioURL = normalizeUrl(bloques.portfolioURL);
     if (bloques.disponibilidad) {
@@ -828,6 +869,7 @@
   global.CariHubRegistroPublicBlocks = {
     resolveConfig: resolveConfig,
     matchesEscort: matchesEscort,
+    matchesPareja: matchesPareja,
     apply: apply,
     collectValues: collectValues,
     validateValues: validateValues,

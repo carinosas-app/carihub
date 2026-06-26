@@ -4399,6 +4399,14 @@ function lesbiansMostrarFicha(u, visibilityKey, contentVal){
   if(u[visibilityKey]!=null && String(u[visibilityKey]).trim()!=='') return String(u[visibilityKey]).trim()==='Sí';
   return true;
 }
+function normSubFicha(u){
+  return String(u.subcategoriaId||u.subcategoria||'').trim().toLowerCase().replace(/_/g,' ');
+}
+function isLesbiansSubFicha(u){ return normSubFicha(u)==='lesbians'; }
+function isSwingerSubFicha(u){
+  var id=normSubFicha(u);
+  return id==='swinger'||id==='parejas swinger';
+}
 function adultoFichaHTML(u){
   if(u.especialidadBdsm){
     return '<div class="pcard"><div class="dlist">'+
@@ -4440,10 +4448,17 @@ function adultoFichaHTML(u){
   if(u.reglasAcceso) html+=row(pico("shield"),"Acceso",safe(u.reglasAcceso));
   if(u.areasVenue) html+=row(pico("pin"),"Áreas",safe(u.areasVenue));
   if(u.orientacion) html+=row(pico("gender"),"Orientación",safe(u.orientacion));
-  if(lesbiansMostrarFicha(u,'mostrarAtiendoA',u.atiendoA)) html+=row(pico("heart"),"Atiende a",safe(u.atiendoA));
-  if(lesbiansMostrarFicha(u,'mostrarColaboraciones',u.haceColaboraciones)) html+=row(pico("camera"),"Colaboraciones",safe(u.haceColaboraciones));
-  if(lesbiansMostrarFicha(u,'mostrarColaboraciones',u.haceColaboraciones) && Array.isArray(u.colaboraCon)&&u.colaboraCon.length) html+=row(pico("heart"),"Busco colaborar con",safe(u.colaboraCon.join(", ")));
-  if(u.estiloLesbian) html+=row(pico("gender"),"Estilo",safe(u.estiloLesbian));
+  if(isLesbiansSubFicha(u)&&lesbiansMostrarFicha(u,'mostrarAtiendoA',u.atiendoA)) html+=row(pico("heart"),"Atiende a",safe(u.atiendoA));
+  if(isLesbiansSubFicha(u)&&lesbiansMostrarFicha(u,'mostrarColaboraciones',u.haceColaboraciones)) html+=row(pico("camera"),"Colaboraciones",safe(u.haceColaboraciones));
+  if(isLesbiansSubFicha(u)&&lesbiansMostrarFicha(u,'mostrarColaboraciones',u.haceColaboraciones) && Array.isArray(u.colaboraCon)&&u.colaboraCon.length) html+=row(pico("heart"),"Busco colaborar con",safe(u.colaboraCon.join(", ")));
+  if(isLesbiansSubFicha(u)&&u.estiloLesbian) html+=row(pico("gender"),"Estilo",safe(u.estiloLesbian));
+  if(isSwingerSubFicha(u)&&Array.isArray(u.objetivosPerfil)&&u.objetivosPerfil.length&&lesbiansMostrarFicha(u,'mostrarObjetivosPerfil',u.objetivosPerfil)) html+=row(pico("heart"),"Objetivos del perfil",safe(u.objetivosPerfil.join(", ")));
+  if(isSwingerSubFicha(u)&&Array.isArray(u.tipoInteraccion)&&u.tipoInteraccion.length) html+=row(pico("briefcase"),"Tipo de interacción",safe(u.tipoInteraccion.join(", ")));
+  if(isSwingerSubFicha(u)&&u.tipoPareja) html+=row(pico("gender"),"Tipo de pareja",safe(u.tipoPareja));
+  if(isSwingerSubFicha(u)&&lesbiansMostrarFicha(u,'mostrarAtiendenA',u.atiendenA)) html+=row(pico("heart"),"Atienden a",safe(u.atiendenA));
+  if(isSwingerSubFicha(u)&&u.aceptanSolteros) html+=row(pico("chat"),"Aceptan solteros",safe(u.aceptanSolteros));
+  if(isSwingerSubFicha(u)&&lesbiansMostrarFicha(u,'mostrarColaboraciones',u.haceColaboraciones)&&u.haceColaboraciones) html+=row(pico("camera"),"Colaboraciones",safe(u.haceColaboraciones));
+  if(isSwingerSubFicha(u)&&lesbiansMostrarFicha(u,'mostrarColaboraciones',u.haceColaboraciones)&&Array.isArray(u.colaboraCon)&&u.colaboraCon.length) html+=row(pico("heart"),"Colaboran con",safe(u.colaboraCon.join(", ")));
   if(u.presentacionFemboy) html+=row(pico("gender"),"Presentación",safe(u.presentacionFemboy));
   else if(u.presentacionTom) html+=row(pico("gender"),"Presentación",safe(u.presentacionTom));
   else if(u.identidadGenero) html+=row(pico("gender"),"Identidad / presentación",safe(u.identidadGenero));
@@ -6434,6 +6449,13 @@ function aplicarPerfilResultadosEnDemo(vista,u){
   if(Array.isArray(u.colaboraCon)&&u.colaboraCon.length) d.colaboraCon=u.colaboraCon.slice();
   if(u.mostrarColaboraciones) d.mostrarColaboraciones=u.mostrarColaboraciones;
   if(u.estiloLesbian) d.estiloLesbian=u.estiloLesbian;
+  if(Array.isArray(u.objetivosPerfil)&&u.objetivosPerfil.length) d.objetivosPerfil=u.objetivosPerfil.slice();
+  if(Array.isArray(u.tipoInteraccion)&&u.tipoInteraccion.length) d.tipoInteraccion=u.tipoInteraccion.slice();
+  if(u.tipoPareja) d.tipoPareja=u.tipoPareja;
+  if(u.atiendenA) d.atiendenA=u.atiendenA;
+  if(u.mostrarAtiendenA) d.mostrarAtiendenA=u.mostrarAtiendenA;
+  if(u.aceptanSolteros) d.aceptanSolteros=u.aceptanSolteros;
+  if(u.mostrarObjetivosPerfil) d.mostrarObjetivosPerfil=u.mostrarObjetivosPerfil;
   if(u.__id) d.__id=u.__id;
   if(u.uid) d.uid=u.uid;
   if(u.__demo!=null) d.__demo=u.__demo;

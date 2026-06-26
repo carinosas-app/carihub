@@ -6,7 +6,8 @@
 
   var VIAJES_SUBCATEGORIAS = [
     'escort', 'escort gay', 'escort vip', 'trans', 'femboy', 'tom boy', 'tom fem',
-    'gigolo', 'dotados', 'lesbians', 'hotwife', 'singles', 'acompanante', 'edecan', 'modelos'
+    'gigolo', 'dotados', 'lesbians', 'hotwife', 'singles', 'acompanante', 'edecan', 'modelos',
+    'swinger'
   ];
 
   var ALCANCE = {

@@ -96,8 +96,34 @@
     return '<p class="res-card__viajes-resumen">' + safeTxt(lines.join(' · ')) + '</p>';
   }
 
+  function swingerMostrarPublico(u, visibilityKey, contentVal) {
+    return lesbiansMostrarPublico(u, visibilityKey, contentVal);
+  }
+
+  function isSwingerPerfil(u) {
+    var id = normTxt(u.subcategoriaId || u.subcategoria || '');
+    return id === 'swinger' || id === 'parejas swinger';
+  }
+
+  function swingerCardExtraHTML(u) {
+    if (!isSwingerPerfil(u)) return '';
+    var lines = [];
+    if (swingerMostrarPublico(u, 'mostrarObjetivosPerfil', u.objetivosPerfil)) {
+      var obj = Array.isArray(u.objetivosPerfil) ? u.objetivosPerfil.join(', ') : String(u.objetivosPerfil || '').trim();
+      if (obj) lines.push('Objetivos: ' + obj);
+    }
+    if (swingerMostrarPublico(u, 'mostrarAtiendenA', u.atiendenA)) {
+      lines.push('Atienden a: ' + String(u.atiendenA).trim());
+    }
+    if (swingerMostrarPublico(u, 'mostrarColaboraciones', u.haceColaboraciones)) {
+      lines.push('Colaboraciones: ' + String(u.haceColaboraciones).trim());
+    }
+    if (!lines.length) return '';
+    return '<p class="res-card__viajes-resumen">' + safeTxt(lines.join(' · ')) + '</p>';
+  }
+
   function cardPerfilExtraHTML(u) {
-    return cardViajesExtraHTML(u) + lesbiansCardExtraHTML(u);
+    return cardViajesExtraHTML(u) + lesbiansCardExtraHTML(u) + swingerCardExtraHTML(u);
   }
 
   function ubicacionCorta(u) {
@@ -334,6 +360,28 @@
     });
   }
 
+  function cardHTMLPareja(u, Q) {
+    Q = Q || {};
+    var set = modalidadesSet(u);
+    var mods = chipModalidadHTML(set);
+    var viajesLine = cardPerfilExtraHTML(u);
+    var catLabel = (global.CariHubResultadosDemo && CariHubResultadosDemo.labelCategoria)
+      ? CariHubResultadosDemo.labelCategoria(u.categoriaPublica || u.categoria || Q.categoria || '')
+      : (u.categoriaPublica || u.categoria || Q.categoria || '');
+    var headExtra = u.tipoPareja
+      ? '<span class="age">' + safeTxt(String(u.tipoPareja)) + '</span>'
+      : '';
+    return cardShell(u, Q, {
+      cardClass: 'res-card--pareja',
+      nombre: u.aliasPareja || u.nombre || u.alias,
+      headExtra: headExtra,
+      metaRight: mods,
+      descBlock: descripcionCompactHTML(u, 'Presentación') + viajesLine,
+      catLabel: catLabel,
+      badges: badgesCompactHTML(u, { respRapida: !u.__previewRegistro && u.respuestaRapida === true })
+    });
+  }
+
   function cardHTML(u, Q) {
     if (global.CariHubFieldEngineLite && CariHubFieldEngineLite.enriquecerPerfilPublico) {
       CariHubFieldEngineLite.enriquecerPerfilPublico(u, {
@@ -345,6 +393,7 @@
     if (comp === 'ResultCardNegocio') return cardHTMLNegocio(u, Q);
     if (comp === 'ResultCardProfesional') return cardHTMLProfesional(u, Q);
     if (comp === 'ResultCardServicio') return cardHTMLServicio(u, Q);
+    if (comp === 'ResultCardPareja') return cardHTMLPareja(u, Q);
     return cardHTMLAdultos(u, Q);
   }
 
@@ -441,6 +490,7 @@
     cardHTMLNegocio: cardHTMLNegocio,
     cardHTMLServicio: cardHTMLServicio,
     cardHTMLProfesional: cardHTMLProfesional,
+    cardHTMLPareja: cardHTMLPareja,
     resolveComponente: resolveComponente,
     applyPublicProfilePresentation: applyPublicProfilePresentation,
     PUB_BLOCKS: PUB_BLOCKS
