@@ -1,5 +1,10 @@
 /**
- * QA — Pack persona_acompanante render tarjeta + routing (sin browser).
+ * QA — Pack persona_acompanante render tarjeta + ficha toggles (sin browser).
+ * H2: cobertura 15/15 subs persona_acompanante (tarjeta + ficha donde aplique).
+ *
+ * Matriz subs: escort, escort gay, escort vip, edecan, modelos, gigolo, acompanante,
+ * petit, trans, femboy, singles, lesbians, tom boy, tom fem, dotados.
+ *
  * node scripts/qa-persona-acompanante-render.mjs
  */
 import fs from 'fs';
@@ -11,12 +16,24 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.join(__dirname, '..');
 const root = path.join(repoRoot, 'public', 'js');
 
+/** 15 subs oficiales del pack escort (persona_acompanante). */
+const PERSONA_ACOMPANANTE_15 = [
+  'escort', 'escort_gay', 'escort_vip', 'edecan', 'modelos', 'gigolo', 'acompanante',
+  'petit', 'trans', 'femboy', 'singles', 'lesbians', 'tom_boy', 'tom_fem', 'dotados',
+];
+
 const pass = [];
 const fail = [];
+const cardCoverage = new Set();
 
 function ok(name, cond, detail) {
   if (cond) pass.push({ name, detail });
   else fail.push({ name, detail: detail || 'falló' });
+}
+
+function okCard(subKey, name, cond, detail) {
+  if (cond) cardCoverage.add(subKey);
+  ok(name, cond, detail);
 }
 
 function loadScript(relativePath, ctx) {
@@ -42,7 +59,7 @@ function extractDemoBlock(html, marker) {
   return m ? m[0] : '';
 }
 
-function lesbiansMostrarFicha(u, visibilityKey, contentVal) {
+function mostrarPublico(u, visibilityKey, contentVal) {
   if (contentVal == null || String(contentVal).trim() === '') return false;
   if (Array.isArray(contentVal) && !contentVal.length) return false;
   const vis = String(u[visibilityKey] || 'Sí').trim().toLowerCase();
@@ -51,12 +68,40 @@ function lesbiansMostrarFicha(u, visibilityKey, contentVal) {
 
 function fichaLesbiansRows(u) {
   const rows = [];
-  if (lesbiansMostrarFicha(u, 'mostrarAtiendoA', u.atiendoA)) rows.push('atiendoA');
-  if (lesbiansMostrarFicha(u, 'mostrarColaboraciones', u.haceColaboraciones)) rows.push('colaboraciones');
-  if (lesbiansMostrarFicha(u, 'mostrarColaboraciones', u.haceColaboraciones) && Array.isArray(u.colaboraCon) && u.colaboraCon.length) {
+  if (mostrarPublico(u, 'mostrarAtiendoA', u.atiendoA)) rows.push('atiendoA');
+  if (mostrarPublico(u, 'mostrarColaboraciones', u.haceColaboraciones)) rows.push('colaboraciones');
+  if (mostrarPublico(u, 'mostrarColaboraciones', u.haceColaboraciones) && Array.isArray(u.colaboraCon) && u.colaboraCon.length) {
     rows.push('colaboraCon');
   }
   return rows;
+}
+
+/** Mirror adultoFichaHTML + dotadosAtencionPublica toggles (perfil-publico.html). */
+function fichaDotadosRows(u) {
+  const rows = [];
+  if (mostrarPublico(u, 'mostrarLongitudPublico', u.longitudCm)) rows.push('longitud');
+  if (mostrarPublico(u, 'mostrarLongitudPublico', u.categoriaTamaño)) rows.push('categoriaTamano');
+  if (mostrarPublico(u, 'mostrarAtencionHombresPublico', u.atencionHombres)) rows.push('atencionHombres');
+  if (mostrarPublico(u, 'mostrarAtencionMujeresPublico', u.atencionMujeres)) rows.push('atencionMujeres');
+  if (mostrarPublico(u, 'mostrarAtencionParejasPublico', u.atencionParejas)) rows.push('atencionParejas');
+  if (mostrarPublico(u, 'mostrarAtencionTransPublico', u.atencionTrans)) rows.push('atencionTrans');
+  return rows;
+}
+
+function fichaEdecanRows(u) {
+  return u.eventosDisponibles ? ['eventos'] : [];
+}
+
+function fichaModelosRows(u) {
+  return u.portfolioURL ? ['portfolio'] : [];
+}
+
+function fichaTransRows(u) {
+  return u.identidadGenero ? ['identidadGenero'] : [];
+}
+
+function cardHasViajaChip(html) {
+  return html.includes('Viaja: Sí') || html.includes('>Viaja<') || /modchip mc-teal[^>]*>[\s\S]*Viaja/.test(html);
 }
 
 let ctx;
@@ -66,6 +111,7 @@ try {
   loadScript('carihub-viajes-desplazamiento.js', ctx);
   loadScript('carihub-public-render-lite.js', ctx);
   const PR = ctx.CariHubPublicRenderLite;
+  const V = ctx.CariHubViajesDesplazamiento;
   ok('load render lite', !!PR && !!PR.cardHTMLAdultos, 'render');
 
   const perfilHtml = fs.readFileSync(path.join(repoRoot, 'public', 'perfil-publico.html'), 'utf8');
@@ -81,14 +127,60 @@ try {
     modalidades: ['recibe'],
   };
 
-  const escortCard = PR.cardHTMLAdultos({ ...cardBase, subcategoriaId: 'escort' }, {});
-  ok('escort tarjeta render', escortCard.includes('Perfil QA render'), 'html');
+  // --- 15 subs: tarjeta smoke (1+ assert cada una) ---
+  okCard('escort', 'escort tarjeta render', PR.cardHTMLAdultos({ ...cardBase, subcategoriaId: 'escort' }, {}).includes('Perfil QA render'), 'html');
 
   const vipCard = PR.cardHTMLAdultos({ ...cardBase, subcategoriaId: 'escort_vip', badgeVip: true }, {});
-  ok('vip badge tarjeta', vipCard.includes('res-badge--vip') || vipCard.includes('VIP'), vipCard.slice(0, 120));
+  okCard('escort_vip', 'escort_vip badge tarjeta', vipCard.includes('res-badge--vip') || vipCard.includes('VIP'), vipCard.slice(0, 120));
 
   const gayCard = PR.cardHTMLAdultos({ ...cardBase, subcategoriaId: 'escort_gay', badgeLgbt: true }, {});
-  ok('gay badge tarjeta', gayCard.includes('res-badge--lgbt') || gayCard.includes('LGBT'), gayCard.slice(0, 120));
+  okCard('escort_gay', 'escort_gay badge tarjeta', gayCard.includes('res-badge--lgbt') || gayCard.includes('LGBT'), gayCard.slice(0, 120));
+
+  okCard('edecan', 'edecan tarjeta smoke', PR.cardHTMLAdultos({
+    ...cardBase, subcategoriaId: 'edecan', eventosDisponibles: true,
+  }, {}).includes('Perfil QA render'), 'html');
+
+  okCard('modelos', 'modelos tarjeta smoke', PR.cardHTMLAdultos({
+    ...cardBase, subcategoriaId: 'modelos', portfolioURL: 'https://example.com/portfolio',
+  }, {}).includes('Perfil QA render'), 'html');
+
+  const gigoloViaja = PR.cardHTMLAdultos({
+    ...cardBase,
+    subcategoriaId: 'gigolo',
+    modalidades: ['recibe', 'viaja'],
+    viajesDesplazamiento: { viaja: true, alcanceDesplazamiento: 'toda_ciudad' },
+  }, {});
+  okCard('gigolo', 'gigolo tarjeta smoke', gigoloViaja.includes('Perfil QA render'), 'html');
+  ok('gigolo tarjeta viaja', cardHasViajaChip(gigoloViaja), gigoloViaja.slice(0, 120));
+
+  okCard('acompanante', 'acompanante tarjeta smoke', PR.cardHTMLAdultos({
+    ...cardBase, subcategoriaId: 'acompanante',
+  }, {}).includes('Perfil QA render'), 'html');
+
+  const petitCard = PR.cardHTMLAdultos({
+    ...cardBase,
+    subcategoriaId: 'petit',
+    modalidades: ['recibe'],
+    estatura: '1.55 m',
+  }, {});
+  okCard('petit', 'petit tarjeta smoke', petitCard.includes('Perfil QA render'), 'html');
+  ok('petit sin chip Viaja', !cardHasViajaChip(petitCard), petitCard.slice(0, 120));
+  ok('petit subcategoriaActivaViajes false', V.subcategoriaActivaViajes('petit') === false, 'excluido');
+
+  okCard('trans', 'trans tarjeta smoke', PR.cardHTMLAdultos({
+    ...cardBase, subcategoriaId: 'trans', identidadGenero: 'Mujer trans', badgeLgbt: true,
+  }, {}).includes('Perfil QA render'), 'html');
+
+  okCard('femboy', 'femboy tarjeta smoke', PR.cardHTMLAdultos({
+    ...cardBase, subcategoriaId: 'femboy', presentacionFemboy: 'Femboy', badgeLgbt: true,
+  }, {}).includes('Perfil QA render'), 'html');
+
+  okCard('singles', 'singles tarjeta smoke', PR.cardHTMLAdultos({
+    ...cardBase,
+    subcategoriaId: 'singles',
+    buscanConocer: ['Parejas', 'Hombres solteros'],
+    disponibilidadAgenda: ['Fines de semana'],
+  }, {}).includes('Perfil QA render'), 'html');
 
   const lesCard = PR.cardHTMLAdultos({
     ...cardBase,
@@ -98,8 +190,8 @@ try {
     mostrarAtiendoA: 'Sí',
     mostrarColaboraciones: 'Sí',
   }, {});
-  ok('lesbians extra atiende a', lesCard.includes('Atiende a: Mujeres'), lesCard);
-  ok('lesbians extra colaboraciones', lesCard.includes('Colaboraciones: Sí'), lesCard);
+  okCard('lesbians', 'lesbians tarjeta atiende a', lesCard.includes('Atiende a: Mujeres'), lesCard);
+  ok('lesbians tarjeta colaboraciones', lesCard.includes('Colaboraciones: Sí'), lesCard);
 
   const lesHidden = PR.cardHTMLAdultos({
     ...cardBase,
@@ -107,7 +199,37 @@ try {
     atiendoA: 'Mujeres',
     mostrarAtiendoA: 'No',
   }, {});
-  ok('lesbians toggle oculta atiendoA', !lesHidden.includes('Atiende a:'), lesHidden);
+  ok('lesbians toggle oculta atiendoA tarjeta', !lesHidden.includes('Atiende a:'), lesHidden);
+
+  const tomBoyCard = PR.cardHTMLAdultos({
+    ...cardBase,
+    subcategoriaId: 'tom_boy',
+    badgeLgbt: true,
+    presentacionTom: 'Andrógina',
+  }, {});
+  okCard('tom_boy', 'tom_boy tarjeta render', tomBoyCard.includes('Perfil QA render'), tomBoyCard.slice(0, 80));
+
+  const tomFemCard = PR.cardHTMLAdultos({
+    ...cardBase,
+    subcategoriaId: 'tom_fem',
+    badgeLgbt: true,
+    presentacionTom: 'Femme tomboy',
+  }, {});
+  okCard('tom_fem', 'tom_fem tarjeta paridad tom_boy', tomFemCard.includes('Perfil QA render'), tomFemCard.slice(0, 80));
+  ok('tom_fem paridad presentacionTom', tomFemCard.includes('Perfil QA render') && tomBoyCard.includes('Perfil QA render'), 'ambos OK');
+
+  const dotadosCard = PR.cardHTMLAdultos({
+    subcategoriaId: 'dotados',
+    longitudCm: '20',
+    mostrarLongitudPublico: 'Sí',
+    categoriaTamaño: 'Dotado',
+    tagline: 'Perfil discreto',
+    edad: 28,
+    precio: '2500',
+    modalidades: ['recibe'],
+  }, {});
+  okCard('dotados', 'dotados tarjeta sin crash', dotadosCard.includes('Perfil discreto'), dotadosCard.slice(0, 80));
+  ok('dotados tarjeta NO expone longitud cm', !dotadosCard.includes('20 cm') && !/Longitud/i.test(dotadosCard), dotadosCard.slice(0, 100));
 
   const viajesCard = PR.cardHTMLAdultos({
     ...cardBase,
@@ -115,16 +237,61 @@ try {
     modalidades: ['recibe', 'viaja'],
     viajesDesplazamiento: { viaja: true, alcanceDesplazamiento: 'toda_ciudad' },
   }, {});
-  ok('escort tarjeta viaja', viajesCard.includes('Viaja: Sí') || viajesCard.includes('>Viaja<'), viajesCard);
+  ok('escort tarjeta viaja', cardHasViajaChip(viajesCard), viajesCard);
 
-  const tomCard = PR.cardHTMLAdultos({
-    ...cardBase,
-    subcategoriaId: 'tom_boy',
-    badgeLgbt: true,
-    presentacionTom: 'Andrógina',
-  }, {});
-  ok('tom_boy tarjeta sin crash', tomCard.includes('Perfil QA render'), tomCard.slice(0, 80));
+  // --- Ficha / toggles ---
+  ok('ficha lesbians rows visibles', fichaLesbiansRows({
+    subcategoriaId: 'lesbians',
+    atiendoA: 'Mujeres',
+    haceColaboraciones: 'Sí',
+    colaboraCon: ['Mujeres'],
+    mostrarAtiendoA: 'Sí',
+    mostrarColaboraciones: 'Sí',
+  }).join(',') === 'atiendoA,colaboraciones,colaboraCon', 'rows');
 
+  ok('ficha lesbians toggle colaboraciones', !fichaLesbiansRows({
+    subcategoriaId: 'lesbians',
+    atiendoA: 'Mujeres',
+    haceColaboraciones: 'Sí',
+    colaboraCon: ['Mujeres'],
+    mostrarAtiendoA: 'Sí',
+    mostrarColaboraciones: 'No',
+  }).includes('colaboraciones'), 'off');
+
+  ok('ficha edecan eventos visibles', fichaEdecanRows({ eventosDisponibles: true }).join(',') === 'eventos', 'eventos');
+  ok('ficha edecan sin eventos', fichaEdecanRows({ eventosDisponibles: false }).length === 0, 'vacío');
+
+  ok('ficha modelos portfolio visible', fichaModelosRows({ portfolioURL: 'https://example.com/p' }).join(',') === 'portfolio', 'portfolio');
+
+  ok('ficha trans identidadGenero', fichaTransRows({ identidadGenero: 'Mujer trans' }).join(',') === 'identidadGenero', 'identidad');
+
+  ok('ficha dotados toggles longitud visibles', fichaDotadosRows({
+    longitudCm: '18',
+    categoriaTamaño: 'Por encima del promedio',
+    mostrarLongitudPublico: 'Sí',
+    atencionHombres: 'Sí',
+    mostrarAtencionHombresPublico: 'Sí',
+  }).join(',') === 'longitud,categoriaTamano,atencionHombres', fichaDotadosRows({
+    longitudCm: '18',
+    categoriaTamaño: 'Por encima del promedio',
+    mostrarLongitudPublico: 'Sí',
+    atencionHombres: 'Sí',
+    mostrarAtencionHombresPublico: 'Sí',
+  }).join(','));
+
+  ok('ficha dotados toggle longitud oculta', !fichaDotadosRows({
+    longitudCm: '18',
+    mostrarLongitudPublico: 'No',
+    atencionHombres: 'Sí',
+    mostrarAtencionHombresPublico: 'Sí',
+  }).includes('longitud'), 'off');
+
+  ok('ficha dotados toggle atencion oculta', !fichaDotadosRows({
+    atencionMujeres: 'Sí',
+    mostrarAtencionMujeresPublico: 'No',
+  }).includes('atencionMujeres'), 'off');
+
+  // --- Regresión routing (no escort pack, pero en mismo script) ---
   const chCard = PR.cardHTML({
     subcategoriaId: 'cuckold_hotwife',
     aliasPareja: 'Pareja CH',
@@ -137,19 +304,6 @@ try {
   ok('routing C/H pareja usa tarjeta C/H', chCard.includes('res-card--cuckold-hotwife'), chCard.slice(0, 100));
   ok('routing C/H badge hotwife dinamica', chCard.includes('res-badge--hotwife') || chCard.includes('Hotwife'), chCard.slice(0, 120));
 
-  const lesFicha = {
-    subcategoriaId: 'lesbians',
-    atiendoA: 'Mujeres',
-    haceColaboraciones: 'Sí',
-    colaboraCon: ['Mujeres'],
-    mostrarAtiendoA: 'Sí',
-    mostrarColaboraciones: 'Sí',
-  };
-  ok('ficha lesbians rows visibles', fichaLesbiansRows(lesFicha).join(',') === 'atiendoA,colaboraciones,colaboraCon', fichaLesbiansRows(lesFicha).join(','));
-
-  const lesFichaOff = { ...lesFicha, mostrarColaboraciones: 'No' };
-  ok('ficha lesbians toggle colaboraciones', !fichaLesbiansRows(lesFichaOff).includes('colaboraciones'), fichaLesbiansRows(lesFichaOff).join(','));
-
   const swCard = PR.cardHTMLParejaSwinger({
     subcategoriaId: 'swinger',
     aliasPareja: 'Pareja Sw',
@@ -160,6 +314,9 @@ try {
     precio: 'Consultar',
   }, {});
   ok('swinger tarjeta sin mezcla escort', swCard.includes('res-card--pareja') && !swCard.includes('res-card--adult'), swCard.slice(0, 100));
+
+  ok('H2 cobertura tarjeta 15/15 subs', cardCoverage.size === 15, [...cardCoverage].sort().join(', '));
+  ok('H2 lista subs alineada pack', PERSONA_ACOMPANANTE_15.every((s) => cardCoverage.has(s)), PERSONA_ACOMPANANTE_15.filter((s) => !cardCoverage.has(s)).join(', '));
 } catch (e) {
   fail.push({ name: 'EXCEPTION', detail: e.stack || e.message });
 }
