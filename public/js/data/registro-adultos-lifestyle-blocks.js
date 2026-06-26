@@ -1,6 +1,6 @@
 /**
  * Bloques públicos registro — persona_lifestyle (v1: unicorns).
- * Infraestructura compartible con hotwife/cuckold lifestyle (fases posteriores).
+ * Infraestructura compartible con lifestyle pareja (fases posteriores).
  */
 (function (global) {
   'use strict';

@@ -221,23 +221,6 @@ const CASES = [
     expect: (doc) => ok('trans identidadGenero', doc.identidadGenero === 'Mujer trans', doc.identidadGenero),
   },
   {
-    key: 'hotwife',
-    ctx: escortCtx('hotwife'),
-    alias: 'Hotwife Solo QA',
-    delta: {
-      participacionPareja: 'Participa activamente',
-      tipoPublico: 'Singles',
-      disponibilidadAgenda: ['Entre semana', 'Viajes disponibles'],
-      tipoExperiencia: ['Encuentros privados'],
-    },
-    expect: (doc) => {
-      ok('hotwife participacionPareja', doc.participacionPareja === 'Participa activamente', doc.participacionPareja);
-      ok('hotwife tipoPublico mirror buscan', doc.tipoPublico === 'Singles' && doc.buscan === 'Singles', JSON.stringify({ tipoPublico: doc.tipoPublico, buscan: doc.buscan }));
-      ok('hotwife badgeHotwife', doc.badgeHotwife === true, String(doc.badgeHotwife));
-      ok('hotwife subcategoriaId hotwife', doc.subcategoriaId === 'hotwife', doc.subcategoriaId);
-    },
-  },
-  {
     key: 'lesbians',
     ctx: escortCtx('lesbians'),
     alias: 'Lesbians QA',

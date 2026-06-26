@@ -40,7 +40,6 @@
     unicorns: 'unicorn',
     'cuckold hotwife': 'pareja',
     singles: 'pareja',
-    hotwife: 'pareja',
     lesbians: 'pareja',
     'tom boy': 'adult',
     'tom fem': 'adult',

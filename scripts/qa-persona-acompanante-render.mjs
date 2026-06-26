@@ -90,16 +90,6 @@ try {
   const gayCard = PR.cardHTMLAdultos({ ...cardBase, subcategoriaId: 'escort_gay', badgeLgbt: true }, {});
   ok('gay badge tarjeta', gayCard.includes('res-badge--lgbt') || gayCard.includes('LGBT'), gayCard.slice(0, 120));
 
-  const hwCard = PR.cardHTMLAdultos({
-    ...cardBase,
-    subcategoriaId: 'hotwife',
-    badgeHotwife: true,
-    participacionPareja: 'Presente',
-    tipoExperiencia: ['Citas'],
-  }, {});
-  ok('hotwife badge tarjeta', hwCard.includes('res-badge--hotwife') || hwCard.includes('Hotwife'), hwCard.slice(0, 140));
-  ok('hotwife no tarjeta C/H pareja', !hwCard.includes('res-card--cuckold-hotwife'), hwCard.slice(0, 80));
-
   const lesCard = PR.cardHTMLAdultos({
     ...cardBase,
     subcategoriaId: 'lesbians',
@@ -145,15 +135,7 @@ try {
     precio: '2000',
   }, { componenteResultados: 'ResultCardPareja' });
   ok('routing C/H pareja usa tarjeta C/H', chCard.includes('res-card--cuckold-hotwife'), chCard.slice(0, 100));
-
-  const hwPersonaCard = PR.cardHTML({
-    subcategoriaId: 'hotwife',
-    badgeHotwife: true,
-    tagline: 'Hotwife persona',
-    edad: 28,
-    precio: '1800',
-  }, { componenteResultados: 'ResultCardAdultos' });
-  ok('routing hotwife persona adultos', hwPersonaCard.includes('res-card--adult') && !hwPersonaCard.includes('res-card--cuckold-hotwife'), hwPersonaCard.slice(0, 100));
+  ok('routing C/H badge hotwife dinamica', chCard.includes('res-badge--hotwife') || chCard.includes('Hotwife'), chCard.slice(0, 120));
 
   const lesFicha = {
     subcategoriaId: 'lesbians',

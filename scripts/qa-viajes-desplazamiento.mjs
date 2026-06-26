@@ -206,7 +206,6 @@ try {
     ['escort_vip', { oblig: ['nivelPremium'], fotosMin: 5 }],
     ['edecan', { oblig: ['eventosDisponibles'], forbid: [] }],
     ['singles', { oblig: ['buscanConocer', 'disponibilidadAgenda'], forbid: ['modalidades'], modalidadesOptional: true }],
-    ['hotwife', { oblig: ['participacionPareja', 'tipoExperiencia'], forbid: [] }],
     ['lesbians', { oblig: ['orientacion'], forbid: [] }],
     ['femboy', { oblig: ['presentacionFemboy', 'disponiblePara'], forbid: ['modalidades'], modalidadesOptional: true }],
   ];
@@ -238,12 +237,6 @@ try {
       const disp = fem?.fields.find((f) => f.id === 'disponiblePara');
       const opts = (disp?.options || []).map((o) => (typeof o === 'string' ? o : o.label || o.value));
       ok('4 femboy disponiblePara sin Viajes', !opts.includes('Viajes'), opts.join(', '));
-    }
-    if (sub === 'hotwife') {
-      const hw = m.blocks.find((b) => b.id === 'hotwifePerfil');
-      const agenda = hw?.fields.find((f) => f.id === 'disponibilidadAgenda');
-      const opts = (agenda?.options || []).map((o) => (typeof o === 'string' ? o : o.label || o.value));
-      ok('4 hotwife mantiene Viajes disponibles', opts.includes('Viajes disponibles'), opts.join(', '));
     }
   }
 

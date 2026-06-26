@@ -2,11 +2,11 @@
  * QA — Cierre pack persona_acompanante + regresiones obligatorias.
  *
  * Smoke manual (browser):
- * 1. Registro — wizard por subcategoría escort/lifestyle persona (hotwife, lesbians, singles, femboy, tom boy/fem, shell escort).
- * 2. Preview tarjeta — badges VIP/LGBT/Hotwife, extras lesbians, chip Viaja donde aplique.
- * 3. Preview iframe — persona individual, subcategoriaId preservado; hotwife persona ≠ pareja cuckold_hotwife.
+ * 1. Registro — wizard por subcategoría escort/lifestyle persona (lesbians, singles, femboy, tom boy/fem, shell escort).
+ * 2. Preview tarjeta — badges VIP/LGBT, extras lesbians, chip Viaja donde aplique.
+ * 3. Preview iframe — persona individual, subcategoriaId preservado; C/H solo vía pareja cuckold_hotwife + dinamica.
  * 4. perfil-publico.html — DEMO escortGay, escortVip, trans.
- * 5. Anti-contaminación — hotwife persona sin cuckoldHotwifePerfil; lesbians sin swingerPerfil.
+ * 5. Anti-contaminación — lesbians sin swingerPerfil; persona sin cuckoldHotwifePerfil.
  *
  * node scripts/qa-persona-acompanante-cierre.mjs
  */

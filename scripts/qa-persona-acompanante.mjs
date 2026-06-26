@@ -152,15 +152,6 @@ const SUBS = [
     viajes: true,
   },
   {
-    key: 'hotwife',
-    ids: ['hotwife'],
-    oblig: ['participacionPareja', 'tipoPublico', 'tipoExperiencia', 'disponibilidadAgenda', 'sobreMi'],
-    block: 'hotwifePerfil',
-    blockFields: ['participacionPareja', 'tipoPublico', 'tipoExperiencia'],
-    badge: 'hotwife',
-    viajes: true,
-  },
-  {
     key: 'lesbians',
     ids: ['lesbians'],
     oblig: ['orientacion', 'atiendoA', 'haceColaboraciones', 'modalidades'],
@@ -242,12 +233,6 @@ function deltaForSub(spec) {
       break;
     case 'trans':
       v.identidadGenero = 'Mujer trans';
-      break;
-    case 'hotwife':
-      v.participacionPareja = 'Presente';
-      v.tipoPublico = 'Parejas';
-      v.disponibilidadAgenda = ['Entre semana', 'Viajes disponibles'];
-      v.tipoExperiencia = ['Citas'];
       break;
     case 'lesbians':
       v.orientacion = 'Lesbiana';
@@ -357,16 +342,6 @@ try {
     }
   }
 
-  const hwCtx = escortCtx('hotwife');
-  const hwVals = deltaForSub(SUBS.find((s) => s.key === 'hotwife'));
-  ok('hotwife no pipeline C/H ctx', !RP.shouldApplyCuckoldHotwifePipeline(hwCtx, hwVals), 'ctx guard');
-  ok('hotwife hasCuckoldDelta heurística ok', RP.hasCuckoldHotwifeDelta(hwVals), 'heuristic fields');
-  const hwMapped = RP.mapToPerfil({ subcategoriaId: 'hotwife' }, hwVals, hwCtx);
-  ok('hotwife map sin cuckoldHotwifePerfil', !hwMapped.cuckoldHotwifePerfil, JSON.stringify(hwMapped.cuckoldHotwifePerfil));
-  ok('hotwife map sin dinamica pareja', !hwMapped.dinamica, hwMapped.dinamica || 'vacío');
-  ok('hotwife map sin swingerPerfil', !hwMapped.swingerPerfil, 'no swinger');
-  ok('hotwife map sin unicornPerfil', !hwMapped.unicornPerfil, 'no unicorn');
-
   const finLes = {
     orientacion: 'Lesbiana',
     atiendoA: 'Mujeres',
@@ -382,9 +357,10 @@ try {
   if (String(finLes.haceColaboraciones || '').trim() === 'No') delete finLes.colaboraCon;
   ok('lesbians finalize borra colaboraCon', finLes.colaboraCon == null, JSON.stringify(finLes.colaboraCon));
 
-  for (const sample of ['escort', 'hotwife', 'lesbians', 'femboy']) {
+  for (const sample of ['escort', 'lesbians', 'femboy']) {
     ok(`schema-index ${sample}`, indexJs.includes(`"${sample}"`), sample);
   }
+  ok('schema-index no hotwife byId', !indexJs.includes('"hotwife":{'), 'removed');
   ok('schema-index escort vip', indexJs.includes('"escort vip"') && indexJs.includes('persona_acompanante'), 'vip');
 } catch (e) {
   fail.push({ name: 'EXCEPTION', detail: e.stack || e.message });

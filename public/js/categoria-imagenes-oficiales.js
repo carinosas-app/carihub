@@ -32,7 +32,6 @@
     unicorns: { src: 'img/home/lounge-swinger.jpg', pos: 'center center' },
     'cuckold hotwife': { src: 'img/home/cat-cards/queen-of-spades.png', pos: 'center center', fit: 'contain', bg: '#ffffff' },
     cuckold: { src: 'img/home/cat-cards/queen-of-spades.png', pos: 'center center', fit: 'contain', bg: '#ffffff' },
-    hotwife: { src: 'img/home/cat-cards/queen-of-spades.png', pos: 'center center', fit: 'contain', bg: '#ffffff' },
     singles: { src: 'img/home/nightclub.jpg', pos: 'center center' },
     lesbians: { src: 'img/home/cat-cards/lesbians.png', pos: 'center center' },
     'tom boy': { src: 'img/home/escort-gay.jpg', pos: 'center center' },
