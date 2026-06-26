@@ -44,7 +44,7 @@
     'tom boy': 'adult',
     'tom fem': 'adult',
     dotados: 'adult',
-    fetiche: 'adult',
+    fetiche: 'dominatrix',
     sado: 'dominatrix',
     dominatrix: 'dominatrix',
     'cine xxx': 'cineXxx'
