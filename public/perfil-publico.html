@@ -4403,6 +4403,7 @@ function adultoFichaHTML(u){
   if(u.areasVenue) html+=row(pico("pin"),"Áreas",safe(u.areasVenue));
   if(u.orientacion) html+=row(pico("gender"),"Orientación",safe(u.orientacion));
   if(u.presentacionFemboy) html+=row(pico("gender"),"Presentación",safe(u.presentacionFemboy));
+  else if(u.presentacionTom) html+=row(pico("gender"),"Presentación",safe(u.presentacionTom));
   else if(u.identidadGenero) html+=row(pico("gender"),"Identidad / presentación",safe(u.identidadGenero));
   if(u.estiloPredominante) html+=row(pico("heart"),"Estilo predominante",safe(u.estiloPredominante));
   if(u.estiloPersonal) html+=row(pico("heart"),"Estilo",safe(u.estiloPersonal));
@@ -4427,6 +4428,8 @@ function adultoFichaHTML(u){
   if(Array.isArray(u.disponibilidadAgenda)&&u.disponibilidadAgenda.length&&u.participacionPareja) html+=row(pico("clock"),"Disponibilidad",safe(u.disponibilidadAgenda.join(", ")));
   if(Array.isArray(u.tipoExperiencia)&&u.tipoExperiencia.length) html+=row(pico("briefcase"),"Tipo de experiencia",safe(u.tipoExperiencia.join(", ")));
   if(u.loQueBuscaConocer) html+=row(pico("chat"),"Lo que busca conocer",safe(u.loQueBuscaConocer));
+  if(u.personalidad) html+=row(pico("chat"),"Personalidad",safe(u.personalidad));
+  if(u.pasatiempos) html+=row(pico("heart"),"Pasatiempos",safe(u.pasatiempos));
   if(u.aficiones) html+=row(pico("heart"),"Aficiones",safe(u.aficiones));
   if(u.estiloVida) html+=row(pico("gender"),"Estilo de vida",safe(u.estiloVida));
   if(u.estatura) html+=row(pico("user"),"Estatura",safe(u.estatura));
@@ -6280,8 +6283,9 @@ function aplicarPerfilDesdeRegistro(vista,u){
     frase:u.tagline||u.descripcion||"",
     sobreMi:u.sobreMi||"",
     orientacion:u.orientacion||"",
-    identidadGenero:u.presentacionFemboy||u.identidadGenero||"",
+    identidadGenero:u.presentacionFemboy||u.presentacionTom||u.identidadGenero||"",
     presentacionFemboy:u.presentacionFemboy||"",
+    presentacionTom:u.presentacionTom||"",
     estiloPredominante:u.estiloPredominante||"",
     disponibilidadAgenda:Array.isArray(u.disponibilidadAgenda)?u.disponibilidadAgenda.slice():[],
     disponiblePara:Array.isArray(u.disponiblePara)?u.disponiblePara.slice():[],
@@ -6306,6 +6310,8 @@ function aplicarPerfilDesdeRegistro(vista,u){
     tipoExperiencia:Array.isArray(u.tipoExperiencia)?u.tipoExperiencia.slice():[],
     loQueBuscaConocer:u.loQueBuscaConocer||"",
     aficiones:u.aficiones||"",
+    personalidad:u.personalidad||"",
+    pasatiempos:u.pasatiempos||"",
     estiloVida:u.estiloVida||"",
     idiomas:u.idiomas||"",
     nivelServicio:u.nivelServicio||"",
@@ -6383,6 +6389,7 @@ function aplicarPerfilResultadosEnDemo(vista,u){
   if(u.orientacion) d.orientacion=u.orientacion;
   if(u.identidadGenero) d.identidadGenero=u.identidadGenero;
   if(u.presentacionFemboy){ d.presentacionFemboy=u.presentacionFemboy; d.identidadGenero=u.presentacionFemboy; }
+  else if(u.presentacionTom){ d.presentacionTom=u.presentacionTom; d.identidadGenero=u.presentacionTom; }
   if(u.estiloPredominante) d.estiloPredominante=u.estiloPredominante;
   if(Array.isArray(u.disponiblePara)&&u.disponiblePara.length) d.disponiblePara=u.disponiblePara.slice();
   if(u.largoCabello) d.largoCabello=u.largoCabello;
@@ -6407,6 +6414,8 @@ function aplicarPerfilResultadosEnDemo(vista,u){
   if(Array.isArray(u.tipoExperiencia)&&u.tipoExperiencia.length) d.tipoExperiencia=u.tipoExperiencia.slice();
   if(u.loQueBuscaConocer) d.loQueBuscaConocer=u.loQueBuscaConocer;
   if(u.aficiones) d.aficiones=u.aficiones;
+  if(u.personalidad) d.personalidad=u.personalidad;
+  if(u.pasatiempos) d.pasatiempos=u.pasatiempos;
   if(u.estiloVida) d.estiloVida=u.estiloVida;
   if(u.idiomas) d.idiomas=u.idiomas;
   if(u.nivelServicio) d.nivelServicio=u.nivelServicio;

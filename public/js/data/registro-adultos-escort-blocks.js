@@ -60,6 +60,11 @@
     'Comunicación profesional'
   ];
 
+  var TOM_BOY_ESTILO = ['Deportivo', 'Urbano', 'Casual', 'Streetwear', 'Rockero', 'Elegante'];
+  var TOM_BOY_PRESENTACION = ['Masculina', 'Andrógina', 'Tomboy clásica'];
+  var TOM_FEM_ESTILO = ['Elegante', 'Glamour', 'Casual', 'Kawaii', 'Gótico', 'Cosplay'];
+  var TOM_FEM_PRESENTACION = ['Muy femenina', 'Femenina', 'Andrógina'];
+
   global.CARIHUB_REGISTRO_ESCORT_BLOCKS = {
     id: 'persona_acompanante',
     formularioId: 'adultos',
@@ -228,6 +233,34 @@
           tiposTrios: 'Marca los tipos de trío que realizas (puedes elegir más de uno).',
           colaboracionContenido: 'Indica si colaboras en contenido para redes o plataformas.',
           sobreMi: 'Cuéntanos quién eres, tu estilo y qué te hace diferente.'
+        }
+      },
+      'tom boy': {
+        badges: ['lgbt'],
+        fieldHints: {
+          presentacionTom: 'Cómo te presentas en tu perfil público.',
+          estiloPredominante: 'Tu estilo predominante al vestir.',
+          videoPresentacion: 'Enlace a un video corto de presentación (opcional).',
+          realizaTrios: 'Indica si ofreces tríos.',
+          tiposTrios: 'MHM o HMH — tipos de trío que realizas.',
+          colaboracionContenido: 'Indica si colaboras en contenido para redes o plataformas.',
+          sobreMi: 'Biografía: quién eres y qué te hace diferente.',
+          personalidad: 'Cómo te describe la gente que te conoce.',
+          pasatiempos: 'Hobbies o gustos que aparecen en tu ficha.'
+        }
+      },
+      'tom fem': {
+        badges: ['lgbt'],
+        fieldHints: {
+          presentacionTom: 'Cómo te presentas en tu perfil público.',
+          estiloPredominante: 'Tu estilo predominante al vestir.',
+          videoPresentacion: 'Enlace a un video corto de presentación (opcional).',
+          realizaTrios: 'Indica si ofreces tríos.',
+          tiposTrios: 'MHM o HMH — tipos de trío que realizas.',
+          colaboracionContenido: 'Indica si colaboras en contenido para redes o plataformas.',
+          sobreMi: 'Biografía: quién eres y qué te hace diferente.',
+          personalidad: 'Cómo te describe la gente que te conoce.',
+          pasatiempos: 'Hobbies o gustos que aparecen en tu ficha.'
         }
       }
     },
@@ -436,6 +469,74 @@
         ]
       },
       {
+        id: 'tomPerfil',
+        title: 'Presentación y estilo',
+        hint: 'Campos distintivos de tu perfil — el resto del formulario es el mismo que Escort.',
+        onlySubcategorias: ['tom boy', 'tom fem'],
+        fields: [
+          {
+            id: 'presentacionTom',
+            label: 'Presentación',
+            type: 'select',
+            required: false,
+            onlySubcategorias: ['tom boy'],
+            options: TOM_BOY_PRESENTACION.slice()
+          },
+          {
+            id: 'presentacionTom',
+            label: 'Presentación',
+            type: 'select',
+            required: false,
+            onlySubcategorias: ['tom fem'],
+            options: TOM_FEM_PRESENTACION.slice()
+          },
+          {
+            id: 'estiloPredominante',
+            label: 'Estilo predominante',
+            type: 'select',
+            required: false,
+            onlySubcategorias: ['tom boy'],
+            options: TOM_BOY_ESTILO.slice()
+          },
+          {
+            id: 'estiloPredominante',
+            label: 'Estilo predominante',
+            type: 'select',
+            required: false,
+            onlySubcategorias: ['tom fem'],
+            options: TOM_FEM_ESTILO.slice()
+          },
+          {
+            id: 'videoPresentacion',
+            label: 'Video de presentación',
+            type: 'url',
+            required: false,
+            placeholder: 'https://… (opcional)'
+          },
+          {
+            id: 'realizaTrios',
+            label: '¿Realizas tríos?',
+            type: 'select',
+            required: false,
+            options: OPCIONES_SI_NO_ACUERDO.slice()
+          },
+          {
+            id: 'tiposTrios',
+            label: 'Tipo de trío',
+            type: 'checklist',
+            required: false,
+            options: TIPOS_TRIOS_COMP.slice()
+          },
+          {
+            id: 'colaboracionContenido',
+            label: 'Colaboración para contenido',
+            type: 'select',
+            required: false,
+            options: OPCIONES_SI_NO_ACUERDO.slice()
+          }
+        ]
+      },
+      {
         id: 'hotwifePerfil',
         title: 'Perfil hotwife',
         hint: 'Estos datos diferencian tu perfil en la comunidad lifestyle.',
@@ -605,7 +706,7 @@
             label: 'Largo del cabello',
             type: 'select',
             required: false,
-            onlySubcategorias: ['femboy'],
+            onlySubcategorias: ['femboy', 'tom boy', 'tom fem'],
             options: ['Corto', 'Medio', 'Largo', 'Muy largo']
           },
           { id: 'ojos', label: 'Color de ojos', type: 'text', required: false, placeholder: 'Ej. Café oscuro' },
@@ -678,11 +779,27 @@
         fields: [
           {
             id: 'sobreMi',
-            label: 'Descripción personal',
+            label: 'Biografía',
             type: 'textarea',
             required: false,
             placeholder: 'Describe tu estilo, experiencia y qué te hace diferente…',
             rows: 4
+          },
+          {
+            id: 'personalidad',
+            label: 'Personalidad',
+            type: 'text',
+            required: false,
+            onlySubcategorias: ['tom boy', 'tom fem'],
+            placeholder: 'Ej. extrovertida, tranquila, aventurera…'
+          },
+          {
+            id: 'pasatiempos',
+            label: 'Pasatiempos',
+            type: 'text',
+            required: false,
+            onlySubcategorias: ['tom boy', 'tom fem'],
+            placeholder: 'Ej. deporte, música, viajes…'
           }
         ]
       }

@@ -446,6 +446,10 @@
       u.presentacionFemboy = bloques.presentacionFemboy;
       u.identidadGenero = bloques.presentacionFemboy;
     }
+    if (bloques.presentacionTom) {
+      u.presentacionTom = bloques.presentacionTom;
+      u.identidadGenero = bloques.presentacionTom;
+    }
     if (bloques.estiloPredominante) u.estiloPredominante = bloques.estiloPredominante;
     if (Array.isArray(bloques.disponiblePara) && bloques.disponiblePara.length) {
       u.disponiblePara = bloques.disponiblePara.slice();
@@ -489,6 +493,8 @@
     if (bloques.loQueBuscaConocer) u.loQueBuscaConocer = bloques.loQueBuscaConocer;
     if (bloques.aficiones) u.aficiones = bloques.aficiones;
     if (bloques.estiloVida) u.estiloVida = bloques.estiloVida;
+    if (bloques.personalidad) u.personalidad = bloques.personalidad;
+    if (bloques.pasatiempos) u.pasatiempos = bloques.pasatiempos;
     if (bloques.idiomas) u.idiomas = bloques.idiomas;
     if (bloques.nivelServicio) u.nivelServicio = bloques.nivelServicio;
     if (bloques.nivelPremium) u.nivelPremium = bloques.nivelPremium;
