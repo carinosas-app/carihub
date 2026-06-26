@@ -363,6 +363,20 @@
     return 'ResultCardAdultos';
   }
 
+  function normDomSubId(u) {
+    return String((u && u.subcategoriaId) || '').trim().toLowerCase().replace(/_/g, ' ');
+  }
+
+  function isDominatrixPerfil(u) {
+    if (!u) return false;
+    var id = normDomSubId(u);
+    if (id === 'dominatrix' || id === 'fetiche' || id === 'sado') return true;
+    if (u.arquetipo === 'persona_dominatrix') return true;
+    if (u.dominatrixPerfil) return true;
+    if (u.especialidadBdsm) return true;
+    return false;
+  }
+
   function cardShell(u, Q, opts) {
     opts = opts || {};
     Q = Q || {};
@@ -443,6 +457,35 @@
           '</button>' +
         '</div>' +
       '</article>';
+  }
+
+  function cardHTMLDominatrix(u, Q) {
+    Q = Q || {};
+    var edad = u.edad != null ? String(u.edad).trim() + ' años' : '';
+    var set = modalidadesSet(u);
+    var mods = chipModalidadHTML(set);
+    if (u.modalidadSesion) {
+      mods += '<span class="modchip mc-purple">' + svgIco('briefcase') + safeTxt(u.modalidadSesion) + '</span>';
+    }
+    var estiloChip = u.estiloDominacion ||
+      (u.especialidadBdsm ? String(u.especialidadBdsm).split(' · ')[0] : '');
+    if (estiloChip) {
+      var estTxt = estiloChip.length > 24 ? estiloChip.slice(0, 22) + '…' : estiloChip;
+      mods += '<span class="modchip mc-pink">' + svgIco('shield') + safeTxt(estTxt) + '</span>';
+    }
+    var catLabel = (global.CariHubResultadosDemo && CariHubResultadosDemo.labelCategoria)
+      ? CariHubResultadosDemo.labelCategoria(u.categoriaPublica || u.categoria || Q.categoria || '')
+      : (u.categoriaPublica || u.categoria || Q.categoria || '');
+    return cardShell(u, Q, {
+      cardClass: 'res-card--adult res-card--dominatrix',
+      headExtra: edad ? '<span class="age">' + safeTxt(edad) + '</span>' : '',
+      metaRight: mods,
+      descBlock: descripcionCompactHTML(u),
+      catLabel: catLabel,
+      badges: badgesCompactHTML(u, {
+        respRapida: !u.__previewRegistro && u.respuestaRapida === true
+      })
+    });
   }
 
   function cardHTMLAdultos(u, Q) {
@@ -563,6 +606,7 @@
     if (comp === 'ResultCardProfesional') return cardHTMLProfesional(u, Q);
     if (comp === 'ResultCardServicio') return cardHTMLServicio(u, Q);
     if (comp === 'ResultCardPareja') return cardHTMLPareja(u, Q);
+    if (isDominatrixPerfil(u)) return cardHTMLDominatrix(u, Q);
     return cardHTMLAdultos(u, Q);
   }
 
@@ -656,6 +700,8 @@
   global.CariHubPublicRenderLite = {
     cardHTML: cardHTML,
     cardHTMLAdultos: cardHTMLAdultos,
+    cardHTMLDominatrix: cardHTMLDominatrix,
+    isDominatrixPerfil: isDominatrixPerfil,
     cardHTMLNegocio: cardHTMLNegocio,
     cardHTMLServicio: cardHTMLServicio,
     cardHTMLProfesional: cardHTMLProfesional,
