@@ -158,7 +158,10 @@
       u = global.CariHubRegistroPublicBlocks.mapToPerfil(u, bloques, ctx);
     }
     if (global.CariHubRegistroPublicBlocks && CariHubRegistroPublicBlocks.applySwingerPerfilFields) {
-      u = CariHubRegistroPublicBlocks.applySwingerPerfilFields(u, bloques || {});
+      u = CariHubRegistroPublicBlocks.applySwingerPerfilFields(u, bloques || {}, ctx);
+    }
+    if (global.CariHubRegistroPublicBlocks && CariHubRegistroPublicBlocks.applyUnicornPerfilFields) {
+      u = CariHubRegistroPublicBlocks.applyUnicornPerfilFields(u, bloques || {}, ctx);
     }
     if (global.CariHubRegistroPublicBlocks && CariHubRegistroPublicBlocks.matchesPareja(ctx, null)) {
       u.aliasPareja = u.aliasPareja || alias;

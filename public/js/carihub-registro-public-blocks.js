@@ -765,6 +765,11 @@
     return subId === 'swinger' || subId === 'parejas swinger';
   }
 
+  function isUnicornSubcategoria(ctx) {
+    var subId = subIdFromCtx(ctx);
+    return subId === 'unicorns' || subId === 'unicorn';
+  }
+
   function buildSwingerPerfil(values) {
     values = values || {};
     return {
@@ -790,18 +795,79 @@
 
   function hasSwingerDelta(values) {
     if (!values) return false;
+    if (values.swingerPerfil) return true;
     if (values.intercambioSwinger) return true;
-    if (Array.isArray(values.objetivosPerfil) && values.objetivosPerfil.length) return true;
     if (Array.isArray(values.tipoInteraccion) && values.tipoInteraccion.length) return true;
+    if (Array.isArray(values.modalidadInteraccion) && values.modalidadInteraccion.length) return true;
     if (values.atiendenA) return true;
+    if (values.aceptanSolteros) return true;
+    if (values.aceptanParejasPrincipiantes) return true;
+    if (values.experienciaEnLifestyle) return true;
+    if (Array.isArray(values.estiloPareja) && values.estiloPareja.length) return true;
     return false;
   }
 
-  function applySwingerPerfilFields(u, bloques) {
+  function buildUnicornPerfil(values) {
+    values = values || {};
+    return {
+      objetivosPerfil: Array.isArray(values.objetivosPerfil) ? values.objetivosPerfil.slice() : [],
+      objetivoPrincipal: values.objetivoPrincipal || buildObjetivoPrincipal(values.objetivosPerfil),
+      tipoUnicornio: values.tipoUnicornio || '',
+      buscoConocer: Array.isArray(values.buscoConocer) ? values.buscoConocer.slice() : [],
+      tipoParejaPreferida: Array.isArray(values.tipoParejaPreferida) ? values.tipoParejaPreferida.slice() : [],
+      finalidadEncuentro: Array.isArray(values.finalidadEncuentro) ? values.finalidadEncuentro.slice() : [],
+      estadoPerfil: values.estadoPerfil || '',
+      haceColaboraciones: values.haceColaboraciones || '',
+      colaboraCon: Array.isArray(values.colaboraCon) ? values.colaboraCon.slice() : [],
+      experiencia: values.experiencia || '',
+      ambientePreferido: Array.isArray(values.ambientePreferido) ? values.ambientePreferido.slice() : [],
+      estilo: values.estilo || '',
+      serviciosLifestyle: Array.isArray(values.serviciosLifestyle) ? values.serviciosLifestyle.slice() : [],
+      mostrarObjetivosPerfil: values.mostrarObjetivosPerfil || 'Sí',
+      mostrarColaboraciones: values.mostrarColaboraciones || 'Sí',
+      modalidades: Array.isArray(values.modalidades) ? values.modalidades.slice() : [],
+      viajesDesplazamiento: values.viajesDesplazamiento || null,
+      horarioDetalle: values.horarioDetalle || '',
+      metodosPago: Array.isArray(values.metodosPago) ? values.metodosPago.slice() : [],
+      sobreMi: values.sobreMi || '',
+      idiomas: values.idiomas || ''
+    };
+  }
+
+  function hasUnicornDelta(values) {
+    if (!values) return false;
+    if (values.unicornPerfil) return true;
+    if (values.tipoUnicornio) return true;
+    if (values.estadoPerfil) return true;
+    if (Array.isArray(values.buscoConocer) && values.buscoConocer.length) return true;
+    if (Array.isArray(values.tipoParejaPreferida) && values.tipoParejaPreferida.length) return true;
+    if (Array.isArray(values.finalidadEncuentro) && values.finalidadEncuentro.length) return true;
+    if (values.experiencia) return true;
+    if (Array.isArray(values.ambientePreferido) && values.ambientePreferido.length) return true;
+    if (values.estilo) return true;
+    if (Array.isArray(values.serviciosLifestyle) && values.serviciosLifestyle.length) return true;
+    return false;
+  }
+
+  function shouldApplySwingerPipeline(ctx, values) {
+    if (ctx && isUnicornSubcategoria(ctx)) return false;
+    if (ctx) return isSwingerSubcategoria(ctx);
+    return hasSwingerDelta(values);
+  }
+
+  function shouldApplyUnicornPipeline(ctx, values) {
+    if (ctx && isSwingerSubcategoria(ctx)) return false;
+    if (ctx) return isUnicornSubcategoria(ctx);
+    return hasUnicornDelta(values);
+  }
+
+  function applySwingerPerfilFields(u, bloques, ctx) {
     if (!u || !bloques) return u;
+    if (!shouldApplySwingerPipeline(ctx, bloques)) return u;
     var sw = bloques.swingerPerfil;
     if (!sw && hasSwingerDelta(bloques)) sw = buildSwingerPerfil(bloques);
     if (!sw || !hasSwingerDelta(sw)) return u;
+    delete u.unicornPerfil;
     u.swingerPerfil = Object.assign({}, sw);
     if (Array.isArray(sw.objetivosPerfil) && sw.objetivosPerfil.length) {
       u.objetivosPerfil = sw.objetivosPerfil.slice();
@@ -827,8 +893,53 @@
     return u;
   }
 
-  function finalizeParejaSwingerValues(values) {
+  function applyUnicornPerfilFields(u, bloques, ctx) {
+    if (!u || !bloques) return u;
+    if (!shouldApplyUnicornPipeline(ctx, bloques)) return u;
+    var un = bloques.unicornPerfil;
+    if (!un && (hasUnicornDelta(bloques) || (ctx && isUnicornSubcategoria(ctx)))) {
+      un = buildUnicornPerfil(bloques);
+    }
+    if (!un) return u;
+    delete u.swingerPerfil;
+    u.unicornPerfil = Object.assign({}, un);
+    if (Array.isArray(un.objetivosPerfil) && un.objetivosPerfil.length) {
+      u.objetivosPerfil = un.objetivosPerfil.slice();
+      u.objetivoPrincipal = un.objetivoPrincipal || buildObjetivoPrincipal(un.objetivosPerfil);
+    }
+    if (un.mostrarObjetivosPerfil) u.mostrarObjetivosPerfil = un.mostrarObjetivosPerfil;
+    if (un.tipoUnicornio) u.tipoUnicornio = un.tipoUnicornio;
+    if (Array.isArray(un.buscoConocer) && un.buscoConocer.length) {
+      u.buscoConocer = un.buscoConocer.slice();
+      u.buscan = un.buscoConocer.slice();
+    }
+    if (Array.isArray(un.tipoParejaPreferida) && un.tipoParejaPreferida.length) {
+      u.tipoParejaPreferida = un.tipoParejaPreferida.slice();
+    }
+    if (Array.isArray(un.finalidadEncuentro) && un.finalidadEncuentro.length) {
+      u.finalidadEncuentro = un.finalidadEncuentro.slice();
+    }
+    if (un.estadoPerfil) u.estadoPerfil = un.estadoPerfil;
+    if (un.haceColaboraciones) u.haceColaboraciones = un.haceColaboraciones;
+    if (Array.isArray(un.colaboraCon) && un.colaboraCon.length) u.colaboraCon = un.colaboraCon.slice();
+    if (un.mostrarColaboraciones) u.mostrarColaboraciones = un.mostrarColaboraciones;
+    if (un.experiencia) u.experiencia = un.experiencia;
+    if (Array.isArray(un.ambientePreferido) && un.ambientePreferido.length) {
+      u.ambientePreferido = un.ambientePreferido.slice();
+    }
+    if (un.estilo) u.estilo = un.estilo;
+    if (Array.isArray(un.serviciosLifestyle) && un.serviciosLifestyle.length) {
+      u.serviciosLifestyle = un.serviciosLifestyle.slice();
+      u.serviciosIncluidos = un.serviciosLifestyle.slice();
+    }
+    u.tipoPerfil = 'persona';
+    u.badgeUnicorn = true;
+    return u;
+  }
+
+  function finalizeParejaSwingerValues(values, ctx) {
     if (!values) return values;
+    if (!shouldApplySwingerPipeline(ctx, values)) return values;
     if (!String(values.mostrarAtiendenA || '').trim()) values.mostrarAtiendenA = 'Sí';
     if (!String(values.mostrarColaboraciones || '').trim()) values.mostrarColaboraciones = 'Sí';
     if (!String(values.mostrarObjetivosPerfil || '').trim()) values.mostrarObjetivosPerfil = 'Sí';
@@ -837,19 +948,24 @@
     if (Array.isArray(values.objetivosPerfil)) {
       values.objetivoPrincipal = buildObjetivoPrincipal(values.objetivosPerfil);
     }
-    if (hasSwingerDelta(values)) {
-      values.swingerPerfil = buildSwingerPerfil(values);
-    }
+    delete values.unicornPerfil;
+    values.swingerPerfil = buildSwingerPerfil(values);
     delete values.deltaSwinger;
     return values;
   }
 
-  function finalizeUnicornValues(values) {
+  function finalizeUnicornValues(values, ctx) {
     if (!values) return values;
+    if (!shouldApplyUnicornPipeline(ctx, values)) return values;
     if (!String(values.mostrarObjetivosPerfil || '').trim()) values.mostrarObjetivosPerfil = 'Sí';
     if (!String(values.mostrarColaboraciones || '').trim()) values.mostrarColaboraciones = 'Sí';
     var hace = String(values.haceColaboraciones || '').trim();
     if (hace !== 'Sí') delete values.colaboraCon;
+    if (Array.isArray(values.objetivosPerfil)) {
+      values.objetivoPrincipal = buildObjetivoPrincipal(values.objetivosPerfil);
+    }
+    delete values.swingerPerfil;
+    values.unicornPerfil = buildUnicornPerfil(values);
     return values;
   }
 
@@ -865,8 +981,9 @@
     return values;
   }
 
-  function collectValues(cfg) {
+  function collectValues(cfg, ctx) {
     if (!cfg) return {};
+    ctx = ctx || {};
     var values = {};
     cfg.blocks.forEach(function (block) {
       block.fields.forEach(function (field) {
@@ -887,7 +1004,12 @@
         values[field.id] = el ? String(el.value || '').trim() : '';
       });
     });
-    return finalizeParejaGrupoValues(finalizeUnicornValues(finalizeParejaSwingerValues(finalizeLesbiansValues(finalizeViajesValues(values)))));
+    values = finalizeViajesValues(values);
+    values = finalizeLesbiansValues(values);
+    values = finalizeParejaSwingerValues(values, ctx);
+    values = finalizeUnicornValues(values, ctx);
+    values = finalizeParejaGrupoValues(values);
+    return values;
   }
 
   function validateValues(cfg, values, ctx) {
@@ -960,7 +1082,30 @@
     if (isSwingerSubcategoria(ctx)) {
       validateSwingerDeltaValues(cfg, values, missing);
     }
+    if (isUnicornSubcategoria(ctx)) {
+      validateUnicornDeltaValues(cfg, values, missing);
+    }
     return missing;
+  }
+
+  function validateUnicornDeltaValues(cfg, values, missing) {
+    var objetivos = values.objetivosPerfil;
+    if (!Array.isArray(objetivos) || !objetivos.length) {
+      pushMissing(missing, labelForField(cfg, 'objetivosPerfil') || 'Objetivo del perfil');
+    }
+    if (!String(values.tipoUnicornio || '').trim()) {
+      pushMissing(missing, labelForField(cfg, 'tipoUnicornio') || 'Tipo de unicornio');
+    }
+    var busco = values.buscoConocer;
+    if (!Array.isArray(busco) || !busco.length) {
+      pushMissing(missing, labelForField(cfg, 'buscoConocer') || 'Busco conocer');
+    }
+    if (!String(values.estadoPerfil || '').trim()) {
+      pushMissing(missing, labelForField(cfg, 'estadoPerfil') || '¿Qué buscas actualmente?');
+    }
+    if (!String(values.haceColaboraciones || '').trim()) {
+      pushMissing(missing, labelForField(cfg, 'haceColaboraciones') || 'Disponibilidad para colaboraciones');
+    }
   }
 
   function validateSwingerDeltaValues(cfg, values, missing) {
@@ -1083,7 +1228,7 @@
   function collectForPreview(ctx) {
     var cfg = resolveConfig(ctx || {}, null);
     if (!cfg || !$('rpDynamicPublicHost') || $('rpDynamicPublicHost').classList.contains('rp-hidden')) return null;
-    return collectValues(mergedConfig(cfg, ctx || {}));
+    return collectValues(mergedConfig(cfg, ctx || {}), ctx || {});
   }
 
   function mapToPerfil(u, bloques, ctx) {
@@ -1162,7 +1307,7 @@
     }
     if (bloques.mostrarColaboraciones) u.mostrarColaboraciones = bloques.mostrarColaboraciones;
     if (bloques.estiloLesbian) u.estiloLesbian = bloques.estiloLesbian;
-    u = applySwingerPerfilFields(u, bloques);
+    u = applySwingerPerfilFields(u, bloques, ctx);
     if (bloques.configuracionGrupo) {
       u.configuracionGrupo = bloques.configuracionGrupo;
       u.configuracionGrupoLabel = bloques.configuracionGrupoLabel || configuracionGrupoLabel(bloques.configuracionGrupo);
@@ -1184,27 +1329,7 @@
       u.tipoPerfil = 'pareja_grupo';
     }
     if (bloques.tipoPareja && !bloques.configuracionGrupo) u.tipoPareja = bloques.tipoPareja;
-    if (bloques.tipoUnicornio) u.tipoUnicornio = bloques.tipoUnicornio;
-    if (Array.isArray(bloques.buscoConocer) && bloques.buscoConocer.length) {
-      u.buscoConocer = bloques.buscoConocer.slice();
-      u.buscan = bloques.buscoConocer.slice();
-    }
-    if (Array.isArray(bloques.tipoParejaPreferida) && bloques.tipoParejaPreferida.length) {
-      u.tipoParejaPreferida = bloques.tipoParejaPreferida.slice();
-    }
-    if (Array.isArray(bloques.finalidadEncuentro) && bloques.finalidadEncuentro.length) {
-      u.finalidadEncuentro = bloques.finalidadEncuentro.slice();
-    }
-    if (bloques.estadoPerfil) u.estadoPerfil = bloques.estadoPerfil;
-    if (bloques.experiencia) u.experiencia = bloques.experiencia;
-    if (Array.isArray(bloques.ambientePreferido) && bloques.ambientePreferido.length) {
-      u.ambientePreferido = bloques.ambientePreferido.slice();
-    }
-    if (bloques.estilo) u.estilo = bloques.estilo;
-    if (Array.isArray(bloques.serviciosLifestyle) && bloques.serviciosLifestyle.length) {
-      u.serviciosLifestyle = bloques.serviciosLifestyle.slice();
-      u.serviciosIncluidos = bloques.serviciosLifestyle.slice();
-    }
+    u = applyUnicornPerfilFields(u, bloques, ctx);
     if (!u.mostrarAtiendoA) u.mostrarAtiendoA = 'Sí';
     if (!u.mostrarColaboraciones) u.mostrarColaboraciones = 'Sí';
     if (!u.mostrarAtiendenA) u.mostrarAtiendenA = 'Sí';
@@ -1258,7 +1383,7 @@
   function collect(ctx, resolved) {
     var cfg = resolveConfig(ctx, resolved);
     if (!cfg) return null;
-    return collectValues(mergedConfig(cfg, ctx));
+    return collectValues(mergedConfig(cfg, ctx), ctx);
   }
 
   function getFieldLabels(ctx, resolved) {
@@ -1314,9 +1439,16 @@
     normalizeMemberRow: normalizeMemberRow,
     finalizeParejaGrupoValues: finalizeParejaGrupoValues,
     finalizeParejaSwingerValues: finalizeParejaSwingerValues,
+    finalizeUnicornValues: finalizeUnicornValues,
     buildSwingerPerfil: buildSwingerPerfil,
+    buildUnicornPerfil: buildUnicornPerfil,
     buildDeltaSwinger: buildDeltaSwinger,
     buildObjetivoPrincipal: buildObjetivoPrincipal,
-    applySwingerPerfilFields: applySwingerPerfilFields
+    hasSwingerDelta: hasSwingerDelta,
+    hasUnicornDelta: hasUnicornDelta,
+    isSwingerSubcategoria: isSwingerSubcategoria,
+    isUnicornSubcategoria: isUnicornSubcategoria,
+    applySwingerPerfilFields: applySwingerPerfilFields,
+    applyUnicornPerfilFields: applyUnicornPerfilFields
   };
 })(typeof window !== 'undefined' ? window : globalThis);
