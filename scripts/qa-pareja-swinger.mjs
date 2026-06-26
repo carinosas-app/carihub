@@ -171,7 +171,7 @@ try {
     haceColaboraciones: 'Sí',
     colaboraCon: ['Parejas', 'Unicorns'],
   });
-  ok('deltaSwinger generado', colabSi.deltaSwinger && colabSi.deltaSwinger.intercambioSwinger === 'A convenir', JSON.stringify(colabSi.deltaSwinger));
+  ok('swingerPerfil generado', colabSi.swingerPerfil && colabSi.swingerPerfil.intercambioSwinger === 'A convenir', JSON.stringify(colabSi.swingerPerfil));
   ok('objetivoPrincipal', colabSi.objetivoPrincipal === 'Conocer parejas', colabSi.objetivoPrincipal);
 
   const colabNo = simulateCollect(ctx, {
@@ -193,7 +193,8 @@ try {
     intercambioSwinger: perf.intercambioSwinger,
     modalidadInteraccion: perf.modalidadInteraccion,
   }));
-  ok('mapToPerfil deltaSwinger nested', perf.deltaSwinger && perf.deltaSwinger.atiendenA === 'Parejas', JSON.stringify(perf.deltaSwinger));
+  ok('mapToPerfil swingerPerfil nested', perf.swingerPerfil && perf.swingerPerfil.atiendenA === 'Parejas', JSON.stringify(perf.swingerPerfil));
+  ok('sin deltaSwinger legacy', perf.deltaSwinger == null, 'solo swingerPerfil');
 
   ok('shell + swinger compat', colabSi.parejaGrupoPerfil && colabSi.tipoPareja === 'Hombre + Mujer', 'ok');
 } catch (e) {

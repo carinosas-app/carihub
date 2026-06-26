@@ -199,6 +199,10 @@
       if (mappedBloques.metodosPago) parejaGrupoPerfil.metodosPago = mappedBloques.metodosPago;
     }
 
+    var swingerPerfil = mappedBloques.swingerPerfil
+      ? Object.assign({}, mappedBloques.swingerPerfil)
+      : null;
+
     return {
       uid: uid,
       cuentaUid: uid,
@@ -227,6 +231,17 @@
       miembrosResumen: mappedBloques.miembrosResumen || '',
       reglasAcceso: mappedBloques.reglasAcceso || '',
       parejaGrupoPerfil: parejaGrupoPerfil,
+      swingerPerfil: swingerPerfil,
+      objetivosPerfil: mappedBloques.objetivosPerfil || [],
+      objetivoPrincipal: mappedBloques.objetivoPrincipal || '',
+      tipoInteraccion: mappedBloques.tipoInteraccion || [],
+      modalidadInteraccion: mappedBloques.modalidadInteraccion || [],
+      intercambioSwinger: mappedBloques.intercambioSwinger || '',
+      atiendenA: mappedBloques.atiendenA || '',
+      aceptanSolteros: mappedBloques.aceptanSolteros || '',
+      estiloPareja: mappedBloques.estiloPareja || [],
+      mostrarObjetivosPerfil: mappedBloques.mostrarObjetivosPerfil || 'Sí',
+      mostrarAtiendenA: mappedBloques.mostrarAtiendenA || 'Sí',
       formularioUiId: (draft.schemaResuelto && draft.schemaResuelto.formularioUiId) ||
         ctx.formularioUiId || '',
       schemaVersion: ctx.schemaVersion || '',
