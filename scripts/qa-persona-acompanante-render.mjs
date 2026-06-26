@@ -1,6 +1,7 @@
 /**
  * QA — Pack persona_acompanante render tarjeta + ficha toggles (sin browser).
  * H2: cobertura 15/15 subs persona_acompanante (tarjeta + ficha donde aplique).
+ * H6: DEMO/ficha pública edecan, modelos, dotados, femboy, singles.
  *
  * Matriz subs: escort, escort gay, escort vip, edecan, modelos, gigolo, acompanante,
  * petit, trans, femboy, singles, lesbians, tom boy, tom fem, dotados.
@@ -59,6 +60,28 @@ function extractDemoBlock(html, marker) {
   return m ? m[0] : '';
 }
 
+function extractDemoObject(html, demoKey) {
+  const re = new RegExp(`DEMO\\.${demoKey}=\\{([\\s\\S]*?)\\n\\};`);
+  const m = html.match(re);
+  return m ? m[0] : '';
+}
+
+function normSubFichaId(subId) {
+  return String(subId || '').trim().toLowerCase().replace(/_/g, ' ');
+}
+
+function fichaShowsModalidadRow(u) {
+  if (normSubFichaId(u.subcategoriaId) === 'singles') return false;
+  const modalidad = u.modalidadFicha || ((u.modalidades || []).map((m) => {
+    if (m === 'recibe') return 'Recibe';
+    if (m === 'hotel') return 'Hotel';
+    if (m === 'domicilio') return 'Domicilio';
+    if (m === 'viaja') return 'Viaja';
+    return m;
+  }).join(' · ') || '');
+  return !!modalidad;
+}
+
 function mostrarPublico(u, visibilityKey, contentVal) {
   if (contentVal == null || String(contentVal).trim() === '') return false;
   if (Array.isArray(contentVal) && !contentVal.length) return false;
@@ -100,6 +123,24 @@ function fichaTransRows(u) {
   return u.identidadGenero ? ['identidadGenero'] : [];
 }
 
+function fichaFemboyRows(u) {
+  const rows = [];
+  if (u.presentacionFemboy) rows.push('presentacion');
+  if (u.estiloPredominante) rows.push('estilo');
+  if (Array.isArray(u.disponibilidadAgenda) && u.disponibilidadAgenda.length) rows.push('disponibilidad');
+  if (Array.isArray(u.disponiblePara) && u.disponiblePara.length) rows.push('disponiblePara');
+  return rows;
+}
+
+function fichaSinglesRows(u) {
+  const rows = [];
+  if (Array.isArray(u.buscanConocer) && u.buscanConocer.length) rows.push('buscanConocer');
+  if (u.personalidadPredominante) rows.push('personalidad');
+  if (u.estiloPersonal) rows.push('estiloPersonal');
+  if (Array.isArray(u.disponibilidadAgenda) && u.disponibilidadAgenda.length) rows.push('disponibilidad');
+  return rows;
+}
+
 function cardHasViajaChip(html) {
   return html.includes('Viaja: Sí') || html.includes('>Viaja<') || /modchip mc-teal[^>]*>[\s\S]*Viaja/.test(html);
 }
@@ -118,6 +159,29 @@ try {
   ok('DEMO escortGay presente', extractDemoBlock(perfilHtml, 'Escort Gay').includes('subcategoriaId:"escort_gay"'), 'demo gay');
   ok('DEMO escortVip presente', extractDemoBlock(perfilHtml, 'Escort VIP').includes('badgeVip:true'), 'demo vip');
   ok('DEMO trans presente', extractDemoBlock(perfilHtml, 'Trans — schema: trans').includes('identidadGenero') || perfilHtml.includes('DEMO.trans='), 'demo trans');
+
+  // --- H6: DEMO ficha pública gaps ---
+  const demoEdecan = extractDemoObject(perfilHtml, 'edecan');
+  ok('H6 DEMO edecan presente', demoEdecan.includes('subcategoriaId:"edecan"'), 'edecan');
+  ok('H6 DEMO edecan eventosDisponibles', /eventosDisponibles\s*:\s*true/.test(demoEdecan), demoEdecan.slice(0, 120));
+
+  const demoModelos = extractDemoObject(perfilHtml, 'modelos');
+  ok('H6 DEMO modelos presente', demoModelos.includes('subcategoriaId:"modelos"'), 'modelos');
+  ok('H6 DEMO modelos portfolioURL', demoModelos.includes('portfolioURL:') && demoModelos.includes('https://'), demoModelos.match(/portfolioURL:"[^"]+"/)?.[0]);
+
+  const demoDotados = extractDemoObject(perfilHtml, 'dotados');
+  ok('H6 DEMO dotados presente', demoDotados.includes('subcategoriaId:"dotados"'), 'dotados');
+  ok('H6 DEMO dotados longitudCm', demoDotados.includes('longitudCm:"19"'), 'longitud');
+  ok('H6 DEMO dotados toggles', demoDotados.includes('mostrarLongitudPublico:"Sí"') && demoDotados.includes('mostrarAtencionMujeresPublico:"Sí"'), 'toggles');
+
+  const demoFemboy = extractDemoObject(perfilHtml, 'femboy');
+  ok('H6 DEMO femboy presente', demoFemboy.includes('subcategoriaId:"femboy"'), 'femboy');
+  ok('H6 DEMO femboy delta campos', demoFemboy.includes('presentacionFemboy:') && demoFemboy.includes('estiloPredominante:') && demoFemboy.includes('disponiblePara:'), 'delta');
+
+  const demoSingles = extractDemoObject(perfilHtml, 'singles');
+  ok('H6 DEMO singles presente', demoSingles.includes('subcategoriaId:"singles"'), 'singles');
+  ok('H6 DEMO singles buscanConocer', demoSingles.includes('buscanConocer:'), 'buscan');
+  ok('H6 DEMO singles sin modalidades escort', !demoSingles.includes('modalidades:') && !demoSingles.includes('modalidadFicha:'), 'sin modalidades');
 
   const cardBase = {
     tagline: 'Perfil QA render',
@@ -290,6 +354,32 @@ try {
     atencionMujeres: 'Sí',
     mostrarAtencionMujeresPublico: 'No',
   }).includes('atencionMujeres'), 'off');
+
+  ok('H6 ficha femboy delta visible', fichaFemboyRows({
+    presentacionFemboy: 'Andrógino femenino',
+    estiloPredominante: 'Kawaii',
+    disponibilidadAgenda: ['Fines de semana'],
+    disponiblePara: ['Citas', 'Eventos'],
+  }).join(',') === 'presentacion,estilo,disponibilidad,disponiblePara', 'femboy rows');
+
+  ok('H6 ficha singles lifestyle', fichaSinglesRows({
+    buscanConocer: ['Parejas', 'Hombres solteros'],
+    personalidadPredominante: 'Extrovertida',
+    estiloPersonal: 'Elegante casual',
+    disponibilidadAgenda: ['Fines de semana'],
+  }).join(',') === 'buscanConocer,personalidad,estiloPersonal,disponibilidad', 'singles rows');
+
+  ok('H6 singles ficha sin modalidad escort', !fichaShowsModalidadRow({
+    subcategoriaId: 'singles',
+    modalidades: ['recibe', 'hotel'],
+    modalidadFicha: 'Recibe · Hotel',
+  }), 'omit modalidad');
+
+  ok('H6 escort ficha conserva modalidad', fichaShowsModalidadRow({
+    subcategoriaId: 'escort',
+    modalidades: ['recibe'],
+    modalidadFicha: 'Recibe',
+  }), 'modalidad escort');
 
   // --- Regresión routing (no escort pack, pero en mismo script) ---
   const chCard = PR.cardHTML({
