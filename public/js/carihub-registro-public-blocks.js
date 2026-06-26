@@ -31,6 +31,17 @@
     return global.CARIHUB_REGISTRO_ESPECTACULO_BLOCKS || null;
   }
 
+  function resolveCreadorConfig() {
+    return global.CARIHUB_REGISTRO_CREADOR_BLOCKS || null;
+  }
+
+  function normalizeCreadorSubId(raw) {
+    var subId = normalizeSubId(raw);
+    if (subId === 'contenido') return 'contenido';
+    if (subId === 'creador contenido') return 'contenido';
+    return '';
+  }
+
   function normalizeEspectaculoSubId(raw) {
     var subId = normalizeSubId(raw);
     if (subId === 'table dance' || subId === 'tabledance') return 'tabledance';
@@ -266,9 +277,23 @@
     return false;
   }
 
+  function matchesCreador(ctx, resolved) {
+    var cfg = resolveCreadorConfig();
+    if (!cfg) return false;
+    ctx = ctx || {};
+    var canon = normalizeCreadorSubId((ctx && ctx.subcategoriaId) || (ctx && ctx.subcategoria) || '');
+    if (canon === 'contenido') return true;
+    if (ctx.arquetipo === cfg.id) return true;
+    var ident = resolved && resolved.identidad ? resolved.identidad : {};
+    if (ident.formularioId === cfg.formularioId && ident.arquetipo === cfg.id) return true;
+    if (resolved && cfg.uiIds.indexOf(resolved.formularioUiId || '') >= 0) return true;
+    return false;
+  }
+
   function resolveConfig(ctx, resolved) {
     if (matchesDominatrix(ctx, resolved)) return resolveDominatrixConfig();
     if (matchesEspectaculo(ctx, resolved)) return resolveEspectaculoConfig();
+    if (matchesCreador(ctx, resolved)) return resolveCreadorConfig();
     if (matchesEscort(ctx, resolved)) return resolveEscortConfig();
     if (matchesLifestyle(ctx, resolved)) return resolveLifestyleConfig();
     if (matchesPareja(ctx, resolved)) return resolveParejaConfig();
@@ -1954,6 +1979,7 @@
     matchesLifestyle: matchesLifestyle,
     matchesDominatrix: matchesDominatrix,
     matchesEspectaculo: matchesEspectaculo,
+    matchesCreador: matchesCreador,
     apply: apply,
     collectValues: collectValues,
     validateValues: validateValues,

@@ -33,6 +33,10 @@
       "precioSuscripcion": { "id": "precioSuscripcion", "label": "Precio suscripción", "tipo": "currency" },
       "tiposContenido": { "id": "tiposContenido", "label": "Tipos de contenido", "tipo": "tags", "iaCopy": true },
       "redesSociales": { "id": "redesSociales", "label": "Redes sociales", "tipo": "urlList" },
+      "creadorPerfil": { "id": "creadorPerfil", "label": "Perfil creador", "tipo": "group" },
+      "contenidoPersonalizado": { "id": "contenidoPersonalizado", "label": "Contenido personalizado", "tipo": "select", "opciones": ["Sí", "No", "A convenir"] },
+      "paquetesContenido": { "id": "paquetesContenido", "label": "Paquetes / tiers", "tipo": "checklist" },
+      "colaboracionesCreador": { "id": "colaboracionesCreador", "label": "Colaboraciones con otros creadores", "tipo": "select", "opciones": ["Sí", "No", "A convenir"] },
       "categoriasProducto": { "id": "categoriasProducto", "label": "Categorías de productos", "tipo": "tags" },
       "envioDomicilio": { "id": "envioDomicilio", "label": "Envío a domicilio", "tipo": "boolean" },
       "tiendaOnline": { "id": "tiendaOnline", "label": "Tienda en línea", "tipo": "boolean" },
@@ -296,11 +300,11 @@
     "persona_creador": {
       "tipoPerfil": "creador",
       "componentes": { "resultados": "ResultCardCreador", "perfil": "ProfileLayoutCreador" },
-      "camposPublicosResultados": ["plataformas", "precioSuscripcion", "redesSociales"],
-      "camposPublicosPerfil": ["plataformas", "precioSuscripcion", "tiposContenido", "redesSociales", "horarioDetalle"],
+      "camposPublicosResultados": ["tiposContenido", "plataformas", "precioSuscripcion", "geo"],
+      "camposPublicosPerfil": ["tiposContenido", "plataformas", "precioSuscripcion", "contenidoPersonalizado", "paquetesContenido", "redesSociales", "horarioDetalle", "disponibilidad", "serviciosIncluidos", "serviciosNoRealizo", "colaboracionesCreador", "sobreMi"],
       "camposPrivados": ["ineFrente", "selfieVerificacion"],
-      "obligatoriosExtra": ["plataformas", "tiposContenido", "redesSociales", "ineFrente", "selfieVerificacion"],
-      "opcionalesExtra": ["precioSuscripcion"],
+      "obligatoriosExtra": ["plataformas", "tiposContenido", "redesSociales", "serviciosIncluidos", "serviciosNoRealizo", "horarioDetalle"],
+      "opcionalesExtra": ["precioSuscripcion", "contenidoPersonalizado", "paquetesContenido", "colaboracionesCreador"],
       "fotosMin": 4,
       "verificacionTipo": "creador_plataformas",
       "textosAyuda": {
@@ -523,8 +527,11 @@
       "arquetipo": "persona_creador",
       "tipoPerfil": "creador",
       "heredaDe": "plantillasArquetipo.persona_creador",
-      "delta": {},
-      "coherenciaExtra": [{ "id": "CREADOR_REDES", "requiere": ["plataformas", "redesSociales"], "severidad": "error" }]
+      "delta": {
+        "obligatoriosExtra": ["precioSuscripcion", "metodosPago"],
+        "coherenciaExtra": [{ "id": "CREADOR_REDES", "requiere": ["plataformas", "redesSociales", "tiposContenido"], "severidad": "error" }]
+      },
+      "keywordsIA": ["onlyfans", "contenido", "creador", "suscripción", "telegram vip", "fansly"]
     },
     {
       "subcategoriaId": "tabledance",
