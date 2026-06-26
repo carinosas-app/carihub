@@ -202,6 +202,13 @@ try {
 
   const css = fs.readFileSync(path.join(repoRoot, 'public', 'css', 'resultados.css'), 'utf8');
   ok('css badge cuckold', css.includes('res-badge--cuckold'), 'css');
+
+  ok(
+    'renderParejaLifestyle enruta C/H',
+    /isCuckoldHotwifeSubFicha\(u\).*return renderParejaGrupoCuckoldHotwife/s.test(perfilHtml),
+    'routing'
+  );
+  ok('rule A4.4 presente', fs.existsSync(path.join(repoRoot, '.cursor', 'rules', 'registro-pareja-cuckold-hotwife.mdc')), 'rule');
 } catch (e) {
   fail.push({ name: 'exception', detail: e.message + (e.stack ? '\n' + e.stack.split('\n')[1] : '') });
 }

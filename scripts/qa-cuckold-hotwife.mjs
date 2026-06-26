@@ -242,6 +242,17 @@ try {
     badgeHotwife: perfAmbos.badgeHotwife,
     badgeCuckold: perfAmbos.badgeCuckold,
   }));
+
+  const schemaJson = fs.readFileSync(path.join(__dirname, '..', 'scripts', 'config-registro-adultos-schema.json'), 'utf8');
+  ok('schema cuckold_hotwife', schemaJson.includes('"subcategoriaId": "cuckold_hotwife"') && schemaJson.includes('"tipoPerfil": "pareja_grupo"'), 'schema');
+  const srcBlock = CFG.blocks.find((b) => b.id === 'cuckoldHotwifePerfil');
+  ok(
+    'pareja block onlySubcategorias C/H',
+    srcBlock && Array.isArray(srcBlock.onlySubcategorias) &&
+      srcBlock.onlySubcategorias.indexOf('cuckold hotwife') >= 0 &&
+      srcBlock.onlySubcategorias.indexOf('cuckold_hotwife') >= 0,
+    JSON.stringify(srcBlock && srcBlock.onlySubcategorias)
+  );
 } catch (e) {
   fail.push({ name: 'exception', detail: e.message + (e.stack ? '\n' + e.stack.split('\n')[1] : '') });
 }

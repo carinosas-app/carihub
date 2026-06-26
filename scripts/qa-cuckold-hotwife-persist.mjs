@@ -339,6 +339,8 @@ try {
 
   const previewJs = fs.readFileSync(path.join(__dirname, '..', 'public', 'js', 'registro-perfil-preview.js'), 'utf8');
   ok('preview applyCuckoldHotwifePerfilFields', previewJs.includes('applyCuckoldHotwifePerfilFields'), 'preview.js');
+  ok('preview vista pareja no unicorn', !previewJs.includes("vistaPerfil = 'cuckold_hotwife'"), 'vista pareja');
+  ok('preview canonical subcategoriaId', previewJs.includes("u.subcategoriaId = 'cuckold_hotwife'"), 'canon');
 } catch (e) {
   fail.push({ name: 'exception', detail: e.message + (e.stack ? '\n' + e.stack.split('\n')[1] : '') });
 }
