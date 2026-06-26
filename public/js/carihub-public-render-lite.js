@@ -377,6 +377,106 @@
     return false;
   }
 
+  function normEspSubId(u) {
+    var id = String((u && u.subcategoriaId) || '').trim().toLowerCase().replace(/_/g, ' ');
+    if (id === 'table dance' || id === 'tabledance') return 'tabledance';
+    if (id === 'stripper') return 'stripper';
+    if (u && u.arquetipo === 'persona_espectaculo') {
+      var cat = String(u.categoriaPublica || u.categoria || '').toLowerCase();
+      if (cat.indexOf('table') >= 0 && cat.indexOf('dance') >= 0) return 'tabledance';
+      if (cat.indexOf('stripper') >= 0) return 'stripper';
+    }
+    return id;
+  }
+
+  function isTableDancePerfil(u) {
+    return normEspSubId(u) === 'tabledance';
+  }
+
+  function isStripperPerfil(u) {
+    return normEspSubId(u) === 'stripper';
+  }
+
+  function isEspectaculoPerfil(u) {
+    if (!u) return false;
+    if (u.arquetipo === 'persona_espectaculo') return true;
+    if (u.espectaculoPerfil) return true;
+    var id = normEspSubId(u);
+    return id === 'stripper' || id === 'tabledance';
+  }
+
+  function espectaculoShowChips(u, opts) {
+    opts = opts || {};
+    var mods = '';
+    if (u.tipoShow) {
+      var showTxt = String(u.tipoShow).split(' · ')[0];
+      if (showTxt.length > 26) showTxt = showTxt.slice(0, 24) + '…';
+      mods += '<span class="modchip mc-pink">' + svgIco('heart') + safeTxt(showTxt) + '</span>';
+    }
+    if (opts.venue && u.venueFijo) {
+      var venueTxt = String(u.venueFijo);
+      if (venueTxt.length > 28) venueTxt = venueTxt.slice(0, 26) + '…';
+      mods += '<span class="modchip mc-purple">' + svgIco('pin') + safeTxt(venueTxt) + '</span>';
+    }
+    if (opts.horario && (u.horarioDetalle || u.horario)) {
+      var h = String(u.horarioDetalle || u.horario);
+      if (h.length > 28) h = h.slice(0, 26) + '…';
+      mods += '<span class="modchip mc-purple">' + svgIco('clock') + safeTxt(h) + '</span>';
+    }
+    if (opts.eventos && String(u.eventosDisponibles || '').trim() === 'Sí') {
+      mods += '<span class="modchip mc-pink">' + svgIco('briefcase') + 'Eventos</span>';
+    }
+    if (Array.isArray(u.disponiblePara) && u.disponiblePara.length && opts.contexto) {
+      var ctxTxt = u.disponiblePara[0];
+      if (ctxTxt.length > 24) ctxTxt = ctxTxt.slice(0, 22) + '…';
+      mods += '<span class="modchip mc-purple">' + svgIco('chat') + safeTxt(ctxTxt) + '</span>';
+    }
+    return mods;
+  }
+
+  function cardHTMLStripper(u, Q) {
+    Q = Q || {};
+    var edad = u.edad != null ? String(u.edad).trim() + ' años' : '';
+    var mods = espectaculoShowChips(u, { contexto: true, eventos: true });
+    var catLabel = (global.CariHubResultadosDemo && CariHubResultadosDemo.labelCategoria)
+      ? CariHubResultadosDemo.labelCategoria(u.categoriaPublica || u.categoria || Q.categoria || '')
+      : (u.categoriaPublica || u.categoria || Q.categoria || 'Stripper');
+    return cardShell(u, Q, {
+      cardClass: 'res-card--adult res-card--stripper',
+      headExtra: edad ? '<span class="age">' + safeTxt(edad) + '</span>' : '',
+      metaRight: mods,
+      descBlock: descripcionCompactHTML(u),
+      priceLabel: 'Show desde',
+      catLabel: catLabel,
+      badges: badgesCompactHTML(u, {
+        respRapida: !u.__previewRegistro && u.respuestaRapida === true
+      })
+    });
+  }
+
+  function cardHTMLTableDance(u, Q) {
+    Q = Q || {};
+    var mods = espectaculoShowChips(u, { venue: true, horario: true });
+    var catLabel = (global.CariHubResultadosDemo && CariHubResultadosDemo.labelCategoria)
+      ? CariHubResultadosDemo.labelCategoria(u.categoriaPublica || u.categoria || Q.categoria || '')
+      : (u.categoriaPublica || u.categoria || Q.categoria || 'Table Dance');
+    return cardShell(u, Q, {
+      cardClass: 'res-card--adult res-card--tabledance',
+      metaRight: mods,
+      descBlock: descripcionCompactHTML(u),
+      priceLabel: 'Show desde',
+      catLabel: catLabel,
+      badges: badgesCompactHTML(u, {
+        respRapida: !u.__previewRegistro && u.respuestaRapida === true
+      })
+    });
+  }
+
+  function cardHTMLEspectaculo(u, Q) {
+    if (isTableDancePerfil(u)) return cardHTMLTableDance(u, Q);
+    return cardHTMLStripper(u, Q);
+  }
+
   function cardShell(u, Q, opts) {
     opts = opts || {};
     Q = Q || {};
@@ -606,6 +706,7 @@
     if (comp === 'ResultCardProfesional') return cardHTMLProfesional(u, Q);
     if (comp === 'ResultCardServicio') return cardHTMLServicio(u, Q);
     if (comp === 'ResultCardPareja') return cardHTMLPareja(u, Q);
+    if (comp === 'ResultCardEspectaculo' || isEspectaculoPerfil(u)) return cardHTMLEspectaculo(u, Q);
     if (isDominatrixPerfil(u)) return cardHTMLDominatrix(u, Q);
     return cardHTMLAdultos(u, Q);
   }
@@ -701,7 +802,13 @@
     cardHTML: cardHTML,
     cardHTMLAdultos: cardHTMLAdultos,
     cardHTMLDominatrix: cardHTMLDominatrix,
+    cardHTMLEspectaculo: cardHTMLEspectaculo,
+    cardHTMLStripper: cardHTMLStripper,
+    cardHTMLTableDance: cardHTMLTableDance,
     isDominatrixPerfil: isDominatrixPerfil,
+    isEspectaculoPerfil: isEspectaculoPerfil,
+    isStripperPerfil: isStripperPerfil,
+    isTableDancePerfil: isTableDancePerfil,
     cardHTMLNegocio: cardHTMLNegocio,
     cardHTMLServicio: cardHTMLServicio,
     cardHTMLProfesional: cardHTMLProfesional,

@@ -625,6 +625,17 @@
       }
       return 'pareja';
     }
+    if (comp === 'ResultCardEspectaculo' || comp === 'ProfileLayoutEspectaculo') {
+      var espId = String(subId || '').trim().toLowerCase().replace(/_/g, ' ');
+      if (espId === 'table dance' || espId === 'tabledance') return 'tableDance';
+      if (espId === 'stripper') return 'stripper';
+      if (row && row.arquetipo === 'persona_espectaculo') {
+        var n = String(row.subcategoria || '').toLowerCase();
+        if (n.indexOf('table') >= 0) return 'tableDance';
+        if (n.indexOf('stripper') >= 0) return 'stripper';
+      }
+      return 'stripper';
+    }
     if (comp === 'ResultCardUnicorn') return 'unicorn';
     return 'adult';
   }
