@@ -29,7 +29,6 @@
     'swinger': ['Parejas', 'Swinger'],
     'contenido': ['Creadores de', 'contenido'],
     'cuckold hotwife': ['Cuckold', 'Hotwife'],
-    'hotwife': ['Hotwife'],
     'cine xxx': ['Cine', 'XXX'],
     'tom boy': ['Tom', 'Boy'],
     'tom fem': ['Tom', 'Fem'],
@@ -315,16 +314,6 @@
       titleLines: ['Cuckold /', 'Hotwife']
     },
     'singles': { template: 'classic', accent: '#fb5607', photo: 'img/home/nightclub.jpg', icon: '💫' },
-    'hotwife': {
-      template: 'bloom',
-      accent: '#ff006e',
-      photo: 'img/home/cat-cards/queen-of-spades.png',
-      photoFit: 'contain',
-      photoPos: 'center center',
-      photoBg: '#ffffff',
-      icon: '🔥',
-      titleLines: ['Hotwife']
-    },
     'lesbians': {
       template: 'pulse',
       accent: '#e91e98',

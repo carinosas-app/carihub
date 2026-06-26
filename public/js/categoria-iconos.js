@@ -414,7 +414,6 @@
     unicorns: I.unicorns,
     'cuckold hotwife': I.cuckold,
     singles: I.singles,
-    hotwife: I.hotwife,
     lesbians: I.lesbians,
     'tom boy': I.tomBoy,
     'tom fem': I.tomFem,

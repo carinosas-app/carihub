@@ -83,7 +83,7 @@
     uiIds: ['ui_adulto_acompanante'],
     subcategoriaIds: [
       'escort', 'escort gay', 'escort vip', 'edecan', 'modelos', 'gigolo',
-      'acompanante', 'petit', 'trans', 'femboy', 'singles', 'hotwife',
+      'acompanante', 'petit', 'trans', 'femboy', 'singles',
       'lesbians', 'tom boy', 'tom fem', 'dotados'
     ],
     subcategoriaOverrides: {
@@ -206,31 +206,6 @@
           dinamicasParticipa: 'Marca las dinámicas lifestyle en las que participas (opcional).',
           colaboracionContenido: 'Indica si colaboras en contenido para redes o plataformas.',
           sobreMi: 'Descríbete: quién eres y qué buscas en una cita.'
-        }
-      },
-      hotwife: {
-        badges: ['hotwife'],
-        obligatoriosExtra: [
-          'participacionPareja', 'tipoPublico', 'disponibilidadAgenda', 'tipoExperiencia', 'sobreMi'
-        ],
-        fieldPatches: {
-          participacionPareja: { required: true },
-          tipoPublico: { required: true },
-          disponibilidadAgenda: { required: true },
-          tipoExperiencia: { required: true },
-          sobreMi: { required: true }
-        },
-        fieldHints: {
-          participacionPareja: 'Indica si tu pareja participa en las experiencias o solo acuerda por contacto previo.',
-          tipoPublico: 'Singles, parejas o ambos — aparece en tu ficha para quien te contacte.',
-          disponibilidadAgenda: 'Marca cuándo sueles estar disponible (puedes elegir más de una).',
-          tipoExperiencia: 'Qué tipo de experiencias lifestyle buscas o aceptas.',
-          loQueBuscaConocer: 'Describe con quién te gustaría conectar y qué tipo de química buscas.',
-          aficiones: 'Hobbies o gustos que ayuden a romper el hielo.',
-          estiloVida: 'Cómo vives el lifestyle: discreto, social, viajero, etc.',
-          realizaGangBang: 'Indica si participas en gang bang.',
-          colaboracionContenido: 'Indica si colaboras en contenido para redes o plataformas.',
-          sobreMi: 'Presentación personal: quién eres, tu estilo y qué te hace diferente como hotwife.'
         }
       },
       femboy: {
@@ -360,7 +335,7 @@
             label: 'Disponibilidad',
             type: 'select',
             required: false,
-            excludeSubcategorias: ['hotwife', 'femboy', 'singles'],
+            excludeSubcategorias: ['femboy', 'singles'],
             options: [
               { value: 'disponible', label: 'Disponible' },
               { value: 'ocupada', label: 'Ocupada' },
@@ -567,84 +542,6 @@
             type: 'checklist',
             required: false,
             options: TIPOS_TRIOS_COMP.slice()
-          },
-          {
-            id: 'colaboracionContenido',
-            label: 'Colaboración para contenido',
-            type: 'select',
-            required: false,
-            options: OPCIONES_SI_NO_ACUERDO.slice()
-          }
-        ]
-      },
-      {
-        id: 'hotwifePerfil',
-        title: 'Perfil hotwife',
-        hint: 'Estos datos diferencian tu perfil en la comunidad lifestyle.',
-        onlySubcategorias: ['hotwife'],
-        fields: [
-          {
-            id: 'participacionPareja',
-            label: 'Participación de la pareja',
-            type: 'select',
-            required: true,
-            options: ['Presente', 'Opcional', 'Solo contacto previo', 'A convenir']
-          },
-          {
-            id: 'tipoPublico',
-            label: 'Busco conocer',
-            type: 'select',
-            required: true,
-            options: ['Singles', 'Parejas', 'Ambos']
-          },
-          {
-            id: 'disponibilidadAgenda',
-            label: 'Disponibilidad',
-            type: 'checklist',
-            required: true,
-            options: ['Entre semana', 'Fines de semana', 'Solo con cita', 'Viajes disponibles']
-          },
-          {
-            id: 'tipoExperiencia',
-            label: 'Tipo de experiencia que busca',
-            type: 'checklist',
-            required: true,
-            options: [
-              'Citas',
-              'Eventos sociales',
-              'Viajes',
-              'Conocer personas',
-              'Experiencias para parejas'
-            ]
-          },
-          {
-            id: 'loQueBuscaConocer',
-            label: 'Lo que busca conocer',
-            type: 'textarea',
-            required: false,
-            rows: 3,
-            placeholder: 'Describe qué tipo de conexiones o experiencias te interesan…'
-          },
-          {
-            id: 'aficiones',
-            label: 'Aficiones',
-            type: 'text',
-            required: false,
-            placeholder: 'Ej. viajes, gastronomía, deporte…'
-          },
-          {
-            id: 'estiloVida',
-            label: 'Estilo de vida',
-            type: 'text',
-            required: false,
-            placeholder: 'Ej. discreta, social, viajera…'
-          },
-          {
-            id: 'realizaGangBang',
-            label: '¿Realizas gang bang?',
-            type: 'select',
-            required: false,
-            options: OPCIONES_SI_NO_ACUERDO.slice()
           },
           {
             id: 'colaboracionContenido',

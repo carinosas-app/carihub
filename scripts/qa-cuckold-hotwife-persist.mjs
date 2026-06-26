@@ -73,10 +73,6 @@ function unicornCtx() {
   return { subcategoriaId: 'unicorns', subcategoria: 'Unicorns', arquetipo: 'persona_lifestyle' };
 }
 
-function hotwifePersonaCtx() {
-  return { subcategoriaId: 'hotwife', subcategoria: 'Hotwife', arquetipo: 'persona_acompanante' };
-}
-
 function baseShell() {
   return {
     aliasPareja: 'Pareja CH Persist',
@@ -308,31 +304,6 @@ try {
     },
   }, priv, {}, {});
   ok('unicorn sin cuckoldHotwifePerfil', uniDoc.cuckoldHotwifePerfil == null, JSON.stringify(uniDoc.cuckoldHotwifePerfil));
-
-  const hwPersonaBloques = {
-    alias: 'Hotwife Solo',
-    participacionPareja: 'Participa activamente',
-    tipoPublico: 'Singles',
-    disponibilidadAgenda: ['Entre semana'],
-    tipoExperiencia: ['Encuentros privados'],
-    sobreMi: 'Hotwife individual.',
-    modalidades: ['recibe'],
-    metodosPago: ['Efectivo'],
-    serviciosIncluidos: ['Cita'],
-    estatura: '1.65',
-    peso: '58',
-  };
-  const hwDoc = Submit.buildUsuarioDoc('uid_hw', {
-    contexto: hotwifePersonaCtx(),
-    schemaResuelto: { identidad: { arquetipo: 'persona_acompanante', tipoPerfil: 'persona' } },
-    camposPublicos: {
-      alias: 'Hotwife Solo',
-      bloquesPublicos: hwPersonaBloques,
-    },
-  }, priv, {}, {});
-  ok('hotwife persona sin cuckoldHotwifePerfil', hwDoc.cuckoldHotwifePerfil == null, JSON.stringify(hwDoc.cuckoldHotwifePerfil));
-  ok('hotwife persona tipoPerfil persona', hwDoc.tipoPerfil === 'persona', hwDoc.tipoPerfil);
-  ok('hotwife persona participacion preservada', hwDoc.participacionPareja === 'Participa activamente', hwDoc.participacionPareja);
 
   const submitJs = fs.readFileSync(path.join(__dirname, '..', 'public', 'js', 'registro-perfil-submit.js'), 'utf8');
   ok('submit cuckoldHotwifePerfil builder', submitJs.includes('cuckoldHotwifePerfil: cuckoldHotwifePerfil'), 'submit.js');

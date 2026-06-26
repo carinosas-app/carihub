@@ -130,7 +130,6 @@
     if (over.badges.indexOf('lgbt') >= 0) u.badgeLgbt = true;
     if (over.badges.indexOf('vip') >= 0) u.badgeVip = true;
     if (over.badges.indexOf('trans') >= 0) u.badgeTrans = true;
-    if (over.badges.indexOf('hotwife') >= 0) u.badgeHotwife = true;
     return u;
   }
 
@@ -808,10 +807,7 @@
     if (!values) return false;
     if (values.cuckoldHotwifePerfil) return true;
     var din = String(values.dinamica || '').trim();
-    if (din === 'cuckold' || din === 'hotwife' || din === 'ambos') return true;
-    if (Array.isArray(values.buscan) && values.buscan.length) return true;
-    if (Array.isArray(values.tipoExperiencia) && values.tipoExperiencia.length) return true;
-    return false;
+    return din === 'cuckold' || din === 'hotwife' || din === 'ambos';
   }
 
   function shouldApplyCuckoldHotwifePipeline(ctx, values) {
@@ -1435,23 +1431,10 @@
       u.tiposTrios = bloques.tiposTrios.slice();
     }
     if (bloques.esBisexual) u.esBisexual = bloques.esBisexual;
-    if (bloques.realizaGangBang) u.realizaGangBang = bloques.realizaGangBang;
     if (Array.isArray(bloques.buscan) && bloques.buscan.length) u.buscan = bloques.buscan.slice();
-    else if (bloques.buscan) u.buscan = bloques.buscan;
-    if (bloques.tipoPublico) {
-      u.tipoPublico = bloques.tipoPublico;
-      u.buscan = bloques.tipoPublico;
-    }
-    if (bloques.participacionPareja) u.participacionPareja = bloques.participacionPareja;
     if (Array.isArray(bloques.disponibilidadAgenda) && bloques.disponibilidadAgenda.length) {
       u.disponibilidadAgenda = bloques.disponibilidadAgenda.slice();
     }
-    if (Array.isArray(bloques.tipoExperiencia) && bloques.tipoExperiencia.length) {
-      u.tipoExperiencia = bloques.tipoExperiencia.slice();
-    }
-    if (bloques.loQueBuscaConocer) u.loQueBuscaConocer = bloques.loQueBuscaConocer;
-    if (bloques.aficiones) u.aficiones = bloques.aficiones;
-    if (bloques.estiloVida) u.estiloVida = bloques.estiloVida;
     if (bloques.personalidad) u.personalidad = bloques.personalidad;
     if (bloques.pasatiempos) u.pasatiempos = bloques.pasatiempos;
     if (bloques.idiomas) u.idiomas = bloques.idiomas;

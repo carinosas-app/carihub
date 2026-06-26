@@ -136,20 +136,19 @@ Según `verificacionTipo`:
 | 9 | trans | Trans | persona_acompanante | ↑ igual |
 | 10 | femboy | Femboy | persona_acompanante | ↑ igual |
 | 11 | singles | Singles | persona_acompanante | ↑ igual |
-| 12 | hotwife | Hotwife | persona_acompanante | ↑ igual |
-| 13 | lesbians | Lesbians | persona_acompanante | ↑ igual |
-| 14 | tom_boy | Tom Boy | persona_acompanante | ↑ igual |
-| 15 | tom_fem | Tom Fem | persona_acompanante | ↑ igual |
-| 16 | dotados | Dotados | persona_acompanante | ↑ igual |
-| 17 | fetiche | Fetiche | persona_dominatrix | ↑ igual |
-| 18 | sado | Sado | persona_dominatrix | ↑ igual |
-| 19 | dominatrix | Dominatrix | persona_dominatrix | ↑ igual |
-| 20 | contenido | Creador(a) de Contenido | persona_creador | tel contacto → INE frente → selfie → mayor edad → términos |
-| 21 | stripper | Stripper | persona_espectaculo | tel contacto → INE frente → selfie → mayor edad → términos |
-| 22 | table_dance | Table Dance | persona_espectaculo | ↑ igual |
-| 23 | swinger | Swinger | pareja_grupo | tel → whatsapp → consentimiento dual → INE frente → selfie → mayor edad → términos |
-| 24 | unicorns | Unicorns | pareja_grupo | ↑ igual |
-| 25 | cuckold_hotwife | Cuckold / Hotwife | pareja_grupo | ↑ igual |
+| 12 | lesbians | Lesbians | persona_acompanante | ↑ igual |
+| 13 | tom_boy | Tom Boy | persona_acompanante | ↑ igual |
+| 14 | tom_fem | Tom Fem | persona_acompanante | ↑ igual |
+| 15 | dotados | Dotados | persona_acompanante | ↑ igual |
+| 16 | fetiche | Fetiche | persona_dominatrix | ↑ igual |
+| 17 | sado | Sado | persona_dominatrix | ↑ igual |
+| 18 | dominatrix | Dominatrix | persona_dominatrix | ↑ igual |
+| 19 | contenido | Creador(a) de Contenido | persona_creador | tel contacto → INE frente → selfie → mayor edad → términos |
+| 20 | stripper | Stripper | persona_espectaculo | tel contacto → INE frente → selfie → mayor edad → términos |
+| 21 | table_dance | Table Dance | persona_espectaculo | ↑ igual |
+| 22 | swinger | Swinger | pareja_grupo | tel → whatsapp → consentimiento dual → INE frente → selfie → mayor edad → términos |
+| 23 | unicorns | Unicorns | pareja_grupo | ↑ igual |
+| 24 | cuckold_hotwife | Cuckold / Hotwife | pareja_grupo | ↑ igual |
 | 26 | sex_shop | Sex Shop | negocio_retail | tel → RFC → razón social → licencia → mayor edad → términos |
 | 27 | spa | Spa | negocio_bienestar | ↑ igual |
 | 28 | masajes | Masajes | negocio_bienestar | ↑ igual |
