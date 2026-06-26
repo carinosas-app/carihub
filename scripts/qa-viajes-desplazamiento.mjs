@@ -1,5 +1,6 @@
 /**
- * QA mínima — bloque viajesDesplazamiento (sin browser).
+ * QA — bloque viajesDesplazamiento (sin browser).
+ * H3: loop 18 subs con soporte viajes + regresiones escort/pareja/lifestyle.
  * node scripts/qa-viajes-desplazamiento.mjs
  */
 import fs from 'fs';
@@ -46,6 +47,8 @@ function loadAll() {
   const ctx = makeCtx();
   loadScript('carihub-viajes-desplazamiento.js', ctx);
   loadScript('data/registro-adultos-escort-blocks.js', ctx);
+  loadScript('data/registro-adultos-pareja-blocks.js', ctx);
+  loadScript('data/registro-adultos-lifestyle-blocks.js', ctx);
   loadScript('carihub-registro-public-blocks.js', ctx);
   loadScript('carihub-public-render-lite.js', ctx);
   return ctx;
@@ -58,6 +61,14 @@ function escortCtx(subId) {
 function mergedEscort(vmCtx, userCtx) {
   const cfg = vmCtx.CARIHUB_REGISTRO_ESCORT_BLOCKS;
   return vmCtx.CariHubRegistroPublicBlocks.mergedConfig(cfg, userCtx);
+}
+
+function mergedPareja(vmCtx, userCtx) {
+  return vmCtx.CariHubRegistroPublicBlocks.mergedConfig(vmCtx.CARIHUB_REGISTRO_PAREJA_BLOCKS, userCtx);
+}
+
+function mergedLifestyle(vmCtx, userCtx) {
+  return vmCtx.CariHubRegistroPublicBlocks.mergedConfig(vmCtx.CARIHUB_REGISTRO_LIFESTYLE_BLOCKS, userCtx);
 }
 
 function modalidadesBlock(merged) {
@@ -101,15 +112,67 @@ function cardHtml(ctx, u) {
   return ctx.CariHubPublicRenderLite.cardHTMLAdultos(u, {});
 }
 
+function cardHasViajaChip(html) {
+  return html.includes('Viaja: Sí') || html.includes('>Viaja<') || /modchip mc-teal[^>]*>[\s\S]*Viaja/.test(html);
+}
+
+function viajaOptionInModalidades(ctx, userCtx, merged) {
+  const modBlock = modalidadesBlock(merged);
+  const modF = modBlock?.fields.find((f) => f.id === 'modalidades');
+  if (!modF?.options) return false;
+  const filtered = modF.options.filter((opt) => {
+    if (typeof opt === 'object' && opt.onlySubcategoriasViajes) {
+      return ctx.CariHubViajesDesplazamiento.subcategoriaActivaViajes(userCtx.subcategoriaId);
+    }
+    return true;
+  }).map((o) => o.value || o);
+  return filtered.includes('viaja');
+}
+
+const ON_VIAJES_VALUES = {
+  modalidades: ['recibe', 'viaja'],
+  alcanceDesplazamiento: 'toda_ciudad',
+  viajesProgramados: 'si',
+  gastosTraslado: 'cliente',
+  anticipacionViaje: '48h',
+};
+
+const ESCORT_VIAJES_SPECS = [
+  ['escort', { oblig: ['modalidades'], forbid: [] }],
+  ['escort_gay', { oblig: ['orientacion'], forbid: [] }],
+  ['escort_vip', { oblig: ['nivelPremium'], fotosMin: 5 }],
+  ['edecan', { oblig: ['eventosDisponibles'], forbid: [] }],
+  ['modelos', { oblig: ['portfolioURL'], fotosMin: 6 }],
+  ['gigolo', { oblig: ['modalidades'], forbid: [] }],
+  ['acompanante', { oblig: ['modalidades'], forbid: [] }],
+  ['trans', { oblig: ['identidadGenero'], forbid: [] }],
+  ['femboy', { oblig: ['presentacionFemboy', 'disponiblePara'], forbid: ['modalidades'], modalidadesOptional: true }],
+  ['singles', { oblig: ['buscanConocer', 'disponibilidadAgenda'], forbid: ['modalidades'], modalidadesOptional: true }],
+  ['lesbians', { oblig: ['orientacion'], forbid: [] }],
+  ['tom_boy', { oblig: ['modalidades'], forbid: [] }],
+  ['tom_fem', { oblig: ['modalidades'], forbid: [] }],
+  ['dotados', { oblig: ['modalidades'], forbid: [] }],
+];
+
+const PAREJA_LIFESTYLE_VIAJES = [
+  ['swinger', 'pareja'],
+  ['cuckold hotwife', 'pareja'],
+  ['cuckold_hotwife', 'pareja'],
+  ['unicorns', 'lifestyle'],
+];
+
 let ctx;
 
 try {
   ctx = loadAll();
-  ok('load módulos', !!(ctx.CariHubViajesDesplazamiento && ctx.CariHubRegistroPublicBlocks && ctx.CARIHUB_REGISTRO_ESCORT_BLOCKS),
+  ok('load módulos', !!(ctx.CariHubViajesDesplazamiento && ctx.CariHubRegistroPublicBlocks &&
+    ctx.CARIHUB_REGISTRO_ESCORT_BLOCKS && ctx.CARIHUB_REGISTRO_PAREJA_BLOCKS && ctx.CARIHUB_REGISTRO_LIFESTYLE_BLOCKS),
     JSON.stringify({
       V: !!ctx.CariHubViajesDesplazamiento,
       RP: !!ctx.CariHubRegistroPublicBlocks,
-      CFG: !!ctx.CARIHUB_REGISTRO_ESCORT_BLOCKS,
+      ESC: !!ctx.CARIHUB_REGISTRO_ESCORT_BLOCKS,
+      PAR: !!ctx.CARIHUB_REGISTRO_PAREJA_BLOCKS,
+      LIFE: !!ctx.CARIHUB_REGISTRO_LIFESTYLE_BLOCKS,
     }));
   const V = ctx.CariHubViajesDesplazamiento;
   const RP = ctx.CariHubRegistroPublicBlocks;
@@ -199,20 +262,24 @@ try {
   ok('3e perfil España', V.alcanceLabelPublic('cualquier_ciudad_pais', { pais: 'España' }) === 'Cualquier ciudad de España');
   ok('3f sin Todo México en repo', true, 'grep previo sin matches');
 
-  // --- Caso 4: regresión subcategorías ---
-  const subs = [
-    ['escort', { oblig: ['modalidades'], forbid: [] }],
-    ['escort_gay', { oblig: ['orientacion'], forbid: [] }],
-    ['escort_vip', { oblig: ['nivelPremium'], fotosMin: 5 }],
-    ['edecan', { oblig: ['eventosDisponibles'], forbid: [] }],
-    ['singles', { oblig: ['buscanConocer', 'disponibilidadAgenda'], forbid: ['modalidades'], modalidadesOptional: true }],
-    ['lesbians', { oblig: ['orientacion'], forbid: [] }],
-    ['femboy', { oblig: ['presentacionFemboy', 'disponiblePara'], forbid: ['modalidades'], modalidadesOptional: true }],
-  ];
+  // --- H3: 18 subs con soporte viajes ---
+  const VIAJES_EXPECT = V.VIAJES_SUBCATEGORIAS.slice();
+  ok('H3 VIAJES_SUBCATEGORIAS count 18', VIAJES_EXPECT.length === 18, String(VIAJES_EXPECT.length));
+  ok('H3 petit no en lista viajes', !VIAJES_EXPECT.some((id) => String(id).replace(/_/g, ' ') === 'petit'), VIAJES_EXPECT.join(', '));
 
-  for (const [sub, expect] of subs) {
+  for (const subId of VIAJES_EXPECT) {
+    ok(`H3 subcategoriaActivaViajes ${subId}`, V.subcategoriaActivaViajes(subId) === true, subId);
+  }
+  ok('H3 petit subcategoriaActivaViajes false', V.subcategoriaActivaViajes('petit') === false, 'excluido');
+
+  // --- Caso 4 / H3: regresión escort (14 subs con viajes; petit aparte) ---
+  for (const [sub, expect] of ESCORT_VIAJES_SPECS) {
     const c = escortCtx(sub);
     const m = mergedEscort(ctx, c);
+    ok(`H3 viajes activo escort ${sub}`, V.subcategoriaActivaViajes(sub), sub);
+    ok(`H3 subcampos viajes escort ${sub}`, viajesSubfields(m).join(',') ===
+      'alcanceDesplazamiento,viajesProgramados,gastosTraslado,anticipacionViaje,notasViaje', viajesSubfields(m).join(','));
+    ok(`H3 opcion viaja escort ${sub}`, viajaOptionInModalidades(ctx, c, m), sub);
     for (const ob of expect.oblig || []) {
       ok(`4 oblig ${sub}: ${ob}`, m.obligatorios.includes(ob), m.obligatorios.join(', '));
     }
@@ -239,6 +306,47 @@ try {
       ok('4 femboy disponiblePara sin Viajes', !opts.includes('Viajes'), opts.join(', '));
     }
   }
+
+  // --- H3: pareja + lifestyle (4 subs) ---
+  for (const [sub, pack] of PAREJA_LIFESTYLE_VIAJES) {
+    const c = escortCtx(sub);
+    const m = pack === 'pareja' ? mergedPareja(ctx, c) : mergedLifestyle(ctx, c);
+    ok(`H3 viajes activo ${pack} ${sub}`, V.subcategoriaActivaViajes(sub), sub);
+    ok(`H3 subcampos viajes ${pack} ${sub}`, viajesSubfields(m).length === 5, viajesSubfields(m).join(','));
+    ok(`H3 opcion viaja ${pack} ${sub}`, viajaOptionInModalidades(ctx, c, m), sub);
+  }
+
+  ok('H3 cobertura viajes 18 subs', VIAJES_EXPECT.length === 14 + PAREJA_LIFESTYLE_VIAJES.length, '14 escort + 4 pareja/lifestyle');
+
+  // --- H3: tarjeta chip Viaja (muestra representativa) ---
+  const dotadosOn = simulateCollect(ctx, { ...ON_VIAJES_VALUES, modalidades: ['recibe', 'viaja'] });
+  const dotadosPerf = simulateMapToPerfil(ctx, escortCtx('dotados'), dotadosOn);
+  const dotadosCard = cardHtml(ctx, { ...dotadosPerf, subcategoriaId: 'dotados', tagline: 'Dotados QA', edad: 28, precio: '2500' });
+  ok('H3 tarjeta viaja dotados', cardHasViajaChip(dotadosCard), dotadosCard.slice(0, 120));
+
+  const swOn = simulateCollect(ctx, ON_VIAJES_VALUES);
+  const swPerf = simulateMapToPerfil(ctx, escortCtx('swinger'), swOn);
+  const swCard = ctx.CariHubPublicRenderLite.cardHTMLParejaSwinger({
+    ...swPerf,
+    subcategoriaId: 'swinger',
+    aliasPareja: 'Pareja Sw',
+    tagline: 'Swinger QA',
+    edad: 35,
+    precio: 'Consultar',
+  }, {});
+  ok('H3 tarjeta viaja swinger', cardHasViajaChip(swCard), swCard.slice(0, 120));
+
+  const uniOn = simulateCollect(ctx, ON_VIAJES_VALUES);
+  const uniPerf = simulateMapToPerfil(ctx, escortCtx('unicorns'), uniOn);
+  const uniCard = ctx.CariHubPublicRenderLite.cardHTMLUnicorn({
+    ...uniPerf,
+    subcategoriaId: 'unicorns',
+    tagline: 'Unicorn QA',
+    edad: 26,
+    precio: '2000',
+    badgeUnicorn: true,
+  }, {});
+  ok('H3 tarjeta viaja unicorns', cardHasViajaChip(uniCard), uniCard.slice(0, 120));
 
   // petit NO debe tener chip viaja
   // petit NO debe ver chip viaja en UI (filtro render)
