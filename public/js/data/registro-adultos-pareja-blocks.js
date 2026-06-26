@@ -21,18 +21,29 @@
 
   var SWINGER_OBJETIVOS = [
     'Ofrecer servicios',
-    'Conocer otras parejas',
-    'Colaboraciones con otros anunciantes',
-    'Asistir a eventos o reuniones privadas',
+    'Conocer parejas',
+    'Conocer personas',
+    'Colaboraciones',
+    'Eventos',
     'Todo lo anterior'
   ];
 
   var SWINGER_TIPO_INTERACCION = [
-    'Intercambio de parejas',
+    'Intercambio swinger',
     'Tríos',
+    'Cuartetos',
     'Reuniones privadas',
-    'Eventos Swinger',
-    'Conocer nuevas parejas',
+    'Eventos swinger',
+    'Conocer parejas',
+    'Colaboraciones',
+    'A convenir'
+  ];
+
+  var SWINGER_MODALIDAD_INTERACCION = [
+    'Individual',
+    'Grupal',
+    'Discreta',
+    'Social primero',
     'A convenir'
   ];
 
@@ -42,22 +53,33 @@
     'Sí',
     'No',
     'Solo hombres',
-    'Solo mujeres'
+    'Solo mujeres',
+    'A convenir'
   ];
 
   var SWINGER_COLABORA_CON = [
     'Parejas',
+    'Unicorns',
+    'Hotwife',
+    'Cuckold',
     'Escorts',
     'Lesbians',
-    'Hotwife',
-    'Singles',
+    'Trans',
     'Femboy',
     'Tom Boy',
     'Tom Fem',
-    'Trans',
-    'Gigoló',
-    'Dotados',
+    'Singles',
     'Cualquier anunciante'
+  ];
+
+  var SWINGER_ESTILO_PAREJA = [
+    'Elegante',
+    'Casual',
+    'Glamour',
+    'Fitness',
+    'Alternativo',
+    'Discreto',
+    'Fiesta'
   ];
 
   global.CARIHUB_REGISTRO_PAREJA_BLOCKS = {
@@ -70,24 +92,28 @@
       swinger: {
         obligatoriosExtra: [
           'objetivosPerfil',
+          'intercambioSwinger',
           'tipoInteraccion',
+          'modalidadInteraccion',
           'atiendenA',
-          'aceptanSolteros',
           'haceColaboraciones'
         ],
         fieldHints: {
           configuracionGrupo: 'Configuración de quienes publican este perfil.',
           miembros: 'Mínimo 2 integrantes para pareja; 3 o más si eliges «Grupo».',
-          reglasAcceso: 'Reglas de acceso, dress code o requisitos para contactar o visitar.',
-          objetivosPerfil: 'Marca uno o varios objetivos de tu perfil.',
-          tipoInteraccion: 'Categorías de interacción — sin detallar prácticas explícitas.',
+          reglasAcceso: 'Reglas de acceso generales (máx. 500 caracteres).',
+          objetivosPerfil: 'Marca uno o varios objetivos — servicios, conocer parejas, eventos, etc.',
+          intercambioSwinger: 'Indica si realizan intercambio swinger.',
+          tipoInteraccion: 'Qué buscan o qué tipo de experiencia ofrecen.',
+          modalidadInteraccion: 'Cómo prefieren que sea la interacción.',
           atiendenA: 'A quién reciben o con quién buscan conectar.',
-          aceptanSolteros: 'Indica si aceptan personas solteras y bajo qué condiciones.',
+          aceptanSolteros: 'Opcional — ayuda a filtrar contactos.',
           haceColaboraciones: 'Si colaboran con otros anunciantes en encuentros o eventos.',
-          colaboraCon: 'Marca con qué tipos de anunciantes colaboran.',
-          mostrarObjetivosPerfil: 'Controla si los objetivos aparecen en tarjeta y ficha pública.',
-          mostrarAtiendenA: 'Controla si «Atienden a» aparece en tarjeta y ficha pública.',
-          mostrarColaboraciones: 'Controla si colaboraciones se ven en tarjeta y ficha pública.',
+          colaboraCon: 'Obligatorio si respondiste Sí; opcional si es A convenir.',
+          estiloPareja: 'Opcional — estilo general de la pareja.',
+          mostrarObjetivosPerfil: 'Controla si el objetivo principal aparece en tarjeta y ficha.',
+          mostrarAtiendenA: 'Controla si «Atienden a» aparece en tarjeta y ficha.',
+          mostrarColaboraciones: 'Controla si colaboraciones se ven en tarjeta y ficha.',
           modalidades: 'Marca dónde se reciben o si viajan. Si marcas «Viaja», completa alcance y condiciones.'
         },
         labels: {
@@ -116,6 +142,8 @@
             required: true,
             minMembers: 2,
             minMembersGrupo: 3,
+            maxMembers: 2,
+            maxMembersGrupo: 8,
             memberFields: [
               {
                 id: 'etiquetaPublica',
@@ -155,14 +183,15 @@
             type: 'textarea',
             required: false,
             placeholder: 'Ej. Solo mayores de edad · cita previa · dress code…',
-            rows: 3
+            rows: 3,
+            maxLength: 500
           }
         ]
       },
       {
         id: 'swingerPerfil',
         title: 'Perfil pareja swinger',
-        hint: 'Datos específicos de tu perfil. Usa categorías generales de interacción, no prácticas explícitas.',
+        hint: 'Datos específicos swinger. Usa categorías generales, no prácticas explícitas.',
         onlySubcategorias: ['swinger'],
         fields: [
           {
@@ -173,11 +202,25 @@
             options: SWINGER_OBJETIVOS.slice()
           },
           {
+            id: 'intercambioSwinger',
+            label: 'Intercambio swinger',
+            type: 'select',
+            required: true,
+            options: OPCIONES_SI_NO_CONVENIR.slice()
+          },
+          {
             id: 'tipoInteraccion',
-            label: 'Tipo de interacción que buscan',
+            label: 'Tipo de interacción (qué buscan)',
             type: 'checklist',
             required: true,
             options: SWINGER_TIPO_INTERACCION.slice()
+          },
+          {
+            id: 'modalidadInteraccion',
+            label: 'Modalidad de interacción (cómo prefieren)',
+            type: 'checklist',
+            required: true,
+            options: SWINGER_MODALIDAD_INTERACCION.slice()
           },
           {
             id: 'atiendenA',
@@ -198,7 +241,7 @@
             id: 'aceptanSolteros',
             label: '¿Aceptan personas solteras?',
             type: 'select',
-            required: true,
+            required: false,
             options: SWINGER_ACEPTAN_SOLTEROS.slice()
           },
           {
@@ -213,8 +256,15 @@
             label: 'Colaboran con',
             type: 'checklist',
             required: false,
-            showWhen: { field: 'haceColaboraciones', values: ['Sí'] },
+            showWhen: { field: 'haceColaboraciones', values: ['Sí', 'A convenir'] },
             options: SWINGER_COLABORA_CON.slice()
+          },
+          {
+            id: 'estiloPareja',
+            label: 'Estilo de pareja',
+            type: 'checklist',
+            required: false,
+            options: SWINGER_ESTILO_PAREJA.slice()
           },
           {
             id: 'mostrarColaboraciones',
@@ -226,7 +276,7 @@
           },
           {
             id: 'mostrarObjetivosPerfil',
-            label: '¿Mostrar objetivos del perfil en tarjeta y perfil?',
+            label: '¿Mostrar objetivo del perfil en tarjeta y perfil?',
             type: 'select',
             required: false,
             defaultValue: 'Sí',

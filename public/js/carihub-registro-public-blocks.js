@@ -754,13 +754,49 @@
     return values;
   }
 
+  function buildObjetivoPrincipal(objetivos) {
+    if (!Array.isArray(objetivos) || !objetivos.length) return '';
+    if (objetivos.indexOf('Todo lo anterior') >= 0) return 'Todo lo anterior';
+    return String(objetivos[0] || '').trim();
+  }
+
+  function isSwingerSubcategoria(ctx) {
+    var subId = subIdFromCtx(ctx);
+    return subId === 'swinger' || subId === 'parejas swinger';
+  }
+
+  function buildDeltaSwinger(values) {
+    values = values || {};
+    return {
+      objetivosPerfil: Array.isArray(values.objetivosPerfil) ? values.objetivosPerfil.slice() : [],
+      objetivoPrincipal: values.objetivoPrincipal || buildObjetivoPrincipal(values.objetivosPerfil),
+      intercambioSwinger: values.intercambioSwinger || '',
+      tipoInteraccion: Array.isArray(values.tipoInteraccion) ? values.tipoInteraccion.slice() : [],
+      modalidadInteraccion: Array.isArray(values.modalidadInteraccion) ? values.modalidadInteraccion.slice() : [],
+      atiendenA: values.atiendenA || '',
+      aceptanSolteros: values.aceptanSolteros || '',
+      haceColaboraciones: values.haceColaboraciones || '',
+      colaboraCon: Array.isArray(values.colaboraCon) ? values.colaboraCon.slice() : [],
+      estiloPareja: Array.isArray(values.estiloPareja) ? values.estiloPareja.slice() : [],
+      mostrarObjetivosPerfil: values.mostrarObjetivosPerfil || 'Sí',
+      mostrarAtiendenA: values.mostrarAtiendenA || 'Sí',
+      mostrarColaboraciones: values.mostrarColaboraciones || 'Sí'
+    };
+  }
+
   function finalizeParejaSwingerValues(values) {
     if (!values) return values;
     if (!String(values.mostrarAtiendenA || '').trim()) values.mostrarAtiendenA = 'Sí';
     if (!String(values.mostrarColaboraciones || '').trim()) values.mostrarColaboraciones = 'Sí';
     if (!String(values.mostrarObjetivosPerfil || '').trim()) values.mostrarObjetivosPerfil = 'Sí';
     var hace = String(values.haceColaboraciones || '').trim();
-    if (hace !== 'Sí') delete values.colaboraCon;
+    if (hace === 'No') delete values.colaboraCon;
+    if (Array.isArray(values.objetivosPerfil)) {
+      values.objetivoPrincipal = buildObjetivoPrincipal(values.objetivosPerfil);
+    }
+    if (values.intercambioSwinger || (Array.isArray(values.objetivosPerfil) && values.objetivosPerfil.length)) {
+      values.deltaSwinger = buildDeltaSwinger(values);
+    }
     return values;
   }
 
@@ -877,26 +913,55 @@
     if (cfg.id === 'pareja_grupo') {
       validateParejaGrupoValues(cfg, values, missing);
     }
+    if (isSwingerSubcategoria(ctx)) {
+      validateSwingerDeltaValues(cfg, values, missing);
+    }
     return missing;
+  }
+
+  function validateSwingerDeltaValues(cfg, values, missing) {
+    var hace = String(values.haceColaboraciones || '').trim();
+    if (hace === 'Sí') {
+      var colabora = values.colaboraCon;
+      if (!Array.isArray(colabora) || !colabora.length) {
+        pushMissing(missing, labelForField(cfg, 'colaboraCon') || 'Colaboran con');
+      }
+    }
   }
 
   function validateParejaGrupoValues(cfg, values, missing) {
     var aliasEl = $('fldAlias');
     var alias = aliasEl ? String(aliasEl.value || '').trim() : String(values.aliasPareja || values.alias || '').trim();
-    if (!alias) pushMissing(missing, 'Alias de la pareja / grupo');
+    if (!alias) {
+      pushMissing(missing, 'Alias de la pareja / grupo');
+    } else if (alias.length < 3) {
+      pushMissing(missing, 'Alias de la pareja / grupo (mínimo 3 caracteres)');
+    }
+
+    var reglas = String(values.reglasAcceso || '').trim();
+    if (reglas.length > 500) {
+      pushMissing(missing, 'Reglas de acceso (máximo 500 caracteres)');
+    }
 
     var config = String(values.configuracionGrupo || '').trim();
     var minMembers = 2;
     var minGrupo = 3;
+    var maxMembers = 2;
+    var maxGrupo = 8;
     cfg.blocks.forEach(function (block) {
       block.fields.forEach(function (field) {
         if (field.id === 'miembros') {
           if (field.minMembers) minMembers = field.minMembers;
           if (field.minMembersGrupo) minGrupo = field.minMembersGrupo;
+          if (field.maxMembers) maxMembers = field.maxMembers;
+          if (field.maxMembersGrupo) maxGrupo = field.maxMembersGrupo;
         }
       });
     });
-    if (config === 'grupo') minMembers = minGrupo;
+    if (config === 'grupo') {
+      minMembers = minGrupo;
+      maxMembers = maxGrupo;
+    }
 
     var members = Array.isArray(values.miembros) ? values.miembros : [];
     var validMembers = members.filter(function (m) {
@@ -904,6 +969,9 @@
     });
     if (validMembers.length < minMembers) {
       pushMissing(missing, 'Integrantes (mínimo ' + minMembers + ')');
+    }
+    if (validMembers.length > maxMembers) {
+      pushMissing(missing, 'Integrantes (máximo ' + maxMembers + ')');
     }
     validMembers.forEach(function (m, i) {
       if (!memberRowHasAge(m)) {
@@ -1052,7 +1120,16 @@
     if (bloques.estiloLesbian) u.estiloLesbian = bloques.estiloLesbian;
     if (Array.isArray(bloques.objetivosPerfil) && bloques.objetivosPerfil.length) {
       u.objetivosPerfil = bloques.objetivosPerfil.slice();
+      u.objetivoPrincipal = bloques.objetivoPrincipal || buildObjetivoPrincipal(bloques.objetivosPerfil);
     }
+    if (bloques.intercambioSwinger) u.intercambioSwinger = bloques.intercambioSwinger;
+    if (Array.isArray(bloques.modalidadInteraccion) && bloques.modalidadInteraccion.length) {
+      u.modalidadInteraccion = bloques.modalidadInteraccion.slice();
+    }
+    if (Array.isArray(bloques.estiloPareja) && bloques.estiloPareja.length) {
+      u.estiloPareja = bloques.estiloPareja.slice();
+    }
+    if (bloques.deltaSwinger) u.deltaSwinger = Object.assign({}, bloques.deltaSwinger);
     if (bloques.configuracionGrupo) {
       u.configuracionGrupo = bloques.configuracionGrupo;
       u.configuracionGrupoLabel = bloques.configuracionGrupoLabel || configuracionGrupoLabel(bloques.configuracionGrupo);
@@ -1209,6 +1286,9 @@
     configuracionGrupoLabel: configuracionGrupoLabel,
     buildMiembrosResumen: buildMiembrosResumen,
     normalizeMemberRow: normalizeMemberRow,
-    finalizeParejaGrupoValues: finalizeParejaGrupoValues
+    finalizeParejaGrupoValues: finalizeParejaGrupoValues,
+    finalizeParejaSwingerValues: finalizeParejaSwingerValues,
+    buildDeltaSwinger: buildDeltaSwinger,
+    buildObjetivoPrincipal: buildObjetivoPrincipal
   };
 })(typeof window !== 'undefined' ? window : globalThis);

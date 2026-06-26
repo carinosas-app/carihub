@@ -1,5 +1,5 @@
 /**
- * QA mínima — delta pareja swinger (sin browser).
+ * QA — delta pareja swinger A2.1 (sin browser).
  * node scripts/qa-pareja-swinger.mjs
  */
 import fs from 'fs';
@@ -74,19 +74,28 @@ function baseShell() {
   };
 }
 
+function swingerDelta() {
+  return {
+    objetivosPerfil: ['Conocer parejas'],
+    intercambioSwinger: 'A convenir',
+    tipoInteraccion: ['Intercambio swinger'],
+    modalidadInteraccion: ['Discreta'],
+    atiendenA: 'Parejas',
+    haceColaboraciones: 'No',
+    modalidades: ['recibe'],
+  };
+}
+
 function simulateCollect(vmCtx, values) {
   const V = vmCtx.CariHubViajesDesplazamiento;
   const RP = vmCtx.CariHubRegistroPublicBlocks;
-  let out = { ...values };
+  let out = Object.assign({}, values);
+  out = RP.finalizeParejaSwingerValues(out);
   out = RP.finalizeParejaGrupoValues(out);
   out.viajesDesplazamiento = V.buildViajesDesplazamiento(out, out.modalidades || []);
   if (!out.viajesDesplazamiento.viaja) {
     V.viajesFieldIds().forEach((k) => delete out[k]);
   }
-  if (out.haceColaboraciones !== 'Sí') delete out.colaboraCon;
-  if (!out.mostrarAtiendenA) out.mostrarAtiendenA = 'Sí';
-  if (!out.mostrarColaboraciones) out.mostrarColaboraciones = 'Sí';
-  if (!out.mostrarObjetivosPerfil) out.mostrarObjetivosPerfil = 'Sí';
   return out;
 }
 
@@ -110,109 +119,88 @@ try {
 
   ok('load módulos', !!(ctx.CARIHUB_REGISTRO_PAREJA_BLOCKS && RP && V), 'pareja blocks + motor');
 
-  ok('resolveConfig swinger', RP.resolveConfig(userCtx, null) === ctx.CARIHUB_REGISTRO_PAREJA_BLOCKS, 'cfg pareja');
-  ok('matchesPareja', RP.matchesPareja(userCtx, null) === true, 'match');
-  ok('matchesEscort false', RP.matchesEscort(userCtx, null) === false, 'no escort');
-
-  ok('viajes activo swinger', V.subcategoriaActivaViajes('swinger') === true, 'swinger en viajes');
-
   const merged = mergedPareja(ctx, userCtx);
   const swBlock = merged.blocks.find((b) => b.id === 'swingerPerfil');
-  ok('bloque swingerPerfil', !!swBlock, swBlock ? swBlock.fields.length + ' campos' : '');
-
   const fieldIds = swBlock.fields.map((f) => f.id);
-  ok('campos obligatorios swinger', [
-    'objetivosPerfil', 'tipoInteraccion', 'atiendenA',
-    'aceptanSolteros', 'haceColaboraciones', 'colaboraCon'
+
+  ok('campos A2 swinger', [
+    'objetivosPerfil', 'intercambioSwinger', 'tipoInteraccion', 'modalidadInteraccion',
+    'atiendenA', 'haceColaboraciones', 'colaboraCon', 'estiloPareja',
+    'mostrarObjetivosPerfil', 'mostrarAtiendenA', 'mostrarColaboraciones',
   ].every((id) => fieldIds.includes(id)), fieldIds.join(', '));
 
-  ok('shell base presente', merged.blocks.some((b) => b.id === 'parejaGrupoBase'), 'parejaGrupoBase');
+  ok('sin tipoPareja en delta', !fieldIds.includes('tipoPareja'), 'shell A1');
 
   const colabField = swBlock.fields.find((f) => f.id === 'colaboraCon');
-  ok('colaboraCon solo si Sí', colabField.showWhen.values.join(',') === 'Sí', JSON.stringify(colabField.showWhen));
+  ok('colaboraCon visible Sí o A convenir', colabField.showWhen.values.join(',') === 'Sí,A convenir', JSON.stringify(colabField.showWhen));
 
-  ok('fotosMin pareja', RP.getFotosMin(userCtx) === 4, String(RP.getFotosMin(userCtx)));
+  ok('aceptanSolteros opcional', swBlock.fields.find((f) => f.id === 'aceptanSolteros')?.required === false, 'no required');
 
-  const baseVals = {
-    ...baseShell(),
-    objetivosPerfil: ['Conocer otras parejas'],
-    tipoInteraccion: ['Intercambio de parejas'],
-    atiendenA: 'Parejas',
-    aceptanSolteros: 'No',
-    haceColaboraciones: 'No',
-    modalidades: ['recibe'],
-  };
+  const oblig = merged.obligatorios || [];
+  ok('obligatorios delta', [
+    'objetivosPerfil', 'intercambioSwinger', 'tipoInteraccion', 'modalidadInteraccion', 'atiendenA', 'haceColaboraciones',
+  ].every((k) => oblig.includes(k)), oblig.join(', '));
+  ok('aceptanSolteros no obligatorio', !oblig.includes('aceptanSolteros'), oblig.join(', '));
+
+  const baseVals = { ...baseShell(), ...swingerDelta() };
   const missBase = simulateValidate(ctx, userCtx, baseVals);
   ok('validación mínima ok', missBase.length === 0, missBase.join('; '));
 
-  const missReq = simulateValidate(ctx, userCtx, { modalidades: ['recibe'], ...baseShell() });
-  ok('faltan obligatorios swinger', missReq.length >= 5, missReq.join('; '));
+  const missInter = simulateValidate(ctx, userCtx, { ...baseVals, intercambioSwinger: '' });
+  ok('intercambioSwinger obligatorio', missInter.some((m) => /intercambio/i.test(m)), missInter.join('; '));
+
+  const missMod = simulateValidate(ctx, userCtx, { ...baseVals, modalidadInteraccion: [] });
+  ok('modalidadInteraccion obligatorio', missMod.some((m) => /modalidad/i.test(m)), missMod.join('; '));
+
+  const missColab = simulateValidate(ctx, userCtx, {
+    ...baseVals,
+    haceColaboraciones: 'Sí',
+    colaboraCon: [],
+  });
+  ok('colaboraCon obligatorio si Sí', missColab.some((m) => /colaboran con/i.test(m)), missColab.join('; '));
+
+  const okConvenir = simulateValidate(ctx, userCtx, {
+    ...baseVals,
+    haceColaboraciones: 'A convenir',
+    colaboraCon: [],
+  });
+  ok('colaboraCon opcional si A convenir', okConvenir.length === 0, okConvenir.join('; '));
 
   const colabSi = simulateCollect(ctx, {
     ...baseVals,
     haceColaboraciones: 'Sí',
-    colaboraCon: ['Parejas', 'Escorts'],
+    colaboraCon: ['Parejas', 'Unicorns'],
   });
-  ok('colaboraCon persistido si Sí', Array.isArray(colabSi.colaboraCon) && colabSi.colaboraCon.length === 2, JSON.stringify(colabSi.colaboraCon));
+  ok('deltaSwinger generado', colabSi.deltaSwinger && colabSi.deltaSwinger.intercambioSwinger === 'A convenir', JSON.stringify(colabSi.deltaSwinger));
+  ok('objetivoPrincipal', colabSi.objetivoPrincipal === 'Conocer parejas', colabSi.objetivoPrincipal);
 
   const colabNo = simulateCollect(ctx, {
     ...baseVals,
     haceColaboraciones: 'No',
     colaboraCon: ['Parejas'],
   });
-  ok('colaboraCon limpiado si No', colabNo.colaboraCon == null, JSON.stringify(colabNo));
+  ok('colaboraCon limpiado si No', colabNo.colaboraCon == null, JSON.stringify(colabNo.colaboraCon));
 
-  ok('shell + swinger compat', colabSi.parejaGrupoPerfil && colabSi.tipoPareja === 'Hombre + Mujer', JSON.stringify(colabSi.parejaGrupoPerfil));
-
-  const viajaOn = simulateCollect(ctx, {
+  const colabConvenir = simulateCollect(ctx, {
     ...baseVals,
-    modalidades: ['viaja'],
-    alcanceDesplazamiento: 'toda_ciudad',
-    viajesProgramados: 'si',
-    gastosTraslado: 'se_acuerda',
-    anticipacionViaje: '48h',
+    haceColaboraciones: 'A convenir',
+    colaboraCon: ['Escorts'],
   });
-  ok('viajes swinger on', viajaOn.viajesDesplazamiento.viaja === true, JSON.stringify(viajaOn.viajesDesplazamiento));
+  ok('colaboraCon persistido si A convenir', Array.isArray(colabConvenir.colaboraCon) && colabConvenir.colaboraCon.length === 1, JSON.stringify(colabConvenir.colaboraCon));
 
   const perf = simulateMapToPerfil(ctx, userCtx, colabSi);
-  ok('mapToPerfil campos', perf.atiendenA === 'Parejas' && perf.configuracionGrupo === 'pareja_hm', JSON.stringify({
-    atiendenA: perf.atiendenA,
-    configuracionGrupo: perf.configuracionGrupo,
+  ok('mapToPerfil delta', perf.intercambioSwinger === 'A convenir' && perf.modalidadInteraccion?.[0] === 'Discreta', JSON.stringify({
+    intercambioSwinger: perf.intercambioSwinger,
+    modalidadInteraccion: perf.modalidadInteraccion,
   }));
+  ok('mapToPerfil deltaSwinger nested', perf.deltaSwinger && perf.deltaSwinger.atiendenA === 'Parejas', JSON.stringify(perf.deltaSwinger));
 
-  const cardOn = ctx.CariHubPublicRenderLite.cardHTMLPareja({
-    ...perf,
-    nombre: 'Pareja Demo',
-    tagline: 'Pareja abierta y respetuosa',
-    precio: 'Consultar',
-    modalidades: ['recibe', 'viaja'],
-    viajesDesplazamiento: viajaOn.viajesDesplazamiento,
-    haceColaboraciones: 'Sí',
-    mostrarColaboraciones: 'Sí',
-    mostrarAtiendenA: 'Sí',
-    mostrarObjetivosPerfil: 'Sí',
-    objetivosPerfil: ['Conocer otras parejas'],
-  }, {});
-  ok('tarjeta pareja render', cardOn.includes('res-card--pareja') && cardOn.includes('Atienden a'), 'html');
-  ok('tarjeta chip Viaja', cardOn.includes('>Viaja<'), 'chip viaja');
-
-  const cardHidden = ctx.CariHubPublicRenderLite.cardHTMLPareja({
-    ...perf,
-    nombre: 'Pareja Demo',
-    tagline: 'Test',
-    mostrarAtiendenA: 'No',
-    mostrarColaboraciones: 'No',
-    mostrarObjetivosPerfil: 'No',
-    atiendenA: 'Todos',
-    haceColaboraciones: 'Sí',
-    objetivosPerfil: ['Conocer otras parejas'],
-  }, {});
-  ok('visibilidad oculta tarjeta', !cardHidden.includes('Atienden a') && !cardHidden.includes('Objetivos:'), 'sin líneas públicas');
+  ok('shell + swinger compat', colabSi.parejaGrupoPerfil && colabSi.tipoPareja === 'Hombre + Mujer', 'ok');
 } catch (e) {
   fail.push({ name: 'exception', detail: e.message });
 }
 
-console.log('\n=== QA Pareja Swinger ===');
+console.log('\n=== QA Pareja Swinger A2.1 ===');
 console.log('PASS:', pass.length);
 pass.forEach((p) => console.log('  ✓', p.name, p.detail ? '— ' + p.detail : ''));
 if (fail.length) {

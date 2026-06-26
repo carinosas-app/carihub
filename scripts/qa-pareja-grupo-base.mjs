@@ -132,6 +132,25 @@ try {
   const missAlias = RP.validateValues(CFG, { ...vals, aliasPareja: '', alias: '' }, shellCtx);
   ok('alias obligatorio', missAlias.some((m) => /alias/i.test(m)), missAlias.join('; '));
 
+  const missAliasShort = RP.validateValues(CFG, { ...vals, aliasPareja: 'AB', alias: 'AB' }, shellCtx);
+  ok('alias mínimo 3 caracteres', missAliasShort.some((m) => /mínimo 3/i.test(m)), missAliasShort.join('; '));
+
+  const missReglas = RP.validateValues(CFG, {
+    ...vals,
+    reglasAcceso: 'x'.repeat(501),
+  }, shellCtx);
+  ok('reglasAcceso máximo 500', missReglas.some((m) => /máximo 500/i.test(m)), missReglas.join('; '));
+
+  const missMaxPareja = RP.validateValues(CFG, {
+    ...vals,
+    miembros: [
+      baseMembers()[0],
+      baseMembers()[1],
+      { etiquetaPublica: 'Extra', generoPresentacion: 'Hombre', edad: 30 },
+    ],
+  }, shellCtx);
+  ok('máximo 2 integrantes pareja', missMaxPareja.some((m) => /máximo 2/i.test(m)), missMaxPareja.join('; '));
+
   const missConfig = RP.validateValues(CFG, { ...vals, configuracionGrupo: '' }, shellCtx);
   ok('configuración obligatoria', missConfig.some((m) => /configuraci/i.test(m)), missConfig.join('; '));
 
