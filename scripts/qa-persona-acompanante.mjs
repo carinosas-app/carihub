@@ -197,6 +197,16 @@ const SUBS = [
     badge: 'lgbt',
     viajes: true,
   },
+  {
+    key: 'dotados',
+    ids: ['dotados'],
+    oblig: ['modalidades', 'serviciosIncluidos'],
+    block: 'dotadosPerfil',
+    blockFields: ['longitudCm', 'mostrarLongitudPublico', 'atencionHombres'],
+    blockPref: 'dotadosPreferencias',
+    blockPrefFields: ['realizaTrios', 'mostrarRealizaTriosPublico'],
+    viajes: true,
+  },
 ];
 
 function baseValidValues() {
@@ -259,6 +269,12 @@ function deltaForSub(spec) {
       v.disponibilidadAgenda = ['Entre semana'];
       v.disponiblePara = ['Citas'];
       break;
+    case 'dotados':
+      v.longitudCm = '18';
+      v.mostrarLongitudPublico = 'No';
+      v.atencionHombres = 'Sí';
+      v.mostrarAtencionHombresPublico = 'No';
+      break;
     default:
       break;
   }
@@ -277,6 +293,9 @@ try {
 
   const indexJs = fs.readFileSync(path.join(root, 'data', 'registro-schema-index.js'), 'utf8');
   ok('schema-index persona_acompanante', indexJs.includes('"arquetipo":"persona_acompanante"'), 'index');
+  ok('escort pack subcategoriaIds dotados', CFG.subcategoriaIds.includes('dotados'), CFG.subcategoriaIds.join(', '));
+  ok('escort pack 15 subs', CFG.subcategoriaIds.length === 15, String(CFG.subcategoriaIds.length));
+  ok('SUBS loop 15 persona_acompanante', SUBS.length === 15, String(SUBS.length));
 
   for (const spec of SUBS) {
     const primaryId = spec.ids[0];
@@ -302,6 +321,12 @@ try {
     }
     for (const fid of spec.blockFields || []) {
       ok(`${spec.key} campo ${fid}`, hasField(merged, fid), fid);
+    }
+    if (spec.blockPref) {
+      ok(`${spec.key} bloque ${spec.blockPref}`, !!blockById(merged, spec.blockPref), spec.blockPref);
+    }
+    for (const fid of spec.blockPrefFields || []) {
+      ok(`${spec.key} pref ${fid}`, hasField(merged, fid), fid);
     }
     if (spec.aliasLabel) {
       ok(`${spec.key} alias label`, RP.getAliasLabel(userCtx, null) === spec.aliasLabel, RP.getAliasLabel(userCtx, null));
@@ -357,7 +382,7 @@ try {
   if (String(finLes.haceColaboraciones || '').trim() === 'No') delete finLes.colaboraCon;
   ok('lesbians finalize borra colaboraCon', finLes.colaboraCon == null, JSON.stringify(finLes.colaboraCon));
 
-  for (const sample of ['escort', 'lesbians', 'femboy']) {
+  for (const sample of ['escort', 'lesbians', 'femboy', 'dotados']) {
     ok(`schema-index ${sample}`, indexJs.includes(`"${sample}"`), sample);
   }
   ok('schema-index no hotwife byId', !indexJs.includes('"hotwife":{'), 'removed');

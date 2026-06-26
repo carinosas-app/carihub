@@ -42,6 +42,7 @@ function loadAll() {
   loadScript('data/registro-adultos-lifestyle-blocks.js', ctx);
   loadScript('carihub-registro-public-blocks.js', ctx);
   loadScript('data/registro-schema-index.js', ctx);
+  loadScript('data/registro-ui-index.js', ctx);
   loadScript('resultados-demo.js', ctx);
   loadScript('carihub-field-engine-lite.js', ctx);
   loadScript('carihub-public-render-lite.js', ctx);
@@ -97,6 +98,22 @@ try {
   ok('no matchesEscort', !RP.matchesEscort(userCtx, null), 'not escort');
   ok('no matchesPareja', !RP.matchesPareja(userCtx, null), 'not pareja');
   ok('viajes unicorns', V.subcategoriaActivaViajes('unicorns'), 'viajes activo');
+
+  // H5: schema/UI index alineados (persona_lifestyle + ProfileLayoutAdultos)
+  const uiIdx = ctx.CARIHUB_REGISTRO_UI_INDEX;
+  ok('H5 ui index unicorns lifestyle', uiIdx?.bySubcategoriaId?.unicorns === 'ui_adulto_lifestyle', uiIdx?.bySubcategoriaId?.unicorns);
+  ok('H5 lifestyle blocks uiIds', ctx.CARIHUB_REGISTRO_LIFESTYLE_BLOCKS.uiIds.join(',') === 'ui_adulto_lifestyle', ctx.CARIHUB_REGISTRO_LIFESTYLE_BLOCKS.uiIds.join(','));
+  const schemaRow = ctx.CARIHUB_REGISTRO_SCHEMA_INDEX?.byId?.unicorns;
+  ok('H5 schema index ProfileLayoutAdultos', schemaRow?.componentePerfil === 'ProfileLayoutAdultos', schemaRow?.componentePerfil);
+  ok('H5 schema index ResultCardUnicorn', schemaRow?.componenteResultados === 'ResultCardUnicorn', schemaRow?.componenteResultados);
+  ok('H5 schema index arquetipo lifestyle', schemaRow?.arquetipo === 'persona_lifestyle', schemaRow?.arquetipo);
+
+  const resolvedH5 = ctx.CariHubFieldEngineLite.resolveRegistrationSchema(userCtx);
+  ok('H5 field-engine uiProfileKey lifestyle', resolvedH5.uiProfileKey === 'persona_lifestyle', resolvedH5.uiProfileKey);
+  ok('H5 field-engine formularioUiId lifestyle', resolvedH5.formularioUiId === 'ui_adulto_lifestyle', resolvedH5.formularioUiId);
+  ok('H5 field-engine hide modalidad/servicios', (resolvedH5.ui.hide || []).includes('modalidad') && (resolvedH5.ui.hide || []).includes('servicios'), (resolvedH5.ui.hide || []).join(','));
+
+  ok('H5 resolveConfig con ui lifestyle', RP.resolveConfig(userCtx, { formularioUiId: 'ui_adulto_lifestyle' }) === ctx.CARIHUB_REGISTRO_LIFESTYLE_BLOCKS, 'ui match');
 
   const merged = RP.mergedConfig(ctx.CARIHUB_REGISTRO_LIFESTYLE_BLOCKS, userCtx);
   const block = merged.blocks.find((b) => b.id === 'unicornPerfil');

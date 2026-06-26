@@ -101,7 +101,7 @@
   global.CARIHUB_REGISTRO_LIFESTYLE_BLOCKS = {
     id: 'persona_lifestyle',
     formularioId: 'adultos',
-    uiIds: ['ui_adulto_acompanante'],
+    uiIds: ['ui_adulto_lifestyle'],
     subcategoriaIds: ['unicorns'],
     fotosMin: 3,
     subcategoriaOverrides: {
