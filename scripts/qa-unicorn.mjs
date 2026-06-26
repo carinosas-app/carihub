@@ -1,5 +1,5 @@
 /**
- * QA mínima — delta unicornio / persona_lifestyle (sin browser).
+ * QA Unicorn — motor blocks/validación/mapToPerfil/tarjeta (A3.1 + cierre A3.4).
  * node scripts/qa-unicorn.mjs
  */
 import fs from 'fs';
@@ -8,6 +8,7 @@ import vm from 'vm';
 import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const repoRoot = path.join(__dirname, '..');
 const root = path.join(__dirname, '..', 'public', 'js');
 
 function loadScript(relativePath, ctx) {
@@ -40,6 +41,9 @@ function loadAll() {
   loadScript('data/registro-adultos-pareja-blocks.js', ctx);
   loadScript('data/registro-adultos-lifestyle-blocks.js', ctx);
   loadScript('carihub-registro-public-blocks.js', ctx);
+  loadScript('data/registro-schema-index.js', ctx);
+  loadScript('resultados-demo.js', ctx);
+  loadScript('carihub-field-engine-lite.js', ctx);
   loadScript('carihub-public-render-lite.js', ctx);
   return ctx;
 }
@@ -208,11 +212,81 @@ try {
     buscoConocer: ['Parejas'],
   }, {});
   ok('objetivo oculto', !cardHidden.includes('Conocer parejas') || cardHidden.includes('Busco:'), 'visibilidad objetivos');
+
+  const FE = ctx.CariHubFieldEngineLite;
+  const pres = FE.resolvePublicPresentation({ subcategoriaId: 'unicorns', categoria: 'Unicorn' });
+  ok('cierre vista unicorn', pres.vistaPerfil === 'unicorn', pres.vistaPerfil);
+  ok('cierre ResultCardUnicorn', pres.componenteResultados === 'ResultCardUnicorn', pres.componenteResultados);
+  ok('cierre tipoPerfil persona', pres.tipoPerfil === 'persona', pres.tipoPerfil);
+
+  const blockIds = merged.blocks.map((b) => b.id);
+  ok(
+    'blocks operativos lifestyle',
+    ['serviciosLifestyle', 'horarios', 'sobreMi', 'perfilDetalle', 'modalidades', 'metodosPago'].every((id) => blockIds.includes(id)),
+    blockIds.join(', ')
+  );
+
+  const fullVals = {
+    ...baseVals(),
+    buscoConocer: ['Parejas', 'Mujeres'],
+    tipoParejaPreferida: ['Hombre + Mujer'],
+    finalidadEncuentro: ['Socializar'],
+    experiencia: 'Intermedio',
+    ambientePreferido: ['Hotel'],
+    estilo: 'Discreto',
+    serviciosLifestyle: ['Citas con parejas'],
+    modalidades: ['hotel', 'viaja'],
+    alcanceDesplazamiento: 'cualquier_ciudad_pais',
+    viajesProgramados: 'si',
+    gastosTraslado: 'se_acuerda',
+    anticipacionViaje: '48h',
+    horarioDetalle: 'Vie–Dom 20:00–02:00',
+    sobreMi: 'Unicornio lifestyle.',
+    idiomas: 'Español',
+  };
+  let fullFinal = RP.finalizeUnicornValues(fullVals, userCtx);
+  fullFinal.viajesDesplazamiento = V.buildViajesDesplazamiento(fullFinal, fullFinal.modalidades || []);
+  const fullPerf = RP.mapToPerfil({ subcategoriaId: 'unicorns', edad: 28, ciudad: 'Monterrey' }, fullFinal, userCtx);
+  ok('mapToPerfil serviciosLifestyle', Array.isArray(fullPerf.serviciosLifestyle) && fullPerf.serviciosLifestyle.length === 1, JSON.stringify(fullPerf.serviciosLifestyle));
+  ok('mapToPerfil horarioDetalle', fullPerf.horarioDetalle === 'Vie–Dom 20:00–02:00', fullPerf.horarioDetalle);
+  ok('mapToPerfil idiomas', fullPerf.idiomas === 'Español', fullPerf.idiomas);
+  ok('mapToPerfil sobreMi', fullPerf.sobreMi === 'Unicornio lifestyle.', fullPerf.sobreMi);
+  ok('mapToPerfil viajes nested', fullPerf.unicornPerfil && fullPerf.unicornPerfil.viajesDesplazamiento && fullPerf.unicornPerfil.viajesDesplazamiento.viaja === true, 'viaja');
+
+  const built = RP.buildUnicornPerfil(fullFinal);
+  ok(
+    'buildUnicornPerfil shape A3.4',
+    built.tipoUnicornio === 'Mujer'
+      && Array.isArray(built.modalidades)
+      && built.horarioDetalle === 'Vie–Dom 20:00–02:00'
+      && built.sobreMi === 'Unicornio lifestyle.'
+      && built.idiomas === 'Español',
+    JSON.stringify({ modalidades: built.modalidades, horarioDetalle: built.horarioDetalle })
+  );
+
+  const cardPipe = ctx.CariHubPublicRenderLite.cardHTML({
+    ...fullPerf,
+    nombre: 'Luna U.',
+    edad: 28,
+    precio: '1500',
+    ciudad: 'Monterrey',
+    badgeUnicorn: true,
+  }, { categoria: 'Unicorn' });
+  ok('cardHTML pipeline unicorn', cardPipe.includes('res-card--unicorn') && cardPipe.includes('Busco:'), 'cardHTML');
+
+  const perfilHtml = fs.readFileSync(path.join(repoRoot, 'public', 'perfil-publico.html'), 'utf8');
+  ok('ficha tipo unicornio', perfilHtml.includes('Tipo de unicornio'), 'row');
+  ok('ficha busca actualmente', perfilHtml.includes('Busca actualmente'), 'row');
+  ok('ficha busco conocer unicorn', perfilHtml.includes('isUnicornSubFicha(u)&&Array.isArray(u.buscoConocer)'), 'guard');
+
+  const previewJs = fs.readFileSync(path.join(repoRoot, 'public', 'js', 'registro-perfil-preview.js'), 'utf8');
+  ok('preview vista unicorn source', previewJs.includes("vistaPerfil = 'unicorn'"), 'preview.js');
+  ok('preview strip swingerPerfil', previewJs.includes('delete u.swingerPerfil'), 'anti-contam');
 } catch (e) {
   fail.push({ name: 'exception', detail: e.message });
 }
 
-console.log('\n=== QA Unicornio A3.1 ===');
+console.log('\n=== QA Unicorn A3.4 Cierre (motor) ===');
 console.log('PASS:', pass.length);
 pass.forEach((p) => console.log('  ✓', p.name, p.detail ? '— ' + p.detail : ''));
 if (fail.length) {

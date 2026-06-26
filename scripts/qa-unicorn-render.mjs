@@ -1,5 +1,5 @@
 /**
- * QA — A3.3 render tarjeta + routing + DEMO unicorn (sin browser).
+ * QA — A3.4 render tarjeta + routing + ficha DEMO unicorn (sin browser).
  * node scripts/qa-unicorn-render.mjs
  */
 import fs from 'fs';
@@ -146,11 +146,40 @@ try {
   ok('DEMO campos lifestyle', /tipoUnicornio:"Mujer"/.test(demoBlock) && /buscoConocer:\["Parejas"/.test(demoBlock), 'campos');
   ok('ficha serviciosLifestyle', perfilHtml.includes('Servicios lifestyle'), 'ficha row');
   ok('schema ResultCardUnicorn registrado', perfilHtml.includes('ResultCardUnicorn') || fs.readFileSync(path.join(repoRoot, 'scripts', 'config-registro-adultos-schema.json'), 'utf8').includes('"ResultCardUnicorn"'), 'validator');
+
+  const previewHtml = fs.readFileSync(path.join(repoRoot, 'public', 'preview', 'perfil-vista-previa.html'), 'utf8');
+  ok('preview DEMO persona', /DEMO\.unicorn[\s\S]*tipoPerfil:"persona"/.test(previewHtml), 'vista-previa');
+  ok('packs sin pareja buscando', !/Buscan su unicornio ideal/i.test(perfilHtml), 'CARINOSAS_PACKS');
+
+  const fichaRows = [
+    'Tipo de unicornio',
+    'Objetivo del perfil',
+    'Busco conocer',
+    'Tipo de pareja preferida',
+    'Finalidad del encuentro',
+    'Busca actualmente',
+    'Experiencia',
+    'Ambiente preferido',
+    'Servicios lifestyle',
+    'Métodos de pago',
+  ];
+  ok(
+    'ficha filas unicorn A3.4',
+    fichaRows.every((row) => perfilHtml.includes(row)),
+    fichaRows.filter((row) => !perfilHtml.includes(row)).join(', ')
+  );
+
+  const previewJs = fs.readFileSync(path.join(repoRoot, 'public', 'js', 'registro-perfil-preview.js'), 'utf8');
+  ok('preview iframe vista param', previewJs.includes("params.set('vista', data.vista)"), 'iframe src');
+  ok('preview perfilIframeSrc unicorn', previewJs.includes("vistaPerfil = 'unicorn'"), 'vista unicorn');
+
+  const mapa = fs.readFileSync(path.join(repoRoot, 'scripts', 'mapa-registro-categorias.json'), 'utf8');
+  ok('mapa unicorns persona_lifestyle', mapa.includes('"subcategoriaId": "unicorns"') && mapa.includes('"arquetipo": "persona_lifestyle"'), 'mapa');
 } catch (e) {
   fail.push({ name: 'exception', detail: e.message });
 }
 
-console.log('\n=== QA Unicorn A3.3 Render ===');
+console.log('\n=== QA Unicorn A3.4 Render ===');
 console.log('PASS:', pass.length);
 pass.forEach((p) => console.log('  ✓', p.name, p.detail ? '— ' + p.detail : ''));
 if (fail.length) {

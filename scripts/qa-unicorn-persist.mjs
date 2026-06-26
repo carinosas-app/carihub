@@ -1,5 +1,5 @@
 /**
- * QA — A3.2 persistencia submit + preview unicorn (sin browser).
+ * QA — A3.4 persistencia submit + preview unicorn (sin browser).
  * node scripts/qa-unicorn-persist.mjs
  */
 import fs from 'fs';
@@ -231,6 +231,15 @@ try {
   ok('preview idiomas', preview.idiomas === 'Español, Inglés', preview.idiomas);
   ok('preview sin swingerPerfil', !preview.swingerPerfil, 'no swinger');
   ok('preview badgeUnicorn', preview.badgeUnicorn === true, String(preview.badgeUnicorn));
+  ok('preview tipoPerfil persona', preview.tipoPerfil === 'persona', preview.tipoPerfil);
+  ok('preview arquetipo persona_lifestyle', preview.arquetipo === 'persona_lifestyle', preview.arquetipo);
+  ok('preview sobreMi', preview.sobreMi === 'Unicornio lifestyle discreta.', preview.sobreMi);
+  ok('preview serviciosLifestyle', Array.isArray(preview.serviciosLifestyle) && preview.serviciosLifestyle.length === 2, JSON.stringify(preview.serviciosLifestyle));
+  ok('preview nested mirrors top-level', preview.unicornPerfil && preview.unicornPerfil.tipoUnicornio === preview.tipoUnicornio, 'mirror');
+  ok('preview unicornPerfil idiomas', preview.unicornPerfil && preview.unicornPerfil.idiomas === 'Español, Inglés', preview.unicornPerfil.idiomas);
+
+  const submitJs = fs.readFileSync(path.join(__dirname, '..', 'public', 'js', 'registro-perfil-submit.js'), 'utf8');
+  ok('submit unicornPerfil builder', submitJs.includes('unicornPerfil: unicornPerfil'), 'submit.js');
 
   const swingerBloques = RP.finalizeParejaSwingerValues({
     objetivosPerfil: ['Conocer parejas'],
@@ -258,7 +267,7 @@ try {
   fail.push({ name: 'exception', detail: e.message });
 }
 
-console.log('\n=== QA Unicorn A3.2 Persist ===');
+console.log('\n=== QA Unicorn A3.4 Persist ===');
 console.log('PASS:', pass.length);
 pass.forEach((p) => console.log('  ✓', p.name, p.detail ? '— ' + p.detail : ''));
 if (fail.length) {
