@@ -71,6 +71,35 @@
     return '<p class="res-card__viajes-resumen">' + safeTxt(sum) + '</p>';
   }
 
+  function lesbiansMostrarPublico(u, visibilityKey, contentVal) {
+    if (!contentVal) return false;
+    var vis = u[visibilityKey];
+    if (vis != null && String(vis).trim() !== '') return String(vis).trim() === 'Sí';
+    return true;
+  }
+
+  function isLesbiansPerfil(u) {
+    var id = normTxt(u.subcategoriaId || u.subcategoria || '');
+    return id === 'lesbians';
+  }
+
+  function lesbiansCardExtraHTML(u) {
+    if (!isLesbiansPerfil(u)) return '';
+    var lines = [];
+    if (lesbiansMostrarPublico(u, 'mostrarAtiendoA', u.atiendoA)) {
+      lines.push('Atiende a: ' + String(u.atiendoA).trim());
+    }
+    if (lesbiansMostrarPublico(u, 'mostrarColaboraciones', u.haceColaboraciones)) {
+      lines.push('Colaboraciones: ' + String(u.haceColaboraciones).trim());
+    }
+    if (!lines.length) return '';
+    return '<p class="res-card__viajes-resumen">' + safeTxt(lines.join(' · ')) + '</p>';
+  }
+
+  function cardPerfilExtraHTML(u) {
+    return cardViajesExtraHTML(u) + lesbiansCardExtraHTML(u);
+  }
+
   function ubicacionCorta(u) {
     if (u.ubicacion) return String(u.ubicacion).trim();
     var z = String(u.zona || '').trim();
@@ -234,7 +263,7 @@
     var edad = u.edad != null ? String(u.edad).trim() + ' años' : '';
     var set = modalidadesSet(u);
     var mods = chipModalidadHTML(set);
-    var viajesLine = cardViajesExtraHTML(u);
+    var viajesLine = cardPerfilExtraHTML(u);
     var catLabel = (global.CariHubResultadosDemo && CariHubResultadosDemo.labelCategoria)
       ? CariHubResultadosDemo.labelCategoria(u.categoriaPublica || u.categoria || Q.categoria || '')
       : (u.categoriaPublica || u.categoria || Q.categoria || '');

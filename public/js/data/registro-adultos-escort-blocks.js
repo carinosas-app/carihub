@@ -66,6 +66,17 @@
   var TOM_FEM_ESTILO = ['Elegante', 'Glamour', 'Casual', 'Kawaii', 'Gótico', 'Cosplay'];
   var TOM_FEM_PRESENTACION = ['Muy femenina', 'Femenina', 'Andrógina'];
 
+  var LESBIANS_COLABORA_CON = [
+    'Mujeres', 'Lesbians', 'Bisexuales', 'Trans', 'Femboy', 'Tom Boy', 'Tom Fem',
+    'Parejas', 'Cualquier anunciante'
+  ];
+
+  var LESBIANS_ESTILO = [
+    'Elegante', 'Casual', 'Glamour', 'Deportivo', 'Alternativo', 'Urbano', 'Discreto'
+  ];
+
+  var OPCIONES_SI_NO_CONVENIR = ['Sí', 'No', 'A convenir'];
+
   global.CARIHUB_REGISTRO_ESCORT_BLOCKS = {
     id: 'persona_acompanante',
     formularioId: 'adultos',
@@ -87,13 +98,23 @@
         }
       },
       'lesbians': {
-        obligatoriosExtra: ['orientacion'],
+        obligatoriosExtra: ['orientacion', 'atiendoA', 'haceColaboraciones'],
         badges: ['lgbt'],
         fieldPatches: {
-          orientacion: { required: true }
+          orientacion: { required: true },
+          atiendoA: { required: true },
+          haceColaboraciones: { required: true },
+          mostrarAtiendoA: { defaultValue: 'Sí' },
+          mostrarColaboraciones: { defaultValue: 'Sí' }
         },
         fieldHints: {
-          orientacion: 'Indica orientación y tipo de clientela.'
+          orientacion: 'Indica orientación y tipo de clientela.',
+          atiendoA: 'Define a quién atiendes en tu perfil.',
+          mostrarAtiendoA: 'Controla si «Atiende a» aparece en tarjeta y ficha pública.',
+          haceColaboraciones: 'Indica si colaboras con otras anunciantes (distinto de colaboración para contenido).',
+          colaboraCon: 'Marca con quién te interesa colaborar.',
+          mostrarColaboraciones: 'Controla si colaboraciones se ven en tarjeta y ficha pública.',
+          estiloLesbian: 'Tu estilo o estética principal (opcional).'
         }
       },
       'escort vip': {
@@ -631,6 +652,59 @@
             type: 'select',
             required: false,
             options: OPCIONES_SI_NO_ACUERDO.slice()
+          }
+        ]
+      },
+      {
+        id: 'lesbiansPerfil',
+        title: 'Perfil lesbians',
+        hint: 'Datos específicos de tu perfil. El badge LGBT+ se asigna automáticamente.',
+        onlySubcategorias: ['lesbians'],
+        fields: [
+          {
+            id: 'atiendoA',
+            label: 'Atiende a',
+            type: 'select',
+            required: true,
+            options: ['Mujeres', 'Parejas', 'Ambos']
+          },
+          {
+            id: 'mostrarAtiendoA',
+            label: '¿Mostrar «Atiende a» en tarjeta y perfil?',
+            type: 'select',
+            required: false,
+            defaultValue: 'Sí',
+            options: OPCIONES_SI_NO.slice()
+          },
+          {
+            id: 'haceColaboraciones',
+            label: 'Colaboraciones con otras anunciantes',
+            type: 'select',
+            required: true,
+            options: OPCIONES_SI_NO_CONVENIR.slice()
+          },
+          {
+            id: 'colaboraCon',
+            label: 'Busco colaborar con',
+            type: 'checklist',
+            required: false,
+            showWhen: { field: 'haceColaboraciones', values: ['Sí', 'A convenir'] },
+            options: LESBIANS_COLABORA_CON.slice()
+          },
+          {
+            id: 'mostrarColaboraciones',
+            label: '¿Mostrar colaboraciones en tarjeta y perfil?',
+            type: 'select',
+            required: false,
+            defaultValue: 'Sí',
+            options: OPCIONES_SI_NO.slice()
+          },
+          {
+            id: 'estiloLesbian',
+            label: 'Estilo',
+            type: 'select',
+            required: false,
+            options: LESBIANS_ESTILO.slice()
           }
         ]
       },

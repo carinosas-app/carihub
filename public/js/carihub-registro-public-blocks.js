@@ -212,6 +212,34 @@
     return !!(field && field.showWhenViaja);
   }
 
+  function fieldMatchesShowWhen(field, values) {
+    if (!field || !field.showWhen) return true;
+    values = values || {};
+    var depVal = values[field.showWhen.field];
+    var allowed = field.showWhen.values || [];
+    var current = String(depVal || '').trim();
+    return allowed.indexOf(current) >= 0;
+  }
+
+  function isConditionalSubfield(field) {
+    return isViajesSubfield(field) || !!(field && field.showWhen);
+  }
+
+  function isFieldHiddenByCondition(field, values) {
+    if (isViajesSubfield(field)) return !modalidadesIncluyeViaja(values);
+    if (field.showWhen) return !fieldMatchesShowWhen(field, values);
+    return false;
+  }
+
+  function fieldValueWithDefault(field, values) {
+    values = values || {};
+    var val = values[field.id];
+    if ((val == null || String(val).trim() === '') && field.defaultValue) {
+      return field.defaultValue;
+    }
+    return val != null ? val : '';
+  }
+
   function renderChecklist(field, values, ctx) {
     values = values || {};
     var selected = values[field.id];
@@ -273,16 +301,17 @@
 
   function renderField(field, values, ctx) {
     values = values || {};
-    var val = values[field.id] != null ? values[field.id] : '';
+    var val = fieldValueWithDefault(field, values);
     var req = field.required ? ' <span class="rp-req">*</span>' : '';
-    var viajesSub = isViajesSubfield(field);
-    var viajesHidden = viajesSub && !modalidadesIncluyeViaja(values);
+    var conditionalSub = isConditionalSubfield(field);
+    var hidden = isFieldHiddenByCondition(field, values);
     var wrap = '<div class="rp-field rp-pub-field' +
-      (viajesSub ? ' rp-viajes-subfield' : '') +
-      (viajesHidden ? ' rp-hidden' : '') +
+      (conditionalSub ? ' rp-conditional-subfield' : '') +
+      (hidden ? ' rp-hidden' : '') +
       '" data-rp-pub-field-wrap="' + esc(field.id) + '"' +
-      (viajesSub ? ' data-rp-viajes-sub="1"' : '') +
-      (viajesHidden ? ' aria-hidden="true"' : '') + '>';
+      (isViajesSubfield(field) ? ' data-rp-viajes-sub="1"' : '') +
+      (field.showWhen ? ' data-rp-show-when-field="' + esc(field.showWhen.field) + '"' : '') +
+      (hidden ? ' aria-hidden="true"' : '') + '>';
     if (field.type === 'checklist') {
       wrap += '<span class="rp-pub-field-label">' + esc(field.label) + req + '</span>' + renderChecklist(field, values, ctx);
     } else if (field.type === 'select') {
@@ -357,7 +386,46 @@
     host.removeAttribute('aria-hidden');
     bindNivelServicioHelp();
     bindViajaToggle();
+    bindConditionalFieldToggles();
+    syncConditionalSubfieldsVisibility();
+  }
+
+  function readSelectValue(fieldId) {
+    var el = $(fieldDomId(fieldId));
+    return el ? String(el.value || '').trim() : '';
+  }
+
+  function collectCurrentConditionalValues() {
+    return {
+      modalidades: readChecklist('modalidades'),
+      haceColaboraciones: readSelectValue('haceColaboraciones')
+    };
+  }
+
+  function clearColaboraConValues() {
+    document.querySelectorAll('[data-rp-pub-field="colaboraCon"] input[type="checkbox"]').forEach(function (cb) {
+      cb.checked = false;
+    });
+  }
+
+  function syncConditionalSubfieldsVisibility() {
     syncViajesSubformVisibility();
+    var hace = readSelectValue('haceColaboraciones');
+    var showColabora = hace === 'Sí' || hace === 'A convenir';
+    document.querySelectorAll('[data-rp-show-when-field="haceColaboraciones"]').forEach(function (el) {
+      el.classList.toggle('rp-hidden', !showColabora);
+      if (showColabora) el.removeAttribute('aria-hidden');
+      else el.setAttribute('aria-hidden', 'true');
+    });
+    if (!showColabora) clearColaboraConValues();
+  }
+
+  function bindConditionalFieldToggles() {
+    var sel = $(fieldDomId('haceColaboraciones'));
+    if (sel && sel.dataset.rpColabBound !== '1') {
+      sel.dataset.rpColabBound = '1';
+      sel.addEventListener('change', syncConditionalSubfieldsVisibility);
+    }
   }
 
   function clearViajesSubfieldValues() {
@@ -433,6 +501,15 @@
     return out;
   }
 
+  function finalizeLesbiansValues(values) {
+    if (!values) return values;
+    if (!String(values.mostrarAtiendoA || '').trim()) values.mostrarAtiendoA = 'Sí';
+    if (!String(values.mostrarColaboraciones || '').trim()) values.mostrarColaboraciones = 'Sí';
+    var hace = String(values.haceColaboraciones || '').trim();
+    if (hace === 'No') delete values.colaboraCon;
+    return values;
+  }
+
   function finalizeViajesValues(values) {
     var api = viajesApi();
     if (!api) return values;
@@ -463,7 +540,7 @@
         values[field.id] = el ? String(el.value || '').trim() : '';
       });
     });
-    return finalizeViajesValues(values);
+    return finalizeLesbiansValues(finalizeViajesValues(values));
   }
 
   function validateValues(cfg, values, ctx) {
@@ -492,7 +569,7 @@
     cfg.blocks.forEach(function (block) {
       block.fields.forEach(function (field) {
         if (!field.required) return;
-        if (isViajesSubfield(field) && !viajaActivo) return;
+        if (isFieldHiddenByCondition(field, values)) return;
         var val = values[field.id];
         var empty = field.type === 'boolean'
           ? !isTruthyFieldValue(val)
@@ -518,6 +595,12 @@
         }
       }
     });
+    if (String(values.haceColaboraciones || '').trim() === 'Sí') {
+      var colabora = values.colaboraCon;
+      if (!Array.isArray(colabora) || !colabora.length) {
+        pushMissing(missing, labelForField(cfg, 'colaboraCon') || 'Busco colaborar con');
+      }
+    }
     return missing;
   }
 
@@ -649,6 +732,16 @@
       u.distintivosVip = bloques.distintivosVip.slice();
     }
     u = mapDotadosFields(u, bloques);
+    if (bloques.atiendoA) u.atiendoA = bloques.atiendoA;
+    if (bloques.mostrarAtiendoA) u.mostrarAtiendoA = bloques.mostrarAtiendoA;
+    if (bloques.haceColaboraciones) u.haceColaboraciones = bloques.haceColaboraciones;
+    if (Array.isArray(bloques.colaboraCon) && bloques.colaboraCon.length) {
+      u.colaboraCon = bloques.colaboraCon.slice();
+    }
+    if (bloques.mostrarColaboraciones) u.mostrarColaboraciones = bloques.mostrarColaboraciones;
+    if (bloques.estiloLesbian) u.estiloLesbian = bloques.estiloLesbian;
+    if (!u.mostrarAtiendoA) u.mostrarAtiendoA = 'Sí';
+    if (!u.mostrarColaboraciones) u.mostrarColaboraciones = 'Sí';
     if (isTruthyFieldValue(bloques.eventosDisponibles)) u.eventosDisponibles = true;
     if (bloques.portfolioURL) u.portfolioURL = normalizeUrl(bloques.portfolioURL);
     if (bloques.disponibilidad) {
