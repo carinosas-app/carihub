@@ -763,6 +763,8 @@
     if (id === 'antro restaurant bar lgbt' || id === 'antro lgbt') return 'antro_lgbt';
     if (id === 'antro restaurant bar' || id === 'antro') return 'antro';
     if (id === 'club sw' || id === 'club swinger' || id === 'club_sw' || id === 'club_swinger') return 'club_sw';
+    if (id === 'cabinas glory holes' || id === 'cabinas / glory holes' || id === 'cabinas') return 'cabinas';
+    if (id === 'cine xxx' || id === 'cine adulto' || id === 'cine_xxx') return 'cine_xxx';
     if (u && u.arquetipo === 'negocio_venue') {
       if (u.badgeLgbt === true) return 'antro_lgbt';
       if (u.badgeSwinger === true) return 'club_sw';
@@ -771,8 +773,12 @@
         if (sid === 'antro_lgbt') return 'antro_lgbt';
         if (sid === 'antro') return 'antro';
         if (sid === 'club sw' || sid === 'club swinger' || sid === 'club_sw' || sid === 'club_swinger') return 'club_sw';
+        if (sid === 'cabinas glory holes' || sid === 'cabinas / glory holes' || sid === 'cabinas') return 'cabinas';
+        if (sid === 'cine xxx' || sid === 'cine adulto' || sid === 'cine_xxx') return 'cine_xxx';
       }
       var tipoVenue = String(u.tipoVenue || (u.venuePerfil && u.venuePerfil.tipoVenue) || '').toLowerCase();
+      if (tipoVenue.indexOf('cabina') >= 0 || tipoVenue.indexOf('glory') >= 0) return 'cabinas';
+      if (tipoVenue.indexOf('cine') >= 0 || tipoVenue.indexOf('sala xxx') >= 0) return 'cine_xxx';
       if (tipoVenue.indexOf('club') >= 0 || tipoVenue.indexOf('lifestyle') >= 0 || tipoVenue.indexOf('swinger') >= 0) return 'club_sw';
     }
     return id;
@@ -781,13 +787,22 @@
   function isVenuePerfil(u) {
     if (!u) return false;
     var sid = normVenueSubId(u);
-    if (u.arquetipo === 'negocio_venue' && (sid === 'antro' || sid === 'antro_lgbt' || sid === 'club_sw')) return true;
-    if (u.venuePerfil && (sid === 'antro' || sid === 'antro_lgbt' || sid === 'club_sw')) return true;
-    return sid === 'antro' || sid === 'antro_lgbt' || sid === 'club_sw';
+    var venueSubs = ['antro', 'antro_lgbt', 'club_sw', 'cabinas', 'cine_xxx'];
+    if (u.arquetipo === 'negocio_venue' && venueSubs.indexOf(sid) >= 0) return true;
+    if (u.venuePerfil && venueSubs.indexOf(sid) >= 0) return true;
+    return venueSubs.indexOf(sid) >= 0;
   }
 
   function isClubSwPerfil(u) {
     return isVenuePerfil(u) && normVenueSubId(u) === 'club_sw';
+  }
+
+  function isCabinasPerfil(u) {
+    return isVenuePerfil(u) && normVenueSubId(u) === 'cabinas';
+  }
+
+  function isCineXxxPerfil(u) {
+    return isVenuePerfil(u) && normVenueSubId(u) === 'cine_xxx';
   }
 
   function isAntroPerfil(u) {
@@ -834,6 +849,24 @@
       var pol = String(politica).split(/[\n·|]/)[0].trim();
       if (pol.length > 26) pol = pol.slice(0, 24) + '…';
       if (pol) mods += '<span class="modchip mc-purple">' + svgIco('users') + safeTxt(pol) + '</span>';
+    }
+    var priv = u.nivelPrivacidad || (u.venuePerfil && u.venuePerfil.nivelPrivacidad);
+    if (priv) {
+      var privTxt = String(priv);
+      if (privTxt.length > 24) privTxt = privTxt.slice(0, 22) + '…';
+      mods += '<span class="modchip mc-purple">' + svgIco('shield') + safeTxt(privTxt) + '</span>';
+    }
+    var funciones = u.horariosFunciones || (u.venuePerfil && u.venuePerfil.horariosFunciones);
+    if (funciones) {
+      var fn = String(funciones).split(/[\n·|]/)[0].trim();
+      if (fn.length > 26) fn = fn.slice(0, 24) + '…';
+      if (fn) mods += '<span class="modchip mc-purple">' + svgIco('clock') + safeTxt(fn) + '</span>';
+    }
+    var clasif = u.clasificacion || (u.venuePerfil && u.venuePerfil.clasificacion);
+    if (clasif) {
+      var cl = String(clasif);
+      if (cl.length > 24) cl = cl.slice(0, 22) + '…';
+      mods += '<span class="modchip mc-pink">' + svgIco('shield') + safeTxt(cl) + '</span>';
     }
     return mods;
   }
@@ -884,6 +917,42 @@
       descBlock: descripcionCompactHTML(u, 'Descripción'),
       priceLabel: 'Cover',
       badges: badgesCompactHTML(u, badgeOpts)
+    });
+  }
+
+  function cardHTMLCabinas(u, Q) {
+    Q = Q || {};
+    var mods = venueShowChips(u, { horario: true });
+    var catLabel = (global.CariHubResultadosDemo && CariHubResultadosDemo.labelCategoria)
+      ? CariHubResultadosDemo.labelCategoria(u.categoriaPublica || u.categoria || Q.categoria || '')
+      : (u.categoriaPublica || u.categoria || Q.categoria || 'Cabinas');
+    return cardShell(u, Q, {
+      cardClass: 'res-card--negocio res-card--venue res-card--cabinas',
+      nombre: u.nombreComercial || u.nombre || u.alias,
+      catIcon: 'briefcase',
+      catLabel: catLabel,
+      metaRight: mods,
+      descBlock: descripcionCompactHTML(u, 'Descripción'),
+      priceLabel: 'Desde',
+      badges: badgesCompactHTML(u, { negocio: u.verificada !== false })
+    });
+  }
+
+  function cardHTMLCineXxx(u, Q) {
+    Q = Q || {};
+    var mods = venueShowChips(u, { horario: true });
+    var catLabel = (global.CariHubResultadosDemo && CariHubResultadosDemo.labelCategoria)
+      ? CariHubResultadosDemo.labelCategoria(u.categoriaPublica || u.categoria || Q.categoria || '')
+      : (u.categoriaPublica || u.categoria || Q.categoria || 'Cine XXX');
+    return cardShell(u, Q, {
+      cardClass: 'res-card--negocio res-card--venue res-card--cine-xxx',
+      nombre: u.nombreComercial || u.nombre || u.alias,
+      catIcon: 'briefcase',
+      catLabel: catLabel,
+      metaRight: mods,
+      descBlock: descripcionCompactHTML(u, 'Descripción'),
+      priceLabel: 'Boleto',
+      badges: badgesCompactHTML(u, { negocio: u.verificada !== false })
     });
   }
 
@@ -1119,6 +1188,8 @@
     if (comp === 'ResultCardPareja') return cardHTMLPareja(u, Q);
     if (comp === 'ResultCardEspectaculo' || isEspectaculoPerfil(u)) return cardHTMLEspectaculo(u, Q);
     if (comp === 'ResultCardCreador' || isCreadorPerfil(u)) return cardHTMLCreador(u, Q);
+    if (isCabinasPerfil(u)) return cardHTMLCabinas(u, Q);
+    if (isCineXxxPerfil(u)) return cardHTMLCineXxx(u, Q);
     if (isClubSwPerfil(u)) return cardHTMLClubSw(u, Q);
     if (isVenuePerfil(u)) return cardHTMLVenue(u, Q);
     if (isBienestarPerfil(u)) return cardHTMLBienestar(u, Q);
@@ -1236,7 +1307,11 @@
     cardHTMLAntro: cardHTMLAntro,
     cardHTMLAntroLgbt: cardHTMLAntroLgbt,
     cardHTMLClubSw: cardHTMLClubSw,
+    cardHTMLCabinas: cardHTMLCabinas,
+    cardHTMLCineXxx: cardHTMLCineXxx,
     isClubSwPerfil: isClubSwPerfil,
+    isCabinasPerfil: isCabinasPerfil,
+    isCineXxxPerfil: isCineXxxPerfil,
     cardHTMLBienestar: cardHTMLBienestar,
     cardHTMLSpa: cardHTMLSpa,
     cardHTMLMasajesLocal: cardHTMLMasajesLocal,
