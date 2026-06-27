@@ -5680,12 +5680,14 @@ DEMO.creador={
 /* Sex Shop */
 DEMO.sexShop={
   subcategoriaId:"sex_shop", categoria:"Sex Shop", categoriaPublica:"Sex Shop",
-  arquetipo:"retail", tipoPerfil:"negocio", nombre:"Pleasure Boutique MTY", verificada:true,
+  arquetipo:"negocio_retail", tipoPerfil:"negocio", nombreComercial:"Pleasure Boutique MTY", nombre:"Pleasure Boutique MTY", verificada:true,
   pais:"México", estado:"Nuevo León", ciudad:"Monterrey", zona:"Centro",
   tagline:"Lencería, juguetes y productos premium con asesoría discreta.",
-  precio:"199", moneda:"MXN", tiempoMinimo:"Compra mínima",
-  tipoNegocio:"Tienda especializada", categoriasProducto:"Lencería, Juguetes, Lubricantes, Accesorios",
+  precio:"$199 MXN", precioDesde:"$199 MXN", moneda:"MXN", tiempoMinimo:"Compra mínima",
+  categoriasProducto:"Lencería, Juguetes, Lubricantes, Accesorios",
   envioDomicilio:true, tiendaOnline:true,
+  tipoServicio:"Tienda · Lencería · Juguetes",
+  horarioDetalle:"Lun–Sáb 10:00 AM – 8:00 PM",
   metodosPago:["Efectivo","Tarjeta","Transferencia","Pago en línea"],
   disponibilidad:"Abierto ahora", horario:"Lun–Sáb 10:00 AM – 8:00 PM",
   respuestaCorta:"Responde en menos de 30 min",
@@ -6783,7 +6785,7 @@ function resolverVistaPerfil(u,q){
 function normalizarVistaPreview(vista){
   var v=String(vista||"").trim();
   if(!v) return "";
-  var alias={escort:"adult",acompanante:"adult",adulto:"adult",edecan:"edecan",modelos:"modelos",dotados:"dotados",femboy:"femboy",singles:"singles",dominatrix:"dominatrix",fetiche:"fetiche",sado:"sado",stripper:"stripper",tabledance:"tableDance",table_dance:"tableDance","table dance":"tableDance",contenido:"creador",creador_contenido:"creador","creador contenido":"creador"};
+  var alias={escort:"adult",acompanante:"adult",adulto:"adult",edecan:"edecan",modelos:"modelos",dotados:"dotados",femboy:"femboy",singles:"singles",dominatrix:"dominatrix",fetiche:"fetiche",sado:"sado",stripper:"stripper",tabledance:"tableDance",table_dance:"tableDance","table dance":"tableDance",contenido:"creador",creador_contenido:"creador","creador contenido":"creador",sex_shop:"sexShop","sex shop":"sexShop"};
   return alias[v.toLowerCase()]||v;
 }
 function resolverPerfilDesdeQuery(q){
@@ -6920,6 +6922,13 @@ function aplicarPerfilDesdeRegistro(vista,u){
     colaboracionesCreador:u.colaboracionesCreador||"",
     politicaPerfil:u.politicaPerfil||"",
     creadorPerfil:u.creadorPerfil?Object.assign({},u.creadorPerfil):null,
+    retailPerfil:u.retailPerfil?Object.assign({},u.retailPerfil):null,
+    nombreComercial:u.nombreComercial||u.nombre||"",
+    categoriasProducto:Array.isArray(u.categoriasProducto)?u.categoriasProducto.slice():(u.categoriasProducto||""),
+    envioDomicilio:u.envioDomicilio===true||u.envioDomicilio==="true"||u.envioDomicilio,
+    tiendaOnline:u.tiendaOnline===true||u.tiendaOnline==="true"||u.tiendaOnline,
+    direccion:u.direccion||"",
+    perfilNosotros:u.perfilNosotros||u.sobreNosotros||u.sobreMi||"",
     estiloDominacion:u.estiloDominacion||"",
     especialidadBdsm:u.especialidadBdsm||"",
     experienciaBdsm:u.experienciaBdsm||"",
@@ -6970,6 +6979,7 @@ function aplicarPerfilDesdeRegistro(vista,u){
   if(sidNorm==="table dance"||sidNorm==="table_dance"||sidNorm==="tabledance") clean.subcategoriaId="tabledance";
   if(sidNorm==="stripper") clean.subcategoriaId="stripper";
   if(sidNorm==="contenido"||sidNorm==="creador contenido"||sidNorm==="creador_contenido") clean.subcategoriaId="contenido";
+  if(sidNorm==="sex shop"||sidNorm==="sex_shop") clean.subcategoriaId="sex_shop";
   if(u.arquetipo) clean.arquetipo=u.arquetipo;
   if(u.tipoPerfil) clean.tipoPerfil=u.tipoPerfil;
   DEMO[vista]=clean;
