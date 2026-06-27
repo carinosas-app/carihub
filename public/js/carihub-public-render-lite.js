@@ -100,14 +100,20 @@
     return lesbiansMostrarPublico(u, visibilityKey, contentVal);
   }
 
+  function normalizeParejaSubId(id) {
+    var norm = normTxt(id).replace(/_/g, ' ');
+    if (norm === 'parejas swinger' || norm === 'swinger') return 'swinger';
+    if (norm === 'cuckold hotwife' || norm === 'cuckold_hotwife') return 'cuckold hotwife';
+    if (norm === 'unicorn' || norm === 'unicorns') return 'unicorns';
+    return norm;
+  }
+
   function isSwingerPerfil(u) {
-    var id = normTxt(u.subcategoriaId || u.subcategoria || '');
-    return id === 'swinger' || id === 'parejas swinger';
+    return normalizeParejaSubId(u.subcategoriaId || u.subcategoria || '') === 'swinger';
   }
 
   function isCuckoldHotwifePerfil(u) {
-    var id = normTxt(u.subcategoriaId || u.subcategoria || '').replace(/_/g, ' ');
-    return id === 'cuckold hotwife' || id === 'cuckold_hotwife';
+    return normalizeParejaSubId(u.subcategoriaId || u.subcategoria || '') === 'cuckold hotwife';
   }
 
   function cuckoldHotwifeMostrarPublico(u, visibilityKey, contentVal) {
