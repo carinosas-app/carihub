@@ -142,12 +142,20 @@ const demoModelos = extractDemoObject(perfilHtml, 'modelos');
 const demoDotados = extractDemoObject(perfilHtml, 'dotados');
 const demoFemboy = extractDemoObject(perfilHtml, 'femboy');
 const demoSingles = extractDemoObject(perfilHtml, 'singles');
+const demoGigolo = extractDemoObject(perfilHtml, 'gigolo');
+const demoLesbians = extractDemoObject(perfilHtml, 'lesbians');
+const demoTomBoy = extractDemoObject(perfilHtml, 'tomBoy');
+const demoTomFem = extractDemoObject(perfilHtml, 'tomFem');
 
 ok('H6 DEMO.edecan presente', demoEdecan.includes('subcategoriaId:"edecan"'), 'edecan');
 ok('H6 DEMO.modelos presente', demoModelos.includes('subcategoriaId:"modelos"'), 'modelos');
 ok('H6 DEMO.dotados presente', demoDotados.includes('subcategoriaId:"dotados"'), 'dotados');
 ok('H6 DEMO.femboy presente', demoFemboy.includes('subcategoriaId:"femboy"'), 'femboy');
 ok('H6 DEMO.singles presente', demoSingles.includes('subcategoriaId:"singles"'), 'singles');
+ok('H7 DEMO.gigolo presente', demoGigolo.includes('subcategoriaId:"gigolo"'), 'gigolo');
+ok('H7 DEMO.lesbians presente', demoLesbians.includes('subcategoriaId:"lesbians"'), 'lesbians');
+ok('H7 DEMO.tomBoy presente', demoTomBoy.includes('subcategoriaId:"tom_boy"'), 'tomBoy');
+ok('H7 DEMO.tomFem presente', demoTomFem.includes('subcategoriaId:"tom_fem"'), 'tomFem');
 ok('H6 DEMO edecan eventosDisponibles', demoEdecan.includes('eventosDisponibles:true'), 'eventos');
 ok('H6 DEMO modelos portfolioURL', demoModelos.includes('portfolioURL:'), 'portfolio');
 ok('H6 DEMO dotados longitudCm', demoDotados.includes('longitudCm:'), 'longitud');
@@ -157,6 +165,15 @@ ok(
   demoSingles.length > 0 && !demoSingles.includes('modalidades:') && !demoSingles.includes('modalidadFicha:'),
   'sin modalidades'
 );
+ok('H7 DEMO lesbians toggles', demoLesbians.includes('mostrarAtiendoA:"Sí"') && demoLesbians.includes('mostrarColaboraciones:"Sí"'), 'toggles');
+ok('H7 DEMO tomBoy presentacion', demoTomBoy.includes('presentacionTom:') && demoTomBoy.includes('estiloPredominante:'), 'tomBoy');
+ok('H7 DEMO tomFem presentacion', demoTomFem.includes('presentacionTom:') && demoTomFem.includes('estiloPredominante:'), 'tomFem');
+
+const resultadosDemoJs = fs.readFileSync(path.join(repoRoot, 'public', 'js', 'resultados-demo.js'), 'utf8');
+ok('H7 routing demo gigolo -> adult', /gigolo:\s*'adult'/.test(resultadosDemoJs), 'gigolo');
+ok('H7 routing demo femboy -> femboy', /femboy:\s*'femboy'/.test(resultadosDemoJs), 'femboy');
+ok('H7 routing demo singles -> singles', /singles:\s*'singles'/.test(resultadosDemoJs), 'singles');
+ok('H7 routing demo lesbians -> adult', /lesbians:\s*'adult'/.test(resultadosDemoJs), 'lesbians');
 
 console.log('\n=== HARDEN-01 Gate (meta) ===');
 console.log('PASS:', pass.length);
