@@ -108,7 +108,6 @@ const routeEarly = PB.mapToPerfil(
 );
 ok('mapToPerfil route venue early', routeEarly.arquetipo === 'negocio_venue' && !routeEarly.retailPerfil && !routeEarly.modalidades, 'anti contamination');
 
-ok('club_sw not venue pipeline', !PB.isVenueSubcategoria({ subcategoriaId: 'club_sw' }), 'club_sw');
 ok('retail not venue pipeline', !PB.isVenueSubcategoria({ subcategoriaId: 'sex_shop' }), 'sex_shop');
 
 console.log('\n=== QA Neg venue persist ===');

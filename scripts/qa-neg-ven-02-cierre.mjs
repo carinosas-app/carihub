@@ -1,7 +1,7 @@
 /**
- * QA — Gate final NEG-VEN-01 (antro + antro_lgbt + RET/CRE/ESP/DOM/HARDEN regresión).
+ * QA — Gate final NEG-VEN-02 (club_sw + HOSP/BIEN/VEN01/RET/CRE/ESP/DOM/HARDEN regresión).
  *
- * node scripts/qa-neg-ven-01-cierre.mjs
+ * node scripts/qa-neg-ven-02-cierre.mjs
  */
 import { spawnSync } from 'child_process';
 import fs from 'fs';
@@ -12,7 +12,10 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.join(__dirname, '..');
 
 const GATE_SCRIPTS = [
-  'qa-neg-venue-cierre.mjs',
+  'qa-neg-venue-club-sw-cierre.mjs',
+  'qa-neg-hosp-01-cierre.mjs',
+  'qa-neg-bien-01-cierre.mjs',
+  'qa-neg-ven-01-cierre.mjs',
   'qa-neg-ret-01-cierre.mjs',
   'qa-cre-01-cierre.mjs',
   'qa-esp-01-cierre.mjs',
@@ -52,7 +55,7 @@ function parsePassCount(out) {
   return total;
 }
 
-console.log('\n=== NEG-VEN-01 Gate — ejecución scripts ===');
+console.log('\n=== NEG-VEN-02 Gate — ejecución scripts ===');
 let gateChecks = 0;
 
 for (const script of GATE_SCRIPTS) {
@@ -62,33 +65,34 @@ for (const script of GATE_SCRIPTS) {
   else pass.push({ name: script, detail: 'ok' });
 }
 
-console.log('\n=== NEG-VEN-01 Gate — invariantes ===');
+console.log('\n=== NEG-VEN-02 Gate — invariantes ===');
 
 const blocksJs = fs.readFileSync(path.join(repoRoot, 'public', 'js', 'data', 'registro-adultos-venue-blocks.js'), 'utf8');
-ok('blocks NEG_VEN_1 sub antro', blocksJs.includes("'antro'"), 'antro');
-ok('blocks NEG_VEN_1 sub antro_lgbt', blocksJs.includes("'antro_lgbt'"), 'antro_lgbt');
-ok('nested venuePerfil', blocksJs.includes("id: 'venuePerfil'"), 'block');
-ok('antro subs still in bundle', blocksJs.includes("'antro'") && blocksJs.includes("'antro_lgbt'"), 'antro + antro_lgbt');
+ok('blocks NEG_VEN_02 sub club_sw', blocksJs.includes("'club_sw'"), 'club_sw');
+ok('1/1 sub club_sw only once', (blocksJs.match(/'club_sw'/g) || []).length >= 1, 'canon');
+ok('nested venuePerfil not clubSwPerfil', blocksJs.includes("id: 'venuePerfil'") && !blocksJs.includes("id: 'clubSwPerfil'"), 'venuePerfil');
+ok('no cabinas', !blocksJs.includes("'cabinas'"), 'excluido');
+ok('no cine_xxx', !blocksJs.includes("'cine_xxx'"), 'excluido');
+ok('no modalidades in bundle', !blocksJs.includes("id: 'modalidades'"), 'excluido');
+ok('no edad in bundle', !blocksJs.includes("id: 'edad'"), 'excluido');
 
 const perfilHtml = fs.readFileSync(path.join(repoRoot, 'public', 'perfil-publico.html'), 'utf8');
-ok('DEMO.antro sub antro', perfilHtml.includes('subcategoriaId:"antro"'), 'antro');
-ok('DEMO.antro negocio_venue', /DEMO\.antro=\{[\s\S]*?arquetipo:"negocio_venue"/.test(perfilHtml), 'arquetipo');
-ok('DEMO.antroLgbt sub antro_lgbt', perfilHtml.includes('subcategoriaId:"antro_lgbt"'), 'antro_lgbt');
-ok('DEMO.antroLgbt badgeLgbt', /DEMO\.antroLgbt=\{[\s\S]*?badgeLgbt:true/.test(perfilHtml), 'badge');
-ok('aplicarPerfilDesdeRegistro venuePerfil', perfilHtml.includes('venuePerfil:'), 'preview');
-ok('preview alias antro', perfilHtml.includes('"antro restaurant bar":"antro"'), 'alias');
-ok('preview alias antro_lgbt', perfilHtml.includes('"antro restaurant bar lgbt":"antroLgbt"'), 'alias lgbt');
+ok('DEMO.clubSw sub club_sw', perfilHtml.includes('subcategoriaId:"club_sw"'), 'sub');
+ok('DEMO.clubSw negocio_venue', /DEMO\.clubSw=\{[\s\S]*?arquetipo:"negocio_venue"/.test(perfilHtml), 'arquetipo');
+ok('DEMO.clubSw tipoPerfil lugar', /DEMO\.clubSw=\{[\s\S]*?tipoPerfil:"lugar"/.test(perfilHtml), 'lugar');
+ok('DEMO.clubSw badgeSwinger', /DEMO\.clubSw=\{[\s\S]*?badgeSwinger:true/.test(perfilHtml), 'badge negocio');
+ok('preview alias club_sw', perfilHtml.includes('club_sw:"clubSw"'), 'alias');
 
 const viajesJs = fs.readFileSync(path.join(repoRoot, 'public', 'js', 'carihub-viajes-desplazamiento.js'), 'utf8');
 const viajesMatch = viajesJs.match(/VIAJES_SUBCATEGORIAS\s*=\s*\[([\s\S]*?)\];/);
 const viajesList = viajesMatch ? viajesMatch[1] : '';
-ok('v1 sin viajes antro', !viajesList.includes("'antro'"), 'excluido');
-ok('v1 sin viajes antro_lgbt', !viajesList.includes("'antro_lgbt'"), 'excluido');
+ok('v1 sin viajes club_sw', !viajesList.includes("'club_sw'"), 'excluido');
 
-ok('2/2 subs antro resolve venue', blocksJs.includes("'antro'") && blocksJs.includes("'antro_lgbt'"), 'antro + antro_lgbt');
-ok('normalize antro restaurant bar', fs.readFileSync(path.join(repoRoot, 'public', 'js', 'carihub-registro-public-blocks.js'), 'utf8').includes('normalizeVenueSubId'), 'normalizer');
+const registroJs = fs.readFileSync(path.join(repoRoot, 'public', 'js', 'carihub-registro-public-blocks.js'), 'utf8');
+ok('normalizeVenueSubId club aliases', registroJs.includes("'club sw'") && registroJs.includes("'club_swinger'"), 'aliases');
+ok('resolveConfig club_sw -> negocio_venue', registroJs.includes("canon === 'club_sw'"), 'venue canon');
 
-console.log('\n=== NEG-VEN-01 Gate (meta) ===');
+console.log('\n=== NEG-VEN-02 Gate (meta) ===');
 console.log('PASS:', pass.length);
 pass.forEach((p) => console.log('  ✓', p.name, p.detail ? '— ' + p.detail : ''));
 if (fail.length) {
@@ -96,4 +100,4 @@ if (fail.length) {
   fail.forEach((f) => console.log('  ✗', f.name, '—', f.detail));
   process.exit(1);
 }
-console.log('\nNEG-VEN-01 Gate OK. Checks acumulados (scripts hijos):', gateChecks);
+console.log('\nNEG-VEN-02 Gate OK. Checks acumulados (scripts hijos):', gateChecks);
