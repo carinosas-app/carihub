@@ -47,6 +47,10 @@
     return global.CARIHUB_REGISTRO_BIENESTAR_BLOCKS || null;
   }
 
+  function resolveHospedajeConfig() {
+    return global.CARIHUB_REGISTRO_HOSPEDAJE_BLOCKS || null;
+  }
+
   function normalizeCreadorSubId(raw) {
     var subId = normalizeSubId(raw);
     if (subId === 'contenido' || subId === 'creador contenido') return 'contenido';
@@ -70,6 +74,13 @@
     var subId = normalizeSubId(raw);
     if (subId === 'spa') return 'spa';
     if (subId === 'masajes') return 'masajes';
+    return '';
+  }
+
+  function normalizeHospedajeSubId(raw) {
+    var subId = normalizeSubId(raw);
+    if (subId === 'hotel motel' || subId === 'hotel / motel' || subId === 'hotel_motel') return 'hotel_motel';
+    if (subId === 'hotel' || subId === 'motel') return 'hotel_motel';
     return '';
   }
 
@@ -361,6 +372,22 @@
     return false;
   }
 
+  function matchesHospedaje(ctx, resolved) {
+    var cfg = resolveHospedajeConfig();
+    if (!cfg) return false;
+    ctx = ctx || {};
+    if (String(ctx.tipoPerfil || '').trim().toLowerCase() === 'persona') return false;
+    var raw = String((ctx.subcategoriaId) || (ctx.subcategoria) || '').trim().toLowerCase();
+    if (cfg.subcategoriaIds.indexOf(raw) >= 0) return true;
+    var canon = normalizeHospedajeSubId((ctx.subcategoriaId) || (ctx.subcategoria) || '');
+    if (canon === 'hotel_motel') return true;
+    if (ctx.arquetipo === cfg.id) return true;
+    var ident = resolved && resolved.identidad ? resolved.identidad : {};
+    if (ident.formularioId === cfg.formularioId && ident.arquetipo === cfg.id) return true;
+    if (resolved && cfg.uiIds.indexOf(resolved.formularioUiId || '') >= 0) return true;
+    return false;
+  }
+
   function resolveConfig(ctx, resolved) {
     if (matchesDominatrix(ctx, resolved)) return resolveDominatrixConfig();
     if (matchesEspectaculo(ctx, resolved)) return resolveEspectaculoConfig();
@@ -368,6 +395,7 @@
     if (matchesRetail(ctx, resolved)) return resolveRetailConfig();
     if (matchesVenue(ctx, resolved)) return resolveVenueConfig();
     if (matchesBienestar(ctx, resolved)) return resolveBienestarConfig();
+    if (matchesHospedaje(ctx, resolved)) return resolveHospedajeConfig();
     if (matchesEscort(ctx, resolved)) return resolveEscortConfig();
     if (matchesLifestyle(ctx, resolved)) return resolveLifestyleConfig();
     if (matchesPareja(ctx, resolved)) return resolveParejaConfig();
@@ -965,6 +993,16 @@
     if (raw === 'spa' || raw === 'masajes') return true;
     var canon = normalizeBienestarSubId((ctx.subcategoriaId) || (ctx.subcategoria) || '');
     return canon === 'spa' || canon === 'masajes';
+  }
+
+  function isHospedajeSubcategoria(ctx) {
+    ctx = ctx || {};
+    if (String(ctx.tipoPerfil || '').trim().toLowerCase() === 'persona') return false;
+    if (ctx.arquetipo === 'negocio_hospedaje') return true;
+    var raw = String(ctx.subcategoriaId || ctx.subcategoria || '').trim().toLowerCase();
+    if (raw === 'hotel_motel') return true;
+    var canon = normalizeHospedajeSubId((ctx.subcategoriaId) || (ctx.subcategoria) || '');
+    return canon === 'hotel_motel';
   }
 
   var MODALIDADES_SHOW_LABELS = {
@@ -1600,6 +1638,7 @@
     if (!values || !isBienestarSubcategoria(ctx || {})) return values;
     delete values.retailPerfil;
     delete values.venuePerfil;
+    delete values.hospedajePerfil;
     delete values.creadorPerfil;
     delete values.espectaculoPerfil;
     delete values.dominatrixPerfil;
@@ -1720,6 +1759,185 @@
       if (!Array.isArray(noSvc) || !noSvc.length) {
         pushMissing(missing, labelForField(cfg, 'serviciosNoRealizo') || 'No incluye / reglas');
       }
+    }
+    if (!String(values.rfc || '').trim()) {
+      pushMissing(missing, labelForField(cfg, 'rfc') || 'RFC');
+    }
+    if (!String(values.razonSocial || '').trim()) {
+      pushMissing(missing, labelForField(cfg, 'razonSocial') || 'Razón social');
+    }
+  }
+
+  function hospedajeFlagFromSelect(val) {
+    var s = String(val || '').trim().toLowerCase();
+    return s === 'sí' || s === 'si' || s === 'yes' || val === true;
+  }
+
+  function inferHospedajeSubId(values, ctx) {
+    var canon = normalizeHospedajeSubId((ctx && ctx.subcategoriaId) || (values && values.subcategoriaId) || '');
+    if (canon) return canon;
+    return 'hotel_motel';
+  }
+
+  function buildTiposHabitacionMirror(list) {
+    if (!Array.isArray(list) || !list.length) return '';
+    return list.join(' · ');
+  }
+
+  function buildHospedajePerfil(values) {
+    values = values || {};
+    return {
+      nombreComercial: values.nombreComercial || '',
+      tipoHospedaje: values.tipoHospedaje || '',
+      tagline: values.tagline || '',
+      tiposHabitacion: Array.isArray(values.tiposHabitacion) ? values.tiposHabitacion.slice() : [],
+      tarifaHora: values.tarifaHora || '',
+      tarifaNoche: values.tarifaNoche || '',
+      reservaciones: hospedajeFlagFromSelect(values.reservaciones),
+      direccion: values.direccion || '',
+      zonaPublica: values.zonaPublica || '',
+      mostrarDireccionExacta: hospedajeFlagFromSelect(values.mostrarDireccionExacta),
+      amenidades: Array.isArray(values.amenidades) ? values.amenidades.slice() : [],
+      estacionamiento: values.estacionamiento || '',
+      privacidadDiscrecion: Array.isArray(values.privacidadDiscrecion) ? values.privacidadDiscrecion.slice() : [],
+      reglasEstancia: Array.isArray(values.reglasEstancia) ? values.reglasEstancia.slice() : [],
+      horarioDetalle: values.horarioDetalle || '',
+      metodosPago: Array.isArray(values.metodosPago) ? values.metodosPago.slice() : [],
+      sobreMi: values.sobreMi || '',
+      disponibilidad: values.disponibilidad || '',
+      rfc: values.rfc || '',
+      razonSocial: values.razonSocial || '',
+      telefonoContacto: values.telefonoContacto || '',
+      licenciaOperacion: values.licenciaOperacion || '',
+      documentos: values.documentos || '',
+      notasInternas: values.notasInternas || ''
+    };
+  }
+
+  function finalizeHospedajeValues(values, ctx) {
+    if (!values || !isHospedajeSubcategoria(ctx || {})) return values;
+    delete values.retailPerfil;
+    delete values.venuePerfil;
+    delete values.bienestarPerfil;
+    delete values.creadorPerfil;
+    delete values.espectaculoPerfil;
+    delete values.dominatrixPerfil;
+    delete values.swingerPerfil;
+    delete values.unicornPerfil;
+    delete values.cuckoldHotwifePerfil;
+    delete values.modalidades;
+    delete values.edad;
+    delete values.viaja;
+    values.hospedajePerfil = buildHospedajePerfil(values);
+    return values;
+  }
+
+  function mapHospedajeToPerfil(u, bloques, ctx) {
+    u = u || {};
+    ctx = ctx || {};
+    var canon = inferHospedajeSubId(bloques, ctx);
+    var hosp = bloques.hospedajePerfil || buildHospedajePerfil(bloques);
+    delete u.retailPerfil;
+    delete u.venuePerfil;
+    delete u.bienestarPerfil;
+    delete u.creadorPerfil;
+    delete u.espectaculoPerfil;
+    delete u.dominatrixPerfil;
+    delete u.swingerPerfil;
+    delete u.unicornPerfil;
+    delete u.cuckoldHotwifePerfil;
+    delete u.modalidades;
+    delete u.edad;
+    delete u.viaja;
+    u.hospedajePerfil = Object.assign({}, hosp);
+    u.arquetipo = 'negocio_hospedaje';
+    u.tipoPerfil = 'lugar';
+    u.subcategoriaId = canon;
+    if (hosp.nombreComercial) {
+      u.nombreComercial = hosp.nombreComercial;
+      u.nombre = hosp.nombreComercial;
+      u.alias = hosp.nombreComercial;
+    }
+    if (hosp.tagline) {
+      u.tagline = hosp.tagline;
+      u.frase = hosp.tagline;
+      u.descripcion = hosp.tagline;
+    }
+    if (hosp.tipoHospedaje) u.tipoHospedaje = hosp.tipoHospedaje;
+    if (Array.isArray(hosp.tiposHabitacion) && hosp.tiposHabitacion.length) {
+      u.tiposHabitacion = hosp.tiposHabitacion.slice();
+      u.perfilTags = hosp.tiposHabitacion.slice();
+    }
+    if (hosp.tarifaHora) {
+      u.tarifaHora = hosp.tarifaHora;
+      u.precio = hosp.tarifaHora;
+    }
+    if (hosp.tarifaNoche) u.tarifaNoche = hosp.tarifaNoche;
+    u.reservaciones = hosp.reservaciones === true;
+    if (hosp.direccion) {
+      u.direccion = hosp.direccion;
+      u.ubicacionFicha = hosp.zonaPublica || hosp.direccion;
+    } else if (hosp.zonaPublica) {
+      u.ubicacionFicha = hosp.zonaPublica;
+    }
+    u.mostrarDireccionExacta = hosp.mostrarDireccionExacta === true;
+    if (Array.isArray(hosp.amenidades) && hosp.amenidades.length) {
+      u.amenidades = hosp.amenidades.slice();
+    }
+    if (hosp.estacionamiento) u.estacionamiento = hosp.estacionamiento;
+    if (Array.isArray(hosp.privacidadDiscrecion) && hosp.privacidadDiscrecion.length) {
+      u.privacidadDiscrecion = hosp.privacidadDiscrecion.slice();
+    }
+    if (Array.isArray(hosp.reglasEstancia) && hosp.reglasEstancia.length) {
+      u.reglasEstancia = hosp.reglasEstancia.slice();
+      u.noRealiza = hosp.reglasEstancia.slice();
+    }
+    if (Array.isArray(hosp.metodosPago) && hosp.metodosPago.length) {
+      u.metodosPago = hosp.metodosPago.slice();
+    }
+    if (hosp.horarioDetalle) {
+      u.horarioDetalle = hosp.horarioDetalle;
+      u.horario = hosp.horarioDetalle;
+    }
+    if (hosp.sobreMi) {
+      u.sobreMi = hosp.sobreMi;
+      u.sobreNosotros = hosp.sobreMi;
+      u.perfilNosotros = hosp.sobreMi;
+    }
+    if (hosp.disponibilidad) {
+      u.disponibilidad = DISPONIBILIDAD_LABELS[hosp.disponibilidad] || hosp.disponibilidad;
+    }
+    return u;
+  }
+
+  function validateHospedajeDeltaValues(cfg, values, missing, ctx) {
+    ctx = ctx || {};
+    if (!String(values.nombreComercial || '').trim()) {
+      pushMissing(missing, labelForField(cfg, 'nombreComercial') || 'Nombre comercial');
+    }
+    if (!String(values.tipoHospedaje || '').trim()) {
+      pushMissing(missing, labelForField(cfg, 'tipoHospedaje') || 'Tipo de hospedaje');
+    }
+    var habitaciones = values.tiposHabitacion;
+    if (!Array.isArray(habitaciones) || !habitaciones.length) {
+      pushMissing(missing, labelForField(cfg, 'tiposHabitacion') || 'Tipos de habitación');
+    }
+    if (!String(values.tarifaHora || '').trim()) {
+      pushMissing(missing, labelForField(cfg, 'tarifaHora') || 'Tarifa por hora');
+    }
+    if (!String(values.direccion || '').trim()) {
+      pushMissing(missing, labelForField(cfg, 'direccion') || 'Dirección o zona pública');
+    }
+    if (!String(values.horarioDetalle || '').trim()) {
+      pushMissing(missing, labelForField(cfg, 'horarioDetalle') || 'Horario');
+    }
+    var reglas = values.reglasEstancia;
+    if (!Array.isArray(reglas) || !reglas.length) {
+      pushMissing(missing, labelForField(cfg, 'reglasEstancia') || 'Reglas de estancia');
+    }
+    var pagos = values.metodosPago;
+    if (!Array.isArray(pagos) || !pagos.length) {
+      pushMissing(missing, labelForField(cfg, 'metodosPago') || 'Métodos de pago');
     }
     if (!String(values.rfc || '').trim()) {
       pushMissing(missing, labelForField(cfg, 'rfc') || 'RFC');
@@ -2252,6 +2470,7 @@
     values = finalizeRetailValues(values, ctx);
     values = finalizeVenueValues(values, ctx);
     values = finalizeBienestarValues(values, ctx);
+    values = finalizeHospedajeValues(values, ctx);
     values = finalizeParejaGrupoValues(values);
     return values;
   }
@@ -2349,6 +2568,9 @@
     }
     if (isBienestarSubcategoria(ctx)) {
       validateBienestarDeltaValues(cfg, values, missing, ctx);
+    }
+    if (isHospedajeSubcategoria(ctx)) {
+      validateHospedajeDeltaValues(cfg, values, missing, ctx);
     }
     return missing;
   }
@@ -2540,6 +2762,9 @@
     if (isBienestarSubcategoria(ctx)) {
       return mapBienestarToPerfil(u, bloques, ctx);
     }
+    if (isHospedajeSubcategoria(ctx)) {
+      return mapHospedajeToPerfil(u, bloques, ctx);
+    }
     if (bloques.orientacion) u.orientacion = bloques.orientacion;
     if (bloques.identidadGenero) u.identidadGenero = bloques.identidadGenero;
     if (bloques.presentacionFemboy) {
@@ -2722,6 +2947,7 @@
     matchesRetail: matchesRetail,
     matchesVenue: matchesVenue,
     matchesBienestar: matchesBienestar,
+    matchesHospedaje: matchesHospedaje,
     apply: apply,
     collectValues: collectValues,
     validateValues: validateValues,
@@ -2765,6 +2991,11 @@
     mapBienestarToPerfil: mapBienestarToPerfil,
     normalizeBienestarSubId: normalizeBienestarSubId,
     isBienestarSubcategoria: isBienestarSubcategoria,
+    finalizeHospedajeValues: finalizeHospedajeValues,
+    buildHospedajePerfil: buildHospedajePerfil,
+    mapHospedajeToPerfil: mapHospedajeToPerfil,
+    normalizeHospedajeSubId: normalizeHospedajeSubId,
+    isHospedajeSubcategoria: isHospedajeSubcategoria,
     buildSwingerPerfil: buildSwingerPerfil,
     buildUnicornPerfil: buildUnicornPerfil,
     buildCuckoldHotwifePerfil: buildCuckoldHotwifePerfil,
