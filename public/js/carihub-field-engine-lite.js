@@ -604,6 +604,12 @@
       if (vn.indexOf('lgbt') >= 0) return 'antroLgbt';
       if (vn.indexOf('antro') >= 0) return 'antro';
     }
+    if (sidNorm === 'spa') return 'spa';
+    if (sidNorm === 'masajes') return 'masajesLocal';
+    if (row && row.arquetipo === 'negocio_bienestar') {
+      if (sidNorm === 'masajes') return 'masajesLocal';
+      return 'spa';
+    }
     if (comp === 'ResultCardAdultos' || comp === 'ProfileLayoutAdultos') {
       if (subId && global.CariHubResultadosDemo && CariHubResultadosDemo.vistaDeCategoriaLegacy) {
         return CariHubResultadosDemo.vistaDeCategoriaLegacy(subId);
@@ -617,7 +623,11 @@
       if (retId === 'antro restaurant bar lgbt' || retId === 'antro lgbt' || retId === 'antro_lgbt') return 'antroLgbt';
       if (retId === 'antro restaurant bar' || retId === 'antro') return 'antro';
       if (retId === 'masajes') return 'masajesLocal';
-      if (retId === 'spa') return 'negocio';
+      if (retId === 'spa') return 'spa';
+      if (row && row.arquetipo === 'negocio_bienestar') {
+        if (retId === 'masajes') return 'masajesLocal';
+        return 'spa';
+      }
       return 'negocio';
     }
     if (comp === 'ResultCardVenue' || comp === 'ProfileLayoutVenue') {
