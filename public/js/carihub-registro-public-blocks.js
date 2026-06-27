@@ -39,6 +39,10 @@
     return global.CARIHUB_REGISTRO_RETAIL_BLOCKS || null;
   }
 
+  function resolveVenueConfig() {
+    return global.CARIHUB_REGISTRO_VENUE_BLOCKS || null;
+  }
+
   function normalizeCreadorSubId(raw) {
     var subId = normalizeSubId(raw);
     if (subId === 'contenido' || subId === 'creador contenido') return 'contenido';
@@ -48,6 +52,13 @@
   function normalizeRetailSubId(raw) {
     var subId = normalizeSubId(raw);
     if (subId === 'sex shop') return 'sex_shop';
+    return '';
+  }
+
+  function normalizeVenueSubId(raw) {
+    var subId = normalizeSubId(raw);
+    if (subId === 'antro restaurant bar lgbt' || subId === 'antro lgbt') return 'antro_lgbt';
+    if (subId === 'antro restaurant bar' || subId === 'antro') return 'antro';
     return '';
   }
 
@@ -312,11 +323,23 @@
     return false;
   }
 
+  function matchesVenue(ctx, resolved) {
+    var cfg = resolveVenueConfig();
+    if (!cfg) return false;
+    ctx = ctx || {};
+    var raw = String((ctx.subcategoriaId) || (ctx.subcategoria) || '').trim().toLowerCase();
+    if (cfg.subcategoriaIds.indexOf(raw) >= 0) return true;
+    var canon = normalizeVenueSubId((ctx.subcategoriaId) || (ctx.subcategoria) || '');
+    if (canon === 'antro' || canon === 'antro_lgbt') return true;
+    return false;
+  }
+
   function resolveConfig(ctx, resolved) {
     if (matchesDominatrix(ctx, resolved)) return resolveDominatrixConfig();
     if (matchesEspectaculo(ctx, resolved)) return resolveEspectaculoConfig();
     if (matchesCreador(ctx, resolved)) return resolveCreadorConfig();
     if (matchesRetail(ctx, resolved)) return resolveRetailConfig();
+    if (matchesVenue(ctx, resolved)) return resolveVenueConfig();
     if (matchesEscort(ctx, resolved)) return resolveEscortConfig();
     if (matchesLifestyle(ctx, resolved)) return resolveLifestyleConfig();
     if (matchesPareja(ctx, resolved)) return resolveParejaConfig();
@@ -898,6 +921,14 @@
     return normalizeRetailSubId((ctx.subcategoriaId) || (ctx.subcategoria) || '') === 'sex_shop';
   }
 
+  function isVenueSubcategoria(ctx) {
+    ctx = ctx || {};
+    var raw = String(ctx.subcategoriaId || ctx.subcategoria || '').trim().toLowerCase();
+    if (raw === 'antro' || raw === 'antro_lgbt') return true;
+    var canon = normalizeVenueSubId((ctx.subcategoriaId) || (ctx.subcategoria) || '');
+    return canon === 'antro' || canon === 'antro_lgbt';
+  }
+
   var MODALIDADES_SHOW_LABELS = {
     fiestas: 'Fiestas privadas',
     despedidas: 'Despedidas',
@@ -1307,6 +1338,173 @@
     var noSvc = values.serviciosNoRealizo;
     if (!Array.isArray(noSvc) || !noSvc.length) {
       pushMissing(missing, labelForField(cfg, 'serviciosNoRealizo') || 'Políticas / no incluye');
+    }
+    var pagos = values.metodosPago;
+    if (!Array.isArray(pagos) || !pagos.length) {
+      pushMissing(missing, labelForField(cfg, 'metodosPago') || 'Métodos de pago');
+    }
+    if (!String(values.rfc || '').trim()) {
+      pushMissing(missing, labelForField(cfg, 'rfc') || 'RFC');
+    }
+    if (!String(values.razonSocial || '').trim()) {
+      pushMissing(missing, labelForField(cfg, 'razonSocial') || 'Razón social');
+    }
+  }
+
+  function venueFlagFromSelect(val) {
+    var s = String(val || '').trim().toLowerCase();
+    return s === 'sí' || s === 'si' || s === 'yes' || val === true;
+  }
+
+  function buildReglasAccesoMirror(list) {
+    if (!Array.isArray(list) || !list.length) return '';
+    return list.join(' · ');
+  }
+
+  function buildVenuePerfil(values) {
+    values = values || {};
+    return {
+      nombreComercial: values.nombreComercial || '',
+      tipoVenue: values.tipoVenue || '',
+      tagline: values.tagline || '',
+      precioEntrada: values.precioEntrada || '',
+      cartelera: values.cartelera || '',
+      dressCode: values.dressCode || '',
+      areasVenue: Array.isArray(values.areasVenue) ? values.areasVenue.slice() : [],
+      reservaciones: venueFlagFromSelect(values.reservaciones),
+      reglasAcceso: Array.isArray(values.reglasAcceso) ? values.reglasAcceso.slice() : [],
+      direccion: values.direccion || '',
+      zonaPublica: values.zonaPublica || '',
+      horarioDetalle: values.horarioDetalle || '',
+      metodosPago: Array.isArray(values.metodosPago) ? values.metodosPago.slice() : [],
+      sobreMi: values.sobreMi || '',
+      disponibilidad: values.disponibilidad || '',
+      rfc: values.rfc || '',
+      razonSocial: values.razonSocial || '',
+      telefonoContacto: values.telefonoContacto || '',
+      licenciaOperacion: values.licenciaOperacion || '',
+      notasInternas: values.notasInternas || ''
+    };
+  }
+
+  function finalizeVenueValues(values, ctx) {
+    if (!values || !isVenueSubcategoria(ctx || {})) return values;
+    delete values.retailPerfil;
+    delete values.creadorPerfil;
+    delete values.espectaculoPerfil;
+    delete values.dominatrixPerfil;
+    delete values.swingerPerfil;
+    delete values.unicornPerfil;
+    delete values.cuckoldHotwifePerfil;
+    delete values.modalidades;
+    values.venuePerfil = buildVenuePerfil(values);
+    return values;
+  }
+
+  function mapVenueToPerfil(u, bloques, ctx) {
+    u = u || {};
+    ctx = ctx || {};
+    var canon = normalizeVenueSubId((ctx && ctx.subcategoriaId) || u.subcategoriaId || '') || 'antro';
+    var ven = bloques.venuePerfil || buildVenuePerfil(bloques);
+    delete u.retailPerfil;
+    delete u.creadorPerfil;
+    delete u.espectaculoPerfil;
+    delete u.dominatrixPerfil;
+    delete u.swingerPerfil;
+    delete u.unicornPerfil;
+    delete u.cuckoldHotwifePerfil;
+    u.venuePerfil = Object.assign({}, ven);
+    u.arquetipo = 'negocio_venue';
+    u.tipoPerfil = 'lugar';
+    u.subcategoriaId = canon;
+    if (canon === 'antro_lgbt') {
+      u.badgeLgbt = true;
+    } else {
+      delete u.badgeLgbt;
+    }
+    if (ven.nombreComercial) {
+      u.nombreComercial = ven.nombreComercial;
+      u.nombre = ven.nombreComercial;
+      u.alias = ven.nombreComercial;
+    }
+    if (ven.tipoVenue) {
+      u.tipoVenue = ven.tipoVenue;
+      u.tipoServicio = ven.tipoVenue;
+      u.tipoNegocio = ven.tipoVenue;
+    }
+    if (ven.tagline) {
+      u.tagline = ven.tagline;
+      u.descripcion = ven.tagline;
+    }
+    if (ven.precioEntrada) {
+      u.precioEntrada = ven.precioEntrada;
+      u.precio = ven.precioEntrada;
+    }
+    if (ven.cartelera) u.cartelera = ven.cartelera;
+    if (ven.dressCode) u.dressCode = ven.dressCode;
+    if (Array.isArray(ven.areasVenue) && ven.areasVenue.length) {
+      u.areasVenue = ven.areasVenue.slice();
+      u.perfilTags = ven.areasVenue.slice();
+      u.serviciosIncluidos = ven.areasVenue.slice();
+    }
+    if (Array.isArray(ven.reglasAcceso) && ven.reglasAcceso.length) {
+      u.reglasAcceso = buildReglasAccesoMirror(ven.reglasAcceso);
+      u.noRealiza = ven.reglasAcceso.slice();
+    }
+    u.reservaciones = ven.reservaciones === true;
+    if (ven.direccion) {
+      u.direccion = ven.direccion;
+      u.ubicacionFicha = ven.zonaPublica || ven.direccion;
+    } else if (ven.zonaPublica) {
+      u.ubicacionFicha = ven.zonaPublica;
+    }
+    if (Array.isArray(ven.metodosPago) && ven.metodosPago.length) {
+      u.metodosPago = ven.metodosPago.slice();
+    }
+    if (ven.horarioDetalle) {
+      u.horarioDetalle = ven.horarioDetalle;
+      u.horario = ven.horarioDetalle;
+    }
+    if (ven.sobreMi) {
+      u.sobreMi = ven.sobreMi;
+      u.sobreNosotros = ven.sobreMi;
+      u.perfilNosotros = ven.sobreMi;
+    }
+    if (ven.disponibilidad) {
+      u.disponibilidad = DISPONIBILIDAD_LABELS[ven.disponibilidad] || ven.disponibilidad;
+    }
+    return u;
+  }
+
+  function validateVenueDeltaValues(cfg, values, missing) {
+    if (!String(values.nombreComercial || '').trim()) {
+      pushMissing(missing, labelForField(cfg, 'nombreComercial') || 'Nombre comercial');
+    }
+    if (!String(values.tipoVenue || '').trim()) {
+      pushMissing(missing, labelForField(cfg, 'tipoVenue') || 'Tipo de venue');
+    }
+    if (!String(values.precioEntrada || '').trim()) {
+      pushMissing(missing, labelForField(cfg, 'precioEntrada') || 'Cover / precio de entrada');
+    }
+    if (!String(values.cartelera || '').trim()) {
+      pushMissing(missing, labelForField(cfg, 'cartelera') || 'Cartelera / eventos');
+    }
+    if (!String(values.dressCode || '').trim()) {
+      pushMissing(missing, labelForField(cfg, 'dressCode') || 'Dress code');
+    }
+    var areas = values.areasVenue;
+    if (!Array.isArray(areas) || !areas.length) {
+      pushMissing(missing, labelForField(cfg, 'areasVenue') || 'Áreas del local');
+    }
+    var reglas = values.reglasAcceso;
+    if (!Array.isArray(reglas) || !reglas.length) {
+      pushMissing(missing, labelForField(cfg, 'reglasAcceso') || 'Reglas de acceso');
+    }
+    if (!String(values.direccion || '').trim()) {
+      pushMissing(missing, labelForField(cfg, 'direccion') || 'Dirección o zona pública');
+    }
+    if (!String(values.horarioDetalle || '').trim()) {
+      pushMissing(missing, labelForField(cfg, 'horarioDetalle') || 'Horario');
     }
     var pagos = values.metodosPago;
     if (!Array.isArray(pagos) || !pagos.length) {
@@ -1841,6 +2039,7 @@
     values = finalizeEspectaculoValues(values, ctx);
     values = finalizeCreadorValues(values, ctx);
     values = finalizeRetailValues(values, ctx);
+    values = finalizeVenueValues(values, ctx);
     values = finalizeParejaGrupoValues(values);
     return values;
   }
@@ -1932,6 +2131,9 @@
     }
     if (isRetailSubcategoria(ctx)) {
       validateRetailDeltaValues(cfg, values, missing);
+    }
+    if (isVenueSubcategoria(ctx)) {
+      validateVenueDeltaValues(cfg, values, missing);
     }
     return missing;
   }
@@ -2117,6 +2319,9 @@
     if (isRetailSubcategoria(ctx)) {
       return mapRetailToPerfil(u, bloques, ctx);
     }
+    if (isVenueSubcategoria(ctx)) {
+      return mapVenueToPerfil(u, bloques, ctx);
+    }
     if (bloques.orientacion) u.orientacion = bloques.orientacion;
     if (bloques.identidadGenero) u.identidadGenero = bloques.identidadGenero;
     if (bloques.presentacionFemboy) {
@@ -2297,6 +2502,7 @@
     matchesEspectaculo: matchesEspectaculo,
     matchesCreador: matchesCreador,
     matchesRetail: matchesRetail,
+    matchesVenue: matchesVenue,
     apply: apply,
     collectValues: collectValues,
     validateValues: validateValues,
@@ -2331,6 +2537,10 @@
     buildRetailPerfil: buildRetailPerfil,
     mapRetailToPerfil: mapRetailToPerfil,
     normalizeRetailSubId: normalizeRetailSubId,
+    finalizeVenueValues: finalizeVenueValues,
+    buildVenuePerfil: buildVenuePerfil,
+    mapVenueToPerfil: mapVenueToPerfil,
+    normalizeVenueSubId: normalizeVenueSubId,
     buildSwingerPerfil: buildSwingerPerfil,
     buildUnicornPerfil: buildUnicornPerfil,
     buildCuckoldHotwifePerfil: buildCuckoldHotwifePerfil,
@@ -2346,6 +2556,7 @@
     isEspectaculoSubcategoria: isEspectaculoSubcategoria,
     isCreadorSubcategoria: isCreadorSubcategoria,
     isRetailSubcategoria: isRetailSubcategoria,
+    isVenueSubcategoria: isVenueSubcategoria,
     shouldApplySwingerPipeline: shouldApplySwingerPipeline,
     shouldApplyUnicornPipeline: shouldApplyUnicornPipeline,
     shouldApplyCuckoldHotwifePipeline: shouldApplyCuckoldHotwifePipeline,

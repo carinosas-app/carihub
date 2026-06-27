@@ -1,6 +1,6 @@
 /**
- * QA — Cierre pack NEG retail (orquesta motor + persist + render + schema + viajes exclusion).
- * node scripts/qa-neg-retail-cierre.mjs
+ * QA — Cierre pack NEG venue (orquesta motor + persist + render + schema + viajes exclusion).
+ * node scripts/qa-neg-venue-cierre.mjs
  */
 import { spawnSync } from 'child_process';
 import fs from 'fs';
@@ -12,9 +12,9 @@ const repoRoot = path.join(__dirname, '..');
 
 const PACK = [
   'validar-schemas-registro.mjs',
-  'qa-neg-retail.mjs',
-  'qa-neg-retail-persist.mjs',
-  'qa-neg-retail-render.mjs',
+  'qa-neg-venue.mjs',
+  'qa-neg-venue-persist.mjs',
+  'qa-neg-venue-render.mjs',
 ];
 
 const pass = [];
@@ -36,43 +36,48 @@ function runScript(scriptName) {
   return { status: r.status, out };
 }
 
-console.log('\n=== NEG retail pack cierre — scripts ===');
+console.log('\n=== NEG venue pack cierre — scripts ===');
 for (const script of PACK) {
   const { status } = runScript(script);
   if (status !== 0) fail.push({ name: script, detail: 'exit ' + status });
   else pass.push({ name: script, detail: 'ok' });
 }
 
-console.log('\n=== NEG retail pack cierre — invariantes ===');
+console.log('\n=== NEG venue pack cierre — invariantes ===');
 
-const blocksJs = fs.readFileSync(path.join(repoRoot, 'public', 'js', 'data', 'registro-adultos-retail-blocks.js'), 'utf8');
-ok('blocks sub sex_shop', blocksJs.includes("'sex_shop'"), 'sex_shop');
-ok('nested retailPerfil block id', blocksJs.includes("id: 'retailPerfil'"), 'block');
+const blocksJs = fs.readFileSync(path.join(repoRoot, 'public', 'js', 'data', 'registro-adultos-venue-blocks.js'), 'utf8');
+ok('blocks sub antro', blocksJs.includes("'antro'"), 'antro');
+ok('blocks sub antro_lgbt', blocksJs.includes("'antro_lgbt'"), 'antro_lgbt');
+ok('nested venuePerfil block id', blocksJs.includes("id: 'venuePerfil'"), 'block');
 ok('no viaja modalidad', !blocksJs.includes("'viaja'"), 'no viaja');
 ok('no modalidades escort field', !blocksJs.includes("id: 'modalidades'"), 'no modalidades escort');
+ok('no club_sw in bundle', !blocksJs.includes("'club_sw'"), 'no club_sw');
 
 const registroJs = fs.readFileSync(path.join(repoRoot, 'public', 'js', 'carihub-registro-public-blocks.js'), 'utf8');
-ok('buildRetailPerfil', registroJs.includes('buildRetailPerfil'), 'persist');
-ok('normalizeRetailSubId', registroJs.includes('normalizeRetailSubId'), 'canonical');
-ok('resolveConfig retail before escort', /if \(matchesRetail\(ctx, resolved\)\) return resolveRetailConfig\(\);[\s\S]*?if \(matchesEscort/.test(registroJs), 'order');
+ok('buildVenuePerfil', registroJs.includes('buildVenuePerfil'), 'persist');
+ok('normalizeVenueSubId', registroJs.includes('normalizeVenueSubId'), 'canonical');
+ok('resolveConfig venue before escort', /if \(matchesVenue\(ctx, resolved\)\) return resolveVenueConfig\(\);\s*\n\s*if \(matchesEscort/.test(registroJs), 'order');
 
 const renderJs = fs.readFileSync(path.join(repoRoot, 'public', 'js', 'carihub-public-render-lite.js'), 'utf8');
-ok('cardHTMLRetail', renderJs.includes('cardHTMLRetail'), 'render');
-ok('isRetailPerfil', renderJs.includes('isRetailPerfil'), 'detect');
+ok('cardHTMLVenue', renderJs.includes('cardHTMLVenue'), 'render');
+ok('isVenuePerfil', renderJs.includes('isVenuePerfil'), 'detect');
 
 const viajesJs = fs.readFileSync(path.join(repoRoot, 'public', 'js', 'carihub-viajes-desplazamiento.js'), 'utf8');
 const viajesMatch = viajesJs.match(/VIAJES_SUBCATEGORIAS\s*=\s*\[([\s\S]*?)\];/);
 const viajesList = viajesMatch ? viajesMatch[1] : '';
-ok('sex_shop no en VIAJES_SUBCATEGORIAS', !viajesList.includes("'sex_shop'") && !viajesList.includes("'sex shop'"), 'no viajes v1');
+ok('antro no en VIAJES_SUBCATEGORIAS', !viajesList.includes("'antro'"), 'no viajes v1');
+ok('antro_lgbt no en VIAJES_SUBCATEGORIAS', !viajesList.includes("'antro_lgbt'"), 'no viajes v1');
 
 const schemaJson = fs.readFileSync(path.join(repoRoot, 'scripts', 'config-registro-adultos-schema.json'), 'utf8');
-ok('schema sub sex_shop', schemaJson.includes('"subcategoriaId": "sex_shop"'), 'sex_shop id');
-ok('schema retailPerfil registry', schemaJson.includes('"retailPerfil"'), 'registry');
+ok('schema sub antro', schemaJson.includes('"subcategoriaId": "antro"'), 'antro id');
+ok('schema sub antro_lgbt', schemaJson.includes('"subcategoriaId": "antro_lgbt"'), 'antro_lgbt id');
+ok('schema venuePerfil registry', schemaJson.includes('"venuePerfil"'), 'registry');
+ok('schema tipoVenue registry', schemaJson.includes('"tipoVenue"'), 'tipoVenue');
 
 const perfilHtml = fs.readFileSync(path.join(repoRoot, 'public', 'perfil-publico.html'), 'utf8');
-ok('aplicarPerfilDesdeRegistro retailPerfil', perfilHtml.includes('retailPerfil:'), 'preview');
+ok('aplicarPerfilDesdeRegistro venuePerfil', perfilHtml.includes('venuePerfil:'), 'preview');
 
-console.log('\n=== NEG retail pack cierre (meta) ===');
+console.log('\n=== NEG venue pack cierre (meta) ===');
 console.log('PASS:', pass.length);
 pass.forEach((p) => console.log('  ✓', p.name, p.detail ? '— ' + p.detail : ''));
 if (fail.length) {
@@ -80,4 +85,4 @@ if (fail.length) {
   fail.forEach((f) => console.log('  ✗', f.name, '—', f.detail));
   process.exit(1);
 }
-console.log('\nNEG retail pack cierre OK.');
+console.log('\nNEG venue pack cierre OK.');
