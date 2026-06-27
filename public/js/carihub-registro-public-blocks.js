@@ -67,6 +67,7 @@
     var subId = normalizeSubId(raw);
     if (subId === 'antro restaurant bar lgbt' || subId === 'antro lgbt') return 'antro_lgbt';
     if (subId === 'antro restaurant bar' || subId === 'antro') return 'antro';
+    if (subId === 'club sw' || subId === 'club_sw' || subId === 'club swinger' || subId === 'club_swinger') return 'club_sw';
     return '';
   }
 
@@ -103,6 +104,10 @@
       var canonEsp = normalizeEspectaculoSubId(raw);
       if (canonEsp && cfg.subcategoriaOverrides[canonEsp]) return cfg.subcategoriaOverrides[canonEsp];
     }
+    if (cfg.id === 'negocio_venue') {
+      var canonVen = normalizeVenueSubId(raw);
+      if (canonVen && cfg.subcategoriaOverrides[canonVen]) return cfg.subcategoriaOverrides[canonVen];
+    }
     return cfg.subcategoriaOverrides[subId] || null;
   }
 
@@ -114,28 +119,30 @@
       var canonEspSub = normalizeEspectaculoSubId(rawSub);
       if (canonEspSub) subId = canonEspSub;
     }
+    if (cfg && cfg.id === 'negocio_venue') {
+      var canonVenSub = normalizeVenueSubId(rawSub);
+      if (canonVenSub) subId = canonVenSub;
+    }
+    function subcategoriaTokenMatches(token) {
+      if (cfg && cfg.id === 'negocio_venue') {
+        return normalizeVenueSubId(token) === subId;
+      }
+      return normalizeSubId(token) === subId;
+    }
     function fieldVisible(field) {
       if (field.excludeSubcategorias && field.excludeSubcategorias.length) {
-        if (field.excludeSubcategorias.some(function (s) {
-          return normalizeSubId(s) === subId;
-        })) return false;
+        if (field.excludeSubcategorias.some(subcategoriaTokenMatches)) return false;
       }
       if (field.showWhenViaja && !subcategoriaViajesActiva(ctx)) return false;
       if (!field.onlySubcategorias || !field.onlySubcategorias.length) return true;
-      return field.onlySubcategorias.some(function (s) {
-        return normalizeSubId(s) === subId;
-      });
+      return field.onlySubcategorias.some(subcategoriaTokenMatches);
     }
     function blockVisible(block) {
       if (block.excludeSubcategorias && block.excludeSubcategorias.length) {
-        if (block.excludeSubcategorias.some(function (s) {
-          return normalizeSubId(s) === subId;
-        })) return false;
+        if (block.excludeSubcategorias.some(subcategoriaTokenMatches)) return false;
       }
       if (!block.onlySubcategorias || !block.onlySubcategorias.length) return true;
-      return block.onlySubcategorias.some(function (s) {
-        return normalizeSubId(s) === subId;
-      });
+      return block.onlySubcategorias.some(subcategoriaTokenMatches);
     }
     var baseBlocks = cfg.blocks.filter(blockVisible).map(function (block) {
       return {
@@ -352,7 +359,7 @@
     var raw = String((ctx.subcategoriaId) || (ctx.subcategoria) || '').trim().toLowerCase();
     if (cfg.subcategoriaIds.indexOf(raw) >= 0) return true;
     var canon = normalizeVenueSubId((ctx.subcategoriaId) || (ctx.subcategoria) || '');
-    if (canon === 'antro' || canon === 'antro_lgbt') return true;
+    if (canon === 'antro' || canon === 'antro_lgbt' || canon === 'club_sw') return true;
     return false;
   }
 
@@ -979,10 +986,13 @@
 
   function isVenueSubcategoria(ctx) {
     ctx = ctx || {};
+    if (String(ctx.tipoPerfil || '').trim().toLowerCase() === 'persona') return false;
+    if (String(ctx.tipoPerfil || '').trim().toLowerCase() === 'pareja_grupo') return false;
+    if (ctx.arquetipo === 'negocio_venue') return true;
     var raw = String(ctx.subcategoriaId || ctx.subcategoria || '').trim().toLowerCase();
-    if (raw === 'antro' || raw === 'antro_lgbt') return true;
+    if (raw === 'antro' || raw === 'antro_lgbt' || raw === 'club_sw') return true;
     var canon = normalizeVenueSubId((ctx.subcategoriaId) || (ctx.subcategoria) || '');
-    return canon === 'antro' || canon === 'antro_lgbt';
+    return canon === 'antro' || canon === 'antro_lgbt' || canon === 'club_sw';
   }
 
   function isBienestarSubcategoria(ctx) {
@@ -1437,6 +1447,15 @@
     return list.join(' · ');
   }
 
+  function inferVenueSubId(values, ctx) {
+    var canon = normalizeVenueSubId((ctx && ctx.subcategoriaId) || (values && values.subcategoriaId) || '');
+    if (canon) return canon;
+    var tipo = String((values && values.tipoVenue) || '').toLowerCase();
+    if (tipo.indexOf('club') >= 0 || tipo.indexOf('lifestyle') >= 0 || tipo.indexOf('swinger') >= 0) return 'club_sw';
+    if (tipo.indexOf('lgbt') >= 0) return 'antro_lgbt';
+    return 'antro';
+  }
+
   function buildVenuePerfil(values) {
     values = values || {};
     return {
@@ -1445,6 +1464,8 @@
       tagline: values.tagline || '',
       precioEntrada: values.precioEntrada || '',
       cartelera: values.cartelera || '',
+      eventosTematicos: values.eventosTematicos || '',
+      politicaParejasSingles: values.politicaParejasSingles || '',
       dressCode: values.dressCode || '',
       areasVenue: Array.isArray(values.areasVenue) ? values.areasVenue.slice() : [],
       reservaciones: venueFlagFromSelect(values.reservaciones),
@@ -1459,6 +1480,7 @@
       razonSocial: values.razonSocial || '',
       telefonoContacto: values.telefonoContacto || '',
       licenciaOperacion: values.licenciaOperacion || '',
+      documentos: values.documentos || '',
       notasInternas: values.notasInternas || ''
     };
   }
@@ -1466,13 +1488,18 @@
   function finalizeVenueValues(values, ctx) {
     if (!values || !isVenueSubcategoria(ctx || {})) return values;
     delete values.retailPerfil;
+    delete values.bienestarPerfil;
+    delete values.hospedajePerfil;
     delete values.creadorPerfil;
     delete values.espectaculoPerfil;
     delete values.dominatrixPerfil;
     delete values.swingerPerfil;
     delete values.unicornPerfil;
     delete values.cuckoldHotwifePerfil;
+    delete values.parejaGrupoPerfil;
     delete values.modalidades;
+    delete values.edad;
+    delete values.viaja;
     values.venuePerfil = buildVenuePerfil(values);
     return values;
   }
@@ -1480,23 +1507,34 @@
   function mapVenueToPerfil(u, bloques, ctx) {
     u = u || {};
     ctx = ctx || {};
-    var canon = normalizeVenueSubId((ctx && ctx.subcategoriaId) || u.subcategoriaId || '') || 'antro';
+    var canon = inferVenueSubId(bloques, ctx);
     var ven = bloques.venuePerfil || buildVenuePerfil(bloques);
     delete u.retailPerfil;
+    delete u.bienestarPerfil;
+    delete u.hospedajePerfil;
     delete u.creadorPerfil;
     delete u.espectaculoPerfil;
     delete u.dominatrixPerfil;
     delete u.swingerPerfil;
     delete u.unicornPerfil;
     delete u.cuckoldHotwifePerfil;
+    delete u.parejaGrupoPerfil;
+    delete u.modalidades;
+    delete u.edad;
+    delete u.viaja;
     u.venuePerfil = Object.assign({}, ven);
     u.arquetipo = 'negocio_venue';
     u.tipoPerfil = 'lugar';
     u.subcategoriaId = canon;
     if (canon === 'antro_lgbt') {
       u.badgeLgbt = true;
+      delete u.badgeSwinger;
+    } else if (canon === 'club_sw') {
+      u.badgeSwinger = true;
+      delete u.badgeLgbt;
     } else {
       delete u.badgeLgbt;
+      delete u.badgeSwinger;
     }
     if (ven.nombreComercial) {
       u.nombreComercial = ven.nombreComercial;
@@ -1517,6 +1555,15 @@
       u.precio = ven.precioEntrada;
     }
     if (ven.cartelera) u.cartelera = ven.cartelera;
+    if (ven.eventosTematicos) {
+      u.eventosTematicos = ven.eventosTematicos;
+      if (!u.cartelera) u.cartelera = ven.eventosTematicos;
+    }
+    if (ven.politicaParejasSingles) {
+      u.politicaParejasSingles = ven.politicaParejasSingles;
+      u.politicaParejas = ven.politicaParejasSingles;
+      u.disponiblePara = ven.politicaParejasSingles;
+    }
     if (ven.dressCode) u.dressCode = ven.dressCode;
     if (Array.isArray(ven.areasVenue) && ven.areasVenue.length) {
       u.areasVenue = ven.areasVenue.slice();
@@ -1552,7 +1599,9 @@
     return u;
   }
 
-  function validateVenueDeltaValues(cfg, values, missing) {
+  function validateVenueDeltaValues(cfg, values, missing, ctx) {
+    ctx = ctx || {};
+    var subId = inferVenueSubId(values, ctx);
     if (!String(values.nombreComercial || '').trim()) {
       pushMissing(missing, labelForField(cfg, 'nombreComercial') || 'Nombre comercial');
     }
@@ -1562,8 +1611,17 @@
     if (!String(values.precioEntrada || '').trim()) {
       pushMissing(missing, labelForField(cfg, 'precioEntrada') || 'Cover / precio de entrada');
     }
-    if (!String(values.cartelera || '').trim()) {
-      pushMissing(missing, labelForField(cfg, 'cartelera') || 'Cartelera / eventos');
+    if (subId === 'club_sw') {
+      if (!String(values.eventosTematicos || '').trim()) {
+        pushMissing(missing, labelForField(cfg, 'eventosTematicos') || 'Eventos temáticos');
+      }
+      if (!String(values.politicaParejasSingles || '').trim()) {
+        pushMissing(missing, labelForField(cfg, 'politicaParejasSingles') || 'Política parejas / singles');
+      }
+    } else {
+      if (!String(values.cartelera || '').trim()) {
+        pushMissing(missing, labelForField(cfg, 'cartelera') || 'Cartelera / eventos');
+      }
     }
     if (!String(values.dressCode || '').trim()) {
       pushMissing(missing, labelForField(cfg, 'dressCode') || 'Dress code');
@@ -2564,7 +2622,7 @@
       validateRetailDeltaValues(cfg, values, missing);
     }
     if (isVenueSubcategoria(ctx)) {
-      validateVenueDeltaValues(cfg, values, missing);
+      validateVenueDeltaValues(cfg, values, missing, ctx);
     }
     if (isBienestarSubcategoria(ctx)) {
       validateBienestarDeltaValues(cfg, values, missing, ctx);
@@ -2986,6 +3044,7 @@
     buildVenuePerfil: buildVenuePerfil,
     mapVenueToPerfil: mapVenueToPerfil,
     normalizeVenueSubId: normalizeVenueSubId,
+    inferVenueSubId: inferVenueSubId,
     finalizeBienestarValues: finalizeBienestarValues,
     buildBienestarPerfil: buildBienestarPerfil,
     mapBienestarToPerfil: mapBienestarToPerfil,
