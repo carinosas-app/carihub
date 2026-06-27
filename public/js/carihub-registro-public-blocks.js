@@ -39,6 +39,10 @@
     return global.CARIHUB_REGISTRO_RETAIL_BLOCKS || null;
   }
 
+  function resolveVenueConfig() {
+    return global.CARIHUB_REGISTRO_VENUE_BLOCKS || null;
+  }
+
   function normalizeCreadorSubId(raw) {
     var subId = normalizeSubId(raw);
     if (subId === 'contenido' || subId === 'creador contenido') return 'contenido';
@@ -48,6 +52,13 @@
   function normalizeRetailSubId(raw) {
     var subId = normalizeSubId(raw);
     if (subId === 'sex shop') return 'sex_shop';
+    return '';
+  }
+
+  function normalizeVenueSubId(raw) {
+    var subId = normalizeSubId(raw);
+    if (subId === 'antro restaurant bar lgbt' || subId === 'antro lgbt') return 'antro_lgbt';
+    if (subId === 'antro restaurant bar' || subId === 'antro') return 'antro';
     return '';
   }
 
@@ -312,11 +323,23 @@
     return false;
   }
 
+  function matchesVenue(ctx, resolved) {
+    var cfg = resolveVenueConfig();
+    if (!cfg) return false;
+    ctx = ctx || {};
+    var raw = String((ctx.subcategoriaId) || (ctx.subcategoria) || '').trim().toLowerCase();
+    if (cfg.subcategoriaIds.indexOf(raw) >= 0) return true;
+    var canon = normalizeVenueSubId((ctx.subcategoriaId) || (ctx.subcategoria) || '');
+    if (canon === 'antro' || canon === 'antro_lgbt') return true;
+    return false;
+  }
+
   function resolveConfig(ctx, resolved) {
     if (matchesDominatrix(ctx, resolved)) return resolveDominatrixConfig();
     if (matchesEspectaculo(ctx, resolved)) return resolveEspectaculoConfig();
     if (matchesCreador(ctx, resolved)) return resolveCreadorConfig();
     if (matchesRetail(ctx, resolved)) return resolveRetailConfig();
+    if (matchesVenue(ctx, resolved)) return resolveVenueConfig();
     if (matchesEscort(ctx, resolved)) return resolveEscortConfig();
     if (matchesLifestyle(ctx, resolved)) return resolveLifestyleConfig();
     if (matchesPareja(ctx, resolved)) return resolveParejaConfig();
@@ -896,6 +919,14 @@
     ctx = ctx || {};
     if (ctx.arquetipo === 'negocio_retail') return true;
     return normalizeRetailSubId((ctx.subcategoriaId) || (ctx.subcategoria) || '') === 'sex_shop';
+  }
+
+  function isVenueSubcategoria(ctx) {
+    ctx = ctx || {};
+    var raw = String(ctx.subcategoriaId || ctx.subcategoria || '').trim().toLowerCase();
+    if (raw === 'antro' || raw === 'antro_lgbt') return true;
+    var canon = normalizeVenueSubId((ctx.subcategoriaId) || (ctx.subcategoria) || '');
+    return canon === 'antro' || canon === 'antro_lgbt';
   }
 
   var MODALIDADES_SHOW_LABELS = {
