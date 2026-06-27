@@ -182,6 +182,27 @@ try {
   ok('H6 DEMO singles presente', demoSingles.includes('subcategoriaId:"singles"'), 'singles');
   ok('H6 DEMO singles buscanConocer', demoSingles.includes('buscanConocer:'), 'buscan');
   ok('H6 DEMO singles sin modalidades escort', !demoSingles.includes('modalidades:') && !demoSingles.includes('modalidadFicha:'), 'sin modalidades');
+  const demoGigolo = extractDemoObject(perfilHtml, 'gigolo');
+  ok('H7 DEMO gigolo presente', demoGigolo.includes('subcategoriaId:"gigolo"'), 'gigolo');
+  ok('H7 DEMO gigolo persona', demoGigolo.includes('categoria:"Gigolo"') && demoGigolo.includes('modalidades:'), 'gigolo persona');
+
+  const demoLesbians = extractDemoObject(perfilHtml, 'lesbians');
+  ok('H7 DEMO lesbians presente', demoLesbians.includes('subcategoriaId:"lesbians"'), 'lesbians');
+  ok('H7 DEMO lesbians toggles', demoLesbians.includes('mostrarAtiendoA:"Sí"') && demoLesbians.includes('mostrarColaboraciones:"Sí"'), 'toggles');
+
+  const demoTomBoy = extractDemoObject(perfilHtml, 'tomBoy');
+  ok('H7 DEMO tomBoy presente', demoTomBoy.includes('subcategoriaId:"tom_boy"'), 'tomBoy');
+  ok('H7 DEMO tomBoy presentacion', demoTomBoy.includes('presentacionTom:') && demoTomBoy.includes('estiloPredominante:'), 'tomBoy fields');
+
+  const demoTomFem = extractDemoObject(perfilHtml, 'tomFem');
+  ok('H7 DEMO tomFem presente', demoTomFem.includes('subcategoriaId:"tom_fem"'), 'tomFem');
+  ok('H7 DEMO tomFem presentacion', demoTomFem.includes('presentacionTom:') && demoTomFem.includes('estiloPredominante:'), 'tomFem fields');
+
+  const resultadosDemoJs = fs.readFileSync(path.join(root, 'resultados-demo.js'), 'utf8');
+  ok('H7 routing demo gigolo -> adult', /gigolo:\s*'adult'/.test(resultadosDemoJs), 'gigolo');
+  ok('H7 routing demo femboy -> femboy', /femboy:\s*'femboy'/.test(resultadosDemoJs), 'femboy');
+  ok('H7 routing demo singles -> singles', /singles:\s*'singles'/.test(resultadosDemoJs), 'singles');
+  ok('H7 routing demo lesbians -> adult', /lesbians:\s*'adult'/.test(resultadosDemoJs), 'lesbians');
 
   const cardBase = {
     tagline: 'Perfil QA render',
