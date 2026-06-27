@@ -1,0 +1,151 @@
+---
+description: Disciplina operativa CariHub — evidencia, impacto, contratos, MPS y reutilización
+alwaysApply: true
+---
+
+# Disciplina operativa — CariHub
+
+Complementa `mcp-evidencia-objetiva.mdc`, `arquitectura-produccion.mdc` y `firebase-mcp-politica-seguridad.mdc`.
+
+## 1. No asumir nunca
+
+- No dar por hecho que algo existe, está implementado o funciona.
+- Verificar con herramientas (MCP, Git, QA, grep, lectura de archivos).
+- Mostrar evidencia concreta (salida, diff, hash, conteo de checks).
+- Si no se pudo verificar, decirlo explícitamente como **hipótesis**.
+
+## 2. Analizar impacto antes de cambiar
+
+Antes de tocar archivos importantes (`schema`, `blocks`, `mapToPerfil`, `submit`, `preview`, `render`, `perfil-publico.html`, QA gates), responder:
+
+- ¿Qué módulos dependen de esto?
+- ¿Qué scripts QA deben correr?
+- ¿Qué contratos podrían romperse?
+- ¿Qué riesgo tiene el cambio?
+
+Si el impacto es amplio → plan por fases y esperar autorización.
+
+## 3. Cambios pequeños y aislados
+
+Un objetivo por commit y por PR. No mezclar en el mismo diff:
+
+- nueva funcionalidad,
+- refactor,
+- corrección de bug,
+- documentación formal.
+
+## 4. Compatibilidad hacia atrás
+
+Antes de eliminar, renombrar o mover:
+
+- buscar consumidores (pantallas, módulos, QA, aliases, DEMO);
+- confirmar que no hay dependencias ocultas;
+- preferir alias temporal + deprecación antes de ruptura.
+
+## 5. No romper contratos
+
+Si cambia **schema**, **Firestore**, **mapToPerfil**, **preview**, **render** o **payload**, validar todos los consumidores conocidos y ejecutar el QA pack del dominio afectado.
+
+Contratos críticos de registro: nested `*Perfil`, anti-contaminación entre arquetipos, preview iframe vs persist vs render público.
+
+## 6. Priorizar estabilidad
+
+Entre solución elegante/riesgosa y solución simple/estable → **estable**, salvo autorización expresa.
+
+## 7. No duplicar lógica
+
+Antes de crear función, helper, bloque o ruta nueva: buscar equivalente existente (`grep`, schema index, blocks, field-engine, render-lite).
+
+Extender lo existente; no crear pipeline paralelo.
+
+## 8. Todo cambio importante debe poder revertirse
+
+- Diff acotado y revisable.
+- Commits atómicos.
+- Sin mezclar untracked ajenos ni artefactos generados (`validacion-schemas-report.json`).
+- Deploy/producción solo con autorización explícita.
+
+## 9. Mantener el MPS actualizado
+
+Al descubrir dependencia, contrato, alias, riesgo o punto crítico → **proponer** actualización del MPS (mapa arquitectónico). No dejar el mapa obsoleto tras hallazgos de auditoría.
+
+## 10. Pensar como arquitecto principal
+
+Antes de implementar: ¿esta decisión escala con cientos de módulos, miles de perfiles y más tráfico?
+
+No optimizar solo para el caso inmediato.
+
+## 11. No generar deuda técnica innecesaria
+
+Advertir antes de implementar si la solución:
+
+- duplica código,
+- crea alias innecesarios,
+- aumenta acoplamiento,
+- rompe capas (blocks → mapToPerfil → preview → render).
+
+## 12. Seguridad antes que funcionalidad
+
+Si algo funciona pero reduce seguridad (Firebase prod, datos privados, tokens, reglas) → **detenerse** y pedir autorización.
+
+## 13. Clasificar hallazgos — bloqueador vs pendiente
+
+Cada hallazgo de auditoría, revisión o QA debe etiquetarse explícitamente:
+
+| Nivel | Significado | Acción |
+|-------|-------------|--------|
+| **Bloqueador absoluto** | Impide merge seguro o rompe contrato/seguridad | Resolver **antes** de merge |
+| **Importante** | Riesgo real pero acotable al siguiente bloque | Registrar; no bloquear el objetivo actual si está fuera de alcance |
+| **Mejora futura** | Deseable, no urgente | No inflar el backlog del bloque activo |
+
+No entregar listas de pendientes sin prioridad. Indicar siempre el nivel de cada ítem.
+
+## 14. Congelar módulos estables
+
+Un módulo que ya pasó **auditoría + QA + PR + merge** se considera **congelado**.
+
+No modificarlo durante otro desarrollo salvo:
+
+- bug demostrado,
+- necesidad funcional autorizada, o
+- mejora previamente aprobada en el plan del bloque.
+
+Evita regresiones en la base estable mientras se avanza en otro dominio.
+
+## 15. Documentar decisiones arquitectónicas
+
+Cuando se tome una decisión de largo plazo (contratos, alias, rutas, pipelines, reglas de negocio, anti-contaminación, gates QA), **proponer registrarla** en el MPS o en la documentación del dominio correspondiente.
+
+El conocimiento no debe depender de la memoria del chat ni de un solo PR.
+
+Complementa la regla 9 (mantener MPS actualizado al descubrir); aquí aplica al **momento de decidir**.
+
+## 16. No ampliar el alcance (scope creep)
+
+Si durante una tarea aparecen mejoras **no relacionadas** con el objetivo autorizado:
+
+- registrarlas como observaciones (con nivel: importante / mejora futura);
+- **continuar** con el objetivo original;
+- no implementarlas ni mezclarlas en el mismo commit/PR sin autorización explícita.
+
+Terminar el módulo o bloque en curso antes de abrir otro.
+
+## 17. Reutilizar antes de crear
+
+Antes de **cualquier módulo nuevo o subcategoría nueva**:
+
+1. Revisar infraestructura reutilizable ya existente (blocks, schema index, UI index, field-engine, render-lite, QA pack, DEMO, reglas de arquetipo).
+2. Solo si no existe capacidad suficiente → proponer código nuevo.
+3. Priorizar **extender** la arquitectura actual sobre introducir componentes paralelos.
+
+Objetivo: una sola forma de resolver cada problema; evitar implementaciones duplicadas conforme crece el catálogo.
+
+## Checklist mínimo pre-entrega
+
+- [ ] Evidencia verificada (no suposiciones).
+- [ ] Impacto y QA indicados.
+- [ ] Diff acotado al objetivo (sin scope creep).
+- [ ] Contratos y consumidores considerados.
+- [ ] Hallazgos clasificados (bloqueador / importante / mejora futura).
+- [ ] Módulos congelados no tocados sin autorización.
+- [ ] Sin deploy/push/commit no autorizados.
