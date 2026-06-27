@@ -1,7 +1,7 @@
 /**
- * QA — Gate final NEG-VEN-02 (club_sw + HOSP/BIEN/VEN01/RET/CRE/ESP/DOM/HARDEN regresión).
+ * QA — Gate final NEG-VEN-03 (cabinas + cine_xxx + regresiones).
  *
- * node scripts/qa-neg-ven-02-cierre.mjs
+ * node scripts/qa-neg-ven-03-cierre.mjs
  */
 import { spawnSync } from 'child_process';
 import fs from 'fs';
@@ -12,7 +12,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.join(__dirname, '..');
 
 const GATE_SCRIPTS = [
-  'qa-neg-venue-club-sw-cierre.mjs',
+  'qa-neg-venue-cabinas-cine-cierre.mjs',
+  'qa-neg-ven-02-cierre.mjs',
   'qa-neg-hosp-01-cierre.mjs',
   'qa-neg-bien-01-cierre.mjs',
   'qa-neg-ven-01-cierre.mjs',
@@ -55,7 +56,7 @@ function parsePassCount(out) {
   return total;
 }
 
-console.log('\n=== NEG-VEN-02 Gate — ejecución scripts ===');
+console.log('\n=== NEG-VEN-03 Gate — ejecución scripts ===');
 let gateChecks = 0;
 
 for (const script of GATE_SCRIPTS) {
@@ -65,33 +66,39 @@ for (const script of GATE_SCRIPTS) {
   else pass.push({ name: script, detail: 'ok' });
 }
 
-console.log('\n=== NEG-VEN-02 Gate — invariantes ===');
+console.log('\n=== NEG-VEN-03 Gate — invariantes ===');
 
 const blocksJs = fs.readFileSync(path.join(repoRoot, 'public', 'js', 'data', 'registro-adultos-venue-blocks.js'), 'utf8');
-ok('blocks NEG_VEN_02 sub club_sw', blocksJs.includes("'club_sw'"), 'club_sw');
-ok('1/1 sub club_sw only once', (blocksJs.match(/'club_sw'/g) || []).length >= 1, 'canon');
-ok('nested venuePerfil not clubSwPerfil', blocksJs.includes("id: 'venuePerfil'") && !blocksJs.includes("id: 'clubSwPerfil'"), 'venuePerfil');
-ok('club_sw still in bundle post VEN-03', blocksJs.includes("'club_sw'"), 'club_sw');
+ok('blocks NEG_VEN_03 sub cabinas', blocksJs.includes("'cabinas'"), 'cabinas');
+ok('blocks NEG_VEN_03 sub cine_xxx', blocksJs.includes("'cine_xxx'"), 'cine_xxx');
+ok('2/2 subs resolve negocio_venue', blocksJs.includes("'cabinas'") && blocksJs.includes("'cine_xxx'"), 'cabinas + cine_xxx');
+ok('nested venuePerfil not cabinasPerfil', blocksJs.includes("id: 'venuePerfil'") && !blocksJs.includes("id: 'cabinasPerfil'"), 'venuePerfil');
+ok('no cineXxxPerfil', !blocksJs.includes("id: 'cineXxxPerfil'"), 'no cineXxxPerfil');
 ok('no modalidades in bundle', !blocksJs.includes("id: 'modalidades'"), 'excluido');
 ok('no edad in bundle', !blocksJs.includes("id: 'edad'"), 'excluido');
 
 const perfilHtml = fs.readFileSync(path.join(repoRoot, 'public', 'perfil-publico.html'), 'utf8');
-ok('DEMO.clubSw sub club_sw', perfilHtml.includes('subcategoriaId:"club_sw"'), 'sub');
-ok('DEMO.clubSw negocio_venue', /DEMO\.clubSw=\{[\s\S]*?arquetipo:"negocio_venue"/.test(perfilHtml), 'arquetipo');
-ok('DEMO.clubSw tipoPerfil lugar', /DEMO\.clubSw=\{[\s\S]*?tipoPerfil:"lugar"/.test(perfilHtml), 'lugar');
-ok('DEMO.clubSw badgeSwinger', /DEMO\.clubSw=\{[\s\S]*?badgeSwinger:true/.test(perfilHtml), 'badge negocio');
-ok('preview alias club_sw', perfilHtml.includes('club_sw:"clubSw"'), 'alias');
+ok('DEMO.cabinas sub cabinas', perfilHtml.includes('subcategoriaId:"cabinas"'), 'sub');
+ok('DEMO.cabinas negocio_venue', /DEMO\.cabinas=\{[\s\S]*?arquetipo:"negocio_venue"/.test(perfilHtml), 'arquetipo');
+ok('DEMO.cabinas tipoPerfil lugar', /DEMO\.cabinas=\{[\s\S]*?tipoPerfil:"lugar"/.test(perfilHtml), 'lugar');
+ok('DEMO.cineXxx sub cine_xxx', perfilHtml.includes('subcategoriaId:"cine_xxx"'), 'sub cine');
+ok('DEMO.cineXxx negocio_venue', /DEMO\.cineXxx=\{[\s\S]*?arquetipo:"negocio_venue"/.test(perfilHtml), 'arquetipo cine');
+ok('preview alias cabinas', perfilHtml.includes('"cabinas glory holes":"cabinas"'), 'alias cabinas');
+ok('preview alias cine_xxx', perfilHtml.includes('cine_xxx:"cineXxx"'), 'alias cine');
 
 const viajesJs = fs.readFileSync(path.join(repoRoot, 'public', 'js', 'carihub-viajes-desplazamiento.js'), 'utf8');
 const viajesMatch = viajesJs.match(/VIAJES_SUBCATEGORIAS\s*=\s*\[([\s\S]*?)\];/);
 const viajesList = viajesMatch ? viajesMatch[1] : '';
-ok('v1 sin viajes club_sw', !viajesList.includes("'club_sw'"), 'excluido');
+ok('v1 sin viajes cabinas', !viajesList.includes("'cabinas'"), 'excluido');
+ok('v1 sin viajes cine_xxx', !viajesList.includes("'cine_xxx'"), 'excluido');
 
 const registroJs = fs.readFileSync(path.join(repoRoot, 'public', 'js', 'carihub-registro-public-blocks.js'), 'utf8');
-ok('normalizeVenueSubId club aliases', registroJs.includes("'club sw'") && registroJs.includes("'club_swinger'"), 'aliases');
-ok('resolveConfig club_sw -> negocio_venue', registroJs.includes("canon === 'club_sw'"), 'venue canon');
+ok('normalizeVenueSubId cabinas aliases', registroJs.includes("'cabinas glory holes'"), 'aliases cabinas');
+ok('normalizeVenueSubId cine aliases', registroJs.includes("'cine adulto'"), 'aliases cine');
+ok('resolveConfig cabinas -> negocio_venue', registroJs.includes("canon === 'cabinas'"), 'venue canon');
+ok('resolveConfig cine_xxx -> negocio_venue', registroJs.includes("canon === 'cine_xxx'"), 'venue canon cine');
 
-console.log('\n=== NEG-VEN-02 Gate (meta) ===');
+console.log('\n=== NEG-VEN-03 Gate (meta) ===');
 console.log('PASS:', pass.length);
 pass.forEach((p) => console.log('  ✓', p.name, p.detail ? '— ' + p.detail : ''));
 if (fail.length) {
@@ -99,4 +106,4 @@ if (fail.length) {
   fail.forEach((f) => console.log('  ✗', f.name, '—', f.detail));
   process.exit(1);
 }
-console.log('\nNEG-VEN-02 Gate OK. Checks acumulados (scripts hijos):', gateChecks);
+console.log('\nNEG-VEN-03 Gate OK. Checks acumulados (scripts hijos):', gateChecks);

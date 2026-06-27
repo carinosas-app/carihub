@@ -51,7 +51,7 @@ ok('blocks sub antro_lgbt', blocksJs.includes("'antro_lgbt'"), 'antro_lgbt');
 ok('nested venuePerfil block id', blocksJs.includes("id: 'venuePerfil'"), 'block');
 ok('no viaja modalidad', !blocksJs.includes("'viaja'"), 'no viaja');
 ok('no modalidades escort field', !blocksJs.includes("id: 'modalidades'"), 'no modalidades escort');
-ok('no cabinas in bundle', !blocksJs.includes("'cabinas'"), 'no cabinas');
+ok('antro subs still in bundle post VEN-03', blocksJs.includes("'antro'") && blocksJs.includes("'antro_lgbt'"), 'antro + antro_lgbt');
 
 const registroJs = fs.readFileSync(path.join(repoRoot, 'public', 'js', 'carihub-registro-public-blocks.js'), 'utf8');
 ok('buildVenuePerfil', registroJs.includes('buildVenuePerfil'), 'persist');
