@@ -35,9 +35,19 @@
     return global.CARIHUB_REGISTRO_CREADOR_BLOCKS || null;
   }
 
+  function resolveRetailConfig() {
+    return global.CARIHUB_REGISTRO_RETAIL_BLOCKS || null;
+  }
+
   function normalizeCreadorSubId(raw) {
     var subId = normalizeSubId(raw);
     if (subId === 'contenido' || subId === 'creador contenido') return 'contenido';
+    return '';
+  }
+
+  function normalizeRetailSubId(raw) {
+    var subId = normalizeSubId(raw);
+    if (subId === 'sex shop') return 'sex_shop';
     return '';
   }
 
@@ -289,10 +299,24 @@
     return false;
   }
 
+  function matchesRetail(ctx, resolved) {
+    var cfg = resolveRetailConfig();
+    if (!cfg) return false;
+    ctx = ctx || {};
+    var canon = normalizeRetailSubId((ctx && ctx.subcategoriaId) || (ctx && ctx.subcategoria) || '');
+    if (canon === 'sex_shop') return true;
+    if (ctx.arquetipo === cfg.id) return true;
+    var ident = resolved && resolved.identidad ? resolved.identidad : {};
+    if (ident.formularioId === cfg.formularioId && ident.arquetipo === cfg.id) return true;
+    if (resolved && cfg.uiIds.indexOf(resolved.formularioUiId || '') >= 0) return true;
+    return false;
+  }
+
   function resolveConfig(ctx, resolved) {
     if (matchesDominatrix(ctx, resolved)) return resolveDominatrixConfig();
     if (matchesEspectaculo(ctx, resolved)) return resolveEspectaculoConfig();
     if (matchesCreador(ctx, resolved)) return resolveCreadorConfig();
+    if (matchesRetail(ctx, resolved)) return resolveRetailConfig();
     if (matchesEscort(ctx, resolved)) return resolveEscortConfig();
     if (matchesLifestyle(ctx, resolved)) return resolveLifestyleConfig();
     if (matchesPareja(ctx, resolved)) return resolveParejaConfig();
@@ -868,6 +892,12 @@
     return normalizeCreadorSubId((ctx.subcategoriaId) || (ctx.subcategoria) || '') === 'contenido';
   }
 
+  function isRetailSubcategoria(ctx) {
+    ctx = ctx || {};
+    if (ctx.arquetipo === 'negocio_retail') return true;
+    return normalizeRetailSubId((ctx.subcategoriaId) || (ctx.subcategoria) || '') === 'sex_shop';
+  }
+
   var MODALIDADES_SHOW_LABELS = {
     fiestas: 'Fiestas privadas',
     despedidas: 'Despedidas',
@@ -1144,6 +1174,149 @@
     var pagos = values.metodosPago;
     if (!Array.isArray(pagos) || !pagos.length) {
       pushMissing(missing, labelForField(cfg, 'metodosPago') || 'Métodos de pago');
+    }
+  }
+
+  function retailFlagFromSelect(val) {
+    var s = String(val || '').trim().toLowerCase();
+    return s === 'sí' || s === 'si' || s === 'yes' || val === true;
+  }
+
+  function buildCategoriasProductoMirror(list) {
+    if (!Array.isArray(list) || !list.length) return '';
+    return list.join(', ');
+  }
+
+  function buildRetailPerfil(values) {
+    values = values || {};
+    return {
+      nombreComercial: values.nombreComercial || '',
+      categoriasProducto: Array.isArray(values.categoriasProducto) ? values.categoriasProducto.slice() : [],
+      precioDesde: values.precioDesde || '',
+      envioDomicilio: retailFlagFromSelect(values.envioDomicilio),
+      tiendaOnline: retailFlagFromSelect(values.tiendaOnline),
+      direccion: values.direccion || '',
+      zonaPublica: values.zonaPublica || '',
+      serviciosIncluidos: Array.isArray(values.serviciosIncluidos) ? values.serviciosIncluidos.slice() : [],
+      serviciosNoRealizo: Array.isArray(values.serviciosNoRealizo) ? values.serviciosNoRealizo.slice() : [],
+      horarioDetalle: values.horarioDetalle || '',
+      metodosPago: Array.isArray(values.metodosPago) ? values.metodosPago.slice() : [],
+      sobreMi: values.sobreMi || '',
+      disponibilidad: values.disponibilidad || '',
+      rfc: values.rfc || '',
+      razonSocial: values.razonSocial || '',
+      licenciaOperacion: values.licenciaOperacion || ''
+    };
+  }
+
+  function finalizeRetailValues(values, ctx) {
+    if (!values || !isRetailSubcategoria(ctx || {})) return values;
+    delete values.creadorPerfil;
+    delete values.espectaculoPerfil;
+    delete values.dominatrixPerfil;
+    delete values.swingerPerfil;
+    delete values.unicornPerfil;
+    delete values.cuckoldHotwifePerfil;
+    delete values.modalidades;
+    values.retailPerfil = buildRetailPerfil(values);
+    return values;
+  }
+
+  function mapRetailToPerfil(u, bloques, ctx) {
+    u = u || {};
+    ctx = ctx || {};
+    var canon = normalizeRetailSubId((ctx && ctx.subcategoriaId) || u.subcategoriaId || '') || 'sex_shop';
+    var ret = bloques.retailPerfil || buildRetailPerfil(bloques);
+    delete u.creadorPerfil;
+    delete u.espectaculoPerfil;
+    delete u.dominatrixPerfil;
+    delete u.swingerPerfil;
+    delete u.unicornPerfil;
+    delete u.cuckoldHotwifePerfil;
+    u.retailPerfil = Object.assign({}, ret);
+    u.arquetipo = 'negocio_retail';
+    u.tipoPerfil = 'negocio';
+    u.subcategoriaId = canon;
+    if (ret.nombreComercial) {
+      u.nombreComercial = ret.nombreComercial;
+      u.nombre = ret.nombreComercial;
+      u.alias = ret.nombreComercial;
+    }
+    if (Array.isArray(ret.categoriasProducto) && ret.categoriasProducto.length) {
+      u.categoriasProducto = buildCategoriasProductoMirror(ret.categoriasProducto);
+      u.tipoServicio = 'Tienda · ' + ret.categoriasProducto.slice(0, 2).join(' · ');
+    }
+    if (ret.precioDesde) {
+      u.precioDesde = ret.precioDesde;
+      u.precio = ret.precioDesde;
+    }
+    u.envioDomicilio = ret.envioDomicilio === true;
+    u.tiendaOnline = ret.tiendaOnline === true;
+    if (ret.direccion) {
+      u.direccion = ret.direccion;
+      u.ubicacionFicha = ret.zonaPublica || ret.direccion;
+    } else if (ret.zonaPublica) {
+      u.ubicacionFicha = ret.zonaPublica;
+    }
+    if (Array.isArray(ret.serviciosIncluidos) && ret.serviciosIncluidos.length) {
+      u.serviciosIncluidos = ret.serviciosIncluidos.slice();
+    }
+    if (Array.isArray(ret.serviciosNoRealizo) && ret.serviciosNoRealizo.length) {
+      u.noRealiza = ret.serviciosNoRealizo.slice();
+    }
+    if (Array.isArray(ret.metodosPago) && ret.metodosPago.length) {
+      u.metodosPago = ret.metodosPago.slice();
+    }
+    if (ret.horarioDetalle) {
+      u.horarioDetalle = ret.horarioDetalle;
+      u.horario = ret.horarioDetalle;
+    }
+    if (ret.sobreMi) {
+      u.sobreMi = ret.sobreMi;
+      u.sobreNosotros = ret.sobreMi;
+      u.perfilNosotros = ret.sobreMi;
+    }
+    if (ret.disponibilidad) {
+      u.disponibilidad = DISPONIBILIDAD_LABELS[ret.disponibilidad] || ret.disponibilidad;
+    }
+    u.disponiblePara = 'Venta al público';
+    return u;
+  }
+
+  function validateRetailDeltaValues(cfg, values, missing) {
+    if (!String(values.nombreComercial || '').trim()) {
+      pushMissing(missing, labelForField(cfg, 'nombreComercial') || 'Nombre comercial');
+    }
+    var cats = values.categoriasProducto;
+    if (!Array.isArray(cats) || !cats.length) {
+      pushMissing(missing, labelForField(cfg, 'categoriasProducto') || 'Categorías de productos');
+    }
+    if (!String(values.direccion || '').trim()) {
+      pushMissing(missing, labelForField(cfg, 'direccion') || 'Dirección o zona pública');
+    }
+    if (!String(values.precioDesde || '').trim()) {
+      pushMissing(missing, labelForField(cfg, 'precioDesde') || 'Precio / compra mínima desde');
+    }
+    if (!String(values.horarioDetalle || '').trim()) {
+      pushMissing(missing, labelForField(cfg, 'horarioDetalle') || 'Horario');
+    }
+    var svc = values.serviciosIncluidos;
+    if (!Array.isArray(svc) || !svc.length) {
+      pushMissing(missing, labelForField(cfg, 'serviciosIncluidos') || 'Qué ofrece la tienda');
+    }
+    var noSvc = values.serviciosNoRealizo;
+    if (!Array.isArray(noSvc) || !noSvc.length) {
+      pushMissing(missing, labelForField(cfg, 'serviciosNoRealizo') || 'Políticas / no incluye');
+    }
+    var pagos = values.metodosPago;
+    if (!Array.isArray(pagos) || !pagos.length) {
+      pushMissing(missing, labelForField(cfg, 'metodosPago') || 'Métodos de pago');
+    }
+    if (!String(values.rfc || '').trim()) {
+      pushMissing(missing, labelForField(cfg, 'rfc') || 'RFC');
+    }
+    if (!String(values.razonSocial || '').trim()) {
+      pushMissing(missing, labelForField(cfg, 'razonSocial') || 'Razón social');
     }
   }
 
@@ -1667,6 +1840,7 @@
     values = finalizeDominatrixValues(values, ctx);
     values = finalizeEspectaculoValues(values, ctx);
     values = finalizeCreadorValues(values, ctx);
+    values = finalizeRetailValues(values, ctx);
     values = finalizeParejaGrupoValues(values);
     return values;
   }
@@ -1755,6 +1929,9 @@
     }
     if (isCreadorSubcategoria(ctx)) {
       validateCreadorDeltaValues(cfg, values, missing);
+    }
+    if (isRetailSubcategoria(ctx)) {
+      validateRetailDeltaValues(cfg, values, missing);
     }
     return missing;
   }
@@ -1937,6 +2114,9 @@
     if (isCreadorSubcategoria(ctx)) {
       return mapCreadorToPerfil(u, bloques, ctx);
     }
+    if (isRetailSubcategoria(ctx)) {
+      return mapRetailToPerfil(u, bloques, ctx);
+    }
     if (bloques.orientacion) u.orientacion = bloques.orientacion;
     if (bloques.identidadGenero) u.identidadGenero = bloques.identidadGenero;
     if (bloques.presentacionFemboy) {
@@ -2116,6 +2296,7 @@
     matchesDominatrix: matchesDominatrix,
     matchesEspectaculo: matchesEspectaculo,
     matchesCreador: matchesCreador,
+    matchesRetail: matchesRetail,
     apply: apply,
     collectValues: collectValues,
     validateValues: validateValues,
@@ -2146,6 +2327,10 @@
     buildCreadorPerfil: buildCreadorPerfil,
     mapCreadorToPerfil: mapCreadorToPerfil,
     normalizeCreadorSubId: normalizeCreadorSubId,
+    finalizeRetailValues: finalizeRetailValues,
+    buildRetailPerfil: buildRetailPerfil,
+    mapRetailToPerfil: mapRetailToPerfil,
+    normalizeRetailSubId: normalizeRetailSubId,
     buildSwingerPerfil: buildSwingerPerfil,
     buildUnicornPerfil: buildUnicornPerfil,
     buildCuckoldHotwifePerfil: buildCuckoldHotwifePerfil,
@@ -2160,6 +2345,7 @@
     isDominatrixSubcategoria: isDominatrixSubcategoria,
     isEspectaculoSubcategoria: isEspectaculoSubcategoria,
     isCreadorSubcategoria: isCreadorSubcategoria,
+    isRetailSubcategoria: isRetailSubcategoria,
     shouldApplySwingerPipeline: shouldApplySwingerPipeline,
     shouldApplyUnicornPipeline: shouldApplyUnicornPipeline,
     shouldApplyCuckoldHotwifePipeline: shouldApplyCuckoldHotwifePipeline,
