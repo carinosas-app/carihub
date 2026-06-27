@@ -56,7 +56,7 @@ ok('no club_sw in bundle', !blocksJs.includes("'club_sw'"), 'no club_sw');
 const registroJs = fs.readFileSync(path.join(repoRoot, 'public', 'js', 'carihub-registro-public-blocks.js'), 'utf8');
 ok('buildVenuePerfil', registroJs.includes('buildVenuePerfil'), 'persist');
 ok('normalizeVenueSubId', registroJs.includes('normalizeVenueSubId'), 'canonical');
-ok('resolveConfig venue before escort', /if \(matchesVenue\(ctx, resolved\)\) return resolveVenueConfig\(\);\s*\n\s*if \(matchesEscort/.test(registroJs), 'order');
+ok('resolveConfig venue before bienestar', /if \(matchesVenue\(ctx, resolved\)\) return resolveVenueConfig\(\);\s*\n\s*if \(matchesBienestar/.test(registroJs), 'order');
 
 const renderJs = fs.readFileSync(path.join(repoRoot, 'public', 'js', 'carihub-public-render-lite.js'), 'utf8');
 ok('cardHTMLVenue', renderJs.includes('cardHTMLVenue'), 'render');

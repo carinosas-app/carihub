@@ -847,6 +847,87 @@
     return cardHTMLVenue(u, Q);
   }
 
+  function normBienestarSubId(u) {
+    var id = String((u && u.subcategoriaId) || '').trim().toLowerCase().replace(/_/g, ' ');
+    if (id === 'spa') return 'spa';
+    if (id === 'masajes') return 'masajes';
+    if (u && u.arquetipo === 'negocio_bienestar') {
+      var tipo = String(u.tipoBienestar || (u.bienestarPerfil && u.bienestarPerfil.tipoBienestar) || '').toLowerCase();
+      if (tipo.indexOf('masajes') >= 0) return 'masajes';
+      if (u.bienestarPerfil) return 'spa';
+    }
+    return id;
+  }
+
+  function isBienestarPerfil(u) {
+    if (!u) return false;
+    if (u.arquetipo === 'negocio_bienestar') return true;
+    if (u.bienestarPerfil) return true;
+    var sid = normBienestarSubId(u);
+    return sid === 'spa' || sid === 'masajes';
+  }
+
+  function isSpaPerfil(u) {
+    return isBienestarPerfil(u) && normBienestarSubId(u) === 'spa';
+  }
+
+  function isMasajesLocalPerfil(u) {
+    return isBienestarPerfil(u) && normBienestarSubId(u) === 'masajes';
+  }
+
+  function bienestarShowChips(u, opts) {
+    opts = opts || {};
+    var mods = '';
+    var menu = String(u.menuServicios || (u.bienestarPerfil && u.bienestarPerfil.menuServicios) || '').trim();
+    if (menu) {
+      var menuTxt = menu.split(/[\n·|]/)[0].trim();
+      if (menuTxt.length > 26) menuTxt = menuTxt.slice(0, 24) + '…';
+      if (menuTxt) mods += '<span class="modchip mc-pink">' + svgIco('briefcase') + safeTxt(menuTxt) + '</span>';
+    }
+    var am = u.amenidades || (u.bienestarPerfil && u.bienestarPerfil.amenidades);
+    if (Array.isArray(am) && am.length) {
+      var amTxt = String(am[0]);
+      if (amTxt.length > 22) amTxt = amTxt.slice(0, 20) + '…';
+      mods += '<span class="modchip mc-purple">' + svgIco('flower') + safeTxt(amTxt) + '</span>';
+    }
+    if (u.reservaciones === true || String(u.reservaciones || '').toLowerCase() === 'true') {
+      mods += '<span class="modchip mc-purple">' + svgIco('calendar') + 'Reservaciones</span>';
+    }
+    if (opts.horario && (u.horarioDetalle || u.horario)) {
+      var h = String(u.horarioDetalle || u.horario);
+      if (h.length > 28) h = h.slice(0, 26) + '…';
+      mods += '<span class="modchip mc-purple">' + svgIco('clock') + safeTxt(h) + '</span>';
+    }
+    return mods;
+  }
+
+  function cardHTMLBienestar(u, Q) {
+    Q = Q || {};
+    var mods = bienestarShowChips(u, { horario: true });
+    var catLabel = (global.CariHubResultadosDemo && CariHubResultadosDemo.labelCategoria)
+      ? CariHubResultadosDemo.labelCategoria(u.categoriaPublica || u.categoria || Q.categoria || '')
+      : (u.categoriaPublica || u.categoria || Q.categoria || 'Bienestar');
+    var cardExtra = isMasajesLocalPerfil(u) ? ' res-card--masajes-local' : ' res-card--spa';
+    return cardShell(u, Q, {
+      cardClass: 'res-card--negocio res-card--bienestar' + cardExtra,
+      nombre: u.nombreComercial || u.nombre || u.alias,
+      catIcon: 'briefcase',
+      catLabel: catLabel,
+      metaRight: mods,
+      descBlock: descripcionCompactHTML(u, 'Descripción'),
+      priceLabel: 'Desde',
+      badges: badgesCompactHTML(u, { negocio: u.verificada !== false })
+    });
+  }
+
+  function cardHTMLSpa(u, Q) {
+    return cardHTMLBienestar(u, Q);
+  }
+
+  function cardHTMLMasajesLocal(u, Q) {
+    return cardHTMLBienestar(u, Q);
+  }
+
   function cardHTMLServicio(u, Q) {
     Q = Q || {};
     var cobertura = String(u.zonaCobertura || u.zona || u.serviciosPrincipales || 'A domicilio').trim();
@@ -925,6 +1006,7 @@
     if (comp === 'ResultCardEspectaculo' || isEspectaculoPerfil(u)) return cardHTMLEspectaculo(u, Q);
     if (comp === 'ResultCardCreador' || isCreadorPerfil(u)) return cardHTMLCreador(u, Q);
     if (isVenuePerfil(u)) return cardHTMLVenue(u, Q);
+    if (isBienestarPerfil(u)) return cardHTMLBienestar(u, Q);
     if (comp === 'ResultCardNegocio' && isRetailPerfil(u)) return cardHTMLRetail(u, Q);
     if (comp === 'ResultCardNegocio') return cardHTMLNegocio(u, Q);
     if (isDominatrixPerfil(u)) return cardHTMLDominatrix(u, Q);
@@ -1037,6 +1119,12 @@
     cardHTMLVenue: cardHTMLVenue,
     cardHTMLAntro: cardHTMLAntro,
     cardHTMLAntroLgbt: cardHTMLAntroLgbt,
+    cardHTMLBienestar: cardHTMLBienestar,
+    cardHTMLSpa: cardHTMLSpa,
+    cardHTMLMasajesLocal: cardHTMLMasajesLocal,
+    isBienestarPerfil: isBienestarPerfil,
+    isSpaPerfil: isSpaPerfil,
+    isMasajesLocalPerfil: isMasajesLocalPerfil,
     isRetailPerfil: isRetailPerfil,
     isSexShopPerfil: isSexShopPerfil,
     isVenuePerfil: isVenuePerfil,

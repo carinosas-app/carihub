@@ -43,6 +43,10 @@
     return global.CARIHUB_REGISTRO_VENUE_BLOCKS || null;
   }
 
+  function resolveBienestarConfig() {
+    return global.CARIHUB_REGISTRO_BIENESTAR_BLOCKS || null;
+  }
+
   function normalizeCreadorSubId(raw) {
     var subId = normalizeSubId(raw);
     if (subId === 'contenido' || subId === 'creador contenido') return 'contenido';
@@ -59,6 +63,13 @@
     var subId = normalizeSubId(raw);
     if (subId === 'antro restaurant bar lgbt' || subId === 'antro lgbt') return 'antro_lgbt';
     if (subId === 'antro restaurant bar' || subId === 'antro') return 'antro';
+    return '';
+  }
+
+  function normalizeBienestarSubId(raw) {
+    var subId = normalizeSubId(raw);
+    if (subId === 'spa') return 'spa';
+    if (subId === 'masajes') return 'masajes';
     return '';
   }
 
@@ -334,12 +345,29 @@
     return false;
   }
 
+  function matchesBienestar(ctx, resolved) {
+    var cfg = resolveBienestarConfig();
+    if (!cfg) return false;
+    ctx = ctx || {};
+    if (String(ctx.tipoPerfil || '').trim().toLowerCase() === 'persona') return false;
+    var raw = String((ctx.subcategoriaId) || (ctx.subcategoria) || '').trim().toLowerCase();
+    if (cfg.subcategoriaIds.indexOf(raw) >= 0) return true;
+    var canon = normalizeBienestarSubId((ctx.subcategoriaId) || (ctx.subcategoria) || '');
+    if (canon === 'spa' || canon === 'masajes') return true;
+    if (ctx.arquetipo === cfg.id) return true;
+    var ident = resolved && resolved.identidad ? resolved.identidad : {};
+    if (ident.formularioId === cfg.formularioId && ident.arquetipo === cfg.id) return true;
+    if (resolved && cfg.uiIds.indexOf(resolved.formularioUiId || '') >= 0) return true;
+    return false;
+  }
+
   function resolveConfig(ctx, resolved) {
     if (matchesDominatrix(ctx, resolved)) return resolveDominatrixConfig();
     if (matchesEspectaculo(ctx, resolved)) return resolveEspectaculoConfig();
     if (matchesCreador(ctx, resolved)) return resolveCreadorConfig();
     if (matchesRetail(ctx, resolved)) return resolveRetailConfig();
     if (matchesVenue(ctx, resolved)) return resolveVenueConfig();
+    if (matchesBienestar(ctx, resolved)) return resolveBienestarConfig();
     if (matchesEscort(ctx, resolved)) return resolveEscortConfig();
     if (matchesLifestyle(ctx, resolved)) return resolveLifestyleConfig();
     if (matchesPareja(ctx, resolved)) return resolveParejaConfig();
@@ -927,6 +955,16 @@
     if (raw === 'antro' || raw === 'antro_lgbt') return true;
     var canon = normalizeVenueSubId((ctx.subcategoriaId) || (ctx.subcategoria) || '');
     return canon === 'antro' || canon === 'antro_lgbt';
+  }
+
+  function isBienestarSubcategoria(ctx) {
+    ctx = ctx || {};
+    if (String(ctx.tipoPerfil || '').trim().toLowerCase() === 'persona') return false;
+    if (ctx.arquetipo === 'negocio_bienestar') return true;
+    var raw = String(ctx.subcategoriaId || ctx.subcategoria || '').trim().toLowerCase();
+    if (raw === 'spa' || raw === 'masajes') return true;
+    var canon = normalizeBienestarSubId((ctx.subcategoriaId) || (ctx.subcategoria) || '');
+    return canon === 'spa' || canon === 'masajes';
   }
 
   var MODALIDADES_SHOW_LABELS = {
@@ -1518,6 +1556,179 @@
     }
   }
 
+  function bienestarFlagFromSelect(val) {
+    var s = String(val || '').trim().toLowerCase();
+    return s === 'sí' || s === 'si' || s === 'yes' || val === true;
+  }
+
+  function inferBienestarSubId(values, ctx) {
+    var canon = normalizeBienestarSubId((ctx && ctx.subcategoriaId) || (values && values.subcategoriaId) || '');
+    if (canon) return canon;
+    var tipo = String((values && values.tipoBienestar) || '').toLowerCase();
+    if (tipo.indexOf('masajes') >= 0) return 'masajes';
+    return 'spa';
+  }
+
+  function buildBienestarPerfil(values) {
+    values = values || {};
+    return {
+      nombreComercial: values.nombreComercial || '',
+      tipoBienestar: values.tipoBienestar || '',
+      tagline: values.tagline || '',
+      menuServicios: values.menuServicios || '',
+      precioDesde: values.precioDesde || '',
+      amenidades: Array.isArray(values.amenidades) ? values.amenidades.slice() : [],
+      reservaciones: bienestarFlagFromSelect(values.reservaciones),
+      direccion: values.direccion || '',
+      zonaPublica: values.zonaPublica || '',
+      serviciosIncluidos: Array.isArray(values.serviciosIncluidos) ? values.serviciosIncluidos.slice() : [],
+      serviciosNoRealizo: Array.isArray(values.serviciosNoRealizo) ? values.serviciosNoRealizo.slice() : [],
+      horarioDetalle: values.horarioDetalle || '',
+      metodosPago: Array.isArray(values.metodosPago) ? values.metodosPago.slice() : [],
+      sobreMi: values.sobreMi || '',
+      disponibilidad: values.disponibilidad || '',
+      rfc: values.rfc || '',
+      razonSocial: values.razonSocial || '',
+      telefonoContacto: values.telefonoContacto || '',
+      licenciaOperacion: values.licenciaOperacion || '',
+      documentos: values.documentos || '',
+      notasInternas: values.notasInternas || ''
+    };
+  }
+
+  function finalizeBienestarValues(values, ctx) {
+    if (!values || !isBienestarSubcategoria(ctx || {})) return values;
+    delete values.retailPerfil;
+    delete values.venuePerfil;
+    delete values.creadorPerfil;
+    delete values.espectaculoPerfil;
+    delete values.dominatrixPerfil;
+    delete values.swingerPerfil;
+    delete values.unicornPerfil;
+    delete values.cuckoldHotwifePerfil;
+    delete values.modalidades;
+    delete values.edad;
+    values.bienestarPerfil = buildBienestarPerfil(values);
+    return values;
+  }
+
+  function mapBienestarToPerfil(u, bloques, ctx) {
+    u = u || {};
+    ctx = ctx || {};
+    var canon = inferBienestarSubId(bloques, ctx);
+    var bien = bloques.bienestarPerfil || buildBienestarPerfil(bloques);
+    delete u.retailPerfil;
+    delete u.venuePerfil;
+    delete u.creadorPerfil;
+    delete u.espectaculoPerfil;
+    delete u.dominatrixPerfil;
+    delete u.swingerPerfil;
+    delete u.unicornPerfil;
+    delete u.cuckoldHotwifePerfil;
+    delete u.modalidades;
+    delete u.edad;
+    u.bienestarPerfil = Object.assign({}, bien);
+    u.arquetipo = 'negocio_bienestar';
+    u.tipoPerfil = 'negocio';
+    u.subcategoriaId = canon;
+    if (bien.nombreComercial) {
+      u.nombreComercial = bien.nombreComercial;
+      u.nombre = bien.nombreComercial;
+      u.alias = bien.nombreComercial;
+    }
+    if (bien.tagline) {
+      u.tagline = bien.tagline;
+      u.frase = bien.tagline;
+    }
+    if (bien.menuServicios) u.menuServicios = bien.menuServicios;
+    if (bien.precioDesde) {
+      u.precioDesde = bien.precioDesde;
+      u.precio = bien.precioDesde;
+    }
+    if (bien.tipoBienestar) u.tipoBienestar = bien.tipoBienestar;
+    if (Array.isArray(bien.amenidades) && bien.amenidades.length) {
+      u.amenidades = bien.amenidades.slice();
+    }
+    u.reservaciones = bien.reservaciones === true;
+    if (bien.direccion) {
+      u.direccion = bien.direccion;
+      u.ubicacionFicha = bien.zonaPublica || bien.direccion;
+    } else if (bien.zonaPublica) {
+      u.ubicacionFicha = bien.zonaPublica;
+    }
+    if (Array.isArray(bien.serviciosIncluidos) && bien.serviciosIncluidos.length) {
+      u.serviciosIncluidos = bien.serviciosIncluidos.slice();
+    }
+    if (Array.isArray(bien.serviciosNoRealizo) && bien.serviciosNoRealizo.length) {
+      u.noRealiza = bien.serviciosNoRealizo.slice();
+    }
+    if (Array.isArray(bien.metodosPago) && bien.metodosPago.length) {
+      u.metodosPago = bien.metodosPago.slice();
+    }
+    if (bien.horarioDetalle) {
+      u.horarioDetalle = bien.horarioDetalle;
+      u.horario = bien.horarioDetalle;
+    }
+    if (bien.sobreMi) {
+      u.sobreMi = bien.sobreMi;
+      u.sobreNosotros = bien.sobreMi;
+      u.perfilNosotros = bien.sobreMi;
+    }
+    if (bien.disponibilidad) {
+      u.disponibilidad = DISPONIBILIDAD_LABELS[bien.disponibilidad] || bien.disponibilidad;
+    }
+    return u;
+  }
+
+  function validateBienestarDeltaValues(cfg, values, missing, ctx) {
+    ctx = ctx || {};
+    var subId = inferBienestarSubId(values, ctx);
+    if (!String(values.nombreComercial || '').trim()) {
+      pushMissing(missing, labelForField(cfg, 'nombreComercial') || 'Nombre comercial');
+    }
+    if (!String(values.tipoBienestar || '').trim()) {
+      pushMissing(missing, labelForField(cfg, 'tipoBienestar') || 'Tipo de negocio');
+    }
+    if (!String(values.menuServicios || '').trim()) {
+      pushMissing(missing, labelForField(cfg, 'menuServicios') || 'Menú de servicios');
+    }
+    if (!String(values.precioDesde || '').trim()) {
+      pushMissing(missing, labelForField(cfg, 'precioDesde') || 'Precio desde');
+    }
+    if (!String(values.direccion || '').trim()) {
+      pushMissing(missing, labelForField(cfg, 'direccion') || 'Dirección o zona pública');
+    }
+    if (!String(values.horarioDetalle || '').trim()) {
+      pushMissing(missing, labelForField(cfg, 'horarioDetalle') || 'Horario');
+    }
+    var pagos = values.metodosPago;
+    if (!Array.isArray(pagos) || !pagos.length) {
+      pushMissing(missing, labelForField(cfg, 'metodosPago') || 'Métodos de pago');
+    }
+    if (subId === 'spa') {
+      var am = values.amenidades;
+      if (!Array.isArray(am) || !am.length) {
+        pushMissing(missing, labelForField(cfg, 'amenidades') || 'Amenidades');
+      }
+    }
+    if (subId === 'masajes') {
+      var svc = values.serviciosIncluidos;
+      if (!Array.isArray(svc) || !svc.length) {
+        pushMissing(missing, labelForField(cfg, 'serviciosIncluidos') || 'Servicios incluidos');
+      }
+      var noSvc = values.serviciosNoRealizo;
+      if (!Array.isArray(noSvc) || !noSvc.length) {
+        pushMissing(missing, labelForField(cfg, 'serviciosNoRealizo') || 'No incluye / reglas');
+      }
+    }
+    if (!String(values.rfc || '').trim()) {
+      pushMissing(missing, labelForField(cfg, 'rfc') || 'RFC');
+    }
+    if (!String(values.razonSocial || '').trim()) {
+      pushMissing(missing, labelForField(cfg, 'razonSocial') || 'Razón social');
+    }
+  }
+
   function joinTagsList(list) {
     if (!Array.isArray(list) || !list.length) return '';
     return list.join(' · ');
@@ -2040,6 +2251,7 @@
     values = finalizeCreadorValues(values, ctx);
     values = finalizeRetailValues(values, ctx);
     values = finalizeVenueValues(values, ctx);
+    values = finalizeBienestarValues(values, ctx);
     values = finalizeParejaGrupoValues(values);
     return values;
   }
@@ -2134,6 +2346,9 @@
     }
     if (isVenueSubcategoria(ctx)) {
       validateVenueDeltaValues(cfg, values, missing);
+    }
+    if (isBienestarSubcategoria(ctx)) {
+      validateBienestarDeltaValues(cfg, values, missing, ctx);
     }
     return missing;
   }
@@ -2322,6 +2537,9 @@
     if (isVenueSubcategoria(ctx)) {
       return mapVenueToPerfil(u, bloques, ctx);
     }
+    if (isBienestarSubcategoria(ctx)) {
+      return mapBienestarToPerfil(u, bloques, ctx);
+    }
     if (bloques.orientacion) u.orientacion = bloques.orientacion;
     if (bloques.identidadGenero) u.identidadGenero = bloques.identidadGenero;
     if (bloques.presentacionFemboy) {
@@ -2503,6 +2721,7 @@
     matchesCreador: matchesCreador,
     matchesRetail: matchesRetail,
     matchesVenue: matchesVenue,
+    matchesBienestar: matchesBienestar,
     apply: apply,
     collectValues: collectValues,
     validateValues: validateValues,
@@ -2541,6 +2760,11 @@
     buildVenuePerfil: buildVenuePerfil,
     mapVenueToPerfil: mapVenueToPerfil,
     normalizeVenueSubId: normalizeVenueSubId,
+    finalizeBienestarValues: finalizeBienestarValues,
+    buildBienestarPerfil: buildBienestarPerfil,
+    mapBienestarToPerfil: mapBienestarToPerfil,
+    normalizeBienestarSubId: normalizeBienestarSubId,
+    isBienestarSubcategoria: isBienestarSubcategoria,
     buildSwingerPerfil: buildSwingerPerfil,
     buildUnicornPerfil: buildUnicornPerfil,
     buildCuckoldHotwifePerfil: buildCuckoldHotwifePerfil,
