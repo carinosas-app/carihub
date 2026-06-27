@@ -198,11 +198,26 @@ try {
   ok('H7 DEMO tomFem presente', demoTomFem.includes('subcategoriaId:"tom_fem"'), 'tomFem');
   ok('H7 DEMO tomFem presentacion', demoTomFem.includes('presentacionTom:') && demoTomFem.includes('estiloPredominante:'), 'tomFem fields');
 
+  const demoEscort = extractDemoObject(perfilHtml, 'escort');
+  ok('H8 DEMO escort presente', demoEscort.includes('subcategoriaId:"escort"'), 'escort');
+  ok('H8 DEMO escort modalidades', demoEscort.includes('modalidades:') && demoEscort.includes('modalidadFicha:'), 'modalidades');
+
+  const demoAcompanante = extractDemoObject(perfilHtml, 'acompanante');
+  ok('H8 DEMO acompanante presente', demoAcompanante.includes('subcategoriaId:"acompanante"'), 'acompanante');
+  ok('H8 DEMO acompanante social', demoAcompanante.includes('categoria:"Acompañante"') || demoAcompanante.includes('Compañía social'), 'social');
+
+  const demoPetit = extractDemoObject(perfilHtml, 'petit');
+  ok('H8 DEMO petit presente', demoPetit.includes('subcategoriaId:"petit"'), 'petit');
+  ok('H8 DEMO petit estatura', demoPetit.includes('estatura:"1.55 m"') || demoPetit.includes('Petite'), 'estatura');
+
   const resultadosDemoJs = fs.readFileSync(path.join(root, 'resultados-demo.js'), 'utf8');
-  ok('H7 routing demo gigolo -> adult', /gigolo:\s*'adult'/.test(resultadosDemoJs), 'gigolo');
+  ok('H8 routing demo escort -> escort', /escort:\s*'escort'/.test(resultadosDemoJs), 'escort');
+  ok('H8 routing demo acompanante -> acompanante', /acompanante:\s*'acompanante'/.test(resultadosDemoJs), 'acompanante');
+  ok('H8 routing demo petit -> petit', /petit:\s*'petit'/.test(resultadosDemoJs), 'petit');
+  ok('H7 routing demo gigolo -> gigolo', /gigolo:\s*'gigolo'/.test(resultadosDemoJs), 'gigolo');
   ok('H7 routing demo femboy -> femboy', /femboy:\s*'femboy'/.test(resultadosDemoJs), 'femboy');
   ok('H7 routing demo singles -> singles', /singles:\s*'singles'/.test(resultadosDemoJs), 'singles');
-  ok('H7 routing demo lesbians -> adult', /lesbians:\s*'adult'/.test(resultadosDemoJs), 'lesbians');
+  ok('H7 routing demo lesbians -> lesbians', /lesbians:\s*'lesbians'/.test(resultadosDemoJs), 'lesbians');
 
   const cardBase = {
     tagline: 'Perfil QA render',

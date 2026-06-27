@@ -14,15 +14,15 @@
   var ZONAS = ['San Pedro', 'Centro', 'Valle Oriente', 'Cumbres', 'Mitras', 'Del Valle'];
 
   var VISTA_POR_CATEGORIA = {
-    escort: 'adult',
+    escort: 'escort',
     'escort gay': 'escortGay',
     'escort vip': 'escortVip',
     edecan: 'adult',
     stripper: 'stripper',
     modelos: 'adult',
-    gigolo: 'adult',
-    acompanante: 'adult',
-    petit: 'adult',
+    gigolo: 'gigolo',
+    acompanante: 'acompanante',
+    petit: 'petit',
     contenido: 'creador',
     tabledance: 'tableDance',
     'sex shop': 'sexShop',
@@ -40,7 +40,7 @@
     unicorns: 'unicorn',
     'cuckold hotwife': 'pareja',
     singles: 'singles',
-    lesbians: 'adult',
+    lesbians: 'lesbians',
     'tom boy': 'adult',
     'tom fem': 'adult',
     dotados: 'adult',
