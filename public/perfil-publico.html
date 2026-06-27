@@ -7239,6 +7239,9 @@ function aplicarPerfilDesdeRegistro(vista,u){
     videoPresentacion:u.videoPresentacion||"",
     promociones:u.promociones||"",
     buscanConocer:Array.isArray(u.buscanConocer)?u.buscanConocer.slice():[],
+    buscoConocer:Array.isArray(u.buscoConocer)?u.buscoConocer.slice():[],
+    objetivosPerfil:Array.isArray(u.objetivosPerfil)?u.objetivosPerfil.slice():[],
+    objetivoPrincipal:u.objetivoPrincipal||"",
     tipoCitaPreferida:Array.isArray(u.tipoCitaPreferida)?u.tipoCitaPreferida.slice():[],
     personalidadPredominante:u.personalidadPredominante||"",
     estiloPersonal:u.estiloPersonal||"",
@@ -7248,7 +7251,7 @@ function aplicarPerfilDesdeRegistro(vista,u){
     tiposTrios:Array.isArray(u.tiposTrios)?u.tiposTrios.slice():[],
     esBisexual:u.esBisexual||"",
     realizaGangBang:u.realizaGangBang||"",
-    buscan:Array.isArray(u.buscanConocer)&&u.buscanConocer.length?u.buscanConocer.slice():(u.tipoPublico||(Array.isArray(u.buscan)?u.buscan.slice():(u.buscan?String(u.buscan):""))),
+    buscan:Array.isArray(u.buscoConocer)&&u.buscoConocer.length?u.buscoConocer.slice():(Array.isArray(u.buscanConocer)&&u.buscanConocer.length?u.buscanConocer.slice():(u.tipoPublico||(Array.isArray(u.buscan)?u.buscan.slice():(u.buscan?String(u.buscan):"")))),
     tipoPublico:u.tipoPublico||"",
     participacionPareja:u.participacionPareja||"",
     disponibilidadAgenda:Array.isArray(u.disponibilidadAgenda)?u.disponibilidadAgenda.slice():[],
@@ -7371,7 +7374,8 @@ function aplicarPerfilDesdeRegistro(vista,u){
     badgeVip:!!u.badgeVip,
     badgeTrans:!!u.badgeTrans,
     badgeHotwife:!!u.badgeHotwife,
-    badgeCuckold:!!u.badgeCuckold
+    badgeCuckold:!!u.badgeCuckold,
+    badgeUnicorn:!!u.badgeUnicorn
   };
   if(u.ubicacion){
     clean.ubicacionPublica=u.ubicacion;
@@ -7379,6 +7383,14 @@ function aplicarPerfilDesdeRegistro(vista,u){
     if(parts.length) clean.direccionLineas=parts.length>1?[parts[0],parts.slice(1).join(", ")]:[parts[0]];
   }
   clean=mergeParejaGrupoRegistroFields(clean,u);
+  var sidUnicornNorm=String(clean.subcategoriaId||u.subcategoriaId||"").trim().toLowerCase().replace(/_/g," ");
+  if(sidUnicornNorm==="unicorns"||sidUnicornNorm==="unicorn"){
+    delete clean.swingerPerfil;
+    delete clean.cuckoldHotwifePerfil;
+    if(Array.isArray(clean.buscoConocer)&&clean.buscoConocer.length) clean.buscan=clean.buscoConocer.slice();
+    else if(Array.isArray(u.buscoConocer)&&u.buscoConocer.length){ clean.buscoConocer=u.buscoConocer.slice(); clean.buscan=u.buscoConocer.slice(); }
+    if(u.badgeUnicorn===true) clean.badgeUnicorn=true;
+  }
   var sidNorm=String(clean.subcategoriaId||"").trim().toLowerCase().replace(/_/g," ");
   if(sidNorm==="table dance"||sidNorm==="table_dance"||sidNorm==="tabledance") clean.subcategoriaId="tabledance";
   if(sidNorm==="stripper") clean.subcategoriaId="stripper";
