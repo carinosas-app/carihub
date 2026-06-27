@@ -58,7 +58,8 @@ ok('no club_sw in bundle', !blocksJs.includes("'club_sw'"), 'no club_sw');
 const registroJs = fs.readFileSync(path.join(repoRoot, 'public', 'js', 'carihub-registro-public-blocks.js'), 'utf8');
 ok('buildBienestarPerfil', registroJs.includes('buildBienestarPerfil'), 'persist');
 ok('normalizeBienestarSubId', registroJs.includes('normalizeBienestarSubId'), 'canonical');
-ok('resolveConfig bienestar before escort', /if \(matchesBienestar\(ctx, resolved\)\) return resolveBienestarConfig\(\);\s*\n\s*if \(matchesEscort/.test(registroJs), 'order');
+ok('resolveConfig bienestar before hospedaje', /if \(matchesBienestar\(ctx, resolved\)\) return resolveBienestarConfig\(\);\s*\n\s*if \(matchesHospedaje/.test(registroJs), 'order bienestar');
+ok('resolveConfig hospedaje before escort', /if \(matchesHospedaje\(ctx, resolved\)\) return resolveHospedajeConfig\(\);\s*\n\s*if \(matchesEscort/.test(registroJs), 'order escort');
 ok('resolveConfig venue before bienestar', /if \(matchesVenue\(ctx, resolved\)\) return resolveVenueConfig\(\);\s*\n\s*if \(matchesBienestar/.test(registroJs), 'order venue');
 
 const renderJs = fs.readFileSync(path.join(repoRoot, 'public', 'js', 'carihub-public-render-lite.js'), 'utf8');
