@@ -1,7 +1,7 @@
 /**
- * Bloques públicos registro — negocio_venue (antro + antro_lgbt + club_sw).
+ * Bloques públicos registro — negocio_venue (antro + antro_lgbt + club_sw + cabinas + cine_xxx).
  * Fuente: scripts/config-registro-adultos-schema.json (plantilla negocio_venue).
- * v1 antros (NEG-VEN-01); v2 club_sw (NEG-VEN-02) — sin cabinas/cine_xxx; sin viajes escort.
+ * v1 antros (NEG-VEN-01); v2 club_sw (NEG-VEN-02); v3 cabinas + cine_xxx (NEG-VEN-03).
  */
 (function (global) {
   'use strict';
@@ -17,6 +17,8 @@
   ];
 
   var TIPO_VENUE_CLUB = ['Club Swinger / Lifestyle'];
+  var TIPO_VENUE_CABINAS = ['Cabinas privadas / Glory holes'];
+  var TIPO_VENUE_CINE = ['Cine para adultos / Sala XXX'];
 
   var AREAS_VENUE = [
     'Pista principal',
@@ -39,6 +41,26 @@
     'Estacionamiento techado'
   ];
 
+  var AREAS_CABINAS = [
+    'Cabina estándar',
+    'Cabina pareja',
+    'Glory hole',
+    'Regadera privada',
+    'Aire acondicionado',
+    'Estacionamiento techado',
+    'Acceso discreto'
+  ];
+
+  var AREAS_CINE = [
+    'Sala principal',
+    'Butacas',
+    'Sala privada',
+    'Área común',
+    'Snacks / bar',
+    'Aire acondicionado',
+    'Entrada discreta'
+  ];
+
   var REGLAS_ACESO_OPTS = [
     'Solo mayores de edad',
     'Identificación obligatoria',
@@ -59,11 +81,45 @@
     'Conducta respetuosa obligatoria'
   ];
 
+  var REGLAS_CABINAS = [
+    'Solo mayores de edad',
+    'Identificación obligatoria',
+    'No cámaras no autorizadas',
+    'No menores',
+    'Limpieza entre usos',
+    'Conducta respetuosa obligatoria',
+    'Acceso discreto'
+  ];
+
+  var REGLAS_CINE = [
+    'Solo mayores de edad',
+    'Identificación obligatoria',
+    'No grabaciones',
+    'No menores',
+    'Conducta respetuosa obligatoria',
+    'Prohibido el ingreso de menores de edad'
+  ];
+
+  var NIVEL_PRIVACIDAD_OPTS = [
+    'Alta discreción',
+    'Entrada discreta',
+    'Cabinas insonorizadas',
+    'Sin ventanas exteriores',
+    'Recepción privada'
+  ];
+
+  var CLASIFICACION_OPTS = [
+    'Solo adultos (+18)',
+    'Contenido explícito',
+    'Aviso de clasificación en entrada',
+    'Restringido a mayores de edad'
+  ];
+
   global.CARIHUB_REGISTRO_VENUE_BLOCKS = {
     id: 'negocio_venue',
     formularioId: 'adultos',
     uiIds: ['ui_adulto_negocio_venue'],
-    subcategoriaIds: ['antro', 'antro_lgbt', 'club_sw'],
+    subcategoriaIds: ['antro', 'antro_lgbt', 'club_sw', 'cabinas', 'cine_xxx'],
     fotosMin: 6,
     obligatorios: [
       'nombreComercial',
@@ -81,7 +137,7 @@
     ],
     subcategoriaOverrides: {
       club_sw: {
-        obligatoriosRemove: ['cartelera'],
+        obligatoriosRemove: ['cartelera', 'dressCode'],
         obligatoriosExtra: ['eventosTematicos', 'politicaParejasSingles'],
         fieldPatches: {
           tipoVenue: {
@@ -90,6 +146,38 @@
           },
           areasVenue: { options: AREAS_CLUB_SW.slice() },
           reglasAcceso: { options: REGLAS_CLUB_SW.slice() }
+        }
+      },
+      cabinas: {
+        obligatoriosRemove: ['cartelera', 'dressCode'],
+        obligatoriosExtra: ['nivelPrivacidad'],
+        fieldPatches: {
+          tipoVenue: {
+            options: TIPO_VENUE_CABINAS.slice(),
+            defaultValue: 'Cabinas privadas / Glory holes'
+          },
+          precioEntrada: {
+            label: 'Tarifa desde',
+            placeholder: 'Ej. $400 MXN / 30 min'
+          },
+          areasVenue: { options: AREAS_CABINAS.slice() },
+          reglasAcceso: { options: REGLAS_CABINAS.slice() }
+        }
+      },
+      cine_xxx: {
+        obligatoriosRemove: ['dressCode'],
+        obligatoriosExtra: ['horariosFunciones', 'clasificacion'],
+        fieldPatches: {
+          tipoVenue: {
+            options: TIPO_VENUE_CINE.slice(),
+            defaultValue: 'Cine para adultos / Sala XXX'
+          },
+          precioEntrada: {
+            label: 'Precio boleto desde',
+            placeholder: 'Ej. $150 MXN'
+          },
+          areasVenue: { options: AREAS_CINE.slice() },
+          reglasAcceso: { options: REGLAS_CINE.slice() }
         }
       }
     },
@@ -124,6 +212,24 @@
             onlySubcategorias: ['club_sw']
           },
           {
+            id: 'tipoVenue',
+            label: 'Tipo de venue',
+            type: 'select',
+            required: true,
+            options: TIPO_VENUE_CABINAS.slice(),
+            defaultValue: 'Cabinas privadas / Glory holes',
+            onlySubcategorias: ['cabinas']
+          },
+          {
+            id: 'tipoVenue',
+            label: 'Tipo de venue',
+            type: 'select',
+            required: true,
+            options: TIPO_VENUE_CINE.slice(),
+            defaultValue: 'Cine para adultos / Sala XXX',
+            onlySubcategorias: ['cine_xxx']
+          },
+          {
             id: 'tagline',
             label: 'Frase corta',
             type: 'text',
@@ -144,7 +250,7 @@
             required: true,
             rows: 3,
             placeholder: 'Ej. DJ internacional viernes · Drag show sábado',
-            onlySubcategorias: ['antro', 'antro_lgbt']
+            onlySubcategorias: ['antro', 'antro_lgbt', 'cine_xxx']
           },
           {
             id: 'eventosTematicos',
@@ -165,11 +271,37 @@
             onlySubcategorias: ['club_sw']
           },
           {
+            id: 'horariosFunciones',
+            label: 'Horarios de funciones',
+            type: 'textarea',
+            required: true,
+            rows: 3,
+            placeholder: 'Ej. Funciones cada hora · Estreno viernes 8:00 PM',
+            onlySubcategorias: ['cine_xxx']
+          },
+          {
+            id: 'clasificacion',
+            label: 'Clasificación / aviso',
+            type: 'select',
+            required: true,
+            options: CLASIFICACION_OPTS.slice(),
+            onlySubcategorias: ['cine_xxx']
+          },
+          {
+            id: 'nivelPrivacidad',
+            label: 'Nivel de privacidad',
+            type: 'select',
+            required: true,
+            options: NIVEL_PRIVACIDAD_OPTS.slice(),
+            onlySubcategorias: ['cabinas']
+          },
+          {
             id: 'dressCode',
             label: 'Dress code',
             type: 'text',
             required: true,
-            placeholder: 'Ej. Elegante casual · No shorts'
+            placeholder: 'Ej. Elegante casual · No shorts',
+            onlySubcategorias: ['antro', 'antro_lgbt', 'club_sw']
           },
           {
             id: 'areasVenue',
@@ -186,6 +318,22 @@
             required: true,
             options: AREAS_CLUB_SW.slice(),
             onlySubcategorias: ['club_sw']
+          },
+          {
+            id: 'areasVenue',
+            label: 'Áreas del local',
+            type: 'checklist',
+            required: true,
+            options: AREAS_CABINAS.slice(),
+            onlySubcategorias: ['cabinas']
+          },
+          {
+            id: 'areasVenue',
+            label: 'Áreas del local',
+            type: 'checklist',
+            required: true,
+            options: AREAS_CINE.slice(),
+            onlySubcategorias: ['cine_xxx']
           },
           {
             id: 'reservaciones',
@@ -237,6 +385,22 @@
             required: true,
             options: REGLAS_CLUB_SW.slice(),
             onlySubcategorias: ['club_sw']
+          },
+          {
+            id: 'reglasAcceso',
+            label: 'Reglas de acceso',
+            type: 'checklist',
+            required: true,
+            options: REGLAS_CABINAS.slice(),
+            onlySubcategorias: ['cabinas']
+          },
+          {
+            id: 'reglasAcceso',
+            label: 'Reglas de acceso',
+            type: 'checklist',
+            required: true,
+            options: REGLAS_CINE.slice(),
+            onlySubcategorias: ['cine_xxx']
           },
           {
             id: 'horarioDetalle',
