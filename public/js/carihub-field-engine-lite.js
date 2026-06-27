@@ -606,6 +606,8 @@
     }
     if (sidNorm === 'spa') return 'spa';
     if (sidNorm === 'masajes') return 'masajesLocal';
+    if (sidNorm === 'hotel motel' || sidNorm === 'hotel / motel' || sidNorm === 'hotel_motel' || sidNorm === 'hotel' || sidNorm === 'motel') return 'hotelMotel';
+    if (row && row.arquetipo === 'negocio_hospedaje') return 'hotelMotel';
     if (row && row.arquetipo === 'negocio_bienestar') {
       if (sidNorm === 'masajes') return 'masajesLocal';
       return 'spa';
@@ -624,6 +626,8 @@
       if (retId === 'antro restaurant bar' || retId === 'antro') return 'antro';
       if (retId === 'masajes') return 'masajesLocal';
       if (retId === 'spa') return 'spa';
+      if (retId === 'hotel motel' || retId === 'hotel / motel' || retId === 'hotel_motel' || retId === 'hotel' || retId === 'motel') return 'hotelMotel';
+      if (row && row.arquetipo === 'negocio_hospedaje') return 'hotelMotel';
       if (row && row.arquetipo === 'negocio_bienestar') {
         if (retId === 'masajes') return 'masajesLocal';
         return 'spa';

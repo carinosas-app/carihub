@@ -928,6 +928,80 @@
     return cardHTMLBienestar(u, Q);
   }
 
+  function normHospedajeSubId(u) {
+    var id = String((u && u.subcategoriaId) || '').trim().toLowerCase().replace(/_/g, ' ');
+    if (id === 'hotel motel' || id === 'hotel / motel' || id === 'hotel_motel') return 'hotel_motel';
+    if (id === 'hotel' || id === 'motel') return 'hotel_motel';
+    if (u && u.arquetipo === 'negocio_hospedaje') return 'hotel_motel';
+    if (u && u.hospedajePerfil) return 'hotel_motel';
+    return id;
+  }
+
+  function isHospedajePerfil(u) {
+    if (!u) return false;
+    if (u.arquetipo === 'negocio_hospedaje') return true;
+    if (u.hospedajePerfil) return true;
+    return normHospedajeSubId(u) === 'hotel_motel';
+  }
+
+  function isHotelMotelPerfil(u) {
+    return isHospedajePerfil(u) && normHospedajeSubId(u) === 'hotel_motel';
+  }
+
+  function hospedajeShowChips(u, opts) {
+    opts = opts || {};
+    var mods = '';
+    var tipo = String(u.tipoHospedaje || (u.hospedajePerfil && u.hospedajePerfil.tipoHospedaje) || '').trim();
+    if (tipo) {
+      var tipoTxt = tipo.length > 22 ? tipo.slice(0, 20) + '…' : tipo;
+      mods += '<span class="modchip mc-pink">' + svgIco('briefcase') + safeTxt(tipoTxt) + '</span>';
+    }
+    var habitaciones = u.tiposHabitacion || (u.hospedajePerfil && u.hospedajePerfil.tiposHabitacion);
+    if (Array.isArray(habitaciones) && habitaciones.length) {
+      var habTxt = String(habitaciones[0]);
+      if (habTxt.length > 22) habTxt = habTxt.slice(0, 20) + '…';
+      mods += '<span class="modchip mc-purple">' + svgIco('hotel') + safeTxt(habTxt) + '</span>';
+    }
+    if (u.reservaciones === true || String(u.reservaciones || '').toLowerCase() === 'true') {
+      mods += '<span class="modchip mc-purple">' + svgIco('calendar') + 'Reservaciones</span>';
+    }
+    if (opts.horario && (u.horarioDetalle || u.horario)) {
+      var h = String(u.horarioDetalle || u.horario);
+      if (h.length > 28) h = h.slice(0, 26) + '…';
+      mods += '<span class="modchip mc-purple">' + svgIco('clock') + safeTxt(h) + '</span>';
+    }
+    var tarifaNoche = u.tarifaNoche || (u.hospedajePerfil && u.hospedajePerfil.tarifaNoche);
+    if (tarifaNoche) {
+      var nTxt = String(tarifaNoche);
+      if (nTxt.length > 24) nTxt = nTxt.slice(0, 22) + '…';
+      mods += '<span class="modchip mc-pink">' + svgIco('clock') + safeTxt(nTxt) + '</span>';
+    }
+    return mods;
+  }
+
+  function cardHTMLHospedaje(u, Q) {
+    Q = Q || {};
+    var mods = hospedajeShowChips(u, { horario: true });
+    var catLabel = (global.CariHubResultadosDemo && CariHubResultadosDemo.labelCategoria)
+      ? CariHubResultadosDemo.labelCategoria(u.categoriaPublica || u.categoria || Q.categoria || '')
+      : (u.categoriaPublica || u.categoria || Q.categoria || 'Hotel / Motel');
+    var cardExtra = isHotelMotelPerfil(u) ? ' res-card--hotel-motel' : ' res-card--hospedaje';
+    return cardShell(u, Q, {
+      cardClass: 'res-card--negocio res-card--hospedaje' + cardExtra,
+      nombre: u.nombreComercial || u.nombre || u.alias,
+      catIcon: 'briefcase',
+      catLabel: catLabel,
+      metaRight: mods,
+      descBlock: descripcionCompactHTML(u, 'Descripción'),
+      priceLabel: 'Hora',
+      badges: badgesCompactHTML(u, { negocio: u.verificada !== false })
+    });
+  }
+
+  function cardHTMLHotelMotel(u, Q) {
+    return cardHTMLHospedaje(u, Q);
+  }
+
   function cardHTMLServicio(u, Q) {
     Q = Q || {};
     var cobertura = String(u.zonaCobertura || u.zona || u.serviciosPrincipales || 'A domicilio').trim();
@@ -1007,6 +1081,7 @@
     if (comp === 'ResultCardCreador' || isCreadorPerfil(u)) return cardHTMLCreador(u, Q);
     if (isVenuePerfil(u)) return cardHTMLVenue(u, Q);
     if (isBienestarPerfil(u)) return cardHTMLBienestar(u, Q);
+    if (isHospedajePerfil(u)) return cardHTMLHospedaje(u, Q);
     if (comp === 'ResultCardNegocio' && isRetailPerfil(u)) return cardHTMLRetail(u, Q);
     if (comp === 'ResultCardNegocio') return cardHTMLNegocio(u, Q);
     if (isDominatrixPerfil(u)) return cardHTMLDominatrix(u, Q);
@@ -1125,6 +1200,10 @@
     isBienestarPerfil: isBienestarPerfil,
     isSpaPerfil: isSpaPerfil,
     isMasajesLocalPerfil: isMasajesLocalPerfil,
+    isHospedajePerfil: isHospedajePerfil,
+    isHotelMotelPerfil: isHotelMotelPerfil,
+    cardHTMLHospedaje: cardHTMLHospedaje,
+    cardHTMLHotelMotel: cardHTMLHotelMotel,
     isRetailPerfil: isRetailPerfil,
     isSexShopPerfil: isSexShopPerfil,
     isVenuePerfil: isVenuePerfil,
