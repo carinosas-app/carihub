@@ -68,6 +68,8 @@
     if (subId === 'antro restaurant bar lgbt' || subId === 'antro lgbt') return 'antro_lgbt';
     if (subId === 'antro restaurant bar' || subId === 'antro') return 'antro';
     if (subId === 'club sw' || subId === 'club_sw' || subId === 'club swinger' || subId === 'club_swinger') return 'club_sw';
+    if (subId === 'cabinas glory holes' || subId === 'cabinas / glory holes' || subId === 'cabinas') return 'cabinas';
+    if (subId === 'cine xxx' || subId === 'cine adulto' || subId === 'cine_xxx') return 'cine_xxx';
     return '';
   }
 
@@ -359,7 +361,7 @@
     var raw = String((ctx.subcategoriaId) || (ctx.subcategoria) || '').trim().toLowerCase();
     if (cfg.subcategoriaIds.indexOf(raw) >= 0) return true;
     var canon = normalizeVenueSubId((ctx.subcategoriaId) || (ctx.subcategoria) || '');
-    if (canon === 'antro' || canon === 'antro_lgbt' || canon === 'club_sw') return true;
+    if (canon === 'antro' || canon === 'antro_lgbt' || canon === 'club_sw' || canon === 'cabinas' || canon === 'cine_xxx') return true;
     return false;
   }
 
@@ -990,9 +992,9 @@
     if (String(ctx.tipoPerfil || '').trim().toLowerCase() === 'pareja_grupo') return false;
     if (ctx.arquetipo === 'negocio_venue') return true;
     var raw = String(ctx.subcategoriaId || ctx.subcategoria || '').trim().toLowerCase();
-    if (raw === 'antro' || raw === 'antro_lgbt' || raw === 'club_sw') return true;
+    if (raw === 'antro' || raw === 'antro_lgbt' || raw === 'club_sw' || raw === 'cabinas' || raw === 'cine_xxx') return true;
     var canon = normalizeVenueSubId((ctx.subcategoriaId) || (ctx.subcategoria) || '');
-    return canon === 'antro' || canon === 'antro_lgbt' || canon === 'club_sw';
+    return canon === 'antro' || canon === 'antro_lgbt' || canon === 'club_sw' || canon === 'cabinas' || canon === 'cine_xxx';
   }
 
   function isBienestarSubcategoria(ctx) {
@@ -1451,8 +1453,10 @@
     var canon = normalizeVenueSubId((ctx && ctx.subcategoriaId) || (values && values.subcategoriaId) || '');
     if (canon) return canon;
     var tipo = String((values && values.tipoVenue) || '').toLowerCase();
-    if (tipo.indexOf('club') >= 0 || tipo.indexOf('lifestyle') >= 0 || tipo.indexOf('swinger') >= 0) return 'club_sw';
+    if (tipo.indexOf('cabina') >= 0 || tipo.indexOf('glory') >= 0) return 'cabinas';
+    if (tipo.indexOf('cine') >= 0 || tipo.indexOf('sala xxx') >= 0) return 'cine_xxx';
     if (tipo.indexOf('lgbt') >= 0) return 'antro_lgbt';
+    if (tipo.indexOf('club') >= 0 || tipo.indexOf('lifestyle') >= 0 || tipo.indexOf('swinger') >= 0) return 'club_sw';
     return 'antro';
   }
 
@@ -1466,6 +1470,9 @@
       cartelera: values.cartelera || '',
       eventosTematicos: values.eventosTematicos || '',
       politicaParejasSingles: values.politicaParejasSingles || '',
+      horariosFunciones: values.horariosFunciones || '',
+      clasificacion: values.clasificacion || '',
+      nivelPrivacidad: values.nivelPrivacidad || '',
       dressCode: values.dressCode || '',
       areasVenue: Array.isArray(values.areasVenue) ? values.areasVenue.slice() : [],
       reservaciones: venueFlagFromSelect(values.reservaciones),
@@ -1564,6 +1571,12 @@
       u.politicaParejas = ven.politicaParejasSingles;
       u.disponiblePara = ven.politicaParejasSingles;
     }
+    if (ven.nivelPrivacidad) u.nivelPrivacidad = ven.nivelPrivacidad;
+    if (ven.horariosFunciones) {
+      u.horariosFunciones = ven.horariosFunciones;
+      if (!u.horario && !u.horarioDetalle) u.horario = ven.horariosFunciones;
+    }
+    if (ven.clasificacion) u.clasificacion = ven.clasificacion;
     if (ven.dressCode) u.dressCode = ven.dressCode;
     if (Array.isArray(ven.areasVenue) && ven.areasVenue.length) {
       u.areasVenue = ven.areasVenue.slice();
@@ -1618,13 +1631,29 @@
       if (!String(values.politicaParejasSingles || '').trim()) {
         pushMissing(missing, labelForField(cfg, 'politicaParejasSingles') || 'Política parejas / singles');
       }
-    } else {
+    } else if (subId === 'cabinas') {
+      if (!String(values.nivelPrivacidad || '').trim()) {
+        pushMissing(missing, labelForField(cfg, 'nivelPrivacidad') || 'Nivel de privacidad');
+      }
+    } else if (subId === 'cine_xxx') {
+      if (!String(values.cartelera || '').trim()) {
+        pushMissing(missing, labelForField(cfg, 'cartelera') || 'Cartelera / funciones');
+      }
+      if (!String(values.horariosFunciones || '').trim()) {
+        pushMissing(missing, labelForField(cfg, 'horariosFunciones') || 'Horarios de funciones');
+      }
+      if (!String(values.clasificacion || '').trim()) {
+        pushMissing(missing, labelForField(cfg, 'clasificacion') || 'Clasificación / aviso');
+      }
+    } else if (subId === 'antro' || subId === 'antro_lgbt') {
       if (!String(values.cartelera || '').trim()) {
         pushMissing(missing, labelForField(cfg, 'cartelera') || 'Cartelera / eventos');
       }
     }
-    if (!String(values.dressCode || '').trim()) {
-      pushMissing(missing, labelForField(cfg, 'dressCode') || 'Dress code');
+    if (subId === 'antro' || subId === 'antro_lgbt' || subId === 'club_sw') {
+      if (!String(values.dressCode || '').trim()) {
+        pushMissing(missing, labelForField(cfg, 'dressCode') || 'Dress code');
+      }
     }
     var areas = values.areasVenue;
     if (!Array.isArray(areas) || !areas.length) {

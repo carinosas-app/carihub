@@ -5780,14 +5780,21 @@ DEMO.antroLgbt={
   ubicacionPerks:["Zona segura","Ambiente LGBT+","Personal capacitado"],
   ubicacionImg:HOTEL_IMGS.ubicacion
 };
-/* Cine XXX */
+/* Cine XXX — schema: cine_xxx (negocio_venue) */
 DEMO.cineXxx={
   subcategoriaId:"cine_xxx", categoria:"Cine XXX", categoriaPublica:"Cine XXX",
-  arquetipo:"venue", tipoPerfil:"negocio", nombre:"Cine Privé MTY", verificada:true,
+  arquetipo:"negocio_venue", tipoPerfil:"lugar", nombreComercial:"Cine Privé MTY", nombre:"Cine Privé MTY", verificada:true,
   pais:"México", estado:"Nuevo León", ciudad:"Monterrey", zona:"Centro",
   tagline:"Salas privadas, discreción total y cartelera actualizada.",
-  precio:"150", moneda:"MXN", tiempoMinimo:"Boleto por función",
-  tipoNegocio:"Cine para adultos", horario:"Lun–Dom 12:00 PM – 12:00 AM",
+  precio:"150", precioEntrada:"$150 MXN", moneda:"MXN", tiempoMinimo:"Boleto por función",
+  tipoVenue:"Cine para adultos", tipoNegocio:"Cine para adultos", tipoServicio:"Cine para adultos",
+  cartelera:"Estrenos semanales · Maratón viernes · Clásicos sábado",
+  horariosFunciones:"Lun–Vie 12:00–10:00 PM · Sáb–Dom 11:00 AM–12:00 AM",
+  clasificacion:"Solo mayores de 18 años · Contenido explícito",
+  areasVenue:["Sala principal","Cabinas privadas","Lobby discreto"],
+  reglasAcceso:["Solo mayores de edad","Identificación obligatoria","Sin grabaciones"],
+  horarioDetalle:"Lun–Dom 12:00 PM – 12:00 AM",
+  horario:"Lun–Dom 12:00 PM – 12:00 AM",
   metodosPago:["Efectivo","Tarjeta"], disponibilidad:"Abierto ahora",
   respuestaCorta:"Responde en menos de 20 min",
   contactos:["wa","tg","ig","fb","of","x","msg","tel","gmail"], fotos:10,
@@ -5806,14 +5813,20 @@ DEMO.cineXxx={
   ubicacionPerks:["Zona céntrica","Entrada discreta","Salas privadas"],
   ubicacionImg:HOTEL_IMGS.ubicacion
 };
-/* Cabinas */
+/* Cabinas — schema: cabinas (negocio_venue) */
 DEMO.cabinas={
   subcategoriaId:"cabinas", categoria:"Cabinas", categoriaPublica:"Cabinas privadas",
-  arquetipo:"venue", tipoPerfil:"negocio", nombre:"Cabinas Discretas MTY", verificada:true,
+  arquetipo:"negocio_venue", tipoPerfil:"lugar", nombreComercial:"Cabinas Discretas MTY", nombre:"Cabinas Discretas MTY", verificada:true,
   pais:"México", estado:"Nuevo León", ciudad:"Monterrey", zona:"Valle Oriente",
   tagline:"Espacios privados, limpios y con acceso discreto las 24 horas.",
-  precio:"400", moneda:"MXN", tiempoMinimo:"30 min",
-  tipoNegocio:"Cabinas privadas", horario:"Abierto 24 horas",
+  precio:"400", precioEntrada:"$400 MXN / 30 min", moneda:"MXN", tiempoMinimo:"30 min",
+  tipoVenue:"Cabinas privadas / Glory holes", tipoNegocio:"Cabinas privadas", tipoServicio:"Cabinas privadas",
+  nivelPrivacidad:"Alta — acceso individual y discreto",
+  areasVenue:["Cabinas privadas","Glory holes","Regaderas","Área lounge"],
+  reglasAcceso:["Solo mayores de edad","Identificación obligatoria","Limpieza entre usos"],
+  horarioDetalle:"Abierto 24 horas",
+  horario:"Abierto 24 horas",
+  reservaciones:true,
   metodosPago:["Efectivo","Tarjeta","Transferencia"], disponibilidad:"Abierto ahora",
   respuestaCorta:"Responde en menos de 10 min",
   contactos:["wa","tg","ig","fb","of","x","msg","tel","gmail"], fotos:14,
@@ -6173,7 +6186,7 @@ function cabinasFichaFilas(u){
     ["clock","Horario:",safe(u.horarioDetalle||u.horario||"—")],
     ["pin","Ubicación:",safe(u.ubicacionFicha||"—"),true],
     ["room","Cabinas / áreas:",safe(u.areasVenue||u.salas||"—"),true],
-    ["shield","Privacidad:",safe(u.privacidadNivel||"—")],
+    ["shield","Privacidad:",safe(u.nivelPrivacidad||u.privacidadNivel||"—")],
     ["wallet","Métodos de pago:",safe(pagos||"—")],
     ["invoice","Acceso:",safe(u.reglasAcceso||"—")]
   ];
@@ -6969,7 +6982,7 @@ function resolverVistaPerfil(u,q){
 function normalizarVistaPreview(vista){
   var v=String(vista||"").trim();
   if(!v) return "";
-  var alias={escort:"adult",acompanante:"adult",adulto:"adult",edecan:"edecan",modelos:"modelos",dotados:"dotados",femboy:"femboy",singles:"singles",dominatrix:"dominatrix",fetiche:"fetiche",sado:"sado",stripper:"stripper",tabledance:"tableDance",table_dance:"tableDance","table dance":"tableDance",contenido:"creador",creador_contenido:"creador","creador contenido":"creador",sex_shop:"sexShop","sex shop":"sexShop",antro:"antro",antro_lgbt:"antroLgbt","antro restaurant bar":"antro","antro restaurant bar lgbt":"antroLgbt",club_sw:"clubSw","club sw":"clubSw",club_swinger:"clubSw","club swinger":"clubSw",spa:"spa",masajes:"masajesLocal","masajes local":"masajesLocal",hotel_motel:"hotelMotel","hotel motel":"hotelMotel","hotel / motel":"hotelMotel",hotel:"hotelMotel",motel:"hotelMotel"};
+  var alias={escort:"adult",acompanante:"adult",adulto:"adult",edecan:"edecan",modelos:"modelos",dotados:"dotados",femboy:"femboy",singles:"singles",dominatrix:"dominatrix",fetiche:"fetiche",sado:"sado",stripper:"stripper",tabledance:"tableDance",table_dance:"tableDance","table dance":"tableDance",contenido:"creador",creador_contenido:"creador","creador contenido":"creador",sex_shop:"sexShop","sex shop":"sexShop",antro:"antro",antro_lgbt:"antroLgbt","antro restaurant bar":"antro","antro restaurant bar lgbt":"antroLgbt",club_sw:"clubSw","club sw":"clubSw",club_swinger:"clubSw","club swinger":"clubSw",cabinas:"cabinas","cabinas glory holes":"cabinas","cabinas / glory holes":"cabinas",cine_xxx:"cineXxx","cine xxx":"cineXxx","cine adulto":"cineXxx",spa:"spa",masajes:"masajesLocal","masajes local":"masajesLocal",hotel_motel:"hotelMotel","hotel motel":"hotelMotel","hotel / motel":"hotelMotel",hotel:"hotelMotel",motel:"hotelMotel"};
   return alias[v.toLowerCase()]||v;
 }
 function resolverPerfilDesdeQuery(q){
@@ -7127,6 +7140,9 @@ function aplicarPerfilDesdeRegistro(vista,u){
     cartelera:u.cartelera||"",
     eventosTematicos:u.eventosTematicos||(u.venuePerfil&&u.venuePerfil.eventosTematicos)||"",
     politicaParejasSingles:u.politicaParejasSingles||(u.venuePerfil&&u.venuePerfil.politicaParejasSingles)||"",
+    nivelPrivacidad:u.nivelPrivacidad||(u.venuePerfil&&u.venuePerfil.nivelPrivacidad)||"",
+    horariosFunciones:u.horariosFunciones||(u.venuePerfil&&u.venuePerfil.horariosFunciones)||"",
+    clasificacion:u.clasificacion||(u.venuePerfil&&u.venuePerfil.clasificacion)||"",
     dressCode:u.dressCode||"",
     areasVenue:Array.isArray(u.areasVenue)?u.areasVenue.slice():(u.areasVenue||""),
     reservaciones:u.reservaciones===true||u.reservaciones==="true"||u.reservaciones,
@@ -7192,9 +7208,12 @@ function aplicarPerfilDesdeRegistro(vista,u){
   if(sidNorm==="antro restaurant bar lgbt"||sidNorm==="antro lgbt"||sidNorm==="antro_lgbt") clean.subcategoriaId="antro_lgbt";
   if(sidNorm==="antro restaurant bar"||sidNorm==="antro") clean.subcategoriaId="antro";
   if(sidNorm==="club sw"||sidNorm==="club swinger"||sidNorm==="club_sw"||sidNorm==="club_swinger") clean.subcategoriaId="club_sw";
+  if(sidNorm==="cabinas glory holes"||sidNorm==="cabinas / glory holes"||sidNorm==="cabinas") clean.subcategoriaId="cabinas";
+  if(sidNorm==="cine xxx"||sidNorm==="cine adulto"||sidNorm==="cine_xxx") clean.subcategoriaId="cine_xxx";
   if(clean.subcategoriaId==="antro_lgbt") clean.badgeLgbt=true;
   if(clean.subcategoriaId==="antro") clean.badgeLgbt=false;
   if(clean.subcategoriaId==="club_sw"){ clean.badgeSwinger=true; clean.badgeLgbt=false; }
+  if(clean.subcategoriaId==="cabinas"||clean.subcategoriaId==="cine_xxx"){ clean.badgeSwinger=false; clean.badgeLgbt=false; }
   if(u.arquetipo) clean.arquetipo=u.arquetipo;
   if(u.tipoPerfil) clean.tipoPerfil=u.tipoPerfil;
   DEMO[vista]=clean;

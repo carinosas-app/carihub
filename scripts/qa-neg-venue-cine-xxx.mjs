@@ -1,6 +1,6 @@
 /**
- * QA — Pack negocio_venue motor/blocks (club_sw / NEG-VEN-02).
- * node scripts/qa-neg-venue-club-sw.mjs
+ * QA — Pack negocio_venue motor/blocks (cine_xxx / NEG-VEN-03).
+ * node scripts/qa-neg-venue-cine-xxx.mjs
  */
 import fs from 'fs';
 import path from 'path';
@@ -59,23 +59,22 @@ function hasField(merged, fieldId) {
   return merged.blocks.some((b) => b.fields.some((f) => f.id === fieldId));
 }
 
-function baseValidClub() {
+function baseValidCine() {
   return {
-    nombreComercial: 'Club Eros Lifestyle',
-    tipoVenue: 'Club Swinger / Lifestyle',
-    precioEntrada: '$600 MXN',
-    eventosTematicos: 'Noche lifestyle viernes · Fiesta temática sábado',
-    politicaParejasSingles: 'Parejas y singles bienvenidos con previa reservación',
-    dressCode: 'Elegante casual',
-    areasVenue: ['Salón principal', 'Bar premium', 'Lockers'],
-    reglasAcceso: ['Solo mayores de edad', 'Moderación en puerta'],
-    direccion: 'Valle Oriente, Monterrey, N.L.',
-    horarioDetalle: 'Jue–Dom 9:00 PM – 3:00 AM',
+    nombreComercial: 'Cine Privé MTY',
+    tipoVenue: 'Cine para adultos',
+    precioEntrada: '$150 MXN',
+    cartelera: 'Estrenos semanales · Maratón viernes',
+    horariosFunciones: 'Lun–Vie 12:00–10:00 PM · Sáb–Dom 11:00 AM–12:00 AM',
+    clasificacion: 'Solo mayores de 18 años',
+    areasVenue: ['Sala principal', 'Cabinas privadas', 'Lobby discreto'],
+    reglasAcceso: ['Solo mayores de edad', 'Identificación obligatoria'],
+    direccion: 'Centro, Monterrey, N.L.',
+    horarioDetalle: 'Lun–Dom 12:00 PM – 12:00 AM',
     metodosPago: ['Efectivo', 'Tarjeta'],
-    reservaciones: 'Sí',
-    rfc: 'CLB123456ABC',
-    razonSocial: 'Club Eros SA de CV',
-    tagline: 'Ambiente elegante lifestyle',
+    rfc: 'CIN123456ABC',
+    razonSocial: 'Cine Privé SA de CV',
+    tagline: 'Cartelera actualizada',
   };
 }
 
@@ -86,41 +85,44 @@ const blocks = vmCtx.CARIHUB_REGISTRO_VENUE_BLOCKS;
 const blocksJs = fs.readFileSync(path.join(root, 'data', 'registro-adultos-venue-blocks.js'), 'utf8');
 
 ok('blocks file loaded', !!blocks, 'negocio_venue');
-ok('blocks sub club_sw', blocks.subcategoriaIds.includes('club_sw'), 'club_sw');
-ok('1/1 sub club_sw in bundle', blocks.subcategoriaIds.filter((s) => s === 'club_sw').length === 1, 'canon');
-ok('cabinas in bundle post VEN-03', blocks.subcategoriaIds.includes('cabinas'), 'cabinas allowed');
+ok('blocks sub cine_xxx', blocks.subcategoriaIds.includes('cine_xxx'), 'cine_xxx');
+ok('1/1 sub cine_xxx in bundle', blocks.subcategoriaIds.filter((s) => s === 'cine_xxx').length === 1, 'canon');
 ok('no modalidades escort field', !blocksJs.includes("id: 'modalidades'"), 'no modalidades');
 ok('no edad field', !blocksJs.includes("id: 'edad'"), 'no edad');
 ok('no viaja field', !blocksJs.includes("id: 'viaja'"), 'no viaja');
+ok('no cineXxxPerfil nested', !blocksJs.includes("id: 'cineXxxPerfil'"), 'venuePerfil only');
 
-const subId = 'club_sw';
+const subId = 'cine_xxx';
 const cfg = PB.resolveConfig(venueCtx(subId), null);
-ok('club_sw resolveConfig negocio_venue', cfg && cfg.id === 'negocio_venue', cfg && cfg.id);
-ok('club_sw matchesVenue', PB.matchesVenue(venueCtx(subId), null), subId);
-ok('club_sw isVenueSubcategoria', PB.isVenueSubcategoria(venueCtx(subId)), 'venue');
-ok('club_sw not matchesRetail', !PB.matchesRetail(venueCtx(subId), null), 'retail');
-ok('club_sw not matchesEscort', !PB.matchesEscort(venueCtx(subId), null), 'escort');
-ok('club_sw not isSwingerSubcategoria', !PB.isSwingerSubcategoria(venueCtx(subId)), 'no pareja pipeline');
+ok('cine_xxx resolveConfig negocio_venue', cfg && cfg.id === 'negocio_venue', cfg && cfg.id);
+ok('cine_xxx matchesVenue', PB.matchesVenue(venueCtx(subId), null), subId);
+ok('cine_xxx isVenueSubcategoria', PB.isVenueSubcategoria(venueCtx(subId)), 'venue');
+ok('cine_xxx not matchesRetail', !PB.matchesRetail(venueCtx(subId), null), 'retail');
+ok('cine_xxx not matchesEscort', !PB.matchesEscort(venueCtx(subId), null), 'escort');
+ok('cine_xxx not isSwingerSubcategoria', !PB.isSwingerSubcategoria(venueCtx(subId)), 'no pareja pipeline');
 
 const merged = mergedVenue(vmCtx, subId);
 ok('merged venuePerfil block', merged.blocks.some((b) => b.id === 'venuePerfil'), 'block');
-ok('eventosTematicos field', hasField(merged, 'eventosTematicos'), 'eventosTematicos');
-ok('politicaParejasSingles field', hasField(merged, 'politicaParejasSingles'), 'politicaParejasSingles');
-ok('no cartelera for club_sw', !hasField(merged, 'cartelera'), 'no cartelera');
+ok('cartelera field', hasField(merged, 'cartelera'), 'cartelera');
+ok('horariosFunciones field', hasField(merged, 'horariosFunciones'), 'horariosFunciones');
+ok('clasificacion field', hasField(merged, 'clasificacion'), 'clasificacion');
+ok('no dressCode for cine_xxx', !hasField(merged, 'dressCode'), 'no dressCode');
+ok('no eventosTematicos for cine_xxx', !hasField(merged, 'eventosTematicos'), 'no eventosTematicos');
+ok('no politicaParejasSingles for cine_xxx', !hasField(merged, 'politicaParejasSingles'), 'no politica');
 ok('no modalidades escort merged', !hasField(merged, 'modalidades'), 'no modalidades');
 
-const valid = PB.validateValues(merged, baseValidClub(), venueCtx(subId));
+const valid = PB.validateValues(merged, baseValidCine(), venueCtx(subId));
 ok('validate ok payload', valid.length === 0, valid.join('; '));
 
-['club sw', 'club_swinger', 'club swinger'].forEach((alias) => {
-  ok(`alias ${alias} normalize`, PB.normalizeVenueSubId(alias) === 'club_sw', alias);
+['cine_xxx', 'cine xxx', 'cine adulto'].forEach((alias) => {
+  ok(`alias ${alias} normalize`, PB.normalizeVenueSubId(alias) === 'cine_xxx', alias);
   ok(`alias ${alias} matchesVenue`, PB.matchesVenue(venueCtx(alias), null), alias);
 });
 
-ok('viajes inactivo club_sw', !viajes.subcategoriaActivaViajes('club_sw'), 'no viajes v1');
-ok('viajes inactivo club sw alias', !viajes.subcategoriaActivaViajes('club sw'), 'no viajes alias');
+ok('viajes inactivo cine_xxx', !viajes.subcategoriaActivaViajes('cine_xxx'), 'no viajes v1');
+ok('viajes inactivo cine xxx alias', !viajes.subcategoriaActivaViajes('cine xxx'), 'no viajes alias');
 
-console.log('\n=== QA Neg venue club_sw motor/blocks ===');
+console.log('\n=== QA Neg venue cine_xxx motor/blocks ===');
 console.log('PASS:', pass.length);
 pass.forEach((p) => console.log('  ✓', p.name, p.detail ? '— ' + p.detail : ''));
 if (fail.length) {
