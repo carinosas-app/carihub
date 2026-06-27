@@ -60,7 +60,7 @@ ok('buildVenuePerfil', registroJs.includes('buildVenuePerfil'), 'persist');
 ok('normalizeVenueSubId club aliases', registroJs.includes("'club sw'") && registroJs.includes("'club_sw'"), 'aliases');
 ok('inferVenueSubId export', registroJs.includes('inferVenueSubId: inferVenueSubId'), 'export');
 ok('badgeSwinger on club_sw map', /canon === 'club_sw'[\s\S]*?u\.badgeSwinger = true/.test(registroJs), 'badge negocio');
-ok('isSwingerSubcategoria excludes club_sw', registroJs.includes("return subId === 'swinger' || subId === 'parejas swinger';"), 'no pareja pipeline');
+ok('isSwingerSubcategoria excludes club_sw', registroJs.includes("normalizeParejaSubId") && registroJs.includes("=== 'swinger'"), 'no pareja pipeline');
 
 const renderJs = fs.readFileSync(path.join(repoRoot, 'public', 'js', 'carihub-public-render-lite.js'), 'utf8');
 ok('cardHTMLClubSw', renderJs.includes('cardHTMLClubSw'), 'render');

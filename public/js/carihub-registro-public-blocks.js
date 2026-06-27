@@ -57,6 +57,15 @@
     return '';
   }
 
+  function normalizeEscortSubId(raw) {
+    var subId = normalizeSubId(raw);
+    if (!subId) return '';
+    if (subId === 'escort gay') return 'escort gay';
+    if (subId === 'escort vip') return 'escort vip';
+    if (subId === 'tom boy' || subId === 'tom fem') return subId;
+    return subId;
+  }
+
   function normalizeRetailSubId(raw) {
     var subId = normalizeSubId(raw);
     if (subId === 'sex shop') return 'sex_shop';
@@ -94,8 +103,38 @@
     return '';
   }
 
+  function normalizeParejaSubId(raw) {
+    var subId = normalizeSubId(raw);
+    if (subId === 'parejas swinger' || subId === 'swinger') return 'swinger';
+    if (subId === 'cuckold hotwife' || subId === 'cuckold_hotwife') return 'cuckold hotwife';
+    return '';
+  }
+
+  function normalizeLifestyleSubId(raw) {
+    var subId = normalizeSubId(raw);
+    if (subId === 'unicorn' || subId === 'unicorns') return 'unicorns';
+    return '';
+  }
+
+  function normalizeDominatrixSubId(raw) {
+    var subId = normalizeSubId(raw);
+    if (subId === 'dominatrix' || subId === 'fetiche' || subId === 'sado') return subId;
+    return '';
+  }
+
   function normalizeSubId(id) {
     return String(id || '').trim().toLowerCase().replace(/_/g, ' ');
+  }
+
+  function cfgIncludesSubcategoria(cfg, raw, normalizer) {
+    if (!cfg || !Array.isArray(cfg.subcategoriaIds)) return false;
+    var fn = typeof normalizer === 'function' ? normalizer : normalizeSubId;
+    var canon = fn(raw);
+    if (!canon) return false;
+    for (var i = 0; i < cfg.subcategoriaIds.length; i++) {
+      if (fn(cfg.subcategoriaIds[i]) === canon) return true;
+    }
+    return false;
   }
 
   function getSubcategoriaOverride(cfg, ctx) {
@@ -266,8 +305,8 @@
     var cfg = resolveEscortConfig();
     if (!cfg) return false;
     ctx = ctx || {};
-    var subId = String(ctx.subcategoriaId || '').trim().toLowerCase();
-    if (cfg.subcategoriaIds.indexOf(subId) >= 0) return true;
+    if (cfgIncludesSubcategoria(cfg, ctx.subcategoriaId || ctx.subcategoria || '', normalizeEscortSubId)) return true;
+    if (ctx.arquetipo === cfg.id) return true;
     var ident = resolved && resolved.identidad ? resolved.identidad : {};
     if (ident.formularioId === cfg.formularioId && ident.arquetipo === cfg.id) return true;
     if (resolved && cfg.uiIds.indexOf(resolved.formularioUiId || '') >= 0) return true;
@@ -278,8 +317,7 @@
     var cfg = resolveParejaConfig();
     if (!cfg) return false;
     ctx = ctx || {};
-    var subId = String(ctx.subcategoriaId || '').trim().toLowerCase();
-    if (cfg.subcategoriaIds.indexOf(subId) >= 0) return true;
+    if (cfgIncludesSubcategoria(cfg, ctx.subcategoriaId || ctx.subcategoria || '', normalizeParejaSubId)) return true;
     if (ctx.arquetipo === cfg.id) return true;
     var ident = resolved && resolved.identidad ? resolved.identidad : {};
     if (ident.formularioId === cfg.formularioId && ident.arquetipo === cfg.id) return true;
@@ -292,8 +330,8 @@
     var cfg = resolveLifestyleConfig();
     if (!cfg) return false;
     ctx = ctx || {};
-    var subId = String(ctx.subcategoriaId || '').trim().toLowerCase();
-    if (cfg.subcategoriaIds.indexOf(subId) >= 0) return true;
+    if (cfgIncludesSubcategoria(cfg, ctx.subcategoriaId || ctx.subcategoria || '', normalizeLifestyleSubId)) return true;
+    if (ctx.arquetipo === cfg.id) return true;
     var ident = resolved && resolved.identidad ? resolved.identidad : {};
     if (ident.formularioId === cfg.formularioId && ident.arquetipo === cfg.id) return true;
     if (resolved && cfg.uiIds.indexOf(resolved.formularioUiId || '') >= 0) return true;
@@ -304,10 +342,7 @@
     var cfg = resolveDominatrixConfig();
     if (!cfg) return false;
     ctx = ctx || {};
-    var subId = subIdFromCtx(ctx);
-    if (cfg.subcategoriaIds.some(function (s) {
-      return normalizeSubId(s) === subId;
-    })) return true;
+    if (cfgIncludesSubcategoria(cfg, ctx.subcategoriaId || ctx.subcategoria || '', normalizeDominatrixSubId)) return true;
     if (ctx.arquetipo === cfg.id) return true;
     var ident = resolved && resolved.identidad ? resolved.identidad : {};
     if (ident.formularioId === cfg.formularioId && ident.arquetipo === cfg.id) return true;
@@ -951,23 +986,19 @@
   }
 
   function isSwingerSubcategoria(ctx) {
-    var subId = subIdFromCtx(ctx);
-    return subId === 'swinger' || subId === 'parejas swinger';
+    return normalizeParejaSubId((ctx && ctx.subcategoriaId) || (ctx && ctx.subcategoria) || '') === 'swinger';
   }
 
   function isUnicornSubcategoria(ctx) {
-    var subId = subIdFromCtx(ctx);
-    return subId === 'unicorns' || subId === 'unicorn';
+    return normalizeLifestyleSubId((ctx && ctx.subcategoriaId) || (ctx && ctx.subcategoria) || '') === 'unicorns';
   }
 
   function isCuckoldHotwifeSubcategoria(ctx) {
-    var subId = subIdFromCtx(ctx);
-    return subId === 'cuckold hotwife' || subId === 'cuckold_hotwife';
+    return normalizeParejaSubId((ctx && ctx.subcategoriaId) || (ctx && ctx.subcategoria) || '') === 'cuckold hotwife';
   }
 
   function isDominatrixSubcategoria(ctx) {
-    var subId = subIdFromCtx(ctx);
-    return subId === 'dominatrix' || subId === 'fetiche' || subId === 'sado';
+    return !!normalizeDominatrixSubId((ctx && ctx.subcategoriaId) || (ctx && ctx.subcategoria) || '');
   }
 
   function isEspectaculoSubcategoria(ctx) {
@@ -1017,6 +1048,37 @@
     return canon === 'hotel_motel';
   }
 
+  var PROFILE_NESTED_KEYS = [
+    'dominatrixPerfil',
+    'espectaculoPerfil',
+    'creadorPerfil',
+    'retailPerfil',
+    'venuePerfil',
+    'bienestarPerfil',
+    'hospedajePerfil',
+    'swingerPerfil',
+    'unicornPerfil',
+    'cuckoldHotwifePerfil',
+    'parejaGrupoPerfil'
+  ];
+
+  var PROFILE_INCOMPATIBLE_KEYS = ['modalidades', 'edad', 'viaja'];
+
+  function clearProfileContractState(target, keepNested, keepFields) {
+    if (!target) return target;
+    var keepNestedMap = {};
+    var keepFieldsMap = {};
+    (keepNested || []).forEach(function (k) { keepNestedMap[k] = true; });
+    (keepFields || []).forEach(function (k) { keepFieldsMap[k] = true; });
+    PROFILE_NESTED_KEYS.forEach(function (key) {
+      if (!keepNestedMap[key]) delete target[key];
+    });
+    PROFILE_INCOMPATIBLE_KEYS.forEach(function (key) {
+      if (!keepFieldsMap[key]) delete target[key];
+    });
+    return target;
+  }
+
   var MODALIDADES_SHOW_LABELS = {
     fiestas: 'Fiestas privadas',
     despedidas: 'Despedidas',
@@ -1062,11 +1124,9 @@
 
   function finalizeEspectaculoValues(values, ctx) {
     if (!values || !isEspectaculoSubcategoria(ctx || {})) return values;
-    delete values.dominatrixPerfil;
-    delete values.swingerPerfil;
-    delete values.unicornPerfil;
-    delete values.cuckoldHotwifePerfil;
-    values.espectaculoPerfil = buildEspectaculoPerfil(values);
+    var esp = buildEspectaculoPerfil(values);
+    clearProfileContractState(values, ['espectaculoPerfil'], ['modalidades']);
+    values.espectaculoPerfil = esp;
     return values;
   }
 
@@ -1075,10 +1135,7 @@
     ctx = ctx || {};
     var canon = normalizeEspectaculoSubId((ctx && ctx.subcategoriaId) || u.subcategoriaId || '');
     var esp = bloques.espectaculoPerfil || buildEspectaculoPerfil(bloques);
-    delete u.dominatrixPerfil;
-    delete u.swingerPerfil;
-    delete u.unicornPerfil;
-    delete u.cuckoldHotwifePerfil;
+    clearProfileContractState(u, ['espectaculoPerfil'], ['modalidades']);
     u.espectaculoPerfil = Object.assign({}, esp);
     u.arquetipo = 'persona_espectaculo';
     u.tipoPerfil = 'espectaculo';
@@ -1200,12 +1257,9 @@
 
   function finalizeCreadorValues(values, ctx) {
     if (!values || !isCreadorSubcategoria(ctx || {})) return values;
-    delete values.dominatrixPerfil;
-    delete values.espectaculoPerfil;
-    delete values.swingerPerfil;
-    delete values.unicornPerfil;
-    delete values.cuckoldHotwifePerfil;
-    values.creadorPerfil = buildCreadorPerfil(values);
+    var cre = buildCreadorPerfil(values);
+    clearProfileContractState(values, ['creadorPerfil']);
+    values.creadorPerfil = cre;
     return values;
   }
 
@@ -1214,11 +1268,7 @@
     ctx = ctx || {};
     var canon = normalizeCreadorSubId((ctx && ctx.subcategoriaId) || u.subcategoriaId || '') || 'contenido';
     var cre = bloques.creadorPerfil || buildCreadorPerfil(bloques);
-    delete u.dominatrixPerfil;
-    delete u.espectaculoPerfil;
-    delete u.swingerPerfil;
-    delete u.unicornPerfil;
-    delete u.cuckoldHotwifePerfil;
+    clearProfileContractState(u, ['creadorPerfil']);
     u.creadorPerfil = Object.assign({}, cre);
     u.arquetipo = 'persona_creador';
     u.tipoPerfil = 'creador';
@@ -1330,14 +1380,9 @@
 
   function finalizeRetailValues(values, ctx) {
     if (!values || !isRetailSubcategoria(ctx || {})) return values;
-    delete values.creadorPerfil;
-    delete values.espectaculoPerfil;
-    delete values.dominatrixPerfil;
-    delete values.swingerPerfil;
-    delete values.unicornPerfil;
-    delete values.cuckoldHotwifePerfil;
-    delete values.modalidades;
-    values.retailPerfil = buildRetailPerfil(values);
+    var ret = buildRetailPerfil(values);
+    clearProfileContractState(values, ['retailPerfil']);
+    values.retailPerfil = ret;
     return values;
   }
 
@@ -1346,12 +1391,7 @@
     ctx = ctx || {};
     var canon = normalizeRetailSubId((ctx && ctx.subcategoriaId) || u.subcategoriaId || '') || 'sex_shop';
     var ret = bloques.retailPerfil || buildRetailPerfil(bloques);
-    delete u.creadorPerfil;
-    delete u.espectaculoPerfil;
-    delete u.dominatrixPerfil;
-    delete u.swingerPerfil;
-    delete u.unicornPerfil;
-    delete u.cuckoldHotwifePerfil;
+    clearProfileContractState(u, ['retailPerfil']);
     u.retailPerfil = Object.assign({}, ret);
     u.arquetipo = 'negocio_retail';
     u.tipoPerfil = 'negocio';
@@ -1723,18 +1763,9 @@
 
   function finalizeBienestarValues(values, ctx) {
     if (!values || !isBienestarSubcategoria(ctx || {})) return values;
-    delete values.retailPerfil;
-    delete values.venuePerfil;
-    delete values.hospedajePerfil;
-    delete values.creadorPerfil;
-    delete values.espectaculoPerfil;
-    delete values.dominatrixPerfil;
-    delete values.swingerPerfil;
-    delete values.unicornPerfil;
-    delete values.cuckoldHotwifePerfil;
-    delete values.modalidades;
-    delete values.edad;
-    values.bienestarPerfil = buildBienestarPerfil(values);
+    var bien = buildBienestarPerfil(values);
+    clearProfileContractState(values, ['bienestarPerfil']);
+    values.bienestarPerfil = bien;
     return values;
   }
 
@@ -1743,16 +1774,7 @@
     ctx = ctx || {};
     var canon = inferBienestarSubId(bloques, ctx);
     var bien = bloques.bienestarPerfil || buildBienestarPerfil(bloques);
-    delete u.retailPerfil;
-    delete u.venuePerfil;
-    delete u.creadorPerfil;
-    delete u.espectaculoPerfil;
-    delete u.dominatrixPerfil;
-    delete u.swingerPerfil;
-    delete u.unicornPerfil;
-    delete u.cuckoldHotwifePerfil;
-    delete u.modalidades;
-    delete u.edad;
+    clearProfileContractState(u, ['bienestarPerfil']);
     u.bienestarPerfil = Object.assign({}, bien);
     u.arquetipo = 'negocio_bienestar';
     u.tipoPerfil = 'negocio';
@@ -1903,19 +1925,9 @@
 
   function finalizeHospedajeValues(values, ctx) {
     if (!values || !isHospedajeSubcategoria(ctx || {})) return values;
-    delete values.retailPerfil;
-    delete values.venuePerfil;
-    delete values.bienestarPerfil;
-    delete values.creadorPerfil;
-    delete values.espectaculoPerfil;
-    delete values.dominatrixPerfil;
-    delete values.swingerPerfil;
-    delete values.unicornPerfil;
-    delete values.cuckoldHotwifePerfil;
-    delete values.modalidades;
-    delete values.edad;
-    delete values.viaja;
-    values.hospedajePerfil = buildHospedajePerfil(values);
+    var hosp = buildHospedajePerfil(values);
+    clearProfileContractState(values, ['hospedajePerfil']);
+    values.hospedajePerfil = hosp;
     return values;
   }
 
@@ -1924,18 +1936,7 @@
     ctx = ctx || {};
     var canon = inferHospedajeSubId(bloques, ctx);
     var hosp = bloques.hospedajePerfil || buildHospedajePerfil(bloques);
-    delete u.retailPerfil;
-    delete u.venuePerfil;
-    delete u.bienestarPerfil;
-    delete u.creadorPerfil;
-    delete u.espectaculoPerfil;
-    delete u.dominatrixPerfil;
-    delete u.swingerPerfil;
-    delete u.unicornPerfil;
-    delete u.cuckoldHotwifePerfil;
-    delete u.modalidades;
-    delete u.edad;
-    delete u.viaja;
+    clearProfileContractState(u, ['hospedajePerfil']);
     u.hospedajePerfil = Object.assign({}, hosp);
     u.arquetipo = 'negocio_hospedaje';
     u.tipoPerfil = 'lugar';
@@ -2077,25 +2078,22 @@
 
   function finalizeDominatrixValues(values, ctx) {
     if (!values || !isDominatrixSubcategoria(ctx || {})) return values;
-    delete values.swingerPerfil;
-    delete values.unicornPerfil;
-    delete values.cuckoldHotwifePerfil;
-    values.dominatrixPerfil = buildDominatrixPerfil(values);
+    var dom = buildDominatrixPerfil(values);
+    clearProfileContractState(values, ['dominatrixPerfil'], ['modalidades']);
+    values.dominatrixPerfil = dom;
     return values;
   }
 
   function mapDominatrixToPerfil(u, bloques, ctx) {
     u = u || {};
     ctx = ctx || {};
-    var subId = subIdFromCtx(ctx);
+    var subId = normalizeDominatrixSubId((ctx && ctx.subcategoriaId) || (ctx && ctx.subcategoria) || '') || subIdFromCtx(ctx);
     var dom = bloques.dominatrixPerfil || buildDominatrixPerfil(bloques);
-    delete u.swingerPerfil;
-    delete u.unicornPerfil;
-    delete u.cuckoldHotwifePerfil;
+    clearProfileContractState(u, ['dominatrixPerfil'], ['modalidades']);
     u.dominatrixPerfil = Object.assign({}, dom);
     u.arquetipo = 'persona_dominatrix';
     u.tipoPerfil = 'persona';
-    u.subcategoriaId = u.subcategoriaId || subId;
+    u.subcategoriaId = subId || u.subcategoriaId;
     if (dom.estiloDominacion) u.estiloDominacion = dom.estiloDominacion;
     u.especialidadBdsm = buildEspecialidadBdsmMirror(dom.estiloDominacion, dom.listaFetiches, subId);
     if (dom.experienciaBdsm) u.experienciaBdsm = dom.experienciaBdsm;
@@ -2324,9 +2322,10 @@
     var ch = bloques.cuckoldHotwifePerfil;
     if (!ch && hasCuckoldHotwifeDelta(bloques)) ch = buildCuckoldHotwifePerfil(bloques);
     if (!ch || !hasCuckoldHotwifeDelta(ch)) return u;
-    delete u.swingerPerfil;
-    delete u.unicornPerfil;
+    clearProfileContractState(u, ['cuckoldHotwifePerfil', 'parejaGrupoPerfil'], ['modalidades', 'viaja']);
     u.cuckoldHotwifePerfil = Object.assign({}, ch);
+    u.subcategoriaId = 'cuckold hotwife';
+    u.arquetipo = 'pareja_grupo';
     if (ch.dinamica) {
       u.dinamica = ch.dinamica;
       u.dinamicaLabel = ch.dinamicaLabel || dinamicaCuckoldHotwifeLabel(ch.dinamica);
@@ -2356,9 +2355,11 @@
     var sw = bloques.swingerPerfil;
     if (!sw && hasSwingerDelta(bloques)) sw = buildSwingerPerfil(bloques);
     if (!sw || !hasSwingerDelta(sw)) return u;
-    delete u.unicornPerfil;
-    delete u.cuckoldHotwifePerfil;
+    clearProfileContractState(u, ['swingerPerfil', 'parejaGrupoPerfil'], ['modalidades', 'viaja']);
     u.swingerPerfil = Object.assign({}, sw);
+    u.subcategoriaId = 'swinger';
+    u.arquetipo = 'pareja_grupo';
+    u.tipoPerfil = 'pareja_grupo';
     if (Array.isArray(sw.objetivosPerfil) && sw.objetivosPerfil.length) {
       u.objetivosPerfil = sw.objetivosPerfil.slice();
       u.objetivoPrincipal = sw.objetivoPrincipal || buildObjetivoPrincipal(sw.objetivosPerfil);
@@ -2391,8 +2392,7 @@
       un = buildUnicornPerfil(bloques);
     }
     if (!un) return u;
-    delete u.swingerPerfil;
-    delete u.cuckoldHotwifePerfil;
+    clearProfileContractState(u, ['unicornPerfil'], ['modalidades', 'viaja']);
     if (Array.isArray(un.objetivosPerfil) && un.objetivosPerfil.length) {
       u.objetivosPerfil = un.objetivosPerfil.slice();
       u.objetivoPrincipal = un.objetivoPrincipal || buildObjetivoPrincipal(un.objetivosPerfil);
@@ -2448,6 +2448,7 @@
     if (un.idiomas) u.idiomas = un.idiomas;
     u.tipoPerfil = 'persona';
     u.arquetipo = (ctx && ctx.arquetipo) || 'persona_lifestyle';
+    u.subcategoriaId = 'unicorns';
     u.badgeUnicorn = true;
     u.unicornPerfil = Object.assign({}, un, {
       modalidades: u.modalidades || un.modalidades || [],
@@ -2471,8 +2472,8 @@
     if (Array.isArray(values.objetivosPerfil)) {
       values.objetivoPrincipal = buildObjetivoPrincipal(values.objetivosPerfil);
     }
-    delete values.unicornPerfil;
-    delete values.cuckoldHotwifePerfil;
+    clearProfileContractState(values, ['swingerPerfil', 'parejaGrupoPerfil'], ['modalidades', 'viaja']);
+    values.subcategoriaId = 'swinger';
     values.swingerPerfil = buildSwingerPerfil(values);
     delete values.deltaSwinger;
     return values;
@@ -2488,8 +2489,8 @@
     if (Array.isArray(values.objetivosPerfil)) {
       values.objetivoPrincipal = buildObjetivoPrincipal(values.objetivosPerfil);
     }
-    delete values.swingerPerfil;
-    delete values.cuckoldHotwifePerfil;
+    clearProfileContractState(values, ['unicornPerfil'], ['modalidades', 'viaja']);
+    values.subcategoriaId = 'unicorns';
     values.unicornPerfil = buildUnicornPerfil(values);
     return values;
   }
@@ -2505,8 +2506,8 @@
     if (values.dinamica) {
       values.dinamicaLabel = dinamicaCuckoldHotwifeLabel(values.dinamica);
     }
-    delete values.swingerPerfil;
-    delete values.unicornPerfil;
+    clearProfileContractState(values, ['cuckoldHotwifePerfil', 'parejaGrupoPerfil'], ['modalidades', 'viaja']);
+    values.subcategoriaId = 'cuckold hotwife';
     values.cuckoldHotwifePerfil = buildCuckoldHotwifePerfil(values);
     return values;
   }
@@ -2831,6 +2832,10 @@
   function mapToPerfil(u, bloques, ctx) {
     if (!bloques) return u;
     u = u || {};
+    var parejaCanon = normalizeParejaSubId((ctx && ctx.subcategoriaId) || (ctx && ctx.subcategoria) || u.subcategoriaId || '');
+    var lifestyleCanon = normalizeLifestyleSubId((ctx && ctx.subcategoriaId) || (ctx && ctx.subcategoria) || u.subcategoriaId || '');
+    if (parejaCanon) u.subcategoriaId = parejaCanon;
+    if (lifestyleCanon) u.subcategoriaId = lifestyleCanon;
     if (isDominatrixSubcategoria(ctx)) {
       return mapDominatrixToPerfil(u, bloques, ctx);
     }
@@ -3069,6 +3074,10 @@
     buildRetailPerfil: buildRetailPerfil,
     mapRetailToPerfil: mapRetailToPerfil,
     normalizeRetailSubId: normalizeRetailSubId,
+    normalizeEscortSubId: normalizeEscortSubId,
+    normalizeParejaSubId: normalizeParejaSubId,
+    normalizeLifestyleSubId: normalizeLifestyleSubId,
+    normalizeDominatrixSubId: normalizeDominatrixSubId,
     finalizeVenueValues: finalizeVenueValues,
     buildVenuePerfil: buildVenuePerfil,
     mapVenueToPerfil: mapVenueToPerfil,
