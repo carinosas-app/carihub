@@ -35,9 +35,19 @@
     return global.CARIHUB_REGISTRO_CREADOR_BLOCKS || null;
   }
 
+  function resolveRetailConfig() {
+    return global.CARIHUB_REGISTRO_RETAIL_BLOCKS || null;
+  }
+
   function normalizeCreadorSubId(raw) {
     var subId = normalizeSubId(raw);
     if (subId === 'contenido' || subId === 'creador contenido') return 'contenido';
+    return '';
+  }
+
+  function normalizeRetailSubId(raw) {
+    var subId = normalizeSubId(raw);
+    if (subId === 'sex shop') return 'sex_shop';
     return '';
   }
 
@@ -289,10 +299,24 @@
     return false;
   }
 
+  function matchesRetail(ctx, resolved) {
+    var cfg = resolveRetailConfig();
+    if (!cfg) return false;
+    ctx = ctx || {};
+    var canon = normalizeRetailSubId((ctx && ctx.subcategoriaId) || (ctx && ctx.subcategoria) || '');
+    if (canon === 'sex_shop') return true;
+    if (ctx.arquetipo === cfg.id) return true;
+    var ident = resolved && resolved.identidad ? resolved.identidad : {};
+    if (ident.formularioId === cfg.formularioId && ident.arquetipo === cfg.id) return true;
+    if (resolved && cfg.uiIds.indexOf(resolved.formularioUiId || '') >= 0) return true;
+    return false;
+  }
+
   function resolveConfig(ctx, resolved) {
     if (matchesDominatrix(ctx, resolved)) return resolveDominatrixConfig();
     if (matchesEspectaculo(ctx, resolved)) return resolveEspectaculoConfig();
     if (matchesCreador(ctx, resolved)) return resolveCreadorConfig();
+    if (matchesRetail(ctx, resolved)) return resolveRetailConfig();
     if (matchesEscort(ctx, resolved)) return resolveEscortConfig();
     if (matchesLifestyle(ctx, resolved)) return resolveLifestyleConfig();
     if (matchesPareja(ctx, resolved)) return resolveParejaConfig();
@@ -866,6 +890,12 @@
     ctx = ctx || {};
     if (ctx.arquetipo === 'persona_creador') return true;
     return normalizeCreadorSubId((ctx.subcategoriaId) || (ctx.subcategoria) || '') === 'contenido';
+  }
+
+  function isRetailSubcategoria(ctx) {
+    ctx = ctx || {};
+    if (ctx.arquetipo === 'negocio_retail') return true;
+    return normalizeRetailSubId((ctx.subcategoriaId) || (ctx.subcategoria) || '') === 'sex_shop';
   }
 
   var MODALIDADES_SHOW_LABELS = {
