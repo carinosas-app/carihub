@@ -597,10 +597,12 @@
     var comp = componente || 'ResultCardGenerico';
     var subId = row && row.subcategoriaId;
     var sidNorm = String(subId || '').trim().toLowerCase().replace(/_/g, ' ');
+    if (sidNorm === 'club sw' || sidNorm === 'club_sw' || sidNorm === 'club swinger' || sidNorm === 'club_swinger') return 'clubSw';
     if (sidNorm === 'antro restaurant bar lgbt' || sidNorm === 'antro lgbt' || sidNorm === 'antro_lgbt') return 'antroLgbt';
     if (sidNorm === 'antro restaurant bar' || sidNorm === 'antro') return 'antro';
     if (row && row.arquetipo === 'negocio_venue') {
       var vn = String(row.subcategoria || row.subcategoriaId || '').toLowerCase();
+      if (vn.indexOf('club') >= 0 || vn.indexOf('lifestyle') >= 0 || (vn.indexOf('swinger') >= 0 && vn.indexOf('pareja') < 0)) return 'clubSw';
       if (vn.indexOf('lgbt') >= 0) return 'antroLgbt';
       if (vn.indexOf('antro') >= 0) return 'antro';
     }
@@ -622,6 +624,7 @@
       var retId = String(subId || '').trim().toLowerCase().replace(/_/g, ' ');
       if (retId === 'sex shop' || retId === 'sex_shop') return 'sexShop';
       if (row && row.arquetipo === 'negocio_retail') return 'sexShop';
+      if (retId === 'club sw' || retId === 'club_sw' || retId === 'club swinger' || retId === 'club_swinger') return 'clubSw';
       if (retId === 'antro restaurant bar lgbt' || retId === 'antro lgbt' || retId === 'antro_lgbt') return 'antroLgbt';
       if (retId === 'antro restaurant bar' || retId === 'antro') return 'antro';
       if (retId === 'masajes') return 'masajesLocal';
@@ -636,10 +639,12 @@
     }
     if (comp === 'ResultCardVenue' || comp === 'ProfileLayoutVenue') {
       var venId = String(subId || '').trim().toLowerCase().replace(/_/g, ' ');
+      if (venId === 'club sw' || venId === 'club_sw' || venId === 'club swinger' || venId === 'club_swinger') return 'clubSw';
       if (venId === 'antro restaurant bar lgbt' || venId === 'antro lgbt' || venId === 'antro_lgbt') return 'antroLgbt';
       if (venId === 'antro restaurant bar' || venId === 'antro') return 'antro';
       if (row && row.arquetipo === 'negocio_venue') {
         var n = String(row.subcategoria || row.subcategoriaId || '').toLowerCase();
+        if (n.indexOf('club') >= 0 || n.indexOf('lifestyle') >= 0 || (n.indexOf('swinger') >= 0 && n.indexOf('pareja') < 0)) return 'clubSw';
         if (n.indexOf('lgbt') >= 0) return 'antroLgbt';
         if (n.indexOf('antro') >= 0) return 'antro';
       }

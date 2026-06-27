@@ -5684,17 +5684,24 @@ DEMO.tableDance={
   ubicacionPerks:["Zona céntrica","Cerca de antros","Discreción garantizada"],
   ubicacionImg:HOTEL_IMGS.ubicacion
 };
-/* Club Swinger — schema: club_swinger (negocio venue) */
+/* Club Swinger — schema: club_sw (negocio_venue) */
 DEMO.clubSw={
-  subcategoriaId:"club_swinger", categoria:"Club Swinger", categoriaPublica:"Club Swinger",
-  arquetipo:"venue", tipoPerfil:"negocio", nombre:"Club Eros Lifestyle", verificada:true,
+  subcategoriaId:"club_sw", categoria:"Club Swinger", categoriaPublica:"Club Swinger",
+  arquetipo:"negocio_venue", tipoPerfil:"lugar", nombreComercial:"Club Eros Lifestyle", nombre:"Club Eros Lifestyle", verificada:true, badgeSwinger:true,
   pais:"México", estado:"Nuevo León", ciudad:"Monterrey", zona:"Valle Oriente",
   tagline:"Ambiente elegante para parejas y singles con reglas claras y privacidad.",
-  precio:"600", moneda:"MXN", tiempoMinimo:"Cover entrada",
-  tipoNegocio:"Club lifestyle", dressCode:"Elegante casual", reglasAcceso:"Solo mayores de edad",
-  areasVenue:"Salón principal, Bar, Área privada, Lockers",
+  precio:"600", precioEntrada:"$600 MXN", moneda:"MXN", tiempoMinimo:"Cover entrada",
+  tipoVenue:"Club Swinger / Lifestyle", tipoNegocio:"Club Swinger / Lifestyle", tipoServicio:"Club Swinger / Lifestyle",
+  eventosTematicos:"Noche lifestyle viernes · Fiesta temática sábado",
+  politicaParejasSingles:"Parejas y singles bienvenidos con previa reservación",
+  dressCode:"Elegante casual",
+  areasVenue:["Salón principal","Bar premium","Área privada","Lockers"],
+  reglasAcceso:["Solo mayores de edad","Identificación obligatoria","Moderación en puerta"],
+  horarioDetalle:"Jue–Dom 9:00 PM – 3:00 AM",
+  horario:"Jue–Dom 9:00 PM – 3:00 AM",
+  reservaciones:true,
   metodosPago:["Efectivo","Tarjeta","Transferencia"], disponibilidad:"Abierto ahora",
-  horario:"Jue–Dom 9:00 PM – 3:00 AM", respuestaCorta:"Responde en menos de 20 min",
+  respuestaCorta:"Responde en menos de 20 min",
   contactos:["wa","tg","ig","fb","of","x","msg","tel","gmail"], fotos:20,
   galeria:[HOTEL_IMGS.principal,HOTEL_IMGS.extra1,HOTEL_IMGS.extra2,HOTEL_IMGS.live],
   perfilTags:["Club swinger","Parejas","Singles verificados","Bar premium","Lockers"],
@@ -6962,7 +6969,7 @@ function resolverVistaPerfil(u,q){
 function normalizarVistaPreview(vista){
   var v=String(vista||"").trim();
   if(!v) return "";
-  var alias={escort:"adult",acompanante:"adult",adulto:"adult",edecan:"edecan",modelos:"modelos",dotados:"dotados",femboy:"femboy",singles:"singles",dominatrix:"dominatrix",fetiche:"fetiche",sado:"sado",stripper:"stripper",tabledance:"tableDance",table_dance:"tableDance","table dance":"tableDance",contenido:"creador",creador_contenido:"creador","creador contenido":"creador",sex_shop:"sexShop","sex shop":"sexShop",antro:"antro",antro_lgbt:"antroLgbt","antro restaurant bar":"antro","antro restaurant bar lgbt":"antroLgbt",spa:"spa",masajes:"masajesLocal","masajes local":"masajesLocal",hotel_motel:"hotelMotel","hotel motel":"hotelMotel","hotel / motel":"hotelMotel",hotel:"hotelMotel",motel:"hotelMotel"};
+  var alias={escort:"adult",acompanante:"adult",adulto:"adult",edecan:"edecan",modelos:"modelos",dotados:"dotados",femboy:"femboy",singles:"singles",dominatrix:"dominatrix",fetiche:"fetiche",sado:"sado",stripper:"stripper",tabledance:"tableDance",table_dance:"tableDance","table dance":"tableDance",contenido:"creador",creador_contenido:"creador","creador contenido":"creador",sex_shop:"sexShop","sex shop":"sexShop",antro:"antro",antro_lgbt:"antroLgbt","antro restaurant bar":"antro","antro restaurant bar lgbt":"antroLgbt",club_sw:"clubSw","club sw":"clubSw",club_swinger:"clubSw","club swinger":"clubSw",spa:"spa",masajes:"masajesLocal","masajes local":"masajesLocal",hotel_motel:"hotelMotel","hotel motel":"hotelMotel","hotel / motel":"hotelMotel",hotel:"hotelMotel",motel:"hotelMotel"};
   return alias[v.toLowerCase()]||v;
 }
 function resolverPerfilDesdeQuery(q){
@@ -7118,6 +7125,8 @@ function aplicarPerfilDesdeRegistro(vista,u){
     tipoVenue:u.tipoVenue||u.tipoServicio||u.tipoNegocio||"",
     precioEntrada:u.precioEntrada||u.precio||"",
     cartelera:u.cartelera||"",
+    eventosTematicos:u.eventosTematicos||(u.venuePerfil&&u.venuePerfil.eventosTematicos)||"",
+    politicaParejasSingles:u.politicaParejasSingles||(u.venuePerfil&&u.venuePerfil.politicaParejasSingles)||"",
     dressCode:u.dressCode||"",
     areasVenue:Array.isArray(u.areasVenue)?u.areasVenue.slice():(u.areasVenue||""),
     reservaciones:u.reservaciones===true||u.reservaciones==="true"||u.reservaciones,
@@ -7162,6 +7171,7 @@ function aplicarPerfilDesdeRegistro(vista,u){
     verificada:false,
     nueva:!!u.nueva,
     badgeLgbt:!!u.badgeLgbt,
+    badgeSwinger:!!u.badgeSwinger,
     badgeVip:!!u.badgeVip,
     badgeTrans:!!u.badgeTrans,
     badgeHotwife:!!u.badgeHotwife,
@@ -7181,8 +7191,10 @@ function aplicarPerfilDesdeRegistro(vista,u){
   if(sidNorm==="sex shop"||sidNorm==="sex_shop") clean.subcategoriaId="sex_shop";
   if(sidNorm==="antro restaurant bar lgbt"||sidNorm==="antro lgbt"||sidNorm==="antro_lgbt") clean.subcategoriaId="antro_lgbt";
   if(sidNorm==="antro restaurant bar"||sidNorm==="antro") clean.subcategoriaId="antro";
+  if(sidNorm==="club sw"||sidNorm==="club swinger"||sidNorm==="club_sw"||sidNorm==="club_swinger") clean.subcategoriaId="club_sw";
   if(clean.subcategoriaId==="antro_lgbt") clean.badgeLgbt=true;
   if(clean.subcategoriaId==="antro") clean.badgeLgbt=false;
+  if(clean.subcategoriaId==="club_sw"){ clean.badgeSwinger=true; clean.badgeLgbt=false; }
   if(u.arquetipo) clean.arquetipo=u.arquetipo;
   if(u.tipoPerfil) clean.tipoPerfil=u.tipoPerfil;
   DEMO[vista]=clean;

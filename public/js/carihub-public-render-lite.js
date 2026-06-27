@@ -762,23 +762,32 @@
     var id = String((u && u.subcategoriaId) || '').trim().toLowerCase().replace(/_/g, ' ');
     if (id === 'antro restaurant bar lgbt' || id === 'antro lgbt') return 'antro_lgbt';
     if (id === 'antro restaurant bar' || id === 'antro') return 'antro';
+    if (id === 'club sw' || id === 'club swinger' || id === 'club_sw' || id === 'club_swinger') return 'club_sw';
     if (u && u.arquetipo === 'negocio_venue') {
       if (u.badgeLgbt === true) return 'antro_lgbt';
+      if (u.badgeSwinger === true) return 'club_sw';
       if (u.venuePerfil && u.subcategoriaId) {
-        var sid = String(u.subcategoriaId).trim().toLowerCase();
+        var sid = String(u.subcategoriaId).trim().toLowerCase().replace(/_/g, ' ');
         if (sid === 'antro_lgbt') return 'antro_lgbt';
         if (sid === 'antro') return 'antro';
+        if (sid === 'club sw' || sid === 'club swinger' || sid === 'club_sw' || sid === 'club_swinger') return 'club_sw';
       }
+      var tipoVenue = String(u.tipoVenue || (u.venuePerfil && u.venuePerfil.tipoVenue) || '').toLowerCase();
+      if (tipoVenue.indexOf('club') >= 0 || tipoVenue.indexOf('lifestyle') >= 0 || tipoVenue.indexOf('swinger') >= 0) return 'club_sw';
     }
     return id;
   }
 
   function isVenuePerfil(u) {
     if (!u) return false;
-    if (u.arquetipo === 'negocio_venue' && (normVenueSubId(u) === 'antro' || normVenueSubId(u) === 'antro_lgbt')) return true;
-    if (u.venuePerfil && (normVenueSubId(u) === 'antro' || normVenueSubId(u) === 'antro_lgbt')) return true;
     var sid = normVenueSubId(u);
-    return sid === 'antro' || sid === 'antro_lgbt';
+    if (u.arquetipo === 'negocio_venue' && (sid === 'antro' || sid === 'antro_lgbt' || sid === 'club_sw')) return true;
+    if (u.venuePerfil && (sid === 'antro' || sid === 'antro_lgbt' || sid === 'club_sw')) return true;
+    return sid === 'antro' || sid === 'antro_lgbt' || sid === 'club_sw';
+  }
+
+  function isClubSwPerfil(u) {
+    return isVenuePerfil(u) && normVenueSubId(u) === 'club_sw';
   }
 
   function isAntroPerfil(u) {
@@ -810,10 +819,21 @@
       if (h.length > 28) h = h.slice(0, 26) + '…';
       mods += '<span class="modchip mc-purple">' + svgIco('clock') + safeTxt(h) + '</span>';
     }
-    if (u.cartelera) {
+    var eventos = u.eventosTematicos || (u.venuePerfil && u.venuePerfil.eventosTematicos);
+    if (eventos) {
+      var ev = String(eventos).split(/[\n·|]/)[0].trim();
+      if (ev.length > 26) ev = ev.slice(0, 24) + '…';
+      if (ev) mods += '<span class="modchip mc-pink">' + svgIco('tv') + safeTxt(ev) + '</span>';
+    } else if (u.cartelera) {
       var cart = String(u.cartelera).split(/[\n·|]/)[0].trim();
       if (cart.length > 26) cart = cart.slice(0, 24) + '…';
       if (cart) mods += '<span class="modchip mc-pink">' + svgIco('tv') + safeTxt(cart) + '</span>';
+    }
+    var politica = u.politicaParejasSingles || (u.venuePerfil && u.venuePerfil.politicaParejasSingles);
+    if (politica) {
+      var pol = String(politica).split(/[\n·|]/)[0].trim();
+      if (pol.length > 26) pol = pol.slice(0, 24) + '…';
+      if (pol) mods += '<span class="modchip mc-purple">' + svgIco('users') + safeTxt(pol) + '</span>';
     }
     return mods;
   }
@@ -845,6 +865,26 @@
 
   function cardHTMLAntroLgbt(u, Q) {
     return cardHTMLVenue(u, Q);
+  }
+
+  function cardHTMLClubSw(u, Q) {
+    Q = Q || {};
+    var mods = venueShowChips(u, { horario: true });
+    var catLabel = (global.CariHubResultadosDemo && CariHubResultadosDemo.labelCategoria)
+      ? CariHubResultadosDemo.labelCategoria(u.categoriaPublica || u.categoria || Q.categoria || '')
+      : (u.categoriaPublica || u.categoria || Q.categoria || 'Club Swinger');
+    var badgeOpts = { negocio: u.verificada !== false };
+    if (u.badgeSwinger !== false) badgeOpts.swinger = true;
+    return cardShell(u, Q, {
+      cardClass: 'res-card--negocio res-card--venue res-card--club-sw',
+      nombre: u.nombreComercial || u.nombre || u.alias,
+      catIcon: 'briefcase',
+      catLabel: catLabel,
+      metaRight: mods,
+      descBlock: descripcionCompactHTML(u, 'Descripción'),
+      priceLabel: 'Cover',
+      badges: badgesCompactHTML(u, badgeOpts)
+    });
   }
 
   function normBienestarSubId(u) {
@@ -1079,6 +1119,7 @@
     if (comp === 'ResultCardPareja') return cardHTMLPareja(u, Q);
     if (comp === 'ResultCardEspectaculo' || isEspectaculoPerfil(u)) return cardHTMLEspectaculo(u, Q);
     if (comp === 'ResultCardCreador' || isCreadorPerfil(u)) return cardHTMLCreador(u, Q);
+    if (isClubSwPerfil(u)) return cardHTMLClubSw(u, Q);
     if (isVenuePerfil(u)) return cardHTMLVenue(u, Q);
     if (isBienestarPerfil(u)) return cardHTMLBienestar(u, Q);
     if (isHospedajePerfil(u)) return cardHTMLHospedaje(u, Q);
@@ -1194,6 +1235,8 @@
     cardHTMLVenue: cardHTMLVenue,
     cardHTMLAntro: cardHTMLAntro,
     cardHTMLAntroLgbt: cardHTMLAntroLgbt,
+    cardHTMLClubSw: cardHTMLClubSw,
+    isClubSwPerfil: isClubSwPerfil,
     cardHTMLBienestar: cardHTMLBienestar,
     cardHTMLSpa: cardHTMLSpa,
     cardHTMLMasajesLocal: cardHTMLMasajesLocal,

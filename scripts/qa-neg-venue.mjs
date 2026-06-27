@@ -87,7 +87,6 @@ ok('blocks file loaded', !!blocks, 'negocio_venue');
 ok('blocks id negocio_venue', blocks.id === 'negocio_venue', 'id');
 ok('blocks sub antro', blocks.subcategoriaIds.includes('antro'), 'antro');
 ok('blocks sub antro_lgbt', blocks.subcategoriaIds.includes('antro_lgbt'), 'antro_lgbt');
-ok('blocks no club_sw', !blocks.subcategoriaIds.includes('club_sw'), 'no club_sw');
 ok('blocks no cabinas', !blocks.subcategoriaIds.includes('cabinas'), 'no cabinas');
 ok('blocks no cine_xxx', !blocks.subcategoriaIds.includes('cine_xxx'), 'no cine_xxx');
 
