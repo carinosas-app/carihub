@@ -596,6 +596,14 @@
   function componenteToVistaPerfil(componente, row) {
     var comp = componente || 'ResultCardGenerico';
     var subId = row && row.subcategoriaId;
+    var sidNorm = String(subId || '').trim().toLowerCase().replace(/_/g, ' ');
+    if (sidNorm === 'antro restaurant bar lgbt' || sidNorm === 'antro lgbt' || sidNorm === 'antro_lgbt') return 'antroLgbt';
+    if (sidNorm === 'antro restaurant bar' || sidNorm === 'antro') return 'antro';
+    if (row && row.arquetipo === 'negocio_venue') {
+      var vn = String(row.subcategoria || row.subcategoriaId || '').toLowerCase();
+      if (vn.indexOf('lgbt') >= 0) return 'antroLgbt';
+      if (vn.indexOf('antro') >= 0) return 'antro';
+    }
     if (comp === 'ResultCardAdultos' || comp === 'ProfileLayoutAdultos') {
       if (subId && global.CariHubResultadosDemo && CariHubResultadosDemo.vistaDeCategoriaLegacy) {
         return CariHubResultadosDemo.vistaDeCategoriaLegacy(subId);
@@ -606,9 +614,22 @@
       var retId = String(subId || '').trim().toLowerCase().replace(/_/g, ' ');
       if (retId === 'sex shop' || retId === 'sex_shop') return 'sexShop';
       if (row && row.arquetipo === 'negocio_retail') return 'sexShop';
+      if (retId === 'antro restaurant bar lgbt' || retId === 'antro lgbt' || retId === 'antro_lgbt') return 'antroLgbt';
+      if (retId === 'antro restaurant bar' || retId === 'antro') return 'antro';
       if (retId === 'masajes') return 'masajesLocal';
       if (retId === 'spa') return 'negocio';
       return 'negocio';
+    }
+    if (comp === 'ResultCardVenue' || comp === 'ProfileLayoutVenue') {
+      var venId = String(subId || '').trim().toLowerCase().replace(/_/g, ' ');
+      if (venId === 'antro restaurant bar lgbt' || venId === 'antro lgbt' || venId === 'antro_lgbt') return 'antroLgbt';
+      if (venId === 'antro restaurant bar' || venId === 'antro') return 'antro';
+      if (row && row.arquetipo === 'negocio_venue') {
+        var n = String(row.subcategoria || row.subcategoriaId || '').toLowerCase();
+        if (n.indexOf('lgbt') >= 0) return 'antroLgbt';
+        if (n.indexOf('antro') >= 0) return 'antro';
+      }
+      return 'antro';
     }
     if (comp === 'ResultCardProfesional' || comp === 'ProfileLayoutProfesional') {
       if (row && (row.arquetipo === 'profesional_salud' || row.formularioId === 'profesionista_cedula')) {

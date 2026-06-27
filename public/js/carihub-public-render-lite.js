@@ -758,6 +758,95 @@
     return cardHTMLRetail(u, Q);
   }
 
+  function normVenueSubId(u) {
+    var id = String((u && u.subcategoriaId) || '').trim().toLowerCase().replace(/_/g, ' ');
+    if (id === 'antro restaurant bar lgbt' || id === 'antro lgbt') return 'antro_lgbt';
+    if (id === 'antro restaurant bar' || id === 'antro') return 'antro';
+    if (u && u.arquetipo === 'negocio_venue') {
+      if (u.badgeLgbt === true) return 'antro_lgbt';
+      if (u.venuePerfil && u.subcategoriaId) {
+        var sid = String(u.subcategoriaId).trim().toLowerCase();
+        if (sid === 'antro_lgbt') return 'antro_lgbt';
+        if (sid === 'antro') return 'antro';
+      }
+    }
+    return id;
+  }
+
+  function isVenuePerfil(u) {
+    if (!u) return false;
+    if (u.arquetipo === 'negocio_venue' && (normVenueSubId(u) === 'antro' || normVenueSubId(u) === 'antro_lgbt')) return true;
+    if (u.venuePerfil && (normVenueSubId(u) === 'antro' || normVenueSubId(u) === 'antro_lgbt')) return true;
+    var sid = normVenueSubId(u);
+    return sid === 'antro' || sid === 'antro_lgbt';
+  }
+
+  function isAntroPerfil(u) {
+    return isVenuePerfil(u) && normVenueSubId(u) === 'antro';
+  }
+
+  function isAntroLgbtPerfil(u) {
+    return isVenuePerfil(u) && normVenueSubId(u) === 'antro_lgbt';
+  }
+
+  function venueShowChips(u, opts) {
+    opts = opts || {};
+    var mods = '';
+    var cover = String(u.precioEntrada || u.precio || '').trim();
+    if (cover) {
+      var coverTxt = cover.length > 22 ? cover.slice(0, 20) + '…' : cover;
+      mods += '<span class="modchip mc-pink">' + svgIco('wallet') + safeTxt('Cover ' + coverTxt) + '</span>';
+    }
+    if (u.dressCode) {
+      var dc = String(u.dressCode);
+      if (dc.length > 24) dc = dc.slice(0, 22) + '…';
+      mods += '<span class="modchip mc-purple">' + svgIco('briefcase') + safeTxt(dc) + '</span>';
+    }
+    if (u.reservaciones === true || String(u.reservaciones || '').toLowerCase() === 'true') {
+      mods += '<span class="modchip mc-purple">' + svgIco('calendar') + 'Reservaciones</span>';
+    }
+    if (opts.horario && (u.horarioDetalle || u.horario)) {
+      var h = String(u.horarioDetalle || u.horario);
+      if (h.length > 28) h = h.slice(0, 26) + '…';
+      mods += '<span class="modchip mc-purple">' + svgIco('clock') + safeTxt(h) + '</span>';
+    }
+    if (u.cartelera) {
+      var cart = String(u.cartelera).split(/[\n·|]/)[0].trim();
+      if (cart.length > 26) cart = cart.slice(0, 24) + '…';
+      if (cart) mods += '<span class="modchip mc-pink">' + svgIco('tv') + safeTxt(cart) + '</span>';
+    }
+    return mods;
+  }
+
+  function cardHTMLVenue(u, Q) {
+    Q = Q || {};
+    var mods = venueShowChips(u, { horario: true });
+    var catLabel = (global.CariHubResultadosDemo && CariHubResultadosDemo.labelCategoria)
+      ? CariHubResultadosDemo.labelCategoria(u.categoriaPublica || u.categoria || Q.categoria || '')
+      : (u.categoriaPublica || u.categoria || Q.categoria || 'Antro');
+    var cardExtra = isAntroLgbtPerfil(u) ? ' res-card--antro-lgbt' : ' res-card--antro';
+    var badgeOpts = { negocio: u.verificada !== false };
+    if (isAntroLgbtPerfil(u)) badgeOpts.lgbt = true;
+    return cardShell(u, Q, {
+      cardClass: 'res-card--negocio res-card--venue' + cardExtra,
+      nombre: u.nombreComercial || u.nombre || u.alias,
+      catIcon: 'briefcase',
+      catLabel: catLabel,
+      metaRight: mods,
+      descBlock: descripcionCompactHTML(u, 'Descripción'),
+      priceLabel: 'Cover',
+      badges: badgesCompactHTML(u, badgeOpts)
+    });
+  }
+
+  function cardHTMLAntro(u, Q) {
+    return cardHTMLVenue(u, Q);
+  }
+
+  function cardHTMLAntroLgbt(u, Q) {
+    return cardHTMLVenue(u, Q);
+  }
+
   function cardHTMLServicio(u, Q) {
     Q = Q || {};
     var cobertura = String(u.zonaCobertura || u.zona || u.serviciosPrincipales || 'A domicilio').trim();
@@ -835,6 +924,7 @@
     if (comp === 'ResultCardPareja') return cardHTMLPareja(u, Q);
     if (comp === 'ResultCardEspectaculo' || isEspectaculoPerfil(u)) return cardHTMLEspectaculo(u, Q);
     if (comp === 'ResultCardCreador' || isCreadorPerfil(u)) return cardHTMLCreador(u, Q);
+    if (isVenuePerfil(u)) return cardHTMLVenue(u, Q);
     if (comp === 'ResultCardNegocio' && isRetailPerfil(u)) return cardHTMLRetail(u, Q);
     if (comp === 'ResultCardNegocio') return cardHTMLNegocio(u, Q);
     if (isDominatrixPerfil(u)) return cardHTMLDominatrix(u, Q);
@@ -944,8 +1034,14 @@
     cardHTMLNegocio: cardHTMLNegocio,
     cardHTMLRetail: cardHTMLRetail,
     cardHTMLSexShop: cardHTMLSexShop,
+    cardHTMLVenue: cardHTMLVenue,
+    cardHTMLAntro: cardHTMLAntro,
+    cardHTMLAntroLgbt: cardHTMLAntroLgbt,
     isRetailPerfil: isRetailPerfil,
     isSexShopPerfil: isSexShopPerfil,
+    isVenuePerfil: isVenuePerfil,
+    isAntroPerfil: isAntroPerfil,
+    isAntroLgbtPerfil: isAntroLgbtPerfil,
     cardHTMLServicio: cardHTMLServicio,
     cardHTMLProfesional: cardHTMLProfesional,
     cardHTMLPareja: cardHTMLPareja,
