@@ -1,7 +1,7 @@
 /**
- * Bloques públicos registro — negocio_venue (antro + antro_lgbt v1).
+ * Bloques públicos registro — negocio_venue (antro + antro_lgbt + club_sw).
  * Fuente: scripts/config-registro-adultos-schema.json (plantilla negocio_venue).
- * v1: antros — sin viajes ni modalidades escort; sin club_sw/cabinas/cine_xxx.
+ * v1 antros (NEG-VEN-01); v2 club_sw (NEG-VEN-02) — sin cabinas/cine_xxx; sin viajes escort.
  */
 (function (global) {
   'use strict';
@@ -16,6 +16,8 @@
     'Antro LGBT+'
   ];
 
+  var TIPO_VENUE_CLUB = ['Club Swinger / Lifestyle'];
+
   var AREAS_VENUE = [
     'Pista principal',
     'Mesas VIP',
@@ -25,6 +27,16 @@
     'Zona fumadores',
     'Estacionamiento',
     'Valet parking'
+  ];
+
+  var AREAS_CLUB_SW = [
+    'Salón principal',
+    'Bar premium',
+    'Área privada',
+    'Lockers',
+    'Terraza',
+    'Valet parking',
+    'Estacionamiento techado'
   ];
 
   var REGLAS_ACESO_OPTS = [
@@ -37,11 +49,21 @@
     'Cero tolerancia a discriminación'
   ];
 
+  var REGLAS_CLUB_SW = [
+    'Solo mayores de edad',
+    'Identificación obligatoria',
+    'Registro en recepción',
+    'Moderación en puerta',
+    'No cámaras no autorizadas',
+    'No menores',
+    'Conducta respetuosa obligatoria'
+  ];
+
   global.CARIHUB_REGISTRO_VENUE_BLOCKS = {
     id: 'negocio_venue',
     formularioId: 'adultos',
     uiIds: ['ui_adulto_negocio_venue'],
-    subcategoriaIds: ['antro', 'antro_lgbt'],
+    subcategoriaIds: ['antro', 'antro_lgbt', 'club_sw'],
     fotosMin: 6,
     obligatorios: [
       'nombreComercial',
@@ -57,10 +79,24 @@
       'rfc',
       'razonSocial'
     ],
+    subcategoriaOverrides: {
+      club_sw: {
+        obligatoriosRemove: ['cartelera'],
+        obligatoriosExtra: ['eventosTematicos', 'politicaParejasSingles'],
+        fieldPatches: {
+          tipoVenue: {
+            options: TIPO_VENUE_CLUB.slice(),
+            defaultValue: 'Club Swinger / Lifestyle'
+          },
+          areasVenue: { options: AREAS_CLUB_SW.slice() },
+          reglasAcceso: { options: REGLAS_CLUB_SW.slice() }
+        }
+      }
+    },
     blocks: [
       {
         id: 'venuePerfil',
-        title: 'Local / antro',
+        title: 'Local / venue',
         hint: 'Datos públicos del venue — sin modalidades escort ni viajes.',
         fields: [
           {
@@ -75,14 +111,24 @@
             label: 'Tipo de venue',
             type: 'select',
             required: true,
-            options: TIPOS_VENUE.slice()
+            options: TIPOS_VENUE.slice(),
+            onlySubcategorias: ['antro', 'antro_lgbt']
+          },
+          {
+            id: 'tipoVenue',
+            label: 'Tipo de venue',
+            type: 'select',
+            required: true,
+            options: TIPO_VENUE_CLUB.slice(),
+            defaultValue: 'Club Swinger / Lifestyle',
+            onlySubcategorias: ['club_sw']
           },
           {
             id: 'tagline',
             label: 'Frase corta',
             type: 'text',
             required: false,
-            placeholder: 'Ej. Vida nocturna, mesas VIP y DJs en vivo'
+            placeholder: 'Ej. Ambiente elegante para parejas y singles'
           },
           {
             id: 'precioEntrada',
@@ -97,7 +143,26 @@
             type: 'textarea',
             required: true,
             rows: 3,
-            placeholder: 'Ej. DJ internacional viernes · Drag show sábado'
+            placeholder: 'Ej. DJ internacional viernes · Drag show sábado',
+            onlySubcategorias: ['antro', 'antro_lgbt']
+          },
+          {
+            id: 'eventosTematicos',
+            label: 'Eventos temáticos',
+            type: 'textarea',
+            required: true,
+            rows: 3,
+            placeholder: 'Ej. Noche lifestyle viernes · Fiesta temática sábado',
+            onlySubcategorias: ['club_sw']
+          },
+          {
+            id: 'politicaParejasSingles',
+            label: 'Política parejas / singles',
+            type: 'textarea',
+            required: true,
+            rows: 3,
+            placeholder: 'Ej. Parejas y singles bienvenidos con previa reservación',
+            onlySubcategorias: ['club_sw']
           },
           {
             id: 'dressCode',
@@ -111,7 +176,16 @@
             label: 'Áreas del local',
             type: 'checklist',
             required: true,
-            options: AREAS_VENUE.slice()
+            options: AREAS_VENUE.slice(),
+            onlySubcategorias: ['antro', 'antro_lgbt']
+          },
+          {
+            id: 'areasVenue',
+            label: 'Áreas del local',
+            type: 'checklist',
+            required: true,
+            options: AREAS_CLUB_SW.slice(),
+            onlySubcategorias: ['club_sw']
           },
           {
             id: 'reservaciones',
@@ -153,7 +227,16 @@
             label: 'Reglas de acceso',
             type: 'checklist',
             required: true,
-            options: REGLAS_ACESO_OPTS.slice()
+            options: REGLAS_ACESO_OPTS.slice(),
+            onlySubcategorias: ['antro', 'antro_lgbt']
+          },
+          {
+            id: 'reglasAcceso',
+            label: 'Reglas de acceso',
+            type: 'checklist',
+            required: true,
+            options: REGLAS_CLUB_SW.slice(),
+            onlySubcategorias: ['club_sw']
           },
           {
             id: 'horarioDetalle',
@@ -222,6 +305,13 @@
             type: 'text',
             required: false,
             placeholder: 'Número o folio de licencia'
+          },
+          {
+            id: 'documentos',
+            label: 'Documentos (referencia interna)',
+            type: 'text',
+            required: false,
+            placeholder: 'Folio o nota de documentación cargada'
           },
           {
             id: 'notasInternas',
