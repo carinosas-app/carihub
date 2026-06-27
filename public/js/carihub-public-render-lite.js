@@ -405,6 +405,51 @@
     return id === 'stripper' || id === 'tabledance';
   }
 
+  function normCreadorSubId(u) {
+    var id = String((u && u.subcategoriaId) || '').trim().toLowerCase().replace(/_/g, ' ');
+    if (id === 'contenido' || id === 'creador contenido') return 'contenido';
+    if (u && u.arquetipo === 'persona_creador') return 'contenido';
+    return id;
+  }
+
+  function isCreadorPerfil(u) {
+    if (!u) return false;
+    if (u.arquetipo === 'persona_creador') return true;
+    if (u.creadorPerfil) return true;
+    return normCreadorSubId(u) === 'contenido';
+  }
+
+  function creadorContentChips(u, opts) {
+    opts = opts || {};
+    var mods = '';
+    var plats = Array.isArray(u.plataformas) ? u.plataformas : [];
+    if (plats.length && opts.plataformas !== false) {
+      var platTxt = plats[0];
+      if (platTxt.length > 26) platTxt = platTxt.slice(0, 24) + '…';
+      mods += '<span class="modchip mc-pink">' + svgIco('briefcase') + safeTxt(platTxt) + '</span>';
+    }
+    var tipos = u.tiposContenido;
+    if (typeof tipos === 'string' && tipos.trim()) {
+      var tipoTxt = tipos.split(' · ')[0];
+      if (tipoTxt.length > 26) tipoTxt = tipoTxt.slice(0, 24) + '…';
+      mods += '<span class="modchip mc-purple">' + svgIco('heart') + safeTxt(tipoTxt) + '</span>';
+    } else if (Array.isArray(tipos) && tipos.length) {
+      var t0 = tipos[0];
+      if (t0.length > 26) t0 = t0.slice(0, 24) + '…';
+      mods += '<span class="modchip mc-purple">' + svgIco('heart') + safeTxt(t0) + '</span>';
+    } else if (u.tipoServicio) {
+      var svcTxt = String(u.tipoServicio).split(' · ')[0];
+      if (svcTxt.length > 26) svcTxt = svcTxt.slice(0, 24) + '…';
+      mods += '<span class="modchip mc-purple">' + svgIco('heart') + safeTxt(svcTxt) + '</span>';
+    }
+    if (opts.horario && (u.horarioDetalle || u.horario || u.tiempoMinimo)) {
+      var h = String(u.horarioDetalle || u.horario || u.tiempoMinimo);
+      if (h.length > 28) h = h.slice(0, 26) + '…';
+      mods += '<span class="modchip mc-purple">' + svgIco('clock') + safeTxt(h) + '</span>';
+    }
+    return mods;
+  }
+
   function espectaculoShowChips(u, opts) {
     opts = opts || {};
     var mods = '';
@@ -475,6 +520,26 @@
   function cardHTMLEspectaculo(u, Q) {
     if (isTableDancePerfil(u)) return cardHTMLTableDance(u, Q);
     return cardHTMLStripper(u, Q);
+  }
+
+  function cardHTMLCreador(u, Q) {
+    Q = Q || {};
+    var edad = u.edad != null ? String(u.edad).trim() + ' años' : '';
+    var mods = creadorContentChips(u, { plataformas: true, horario: true });
+    var catLabel = (global.CariHubResultadosDemo && CariHubResultadosDemo.labelCategoria)
+      ? CariHubResultadosDemo.labelCategoria(u.categoriaPublica || u.categoria || Q.categoria || '')
+      : (u.categoriaPublica || u.categoria || Q.categoria || 'Creadora de contenido');
+    return cardShell(u, Q, {
+      cardClass: 'res-card--adult res-card--creador',
+      headExtra: edad ? '<span class="age">' + safeTxt(edad) + '</span>' : '',
+      metaRight: mods,
+      descBlock: descripcionCompactHTML(u),
+      priceLabel: 'Suscripción desde',
+      catLabel: catLabel,
+      badges: badgesCompactHTML(u, {
+        respRapida: !u.__previewRegistro && u.respuestaRapida === true
+      })
+    });
   }
 
   function cardShell(u, Q, opts) {
@@ -707,6 +772,7 @@
     if (comp === 'ResultCardServicio') return cardHTMLServicio(u, Q);
     if (comp === 'ResultCardPareja') return cardHTMLPareja(u, Q);
     if (comp === 'ResultCardEspectaculo' || isEspectaculoPerfil(u)) return cardHTMLEspectaculo(u, Q);
+    if (comp === 'ResultCardCreador' || isCreadorPerfil(u)) return cardHTMLCreador(u, Q);
     if (isDominatrixPerfil(u)) return cardHTMLDominatrix(u, Q);
     return cardHTMLAdultos(u, Q);
   }
@@ -803,10 +869,12 @@
     cardHTMLAdultos: cardHTMLAdultos,
     cardHTMLDominatrix: cardHTMLDominatrix,
     cardHTMLEspectaculo: cardHTMLEspectaculo,
+    cardHTMLCreador: cardHTMLCreador,
     cardHTMLStripper: cardHTMLStripper,
     cardHTMLTableDance: cardHTMLTableDance,
     isDominatrixPerfil: isDominatrixPerfil,
     isEspectaculoPerfil: isEspectaculoPerfil,
+    isCreadorPerfil: isCreadorPerfil,
     isStripperPerfil: isStripperPerfil,
     isTableDancePerfil: isTableDancePerfil,
     cardHTMLNegocio: cardHTMLNegocio,

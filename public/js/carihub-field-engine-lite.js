@@ -636,6 +636,7 @@
       }
       return 'stripper';
     }
+    if (comp === 'ResultCardCreador' || comp === 'ProfileLayoutCreador') return 'creador';
     if (comp === 'ResultCardUnicorn') return 'unicorn';
     return 'adult';
   }

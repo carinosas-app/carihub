@@ -5650,14 +5650,18 @@ DEMO.cabinas={
 };
 /* Creadora de contenido */
 DEMO.creador={
-  subcategoriaId:"creador_contenido", categoria:"Creadora", categoriaPublica:"Creadora de contenido",
-  arquetipo:"persona_creador", tipoPerfil:"persona",
+  subcategoriaId:"contenido", categoria:"Creadora", categoriaPublica:"Creadora de contenido",
+  arquetipo:"persona_creador", tipoPerfil:"creador",
   nombre:"Luna X.", edad:26, verificada:true,
   pais:"México", estado:"Nuevo León", ciudad:"Monterrey", zona:"Servicio digital",
   tagline:"Contenido exclusivo, suscripciones y lives privados. Verificada.",
-  precio:"299", moneda:"MXN", tiempoMinimo:"Suscripción mensual",
+  precio:"$299 MXN / mes", precioSuscripcion:"$299 MXN / mes", moneda:"MXN", tiempoMinimo:"Suscripción mensual",
+  tiposContenido:["Fotos exclusivas","Videos","Lives privados","Suscripción mensual"],
+  plataformas:["OnlyFans","Telegram VIP"],
+  tipoServicio:"Fotos exclusivas · Videos · Lives privados · Suscripción mensual",
   metodosPago:["Pago en línea","Transferencia"],
-  modalidades:["recibe"], disponibilidad:"Consultar horario",
+  horarioDetalle:"Publico diario · lives semanales",
+  disponibilidad:"Consultar horario",
   respuesta:"Responde en menos de 1 hora", nivelActividad:"Muy activa", miembroDesde:"Febrero 2023",
   sobreMi:"Creadora de contenido adulto verificada. Publico diario, lives semanales y contenido personalizado bajo pedido. Discreción y respeto siempre.",
   estatura:"1.66 m", peso:"52 kg", complexion:"Delgada", cabello:"Rubio", ojos:"Verdes", tatuajes:"Sí", piercings:"No",
@@ -6779,7 +6783,7 @@ function resolverVistaPerfil(u,q){
 function normalizarVistaPreview(vista){
   var v=String(vista||"").trim();
   if(!v) return "";
-  var alias={escort:"adult",acompanante:"adult",adulto:"adult",edecan:"edecan",modelos:"modelos",dotados:"dotados",femboy:"femboy",singles:"singles",dominatrix:"dominatrix",fetiche:"fetiche",sado:"sado",stripper:"stripper",tabledance:"tableDance",table_dance:"tableDance","table dance":"tableDance"};
+  var alias={escort:"adult",acompanante:"adult",adulto:"adult",edecan:"edecan",modelos:"modelos",dotados:"dotados",femboy:"femboy",singles:"singles",dominatrix:"dominatrix",fetiche:"fetiche",sado:"sado",stripper:"stripper",tabledance:"tableDance",table_dance:"tableDance","table dance":"tableDance",contenido:"creador",creador_contenido:"creador","creador contenido":"creador"};
   return alias[v.toLowerCase()]||v;
 }
 function resolverPerfilDesdeQuery(q){
@@ -6907,6 +6911,15 @@ function aplicarPerfilDesdeRegistro(vista,u){
     tipoServicio:u.tipoServicio||u.tipoShow||"",
     sobreNosotros:u.sobreNosotros||u.sobreMi||"",
     espectaculoPerfil:u.espectaculoPerfil?Object.assign({},u.espectaculoPerfil):null,
+    tiposContenido:Array.isArray(u.tiposContenido)?u.tiposContenido.slice():(u.tiposContenido||""),
+    plataformas:Array.isArray(u.plataformas)?u.plataformas.slice():[],
+    precioSuscripcion:u.precioSuscripcion||u.precioDesde||u.precio||"",
+    redesSociales:u.redesSociales||"",
+    contenidoPersonalizado:u.contenidoPersonalizado||"",
+    paquetesContenido:Array.isArray(u.paquetesContenido)?u.paquetesContenido.slice():[],
+    colaboracionesCreador:u.colaboracionesCreador||"",
+    politicaPerfil:u.politicaPerfil||"",
+    creadorPerfil:u.creadorPerfil?Object.assign({},u.creadorPerfil):null,
     estiloDominacion:u.estiloDominacion||"",
     especialidadBdsm:u.especialidadBdsm||"",
     experienciaBdsm:u.experienciaBdsm||"",
@@ -6956,6 +6969,7 @@ function aplicarPerfilDesdeRegistro(vista,u){
   var sidNorm=String(clean.subcategoriaId||"").trim().toLowerCase().replace(/_/g," ");
   if(sidNorm==="table dance"||sidNorm==="table_dance"||sidNorm==="tabledance") clean.subcategoriaId="tabledance";
   if(sidNorm==="stripper") clean.subcategoriaId="stripper";
+  if(sidNorm==="contenido"||sidNorm==="creador contenido"||sidNorm==="creador_contenido") clean.subcategoriaId="contenido";
   if(u.arquetipo) clean.arquetipo=u.arquetipo;
   if(u.tipoPerfil) clean.tipoPerfil=u.tipoPerfil;
   DEMO[vista]=clean;
