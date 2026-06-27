@@ -695,6 +695,69 @@
     });
   }
 
+  function normRetailSubId(u) {
+    var id = String((u && u.subcategoriaId) || '').trim().toLowerCase().replace(/_/g, ' ');
+    if (id === 'sex shop') return 'sex_shop';
+    if (u && u.arquetipo === 'negocio_retail') return 'sex_shop';
+    return id;
+  }
+
+  function isRetailPerfil(u) {
+    if (!u) return false;
+    if (u.arquetipo === 'negocio_retail') return true;
+    if (u.retailPerfil) return true;
+    return normRetailSubId(u) === 'sex_shop';
+  }
+
+  function isSexShopPerfil(u) {
+    return isRetailPerfil(u) && normRetailSubId(u) === 'sex_shop';
+  }
+
+  function retailShowChips(u, opts) {
+    opts = opts || {};
+    var mods = '';
+    var cats = String(u.categoriasProducto || '').trim();
+    if (cats) {
+      var catTxt = cats.split(',')[0].trim();
+      if (catTxt.length > 26) catTxt = catTxt.slice(0, 24) + '…';
+      mods += '<span class="modchip mc-pink">' + svgIco('briefcase') + safeTxt(catTxt) + '</span>';
+    }
+    if (u.envioDomicilio === true || String(u.envioDomicilio || '').toLowerCase() === 'true') {
+      mods += '<span class="modchip mc-purple">' + svgIco('car') + 'Envío</span>';
+    }
+    if (u.tiendaOnline === true || String(u.tiendaOnline || '').toLowerCase() === 'true') {
+      mods += '<span class="modchip mc-purple">' + svgIco('briefcase') + 'En línea</span>';
+    }
+    if (opts.horario && (u.horarioDetalle || u.horario)) {
+      var h = String(u.horarioDetalle || u.horario);
+      if (h.length > 28) h = h.slice(0, 26) + '…';
+      mods += '<span class="modchip mc-purple">' + svgIco('clock') + safeTxt(h) + '</span>';
+    }
+    return mods;
+  }
+
+  function cardHTMLRetail(u, Q) {
+    Q = Q || {};
+    var mods = retailShowChips(u, { horario: true });
+    var catLabel = (global.CariHubResultadosDemo && CariHubResultadosDemo.labelCategoria)
+      ? CariHubResultadosDemo.labelCategoria(u.categoriaPublica || u.categoria || Q.categoria || '')
+      : (u.categoriaPublica || u.categoria || Q.categoria || 'Sex Shop');
+    return cardShell(u, Q, {
+      cardClass: 'res-card--negocio res-card--retail res-card--sexshop',
+      nombre: u.nombreComercial || u.nombre || u.alias,
+      catIcon: 'briefcase',
+      catLabel: catLabel,
+      metaRight: mods,
+      descBlock: descripcionCompactHTML(u, 'Descripción'),
+      priceLabel: 'Desde',
+      badges: badgesCompactHTML(u, { negocio: u.verificada !== false })
+    });
+  }
+
+  function cardHTMLSexShop(u, Q) {
+    return cardHTMLRetail(u, Q);
+  }
+
   function cardHTMLServicio(u, Q) {
     Q = Q || {};
     var cobertura = String(u.zonaCobertura || u.zona || u.serviciosPrincipales || 'A domicilio').trim();
@@ -767,12 +830,13 @@
     var comp = resolveComponente(u, Q);
     if (comp === 'ResultCardUnicorn' || isUnicornPerfil(u)) return cardHTMLUnicorn(u, Q);
     if (isCuckoldHotwifePerfil(u)) return cardHTMLCuckoldHotwife(u, Q);
-    if (comp === 'ResultCardNegocio') return cardHTMLNegocio(u, Q);
     if (comp === 'ResultCardProfesional') return cardHTMLProfesional(u, Q);
     if (comp === 'ResultCardServicio') return cardHTMLServicio(u, Q);
     if (comp === 'ResultCardPareja') return cardHTMLPareja(u, Q);
     if (comp === 'ResultCardEspectaculo' || isEspectaculoPerfil(u)) return cardHTMLEspectaculo(u, Q);
     if (comp === 'ResultCardCreador' || isCreadorPerfil(u)) return cardHTMLCreador(u, Q);
+    if (comp === 'ResultCardNegocio' && isRetailPerfil(u)) return cardHTMLRetail(u, Q);
+    if (comp === 'ResultCardNegocio') return cardHTMLNegocio(u, Q);
     if (isDominatrixPerfil(u)) return cardHTMLDominatrix(u, Q);
     return cardHTMLAdultos(u, Q);
   }
@@ -878,6 +942,10 @@
     isStripperPerfil: isStripperPerfil,
     isTableDancePerfil: isTableDancePerfil,
     cardHTMLNegocio: cardHTMLNegocio,
+    cardHTMLRetail: cardHTMLRetail,
+    cardHTMLSexShop: cardHTMLSexShop,
+    isRetailPerfil: isRetailPerfil,
+    isSexShopPerfil: isSexShopPerfil,
     cardHTMLServicio: cardHTMLServicio,
     cardHTMLProfesional: cardHTMLProfesional,
     cardHTMLPareja: cardHTMLPareja,

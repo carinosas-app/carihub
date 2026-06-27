@@ -603,9 +603,11 @@
       return 'adult';
     }
     if (comp === 'ResultCardNegocio' || comp === 'ProfileLayoutNegocio') {
-      if (subId === 'sex shop') return 'sexShop';
-      if (subId === 'masajes') return 'masajesLocal';
-      if (subId === 'spa') return 'negocio';
+      var retId = String(subId || '').trim().toLowerCase().replace(/_/g, ' ');
+      if (retId === 'sex shop' || retId === 'sex_shop') return 'sexShop';
+      if (row && row.arquetipo === 'negocio_retail') return 'sexShop';
+      if (retId === 'masajes') return 'masajesLocal';
+      if (retId === 'spa') return 'negocio';
       return 'negocio';
     }
     if (comp === 'ResultCardProfesional' || comp === 'ProfileLayoutProfesional') {
