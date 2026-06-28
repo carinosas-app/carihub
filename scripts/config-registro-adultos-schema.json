@@ -120,7 +120,15 @@
       "mayorEdadConfirmado": { "id": "mayorEdadConfirmado", "label": "Mayor de edad confirmado", "tipo": "boolean", "privado": true },
       "realizaTrios": { "id": "realizaTrios", "label": "¿Realizas tríos?", "tipo": "select", "opciones": ["Sí", "No", "A convenir"] },
       "colaboracionContenido": { "id": "colaboracionContenido", "label": "Colaboración para contenido", "tipo": "select", "opciones": ["Sí", "No", "A convenir"] },
-      "esBisexual": { "id": "esBisexual", "label": "¿Eres bisexual?", "tipo": "select", "opciones": ["Sí", "No"] },
+      "esBisexual": { "id": "esBisexual", "label": "¿Eres bisexual?", "tipo": "select", "opciones": ["Sí", "No"], "notaPublica": "Legacy — retirado del formulario v3; lectura histórica." },
+      "rolInteraccion": { "id": "rolInteraccion", "label": "Rol / preferencia de interacción", "tipo": "select" },
+      "tiposEvento": { "id": "tiposEvento", "label": "Tipos de evento", "tipo": "checklist", "iaCopy": true },
+      "tiposModelaje": { "id": "tiposModelaje", "label": "Tipos de modelaje", "tipo": "checklist", "iaCopy": true },
+      "experienciaProfesional": { "id": "experienciaProfesional", "label": "Experiencia profesional", "tipo": "select" },
+      "serviciosProfesionales": { "id": "serviciosProfesionales", "label": "Servicios profesionales", "tipo": "checklist", "iaCopy": true },
+      "restriccionesProfesionales": { "id": "restriccionesProfesionales", "label": "Restricciones profesionales", "tipo": "checklist", "iaCopy": true },
+      "edecanPerfil": { "id": "edecanPerfil", "label": "Perfil edecán", "tipo": "object", "notaPublica": "Contrato anidado MP-REGISTRO-SUBCATEGORIA-V3." },
+      "modelosPerfil": { "id": "modelosPerfil", "label": "Perfil modelaje", "tipo": "object", "notaPublica": "Contrato anidado MP-REGISTRO-SUBCATEGORIA-V3." },
       "tiposTrios": { "id": "tiposTrios", "label": "Tipo de trío", "tipo": "checklist" },
       "experienciaVip": { "id": "experienciaVip", "label": "Experiencia VIP que ofreces", "tipo": "checklist", "iaCopy": true },
       "distintivosVip": { "id": "distintivosVip", "label": "Distintivos y compromisos VIP", "tipo": "checklist", "iaCopy": true },
@@ -335,10 +343,10 @@
       "tipoPerfil": "espectaculo",
       "componentes": { "resultados": "ResultCardEspectaculo", "perfil": "ProfileLayoutEspectaculo" },
       "camposPublicosResultados": ["tipoShow", "precioShow", "horarioMinimo", "venueFijo", "disponibilidad", "modalidades", "geo"],
-      "camposPublicosPerfil": ["tipoShow", "precioShow", "horarioMinimo", "horarioDetalle", "venueFijo", "modalidades", "desplazamientos", "serviciosIncluidos", "serviciosNoRealizo", "anosExperiencia", "vestuarioShow", "requisitosLugar", "eventosDisponibles", "metodosPago", "disponibilidad", "sobreMi"],
+      "camposPublicosPerfil": ["tipoShow", "precioShow", "horarioMinimo", "horarioDetalle", "venueFijo", "modalidades", "viajesDesplazamiento", "serviciosIncluidos", "serviciosNoRealizo", "anosExperiencia", "vestuarioShow", "requisitosLugar", "eventosDisponibles", "metodosPago", "disponibilidad", "sobreMi"],
       "camposPrivados": ["telefonoContacto", "ineFrente", "selfieVerificacion"],
       "obligatoriosExtra": ["tipoShow", "precioShow", "horarioMinimo", "horarioDetalle", "modalidades", "serviciosIncluidos", "serviciosNoRealizo", "metodosPago"],
-      "opcionalesExtra": ["venueFijo", "desplazamientos", "anosExperiencia", "vestuarioShow", "requisitosLugar", "eventosDisponibles"],
+      "opcionalesExtra": ["venueFijo", "anosExperiencia", "vestuarioShow", "requisitosLugar", "eventosDisponibles", "viajesDesplazamiento"],
       "fotosMin": 4,
       "verificacionTipo": "persona_estandar",
       "keywordsIA": ["stripper", "table dance", "show", "baile", "espectáculo"]
@@ -424,11 +432,10 @@
       "tipoPerfil": "persona",
       "heredaDe": "plantillasArquetipo.persona_acompanante",
       "delta": {
-        "camposPublicosPerfil": ["realizaTrios", "colaboracionContenido", "esBisexual"],
+        "camposPublicosPerfil": ["realizaTrios", "colaboracionContenido"],
         "textosAyuda": {
           "realizaTrios": "Indica si ofreces tríos en tu servicio.",
-          "colaboracionContenido": "Si colaboras en contenido para redes o plataformas.",
-          "esBisexual": "Aparece en tu ficha para quien te contacte."
+          "colaboracionContenido": "Si colaboras en contenido para redes o plataformas."
         }
       },
       "coherenciaExtra": [{ "id": "ESCORT_MODALIDAD", "requiere": ["modalidades", "precioDesde"], "severidad": "error" }]
@@ -440,12 +447,15 @@
       "tipoPerfil": "persona",
       "heredaDe": "plantillasArquetipo.persona_acompanante",
       "delta": {
-        "camposPublicosPerfil": ["orientacion"],
+        "camposPublicosPerfil": ["orientacion", "rolInteraccion"],
         "obligatoriosExtra": ["orientacion"],
         "badges": ["lgbt"]
       },
-      "keywordsIA": ["escort gay", "hombre", "lgbt", "gay"],
-      "textosAyuda": { "orientacion": "Indica orientación y tipo de clientela." }
+      "keywordsIA": ["escort gay", "cariñosas gay", "hombre", "lgbt", "gay"],
+      "textosAyuda": {
+        "orientacion": "Tu orientación sexual.",
+        "rolInteraccion": "Tu rol o preferencia de interacción (opcional)."
+      }
     },
     {
       "subcategoriaId": "escort_vip",
@@ -457,7 +467,7 @@
         "camposPublicosResultados": ["nivelPremium"],
         "camposPublicosPerfil": [
           "nivelPremium", "experienciaVip", "distintivosVip",
-          "realizaTrios", "colaboracionContenido", "esBisexual"
+          "realizaTrios", "colaboracionContenido"
         ],
         "obligatoriosExtra": ["nivelPremium"],
         "fotosMin": 5,
@@ -478,8 +488,15 @@
       "tipoPerfil": "persona",
       "heredaDe": "plantillasArquetipo.persona_acompanante",
       "delta": {
-        "camposPublicosPerfil": ["eventosDisponibles"],
-        "obligatoriosExtra": ["eventosDisponibles"]
+        "camposPublicosPerfil": [
+          "eventosDisponibles", "tiposEvento", "experienciaProfesional",
+          "serviciosProfesionales", "restriccionesProfesionales", "edecanPerfil", "modalidades", "viajesDesplazamiento"
+        ],
+        "obligatoriosExtra": [
+          "eventosDisponibles", "tiposEvento", "experienciaProfesional",
+          "serviciosProfesionales", "restriccionesProfesionales", "modalidades"
+        ],
+        "obligatoriosRemove": ["serviciosIncluidos", "serviciosNoRealizo", "nivelServicio", "orientacion"]
       },
       "keywordsIA": ["edecán", "eventos", "expos", "congresos", "modelo evento"]
     },
@@ -490,8 +507,9 @@
       "tipoPerfil": "espectaculo",
       "heredaDe": "plantillasArquetipo.persona_espectaculo",
       "delta": {
-        "camposPublicosPerfil": ["modalidades", "desplazamientos", "anosExperiencia"],
-        "obligatoriosExtra": ["modalidades", "desplazamientos", "anosExperiencia"],
+        "camposPublicosPerfil": ["modalidades", "viajesDesplazamiento", "anosExperiencia"],
+        "obligatoriosExtra": ["modalidades", "anosExperiencia"],
+        "obligatoriosRemove": ["desplazamientos"],
         "coherenciaExtra": [{ "id": "STRIPPER_SHOW", "requiere": ["tipoShow", "precioShow", "horarioMinimo"], "severidad": "error" }]
       },
       "keywordsIA": ["stripper", "baile", "show privado", "despedida"]
@@ -503,8 +521,15 @@
       "tipoPerfil": "persona",
       "heredaDe": "plantillasArquetipo.persona_acompanante",
       "delta": {
-        "camposPublicosPerfil": ["portfolioURL"],
-        "obligatoriosExtra": ["portfolioURL"],
+        "camposPublicosPerfil": [
+          "portfolioURL", "tiposModelaje", "experienciaProfesional",
+          "serviciosProfesionales", "restriccionesProfesionales", "modelosPerfil", "modalidades", "viajesDesplazamiento"
+        ],
+        "obligatoriosExtra": [
+          "portfolioURL", "tiposModelaje", "experienciaProfesional",
+          "serviciosProfesionales", "restriccionesProfesionales", "modalidades"
+        ],
+        "obligatoriosRemove": ["serviciosIncluidos", "serviciosNoRealizo", "nivelServicio", "orientacion"],
         "fotosMin": 6
       },
       "keywordsIA": ["modelo", "sesión fotos", "portafolio", "book"]
@@ -524,7 +549,11 @@
       "arquetipo": "persona_acompanante",
       "tipoPerfil": "persona",
       "heredaDe": "plantillasArquetipo.persona_acompanante",
-      "delta": {}
+      "delta": {
+        "registroOculto": true,
+        "lecturaAliasSubcategoriaId": "escort",
+        "nota": "Deprecación suave v3 — oculto en registro; alias lectura → Cariñosas (escort)."
+      }
     },
     {
       "subcategoriaId": "petit",

@@ -201,6 +201,14 @@
       });
     }
 
+    if (global.CariHubSubcategoriaLabels && CariHubSubcategoriaLabels.resolveVisibleCategoria) {
+      var visibleCat = CariHubSubcategoriaLabels.resolveVisibleCategoria(subName || catName, subId);
+      if (visibleCat) {
+        u.categoria = visibleCat;
+        u.categoriaPublica = visibleCat;
+      }
+    }
+
     var vistaPerfil = (pres && pres.vistaPerfil) || 'adult';
     if (global.CariHubRegistroPublicBlocks &&
       CariHubRegistroPublicBlocks.isUnicornSubcategoria &&

@@ -18,8 +18,8 @@
 
   /** Saltos de línea óptimos para la cuadrícula de 6 tarjetas en Home */
   var CAT_GRID_LINES = {
-    'escort gay': ['Escort', 'Gay'],
-    'escort vip': ['Escort', 'VIP'],
+    'escort gay': ['Cariñosas', 'gay'],
+    'escort vip': ['Cariñosas', 'VIP'],
     'antro restaurant bar': ['Antros', 'y bares'],
     'antro restaurant bar lgbt': ['Antro', 'LGBT'],
     'hotel motel': ['Hotel', 'y Motel'],
@@ -165,9 +165,9 @@
       photo: 'img/home/cat-cards/escort.png',
       photoPos: 'center center',
       icon: '💃',
-      titleLines: ['Escort']
+      titleLines: ['Cariñosas']
     },
-    'escort gay': { template: 'neon', accent: '#9b5de5', accent2: '#00bbf9', photo: 'img/home/hero-escort-gay.png', icon: '🏳️‍🌈', titleLines: ['Escort', 'Gay'] },
+    'escort gay': { template: 'neon', accent: '#9b5de5', accent2: '#00bbf9', photo: 'img/home/hero-escort-gay.png', icon: '🏳️‍🌈', titleLines: ['Cariñosas', 'gay'] },
     'escort vip': { template: 'pulse', accent: '#ffd700', accent2: '#ff8c00', photo: 'img/home/hero-carinosa-motel-spa-runway.png', icon: '👑' },
     'edecan': { template: 'sunset', accent: '#ff6b9d', photo: 'img/home/hero-carinosa-motel-spa-runway.png', icon: '✨' },
     'stripper': {

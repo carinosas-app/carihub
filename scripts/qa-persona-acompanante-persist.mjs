@@ -83,6 +83,8 @@ function simulateBloques(vmCtx, values, ctx) {
   out = RP.finalizeUnicornValues(out, ctx);
   out = RP.finalizeCuckoldHotwifeValues(out, ctx);
   out = RP.finalizeParejaGrupoValues(out);
+  out = RP.finalizeEdecanValues(out, ctx);
+  out = RP.finalizeModelosValues(out, ctx);
   if (String(out.haceColaboraciones || '').trim() === 'No') delete out.colaboraCon;
   out.viajesDesplazamiento = V.buildViajesDesplazamiento(out, out.modalidades || []);
   if (!out.viajesDesplazamiento.viaja) {
@@ -147,7 +149,7 @@ const CASES = [
     key: 'escort',
     ctx: escortCtx('escort'),
     alias: 'Escort QA',
-    delta: { realizaTrios: 'Sí', colaboracionContenido: 'No', esBisexual: 'No' },
+    delta: { realizaTrios: 'Sí', colaboracionContenido: 'No' },
     expect: (doc) => {
       ok('escort realizaTrios', doc.realizaTrios === 'Sí', doc.realizaTrios);
       ok('escort modalidades', Array.isArray(doc.modalidades) && doc.modalidades.includes('recibe'), JSON.stringify(doc.modalidades));
@@ -172,9 +174,10 @@ const CASES = [
     key: 'escort_gay',
     ctx: escortCtx('escort gay', 'Escort Gay'),
     alias: 'Gay QA',
-    delta: { orientacion: 'Gay' },
+    delta: { orientacion: 'Gay', rolInteraccion: 'Versátil' },
     expect: (doc) => {
       ok('gay orientacion', doc.orientacion === 'Gay', doc.orientacion);
+      ok('gay rolInteraccion', doc.rolInteraccion === 'Versátil', doc.rolInteraccion);
       ok('gay badgeLgbt', doc.badgeLgbt === true, String(doc.badgeLgbt));
     },
   },
@@ -182,15 +185,36 @@ const CASES = [
     key: 'edecan',
     ctx: escortCtx('edecan'),
     alias: 'Edecan QA',
-    delta: { eventosDisponibles: true },
-    expect: (doc) => ok('edecan eventosDisponibles', doc.eventosDisponibles === true, String(doc.eventosDisponibles)),
+    delta: {
+      eventosDisponibles: true,
+      modalidades: ['evento_venue'],
+      tiposEvento: ['Evento corporativo'],
+      experienciaProfesional: 'Intermedia',
+      serviciosProfesionales: ['Atención a invitados'],
+      restriccionesProfesionales: ['Servicios íntimos'],
+    },
+    expect: (doc) => {
+      ok('edecan eventosDisponibles', doc.eventosDisponibles === true, String(doc.eventosDisponibles));
+      ok('edecan serviciosIncluidos pro', Array.isArray(doc.serviciosIncluidos) && doc.serviciosIncluidos[0] === 'Atención a invitados', JSON.stringify(doc.serviciosIncluidos));
+      ok('edecan edecanPerfil', doc.edecanPerfil && Array.isArray(doc.edecanPerfil.tiposEvento), JSON.stringify(doc.edecanPerfil));
+    },
   },
   {
     key: 'modelos',
     ctx: escortCtx('modelos'),
     alias: 'Modelo QA',
-    delta: { portfolioURL: 'https://example.com/portfolio' },
-    expect: (doc) => ok('modelos portfolioURL', doc.portfolioURL === 'https://example.com/portfolio', doc.portfolioURL),
+    delta: {
+      portfolioURL: 'https://example.com/portfolio',
+      modalidades: ['estudio'],
+      tiposModelaje: ['Fotografía'],
+      experienciaProfesional: 'Intermedia',
+      serviciosProfesionales: ['Sesión fotográfica'],
+      restriccionesProfesionales: ['Contenido explícito'],
+    },
+    expect: (doc) => {
+      ok('modelos portfolioURL', doc.portfolioURL === 'https://example.com/portfolio', doc.portfolioURL);
+      ok('modelos modelosPerfil', doc.modelosPerfil && Array.isArray(doc.modelosPerfil.tiposModelaje), JSON.stringify(doc.modelosPerfil));
+    },
   },
   {
     key: 'gigolo',

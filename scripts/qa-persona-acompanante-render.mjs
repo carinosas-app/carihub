@@ -112,11 +112,23 @@ function fichaDotadosRows(u) {
 }
 
 function fichaEdecanRows(u) {
-  return u.eventosDisponibles ? ['eventos'] : [];
+  const rows = [];
+  if (u.experienciaProfesional) rows.push('experienciaProfesional');
+  if (Array.isArray(u.tiposEvento) && u.tiposEvento.length) rows.push('tiposEvento');
+  if (Array.isArray(u.serviciosIncluidos) && u.serviciosIncluidos.length) rows.push('serviciosProfesionales');
+  if (Array.isArray(u.noRealiza) && u.noRealiza.length) rows.push('restriccionesProfesionales');
+  if (u.eventosDisponibles) rows.push('eventos');
+  return rows;
 }
 
 function fichaModelosRows(u) {
-  return u.portfolioURL ? ['portfolio'] : [];
+  const rows = [];
+  if (u.experienciaProfesional) rows.push('experienciaProfesional');
+  if (Array.isArray(u.tiposModelaje) && u.tiposModelaje.length) rows.push('tiposModelaje');
+  if (Array.isArray(u.serviciosIncluidos) && u.serviciosIncluidos.length) rows.push('serviciosProfesionales');
+  if (Array.isArray(u.noRealiza) && u.noRealiza.length) rows.push('restriccionesProfesionales');
+  if (u.portfolioURL) rows.push('portfolio');
+  return rows;
 }
 
 function fichaTransRows(u) {
@@ -164,10 +176,15 @@ try {
   const demoEdecan = extractDemoObject(perfilHtml, 'edecan');
   ok('H6 DEMO edecan presente', demoEdecan.includes('subcategoriaId:"edecan"'), 'edecan');
   ok('H6 DEMO edecan eventosDisponibles', /eventosDisponibles\s*:\s*true/.test(demoEdecan), demoEdecan.slice(0, 120));
+  ok('H6 DEMO edecan tiposEvento v3', demoEdecan.includes('tiposEvento:') && demoEdecan.includes('Coctel corporativo'), 'tiposEvento');
+  ok('H6 DEMO edecan experienciaProfesional v3', demoEdecan.includes('experienciaProfesional:'), 'experienciaProfesional');
+  ok('H6 DEMO edecan edecanPerfil nested', demoEdecan.includes('edecanPerfil:'), 'nested');
 
   const demoModelos = extractDemoObject(perfilHtml, 'modelos');
   ok('H6 DEMO modelos presente', demoModelos.includes('subcategoriaId:"modelos"'), 'modelos');
   ok('H6 DEMO modelos portfolioURL', demoModelos.includes('portfolioURL:') && demoModelos.includes('https://'), demoModelos.match(/portfolioURL:"[^"]+"/)?.[0]);
+  ok('H6 DEMO modelos tiposModelaje v3', demoModelos.includes('tiposModelaje:') && demoModelos.includes('Editorial'), 'tiposModelaje');
+  ok('H6 DEMO modelos modelosPerfil nested', demoModelos.includes('modelosPerfil:'), 'nested');
 
   const demoDotados = extractDemoObject(perfilHtml, 'dotados');
   ok('H6 DEMO dotados presente', demoDotados.includes('subcategoriaId:"dotados"'), 'dotados');
@@ -359,9 +376,23 @@ try {
   }).includes('colaboraciones'), 'off');
 
   ok('ficha edecan eventos visibles', fichaEdecanRows({ eventosDisponibles: true }).join(',') === 'eventos', 'eventos');
+  ok('ficha edecan v3 campos', fichaEdecanRows({
+    experienciaProfesional: '5+ años',
+    tiposEvento: ['Coctel corporativo'],
+    serviciosIncluidos: ['Acompañamiento en evento'],
+    noRealiza: ['Menores de edad'],
+    eventosDisponibles: true,
+  }).join(',') === 'experienciaProfesional,tiposEvento,serviciosProfesionales,restriccionesProfesionales,eventos', 'edecan v3');
   ok('ficha edecan sin eventos', fichaEdecanRows({ eventosDisponibles: false }).length === 0, 'vacío');
 
   ok('ficha modelos portfolio visible', fichaModelosRows({ portfolioURL: 'https://example.com/p' }).join(',') === 'portfolio', 'portfolio');
+  ok('ficha modelos v3 campos', fichaModelosRows({
+    experienciaProfesional: '3+ años',
+    tiposModelaje: ['Editorial'],
+    serviciosIncluidos: ['Sesión fotográfica'],
+    noRealiza: ['Menores'],
+    portfolioURL: 'https://example.com/p',
+  }).join(',') === 'experienciaProfesional,tiposModelaje,serviciosProfesionales,restriccionesProfesionales,portfolio', 'modelos v3');
 
   ok('ficha trans identidadGenero', fichaTransRows({ identidadGenero: 'Mujer trans' }).join(',') === 'identidadGenero', 'identidad');
 

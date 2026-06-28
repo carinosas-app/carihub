@@ -1175,17 +1175,37 @@
     var modal = document.getElementById('chGeoModal');
     if (modal && modal.classList.contains('is-open') && selectorTipo === tipo) return;
     if (tipo === 'estado' && !this.state.pais) {
-      alert('Primero selecciona país.');
+      if (global.CariHubUiNotices && CariHubUiNotices.showInfoModal) {
+        CariHubUiNotices.showInfoModal({
+          title: 'Selecciona un país',
+          message: 'Primero selecciona un país para poder elegir estado.',
+          okLabel: 'Entendido'
+        });
+      }
       return;
     }
     if (tipo === 'ciudad' && (!this.state.pais || !this.state.estado)) {
-      alert('Primero selecciona país y estado.');
+      if (global.CariHubUiNotices && CariHubUiNotices.showInfoModal) {
+        CariHubUiNotices.showInfoModal({
+          title: 'Completa la ubicación',
+          message: this.state.pais
+            ? 'Primero selecciona un estado para poder elegir ciudad.'
+            : 'Primero selecciona un país y un estado para poder elegir ciudad.',
+          okLabel: 'Entendido'
+        });
+      }
       return;
     }
     loadGeoScripts().then(function () {
       openModal(self, tipo);
     }).catch(function () {
-      alert('No se pudo cargar la lista de ubicaciones.');
+      if (global.CariHubUiNotices && CariHubUiNotices.showInfoModal) {
+        CariHubUiNotices.showInfoModal({
+          title: 'Ubicaciones no disponibles',
+          message: 'No se pudo cargar la lista de ubicaciones. Revisa tu conexión e intenta de nuevo.',
+          okLabel: 'Entendido'
+        });
+      }
     });
   };
 

@@ -27,8 +27,20 @@ export function extractFunctionBlock(html, fnName, nextFnName) {
   return html.slice(start, end);
 }
 
+export function extractProfesionalPromoHydrateHelpers(html) {
+  return [
+    extractFunctionBlock(html, 'normSubFicha', 'isLesbiansSubFicha'),
+    extractFunctionBlock(html, 'isEdecanSubFicha', 'isModelosSubFicha'),
+    extractFunctionBlock(html, 'isModelosSubFicha', 'isProfesionalPromoSubFicha'),
+    extractFunctionBlock(html, 'isProfesionalPromoSubFicha', 'hydrateProfesionalPromoFicha'),
+    extractFunctionBlock(html, 'hydrateProfesionalPromoFicha', 'resolveCategoriaVisibleFicha'),
+    extractFunctionBlock(html, 'resolveCategoriaVisibleFicha', 'adultoFichaHTML'),
+  ].join('\n');
+}
+
 export function extractAplicarPerfilDesdeRegistroBlock(html) {
   return [
+    extractProfesionalPromoHydrateHelpers(html),
     extractFunctionBlock(html, 'mergeParejaGrupoRegistroFields', 'parejaPieBottomHTML'),
     extractFunctionBlock(html, 'demoAssetDesdeResultados', 'aplicarPerfilDesdeRegistro'),
     extractFunctionBlock(html, 'aplicarPerfilDesdeRegistro', 'aplicarPerfilResultadosEnDemo'),

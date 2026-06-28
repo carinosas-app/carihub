@@ -55,7 +55,6 @@ function payload(subId) {
     precioShow: '$1,200 MXN por canción',
     horarioMinimo: 'Por canción',
     modalidades: ['fiestas', 'despedidas', 'clubes'],
-    desplazamientos: 'Sí (costo extra según ubicación)',
     anosExperiencia: '5+ años',
     venueFijo: subId === 'tabledance' ? 'Antros zona centro' : 'Monterrey y área metropolitana',
     serviciosIncluidos: ['Shows privados', 'Interacción con el público'],

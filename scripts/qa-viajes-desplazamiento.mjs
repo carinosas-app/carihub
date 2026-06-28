@@ -1,6 +1,6 @@
 /**
  * QA — bloque viajesDesplazamiento (sin browser).
- * H3: loop 18 subs con soporte viajes + regresiones escort/pareja/lifestyle.
+ * H3: loop 19 subs con soporte viajes + regresiones escort/pareja/lifestyle/stripper.
  * node scripts/qa-viajes-desplazamiento.mjs
  */
 import fs from 'fs';
@@ -72,7 +72,9 @@ function mergedLifestyle(vmCtx, userCtx) {
 }
 
 function modalidadesBlock(merged) {
-  return merged.blocks.find((b) => b.id === 'modalidades');
+  return merged.blocks.find((b) => b.id === 'modalidades')
+    || merged.blocks.find((b) => b.id === 'modalidadesEdecan')
+    || merged.blocks.find((b) => b.id === 'modalidadesModelos');
 }
 
 function hasField(merged, fieldId) {
@@ -141,8 +143,8 @@ const ESCORT_VIAJES_SPECS = [
   ['escort', { oblig: ['modalidades'], forbid: [] }],
   ['escort_gay', { oblig: ['orientacion'], forbid: [] }],
   ['escort_vip', { oblig: ['nivelPremium'], fotosMin: 5 }],
-  ['edecan', { oblig: ['eventosDisponibles'], forbid: [] }],
-  ['modelos', { oblig: ['portfolioURL'], fotosMin: 6 }],
+  ['edecan', { oblig: ['eventosDisponibles', 'tiposEvento', 'experienciaProfesional', 'serviciosProfesionales', 'restriccionesProfesionales', 'modalidades'], forbid: ['serviciosIncluidos', 'serviciosNoRealizo'] }],
+  ['modelos', { oblig: ['portfolioURL', 'tiposModelaje', 'experienciaProfesional', 'serviciosProfesionales', 'restriccionesProfesionales', 'modalidades'], fotosMin: 6, forbid: ['serviciosIncluidos', 'serviciosNoRealizo'] }],
   ['gigolo', { oblig: ['modalidades'], forbid: [] }],
   ['acompanante', { oblig: ['modalidades'], forbid: [] }],
   ['trans', { oblig: ['identidadGenero'], forbid: [] }],
@@ -262,9 +264,9 @@ try {
   ok('3e perfil España', V.alcanceLabelPublic('cualquier_ciudad_pais', { pais: 'España' }) === 'Cualquier ciudad de España');
   ok('3f sin Todo México en repo', true, 'grep previo sin matches');
 
-  // --- H3: 18 subs con soporte viajes ---
+  // --- H3: 19 subs con soporte viajes (incl. stripper v3) ---
   const VIAJES_EXPECT = V.VIAJES_SUBCATEGORIAS.slice();
-  ok('H3 VIAJES_SUBCATEGORIAS count 18', VIAJES_EXPECT.length === 18, String(VIAJES_EXPECT.length));
+  ok('H3 VIAJES_SUBCATEGORIAS count 19', VIAJES_EXPECT.length === 19, String(VIAJES_EXPECT.length));
   ok('H3 petit no en lista viajes', !VIAJES_EXPECT.some((id) => String(id).replace(/_/g, ' ') === 'petit'), VIAJES_EXPECT.join(', '));
 
   for (const subId of VIAJES_EXPECT) {
@@ -316,7 +318,8 @@ try {
     ok(`H3 opcion viaja ${pack} ${sub}`, viajaOptionInModalidades(ctx, c, m), sub);
   }
 
-  ok('H3 cobertura viajes 18 subs', VIAJES_EXPECT.length === 14 + PAREJA_LIFESTYLE_VIAJES.length, '14 escort + 4 pareja/lifestyle');
+  ok('H3 cobertura viajes 19 subs', VIAJES_EXPECT.length === ESCORT_VIAJES_SPECS.length + PAREJA_LIFESTYLE_VIAJES.length + 1, '14 escort + 1 stripper + 4 pareja/lifestyle');
+  ok('H3 stripper en lista viajes', VIAJES_EXPECT.includes('stripper'), VIAJES_EXPECT.join(', '));
 
   // --- H3: tarjeta chip Viaja (muestra representativa) ---
   const dotadosOn = simulateCollect(ctx, { ...ON_VIAJES_VALUES, modalidades: ['recibe', 'viaja'] });

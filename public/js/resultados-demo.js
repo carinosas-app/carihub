@@ -65,7 +65,7 @@
       tagline: 'Complaciente y cariñosa, trato de novia.',
       observaciones: ['Complaciente', 'Cariñosa', 'Trato de novia'],
       modalidades: ['recibe', 'hotel', 'domicilio'],
-      categoriaPublica: 'Escort VIP',
+      categoriaPublica: 'Cariñosas VIP',
       verificada: true,
       nueva: true,
       disponibilidad: 'Consultar disponibilidad',
@@ -108,7 +108,7 @@
       tagline: 'Linda, divertida y muy complaciente.',
       observaciones: ['Linda', 'Divertida', 'Complaciente'],
       modalidades: ['recibe', 'hotel', 'domicilio'],
-      categoriaPublica: 'Escort',
+      categoriaPublica: 'Cariñosas',
       verificada: true,
       nueva: false,
       disponibilidad: 'Ocupada',
@@ -132,7 +132,7 @@
     tagline: 'Elegante, discreta y siempre puntual.',
     observaciones: ['Elegante', 'Discreta', 'Puntual'],
     modalidades: ['recibe', 'hotel', 'domicilio'],
-    categoriaPublica: 'Escort VIP',
+    categoriaPublica: 'Cariñosas VIP',
     verificada: true,
     nueva: false,
     disponibilidad: 'Ocupada',
@@ -155,7 +155,7 @@
     tagline: 'Trato de novia y conversación agradable.',
     observaciones: ['Trato de novia', 'Conversación', 'Agradable'],
     modalidades: ['hotel', 'domicilio'],
-    categoriaPublica: 'Escort',
+    categoriaPublica: 'Cariñosas',
     verificada: false,
     nueva: true,
     disponibilidad: 'Consultar disponibilidad',
@@ -255,7 +255,7 @@
 
   function labelCategoria(valor) {
     if (global.CariHubCatalogos) return CariHubCatalogos.labelCategoria(valor);
-    return String(valor || '').trim() || 'Escort';
+    return String(valor || '').trim() || 'Cariñosas';
   }
 
   function vistaDeCategoriaLegacy(valor) {
@@ -313,7 +313,7 @@
     for (k in base) {
       if (Object.prototype.hasOwnProperty.call(base, k)) u[k] = base[k];
     }
-    u.categoria = base.categoria || Q.categoria || 'Escort';
+    u.categoria = base.categoria || Q.categoria || 'Cariñosas';
     u.categoriaPublica = base.categoriaPublica || u.categoria;
     u.pais = Q.pais || 'México';
     u.estado = u.estado || Q.estado || 'Nuevo León';
@@ -558,13 +558,13 @@
     try {
       var p = new URL(href || global.location.href).searchParams;
       return {
-        categoria: p.get('categoria') || 'Escort',
+        categoria: p.get('categoria') || 'Cariñosas',
         pais: p.get('pais') || 'México',
         estado: p.get('estado') || '',
         ciudad: p.get('ciudad') || ''
       };
     } catch (e) {
-      return { categoria: 'Escort', pais: 'México', estado: '', ciudad: '' };
+      return { categoria: 'Cariñosas', pais: 'México', estado: '', ciudad: '' };
     }
   }
 

@@ -982,12 +982,20 @@
     if (submitBtn) submitBtn.classList.toggle('rp-hidden', !hasText);
   }
 
+  function uiNotice(msg) {
+    if (global.CariHubUiNotices && CariHubUiNotices.showInfoModal) {
+      CariHubUiNotices.showInfoModal(typeof msg === 'string' ? { message: msg } : msg);
+      return;
+    }
+    alert(msg);
+  }
+
   function runCatSearch() {
     var input = $('rpCatSearch');
     if (!input) return;
     var query = String(input.value || '').trim();
     if (!query) {
-      alert('Escribe el nombre de tu negocio o subcategoría.');
+      uiNotice('Escribe el nombre de tu negocio o subcategoría.');
       input.focus();
       return;
     }
@@ -1228,7 +1236,7 @@
     var sectorSolicitado = String(opts.sectorSolicitado || '').trim();
 
     if (!subText) {
-      alert('Escribe la subcategoría o negocio a registrar.');
+      uiNotice('Escribe la subcategoría o negocio a registrar.');
       return;
     }
 
@@ -1595,7 +1603,7 @@
     var grid = $('rpGalleryGrid');
     if (hint) {
       if (fotosMin === 5) {
-        hint.textContent = 'Escort VIP: foto principal y mínimo 4 fotos más (5 en total).';
+        hint.textContent = 'Cariñosas VIP: foto principal y mínimo 4 fotos más (5 en total).';
       } else if (fotosMin === 6) {
         hint.textContent = 'Modelos: foto principal y mínimo 5 fotos más (6 en total).';
       } else {
@@ -2105,7 +2113,7 @@
       return;
     }
     if (!global.CariHubRegistroPerfilSubmit || !CariHubRegistroPerfilSubmit.submitRegistroPerfil) {
-      alert('El envío a revisión requiere conexión con Firebase. Recarga la página e intenta de nuevo.');
+      uiNotice('El envío a revisión requiere conexión con Firebase. Recarga la página e intenta de nuevo.');
       return;
     }
     var draft;
@@ -2164,7 +2172,7 @@
         } else if (code === 'auth/wrong-password' || code === 'auth/invalid-credential' || code === 'auth/invalid-login-credentials') {
           msg = 'Contraseña incorrecta. Confirma la misma con la que entras al dashboard.';
         }
-        alert('No se pudo enviar la solicitud: ' + msg);
+        uiNotice('No se pudo enviar la solicitud: ' + msg);
       })
       .finally(function () {
         if (primary) {
@@ -2305,6 +2313,11 @@
     }
     if (params.get('preview') !== 'privados') return null;
     var key = params.get('ejemplo') || params.get('sub') || 'escort';
+    if (global.CariHubSubcategoriaLabels) {
+      key = CariHubSubcategoriaLabels.legacyRegistroRedirectId(key);
+    } else if (String(key).toLowerCase().replace(/_/g, ' ') === 'acompanante') {
+      key = 'escort';
+    }
     var preset = PREVIEW_PRIVADOS_EJEMPLOS[key];
     if (preset) return preset;
     var sectors = global.CariHubSectores && CariHubSectores.sectores

@@ -62,7 +62,7 @@
     'Unicorns',
     'Hotwife',
     'Cuckold',
-    'Escorts',
+    'Cariñosas',
     'Lesbians',
     'Trans',
     'Femboy',

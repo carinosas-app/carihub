@@ -25,8 +25,8 @@
   /* Palabras del hero — ortografía revisada */
   var HERO_COPY = {
     escort: { kw: 'acompañantes cariñosas', prefix: 'Encuentra ', subtitle: 'Perfiles reales, verificados y actualizados', showcase: true },
-    'escort gay': { kw: 'escorts gay', prefix: 'Encuentra ', subtitle: 'Perfiles LGBT verificados' },
-    'escort vip': { kw: 'escorts VIP', prefix: 'Encuentra ', subtitle: 'Experiencias premium cerca de ti' },
+    'escort gay': { kw: 'cariñosas gay', prefix: 'Encuentra ', subtitle: 'Perfiles LGBT verificados' },
+    'escort vip': { kw: 'cariñosas VIP', prefix: 'Encuentra ', subtitle: 'Experiencias premium cerca de ti' },
     edecan: { kw: 'edecanes', prefix: 'Encuentra ', subtitle: 'Eventos, convenciones y promociones' },
     stripper: { kw: 'strippers', prefix: 'Encuentra ', subtitle: 'Shows y entretenimiento' },
     modelos: { kw: 'modelos', prefix: 'Encuentra ', subtitle: 'Sesiones y casting en tu zona' },

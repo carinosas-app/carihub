@@ -200,7 +200,7 @@
   };
 
   var MATRIX_SAMPLES = [
-    { id: 'escort', nombre: 'Escort' },
+    { id: 'escort', nombre: 'Cariñosas' },
     { id: 'sex shop', nombre: 'Sex Shop' },
     { id: 'spa', nombre: 'Spa (adultos)' },
     { id: 'hotel motel', nombre: 'Hotel / Motel' },
@@ -531,18 +531,9 @@
 
     var faltantes = $('rpSchemaFaltantesNotice');
     if (faltantes) {
-      var pending = getPendingPhase2Items(resolved);
-      if (pending.length) {
-        faltantes.innerHTML = 'En el paso de datos privados también pediremos: <strong>' +
-          pending.slice(0, 6).join('</strong>, <strong>') + '</strong>' +
-          (pending.length > 6 ? '…' : '') + '.';
-        faltantes.classList.remove('rp-hidden');
-        faltantes.removeAttribute('aria-hidden');
-      } else {
-        faltantes.innerHTML = '';
-        faltantes.classList.add('rp-hidden');
-        faltantes.setAttribute('aria-hidden', 'true');
-      }
+      faltantes.innerHTML = '';
+      faltantes.classList.add('rp-hidden');
+      faltantes.setAttribute('aria-hidden', 'true');
     }
 
     var uiNotice = $('rpUiFormNotice');

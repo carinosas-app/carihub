@@ -1,7 +1,7 @@
 /**
  * Bloques públicos registro — persona_espectaculo (stripper / tabledance).
  * Fuente: scripts/config-registro-adultos-schema.json (plantilla persona_espectaculo).
- * v1: sin viajes transversal — desplazamientos propios del show.
+ * Stripper: módulo Viaja transversal (sin desplazamiento básico v1).
  */
 (function (global) {
   'use strict';
@@ -90,11 +90,11 @@
     fotosMin: 4,
     subcategoriaOverrides: {
       stripper: {
-        obligatoriosExtra: ['modalidades', 'desplazamientos', 'anosExperiencia'],
+        obligatoriosExtra: ['modalidades', 'anosExperiencia'],
+        obligatoriosRemove: ['desplazamientos'],
         fieldHints: {
           tipoShow: 'Tipos de show que ofreces — aparecen en tarjeta y ficha.',
-          modalidades: 'Obligatorio: fiestas, despedidas, hoteles, clubes, etc.',
-          desplazamientos: 'Alcance de desplazamiento (v1 sin módulo viajes transversal).',
+          modalidades: 'Contextos del show. Marca «Viaja a eventos» si te desplazas con el módulo Viaja.',
           venueFijo: 'Opcional: zona o área donde sueles trabajar.',
           serviciosIncluidos: 'Qué incluye tu show — no uses listados escort.',
           serviciosNoRealizo: 'Restricciones claras y profesionales.'
@@ -193,21 +193,77 @@
       {
         id: 'modalidadesShow',
         title: 'Contexto del show',
-        hint: 'Dónde realizas shows — v1 sin viajes transversal.',
+        hint: 'Dónde realizas shows. Stripper puede activar «Viaja a eventos» con alcance y condiciones.',
         fields: [
           {
             id: 'modalidades',
             label: 'Disponible para',
             type: 'checklist',
             required: true,
-            options: MODALIDADES_SHOW.slice()
+            options: MODALIDADES_SHOW.concat([
+              { value: 'viaja', label: 'Viaja a eventos', onlySubcategoriasViajes: true }
+            ])
           },
           {
-            id: 'desplazamientos',
-            label: 'Desplazamientos',
+            id: 'alcanceDesplazamiento',
+            label: 'Alcance de desplazamiento',
             type: 'select',
             required: true,
-            options: DESPLAZAMIENTOS_SHOW.slice()
+            showWhenViaja: true,
+            options: [
+              { value: 'solo_zona', label: 'Solo mi zona' },
+              { value: 'toda_ciudad', label: 'Toda mi ciudad' },
+              { value: 'todo_estado', label: 'Todo mi estado / provincia / departamento' },
+              { value: 'cualquier_ciudad_pais', label: 'Cualquier ciudad de mi país' },
+              { value: 'otro_pais', label: 'Otro país' },
+              { value: 'internacional', label: 'Internacional / varios países' }
+            ]
+          },
+          {
+            id: 'viajesProgramados',
+            label: 'Viajes programados',
+            type: 'select',
+            required: true,
+            showWhenViaja: true,
+            options: [
+              { value: 'si', label: 'Sí' },
+              { value: 'no', label: 'No' },
+              { value: 'a_convenir', label: 'A convenir' }
+            ]
+          },
+          {
+            id: 'gastosTraslado',
+            label: 'Gastos de viaje',
+            type: 'select',
+            required: true,
+            showWhenViaja: true,
+            options: [
+              { value: 'cliente', label: 'El cliente / contratante' },
+              { value: 'anunciante', label: 'El anunciante' },
+              { value: 'se_acuerda', label: 'Se acuerda' }
+            ]
+          },
+          {
+            id: 'anticipacionViaje',
+            label: 'Anticipación requerida',
+            type: 'select',
+            required: true,
+            showWhenViaja: true,
+            options: [
+              { value: 'mismo_dia', label: 'Mismo día' },
+              { value: '24h', label: '24 horas antes' },
+              { value: '48h', label: '48 horas antes' },
+              { value: '1_semana', label: 'Una semana antes' },
+              { value: 'a_convenir', label: 'A convenir' }
+            ]
+          },
+          {
+            id: 'notasViaje',
+            label: 'Notas de viaje',
+            type: 'text',
+            required: false,
+            showWhenViaja: true,
+            placeholder: 'Destinos, eventos frecuentes, condiciones, etc.'
           }
         ]
       },

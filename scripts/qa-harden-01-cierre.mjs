@@ -133,8 +133,8 @@ const viajesMatch = viajesJs.match(/VIAJES_SUBCATEGORIAS\s*=\s*\[([\s\S]*?)\];/)
 const viajesIds = viajesMatch
   ? viajesMatch[1].match(/'[^']+'/g).map((s) => s.replace(/'/g, ''))
   : [];
-ok('viajes 18 subs en runtime', viajesIds.length === 18, String(viajesIds.length));
-ok('viajes QA H3 count 18', fs.readFileSync(path.join(__dirname, 'qa-viajes-desplazamiento.mjs'), 'utf8').includes('H3 VIAJES_SUBCATEGORIAS count 18'), 'H3');
+ok('viajes 19 subs en runtime', viajesIds.length === 19, String(viajesIds.length));
+ok('viajes QA H3 count 19', fs.readFileSync(path.join(__dirname, 'qa-viajes-desplazamiento.mjs'), 'utf8').includes('H3 VIAJES_SUBCATEGORIAS count 19'), 'H3');
 
 const perfilHtml = fs.readFileSync(path.join(repoRoot, 'public', 'perfil-publico.html'), 'utf8');
 const demoEdecan = extractDemoObject(perfilHtml, 'edecan');

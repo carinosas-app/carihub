@@ -103,6 +103,171 @@
     return '';
   }
 
+  function isEdecanSubcategoria(ctx) {
+    return normalizeSubId((ctx && ctx.subcategoriaId) || (ctx && ctx.subcategoria) || '') === 'edecan';
+  }
+
+  function isModelosSubcategoria(ctx) {
+    return normalizeSubId((ctx && ctx.subcategoriaId) || (ctx && ctx.subcategoria) || '') === 'modelos';
+  }
+
+  var MODALIDAD_EDECAN_LABELS = {
+    evento_venue: 'Eventos / venue acordado',
+    activaciones: 'Activaciones',
+    expos: 'Expos',
+    imagen_marca: 'Imagen de marca',
+    viaja: 'Viaja a eventos'
+  };
+
+  var MODALIDAD_MODELOS_LABELS = {
+    estudio: 'Sesión en estudio',
+    locacion: 'Locación acordada',
+    pasarela: 'Pasarela / evento',
+    produccion: 'Campaña / producción',
+    viaja: 'Viaja a producción/evento'
+  };
+
+  function buildEdecanPerfil(values) {
+    values = values || {};
+    return {
+      tiposEvento: Array.isArray(values.tiposEvento) ? values.tiposEvento.slice() : [],
+      experienciaProfesional: values.experienciaProfesional || '',
+      serviciosProfesionales: Array.isArray(values.serviciosProfesionales) ? values.serviciosProfesionales.slice() : [],
+      restriccionesProfesionales: Array.isArray(values.restriccionesProfesionales) ? values.restriccionesProfesionales.slice() : [],
+      eventosDisponibles: values.eventosDisponibles,
+      modalidades: Array.isArray(values.modalidades) ? values.modalidades.slice() : [],
+      viajesDesplazamiento: values.viajesDesplazamiento || null
+    };
+  }
+
+  function buildModelosPerfil(values) {
+    values = values || {};
+    return {
+      tiposModelaje: Array.isArray(values.tiposModelaje) ? values.tiposModelaje.slice() : [],
+      experienciaProfesional: values.experienciaProfesional || '',
+      serviciosProfesionales: Array.isArray(values.serviciosProfesionales) ? values.serviciosProfesionales.slice() : [],
+      restriccionesProfesionales: Array.isArray(values.restriccionesProfesionales) ? values.restriccionesProfesionales.slice() : [],
+      portfolioURL: values.portfolioURL || '',
+      modalidades: Array.isArray(values.modalidades) ? values.modalidades.slice() : [],
+      viajesDesplazamiento: values.viajesDesplazamiento || null
+    };
+  }
+
+  function modalidadProfLabel(m, labels) {
+    return labels[m] || m;
+  }
+
+  function finalizeEdecanValues(values, ctx) {
+    if (!values || !isEdecanSubcategoria(ctx || {})) return values;
+    clearProfileContractState(values, ['edecanPerfil'], ['modalidades', 'viaja']);
+    values.subcategoriaId = 'edecan';
+    values.edecanPerfil = buildEdecanPerfil(values);
+    return values;
+  }
+
+  function finalizeModelosValues(values, ctx) {
+    if (!values || !isModelosSubcategoria(ctx || {})) return values;
+    clearProfileContractState(values, ['modelosPerfil'], ['modalidades', 'viaja']);
+    values.subcategoriaId = 'modelos';
+    values.modelosPerfil = buildModelosPerfil(values);
+    return values;
+  }
+
+  function mapProfesionalCommonFields(u, bloques, labelMap) {
+    if (bloques.idiomas) u.idiomas = bloques.idiomas;
+    if (bloques.estatura) u.estatura = bloques.estatura;
+    if (bloques.peso) u.peso = bloques.peso;
+    if (bloques.complexion) u.complexion = bloques.complexion;
+    if (bloques.cabello) u.cabello = bloques.cabello;
+    if (bloques.ojos) u.ojos = bloques.ojos;
+    if (bloques.tatuajes) u.tatuajes = bloques.tatuajes;
+    if (bloques.piercings) u.piercings = bloques.piercings;
+    if (bloques.sobreMi) u.sobreMi = bloques.sobreMi;
+    if (Array.isArray(bloques.metodosPago) && bloques.metodosPago.length) {
+      u.metodosPago = bloques.metodosPago.slice();
+    }
+    if (bloques.horarioDetalle) {
+      u.horario = bloques.horarioDetalle;
+      u.horarioDetalle = bloques.horarioDetalle;
+    }
+    if (Array.isArray(bloques.modalidades) && bloques.modalidades.length) {
+      u.modalidades = bloques.modalidades.slice();
+      u.modalidadFicha = bloques.modalidades.map(function (m) {
+        return modalidadProfLabel(m, labelMap);
+      }).join(' · ');
+    }
+    if (bloques.viajesDesplazamiento) {
+      u.viajesDesplazamiento = bloques.viajesDesplazamiento;
+    } else if (viajesApi()) {
+      u.viajesDesplazamiento = viajesApi().buildViajesDesplazamiento(bloques, bloques.modalidades);
+    }
+    return u;
+  }
+
+  function mapEdecanToPerfil(u, bloques, ctx) {
+    u = u || {};
+    ctx = ctx || {};
+    var perfil = bloques.edecanPerfil || buildEdecanPerfil(bloques);
+    u.subcategoriaId = 'edecan';
+    u.edecanPerfil = Object.assign({}, perfil);
+    if (isTruthyFieldValue(bloques.eventosDisponibles)) u.eventosDisponibles = true;
+    if (perfil.experienciaProfesional) u.experienciaProfesional = perfil.experienciaProfesional;
+    if (Array.isArray(perfil.tiposEvento) && perfil.tiposEvento.length) {
+      u.tiposEvento = perfil.tiposEvento.slice();
+    }
+    if (Array.isArray(perfil.serviciosProfesionales) && perfil.serviciosProfesionales.length) {
+      u.serviciosIncluidos = perfil.serviciosProfesionales.slice();
+    }
+    if (Array.isArray(perfil.restriccionesProfesionales) && perfil.restriccionesProfesionales.length) {
+      u.noRealiza = perfil.restriccionesProfesionales.slice();
+    }
+    u = mapProfesionalCommonFields(u, bloques, MODALIDAD_EDECAN_LABELS);
+    return applyBadges(u, ctx);
+  }
+
+  function mapModelosToPerfil(u, bloques, ctx) {
+    u = u || {};
+    ctx = ctx || {};
+    var perfil = bloques.modelosPerfil || buildModelosPerfil(bloques);
+    u.subcategoriaId = 'modelos';
+    u.modelosPerfil = Object.assign({}, perfil);
+    if (bloques.portfolioURL) u.portfolioURL = normalizeUrl(bloques.portfolioURL);
+    if (perfil.experienciaProfesional) u.experienciaProfesional = perfil.experienciaProfesional;
+    if (Array.isArray(perfil.tiposModelaje) && perfil.tiposModelaje.length) {
+      u.tiposModelaje = perfil.tiposModelaje.slice();
+    }
+    if (Array.isArray(perfil.serviciosProfesionales) && perfil.serviciosProfesionales.length) {
+      u.serviciosIncluidos = perfil.serviciosProfesionales.slice();
+    }
+    if (Array.isArray(perfil.restriccionesProfesionales) && perfil.restriccionesProfesionales.length) {
+      u.noRealiza = perfil.restriccionesProfesionales.slice();
+    }
+    u = mapProfesionalCommonFields(u, bloques, MODALIDAD_MODELOS_LABELS);
+    return applyBadges(u, ctx);
+  }
+
+  function validateProfesionalDeltaValues(cfg, values, missing) {
+    var tipos = values.tiposEvento || values.tiposModelaje;
+    if (!Array.isArray(tipos) || !tipos.length) {
+      pushMissing(missing, labelForField(cfg, values.tiposEvento != null ? 'tiposEvento' : 'tiposModelaje') || 'Tipos');
+    }
+    if (!String(values.experienciaProfesional || '').trim()) {
+      pushMissing(missing, labelForField(cfg, 'experienciaProfesional') || 'Experiencia profesional');
+    }
+    var svc = values.serviciosProfesionales;
+    if (!Array.isArray(svc) || !svc.length) {
+      pushMissing(missing, labelForField(cfg, 'serviciosProfesionales') || 'Servicios profesionales');
+    }
+    var restr = values.restriccionesProfesionales;
+    if (!Array.isArray(restr) || !restr.length) {
+      pushMissing(missing, labelForField(cfg, 'restriccionesProfesionales') || 'Restricciones profesionales');
+    }
+    var mods = values.modalidades;
+    if (!Array.isArray(mods) || !mods.length) {
+      pushMissing(missing, labelForField(cfg, 'modalidades') || 'Modalidades');
+    }
+  }
+
   function normalizeParejaSubId(raw) {
     var subId = normalizeSubId(raw);
     if (subId === 'parejas swinger' || subId === 'swinger') return 'swinger';
@@ -1112,7 +1277,7 @@
       venueFijo: values.venueFijo || '',
       requisitosLugar: values.requisitosLugar || '',
       modalidades: Array.isArray(values.modalidades) ? values.modalidades.slice() : [],
-      desplazamientos: values.desplazamientos || '',
+      viajesDesplazamiento: values.viajesDesplazamiento || null,
       serviciosIncluidos: Array.isArray(values.serviciosIncluidos) ? values.serviciosIncluidos.slice() : [],
       serviciosNoRealizo: Array.isArray(values.serviciosNoRealizo) ? values.serviciosNoRealizo.slice() : [],
       horarioDetalle: values.horarioDetalle || '',
@@ -1166,8 +1331,14 @@
     if (Array.isArray(esp.modalidades) && esp.modalidades.length) {
       u.modalidades = esp.modalidades.slice();
       u.disponiblePara = buildDisponibleParaMirror(esp.modalidades);
+      if (esp.modalidades.indexOf('viaja') >= 0) {
+        u.disponiblePara.push('Viaja a eventos');
+      }
     }
-    if (esp.desplazamientos) u.desplazamientos = esp.desplazamientos;
+    if (esp.viajesDesplazamiento) u.viajesDesplazamiento = esp.viajesDesplazamiento;
+    else if (viajesApi()) {
+      u.viajesDesplazamiento = viajesApi().buildViajesDesplazamiento(esp, esp.modalidades);
+    }
     if (Array.isArray(esp.serviciosIncluidos) && esp.serviciosIncluidos.length) {
       u.serviciosIncluidos = esp.serviciosIncluidos.slice();
     }
@@ -1209,9 +1380,6 @@
       pushMissing(missing, labelForField(cfg, 'modalidades') || 'Disponible para');
     }
     if (canon === 'stripper') {
-      if (!String(values.desplazamientos || '').trim()) {
-        pushMissing(missing, labelForField(cfg, 'desplazamientos') || 'Desplazamientos');
-      }
       if (!String(values.anosExperiencia || '').trim()) {
         pushMissing(missing, labelForField(cfg, 'anosExperiencia') || 'Experiencia');
       }
@@ -2548,6 +2716,8 @@
       });
     });
     values = finalizeViajesValues(values);
+    values = finalizeEdecanValues(values, ctx);
+    values = finalizeModelosValues(values, ctx);
     values = finalizeLesbiansValues(values);
     values = finalizeParejaSwingerValues(values, ctx);
     values = finalizeUnicornValues(values, ctx);
@@ -2659,6 +2829,9 @@
     }
     if (isHospedajeSubcategoria(ctx)) {
       validateHospedajeDeltaValues(cfg, values, missing, ctx);
+    }
+    if (isEdecanSubcategoria(ctx) || isModelosSubcategoria(ctx)) {
+      validateProfesionalDeltaValues(cfg, values, missing);
     }
     return missing;
   }
@@ -2857,6 +3030,12 @@
     if (isHospedajeSubcategoria(ctx)) {
       return mapHospedajeToPerfil(u, bloques, ctx);
     }
+    if (isEdecanSubcategoria(ctx)) {
+      return mapEdecanToPerfil(u, bloques, ctx);
+    }
+    if (isModelosSubcategoria(ctx)) {
+      return mapModelosToPerfil(u, bloques, ctx);
+    }
     if (bloques.orientacion) u.orientacion = bloques.orientacion;
     if (bloques.identidadGenero) u.identidadGenero = bloques.identidadGenero;
     if (bloques.presentacionFemboy) {
@@ -2892,7 +3071,7 @@
     if (Array.isArray(bloques.tiposTrios) && bloques.tiposTrios.length) {
       u.tiposTrios = bloques.tiposTrios.slice();
     }
-    if (bloques.esBisexual) u.esBisexual = bloques.esBisexual;
+    if (bloques.rolInteraccion) u.rolInteraccion = bloques.rolInteraccion;
     if (Array.isArray(bloques.buscan) && bloques.buscan.length) u.buscan = bloques.buscan.slice();
     if (Array.isArray(bloques.disponibilidadAgenda) && bloques.disponibilidadAgenda.length) {
       u.disponibilidadAgenda = bloques.disponibilidadAgenda.slice();
@@ -3059,6 +3238,10 @@
     finalizeParejaSwingerValues: finalizeParejaSwingerValues,
     finalizeUnicornValues: finalizeUnicornValues,
     finalizeCuckoldHotwifeValues: finalizeCuckoldHotwifeValues,
+    finalizeEdecanValues: finalizeEdecanValues,
+    finalizeModelosValues: finalizeModelosValues,
+    mapEdecanToPerfil: mapEdecanToPerfil,
+    mapModelosToPerfil: mapModelosToPerfil,
     finalizeDominatrixValues: finalizeDominatrixValues,
     buildDominatrixPerfil: buildDominatrixPerfil,
     mapDominatrixToPerfil: mapDominatrixToPerfil,

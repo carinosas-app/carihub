@@ -43,7 +43,7 @@
     'Parejas Swinger',
     'Hotwife',
     'Cuckold',
-    'Escorts',
+    'Cariñosas',
     'Lesbians',
     'Femboy',
     'Tom Boy',

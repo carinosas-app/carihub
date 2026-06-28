@@ -30,6 +30,47 @@
 
   var OPCIONES_SI_NO = ['Sí', 'No'];
 
+  var EXPERIENCIA_PROFESIONAL = ['Principiante', 'Intermedia', 'Avanzada', 'Profesional'];
+  var EDECAN_TIPOS_EVENTO = [
+    'Evento corporativo', 'Exposición / expo', 'Activación de marca', 'Promoción',
+    'Recepción / hostess', 'Imagen de marca', 'Pasarela / protocolo'
+  ];
+  var EDECAN_SERVICIOS_PRO = [
+    'Atención a invitados', 'Promoción de producto', 'Entrega de flyers/muestras',
+    'Registro de asistentes', 'Hostess / recepción', 'Imagen de marca', 'Animación ligera'
+  ];
+  var EDECAN_RESTRICCIONES = [
+    'Servicios íntimos', 'Contacto físico no autorizado', 'Eventos privados sin contrato',
+    'Consumo obligatorio de alcohol', 'Traslados no acordados'
+  ];
+  var EDECAN_MODALIDADES = [
+    { value: 'evento_venue', label: 'Eventos / venue acordado' },
+    { value: 'activaciones', label: 'Activaciones' },
+    { value: 'expos', label: 'Expos' },
+    { value: 'imagen_marca', label: 'Imagen de marca' },
+    { value: 'viaja', label: 'Viaja a eventos', onlySubcategoriasViajes: true }
+  ];
+  var MODELOS_TIPOS_MODELAJE = [
+    'Fotografía', 'Video', 'Pasarela', 'Comercial', 'Catálogo', 'Fitness', 'Glamour', 'Imagen de marca'
+  ];
+  var MODELOS_SERVICIOS_PRO = [
+    'Sesión fotográfica', 'Grabación de video', 'Pasarela', 'Catálogo',
+    'Campaña publicitaria', 'Imagen de marca', 'Contenido para redes'
+  ];
+  var MODELOS_RESTRICCIONES = [
+    'Contenido explícito', 'Servicios íntimos', 'Contacto físico no autorizado',
+    'Sesiones sin contrato/acuerdo', 'Traslados no acordados'
+  ];
+  var MODELOS_MODALIDADES = [
+    { value: 'estudio', label: 'Sesión en estudio' },
+    { value: 'locacion', label: 'Locación acordada' },
+    { value: 'pasarela', label: 'Pasarela / evento' },
+    { value: 'produccion', label: 'Campaña / producción' },
+    { value: 'viaja', label: 'Viaja a producción/evento', onlySubcategoriasViajes: true }
+  ];
+  var ORIENTACION_ESCORT_GAY = ['Gay', 'Bisexual', 'Pansexual', 'Queer', 'Otro / prefiero no decir'];
+  var ROL_INTERACCION_GAY = ['Activo', 'Pasivo', 'Versátil', 'No especificar'];
+
   var TIPOS_TRIOS_COMP = [
     'MHM (Mujer–Hombre–Mujer)',
     'HMH (Hombre–Mujer–Hombre)'
@@ -94,7 +135,8 @@
           orientacion: { required: true }
         },
         fieldHints: {
-          orientacion: 'Indica orientación y tipo de clientela.'
+          orientacion: 'Tu orientación sexual.',
+          rolInteraccion: 'Tu rol o preferencia de interacción (opcional).'
         }
       },
       'lesbians': {
@@ -126,27 +168,42 @@
         },
         fieldHints: {
           nivelPremium: 'Distintivo premium — aparece en tu tarjeta y ficha.',
-          experienciaVip: 'Marca las experiencias VIP que sí ofreces (heredas el formulario Escort completo).',
+          experienciaVip: 'Marca las experiencias VIP que sí ofreces (heredas el formulario Cariñosas completo).',
           distintivosVip: 'Compromisos y cualidades de tu perfil de alto nivel.',
           realizaTrios: 'Indica si ofreces tríos en tu servicio.',
-          colaboracionContenido: 'Indica si colaboras en contenido para redes o plataformas.',
-          esBisexual: 'Aparece en tu ficha para quien te contacte.'
+          colaboracionContenido: 'Indica si colaboras en contenido para redes o plataformas.'
         }
       },
       'edecan': {
-        obligatoriosExtra: ['eventosDisponibles'],
+        obligatoriosRemove: ['serviciosIncluidos', 'serviciosNoRealizo'],
+        obligatoriosExtra: [
+          'eventosDisponibles', 'tiposEvento', 'experienciaProfesional',
+          'serviciosProfesionales', 'restriccionesProfesionales', 'modalidades'
+        ],
         fieldPatches: {
-          eventosDisponibles: { required: true }
+          eventosDisponibles: { required: true },
+          tiposEvento: { required: true },
+          experienciaProfesional: { required: true },
+          serviciosProfesionales: { required: true },
+          restriccionesProfesionales: { required: true }
         },
         fieldHints: {
           eventosDisponibles: 'Confirma que aceptas contratación para eventos, expos y promociones.'
         }
       },
       'modelos': {
-        obligatoriosExtra: ['portfolioURL'],
+        obligatoriosRemove: ['serviciosIncluidos', 'serviciosNoRealizo'],
+        obligatoriosExtra: [
+          'portfolioURL', 'tiposModelaje', 'experienciaProfesional',
+          'serviciosProfesionales', 'restriccionesProfesionales', 'modalidades'
+        ],
         fotosMin: 6,
         fieldPatches: {
-          portfolioURL: { required: true }
+          portfolioURL: { required: true },
+          tiposModelaje: { required: true },
+          experienciaProfesional: { required: true },
+          serviciosProfesionales: { required: true },
+          restriccionesProfesionales: { required: true }
         },
         fieldHints: {
           portfolioURL: 'Enlace público a tu book o portafolio (Instagram, Behance, sitio propio, etc.).'
@@ -158,8 +215,7 @@
       escort: {
         fieldHints: {
           realizaTrios: 'Indica si ofreces tríos en tu servicio.',
-          colaboracionContenido: 'Indica si colaboras en contenido para redes o plataformas.',
-          esBisexual: 'Aparece en tu ficha para quien te contacte.'
+          colaboracionContenido: 'Indica si colaboras en contenido para redes o plataformas.'
         }
       },
       'petit': {
@@ -291,7 +347,23 @@
         title: 'Tu ficha pública',
         hint: 'Estos datos aparecen en la columna derecha de tu perfil (categoría, idiomas, orientación).',
         fields: [
-          { id: 'orientacion', label: 'Orientación sexual', type: 'select', required: false, excludeSubcategorias: ['femboy', 'singles'], options: ['Heterosexual', 'Bisexual', 'Pansexual', 'Gay', 'Lesbiana', 'Queer'] },
+          { id: 'orientacion', label: 'Orientación sexual', type: 'select', required: false, excludeSubcategorias: ['femboy', 'singles', 'escort gay', 'edecan', 'modelos'], options: ['Heterosexual', 'Bisexual', 'Pansexual', 'Gay', 'Lesbiana', 'Queer'] },
+          {
+            id: 'orientacion',
+            label: 'Orientación sexual',
+            type: 'select',
+            required: true,
+            onlySubcategorias: ['escort gay'],
+            options: ORIENTACION_ESCORT_GAY.slice()
+          },
+          {
+            id: 'rolInteraccion',
+            label: 'Rol / preferencia de interacción',
+            type: 'select',
+            required: false,
+            onlySubcategorias: ['escort gay'],
+            options: ROL_INTERACCION_GAY.slice()
+          },
           {
             id: 'identidadGenero',
             label: 'Identidad / presentación',
@@ -301,7 +373,7 @@
             placeholder: 'Ej. Mujer trans, no binaria…'
           },
           { id: 'idiomas', label: 'Idiomas', type: 'text', required: false, placeholder: 'Ej. Español, Inglés' },
-          { id: 'nivelServicio', label: 'Nivel de servicios', type: 'select', required: false, excludeSubcategorias: ['femboy', 'singles'], options: ['Básico', 'Completo', 'Premium'], helpKey: 'nivelServicio' },
+          { id: 'nivelServicio', label: 'Nivel de servicios', type: 'select', required: false, excludeSubcategorias: ['femboy', 'singles', 'edecan', 'modelos'], options: ['Básico', 'Completo', 'Premium'], helpKey: 'nivelServicio' },
           {
             id: 'nivelPremium',
             label: 'Nivel premium',
@@ -335,7 +407,7 @@
             label: 'Disponibilidad',
             type: 'select',
             required: false,
-            excludeSubcategorias: ['femboy', 'singles'],
+            excludeSubcategorias: ['femboy', 'singles', 'edecan', 'modelos'],
             options: [
               { value: 'disponible', label: 'Disponible' },
               { value: 'ocupada', label: 'Ocupada' },
@@ -487,7 +559,7 @@
       {
         id: 'tomPerfil',
         title: 'Presentación y estilo',
-        hint: 'Campos distintivos de tu perfil — el resto del formulario es el mismo que Escort.',
+        hint: 'Campos distintivos de tu perfil — el resto del formulario es el mismo que Cariñosas.',
         onlySubcategorias: ['tom boy', 'tom fem'],
         fields: [
           {
@@ -608,7 +680,7 @@
       {
         id: 'vipPerfil',
         title: 'Perfil VIP',
-        hint: 'Heredas el formulario Escort; aquí marcas experiencia exclusiva y distintivos de alto nivel.',
+        hint: 'Heredas el formulario Cariñosas; aquí marcas experiencia exclusiva y distintivos de alto nivel.',
         onlySubcategorias: ['escort vip'],
         fields: [
           {
@@ -760,13 +832,78 @@
             type: 'select',
             required: false,
             options: OPCIONES_SI_NO_ACUERDO.slice()
+          }
+        ]
+      },
+      {
+        id: 'edecanProfesional',
+        title: 'Perfil profesional — edecán',
+        hint: 'Eventos, activaciones y promoción — sin campos de servicios íntimos.',
+        onlySubcategorias: ['edecan'],
+        fields: [
+          {
+            id: 'tiposEvento',
+            label: 'Tipos de evento',
+            type: 'checklist',
+            required: true,
+            options: EDECAN_TIPOS_EVENTO.slice()
           },
           {
-            id: 'esBisexual',
-            label: '¿Eres bisexual?',
+            id: 'experienciaProfesional',
+            label: 'Experiencia profesional',
             type: 'select',
-            required: false,
-            options: ['Sí', 'No']
+            required: true,
+            options: EXPERIENCIA_PROFESIONAL.slice()
+          },
+          {
+            id: 'serviciosProfesionales',
+            label: 'Servicios profesionales',
+            type: 'checklist',
+            required: true,
+            options: EDECAN_SERVICIOS_PRO.slice()
+          },
+          {
+            id: 'restriccionesProfesionales',
+            label: 'Restricciones / no realizo',
+            type: 'checklist',
+            required: true,
+            options: EDECAN_RESTRICCIONES.slice()
+          }
+        ]
+      },
+      {
+        id: 'modelosProfesional',
+        title: 'Perfil profesional — modelaje',
+        hint: 'Sesiones, campañas y producción — sin campos de servicios íntimos.',
+        onlySubcategorias: ['modelos'],
+        fields: [
+          {
+            id: 'tiposModelaje',
+            label: 'Tipos de modelaje',
+            type: 'checklist',
+            required: true,
+            options: MODELOS_TIPOS_MODELAJE.slice()
+          },
+          {
+            id: 'experienciaProfesional',
+            label: 'Experiencia profesional',
+            type: 'select',
+            required: true,
+            options: EXPERIENCIA_PROFESIONAL.slice()
+          },
+          {
+            id: 'serviciosProfesionales',
+            label: 'Servicios profesionales',
+            type: 'checklist',
+            required: true,
+            options: MODELOS_SERVICIOS_PRO.slice()
+          },
+          {
+            id: 'restriccionesProfesionales',
+            label: 'Restricciones / no realizo',
+            type: 'checklist',
+            required: true,
+            options: MODELOS_RESTRICCIONES.slice()
           }
         ]
       },
@@ -774,6 +911,7 @@
         id: 'modalidades',
         title: 'Modalidad de atención',
         hint: 'Marca dónde atiendes (puedes elegir más de una). Si viajas, marca «Viaja» para indicar alcance y condiciones.',
+        excludeSubcategorias: ['edecan', 'modelos'],
         fields: [
           {
             id: 'modalidades',
@@ -851,6 +989,158 @@
         ]
       },
       {
+        id: 'modalidadesEdecan',
+        title: 'Modalidad de trabajo',
+        hint: 'Contextos profesionales donde trabajas. Si viajas a eventos, marca la opción correspondiente.',
+        onlySubcategorias: ['edecan'],
+        fields: [
+          {
+            id: 'modalidades',
+            label: 'Modalidades',
+            type: 'checklist',
+            required: true,
+            options: EDECAN_MODALIDADES.slice()
+          },
+          {
+            id: 'alcanceDesplazamiento',
+            label: 'Alcance de desplazamiento',
+            type: 'select',
+            required: true,
+            showWhenViaja: true,
+            options: [
+              { value: 'solo_zona', label: 'Solo mi zona' },
+              { value: 'toda_ciudad', label: 'Toda mi ciudad' },
+              { value: 'todo_estado', label: 'Todo mi estado / provincia / departamento' },
+              { value: 'cualquier_ciudad_pais', label: 'Cualquier ciudad de mi país' },
+              { value: 'otro_pais', label: 'Otro país' },
+              { value: 'internacional', label: 'Internacional / varios países' }
+            ]
+          },
+          {
+            id: 'viajesProgramados',
+            label: 'Viajes programados',
+            type: 'select',
+            required: true,
+            showWhenViaja: true,
+            options: [
+              { value: 'si', label: 'Sí' },
+              { value: 'no', label: 'No' },
+              { value: 'a_convenir', label: 'A convenir' }
+            ]
+          },
+          {
+            id: 'gastosTraslado',
+            label: 'Gastos de viaje',
+            type: 'select',
+            required: true,
+            showWhenViaja: true,
+            options: [
+              { value: 'cliente', label: 'El cliente / contratante' },
+              { value: 'anunciante', label: 'El anunciante' },
+              { value: 'se_acuerda', label: 'Se acuerda' }
+            ]
+          },
+          {
+            id: 'anticipacionViaje',
+            label: 'Anticipación requerida',
+            type: 'select',
+            required: true,
+            showWhenViaja: true,
+            options: [
+              { value: 'mismo_dia', label: 'Mismo día' },
+              { value: '24h', label: '24 horas antes' },
+              { value: '48h', label: '48 horas antes' },
+              { value: '1_semana', label: 'Una semana antes' },
+              { value: 'a_convenir', label: 'A convenir' }
+            ]
+          },
+          {
+            id: 'notasViaje',
+            label: 'Notas de viaje',
+            type: 'text',
+            required: false,
+            showWhenViaja: true,
+            placeholder: 'Destinos frecuentes, condiciones de evento, etc.'
+          }
+        ]
+      },
+      {
+        id: 'modalidadesModelos',
+        title: 'Modalidad de trabajo',
+        hint: 'Contextos de modelaje y producción. Si viajas a sesiones o eventos, marca la opción correspondiente.',
+        onlySubcategorias: ['modelos'],
+        fields: [
+          {
+            id: 'modalidades',
+            label: 'Modalidades',
+            type: 'checklist',
+            required: true,
+            options: MODELOS_MODALIDADES.slice()
+          },
+          {
+            id: 'alcanceDesplazamiento',
+            label: 'Alcance de desplazamiento',
+            type: 'select',
+            required: true,
+            showWhenViaja: true,
+            options: [
+              { value: 'solo_zona', label: 'Solo mi zona' },
+              { value: 'toda_ciudad', label: 'Toda mi ciudad' },
+              { value: 'todo_estado', label: 'Todo mi estado / provincia / departamento' },
+              { value: 'cualquier_ciudad_pais', label: 'Cualquier ciudad de mi país' },
+              { value: 'otro_pais', label: 'Otro país' },
+              { value: 'internacional', label: 'Internacional / varios países' }
+            ]
+          },
+          {
+            id: 'viajesProgramados',
+            label: 'Viajes programados',
+            type: 'select',
+            required: true,
+            showWhenViaja: true,
+            options: [
+              { value: 'si', label: 'Sí' },
+              { value: 'no', label: 'No' },
+              { value: 'a_convenir', label: 'A convenir' }
+            ]
+          },
+          {
+            id: 'gastosTraslado',
+            label: 'Gastos de viaje',
+            type: 'select',
+            required: true,
+            showWhenViaja: true,
+            options: [
+              { value: 'cliente', label: 'El cliente / contratante' },
+              { value: 'anunciante', label: 'El anunciante' },
+              { value: 'se_acuerda', label: 'Se acuerda' }
+            ]
+          },
+          {
+            id: 'anticipacionViaje',
+            label: 'Anticipación requerida',
+            type: 'select',
+            required: true,
+            showWhenViaja: true,
+            options: [
+              { value: 'mismo_dia', label: 'Mismo día' },
+              { value: '24h', label: '24 horas antes' },
+              { value: '48h', label: '48 horas antes' },
+              { value: '1_semana', label: 'Una semana antes' },
+              { value: 'a_convenir', label: 'A convenir' }
+            ]
+          },
+          {
+            id: 'notasViaje',
+            label: 'Notas de viaje',
+            type: 'text',
+            required: false,
+            showWhenViaja: true,
+            placeholder: 'Destinos, producciones frecuentes, condiciones, etc.'
+          }
+        ]
+      },
+      {
         id: 'horarios',
         title: 'Horario de atención',
         hint: 'Indica cuándo atiendes. No pedimos duración mínima de cita aquí.',
@@ -892,7 +1182,7 @@
         id: 'serviciosIncluidos',
         title: 'Servicios incluidos',
         hint: 'Marca todo lo que sí ofreces en tu servicio base.',
-        excludeSubcategorias: ['femboy', 'singles'],
+        excludeSubcategorias: ['femboy', 'singles', 'edecan', 'modelos'],
         fields: [
           {
             id: 'serviciosIncluidos',
@@ -907,7 +1197,7 @@
         id: 'serviciosNoRealizo',
         title: 'No realizo / límites',
         hint: 'Marca lo que no ofreces — aparece en tu perfil y evita malentendidos.',
-        excludeSubcategorias: ['femboy', 'singles'],
+        excludeSubcategorias: ['femboy', 'singles', 'edecan', 'modelos'],
         fields: [
           {
             id: 'serviciosNoRealizo',

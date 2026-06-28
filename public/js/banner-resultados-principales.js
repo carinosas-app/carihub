@@ -47,13 +47,13 @@
     try {
       var p = new URL(global.location.href).searchParams;
       return {
-        categoria: p.get('categoria') || 'Escort',
+        categoria: p.get('categoria') || 'Cariñosas',
         pais: p.get('pais') || 'México',
         estado: p.get('estado') || '',
         ciudad: p.get('ciudad') || ''
       };
     } catch (e) {
-      return { categoria: 'Escort', pais: 'México', estado: '', ciudad: '' };
+      return { categoria: 'Cariñosas', pais: 'México', estado: '', ciudad: '' };
     }
   }
 

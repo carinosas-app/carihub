@@ -290,7 +290,7 @@
       id: "banner-home-lateral",
       nombre: "Banner Home lateral",
       slot: "Home · lateral derecho",
-      categoria: "Escort VIP",
+      categoria: "Cariñosas VIP",
       pais: "México",
       estado: "Nuevo León",
       ciudad: "Monterrey",
@@ -303,7 +303,7 @@
       id: "banner-resultados-top",
       nombre: "Destacado resultados",
       slot: "Resultados · superior",
-      categoria: "Escort VIP",
+      categoria: "Cariñosas VIP",
       pais: "México",
       estado: "Nuevo León",
       ciudad: "Monterrey",
@@ -329,7 +329,7 @@
     {
       tipo: "Live",
       nombre: "Andrea VIP",
-      categoria: "Escort VIP",
+      categoria: "Cariñosas VIP",
       ciudad: "Monterrey",
       hora: "Live promocional",
       texto: "Transmisión en vivo · Promoción fin de semana. Pregúntame lo que quieras.",
@@ -393,9 +393,9 @@
   }
 
   const MOCK_LIVES_SOCIOS = [
-    { nombre: "Andrea VIP", categoria: "Escort VIP", ciudad: "Monterrey", viewers: 124, img: "https://images.unsplash.com/photo-1509967419530-da38b4704bc6?auto=format&fit=crop&w=900&q=80", avatar: "https://images.unsplash.com/photo-1509967419530-da38b4704bc6?w=80&q=80" },
+    { nombre: "Andrea VIP", categoria: "Cariñosas VIP", ciudad: "Monterrey", viewers: 124, img: "https://images.unsplash.com/photo-1509967419530-da38b4704bc6?auto=format&fit=crop&w=900&q=80", avatar: "https://images.unsplash.com/photo-1509967419530-da38b4704bc6?w=80&q=80" },
     { nombre: "Studio Velvet", categoria: "Table Dance", ciudad: "San Pedro", viewers: 89, img: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=900&q=80", avatar: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=80&q=80" },
-    { nombre: "Luna M.", categoria: "Escort", ciudad: "Monterrey", viewers: 56, img: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=900&q=80", avatar: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=80&q=80" },
+    { nombre: "Luna M.", categoria: "Cariñosas", ciudad: "Monterrey", viewers: 56, img: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=900&q=80", avatar: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=80&q=80" },
   ];
 
   let activeModule = "inicio";

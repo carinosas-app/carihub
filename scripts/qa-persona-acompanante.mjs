@@ -77,7 +77,9 @@ function hasField(merged, fieldId) {
 }
 
 function modalidadesBlock(merged) {
-  return blockById(merged, 'modalidades');
+  return blockById(merged, 'modalidades')
+    || blockById(merged, 'modalidadesEdecan')
+    || blockById(merged, 'modalidadesModelos');
 }
 
 function viajesSubfields(merged) {
@@ -92,7 +94,7 @@ const SUBS = [
     ids: ['escort'],
     oblig: ['modalidades', 'serviciosIncluidos', 'serviciosNoRealizo'],
     block: 'serviciosPreferencias',
-    blockFields: ['realizaTrios', 'colaboracionContenido', 'esBisexual'],
+    blockFields: ['realizaTrios', 'colaboracionContenido'],
     viajes: true,
   },
   {
@@ -109,19 +111,26 @@ const SUBS = [
     key: 'escort_gay',
     ids: ['escort gay', 'escort_gay'],
     oblig: ['orientacion', 'modalidades'],
+    blockFields: ['rolInteraccion'],
     badge: 'lgbt',
     viajes: true,
   },
   {
     key: 'edecan',
     ids: ['edecan'],
-    oblig: ['eventosDisponibles', 'modalidades'],
+    oblig: ['eventosDisponibles', 'tiposEvento', 'experienciaProfesional', 'serviciosProfesionales', 'restriccionesProfesionales', 'modalidades'],
+    forbidOblig: ['serviciosIncluidos', 'serviciosNoRealizo'],
+    block: 'edecanProfesional',
+    blockFields: ['tiposEvento', 'serviciosProfesionales', 'restriccionesProfesionales'],
     viajes: true,
   },
   {
     key: 'modelos',
     ids: ['modelos'],
-    oblig: ['portfolioURL', 'modalidades'],
+    oblig: ['portfolioURL', 'tiposModelaje', 'experienciaProfesional', 'serviciosProfesionales', 'restriccionesProfesionales', 'modalidades'],
+    forbidOblig: ['serviciosIncluidos', 'serviciosNoRealizo'],
+    block: 'modelosProfesional',
+    blockFields: ['tiposModelaje', 'serviciosProfesionales', 'restriccionesProfesionales'],
     fotosMin: 6,
     viajes: true,
   },
@@ -231,12 +240,27 @@ function deltaForSub(spec) {
       break;
     case 'escort_gay':
       v.orientacion = 'Gay';
+      v.rolInteraccion = 'Versátil';
       break;
     case 'edecan':
       v.eventosDisponibles = true;
+      delete v.serviciosIncluidos;
+      delete v.serviciosNoRealizo;
+      v.modalidades = ['evento_venue'];
+      v.tiposEvento = ['Evento corporativo'];
+      v.experienciaProfesional = 'Intermedia';
+      v.serviciosProfesionales = ['Atención a invitados'];
+      v.restriccionesProfesionales = ['Servicios íntimos'];
       break;
     case 'modelos':
       v.portfolioURL = 'https://example.com/portfolio';
+      delete v.serviciosIncluidos;
+      delete v.serviciosNoRealizo;
+      v.modalidades = ['estudio'];
+      v.tiposModelaje = ['Fotografía'];
+      v.experienciaProfesional = 'Intermedia';
+      v.serviciosProfesionales = ['Sesión fotográfica'];
+      v.restriccionesProfesionales = ['Contenido explícito'];
       break;
     case 'petit':
       v.estatura = '1.55 m';

@@ -68,7 +68,6 @@ function baseValid(subId) {
     precioShow: '$1,200 MXN por canción',
     horarioMinimo: 'Por canción',
     modalidades: ['fiestas', 'clubes'],
-    desplazamientos: 'Zona local / área metropolitana',
     anosExperiencia: '3–5 años',
     venueFijo: subId === 'tabledance' ? 'Antros zona centro' : 'Monterrey y área metropolitana',
     serviciosIncluidos: ['Shows privados', 'Interacción con el público'],
@@ -98,14 +97,19 @@ ESP_2.forEach((subId) => {
   ok(`${subId} tipoShow field`, hasField(merged, 'tipoShow'), 'tipoShow');
   ok(`${subId} precioShow field`, hasField(merged, 'precioShow'), 'precioShow');
   ok(`${subId} no escort servicios sexuales`, !hasField(merged, 'realizaTrios'), 'no escort');
-  ok(`${subId} viajes inactivo`, !viajes.subcategoriaActivaViajes(subId), 'no viajes v1');
+  if (subId === 'stripper') {
+    ok('stripper viajes activo', viajes.subcategoriaActivaViajes(subId), 'stripper viaja');
+  } else {
+    ok(`${subId} viajes inactivo`, !viajes.subcategoriaActivaViajes(subId), 'no viajes tabledance');
+  }
 });
 
 ok('table_dance alias resolves', PB.matchesEspectaculo(espCtx('table_dance'), null), 'table_dance');
 ok('table_dance canonical tabledance', PB.normalizeEspectaculoSubId('table_dance') === 'tabledance', 'canonical');
 
 const stripperMerged = mergedEsp(vmCtx, 'stripper');
-ok('stripper desplazamientos oblig', stripperMerged.obligatorios.includes('desplazamientos'), stripperMerged.obligatorios.join(','));
+ok('stripper sin desplazamientos oblig', !stripperMerged.obligatorios.includes('desplazamientos'), stripperMerged.obligatorios.join(','));
+ok('stripper modalidades oblig', stripperMerged.obligatorios.includes('modalidades'), stripperMerged.obligatorios.join(','));
 
 const tdMerged = mergedEsp(vmCtx, 'tabledance');
 ok('tabledance venueFijo oblig merge', tdMerged.obligatorios.includes('venueFijo'), tdMerged.obligatorios.join(','));

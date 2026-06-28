@@ -77,7 +77,6 @@ ESP_2.forEach(({ subId, cardClass }) => {
     precioShow: '$800 MXN',
     horarioMinimo: 'Por canción',
     modalidades: ['clubes'],
-    desplazamientos: subId === 'stripper' ? 'Zona local / área metropolitana' : '',
     venueFijo: subId === 'tabledance' ? 'Antro centro' : 'Monterrey',
     serviciosIncluidos: ['Shows privados'],
     serviciosNoRealizo: ['Servicios sexuales'],

@@ -1,13 +1,12 @@
 (function(){
   const CATEGORIAS=[
-    {id:"escort",nombre:"Escort",emoji:"",label:"Escort"},
-    {id:"escort gay",nombre:"Escort Gay",emoji:"",label:"Escort Gay"},
-    {id:"escort vip",nombre:"Escort VIP",emoji:"",label:"Escort VIP"},
+    {id:"escort",nombre:"Cariñosas",emoji:"",label:"Cariñosas"},
+    {id:"escort gay",nombre:"Cariñosas gay",emoji:"",label:"Cariñosas gay"},
+    {id:"escort vip",nombre:"Cariñosas VIP",emoji:"",label:"Cariñosas VIP"},
     {id:"edecan",nombre:"Edecán",emoji:"",label:"Edecán"},
     {id:"stripper",nombre:"Stripper",emoji:"",label:"Stripper"},
     {id:"modelos",nombre:"Modelos",emoji:"",label:"Modelos"},
     {id:"gigolo",nombre:"Gigoló",emoji:"",label:"Gigoló"},
-    {id:"acompanante",nombre:"Acompañante",emoji:"",label:"Acompañante"},
     {id:"petit",nombre:"Petit",emoji:"",label:"Petit"},
     {id:"contenido",nombre:"Contenido",emoji:"",label:"Contenido"},
     {id:"tabledance",nombre:"Tabledance",emoji:"",label:"Tabledance"},
@@ -36,7 +35,8 @@
   ];
 
   const ALIASES={
-    "escort gay":"escort gay",
+    "acompanante":"escort",
+    "acompañante":"escort",
     "escort vip":"escort vip",
     "sex shop":"sex shop",
     "sexshop":"sex shop",
@@ -97,6 +97,10 @@
   }
 
   function labelCategoria(valor){
+    if(window.CariHubSubcategoriaLabels&&CariHubSubcategoriaLabels.resolveVisibleCategoria){
+      const visible=CariHubSubcategoriaLabels.resolveVisibleCategoria(valor);
+      if(visible) return visible;
+    }
     const categoria=categoriaPorValor(valor);
     return categoria?.label||String(valor||"").trim();
   }

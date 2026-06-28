@@ -186,7 +186,7 @@
       nombre: 'Adultos y Entretenimiento para Adultos',
       fuente: 'catalogo-adultos',
       panelClass: 'home-field__sector-panel--adultos',
-      bgWords: ['Spa', 'Motel', 'Escort', 'Antro']
+      bgWords: ['Spa', 'Motel', 'Cariñosas', 'Antro']
     },
     {
       id: 'bienestar',
@@ -416,7 +416,9 @@
     var sector = sectorPorId(sectorId);
     if (!sector) return [];
     if (sector.fuente === 'catalogo-adultos' && window.CATALOGO_CATEGORIAS_CARIHUB) {
-      return window.CATALOGO_CATEGORIAS_CARIHUB.map(function (c) {
+      return window.CATALOGO_CATEGORIAS_CARIHUB.filter(function (c) {
+        return !global.CariHubSubcategoriaLabels || !CariHubSubcategoriaLabels.ocultaEnRegistro(c.id);
+      }).map(function (c) {
         return { id: c.id, nombre: c.nombre, emoji: c.emoji };
       });
     }
