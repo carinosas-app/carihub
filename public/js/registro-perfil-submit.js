@@ -304,7 +304,8 @@
       descripcionCompleta: mappedBloques.sobreMi || cp.descripcionCorta || '',
       precio: cp.precioDesde || '',
       modalidad: cp.modalidad || '',
-      horario: mappedBloques.horario || cp.horarioPublico || '',
+      horario: mappedBloques.horario || mappedBloques.horarioDetalle || cp.horarioPublico || '',
+      horarioDetalle: mappedBloques.horarioDetalle || mappedBloques.horario || '',
       servicios: Array.isArray(mappedBloques.serviciosIncluidos)
         ? mappedBloques.serviciosIncluidos.join('; ')
         : (cp.serviciosPrincipales || ''),
