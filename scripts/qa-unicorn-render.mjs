@@ -115,8 +115,14 @@ function buildUnicornPreviewPayload(RP, ctx) {
     objetivosPerfil: ['Conocer parejas', 'Viajes'],
     tipoUnicornio: 'Mujer',
     buscoConocer: ['Parejas', 'Mujeres'],
-    haceColaboraciones: 'No',
+    tipoParejaPreferida: ['Hombre + Mujer'],
+    finalidadEncuentro: ['Socializar'],
     estadoPerfil: 'Disponible para encuentros',
+    experiencia: 'Intermedio',
+    ambientePreferido: ['Hotel'],
+    estilo: 'Discreto',
+    serviciosLifestyle: ['Citas con parejas'],
+    haceColaboraciones: 'No',
     modalidades: ['hotel'],
     metodosPago: ['Efectivo'],
     mostrarObjetivosPerfil: 'Sí',
@@ -243,6 +249,15 @@ try {
   ok('aplicarPerfilDesdeRegistro badgeUnicorn', /badgeUnicorn:/.test(aplicarBlock), 'campo preview');
   ok('aplicarPerfilDesdeRegistro buscan prioriza buscoConocer', /buscan:Array\.isArray\(u\.buscoConocer\)/.test(aplicarBlock), 'fallback buscan');
   ok('aplicarPerfilDesdeRegistro anti-contam unicorn', /delete clean\.swingerPerfil/.test(aplicarBlock) && /delete clean\.cuckoldHotwifePerfil/.test(aplicarBlock), 'strip nested');
+  ok('aplicarPerfilDesdeRegistro tipoUnicornio', /clean\.tipoUnicornio/.test(aplicarBlock), 'campo preview');
+  ok('aplicarPerfilDesdeRegistro tipoParejaPreferida', /clean\.tipoParejaPreferida/.test(aplicarBlock), 'campo preview');
+  ok('aplicarPerfilDesdeRegistro finalidadEncuentro', /clean\.finalidadEncuentro/.test(aplicarBlock), 'campo preview');
+  ok('aplicarPerfilDesdeRegistro estadoPerfil', /clean\.estadoPerfil/.test(aplicarBlock), 'campo preview');
+  ok('aplicarPerfilDesdeRegistro experiencia', /clean\.experiencia/.test(aplicarBlock), 'campo preview');
+  ok('aplicarPerfilDesdeRegistro ambientePreferido', /clean\.ambientePreferido/.test(aplicarBlock), 'campo preview');
+  ok('aplicarPerfilDesdeRegistro estilo', /clean\.estilo/.test(aplicarBlock), 'campo preview');
+  ok('aplicarPerfilDesdeRegistro serviciosLifestyle', /clean\.serviciosLifestyle/.test(aplicarBlock), 'campo preview');
+  ok('aplicarPerfilDesdeRegistro unicornPerfil nested', /clean\.unicornPerfil=Object\.assign/.test(aplicarBlock), 'nested preview');
 
   const previewCtx = loadAplicarPerfilDesdeRegistro(perfilHtml);
   const previewU = buildUnicornPreviewPayload(ctx.CariHubRegistroPublicBlocks, ctx);
@@ -257,6 +272,15 @@ try {
   ok('preview registro sin cuckoldHotwifePerfil', demoPreview.cuckoldHotwifePerfil == null, JSON.stringify(demoPreview.cuckoldHotwifePerfil));
   ok('preview registro arquetipo lifestyle', demoPreview.arquetipo === 'persona_lifestyle', demoPreview.arquetipo);
   ok('preview registro tipoPerfil persona', demoPreview.tipoPerfil === 'persona', demoPreview.tipoPerfil);
+  ok('preview iframe ruta B tipoUnicornio', demoPreview.tipoUnicornio === 'Mujer', demoPreview.tipoUnicornio);
+  ok('preview iframe ruta B tipoParejaPreferida', Array.isArray(demoPreview.tipoParejaPreferida) && demoPreview.tipoParejaPreferida[0] === 'Hombre + Mujer', JSON.stringify(demoPreview.tipoParejaPreferida));
+  ok('preview iframe ruta B finalidadEncuentro', Array.isArray(demoPreview.finalidadEncuentro) && demoPreview.finalidadEncuentro[0] === 'Socializar', JSON.stringify(demoPreview.finalidadEncuentro));
+  ok('preview iframe ruta B estadoPerfil', demoPreview.estadoPerfil === 'Disponible para encuentros', demoPreview.estadoPerfil);
+  ok('preview iframe ruta B experiencia', demoPreview.experiencia === 'Intermedio', demoPreview.experiencia);
+  ok('preview iframe ruta B ambientePreferido', Array.isArray(demoPreview.ambientePreferido) && demoPreview.ambientePreferido[0] === 'Hotel', JSON.stringify(demoPreview.ambientePreferido));
+  ok('preview iframe ruta B estilo', demoPreview.estilo === 'Discreto', demoPreview.estilo);
+  ok('preview iframe ruta B serviciosLifestyle', Array.isArray(demoPreview.serviciosLifestyle) && demoPreview.serviciosLifestyle[0] === 'Citas con parejas', JSON.stringify(demoPreview.serviciosLifestyle));
+  ok('preview iframe ruta B unicornPerfil nested', demoPreview.unicornPerfil && demoPreview.unicornPerfil.tipoUnicornio === 'Mujer', JSON.stringify(demoPreview.unicornPerfil && demoPreview.unicornPerfil.tipoUnicornio));
 } catch (e) {
   fail.push({ name: 'exception', detail: e.message });
 }
