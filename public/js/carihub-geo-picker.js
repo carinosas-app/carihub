@@ -141,7 +141,9 @@
   }
 
   function usesHomePaisPremium() {
-    return document.body.getAttribute('data-page') === 'home';
+    return document.body.getAttribute('data-page') === 'home' ||
+      document.body.classList.contains('rp-screen1-form') ||
+      document.body.classList.contains('rp-screen4-form');
   }
 
   function ensureModal() {
@@ -725,15 +727,14 @@
 
   function usesRegistroGeoShell() {
     return document.body.classList.contains('rp-screen1-form') ||
-      document.body.classList.contains('rp-screen4-form') ||
-      document.body.getAttribute('data-page') === 'home';
+      document.body.classList.contains('rp-screen4-form');
   }
 
   function syncRegistroGeoTheme(modal) {
     if (!modal) return;
     var isRegistro = usesRegistroGeoShell();
-    var isHome = document.body.getAttribute('data-page') === 'home';
-    modal.classList.toggle('ch-geo-modal--home', isHome);
+    var isUnifiedShell = usesHomePaisPremium();
+    modal.classList.toggle('ch-geo-modal--home', isUnifiedShell);
     modal.classList.toggle('ch-geo-modal--registro', isRegistro);
     if (!isRegistro) {
       modal.removeAttribute('data-rp-sector');

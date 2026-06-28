@@ -1314,12 +1314,26 @@ function abrirSelector(tipo){
   if(tipo==="ciudad")titulo.innerText="Selecciona ciudad";
 
   if(tipo==="estado"&&!paisSeleccionado){
-    alert("Primero selecciona país.");
+    if(window.CariHubUiNotices&&CariHubUiNotices.showInfoModal){
+      CariHubUiNotices.showInfoModal({
+        title:"Selecciona un país",
+        message:"Primero selecciona un país para poder elegir estado.",
+        okLabel:"Entendido"
+      });
+    }
     return;
   }
 
   if(tipo==="ciudad"&&(!paisSeleccionado||!estadoSeleccionado)){
-    alert("Primero selecciona país y estado.");
+    if(window.CariHubUiNotices&&CariHubUiNotices.showInfoModal){
+      CariHubUiNotices.showInfoModal({
+        title:"Completa la ubicación",
+        message:paisSeleccionado
+          ?"Primero selecciona un estado para poder elegir ciudad."
+          :"Primero selecciona un país y un estado para poder elegir ciudad.",
+        okLabel:"Entendido"
+      });
+    }
     return;
   }
 
@@ -2814,7 +2828,8 @@ const params = new URLSearchParams(window.location.search);
 <script src="js/banner-general-slides.js"></script>
 <script src="js/carihub-slot-preview-images.js?v=20260628b"></script>
 <script src="js/carihub-sector-sparkles.js?v=20260628b"></script>
-<script src="js/carihub-geo-picker.js?v=20260628b"></script>
+<script src="js/carihub-ui-notices.js?v=20260629v3"></script>
+<script src="js/carihub-geo-picker.js?v=20260630geo1"></script>
 <script src="js/ch-slot-dock.js?v=20260628b"></script>
 <script src="js/banner-home-laterales.js"></script>
 <script src="js/resultados-demo.js"></script>
