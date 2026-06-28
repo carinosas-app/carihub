@@ -6,6 +6,11 @@ import fs from 'fs';
 import path from 'path';
 import vm from 'vm';
 import { fileURLToPath } from 'url';
+import {
+  extractAplicarPerfilDesdeRegistroBlock,
+  readPerfilPublicoHtml,
+  runPreviewRouteB,
+} from './qa-preview-iframe-route-b-lib.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.join(__dirname, '..', 'public', 'js');
@@ -76,30 +81,6 @@ function unicornPerfilDemo() {
 function extractDemoUnicornBlock(html) {
   const m = html.match(/\/\* Unicorn — schema:[\s\S]*?DEMO\.unicorn=\{([\s\S]*?)\n\};/);
   return m ? m[0] : '';
-}
-
-function extractFunctionBlock(html, fnName, nextFnName) {
-  const start = html.indexOf(`function ${fnName}`);
-  const end = html.indexOf(`function ${nextFnName}`, start + 1);
-  if (start < 0 || end < 0 || end <= start) return '';
-  return html.slice(start, end);
-}
-
-function extractAplicarPerfilDesdeRegistroBlock(html) {
-  return [
-    extractFunctionBlock(html, 'mergeParejaGrupoRegistroFields', 'parejaPieBottomHTML'),
-    extractFunctionBlock(html, 'demoAssetDesdeResultados', 'aplicarPerfilDesdeRegistro'),
-    extractFunctionBlock(html, 'aplicarPerfilDesdeRegistro', 'aplicarPerfilResultadosEnDemo'),
-  ].join('\n');
-}
-
-function loadAplicarPerfilDesdeRegistro(html) {
-  const slice = extractAplicarPerfilDesdeRegistroBlock(html);
-  const ctx = makeCtx();
-  ctx.DEMO = { unicorn: { nombre: 'Demo base', alias: 'Demo base' } };
-  ctx.window = ctx;
-  vm.runInContext(slice, ctx);
-  return ctx;
 }
 
 function buildUnicornPreviewPayload(RP, ctx) {
@@ -204,7 +185,7 @@ try {
   const svcIds = svcBlock ? svcBlock.fields.map((f) => f.id) : [];
   ok('campos registro lifestyle', ids.includes('tipoUnicornio') && svcIds.includes('serviciosLifestyle'), ids.join(', ') + ' | ' + svcIds.join(', '));
 
-  const perfilHtml = fs.readFileSync(path.join(repoRoot, 'public', 'perfil-publico.html'), 'utf8');
+  const perfilHtml = readPerfilPublicoHtml(repoRoot);
   const demoBlock = extractDemoUnicornBlock(perfilHtml);
   ok('DEMO.unicorn persona', /tipoPerfil:"persona"/.test(demoBlock), 'tipoPerfil');
   ok('DEMO.unicorn arquetipo', /arquetipo:"persona_lifestyle"/.test(demoBlock), 'arquetipo');
@@ -259,10 +240,8 @@ try {
   ok('aplicarPerfilDesdeRegistro serviciosLifestyle', /clean\.serviciosLifestyle/.test(aplicarBlock), 'campo preview');
   ok('aplicarPerfilDesdeRegistro unicornPerfil nested', /clean\.unicornPerfil=Object\.assign/.test(aplicarBlock), 'nested preview');
 
-  const previewCtx = loadAplicarPerfilDesdeRegistro(perfilHtml);
   const previewU = buildUnicornPreviewPayload(ctx.CariHubRegistroPublicBlocks, ctx);
-  previewCtx.aplicarPerfilDesdeRegistro('unicorn', previewU);
-  const demoPreview = previewCtx.DEMO.unicorn;
+  const demoPreview = runPreviewRouteB(perfilHtml, 'unicorn', previewU);
   ok('preview registro buscoConocer', Array.isArray(demoPreview.buscoConocer) && demoPreview.buscoConocer.length === 2, JSON.stringify(demoPreview.buscoConocer));
   ok('preview registro objetivosPerfil', Array.isArray(demoPreview.objetivosPerfil) && demoPreview.objetivosPerfil.length === 2, JSON.stringify(demoPreview.objetivosPerfil));
   ok('preview registro objetivoPrincipal', demoPreview.objetivoPrincipal === 'Conocer parejas', demoPreview.objetivoPrincipal);

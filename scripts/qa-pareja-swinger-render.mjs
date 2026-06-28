@@ -6,9 +6,15 @@ import fs from 'fs';
 import path from 'path';
 import vm from 'vm';
 import { fileURLToPath } from 'url';
+import {
+  extractAplicarPerfilDesdeRegistroBlock,
+  readPerfilPublicoHtml,
+  runPreviewRouteB,
+} from './qa-preview-iframe-route-b-lib.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.join(__dirname, '..', 'public', 'js');
+const repoRoot = path.join(__dirname, '..');
 
 function loadScript(relativePath, ctx) {
   const code = fs.readFileSync(path.join(root, relativePath), 'utf8');
@@ -73,6 +79,62 @@ function swingerPerfilDemo() {
   };
 }
 
+function swingerCtx() {
+  return {
+    subcategoriaId: 'swinger',
+    subcategoria: 'swinger',
+    arquetipo: 'pareja_grupo',
+    categoriaPrincipal: 'Adultos',
+  };
+}
+
+function buildSwingerPreviewPayload(RP, V) {
+  const ctx = swingerCtx();
+  let bloques = {
+    aliasPareja: 'Pareja Luna',
+    alias: 'Pareja Luna',
+    configuracionGrupo: 'pareja_hm',
+    miembros: [
+      { etiquetaPublica: 'Él', generoPresentacion: 'Hombre', edad: 40 },
+      { etiquetaPublica: 'Ella', generoPresentacion: 'Mujer', edad: 38 },
+    ],
+    reglasAcceso: 'Solo mayores de edad',
+    modalidades: ['recibe', 'viaja'],
+    metodosPago: ['Efectivo', 'Transferencia'],
+    horarioDetalle: 'Vie–Dom 20:00–02:00',
+    sobreMi: 'Pareja relajada y respetuosa.',
+    alcanceDesplazamiento: 'cualquier_ciudad_pais',
+    viajesProgramados: 'si',
+    gastosTraslado: 'cliente',
+    anticipacionViaje: '48h',
+    objetivosPerfil: ['Conocer parejas', 'Eventos'],
+    intercambioSwinger: 'A convenir',
+    tipoInteraccion: ['Intercambio swinger'],
+    modalidadInteraccion: ['Discreta'],
+    atiendenA: 'Parejas',
+    aceptanSolteros: 'A convenir',
+    aceptanParejasPrincipiantes: 'Sí',
+    experienciaEnLifestyle: 'Experimentados',
+    mostrarObjetivosPerfil: 'Sí',
+    mostrarAtiendenA: 'Sí',
+  };
+  bloques = RP.finalizeParejaSwingerValues(bloques);
+  bloques = RP.finalizeParejaGrupoValues(bloques);
+  bloques.viajesDesplazamiento = V.buildViajesDesplazamiento(bloques, bloques.modalidades || []);
+  let u = {
+    subcategoriaId: 'swinger',
+    alias: 'Pareja Luna',
+    aliasPareja: 'Pareja Luna',
+    ciudad: 'Monterrey',
+    zona: 'San Pedro',
+    pais: 'México',
+    estado: 'Nuevo León',
+  };
+  u = RP.mapToPerfil(u, bloques, ctx);
+  if (RP.applySwingerPerfilFields) u = RP.applySwingerPerfilFields(u, bloques, ctx);
+  return u;
+}
+
 try {
   const ctx = makeCtx();
   loadScript('carihub-viajes-desplazamiento.js', ctx);
@@ -119,6 +181,36 @@ try {
   const swBlock = ctx.CARIHUB_REGISTRO_PAREJA_BLOCKS.blocks.find((b) => b.id === 'swingerPerfil');
   const ids = swBlock.fields.map((f) => f.id);
   ok('campos registro A2.3b', ids.includes('aceptanParejasPrincipiantes') && ids.includes('experienciaEnLifestyle'), ids.join(', '));
+
+  const perfilHtml = readPerfilPublicoHtml(repoRoot);
+  const aplicarBlock = extractAplicarPerfilDesdeRegistroBlock(perfilHtml);
+  ok('aplicarPerfilDesdeRegistro intercambioSwinger', /clean\.intercambioSwinger/.test(aplicarBlock), 'campo preview');
+  ok('aplicarPerfilDesdeRegistro objetivosPerfil', /clean\.objetivosPerfil/.test(aplicarBlock), 'campo preview');
+  ok('aplicarPerfilDesdeRegistro swingerPerfil nested', /clean\.swingerPerfil=Object\.assign/.test(aplicarBlock), 'nested preview');
+  ok('aplicarPerfilDesdeRegistro atiendenA', /clean\.atiendenA/.test(aplicarBlock), 'campo preview');
+  ok('aplicarPerfilDesdeRegistro aceptanParejasPrincipiantes', /clean\.aceptanParejasPrincipiantes/.test(aplicarBlock), 'campo preview');
+  ok('aplicarPerfilDesdeRegistro experienciaEnLifestyle', /clean\.experienciaEnLifestyle/.test(aplicarBlock), 'campo preview');
+
+  const previewU = buildSwingerPreviewPayload(ctx.CariHubRegistroPublicBlocks, ctx.CariHubViajesDesplazamiento);
+  const demoPreview = runPreviewRouteB(perfilHtml, 'pareja', previewU);
+  ok('preview registro intercambioSwinger', demoPreview.intercambioSwinger === 'A convenir', demoPreview.intercambioSwinger);
+  ok('preview registro objetivosPerfil', Array.isArray(demoPreview.objetivosPerfil) && demoPreview.objetivosPerfil.length === 2, JSON.stringify(demoPreview.objetivosPerfil));
+  ok('preview registro objetivoPrincipal', demoPreview.objetivoPrincipal === 'Conocer parejas', demoPreview.objetivoPrincipal);
+  ok('preview registro atiendenA', demoPreview.atiendenA === 'Parejas', demoPreview.atiendenA);
+  ok('preview registro tipoPerfil pareja_grupo', demoPreview.tipoPerfil === 'pareja_grupo', demoPreview.tipoPerfil);
+  ok('preview registro subcategoriaId swinger', demoPreview.subcategoriaId === 'swinger', demoPreview.subcategoriaId);
+  ok('preview registro aceptanParejasPrincipiantes', demoPreview.aceptanParejasPrincipiantes === 'Sí', demoPreview.aceptanParejasPrincipiantes);
+  ok('preview registro experienciaEnLifestyle', demoPreview.experienciaEnLifestyle === 'Experimentados', demoPreview.experienciaEnLifestyle);
+  ok('preview registro sin cuckoldHotwifePerfil', demoPreview.cuckoldHotwifePerfil == null, JSON.stringify(demoPreview.cuckoldHotwifePerfil));
+  ok('preview registro sin unicornPerfil', demoPreview.unicornPerfil == null, JSON.stringify(demoPreview.unicornPerfil));
+  ok('preview registro sin dinamica C/H', !demoPreview.dinamica, String(demoPreview.dinamica));
+  ok('preview iframe ruta B intercambioSwinger', demoPreview.intercambioSwinger === 'A convenir', demoPreview.intercambioSwinger);
+  ok('preview iframe ruta B objetivosPerfil', Array.isArray(demoPreview.objetivosPerfil) && demoPreview.objetivosPerfil[0] === 'Conocer parejas', JSON.stringify(demoPreview.objetivosPerfil));
+  ok('preview iframe ruta B tipoInteraccion', Array.isArray(demoPreview.tipoInteraccion) && demoPreview.tipoInteraccion[0] === 'Intercambio swinger', JSON.stringify(demoPreview.tipoInteraccion));
+  ok('preview iframe ruta B modalidadInteraccion', Array.isArray(demoPreview.modalidadInteraccion) && demoPreview.modalidadInteraccion[0] === 'Discreta', JSON.stringify(demoPreview.modalidadInteraccion));
+  ok('preview iframe ruta B swingerPerfil nested', demoPreview.swingerPerfil && demoPreview.swingerPerfil.intercambioSwinger === 'A convenir', JSON.stringify(demoPreview.swingerPerfil && demoPreview.swingerPerfil.intercambioSwinger));
+  ok('preview iframe ruta B aliasPareja', demoPreview.aliasPareja === 'Pareja Luna', demoPreview.aliasPareja);
+  ok('preview iframe ruta B configuracionGrupoLabel', demoPreview.configuracionGrupoLabel === 'Hombre + Mujer', demoPreview.configuracionGrupoLabel);
 } catch (e) {
   fail.push({ name: 'exception', detail: e.message });
 }

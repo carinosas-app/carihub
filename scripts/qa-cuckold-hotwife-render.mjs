@@ -6,6 +6,11 @@ import fs from 'fs';
 import path from 'path';
 import vm from 'vm';
 import { fileURLToPath } from 'url';
+import {
+  extractAplicarPerfilDesdeRegistroBlock,
+  readPerfilPublicoHtml,
+  runPreviewRouteB,
+} from './qa-preview-iframe-route-b-lib.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.join(__dirname, '..', 'public', 'js');
@@ -99,10 +104,73 @@ function extractDemoParejaBlock(html) {
   return m ? m[0] : '';
 }
 
+function chCtx() {
+  return {
+    subcategoriaId: 'cuckold hotwife',
+    subcategoria: 'Cuckold / Hotwife',
+    arquetipo: 'pareja_grupo',
+    tipoPerfil: 'pareja_grupo',
+    categoriaPrincipal: 'Adultos',
+  };
+}
+
+function buildCuckoldPreviewPayload(RP, V) {
+  const ctx = chCtx();
+  let bloques = {
+    aliasPareja: 'Pareja CH Render',
+    alias: 'Pareja CH Render',
+    configuracionGrupo: 'pareja_hm',
+    miembros: [
+      { etiquetaPublica: 'Él', generoPresentacion: 'Hombre', edad: 42 },
+      { etiquetaPublica: 'Ella', generoPresentacion: 'Mujer', edad: 39 },
+    ],
+    reglasAcceso: 'Cita previa',
+    modalidades: ['recibe', 'viaja'],
+    metodosPago: ['Efectivo', 'Transferencia'],
+    horarioDetalle: 'Vie–Dom 20:00–02:00',
+    sobreMi: 'Pareja hotwife discreta.',
+    alcanceDesplazamiento: 'toda_ciudad',
+    viajesProgramados: 'a_convenir',
+    gastosTraslado: 'se_acuerda',
+    anticipacionViaje: '48h',
+    dinamica: 'hotwife',
+    buscan: ['Bulls', 'Unicorns'],
+    tipoExperiencia: ['Encuentros privados', 'Hotel / motel'],
+    participacionPareja: 'Solo observa',
+    aceptanSolteros: 'Solo hombres',
+    aceptanPrincipiantes: 'A convenir',
+    experienciaEnLifestyle: 'Experimentados',
+    haceColaboraciones: 'Sí',
+    colaboraCon: ['Unicorns'],
+    mostrarBuscan: 'Sí',
+    mostrarParticipacion: 'Sí',
+    mostrarColaboraciones: 'Sí',
+  };
+  bloques = RP.finalizeParejaSwingerValues(bloques, ctx);
+  bloques = RP.finalizeUnicornValues(bloques, ctx);
+  bloques = RP.finalizeCuckoldHotwifeValues(bloques, ctx);
+  bloques = RP.finalizeParejaGrupoValues(bloques);
+  bloques.viajesDesplazamiento = V.buildViajesDesplazamiento(bloques, bloques.modalidades || []);
+  let u = {
+    subcategoriaId: 'cuckold hotwife',
+    alias: 'Pareja CH Render',
+    aliasPareja: 'Pareja CH Render',
+    ciudad: 'Monterrey',
+    zona: 'San Pedro',
+    pais: 'México',
+    estado: 'Nuevo León',
+    precioDesde: '2000',
+  };
+  u = RP.mapToPerfil(u, bloques, ctx);
+  if (RP.applyCuckoldHotwifePerfilFields) u = RP.applyCuckoldHotwifePerfilFields(u, bloques, ctx);
+  return u;
+}
+
 try {
   const ctx = makeCtx();
   loadScript('carihub-viajes-desplazamiento.js', ctx);
   loadScript('data/registro-adultos-pareja-blocks.js', ctx);
+  loadScript('data/registro-adultos-lifestyle-blocks.js', ctx);
   loadScript('carihub-registro-public-blocks.js', ctx);
   loadScript('data/registro-schema-index.js', ctx);
   loadScript('resultados-demo.js', ctx);
@@ -166,7 +234,15 @@ try {
   const uniCard = R.cardHTML(uni, { categoria: 'Unicorn' });
   ok('unicorn sin tarjeta C/H', !uniCard.includes('res-card--cuckold-hotwife'), uniCard);
 
-  const perfilHtml = fs.readFileSync(path.join(repoRoot, 'public', 'perfil-publico.html'), 'utf8');
+  const perfilHtml = readPerfilPublicoHtml(repoRoot);
+  const aplicarBlock = extractAplicarPerfilDesdeRegistroBlock(perfilHtml);
+  ok('aplicarPerfilDesdeRegistro dinamica', /clean\.dinamica/.test(aplicarBlock), 'campo preview');
+  ok('aplicarPerfilDesdeRegistro participacionPareja', /clean\.participacionPareja/.test(aplicarBlock), 'campo preview');
+  ok('aplicarPerfilDesdeRegistro cuckoldHotwifePerfil nested', /clean\.cuckoldHotwifePerfil=Object\.assign/.test(aplicarBlock), 'nested preview');
+  ok('aplicarPerfilDesdeRegistro badgeHotwife init', /badgeHotwife:!!u\.badgeHotwife/.test(aplicarBlock), 'campo preview');
+  ok('aplicarPerfilDesdeRegistro buscan pareja', /clean\.buscan=u\.buscan\.slice/.test(aplicarBlock), 'campo preview');
+  ok('aplicarPerfilDesdeRegistro tipoExperiencia', /clean\.tipoExperiencia/.test(aplicarBlock), 'campo preview');
+
   const demoBlock = extractDemoParejaBlock(perfilHtml);
   ok('DEMO pareja subcategoriaId', /subcategoriaId:"cuckold_hotwife"/.test(demoBlock), 'id');
   ok('DEMO pareja arquetipo', /arquetipo:"pareja_grupo"/.test(demoBlock), 'arquetipo');
@@ -209,6 +285,26 @@ try {
     'routing'
   );
   ok('rule A4.4 presente', fs.existsSync(path.join(repoRoot, '.cursor', 'rules', 'registro-pareja-cuckold-hotwife.mdc')), 'rule');
+
+  const previewU = buildCuckoldPreviewPayload(ctx.CariHubRegistroPublicBlocks, ctx.CariHubViajesDesplazamiento);
+  const demoPreview = runPreviewRouteB(perfilHtml, 'pareja', previewU);
+  ok('preview registro dinamica', demoPreview.dinamica === 'hotwife', demoPreview.dinamica);
+  ok('preview registro dinamicaLabel', demoPreview.dinamicaLabel === 'Hotwife', demoPreview.dinamicaLabel);
+  ok('preview registro participacionPareja', demoPreview.participacionPareja === 'Solo observa', demoPreview.participacionPareja);
+  ok('preview registro buscan', Array.isArray(demoPreview.buscan) && demoPreview.buscan[0] === 'Bulls', JSON.stringify(demoPreview.buscan));
+  ok('preview registro badgeHotwife', demoPreview.badgeHotwife === true, String(demoPreview.badgeHotwife));
+  ok('preview registro tipoPerfil pareja_grupo', demoPreview.tipoPerfil === 'pareja_grupo', demoPreview.tipoPerfil);
+  ok('preview registro subcategoriaId C/H', demoPreview.subcategoriaId === 'cuckold hotwife', demoPreview.subcategoriaId);
+  ok('preview registro sin intercambioSwinger', !demoPreview.intercambioSwinger, String(demoPreview.intercambioSwinger));
+  ok('preview registro sin swingerPerfil', demoPreview.swingerPerfil == null, JSON.stringify(demoPreview.swingerPerfil));
+  ok('preview registro sin unicornPerfil', demoPreview.unicornPerfil == null, JSON.stringify(demoPreview.unicornPerfil));
+  ok('preview iframe ruta B dinamica', demoPreview.dinamica === 'hotwife', demoPreview.dinamica);
+  ok('preview iframe ruta B participacionPareja', demoPreview.participacionPareja === 'Solo observa', demoPreview.participacionPareja);
+  ok('preview iframe ruta B tipoExperiencia', Array.isArray(demoPreview.tipoExperiencia) && demoPreview.tipoExperiencia[0] === 'Encuentros privados', JSON.stringify(demoPreview.tipoExperiencia));
+  ok('preview iframe ruta B cuckoldHotwifePerfil nested', demoPreview.cuckoldHotwifePerfil && demoPreview.cuckoldHotwifePerfil.dinamica === 'hotwife', JSON.stringify(demoPreview.cuckoldHotwifePerfil && demoPreview.cuckoldHotwifePerfil.dinamica));
+  ok('preview iframe ruta B aliasPareja', demoPreview.aliasPareja === 'Pareja CH Render', demoPreview.aliasPareja);
+  ok('preview iframe ruta B colaboraCon', Array.isArray(demoPreview.colaboraCon) && demoPreview.colaboraCon[0] === 'Unicorns', JSON.stringify(demoPreview.colaboraCon));
+  ok('preview iframe ruta B badgeCuckold off hotwife', demoPreview.badgeCuckold === false, String(demoPreview.badgeCuckold));
 } catch (e) {
   fail.push({ name: 'exception', detail: e.message + (e.stack ? '\n' + e.stack.split('\n')[1] : '') });
 }
