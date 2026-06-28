@@ -417,7 +417,7 @@
     if (!sector) return [];
     if (sector.fuente === 'catalogo-adultos' && window.CATALOGO_CATEGORIAS_CARIHUB) {
       return window.CATALOGO_CATEGORIAS_CARIHUB.filter(function (c) {
-        return !global.CariHubSubcategoriaLabels || !CariHubSubcategoriaLabels.ocultaEnRegistro(c.id);
+        return !window.CariHubSubcategoriaLabels || !CariHubSubcategoriaLabels.ocultaEnRegistro(c.id);
       }).map(function (c) {
         return { id: c.id, nombre: c.nombre, emoji: c.emoji };
       });
