@@ -63,7 +63,7 @@
       slide =
         '<div class="ch-slot-dock__slide is-active ch-slot-dock__mock ch-slot-dock__mock--' + kind + '" aria-hidden="false">' +
           '<span class="ch-slot-dock__mock-bg ch-slot-dock__mock-bg--' + kind + '" aria-hidden="true"></span>' +
-          '<img class="ch-slot-dock__img ch-slot-dock__img--mock" src="' + esc(mock.src) + '" alt="' + esc(mock.alt) + '" decoding="async">' +
+          '<img class="ch-slot-dock__img ch-slot-dock__img--mock ch-media-ph ch-media-ph--' + (kind === 'libe' ? 'live' : 'estado') + '" src="' + esc(mock.src) + '" alt="' + esc(mock.alt) + '" decoding="async">' +
           '<span class="ch-slot-dock__slot-kind">' + esc(mock.label) + '</span>' +
           '<span class="ch-slot-dock__vacant">' + esc(mock.vacantMsg) + '</span>' +
           (isRail ? '<span class="ch-slot-dock__vacant-hint">' + esc(mock.vacantHint) + '</span>' : '') +

@@ -17,6 +17,7 @@
 <script src="../js/data/registro-schema-index.js"></script>
 <script src="../js/carihub-field-engine-lite.js"></script>
 <script src="../js/carihub-public-render-lite.js"></script>
+<script src="../js/carihub-media-placeholders.js?v=20260630ph1"></script>
 <script src="../js/resultados-demo.js"></script>
 <script src="../js/perfil-publico-init.js"></script>
 <script src="../js/carihub-messenger-privacidad-ui.js"></script>
@@ -2157,13 +2158,19 @@ function foto(seed, tipo){
 /* ============ Lluvia de monedas doradas (donaciones en vivo) ============
    Cae en TODA la pantalla: la ve quien transmite y quien lo está viendo.
    Poca = simple · Lluvia = fuerte · Diluvio = casi llena la pantalla. */
-var LIVE_EN_VIVO_IMG="img/live-en-vivo-libe.png";
-var ESTADO_PUBLICADO_IMG="img/estado-publicado-libe.png";
+var LIVE_EN_VIVO_IMG=(window.CariHubMediaPlaceholders&&CariHubMediaPlaceholders.url)?CariHubMediaPlaceholders.url("live"):"assets/placeholders/live-placeholder.webp";
+var ESTADO_PUBLICADO_IMG=(window.CariHubMediaPlaceholders&&CariHubMediaPlaceholders.url)?CariHubMediaPlaceholders.url("estado"):"assets/placeholders/estado-placeholder.webp";
 function livePreviewImgHTML(alt){
-  return '<img src="'+LIVE_EN_VIVO_IMG+'" alt="'+safe(alt||"Transmisión en vivo")+'" decoding="async">';
+  if(window.CariHubMediaPlaceholders&&CariHubMediaPlaceholders.liveThumbHtml){
+    return CariHubMediaPlaceholders.liveThumbHtml(null,alt||"Transmisión en vivo");
+  }
+  return '<img class="ch-media-ph" src="'+LIVE_EN_VIVO_IMG+'" alt="'+safe(alt||"Transmisión en vivo")+'" decoding="async">';
 }
 function estadoPreviewImgHTML(alt){
-  return '<img src="'+ESTADO_PUBLICADO_IMG+'" alt="'+safe(alt||"Estado publicado")+'" decoding="async">';
+  if(window.CariHubMediaPlaceholders&&CariHubMediaPlaceholders.estadoThumbHtml){
+    return CariHubMediaPlaceholders.estadoThumbHtml(null,alt||"Estado publicado");
+  }
+  return '<img class="ch-media-ph" src="'+ESTADO_PUBLICADO_IMG+'" alt="'+safe(alt||"Estado publicado")+'" decoding="async">';
 }
 function coinMini(diamante){
   var id="rc"+(++_fid);

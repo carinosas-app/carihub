@@ -88,7 +88,7 @@
   function buildEstadoMockSlide() {
     return (
       '<div class="pb-slot__slide is-active res-midband__mock res-midband__mock--estado" aria-hidden="false">' +
-        '<img class="res-midband__mock-estado-photo" src="' + esc(previewImg('estados')) + '" alt="Estado publicado — Mi estado" width="380" height="188" decoding="async">' +
+        '<img class="res-midband__mock-estado-photo ch-media-ph ch-media-ph--estado" src="' + esc(previewImg('estados')) + '" alt="Estado publicado — Mi estado" width="380" height="188" decoding="async">' +
         '<span class="res-sr-vacant-msg">Anúnciate aquí</span>' +
       '</div>'
     );
@@ -97,7 +97,7 @@
   function buildLiveMockSlide() {
     return (
       '<div class="pb-slot__slide is-active res-midband__mock res-midband__mock--live" aria-hidden="false">' +
-        '<img class="res-midband__mock-live-photo" src="' + esc(previewImg('libe')) + '" alt="Transmisión en vivo — valeria.music" width="380" height="188" decoding="async">' +
+        '<img class="res-midband__mock-live-photo ch-media-ph ch-media-ph--live" src="' + esc(previewImg('libe')) + '" alt="Transmisión en vivo — valeria.music" width="380" height="188" decoding="async">' +
         '<span class="res-sr-vacant-msg">Anúnciate aquí</span>' +
       '</div>'
     );
