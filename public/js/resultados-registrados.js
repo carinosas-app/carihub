@@ -63,9 +63,86 @@
     return [];
   }
 
-  function normalizarPerfilFirestore(doc) {
-    var data = doc.data() || {};
-    var id = doc.id;
+  function ctxHydrateFromFirestore(data) {
+    data = data || {};
+    return {
+      subcategoriaId: data.subcategoriaId || '',
+      subcategoria: data.subcategoria || '',
+      arquetipo: data.arquetipo || '',
+      tipoPerfil: data.tipoPerfil || '',
+      categoriaPrincipal: data.categoria || '',
+      categoria: data.categoria || '',
+      formularioId: data.formularioId || '',
+      sectorId: data.sectorId || ''
+    };
+  }
+
+  /**
+   * MP-SUBMIT-HYDRATE — reconstruye perfil público desde camposPublicos.bloquesPublicos.
+   * Fallback: devuelve base sin cambios si no hay bloques o mapToPerfil no está cargado.
+   */
+  function hydratePerfilFromFirestoreDoc(data, base) {
+    base = base || {};
+    data = data || {};
+    var cp = data.camposPublicos;
+    var bloques = cp && cp.bloquesPublicos;
+    if (!bloques) return base;
+    var blocks = global.CariHubRegistroPublicBlocks;
+    if (!blocks || typeof blocks.mapToPerfil !== 'function') return base;
+
+    var ctx = ctxHydrateFromFirestore(data);
+    var seed = {
+      __id: base.__id,
+      uid: base.uid,
+      __demo: base.__demo,
+      __registrado: base.__registrado,
+      nombre: base.nombre,
+      alias: data.alias || data.nombre || base.nombre,
+      edad: base.edad,
+      categoria: base.categoria,
+      categoriaPublica: base.categoriaPublica,
+      pais: base.pais,
+      estado: base.estado,
+      ciudad: base.ciudad,
+      zona: base.zona,
+      fotoURL: base.fotoURL,
+      subcategoriaId: data.subcategoriaId || '',
+      arquetipo: data.arquetipo || '',
+      tipoPerfil: data.tipoPerfil || '',
+      precio: base.precio,
+      tagline: base.tagline,
+      descripcion: base.descripcion
+    };
+
+    var hydrated = blocks.mapToPerfil(seed, bloques, ctx);
+    hydrated.__id = base.__id;
+    hydrated.uid = base.uid;
+    hydrated.__demo = base.__demo;
+    hydrated.__registrado = base.__registrado;
+    hydrated.verificada = base.verificada;
+    hydrated.verificado = base.verificado;
+    hydrated.respuestaRapida = base.respuestaRapida;
+    hydrated.nueva = base.nueva;
+    hydrated.fechaPublicacion = base.fechaPublicacion;
+    hydrated.fotosExtraURL = base.fotosExtraURL;
+    hydrated.fotosCount = base.fotosCount;
+    hydrated.telefono = base.telefono;
+    hydrated.email = base.email;
+    hydrated.contactoPublico = base.contactoPublico;
+    if (!hydrated.ubicacion) hydrated.ubicacion = base.ubicacion;
+    if (!hydrated.observaciones || !hydrated.observaciones.length) {
+      hydrated.observaciones = base.observaciones;
+    }
+    if (!hydrated.categoriaPublica) hydrated.categoriaPublica = base.categoriaPublica;
+    if (!hydrated.disponibilidad) hydrated.disponibilidad = base.disponibilidad;
+    if (!hydrated.subcategoriaId && data.subcategoriaId) hydrated.subcategoriaId = data.subcategoriaId;
+    if (!hydrated.arquetipo && data.arquetipo) hydrated.arquetipo = data.arquetipo;
+    if (!hydrated.tipoPerfil && data.tipoPerfil) hydrated.tipoPerfil = data.tipoPerfil;
+    hydrated.__hydratedFromBloques = true;
+    return hydrated;
+  }
+
+  function baseNormalizadoPerfilFirestore(data, id) {
     var extras = Array.isArray(data.fotosExtraURL) ? data.fotosExtraURL.length : 0;
     var foto = data.fotoURL || '';
     var desc = String(data.descripcion || data.descripcionCompleta || '').trim();
@@ -105,6 +182,13 @@
       servicios: data.servicios || '',
       fechaPublicacion: data.fechaPublicacion || null
     };
+  }
+
+  function normalizarPerfilFirestore(doc) {
+    var data = doc.data() || {};
+    var id = doc.id;
+    var base = baseNormalizadoPerfilFirestore(data, id);
+    return hydratePerfilFromFirestoreDoc(data, base);
   }
 
   function consultarPublicos() {
@@ -255,6 +339,8 @@
     listar: listar,
     totalPublicos: totalPublicos,
     normalizar: normalizarPerfilFirestore,
+    hydratePerfilFromFirestoreDoc: hydratePerfilFromFirestoreDoc,
+    baseNormalizadoPerfilFirestore: baseNormalizadoPerfilFirestore,
     urlPerfil: urlPerfil,
     filtrar: filtrarPerfiles,
     paginar: paginar,
