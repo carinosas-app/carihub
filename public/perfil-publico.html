@@ -30,6 +30,17 @@
   <script src="js/perfil-publico-contenido.js"></script>
 <script src="js/perfil-contactos.js"></script>
 
+<script src="js/data/registro-adultos-escort-blocks.js?v=20260620v"></script>
+<script src="js/data/registro-adultos-pareja-blocks.js?v=20260620v"></script>
+<script src="js/data/registro-adultos-lifestyle-blocks.js?v=20260620a3"></script>
+<script src="js/data/registro-adultos-dominatrix-blocks.js?v=20260627d1"></script>
+<script src="js/data/registro-adultos-espectaculo-blocks.js?v=20260627e1"></script>
+<script src="js/data/registro-adultos-creador-blocks.js?v=20260627c1"></script>
+<script src="js/data/registro-adultos-retail-blocks.js?v=20260627n1"></script>
+<script src="js/data/registro-adultos-venue-blocks.js?v=20260627v1"></script>
+<script src="js/data/registro-adultos-bienestar-blocks.js?v=20260628b1"></script>
+<script src="js/data/registro-adultos-hospedaje-blocks.js?v=20260628h1"></script>
+<script src="js/carihub-registro-public-blocks.js?v=20260628h1"></script>
 <script src="js/resultados-registrados.js"></script>
 <script src="js/carihub-cuenta-social.js"></script>
 <script src="js/carihub-gratificaciones.js"></script>
@@ -7157,6 +7168,11 @@ function resolverVistaPerfil(u,q){
   if(!vista&&u&&window.CariHubResultadosDemo&&CariHubResultadosDemo.vistaDeCategoria){
     vista=CariHubResultadosDemo.vistaDeCategoria(u.categoria||u.categoriaPublica||q.categoria);
   }
+  if(u&&u.subcategoriaId){
+    var sid=String(u.subcategoriaId).trim().toLowerCase().replace(/_/g," ");
+    if(sid==="dominatrix"||sid==="fetiche"||sid==="sado") vista="dominatrix";
+    else if(sid==="unicorns"||sid==="unicorn") vista="unicorn";
+  }
   return normalizarVistaPreview(vista)||"adult";
 }
 function normalizarVistaPreview(vista){
@@ -7710,6 +7726,15 @@ function iniciarPerfilPreview(){
     if(resolved.perfil){
       if(resolved.perfil.__id==="preview-registro"||resolved.perfil.__previewRegistro){
         aplicarPerfilDesdeRegistro(resolved.vista,resolved.perfil);
+      }else if(resolved.perfil.__hydratedFromBloques){
+        aplicarPerfilDesdeRegistro(resolved.vista,resolved.perfil);
+        if(DEMO[resolved.vista]){
+          DEMO[resolved.vista].__demo=false;
+          DEMO[resolved.vista].__registrado=true;
+          DEMO[resolved.vista].__previewRegistro=false;
+          DEMO[resolved.vista].__id=resolved.perfil.__id||DEMO[resolved.vista].__id;
+          DEMO[resolved.vista].uid=resolved.perfil.uid||DEMO[resolved.vista].uid;
+        }
       }else{
         aplicarPerfilResultadosEnDemo(resolved.vista,resolved.perfil);
       }
