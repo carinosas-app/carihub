@@ -69,7 +69,7 @@ const viajesJs = fs.readFileSync(path.join(repoRoot, 'public', 'js', 'carihub-vi
 const viajesMatch = viajesJs.match(/VIAJES_SUBCATEGORIAS\s*=\s*\[([\s\S]*?)\];/);
 const viajesList = viajesMatch ? viajesMatch[1] : '';
 DOM_3.forEach((subId) => {
-  ok(`${subId} no en VIAJES_SUBCATEGORIAS`, !viajesList.includes(`'${subId}'`), 'no viajes v1');
+  ok(`${subId} en VIAJES_SUBCATEGORIAS`, viajesList.includes(`'${subId}'`), 'viajes v4');
 });
 
 const registroHtml = fs.readFileSync(path.join(repoRoot, 'public', 'registro-perfil.html'), 'utf8');

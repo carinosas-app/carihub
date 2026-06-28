@@ -1,7 +1,7 @@
 (function(){
   const CATEGORIAS=[
     {id:"escort",nombre:"Cariñosas",emoji:"",label:"Cariñosas"},
-    {id:"escort gay",nombre:"Cariñosas gay",emoji:"",label:"Cariñosas gay"},
+    {id:"escort gay",nombre:"Escort Gay",emoji:"",label:"Escort Gay"},
     {id:"escort vip",nombre:"Cariñosas VIP",emoji:"",label:"Cariñosas VIP"},
     {id:"edecan",nombre:"Edecán",emoji:"",label:"Edecán"},
     {id:"stripper",nombre:"Stripper",emoji:"",label:"Stripper"},

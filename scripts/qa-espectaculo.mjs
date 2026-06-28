@@ -110,8 +110,19 @@ ok('table_dance canonical tabledance', PB.normalizeEspectaculoSubId('table_dance
 const stripperMerged = mergedEsp(vmCtx, 'stripper');
 ok('stripper sin desplazamientos oblig', !stripperMerged.obligatorios.includes('desplazamientos'), stripperMerged.obligatorios.join(','));
 ok('stripper modalidades oblig', stripperMerged.obligatorios.includes('modalidades'), stripperMerged.obligatorios.join(','));
+ok('stripper block modalidad atencion', stripperMerged.blocks.some((b) => b.id === 'modalidadesStripper' && b.title === 'Modalidad de atención'), 'modalidadesStripper');
+const stripperMod = stripperMerged.blocks.flatMap((b) => b.fields).find((f) => f.id === 'modalidades');
+const stripperOpts = (stripperMod?.options || []).filter((opt) => {
+  if (typeof opt === 'object' && opt.onlySubcategoriasViajes) return viajes.subcategoriaActivaViajes('stripper');
+  return true;
+}).map((o) => o.value || o);
+ok('stripper opcion Viaja a eventos', stripperOpts.includes('viaja'), stripperOpts.join(','));
 
 const tdMerged = mergedEsp(vmCtx, 'tabledance');
+ok('tabledance block contexto show', tdMerged.blocks.some((b) => b.id === 'modalidadesTabledance'), 'modalidadesTabledance');
+const tdMod = tdMerged.blocks.flatMap((b) => b.fields).find((f) => f.id === 'modalidades');
+const tdOpts = (tdMod?.options || []).map((o) => o.value || o);
+ok('tabledance sin viaja', !tdOpts.includes('viaja'), tdOpts.join(','));
 ok('tabledance venueFijo oblig merge', tdMerged.obligatorios.includes('venueFijo'), tdMerged.obligatorios.join(','));
 ok('tabledance desplazamientos not oblig', !tdMerged.obligatorios.includes('desplazamientos'), tdMerged.obligatorios.join(','));
 

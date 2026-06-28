@@ -50,7 +50,9 @@ console.log('\n=== ESP pack cierre — invariantes ===');
 const blocksJs = fs.readFileSync(path.join(repoRoot, 'public', 'js', 'data', 'registro-adultos-espectaculo-blocks.js'), 'utf8');
 ok('blocks ESP_2 declaradas', ESP_2.every((id) => blocksJs.includes(`'${id}'`)), ESP_2.join(', '));
 ok('nested espectaculoPerfil block id', blocksJs.includes("id: 'espectaculoPerfil'"), 'block');
-ok('no viaja modalidad', !blocksJs.includes("'viaja'"), 'no viaja');
+ok('stripper modalidad atencion block', blocksJs.includes("id: 'modalidadesStripper'") && blocksJs.includes("title: 'Modalidad de atención'"), 'stripper block');
+ok('tabledance contexto show block', blocksJs.includes("id: 'modalidadesTabledance'") && blocksJs.includes('table dance'), 'tabledance block');
+ok('stripper viaja option', blocksJs.includes("'viaja'") && blocksJs.includes('Viaja a eventos'), 'viaja stripper');
 
 const registroJs = fs.readFileSync(path.join(repoRoot, 'public', 'js', 'carihub-registro-public-blocks.js'), 'utf8');
 ok('buildEspectaculoPerfil', registroJs.includes('buildEspectaculoPerfil'), 'persist');
@@ -65,7 +67,11 @@ const viajesJs = fs.readFileSync(path.join(repoRoot, 'public', 'js', 'carihub-vi
 const viajesMatch = viajesJs.match(/VIAJES_SUBCATEGORIAS\s*=\s*\[([\s\S]*?)\];/);
 const viajesList = viajesMatch ? viajesMatch[1] : '';
 ESP_2.forEach((subId) => {
-  ok(`${subId} no en VIAJES_SUBCATEGORIAS`, !viajesList.includes(`'${subId}'`), 'no viajes v1');
+  if (subId === 'stripper') {
+    ok('stripper en VIAJES_SUBCATEGORIAS', viajesList.includes(`'${subId}'`), 'stripper viaja');
+  } else {
+    ok(`${subId} no en VIAJES_SUBCATEGORIAS`, !viajesList.includes(`'${subId}'`), 'no viajes tabledance');
+  }
 });
 
 const schemaJson = fs.readFileSync(path.join(repoRoot, 'scripts', 'config-registro-adultos-schema.json'), 'utf8');

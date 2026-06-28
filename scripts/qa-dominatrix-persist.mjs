@@ -88,6 +88,21 @@ DOM_3.forEach((subId) => {
   ok(`${subId} nested preserved`, u.dominatrixPerfil && u.dominatrixPerfil.limitesSesion === 'Sin menores', 'nested');
 });
 
+const viajaRaw = Object.assign({}, payload('dominatrix'), {
+  modalidades: ['recibe', 'viaja'],
+  alcanceDesplazamiento: 'toda_ciudad',
+  viajesProgramados: 'si',
+  gastosTraslado: 'cliente',
+  anticipacionViaje: '48h',
+});
+viajaRaw.viajesDesplazamiento = vmCtx.CariHubViajesDesplazamiento.buildViajesDesplazamiento(viajaRaw, viajaRaw.modalidades);
+const viajaFinal = PB.finalizeDominatrixValues(Object.assign({}, viajaRaw), domCtx('dominatrix'));
+ok('dominatrix viajes nested', viajaFinal.dominatrixPerfil && viajaFinal.dominatrixPerfil.viajesDesplazamiento &&
+  viajaFinal.dominatrixPerfil.viajesDesplazamiento.viaja === true, 'viajesDesplazamiento');
+const viajaU = PB.mapDominatrixToPerfil({ subcategoriaId: 'dominatrix', nombre: 'QA DOM V' }, viajaFinal, domCtx('dominatrix'));
+ok('dominatrix map viajesDesplazamiento', viajaU.viajesDesplazamiento && viajaU.viajesDesplazamiento.viaja === true, JSON.stringify(viajaU.viajesDesplazamiento));
+ok('dominatrix map modalidad viaja', (viajaU.modalidades || []).includes('viaja'), (viajaU.modalidades || []).join(','));
+
 const escortPolluted = PB.mapToPerfil(
   { subcategoriaId: 'dominatrix' },
   Object.assign({}, payload('dominatrix'), { swingerPerfil: { intercambioSwinger: 'Sí' } }),

@@ -1,7 +1,7 @@
 /**
  * Bloques públicos registro — persona_dominatrix (dominatrix / fetiche / sado).
  * Fuente: scripts/config-registro-adultos-schema.json (plantilla persona_dominatrix).
- * v1: sin viajes/desplazamiento (decisión posterior).
+ * Módulo Viaja transversal reutilizado (misma shape que escort/espectáculo).
  */
 (function (global) {
   'use strict';
@@ -107,6 +107,70 @@
     'Grabaciones no autorizadas',
     'Sangre / escatología',
     'Coerción real (no consensuada)'
+  ];
+
+  var VIAJES_SUBCAMPOS = [
+    {
+      id: 'alcanceDesplazamiento',
+      label: 'Alcance de desplazamiento',
+      type: 'select',
+      required: true,
+      showWhenViaja: true,
+      options: [
+        { value: 'solo_zona', label: 'Solo mi zona' },
+        { value: 'toda_ciudad', label: 'Toda mi ciudad' },
+        { value: 'todo_estado', label: 'Todo mi estado / provincia / departamento' },
+        { value: 'cualquier_ciudad_pais', label: 'Cualquier ciudad de mi país' },
+        { value: 'otro_pais', label: 'Otro país' },
+        { value: 'internacional', label: 'Internacional / varios países' }
+      ]
+    },
+    {
+      id: 'viajesProgramados',
+      label: 'Viajes programados',
+      type: 'select',
+      required: true,
+      showWhenViaja: true,
+      options: [
+        { value: 'si', label: 'Sí' },
+        { value: 'no', label: 'No' },
+        { value: 'a_convenir', label: 'A convenir' }
+      ]
+    },
+    {
+      id: 'gastosTraslado',
+      label: 'Gastos de viaje',
+      type: 'select',
+      required: true,
+      showWhenViaja: true,
+      options: [
+        { value: 'cliente', label: 'El cliente / contratante' },
+        { value: 'anunciante', label: 'El anunciante' },
+        { value: 'se_acuerda', label: 'Se acuerda' }
+      ]
+    },
+    {
+      id: 'anticipacionViaje',
+      label: 'Anticipación requerida',
+      type: 'select',
+      required: true,
+      showWhenViaja: true,
+      options: [
+        { value: 'mismo_dia', label: 'Mismo día' },
+        { value: '24h', label: '24 horas antes' },
+        { value: '48h', label: '48 horas antes' },
+        { value: '1_semana', label: 'Una semana antes' },
+        { value: 'a_convenir', label: 'A convenir' }
+      ]
+    },
+    {
+      id: 'notasViaje',
+      label: 'Notas de viaje',
+      type: 'text',
+      required: false,
+      showWhenViaja: true,
+      placeholder: 'Destinos, condiciones de sesión fuera de tu espacio, etc.'
+    }
   ];
 
   global.CARIHUB_REGISTRO_DOMINATRIX_BLOCKS = {
@@ -281,7 +345,7 @@
       {
         id: 'modalidadesDom',
         title: 'Modalidad de atención',
-        hint: 'Dónde recibes sesiones presenciales (v1 sin viajes).',
+        hint: 'Dónde recibes sesiones presenciales. Marca «Viaja» para indicar alcance y condiciones.',
         fields: [
           {
             id: 'modalidades',
@@ -290,10 +354,11 @@
             required: true,
             options: [
               { value: 'recibe', label: 'Recibe (espacio propio / dungeon)' },
-              { value: 'hotel', label: 'Hotel' }
+              { value: 'hotel', label: 'Hotel' },
+              { value: 'viaja', label: 'Viaja', onlySubcategoriasViajes: true }
             ]
           }
-        ]
+        ].concat(VIAJES_SUBCAMPOS)
       },
       {
         id: 'serviciosDom',

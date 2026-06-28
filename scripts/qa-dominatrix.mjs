@@ -102,10 +102,16 @@ DOM_3.forEach((subId) => {
   ok(`${subId} servicios BDSM block`, hasField(merged, 'serviciosIncluidos'), 'servicios');
   ok(`${subId} no singlesPerfil`, !hasField(merged, 'buscanConocer'), 'no singles');
   ok(`${subId} no unicorn objetivos`, !hasField(merged, 'objetivosPerfil'), 'no unicorn');
-  ok(`${subId} viajes inactivo`, !viajes.subcategoriaActivaViajes(subId), 'no viajes v1');
+  ok(`${subId} viajes activo`, viajes.subcategoriaActivaViajes(subId), 'viaja module');
   const modField = merged.blocks.flatMap((b) => b.fields).find((f) => f.id === 'modalidades');
-  const modOpts = modField && modField.options ? modField.options.map((o) => (typeof o === 'string' ? o : o.value)) : [];
-  ok(`${subId} modalidades sin viaja`, !modOpts.includes('viaja'), modOpts.join(','));
+  const modOpts = modField && modField.options ? modField.options.filter((opt) => {
+    if (typeof opt === 'object' && opt.onlySubcategoriasViajes) {
+      return viajes.subcategoriaActivaViajes(subId);
+    }
+    return true;
+  }).map((o) => (typeof o === 'string' ? o : o.value)) : [];
+  ok(`${subId} modalidades con viaja`, modOpts.includes('viaja'), modOpts.join(','));
+  ok(`${subId} subcampos viajes`, merged.blocks.some((b) => b.fields.some((f) => f.id === 'alcanceDesplazamiento' && f.showWhenViaja)), 'alcance');
 });
 
 const feticheMerged = mergedDom(vmCtx, 'fetiche');

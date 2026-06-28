@@ -6,7 +6,7 @@
 
   var UI_LABELS = {
     escort: 'Cariñosas',
-    'escort gay': 'Cariñosas gay',
+    'escort gay': 'Escort Gay',
     'escort vip': 'Cariñosas VIP',
     acompanante: 'Cariñosas'
   };

@@ -2236,6 +2236,7 @@
       serviciosIncluidos: Array.isArray(values.serviciosIncluidos) ? values.serviciosIncluidos.slice() : [],
       serviciosNoRealizo: Array.isArray(values.serviciosNoRealizo) ? values.serviciosNoRealizo.slice() : [],
       modalidades: Array.isArray(values.modalidades) ? values.modalidades.slice() : [],
+      viajesDesplazamiento: values.viajesDesplazamiento || null,
       metodosPago: Array.isArray(values.metodosPago) ? values.metodosPago.slice() : [],
       horarioDetalle: values.horarioDetalle || '',
       sobreMi: values.sobreMi || '',
@@ -2297,8 +2298,13 @@
       u.modalidadFicha = dom.modalidades.map(function (m) {
         if (m === 'recibe') return 'Recibe';
         if (m === 'hotel') return 'Hotel';
+        if (m === 'viaja') return 'Viaja';
         return m;
       }).join(' · ');
+    }
+    if (dom.viajesDesplazamiento) u.viajesDesplazamiento = dom.viajesDesplazamiento;
+    else if (viajesApi()) {
+      u.viajesDesplazamiento = viajesApi().buildViajesDesplazamiento(dom, dom.modalidades);
     }
     if (dom.horarioDetalle) {
       u.horarioDetalle = dom.horarioDetalle;

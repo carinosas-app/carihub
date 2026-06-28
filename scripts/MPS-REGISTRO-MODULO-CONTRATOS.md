@@ -653,3 +653,26 @@ Con esto queda explícito que **no** se propone un cambio grande de submit solo 
 ---
 
 *Actualizado post-implementación MP-REGISTRO-SUBCATEGORIA-V3.*
+
+---
+
+## 17. MP-REGISTRO-ADULTOS-V4 — cierre categoría Adultos
+
+**Fecha:** 2026-06-27 · **Estado:** implementado en repo (sin deploy / sin commit).
+
+**Correcciones:**
+
+1. **Stripper:** bloque `modalidadesStripper` con título «Modalidad de atención»; opción «Viaja a eventos» + subcampos módulo Viaja. `tabledance` en bloque aparte sin viaja.
+2. **Escort Gay:** única subcategoría con label UI «Escort Gay»; `escort`/`escort vip` siguen «Cariñosas» / «Cariñosas VIP». IDs legacy sin cambio.
+3. **Table Dance:** hint específico table dance; sin mención Stripper/Viaja.
+4. **Dominatrix / Fetiche / Sado:** opción «Viaja» en `modalidadesDom` + subcampos; `dominatrix`, `fetiche`, `sado` en `VIAJES_SUBCATEGORIAS`; persist `viajesDesplazamiento` en `buildDominatrixPerfil` / `mapDominatrixToPerfil`.
+
+**Módulos reutilizados:** `CariHubViajesDesplazamiento`, `finalizeViajesValues`, `filterChecklistOptions` (`onlySubcategoriasViajes`), `CariHubSubcategoriaLabels`.
+
+**Causa prod Stripper (V3 no visible):** bug `global` en labels (hotfix previo) + deploy hosting no completado (auth Firebase).
+
+**QA:** `qa-viajes-desplazamiento.mjs`, `qa-espectaculo-*`, `qa-dominatrix-*`, `qa-adultos-v4-smoke.mjs`.
+
+---
+
+*Actualizado post-implementación MP-REGISTRO-ADULTOS-V4.*

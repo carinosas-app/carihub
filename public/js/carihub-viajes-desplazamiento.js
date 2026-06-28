@@ -8,6 +8,7 @@
     'escort', 'escort gay', 'escort vip', 'trans', 'femboy', 'tom boy', 'tom fem',
     'gigolo', 'dotados', 'lesbians', 'singles', 'acompanante', 'edecan', 'modelos',
     'stripper',
+    'dominatrix', 'fetiche', 'sado',
     'swinger', 'unicorns', 'cuckold hotwife', 'cuckold_hotwife'
   ];
 

@@ -38,6 +38,70 @@
     { value: 'eventos_privados', label: 'Eventos privados' }
   ];
 
+  var VIAJES_SUBCAMPOS = [
+    {
+      id: 'alcanceDesplazamiento',
+      label: 'Alcance de desplazamiento',
+      type: 'select',
+      required: true,
+      showWhenViaja: true,
+      options: [
+        { value: 'solo_zona', label: 'Solo mi zona' },
+        { value: 'toda_ciudad', label: 'Toda mi ciudad' },
+        { value: 'todo_estado', label: 'Todo mi estado / provincia / departamento' },
+        { value: 'cualquier_ciudad_pais', label: 'Cualquier ciudad de mi país' },
+        { value: 'otro_pais', label: 'Otro país' },
+        { value: 'internacional', label: 'Internacional / varios países' }
+      ]
+    },
+    {
+      id: 'viajesProgramados',
+      label: 'Viajes programados',
+      type: 'select',
+      required: true,
+      showWhenViaja: true,
+      options: [
+        { value: 'si', label: 'Sí' },
+        { value: 'no', label: 'No' },
+        { value: 'a_convenir', label: 'A convenir' }
+      ]
+    },
+    {
+      id: 'gastosTraslado',
+      label: 'Gastos de viaje',
+      type: 'select',
+      required: true,
+      showWhenViaja: true,
+      options: [
+        { value: 'cliente', label: 'El cliente / contratante' },
+        { value: 'anunciante', label: 'El anunciante' },
+        { value: 'se_acuerda', label: 'Se acuerda' }
+      ]
+    },
+    {
+      id: 'anticipacionViaje',
+      label: 'Anticipación requerida',
+      type: 'select',
+      required: true,
+      showWhenViaja: true,
+      options: [
+        { value: 'mismo_dia', label: 'Mismo día' },
+        { value: '24h', label: '24 horas antes' },
+        { value: '48h', label: '48 horas antes' },
+        { value: '1_semana', label: 'Una semana antes' },
+        { value: 'a_convenir', label: 'A convenir' }
+      ]
+    },
+    {
+      id: 'notasViaje',
+      label: 'Notas de viaje',
+      type: 'text',
+      required: false,
+      showWhenViaja: true,
+      placeholder: 'Destinos, eventos frecuentes, condiciones, etc.'
+    }
+  ];
+
   var DESPLAZAMIENTOS_SHOW = [
     'Zona local / área metropolitana',
     'Sí (costo extra según ubicación)',
@@ -94,7 +158,7 @@
         obligatoriosRemove: ['desplazamientos'],
         fieldHints: {
           tipoShow: 'Tipos de show que ofreces — aparecen en tarjeta y ficha.',
-          modalidades: 'Contextos del show. Marca «Viaja a eventos» si te desplazas con el módulo Viaja.',
+          modalidades: 'Contextos del show y desplazamiento a eventos.',
           venueFijo: 'Opcional: zona o área donde sueles trabajar.',
           serviciosIncluidos: 'Qué incluye tu show — no uses listados escort.',
           serviciosNoRealizo: 'Restricciones claras y profesionales.'
@@ -106,7 +170,7 @@
         fieldHints: {
           venueFijo: 'Obligatorio: antro(s) o venue donde trabajas.',
           tipoShow: 'Enfatiza table dance y shows en antro.',
-          modalidades: 'Contextos donde ofreces show (clubes, eventos, etc.).',
+          modalidades: 'Dónde realizas tus presentaciones de table dance. Indica el tipo de venue, disponibilidad y condiciones del lugar.',
           horarioDetalle: 'Ej. Viernes a domingo · turno nocturno.'
         },
         fieldPatches: {
@@ -191,9 +255,10 @@
         ]
       },
       {
-        id: 'modalidadesShow',
-        title: 'Contexto del show',
-        hint: 'Dónde realizas shows. Stripper puede activar «Viaja a eventos» con alcance y condiciones.',
+        id: 'modalidadesStripper',
+        title: 'Modalidad de atención',
+        onlySubcategorias: ['stripper'],
+        hint: 'Contextos del show. Marca «Viaja a eventos» si te desplazas con alcance y condiciones.',
         fields: [
           {
             id: 'modalidades',
@@ -203,67 +268,21 @@
             options: MODALIDADES_SHOW.concat([
               { value: 'viaja', label: 'Viaja a eventos', onlySubcategoriasViajes: true }
             ])
-          },
+          }
+        ].concat(VIAJES_SUBCAMPOS)
+      },
+      {
+        id: 'modalidadesTabledance',
+        title: 'Contexto del show',
+        onlySubcategorias: ['tabledance'],
+        hint: 'Dónde realizas tus presentaciones de table dance. Indica el tipo de venue, disponibilidad y condiciones del lugar.',
+        fields: [
           {
-            id: 'alcanceDesplazamiento',
-            label: 'Alcance de desplazamiento',
-            type: 'select',
+            id: 'modalidades',
+            label: 'Disponible para',
+            type: 'checklist',
             required: true,
-            showWhenViaja: true,
-            options: [
-              { value: 'solo_zona', label: 'Solo mi zona' },
-              { value: 'toda_ciudad', label: 'Toda mi ciudad' },
-              { value: 'todo_estado', label: 'Todo mi estado / provincia / departamento' },
-              { value: 'cualquier_ciudad_pais', label: 'Cualquier ciudad de mi país' },
-              { value: 'otro_pais', label: 'Otro país' },
-              { value: 'internacional', label: 'Internacional / varios países' }
-            ]
-          },
-          {
-            id: 'viajesProgramados',
-            label: 'Viajes programados',
-            type: 'select',
-            required: true,
-            showWhenViaja: true,
-            options: [
-              { value: 'si', label: 'Sí' },
-              { value: 'no', label: 'No' },
-              { value: 'a_convenir', label: 'A convenir' }
-            ]
-          },
-          {
-            id: 'gastosTraslado',
-            label: 'Gastos de viaje',
-            type: 'select',
-            required: true,
-            showWhenViaja: true,
-            options: [
-              { value: 'cliente', label: 'El cliente / contratante' },
-              { value: 'anunciante', label: 'El anunciante' },
-              { value: 'se_acuerda', label: 'Se acuerda' }
-            ]
-          },
-          {
-            id: 'anticipacionViaje',
-            label: 'Anticipación requerida',
-            type: 'select',
-            required: true,
-            showWhenViaja: true,
-            options: [
-              { value: 'mismo_dia', label: 'Mismo día' },
-              { value: '24h', label: '24 horas antes' },
-              { value: '48h', label: '48 horas antes' },
-              { value: '1_semana', label: 'Una semana antes' },
-              { value: 'a_convenir', label: 'A convenir' }
-            ]
-          },
-          {
-            id: 'notasViaje',
-            label: 'Notas de viaje',
-            type: 'text',
-            required: false,
-            showWhenViaja: true,
-            placeholder: 'Destinos, eventos frecuentes, condiciones, etc.'
+            options: MODALIDADES_SHOW.slice()
           }
         ]
       },

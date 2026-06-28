@@ -1,6 +1,6 @@
 /**
  * QA — bloque viajesDesplazamiento (sin browser).
- * H3: loop 19 subs con soporte viajes + regresiones escort/pareja/lifestyle/stripper.
+ * H3: loop 22 subs con soporte viajes + regresiones escort/pareja/lifestyle/stripper/dominatrix.
  * node scripts/qa-viajes-desplazamiento.mjs
  */
 import fs from 'fs';
@@ -49,6 +49,8 @@ function loadAll() {
   loadScript('data/registro-adultos-escort-blocks.js', ctx);
   loadScript('data/registro-adultos-pareja-blocks.js', ctx);
   loadScript('data/registro-adultos-lifestyle-blocks.js', ctx);
+  loadScript('data/registro-adultos-dominatrix-blocks.js', ctx);
+  loadScript('data/registro-adultos-espectaculo-blocks.js', ctx);
   loadScript('carihub-registro-public-blocks.js', ctx);
   loadScript('carihub-public-render-lite.js', ctx);
   return ctx;
@@ -71,10 +73,19 @@ function mergedLifestyle(vmCtx, userCtx) {
   return vmCtx.CariHubRegistroPublicBlocks.mergedConfig(vmCtx.CARIHUB_REGISTRO_LIFESTYLE_BLOCKS, userCtx);
 }
 
+function mergedDominatrix(vmCtx, userCtx) {
+  return vmCtx.CariHubRegistroPublicBlocks.mergedConfig(vmCtx.CARIHUB_REGISTRO_DOMINATRIX_BLOCKS, userCtx);
+}
+
+function mergedEspectaculo(vmCtx, userCtx) {
+  return vmCtx.CariHubRegistroPublicBlocks.mergedConfig(vmCtx.CARIHUB_REGISTRO_ESPECTACULO_BLOCKS, userCtx);
+}
+
 function modalidadesBlock(merged) {
   return merged.blocks.find((b) => b.id === 'modalidades')
     || merged.blocks.find((b) => b.id === 'modalidadesEdecan')
-    || merged.blocks.find((b) => b.id === 'modalidadesModelos');
+    || merged.blocks.find((b) => b.id === 'modalidadesModelos')
+    || merged.blocks.find((b) => b.fields.some((f) => f.id === 'modalidades'));
 }
 
 function hasField(merged, fieldId) {
@@ -162,6 +173,8 @@ const PAREJA_LIFESTYLE_VIAJES = [
   ['cuckold_hotwife', 'pareja'],
   ['unicorns', 'lifestyle'],
 ];
+
+const DOMINATRIX_VIAJES = ['dominatrix', 'fetiche', 'sado'];
 
 let ctx;
 
@@ -264,9 +277,9 @@ try {
   ok('3e perfil España', V.alcanceLabelPublic('cualquier_ciudad_pais', { pais: 'España' }) === 'Cualquier ciudad de España');
   ok('3f sin Todo México en repo', true, 'grep previo sin matches');
 
-  // --- H3: 19 subs con soporte viajes (incl. stripper v3) ---
+  // --- H3: 22 subs con soporte viajes (incl. stripper + dominatrix v4) ---
   const VIAJES_EXPECT = V.VIAJES_SUBCATEGORIAS.slice();
-  ok('H3 VIAJES_SUBCATEGORIAS count 19', VIAJES_EXPECT.length === 19, String(VIAJES_EXPECT.length));
+  ok('H3 VIAJES_SUBCATEGORIAS count 22', VIAJES_EXPECT.length === 22, String(VIAJES_EXPECT.length));
   ok('H3 petit no en lista viajes', !VIAJES_EXPECT.some((id) => String(id).replace(/_/g, ' ') === 'petit'), VIAJES_EXPECT.join(', '));
 
   for (const subId of VIAJES_EXPECT) {
@@ -318,7 +331,29 @@ try {
     ok(`H3 opcion viaja ${pack} ${sub}`, viajaOptionInModalidades(ctx, c, m), sub);
   }
 
-  ok('H3 cobertura viajes 19 subs', VIAJES_EXPECT.length === ESCORT_VIAJES_SPECS.length + PAREJA_LIFESTYLE_VIAJES.length + 1, '14 escort + 1 stripper + 4 pareja/lifestyle');
+  // --- H3: stripper (espectáculo) ---
+  const stripperCtx = escortCtx('stripper');
+  const stripperMerged = mergedEspectaculo(ctx, stripperCtx);
+  ok('H3 viajes activo stripper', V.subcategoriaActivaViajes('stripper'), 'stripper');
+  ok('H3 subcampos viajes stripper', viajesSubfields(stripperMerged).join(',') ===
+    'alcanceDesplazamiento,viajesProgramados,gastosTraslado,anticipacionViaje,notasViaje', viajesSubfields(stripperMerged).join(','));
+  ok('H3 opcion viaja stripper', viajaOptionInModalidades(ctx, stripperCtx, stripperMerged), 'stripper');
+
+  const tabledanceMerged = mergedEspectaculo(ctx, escortCtx('tabledance'));
+  ok('H3 tabledance viajes inactivo', !V.subcategoriaActivaViajes('tabledance'), 'tabledance');
+  ok('H3 tabledance sin opcion viaja', !viajaOptionInModalidades(ctx, escortCtx('tabledance'), tabledanceMerged), 'tabledance');
+
+  // --- H3: dominatrix (3 subs) ---
+  for (const sub of DOMINATRIX_VIAJES) {
+    const c = escortCtx(sub);
+    const m = mergedDominatrix(ctx, c);
+    ok(`H3 viajes activo dominatrix ${sub}`, V.subcategoriaActivaViajes(sub), sub);
+    ok(`H3 subcampos viajes dominatrix ${sub}`, viajesSubfields(m).join(',') ===
+      'alcanceDesplazamiento,viajesProgramados,gastosTraslado,anticipacionViaje,notasViaje', viajesSubfields(m).join(','));
+    ok(`H3 opcion viaja dominatrix ${sub}`, viajaOptionInModalidades(ctx, c, m), sub);
+  }
+
+  ok('H3 cobertura viajes 22 subs', VIAJES_EXPECT.length === ESCORT_VIAJES_SPECS.length + PAREJA_LIFESTYLE_VIAJES.length + 1 + DOMINATRIX_VIAJES.length, '14 escort + 1 stripper + 4 pareja/lifestyle + 3 dominatrix');
   ok('H3 stripper en lista viajes', VIAJES_EXPECT.includes('stripper'), VIAJES_EXPECT.join(', '));
 
   // --- H3: tarjeta chip Viaja (muestra representativa) ---

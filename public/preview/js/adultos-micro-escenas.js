@@ -43,7 +43,7 @@
 
   var CATS = [
     { id: 'escort', nombre: 'Cariñosas' },
-    { id: 'escort gay', nombre: 'Cariñosas gay' },
+    { id: 'escort gay', nombre: 'Escort Gay' },
     { id: 'escort vip', nombre: 'Cariñosas VIP' },
     { id: 'edecan', nombre: 'Edecán' },
     { id: 'stripper', nombre: 'Stripper' },
