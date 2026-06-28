@@ -80,7 +80,9 @@
   function previewImg(kind) {
     var p = global.CariHubSlotPreviewImages;
     if (p && p.get) return p.get(kind);
-    return kind === 'libe' ? 'img/live-en-vivo-libe.png' : 'img/estado-publicado-libe.png';
+    var ph = global.CariHubMediaPlaceholders;
+    if (ph && ph.url) return ph.url(kind);
+    return kind === 'libe' ? 'assets/placeholders/live-placeholder.webp' : 'assets/placeholders/estado-placeholder.webp';
   }
 
   function buildEstadoMockSlide() {

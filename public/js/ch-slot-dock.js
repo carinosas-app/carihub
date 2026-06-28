@@ -5,16 +5,22 @@
   'use strict';
 
   var PREVIEW = global.CariHubSlotPreviewImages || {};
+  var PH = global.CariHubMediaPlaceholders || {};
+  function mockSrc(kind) {
+    if (PH.url) return PH.url(kind);
+    if (PREVIEW.get) return PREVIEW.get(kind);
+    return kind === 'libe' ? 'assets/placeholders/live-placeholder.webp' : 'assets/placeholders/estado-placeholder.webp';
+  }
   var MOCKS = {
     estados: {
-      src: PREVIEW.estados || 'img/estado-publicado-libe.png',
+      src: mockSrc('estados'),
       alt: 'Estados — renta espacio publicitario',
       label: 'Estado',
       vacantMsg: 'Anúnciate aquí',
       vacantHint: 'Estados y zonas'
     },
     libe: {
-      src: PREVIEW.libe || 'img/live-en-vivo-libe.png',
+      src: mockSrc('libe'),
       alt: 'En vivo — transmisión LIBE',
       label: 'LIBE',
       vacantMsg: 'Anúnciate aquí',
