@@ -78,6 +78,66 @@ function extractDemoUnicornBlock(html) {
   return m ? m[0] : '';
 }
 
+function extractFunctionBlock(html, fnName, nextFnName) {
+  const start = html.indexOf(`function ${fnName}`);
+  const end = html.indexOf(`function ${nextFnName}`, start + 1);
+  if (start < 0 || end < 0 || end <= start) return '';
+  return html.slice(start, end);
+}
+
+function extractAplicarPerfilDesdeRegistroBlock(html) {
+  return [
+    extractFunctionBlock(html, 'mergeParejaGrupoRegistroFields', 'parejaPieBottomHTML'),
+    extractFunctionBlock(html, 'demoAssetDesdeResultados', 'aplicarPerfilDesdeRegistro'),
+    extractFunctionBlock(html, 'aplicarPerfilDesdeRegistro', 'aplicarPerfilResultadosEnDemo'),
+  ].join('\n');
+}
+
+function loadAplicarPerfilDesdeRegistro(html) {
+  const slice = extractAplicarPerfilDesdeRegistroBlock(html);
+  const ctx = makeCtx();
+  ctx.DEMO = { unicorn: { nombre: 'Demo base', alias: 'Demo base' } };
+  ctx.window = ctx;
+  vm.runInContext(slice, ctx);
+  return ctx;
+}
+
+function buildUnicornPreviewPayload(RP, ctx) {
+  const userCtx = {
+    subcategoriaId: 'unicorns',
+    subcategoria: 'Unicorns',
+    arquetipo: 'persona_lifestyle',
+    tipoPerfil: 'persona',
+    categoriaPrincipal: 'Adultos',
+  };
+  const bloques = RP.finalizeUnicornValues({
+    alias: 'Luna U.',
+    objetivosPerfil: ['Conocer parejas', 'Viajes'],
+    tipoUnicornio: 'Mujer',
+    buscoConocer: ['Parejas', 'Mujeres'],
+    haceColaboraciones: 'No',
+    estadoPerfil: 'Disponible para encuentros',
+    modalidades: ['hotel'],
+    metodosPago: ['Efectivo'],
+    mostrarObjetivosPerfil: 'Sí',
+  }, userCtx);
+  let u = {
+    subcategoriaId: 'unicorns',
+    subcategoria: 'Unicorns',
+    arquetipo: 'persona_lifestyle',
+    tipoPerfil: 'persona',
+    categoriaPublica: 'Unicorn',
+    alias: 'Luna U.',
+    edad: '28',
+    ciudad: 'Monterrey',
+  };
+  u = RP.mapToPerfil(u, bloques, userCtx);
+  if (RP.applyUnicornPerfilFields) u = RP.applyUnicornPerfilFields(u, bloques, userCtx);
+  u.swingerPerfil = { intercambioSwinger: 'contaminación swinger' };
+  u.cuckoldHotwifePerfil = { dinamica: 'contaminación c/h' };
+  return u;
+}
+
 try {
   const ctx = makeCtx();
   loadScript('carihub-viajes-desplazamiento.js', ctx);
@@ -175,6 +235,28 @@ try {
 
   const mapa = fs.readFileSync(path.join(repoRoot, 'scripts', 'mapa-registro-categorias.json'), 'utf8');
   ok('mapa unicorns persona_lifestyle', mapa.includes('"subcategoriaId": "unicorns"') && mapa.includes('"arquetipo": "persona_lifestyle"'), 'mapa');
+
+  const aplicarBlock = extractAplicarPerfilDesdeRegistroBlock(perfilHtml);
+  ok('aplicarPerfilDesdeRegistro buscoConocer', /buscoConocer:/.test(aplicarBlock), 'campo preview');
+  ok('aplicarPerfilDesdeRegistro objetivosPerfil', /objetivosPerfil:/.test(aplicarBlock), 'campo preview');
+  ok('aplicarPerfilDesdeRegistro objetivoPrincipal', /objetivoPrincipal:/.test(aplicarBlock), 'campo preview');
+  ok('aplicarPerfilDesdeRegistro badgeUnicorn', /badgeUnicorn:/.test(aplicarBlock), 'campo preview');
+  ok('aplicarPerfilDesdeRegistro buscan prioriza buscoConocer', /buscan:Array\.isArray\(u\.buscoConocer\)/.test(aplicarBlock), 'fallback buscan');
+  ok('aplicarPerfilDesdeRegistro anti-contam unicorn', /delete clean\.swingerPerfil/.test(aplicarBlock) && /delete clean\.cuckoldHotwifePerfil/.test(aplicarBlock), 'strip nested');
+
+  const previewCtx = loadAplicarPerfilDesdeRegistro(perfilHtml);
+  const previewU = buildUnicornPreviewPayload(ctx.CariHubRegistroPublicBlocks, ctx);
+  previewCtx.aplicarPerfilDesdeRegistro('unicorn', previewU);
+  const demoPreview = previewCtx.DEMO.unicorn;
+  ok('preview registro buscoConocer', Array.isArray(demoPreview.buscoConocer) && demoPreview.buscoConocer.length === 2, JSON.stringify(demoPreview.buscoConocer));
+  ok('preview registro objetivosPerfil', Array.isArray(demoPreview.objetivosPerfil) && demoPreview.objetivosPerfil.length === 2, JSON.stringify(demoPreview.objetivosPerfil));
+  ok('preview registro objetivoPrincipal', demoPreview.objetivoPrincipal === 'Conocer parejas', demoPreview.objetivoPrincipal);
+  ok('preview registro badgeUnicorn', demoPreview.badgeUnicorn === true, String(demoPreview.badgeUnicorn));
+  ok('preview registro buscan alias', Array.isArray(demoPreview.buscan) && demoPreview.buscan[0] === 'Parejas', JSON.stringify(demoPreview.buscan));
+  ok('preview registro sin swingerPerfil', demoPreview.swingerPerfil == null, JSON.stringify(demoPreview.swingerPerfil));
+  ok('preview registro sin cuckoldHotwifePerfil', demoPreview.cuckoldHotwifePerfil == null, JSON.stringify(demoPreview.cuckoldHotwifePerfil));
+  ok('preview registro arquetipo lifestyle', demoPreview.arquetipo === 'persona_lifestyle', demoPreview.arquetipo);
+  ok('preview registro tipoPerfil persona', demoPreview.tipoPerfil === 'persona', demoPreview.tipoPerfil);
 } catch (e) {
   fail.push({ name: 'exception', detail: e.message });
 }

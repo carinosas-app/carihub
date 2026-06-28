@@ -249,6 +249,22 @@ function validateSchemaStructure(formularioId, schema, fileName) {
       for (const compName of Object.values(comp)) {
         if (!meta.componentesUI[compName]) {
           warn("COMPONENTE_UI_NO_REGISTRADO", `Componente '${compName}' de arquetipo '${arqName}' no está en meta.componentesUI`, { formularioId, componente: compName });
+        } else if (formularioId === "adultos") {
+          const uiCommercial = schemasRef._comercial?.componentesUI;
+          if (uiCommercial && compName.startsWith("ProfileLayout") && !uiCommercial.profileLayouts?.[compName]) {
+            warn(
+              "COMPONENTE_UI_SIN_PROFILE_LAYOUT",
+              `Componente '${compName}' documentado en meta.componentesUI pero ausente en config-registro-componentes-ui-schema.json profileLayouts`,
+              { formularioId, componente: compName, arquetipo: arqName }
+            );
+          }
+          if (uiCommercial && compName.startsWith("ResultCard") && !uiCommercial.resultCards?.[compName]) {
+            warn(
+              "COMPONENTE_UI_SIN_RESULT_CARD",
+              `Componente '${compName}' documentado en meta.componentesUI pero ausente en config-registro-componentes-ui-schema.json resultCards`,
+              { formularioId, componente: compName, arquetipo: arqName }
+            );
+          }
         }
       }
     }
