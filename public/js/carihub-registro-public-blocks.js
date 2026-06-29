@@ -51,6 +51,45 @@
     return global.CARIHUB_REGISTRO_HOSPEDAJE_BLOCKS || null;
   }
 
+  function resolveBienestarSectorApi() {
+    return global.CARIHUB_REGISTRO_BIENESTAR_SECTOR_BLOCKS || null;
+  }
+
+  function slugBienestarSubId(id) {
+    return String(id || '')
+      .trim()
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/_/g, '-');
+  }
+
+  function matchesBienestarSector(ctx, resolved) {
+    var api = resolveBienestarSectorApi();
+    if (!api) return false;
+    ctx = ctx || {};
+    if (String(ctx.sectorId || '') !== 'bienestar') return false;
+    if (String(ctx.formularioId || '') === 'adultos') return false;
+    var subSlug = slugBienestarSubId((ctx.subcategoriaId) || (ctx.subcategoria) || '');
+    if (subSlug === 'spa' || subSlug === 'masajes') return false;
+    var ident = resolved && resolved.identidad ? resolved.identidad : {};
+    var fid = String(ctx.formularioId || ident.formularioId || '').trim();
+    if (fid === 'persona_independiente') return !!api.subToPack[subSlug];
+    if (fid === 'negocio_empresa' && api.retailNegocioSubs.indexOf(subSlug) >= 0) return true;
+    if (ident.sectorId === 'bienestar' && ident.formularioId === 'persona_independiente') return !!api.subToPack[subSlug];
+    return false;
+  }
+
+  function resolveBienestarSectorConfig(ctx, resolved) {
+    if (!matchesBienestarSector(ctx, resolved)) return null;
+    var api = resolveBienestarSectorApi();
+    return api ? api.buildConfig(ctx) : null;
+  }
+
+  function isBienestarSectorSubcategoria(ctx) {
+    return matchesBienestarSector(ctx, null);
+  }
+
   function normalizeCreadorSubId(raw) {
     var subId = normalizeSubId(raw);
     if (subId === 'contenido' || subId === 'creador contenido') return 'contenido';
@@ -603,6 +642,7 @@
     if (matchesCreador(ctx, resolved)) return resolveCreadorConfig();
     if (matchesRetail(ctx, resolved)) return resolveRetailConfig();
     if (matchesVenue(ctx, resolved)) return resolveVenueConfig();
+    if (matchesBienestarSector(ctx, resolved)) return resolveBienestarSectorConfig(ctx, resolved);
     if (matchesBienestar(ctx, resolved)) return resolveBienestarConfig();
     if (matchesHospedaje(ctx, resolved)) return resolveHospedajeConfig();
     if (matchesEscort(ctx, resolved)) return resolveEscortConfig();
@@ -1211,6 +1251,122 @@
     if (raw === 'hotel_motel') return true;
     var canon = normalizeHospedajeSubId((ctx.subcategoriaId) || (ctx.subcategoria) || '');
     return canon === 'hotel_motel';
+  }
+
+  function buildBienestarSectorPerfil(values, pack) {
+    values = values || {};
+    return {
+      deltaPack: pack || values.deltaPack || '',
+      alias: values.alias || '',
+      tagline: values.tagline || '',
+      certificaciones: values.certificaciones || '',
+      tarifaDesde: values.tarifaDesde || '',
+      horarioDetalle: values.horarioDetalle || '',
+      modalidadesTerapia: Array.isArray(values.modalidadesTerapia) ? values.modalidadesTerapia.slice() : [],
+      duracionSesionMinutos: values.duracionSesionMinutos || '',
+      contraindicacionesGenerales: values.contraindicacionesGenerales || '',
+      tipoPractica: values.tipoPractica || '',
+      modalidadClase: values.modalidadClase || '',
+      nivelesAtendidos: values.nivelesAtendidos || '',
+      serviciosCentro: Array.isArray(values.serviciosCentro) ? values.serviciosCentro.slice() : [],
+      capacidadGrupo: values.capacidadGrupo || '',
+      categoriasProductoBienestar: Array.isArray(values.categoriasProductoBienestar) ? values.categoriasProductoBienestar.slice() : [],
+      surtidoPrincipal: values.surtidoPrincipal || '',
+      ventaPresencial: values.ventaPresencial || '',
+      enfoqueEspiritual: values.enfoqueEspiritual || '',
+      modalidadLectura: values.modalidadLectura || '',
+      areaCoaching: values.areaCoaching || '',
+      modalidadSesionCoaching: values.modalidadSesionCoaching || '',
+      tipoExperiencia: values.tipoExperiencia || '',
+      duracionExperiencia: values.duracionExperiencia || '',
+      fechasExperiencia: values.fechasExperiencia || '',
+      lugarExperiencia: values.lugarExperiencia || '',
+      cupoMaximo: values.cupoMaximo || '',
+      disclaimerRegulado: values.disclaimerRegulado === true,
+      edadMinimaServicio: values.edadMinimaServicio || '',
+      jurisdiccionDeclarada: values.jurisdiccionDeclarada || '',
+      contraindicacionesObligatorias: values.contraindicacionesObligatorias || '',
+      tipoExperienciaCeremonial: values.tipoExperienciaCeremonial || '',
+      acompanamientoCeremonial: Array.isArray(values.acompanamientoCeremonial) ? values.acompanamientoCeremonial.slice() : [],
+      requisitosPrevios: values.requisitosPrevios || '',
+      fechasCeremonia: values.fechasCeremonia || '',
+      cupoCeremonia: values.cupoCeremonia || '',
+      lugarCeremonia: values.lugarCeremonia || '',
+      nombreComercial: values.nombreComercial || '',
+      direccion: values.direccion || ''
+    };
+  }
+
+  function finalizeBienestarSectorValues(values, ctx) {
+    if (!values || !isBienestarSectorSubcategoria(ctx || {})) return values;
+    var api = resolveBienestarSectorApi();
+    var pack = api ? api.resolvePack((ctx && ctx.subcategoriaId) || values.subcategoriaId) : 'A';
+    clearProfileContractState(values, ['bienestarHolisticoPerfil']);
+    values.deltaPack = pack;
+    values.bienestarHolisticoPerfil = buildBienestarSectorPerfil(values, pack);
+    if (pack === 'H') {
+      values.sensible = true;
+      values.regulada = true;
+      values.requiresAdminReview = true;
+      values.soloExperienciaCeremonial = true;
+      values.edadMinimaServicio = '18';
+    }
+    return values;
+  }
+
+  function mapBienestarSectorToPerfil(u, bloques, ctx) {
+    u = u || {};
+    ctx = ctx || {};
+    var perfil = bloques.bienestarHolisticoPerfil || buildBienestarSectorPerfil(bloques, bloques.deltaPack);
+    clearProfileContractState(u, ['bienestarHolisticoPerfil']);
+    u.bienestarHolisticoPerfil = Object.assign({}, perfil);
+    u.deltaPack = perfil.deltaPack || bloques.deltaPack || '';
+    if (perfil.alias) {
+      u.alias = perfil.alias;
+      u.nombre = perfil.alias;
+    }
+    if (perfil.nombreComercial) {
+      u.nombreComercial = perfil.nombreComercial;
+      u.nombre = perfil.nombreComercial;
+      u.alias = perfil.nombreComercial;
+    }
+    if (perfil.tagline) {
+      u.tagline = perfil.tagline;
+      u.frase = perfil.tagline;
+    }
+    if (perfil.certificaciones) u.certificaciones = perfil.certificaciones;
+    if (perfil.tarifaDesde) {
+      u.tarifaDesde = perfil.tarifaDesde;
+      u.precio = perfil.tarifaDesde;
+    }
+    if (perfil.horarioDetalle) {
+      u.horarioDetalle = perfil.horarioDetalle;
+      u.horario = perfil.horarioDetalle;
+    }
+    if (perfil.direccion) u.direccion = perfil.direccion;
+    if (u.deltaPack === 'H') {
+      u.sensible = true;
+      u.regulada = true;
+      u.requiresAdminReview = true;
+      u.soloExperienciaCeremonial = true;
+    }
+    u.sectorId = 'bienestar';
+    return u;
+  }
+
+  function validateBienestarSectorValues(cfg, values, missing, ctx) {
+    if (!cfg || !isBienestarSectorSubcategoria(ctx || {})) return;
+    var api = resolveBienestarSectorApi();
+    if (cfg.deltaPack === 'H' && api && api.validatePackH) {
+      api.validatePackH(values || {}).forEach(function (msg) {
+        pushMissing(missing, msg);
+      });
+    }
+    if (cfg.deltaPack === 'H' && api && api.scanPackHCommercialText) {
+      api.scanPackHCommercialText(values || {}).forEach(function (hit) {
+        pushMissing(missing, 'Lenguaje comercial prohibido (Pack H): ' + hit.campo);
+      });
+    }
   }
 
   var PROFILE_NESTED_KEYS = [
@@ -2734,6 +2890,7 @@
     values = finalizeRetailValues(values, ctx);
     values = finalizeVenueValues(values, ctx);
     values = finalizeBienestarValues(values, ctx);
+    values = finalizeBienestarSectorValues(values, ctx);
     values = finalizeHospedajeValues(values, ctx);
     values = finalizeParejaGrupoValues(values);
     return values;
@@ -2832,6 +2989,9 @@
     }
     if (isBienestarSubcategoria(ctx)) {
       validateBienestarDeltaValues(cfg, values, missing, ctx);
+    }
+    if (isBienestarSectorSubcategoria(ctx)) {
+      validateBienestarSectorValues(cfg, values, missing, ctx);
     }
     if (isHospedajeSubcategoria(ctx)) {
       validateHospedajeDeltaValues(cfg, values, missing, ctx);
@@ -3033,6 +3193,9 @@
     if (isBienestarSubcategoria(ctx)) {
       return mapBienestarToPerfil(u, bloques, ctx);
     }
+    if (isBienestarSectorSubcategoria(ctx)) {
+      return mapBienestarSectorToPerfil(u, bloques, ctx);
+    }
     if (isHospedajeSubcategoria(ctx)) {
       return mapHospedajeToPerfil(u, bloques, ctx);
     }
@@ -3224,6 +3387,7 @@
     matchesRetail: matchesRetail,
     matchesVenue: matchesVenue,
     matchesBienestar: matchesBienestar,
+    matchesBienestarSector: matchesBienestarSector,
     matchesHospedaje: matchesHospedaje,
     apply: apply,
     collectValues: collectValues,
@@ -3277,6 +3441,9 @@
     mapBienestarToPerfil: mapBienestarToPerfil,
     normalizeBienestarSubId: normalizeBienestarSubId,
     isBienestarSubcategoria: isBienestarSubcategoria,
+    isBienestarSectorSubcategoria: isBienestarSectorSubcategoria,
+    mapBienestarSectorToPerfil: mapBienestarSectorToPerfil,
+    validateBienestarSectorValues: validateBienestarSectorValues,
     finalizeHospedajeValues: finalizeHospedajeValues,
     buildHospedajePerfil: buildHospedajePerfil,
     mapHospedajeToPerfil: mapHospedajeToPerfil,

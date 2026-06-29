@@ -13,6 +13,9 @@
 
   function subs(nombres) {
     return nombres.map(function (nombre) {
+      if (nombre && typeof nombre === 'object' && nombre.id && nombre.nombre) {
+        return { id: nombre.id, nombre: nombre.nombre };
+      }
       return { id: slug(nombre), nombre: nombre };
     });
   }
@@ -69,7 +72,7 @@
     'Suplementos Naturales',
     'Herbolarios',
     'Naturistas',
-    'Ceremonias de Ayahuasca, Rapé y Plantas de Poder',
+    { id: 'ceremonias-ayahuasca-rape-plantas-de-poder', nombre: 'Ceremonias de Ayahuasca, Rapé y Plantas de Poder' },
     'Cacao Ceremonial',
     'Reflexología',
     'Registros Akáshicos',
