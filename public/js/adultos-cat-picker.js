@@ -66,7 +66,9 @@
     );
   }
 
-  function watermarkForCat(catId) {
+  function watermarkForCat(catId, opts) {
+    opts = opts || {};
+    if (opts.skipWatermark) return '';
     var meta = catImageMeta(catId);
     if (!meta || !meta.src) return '';
     if (window.CariHubSectorCategoryWatermarks && CariHubSectorCategoryWatermarks.buildFromSrc) {
@@ -87,7 +89,7 @@
           'role="option" data-cat-id="' + cat.id + '" aria-selected="' + (selected ? 'true' : 'false') + '">' +
           '<span class="ap-card__visual">' + cardVisual(cat, opts, index) + '</span>' +
           '<span class="ap-card__name">' +
-            watermarkForCat(cat.id) +
+            watermarkForCat(cat.id, opts) +
             sparksHtml() +
             '<span class="ap-card__name-text">' + cat.nombre + '</span>' +
           '</span>' +

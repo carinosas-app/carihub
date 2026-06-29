@@ -752,6 +752,7 @@
       if (listAdultos) {
         window.CariHubAdultosCatPicker.renderList(listAdultos, pickerSubcategorias, {
           selectedId: selectedCategoriaId,
+          skipWatermark: true,
           onSelect: function (cat) { selectSubcategoria(cat, sector); }
         });
       }
