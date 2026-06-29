@@ -685,6 +685,7 @@
   }
 
   function cardHTMLNegocio(u, Q) {
+    if (isEventosSectorPerfil(u)) return cardHTMLEventosSector(u, Q);
     if (isBienestarSectorPerfil(u)) return cardHTMLBienestarSector(u, Q);
     Q = Q || {};
     var horario = String(u.horario || u.horarioPublico || '').trim();
@@ -1123,6 +1124,49 @@
       CariHubBienestarSectorRender.isBienestarSectorPerfil(u);
   }
 
+  function isEventosSectorPerfil(u) {
+    return global.CariHubEventosSectorRender &&
+      CariHubEventosSectorRender.isEventosSectorPerfil(u);
+  }
+
+  function eventosSectorBadgesHTML(u) {
+    var base = badgesCompactHTML(u, { respRapida: false });
+    if (!global.CariHubEventosSectorRender) return base;
+    var hydrated = CariHubEventosSectorRender.hydrateDisplayFields(Object.assign({}, u));
+    var extra = (hydrated.__eventosBadges || []).map(function (b) {
+      return '<span class="res-badge ' + safeTxt(b.cls) + '">' + safeTxt(b.text) + '</span>';
+    }).join('');
+    return base + extra;
+  }
+
+  function cardHTMLEventosSector(u, Q) {
+    Q = Q || {};
+    var ES = global.CariHubEventosSectorRender;
+    var hydrated = ES ? ES.hydrateDisplayFields(Object.assign({}, u)) : (u || {});
+    var chips = ES ? ES.cardMetaChips(hydrated) : [];
+    var mods = '';
+    chips.forEach(function (ch, i) {
+      var txtChip = String(ch || '');
+      if (txtChip.length > 28) txtChip = txtChip.slice(0, 26) + '…';
+      mods += '<span class="modchip ' + (i % 2 ? 'mc-purple' : 'mc-pink') + '">' +
+        svgIco(i === 0 ? 'briefcase' : 'clock') + safeTxt(txtChip) + '</span>';
+    });
+    var esp = hydrated.titulo || hydrated.especialidad || '';
+    var priceLabel = hydrated.__eventosPriceLabel || 'Cotización desde';
+    var pack = String(hydrated.__eventosPack || 'ev').toLowerCase();
+    var cardExtra = ' res-card--eventos-sector res-card--ev-' + safeTxt(pack);
+    return cardShell(hydrated, Q, {
+      cardClass: 'res-card--servicio res-card--eventos' + cardExtra,
+      nombre: hydrated.nombreComercial || hydrated.nombre || hydrated.alias,
+      catIcon: 'briefcase',
+      catLabel: hydrated.categoriaPublica || hydrated.categoria || Q.categoria,
+      metaRight: mods,
+      descBlock: descripcionCompactHTML(Object.assign({}, hydrated, { tagline: hydrated.tagline || esp }), 'Servicios'),
+      priceLabel: priceLabel,
+      badges: eventosSectorBadgesHTML(hydrated)
+    });
+  }
+
   function bienestarSectorBadgesHTML(u) {
     var base = badgesCompactHTML(u, { respRapida: false });
     if (!global.CariHubBienestarSectorRender) return base;
@@ -1163,6 +1207,7 @@
   }
 
   function cardHTMLServicio(u, Q) {
+    if (isEventosSectorPerfil(u)) return cardHTMLEventosSector(u, Q);
     if (isBienestarSectorPerfil(u)) return cardHTMLBienestarSector(u, Q);
     Q = Q || {};
     var cobertura = String(u.zonaCobertura || u.zona || u.serviciosPrincipales || 'A domicilio').trim();
@@ -1244,6 +1289,7 @@
     if (isCineXxxPerfil(u)) return cardHTMLCineXxx(u, Q);
     if (isClubSwPerfil(u)) return cardHTMLClubSw(u, Q);
     if (isVenuePerfil(u)) return cardHTMLVenue(u, Q);
+    if (isEventosSectorPerfil(u)) return cardHTMLEventosSector(u, Q);
     if (isBienestarSectorPerfil(u)) return cardHTMLBienestarSector(u, Q);
     if (isBienestarPerfil(u)) return cardHTMLBienestar(u, Q);
     if (isHospedajePerfil(u)) return cardHTMLHospedaje(u, Q);
@@ -1320,6 +1366,10 @@
       labels = Object.assign({}, labels);
       delete labels.servicios;
     }
+    if (global.CariHubEventosSectorRender && CariHubEventosSectorRender.isEventosSectorPerfil(u)) {
+      labels = Object.assign({}, labels);
+      delete labels.servicios;
+    }
 
     function visible(key) {
       return show.indexOf(key) >= 0 && hide.indexOf(key) < 0;
@@ -1372,6 +1422,8 @@
     cardHTMLBienestar: cardHTMLBienestar,
     cardHTMLBienestarSector: cardHTMLBienestarSector,
     isBienestarSectorPerfil: isBienestarSectorPerfil,
+    cardHTMLEventosSector: cardHTMLEventosSector,
+    isEventosSectorPerfil: isEventosSectorPerfil,
     cardHTMLSpa: cardHTMLSpa,
     cardHTMLMasajesLocal: cardHTMLMasajesLocal,
     isBienestarPerfil: isBienestarPerfil,

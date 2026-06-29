@@ -7,6 +7,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import {
   LEGACY_TO_CANON,
+  SECTOR_UI_SLUG_TO_CANON,
   CANON_SUBCATEGORIAS,
   SUB_TO_PACK,
   SUB_DELTAS,
@@ -102,6 +103,8 @@ const body = `/**
 
   var LEGACY_TO_CANON = ${JSON.stringify(LEGACY_TO_CANON, null, 2)};
 
+  var SECTOR_UI_SLUG_TO_CANON = ${JSON.stringify(SECTOR_UI_SLUG_TO_CANON, null, 2)};
+
   var CANON_META = ${JSON.stringify(canonMeta, null, 2)};
 
   var SUB_TO_PACK = ${JSON.stringify(SUB_TO_PACK, null, 2)};
@@ -135,7 +138,7 @@ const body = `/**
     var key = slugSubId(raw);
     if (!key) return '';
     if (CANON_META[key]) return key;
-    return LEGACY_TO_CANON[key] || '';
+    return LEGACY_TO_CANON[key] || SECTOR_UI_SLUG_TO_CANON[key] || '';
   }
 
   function resolvePack(canonId) {

@@ -205,6 +205,10 @@
       u = CariHubBienestarSectorRender.hydrateDisplayFields(u);
     }
 
+    if (global.CariHubEventosSectorRender && CariHubEventosSectorRender.hydrateDisplayFields) {
+      u = CariHubEventosSectorRender.hydrateDisplayFields(u);
+    }
+
     if (global.CariHubSubcategoriaLabels && CariHubSubcategoriaLabels.resolveVisibleCategoria) {
       var visibleCat = CariHubSubcategoriaLabels.resolveVisibleCategoria(subName || catName, subId);
       if (visibleCat) {
@@ -222,6 +226,10 @@
     if (global.CariHubBienestarSectorRender && CariHubBienestarSectorRender.resolveVistaPerfil) {
       var bsVista = CariHubBienestarSectorRender.resolveVistaPerfil(u);
       if (bsVista) vistaPerfil = bsVista;
+    }
+    if (global.CariHubEventosSectorRender && CariHubEventosSectorRender.resolveVistaPerfil) {
+      var evVista = CariHubEventosSectorRender.resolveVistaPerfil(u);
+      if (evVista) vistaPerfil = evVista;
     }
 
     return {

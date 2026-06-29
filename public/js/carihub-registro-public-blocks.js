@@ -1545,7 +1545,11 @@
       ? api.resolveCanonSubId((ctx.subcategoriaId) || bloques.subcategoriaId || '')
       : '';
     var pack = api ? api.resolvePack(canonId) : '';
-    var perfil = bloques.eventosPerfil || (api ? api.buildEventosPerfil(bloques, canonId, pack) : {});
+    var merged = Object.assign({}, bloques);
+    if (api && api.applyEventosFlags) {
+      merged = api.applyEventosFlags(merged, canonId);
+    }
+    var perfil = bloques.eventosPerfil || (api ? api.buildEventosPerfil(merged, canonId, pack) : {});
     clearProfileContractState(u, ['eventosPerfil']);
     u.eventosPerfil = Object.assign({}, perfil);
     u = applyEventosSectorPerfilFields(u, perfil);

@@ -45,6 +45,29 @@
   "pinatas-y-festejos": "decoracion-ambientacion-eventos"
 };
 
+  var SECTOR_UI_SLUG_TO_CANON = {
+  "espacios-para-eventos": "espacios-para-eventos",
+  "organizadores-y-produccion-de-eventos": "organizadores-produccion-eventos",
+  "decoracion-y-ambientacion": "decoracion-ambientacion-eventos",
+  "fotografia-y-video-para-eventos": "fotografia-video-eventos",
+  "dj-s-para-eventos": "djs-eventos",
+  "grupos-musicales-para-eventos": "grupos-musicales-eventos",
+  "animadores-y-maestros-de-ceremonia": "animadores-maestros-ceremonia",
+  "shows-para-eventos": "shows-para-eventos",
+  "banquetes-y-catering": "banquetes-catering-eventos",
+  "renta-de-mobiliario": "renta-mobiliario-eventos",
+  "renta-de-equipo-audio-iluminacion-escenarios": "renta-equipo-eventos",
+  "food-trucks-y-carritos": "food-trucks-carritos-eventos",
+  "pasteles-y-reposteria-para-eventos": "pasteles-reposteria-eventos",
+  "invitaciones-y-papeleria": "invitaciones-papeleria-eventos",
+  "florerias-para-eventos": "florerias-eventos",
+  "pirotecnia-y-efectos-especiales": "pirotecnia-efectos-especiales",
+  "seguridad-para-eventos": "seguridad-eventos",
+  "valet-parking": "valet-parking-eventos",
+  "transporte-para-eventos": "transporte-eventos",
+  "renta-de-vestuario-y-disfraces": "renta-vestuario-disfraces-eventos"
+};
+
   var CANON_META = {
   "espacios-para-eventos": {
     "pack": "VENUE",
@@ -2441,7 +2464,7 @@
     var key = slugSubId(raw);
     if (!key) return '';
     if (CANON_META[key]) return key;
-    return LEGACY_TO_CANON[key] || '';
+    return LEGACY_TO_CANON[key] || SECTOR_UI_SLUG_TO_CANON[key] || '';
   }
 
   function resolvePack(canonId) {
