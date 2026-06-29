@@ -3,6 +3,7 @@
  * Equivalencias legacy → canónico documentadas en config-registro-schema.meta.json
  */
 import { SUB_TO_PACK, arquetipoForPack, RETAIL_FIX_IDS } from "./bienestar-packs-v1.mjs";
+import { SUB_TO_PACK as EVENTOS_SUB_TO_PACK, packPlantillaKey as eventosPackKey } from "./eventos-packs-v1.mjs";
 
 /** Nombres legacy (integración antigua) → canónico por defecto */
 export const ARQUETIPOS_EQUIVALENCIA = {
@@ -13,6 +14,17 @@ export const ARQUETIPOS_EQUIVALENCIA = {
   persona_servicio: "persona_servicio_general",
   profesional_certificado: "profesional_salud",
 };
+
+
+export function eventosPackForSub(subcategoriaId) {
+  return EVENTOS_SUB_TO_PACK[subcategoriaId] || null;
+}
+
+export function eventosArquetipoForSub(subcategoriaId) {
+  const pack = eventosPackForSub(subcategoriaId);
+  if (!pack) return null;
+  return eventosPackKey(pack);
+}
 
 export function bienestarPackForSub(subcategoriaId) {
   return SUB_TO_PACK[subcategoriaId] || null;
@@ -28,7 +40,12 @@ export function sectorArquetipoIndependiente(sectorId, subcategoriaId) {
   if (sectorId === "bienestar") return bienestarArquetipoForSub(subcategoriaId);
   if (sectorId === "transporte") return "persona_servicio_movil";
   if (["hogar", "automotriz", "industria"].includes(sectorId)) return "persona_servicio_oficio";
-  if (["educacion", "eventos", "tecnologia"].includes(sectorId)) return "persona_servicio_profesional";
+  if (sectorId === "eventos") {
+    const ev = eventosArquetipoForSub(subcategoriaId);
+    if (ev) return ev;
+    return "persona_servicio_profesional";
+  }
+  if (["educacion", "tecnologia"].includes(sectorId)) return "persona_servicio_profesional";
   if (sectorId === "salud" && !subcategoriaId.includes("enfermer")) return "persona_servicio_salud_auxiliar";
   return "persona_servicio_general";
 }

@@ -3,7 +3,7 @@
   "$id": "https://carihub.app/schemas/config-registro-schema.meta.json",
   "title": "CariHub — Meta Schema Registro Dinámico",
   "description": "Contrato compartido para schemas de registro, precios, promociones, contratos, estados y revisión. Usado por FieldEngine, ValidationEngine, IA Arquitecto y validar-schemas-registro.mjs.",
-  "versionMeta": "2026-06-10",
+  "versionMeta": "2026-06-27",
   "convenciones": {
     "versionSchema": "Fecha ISO o semver del schema de registro. Obligatorio en raíz (alias aceptado: version).",
     "formularioId": {
@@ -22,13 +22,56 @@
       "Formulario Profesionista": "profesionista_cedula",
       "Formulario Negocio": "negocio_empresa"
     },
-    "tipoPerfilValidos": ["persona", "negocio", "lugar", "creador", "espectaculo", "pareja_grupo"],
-    "camposSistema": ["subcategoriaId", "formularioId", "sectorId", "planId", "facturacion"],
+    "tipoPerfilValidos": [
+      "persona",
+      "negocio",
+      "lugar",
+      "creador",
+      "espectaculo",
+      "pareja_grupo"
+    ],
+    "camposSistema": [
+      "subcategoriaId",
+      "formularioId",
+      "sectorId",
+      "planId",
+      "facturacion"
+    ],
     "camposAnidadosPermitidos": {
-      "geo": ["pais", "estado", "ciudad", "zona"],
-      "fisico": ["estatura", "peso", "complexion", "cabello", "ojos", "tatuajes", "piercings"],
-      "contactoPublico": ["whatsapp", "telegram", "instagram", "onlyfans", "x", "mensajeInterno", "llamada", "sitioWeb", "telefono"],
-      "facturacion": ["rfc", "razonSocial", "codigoPostalFiscal", "emailFacturacion", "regimenFiscal", "usoCFDI"]
+      "geo": [
+        "pais",
+        "estado",
+        "ciudad",
+        "zona"
+      ],
+      "fisico": [
+        "estatura",
+        "peso",
+        "complexion",
+        "cabello",
+        "ojos",
+        "tatuajes",
+        "piercings"
+      ],
+      "contactoPublico": [
+        "whatsapp",
+        "telegram",
+        "instagram",
+        "onlyfans",
+        "x",
+        "mensajeInterno",
+        "llamada",
+        "sitioWeb",
+        "telefono"
+      ],
+      "facturacion": [
+        "rfc",
+        "razonSocial",
+        "codigoPostalFiscal",
+        "emailFacturacion",
+        "regimenFiscal",
+        "usoCFDI"
+      ]
     },
     "subcategoriaIdCanonico": "minúsculas, sin acentos, separador _ entre tokens (escort_gay ≡ escort gay ≡ escort-gay)",
     "aliasesSubcategoriaId": {
@@ -67,8 +110,17 @@
       "negocio_empresa",
       "usuario_visitante"
     ],
-    "planesComerciales": ["basico", "destacado", "premium", "vip"],
-    "periodosComerciales": ["semanal", "quincenal", "mensual"],
+    "planesComerciales": [
+      "basico",
+      "destacado",
+      "premium",
+      "vip"
+    ],
+    "periodosComerciales": [
+      "semanal",
+      "quincenal",
+      "mensual"
+    ],
     "periodosComercialesFuturos": {
       "anual": "Factor reservado en config-precios-planes-perfiles-schema.json → periodosComercialesFuturos.anual (activo: false). No usar en contratos MVP."
     },
@@ -115,8 +167,16 @@
     "schema": "config-renderizado-dinamico-schema.json",
     "componentes": "config-registro-componentes-ui-schema.json",
     "regla": "resultados.html y perfil.html sin switch por subcategoriaId",
-    "motores": ["RenderEngine", "ComponentRegistry", "PrivacyGuard", "SchemaResolver"],
-    "fallback": { "resultados": "ResultCardGenerico", "perfil": "ProfileLayoutGenerico" },
+    "motores": [
+      "RenderEngine",
+      "ComponentRegistry",
+      "PrivacyGuard",
+      "SchemaResolver"
+    ],
+    "fallback": {
+      "resultados": "ResultCardGenerico",
+      "perfil": "ProfileLayoutGenerico"
+    },
     "versionado": "Perfil conserva schemaVersion al publicar; catálogo puede incrementar versión"
   },
   "arquitecturaCategoriasSugeridas": {
@@ -149,7 +209,13 @@
     "schema": "config-busqueda-categorias-schema.json",
     "sinResultado": "config-busqueda-sin-resultado-schema.json",
     "ejemplos": "ejemplos-busqueda-categorias.json",
-    "flujoGeoPrimero": ["pais", "estado", "ciudad", "categoria?", "palabraClave?"],
+    "flujoGeoPrimero": [
+      "pais",
+      "estado",
+      "ciudad",
+      "categoria?",
+      "palabraClave?"
+    ],
     "indiceFirestore": {
       "sectores": "indice_busqueda_sectores/{sectorId}",
       "subcategorias": "indice_busqueda_subcategorias/{subcategoriaId}",
@@ -181,7 +247,13 @@
       "solicitudesCategoria": "query solicitudes_categorias where usuarioId — sin array en raíz"
     },
     "tiposCuenta": {
-      "valores": ["visitante", "adulto", "independiente", "profesionista", "empresa"],
+      "valores": [
+        "visitante",
+        "adulto",
+        "independiente",
+        "profesionista",
+        "empresa"
+      ],
       "mapeoFormularioId": {
         "visitante": "usuario_visitante",
         "adulto": "adultos",
@@ -191,18 +263,48 @@
       }
     },
     "rolesCuenta": {
-      "valores": ["anunciante", "admin", "moderador", "auditor"],
+      "valores": [
+        "anunciante",
+        "admin",
+        "moderador",
+        "auditor"
+      ],
       "nota": "roles[] permite multirol: visitante + anunciante sin perfil público; admin nunca es tipoCuenta"
     },
     "estados": {
-      "estadoCuenta": ["activa", "suspendida", "eliminada", "pendiente_activacion"],
-      "estadoVerificacion": ["sin_enviar", "enviada", "en_revision", "aprobada", "rechazada", "vencida"],
-      "estadoMensajeria": ["habilitada", "restringida", "suspendida", "solo_lectura"],
+      "estadoCuenta": [
+        "activa",
+        "suspendida",
+        "eliminada",
+        "pendiente_activacion"
+      ],
+      "estadoVerificacion": [
+        "sin_enviar",
+        "enviada",
+        "en_revision",
+        "aprobada",
+        "rechazada",
+        "vencida"
+      ],
+      "estadoMensajeria": [
+        "habilitada",
+        "restringida",
+        "suspendida",
+        "solo_lectura"
+      ],
       "estadoPublicacion": "ver convenciones.estadosRevision + estados categoría sugerida"
     },
     "conversionCuenta": {
       "regla": "Mismo usuarioId al evolucionar visitante → adulto|independiente|profesionista|empresa|anunciante",
-      "conservar": ["favoritos", "pagos", "contratos", "solicitudes_categorias", "solicitudes_anuncios", "preferencias", "mensajes futuros"],
+      "conservar": [
+        "favoritos",
+        "pagos",
+        "contratos",
+        "solicitudes_categorias",
+        "solicitudes_anuncios",
+        "preferencias",
+        "mensajes futuros"
+      ],
       "schema": "config-registro-visitante-schema.json → WizardCrearPerfilDesdeVisitante",
       "sinNuevoAuthUser": true
     },
@@ -210,84 +312,201 @@
       "usuarios": {
         "ruta": "usuarios/{usuarioId}",
         "descripcion": "Hub identidad — Auth uid = document id",
-        "camposRaizObligatorios": ["usuarioId", "email", "tipoCuenta", "estadoCuenta", "createdAt", "updatedAt"],
-        "subobjetos": ["cuenta", "perfil", "anunciante", "verificacion", "mensajeria", "comercial", "seguridad", "preferencias"],
-        "subcolecciones": ["favoritos", "notificaciones", "bloqueos", "conversaciones_meta", "dispositivos"]
+        "camposRaizObligatorios": [
+          "usuarioId",
+          "email",
+          "tipoCuenta",
+          "estadoCuenta",
+          "createdAt",
+          "updatedAt"
+        ],
+        "subobjetos": [
+          "cuenta",
+          "perfil",
+          "anunciante",
+          "verificacion",
+          "mensajeria",
+          "comercial",
+          "seguridad",
+          "preferencias"
+        ],
+        "subcolecciones": [
+          "favoritos",
+          "notificaciones",
+          "bloqueos",
+          "conversaciones_meta",
+          "dispositivos"
+        ]
       },
       "perfiles": {
         "ruta": "perfiles/{perfilId}",
         "descripcion": "Datos registro/publicación; separado de usuarios en diseño objetivo",
-        "fkObligatorias": ["usuarioId", "perfilId", "formularioId", "sectorId", "subcategoriaId", "estadoRevision"],
+        "fkObligatorias": [
+          "usuarioId",
+          "perfilId",
+          "formularioId",
+          "sectorId",
+          "subcategoriaId",
+          "estadoRevision"
+        ],
         "notaLegacy": "Producción actual usa usuarios/{uid} como perfil — migración faseada; perfilId puede = usuarioId en transición"
       },
       "contratos_perfiles": {
         "ruta": "contratos_perfiles/{contratoId}",
         "schema": "config-contratos-carihub-schema.json → contratoPerfil",
-        "fkObligatorias": ["usuarioId", "estadoContrato", "versionPrecio"],
-        "fkOpcionales": ["perfilId"]
+        "fkObligatorias": [
+          "usuarioId",
+          "estadoContrato",
+          "versionPrecio"
+        ],
+        "fkOpcionales": [
+          "perfilId"
+        ]
       },
       "contratos_banners": {
         "ruta": "contratos_banners/{contratoId}",
         "schema": "config-contratos-carihub-schema.json → contratoBanner + config-promociones-banners-schema.json",
-        "fkObligatorias": ["usuarioId", "anuncianteId", "estadoContrato"],
+        "fkObligatorias": [
+          "usuarioId",
+          "anuncianteId",
+          "estadoContrato"
+        ],
         "nota": "anuncianteId MVP = usuarioId"
       },
       "solicitudes_categorias": {
         "ruta": "solicitudes_categorias/{solicitudCategoriaId}",
         "schema": "config-categorias-sugeridas-schema.json",
-        "fkObligatorias": ["usuarioId", "registroId", "estadoSolicitudCategoria"]
+        "fkObligatorias": [
+          "usuarioId",
+          "registroId",
+          "estadoSolicitudCategoria"
+        ]
       },
       "solicitudes_anuncios": {
         "ruta": "solicitudes_anuncios/{solicitudId}",
-        "fkObligatorias": ["usuarioId"],
-        "fkAlternativas": ["uidAnunciante"],
+        "fkObligatorias": [
+          "usuarioId"
+        ],
+        "fkAlternativas": [
+          "uidAnunciante"
+        ],
         "nota": "uidAnunciante legacy = usuarioId; normalizar a usuarioId en diseño nuevo"
       },
       "favoritos": {
         "ruta": "usuarios/{usuarioId}/favoritos/{perfilId}",
-        "fkObligatorias": ["usuarioId", "perfilId"],
+        "fkObligatorias": [
+          "usuarioId",
+          "perfilId"
+        ],
         "nota": "usuarioId implícito en path; perfilId apunta a perfiles/{perfilId}"
       },
       "denuncias": {
         "ruta": "denuncias/{denunciaId}",
-        "fkObligatorias": ["perfilId"],
-        "fkOpcionales": ["reportanteId"],
-        "fkRequeridasUnaDe": ["reportadoId", "perfilId"],
+        "fkObligatorias": [
+          "perfilId"
+        ],
+        "fkOpcionales": [
+          "reportanteId"
+        ],
+        "fkRequeridasUnaDe": [
+          "reportadoId",
+          "perfilId"
+        ],
         "nota": "reportadoId = usuarioId dueño del perfil denunciado"
       },
       "pagos": {
         "ruta": "pagos/{pagoId}",
-        "fkObligatorias": ["usuarioId"],
-        "fkCondicionales": ["contratoId"],
+        "fkObligatorias": [
+          "usuarioId"
+        ],
+        "fkCondicionales": [
+          "contratoId"
+        ],
         "nota": "contratoId obligatorio si pago vinculado a contrato activo"
       },
       "verificaciones": {
         "ruta": "solicitudes_verificacion/{id} | usuarios.verificacion",
-        "fkObligatorias": ["usuarioId"]
+        "fkObligatorias": [
+          "usuarioId"
+        ]
       },
       "mensajeriaFutura": {
         "conversaciones": "conversaciones/{conversacionId}",
         "mensajes": "conversaciones/{conversacionId}/mensajes/{mensajeId}",
-        "fkObligatorias": ["emisorId", "receptorId"],
+        "fkObligatorias": [
+          "emisorId",
+          "receptorId"
+        ],
         "reglaEnvio": "usuarios.mensajeria.estadoMensajeria permite envío",
         "subcoleccionMeta": "usuarios/{usuarioId}/conversaciones_meta/{conversacionId}"
       }
     },
     "reglasFK": {
-      "perfiles.usuarioId": { "obligatorio": true, "tipo": "string", "ref": "usuarios/{usuarioId}" },
-      "solicitudes_categorias.usuarioId": { "obligatorio": true, "tipo": "string", "ref": "usuarios/{usuarioId}" },
-      "contratos_perfiles.usuarioId": { "obligatorio": true, "tipo": "string", "ref": "usuarios/{usuarioId}" },
-      "contratos_banners.usuarioId": { "obligatorio": true, "tipo": "string", "ref": "usuarios/{usuarioId}" },
-      "contratos_banners.anuncianteId": { "obligatorio": true, "tipo": "string", "ref": "usuarios/{usuarioId} en MVP" },
-      "solicitudes_anuncios.usuarioId": { "obligatorio": true, "alternativa": "uidAnunciante", "ref": "usuarios/{usuarioId}" },
-      "pagos.usuarioId": { "obligatorio": true, "ref": "usuarios/{usuarioId}" },
-      "pagos.contratoId": { "obligatorio": "si_aplica_contrato", "ref": "contratos_perfiles|contratos_banners" },
-      "denuncias.reportanteId": { "obligatorio": false, "ref": "usuarios/{usuarioId}" },
-      "denuncias.reportadoId": { "obligatorio": "perfilId_o_reportadoId", "ref": "usuarios/{usuarioId}" },
-      "denuncias.perfilId": { "obligatorio": true, "ref": "perfiles/{perfilId}" },
-      "mensajes.emisorId": { "obligatorio": true, "cuando": "messenger_implementado", "ref": "usuarios/{usuarioId}" },
-      "mensajes.receptorId": { "obligatorio": true, "cuando": "messenger_implementado", "ref": "usuarios/{usuarioId}" },
-      "perfilPublicado.sinUsuarioId": { "obligatorio": false, "prohibido": true, "regla": "Ningún perfil publicado sin usuarioId" }
+      "perfiles.usuarioId": {
+        "obligatorio": true,
+        "tipo": "string",
+        "ref": "usuarios/{usuarioId}"
+      },
+      "solicitudes_categorias.usuarioId": {
+        "obligatorio": true,
+        "tipo": "string",
+        "ref": "usuarios/{usuarioId}"
+      },
+      "contratos_perfiles.usuarioId": {
+        "obligatorio": true,
+        "tipo": "string",
+        "ref": "usuarios/{usuarioId}"
+      },
+      "contratos_banners.usuarioId": {
+        "obligatorio": true,
+        "tipo": "string",
+        "ref": "usuarios/{usuarioId}"
+      },
+      "contratos_banners.anuncianteId": {
+        "obligatorio": true,
+        "tipo": "string",
+        "ref": "usuarios/{usuarioId} en MVP"
+      },
+      "solicitudes_anuncios.usuarioId": {
+        "obligatorio": true,
+        "alternativa": "uidAnunciante",
+        "ref": "usuarios/{usuarioId}"
+      },
+      "pagos.usuarioId": {
+        "obligatorio": true,
+        "ref": "usuarios/{usuarioId}"
+      },
+      "pagos.contratoId": {
+        "obligatorio": "si_aplica_contrato",
+        "ref": "contratos_perfiles|contratos_banners"
+      },
+      "denuncias.reportanteId": {
+        "obligatorio": false,
+        "ref": "usuarios/{usuarioId}"
+      },
+      "denuncias.reportadoId": {
+        "obligatorio": "perfilId_o_reportadoId",
+        "ref": "usuarios/{usuarioId}"
+      },
+      "denuncias.perfilId": {
+        "obligatorio": true,
+        "ref": "perfiles/{perfilId}"
+      },
+      "mensajes.emisorId": {
+        "obligatorio": true,
+        "cuando": "messenger_implementado",
+        "ref": "usuarios/{usuarioId}"
+      },
+      "mensajes.receptorId": {
+        "obligatorio": true,
+        "cuando": "messenger_implementado",
+        "ref": "usuarios/{usuarioId}"
+      },
+      "perfilPublicado.sinUsuarioId": {
+        "obligatorio": false,
+        "prohibido": true,
+        "regla": "Ningún perfil publicado sin usuarioId"
+      }
     },
     "validacionesObligatorias": {
       "descripcion": "validateIdentidadUsuario() en validar-schemas-registro.mjs",
@@ -342,129 +561,384 @@
   "definitions": {
     "fieldDescriptor": {
       "type": "object",
-      "required": ["id", "label", "tipo"],
+      "required": [
+        "id",
+        "label",
+        "tipo"
+      ],
       "properties": {
-        "id": { "type": "string", "minLength": 1 },
-        "label": { "type": "string" },
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "label": {
+          "type": "string"
+        },
         "tipo": {
           "type": "string",
           "enum": [
-            "text", "textarea", "number", "decimal", "currency", "boolean", "enum", "select",
-            "tags", "checklist", "checkboxGroup", "image", "image[]", "file", "phone", "email",
-            "url", "rfc", "geo", "address", "mapPin", "schedule", "duration", "richtext",
-            "group", "serviceMenu", "productList", "platformList", "urlList", "roomList",
-            "eventList", "memberList", "badge"
+            "text",
+            "textarea",
+            "number",
+            "decimal",
+            "currency",
+            "boolean",
+            "enum",
+            "select",
+            "tags",
+            "checklist",
+            "checkboxGroup",
+            "image",
+            "image[]",
+            "file",
+            "phone",
+            "email",
+            "url",
+            "rfc",
+            "geo",
+            "address",
+            "mapPin",
+            "schedule",
+            "duration",
+            "richtext",
+            "group",
+            "serviceMenu",
+            "productList",
+            "platformList",
+            "urlList",
+            "roomList",
+            "eventList",
+            "memberList",
+            "badge"
           ]
         },
-        "privado": { "type": "boolean" },
-        "iaCopy": { "type": "boolean" },
-        "maxLength": { "type": "number" },
-        "min": { "type": "number" },
-        "max": { "type": "number" },
-        "opciones": { "type": "array", "items": { "type": "string" } },
-        "campos": { "type": "array", "items": { "type": "string" } },
-        "mapa": { "type": "boolean" },
-        "tonoPublico": { "type": "string" }
+        "privado": {
+          "type": "boolean"
+        },
+        "iaCopy": {
+          "type": "boolean"
+        },
+        "maxLength": {
+          "type": "number"
+        },
+        "min": {
+          "type": "number"
+        },
+        "max": {
+          "type": "number"
+        },
+        "opciones": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "campos": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "mapa": {
+          "type": "boolean"
+        },
+        "tonoPublico": {
+          "type": "string"
+        }
       }
     },
     "plantillaArquetipo": {
       "type": "object",
-      "required": ["tipoPerfil", "componentes", "fotosMin", "verificacionTipo"],
+      "required": [
+        "tipoPerfil",
+        "componentes",
+        "fotosMin",
+        "verificacionTipo"
+      ],
       "properties": {
-        "tipoPerfil": { "type": "string" },
-        "heredaDe": { "type": "string" },
+        "tipoPerfil": {
+          "type": "string"
+        },
+        "heredaDe": {
+          "type": "string"
+        },
         "componentes": {
           "type": "object",
-          "required": ["resultados", "perfil"],
+          "required": [
+            "resultados",
+            "perfil"
+          ],
           "properties": {
-            "resultados": { "type": "string" },
-            "perfil": { "type": "string" }
+            "resultados": {
+              "type": "string"
+            },
+            "perfil": {
+              "type": "string"
+            }
           }
         },
-        "camposPublicosResultados": { "type": "array", "items": { "type": "string" } },
-        "camposPublicosPerfil": { "type": "array", "items": { "type": "string" } },
-        "camposPrivados": { "type": "array", "items": { "type": "string" } },
-        "obligatoriosExtra": { "type": "array", "items": { "type": "string" } },
-        "opcionalesExtra": { "type": "array", "items": { "type": "string" } },
-        "fotosMin": { "type": "number", "minimum": 0 },
-        "fotosMax": { "type": "number", "minimum": 1 },
-        "verificacionTipo": { "type": "string" },
-        "keywordsIA": { "type": "array", "items": { "type": "string" } },
-        "textosAyuda": { "type": "object", "additionalProperties": { "type": "string" } }
+        "camposPublicosResultados": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "camposPublicosPerfil": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "camposPrivados": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "obligatoriosExtra": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "opcionalesExtra": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "fotosMin": {
+          "type": "number",
+          "minimum": 0
+        },
+        "fotosMax": {
+          "type": "number",
+          "minimum": 1
+        },
+        "verificacionTipo": {
+          "type": "string"
+        },
+        "keywordsIA": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "textosAyuda": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
       }
     },
     "busquedaMetadata": {
       "type": "object",
       "description": "Metadatos de búsqueda por categoría/subcategoría — ver config-busqueda-categorias-schema.json",
       "properties": {
-        "keywords": { "type": "array", "items": { "type": "string" } },
-        "aliases": { "type": "array", "items": { "type": "string" } },
-        "sinonimos": { "type": "array", "items": { "type": "string" } },
-        "palabrasRelacionadas": { "type": "array", "items": { "type": "string" } },
-        "erroresComunes": { "type": "array", "items": { "type": "string" } },
-        "prioridadBusqueda": { "type": "number", "minimum": 0, "maximum": 100 },
-        "estadoActivo": { "type": "boolean" }
+        "keywords": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "aliases": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "sinonimos": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "palabrasRelacionadas": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "erroresComunes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "prioridadBusqueda": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "estadoActivo": {
+          "type": "boolean"
+        }
       }
     },
     "mapaRegistroEntry": {
       "type": "object",
       "description": "Fila de mapa-registro-categorias.json con extensión busqueda",
-      "required": ["sectorId", "subcategoriaId", "formularioId"],
+      "required": [
+        "sectorId",
+        "subcategoriaId",
+        "formularioId"
+      ],
       "properties": {
-        "sectorId": { "type": "string" },
-        "categoriaPrincipal": { "type": "string" },
-        "categoriaPadre": { "type": "string", "const": "sectorId del padre — mismo que sectorId en subcategoría" },
-        "subcategoriaId": { "type": "string" },
-        "subcategoria": { "type": "string" },
-        "formularioId": { "type": "string" },
-        "tipoPerfil": { "type": "string" },
-        "arquetipo": { "type": "string" },
-        "busqueda": { "$ref": "#/definitions/busquedaMetadata" }
+        "sectorId": {
+          "type": "string"
+        },
+        "categoriaPrincipal": {
+          "type": "string"
+        },
+        "categoriaPadre": {
+          "type": "string",
+          "const": "sectorId del padre — mismo que sectorId en subcategoría"
+        },
+        "subcategoriaId": {
+          "type": "string"
+        },
+        "subcategoria": {
+          "type": "string"
+        },
+        "formularioId": {
+          "type": "string"
+        },
+        "tipoPerfil": {
+          "type": "string"
+        },
+        "arquetipo": {
+          "type": "string"
+        },
+        "busqueda": {
+          "$ref": "#/definitions/busquedaMetadata"
+        }
       }
     },
     "subcategoriaEntry": {
       "type": "object",
-      "required": ["subcategoriaId", "nombre", "arquetipo", "tipoPerfil"],
+      "required": [
+        "subcategoriaId",
+        "nombre",
+        "arquetipo",
+        "tipoPerfil"
+      ],
       "properties": {
-        "subcategoriaId": { "type": "string", "minLength": 1 },
-        "nombre": { "type": "string" },
-        "sectorId": { "type": "string" },
-        "arquetipo": { "type": "string" },
-        "tipoPerfil": { "type": "string" },
-        "heredaDe": { "type": "string" },
-        "delta": { "type": "object" },
-        "keywordsIA": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
-        "busqueda": { "$ref": "#/definitions/busquedaMetadata" },
-        "textosAyuda": { "type": "object" },
-        "coherenciaExtra": { "type": "array" }
+        "subcategoriaId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "nombre": {
+          "type": "string"
+        },
+        "sectorId": {
+          "type": "string"
+        },
+        "arquetipo": {
+          "type": "string"
+        },
+        "tipoPerfil": {
+          "type": "string"
+        },
+        "heredaDe": {
+          "type": "string"
+        },
+        "delta": {
+          "type": "object"
+        },
+        "keywordsIA": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        },
+        "busqueda": {
+          "$ref": "#/definitions/busquedaMetadata"
+        },
+        "textosAyuda": {
+          "type": "object"
+        },
+        "coherenciaExtra": {
+          "type": "array"
+        }
       }
     },
     "schemaRegistro": {
       "type": "object",
-      "required": ["formularioId", "meta", "plantillasArquetipo", "subcategorias"],
+      "required": [
+        "formularioId",
+        "meta",
+        "plantillasArquetipo",
+        "subcategorias"
+      ],
       "properties": {
-        "$schema": { "type": "string" },
-        "versionSchema": { "type": "string" },
-        "version": { "type": "string" },
+        "$schema": {
+          "type": "string"
+        },
+        "versionSchema": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        },
         "formularioId": {
           "type": "string",
-          "enum": ["adultos", "persona_independiente", "profesionista_cedula", "negocio_empresa"]
+          "enum": [
+            "adultos",
+            "persona_independiente",
+            "profesionista_cedula",
+            "negocio_empresa"
+          ]
         },
         "meta": {
           "type": "object",
-          "required": ["fieldRegistry", "base", "verificacionTipos", "facturacionTipos", "coherenciaGlobal", "componentesUI", "firestoreRecomendado"],
+          "required": [
+            "fieldRegistry",
+            "base",
+            "verificacionTipos",
+            "facturacionTipos",
+            "coherenciaGlobal",
+            "componentesUI",
+            "firestoreRecomendado"
+          ],
           "properties": {
-            "fieldRegistry": { "type": "object" },
-            "base": { "type": "object" },
-            "verificacionTipos": { "type": "object", "minProperties": 1 },
-            "facturacionTipos": { "type": "object", "minProperties": 1 },
-            "coherenciaGlobal": { "type": "array" },
-            "componentesUI": { "type": "object", "minProperties": 1 },
-            "firestoreRecomendado": { "type": "object" }
+            "fieldRegistry": {
+              "type": "object"
+            },
+            "base": {
+              "type": "object"
+            },
+            "verificacionTipos": {
+              "type": "object",
+              "minProperties": 1
+            },
+            "facturacionTipos": {
+              "type": "object",
+              "minProperties": 1
+            },
+            "coherenciaGlobal": {
+              "type": "array"
+            },
+            "componentesUI": {
+              "type": "object",
+              "minProperties": 1
+            },
+            "firestoreRecomendado": {
+              "type": "object"
+            }
           }
         },
-        "plantillasArquetipo": { "type": "object", "minProperties": 1 },
-        "subcategorias": { "type": "array", "items": { "$ref": "#/definitions/subcategoriaEntry" } }
+        "plantillasArquetipo": {
+          "type": "object",
+          "minProperties": 1
+        },
+        "subcategorias": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/subcategoriaEntry"
+          }
+        }
       }
     },
     "schemaPreciosPerfiles": {
@@ -479,18 +953,39 @@
         "firestoreRecomendado"
       ],
       "properties": {
-        "formularioId": { "const": "config_precios_planes_perfiles" },
-        "versionSchema": { "type": "string" },
+        "formularioId": {
+          "const": "config_precios_planes_perfiles"
+        },
+        "versionSchema": {
+          "type": "string"
+        },
         "planes": {
           "type": "object",
-          "required": ["basico", "destacado", "premium", "vip"]
+          "required": [
+            "basico",
+            "destacado",
+            "premium",
+            "vip"
+          ]
         },
-        "preciosBase": { "type": "object" },
-        "resolucionPrecio": { "type": "object" },
-        "overrides": { "type": "object" },
-        "historialCambios": { "type": "object" },
-        "firestoreRecomendado": { "type": "object" },
-        "alineacionBanners": { "type": "object" }
+        "preciosBase": {
+          "type": "object"
+        },
+        "resolucionPrecio": {
+          "type": "object"
+        },
+        "overrides": {
+          "type": "object"
+        },
+        "historialCambios": {
+          "type": "object"
+        },
+        "firestoreRecomendado": {
+          "type": "object"
+        },
+        "alineacionBanners": {
+          "type": "object"
+        }
       }
     }
   },
@@ -504,7 +999,15 @@
     ]
   },
   "validationEngine": {
-    "fuentesReglas": ["meta.base.obligatorios", "plantilla.obligatoriosExtra", "delta.obligatoriosExtra", "coherenciaGlobal", "coherenciaExtra", "verificacionTipos", "facturacionTipos"]
+    "fuentesReglas": [
+      "meta.base.obligatorios",
+      "plantilla.obligatoriosExtra",
+      "delta.obligatoriosExtra",
+      "coherenciaGlobal",
+      "coherenciaExtra",
+      "verificacionTipos",
+      "facturacionTipos"
+    ]
   },
   "archivos": {
     "registro": [
@@ -514,28 +1017,47 @@
       "scripts/config-registro-negocio-schema.json",
       "scripts/config-registro-visitante-schema.json"
     ],
-    "precios": ["scripts/config-precios-planes-perfiles-schema.json"],
+    "precios": [
+      "scripts/config-precios-planes-perfiles-schema.json"
+    ],
     "promociones": [
       "scripts/config-promociones-perfiles-schema.json",
       "scripts/config-promociones-banners-schema.json"
     ],
-    "contratos": ["scripts/config-contratos-carihub-schema.json"],
-    "estados": ["scripts/config-estados-revision-publicacion-schema.json"],
-    "mapa": ["scripts/mapa-registro-categorias.json"],
+    "contratos": [
+      "scripts/config-contratos-carihub-schema.json"
+    ],
+    "estados": [
+      "scripts/config-estados-revision-publicacion-schema.json"
+    ],
+    "mapa": [
+      "scripts/mapa-registro-categorias.json"
+    ],
     "busqueda": [
       "scripts/config-busqueda-categorias-schema.json",
       "scripts/config-busqueda-sin-resultado-schema.json",
       "scripts/ejemplos-busqueda-categorias.json"
     ],
-    "categoriasSugeridas": ["scripts/config-categorias-sugeridas-schema.json"],
+    "categoriasSugeridas": [
+      "scripts/config-categorias-sugeridas-schema.json"
+    ],
     "renderizado": [
       "scripts/config-renderizado-dinamico-schema.json",
       "scripts/config-registro-componentes-ui-schema.json"
     ],
-    "validador": ["scripts/validar-schemas-registro.mjs"],
+    "validador": [
+      "scripts/validar-schemas-registro.mjs"
+    ],
     "identidadUsuario": [
       "scripts/config-cuentas-usuario-schema.json",
       "scripts/config-admin-arquitectura-completa-schema.json"
     ]
+  },
+  "catalogSemver": "1.1.0",
+  "eventosDeltas": {
+    "mp": "MP-EVENTOS-DELTAS-V1",
+    "canonSubcategorias": 20,
+    "legacyMapped": 37,
+    "legacyRedirect": "busqueda-enriquecimiento.json → legacySubcategoriaRedirectEventos"
   }
 }

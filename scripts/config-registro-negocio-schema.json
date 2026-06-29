@@ -1,7 +1,7 @@
 {
   "$schema": "./config-registro-schema.meta.json",
-  "versionSchema": "2026-06-10",
-  "version": "2026-06-10",
+  "versionSchema": "2026-06-27",
+  "version": "2026-06-27",
   "formularioId": "negocio_empresa",
   "nombre": "Registro Negocio o Empresa",
   "descripcion": "Schema registry para establecimientos comerciales y empresas de servicio. Alineado con arquetipos negocio_* de Adultos.",
@@ -40,8 +40,8 @@
       },
       "tagline": {
         "id": "tagline",
-        "label": "Frase corta",
-        "tipo": "textarea",
+        "label": "Frase que vende tu servicio",
+        "tipo": "text",
         "maxLength": 120,
         "iaCopy": true
       },
@@ -215,6 +215,969 @@
         "label": "Términos aceptados",
         "tipo": "boolean",
         "privado": true
+      },
+      "especialidadesEvento": {
+        "id": "especialidadesEvento",
+        "label": "Tipos de evento que atiendes",
+        "tipo": "checklist",
+        "iaCopy": true
+      },
+      "tiposEspacio": {
+        "id": "tiposEspacio",
+        "label": "Tipo de espacio",
+        "tipo": "checklist",
+        "opciones": [
+          "salon",
+          "quinta",
+          "jardin",
+          "terraza",
+          "hacienda",
+          "viniedo",
+          "roof_top",
+          "salon_industrial",
+          "otro"
+        ],
+        "hint": "Ej.: quinta con jardín, salón con terraza, viñedo."
+      },
+      "capacidadMin": {
+        "id": "capacidadMin",
+        "label": "Capacidad mínima (personas)",
+        "tipo": "number",
+        "min": 1,
+        "max": 50000
+      },
+      "capacidadMax": {
+        "id": "capacidadMax",
+        "label": "Capacidad máxima (personas)",
+        "tipo": "number",
+        "min": 1,
+        "max": 50000
+      },
+      "areasIncluidas": {
+        "id": "areasIncluidas",
+        "label": "Áreas incluidas en el espacio",
+        "tipo": "checklist",
+        "opciones": [
+          "salon",
+          "jardin",
+          "terraza",
+          "cocina",
+          "camerino",
+          "alberca",
+          "estacionamiento",
+          "area_ninos"
+        ]
+      },
+      "estacionamientoCupo": {
+        "id": "estacionamientoCupo",
+        "label": "Cupo de estacionamiento",
+        "tipo": "number",
+        "min": 0,
+        "max": 5000
+      },
+      "mobiliarioIncluido": {
+        "id": "mobiliarioIncluido",
+        "label": "Mobiliario incluido",
+        "tipo": "checklist",
+        "opciones": [
+          "mesas",
+          "sillas",
+          "manteles",
+          "sillas_ninos",
+          "lounge",
+          "ninguno"
+        ]
+      },
+      "cateringPolitica": {
+        "id": "cateringPolitica",
+        "label": "Política de catering",
+        "tipo": "enum",
+        "opciones": [
+          "propio_exclusivo",
+          "propio_opcional",
+          "externo_permitido",
+          "externo_exclusivo"
+        ],
+        "hint": "¿Deben contratar tu banquete o pueden traer catering externo?"
+      },
+      "restriccionRuido": {
+        "id": "restriccionRuido",
+        "label": "Restricción de ruido / horario límite música",
+        "tipo": "text",
+        "maxLength": 120,
+        "hint": "Ej.: música hasta 2:00 am; sin bocinas después de medianoche."
+      },
+      "permiteMusicaEnVivo": {
+        "id": "permiteMusicaEnVivo",
+        "label": "Permite música en vivo",
+        "tipo": "boolean"
+      },
+      "permitePirotecnia": {
+        "id": "permitePirotecnia",
+        "label": "Permite pirotecnia en el venue",
+        "tipo": "boolean"
+      },
+      "tiposEventoAceptados": {
+        "id": "tiposEventoAceptados",
+        "label": "Tipos de evento que aceptas",
+        "tipo": "checklist",
+        "opciones": [
+          "infantil",
+          "xv_anos",
+          "boda",
+          "corporativo",
+          "social_adulto",
+          "religioso",
+          "concierto",
+          "exposicion"
+        ]
+      },
+      "permisosMunicipalesVenue": {
+        "id": "permisosMunicipalesVenue",
+        "label": "Cuenta con permisos municipales vigentes",
+        "tipo": "boolean"
+      },
+      "horarioMaximoEvento": {
+        "id": "horarioMaximoEvento",
+        "label": "Horario máximo del evento",
+        "tipo": "text",
+        "maxLength": 80,
+        "hint": "Ej.: hasta 3:00 am los sábados."
+      },
+      "rolProduccion": {
+        "id": "rolProduccion",
+        "label": "Qué coordina tu producción",
+        "tipo": "checklist",
+        "opciones": [
+          "proveedores",
+          "cronograma",
+          "montaje_desmontaje",
+          "diseno_experiencia",
+          "logistica_invitados"
+        ]
+      },
+      "tamanoEventoAtendido": {
+        "id": "tamanoEventoAtendido",
+        "label": "Tamaño de evento que atiendes",
+        "tipo": "enum",
+        "opciones": [
+          "intimo",
+          "mediano",
+          "masivo"
+        ]
+      },
+      "presupuestoMinimoMxn": {
+        "id": "presupuestoMinimoMxn",
+        "label": "Presupuesto mínimo de proyecto (MXN)",
+        "tipo": "number",
+        "min": 0
+      },
+      "incluyeDirectorEvento": {
+        "id": "incluyeDirectorEvento",
+        "label": "Incluye director de evento",
+        "tipo": "boolean"
+      },
+      "eventosReferencia": {
+        "id": "eventosReferencia",
+        "label": "Eventos de referencia recientes",
+        "tipo": "textarea",
+        "maxLength": 600,
+        "hint": "Menciona 2–3 eventos similares sin datos privados de clientes."
+      },
+      "especialidadesDecoracion": {
+        "id": "especialidadesDecoracion",
+        "label": "Estilos y técnicas de decoración",
+        "tipo": "checklist",
+        "opciones": [
+          "globos",
+          "floral_no_producto",
+          "tematica",
+          "backdrop",
+          "arcos",
+          "lounge",
+          "pinatas_festejos",
+          "iluminacion_decorativa"
+        ]
+      },
+      "incluyeMontajeDesmontaje": {
+        "id": "incluyeMontajeDesmontaje",
+        "label": "Montaje y desmontaje",
+        "tipo": "enum",
+        "opciones": [
+          "ambos_incluidos",
+          "solo_montaje",
+          "cotizar_aparte"
+        ]
+      },
+      "tiempoMontajeHoras": {
+        "id": "tiempoMontajeHoras",
+        "label": "Tiempo estimado de montaje (horas)",
+        "tipo": "number",
+        "min": 0,
+        "max": 72
+      },
+      "estructurasPropias": {
+        "id": "estructurasPropias",
+        "label": "Estructuras propias disponibles",
+        "tipo": "checklist",
+        "opciones": [
+          "arcos",
+          "letras",
+          "tarimas",
+          "tuneles",
+          "carpas"
+        ]
+      },
+      "estiloVisual": {
+        "id": "estiloVisual",
+        "label": "Estilos visuales",
+        "tipo": "tags",
+        "iaCopy": true
+      },
+      "requiereVisitaVenue": {
+        "id": "requiereVisitaVenue",
+        "label": "Requiere visita al venue antes de cotizar",
+        "tipo": "boolean"
+      },
+      "serviciosAudiovisual": {
+        "id": "serviciosAudiovisual",
+        "label": "Servicios que ofreces",
+        "tipo": "checklist",
+        "opciones": [
+          "foto",
+          "video",
+          "dron",
+          "video_360",
+          "same_day_edit",
+          "photobooth"
+        ]
+      },
+      "horasCobertura": {
+        "id": "horasCobertura",
+        "label": "Horas de cobertura incluidas",
+        "tipo": "number",
+        "min": 1,
+        "max": 24
+      },
+      "tiempoEntregaDias": {
+        "id": "tiempoEntregaDias",
+        "label": "Tiempo de entrega (días)",
+        "tipo": "number",
+        "min": 1,
+        "max": 365
+      },
+      "incluyeSegundoOperador": {
+        "id": "incluyeSegundoOperador",
+        "label": "Incluye segundo fotógrafo/videógrafo",
+        "tipo": "boolean"
+      },
+      "licenciaDron": {
+        "id": "licenciaDron",
+        "label": "Cuenta con licencia/registro de dron",
+        "tipo": "boolean"
+      },
+      "especialidadesDj": {
+        "id": "especialidadesDj",
+        "label": "Eventos donde te especializas",
+        "tipo": "checklist",
+        "opciones": [
+          "bodas",
+          "xv_anos",
+          "corporativo",
+          "privados",
+          "graduaciones",
+          "antros_bares"
+        ]
+      },
+      "generosMusicales": {
+        "id": "generosMusicales",
+        "label": "Géneros musicales",
+        "tipo": "tags",
+        "iaCopy": true
+      },
+      "duracionSetMinimaHoras": {
+        "id": "duracionSetMinimaHoras",
+        "label": "Duración mínima de set (horas)",
+        "tipo": "number",
+        "min": 1,
+        "max": 12
+      },
+      "incluyeEquipoDj": {
+        "id": "incluyeEquipoDj",
+        "label": "Equipo incluido",
+        "tipo": "checklist",
+        "opciones": [
+          "audio",
+          "luces",
+          "pantalla",
+          "microfono",
+          "cabina"
+        ]
+      },
+      "aceptaPeticionesEnVivo": {
+        "id": "aceptaPeticionesEnVivo",
+        "label": "Acepta peticiones en vivo",
+        "tipo": "boolean"
+      },
+      "viajaFueraCiudad": {
+        "id": "viajaFueraCiudad",
+        "label": "Viaja fuera de tu ciudad",
+        "tipo": "boolean"
+      },
+      "costoTraslado": {
+        "id": "costoTraslado",
+        "label": "Costo de traslado",
+        "tipo": "enum",
+        "opciones": [
+          "incluido",
+          "por_km",
+          "cotizar_aparte"
+        ]
+      },
+      "tipoAgrupacion": {
+        "id": "tipoAgrupacion",
+        "label": "Tipo de agrupación",
+        "tipo": "enum",
+        "opciones": [
+          "mariachi",
+          "banda",
+          "trio",
+          "solista",
+          "orquesta",
+          "grupo_regional",
+          "fara_fara",
+          "grupo_tropical",
+          "otro"
+        ],
+        "hint": "Fara Fara es formato propio — no lo confundas con vallenato o regional colombiano."
+      },
+      "numeroIntegrantes": {
+        "id": "numeroIntegrantes",
+        "label": "Número de integrantes",
+        "tipo": "number",
+        "min": 1,
+        "max": 50
+      },
+      "repertorioPrincipal": {
+        "id": "repertorioPrincipal",
+        "label": "Repertorio principal",
+        "tipo": "tags",
+        "iaCopy": true
+      },
+      "duracionSetMinutos": {
+        "id": "duracionSetMinutos",
+        "label": "Duración de cada set (minutos)",
+        "tipo": "number",
+        "min": 15,
+        "max": 240
+      },
+      "numeroSetsIncluidos": {
+        "id": "numeroSetsIncluidos",
+        "label": "Sets incluidos por evento",
+        "tipo": "number",
+        "min": 1,
+        "max": 10
+      },
+      "incluyeSonidoMusica": {
+        "id": "incluyeSonidoMusica",
+        "label": "Incluye equipo de sonido",
+        "tipo": "boolean"
+      },
+      "aceptaPeticiones": {
+        "id": "aceptaPeticiones",
+        "label": "Toca peticiones del público",
+        "tipo": "boolean"
+      },
+      "experienciaEnEventos": {
+        "id": "experienciaEnEventos",
+        "label": "Experiencia en",
+        "tipo": "checklist",
+        "opciones": [
+          "bodas",
+          "xv_anos",
+          "empresariales",
+          "fiestas_privadas",
+          "conciertos"
+        ]
+      },
+      "descripcionFormatoFaraFara": {
+        "id": "descripcionFormatoFaraFara",
+        "label": "Describe tu formato Fara Fara",
+        "tipo": "textarea",
+        "maxLength": 400,
+        "hint": "Duración típica, dinámica con el público, repertorio característico."
+      },
+      "rolPrincipal": {
+        "id": "rolPrincipal",
+        "label": "Tu rol principal",
+        "tipo": "enum",
+        "opciones": [
+          "animador",
+          "mc",
+          "presentador",
+          "edecan",
+          "modelo",
+          "mixto"
+        ]
+      },
+      "rangoEdadPublico": {
+        "id": "rangoEdadPublico",
+        "label": "Rango de edad del público",
+        "tipo": "checklist",
+        "opciones": [
+          "infantil",
+          "familiar",
+          "adolescentes",
+          "adultos"
+        ]
+      },
+      "dinamicasOfrecidas": {
+        "id": "dinamicasOfrecidas",
+        "label": "Dinámicas y actividades",
+        "tipo": "checklist",
+        "opciones": [
+          "concursos",
+          "juegos",
+          "show_participativo",
+          "baile",
+          "magia_ligera"
+        ]
+      },
+      "estiloCeremonia": {
+        "id": "estiloCeremonia",
+        "label": "Estilo de ceremonia",
+        "tipo": "checklist",
+        "opciones": [
+          "religiosa",
+          "civil",
+          "hibrida",
+          "corporativa",
+          "xv_anos"
+        ]
+      },
+      "incluyeGuionCeremonia": {
+        "id": "incluyeGuionCeremonia",
+        "label": "Incluye guion o estructura de ceremonia",
+        "tipo": "boolean"
+      },
+      "idiomasAnimacion": {
+        "id": "idiomasAnimacion",
+        "label": "Idiomas",
+        "tipo": "tags"
+      },
+      "trabajaConMenores": {
+        "id": "trabajaConMenores",
+        "label": "Trabaja con menores de edad",
+        "tipo": "boolean",
+        "hint": "Si sí: no subas fotos identificables de niños sin autorización documentada."
+      },
+      "tipoShow": {
+        "id": "tipoShow",
+        "label": "Tipo de show",
+        "tipo": "checklist",
+        "opciones": [
+          "payaso",
+          "mago",
+          "personajes",
+          "comedia",
+          "baile",
+          "fuego",
+          "strippers",
+          "otro"
+        ]
+      },
+      "publicoObjetivo": {
+        "id": "publicoObjetivo",
+        "label": "Público objetivo",
+        "tipo": "enum",
+        "opciones": [
+          "infantil",
+          "familiar",
+          "adultos"
+        ],
+        "hint": "Show adulto no implica desnudo automáticamente."
+      },
+      "contenidoSensible": {
+        "id": "contenidoSensible",
+        "label": "Incluye contenido explícito o show para adultos (+18)",
+        "tipo": "boolean",
+        "hint": "Marca sí solo si hay desnudez, striptease u otro contenido explícito."
+      },
+      "duracionShowMinutos": {
+        "id": "duracionShowMinutos",
+        "label": "Duración del show (minutos)",
+        "tipo": "number",
+        "min": 5,
+        "max": 480
+      },
+      "numeroArtistas": {
+        "id": "numeroArtistas",
+        "label": "Número de artistas en escena",
+        "tipo": "number",
+        "min": 1,
+        "max": 50
+      },
+      "requiereEspacioMinimo": {
+        "id": "requiereEspacioMinimo",
+        "label": "Espacio mínimo requerido",
+        "tipo": "text",
+        "maxLength": 120,
+        "hint": "Ej.: 4×4 m, escenario elevado, pista despejada."
+      },
+      "incluyeAudioShow": {
+        "id": "incluyeAudioShow",
+        "label": "Incluye audio / micrófonos",
+        "tipo": "boolean"
+      },
+      "requiereCamerino": {
+        "id": "requiereCamerino",
+        "label": "Requiere camerino",
+        "tipo": "boolean"
+      },
+      "restriccionesTecnicas": {
+        "id": "restriccionesTecnicas",
+        "label": "Restricciones técnicas",
+        "tipo": "textarea",
+        "maxLength": 600
+      },
+      "experienciaAnios": {
+        "id": "experienciaAnios",
+        "label": "Años de experiencia",
+        "tipo": "number",
+        "min": 0,
+        "max": 80
+      },
+      "formatoBanquete": {
+        "id": "formatoBanquete",
+        "label": "Formato de servicio",
+        "tipo": "checklist",
+        "opciones": [
+          "banquete_emplatado",
+          "buffet",
+          "taquiza",
+          "barra_snacks",
+          "coffee_break"
+        ]
+      },
+      "comensalesMax": {
+        "id": "comensalesMax",
+        "label": "Comensales máximos que atiendes",
+        "tipo": "number",
+        "min": 1,
+        "max": 10000
+      },
+      "menuMuestraDisponible": {
+        "id": "menuMuestraDisponible",
+        "label": "Ofrece menú de degustación o muestra",
+        "tipo": "boolean"
+      },
+      "incluyeMeseros": {
+        "id": "incluyeMeseros",
+        "label": "Incluye meseros y servicio",
+        "tipo": "boolean"
+      },
+      "dietasEspeciales": {
+        "id": "dietasEspeciales",
+        "label": "Dietas que puedes cubrir",
+        "tipo": "checklist",
+        "opciones": [
+          "vegetariano",
+          "vegano",
+          "sin_gluten",
+          "kosher",
+          "halal",
+          "sin_mariscos"
+        ]
+      },
+      "permisoManipulacionAlimentos": {
+        "id": "permisoManipulacionAlimentos",
+        "label": "Permiso de manipulación de alimentos vigente",
+        "tipo": "boolean"
+      },
+      "inventarioMobiliario": {
+        "id": "inventarioMobiliario",
+        "label": "Mobiliario en renta",
+        "tipo": "checklist",
+        "opciones": [
+          "mesas",
+          "sillas",
+          "sillas_ninos",
+          "manteles",
+          "vajilla",
+          "lounge",
+          "carpas"
+        ]
+      },
+      "incluyeEntregaRecoleccion": {
+        "id": "incluyeEntregaRecoleccion",
+        "label": "Incluye entrega y recolección",
+        "tipo": "boolean"
+      },
+      "depositoGarantiaMobiliario": {
+        "id": "depositoGarantiaMobiliario",
+        "label": "Requiere depósito en garantía",
+        "tipo": "boolean"
+      },
+      "minimoRentaMobiliario": {
+        "id": "minimoRentaMobiliario",
+        "label": "Mínimo de renta (MXN)",
+        "tipo": "number",
+        "min": 0
+      },
+      "tipoEquipoRenta": {
+        "id": "tipoEquipoRenta",
+        "label": "Tipo de equipo",
+        "tipo": "checklist",
+        "opciones": [
+          "audio",
+          "iluminacion",
+          "escenario",
+          "pantallas",
+          "generador",
+          "efectos_humo"
+        ]
+      },
+      "incluyeOperadorTecnico": {
+        "id": "incluyeOperadorTecnico",
+        "label": "Incluye operador técnico",
+        "tipo": "boolean"
+      },
+      "potenciaAudioWatts": {
+        "id": "potenciaAudioWatts",
+        "label": "Potencia de audio (W aprox.)",
+        "tipo": "number",
+        "min": 0
+      },
+      "requerimientosElectricos": {
+        "id": "requerimientosElectricos",
+        "label": "Requerimientos eléctricos",
+        "tipo": "text",
+        "maxLength": 200
+      },
+      "tipoUnidadFood": {
+        "id": "tipoUnidadFood",
+        "label": "Tipo de unidad",
+        "tipo": "enum",
+        "opciones": [
+          "food_truck",
+          "carrito",
+          "puesto",
+          "trailer"
+        ]
+      },
+      "cartaPrincipal": {
+        "id": "cartaPrincipal",
+        "label": "Carta o especialidad principal",
+        "tipo": "tags",
+        "iaCopy": true
+      },
+      "comensalesPorHora": {
+        "id": "comensalesPorHora",
+        "label": "Comensales que atiendes por hora",
+        "tipo": "number",
+        "min": 1,
+        "max": 5000
+      },
+      "requiereAguaLuz": {
+        "id": "requiereAguaLuz",
+        "label": "Requiere conexión de agua/luz en sitio",
+        "tipo": "boolean"
+      },
+      "radioServicioKm": {
+        "id": "radioServicioKm",
+        "label": "Radio de servicio (km)",
+        "tipo": "number",
+        "min": 0,
+        "max": 500
+      },
+      "productosReposteria": {
+        "id": "productosReposteria",
+        "label": "Productos que elaboras",
+        "tipo": "checklist",
+        "opciones": [
+          "pastel_boda",
+          "pastel_xv",
+          "cupcakes",
+          "mesa_postres",
+          "galletas",
+          "personalizado"
+        ]
+      },
+      "tiempoPedidoAnticipacionDias": {
+        "id": "tiempoPedidoAnticipacionDias",
+        "label": "Anticipación mínima de pedido (días)",
+        "tipo": "number",
+        "min": 1,
+        "max": 365
+      },
+      "incluyeDegustacion": {
+        "id": "incluyeDegustacion",
+        "label": "Ofrece degustación previa",
+        "tipo": "boolean"
+      },
+      "incluyeMontajeMesaPostres": {
+        "id": "incluyeMontajeMesaPostres",
+        "label": "Incluye montaje de mesa de postres",
+        "tipo": "boolean"
+      },
+      "productosPapeleria": {
+        "id": "productosPapeleria",
+        "label": "Productos de papelería",
+        "tipo": "checklist",
+        "opciones": [
+          "invitacion_fisica",
+          "invitacion_digital",
+          "save_the_date",
+          "menu",
+          "seating_chart",
+          "recuerdos"
+        ]
+      },
+      "tiempoProduccionDias": {
+        "id": "tiempoProduccionDias",
+        "label": "Tiempo de producción (días)",
+        "tipo": "number",
+        "min": 1,
+        "max": 180
+      },
+      "revisionesIncluidas": {
+        "id": "revisionesIncluidas",
+        "label": "Revisiones de diseño incluidas",
+        "tipo": "number",
+        "min": 0,
+        "max": 10
+      },
+      "entregaFormato": {
+        "id": "entregaFormato",
+        "label": "Formatos de entrega",
+        "tipo": "checklist",
+        "opciones": [
+          "impresion",
+          "pdf",
+          "web",
+          "qr"
+        ]
+      },
+      "incluyeDiseno": {
+        "id": "incluyeDiseno",
+        "label": "Incluye diseño gráfico",
+        "tipo": "boolean"
+      },
+      "incluyeImpresion": {
+        "id": "incluyeImpresion",
+        "label": "Incluye impresión",
+        "tipo": "boolean"
+      },
+      "productosFlorales": {
+        "id": "productosFlorales",
+        "label": "Productos florales",
+        "tipo": "checklist",
+        "opciones": [
+          "ramos",
+          "arcos",
+          "centros_mesa",
+          "instalacion_completa",
+          "preservadas",
+          "temporada"
+        ]
+      },
+      "incluyeInstalacionFloral": {
+        "id": "incluyeInstalacionFloral",
+        "label": "Incluye instalación y desmontaje",
+        "tipo": "boolean"
+      },
+      "tipoEfectoPirotecnia": {
+        "id": "tipoEfectoPirotecnia",
+        "label": "Tipo de efecto",
+        "tipo": "checklist",
+        "opciones": [
+          "fuegos_artificiales",
+          "cold_sparks",
+          "confetti",
+          "humo",
+          "laser"
+        ]
+      },
+      "ambientePirotecnia": {
+        "id": "ambientePirotecnia",
+        "label": "Ambiente permitido",
+        "tipo": "enum",
+        "opciones": [
+          "exterior",
+          "interior_condicionado",
+          "ambos"
+        ]
+      },
+      "licenciaPirotecnia": {
+        "id": "licenciaPirotecnia",
+        "label": "Licencia o permiso de pirotecnia vigente",
+        "tipo": "boolean"
+      },
+      "jurisdiccionPirotecnia": {
+        "id": "jurisdiccionPirotecnia",
+        "label": "Jurisdicción donde opera",
+        "tipo": "text",
+        "maxLength": 120
+      },
+      "distanciaSeguridadMetros": {
+        "id": "distanciaSeguridadMetros",
+        "label": "Distancia de seguridad requerida (m)",
+        "tipo": "number",
+        "min": 0
+      },
+      "polizaSeguroPirotecnia": {
+        "id": "polizaSeguroPirotecnia",
+        "label": "Póliza de seguro vigente",
+        "tipo": "boolean"
+      },
+      "elementosSeguridad": {
+        "id": "elementosSeguridad",
+        "label": "Elementos de seguridad",
+        "tipo": "number",
+        "min": 1,
+        "max": 500
+      },
+      "controlAcceso": {
+        "id": "controlAcceso",
+        "label": "Ofrece control de acceso / credenciales",
+        "tipo": "boolean"
+      },
+      "licenciaSeguridadPrivada": {
+        "id": "licenciaSeguridadPrivada",
+        "label": "Licencia de seguridad privada vigente",
+        "tipo": "boolean"
+      },
+      "eventosMasivos": {
+        "id": "eventosMasivos",
+        "label": "Experiencia en eventos masivos (+500 personas)",
+        "tipo": "boolean"
+      },
+      "vehiculosPorHora": {
+        "id": "vehiculosPorHora",
+        "label": "Vehículos que estacionas por hora (aprox.)",
+        "tipo": "number",
+        "min": 1
+      },
+      "elementosValet": {
+        "id": "elementosValet",
+        "label": "Elementos de valet en equipo",
+        "tipo": "number",
+        "min": 1,
+        "max": 100
+      },
+      "polizaResponsabilidadValet": {
+        "id": "polizaResponsabilidadValet",
+        "label": "Póliza de responsabilidad civil vigente",
+        "tipo": "boolean"
+      },
+      "uniformeProfesionalValet": {
+        "id": "uniformeProfesionalValet",
+        "label": "Uniforme profesional",
+        "tipo": "boolean"
+      },
+      "coordinacionConVenue": {
+        "id": "coordinacionConVenue",
+        "label": "Coordina con el venue / estacionamiento",
+        "tipo": "boolean"
+      },
+      "tipoFlotaTransporte": {
+        "id": "tipoFlotaTransporte",
+        "label": "Tipo de flota",
+        "tipo": "checklist",
+        "opciones": [
+          "sprinter",
+          "autobus",
+          "suv",
+          "sedan_ejecutivo",
+          "limousine",
+          "shuttle"
+        ]
+      },
+      "capacidadPasajeros": {
+        "id": "capacidadPasajeros",
+        "label": "Capacidad por unidad (pasajeros)",
+        "tipo": "number",
+        "min": 1,
+        "max": 80
+      },
+      "incluyeChofer": {
+        "id": "incluyeChofer",
+        "label": "Incluye chofer certificado",
+        "tipo": "boolean"
+      },
+      "permisoTransporte": {
+        "id": "permisoTransporte",
+        "label": "Permiso de transporte / SCT vigente",
+        "tipo": "boolean"
+      },
+      "polizaTransporte": {
+        "id": "polizaTransporte",
+        "label": "Póliza de seguro de pasajeros vigente",
+        "tipo": "boolean"
+      },
+      "usoTransporte": {
+        "id": "usoTransporte",
+        "label": "Uso principal",
+        "tipo": "checklist",
+        "opciones": [
+          "boda_invitados",
+          "corporativo",
+          "shuttle",
+          "traslado_artistas"
+        ]
+      },
+      "categoriasVestuario": {
+        "id": "categoriasVestuario",
+        "label": "Categorías en renta",
+        "tipo": "checklist",
+        "opciones": [
+          "trajes_formales",
+          "vestidos_gala",
+          "disfraces",
+          "botargas",
+          "accesorios"
+        ]
+      },
+      "tallasDisponibles": {
+        "id": "tallasDisponibles",
+        "label": "Rango de tallas",
+        "tipo": "text",
+        "maxLength": 80
+      },
+      "higienizacionVestuario": {
+        "id": "higienizacionVestuario",
+        "label": "Higienización entre rentas",
+        "tipo": "boolean"
+      },
+      "depositoVestuario": {
+        "id": "depositoVestuario",
+        "label": "Requiere depósito",
+        "tipo": "boolean"
+      },
+      "unidadCotizacion": {
+        "id": "unidadCotizacion",
+        "label": "Cotizas por",
+        "tipo": "enum",
+        "opciones": [
+          "evento",
+          "hora",
+          "dia",
+          "persona",
+          "km",
+          "proyecto"
+        ]
+      },
+      "cotizacionDesde": {
+        "id": "cotizacionDesde",
+        "label": "Cotización desde (MXN)",
+        "tipo": "number",
+        "min": 0
+      },
+      "disclaimerReguladoEventos": {
+        "id": "disclaimerReguladoEventos",
+        "label": "Acepto avisos legales y limitaciones del servicio regulado",
+        "tipo": "boolean",
+        "privado": false
       }
     },
     "base": {
@@ -552,6 +1515,430 @@
         "casas",
         "renta",
         "terrenos"
+      ]
+    },
+    "eventos_pack_venue": {
+      "heredaDe": "negocio_venue",
+      "deltaPack": "VENUE",
+      "sectorCluster": "eventos",
+      "camposPublicosPerfil": [
+        "tiposEspacio",
+        "capacidadMin",
+        "capacidadMax",
+        "areasIncluidas",
+        "estacionamientoCupo",
+        "mobiliarioIncluido",
+        "cateringPolitica",
+        "restriccionRuido",
+        "permiteMusicaEnVivo",
+        "permitePirotecnia",
+        "tiposEventoAceptados",
+        "horarioMaximoEvento"
+      ],
+      "obligatoriosExtra": [
+        "tiposEspacio",
+        "capacidadMin",
+        "capacidadMax",
+        "areasIncluidas",
+        "estacionamientoCupo",
+        "mobiliarioIncluido",
+        "cateringPolitica",
+        "restriccionRuido",
+        "permiteMusicaEnVivo",
+        "permitePirotecnia",
+        "tiposEventoAceptados",
+        "horarioMaximoEvento",
+        "geo"
+      ],
+      "keywordsIA": [
+        "espacio / venue para eventos",
+        "eventos",
+        "fiestas"
+      ]
+    },
+    "eventos_pack_prod": {
+      "heredaDe": "persona_servicio_general",
+      "deltaPack": "PROD",
+      "sectorCluster": "eventos",
+      "camposPublicosPerfil": [
+        "especialidadesEvento",
+        "rolProduccion",
+        "tamanoEventoAtendido",
+        "presupuestoMinimoMxn",
+        "experienciaAnios",
+        "incluyeDirectorEvento",
+        "eventosReferencia",
+        "radioServicioKm"
+      ],
+      "obligatoriosExtra": [
+        "especialidadesEvento",
+        "rolProduccion",
+        "tamanoEventoAtendido",
+        "presupuestoMinimoMxn",
+        "experienciaAnios",
+        "incluyeDirectorEvento"
+      ],
+      "keywordsIA": [
+        "producción y coordinación",
+        "eventos",
+        "fiestas"
+      ]
+    },
+    "eventos_pack_creative": {
+      "heredaDe": "persona_servicio_profesional",
+      "deltaPack": "CREATIVE",
+      "sectorCluster": "eventos",
+      "camposPublicosPerfil": [
+        "especialidadesDecoracion",
+        "incluyeMontajeDesmontaje",
+        "tiempoMontajeHoras",
+        "estructurasPropias",
+        "estiloVisual",
+        "requiereVisitaVenue",
+        "especialidadesEvento",
+        "serviciosAudiovisual",
+        "horasCobertura",
+        "tiempoEntregaDias",
+        "incluyeSegundoOperador",
+        "licenciaDron"
+      ],
+      "obligatoriosExtra": [
+        "especialidadesDecoracion",
+        "incluyeMontajeDesmontaje",
+        "especialidadesEvento",
+        "requiereVisitaVenue",
+        "serviciosAudiovisual",
+        "horasCobertura",
+        "tiempoEntregaDias",
+        "productosPapeleria",
+        "tiempoProduccionDias",
+        "revisionesIncluidas",
+        "entregaFormato",
+        "incluyeDiseno"
+      ],
+      "keywordsIA": [
+        "creativos (diseño, foto, video, papelería)",
+        "eventos",
+        "fiestas"
+      ]
+    },
+    "eventos_pack_music": {
+      "heredaDe": "persona_servicio_profesional",
+      "deltaPack": "MUSIC",
+      "sectorCluster": "eventos",
+      "camposPublicosPerfil": [
+        "especialidadesDj",
+        "generosMusicales",
+        "duracionSetMinimaHoras",
+        "incluyeEquipoDj",
+        "aceptaPeticionesEnVivo",
+        "experienciaEnEventos",
+        "viajaFueraCiudad",
+        "costoTraslado",
+        "tipoAgrupacion",
+        "numeroIntegrantes",
+        "repertorioPrincipal",
+        "duracionSetMinutos"
+      ],
+      "obligatoriosExtra": [
+        "especialidadesDj",
+        "generosMusicales",
+        "duracionSetMinimaHoras",
+        "incluyeEquipoDj",
+        "aceptaPeticionesEnVivo",
+        "experienciaEnEventos",
+        "tipoAgrupacion",
+        "numeroIntegrantes",
+        "repertorioPrincipal",
+        "duracionSetMinutos",
+        "numeroSetsIncluidos",
+        "incluyeSonidoMusica",
+        "aceptaPeticiones"
+      ],
+      "keywordsIA": [
+        "música en vivo y dj",
+        "eventos",
+        "fiestas"
+      ]
+    },
+    "eventos_pack_show": {
+      "heredaDe": "persona_servicio_profesional",
+      "deltaPack": "SHOW",
+      "sectorCluster": "eventos",
+      "camposPublicosPerfil": [
+        "rolPrincipal",
+        "rangoEdadPublico",
+        "dinamicasOfrecidas",
+        "estiloCeremonia",
+        "incluyeGuionCeremonia",
+        "idiomasAnimacion",
+        "trabajaConMenores",
+        "especialidadesEvento",
+        "duracionShowMinutos",
+        "tipoShow",
+        "publicoObjetivo",
+        "contenidoSensible"
+      ],
+      "obligatoriosExtra": [
+        "rolPrincipal",
+        "idiomasAnimacion",
+        "especialidadesEvento",
+        "duracionShowMinutos",
+        "tipoShow",
+        "publicoObjetivo",
+        "numeroArtistas",
+        "requiereEspacioMinimo",
+        "incluyeAudioShow",
+        "experienciaAnios"
+      ],
+      "keywordsIA": [
+        "animación, mc y shows escénicos",
+        "eventos",
+        "fiestas"
+      ],
+      "coherenciaExtra": [
+        {
+          "id": "SHOW_SENSIBLE_DISCLAIMER",
+          "when": {
+            "field": "contenidoSensible",
+            "equals": true
+          },
+          "requiere": [
+            "disclaimerReguladoEventos"
+          ],
+          "severidad": "error"
+        }
+      ]
+    },
+    "eventos_pack_food": {
+      "heredaDe": "negocio_alimentos",
+      "deltaPack": "FOOD",
+      "sectorCluster": "eventos",
+      "camposPublicosPerfil": [
+        "formatoBanquete",
+        "comensalesMax",
+        "menuMuestraDisponible",
+        "incluyeMeseros",
+        "dietasEspeciales",
+        "permisoManipulacionAlimentos",
+        "especialidadesEvento",
+        "tipoUnidadFood",
+        "cartaPrincipal",
+        "comensalesPorHora",
+        "requiereAguaLuz",
+        "radioServicioKm"
+      ],
+      "obligatoriosExtra": [
+        "formatoBanquete",
+        "comensalesMax",
+        "incluyeMeseros",
+        "permisoManipulacionAlimentos",
+        "especialidadesEvento",
+        "tipoUnidadFood",
+        "cartaPrincipal",
+        "comensalesPorHora",
+        "requiereAguaLuz",
+        "productosReposteria",
+        "tiempoPedidoAnticipacionDias"
+      ],
+      "keywordsIA": [
+        "alimentos y bebidas para eventos",
+        "eventos",
+        "fiestas"
+      ],
+      "coherenciaExtra": [
+        {
+          "id": "FOOD_PERMISO",
+          "requiere": [
+            "permisoManipulacionAlimentos"
+          ],
+          "severidad": "error",
+          "mensaje": "Declara permiso de manipulación de alimentos vigente."
+        }
+      ]
+    },
+    "eventos_pack_rental": {
+      "heredaDe": "negocio_servicios_local",
+      "deltaPack": "RENTAL",
+      "sectorCluster": "eventos",
+      "camposPublicosPerfil": [
+        "inventarioMobiliario",
+        "incluyeEntregaRecoleccion",
+        "depositoGarantiaMobiliario",
+        "minimoRentaMobiliario",
+        "especialidadesEvento",
+        "tipoEquipoRenta",
+        "incluyeOperadorTecnico",
+        "potenciaAudioWatts",
+        "requerimientosElectricos",
+        "categoriasVestuario",
+        "tallasDisponibles",
+        "higienizacionVestuario"
+      ],
+      "obligatoriosExtra": [
+        "inventarioMobiliario",
+        "incluyeEntregaRecoleccion",
+        "minimoRentaMobiliario",
+        "especialidadesEvento",
+        "tipoEquipoRenta",
+        "incluyeOperadorTecnico",
+        "requerimientosElectricos",
+        "categoriasVestuario",
+        "tallasDisponibles",
+        "higienizacionVestuario"
+      ],
+      "keywordsIA": [
+        "renta de mobiliario, equipo y vestuario",
+        "eventos",
+        "fiestas"
+      ]
+    },
+    "eventos_pack_floral": {
+      "heredaDe": "negocio_servicios_local",
+      "deltaPack": "FLORAL",
+      "sectorCluster": "eventos",
+      "camposPublicosPerfil": [
+        "productosFlorales",
+        "incluyeInstalacionFloral",
+        "incluyeMontajeDesmontaje",
+        "especialidadesEvento",
+        "requiereVisitaVenue"
+      ],
+      "obligatoriosExtra": [
+        "productosFlorales",
+        "incluyeInstalacionFloral",
+        "especialidadesEvento",
+        "requiereVisitaVenue"
+      ],
+      "keywordsIA": [
+        "florería e instalación floral",
+        "eventos",
+        "fiestas"
+      ]
+    },
+    "eventos_pack_fx": {
+      "heredaDe": "negocio_servicios_local",
+      "deltaPack": "FX",
+      "sectorCluster": "eventos",
+      "camposPublicosPerfil": [
+        "tipoEfectoPirotecnia",
+        "ambientePirotecnia",
+        "licenciaPirotecnia",
+        "jurisdiccionPirotecnia",
+        "distanciaSeguridadMetros",
+        "polizaSeguroPirotecnia",
+        "disclaimerReguladoEventos",
+        "especialidadesEvento"
+      ],
+      "obligatoriosExtra": [
+        "tipoEfectoPirotecnia",
+        "ambientePirotecnia",
+        "licenciaPirotecnia",
+        "jurisdiccionPirotecnia",
+        "distanciaSeguridadMetros",
+        "polizaSeguroPirotecnia",
+        "disclaimerReguladoEventos",
+        "disclaimerReguladoEventos"
+      ],
+      "keywordsIA": [
+        "pirotecnia y efectos especiales",
+        "eventos",
+        "fiestas"
+      ],
+      "regulada": true,
+      "requiresAdminReview": true,
+      "sensible": true,
+      "nivelRevisionAdmin": "alta",
+      "coherenciaExtra": [
+        {
+          "id": "FX_LICENCIA",
+          "requiere": [
+            "licenciaPirotecnia",
+            "jurisdiccionPirotecnia",
+            "polizaSeguroPirotecnia"
+          ],
+          "severidad": "error"
+        }
+      ]
+    },
+    "eventos_pack_security": {
+      "heredaDe": "negocio_servicios_local",
+      "deltaPack": "SECURITY",
+      "sectorCluster": "eventos",
+      "camposPublicosPerfil": [
+        "elementosSeguridad",
+        "controlAcceso",
+        "licenciaSeguridadPrivada",
+        "eventosMasivos",
+        "especialidadesEvento",
+        "disclaimerReguladoEventos"
+      ],
+      "obligatoriosExtra": [
+        "elementosSeguridad",
+        "controlAcceso",
+        "licenciaSeguridadPrivada",
+        "disclaimerReguladoEventos",
+        "licenciaSeguridadPrivada",
+        "disclaimerReguladoEventos"
+      ],
+      "keywordsIA": [
+        "seguridad para eventos",
+        "eventos",
+        "fiestas"
+      ],
+      "regulada": true,
+      "requiresAdminReview": true
+    },
+    "eventos_pack_valet": {
+      "heredaDe": "negocio_servicios_local",
+      "deltaPack": "VALET",
+      "sectorCluster": "eventos",
+      "camposPublicosPerfil": [
+        "vehiculosPorHora",
+        "elementosValet",
+        "polizaResponsabilidadValet",
+        "uniformeProfesionalValet",
+        "coordinacionConVenue",
+        "especialidadesEvento"
+      ],
+      "obligatoriosExtra": [
+        "vehiculosPorHora",
+        "elementosValet",
+        "polizaResponsabilidadValet",
+        "uniformeProfesionalValet",
+        "coordinacionConVenue"
+      ],
+      "keywordsIA": [
+        "valet parking",
+        "eventos",
+        "fiestas"
+      ]
+    },
+    "eventos_pack_transport": {
+      "heredaDe": "negocio_servicios_local",
+      "deltaPack": "TRANSPORT",
+      "sectorCluster": "eventos",
+      "camposPublicosPerfil": [
+        "tipoFlotaTransporte",
+        "capacidadPasajeros",
+        "incluyeChofer",
+        "permisoTransporte",
+        "polizaTransporte",
+        "usoTransporte",
+        "radioServicioKm"
+      ],
+      "obligatoriosExtra": [
+        "tipoFlotaTransporte",
+        "capacidadPasajeros",
+        "incluyeChofer",
+        "permisoTransporte",
+        "polizaTransporte",
+        "usoTransporte"
+      ],
+      "keywordsIA": [
+        "transporte para invitados / eventos",
+        "eventos",
+        "fiestas"
       ]
     }
   },
@@ -1026,214 +2413,6 @@
       "keywordsIA": [
         "centros de negocios y oficinas",
         "bienes raices"
-      ]
-    },
-    {
-      "subcategoriaId": "salon-de-eventos",
-      "nombre": "Salón de Eventos",
-      "sectorId": "eventos",
-      "arquetipo": "negocio_venue",
-      "tipoPerfil": "lugar",
-      "heredaDe": "plantillasArquetipo.negocio_venue",
-      "delta": {},
-      "keywordsIA": [
-        "salón de eventos",
-        "eventos"
-      ]
-    },
-    {
-      "subcategoriaId": "jardin-para-eventos",
-      "nombre": "Jardín para Eventos",
-      "sectorId": "eventos",
-      "arquetipo": "negocio_venue",
-      "tipoPerfil": "lugar",
-      "heredaDe": "plantillasArquetipo.negocio_venue",
-      "delta": {},
-      "keywordsIA": [
-        "jardín para eventos",
-        "eventos"
-      ]
-    },
-    {
-      "subcategoriaId": "productora-de-espectaculos",
-      "nombre": "Productora de Espectáculos",
-      "sectorId": "eventos",
-      "arquetipo": "negocio_servicios_local",
-      "tipoPerfil": "negocio",
-      "heredaDe": "plantillasArquetipo.negocio_servicios_local",
-      "delta": {},
-      "keywordsIA": [
-        "productora de espectáculos",
-        "eventos"
-      ]
-    },
-    {
-      "subcategoriaId": "agencia-de-edecanes",
-      "nombre": "Agencia de Edecanes",
-      "sectorId": "eventos",
-      "arquetipo": "negocio_servicios_local",
-      "tipoPerfil": "negocio",
-      "heredaDe": "plantillasArquetipo.negocio_servicios_local",
-      "delta": {},
-      "keywordsIA": [
-        "agencia de edecanes",
-        "eventos"
-      ]
-    },
-    {
-      "subcategoriaId": "agencia-de-modelos",
-      "nombre": "Agencia de Modelos",
-      "sectorId": "eventos",
-      "arquetipo": "negocio_servicios_local",
-      "tipoPerfil": "negocio",
-      "heredaDe": "plantillasArquetipo.negocio_servicios_local",
-      "delta": {},
-      "keywordsIA": [
-        "agencia de modelos",
-        "eventos"
-      ]
-    },
-    {
-      "subcategoriaId": "agencia-de-artistas",
-      "nombre": "Agencia de Artistas",
-      "sectorId": "eventos",
-      "arquetipo": "negocio_servicios_local",
-      "tipoPerfil": "negocio",
-      "heredaDe": "plantillasArquetipo.negocio_servicios_local",
-      "delta": {},
-      "keywordsIA": [
-        "agencia de artistas",
-        "eventos"
-      ]
-    },
-    {
-      "subcategoriaId": "renta-de-mobiliario",
-      "nombre": "Renta de Mobiliario",
-      "sectorId": "eventos",
-      "arquetipo": "negocio_servicios_local",
-      "tipoPerfil": "negocio",
-      "heredaDe": "plantillasArquetipo.negocio_servicios_local",
-      "delta": {},
-      "keywordsIA": [
-        "renta de mobiliario",
-        "eventos"
-      ]
-    },
-    {
-      "subcategoriaId": "renta-de-sonido",
-      "nombre": "Renta de Sonido",
-      "sectorId": "eventos",
-      "arquetipo": "negocio_servicios_local",
-      "tipoPerfil": "negocio",
-      "heredaDe": "plantillasArquetipo.negocio_servicios_local",
-      "delta": {},
-      "keywordsIA": [
-        "renta de sonido",
-        "eventos"
-      ]
-    },
-    {
-      "subcategoriaId": "renta-de-iluminacion",
-      "nombre": "Renta de Iluminación",
-      "sectorId": "eventos",
-      "arquetipo": "negocio_servicios_local",
-      "tipoPerfil": "negocio",
-      "heredaDe": "plantillasArquetipo.negocio_servicios_local",
-      "delta": {},
-      "keywordsIA": [
-        "renta de iluminación",
-        "eventos"
-      ]
-    },
-    {
-      "subcategoriaId": "renta-de-escenarios",
-      "nombre": "Renta de Escenarios",
-      "sectorId": "eventos",
-      "arquetipo": "negocio_servicios_local",
-      "tipoPerfil": "negocio",
-      "heredaDe": "plantillasArquetipo.negocio_servicios_local",
-      "delta": {},
-      "keywordsIA": [
-        "renta de escenarios",
-        "eventos"
-      ]
-    },
-    {
-      "subcategoriaId": "catering-para-eventos",
-      "nombre": "Catering para Eventos",
-      "sectorId": "eventos",
-      "arquetipo": "negocio_alimentos",
-      "tipoPerfil": "negocio",
-      "heredaDe": "plantillasArquetipo.negocio_alimentos",
-      "delta": {},
-      "keywordsIA": [
-        "catering para eventos",
-        "eventos"
-      ]
-    },
-    {
-      "subcategoriaId": "organizacion-de-bodas",
-      "nombre": "Organización de Bodas",
-      "sectorId": "eventos",
-      "arquetipo": "negocio_servicios_local",
-      "tipoPerfil": "negocio",
-      "heredaDe": "plantillasArquetipo.negocio_servicios_local",
-      "delta": {},
-      "keywordsIA": [
-        "organización de bodas",
-        "eventos"
-      ]
-    },
-    {
-      "subcategoriaId": "organizacion-de-eventos-corporativos",
-      "nombre": "Organización de Eventos Corporativos",
-      "sectorId": "eventos",
-      "arquetipo": "negocio_servicios_local",
-      "tipoPerfil": "negocio",
-      "heredaDe": "plantillasArquetipo.negocio_servicios_local",
-      "delta": {},
-      "keywordsIA": [
-        "organización de eventos corporativos",
-        "eventos"
-      ]
-    },
-    {
-      "subcategoriaId": "organizacion-de-fiestas-infantiles",
-      "nombre": "Organización de Fiestas Infantiles",
-      "sectorId": "eventos",
-      "arquetipo": "negocio_servicios_local",
-      "tipoPerfil": "negocio",
-      "heredaDe": "plantillasArquetipo.negocio_servicios_local",
-      "delta": {},
-      "keywordsIA": [
-        "organización de fiestas infantiles",
-        "eventos"
-      ]
-    },
-    {
-      "subcategoriaId": "organizacion-de-conciertos",
-      "nombre": "Organización de Conciertos",
-      "sectorId": "eventos",
-      "arquetipo": "negocio_servicios_local",
-      "tipoPerfil": "negocio",
-      "heredaDe": "plantillasArquetipo.negocio_servicios_local",
-      "delta": {},
-      "keywordsIA": [
-        "organización de conciertos",
-        "eventos"
-      ]
-    },
-    {
-      "subcategoriaId": "organizacion-de-exposiciones",
-      "nombre": "Organización de Exposiciones",
-      "sectorId": "eventos",
-      "arquetipo": "negocio_servicios_local",
-      "tipoPerfil": "negocio",
-      "heredaDe": "plantillasArquetipo.negocio_servicios_local",
-      "delta": {},
-      "keywordsIA": [
-        "organización de exposiciones",
-        "eventos"
       ]
     },
     {
@@ -1967,6 +3146,795 @@
         "limpieza industrial",
         "industria"
       ]
+    },
+    {
+      "subcategoriaId": "espacios-para-eventos",
+      "nombre": "Espacios para Eventos",
+      "sectorId": "eventos",
+      "arquetipo": "eventos_pack_venue",
+      "tipoPerfil": "lugar",
+      "heredaDe": "plantillasArquetipo.eventos_pack_venue",
+      "delta": {
+        "deltaPack": "VENUE",
+        "canonSubcategoriaId": "espacios-para-eventos",
+        "obligatoriosDelta": [
+          "tiposEspacio",
+          "capacidadMin",
+          "capacidadMax",
+          "areasIncluidas",
+          "estacionamientoCupo",
+          "mobiliarioIncluido",
+          "cateringPolitica",
+          "restriccionRuido",
+          "permiteMusicaEnVivo",
+          "permitePirotecnia",
+          "tiposEventoAceptados",
+          "horarioMaximoEvento",
+          "geo"
+        ],
+        "camposPublicosPerfil": [
+          "tiposEspacio",
+          "capacidadMin",
+          "capacidadMax",
+          "areasIncluidas",
+          "estacionamientoCupo",
+          "mobiliarioIncluido",
+          "cateringPolitica",
+          "restriccionRuido",
+          "permiteMusicaEnVivo",
+          "permitePirotecnia",
+          "tiposEventoAceptados",
+          "horarioMaximoEvento",
+          "permisosMunicipalesVenue"
+        ],
+        "previewFicha": {
+          "chips": [
+            "tiposEspacio",
+            "tiposEventoAceptados"
+          ],
+          "stats": [
+            "capacidadMin",
+            "capacidadMax",
+            "estacionamientoCupo"
+          ],
+          "rows": [
+            "cateringPolitica",
+            "permiteMusicaEnVivo",
+            "permitePirotecnia",
+            "horarioMaximoEvento"
+          ],
+          "faq": [
+            "restriccionRuido",
+            "mobiliarioIncluido"
+          ]
+        },
+        "textosAyuda": {
+          "tiposEspacio": "Incluye quinta, salón, jardín, viñedo — elige todo lo que aplique.",
+          "cateringPolitica": "Si eres exclusivo, el cliente debe contratar tu banquete."
+        },
+        "legacySubcategoriaIds": [
+          "salon-de-eventos",
+          "jardin-para-eventos"
+        ],
+        "keywordsIA": [
+          "espacios para eventos",
+          "espacios",
+          "para",
+          "eventos"
+        ]
+      },
+      "keywordsIA": [
+        "espacios para eventos",
+        "espacios",
+        "para",
+        "eventos"
+      ],
+      "metadata": {
+        "mp": "MP-EVENTOS-DELTAS-V1",
+        "riskProfile": {
+          "sensible": false,
+          "regulada": false,
+          "requiresAdminReview": false
+        }
+      }
+    },
+    {
+      "subcategoriaId": "banquetes-catering-eventos",
+      "nombre": "Banquetes y Catering",
+      "sectorId": "eventos",
+      "arquetipo": "eventos_pack_food",
+      "tipoPerfil": "negocio",
+      "heredaDe": "plantillasArquetipo.eventos_pack_food",
+      "delta": {
+        "deltaPack": "FOOD",
+        "canonSubcategoriaId": "banquetes-catering-eventos",
+        "obligatoriosDelta": [
+          "formatoBanquete",
+          "comensalesMax",
+          "incluyeMeseros",
+          "permisoManipulacionAlimentos",
+          "especialidadesEvento"
+        ],
+        "camposPublicosPerfil": [
+          "formatoBanquete",
+          "comensalesMax",
+          "menuMuestraDisponible",
+          "incluyeMeseros",
+          "dietasEspeciales",
+          "permisoManipulacionAlimentos",
+          "especialidadesEvento"
+        ],
+        "previewFicha": {
+          "chips": [
+            "formatoBanquete",
+            "dietasEspeciales"
+          ],
+          "stats": [
+            "comensalesMax"
+          ],
+          "rows": [
+            "incluyeMeseros",
+            "menuMuestraDisponible"
+          ]
+        },
+        "textosAyuda": {},
+        "legacySubcategoriaIds": [
+          "catering-para-eventos"
+        ],
+        "keywordsIA": [
+          "banquetes y catering",
+          "banquetes",
+          "catering"
+        ]
+      },
+      "keywordsIA": [
+        "banquetes y catering",
+        "banquetes",
+        "catering"
+      ],
+      "metadata": {
+        "mp": "MP-EVENTOS-DELTAS-V1",
+        "riskProfile": {
+          "sensible": false,
+          "regulada": "declarativa",
+          "requiresAdminReview": false,
+          "notas": [
+            "permisoManipulacionAlimentos obligatorio."
+          ]
+        }
+      }
+    },
+    {
+      "subcategoriaId": "renta-mobiliario-eventos",
+      "nombre": "Renta de Mobiliario",
+      "sectorId": "eventos",
+      "arquetipo": "eventos_pack_rental",
+      "tipoPerfil": "negocio",
+      "heredaDe": "plantillasArquetipo.eventos_pack_rental",
+      "delta": {
+        "deltaPack": "RENTAL",
+        "canonSubcategoriaId": "renta-mobiliario-eventos",
+        "obligatoriosDelta": [
+          "inventarioMobiliario",
+          "incluyeEntregaRecoleccion",
+          "minimoRentaMobiliario",
+          "especialidadesEvento"
+        ],
+        "camposPublicosPerfil": [
+          "inventarioMobiliario",
+          "incluyeEntregaRecoleccion",
+          "depositoGarantiaMobiliario",
+          "minimoRentaMobiliario",
+          "especialidadesEvento"
+        ],
+        "previewFicha": {
+          "chips": [
+            "inventarioMobiliario"
+          ],
+          "rows": [
+            "incluyeEntregaRecoleccion",
+            "depositoGarantiaMobiliario",
+            "minimoRentaMobiliario"
+          ]
+        },
+        "textosAyuda": {},
+        "legacySubcategoriaIds": [
+          "renta-de-mobiliario"
+        ],
+        "keywordsIA": [
+          "renta de mobiliario",
+          "renta",
+          "mobiliario"
+        ]
+      },
+      "keywordsIA": [
+        "renta de mobiliario",
+        "renta",
+        "mobiliario"
+      ],
+      "metadata": {
+        "mp": "MP-EVENTOS-DELTAS-V1",
+        "riskProfile": {
+          "sensible": false,
+          "regulada": false,
+          "requiresAdminReview": false
+        }
+      }
+    },
+    {
+      "subcategoriaId": "renta-equipo-eventos",
+      "nombre": "Renta de Equipo (Audio, Iluminación, Escenarios)",
+      "sectorId": "eventos",
+      "arquetipo": "eventos_pack_rental",
+      "tipoPerfil": "negocio",
+      "heredaDe": "plantillasArquetipo.eventos_pack_rental",
+      "delta": {
+        "deltaPack": "RENTAL",
+        "canonSubcategoriaId": "renta-equipo-eventos",
+        "obligatoriosDelta": [
+          "tipoEquipoRenta",
+          "incluyeOperadorTecnico",
+          "requerimientosElectricos",
+          "especialidadesEvento"
+        ],
+        "camposPublicosPerfil": [
+          "tipoEquipoRenta",
+          "incluyeOperadorTecnico",
+          "potenciaAudioWatts",
+          "requerimientosElectricos",
+          "incluyeEntregaRecoleccion",
+          "especialidadesEvento"
+        ],
+        "previewFicha": {
+          "chips": [
+            "tipoEquipoRenta"
+          ],
+          "stats": [
+            "potenciaAudioWatts"
+          ],
+          "rows": [
+            "incluyeOperadorTecnico",
+            "requerimientosElectricos"
+          ]
+        },
+        "textosAyuda": {},
+        "legacySubcategoriaIds": [
+          "sonidista",
+          "iluminacion-para-eventos",
+          "renta-de-sonido",
+          "renta-de-iluminacion",
+          "renta-de-escenarios"
+        ],
+        "keywordsIA": [
+          "renta de equipo (audio, iluminación, escenarios)",
+          "renta",
+          "equipo",
+          "audio,",
+          "iluminacion,",
+          "escenarios"
+        ]
+      },
+      "keywordsIA": [
+        "renta de equipo (audio, iluminación, escenarios)",
+        "renta",
+        "equipo",
+        "audio,",
+        "iluminacion,",
+        "escenarios"
+      ],
+      "metadata": {
+        "mp": "MP-EVENTOS-DELTAS-V1",
+        "riskProfile": {
+          "sensible": false,
+          "regulada": false,
+          "requiresAdminReview": false
+        }
+      }
+    },
+    {
+      "subcategoriaId": "food-trucks-carritos-eventos",
+      "nombre": "Food Trucks y Carritos",
+      "sectorId": "eventos",
+      "arquetipo": "eventos_pack_food",
+      "tipoPerfil": "negocio",
+      "heredaDe": "plantillasArquetipo.eventos_pack_food",
+      "delta": {
+        "deltaPack": "FOOD",
+        "canonSubcategoriaId": "food-trucks-carritos-eventos",
+        "obligatoriosDelta": [
+          "tipoUnidadFood",
+          "cartaPrincipal",
+          "comensalesPorHora",
+          "permisoManipulacionAlimentos",
+          "requiereAguaLuz"
+        ],
+        "camposPublicosPerfil": [
+          "tipoUnidadFood",
+          "cartaPrincipal",
+          "comensalesPorHora",
+          "permisoManipulacionAlimentos",
+          "requiereAguaLuz",
+          "radioServicioKm",
+          "especialidadesEvento"
+        ],
+        "previewFicha": {
+          "chips": [
+            "cartaPrincipal",
+            "tipoUnidadFood"
+          ],
+          "stats": [
+            "comensalesPorHora"
+          ],
+          "rows": [
+            "requiereAguaLuz",
+            "radioServicioKm"
+          ]
+        },
+        "textosAyuda": {},
+        "legacySubcategoriaIds": [],
+        "keywordsIA": [
+          "food trucks y carritos",
+          "food",
+          "trucks",
+          "carritos"
+        ]
+      },
+      "keywordsIA": [
+        "food trucks y carritos",
+        "food",
+        "trucks",
+        "carritos"
+      ],
+      "metadata": {
+        "mp": "MP-EVENTOS-DELTAS-V1",
+        "riskProfile": {
+          "sensible": false,
+          "regulada": "declarativa",
+          "requiresAdminReview": false,
+          "notas": [
+            "permisoManipulacionAlimentos + requiereAguaLuz."
+          ]
+        }
+      }
+    },
+    {
+      "subcategoriaId": "pasteles-reposteria-eventos",
+      "nombre": "Pasteles y Repostería para Eventos",
+      "sectorId": "eventos",
+      "arquetipo": "eventos_pack_food",
+      "tipoPerfil": "negocio",
+      "heredaDe": "plantillasArquetipo.eventos_pack_food",
+      "delta": {
+        "deltaPack": "FOOD",
+        "canonSubcategoriaId": "pasteles-reposteria-eventos",
+        "obligatoriosDelta": [
+          "productosReposteria",
+          "tiempoPedidoAnticipacionDias",
+          "permisoManipulacionAlimentos",
+          "especialidadesEvento"
+        ],
+        "camposPublicosPerfil": [
+          "productosReposteria",
+          "tiempoPedidoAnticipacionDias",
+          "incluyeDegustacion",
+          "incluyeMontajeMesaPostres",
+          "permisoManipulacionAlimentos",
+          "especialidadesEvento"
+        ],
+        "previewFicha": {
+          "chips": [
+            "productosReposteria"
+          ],
+          "stats": [
+            "tiempoPedidoAnticipacionDias"
+          ],
+          "rows": [
+            "incluyeDegustacion",
+            "incluyeMontajeMesaPostres"
+          ]
+        },
+        "textosAyuda": {},
+        "legacySubcategoriaIds": [],
+        "keywordsIA": [
+          "pasteles y repostería para eventos",
+          "pasteles",
+          "reposteria",
+          "para",
+          "eventos"
+        ]
+      },
+      "keywordsIA": [
+        "pasteles y repostería para eventos",
+        "pasteles",
+        "reposteria",
+        "para",
+        "eventos"
+      ],
+      "metadata": {
+        "mp": "MP-EVENTOS-DELTAS-V1",
+        "riskProfile": {
+          "sensible": false,
+          "regulada": "declarativa",
+          "requiresAdminReview": false,
+          "notas": [
+            "permisoManipulacionAlimentos."
+          ]
+        }
+      }
+    },
+    {
+      "subcategoriaId": "florerias-eventos",
+      "nombre": "Florerías para Eventos",
+      "sectorId": "eventos",
+      "arquetipo": "eventos_pack_floral",
+      "tipoPerfil": "negocio",
+      "heredaDe": "plantillasArquetipo.eventos_pack_floral",
+      "delta": {
+        "deltaPack": "FLORAL",
+        "canonSubcategoriaId": "florerias-eventos",
+        "obligatoriosDelta": [
+          "productosFlorales",
+          "incluyeInstalacionFloral",
+          "especialidadesEvento",
+          "requiereVisitaVenue"
+        ],
+        "camposPublicosPerfil": [
+          "productosFlorales",
+          "incluyeInstalacionFloral",
+          "incluyeMontajeDesmontaje",
+          "especialidadesEvento",
+          "requiereVisitaVenue"
+        ],
+        "previewFicha": {
+          "chips": [
+            "productosFlorales"
+          ],
+          "rows": [
+            "incluyeInstalacionFloral",
+            "requiereVisitaVenue"
+          ]
+        },
+        "textosAyuda": {
+          "productosFlorales": "Producto floral e instalación — distinto de decoración globos/temática."
+        },
+        "legacySubcategoriaIds": [],
+        "keywordsIA": [
+          "florerías para eventos",
+          "florerias",
+          "para",
+          "eventos"
+        ]
+      },
+      "keywordsIA": [
+        "florerías para eventos",
+        "florerias",
+        "para",
+        "eventos"
+      ],
+      "metadata": {
+        "mp": "MP-EVENTOS-DELTAS-V1",
+        "riskProfile": {
+          "sensible": false,
+          "regulada": false,
+          "requiresAdminReview": false
+        }
+      }
+    },
+    {
+      "subcategoriaId": "pirotecnia-efectos-especiales",
+      "nombre": "Pirotecnia y Efectos Especiales",
+      "sectorId": "eventos",
+      "arquetipo": "eventos_pack_fx",
+      "tipoPerfil": "negocio",
+      "heredaDe": "plantillasArquetipo.eventos_pack_fx",
+      "delta": {
+        "deltaPack": "FX",
+        "canonSubcategoriaId": "pirotecnia-efectos-especiales",
+        "obligatoriosDelta": [
+          "tipoEfectoPirotecnia",
+          "ambientePirotecnia",
+          "licenciaPirotecnia",
+          "jurisdiccionPirotecnia",
+          "distanciaSeguridadMetros",
+          "polizaSeguroPirotecnia",
+          "disclaimerReguladoEventos"
+        ],
+        "camposPublicosPerfil": [
+          "tipoEfectoPirotecnia",
+          "ambientePirotecnia",
+          "licenciaPirotecnia",
+          "jurisdiccionPirotecnia",
+          "distanciaSeguridadMetros",
+          "polizaSeguroPirotecnia",
+          "disclaimerReguladoEventos",
+          "especialidadesEvento"
+        ],
+        "previewFicha": {
+          "chips": [
+            "tipoEfectoPirotecnia"
+          ],
+          "rows": [
+            "ambientePirotecnia",
+            "distanciaSeguridadMetros",
+            "jurisdiccionPirotecnia"
+          ],
+          "badge": "regulada"
+        },
+        "textosAyuda": {},
+        "legacySubcategoriaIds": [],
+        "keywordsIA": [
+          "pirotecnia y efectos especiales",
+          "pirotecnia",
+          "efectos",
+          "especiales"
+        ],
+        "sensible": true,
+        "regulada": true,
+        "requiresAdminReview": true,
+        "nivelRevisionAdmin": "alta"
+      },
+      "keywordsIA": [
+        "pirotecnia y efectos especiales",
+        "pirotecnia",
+        "efectos",
+        "especiales"
+      ],
+      "metadata": {
+        "mp": "MP-EVENTOS-DELTAS-V1",
+        "riskProfile": {
+          "sensible": true,
+          "regulada": true,
+          "requiresAdminReview": true,
+          "nivelRevisionAdmin": "alta"
+        }
+      }
+    },
+    {
+      "subcategoriaId": "seguridad-eventos",
+      "nombre": "Seguridad para Eventos",
+      "sectorId": "eventos",
+      "arquetipo": "eventos_pack_security",
+      "tipoPerfil": "negocio",
+      "heredaDe": "plantillasArquetipo.eventos_pack_security",
+      "delta": {
+        "deltaPack": "SECURITY",
+        "canonSubcategoriaId": "seguridad-eventos",
+        "obligatoriosDelta": [
+          "elementosSeguridad",
+          "controlAcceso",
+          "licenciaSeguridadPrivada",
+          "disclaimerReguladoEventos"
+        ],
+        "camposPublicosPerfil": [
+          "elementosSeguridad",
+          "controlAcceso",
+          "licenciaSeguridadPrivada",
+          "eventosMasivos",
+          "especialidadesEvento",
+          "disclaimerReguladoEventos"
+        ],
+        "previewFicha": {
+          "stats": [
+            "elementosSeguridad"
+          ],
+          "rows": [
+            "controlAcceso",
+            "eventosMasivos",
+            "licenciaSeguridadPrivada"
+          ],
+          "badge": "regulada"
+        },
+        "textosAyuda": {},
+        "legacySubcategoriaIds": [],
+        "keywordsIA": [
+          "seguridad para eventos",
+          "seguridad",
+          "para",
+          "eventos"
+        ],
+        "regulada": true,
+        "requiresAdminReview": true,
+        "nivelRevisionAdmin": "alta"
+      },
+      "keywordsIA": [
+        "seguridad para eventos",
+        "seguridad",
+        "para",
+        "eventos"
+      ],
+      "metadata": {
+        "mp": "MP-EVENTOS-DELTAS-V1",
+        "riskProfile": {
+          "sensible": false,
+          "regulada": true,
+          "requiresAdminReview": true,
+          "nivelRevisionAdmin": "alta"
+        }
+      }
+    },
+    {
+      "subcategoriaId": "valet-parking-eventos",
+      "nombre": "Valet Parking",
+      "sectorId": "eventos",
+      "arquetipo": "eventos_pack_valet",
+      "tipoPerfil": "negocio",
+      "heredaDe": "plantillasArquetipo.eventos_pack_valet",
+      "delta": {
+        "deltaPack": "VALET",
+        "canonSubcategoriaId": "valet-parking-eventos",
+        "obligatoriosDelta": [
+          "vehiculosPorHora",
+          "elementosValet",
+          "polizaResponsabilidadValet",
+          "uniformeProfesionalValet",
+          "coordinacionConVenue"
+        ],
+        "camposPublicosPerfil": [
+          "vehiculosPorHora",
+          "elementosValet",
+          "polizaResponsabilidadValet",
+          "uniformeProfesionalValet",
+          "coordinacionConVenue",
+          "especialidadesEvento"
+        ],
+        "previewFicha": {
+          "stats": [
+            "vehiculosPorHora",
+            "elementosValet"
+          ],
+          "rows": [
+            "polizaResponsabilidadValet",
+            "coordinacionConVenue"
+          ]
+        },
+        "textosAyuda": {},
+        "legacySubcategoriaIds": [],
+        "keywordsIA": [
+          "valet parking",
+          "valet",
+          "parking"
+        ]
+      },
+      "keywordsIA": [
+        "valet parking",
+        "valet",
+        "parking"
+      ],
+      "metadata": {
+        "mp": "MP-EVENTOS-DELTAS-V1",
+        "riskProfile": {
+          "sensible": false,
+          "regulada": "declarativa",
+          "requiresAdminReview": false,
+          "notas": [
+            "polizaResponsabilidadValet recomendada/obligatoria Fase 1."
+          ]
+        }
+      }
+    },
+    {
+      "subcategoriaId": "transporte-eventos",
+      "nombre": "Transporte para Eventos",
+      "sectorId": "eventos",
+      "arquetipo": "eventos_pack_transport",
+      "tipoPerfil": "negocio",
+      "heredaDe": "plantillasArquetipo.eventos_pack_transport",
+      "delta": {
+        "deltaPack": "TRANSPORT",
+        "canonSubcategoriaId": "transporte-eventos",
+        "obligatoriosDelta": [
+          "tipoFlotaTransporte",
+          "capacidadPasajeros",
+          "incluyeChofer",
+          "permisoTransporte",
+          "polizaTransporte",
+          "usoTransporte"
+        ],
+        "camposPublicosPerfil": [
+          "tipoFlotaTransporte",
+          "capacidadPasajeros",
+          "incluyeChofer",
+          "permisoTransporte",
+          "polizaTransporte",
+          "usoTransporte",
+          "radioServicioKm"
+        ],
+        "previewFicha": {
+          "chips": [
+            "tipoFlotaTransporte",
+            "usoTransporte"
+          ],
+          "stats": [
+            "capacidadPasajeros"
+          ],
+          "rows": [
+            "incluyeChofer",
+            "permisoTransporte"
+          ]
+        },
+        "textosAyuda": {},
+        "legacySubcategoriaIds": [],
+        "keywordsIA": [
+          "transporte para eventos",
+          "transporte",
+          "para",
+          "eventos"
+        ]
+      },
+      "keywordsIA": [
+        "transporte para eventos",
+        "transporte",
+        "para",
+        "eventos"
+      ],
+      "metadata": {
+        "mp": "MP-EVENTOS-DELTAS-V1",
+        "riskProfile": {
+          "sensible": false,
+          "regulada": "declarativa",
+          "requiresAdminReview": false,
+          "notas": [
+            "permisoTransporte + polizaTransporte."
+          ]
+        }
+      }
+    },
+    {
+      "subcategoriaId": "renta-vestuario-disfraces-eventos",
+      "nombre": "Renta de Vestuario y Disfraces",
+      "sectorId": "eventos",
+      "arquetipo": "eventos_pack_rental",
+      "tipoPerfil": "negocio",
+      "heredaDe": "plantillasArquetipo.eventos_pack_rental",
+      "delta": {
+        "deltaPack": "RENTAL",
+        "canonSubcategoriaId": "renta-vestuario-disfraces-eventos",
+        "obligatoriosDelta": [
+          "categoriasVestuario",
+          "tallasDisponibles",
+          "higienizacionVestuario",
+          "especialidadesEvento"
+        ],
+        "camposPublicosPerfil": [
+          "categoriasVestuario",
+          "tallasDisponibles",
+          "higienizacionVestuario",
+          "depositoVestuario",
+          "especialidadesEvento"
+        ],
+        "previewFicha": {
+          "chips": [
+            "categoriasVestuario"
+          ],
+          "rows": [
+            "tallasDisponibles",
+            "higienizacionVestuario",
+            "depositoVestuario"
+          ]
+        },
+        "textosAyuda": {},
+        "legacySubcategoriaIds": [],
+        "keywordsIA": [
+          "renta de vestuario y disfraces",
+          "renta",
+          "vestuario",
+          "disfraces"
+        ]
+      },
+      "keywordsIA": [
+        "renta de vestuario y disfraces",
+        "renta",
+        "vestuario",
+        "disfraces"
+      ],
+      "metadata": {
+        "mp": "MP-EVENTOS-DELTAS-V1",
+        "riskProfile": {
+          "sensible": false,
+          "regulada": false,
+          "requiresAdminReview": false
+        }
+      }
     }
   ]
 }
