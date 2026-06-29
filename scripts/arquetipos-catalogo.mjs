@@ -4,6 +4,7 @@
  */
 import { SUB_TO_PACK, arquetipoForPack, RETAIL_FIX_IDS } from "./bienestar-packs-v1.mjs";
 import { SUB_TO_PACK as EVENTOS_SUB_TO_PACK, packPlantillaKey as eventosPackKey } from "./eventos-packs-v1.mjs";
+import { SUB_TO_PACK as GASTRONOMIA_SUB_TO_PACK, packPlantillaKey as gastronomiaPackKey } from "./gastronomia-packs-v1.mjs";
 
 /** Nombres legacy (integración antigua) → canónico por defecto */
 export const ARQUETIPOS_EQUIVALENCIA = {
@@ -15,6 +16,17 @@ export const ARQUETIPOS_EQUIVALENCIA = {
   profesional_certificado: "profesional_salud",
 };
 
+
+
+export function gastronomiaPackForSub(subcategoriaId) {
+  return GASTRONOMIA_SUB_TO_PACK[subcategoriaId] || null;
+}
+
+export function gastronomiaArquetipoForSub(subcategoriaId) {
+  const pack = gastronomiaPackForSub(subcategoriaId);
+  if (!pack) return null;
+  return gastronomiaPackKey(pack);
+}
 
 export function eventosPackForSub(subcategoriaId) {
   return EVENTOS_SUB_TO_PACK[subcategoriaId] || null;
@@ -40,6 +52,11 @@ export function sectorArquetipoIndependiente(sectorId, subcategoriaId) {
   if (sectorId === "bienestar") return bienestarArquetipoForSub(subcategoriaId);
   if (sectorId === "transporte") return "persona_servicio_movil";
   if (["hogar", "automotriz", "industria"].includes(sectorId)) return "persona_servicio_oficio";
+  if (sectorId === "restaurantes") {
+    const ga = gastronomiaArquetipoForSub(subcategoriaId);
+    if (ga) return ga;
+    return "persona_servicio_profesional";
+  }
   if (sectorId === "eventos") {
     const ev = eventosArquetipoForSub(subcategoriaId);
     if (ev) return ev;

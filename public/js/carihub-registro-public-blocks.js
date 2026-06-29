@@ -139,6 +139,55 @@
     return matchesEventosSector(ctx, null);
   }
 
+  function resolveGastronomiaSectorApi() {
+    return global.CARIHUB_REGISTRO_GASTRONOMIA_SECTOR_BLOCKS || null;
+  }
+
+  function slugGastronomiaSubId(id) {
+    return String(id || '')
+      .trim()
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/_/g, '-');
+  }
+
+  function matchesGastronomiaSector(ctx, resolved) {
+    var api = resolveGastronomiaSectorApi();
+    if (!api) return false;
+    ctx = ctx || {};
+    if (String(ctx.sectorId || '') !== 'restaurantes') return false;
+    var subSlug = slugGastronomiaSubId((ctx.subcategoriaId) || (ctx.subcategoria) || '');
+    var canonId = api.resolveCanonSubId(subSlug);
+    if (!canonId) return false;
+    var ident = resolved && resolved.identidad ? resolved.identidad : {};
+    var fid = String(ctx.formularioId || ident.formularioId || '').trim();
+    var probe = api.buildConfig({
+      sectorId: 'restaurantes',
+      subcategoriaId: subSlug,
+      formularioId: fid || undefined
+    });
+    if (!probe) return false;
+    if (fid && probe.formularioId !== fid) return false;
+    return true;
+  }
+
+  function resolveGastronomiaSectorConfig(ctx, resolved) {
+    if (!matchesGastronomiaSector(ctx, resolved)) return null;
+    var api = resolveGastronomiaSectorApi();
+    if (!api) return null;
+    var subRaw = (ctx.subcategoriaId) || (ctx.subcategoria) || '';
+    var ident = resolved && resolved.identidad ? resolved.identidad : {};
+    var fid = String(ctx.formularioId || ident.formularioId || '').trim();
+    var cfgCtx = Object.assign({}, ctx, { sectorId: 'restaurantes', subcategoriaId: subRaw });
+    if (fid) cfgCtx.formularioId = fid;
+    return api.buildConfig(cfgCtx);
+  }
+
+  function isGastronomiaSectorSubcategoria(ctx) {
+    return matchesGastronomiaSector(ctx, null);
+  }
+
   function normalizeCreadorSubId(raw) {
     var subId = normalizeSubId(raw);
     if (subId === 'contenido' || subId === 'creador contenido') return 'contenido';
@@ -692,6 +741,7 @@
     if (matchesRetail(ctx, resolved)) return resolveRetailConfig();
     if (matchesVenue(ctx, resolved)) return resolveVenueConfig();
     if (matchesEventosSector(ctx, resolved)) return resolveEventosSectorConfig(ctx, resolved);
+    if (matchesGastronomiaSector(ctx, resolved)) return resolveGastronomiaSectorConfig(ctx, resolved);
     if (matchesBienestarSector(ctx, resolved)) return resolveBienestarSectorConfig(ctx, resolved);
     if (matchesBienestar(ctx, resolved)) return resolveBienestarConfig();
     if (matchesHospedaje(ctx, resolved)) return resolveHospedajeConfig();
@@ -1566,6 +1616,92 @@
     });
   }
 
+  function finalizeGastronomiaSectorValues(values, ctx) {
+    if (!values || !isGastronomiaSectorSubcategoria(ctx || {})) return values;
+    var api = resolveGastronomiaSectorApi();
+    if (!api) return values;
+    var subRaw = (ctx && ctx.subcategoriaId) || values.subcategoriaId || '';
+    var canonId = api.resolveCanonSubId(subRaw);
+    var pack = api.resolvePack(canonId);
+    values = api.applyGastronomiaFlags(values, canonId);
+    values.deltaPack = pack;
+    values.canonSubcategoriaId = canonId;
+    var subSlug = slugGastronomiaSubId(subRaw);
+    if (canonId && subSlug && subSlug !== canonId) {
+      values.legacySubcategoriaId = subSlug;
+      values.subcategoriaId = canonId;
+    }
+    clearProfileContractState(values, ['gastronomiaPerfil']);
+    values.gastronomiaPerfil = api.buildGastronomiaPerfil(values, canonId, pack);
+    return values;
+  }
+
+  function applyGastronomiaSectorPerfilFields(u, perfil) {
+    u = u || {};
+    perfil = perfil || {};
+    if (perfil.alias) {
+      u.alias = perfil.alias;
+      u.nombre = perfil.alias;
+    }
+    if (perfil.nombreComercial) {
+      u.nombreComercial = perfil.nombreComercial;
+      u.nombre = perfil.nombreComercial;
+      u.alias = perfil.nombreComercial;
+    }
+    if (perfil.tagline) {
+      u.tagline = perfil.tagline;
+      u.frase = perfil.tagline;
+    }
+    if (perfil.precioDesdeMx) {
+      u.precioDesdeMx = perfil.precioDesdeMx;
+      u.precio = perfil.precioDesdeMx;
+      u.tarifaDesde = perfil.precioDesdeMx;
+    }
+    if (perfil.precioPromedioMx) {
+      u.precioPromedioMx = perfil.precioPromedioMx;
+      u.precio = perfil.precioPromedioMx;
+    }
+    if (perfil.unidadCotizacion) u.unidadCotizacion = perfil.unidadCotizacion;
+    if (perfil.canonSubcategoriaId) u.subcategoriaId = perfil.canonSubcategoriaId;
+    if (perfil.deltaPack) u.deltaPack = perfil.deltaPack;
+    if (perfil.regulada) u.regulada = true;
+    if (perfil.requiresAdminReview) u.requiresAdminReview = true;
+    if (perfil.privacidadDireccion) u.privacidadDireccion = true;
+    return u;
+  }
+
+  function mapGastronomiaSectorToPerfil(u, bloques, ctx) {
+    u = u || {};
+    ctx = ctx || {};
+    var api = resolveGastronomiaSectorApi();
+    var canonId = api
+      ? api.resolveCanonSubId((ctx.subcategoriaId) || bloques.subcategoriaId || '')
+      : '';
+    var pack = api ? api.resolvePack(canonId) : '';
+    var merged = Object.assign({}, bloques);
+    if (api && api.applyGastronomiaFlags) {
+      merged = api.applyGastronomiaFlags(merged, canonId);
+    }
+    var perfil = bloques.gastronomiaPerfil || (api ? api.buildGastronomiaPerfil(merged, canonId, pack) : {});
+    if (api && api.sanitizeGastronomiaPerfilForPublic) {
+      perfil = api.sanitizeGastronomiaPerfilForPublic(perfil);
+    }
+    clearProfileContractState(u, ['gastronomiaPerfil']);
+    u.gastronomiaPerfil = Object.assign({}, perfil);
+    u = applyGastronomiaSectorPerfilFields(u, perfil);
+    u.sectorId = 'restaurantes';
+    return u;
+  }
+
+  function validateGastronomiaSectorValues(cfg, values, missing, ctx) {
+    if (!cfg || !isGastronomiaSectorSubcategoria(ctx || {})) return;
+    var api = resolveGastronomiaSectorApi();
+    if (!api || !api.validateGastronomiaSectorValues) return;
+    api.validateGastronomiaSectorValues(values || {}, ctx || {}).forEach(function (msg) {
+      pushMissing(missing, msg);
+    });
+  }
+
   var PROFILE_NESTED_KEYS = [
     'dominatrixPerfil',
     'espectaculoPerfil',
@@ -1574,6 +1710,7 @@
     'venuePerfil',
     'bienestarPerfil',
     'eventosPerfil',
+    'gastronomiaPerfil',
     'hospedajePerfil',
     'swingerPerfil',
     'unicornPerfil',
@@ -3090,6 +3227,7 @@
     values = finalizeBienestarValues(values, ctx);
     values = finalizeBienestarSectorValues(values, ctx);
     values = finalizeEventosSectorValues(values, ctx);
+    values = finalizeGastronomiaSectorValues(values, ctx);
     values = finalizeHospedajeValues(values, ctx);
     values = finalizeParejaGrupoValues(values);
     return values;
@@ -3194,6 +3332,9 @@
     }
     if (isEventosSectorSubcategoria(ctx)) {
       validateEventosSectorValues(cfg, values, missing, ctx);
+    }
+    if (isGastronomiaSectorSubcategoria(ctx)) {
+      validateGastronomiaSectorValues(cfg, values, missing, ctx);
     }
     if (isHospedajeSubcategoria(ctx)) {
       validateHospedajeDeltaValues(cfg, values, missing, ctx);
@@ -3401,6 +3542,9 @@
     if (isEventosSectorSubcategoria(ctx)) {
       return mapEventosSectorToPerfil(u, bloques, ctx);
     }
+    if (isGastronomiaSectorSubcategoria(ctx)) {
+      return mapGastronomiaSectorToPerfil(u, bloques, ctx);
+    }
     if (isHospedajeSubcategoria(ctx)) {
       return mapHospedajeToPerfil(u, bloques, ctx);
     }
@@ -3597,6 +3741,10 @@
     isEventosSectorSubcategoria: isEventosSectorSubcategoria,
     mapEventosSectorToPerfil: mapEventosSectorToPerfil,
     validateEventosSectorValues: validateEventosSectorValues,
+    matchesGastronomiaSector: matchesGastronomiaSector,
+    isGastronomiaSectorSubcategoria: isGastronomiaSectorSubcategoria,
+    mapGastronomiaSectorToPerfil: mapGastronomiaSectorToPerfil,
+    validateGastronomiaSectorValues: validateGastronomiaSectorValues,
     matchesHospedaje: matchesHospedaje,
     apply: apply,
     collectValues: collectValues,
