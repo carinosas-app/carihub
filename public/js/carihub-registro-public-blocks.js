@@ -55,6 +55,10 @@
     return global.CARIHUB_REGISTRO_BIENESTAR_SECTOR_BLOCKS || null;
   }
 
+  function resolveEventosSectorApi() {
+    return global.CARIHUB_REGISTRO_EVENTOS_SECTOR_BLOCKS || null;
+  }
+
   function slugBienestarSubId(id) {
     return String(id || '')
       .trim()
@@ -88,6 +92,51 @@
 
   function isBienestarSectorSubcategoria(ctx) {
     return matchesBienestarSector(ctx, null);
+  }
+
+  function slugEventosSubId(id) {
+    return String(id || '')
+      .trim()
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/_/g, '-');
+  }
+
+  function matchesEventosSector(ctx, resolved) {
+    var api = resolveEventosSectorApi();
+    if (!api) return false;
+    ctx = ctx || {};
+    if (String(ctx.sectorId || '') !== 'eventos') return false;
+    var subSlug = slugEventosSubId((ctx.subcategoriaId) || (ctx.subcategoria) || '');
+    var canonId = api.resolveCanonSubId(subSlug);
+    if (!canonId) return false;
+    var ident = resolved && resolved.identidad ? resolved.identidad : {};
+    var fid = String(ctx.formularioId || ident.formularioId || '').trim();
+    var probe = api.buildConfig({
+      sectorId: 'eventos',
+      subcategoriaId: subSlug,
+      formularioId: fid || undefined
+    });
+    if (!probe) return false;
+    if (fid && probe.formularioId !== fid) return false;
+    return true;
+  }
+
+  function resolveEventosSectorConfig(ctx, resolved) {
+    if (!matchesEventosSector(ctx, resolved)) return null;
+    var api = resolveEventosSectorApi();
+    if (!api) return null;
+    var subRaw = (ctx.subcategoriaId) || (ctx.subcategoria) || '';
+    var ident = resolved && resolved.identidad ? resolved.identidad : {};
+    var fid = String(ctx.formularioId || ident.formularioId || '').trim();
+    var cfgCtx = Object.assign({}, ctx, { sectorId: 'eventos', subcategoriaId: subRaw });
+    if (fid) cfgCtx.formularioId = fid;
+    return api.buildConfig(cfgCtx);
+  }
+
+  function isEventosSectorSubcategoria(ctx) {
+    return matchesEventosSector(ctx, null);
   }
 
   function normalizeCreadorSubId(raw) {
@@ -642,6 +691,7 @@
     if (matchesCreador(ctx, resolved)) return resolveCreadorConfig();
     if (matchesRetail(ctx, resolved)) return resolveRetailConfig();
     if (matchesVenue(ctx, resolved)) return resolveVenueConfig();
+    if (matchesEventosSector(ctx, resolved)) return resolveEventosSectorConfig(ctx, resolved);
     if (matchesBienestarSector(ctx, resolved)) return resolveBienestarSectorConfig(ctx, resolved);
     if (matchesBienestar(ctx, resolved)) return resolveBienestarConfig();
     if (matchesHospedaje(ctx, resolved)) return resolveHospedajeConfig();
@@ -688,8 +738,18 @@
   function fieldMatchesShowWhen(field, values) {
     if (!field || !field.showWhen) return true;
     values = values || {};
-    var depVal = values[field.showWhen.field];
-    var allowed = field.showWhen.values || [];
+    var sw = field.showWhen;
+    var depVal = values[sw.field];
+    if (sw.truthy) return isTruthyFieldValue(depVal);
+    if (sw.includes != null) {
+      if (!Array.isArray(depVal)) return false;
+      var needle = String(sw.includes);
+      for (var i = 0; i < depVal.length; i++) {
+        if (String(depVal[i]) === needle) return true;
+      }
+      return false;
+    }
+    var allowed = sw.values || [];
     var current = String(depVal || '').trim();
     return allowed.indexOf(current) >= 0;
   }
@@ -945,6 +1005,9 @@
       '" data-rp-pub-field-wrap="' + esc(field.id) + '"' +
       (isViajesSubfield(field) ? ' data-rp-viajes-sub="1"' : '') +
       (field.showWhen ? ' data-rp-show-when-field="' + esc(field.showWhen.field) + '"' : '') +
+      (field.showWhen && field.showWhen.values ? ' data-rp-show-when-values="' + esc(field.showWhen.values.join(',')) + '"' : '') +
+      (field.showWhen && field.showWhen.truthy ? ' data-rp-show-when-truthy="1"' : '') +
+      (field.showWhen && field.showWhen.includes != null ? ' data-rp-show-when-includes="' + esc(String(field.showWhen.includes)) + '"' : '') +
       (hidden ? ' aria-hidden="true"' : '') + '>';
     if (field.type === 'checklist') {
       wrap += '<span class="rp-pub-field-label">' + esc(field.label) + req + '</span>' + renderChecklist(field, values, ctx);
@@ -1023,6 +1086,7 @@
     bindNivelServicioHelp();
     bindViajaToggle();
     bindConditionalFieldToggles();
+    bindShowWhenToggles(host);
     bindMemberListControls(host);
     syncConditionalSubfieldsVisibility();
   }
@@ -1045,6 +1109,51 @@
     });
   }
 
+  function readFieldValueForShowWhen(fieldId) {
+    var checklist = readChecklist(fieldId);
+    if (checklist.length) return checklist;
+    var cb = $(fieldDomId(fieldId));
+    if (cb && cb.type === 'checkbox') return cb.checked === true;
+    if (cb && cb.tagName === 'SELECT') return String(cb.value || '').trim();
+    var input = $(fieldDomId(fieldId));
+    if (input) return String(input.value || '').trim();
+    return '';
+  }
+
+  function showWhenWrapMatches(wrap) {
+    var depField = wrap.getAttribute('data-rp-show-when-field');
+    if (!depField) return true;
+    if (depField === 'haceColaboraciones') {
+      var hace = readSelectValue('haceColaboraciones');
+      return hace === 'Sí' || hace === 'A convenir';
+    }
+    var depVal = readFieldValueForShowWhen(depField);
+    if (wrap.getAttribute('data-rp-show-when-truthy') === '1') {
+      return isTruthyFieldValue(depVal);
+    }
+    var includes = wrap.getAttribute('data-rp-show-when-includes');
+    if (includes) {
+      if (!Array.isArray(depVal)) return false;
+      for (var i = 0; i < depVal.length; i++) {
+        if (String(depVal[i]) === includes) return true;
+      }
+      return false;
+    }
+    var allowedRaw = wrap.getAttribute('data-rp-show-when-values') || '';
+    if (!allowedRaw) return true;
+    var allowed = allowedRaw.split(',');
+    return allowed.indexOf(String(depVal || '').trim()) >= 0;
+  }
+
+  function syncShowWhenVisibility() {
+    document.querySelectorAll('[data-rp-show-when-field]').forEach(function (wrap) {
+      var visible = showWhenWrapMatches(wrap);
+      wrap.classList.toggle('rp-hidden', !visible);
+      if (visible) wrap.removeAttribute('aria-hidden');
+      else wrap.setAttribute('aria-hidden', 'true');
+    });
+  }
+
   function syncConditionalSubfieldsVisibility() {
     syncViajesSubformVisibility();
     var hace = readSelectValue('haceColaboraciones');
@@ -1055,6 +1164,14 @@
       else el.setAttribute('aria-hidden', 'true');
     });
     if (!showColabora) clearColaboraConValues();
+    syncShowWhenVisibility();
+  }
+
+  function bindShowWhenToggles(host) {
+    if (!host || host.dataset.rpShowWhenBound === '1') return;
+    host.dataset.rpShowWhenBound = '1';
+    host.addEventListener('change', syncShowWhenVisibility);
+    host.addEventListener('input', syncShowWhenVisibility);
   }
 
   function bindConditionalFieldToggles() {
@@ -1369,6 +1486,82 @@
     }
   }
 
+  function finalizeEventosSectorValues(values, ctx) {
+    if (!values || !isEventosSectorSubcategoria(ctx || {})) return values;
+    var api = resolveEventosSectorApi();
+    if (!api) return values;
+    var subRaw = (ctx && ctx.subcategoriaId) || values.subcategoriaId || '';
+    var canonId = api.resolveCanonSubId(subRaw);
+    var pack = api.resolvePack(canonId);
+    values = api.applyEventosFlags(values, canonId);
+    values.deltaPack = pack;
+    values.canonSubcategoriaId = canonId;
+    var subSlug = slugEventosSubId(subRaw);
+    if (canonId && subSlug && subSlug !== canonId) {
+      values.legacySubcategoriaId = subSlug;
+      values.subcategoriaId = canonId;
+    }
+    clearProfileContractState(values, ['eventosPerfil']);
+    values.eventosPerfil = api.buildEventosPerfil(values, canonId, pack);
+    return values;
+  }
+
+  function applyEventosSectorPerfilFields(u, perfil) {
+    u = u || {};
+    perfil = perfil || {};
+    if (perfil.alias) {
+      u.alias = perfil.alias;
+      u.nombre = perfil.alias;
+    }
+    if (perfil.nombreComercial) {
+      u.nombreComercial = perfil.nombreComercial;
+      u.nombre = perfil.nombreComercial;
+      u.alias = perfil.nombreComercial;
+    }
+    if (perfil.tagline) {
+      u.tagline = perfil.tagline;
+      u.frase = perfil.tagline;
+    }
+    if (perfil.cotizacionDesde) {
+      u.cotizacionDesde = perfil.cotizacionDesde;
+      u.precio = perfil.cotizacionDesde;
+      u.tarifaDesde = perfil.cotizacionDesde;
+    }
+    if (perfil.unidadCotizacion) u.unidadCotizacion = perfil.unidadCotizacion;
+    if (perfil.canonSubcategoriaId) u.subcategoriaId = perfil.canonSubcategoriaId;
+    if (perfil.deltaPack) u.deltaPack = perfil.deltaPack;
+    if (perfil.sensible) u.sensible = true;
+    if (perfil.regulada) u.regulada = true;
+    if (perfil.requiresAdminReview) u.requiresAdminReview = true;
+    if (perfil.restriccionImagenMenores) u.restriccionImagenMenores = true;
+    return u;
+  }
+
+  function mapEventosSectorToPerfil(u, bloques, ctx) {
+    u = u || {};
+    ctx = ctx || {};
+    var api = resolveEventosSectorApi();
+    var canonId = api
+      ? api.resolveCanonSubId((ctx.subcategoriaId) || bloques.subcategoriaId || '')
+      : '';
+    var pack = api ? api.resolvePack(canonId) : '';
+    var perfil = bloques.eventosPerfil || (api ? api.buildEventosPerfil(bloques, canonId, pack) : {});
+    clearProfileContractState(u, ['eventosPerfil']);
+    u.eventosPerfil = Object.assign({}, perfil);
+    u = applyEventosSectorPerfilFields(u, perfil);
+    u.sectorId = 'eventos';
+    return u;
+  }
+
+  function validateEventosSectorValues(cfg, values, missing, ctx) {
+    if (!cfg || !isEventosSectorSubcategoria(ctx || {})) return;
+    var api = resolveEventosSectorApi();
+    if (!api || !api.validateEventosSectorValues) return;
+    api.validateEventosSectorValues(values || {}, ctx || {}).forEach(function (msg) {
+      pushMissing(missing, msg);
+    });
+  }
+
   var PROFILE_NESTED_KEYS = [
     'dominatrixPerfil',
     'espectaculoPerfil',
@@ -1376,6 +1569,7 @@
     'retailPerfil',
     'venuePerfil',
     'bienestarPerfil',
+    'eventosPerfil',
     'hospedajePerfil',
     'swingerPerfil',
     'unicornPerfil',
@@ -2891,6 +3085,7 @@
     values = finalizeVenueValues(values, ctx);
     values = finalizeBienestarValues(values, ctx);
     values = finalizeBienestarSectorValues(values, ctx);
+    values = finalizeEventosSectorValues(values, ctx);
     values = finalizeHospedajeValues(values, ctx);
     values = finalizeParejaGrupoValues(values);
     return values;
@@ -2992,6 +3187,9 @@
     }
     if (isBienestarSectorSubcategoria(ctx)) {
       validateBienestarSectorValues(cfg, values, missing, ctx);
+    }
+    if (isEventosSectorSubcategoria(ctx)) {
+      validateEventosSectorValues(cfg, values, missing, ctx);
     }
     if (isHospedajeSubcategoria(ctx)) {
       validateHospedajeDeltaValues(cfg, values, missing, ctx);
@@ -3196,6 +3394,9 @@
     if (isBienestarSectorSubcategoria(ctx)) {
       return mapBienestarSectorToPerfil(u, bloques, ctx);
     }
+    if (isEventosSectorSubcategoria(ctx)) {
+      return mapEventosSectorToPerfil(u, bloques, ctx);
+    }
     if (isHospedajeSubcategoria(ctx)) {
       return mapHospedajeToPerfil(u, bloques, ctx);
     }
@@ -3388,6 +3589,10 @@
     matchesVenue: matchesVenue,
     matchesBienestar: matchesBienestar,
     matchesBienestarSector: matchesBienestarSector,
+    matchesEventosSector: matchesEventosSector,
+    isEventosSectorSubcategoria: isEventosSectorSubcategoria,
+    mapEventosSectorToPerfil: mapEventosSectorToPerfil,
+    validateEventosSectorValues: validateEventosSectorValues,
     matchesHospedaje: matchesHospedaje,
     apply: apply,
     collectValues: collectValues,
