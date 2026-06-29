@@ -11,6 +11,11 @@ import {
   sectorArquetipoNegocio,
   sectorArquetipoProfesionista,
 } from "./arquetipos-catalogo.mjs";
+import {
+  isBienestarRetailVenta,
+  bienestarRetailNegocioPackExtras,
+  BIENESTAR_RETAIL_NEGOCIO_ARQUETIPO,
+} from "./bienestar-packs-v1.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const scripts = path.join(root, "scripts");
@@ -121,6 +126,27 @@ const OVERRIDES = {
     "catering-independiente": pack("Persona Independiente", "Formulario Persona Independiente", "persona_servicio_oficio", "persona", "ResultCardServicio", "ProfileLayoutServicio", { fotos: 3 }),
     catering: pack("Negocio o Empresa", "Formulario Negocio", "negocio_alimentos", "negocio", "ResultCardNegocio", "ProfileLayoutNegocio", { fotos: 5, obs: "Sector restaurantes; eventos usa Catering para Eventos" }),
   },
+  /** MP-BIENESTAR-DELTAS-V1 — retail tienda natural; nunca inmobiliario */
+  bienestar: {
+    "venta-de-inciensos": pack(
+      "Negocio o Empresa",
+      "Formulario Negocio",
+      BIENESTAR_RETAIL_NEGOCIO_ARQUETIPO,
+      "negocio",
+      "ResultCardNegocio",
+      "ProfileLayoutNegocio",
+      bienestarRetailNegocioPackExtras()
+    ),
+    "venta-de-aceites-esenciales": pack(
+      "Negocio o Empresa",
+      "Formulario Negocio",
+      BIENESTAR_RETAIL_NEGOCIO_ARQUETIPO,
+      "negocio",
+      "ResultCardNegocio",
+      "ProfileLayoutNegocio",
+      bienestarRetailNegocioPackExtras()
+    ),
+  },
 };
 
 const CEDULA_IDS = new Set([
@@ -226,8 +252,20 @@ function classifyDefault(sectorId, sub) {
     });
   }
 
+  if (isBienestarRetailVenta(sectorId, sub.nombre, id)) {
+    return pack(
+      "Negocio o Empresa",
+      "Formulario Negocio",
+      BIENESTAR_RETAIL_NEGOCIO_ARQUETIPO,
+      "negocio",
+      "ResultCardNegocio",
+      "ProfileLayoutNegocio",
+      bienestarRetailNegocioPackExtras()
+    );
+  }
+
   if (NEGOCIO_PATTERNS.some((re) => re.test(sub.nombre)) || ["inmobiliaria", "coworking", "mudanzas", "outsourcing", "manufactura"].some((k) => id.includes(k))) {
-    const arq = sectorArquetipoNegocio(sectorId, sub.nombre);
+    const arq = sectorArquetipoNegocio(sectorId, sub.nombre, id);
     const tipoPerfil = arq.includes("hospedaje") || arq.includes("venue") ? "lugar" : "negocio";
     return pack("Negocio o Empresa", "Formulario Negocio", arq, tipoPerfil, "ResultCardNegocio", "ProfileLayoutNegocio", {
       publico: "nombre comercial, dirección, horario, servicios, foto",
@@ -255,7 +293,16 @@ function classifyDefault(sectorId, sub) {
     });
   }
 
-  if (["venta de", "renta de", "renta vacacional"].some((k) => n.startsWith(k)))
+  if (n.startsWith("venta de")) {
+    const arq = sectorArquetipoNegocio(sectorId, sub.nombre, id);
+    return pack("Negocio o Empresa", "Formulario Negocio", arq, "negocio", "ResultCardNegocio", "ProfileLayoutNegocio", {
+      fotos: 5,
+      mapa: true,
+      admin: "media",
+    });
+  }
+
+  if (["renta de", "renta vacacional"].some((k) => n.startsWith(k)))
     return pack("Negocio o Empresa", "Formulario Negocio", "negocio_inmobiliario", "negocio", "ResultCardNegocio", "ProfileLayoutNegocio", {
       fotos: 4, mapa: true, admin: "media",
     });

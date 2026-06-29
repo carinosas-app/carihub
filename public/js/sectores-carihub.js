@@ -69,6 +69,13 @@
     'Suplementos Naturales',
     'Herbolarios',
     'Naturistas',
+    'Ceremonias de Ayahuasca, Rapé y Plantas de Poder',
+    'Cacao Ceremonial',
+    'Reflexología',
+    'Registros Akáshicos',
+    'Cosmética Natural',
+    'Velas Esotéricas',
+    'Sahumerios',
     'Venta de Inciensos',
     'Venta de Aceites Esenciales'
   ]);

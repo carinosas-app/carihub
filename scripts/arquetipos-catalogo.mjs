@@ -2,6 +2,7 @@
  * Arquetipos canónicos del catálogo — fuente compartida para mapa y schemas.
  * Equivalencias legacy → canónico documentadas en config-registro-schema.meta.json
  */
+import { SUB_TO_PACK, arquetipoForPack, RETAIL_FIX_IDS } from "./bienestar-packs-v1.mjs";
 
 /** Nombres legacy (integración antigua) → canónico por defecto */
 export const ARQUETIPOS_EQUIVALENCIA = {
@@ -13,8 +14,18 @@ export const ARQUETIPOS_EQUIVALENCIA = {
   profesional_certificado: "profesional_salud",
 };
 
+export function bienestarPackForSub(subcategoriaId) {
+  return SUB_TO_PACK[subcategoriaId] || null;
+}
+
+export function bienestarArquetipoForSub(subcategoriaId) {
+  const pack = bienestarPackForSub(subcategoriaId);
+  if (!pack) return "persona_servicio_bienestar";
+  return arquetipoForPack(pack, subcategoriaId);
+}
+
 export function sectorArquetipoIndependiente(sectorId, subcategoriaId) {
-  if (sectorId === "bienestar") return "persona_bienestar_individual";
+  if (sectorId === "bienestar") return bienestarArquetipoForSub(subcategoriaId);
   if (sectorId === "transporte") return "persona_servicio_movil";
   if (["hogar", "automotriz", "industria"].includes(sectorId)) return "persona_servicio_oficio";
   if (["educacion", "eventos", "tecnologia"].includes(sectorId)) return "persona_servicio_profesional";
@@ -22,8 +33,10 @@ export function sectorArquetipoIndependiente(sectorId, subcategoriaId) {
   return "persona_servicio_general";
 }
 
-export function sectorArquetipoNegocio(sectorId, nombre) {
+export function sectorArquetipoNegocio(sectorId, nombre, subcategoriaId) {
   const n = nombre.toLowerCase();
+  if (sectorId === "bienestar" && subcategoriaId && RETAIL_FIX_IDS.includes(subcategoriaId)) return "negocio_comercio";
+  if (sectorId === "bienestar" && (n.includes("venta de") || n.includes("tienda") || n.includes("productos"))) return "negocio_comercio";
   if (["hospital", "clinica", "laboratorio", "farmacia", "veterinaria"].some((k) => n.includes(k))) return "negocio_institucion";
   if (["hotel", "motel", "hospedaje", "retiro", "asil"].some((k) => n.includes(k))) return "negocio_hospedaje";
   if (["antro", "bar", "club", "teatro", "cine", "cabina"].some((k) => n.includes(k))) return "negocio_venue";
