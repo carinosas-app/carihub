@@ -201,6 +201,10 @@
       });
     }
 
+    if (global.CariHubBienestarSectorRender && CariHubBienestarSectorRender.hydrateDisplayFields) {
+      u = CariHubBienestarSectorRender.hydrateDisplayFields(u);
+    }
+
     if (global.CariHubSubcategoriaLabels && CariHubSubcategoriaLabels.resolveVisibleCategoria) {
       var visibleCat = CariHubSubcategoriaLabels.resolveVisibleCategoria(subName || catName, subId);
       if (visibleCat) {
@@ -214,6 +218,10 @@
       CariHubRegistroPublicBlocks.isUnicornSubcategoria &&
       CariHubRegistroPublicBlocks.isUnicornSubcategoria(ctx)) {
       vistaPerfil = 'unicorn';
+    }
+    if (global.CariHubBienestarSectorRender && CariHubBienestarSectorRender.resolveVistaPerfil) {
+      var bsVista = CariHubBienestarSectorRender.resolveVistaPerfil(u);
+      if (bsVista) vistaPerfil = bsVista;
     }
 
     return {
@@ -277,7 +285,7 @@
     if (data.query && data.query.pais) params.set('pais', data.query.pais);
     if (data.query && data.query.estado) params.set('estado', data.query.estado);
     if (data.query && data.query.ciudad) params.set('ciudad', data.query.ciudad);
-    return 'perfil-publico.html?' + params.toString();
+    return 'perfil-publico?' + params.toString();
   }
 
   function setLoading(on) {

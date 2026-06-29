@@ -685,6 +685,7 @@
   }
 
   function cardHTMLNegocio(u, Q) {
+    if (isBienestarSectorPerfil(u)) return cardHTMLBienestarSector(u, Q);
     Q = Q || {};
     var horario = String(u.horario || u.horarioPublico || '').trim();
     var metaRight = horario
@@ -1117,7 +1118,52 @@
     return cardHTMLHospedaje(u, Q);
   }
 
+  function isBienestarSectorPerfil(u) {
+    return global.CariHubBienestarSectorRender &&
+      CariHubBienestarSectorRender.isBienestarSectorPerfil(u);
+  }
+
+  function bienestarSectorBadgesHTML(u) {
+    var base = badgesCompactHTML(u, { respRapida: false });
+    if (!global.CariHubBienestarSectorRender) return base;
+    var hydrated = CariHubBienestarSectorRender.hydrateDisplayFields(Object.assign({}, u));
+    var extra = (hydrated.__bienestarBadges || []).map(function (b) {
+      return '<span class="res-badge ' + safeTxt(b.cls) + '">' + safeTxt(b.text) + '</span>';
+    }).join('');
+    return base + extra;
+  }
+
+  function cardHTMLBienestarSector(u, Q) {
+    Q = Q || {};
+    var BS = global.CariHubBienestarSectorRender;
+    var hydrated = BS ? BS.hydrateDisplayFields(Object.assign({}, u)) : (u || {});
+    var chips = BS ? BS.cardMetaChips(hydrated) : [];
+    var mods = '';
+    chips.forEach(function (ch, i) {
+      var txtChip = String(ch || '');
+      if (txtChip.length > 28) txtChip = txtChip.slice(0, 26) + '…';
+      mods += '<span class="modchip ' + (i % 2 ? 'mc-purple' : 'mc-pink') + '">' +
+        svgIco(i === 0 ? 'briefcase' : 'clock') + safeTxt(txtChip) + '</span>';
+    });
+    var esp = hydrated.titulo || hydrated.especialidad || '';
+    var priceLabel = hydrated.__bienestarPriceLabel || 'Tarifa desde';
+    var pack = String(hydrated.__bienestarPack || 'a').toLowerCase();
+    var cardExtra = ' res-card--bienestar-sector res-card--pack-' + safeTxt(pack);
+    if (pack === 'h') cardExtra += ' res-card--pack-h';
+    return cardShell(hydrated, Q, {
+      cardClass: 'res-card--servicio res-card--bienestar-holistico' + cardExtra,
+      nombre: hydrated.nombreComercial || hydrated.nombre || hydrated.alias,
+      catIcon: 'briefcase',
+      catLabel: hydrated.categoriaPublica || hydrated.categoria || Q.categoria,
+      metaRight: mods,
+      descBlock: descripcionCompactHTML(Object.assign({}, hydrated, { tagline: hydrated.tagline || esp }), 'Servicios'),
+      priceLabel: priceLabel,
+      badges: bienestarSectorBadgesHTML(hydrated)
+    });
+  }
+
   function cardHTMLServicio(u, Q) {
+    if (isBienestarSectorPerfil(u)) return cardHTMLBienestarSector(u, Q);
     Q = Q || {};
     var cobertura = String(u.zonaCobertura || u.zona || u.serviciosPrincipales || 'A domicilio').trim();
     var metaRight = '<span class="modchip mc-orange">' + svgIco('car') + safeTxt(cobertura.length > 24 ? cobertura.slice(0, 22) + '…' : cobertura) + '</span>';
@@ -1198,6 +1244,7 @@
     if (isCineXxxPerfil(u)) return cardHTMLCineXxx(u, Q);
     if (isClubSwPerfil(u)) return cardHTMLClubSw(u, Q);
     if (isVenuePerfil(u)) return cardHTMLVenue(u, Q);
+    if (isBienestarSectorPerfil(u)) return cardHTMLBienestarSector(u, Q);
     if (isBienestarPerfil(u)) return cardHTMLBienestar(u, Q);
     if (isHospedajePerfil(u)) return cardHTMLHospedaje(u, Q);
     if (comp === 'ResultCardNegocio' && isRetailPerfil(u)) return cardHTMLRetail(u, Q);
@@ -1269,6 +1316,10 @@
     var show = ui.show || [];
     var hide = ui.hide || [];
     var labels = ui.labels || {};
+    if (global.CariHubBienestarSectorRender && CariHubBienestarSectorRender.isBienestarSectorPerfil(u)) {
+      labels = Object.assign({}, labels);
+      delete labels.servicios;
+    }
 
     function visible(key) {
       return show.indexOf(key) >= 0 && hide.indexOf(key) < 0;
@@ -1319,6 +1370,8 @@
     isCabinasPerfil: isCabinasPerfil,
     isCineXxxPerfil: isCineXxxPerfil,
     cardHTMLBienestar: cardHTMLBienestar,
+    cardHTMLBienestarSector: cardHTMLBienestarSector,
+    isBienestarSectorPerfil: isBienestarSectorPerfil,
     cardHTMLSpa: cardHTMLSpa,
     cardHTMLMasajesLocal: cardHTMLMasajesLocal,
     isBienestarPerfil: isBienestarPerfil,
