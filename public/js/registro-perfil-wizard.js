@@ -167,7 +167,7 @@
     comercio: 'comercio',
     eventos: 'eventos',
     transporte: 'transporte',
-    restaurantes: 'corporate',
+    restaurantes: 'gastronomia',
     industria: 'industria'
   };
 
@@ -202,12 +202,7 @@
   function refreshFormBanners() {
     if (!global.CariHubBannerRegistro) return;
     if (state.screen !== 'screen1' && state.screen !== 'screen4') return;
-    var sectorId = state.sector && state.sector.id;
-    var subId = state.subcategoria && state.subcategoria.id;
-    var subName = state.subcategoria && state.subcategoria.nombre;
-    if (CariHubBannerRegistro.refreshFormPageBanners) {
-      CariHubBannerRegistro.refreshFormPageBanners(sectorId, subId, subName);
-    }
+    refreshFormPromoRail();
   }
 
   function applyFormScreenTheme() {
@@ -468,7 +463,8 @@
     } else if (mode === 'corporate' || mode === 'tech' || mode === 'mascotas' ||
       mode === 'edu' || mode === 'wellness' || mode === 'realestate' ||
       mode === 'auto' || mode === 'hogar' || mode === 'comercio' ||
-      mode === 'eventos' || mode === 'transporte' || mode === 'industria') {
+      mode === 'eventos' || mode === 'transporte' || mode === 'industria' ||
+      mode === 'gastronomia') {
       primary.className = 'rp-btn rp-btn--' + mode;
     } else {
       primary.className = 'rp-btn rp-btn--primary';
@@ -485,7 +481,8 @@
     } else if (mode === 'corporate' || mode === 'tech' || mode === 'mascotas' ||
       mode === 'edu' || mode === 'wellness' || mode === 'realestate' ||
       mode === 'auto' || mode === 'hogar' || mode === 'comercio' ||
-      mode === 'eventos' || mode === 'transporte' || mode === 'industria') {
+      mode === 'eventos' || mode === 'transporte' || mode === 'industria' ||
+      mode === 'gastronomia') {
       secondary.className = 'rp-btn rp-btn--' + mode;
       secondary.textContent = label;
     } else {
@@ -657,6 +654,20 @@
     } else {
       global.CariHubHomeCatPromoRail.mountRail(rail, {});
     }
+  }
+
+  function refreshFormPromoRail() {
+    if (!global.CariHubHomeCatPromoRail) return;
+    if (state.screen !== 'screen1' && state.screen !== 'screen4') return;
+    var rail = state.screen === 'screen4' ? $('rpFormPromoRail4') : $('rpFormPromoRail');
+    if (!rail) return;
+    var sector = state.sector;
+    global.CariHubHomeCatPromoRail.mountRail(rail, {
+      sectorId: sector && sector.id ? sector.id : '',
+      sectorName: sector && sector.nombre ? sector.nombre : '',
+      subcatId: state.subcategoria && state.subcategoria.id ? state.subcategoria.id : '',
+      subcatName: state.subcategoria && state.subcategoria.nombre ? state.subcategoria.nombre : ''
+    });
   }
 
   function renderSectorSubcats(sector) {

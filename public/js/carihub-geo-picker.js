@@ -730,6 +730,34 @@
       document.body.classList.contains('rp-screen4-form');
   }
 
+  function buildPremiumShellFromAccent(accent) {
+    if (!accent) return '';
+    return 'linear-gradient(168deg, ' +
+      'color-mix(in srgb, ' + accent + ' 32%, #fff) 0%, ' +
+      'color-mix(in srgb, ' + accent + ' 52%, #fff) 22%, ' +
+      accent + ' 48%, ' +
+      'color-mix(in srgb, ' + accent + ' 38%, #ffe0b2) 78%, ' +
+      'color-mix(in srgb, ' + accent + ' 10%, #fff) 100%)';
+  }
+
+  var GEO_BANNER_BY_SECTOR = {
+    restaurantes: 'img/home/banners/ad-banner-gastronomia-01.svg',
+    adultos: 'img/home/banners/ad-banner-pink-01.png'
+  };
+
+  function syncGeoBannerImage(modal, sector) {
+    if (!modal) return;
+    var img = modal.querySelector('#chGeoBanner img');
+    if (!img) return;
+    var src = GEO_BANNER_BY_SECTOR[sector] ||
+      ((global.CariHubBannerGeneral && global.CariHubBannerGeneral.pickGeneralBanner()) ||
+        'img/home/banners/ad-banner-pink-01.png');
+    if (sector && sector !== 'adultos' && !GEO_BANNER_BY_SECTOR[sector]) {
+      src = 'img/home/banners/ad-banner-pink-02.png';
+    }
+    if (img.getAttribute('src') !== src) img.src = src;
+  }
+
   function syncRegistroGeoTheme(modal) {
     if (!modal) return;
     var isRegistro = usesRegistroGeoShell();
@@ -741,13 +769,18 @@
       modal.style.removeProperty('--rp-form-accent');
       modal.style.removeProperty('--geo-grad');
       modal.style.removeProperty('--geo-shadow');
+      modal.style.removeProperty('--geo-premium-shell');
       return;
     }
-    var sector = document.body.getAttribute('data-rp-sector') || 'adultos';
+    var sector = document.body.getAttribute('data-rp-sector') || '';
     if (document.body.getAttribute('data-page') === 'home') {
       sector = 'adultos';
     }
-    modal.setAttribute('data-rp-sector', sector);
+    if (sector) {
+      modal.setAttribute('data-rp-sector', sector);
+    } else {
+      modal.removeAttribute('data-rp-sector');
+    }
     var cs = window.getComputedStyle(document.body);
     var accent = cs.getPropertyValue('--rp-form-accent').trim();
     var geoEl = document.getElementById('rpGeoPicker');
@@ -764,6 +797,9 @@
     }
     if (accent) modal.style.setProperty('--rp-form-accent', accent);
     if (grad) modal.style.setProperty('--geo-grad', grad);
+    var shell = sector && sector !== 'adultos' ? buildPremiumShellFromAccent(accent) : '';
+    if (shell) modal.style.setProperty('--geo-premium-shell', shell);
+    else modal.style.removeProperty('--geo-premium-shell');
     var shadow = '';
     if (geoEl) {
       shadow = window.getComputedStyle(geoEl).getPropertyValue('--geo-shadow').trim();
@@ -775,6 +811,7 @@
       shadow = '0 8px 24px rgba(233, 30, 99, 0.38)';
     }
     if (shadow) modal.style.setProperty('--geo-shadow', shadow);
+    syncGeoBannerImage(modal, sector);
   }
 
   function isFlagLandmarkUrl(url) {

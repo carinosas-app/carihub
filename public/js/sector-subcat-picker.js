@@ -131,15 +131,40 @@
     PREFIX + 'industria/ind-08-limpieza.png'
   ];
 
-  var REST_IMAGES = [
-    'img/home/sector-cards/restaurantes.png',
-    'img/home/sectores/sector-13-restaurantes.png',
-    PREFIX + 'eventos/evt-05-catering.png',
-    PREFIX + 'eventos/evt-01-salon.png',
-    PREFIX + 'comercio/com-06-conveniencia.png',
-    PREFIX + 'comercio/com-01-abarrotes.png',
-    PREFIX + 'eventos/evt-03-dj.png'
-  ];
+  var GASTRON_PREFIX = PREFIX + 'gastronomia/';
+
+  var GASTRON_SUBCAT_IMAGES = {
+    'restaurantes-tradicional': GASTRON_PREFIX + 'gast-01-restaurante-tradicional.svg',
+    'marisquerias': GASTRON_PREFIX + 'gast-02-marisqueria.svg',
+    'cocina-economica': GASTRON_PREFIX + 'gast-03-cocina-economica.svg',
+    'taquerias': GASTRON_PREFIX + 'gast-04-taqueria.svg',
+    'hamburgueserias': GASTRON_PREFIX + 'gast-05-hamburgueseria.svg',
+    'pizzerias': GASTRON_PREFIX + 'gast-06-pizzeria.svg',
+    'polleryas-alitas': GASTRON_PREFIX + 'gast-07-polleria-alitas.svg',
+    'sushi-cocina-asiatica': GASTRON_PREFIX + 'gast-08-sushi-asiatico.svg',
+    'carnes-asadas-parrilla': GASTRON_PREFIX + 'gast-09-parrilla.svg',
+    'cafeterias': GASTRON_PREFIX + 'gast-10-cafeteria.svg',
+    'panaderias': GASTRON_PREFIX + 'gast-11-panaderia.svg',
+    'pastelerias-reposteria': GASTRON_PREFIX + 'gast-12-pasteleria.svg',
+    'neverias-heladerias': GASTRON_PREFIX + 'gast-13-neveria.svg',
+    'juguerias': GASTRON_PREFIX + 'gast-14-jugueria.svg',
+    'food-trucks-gastronomia': GASTRON_PREFIX + 'gast-15-food-truck.svg',
+    'comida-a-domicilio': GASTRON_PREFIX + 'gast-16-comida-domicilio.svg',
+    'dark-kitchen': GASTRON_PREFIX + 'gast-17-dark-kitchen.svg',
+    'bares': GASTRON_PREFIX + 'gast-18-bar.svg',
+    'cervecerias': GASTRON_PREFIX + 'gast-19-cerveceria.svg',
+    'cantinas-vinotecas': GASTRON_PREFIX + 'gast-20-cantina-vinoteca.svg',
+    'buffet-comedor': GASTRON_PREFIX + 'gast-21-buffet-comedor.svg',
+    'chef-cocinero-domicilio': GASTRON_PREFIX + 'gast-22-chef-domicilio.svg',
+    'bartender-servicio': GASTRON_PREFIX + 'gast-23-bartender.svg',
+    'distribuidoras-alimentos-bebidas': GASTRON_PREFIX + 'gast-24-distribuidora-b2b.svg'
+  };
+
+  var GASTRON_IMAGES = Object.keys(GASTRON_SUBCAT_IMAGES).map(function (id) {
+    return GASTRON_SUBCAT_IMAGES[id];
+  });
+
+  var REST_IMAGES = GASTRON_IMAGES;
 
   var EDU_IMAGES = [
     'img/home/sector-cards/educacion.png',
@@ -393,6 +418,9 @@
   }
 
   function imageForSubcat(sectorId, subcatId, index) {
+    if (sectorId === 'restaurantes' && GASTRON_SUBCAT_IMAGES[subcatId]) {
+      return GASTRON_SUBCAT_IMAGES[subcatId];
+    }
     var pool = buildImagePool(sectorId);
     var rules = SECTOR_KEYWORD_RULES[sectorId];
     var mapped = rules ? imageFromRules(subcatId, pool, rules) : null;
