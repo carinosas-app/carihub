@@ -12,6 +12,9 @@
   }
 
   function sectorImageMeta(sectorId) {
+    if (global.CariHubSectorCatalogUI && CariHubSectorCatalogUI.sectorImageMeta) {
+      return CariHubSectorCatalogUI.sectorImageMeta(sectorId);
+    }
     return sectorCardMeta(sectorId) || { src: 'img/home/promo-perfil.jpg' };
   }
 
@@ -41,6 +44,9 @@
   var ICON_GO = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
   function sortSectorsForDisplay(sectors) {
+    if (global.CariHubSectorCatalogUI && CariHubSectorCatalogUI.sortSectors) {
+      return CariHubSectorCatalogUI.sortSectors(sectors, { order: SECTOR_DISPLAY_ORDER });
+    }
     var orderMap = {};
     SECTOR_DISPLAY_ORDER.forEach(function (id, idx) { orderMap[id] = idx; });
     return sectors.slice().sort(function (a, b) {
@@ -102,6 +108,9 @@
   }
 
   function buildSectorImageHtml(pngPathOrMeta, opts) {
+    if (global.CariHubSectorCatalogUI && CariHubSectorCatalogUI.buildSectorImageHtml) {
+      return CariHubSectorCatalogUI.buildSectorImageHtml(pngPathOrMeta, opts);
+    }
     opts = opts || {};
     var meta = typeof pngPathOrMeta === 'object' && pngPathOrMeta !== null
       ? pngPathOrMeta
@@ -576,6 +585,15 @@
   }
 
   function buildSectorCardButton(sector) {
+    if (global.CariHubSectorCatalogUI && CariHubSectorCatalogUI.buildSectorCardElement) {
+      return CariHubSectorCatalogUI.buildSectorCardElement(sector, {
+        selectedSectorId: state.sector && state.sector.id,
+        titleHtml: sectorNameHtml(sector),
+        onClick: function (sec, btn) {
+          selectSector(sec, btn);
+        }
+      });
+    }
     var subs = global.CariHubSectores && global.CariHubSectores.subcategoriasDeSector
       ? global.CariHubSectores.subcategoriasDeSector(sector.id)
       : [];
@@ -706,13 +724,23 @@
     }
 
     if (global.CariHubSectorSubcatPicker) {
-      global.CariHubSectorSubcatPicker.renderList(list, items, {
-        sectorId: sector.id,
-        selectedId: state.subcategoria ? state.subcategoria.id : '',
-        onSelect: function (cat) {
-          selectSubcategoria(cat);
-        }
-      });
+      if (global.CariHubSectorCatalogUI && CariHubSectorCatalogUI.renderSubcatList) {
+        CariHubSectorCatalogUI.renderSubcatList(list, items, {
+          sectorId: sector.id,
+          selectedId: state.subcategoria ? state.subcategoria.id : '',
+          onSelect: function (cat) {
+            selectSubcategoria(cat);
+          }
+        });
+      } else {
+        global.CariHubSectorSubcatPicker.renderList(list, items, {
+          sectorId: sector.id,
+          selectedId: state.subcategoria ? state.subcategoria.id : '',
+          onSelect: function (cat) {
+            selectSubcategoria(cat);
+          }
+        });
+      }
     }
   }
 

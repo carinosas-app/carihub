@@ -1,19 +1,11 @@
 /**
- * Home — «Ver otras categorías»: mismas pantallas que registro-perfil (categorías → subcategorías).
- * Destino final: Home + geo picker (no formulario de registro).
+ * Home — «Ver otras categorías»: mismas tarjetas que registro-perfil (CariHubSectorCatalogUI).
+ * Destino final: Home + geo picker (no formulario de registro). Sin categoría Adultos.
  */
 (function (global) {
   'use strict';
 
-  var ICON_GRID = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="7" cy="7" r="2.2" fill="currentColor"/><circle cx="17" cy="7" r="2.2" fill="currentColor"/><circle cx="7" cy="17" r="2.2" fill="currentColor"/><circle cx="17" cy="17" r="2.2" fill="currentColor"/></svg>';
-  var ICON_GO = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
   var TAP_MS = 180;
-
-  var SECTOR_ORDER = [
-    'bienestar', 'eventos', 'restaurantes', 'salud', 'profesionales',
-    'tecnologia', 'bienes-raices', 'educacion', 'mascotas', 'industria',
-    'automotriz', 'hogar', 'comercio', 'transporte'
-  ];
 
   var BACK_BTN = {
     salud: 'corporate',
@@ -28,7 +20,7 @@
     comercio: 'comercio',
     eventos: 'eventos',
     transporte: 'transporte',
-    restaurantes: 'corporate',
+    restaurantes: 'gastronomia',
     industria: 'industria'
   };
 
@@ -42,85 +34,13 @@
     return document.getElementById(id);
   }
 
-  function esc(t) {
-    return String(t == null ? '' : t)
-      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;');
-  }
-
-  function sectorMeta(sectorId) {
-    if (global.CariHubSectorCardImages && global.CariHubSectorCardImages.getSectorCardImage) {
-      return global.CariHubSectorCardImages.getSectorCardImage(sectorId);
-    }
-    return null;
-  }
-
-  function sectorMobPath(pngPath) {
-    var path = String(pngPath || '');
-    if (path.indexOf('/sector-cards/') >= 0) return path;
-    return path.replace('/sectores/', '/sectores/mob/').replace(/\.png$/i, '.jpg');
-  }
-
-  function buildSectorImageHtml(meta) {
-    var pngPath = (meta && meta.src) || 'img/home/promo-perfil.jpg';
-    var mob = sectorMobPath(pngPath);
-    return (
-      '<img class="rp-sector-card__img" src="' + esc(mob) + '" data-fallback="' + esc(pngPath) + '" alt="" ' +
-      'loading="lazy" decoding="async" ' +
-      'onerror="if(this.dataset.fallback){this.src=this.dataset.fallback;this.removeAttribute(\'data-fallback\')}">'
-    );
-  }
-
-  function watermarkHtml(sectorId) {
-    if (global.CariHubSectorCategoryWatermarks && global.CariHubSectorCategoryWatermarks.buildHtml) {
-      return global.CariHubSectorCategoryWatermarks.buildHtml(sectorId);
-    }
-    return '';
-  }
-
   function sectorsForHome() {
     var list = global.CARIHUB_SECTORES || [];
-    var order = {};
-    SECTOR_ORDER.forEach(function (id, i) { order[id] = i; });
-    return list.filter(function (s) { return s.id !== 'adultos'; }).sort(function (a, b) {
-      var ia = order[a.id];
-      var ib = order[b.id];
-      if (ia == null && ib == null) return 0;
-      if (ia == null) return 1;
-      if (ib == null) return -1;
-      return ia - ib;
-    });
-  }
-
-  function buildSectorCard(sector) {
-    var subs = global.CariHubSectores && global.CariHubSectores.subcategoriasDeSector
-      ? global.CariHubSectores.subcategoriasDeSector(sector.id)
-      : [];
-    var imgMeta = sectorMeta(sector.id) || { src: 'img/home/promo-perfil.jpg' };
-    var btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'ch-geo-card rp-sector-card rp-sector-card--portrait';
-    btn.setAttribute('data-sector-id', sector.id);
-    var thumbStyle = imgMeta.bg ? ' style="background:' + esc(imgMeta.bg) + '"' : '';
-    btn.innerHTML =
-      '<span class="ch-geo-card__thumb ch-geo-card__thumb--portrait"' + thumbStyle + '>' +
-        buildSectorImageHtml(imgMeta) +
-      '</span>' +
-      '<span class="ch-geo-card__body">' +
-        watermarkHtml(sector.id) +
-        '<span class="ch-geo-card__text">' +
-          '<p class="ch-geo-card__title">' + esc(sector.nombre) + '</p>' +
-          '<p class="ch-geo-card__meta">' + ICON_GRID + esc(subs.length + ' subcategorías') + '</p>' +
-        '</span>' +
-        '<span class="ch-geo-card__go" aria-hidden="true">' + ICON_GO + '</span>' +
-      '</span>';
-    btn.addEventListener('click', function () {
-      btn.classList.add('is-selected');
-      window.setTimeout(function () {
-        openSubcats(sector);
-      }, TAP_MS);
-    });
-    return btn;
+    var UI = global.CariHubSectorCatalogUI;
+    if (UI && UI.sortSectors) {
+      return UI.sortSectors(list, { excludeAdultos: true, order: UI.SECTOR_DISPLAY_ORDER });
+    }
+    return list.filter(function (s) { return s.id !== 'adultos'; });
   }
 
   function renderSectorCards() {
@@ -129,12 +49,18 @@
     var sectors = sectorsForHome();
     if (!grid) return;
     if (hint) hint.textContent = sectors.length + ' categorías · elige una para continuar';
+    if (global.CariHubSectorCatalogUI && CariHubSectorCatalogUI.renderSectorGrid) {
+      CariHubSectorCatalogUI.renderSectorGrid(grid, sectors, {
+        onSectorClick: function (sector, btn) {
+          btn.classList.add('is-selected');
+          window.setTimeout(function () {
+            openSubcats(sector);
+          }, TAP_MS);
+        }
+      });
+      return;
+    }
     grid.innerHTML = '';
-    sectors.forEach(function (sector) {
-      var li = document.createElement('li');
-      li.appendChild(buildSectorCard(sector));
-      grid.appendChild(li);
-    });
   }
 
   function applySubcatTheme(sector) {
@@ -158,7 +84,18 @@
     if (hint) {
       hint.textContent = items.length + ' subcategorías · elige una para continuar';
     }
-    if (global.CariHubSectorSubcatPicker) {
+    if (global.CariHubSectorCatalogUI && CariHubSectorCatalogUI.renderSubcatList) {
+      CariHubSectorCatalogUI.renderSubcatList(list, items, {
+        sectorId: sector.id,
+        selectedId: '',
+        extraListClass: 'home-otros-subcats__list',
+        onSelect: function (cat) {
+          if (typeof state.onSelectSubcat === 'function') {
+            state.onSelectSubcat(cat, sector);
+          }
+        }
+      });
+    } else if (global.CariHubSectorSubcatPicker) {
       global.CariHubSectorSubcatPicker.renderList(list, items, {
         sectorId: sector.id,
         selectedId: '',
