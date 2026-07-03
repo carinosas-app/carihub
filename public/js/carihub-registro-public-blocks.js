@@ -188,6 +188,1789 @@
     return matchesGastronomiaSector(ctx, null);
   }
 
+  function resolveSaludSectorApi() {
+    return global.CARIHUB_REGISTRO_SALUD_SECTOR_BLOCKS || null;
+  }
+
+  function slugSaludSubId(id) {
+    return String(id || '')
+      .trim()
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/_/g, '-');
+  }
+
+  function matchesSaludSector(ctx, resolved) {
+    var api = resolveSaludSectorApi();
+    if (!api) return false;
+    ctx = ctx || {};
+    if (String(ctx.sectorId || '') !== 'salud') return false;
+    var subSlug = slugSaludSubId((ctx.subcategoriaId) || (ctx.subcategoria) || '');
+    if (!api.subToPack[subSlug]) return false;
+    var ident = resolved && resolved.identidad ? resolved.identidad : {};
+    var fid = String(ctx.formularioId || ident.formularioId || '').trim();
+    var probe = api.buildConfig({
+      sectorId: 'salud',
+      subcategoriaId: subSlug,
+      formularioId: fid || undefined
+    });
+    if (!probe) return false;
+    if (fid && probe.formularioId !== fid) {
+      var mapFid = String(ident.formularioId || '').trim();
+      if (!mapFid || mapFid !== probe.formularioId) return false;
+    }
+    return true;
+  }
+
+  function resolveSaludSectorConfig(ctx, resolved) {
+    if (!matchesSaludSector(ctx, resolved)) return null;
+    var api = resolveSaludSectorApi();
+    if (!api) return null;
+    var subRaw = (ctx.subcategoriaId) || (ctx.subcategoria) || '';
+    var ident = resolved && resolved.identidad ? resolved.identidad : {};
+    var fid = String(ctx.formularioId || ident.formularioId || '').trim();
+    var cfgCtx = Object.assign({}, ctx, { sectorId: 'salud', subcategoriaId: subRaw });
+    if (fid) cfgCtx.formularioId = fid;
+    return api.buildConfig(cfgCtx);
+  }
+
+  function isSaludSectorSubcategoria(ctx) {
+    return matchesSaludSector(ctx, null);
+  }
+
+  function buildSaludSectorPerfil(values, pack) {
+    values = values || {};
+    return {
+      deltaPack: pack || values.deltaPack || '',
+      canonSubcategoriaId: values.canonSubcategoriaId || values.subcategoriaId || '',
+      blockTitle: values.blockTitle || '',
+      nombreProfesional: values.nombreProfesional || '',
+      especialidad: values.especialidad || '',
+      subespecialidad: values.subespecialidad || '',
+      serviciosProfesionales: Array.isArray(values.serviciosProfesionales) ? values.serviciosProfesionales.slice() : [],
+      segurosAceptados: values.segurosAceptados || '',
+      consultaEnLinea: values.consultaEnLinea === true,
+      precioConsulta: values.precioConsulta || '',
+      unidadConsulta: values.unidadConsulta || '',
+      horarioAtencion: values.horarioAtencion || '',
+      alias: values.alias || '',
+      tagline: values.tagline || '',
+      certificaciones: values.certificaciones || '',
+      tarifaDesde: values.tarifaDesde || '',
+      horarioDetalle: values.horarioDetalle || '',
+      especialidadServicio: values.especialidadServicio || '',
+      modalidadConsulta: values.modalidadConsulta || '',
+      segurosAceptadosSalud: Array.isArray(values.segurosAceptadosSalud) ? values.segurosAceptadosSalud.slice() : [],
+      atencionDomicilioSalud: values.atencionDomicilioSalud || '',
+      serviciosCuidado: Array.isArray(values.serviciosCuidado) ? values.serviciosCuidado.slice() : [],
+      coberturaDomicilioZona: values.coberturaDomicilioZona || '',
+      estudiosOfrecidos: Array.isArray(values.estudiosOfrecidos) ? values.estudiosOfrecidos.slice() : [],
+      tiempoEntregaResultados: values.tiempoEntregaResultados || '',
+      tomaMuestrasDomicilio: values.tomaMuestrasDomicilio === true,
+      categoriasFarmacia: Array.isArray(values.categoriasFarmacia) ? values.categoriasFarmacia.slice() : [],
+      surtidoFarmaceutico: values.surtidoFarmaceutico || '',
+      ventaConReceta: values.ventaConReceta || '',
+      nombreComercial: values.nombreComercial || '',
+      direccion: values.direccion || '',
+      serviciosClinica: Array.isArray(values.serviciosClinica) ? values.serviciosClinica.slice() : [],
+      especialidadesClinica: values.especialidadesClinica || '',
+      urgencias24h: values.urgencias24h === true,
+      serviciosHospital: Array.isArray(values.serviciosHospital) ? values.serviciosHospital.slice() : [],
+      nivelesAtencion: Array.isArray(values.nivelesAtencion) ? values.nivelesAtencion.slice() : [],
+      serviciosResidencia: Array.isArray(values.serviciosResidencia) ? values.serviciosResidencia.slice() : [],
+      capacidadResidentes: values.capacidadResidentes || '',
+      serviciosFunerarios: Array.isArray(values.serviciosFunerarios) ? values.serviciosFunerarios.slice() : [],
+      serviciosCorporativos: Array.isArray(values.serviciosCorporativos) ? values.serviciosCorporativos.slice() : [],
+      coberturaEmpresas: values.coberturaEmpresas || '',
+      modalidadTraslado: Array.isArray(values.modalidadTraslado) ? values.modalidadTraslado.slice() : [],
+      coberturaEmergencias: values.coberturaEmergencias || '',
+      diferenciadorSalud: values.diferenciadorSalud || '',
+      referenciasInterconsulta: values.referenciasInterconsulta || '',
+      coberturaAtencionSalud: values.coberturaAtencionSalud || '',
+      idiomasAtencion: values.idiomasAtencion || '',
+      modalidadAtencionProfesional: values.modalidadAtencionProfesional || ''
+    };
+  }
+
+  function finalizeSaludSectorValues(values, ctx) {
+    if (!values || !isSaludSectorSubcategoria(ctx || {})) return values;
+    var api = resolveSaludSectorApi();
+    var subRaw = (ctx && ctx.subcategoriaId) || values.subcategoriaId || '';
+    var canonId = api && api.resolveCanonSubId ? api.resolveCanonSubId(subRaw) : slugSaludSubId(subRaw);
+    var pack = api ? api.resolvePack(canonId) : 'B';
+    var subDelta = global.CARIHUB_SALUD_SUB_DELTAS && global.CARIHUB_SALUD_SUB_DELTAS[canonId];
+    clearProfileContractState(values, ['saludPerfil']);
+    values.deltaPack = pack;
+    values.canonSubcategoriaId = canonId;
+    if (subDelta && subDelta.blockTitle) values.blockTitle = subDelta.blockTitle;
+    values.saludPerfil = buildSaludSectorPerfil(values, pack);
+    if (pack === 'A') values.requiresCedula = true;
+    return values;
+  }
+
+  function applySaludSectorPerfilFields(u, perfil) {
+    u = u || {};
+    perfil = perfil || {};
+    if (perfil.nombreProfesional) {
+      u.nombreProfesional = perfil.nombreProfesional;
+      u.nombre = perfil.nombreProfesional;
+      u.alias = perfil.nombreProfesional;
+    }
+    if (perfil.alias) {
+      u.alias = perfil.alias;
+      u.nombre = perfil.alias;
+    }
+    if (perfil.nombreComercial) {
+      u.nombreComercial = perfil.nombreComercial;
+      u.nombre = perfil.nombreComercial;
+      u.alias = perfil.nombreComercial;
+    }
+    if (perfil.tagline) {
+      u.tagline = perfil.tagline;
+      u.frase = perfil.tagline;
+    }
+    if (perfil.especialidad) u.especialidad = perfil.especialidad;
+    if (perfil.precioConsulta) {
+      u.precioConsulta = perfil.precioConsulta;
+      u.precio = perfil.precioConsulta;
+    }
+    if (perfil.tarifaDesde) {
+      u.tarifaDesde = perfil.tarifaDesde;
+      u.precio = perfil.tarifaDesde;
+    }
+    if (perfil.horarioAtencion) u.horario = perfil.horarioAtencion;
+    if (perfil.horarioDetalle) u.horario = perfil.horarioDetalle;
+    if (perfil.direccion) u.direccion = perfil.direccion;
+    if (perfil.canonSubcategoriaId) u.subcategoriaId = perfil.canonSubcategoriaId;
+    if (perfil.deltaPack) u.deltaPack = perfil.deltaPack;
+    if (perfil.blockTitle) u.titulo = perfil.blockTitle;
+    return u;
+  }
+
+  function mapSaludSectorToPerfil(u, bloques, ctx) {
+    u = u || {};
+    ctx = ctx || {};
+    var perfil = bloques.saludPerfil || buildSaludSectorPerfil(bloques, bloques.deltaPack);
+    clearProfileContractState(u, ['saludPerfil']);
+    u.saludPerfil = Object.assign({}, perfil);
+    u = applySaludSectorPerfilFields(u, perfil);
+    u.sectorId = 'salud';
+    return u;
+  }
+
+  function validateSaludSectorValues(cfg, values, missing, ctx) {
+    if (!cfg || !isSaludSectorSubcategoria(ctx || {})) return;
+    if (cfg.deltaPack === 'A' && !String(values.nombreProfesional || '').trim()) {
+      pushMissing(missing, 'Nombre profesional');
+    }
+  }
+
+  function resolveProfesionalesSectorApi() {
+    return global.CARIHUB_REGISTRO_PROFESIONALES_SECTOR_BLOCKS || null;
+  }
+
+  function slugProfesionalesSubId(id) {
+    return String(id || '')
+      .trim()
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/_/g, '-');
+  }
+
+  function matchesProfesionalesSector(ctx, resolved) {
+    var api = resolveProfesionalesSectorApi();
+    if (!api) return false;
+    ctx = ctx || {};
+    if (String(ctx.sectorId || '') !== 'profesionales') return false;
+    var subSlug = slugProfesionalesSubId((ctx.subcategoriaId) || (ctx.subcategoria) || '');
+    if (!api.subToPack[subSlug]) return false;
+    var ident = resolved && resolved.identidad ? resolved.identidad : {};
+    var fid = String(ctx.formularioId || ident.formularioId || '').trim();
+    var probe = api.buildConfig({
+      sectorId: 'profesionales',
+      subcategoriaId: subSlug,
+      formularioId: fid || undefined
+    });
+    if (!probe) return false;
+    if (fid && probe.formularioId !== fid) {
+      var mapFid = String(ident.formularioId || '').trim();
+      if (!mapFid || mapFid !== probe.formularioId) return false;
+    }
+    return true;
+  }
+
+  function resolveProfesionalesSectorConfig(ctx, resolved) {
+    if (!matchesProfesionalesSector(ctx, resolved)) return null;
+    var api = resolveProfesionalesSectorApi();
+    if (!api) return null;
+    var subRaw = (ctx.subcategoriaId) || (ctx.subcategoria) || '';
+    var ident = resolved && resolved.identidad ? resolved.identidad : {};
+    var fid = String(ctx.formularioId || ident.formularioId || '').trim();
+    var cfgCtx = Object.assign({}, ctx, { sectorId: 'profesionales', subcategoriaId: subRaw });
+    if (fid) cfgCtx.formularioId = fid;
+    return api.buildConfig(cfgCtx);
+  }
+
+  function isProfesionalesSectorSubcategoria(ctx) {
+    return matchesProfesionalesSector(ctx, null);
+  }
+
+  function resolveTecnologiaSectorApi() {
+    return global.CARIHUB_REGISTRO_TECNOLOGIA_SECTOR_BLOCKS || null;
+  }
+
+  function slugTecnologiaSubId(id) {
+    return String(id || '')
+      .trim()
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/_/g, '-');
+  }
+
+  function matchesTecnologiaSector(ctx, resolved) {
+    var api = resolveTecnologiaSectorApi();
+    if (!api) return false;
+    ctx = ctx || {};
+    if (String(ctx.sectorId || '') !== 'tecnologia') return false;
+    var subSlug = slugTecnologiaSubId((ctx.subcategoriaId) || (ctx.subcategoria) || '');
+    if (!api.subToPack[subSlug]) return false;
+    var ident = resolved && resolved.identidad ? resolved.identidad : {};
+    var fid = String(ctx.formularioId || ident.formularioId || '').trim();
+    var probe = api.buildConfig({
+      sectorId: 'tecnologia',
+      subcategoriaId: subSlug,
+      formularioId: fid || undefined
+    });
+    if (!probe) return false;
+    if (fid && probe.formularioId !== fid) {
+      var mapFid = String(ident.formularioId || '').trim();
+      if (!mapFid || mapFid !== probe.formularioId) return false;
+    }
+    return true;
+  }
+
+  function resolveTecnologiaSectorConfig(ctx, resolved) {
+    if (!matchesTecnologiaSector(ctx, resolved)) return null;
+    var api = resolveTecnologiaSectorApi();
+    if (!api) return null;
+    var subRaw = (ctx.subcategoriaId) || (ctx.subcategoria) || '';
+    var ident = resolved && resolved.identidad ? resolved.identidad : {};
+    var fid = String(ctx.formularioId || ident.formularioId || '').trim();
+    var cfgCtx = Object.assign({}, ctx, { sectorId: 'tecnologia', subcategoriaId: subRaw });
+    if (fid) cfgCtx.formularioId = fid;
+    return api.buildConfig(cfgCtx);
+  }
+
+  function isTecnologiaSectorSubcategoria(ctx) {
+    return matchesTecnologiaSector(ctx, null);
+  }
+
+  function sliceIfArray(val) {
+    return Array.isArray(val) ? val.slice() : [];
+  }
+
+  function buildProfesionalesSectorPerfil(values, pack) {
+    values = values || {};
+    return {
+      deltaPack: pack || values.deltaPack || '',
+      canonSubcategoriaId: values.canonSubcategoriaId || values.subcategoriaId || '',
+      blockTitle: values.blockTitle || '',
+      nombreProfesional: values.nombreProfesional || '',
+      especialidadProfesional: values.especialidadProfesional || '',
+      serviciosProfesionales: sliceIfArray(values.serviciosProfesionales),
+      modalidadAtencionProfesional: values.modalidadAtencionProfesional || '',
+      precioConsulta: values.precioConsulta || '',
+      unidadConsulta: values.unidadConsulta || '',
+      horarioAtencion: values.horarioAtencion || '',
+      anosExperienciaProfesional: values.anosExperienciaProfesional || '',
+      alias: values.alias || '',
+      tagline: values.tagline || '',
+      certificaciones: values.certificaciones || '',
+      tarifaDesde: values.tarifaDesde || '',
+      horarioDetalle: values.horarioDetalle || '',
+      areasDerecho: sliceIfArray(values.areasDerecho),
+      tiposClientesLegales: sliceIfArray(values.tiposClientesLegales),
+      serviciosLegales: sliceIfArray(values.serviciosLegales),
+      serviciosDespacho: sliceIfArray(values.serviciosDespacho),
+      areasPracticaDespacho: sliceIfArray(values.areasPracticaDespacho),
+      tamanoEquipoDespacho: values.tamanoEquipoDespacho || '',
+      serviciosContables: sliceIfArray(values.serviciosContables),
+      tiposClientesContables: sliceIfArray(values.tiposClientesContables),
+      serviciosFiscalesLegales: sliceIfArray(values.serviciosFiscalesLegales),
+      tiposClientesProfesionales: sliceIfArray(values.tiposClientesProfesionales),
+      serviciosTramites: sliceIfArray(values.serviciosTramites),
+      especialidadTecnica: sliceIfArray(values.especialidadTecnica),
+      serviciosTecnicos: sliceIfArray(values.serviciosTecnicos),
+      softwareHerramientas: values.softwareHerramientas || '',
+      areasConsultoria: sliceIfArray(values.areasConsultoria),
+      serviciosConsultoria: sliceIfArray(values.serviciosConsultoria),
+      industriasAtendidas: sliceIfArray(values.industriasAtendidas),
+      serviciosCreativos: sliceIfArray(values.serviciosCreativos),
+      especialidadCreativa: sliceIfArray(values.especialidadCreativa),
+      idiomasServicio: values.idiomasServicio || '',
+      portfolioURL: values.portfolioURL || '',
+      serviciosFinancieros: sliceIfArray(values.serviciosFinancieros),
+      aseguradorasRepresentadas: values.aseguradorasRepresentadas || '',
+      normasCertificaciones: sliceIfArray(values.normasCertificaciones),
+      serviciosEmpresariales: sliceIfArray(values.serviciosEmpresariales),
+      especialidadesEmpresa: values.especialidadesEmpresa || '',
+      tamanoEmpresaAtendida: sliceIfArray(values.tamanoEmpresaAtendida),
+      nombreComercial: values.nombreComercial || '',
+      direccion: values.direccion || '',
+      diferenciadorProfesional: values.diferenciadorProfesional || '',
+      coberturaGeografica: values.coberturaGeografica || '',
+      tiempoRespuestaConsulta: values.tiempoRespuestaConsulta || '',
+      regimenesFiscales: sliceIfArray(values.regimenesFiscales),
+      instanciasJudiciales: sliceIfArray(values.instanciasJudiciales),
+      estilosArquitectonicos: sliceIfArray(values.estilosArquitectonicos),
+      metodologiasConsultoria: sliceIfArray(values.metodologiasConsultoria),
+      tiposEntregablesCreativos: sliceIfArray(values.tiposEntregablesCreativos),
+      tiposPolizaSeguros: sliceIfArray(values.tiposPolizaSeguros),
+      colaboracionesComerciales: values.colaboracionesComerciales || '',
+      tiposColaboracionComercial: sliceIfArray(values.tiposColaboracionComercial),
+      colaboracionContenido: values.colaboracionContenido || '',
+      mostrarColaboracionContenidoPublico: values.mostrarColaboracionContenidoPublico || ''
+    };
+  }
+
+  function finalizeProfesionalesSectorValues(values, ctx) {
+    if (!values || !isProfesionalesSectorSubcategoria(ctx || {})) return values;
+    var api = resolveProfesionalesSectorApi();
+    var subRaw = (ctx && ctx.subcategoriaId) || values.subcategoriaId || '';
+    var canonId = api && api.resolveCanonSubId ? api.resolveCanonSubId(subRaw) : slugProfesionalesSubId(subRaw);
+    var pack = api ? api.resolvePack(canonId) : 'B';
+    var subDelta = global.CARIHUB_PROFESIONALES_SUB_DELTAS && global.CARIHUB_PROFESIONALES_SUB_DELTAS[canonId];
+    clearProfileContractState(values, ['profesionalesPerfil']);
+    values.deltaPack = pack;
+    values.canonSubcategoriaId = canonId;
+    if (subDelta && subDelta.blockTitle) values.blockTitle = subDelta.blockTitle;
+    values.profesionalesPerfil = buildProfesionalesSectorPerfil(values, pack);
+    if (pack === 'A') values.requiresCedula = true;
+    return values;
+  }
+
+  function applyProfesionalesSectorPerfilFields(u, perfil) {
+    u = u || {};
+    perfil = perfil || {};
+    if (perfil.nombreProfesional) {
+      u.nombreProfesional = perfil.nombreProfesional;
+      u.nombre = perfil.nombreProfesional;
+      u.alias = perfil.nombreProfesional;
+    }
+    if (perfil.alias) {
+      u.alias = perfil.alias;
+      u.nombre = perfil.alias;
+    }
+    if (perfil.nombreComercial) {
+      u.nombreComercial = perfil.nombreComercial;
+      u.nombre = perfil.nombreComercial;
+      u.alias = perfil.nombreComercial;
+    }
+    if (perfil.tagline) {
+      u.tagline = perfil.tagline;
+      u.frase = perfil.tagline;
+    }
+    if (perfil.especialidadProfesional) u.especialidad = perfil.especialidadProfesional;
+    if (perfil.precioConsulta) {
+      u.precioConsulta = perfil.precioConsulta;
+      u.precio = perfil.precioConsulta;
+    }
+    if (perfil.tarifaDesde) {
+      u.tarifaDesde = perfil.tarifaDesde;
+      u.precio = perfil.tarifaDesde;
+    }
+    if (perfil.horarioAtencion) u.horario = perfil.horarioAtencion;
+    if (perfil.horarioDetalle) u.horario = perfil.horarioDetalle;
+    if (perfil.direccion) u.direccion = perfil.direccion;
+    if (perfil.canonSubcategoriaId) u.subcategoriaId = perfil.canonSubcategoriaId;
+    if (perfil.deltaPack) u.deltaPack = perfil.deltaPack;
+    if (perfil.blockTitle) u.titulo = perfil.blockTitle;
+    return u;
+  }
+
+  function mapProfesionalesSectorToPerfil(u, bloques, ctx) {
+    u = u || {};
+    ctx = ctx || {};
+    var perfil = bloques.profesionalesPerfil || buildProfesionalesSectorPerfil(bloques, bloques.deltaPack);
+    clearProfileContractState(u, ['profesionalesPerfil']);
+    u.profesionalesPerfil = Object.assign({}, perfil);
+    u = applyProfesionalesSectorPerfilFields(u, perfil);
+    u.sectorId = 'profesionales';
+    return applyCrossSectorPublicFields(u, bloques);
+  }
+
+  function validateProfesionalesSectorValues(cfg, values, missing, ctx) {
+    if (!cfg || !isProfesionalesSectorSubcategoria(ctx || {})) return;
+    if (cfg.deltaPack === 'A' && !String(values.nombreProfesional || '').trim()) {
+      pushMissing(missing, 'Nombre profesional');
+    }
+  }
+
+  function buildTecnologiaSectorPerfil(values, pack) {
+    values = values || {};
+    return {
+      deltaPack: pack || values.deltaPack || '',
+      canonSubcategoriaId: values.canonSubcategoriaId || values.subcategoriaId || '',
+      blockTitle: values.blockTitle || '',
+      alias: values.alias || '',
+      tagline: values.tagline || '',
+      certificaciones: values.certificaciones || '',
+      tarifaDesde: values.tarifaDesde || '',
+      horarioDetalle: values.horarioDetalle || '',
+      nombreComercial: values.nombreComercial || '',
+      direccion: values.direccion || '',
+      modalidadServicioTI: values.modalidadServicioTI || '',
+      stackTecnologico: sliceIfArray(values.stackTecnologico),
+      lenguajesFrameworks: values.lenguajesFrameworks || '',
+      serviciosDesarrollo: sliceIfArray(values.serviciosDesarrollo),
+      tipoProyectosDev: sliceIfArray(values.tipoProyectosDev),
+      anosExperienciaTI: values.anosExperienciaTI || '',
+      serviciosSoporteTI: sliceIfArray(values.serviciosSoporteTI),
+      tiposEquipoSoporte: sliceIfArray(values.tiposEquipoSoporte),
+      serviciosReparacion: sliceIfArray(values.serviciosReparacion),
+      tiempoRespuestaSoporte: values.tiempoRespuestaSoporte || '',
+      tiposClientesSoporte: sliceIfArray(values.tiposClientesSoporte),
+      garantiaServicio: values.garantiaServicio || '',
+      serviciosMarketingDigital: sliceIfArray(values.serviciosMarketingDigital),
+      canalesMarketing: sliceIfArray(values.canalesMarketing),
+      especialidadMarketing: sliceIfArray(values.especialidadMarketing),
+      herramientasMarketing: values.herramientasMarketing || '',
+      areasConsultoriaTI: sliceIfArray(values.areasConsultoriaTI),
+      serviciosConsultoriaTI: sliceIfArray(values.serviciosConsultoriaTI),
+      serviciosCiberseguridad: sliceIfArray(values.serviciosCiberseguridad),
+      certificacionesSeguridad: sliceIfArray(values.certificacionesSeguridad),
+      serviciosEmpresaTI: sliceIfArray(values.serviciosEmpresaTI),
+      especialidadesEmpresaTI: values.especialidadesEmpresaTI || '',
+      tamanoEmpresaAtendida: sliceIfArray(values.tamanoEmpresaAtendida),
+      serviciosCreativosTI: sliceIfArray(values.serviciosCreativosTI),
+      especialidadCreativaTI: sliceIfArray(values.especialidadCreativaTI),
+      plataformasInfra: sliceIfArray(values.plataformasInfra),
+      serviciosInfraTI: sliceIfArray(values.serviciosInfraTI),
+      softwareHerramientas: values.softwareHerramientas || '',
+      portfolioURL: values.portfolioURL || '',
+      industriasAtendidas: sliceIfArray(values.industriasAtendidas),
+      diferenciadorProfesional: values.diferenciadorProfesional || '',
+      coberturaGeografica: values.coberturaGeografica || '',
+      tiempoRespuestaConsulta: values.tiempoRespuestaConsulta || '',
+      colaboracionesComerciales: values.colaboracionesComerciales || '',
+      tiposColaboracionComercial: sliceIfArray(values.tiposColaboracionComercial)
+    };
+  }
+
+  function finalizeTecnologiaSectorValues(values, ctx) {
+    if (!values || !isTecnologiaSectorSubcategoria(ctx || {})) return values;
+    var api = resolveTecnologiaSectorApi();
+    var subRaw = (ctx && ctx.subcategoriaId) || values.subcategoriaId || '';
+    var canonId = api && api.resolveCanonSubId ? api.resolveCanonSubId(subRaw) : slugTecnologiaSubId(subRaw);
+    var pack = api ? api.resolvePack(canonId) : 'A';
+    var subDelta = global.CARIHUB_TECNOLOGIA_SUB_DELTAS && global.CARIHUB_TECNOLOGIA_SUB_DELTAS[canonId];
+    clearProfileContractState(values, ['tecnologiaPerfil']);
+    values.deltaPack = pack;
+    values.canonSubcategoriaId = canonId;
+    if (subDelta && subDelta.blockTitle) values.blockTitle = subDelta.blockTitle;
+    values.tecnologiaPerfil = buildTecnologiaSectorPerfil(values, pack);
+    return values;
+  }
+
+  function applyTecnologiaSectorPerfilFields(u, perfil) {
+    u = u || {};
+    perfil = perfil || {};
+    if (perfil.alias) {
+      u.alias = perfil.alias;
+      u.nombre = perfil.alias;
+    }
+    if (perfil.nombreComercial) {
+      u.nombreComercial = perfil.nombreComercial;
+      u.nombre = perfil.nombreComercial;
+      u.alias = perfil.nombreComercial;
+    }
+    if (perfil.tagline) {
+      u.tagline = perfil.tagline;
+      u.frase = perfil.tagline;
+    }
+    if (perfil.tarifaDesde) {
+      u.tarifaDesde = perfil.tarifaDesde;
+      u.precio = perfil.tarifaDesde;
+    }
+    if (perfil.horarioDetalle) u.horario = perfil.horarioDetalle;
+    if (perfil.direccion) u.direccion = perfil.direccion;
+    if (perfil.canonSubcategoriaId) u.subcategoriaId = perfil.canonSubcategoriaId;
+    if (perfil.deltaPack) u.deltaPack = perfil.deltaPack;
+    if (perfil.blockTitle) u.titulo = perfil.blockTitle;
+    return u;
+  }
+
+  function mapTecnologiaSectorToPerfil(u, bloques, ctx) {
+    u = u || {};
+    ctx = ctx || {};
+    var perfil = bloques.tecnologiaPerfil || buildTecnologiaSectorPerfil(bloques, bloques.deltaPack);
+    clearProfileContractState(u, ['tecnologiaPerfil']);
+    u.tecnologiaPerfil = Object.assign({}, perfil);
+    u = applyTecnologiaSectorPerfilFields(u, perfil);
+    u.sectorId = 'tecnologia';
+    return u;
+  }
+
+  function validateTecnologiaSectorValues(cfg, values, missing, ctx) {
+    if (!cfg || !isTecnologiaSectorSubcategoria(ctx || {})) return;
+    if (cfg.formularioId === 'negocio_empresa' && !String(values.nombreComercial || '').trim()) {
+      pushMissing(missing, 'Nombre comercial');
+    }
+  }
+
+  function resolveAutomotrizSectorApi() {
+    return global.CARIHUB_REGISTRO_AUTOMOTRIZ_SECTOR_BLOCKS || null;
+  }
+
+  function slugAutomotrizSubId(id) {
+    return String(id || '')
+      .trim()
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/_/g, '-');
+  }
+
+  function matchesAutomotrizSector(ctx, resolved) {
+    var api = resolveAutomotrizSectorApi();
+    if (!api) return false;
+    ctx = ctx || {};
+    if (String(ctx.sectorId || '') !== 'automotriz') return false;
+    var subSlug = slugAutomotrizSubId((ctx.subcategoriaId) || (ctx.subcategoria) || '');
+    if (!api.subToPack[subSlug]) return false;
+    var ident = resolved && resolved.identidad ? resolved.identidad : {};
+    var fid = String(ctx.formularioId || ident.formularioId || '').trim();
+    var probe = api.buildConfig({
+      sectorId: 'automotriz',
+      subcategoriaId: subSlug,
+      formularioId: fid || undefined
+    });
+    if (!probe) return false;
+    if (fid && probe.formularioId !== fid) {
+      var mapFid = String(ident.formularioId || '').trim();
+      if (!mapFid || mapFid !== probe.formularioId) return false;
+    }
+    return true;
+  }
+
+  function resolveAutomotrizSectorConfig(ctx, resolved) {
+    if (!matchesAutomotrizSector(ctx, resolved)) return null;
+    var api = resolveAutomotrizSectorApi();
+    if (!api) return null;
+    var subRaw = (ctx.subcategoriaId) || (ctx.subcategoria) || '';
+    var ident = resolved && resolved.identidad ? resolved.identidad : {};
+    var fid = String(ctx.formularioId || ident.formularioId || '').trim();
+    var cfgCtx = Object.assign({}, ctx, { sectorId: 'automotriz', subcategoriaId: subRaw });
+    if (fid) cfgCtx.formularioId = fid;
+    return api.buildConfig(cfgCtx);
+  }
+
+  function isAutomotrizSectorSubcategoria(ctx) {
+    return matchesAutomotrizSector(ctx, null);
+  }
+
+  function buildAutomotrizSectorPerfil(values, pack) {
+    values = values || {};
+    return {
+      deltaPack: pack || values.deltaPack || '',
+      canonSubcategoriaId: values.canonSubcategoriaId || values.subcategoriaId || '',
+      blockTitle: values.blockTitle || '',
+      alias: values.alias || '',
+      tagline: values.tagline || '',
+      certificaciones: values.certificaciones || '',
+      tarifaDesde: values.tarifaDesde || '',
+      horarioDetalle: values.horarioDetalle || '',
+      nombreComercial: values.nombreComercial || '',
+      direccion: values.direccion || '',
+      modalidadServicioAuto: values.modalidadServicioAuto || '',
+      serviciosMecanica: sliceIfArray(values.serviciosMecanica),
+      especialidadesMecanica: sliceIfArray(values.especialidadesMecanica),
+      marcasAtendidas: sliceIfArray(values.marcasAtendidas),
+      tiposVehiculoAtendidos: sliceIfArray(values.tiposVehiculoAtendidos),
+      garantiaServicioAuto: values.garantiaServicioAuto || '',
+      tiempoRespuestaAuto: values.tiempoRespuestaAuto || '',
+      anosExperienciaAuto: values.anosExperienciaAuto || '',
+      serviciosLlantas: sliceIfArray(values.serviciosLlantas),
+      tiposLlantas: sliceIfArray(values.tiposLlantas),
+      serviciosCarroceria: sliceIfArray(values.serviciosCarroceria),
+      serviciosEsteticaAuto: sliceIfArray(values.serviciosEsteticaAuto),
+      serviciosRefacciones: sliceIfArray(values.serviciosRefacciones),
+      lineasRefacciones: sliceIfArray(values.lineasRefacciones),
+      serviciosEspecialidadAuto: sliceIfArray(values.serviciosEspecialidadAuto),
+      serviciosVentaAutos: sliceIfArray(values.serviciosVentaAutos),
+      tiposVehiculoVenta: sliceIfArray(values.tiposVehiculoVenta),
+      financiamientoDisponible: values.financiamientoDisponible || '',
+      inventarioAproximado: values.inventarioAproximado || '',
+      cantidadUnidadesAprox: values.cantidadUnidadesAprox || '',
+      serviciosGrua: sliceIfArray(values.serviciosGrua),
+      coberturaCarretera: values.coberturaCarretera || '',
+      diferenciadorAutomotriz: values.diferenciadorAutomotriz || '',
+      coberturaGeografica: values.coberturaGeografica || '',
+      colaboracionesComerciales: values.colaboracionesComerciales || '',
+      tiposColaboracionComercial: sliceIfArray(values.tiposColaboracionComercial)
+    };
+  }
+
+  function finalizeAutomotrizSectorValues(values, ctx) {
+    if (!values || !isAutomotrizSectorSubcategoria(ctx || {})) return values;
+    var api = resolveAutomotrizSectorApi();
+    var subRaw = (ctx && ctx.subcategoriaId) || values.subcategoriaId || '';
+    var canonId = api && api.resolveCanonSubId ? api.resolveCanonSubId(subRaw) : slugAutomotrizSubId(subRaw);
+    var pack = api ? api.resolvePack(canonId) : 'A';
+    var subDelta = global.CARIHUB_AUTOMOTRIZ_SUB_DELTAS && global.CARIHUB_AUTOMOTRIZ_SUB_DELTAS[canonId];
+    clearProfileContractState(values, ['automotrizPerfil']);
+    values.deltaPack = pack;
+    values.canonSubcategoriaId = canonId;
+    if (subDelta && subDelta.blockTitle) values.blockTitle = subDelta.blockTitle;
+    values.automotrizPerfil = buildAutomotrizSectorPerfil(values, pack);
+    return values;
+  }
+
+  function applyAutomotrizSectorPerfilFields(u, perfil) {
+    u = u || {};
+    perfil = perfil || {};
+    if (perfil.alias) {
+      u.alias = perfil.alias;
+      u.nombre = perfil.alias;
+    }
+    if (perfil.nombreComercial) {
+      u.nombreComercial = perfil.nombreComercial;
+      u.nombre = perfil.nombreComercial;
+      u.alias = perfil.nombreComercial;
+    }
+    if (perfil.tagline) {
+      u.tagline = perfil.tagline;
+      u.frase = perfil.tagline;
+    }
+    if (perfil.tarifaDesde) {
+      u.tarifaDesde = perfil.tarifaDesde;
+      u.precio = perfil.tarifaDesde;
+    }
+    if (perfil.horarioDetalle) u.horario = perfil.horarioDetalle;
+    if (perfil.direccion) u.direccion = perfil.direccion;
+    if (perfil.canonSubcategoriaId) u.subcategoriaId = perfil.canonSubcategoriaId;
+    if (perfil.deltaPack) u.deltaPack = perfil.deltaPack;
+    if (perfil.blockTitle) u.titulo = perfil.blockTitle;
+    return u;
+  }
+
+  function mapAutomotrizSectorToPerfil(u, bloques, ctx) {
+    u = u || {};
+    ctx = ctx || {};
+    var perfil = bloques.automotrizPerfil || buildAutomotrizSectorPerfil(bloques, bloques.deltaPack);
+    clearProfileContractState(u, ['automotrizPerfil']);
+    u.automotrizPerfil = Object.assign({}, perfil);
+    u = applyAutomotrizSectorPerfilFields(u, perfil);
+    u.sectorId = 'automotriz';
+    return u;
+  }
+
+  function validateAutomotrizSectorValues(cfg, values, missing, ctx) {
+    if (!cfg || !isAutomotrizSectorSubcategoria(ctx || {})) return;
+    if (cfg.formularioId === 'negocio_empresa' && !String(values.nombreComercial || '').trim()) {
+      pushMissing(missing, 'Nombre comercial');
+    }
+  }
+
+  function resolveTransporteSectorApi() {
+    return global.CARIHUB_REGISTRO_TRANSPORTE_SECTOR_BLOCKS || null;
+  }
+
+  function slugTransporteSubId(id) {
+    return String(id || '')
+      .trim()
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/_/g, '-');
+  }
+
+  function matchesTransporteSector(ctx, resolved) {
+    var api = resolveTransporteSectorApi();
+    if (!api) return false;
+    ctx = ctx || {};
+    if (String(ctx.sectorId || '') !== 'transporte') return false;
+    var subSlug = slugTransporteSubId((ctx.subcategoriaId) || (ctx.subcategoria) || '');
+    if (!api.subToPack[subSlug]) return false;
+    var ident = resolved && resolved.identidad ? resolved.identidad : {};
+    var fid = String(ctx.formularioId || ident.formularioId || '').trim();
+    var probe = api.buildConfig({
+      sectorId: 'transporte',
+      subcategoriaId: subSlug,
+      formularioId: fid || undefined
+    });
+    if (!probe) return false;
+    if (fid && probe.formularioId !== fid) {
+      var mapFid = String(ident.formularioId || '').trim();
+      if (!mapFid || mapFid !== probe.formularioId) return false;
+    }
+    return true;
+  }
+
+  function resolveTransporteSectorConfig(ctx, resolved) {
+    if (!matchesTransporteSector(ctx, resolved)) return null;
+    var api = resolveTransporteSectorApi();
+    if (!api) return null;
+    var subRaw = (ctx.subcategoriaId) || (ctx.subcategoria) || '';
+    var ident = resolved && resolved.identidad ? resolved.identidad : {};
+    var fid = String(ctx.formularioId || ident.formularioId || '').trim();
+    var cfgCtx = Object.assign({}, ctx, { sectorId: 'transporte', subcategoriaId: subRaw });
+    if (fid) cfgCtx.formularioId = fid;
+    return api.buildConfig(cfgCtx);
+  }
+
+  function isTransporteSectorSubcategoria(ctx) {
+    return matchesTransporteSector(ctx, null);
+  }
+
+  function buildTransporteSectorPerfil(values, pack) {
+    values = values || {};
+    return {
+      deltaPack: pack || values.deltaPack || '',
+      canonSubcategoriaId: values.canonSubcategoriaId || values.subcategoriaId || '',
+      blockTitle: values.blockTitle || '',
+      alias: values.alias || '',
+      tagline: values.tagline || '',
+      certificaciones: values.certificaciones || '',
+      tarifaDesde: values.tarifaDesde || '',
+      horarioDetalle: values.horarioDetalle || '',
+      nombreComercial: values.nombreComercial || '',
+      direccion: values.direccion || '',
+      modalidadServicioTransporte: values.modalidadServicioTransporte || '',
+      serviciosTransportePersonas: sliceIfArray(values.serviciosTransportePersonas),
+      tipoVehiculoPasajeros: sliceIfArray(values.tipoVehiculoPasajeros),
+      tiposClientesTransporte: sliceIfArray(values.tiposClientesTransporte),
+      serviciosMensajeria: sliceIfArray(values.serviciosMensajeria),
+      tiposEnvio: sliceIfArray(values.tiposEnvio),
+      tipoVehiculoMensajeria: sliceIfArray(values.tipoVehiculoMensajeria),
+      serviciosFleteMudanza: sliceIfArray(values.serviciosFleteMudanza),
+      capacidadCarga: values.capacidadCarga || '',
+      tiposMercancia: sliceIfArray(values.tiposMercancia),
+      incluyePersonalCarga: values.incluyePersonalCarga || '',
+      serviciosLogistica: sliceIfArray(values.serviciosLogistica),
+      tiposCarga: sliceIfArray(values.tiposCarga),
+      coberturaRutas: values.coberturaRutas || '',
+      serviciosEmpresaTransporte: sliceIfArray(values.serviciosEmpresaTransporte),
+      especialidadesEmpresaTransporte: values.especialidadesEmpresaTransporte || '',
+      tamanoClienteTransporte: sliceIfArray(values.tamanoClienteTransporte),
+      flotaAproximada: values.flotaAproximada || '',
+      serviciosEspecialidadTransporte: sliceIfArray(values.serviciosEspecialidadTransporte),
+      coberturaInternacional: values.coberturaInternacional || '',
+      tiposVehiculoRenta: sliceIfArray(values.tiposVehiculoRenta),
+      permisosLicencias: values.permisosLicencias || '',
+      tiempoRespuestaTransporte: values.tiempoRespuestaTransporte || '',
+      diferenciadorTransporte: values.diferenciadorTransporte || '',
+      coberturaGeografica: values.coberturaGeografica || '',
+      colaboracionesComerciales: values.colaboracionesComerciales || '',
+      tiposColaboracionComercial: sliceIfArray(values.tiposColaboracionComercial)
+    };
+  }
+
+  function finalizeTransporteSectorValues(values, ctx) {
+    if (!values || !isTransporteSectorSubcategoria(ctx || {})) return values;
+    var api = resolveTransporteSectorApi();
+    var subRaw = (ctx && ctx.subcategoriaId) || values.subcategoriaId || '';
+    var canonId = api && api.resolveCanonSubId ? api.resolveCanonSubId(subRaw) : slugTransporteSubId(subRaw);
+    var pack = api ? api.resolvePack(canonId) : 'A';
+    var subDelta = global.CARIHUB_TRANSPORTE_SUB_DELTAS && global.CARIHUB_TRANSPORTE_SUB_DELTAS[canonId];
+    clearProfileContractState(values, ['transportePerfil']);
+    values.deltaPack = pack;
+    values.canonSubcategoriaId = canonId;
+    if (subDelta && subDelta.blockTitle) values.blockTitle = subDelta.blockTitle;
+    values.transportePerfil = buildTransporteSectorPerfil(values, pack);
+    return values;
+  }
+
+  function applyTransporteSectorPerfilFields(u, perfil) {
+    u = u || {};
+    perfil = perfil || {};
+    if (perfil.alias) {
+      u.alias = perfil.alias;
+      u.nombre = perfil.alias;
+    }
+    if (perfil.nombreComercial) {
+      u.nombreComercial = perfil.nombreComercial;
+      u.nombre = perfil.nombreComercial;
+      u.alias = perfil.nombreComercial;
+    }
+    if (perfil.tagline) {
+      u.tagline = perfil.tagline;
+      u.frase = perfil.tagline;
+    }
+    if (perfil.tarifaDesde) {
+      u.tarifaDesde = perfil.tarifaDesde;
+      u.precio = perfil.tarifaDesde;
+    }
+    if (perfil.horarioDetalle) u.horario = perfil.horarioDetalle;
+    if (perfil.direccion) u.direccion = perfil.direccion;
+    if (perfil.canonSubcategoriaId) u.subcategoriaId = perfil.canonSubcategoriaId;
+    if (perfil.deltaPack) u.deltaPack = perfil.deltaPack;
+    if (perfil.blockTitle) u.titulo = perfil.blockTitle;
+    return u;
+  }
+
+  function mapTransporteSectorToPerfil(u, bloques, ctx) {
+    u = u || {};
+    ctx = ctx || {};
+    var perfil = bloques.transportePerfil || buildTransporteSectorPerfil(bloques, bloques.deltaPack);
+    clearProfileContractState(u, ['transportePerfil']);
+    u.transportePerfil = Object.assign({}, perfil);
+    u = applyTransporteSectorPerfilFields(u, perfil);
+    u.sectorId = 'transporte';
+    return u;
+  }
+
+  function validateTransporteSectorValues(cfg, values, missing, ctx) {
+    if (!cfg || !isTransporteSectorSubcategoria(ctx || {})) return;
+    if (cfg.formularioId === 'negocio_empresa' && !String(values.nombreComercial || '').trim()) {
+      pushMissing(missing, 'Nombre comercial');
+    }
+  }
+
+  function resolveComercioSectorApi() {
+    return global.CARIHUB_REGISTRO_COMERCIO_SECTOR_BLOCKS || null;
+  }
+
+  function slugComercioSubId(id) {
+    return String(id || '')
+      .trim()
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/_/g, '-');
+  }
+
+  function matchesComercioSector(ctx, resolved) {
+    var api = resolveComercioSectorApi();
+    if (!api) return false;
+    ctx = ctx || {};
+    if (String(ctx.sectorId || '') !== 'comercio') return false;
+    var subSlug = slugComercioSubId((ctx.subcategoriaId) || (ctx.subcategoria) || '');
+    if (!api.subToPack[subSlug]) return false;
+    var ident = resolved && resolved.identidad ? resolved.identidad : {};
+    var fid = String(ctx.formularioId || ident.formularioId || '').trim();
+    var probe = api.buildConfig({
+      sectorId: 'comercio',
+      subcategoriaId: subSlug,
+      formularioId: fid || undefined
+    });
+    if (!probe) return false;
+    if (fid && probe.formularioId !== fid) {
+      var mapFid = String(ident.formularioId || '').trim();
+      if (!mapFid || mapFid !== probe.formularioId) return false;
+    }
+    return true;
+  }
+
+  function resolveComercioSectorConfig(ctx, resolved) {
+    if (!matchesComercioSector(ctx, resolved)) return null;
+    var api = resolveComercioSectorApi();
+    if (!api) return null;
+    var subRaw = (ctx.subcategoriaId) || (ctx.subcategoria) || '';
+    var ident = resolved && resolved.identidad ? resolved.identidad : {};
+    var fid = String(ctx.formularioId || ident.formularioId || '').trim();
+    var cfgCtx = Object.assign({}, ctx, { sectorId: 'comercio', subcategoriaId: subRaw });
+    if (fid) cfgCtx.formularioId = fid;
+    return api.buildConfig(cfgCtx);
+  }
+
+  function isComercioSectorSubcategoria(ctx) {
+    return matchesComercioSector(ctx, null);
+  }
+
+  function buildComercioSectorPerfil(values, pack) {
+    values = values || {};
+    return {
+      deltaPack: pack || values.deltaPack || '',
+      canonSubcategoriaId: values.canonSubcategoriaId || values.subcategoriaId || '',
+      blockTitle: values.blockTitle || '',
+      alias: values.alias || '',
+      tagline: values.tagline || '',
+      certificaciones: values.certificaciones || '',
+      tarifaDesde: values.tarifaDesde || '',
+      horarioDetalle: values.horarioDetalle || '',
+      nombreComercial: values.nombreComercial || '',
+      direccion: values.direccion || '',
+      modalidadVentaComercio: values.modalidadVentaComercio || '',
+      categoriasProducto: sliceIfArray(values.categoriasProducto),
+      serviciosComercio: sliceIfArray(values.serviciosComercio),
+      formasPagoComercio: sliceIfArray(values.formasPagoComercio),
+      entregaDomicilio: values.entregaDomicilio || '',
+      generosModa: sliceIfArray(values.generosModa),
+      marcasComercializadas: sliceIfArray(values.marcasComercializadas),
+      serviciosMayoreo: sliceIfArray(values.serviciosMayoreo),
+      volumenMinimoPedido: values.volumenMinimoPedido || '',
+      tiposClientesComercio: sliceIfArray(values.tiposClientesComercio),
+      serviciosEmpresaComercio: sliceIfArray(values.serviciosEmpresaComercio),
+      especialidadesEmpresaComercio: values.especialidadesEmpresaComercio || '',
+      flotaEntrega: values.flotaEntrega || '',
+      diferenciadorComercio: values.diferenciadorComercio || '',
+      coberturaGeografica: values.coberturaGeografica || '',
+      colaboracionesComerciales: values.colaboracionesComerciales || '',
+      tiposColaboracionComercial: sliceIfArray(values.tiposColaboracionComercial)
+    };
+  }
+
+  function finalizeComercioSectorValues(values, ctx) {
+    if (!values || !isComercioSectorSubcategoria(ctx || {})) return values;
+    var api = resolveComercioSectorApi();
+    var subRaw = (ctx && ctx.subcategoriaId) || values.subcategoriaId || '';
+    var canonId = api && api.resolveCanonSubId ? api.resolveCanonSubId(subRaw) : slugComercioSubId(subRaw);
+    var pack = api ? api.resolvePack(canonId) : 'A';
+    var subDelta = global.CARIHUB_COMERCIO_SUB_DELTAS && global.CARIHUB_COMERCIO_SUB_DELTAS[canonId];
+    clearProfileContractState(values, ['comercioPerfil']);
+    values.deltaPack = pack;
+    values.canonSubcategoriaId = canonId;
+    if (subDelta && subDelta.blockTitle) values.blockTitle = subDelta.blockTitle;
+    values.comercioPerfil = buildComercioSectorPerfil(values, pack);
+    return values;
+  }
+
+  function applyComercioSectorPerfilFields(u, perfil) {
+    u = u || {};
+    perfil = perfil || {};
+    if (perfil.alias) {
+      u.alias = perfil.alias;
+      u.nombre = perfil.alias;
+    }
+    if (perfil.nombreComercial) {
+      u.nombreComercial = perfil.nombreComercial;
+      u.nombre = perfil.nombreComercial;
+      u.alias = perfil.nombreComercial;
+    }
+    if (perfil.tagline) {
+      u.tagline = perfil.tagline;
+      u.frase = perfil.tagline;
+    }
+    if (perfil.tarifaDesde) {
+      u.tarifaDesde = perfil.tarifaDesde;
+      u.precio = perfil.tarifaDesde;
+    }
+    if (perfil.horarioDetalle) u.horario = perfil.horarioDetalle;
+    if (perfil.direccion) u.direccion = perfil.direccion;
+    if (perfil.canonSubcategoriaId) u.subcategoriaId = perfil.canonSubcategoriaId;
+    if (perfil.deltaPack) u.deltaPack = perfil.deltaPack;
+    if (perfil.blockTitle) u.titulo = perfil.blockTitle;
+    return u;
+  }
+
+  function mapComercioSectorToPerfil(u, bloques, ctx) {
+    u = u || {};
+    ctx = ctx || {};
+    var perfil = bloques.comercioPerfil || buildComercioSectorPerfil(bloques, bloques.deltaPack);
+    clearProfileContractState(u, ['comercioPerfil']);
+    u.comercioPerfil = Object.assign({}, perfil);
+    u = applyComercioSectorPerfilFields(u, perfil);
+    u.sectorId = 'comercio';
+    return u;
+  }
+
+  function validateComercioSectorValues(cfg, values, missing, ctx) {
+    if (!cfg || !isComercioSectorSubcategoria(ctx || {})) return;
+    if (cfg.formularioId === 'negocio_empresa' && !String(values.nombreComercial || '').trim()) {
+      pushMissing(missing, 'Nombre comercial');
+    }
+  }
+
+  function resolveHogarSectorApi() {
+    return global.CARIHUB_REGISTRO_HOGAR_SECTOR_BLOCKS || null;
+  }
+
+  function slugHogarSubId(id) {
+    return String(id || '')
+      .trim()
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/_/g, '-');
+  }
+
+  function matchesHogarSector(ctx, resolved) {
+    var api = resolveHogarSectorApi();
+    if (!api) return false;
+    ctx = ctx || {};
+    if (String(ctx.sectorId || '') !== 'hogar') return false;
+    var subSlug = slugHogarSubId((ctx.subcategoriaId) || (ctx.subcategoria) || '');
+    if (!api.subToPack[subSlug]) return false;
+    var ident = resolved && resolved.identidad ? resolved.identidad : {};
+    var fid = String(ctx.formularioId || ident.formularioId || '').trim();
+    var probe = api.buildConfig({
+      sectorId: 'hogar',
+      subcategoriaId: subSlug,
+      formularioId: fid || undefined
+    });
+    if (!probe) return false;
+    if (fid && probe.formularioId !== fid) {
+      var mapFid = String(ident.formularioId || '').trim();
+      if (!mapFid || mapFid !== probe.formularioId) return false;
+    }
+    return true;
+  }
+
+  function resolveHogarSectorConfig(ctx, resolved) {
+    if (!matchesHogarSector(ctx, resolved)) return null;
+    var api = resolveHogarSectorApi();
+    if (!api) return null;
+    var subRaw = (ctx.subcategoriaId) || (ctx.subcategoria) || '';
+    var ident = resolved && resolved.identidad ? resolved.identidad : {};
+    var fid = String(ctx.formularioId || ident.formularioId || '').trim();
+    var cfgCtx = Object.assign({}, ctx, { sectorId: 'hogar', subcategoriaId: subRaw });
+    if (fid) cfgCtx.formularioId = fid;
+    return api.buildConfig(cfgCtx);
+  }
+
+  function isHogarSectorSubcategoria(ctx) {
+    return matchesHogarSector(ctx, null);
+  }
+
+  function buildHogarSectorPerfil(values, pack) {
+    values = values || {};
+    return {
+      deltaPack: pack || values.deltaPack || '',
+      canonSubcategoriaId: values.canonSubcategoriaId || values.subcategoriaId || '',
+      blockTitle: values.blockTitle || '',
+      alias: values.alias || '',
+      tagline: values.tagline || '',
+      certificaciones: values.certificaciones || '',
+      tarifaDesde: values.tarifaDesde || '',
+      horarioDetalle: values.horarioDetalle || '',
+      modalidadServicioHogar: values.modalidadServicioHogar || '',
+      serviciosHogar: sliceIfArray(values.serviciosHogar),
+      especialidadesHogar: sliceIfArray(values.especialidadesHogar),
+      tiposTrabajoHogar: sliceIfArray(values.tiposTrabajoHogar),
+      tiposInmueble: sliceIfArray(values.tiposInmueble),
+      tiempoRespuestaHogar: values.tiempoRespuestaHogar || '',
+      garantiaServicioHogar: values.garantiaServicioHogar || '',
+      anosExperienciaHogar: values.anosExperienciaHogar || '',
+      materialesIncluidos: values.materialesIncluidos || '',
+      diferenciadorHogar: values.diferenciadorHogar || '',
+      coberturaGeografica: values.coberturaGeografica || '',
+      colaboracionesComerciales: values.colaboracionesComerciales || '',
+      tiposColaboracionComercial: sliceIfArray(values.tiposColaboracionComercial)
+    };
+  }
+
+  function finalizeHogarSectorValues(values, ctx) {
+    if (!values || !isHogarSectorSubcategoria(ctx || {})) return values;
+    var api = resolveHogarSectorApi();
+    var subRaw = (ctx && ctx.subcategoriaId) || values.subcategoriaId || '';
+    var canonId = api && api.resolveCanonSubId ? api.resolveCanonSubId(subRaw) : slugHogarSubId(subRaw);
+    var pack = api ? api.resolvePack(canonId) : 'A';
+    var subDelta = global.CARIHUB_HOGAR_SUB_DELTAS && global.CARIHUB_HOGAR_SUB_DELTAS[canonId];
+    clearProfileContractState(values, ['hogarPerfil']);
+    values.deltaPack = pack;
+    values.canonSubcategoriaId = canonId;
+    if (subDelta && subDelta.blockTitle) values.blockTitle = subDelta.blockTitle;
+    values.hogarPerfil = buildHogarSectorPerfil(values, pack);
+    return values;
+  }
+
+  function applyHogarSectorPerfilFields(u, perfil) {
+    u = u || {};
+    perfil = perfil || {};
+    if (perfil.alias) {
+      u.alias = perfil.alias;
+      u.nombre = perfil.alias;
+    }
+    if (perfil.tagline) {
+      u.tagline = perfil.tagline;
+      u.frase = perfil.tagline;
+    }
+    if (perfil.tarifaDesde) {
+      u.tarifaDesde = perfil.tarifaDesde;
+      u.precio = perfil.tarifaDesde;
+    }
+    if (perfil.horarioDetalle) u.horario = perfil.horarioDetalle;
+    if (perfil.canonSubcategoriaId) u.subcategoriaId = perfil.canonSubcategoriaId;
+    if (perfil.deltaPack) u.deltaPack = perfil.deltaPack;
+    if (perfil.blockTitle) u.titulo = perfil.blockTitle;
+    return u;
+  }
+
+  function mapHogarSectorToPerfil(u, bloques, ctx) {
+    u = u || {};
+    ctx = ctx || {};
+    var perfil = bloques.hogarPerfil || buildHogarSectorPerfil(bloques, bloques.deltaPack);
+    clearProfileContractState(u, ['hogarPerfil']);
+    u.hogarPerfil = Object.assign({}, perfil);
+    u = applyHogarSectorPerfilFields(u, perfil);
+    u.sectorId = 'hogar';
+    return u;
+  }
+
+  function validateHogarSectorValues(cfg, values, missing, ctx) {
+    if (!cfg || !isHogarSectorSubcategoria(ctx || {})) return;
+    if (!String(values.alias || '').trim()) {
+      pushMissing(missing, 'Nombre público');
+    }
+  }
+
+  function resolveMascotasSectorApi() {
+    return global.CARIHUB_REGISTRO_MASCOTAS_SECTOR_BLOCKS || null;
+  }
+
+  function slugMascotasSubId(raw) {
+    return String(raw || '').trim().toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/_/g, '-');
+  }
+
+  function matchesMascotasSector(ctx, resolved) {
+    var api = resolveMascotasSectorApi();
+    if (!api) return false;
+    ctx = ctx || {};
+    if (String(ctx.sectorId || '') !== 'mascotas') return false;
+    var subSlug = slugMascotasSubId((ctx.subcategoriaId) || (ctx.subcategoria) || '');
+    if (!api.subToPack[subSlug]) return false;
+    var ident = resolved && resolved.identidad ? resolved.identidad : {};
+    var fid = String(ctx.formularioId || ident.formularioId || '').trim();
+    var probe = api.buildConfig({
+      sectorId: 'mascotas',
+      subcategoriaId: subSlug,
+      formularioId: fid || undefined
+    });
+    if (!probe) return false;
+    if (fid && probe.formularioId !== fid) {
+      var mapFid = String(ident.formularioId || '').trim();
+      if (!mapFid || mapFid !== probe.formularioId) return false;
+    }
+    return true;
+  }
+
+  function resolveMascotasSectorConfig(ctx, resolved) {
+    if (!matchesMascotasSector(ctx, resolved)) return null;
+    var api = resolveMascotasSectorApi();
+    if (!api) return null;
+    var subRaw = (ctx.subcategoriaId) || (ctx.subcategoria) || '';
+    var ident = resolved && resolved.identidad ? resolved.identidad : {};
+    var fid = String(ctx.formularioId || ident.formularioId || '').trim();
+    var cfgCtx = Object.assign({}, ctx, { sectorId: 'mascotas', subcategoriaId: subRaw });
+    if (fid) cfgCtx.formularioId = fid;
+    return api.buildConfig(cfgCtx);
+  }
+
+  function isMascotasSectorSubcategoria(ctx) {
+    return matchesMascotasSector(ctx, null);
+  }
+
+  function buildMascotasSectorPerfil(values, pack) {
+    values = values || {};
+    return {
+      deltaPack: pack || values.deltaPack || '',
+      canonSubcategoriaId: values.canonSubcategoriaId || values.subcategoriaId || '',
+      blockTitle: values.blockTitle || '',
+      alias: values.alias || '',
+      tagline: values.tagline || '',
+      certificaciones: values.certificaciones || '',
+      tarifaDesde: values.tarifaDesde || '',
+      horarioDetalle: values.horarioDetalle || '',
+      nombreProfesional: values.nombreProfesional || '',
+      especialidadVeterinaria: values.especialidadVeterinaria || '',
+      precioConsulta: values.precioConsulta || '',
+      horarioAtencion: values.horarioAtencion || '',
+      nombreComercial: values.nombreComercial || '',
+      direccion: values.direccion || '',
+      modalidadServicioMascotas: values.modalidadServicioMascotas || '',
+      serviciosMascotas: sliceIfArray(values.serviciosMascotas),
+      serviciosVeterinarios: sliceIfArray(values.serviciosVeterinarios),
+      serviciosEmpresaMascotas: sliceIfArray(values.serviciosEmpresaMascotas),
+      especiesAtendidas: sliceIfArray(values.especiesAtendidas),
+      tamanoMascotasAtendidas: sliceIfArray(values.tamanoMascotasAtendidas),
+      especialidadesVeterinarias: sliceIfArray(values.especialidadesVeterinarias),
+      especialidadesEmpresaMascotas: values.especialidadesEmpresaMascotas || '',
+      emergenciasMascotas: values.emergenciasMascotas || '',
+      capacidadInstalacion: values.capacidadInstalacion || '',
+      tiempoRespuestaMascotas: values.tiempoRespuestaMascotas || '',
+      diferenciadorMascotas: values.diferenciadorMascotas || '',
+      coberturaGeografica: values.coberturaGeografica || '',
+      colaboracionesComerciales: values.colaboracionesComerciales || '',
+      tiposColaboracionComercial: sliceIfArray(values.tiposColaboracionComercial)
+    };
+  }
+
+  function finalizeMascotasSectorValues(values, ctx) {
+    if (!values || !isMascotasSectorSubcategoria(ctx || {})) return values;
+    var api = resolveMascotasSectorApi();
+    var subRaw = (ctx && ctx.subcategoriaId) || values.subcategoriaId || '';
+    var canonId = api && api.resolveCanonSubId ? api.resolveCanonSubId(subRaw) : slugMascotasSubId(subRaw);
+    var pack = api ? api.resolvePack(canonId) : 'A';
+    var subDelta = global.CARIHUB_MASCOTAS_SUB_DELTAS && global.CARIHUB_MASCOTAS_SUB_DELTAS[canonId];
+    clearProfileContractState(values, ['mascotasPerfil']);
+    values.deltaPack = pack;
+    values.canonSubcategoriaId = canonId;
+    if (subDelta && subDelta.blockTitle) values.blockTitle = subDelta.blockTitle;
+    values.mascotasPerfil = buildMascotasSectorPerfil(values, pack);
+    if (subDelta && subDelta.profesionistaCedula) values.requiresCedula = true;
+    return values;
+  }
+
+  function applyMascotasSectorPerfilFields(u, perfil) {
+    u = u || {};
+    perfil = perfil || {};
+    if (perfil.nombreProfesional) {
+      u.nombreProfesional = perfil.nombreProfesional;
+      u.nombre = perfil.nombreProfesional;
+      u.alias = perfil.nombreProfesional;
+    }
+    if (perfil.alias) {
+      u.alias = perfil.alias;
+      u.nombre = perfil.alias;
+    }
+    if (perfil.nombreComercial) {
+      u.nombreComercial = perfil.nombreComercial;
+      u.nombre = perfil.nombreComercial;
+      u.alias = perfil.nombreComercial;
+    }
+    if (perfil.tagline) {
+      u.tagline = perfil.tagline;
+      u.frase = perfil.tagline;
+    }
+    if (perfil.precioConsulta) {
+      u.precioConsulta = perfil.precioConsulta;
+      u.precio = perfil.precioConsulta;
+    }
+    if (perfil.tarifaDesde) {
+      u.tarifaDesde = perfil.tarifaDesde;
+      u.precio = perfil.tarifaDesde;
+    }
+    if (perfil.horarioAtencion) u.horario = perfil.horarioAtencion;
+    if (perfil.horarioDetalle) u.horario = perfil.horarioDetalle;
+    if (perfil.direccion) u.direccion = perfil.direccion;
+    if (perfil.canonSubcategoriaId) u.subcategoriaId = perfil.canonSubcategoriaId;
+    if (perfil.deltaPack) u.deltaPack = perfil.deltaPack;
+    if (perfil.blockTitle) u.titulo = perfil.blockTitle;
+    return u;
+  }
+
+  function mapMascotasSectorToPerfil(u, bloques, ctx) {
+    u = u || {};
+    ctx = ctx || {};
+    var perfil = bloques.mascotasPerfil || buildMascotasSectorPerfil(bloques, bloques.deltaPack);
+    clearProfileContractState(u, ['mascotasPerfil']);
+    u.mascotasPerfil = Object.assign({}, perfil);
+    u = applyMascotasSectorPerfilFields(u, perfil);
+    u.sectorId = 'mascotas';
+    return u;
+  }
+
+  function validateMascotasSectorValues(cfg, values, missing, ctx) {
+    if (!cfg || !isMascotasSectorSubcategoria(ctx || {})) return;
+    var subDelta = global.CARIHUB_MASCOTAS_SUB_DELTAS &&
+      global.CARIHUB_MASCOTAS_SUB_DELTAS[values.canonSubcategoriaId || values.subcategoriaId || ''];
+    if (subDelta && subDelta.profesionistaCedula) {
+      if (!String(values.nombreProfesional || '').trim()) {
+        pushMissing(missing, 'Nombre profesional público');
+      }
+      return;
+    }
+    if (subDelta && subDelta.negocioLocal) {
+      if (!String(values.nombreComercial || '').trim()) {
+        pushMissing(missing, 'Nombre comercial');
+      }
+      return;
+    }
+    if (!String(values.alias || '').trim()) {
+      pushMissing(missing, 'Nombre público');
+    }
+  }
+
+  function resolveBienesRaicesSectorApi() {
+    return global.CARIHUB_REGISTRO_BIENES_RAICES_SECTOR_BLOCKS || null;
+  }
+
+  function slugBienesRaicesSubId(raw) {
+    return String(raw || '').trim().toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/_/g, '-');
+  }
+
+  function matchesBienesRaicesSector(ctx, resolved) {
+    var api = resolveBienesRaicesSectorApi();
+    if (!api) return false;
+    ctx = ctx || {};
+    if (String(ctx.sectorId || '') !== 'bienes-raices') return false;
+    var subSlug = slugBienesRaicesSubId((ctx.subcategoriaId) || (ctx.subcategoria) || '');
+    if (!api.subToPack[subSlug]) return false;
+    var ident = resolved && resolved.identidad ? resolved.identidad : {};
+    var fid = String(ctx.formularioId || ident.formularioId || '').trim();
+    var probe = api.buildConfig({
+      sectorId: 'bienes-raices',
+      subcategoriaId: subSlug,
+      formularioId: fid || undefined
+    });
+    if (!probe) return false;
+    if (fid && probe.formularioId !== fid) {
+      var mapFid = String(ident.formularioId || '').trim();
+      if (!mapFid || mapFid !== probe.formularioId) return false;
+    }
+    return true;
+  }
+
+  function resolveBienesRaicesSectorConfig(ctx, resolved) {
+    if (!matchesBienesRaicesSector(ctx, resolved)) return null;
+    var api = resolveBienesRaicesSectorApi();
+    if (!api) return null;
+    var subRaw = (ctx.subcategoriaId) || (ctx.subcategoria) || '';
+    var ident = resolved && resolved.identidad ? resolved.identidad : {};
+    var fid = String(ctx.formularioId || ident.formularioId || '').trim();
+    var cfgCtx = Object.assign({}, ctx, { sectorId: 'bienes-raices', subcategoriaId: subRaw });
+    if (fid) cfgCtx.formularioId = fid;
+    return api.buildConfig(cfgCtx);
+  }
+
+  function isBienesRaicesSectorSubcategoria(ctx) {
+    return matchesBienesRaicesSector(ctx, null);
+  }
+
+  function buildBienesRaicesSectorPerfil(values, pack) {
+    values = values || {};
+    return {
+      deltaPack: pack || values.deltaPack || '',
+      canonSubcategoriaId: values.canonSubcategoriaId || values.subcategoriaId || '',
+      blockTitle: values.blockTitle || '',
+      alias: values.alias || '',
+      tagline: values.tagline || '',
+      certificaciones: values.certificaciones || '',
+      tarifaDesde: values.tarifaDesde || '',
+      horarioDetalle: values.horarioDetalle || '',
+      nombreComercial: values.nombreComercial || '',
+      direccion: values.direccion || '',
+      modalidadOperacionInmobiliaria: values.modalidadOperacionInmobiliaria || '',
+      operacionInmobiliaria: values.operacionInmobiliaria || '',
+      serviciosInmobiliarios: sliceIfArray(values.serviciosInmobiliarios),
+      serviciosEmpresaInmobiliaria: sliceIfArray(values.serviciosEmpresaInmobiliaria),
+      tiposInmuebleInmobiliario: sliceIfArray(values.tiposInmuebleInmobiliario),
+      especialidadesInmobiliarias: sliceIfArray(values.especialidadesInmobiliarias),
+      especialidadesEmpresaInmobiliaria: values.especialidadesEmpresaInmobiliaria || '',
+      rangoPrecioInmobiliario: values.rangoPrecioInmobiliario || '',
+      amenidadesInmueble: sliceIfArray(values.amenidadesInmueble),
+      caracteristicasInmueble: values.caracteristicasInmueble || '',
+      tiempoRespuestaInmobiliaria: values.tiempoRespuestaInmobiliaria || '',
+      diferenciadorInmobiliario: values.diferenciadorInmobiliario || '',
+      coberturaGeografica: values.coberturaGeografica || '',
+      colaboracionesComerciales: values.colaboracionesComerciales || '',
+      tiposColaboracionComercial: sliceIfArray(values.tiposColaboracionComercial)
+    };
+  }
+
+  function finalizeBienesRaicesSectorValues(values, ctx) {
+    if (!values || !isBienesRaicesSectorSubcategoria(ctx || {})) return values;
+    var api = resolveBienesRaicesSectorApi();
+    var subRaw = (ctx && ctx.subcategoriaId) || values.subcategoriaId || '';
+    var canonId = api && api.resolveCanonSubId ? api.resolveCanonSubId(subRaw) : slugBienesRaicesSubId(subRaw);
+    var pack = api ? api.resolvePack(canonId) : 'A';
+    var subDelta = global.CARIHUB_BIENES_RAICES_SUB_DELTAS && global.CARIHUB_BIENES_RAICES_SUB_DELTAS[canonId];
+    clearProfileContractState(values, ['bienesRaicesPerfil']);
+    values.deltaPack = pack;
+    values.canonSubcategoriaId = canonId;
+    if (subDelta && subDelta.blockTitle) values.blockTitle = subDelta.blockTitle;
+    values.bienesRaicesPerfil = buildBienesRaicesSectorPerfil(values, pack);
+    return values;
+  }
+
+  function applyBienesRaicesSectorPerfilFields(u, perfil) {
+    u = u || {};
+    perfil = perfil || {};
+    if (perfil.alias) {
+      u.alias = perfil.alias;
+      u.nombre = perfil.alias;
+    }
+    if (perfil.nombreComercial) {
+      u.nombreComercial = perfil.nombreComercial;
+      u.nombre = perfil.nombreComercial;
+      u.alias = perfil.nombreComercial;
+    }
+    if (perfil.tagline) {
+      u.tagline = perfil.tagline;
+      u.frase = perfil.tagline;
+    }
+    if (perfil.tarifaDesde) {
+      u.tarifaDesde = perfil.tarifaDesde;
+      u.precio = perfil.tarifaDesde;
+    }
+    if (perfil.rangoPrecioInmobiliario) {
+      u.rangoPrecioInmobiliario = perfil.rangoPrecioInmobiliario;
+      u.precio = perfil.rangoPrecioInmobiliario;
+    }
+    if (perfil.horarioDetalle) u.horario = perfil.horarioDetalle;
+    if (perfil.direccion) u.direccion = perfil.direccion;
+    if (perfil.caracteristicasInmueble) u.descripcion = perfil.caracteristicasInmueble;
+    if (perfil.canonSubcategoriaId) u.subcategoriaId = perfil.canonSubcategoriaId;
+    if (perfil.deltaPack) u.deltaPack = perfil.deltaPack;
+    if (perfil.blockTitle) u.titulo = perfil.blockTitle;
+    return u;
+  }
+
+  function mapBienesRaicesSectorToPerfil(u, bloques, ctx) {
+    u = u || {};
+    ctx = ctx || {};
+    var perfil = bloques.bienesRaicesPerfil || buildBienesRaicesSectorPerfil(bloques, bloques.deltaPack);
+    clearProfileContractState(u, ['bienesRaicesPerfil']);
+    u.bienesRaicesPerfil = Object.assign({}, perfil);
+    u = applyBienesRaicesSectorPerfilFields(u, perfil);
+    u.sectorId = 'bienes-raices';
+    return u;
+  }
+
+  function validateBienesRaicesSectorValues(cfg, values, missing, ctx) {
+    if (!cfg || !isBienesRaicesSectorSubcategoria(ctx || {})) return;
+    var subDelta = global.CARIHUB_BIENES_RAICES_SUB_DELTAS &&
+      global.CARIHUB_BIENES_RAICES_SUB_DELTAS[values.canonSubcategoriaId || values.subcategoriaId || ''];
+    if (subDelta && subDelta.negocioLocal) {
+      if (!String(values.nombreComercial || '').trim()) {
+        pushMissing(missing, 'Nombre comercial');
+      }
+      return;
+    }
+    if (!String(values.alias || '').trim()) {
+      pushMissing(missing, 'Nombre público');
+    }
+  }
+
+  function resolveEducacionSectorApi() {
+    return global.CARIHUB_REGISTRO_EDUCACION_SECTOR_BLOCKS || null;
+  }
+
+  function slugEducacionSubId(raw) {
+    return String(raw || '').trim().toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/_/g, '-');
+  }
+
+  function matchesEducacionSector(ctx, resolved) {
+    var api = resolveEducacionSectorApi();
+    if (!api) return false;
+    ctx = ctx || {};
+    if (String(ctx.sectorId || '') !== 'educacion') return false;
+    var subSlug = slugEducacionSubId((ctx.subcategoriaId) || (ctx.subcategoria) || '');
+    if (!api.subToPack[subSlug]) return false;
+    var ident = resolved && resolved.identidad ? resolved.identidad : {};
+    var fid = String(ctx.formularioId || ident.formularioId || '').trim();
+    var probe = api.buildConfig({
+      sectorId: 'educacion',
+      subcategoriaId: subSlug,
+      formularioId: fid || undefined
+    });
+    if (!probe) return false;
+    if (fid && probe.formularioId !== fid) {
+      var mapFid = String(ident.formularioId || '').trim();
+      if (!mapFid || mapFid !== probe.formularioId) return false;
+    }
+    return true;
+  }
+
+  function resolveEducacionSectorConfig(ctx, resolved) {
+    if (!matchesEducacionSector(ctx, resolved)) return null;
+    var api = resolveEducacionSectorApi();
+    if (!api) return null;
+    var subRaw = (ctx.subcategoriaId) || (ctx.subcategoria) || '';
+    var ident = resolved && resolved.identidad ? resolved.identidad : {};
+    var fid = String(ctx.formularioId || ident.formularioId || '').trim();
+    var cfgCtx = Object.assign({}, ctx, { sectorId: 'educacion', subcategoriaId: subRaw });
+    if (fid) cfgCtx.formularioId = fid;
+    return api.buildConfig(cfgCtx);
+  }
+
+  function isEducacionSectorSubcategoria(ctx) {
+    return matchesEducacionSector(ctx, null);
+  }
+
+  function buildEducacionSectorPerfil(values, pack) {
+    values = values || {};
+    return {
+      deltaPack: pack || values.deltaPack || '',
+      canonSubcategoriaId: values.canonSubcategoriaId || values.subcategoriaId || '',
+      blockTitle: values.blockTitle || '',
+      alias: values.alias || '',
+      tagline: values.tagline || '',
+      certificaciones: values.certificaciones || '',
+      tarifaDesde: values.tarifaDesde || '',
+      horarioDetalle: values.horarioDetalle || '',
+      nombreProfesional: values.nombreProfesional || '',
+      especialidadEducativa: values.especialidadEducativa || '',
+      precioConsulta: values.precioConsulta || '',
+      horarioAtencion: values.horarioAtencion || '',
+      nombreComercial: values.nombreComercial || '',
+      direccion: values.direccion || '',
+      modalidadEducacion: values.modalidadEducacion || '',
+      serviciosEducacion: sliceIfArray(values.serviciosEducacion),
+      serviciosEmpresaEducacion: sliceIfArray(values.serviciosEmpresaEducacion),
+      serviciosProfesionalesEducacion: sliceIfArray(values.serviciosProfesionalesEducacion),
+      materiasEducativas: sliceIfArray(values.materiasEducativas),
+      nivelesEducativos: sliceIfArray(values.nivelesEducativos),
+      edadesAtendidas: sliceIfArray(values.edadesAtendidas),
+      formatoClase: sliceIfArray(values.formatoClase),
+      idiomasEnsenanza: sliceIfArray(values.idiomasEnsenanza),
+      certificacionesEducativas: values.certificacionesEducativas || '',
+      tiempoRespuestaEducacion: values.tiempoRespuestaEducacion || '',
+      diferenciadorEducacion: values.diferenciadorEducacion || '',
+      coberturaGeografica: values.coberturaGeografica || '',
+      colaboracionesComerciales: values.colaboracionesComerciales || '',
+      tiposColaboracionComercial: sliceIfArray(values.tiposColaboracionComercial)
+    };
+  }
+
+  function finalizeEducacionSectorValues(values, ctx) {
+    if (!values || !isEducacionSectorSubcategoria(ctx || {})) return values;
+    var api = resolveEducacionSectorApi();
+    var subRaw = (ctx && ctx.subcategoriaId) || values.subcategoriaId || '';
+    var canonId = api && api.resolveCanonSubId ? api.resolveCanonSubId(subRaw) : slugEducacionSubId(subRaw);
+    var pack = api ? api.resolvePack(canonId) : 'A';
+    var subDelta = global.CARIHUB_EDUCACION_SUB_DELTAS && global.CARIHUB_EDUCACION_SUB_DELTAS[canonId];
+    clearProfileContractState(values, ['educacionPerfil']);
+    values.deltaPack = pack;
+    values.canonSubcategoriaId = canonId;
+    if (subDelta && subDelta.blockTitle) values.blockTitle = subDelta.blockTitle;
+    values.educacionPerfil = buildEducacionSectorPerfil(values, pack);
+    if (subDelta && subDelta.profesionistaCedula) values.requiresCedula = true;
+    return values;
+  }
+
+  function applyEducacionSectorPerfilFields(u, perfil) {
+    u = u || {};
+    perfil = perfil || {};
+    if (perfil.nombreProfesional) {
+      u.nombreProfesional = perfil.nombreProfesional;
+      u.nombre = perfil.nombreProfesional;
+      u.alias = perfil.nombreProfesional;
+    }
+    if (perfil.alias) {
+      u.alias = perfil.alias;
+      u.nombre = perfil.alias;
+    }
+    if (perfil.nombreComercial) {
+      u.nombreComercial = perfil.nombreComercial;
+      u.nombre = perfil.nombreComercial;
+      u.alias = perfil.nombreComercial;
+    }
+    if (perfil.tagline) {
+      u.tagline = perfil.tagline;
+      u.frase = perfil.tagline;
+    }
+    if (perfil.precioConsulta) {
+      u.precioConsulta = perfil.precioConsulta;
+      u.precio = perfil.precioConsulta;
+    }
+    if (perfil.tarifaDesde) {
+      u.tarifaDesde = perfil.tarifaDesde;
+      u.precio = perfil.tarifaDesde;
+    }
+    if (perfil.horarioAtencion) u.horario = perfil.horarioAtencion;
+    if (perfil.horarioDetalle) u.horario = perfil.horarioDetalle;
+    if (perfil.direccion) u.direccion = perfil.direccion;
+    if (perfil.canonSubcategoriaId) u.subcategoriaId = perfil.canonSubcategoriaId;
+    if (perfil.deltaPack) u.deltaPack = perfil.deltaPack;
+    if (perfil.blockTitle) u.titulo = perfil.blockTitle;
+    return u;
+  }
+
+  function mapEducacionSectorToPerfil(u, bloques, ctx) {
+    u = u || {};
+    ctx = ctx || {};
+    var perfil = bloques.educacionPerfil || buildEducacionSectorPerfil(bloques, bloques.deltaPack);
+    clearProfileContractState(u, ['educacionPerfil']);
+    u.educacionPerfil = Object.assign({}, perfil);
+    u = applyEducacionSectorPerfilFields(u, perfil);
+    u.sectorId = 'educacion';
+    return u;
+  }
+
+  function validateEducacionSectorValues(cfg, values, missing, ctx) {
+    if (!cfg || !isEducacionSectorSubcategoria(ctx || {})) return;
+    var subDelta = global.CARIHUB_EDUCACION_SUB_DELTAS &&
+      global.CARIHUB_EDUCACION_SUB_DELTAS[values.canonSubcategoriaId || values.subcategoriaId || ''];
+    if (subDelta && subDelta.profesionistaCedula) {
+      if (!String(values.nombreProfesional || '').trim()) {
+        pushMissing(missing, 'Nombre profesional público');
+      }
+      return;
+    }
+    if (subDelta && subDelta.negocioLocal) {
+      if (!String(values.nombreComercial || '').trim()) {
+        pushMissing(missing, 'Nombre comercial');
+      }
+      return;
+    }
+    if (!String(values.alias || '').trim()) {
+      pushMissing(missing, 'Nombre público');
+    }
+  }
+
+  function resolveIndustriaSectorApi() {
+    return global.CARIHUB_REGISTRO_INDUSTRIA_SECTOR_BLOCKS || null;
+  }
+
+  function slugIndustriaSubId(raw) {
+    return String(raw || '').trim().toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/_/g, '-');
+  }
+
+  function matchesIndustriaSector(ctx, resolved) {
+    var api = resolveIndustriaSectorApi();
+    if (!api) return false;
+    ctx = ctx || {};
+    if (String(ctx.sectorId || '') !== 'industria') return false;
+    var subSlug = slugIndustriaSubId((ctx.subcategoriaId) || (ctx.subcategoria) || '');
+    if (!api.subToPack[subSlug]) return false;
+    var ident = resolved && resolved.identidad ? resolved.identidad : {};
+    var fid = String(ctx.formularioId || ident.formularioId || '').trim();
+    var probe = api.buildConfig({
+      sectorId: 'industria',
+      subcategoriaId: subSlug,
+      formularioId: fid || undefined
+    });
+    if (!probe) return false;
+    if (fid && probe.formularioId !== fid) {
+      var mapFid = String(ident.formularioId || '').trim();
+      if (!mapFid || mapFid !== probe.formularioId) return false;
+    }
+    return true;
+  }
+
+  function resolveIndustriaSectorConfig(ctx, resolved) {
+    if (!matchesIndustriaSector(ctx, resolved)) return null;
+    var api = resolveIndustriaSectorApi();
+    if (!api) return null;
+    var subRaw = (ctx.subcategoriaId) || (ctx.subcategoria) || '';
+    var ident = resolved && resolved.identidad ? resolved.identidad : {};
+    var fid = String(ctx.formularioId || ident.formularioId || '').trim();
+    var cfgCtx = Object.assign({}, ctx, { sectorId: 'industria', subcategoriaId: subRaw });
+    if (fid) cfgCtx.formularioId = fid;
+    return api.buildConfig(cfgCtx);
+  }
+
+  function isIndustriaSectorSubcategoria(ctx) {
+    return matchesIndustriaSector(ctx, null);
+  }
+
+  function buildIndustriaSectorPerfil(values, pack) {
+    values = values || {};
+    return {
+      deltaPack: pack || values.deltaPack || '',
+      canonSubcategoriaId: values.canonSubcategoriaId || values.subcategoriaId || '',
+      blockTitle: values.blockTitle || '',
+      alias: values.alias || '',
+      tagline: values.tagline || '',
+      certificaciones: values.certificaciones || '',
+      tarifaDesde: values.tarifaDesde || '',
+      horarioDetalle: values.horarioDetalle || '',
+      nombreProfesional: values.nombreProfesional || '',
+      especialidadIndustrial: values.especialidadIndustrial || '',
+      precioConsulta: values.precioConsulta || '',
+      horarioAtencion: values.horarioAtencion || '',
+      nombreComercial: values.nombreComercial || '',
+      direccion: values.direccion || '',
+      modalidadServicioIndustrial: values.modalidadServicioIndustrial || '',
+      serviciosIndustriales: sliceIfArray(values.serviciosIndustriales),
+      serviciosEmpresaIndustrial: sliceIfArray(values.serviciosEmpresaIndustrial),
+      serviciosProfesionalesIndustrial: sliceIfArray(values.serviciosProfesionalesIndustrial),
+      sectoresIndustriales: sliceIfArray(values.sectoresIndustriales),
+      procesosIndustriales: sliceIfArray(values.procesosIndustriales),
+      certificacionesIndustriales: sliceIfArray(values.certificacionesIndustriales),
+      capacidadProduccion: values.capacidadProduccion || '',
+      equipamientoIndustrial: values.equipamientoIndustrial || '',
+      tiempoRespuestaIndustrial: values.tiempoRespuestaIndustrial || '',
+      diferenciadorIndustrial: values.diferenciadorIndustrial || '',
+      coberturaGeografica: values.coberturaGeografica || '',
+      colaboracionesComerciales: values.colaboracionesComerciales || '',
+      tiposColaboracionComercial: sliceIfArray(values.tiposColaboracionComercial)
+    };
+  }
+
+  function finalizeIndustriaSectorValues(values, ctx) {
+    if (!values || !isIndustriaSectorSubcategoria(ctx || {})) return values;
+    var api = resolveIndustriaSectorApi();
+    var subRaw = (ctx && ctx.subcategoriaId) || values.subcategoriaId || '';
+    var canonId = api && api.resolveCanonSubId ? api.resolveCanonSubId(subRaw) : slugIndustriaSubId(subRaw);
+    var pack = api ? api.resolvePack(canonId) : 'A';
+    var subDelta = global.CARIHUB_INDUSTRIA_SUB_DELTAS && global.CARIHUB_INDUSTRIA_SUB_DELTAS[canonId];
+    clearProfileContractState(values, ['industriaPerfil']);
+    values.deltaPack = pack;
+    values.canonSubcategoriaId = canonId;
+    if (subDelta && subDelta.blockTitle) values.blockTitle = subDelta.blockTitle;
+    values.industriaPerfil = buildIndustriaSectorPerfil(values, pack);
+    if (subDelta && subDelta.profesionistaCedula) values.requiresCedula = true;
+    return values;
+  }
+
+  function applyIndustriaSectorPerfilFields(u, perfil) {
+    u = u || {};
+    perfil = perfil || {};
+    if (perfil.nombreProfesional) {
+      u.nombreProfesional = perfil.nombreProfesional;
+      u.nombre = perfil.nombreProfesional;
+      u.alias = perfil.nombreProfesional;
+    }
+    if (perfil.alias) {
+      u.alias = perfil.alias;
+      u.nombre = perfil.alias;
+    }
+    if (perfil.nombreComercial) {
+      u.nombreComercial = perfil.nombreComercial;
+      u.nombre = perfil.nombreComercial;
+      u.alias = perfil.nombreComercial;
+    }
+    if (perfil.tagline) {
+      u.tagline = perfil.tagline;
+      u.frase = perfil.tagline;
+    }
+    if (perfil.precioConsulta) {
+      u.precioConsulta = perfil.precioConsulta;
+      u.precio = perfil.precioConsulta;
+    }
+    if (perfil.tarifaDesde) {
+      u.tarifaDesde = perfil.tarifaDesde;
+      u.precio = perfil.tarifaDesde;
+    }
+    if (perfil.horarioAtencion) u.horario = perfil.horarioAtencion;
+    if (perfil.horarioDetalle) u.horario = perfil.horarioDetalle;
+    if (perfil.direccion) u.direccion = perfil.direccion;
+    if (perfil.canonSubcategoriaId) u.subcategoriaId = perfil.canonSubcategoriaId;
+    if (perfil.deltaPack) u.deltaPack = perfil.deltaPack;
+    if (perfil.blockTitle) u.titulo = perfil.blockTitle;
+    return u;
+  }
+
+  function mapIndustriaSectorToPerfil(u, bloques, ctx) {
+    u = u || {};
+    ctx = ctx || {};
+    var perfil = bloques.industriaPerfil || buildIndustriaSectorPerfil(bloques, bloques.deltaPack);
+    clearProfileContractState(u, ['industriaPerfil']);
+    u.industriaPerfil = Object.assign({}, perfil);
+    u = applyIndustriaSectorPerfilFields(u, perfil);
+    u.sectorId = 'industria';
+    return u;
+  }
+
+  function validateIndustriaSectorValues(cfg, values, missing, ctx) {
+    if (!cfg || !isIndustriaSectorSubcategoria(ctx || {})) return;
+    var subDelta = global.CARIHUB_INDUSTRIA_SUB_DELTAS &&
+      global.CARIHUB_INDUSTRIA_SUB_DELTAS[values.canonSubcategoriaId || values.subcategoriaId || ''];
+    if (subDelta && subDelta.profesionistaCedula) {
+      if (!String(values.nombreProfesional || '').trim()) {
+        pushMissing(missing, 'Nombre profesional público');
+      }
+      return;
+    }
+    if (subDelta && subDelta.negocioLocal) {
+      if (!String(values.nombreComercial || '').trim()) {
+        pushMissing(missing, 'Nombre comercial');
+      }
+      return;
+    }
+    if (!String(values.alias || '').trim()) {
+      pushMissing(missing, 'Nombre público');
+    }
+  }
+
   function normalizeCreadorSubId(raw) {
     var subId = normalizeSubId(raw);
     if (subId === 'contenido' || subId === 'creador contenido') return 'contenido';
@@ -454,6 +2237,13 @@
     return cfg.subcategoriaOverrides[subId] || null;
   }
 
+  function appendCrossSectorBlocks(blocks) {
+    if (global.CARIHUB_COLABORACION_CONTENIDO_POLICY && global.CARIHUB_COLABORACION_CONTENIDO_POLICY.appendToBlocks) {
+      return global.CARIHUB_COLABORACION_CONTENIDO_POLICY.appendToBlocks(blocks);
+    }
+    return blocks;
+  }
+
   function mergedConfig(cfg, ctx) {
     var over = getSubcategoriaOverride(cfg, ctx);
     var rawSub = (ctx && ctx.subcategoriaId) || (ctx && ctx.subcategoria) || '';
@@ -512,7 +2302,7 @@
         subcategoriaIds: cfg.subcategoriaIds,
         subcategoriaOverrides: cfg.subcategoriaOverrides,
         obligatorios: (cfg.obligatorios || []).slice(),
-        blocks: baseBlocks,
+        blocks: appendCrossSectorBlocks(baseBlocks),
         validaciones: []
       };
     }
@@ -523,7 +2313,7 @@
       subcategoriaIds: cfg.subcategoriaIds,
       subcategoriaOverrides: cfg.subcategoriaOverrides,
       obligatorios: (cfg.obligatorios || []).slice(),
-      blocks: baseBlocks,
+      blocks: appendCrossSectorBlocks(baseBlocks),
       fotosMin: over.fotosMin || null,
       validaciones: (over.validaciones || []).slice()
     };
@@ -742,6 +2532,17 @@
     if (matchesVenue(ctx, resolved)) return resolveVenueConfig();
     if (matchesEventosSector(ctx, resolved)) return resolveEventosSectorConfig(ctx, resolved);
     if (matchesGastronomiaSector(ctx, resolved)) return resolveGastronomiaSectorConfig(ctx, resolved);
+    if (matchesSaludSector(ctx, resolved)) return resolveSaludSectorConfig(ctx, resolved);
+    if (matchesProfesionalesSector(ctx, resolved)) return resolveProfesionalesSectorConfig(ctx, resolved);
+    if (matchesTecnologiaSector(ctx, resolved)) return resolveTecnologiaSectorConfig(ctx, resolved);
+    if (matchesAutomotrizSector(ctx, resolved)) return resolveAutomotrizSectorConfig(ctx, resolved);
+    if (matchesTransporteSector(ctx, resolved)) return resolveTransporteSectorConfig(ctx, resolved);
+    if (matchesComercioSector(ctx, resolved)) return resolveComercioSectorConfig(ctx, resolved);
+    if (matchesHogarSector(ctx, resolved)) return resolveHogarSectorConfig(ctx, resolved);
+    if (matchesMascotasSector(ctx, resolved)) return resolveMascotasSectorConfig(ctx, resolved);
+    if (matchesBienesRaicesSector(ctx, resolved)) return resolveBienesRaicesSectorConfig(ctx, resolved);
+    if (matchesEducacionSector(ctx, resolved)) return resolveEducacionSectorConfig(ctx, resolved);
+    if (matchesIndustriaSector(ctx, resolved)) return resolveIndustriaSectorConfig(ctx, resolved);
     if (matchesBienestarSector(ctx, resolved)) return resolveBienestarSectorConfig(ctx, resolved);
     if (matchesBienestar(ctx, resolved)) return resolveBienestarConfig();
     if (matchesHospedaje(ctx, resolved)) return resolveHospedajeConfig();
@@ -1285,15 +3086,42 @@
     sync();
   }
 
-  function syncLegacyFields(cfg, active) {
+  function escortLegacyModalidadVisible(ctx, resolved, cfg, active) {
+    if (active) return false;
+    if (global.CariHubFieldEngineLite && CariHubFieldEngineLite.shouldShowEscortLegacyModalidad) {
+      return CariHubFieldEngineLite.shouldShowEscortLegacyModalidad(ctx, resolved);
+    }
+    var sectorId = String(
+      (ctx && ctx.sectorId) ||
+      (cfg && cfg.sectorId) ||
+      ''
+    ).trim();
+    return sectorId === 'adultos' && ctx && ctx.arquetipo === 'persona_acompanante';
+  }
+
+  function syncLegacyFields(cfg, active, ctx, resolved) {
+    ctx = ctx || {};
     var wrapMod = $('wrapModalidad');
     var wrapHor = $('wrapHorario');
     var wrapSvc = $('wrapServicios');
-    if (wrapMod) wrapMod.classList.toggle('rp-hidden', !!active);
+    var wrapEdad = $('wrapEdad');
+    var wrapPrecio = $('wrapPrecio');
+    var wrapDesc = $('wrapDescripcion');
+    var showEscortLegacy = escortLegacyModalidadVisible(ctx, resolved, cfg, active);
+    var hideModalidadEdad = !showEscortLegacy;
+    if (wrapMod) wrapMod.classList.toggle('rp-hidden', hideModalidadEdad);
+    if (wrapEdad) wrapEdad.classList.toggle('rp-hidden', hideModalidadEdad);
     if (wrapHor) wrapHor.classList.toggle('rp-hidden', !!active);
-    if (wrapSvc) wrapSvc.classList.toggle('rp-hidden', !!active);
-    if (active && wrapHor && $('fldHorarioDetalle')) {
-      /* horario legacy hidden; dynamic field used */
+    if (wrapSvc) wrapSvc.classList.toggle('rp-hidden', hideModalidadEdad || !!active);
+    if (wrapPrecio) wrapPrecio.classList.toggle('rp-hidden', !!active);
+    if (wrapDesc) wrapDesc.classList.toggle('rp-hidden', !!active);
+    var cardServ = $('rpCardServicio');
+    if (cardServ && active) {
+      cardServ.classList.add('rp-hidden');
+      cardServ.setAttribute('aria-hidden', 'true');
+    } else if (cardServ) {
+      cardServ.classList.remove('rp-hidden');
+      cardServ.setAttribute('aria-hidden', 'false');
     }
   }
 
@@ -1424,6 +3252,8 @@
     values = values || {};
     return {
       deltaPack: pack || values.deltaPack || '',
+      canonSubcategoriaId: values.canonSubcategoriaId || values.subcategoriaId || '',
+      blockTitle: values.blockTitle || '',
       alias: values.alias || '',
       tagline: values.tagline || '',
       certificaciones: values.certificaciones || '',
@@ -1467,9 +3297,14 @@
   function finalizeBienestarSectorValues(values, ctx) {
     if (!values || !isBienestarSectorSubcategoria(ctx || {})) return values;
     var api = resolveBienestarSectorApi();
-    var pack = api ? api.resolvePack((ctx && ctx.subcategoriaId) || values.subcategoriaId) : 'A';
+    var subRaw = (ctx && ctx.subcategoriaId) || values.subcategoriaId || '';
+    var canonId = api && api.resolveCanonSubId ? api.resolveCanonSubId(subRaw) : subRaw;
+    var pack = api ? api.resolvePack(canonId) : 'A';
+    var subDelta = global.CARIHUB_BIENESTAR_SUB_DELTAS && global.CARIHUB_BIENESTAR_SUB_DELTAS[canonId];
     clearProfileContractState(values, ['bienestarHolisticoPerfil']);
     values.deltaPack = pack;
+    values.canonSubcategoriaId = canonId;
+    if (subDelta && subDelta.blockTitle) values.blockTitle = subDelta.blockTitle;
     values.bienestarHolisticoPerfil = buildBienestarSectorPerfil(values, pack);
     if (pack === 'H') {
       values.sensible = true;
@@ -1488,6 +3323,8 @@
     clearProfileContractState(u, ['bienestarHolisticoPerfil']);
     u.bienestarHolisticoPerfil = Object.assign({}, perfil);
     u.deltaPack = perfil.deltaPack || bloques.deltaPack || '';
+    u.canonSubcategoriaId = perfil.canonSubcategoriaId || bloques.canonSubcategoriaId || '';
+    if (perfil.blockTitle) u.titulo = perfil.blockTitle;
     if (perfil.alias) {
       u.alias = perfil.alias;
       u.nombre = perfil.alias;
@@ -1518,7 +3355,7 @@
       u.soloExperienciaCeremonial = true;
     }
     u.sectorId = 'bienestar';
-    return u;
+    return applyCrossSectorPublicFields(u, bloques);
   }
 
   function validateBienestarSectorValues(cfg, values, missing, ctx) {
@@ -1604,7 +3441,7 @@
     u.eventosPerfil = Object.assign({}, perfil);
     u = applyEventosSectorPerfilFields(u, perfil);
     u.sectorId = 'eventos';
-    return u;
+    return applyCrossSectorPublicFields(u, bloques);
   }
 
   function validateEventosSectorValues(cfg, values, missing, ctx) {
@@ -1690,7 +3527,7 @@
     u.gastronomiaPerfil = Object.assign({}, perfil);
     u = applyGastronomiaSectorPerfilFields(u, perfil);
     u.sectorId = 'restaurantes';
-    return u;
+    return applyCrossSectorPublicFields(u, bloques);
   }
 
   function validateGastronomiaSectorValues(cfg, values, missing, ctx) {
@@ -1709,8 +3546,11 @@
     'retailPerfil',
     'venuePerfil',
     'bienestarPerfil',
+    'bienestarHolisticoPerfil',
     'eventosPerfil',
     'gastronomiaPerfil',
+    'profesionalesPerfil',
+    'saludPerfil',
     'hospedajePerfil',
     'swingerPerfil',
     'unicornPerfil',
@@ -1719,6 +3559,20 @@
   ];
 
   var PROFILE_INCOMPATIBLE_KEYS = ['modalidades', 'edad', 'viaja'];
+
+  /** Colaboración en redes — campos cross-sector en pantalla pública. */
+  function applyCrossSectorPublicFields(u, bloques) {
+    u = u || {};
+    bloques = bloques || {};
+    if (bloques.colaboracionContenido) u.colaboracionContenido = bloques.colaboracionContenido;
+    if (bloques.mostrarColaboracionContenidoPublico) {
+      u.mostrarColaboracionContenidoPublico = bloques.mostrarColaboracionContenidoPublico;
+    } else if (bloques.colaboracionContenido && String(bloques.colaboracionContenido).trim() &&
+        String(bloques.colaboracionContenido).trim() !== 'No' && !u.mostrarColaboracionContenidoPublico) {
+      u.mostrarColaboracionContenidoPublico = 'Sí';
+    }
+    return u;
+  }
 
   function clearProfileContractState(target, keepNested, keepFields) {
     if (!target) return target;
@@ -3228,6 +5082,17 @@
     values = finalizeBienestarSectorValues(values, ctx);
     values = finalizeEventosSectorValues(values, ctx);
     values = finalizeGastronomiaSectorValues(values, ctx);
+    values = finalizeSaludSectorValues(values, ctx);
+    values = finalizeProfesionalesSectorValues(values, ctx);
+    values = finalizeTecnologiaSectorValues(values, ctx);
+    values = finalizeAutomotrizSectorValues(values, ctx);
+    values = finalizeTransporteSectorValues(values, ctx);
+    values = finalizeComercioSectorValues(values, ctx);
+    values = finalizeHogarSectorValues(values, ctx);
+    values = finalizeMascotasSectorValues(values, ctx);
+    values = finalizeBienesRaicesSectorValues(values, ctx);
+    values = finalizeEducacionSectorValues(values, ctx);
+    values = finalizeIndustriaSectorValues(values, ctx);
     values = finalizeHospedajeValues(values, ctx);
     values = finalizeParejaGrupoValues(values);
     return values;
@@ -3335,6 +5200,39 @@
     }
     if (isGastronomiaSectorSubcategoria(ctx)) {
       validateGastronomiaSectorValues(cfg, values, missing, ctx);
+    }
+    if (isSaludSectorSubcategoria(ctx)) {
+      validateSaludSectorValues(cfg, values, missing, ctx);
+    }
+    if (isProfesionalesSectorSubcategoria(ctx)) {
+      validateProfesionalesSectorValues(cfg, values, missing, ctx);
+    }
+    if (isTecnologiaSectorSubcategoria(ctx)) {
+      validateTecnologiaSectorValues(cfg, values, missing, ctx);
+    }
+    if (isAutomotrizSectorSubcategoria(ctx)) {
+      validateAutomotrizSectorValues(cfg, values, missing, ctx);
+    }
+    if (isTransporteSectorSubcategoria(ctx)) {
+      validateTransporteSectorValues(cfg, values, missing, ctx);
+    }
+    if (isComercioSectorSubcategoria(ctx)) {
+      validateComercioSectorValues(cfg, values, missing, ctx);
+    }
+    if (isHogarSectorSubcategoria(ctx)) {
+      validateHogarSectorValues(cfg, values, missing, ctx);
+    }
+    if (isMascotasSectorSubcategoria(ctx)) {
+      validateMascotasSectorValues(cfg, values, missing, ctx);
+    }
+    if (isBienesRaicesSectorSubcategoria(ctx)) {
+      validateBienesRaicesSectorValues(cfg, values, missing, ctx);
+    }
+    if (isEducacionSectorSubcategoria(ctx)) {
+      validateEducacionSectorValues(cfg, values, missing, ctx);
+    }
+    if (isIndustriaSectorSubcategoria(ctx)) {
+      validateIndustriaSectorValues(cfg, values, missing, ctx);
     }
     if (isHospedajeSubcategoria(ctx)) {
       validateHospedajeDeltaValues(cfg, values, missing, ctx);
@@ -3496,12 +5394,12 @@
       host.innerHTML = '';
       host.classList.add('rp-hidden');
       host.setAttribute('aria-hidden', 'true');
-      syncLegacyFields(null, false);
+      syncLegacyFields(null, false, ctx, resolved);
       return null;
     }
     savedValues = flattenViajesSaved(savedValues || {});
     renderBlocks(host, mergedConfig(cfg, ctx), savedValues, ctx);
-    syncLegacyFields(cfg, true);
+    syncLegacyFields(cfg, true, ctx, resolved);
     return cfg;
   }
 
@@ -3545,6 +5443,39 @@
     if (isGastronomiaSectorSubcategoria(ctx)) {
       return mapGastronomiaSectorToPerfil(u, bloques, ctx);
     }
+    if (isSaludSectorSubcategoria(ctx)) {
+      return mapSaludSectorToPerfil(u, bloques, ctx);
+    }
+    if (isProfesionalesSectorSubcategoria(ctx)) {
+      return mapProfesionalesSectorToPerfil(u, bloques, ctx);
+    }
+    if (isTecnologiaSectorSubcategoria(ctx)) {
+      return mapTecnologiaSectorToPerfil(u, bloques, ctx);
+    }
+    if (isAutomotrizSectorSubcategoria(ctx)) {
+      return mapAutomotrizSectorToPerfil(u, bloques, ctx);
+    }
+    if (isTransporteSectorSubcategoria(ctx)) {
+      return mapTransporteSectorToPerfil(u, bloques, ctx);
+    }
+    if (isComercioSectorSubcategoria(ctx)) {
+      return mapComercioSectorToPerfil(u, bloques, ctx);
+    }
+    if (isHogarSectorSubcategoria(ctx)) {
+      return mapHogarSectorToPerfil(u, bloques, ctx);
+    }
+    if (isMascotasSectorSubcategoria(ctx)) {
+      return mapMascotasSectorToPerfil(u, bloques, ctx);
+    }
+    if (isBienesRaicesSectorSubcategoria(ctx)) {
+      return mapBienesRaicesSectorToPerfil(u, bloques, ctx);
+    }
+    if (isEducacionSectorSubcategoria(ctx)) {
+      return mapEducacionSectorToPerfil(u, bloques, ctx);
+    }
+    if (isIndustriaSectorSubcategoria(ctx)) {
+      return mapIndustriaSectorToPerfil(u, bloques, ctx);
+    }
     if (isHospedajeSubcategoria(ctx)) {
       return mapHospedajeToPerfil(u, bloques, ctx);
     }
@@ -3585,6 +5516,12 @@
       u.dinamicasParticipa = bloques.dinamicasParticipa.slice();
     }
     if (bloques.colaboracionContenido) u.colaboracionContenido = bloques.colaboracionContenido;
+    if (bloques.mostrarColaboracionContenidoPublico) {
+      u.mostrarColaboracionContenidoPublico = bloques.mostrarColaboracionContenidoPublico;
+    } else if (bloques.colaboracionContenido && String(bloques.colaboracionContenido).trim() &&
+        String(bloques.colaboracionContenido).trim() !== 'No' && !u.mostrarColaboracionContenidoPublico) {
+      u.mostrarColaboracionContenidoPublico = 'Sí';
+    }
     if (bloques.realizaTrios) u.realizaTrios = bloques.realizaTrios;
     if (Array.isArray(bloques.tiposTrios) && bloques.tiposTrios.length) {
       u.tiposTrios = bloques.tiposTrios.slice();
@@ -3745,6 +5682,61 @@
     isGastronomiaSectorSubcategoria: isGastronomiaSectorSubcategoria,
     mapGastronomiaSectorToPerfil: mapGastronomiaSectorToPerfil,
     validateGastronomiaSectorValues: validateGastronomiaSectorValues,
+    matchesSaludSector: matchesSaludSector,
+    isSaludSectorSubcategoria: isSaludSectorSubcategoria,
+    mapSaludSectorToPerfil: mapSaludSectorToPerfil,
+    validateSaludSectorValues: validateSaludSectorValues,
+    buildSaludSectorPerfil: buildSaludSectorPerfil,
+    matchesProfesionalesSector: matchesProfesionalesSector,
+    isProfesionalesSectorSubcategoria: isProfesionalesSectorSubcategoria,
+    mapProfesionalesSectorToPerfil: mapProfesionalesSectorToPerfil,
+    validateProfesionalesSectorValues: validateProfesionalesSectorValues,
+    buildProfesionalesSectorPerfil: buildProfesionalesSectorPerfil,
+    matchesTecnologiaSector: matchesTecnologiaSector,
+    isTecnologiaSectorSubcategoria: isTecnologiaSectorSubcategoria,
+    mapTecnologiaSectorToPerfil: mapTecnologiaSectorToPerfil,
+    validateTecnologiaSectorValues: validateTecnologiaSectorValues,
+    buildTecnologiaSectorPerfil: buildTecnologiaSectorPerfil,
+    matchesAutomotrizSector: matchesAutomotrizSector,
+    isAutomotrizSectorSubcategoria: isAutomotrizSectorSubcategoria,
+    mapAutomotrizSectorToPerfil: mapAutomotrizSectorToPerfil,
+    validateAutomotrizSectorValues: validateAutomotrizSectorValues,
+    buildAutomotrizSectorPerfil: buildAutomotrizSectorPerfil,
+    matchesTransporteSector: matchesTransporteSector,
+    isTransporteSectorSubcategoria: isTransporteSectorSubcategoria,
+    mapTransporteSectorToPerfil: mapTransporteSectorToPerfil,
+    validateTransporteSectorValues: validateTransporteSectorValues,
+    buildTransporteSectorPerfil: buildTransporteSectorPerfil,
+    matchesComercioSector: matchesComercioSector,
+    isComercioSectorSubcategoria: isComercioSectorSubcategoria,
+    mapComercioSectorToPerfil: mapComercioSectorToPerfil,
+    validateComercioSectorValues: validateComercioSectorValues,
+    buildComercioSectorPerfil: buildComercioSectorPerfil,
+    matchesHogarSector: matchesHogarSector,
+    isHogarSectorSubcategoria: isHogarSectorSubcategoria,
+    mapHogarSectorToPerfil: mapHogarSectorToPerfil,
+    validateHogarSectorValues: validateHogarSectorValues,
+    buildHogarSectorPerfil: buildHogarSectorPerfil,
+    matchesMascotasSector: matchesMascotasSector,
+    isMascotasSectorSubcategoria: isMascotasSectorSubcategoria,
+    mapMascotasSectorToPerfil: mapMascotasSectorToPerfil,
+    validateMascotasSectorValues: validateMascotasSectorValues,
+    buildMascotasSectorPerfil: buildMascotasSectorPerfil,
+    matchesBienesRaicesSector: matchesBienesRaicesSector,
+    isBienesRaicesSectorSubcategoria: isBienesRaicesSectorSubcategoria,
+    mapBienesRaicesSectorToPerfil: mapBienesRaicesSectorToPerfil,
+    validateBienesRaicesSectorValues: validateBienesRaicesSectorValues,
+    buildBienesRaicesSectorPerfil: buildBienesRaicesSectorPerfil,
+    matchesEducacionSector: matchesEducacionSector,
+    isEducacionSectorSubcategoria: isEducacionSectorSubcategoria,
+    mapEducacionSectorToPerfil: mapEducacionSectorToPerfil,
+    validateEducacionSectorValues: validateEducacionSectorValues,
+    buildEducacionSectorPerfil: buildEducacionSectorPerfil,
+    matchesIndustriaSector: matchesIndustriaSector,
+    isIndustriaSectorSubcategoria: isIndustriaSectorSubcategoria,
+    mapIndustriaSectorToPerfil: mapIndustriaSectorToPerfil,
+    validateIndustriaSectorValues: validateIndustriaSectorValues,
+    buildIndustriaSectorPerfil: buildIndustriaSectorPerfil,
     matchesHospedaje: matchesHospedaje,
     apply: apply,
     collectValues: collectValues,

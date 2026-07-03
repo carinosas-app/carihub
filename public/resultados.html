@@ -8,7 +8,7 @@
 <link rel="stylesheet" href="css/carihub-premium-theme.css">
 <link rel="stylesheet" href="css/carihub-pink-sheen.css">
 <link rel="stylesheet" href="css/carihub-nav-quick.css">
-<link rel="stylesheet" href="css/resultados.css">
+<link rel="stylesheet" href="css/resultados.css?v=20260702res8">
 <link rel="stylesheet" href="css/carihub-media-placeholders.css?v=20260630hf1">
 </head>
 <body data-tema="adult">
@@ -86,16 +86,6 @@
         <span class="pnav__ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20.2l-.9-.8C6.8 15.2 4.5 12.6 4.5 9.8 4.5 7 6.6 5 9.4 5c1.6 0 3.1.8 4 2.1.9-1.3 2.4-2.1 4-2.1 2.8 0 4.9 2 4.9 4.8 0 2.8-2.3 5.4-6.6 9.4l-.9.9z"/></svg></span>
         <span class="pnav__label">Favoritas</span>
       </a>
-      <a href="index.html">
-        <span class="pnav__ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7.5A2.5 2.5 0 015.5 5H13A2.5 2.5 0 0115.5 7.5v3A2.5 2.5 0 0113 13H8l-3.5 2.6V13H5.5A2.5 2.5 0 013 10.5z"/></svg></span>
-        <span class="pnav__label">Mensajes</span>
-        <span class="bdg">3</span>
-      </a>
-      <a href="#">
-        <span class="pnav__ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9a6 6 0 1112 0c0 5 2 6 2 6H4s2-1 2-6z"/><path d="M10 19a2 2 0 004 0"/></svg></span>
-        <span class="pnav__label">Notificaciones</span>
-        <span class="bdg">2</span>
-      </a>
     </nav>
     <button class="pbtn pbtn--publicar-res" type="button" onclick="location.href='index.html?abrir=registro'">
       <span class="pbtn--publicar-res__sparkles" aria-hidden="true"></span>
@@ -112,9 +102,25 @@
         <p class="res-midband__seo" id="resSeoLine"></p>
       </div>
       <div class="res-midband__actions">
-        <button class="res-midband__btn res-midband__btn--volver" type="button" id="resBtnVolver">Volver</button>
-        <a class="res-midband__btn res-midband__btn--fuchsia" id="resBtnRegistro" href="index.html?abrir=registro">Registrarse</a>
-        <button class="res-midband__btn res-midband__btn--fuchsia" type="button" id="resBtnCerca"><span class="res-midband__btn-ic" aria-hidden="true">📍</span>Cerca de mí</button>
+        <button class="res-midband__btn res-midband__btn--volver" type="button" id="resBtnVolver">
+          <span class="res-midband__btn-ic" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+          </span>
+          <span class="res-midband__btn-txt">Volver</span>
+        </button>
+        <a class="res-midband__btn res-midband__btn--registro" id="resBtnRegistro" href="index.html?abrir=registro">
+          <span class="res-midband__btn-sparkles" aria-hidden="true"></span>
+          <span class="res-midband__btn-ic" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg>
+          </span>
+          <span class="res-midband__btn-txt">Registrarse</span>
+        </a>
+        <button class="res-midband__btn res-midband__btn--cerca" type="button" id="resBtnCerca">
+          <span class="res-midband__btn-ic" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-6.5-4.9-6.5-10a6.5 6.5 0 1113 0c0 5.1-6.5 10-6.5 10z"/><circle cx="12" cy="11" r="2.4"/></svg>
+          </span>
+          <span class="res-midband__btn-txt">Cerca de mí</span>
+        </button>
       </div>
     </div>
     <div class="res-midband__slot res-midband__slot--libe" id="resMidLibe" data-slot="resultados_libe"></div>
@@ -122,43 +128,13 @@
 
   </div>
 
-  <!-- 7) TARJETAS (única zona con scroll) -->
+  <!-- Zona con scroll: tarjetas + banner inferior + cambiar búsqueda (se mueven juntos) -->
+  <div class="res-scroll" id="resScroll">
+
+  <!-- 7) TARJETAS -->
   <section class="resultados-container profiles-list res-lista" id="profilesList"></section>
 
-  <div class="res-shell__bottom">
-
-  <!-- 8) CAMBIAR BÚSQUEDA (único selector interactivo) -->
-  <div class="res-search-dock" id="resSearchDock">
-  <p class="res-search-dock__hint">Cambiar búsqueda</p>
-  <section class="res-search-bar" aria-label="Cambiar búsqueda">
-    <label class="res-sbar-btn" data-sbar-field="cat">
-      <span class="res-sbar-btn__sparkles" aria-hidden="true"></span>
-      <span class="res-sbar-btn__value" id="resSbarCatLabel">Cariñosas</span>
-      <select id="resSbarCat" class="res-sbar-btn__select" aria-label="Categoría" tabindex="-1"></select>
-    </label>
-    <label class="res-sbar-btn" data-sbar-field="pais">
-      <span class="res-sbar-btn__sparkles" aria-hidden="true"></span>
-      <span class="res-sbar-btn__value" id="resSbarPaisLabel">México</span>
-      <select id="resSbarPais" class="res-sbar-btn__select" aria-label="País" tabindex="-1"></select>
-    </label>
-    <label class="res-sbar-btn" data-sbar-field="estado">
-      <span class="res-sbar-btn__sparkles" aria-hidden="true"></span>
-      <span class="res-sbar-btn__value" id="resSbarEstadoLabel">Estado</span>
-      <select id="resSbarEstado" class="res-sbar-btn__select" aria-label="Estado" tabindex="-1"></select>
-    </label>
-    <label class="res-sbar-btn" data-sbar-field="ciudad">
-      <span class="res-sbar-btn__sparkles" aria-hidden="true"></span>
-      <span class="res-sbar-btn__value" id="resSbarCiudadLabel">Ciudad</span>
-      <select id="resSbarCiudad" class="res-sbar-btn__select" aria-label="Ciudad" tabindex="-1"></select>
-    </label>
-    <button type="button" class="res-sbar-btn res-sbar-btn--buscar" id="resSbarBuscar" aria-label="Buscar">
-      <span class="res-sbar-btn__sparkles" aria-hidden="true"></span>
-      <span class="res-sbar-btn__txt">Buscar</span>
-    </button>
-  </section>
-  </div>
-
-  <!-- 9) BANNER INFERIOR (patrón .pb-slot--bottom) -->
+  <!-- 8) BANNER INFERIOR (justo debajo de las tarjetas; scroll junto con ellas) -->
   <a class="pb-slot pb-slot--bottom res-bottom" href="registro-banner.html?slot=resultados_inferior" data-resultados-slot="resultados_inferior" aria-label="Anuncia tu perfil en Cariñosas">
     <span class="res-bottom__glow" aria-hidden="true"></span>
     <span class="res-bottom__photo"><img src="img/resultados-demo/violeta-2.png" alt="" width="92" height="92" decoding="async"></span>
@@ -179,7 +155,42 @@
     <span class="res-bottom__btn">ANUNCIA AHORA <span class="res-bottom__btn-go" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 6l6 6-6 6"/></svg></span></span>
   </a>
 
-  </div><!-- /.res-shell__bottom -->
+  <!-- 9) CAMBIAR BÚSQUEDA -->
+  <div class="res-search-dock" id="resSearchDock">
+  <p class="res-search-dock__hint">Cambiar búsqueda</p>
+  <section class="res-search-bar" aria-label="Cambiar búsqueda">
+    <label class="res-sbar-btn" data-sbar-field="cat">
+      <span class="res-sbar-btn__sparkles" aria-hidden="true"></span>
+      <span class="res-sbar-btn__label">Categoría</span>
+      <span class="res-sbar-btn__value" id="resSbarCatLabel">Cariñosas</span>
+      <select id="resSbarCat" class="res-sbar-btn__select" aria-label="Categoría" tabindex="-1"></select>
+    </label>
+    <label class="res-sbar-btn" data-sbar-field="pais">
+      <span class="res-sbar-btn__sparkles" aria-hidden="true"></span>
+      <span class="res-sbar-btn__label">País</span>
+      <span class="res-sbar-btn__value" id="resSbarPaisLabel">México</span>
+      <select id="resSbarPais" class="res-sbar-btn__select" aria-label="País" tabindex="-1"></select>
+    </label>
+    <label class="res-sbar-btn" data-sbar-field="estado">
+      <span class="res-sbar-btn__sparkles" aria-hidden="true"></span>
+      <span class="res-sbar-btn__label">Estado</span>
+      <span class="res-sbar-btn__value" id="resSbarEstadoLabel">Todos</span>
+      <select id="resSbarEstado" class="res-sbar-btn__select" aria-label="Estado" tabindex="-1"></select>
+    </label>
+    <label class="res-sbar-btn" data-sbar-field="ciudad">
+      <span class="res-sbar-btn__sparkles" aria-hidden="true"></span>
+      <span class="res-sbar-btn__label">Ciudad</span>
+      <span class="res-sbar-btn__value" id="resSbarCiudadLabel">Todas</span>
+      <select id="resSbarCiudad" class="res-sbar-btn__select" aria-label="Ciudad" tabindex="-1"></select>
+    </label>
+    <button type="button" class="res-sbar-btn res-sbar-btn--buscar" id="resSbarBuscar" aria-label="Buscar más">
+      <span class="res-sbar-btn__sparkles" aria-hidden="true"></span>
+      <span class="res-sbar-btn__txt">Buscar más</span>
+    </button>
+  </section>
+  </div>
+
+  </div><!-- /.res-scroll -->
   </div><!-- /.res-shell -->
 
 </div>
@@ -223,9 +234,15 @@
 <script src="js/banner-general-slides.js"></script>
 <script src="js/carihub-media-placeholders.js?v=20260630ph1"></script>
 <script src="js/carihub-slot-preview-images.js?v=20260630ph1"></script>
+<script src="js/data/registro-schema-index.js"></script>
+<script src="js/carihub-field-engine-lite.js"></script>
+<script src="js/carihub-bienestar-sector-render.js?v=20260702bien1"></script>
+<script src="js/carihub-resultados-sector.js?v=20260702sec2"></script>
+<script src="js/data/registro-sector-contract-registry.js?v=20260702reg-v1"></script>
+<script src="js/carihub-resultados-card-contract.js?v=20260702ctr2"></script>
 <script src="js/banner-sin-resultados.js?v=20260628b"></script>
 <script src="js/banner-resultados-laterales.js?v=20260628b"></script>
-<script src="js/banner-resultados-principales.js"></script>
+<script src="js/banner-resultados-principales.js?v=20260702ban1"></script>
 <script src="js/resultados-banners.js"></script>
 <script src="js/data/registro-adultos-escort-blocks.js?v=20260620v"></script>
 <script src="js/data/registro-adultos-pareja-blocks.js?v=20260620v"></script>
@@ -240,10 +257,9 @@
 <script src="js/carihub-viajes-desplazamiento.js?v=20260620v"></script>
 <script src="js/carihub-registro-public-blocks.js?v=20260628h1"></script>
 <script src="js/resultados-registrados.js"></script>
-<script src="js/data/registro-schema-index.js"></script>
-<script src="js/carihub-field-engine-lite.js"></script>
 <script src="js/carihub-messenger-privacidad-ui.js"></script>
 <script src="js/carihub-public-render-lite.js"></script>
+<script src="js/data/registro-sector-contract-registry.js?v=20260702reg-v1"></script>
 <script src="js/resultados-demo.js"></script>
 <script src="js/carihub-favoritos.js"></script>
 <script src="js/publicidad-activa.js"></script>
@@ -347,6 +363,25 @@
     if (window.CariHubResultadosDemo && CariHubResultadosDemo.queryFromLocation) {
       Q = CariHubResultadosDemo.queryFromLocation();
     }
+    try {
+      if (window.CariHubResultadosSector && Q && Q.categoria) {
+        CariHubResultadosSector.aplicarTemaSector(Q.categoria);
+      }
+    } catch (e) { /* tema opcional */ }
+    try {
+      if (window.CHUI && CHUI.aplicarTema && Q && Q.categoria) {
+        CHUI.aplicarTema(Q.categoria);
+      }
+    } catch (e) { /* opcional */ }
+    remountResultadosBanners();
+  }
+
+  function remountResultadosBanners() {
+    try {
+      if (window.CariHubBannerResultadosPrincipales && CariHubBannerResultadosPrincipales.mount) {
+        CariHubBannerResultadosPrincipales.mount({ Q: Q, force: true });
+      }
+    } catch (e) { /* banners opcionales */ }
   }
 
   function safeTxt(t) {
@@ -584,8 +619,8 @@
     var map = [
       { sel: 'resSbarCat', lbl: 'resSbarCatLabel', empty: 'Categoría' },
       { sel: 'resSbarPais', lbl: 'resSbarPaisLabel', empty: 'País' },
-      { sel: 'resSbarEstado', lbl: 'resSbarEstadoLabel', empty: 'Todos los estados' },
-      { sel: 'resSbarCiudad', lbl: 'resSbarCiudadLabel', empty: 'Todas las ciudades' }
+      { sel: 'resSbarEstado', lbl: 'resSbarEstadoLabel', empty: 'Todos' },
+      { sel: 'resSbarCiudad', lbl: 'resSbarCiudadLabel', empty: 'Todas' }
     ];
     map.forEach(function (m) {
       var el = document.getElementById(m.sel);
@@ -1094,7 +1129,10 @@
     bootPage();
   }
 
-  window.addEventListener('load', bootResultadosDemo);
+  window.addEventListener('load', function () {
+    bootResultadosDemo();
+    refreshQ();
+  });
 
   /* Vista completa en panel estrecho del IDE (mismo patrón que perfil-vista-previa) */
   /* Lienzo resultados: escala uniforme, sin recortar (ver --res-design-w en CSS) */
@@ -1156,15 +1194,33 @@
       docRoot.style.removeProperty('--res-card-h');
       return;
     }
-    var h = list.clientHeight;
-    if (h < 48) {
+    var scroll = document.getElementById('resScroll');
+    if (!scroll) return;
+    /* Alto disponible = zona de scroll menos banner inferior y dock, para que
+       las N tarjetas + banner + dock quepan sin encimarse. */
+    var avail = scroll.clientHeight;
+    if (avail < 48) {
       setTimeout(syncResListaSlots, 50);
       return;
     }
+    var scrollGap = parseFloat(getComputedStyle(scroll).rowGap || getComputedStyle(scroll).gap) || 12;
+    var banner = scroll.querySelector('.res-bottom');
+    var dock = scroll.querySelector('.res-search-dock');
+    var extra = 0;
+    var extraItems = 0;
+    if (banner) { extra += banner.offsetHeight; extraItems++; }
+    if (dock) { extra += dock.offsetHeight; extraItems++; }
+    /* gaps del contenedor scroll: entre lista, banner y dock */
+    extra += scrollGap * extraItems;
+    var listAvail = avail - extra;
     var gap = parseFloat(getComputedStyle(list).rowGap || getComputedStyle(list).gap) || 12;
     var gapCount = resListaGapCount(slots);
-    var cardH = Math.floor((h - gap * gapCount) / slots);
-    if (cardH < 72) return;
+    var cardH = Math.floor((listAvail - gap * gapCount) / slots);
+    if (cardH < 72) {
+      /* No hay espacio para el objetivo: deja que fluya natural y haga scroll */
+      docRoot.style.removeProperty('--res-card-h');
+      return;
+    }
     docRoot.style.setProperty('--res-card-h', cardH + 'px');
     list.scrollTop = 0;
   }

@@ -198,6 +198,14 @@
 
   var DEMO_POR_COMPONENTE = {
     ResultCardNegocio: {
+      'restaurantes-tradicional': [
+        { nombreComercial: 'La Cocina de Monterrey', precio: '180', tagline: 'Cocina regional, terraza y reservaciones.', horario: 'Mar–Dom 13:00–23:00', categoriaPublica: 'Restaurante Tradicional', verificada: true, colaboracionContenido: 'Bajo acuerdo previo', mostrarColaboracionContenidoPublico: 'Sí' },
+        { nombreComercial: 'El Asador del Norte', precio: '250', tagline: 'Cortes premium y parrilla al carbón.', horario: 'Lun–Dom 12:00–00:00', categoriaPublica: 'Restaurante Tradicional', verificada: true },
+        { nombreComercial: 'Cocina de la Abuela', precio: '120', tagline: 'Comida casera, menú del día y postres.', horario: 'Lun–Sáb 8:00–17:00', categoriaPublica: 'Restaurante Tradicional', verificada: true }
+      ],
+      restaurante: [
+        { nombreComercial: 'La Cocina de Monterrey', precio: '180', tagline: 'Cocina regional, terraza y reservaciones.', horario: 'Mar–Dom 13:00–23:00', categoriaPublica: 'Restaurante', verificada: true }
+      ],
       'sex shop': [
         { nombreComercial: 'Sensual Shop MTY', precio: '199', tagline: 'Productos premium, envío discreto y asesoría.', horario: 'Lun–Sáb 10:00–22:00', categoriaPublica: 'Sex Shop', verificada: true }
       ],
@@ -207,35 +215,112 @@
       'hotel motel': [
         { nombreComercial: 'Hotel & Suites Valle', precio: '890', tagline: 'Habitaciones temáticas y total discreción.', horario: '24 horas', categoriaPublica: 'Hotel / Motel', verificada: true }
       ],
-      restaurante: [
-        { nombreComercial: 'La Cocina de Monterrey', precio: '180', tagline: 'Cocina regional, terraza y reservaciones.', horario: 'Mar–Dom 13:00–23:00', categoriaPublica: 'Restaurante', verificada: true }
-      ],
       default: [
-        { nombreComercial: 'Negocio demo local', precio: 'Consultar', tagline: 'Anuncio de demostración para negocios.', horario: 'Horario público en perfil', verificada: true }
+        { nombreComercial: 'Negocio demo local', precio: 'Consultar', tagline: 'Anuncio de demostración para negocios.', horario: 'Horario público en perfil', verificada: true },
+        { nombreComercial: 'Comercio de la zona', precio: '150', tagline: 'Atención personalizada y buen servicio.', horario: 'Lun–Sáb 9:00–20:00', verificada: true }
       ]
     },
     ResultCardServicio: {
+      'talleres-mecanicos': [
+        { nombre: 'Taller Mecánico Rápido', precio: '350', tagline: 'Diagnóstico, frenos, suspensión y afinación.', especialidad: 'Mecánica general', horario: 'Lun–Sáb 8:00–19:00', zonaCobertura: 'Monterrey y área metropolitana', verificada: true, colaboracionContenido: 'Sí', mostrarColaboracionContenidoPublico: 'Sí' },
+        { nombre: 'Auto Service del Valle', precio: '400', tagline: 'Servicio express y garantía por escrito.', especialidad: 'Mecánica automotriz', horario: 'Lun–Vie 8:00–18:00', zonaCobertura: 'San Pedro y Monterrey', verificada: true },
+        { nombre: 'Mecánica Hernández', precio: '300', tagline: 'Más de 15 años de experiencia en autos.', especialidad: 'Motor y transmisión', horario: 'Lun–Sáb 7:00–20:00', verificada: true }
+      ],
+      vulcanizadoras: [
+        { nombre: 'Vulcanizadora El Rápido', precio: '150', tagline: 'Llantas nuevas y usadas, balanceo y alineación.', especialidad: 'Vulcanización', horario: 'Lun–Dom 7:00–21:00', zonaCobertura: 'Monterrey', verificada: true },
+        { nombre: 'Llantas y Rines MTY', precio: '200', tagline: 'Todas las marcas, servicio a domicilio.', especialidad: 'Vulcanización móvil', horario: '24 horas', verificada: true }
+      ],
       plomeros: [
         { nombre: 'Carlos Ramírez', precio: '300', tagline: 'Plomería residencial y comercial con garantía.', especialidad: 'Plomería general', horario: 'Lun–Dom 7:00–22:00', zonaCobertura: 'Monterrey y área metropolitana', verificada: true }
+      ],
+      'paseador-de-perros': [
+        { nombre: 'Paseos Caninos MTY', precio: '150', tagline: 'Paseos diarios, cuidado y socialización.', especialidad: 'Paseo de perros', horario: 'Lun–Sáb 6:00–20:00', zonaCobertura: 'Monterrey centro y sur', verificada: true },
+        { nombre: 'Dog Walker Pro', precio: '180', tagline: 'Rutas seguras, reporte con fotos.', especialidad: 'Paseo y cuidado', horario: 'Lun–Dom', verificada: true }
       ],
       'cirugia-plastica-y-estetica': [
         { nombre: 'Dr. Andrés Meza', precio: 'Consultar', tagline: 'Cirugía estética y reconstructiva con valoración previa.', especialidad: 'Cirugía plástica', horario: 'Con cita previa', verificada: true }
       ],
       default: [
-        { nombre: 'Profesional demo', precio: '500', tagline: 'Servicio independiente de demostración en tu zona.', especialidad: 'Servicio profesional', horario: 'Lun–Sáb', verificada: true }
+        { nombre: 'Profesional demo', precio: '500', tagline: 'Servicio independiente de demostración en tu zona.', especialidad: 'Servicio profesional', horario: 'Lun–Sáb', verificada: true },
+        { nombre: 'Servicio local', precio: '400', tagline: 'Atención personalizada con garantía.', especialidad: 'Servicio general', horario: 'Lun–Vie 9:00–18:00', verificada: true }
       ]
     },
     ResultCardProfesional: {
       'medicos-generales': [
-        { nombre: 'Dra. Ana Lucía Méndez', precio: '800', tagline: 'Medicina general, check-ups y seguimiento.', especialidad: 'Medicina General', cedulaVerificada: true, horario: 'Lun–Vie 9:00–19:00', verificada: true }
+        { nombre: 'Dra. Ana Lucía Méndez', precio: '800', tagline: 'Medicina general, check-ups y seguimiento.', especialidad: 'Medicina General', cedulaVerificada: true, horario: 'Lun–Vie 9:00–19:00', verificada: true, colaboracionContenido: 'Sí', mostrarColaboracionContenidoPublico: 'Sí' },
+        { nombre: 'Dr. Roberto Sánchez', precio: '750', tagline: 'Atención integral, urgencias menores y recetas.', especialidad: 'Medicina General', cedulaVerificada: true, horario: 'Lun–Sáb 8:00–20:00', verificada: true },
+        { nombre: 'Dra. Patricia Vega', precio: '900', tagline: 'Consulta presencial y seguimiento por WhatsApp.', especialidad: 'Medicina Familiar', cedulaVerificada: true, horario: 'Mar–Sáb 10:00–18:00', verificada: true }
       ],
       abogados: [
-        { nombre: 'Lic. Roberto Vega', precio: '1,200', tagline: 'Asesoría laboral, civil y contratos.', especialidad: 'Derecho laboral', verificada: true, horario: 'Lun–Vie 9:00–18:00' }
+        { nombre: 'Lic. Roberto Vega', precio: '1,200', tagline: 'Asesoría laboral, civil y contratos.', especialidad: 'Derecho laboral', verificada: true, horario: 'Lun–Vie 9:00–18:00' },
+        { nombre: 'Lic. María González', precio: '1,500', tagline: 'Divorcios, pensión alimenticia y custodia.', especialidad: 'Derecho familiar', cedulaVerificada: true, horario: 'Lun–Vie 9:00–17:00', verificada: true }
       ],
       default: [
         { nombre: 'Prof. demo certificado', precio: '700', tagline: 'Profesionista con cédula verificada (demo).', especialidad: 'Consulta profesional', cedulaVerificada: true, verificada: true }
       ]
     }
+  };
+
+  /** Demos sector Bienestar holístico (packs A–H). Campos públicos alineados a bienestarHolisticoPerfil. */
+  var BIENESTAR_PACK_POR_SUB = {
+    temazcales: 'C', 'centros-holisticos': 'C', 'centros-de-bienestar': 'C', 'centros-de-meditacion': 'C',
+    'centros-de-yoga': 'C', 'centros-de-sanacion': 'C', reiki: 'A', biomagnetismo: 'A', acupuntura: 'A',
+    aromaterapia: 'A', 'masajes-holisticos': 'A', 'masajes-relajantes': 'A', 'masajes-terapeuticos': 'A',
+    'terapias-holisticas': 'A', 'terapias-energeticas': 'A', 'terapias-alternativas': 'A', yoga: 'B',
+    pilates: 'B', meditacion: 'B', breathwork: 'B', 'centros-de-yoga': 'C', 'tiendas-esotericas': 'D',
+    herbolarios: 'D', 'productos-holisticos': 'D', tarot: 'E', astrologia: 'E', numerologia: 'E',
+    'coaching-de-vida': 'F', 'coaching-espiritual': 'F', 'retiros-espirituales': 'G', 'turismo-espiritual': 'G',
+    'ceremonias-ayahuasca-rape-plantas-de-poder': 'H', chamanismo: 'H', 'medicina-ancestral': 'H'
+  };
+
+  var DEMO_BIENESTAR_BY_PACK = {
+    A: [
+      { alias: 'Luna Reiki MTY', precio: '600', tagline: 'Sesiones de Reiki presencial y a distancia.', certificaciones: 'Certificación Reiki Usui nivel II', modalidadesTerapia: ['Reiki presencial', 'Reiki a distancia'], duracionSesionMinutos: '60_min', horario: 'Mar–Sáb 10:00–19:00', atencionDomicilio: 'No' },
+      { alias: 'Armonía Holística', precio: '750', tagline: 'Biomagnetismo y aromaterapia complementaria.', certificaciones: 'Diplomado en biomagnetismo médico', modalidadesTerapia: ['Biomagnetismo', 'Aromaterapia'], duracionSesionMinutos: '90_min', horario: 'Con cita previa' },
+      { alias: 'Sana Energía', precio: '550', tagline: 'Masajes holísticos y limpieza energética.', certificaciones: 'Curso avanzado de masaje holístico', modalidadesTerapia: ['Masaje holístico'], duracionSesionMinutos: '60_min', horario: 'Lun–Vie 11:00–20:00' }
+    ],
+    B: [
+      { alias: 'Yoga Vida Norte', precio: '350', tagline: 'Clases de Hatha y Vinyasa para todos los niveles.', certificaciones: 'Instructora certificada Yoga Alliance 200h', tipoPractica: 'Hatha · Vinyasa', modalidadClase: 'presencial', nivelesAtendidos: 'todos', horario: 'Lun–Sáb 7:00–21:00' },
+      { alias: 'Centro Prana', precio: '400', tagline: 'Yoga, pilates y breathwork en grupo reducido.', certificaciones: 'Formación en pilates mat y breathwork', tipoPractica: 'Yoga · Pilates', modalidadClase: 'hibrido', nivelesAtendidos: 'intermedio', horario: 'Mar–Dom 8:00–20:00' }
+    ],
+    C: [
+      { alias: 'Temazcal Anáhuac', precio: '450', tagline: 'Ceremonias tradicionales con guía experimentado.', certificaciones: 'Formación en medicina tradicional mexicana', serviciosCentro: ['Temazcal', 'Limpias energéticas', 'Meditación'], capacidadGrupo: '12', horario: 'Sáb y Dom con reservación', colaboracionContenido: 'Bajo acuerdo previo', mostrarColaboracionContenidoPublico: 'Sí' },
+      { alias: 'Centro Holístico Luz', precio: '500', tagline: 'Espacio para yoga, meditación y sanación grupal.', certificaciones: 'Centro registrado · facilitadores certificados', serviciosCentro: ['Yoga', 'Meditación', 'Círculos de sanación'], capacidadGrupo: '20', horario: 'Lun–Sáb 9:00–21:00' },
+      { alias: 'Casa del Temazcal', precio: '380', tagline: 'Ritual de purificación y cantos ancestrales.', certificaciones: 'Guía temazcalero con 10 años de experiencia', serviciosCentro: ['Temazcal', 'Herbolaria ceremonial'], capacidadGrupo: '8', horario: 'Con cita · fines de semana' }
+    ],
+    D: [
+      { alias: 'Mística Esotérica', precio: '150', tagline: 'Velas, sahumerios, cristales y herramientas holísticas.', certificaciones: 'Comercio local especializado', nombreComercial: 'Mística Esotérica', surtidoPrincipal: 'Velas · Sahumerios · Cristales', categoriasProductoBienestar: ['Velas esotéricas', 'Sahumerios', 'Cristales'], ventaPresencial: 'Sí', direccion: 'Centro Monterrey', horario: 'Lun–Sáb 10:00–20:00' },
+      { alias: 'Herbolaria del Valle', precio: '80', tagline: 'Plantas medicinales, tinturas y productos naturales.', certificaciones: 'Herbolaria tradicional', surtidoPrincipal: 'Plantas medicinales · Tinturas', categoriasProductoBienestar: ['Herbolaria', 'Tinturas'], ventaPresencial: 'Sí', horario: 'Lun–Vie 9:00–18:00' }
+    ],
+    E: [
+      { alias: 'Tarot Luna Serena', precio: '400', tagline: 'Lecturas de tarot presenciales y en línea.', certificaciones: 'Formación en tarot terapéutico', enfoqueEspiritual: 'Tarot como herramienta de autoconocimiento', modalidadLectura: 'ambas', horario: 'Mar–Dom con cita' },
+      { alias: 'Astros MTY', precio: '500', tagline: 'Carta natal y tránsitos con enfoque práctico.', certificaciones: 'Estudios de astrología evolutiva', enfoqueEspiritual: 'Astrología evolutiva', modalidadLectura: 'online', horario: 'Lun–Sáb' }
+    ],
+    F: [
+      { alias: 'Coach Vida Plena', precio: '900', tagline: 'Coaching de vida y propósito personal.', certificaciones: 'Certificación ICF nivel asociado', areaCoaching: 'Propósito · hábitos · transiciones', modalidadSesionCoaching: 'individual', horario: 'Lun–Vie 9:00–18:00' },
+      { alias: 'Despertar Interior', precio: '750', tagline: 'Coaching espiritual y desarrollo personal.', certificaciones: 'Diplomado en coaching ontológico', areaCoaching: 'Desarrollo personal · espiritualidad', modalidadSesionCoaching: 'mixta', horario: 'Con cita previa' }
+    ],
+    G: [
+      { alias: 'Retiro Sierra Serena', precio: '3,500', tagline: 'Retiros de silencio y reconexión en la naturaleza.', certificaciones: 'Facilitadores con experiencia en retiros', tipoExperiencia: 'retiro', duracionExperiencia: '3 días / 2 noches', fechasExperiencia: 'Consultar calendario mensual', lugarExperiencia: 'Santiago, N.L.', cupoMaximo: '16', horario: 'Fines de semana largos' },
+      { alias: 'Camino Sagrado', precio: '2,800', tagline: 'Turismo espiritual y ceremonias en espacios naturales.', certificaciones: 'Guías certificados en turismo consciente', tipoExperiencia: 'inmersion', duracionExperiencia: '2 días', fechasExperiencia: 'Próxima salida: consultar', lugarExperiencia: 'Sierra Madre', cupoMaximo: '12', horario: 'Salidas programadas' }
+    ],
+    H: [
+      { alias: 'Centro Ceremonial Ancestral', precio: 'Consultar', tagline: 'Experiencias ceremoniales guiadas con protocolo y acompañamiento.', certificaciones: 'Facilitadores con formación en medicina tradicional', tipoExperienciaCeremonial: 'ceremonia_guiada', acompanamientoCeremonial: ['Guía experimentado', 'Espacio seguro', 'Integración post-ceremonia'], requisitosPrevios: 'Mayor de edad · evaluación previa obligatoria', fechasCeremonia: 'Consultar disponibilidad', cupoCeremonia: '10', lugarCeremonia: 'Retiro privado · ubicación al confirmar', horario: 'Solo con cita y evaluación previa' }
+    ]
+  };
+
+  var DEMO_BIENESTAR = {
+    reiki: DEMO_BIENESTAR_BY_PACK.A,
+    temazcales: DEMO_BIENESTAR_BY_PACK.C,
+    'centros-de-yoga': DEMO_BIENESTAR_BY_PACK.B,
+    'masajes-holisticos': [
+      { alias: 'Manos Sanadoras', precio: '650', tagline: 'Masaje holístico con aceites esenciales.', certificaciones: 'Certificación en masaje terapéutico holístico', modalidadesTerapia: ['Masaje holístico', 'Aromaterapia'], duracionSesionMinutos: '90_min', horario: 'Lun–Sáb 10:00–20:00' }
+    ].concat(DEMO_BIENESTAR_BY_PACK.A.slice(0, 2)),
+    'tiendas-esotericas': DEMO_BIENESTAR_BY_PACK.D,
+    tarot: DEMO_BIENESTAR_BY_PACK.E,
+    'coaching-de-vida': DEMO_BIENESTAR_BY_PACK.F,
+    'retiros-espirituales': DEMO_BIENESTAR_BY_PACK.G,
+    'ceremonias-ayahuasca-rape-plantas-de-poder': DEMO_BIENESTAR_BY_PACK.H
   };
 
   function norm(t) {
@@ -286,12 +371,19 @@
 
   function enriquecerPerfil(u, Q) {
     if (global.CariHubFieldEngineLite && CariHubFieldEngineLite.enriquecerPerfilPublico) {
-      return CariHubFieldEngineLite.enriquecerPerfilPublico(u, {
+      u = CariHubFieldEngineLite.enriquecerPerfilPublico(u, {
+        categoria: (Q && Q.categoria) || u.categoria || u.categoriaPublica,
+        subcategoriaId: u.subcategoriaId
+      });
+    } else {
+      u.__vista = u.__vista || vistaDeCategoria((Q && Q.categoria) || u.categoria);
+    }
+    if (global.CariHubResultadosCardContract && CariHubResultadosCardContract.sanitizePerfil) {
+      CariHubResultadosCardContract.sanitizePerfil(u, {
         categoria: (Q && Q.categoria) || u.categoria || u.categoriaPublica,
         subcategoriaId: u.subcategoriaId
       });
     }
-    u.__vista = u.__vista || vistaDeCategoria((Q && Q.categoria) || u.categoria);
     return u;
   }
 
@@ -380,18 +472,313 @@
       u.nombre = nombre;
       u.alias = nombre;
       if (base.edad != null) u.edad = base.edad;
-      u.modalidades = base.modalidades || ['recibe', 'hotel'];
+      if (base.modalidades) u.modalidades = base.modalidades;
     }
     if (base.especialidad) u.especialidad = base.especialidad;
     if (base.horario) u.horario = base.horario;
     if (base.cedulaVerificada) u.cedulaVerificada = true;
     if (base.zonaCobertura) u.zonaCobertura = base.zonaCobertura;
+    if (base.colaboracionContenido) u.colaboracionContenido = base.colaboracionContenido;
+    if (base.mostrarColaboracionContenidoPublico) {
+      u.mostrarColaboracionContenidoPublico = base.mostrarColaboracionContenidoPublico;
+    }
 
     return enriquecerPerfil(u, Q);
   }
 
+  function bienestarPackDeSub(subId) {
+    var key = String(subId || '').trim().toLowerCase().replace(/_/g, '-');
+    if (BIENESTAR_PACK_POR_SUB[key]) return BIENESTAR_PACK_POR_SUB[key];
+    if (global.CARIHUB_REGISTRO_BIENESTAR_BLOCKS && CARIHUB_REGISTRO_BIENESTAR_BLOCKS.resolvePack) {
+      return CARIHUB_REGISTRO_BIENESTAR_BLOCKS.resolvePack(key);
+    }
+    return 'A';
+  }
+
+  function buildBienestarHolisticoPerfil(base, subId, pack) {
+    pack = String(pack || 'A').toUpperCase();
+    var p = {
+      deltaPack: pack,
+      canonSubcategoriaId: subId,
+      alias: base.alias || base.nombre || '',
+      tagline: base.tagline || '',
+      certificaciones: base.certificaciones || '',
+      tarifaDesde: base.precio || base.tarifaDesde || 'Consultar',
+      horarioDetalle: base.horario || base.horarioDetalle || ''
+    };
+    var keys = [
+      'modalidadesTerapia', 'duracionSesionMinutos', 'contraindicacionesGenerales', 'atencionDomicilio',
+      'tipoPractica', 'modalidadClase', 'nivelesAtendidos', 'serviciosCentro', 'capacidadGrupo',
+      'categoriasProductoBienestar', 'surtidoPrincipal', 'ventaPresencial', 'nombreComercial', 'direccion',
+      'enfoqueEspiritual', 'modalidadLectura', 'areaCoaching', 'modalidadSesionCoaching',
+      'tipoExperiencia', 'duracionExperiencia', 'fechasExperiencia', 'lugarExperiencia', 'cupoMaximo',
+      'tipoExperienciaCeremonial', 'acompanamientoCeremonial', 'requisitosPrevios',
+      'fechasCeremonia', 'cupoCeremonia', 'lugarCeremonia'
+    ];
+    keys.forEach(function (k) {
+      if (base[k] != null && base[k] !== '') p[k] = base[k];
+    });
+    return p;
+  }
+
+  function armarPerfilBienestar(base, idx, Q, pres) {
+    var subId = pres.subcategoriaId || idCategoria(Q.categoria);
+    var catLabel = base.categoriaPublica || labelCategoria(Q.categoria);
+    var pack = base.deltaPack || bienestarPackDeSub(subId);
+    var alias = base.alias || base.nombre || 'Facilitador demo';
+    var holistico = buildBienestarHolisticoPerfil(base, subId, pack);
+    var id = 'demo-bienestar-' + subId + '-' + slug(alias) + '-' + idx;
+    var tarifa = base.precio || holistico.tarifaDesde || 'Consultar';
+
+    var u = {
+      __id: id,
+      __demo: true,
+      __vista: 'pro',
+      sectorId: 'bienestar',
+      subcategoriaId: subId,
+      arquetipo: 'persona_servicio_bienestar',
+      tipoPerfil: 'persona',
+      categoria: catLabel,
+      categoriaPublica: catLabel,
+      nombre: alias,
+      alias: alias,
+      precio: tarifa,
+      tagline: base.tagline || '',
+      horario: base.horario || holistico.horarioDetalle || 'Consultar',
+      certificaciones: holistico.certificaciones,
+      pais: Q.pais,
+      estado: Q.estado || 'Nuevo León',
+      ciudad: Q.ciudad || 'Monterrey',
+      zona: zonaNombre(idx),
+      verificada: base.verificada !== false,
+      verificado: base.verificada !== false,
+      respuestaRapida: base.respuestaRapida !== false,
+      fotoURL: foto(idx),
+      fotosExtraURL: ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'],
+      deltaPack: pack,
+      bienestarHolisticoPerfil: holistico
+    };
+
+    if (base.colaboracionContenido) u.colaboracionContenido = base.colaboracionContenido;
+    if (base.mostrarColaboracionContenidoPublico) {
+      u.mostrarColaboracionContenidoPublico = base.mostrarColaboracionContenidoPublico;
+    }
+    if (pack === 'H') {
+      u.sensible = true;
+      u.regulada = true;
+    }
+
+    return enriquecerPerfil(u, Q);
+  }
+
+  function poolDemoBienestar(subId) {
+    if (DEMO_BIENESTAR[subId]) return DEMO_BIENESTAR[subId];
+    var pack = bienestarPackDeSub(subId);
+    return DEMO_BIENESTAR_BY_PACK[pack] || DEMO_BIENESTAR_BY_PACK.A;
+  }
+
+  function plantillaDemoBienestar(Q, pres) {
+    pres = pres || presentacionDeCategoria(Q.categoria);
+    var subId = pres.subcategoriaId || idCategoria(Q.categoria);
+    return poolDemoBienestar(subId).map(function (base, idx) {
+      return armarPerfilBienestar(base, idx, Q, pres);
+    });
+  }
+
+  var PROFESIONALES_PACK_POR_SUB = {
+    abogados: 'A', contadores: 'A', ingenieros: 'A',
+    'despachos-juridicos': 'B', 'despachos-contables': 'B', 'despachos-de-arquitectura': 'B', 'despachos-de-ingenieria': 'B',
+    'asesoria-fiscal': 'C', auditoria: 'C', notarias: 'C', 'corredurias-publicas': 'C', 'gestoria-y-tramites': 'C',
+    arquitectos: 'D', topografia: 'D', avaluos: 'D', peritos: 'D',
+    'consultoria-financiera': 'E', 'consultoria-de-negocios': 'E', 'recursos-humanos': 'E', 'reclutamiento-y-seleccion': 'E',
+    'estudios-socioeconomicos': 'E', 'coaching-ejecutivo': 'E', 'desarrollo-organizacional': 'E', franquicias: 'E',
+    'traduccion-e-interpretacion': 'F', 'marketing-y-publicidad': 'F', 'diseno-grafico': 'F', 'diseno-de-interiores': 'F',
+    'branding-e-identidad-corporativa': 'F', 'fotografia-profesional': 'F', 'produccion-de-video': 'F',
+    'relaciones-publicas': 'F', 'investigacion-de-mercados': 'F',
+    seguros: 'G', 'agentes-de-seguros': 'G', 'asesoria-patrimonial': 'G', 'asesoria-en-inversiones': 'G',
+    'comercio-internacional': 'G', 'importacion-y-exportacion': 'G', 'certificaciones-y-normatividad': 'G',
+    'seguridad-e-higiene': 'G', 'gestion-de-calidad': 'G', 'consultoria-ambiental': 'G',
+    'consultoria-empresarial': 'H', 'capacitacion-empresarial': 'H', 'agencias-de-marketing': 'H',
+    'diseno-industrial': 'H', 'logistica-empresarial': 'H', 'proteccion-civil-empresarial': 'H',
+    'responsabilidad-social-empresarial': 'H'
+  };
+
+  var DEMO_PROFESIONALES_BY_PACK = {
+    A: [
+      { nombreProfesional: 'Lic. Ana Torres', precio: '1,200', tagline: 'Derecho familiar, sucesiones y divorcios amistosos.', especialidadProfesional: 'Derecho familiar', serviciosProfesionales: ['Consulta', 'Asesoría', 'Representación'], modalidadAtencionProfesional: 'hibrido', horario: 'Lun–Vie 9:00–18:00', areasDerecho: ['Familiar', 'Sucesiones', 'Civil'], serviciosLegales: ['Consulta', 'Mediación', 'Contratos'], cedulaVerificada: true, colaboracionContenido: 'Sí', mostrarColaboracionContenidoPublico: 'Sí' },
+      { nombreProfesional: 'C.P. Luis Mendoza', precio: '900', tagline: 'Contabilidad y declaraciones para PyME y personas físicas.', especialidadProfesional: 'Contabilidad fiscal', serviciosProfesionales: ['Asesoría', 'Dictamen'], modalidadAtencionProfesional: 'consultorio', horario: 'Lun–Sáb 9:00–17:00', serviciosContables: ['Declaraciones', 'Nómina', 'Contabilidad mensual'], cedulaVerificada: true },
+      { nombreProfesional: 'Ing. Carla Ruiz', precio: '1,500', tagline: 'Ingeniería civil, supervisión y dictámenes estructurales.', especialidadProfesional: 'Ingeniería civil', serviciosProfesionales: ['Proyecto', 'Dictamen'], modalidadAtencionProfesional: 'visita_cliente', horario: 'Con cita previa', serviciosTecnicos: ['Supervisión', 'Dictamen'], cedulaVerificada: true }
+    ],
+    B: [
+      { alias: 'Despacho Jurídico Vega & Asoc.', precio: '2,500', tagline: 'Litigio mercantil y laboral para empresas medianas.', serviciosDespacho: ['Litigio', 'Contratos', 'Asesoría corporativa'], areasPracticaDespacho: ['Mercantil', 'Laboral', 'Fiscal'], tamanoEquipoDespacho: 'mediano_6_15', modalidadAtencionProfesional: 'consultorio', horario: 'Lun–Vie 8:00–19:00' },
+      { alias: 'Contadores del Norte SC', precio: '1,800', tagline: 'Despacho contable integral con enfoque en manufactura.', serviciosDespacho: ['Consulta', 'Due diligence'], areasPracticaDespacho: ['Fiscal', 'Mercantil'], tamanoEquipoDespacho: 'pequeno_2_5', horario: 'Lun–Vie 9:00–18:00' }
+    ],
+    C: [
+      { alias: 'Notaría Pública No. 45', precio: 'Consultar', tagline: 'Escrituras, poderes, protocolizaciones y fe de hechos.', serviciosFiscalesLegales: ['Notaría', 'Trámites'], tiposClientesProfesionales: ['Personas físicas', 'PyME', 'Corporativo'], modalidadAtencionProfesional: 'consultorio', horario: 'Lun–Vie 9:00–17:00' },
+      { alias: 'Gestoría MTY Express', precio: '600', tagline: 'Trámites vehiculares, licencias y permisos municipales.', serviciosFiscalesLegales: ['Trámites'], serviciosTramites: ['Vehicular', 'Municipal', 'Licencias'], horario: 'Lun–Sáb 8:00–18:00' }
+    ],
+    D: [
+      { alias: 'Arq. Sofía Delgado', precio: '2,200', tagline: 'Arquitectura residencial contemporánea y remodelaciones.', especialidadTecnica: ['Arquitectura'], serviciosTecnicos: ['Proyecto ejecutivo', 'Supervisión'], estilosArquitectonicos: ['Contemporáneo', 'Minimalista'], softwareHerramientas: 'Revit · AutoCAD · SketchUp', horario: 'Lun–Vie 10:00–19:00' },
+      { alias: 'Topografía Sierra', precio: '1,400', tagline: 'Levantamientos topográficos y mensuras para obra.', especialidadTecnica: ['Topografía'], serviciosTecnicos: ['Levantamiento', 'Dictamen'], horario: 'Lun–Sáb con cita' }
+    ],
+    E: [
+      { alias: 'Consultoría Financiera Atlas', precio: '3,000', tagline: 'Planeación financiera y valuación para PyME.', areasConsultoria: ['Finanzas', 'Estrategia'], serviciosConsultoria: ['Diagnóstico', 'Implementación'], industriasAtendidas: ['Manufactura', 'Retail'], horario: 'Lun–Vie 9:00–18:00' },
+      { alias: 'Coach Ejecutivo Pro', precio: '2,500', tagline: 'Coaching de liderazgo y transiciones de dirección.', areasConsultoria: ['RH', 'Transformación'], serviciosConsultoria: ['Coaching'], metodologiasConsultoria: ['Sesiones 1:1', '360°'], horario: 'Con cita' }
+    ],
+    F: [
+      { alias: 'Estudio Creativo Pixel', precio: '1,600', tagline: 'Branding, diseño gráfico y campañas digitales.', serviciosCreativos: ['Branding', 'Diseño gráfico', 'Redes sociales'], especialidadCreativa: ['Identidad visual', 'Packaging'], portfolioURL: 'https://ejemplo.com/portafolio', horario: 'Lun–Vie 9:00–19:00' },
+      { alias: 'Traducciones Pro MTY', precio: '800', tagline: 'Traducción técnica y jurada EN–ES.', serviciosCreativos: ['Otro'], especialidadCreativa: ['Editorial'], idiomasServicio: 'Español · Inglés · Francés', horario: 'Lun–Sáb' }
+    ],
+    G: [
+      { alias: 'Seguros Integra', precio: 'Consultar', tagline: 'Seguros de gastos médicos, vida y empresariales.', serviciosFinancieros: ['Seguros', 'Patrimonio'], tiposPolizaSeguros: ['GMM', 'Vida', 'Empresarial'], aseguradorasRepresentadas: 'GNP · MetLife · AXA', horario: 'Lun–Vie 9:00–18:00' },
+      { alias: 'Certificación ISO MTY', precio: '4,500', tagline: 'Implementación ISO 9001 y 14001 para industria.', serviciosFinancieros: ['Certificaciones', 'Consultoría ambiental'], normasCertificaciones: ['ISO 9001', 'ISO 14001'], horario: 'Con proyecto' }
+    ],
+    H: [
+      { nombreComercial: 'Consultoría Empresarial Integral', precio: 'Consultar', tagline: 'Estrategia, operaciones y transformación digital.', serviciosEmpresariales: ['Estrategia', 'Operaciones', 'Transformación'], especialidadesEmpresa: 'Manufactura · Retail · Servicios', tamanoEmpresaAtendida: ['PyME', 'Mediana'], direccion: 'San Pedro, N.L.', horario: 'Lun–Vie 8:00–18:00' },
+      { nombreComercial: 'Logística Empresarial del Norte', precio: 'Consultar', tagline: 'Fulfillment, almacenaje y distribución regional.', serviciosEmpresariales: ['Almacenaje', 'Distribución', 'Fulfillment'], especialidadesEmpresa: 'E-commerce · Retail', direccion: 'Monterrey, N.L.', horario: '24 horas operación' }
+    ]
+  };
+
+  var DEMO_PROFESIONALES = {
+    abogados: DEMO_PROFESIONALES_BY_PACK.A,
+    contadores: [DEMO_PROFESIONALES_BY_PACK.A[1]],
+    ingenieros: [DEMO_PROFESIONALES_BY_PACK.A[2]],
+    'despachos-juridicos': DEMO_PROFESIONALES_BY_PACK.B,
+    notarias: DEMO_PROFESIONALES_BY_PACK.C,
+    arquitectos: DEMO_PROFESIONALES_BY_PACK.D,
+    'consultoria-financiera': DEMO_PROFESIONALES_BY_PACK.E,
+    'diseno-grafico': DEMO_PROFESIONALES_BY_PACK.F,
+    seguros: DEMO_PROFESIONALES_BY_PACK.G,
+    'consultoria-empresarial': DEMO_PROFESIONALES_BY_PACK.H
+  };
+
+  function profesionalesPackDeSub(subId) {
+    var key = String(subId || '').trim().toLowerCase().replace(/_/g, '-');
+    if (PROFESIONALES_PACK_POR_SUB[key]) return PROFESIONALES_PACK_POR_SUB[key];
+    if (global.CARIHUB_REGISTRO_PROFESIONALES_SECTOR_BLOCKS && CARIHUB_REGISTRO_PROFESIONALES_SECTOR_BLOCKS.resolvePack) {
+      return CARIHUB_REGISTRO_PROFESIONALES_SECTOR_BLOCKS.resolvePack(key);
+    }
+    return 'B';
+  }
+
+  function buildProfesionalesPerfilDemo(base, subId, pack) {
+    pack = String(pack || 'A').toUpperCase();
+    var p = {
+      deltaPack: pack,
+      canonSubcategoriaId: subId,
+      tagline: base.tagline || '',
+      modalidadAtencionProfesional: base.modalidadAtencionProfesional || '',
+      horarioAtencion: base.horario || base.horarioAtencion || base.horarioDetalle || '',
+      horarioDetalle: base.horario || base.horarioDetalle || '',
+      precioConsulta: base.precio || base.precioConsulta || 'Consultar',
+      tarifaDesde: base.precio || base.tarifaDesde || 'Consultar',
+      colaboracionContenido: base.colaboracionContenido || '',
+      mostrarColaboracionContenidoPublico: base.mostrarColaboracionContenidoPublico || ''
+    };
+    var keys = [
+      'nombreProfesional', 'alias', 'nombreComercial', 'especialidadProfesional', 'certificaciones',
+      'serviciosProfesionales', 'unidadConsulta', 'anosExperienciaProfesional', 'areasDerecho',
+      'tiposClientesLegales', 'serviciosLegales', 'serviciosDespacho', 'areasPracticaDespacho',
+      'tamanoEquipoDespacho', 'serviciosContables', 'tiposClientesContables', 'serviciosFiscalesLegales',
+      'tiposClientesProfesionales', 'serviciosTramites', 'especialidadTecnica', 'serviciosTecnicos',
+      'softwareHerramientas', 'estilosArquitectonicos', 'areasConsultoria', 'serviciosConsultoria',
+      'industriasAtendidas', 'metodologiasConsultoria', 'serviciosCreativos', 'especialidadCreativa',
+      'idiomasServicio', 'portfolioURL', 'serviciosFinancieros', 'tiposPolizaSeguros',
+      'aseguradorasRepresentadas', 'normasCertificaciones', 'serviciosEmpresariales',
+      'especialidadesEmpresa', 'tamanoEmpresaAtendida', 'direccion', 'diferenciadorProfesional',
+      'coberturaGeografica', 'tiempoRespuestaConsulta', 'regimenesFiscales', 'instanciasJudiciales',
+      'tiposEntregablesCreativos', 'colaboracionesComerciales', 'tiposColaboracionComercial'
+    ];
+    keys.forEach(function (k) {
+      if (base[k] != null && base[k] !== '') p[k] = base[k];
+    });
+    return p;
+  }
+
+  function armarPerfilProfesionales(base, idx, Q, pres) {
+    var subId = pres.subcategoriaId || idCategoria(Q.categoria);
+    var catLabel = base.categoriaPublica || labelCategoria(Q.categoria);
+    var pack = base.deltaPack || profesionalesPackDeSub(subId);
+    var perfil = buildProfesionalesPerfilDemo(base, subId, pack);
+    var nombre = perfil.nombreProfesional || perfil.nombreComercial || perfil.alias || 'Profesional demo';
+    var id = 'demo-prof-' + subId + '-' + slug(nombre) + '-' + idx;
+    var precio = base.precio || perfil.precioConsulta || perfil.tarifaDesde || 'Consultar';
+    var esEmpresa = pack === 'H';
+
+    var u = {
+      __id: id,
+      __demo: true,
+      sectorId: 'profesionales',
+      subcategoriaId: subId,
+      categoria: catLabel,
+      categoriaPublica: catLabel,
+      precio: precio,
+      tagline: base.tagline || '',
+      horario: perfil.horarioAtencion || perfil.horarioDetalle || 'Consultar',
+      pais: Q.pais,
+      estado: Q.estado || 'Nuevo León',
+      ciudad: Q.ciudad || 'Monterrey',
+      zona: zonaNombre(idx),
+      verificada: base.verificada !== false,
+      verificado: base.verificada !== false,
+      cedulaVerificada: base.cedulaVerificada === true || (pack === 'A'),
+      respuestaRapida: base.respuestaRapida !== false,
+      fotoURL: foto(idx),
+      fotosExtraURL: ['a', 'b', 'c', 'd', 'e', 'f'],
+      deltaPack: pack,
+      profesionalesPerfil: perfil
+    };
+
+    if (esEmpresa) {
+      u.tipoPerfil = 'negocio';
+      u.tipoCuenta = 'negocio';
+      u.nombreComercial = perfil.nombreComercial || nombre;
+      u.nombre = u.nombreComercial;
+    } else if (pack === 'A') {
+      u.nombreProfesional = perfil.nombreProfesional || nombre;
+      u.nombre = u.nombreProfesional;
+      u.alias = u.nombre;
+      u.especialidad = perfil.especialidadProfesional || base.especialidad || '';
+    } else {
+      u.alias = perfil.alias || nombre;
+      u.nombre = u.alias;
+      u.especialidad = perfil.especialidadProfesional || perfil.especialidadTecnica || base.especialidad || '';
+    }
+
+    if (base.colaboracionContenido) u.colaboracionContenido = base.colaboracionContenido;
+    if (base.mostrarColaboracionContenidoPublico) {
+      u.mostrarColaboracionContenidoPublico = base.mostrarColaboracionContenidoPublico;
+    }
+
+    return enriquecerPerfil(u, Q);
+  }
+
+  function poolDemoProfesionales(subId) {
+    if (DEMO_PROFESIONALES[subId]) return DEMO_PROFESIONALES[subId];
+    var pack = profesionalesPackDeSub(subId);
+    return DEMO_PROFESIONALES_BY_PACK[pack] || DEMO_PROFESIONALES_BY_PACK.B;
+  }
+
+  function plantillaDemoProfesionales(Q, pres) {
+    pres = pres || presentacionDeCategoria(Q.categoria);
+    var subId = pres.subcategoriaId || idCategoria(Q.categoria);
+    return poolDemoProfesionales(subId).map(function (base, idx) {
+      return armarPerfilProfesionales(base, idx, Q, pres);
+    });
+  }
+
   function plantillaDemoSchema(Q, pres) {
     pres = pres || presentacionDeCategoria(Q.categoria);
+    var R = global.CariHubSectorContractRegistry;
+    if (R && R.resolveDemoBuilder) {
+      var builderId = R.resolveDemoBuilder(pres.sectorId);
+      if (builderId === 'plantillaDemoProfesionales' && typeof plantillaDemoProfesionales === 'function') {
+        return plantillaDemoProfesionales(Q, pres);
+      }
+      if (builderId === 'plantillaDemoBienestar' && typeof plantillaDemoBienestar === 'function') {
+        if (!pres.esAdultoPersona) return plantillaDemoBienestar(Q, pres);
+      }
+    }
     var comp = pres.componenteResultados || 'ResultCardAdultos';
     var subId = pres.subcategoriaId || idCategoria(Q.categoria);
     var pool = (DEMO_POR_COMPONENTE[comp] && (DEMO_POR_COMPONENTE[comp][subId] || DEMO_POR_COMPONENTE[comp].default)) || [];
@@ -522,7 +909,7 @@
     }
     var pres = presentacionDeCategoria(Q.categoria);
     var demo = [];
-    if (pres.esAdultoPersona !== false) {
+    if (pres.esAdultoPersona) {
       demo = perfilesCanonicosCuatro(Q).filter(function (u) {
         return coincideBusqueda(u, Q);
       });
@@ -964,7 +1351,7 @@
       global.CariHubBannerSinResultados.syncResultadosPage(false);
     }
     if (global.CariHubBannerResultadosPrincipales && global.CariHubBannerResultadosPrincipales.mount) {
-      global.CariHubBannerResultadosPrincipales.mount({ Q: Q });
+      global.CariHubBannerResultadosPrincipales.mount({ Q: Q, force: true });
     }
     if (global.CariHubBannerResultadosLaterales && global.CariHubBannerResultadosLaterales.mount) {
       global.CariHubBannerResultadosLaterales.mount({ Q: Q });
