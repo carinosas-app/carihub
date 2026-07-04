@@ -1,0 +1,790 @@
+{
+  "planId": "plan-entitlements-enforcement-v1",
+  "generado": "2026-06-23",
+  "fuenteProducto": "Auditoría sostenibilidad aceptada — riesgo = cupos sin enforcement",
+  "restricciones": [
+    "No modificar runtime en este paquete",
+    "No deploy",
+    "No crear issues GitHub sin autorización"
+  ],
+  "clasificacion": {
+    "bloqueador_sostenibilidad": "Sin esto, un plan Básico puede consumir recursos de Premium/Especial; margen contable colapsa en perfiles virales o con adjuntos.",
+    "importante_post_lanzamiento": "Operación y UX post-MVP; reduce soporte y churn pero no bloquea primer pago.",
+    "mejora_futura": "Capacidades aún en diseño (packs completos, lives engine, add-ons billing)."
+  },
+  "labels": [
+    "entitlements",
+    "storage",
+    "firestore",
+    "functions",
+    "dashboard",
+    "admin",
+    "p0-sostenibilidad",
+    "p1-post-launch",
+    "p2-future"
+  ],
+  "epicas": [
+    { "id": "ENT-E0", "nombre": "PlanEntitlements — modelo y resolución" },
+    { "id": "ENT-E1", "nombre": "Enforcement de upload" },
+    { "id": "ENT-E2", "nombre": "Dashboard de uso" },
+    { "id": "ENT-E3", "nombre": "Admin de planes y cupos" },
+    { "id": "ENT-E4", "nombre": "Cleanup y retención" },
+    { "id": "ENT-E5", "nombre": "Enforcement por categoría/subcategoría" }
+  ],
+  "tickets": [
+    {
+      "id": "ENT-001",
+      "epica": "ENT-E0",
+      "title": "Schema PlanEntitlements — límites completos por plan",
+      "clasificacion": "bloqueador_sostenibilidad",
+      "prioridad": "P0",
+      "dependencias": [],
+      "bloquea": ["ENT-002", "ENT-010", "ENT-011", "ENT-012", "ENT-030", "ENT-050"],
+      "archivosAfectados": [
+        "scripts/config-plan-entitlements-schema.json (nuevo — referencia)",
+        "scripts/config-precios-planes-perfiles-schema.json (extender limites)",
+        "firestore: config_plan_entitlements/global"
+      ],
+      "firestoreRules": [
+        "config_plan_entitlements/**: read autenticado; write solo admin/moderador",
+        "Denegar write cliente a perfiles/*/usage/*"
+      ],
+      "storageRules": [],
+      "functions": [],
+      "objetivo": "Definir contrato canónico de cupos por planId (basico|destacado|premium|vip).",
+      "alcance": [
+        "fotosMax, videosMax, galeriaMax (alinear con schema existente)",
+        "tamanoMaxArchivoMb por tipo: foto, video, chatImagen, chatVideo, pack",
+        "storageGbMaxPerfil (techo agregado por perfil)",
+        "adjuntosChat: boolean por tipo + adjuntosChatMesMax",
+        "estados: habilitado, activosMax, publicacionesMesMax, duracionHoras, retencionDias",
+        "lives: habilitado, activosMax, minutosDiaMax, minutosMesMax, retencionHoras",
+        "packs: habilitado, gbMax, archivosMax",
+        "actualizacionesMes (ya en precios schema)"
+      ],
+      "criteriosAceptacion": [
+        "JSON schema versionado en scripts/ y documento Firestore seed (manual, no deploy auto)",
+        "Paridad documentada con planes.basico|destacado|premium|vip en config-precios-planes-perfiles-schema.json",
+        "Matriz contextosUpload → qué límite aplica",
+        "Sin campos ambiguos: todo límite tiene unidad (count, MB, GB, minutos, horas, días)"
+      ],
+      "riesgoSiNoImplementa": "Imposible enforcement consistente; cada módulo inventa su propio límite.",
+      "estimacion": "3-5 días diseño + seed"
+    },
+    {
+      "id": "ENT-002",
+      "epica": "ENT-E0",
+      "title": "PlanEntitlementsResolver — effective entitlements server-side",
+      "clasificacion": "bloqueador_sostenibilidad",
+      "prioridad": "P0",
+      "dependencias": ["ENT-001", "TICKET-003"],
+      "bloquea": ["ENT-010", "ENT-011", "ENT-012", "ENT-020", "ENT-050"],
+      "archivosAfectados": [
+        "functions/lib/plan-entitlements-resolver.js (nuevo)",
+        "functions/index.js (export callable)",
+        "public/js/plan-entitlements-client.js (nuevo, solo lectura)",
+        "firestore: perfiles/{perfilId}, contratos_perfiles, config_plan_entitlements"
+      ],
+      "firestoreRules": [
+        "Lectura de config_plan_entitlements/global: auth != null",
+        "perfiles/{perfilId}/usage/current: read owner|admin; write false (solo Functions)"
+      ],
+      "storageRules": [],
+      "functions": [
+        "resolveEntitlements (callable HTTPS)",
+        "getUsageSnapshot (callable HTTPS)",
+        "onContratoActivado → inicializar usage/current"
+      ],
+      "objetivo": "Una sola función que devuelve límites efectivos + uso actual para un perfil.",
+      "alcance": [
+        "Merge: plan base + overrides categoría + excepción perfil + add-ons",
+        "Leer planIdActivo desde contrato vigente o usuarios/{uid} (bridge MVP)",
+        "Retornar { limites, uso, planId, planMinimoRequerido, upgradeRecomendado }",
+        "Cache 60s en cliente; invalidar en upload exitoso"
+      ],
+      "criteriosAceptacion": [
+        "Mismo resultado en cliente preview y Function uploadGate",
+        "Perfil sin contrato activo → plan basico + flags vencido",
+        "Override subcategoriaId gana sobre sectorId",
+        "Tests unitarios con fixtures adultos/creador/eventos"
+      ],
+      "riesgoSiNoImplementa": "Validación duplicada/inconsistente entre registro, dashboard y chat.",
+      "estimacion": "5-8 días"
+    },
+    {
+      "id": "ENT-003",
+      "epica": "ENT-E0",
+      "title": "Documento usage/current — contadores server-authoritative",
+      "clasificacion": "bloqueador_sostenibilidad",
+      "prioridad": "P0",
+      "dependencias": ["ENT-001"],
+      "bloquea": ["ENT-010", "ENT-011", "ENT-040"],
+      "archivosAfectados": [
+        "firestore: perfiles/{perfilId}/usage/current",
+        "functions/lib/usage-ledger.js (nuevo)",
+        "functions/index.js"
+      ],
+      "firestoreRules": [
+        "match /perfiles/{perfilId}/usage/{docId} { allow read: if isProfileOwner(perfilId) || isAdmin(); allow write: if false; }"
+      ],
+      "storageRules": [],
+      "functions": [
+        "incrementUsage (internal, transaccional)",
+        "decrementUsage on delete confirmado",
+        "recalculateUsageFromStorage (scheduled, reconciliación)"
+      ],
+      "objetivo": "Fuente de verdad de cupo consumido; nunca confiar en conteo cliente.",
+      "alcance": [
+        "Campos: fotosUsadas, videosUsados, bytesStorageUsados, adjuntosChatMes, estadosActivos, livesMinutosMes, packsBytesUsados",
+        "Transacción Firestore: check límite → write Storage → increment usage",
+        "Reset mensual adjuntosChatMes (scheduler día 1)",
+        "Evento audit: usage_events append-only (opcional P1)"
+      ],
+      "criteriosAceptacion": [
+        "Race condition: dos uploads simultáneos no exceden fotosMax",
+        "Rollback usage si Storage write falla",
+        "Admin puede forzar recalculateUsage"
+      ],
+      "riesgoSiNoImplementa": "Usuario sube 50 fotos en plan Básico (3) — egress y storage descontrolados.",
+      "estimacion": "4-6 días"
+    },
+    {
+      "id": "ENT-010",
+      "epica": "ENT-E1",
+      "title": "preUploadValidate — gate cliente antes de Storage.put",
+      "clasificacion": "bloqueador_sostenibilidad",
+      "prioridad": "P0",
+      "dependencias": ["ENT-002", "ENT-003"],
+      "bloquea": [],
+      "archivosAfectados": [
+        "public/js/plan-entitlements-upload-gate.js (nuevo)",
+        "public/js/registro-perfil-submit.js",
+        "public/index.html (upload perfil legacy)",
+        "public/js/dashboard-publicaciones.js",
+        "public/js/dashboard-solicitudes-contenido.js",
+        "public/registro-banner.html",
+        "public/registro-banner2.html"
+      ],
+      "firestoreRules": [],
+      "storageRules": [],
+      "functions": [],
+      "objetivo": "UX temprana: bloquear upload inválido antes de bytes en red.",
+      "alcance": [
+        "API: preUploadValidate({ perfilId, contexto, file: { type, size } })",
+        "Validar: plan activo, !vencido, cupo usado, MIME permitido, tamaño max, límite mensual",
+        "contexto ∈ contextosUpload del schema",
+        "Mensajes i18n: ENT_UPLOAD_PLAN_VENCIDO, ENT_UPLOAD_CUPO_FOTOS, ENT_UPLOAD_TAMANO, ENT_UPGRADE_CTA",
+        "Integrar en TODOS los puntos con storage.ref().put identificados en repo"
+      ],
+      "criteriosAceptacion": [
+        "Básico con 3 fotos → 4ta upload rechazada con CTA upgrade",
+        "Chat adjunto video en destacado → rechazado (solo premium+)",
+        "No es bypassable solo con cliente — ENT-011 obligatorio en paralelo"
+      ],
+      "riesgoSiNoImplementa": "Mala UX (sube y falla tarde) pero peor sin ENT-011: abuso directo.",
+      "estimacion": "3-5 días integración"
+    },
+    {
+      "id": "ENT-011",
+      "epica": "ENT-E1",
+      "title": "uploadGate Cloud Function — validación autoritativa pre-upload",
+      "clasificacion": "bloqueador_sostenibilidad",
+      "prioridad": "P0",
+      "dependencias": ["ENT-002", "ENT-003"],
+      "bloquea": ["ENT-012"],
+      "archivosAfectados": [
+        "functions/upload/upload-gate.js (nuevo)",
+        "functions/index.js"
+      ],
+      "firestoreRules": [],
+      "storageRules": [],
+      "functions": [
+        "uploadGate (callable): recibe perfilId, contexto, contentType, sizeBytes, sha256 opcional",
+        "Retorna: { allowed, uploadToken, storagePath, expiresAt, limitsSnapshot }",
+        "uploadComplete (callable): confirma finalize + increment usage",
+        "onObjectFinalized (Storage trigger): verificar token/path; rechazar huérfanos"
+      ],
+      "objetivo": "Ningún objeto Storage válido sin pasar gate server-side.",
+      "alcance": [
+        "Token firmado HMAC 5 min TTL, single-use",
+        "Path canónico: perfiles/{perfilId}/public|private|chat|estados|lives|packs/{contexto}/{fileId}",
+        "Rechazar si planMinimoRequerido > planIdActivo (ENT-050)",
+        "Idempotencia por uploadId"
+      ],
+      "criteriosAceptacion": [
+        "Cliente que llama put sin token → Storage rules deny",
+        "Function deniega si usage.fotosUsadas >= limites.fotosMax",
+        "Logs estructurados para auditoría admin",
+        "Rate limit 30 uploads/hora/uid (Seguridad MVP)"
+      ],
+      "riesgoSiNoImplementa": "Atacante usa SDK Storage directo y evita UI — principal vector de abuso.",
+      "estimacion": "8-12 días"
+    },
+    {
+      "id": "ENT-012",
+      "epica": "ENT-E1",
+      "title": "Storage Rules v2 — cupos + cross-check Firestore",
+      "clasificacion": "bloqueador_sostenibilidad",
+      "prioridad": "P0",
+      "dependencias": ["ENT-011", "ENT-003"],
+      "bloquea": [],
+      "archivosAfectados": [
+        "storage.rules",
+        "firebase.json",
+        "scripts/blk05-storage-rules-draft.rules (fusión selectiva)",
+        "firestore.rules (helpers compartidos)"
+      ],
+      "firestoreRules": [
+        "Helpers: isProfileOwner(perfilId), perfilActivo(perfilId), planNoVencido(perfilId)"
+      ],
+      "storageRules": [
+        "match /perfiles/{perfilId}/{tipo}/{fileName}: create if isProfileOwner && request.auth.token.uploadToken válido (custom claim temporal) OR metadata.uploadToken verificado vía Function",
+        "MIME whitelist por tipo: public=foto|video; chat=imagen|video; pack=zip|pdf según plan",
+        "isUnderMb dinámico: leer límite desde Firestore config (cap hard 200MB anti-abuso)",
+        "Denegar writes a rutas legacy perfiles/{uid}/ sin perfilId post-BLK-01",
+        "verificaciones/{uid}: mantener reglas KYC actuales"
+      ],
+      "functions": [
+        "setUploadClaim (custom claim temporal post uploadGate — opcional si metadata insuficiente)"
+      ],
+      "objetivo": "Última línea de defensa en Storage; complementa uploadGate.",
+      "alcance": [
+        "Migración gradual: reglas estrictas perfilId + bridge uid MVP",
+        "Emulador: suite tests storage+firestore alignment (blk05-rules-perfiles.test.mjs)",
+        "Default deny global"
+      ],
+      "criteriosAceptacion": [
+        "Test: owner plan basico no crea video en /public/",
+        "Test: admin puede leer KYC, público no",
+        "Deploy coordinado con ENT-011 (orden: Function → Rules)"
+      ],
+      "riesgoSiNoImplementa": "storage.rules actual permite 8MB imagen sin límite de count — abuso trivial.",
+      "estimacion": "5-8 días + QA emulador"
+    },
+    {
+      "id": "ENT-013",
+      "epica": "ENT-E1",
+      "title": "Inventario y migración puntos de upload",
+      "clasificacion": "importante_post_lanzamiento",
+      "prioridad": "P1",
+      "dependencias": ["ENT-010", "ENT-011"],
+      "bloquea": [],
+      "archivosAfectados": [
+        "public/js/registro-perfil-submit.js",
+        "public/index.html",
+        "public/js/dashboard-publicaciones.js",
+        "public/js/dashboard-solicitudes-contenido.js",
+        "public/registro-banner.html",
+        "public/registro-banner2.html",
+        "public/dashboard-rentero.html (dash-studio upload)"
+      ],
+      "firestoreRules": [],
+      "storageRules": [],
+      "functions": [],
+      "objetivo": "Checklist de integración uploadGate en cada superficie.",
+      "alcance": [
+        "Matriz archivo → contextoUpload → perfilId/bannerId scope",
+        "Banners: cupos separados (config banners, fuera PlanEntitlements perfil — referencia PLAN-MAESTRO-BANNERS)",
+        "KYC verificaciones: exento de plan perfil pero con límites propios",
+        "Eliminar put() directo sin gate"
+      ],
+      "criteriosAceptacion": [
+        "grep storage.ref.*put sin uploadGate = 0 en public/",
+        "QA manual registro + dashboard + banner"
+      ],
+      "riesgoSiNoImplementa": "Huecos parciales de enforcement.",
+      "estimacion": "2-4 días"
+    },
+    {
+      "id": "ENT-020",
+      "epica": "ENT-E2",
+      "title": "Widget Dashboard — uso vs cupos + upgrade CTA",
+      "clasificacion": "importante_post_lanzamiento",
+      "prioridad": "P1",
+      "dependencias": ["ENT-002", "ENT-003", "TICKET-011"],
+      "bloquea": [],
+      "archivosAfectados": [
+        "public/js/dashboard-uso-plan.js (nuevo)",
+        "public/dashboard-rentero.html",
+        "public/css/dashboard-rentero-pro.css",
+        "public/js/dashboard-rentero-nav.js"
+      ],
+      "firestoreRules": [],
+      "storageRules": [],
+      "functions": [],
+      "objetivo": "Transparencia al anunciante; reduce soporte y aumenta conversión upgrade.",
+      "alcance": [
+        "Mostrar: espacio usado / GB max (barra %)",
+        "Fotos usadas / disponibles, videos usados / disponibles",
+        "Estados activos / max, lives minutos mes / max",
+        "Adjuntos chat mes / max (si aplica)",
+        "Badge warning >80%, critical >95%",
+        "CTA upgrade con plan recomendado (resolveEntitlements.upgradeRecomendado)",
+        "Scoped a perfilActivoId (dashboard-context.js)"
+      ],
+      "criteriosAceptacion": [
+        "Cambia al tap perfil en rail izquierdo",
+        "No muestra presencia/en línea",
+        "Link a checkout con plan preseleccionado",
+        "Empty state si perfil vencido"
+      ],
+      "riesgoSiNoImplementa": "Usuario descubre límite al fallar upload — churn y tickets soporte.",
+      "estimacion": "3-5 días"
+    },
+    {
+      "id": "ENT-021",
+      "epica": "ENT-E2",
+      "title": "Notificaciones proximidad límite",
+      "clasificacion": "mejora_futura",
+      "prioridad": "P2",
+      "dependencias": ["ENT-020", "ECO-050"],
+      "bloquea": [],
+      "archivosAfectados": [
+        "functions/notifications/usage-threshold.js",
+        "public/js/dashboard-avisos.js"
+      ],
+      "firestoreRules": [],
+      "storageRules": [],
+      "functions": [
+        "onUsageThreshold (80/95/100%) → notificación in-app + email opcional"
+      ],
+      "objetivo": "Proactivo antes de bloqueo hard.",
+      "criteriosAceptacion": [
+        "Máx 1 aviso/día/tipo límite",
+        "No spam en plan vip con margen alto"
+      ],
+      "riesgoSiNoImplementa": "Bajo — ENT-020 cubre visibilidad pasiva.",
+      "estimacion": "2-3 días"
+    },
+    {
+      "id": "ENT-030",
+      "epica": "ENT-E3",
+      "title": "Admin UI — precios y cupos por plan",
+      "clasificacion": "importante_post_lanzamiento",
+      "prioridad": "P1",
+      "dependencias": ["ENT-001", "ECO-000"],
+      "bloquea": ["ENT-031", "ENT-032"],
+      "archivosAfectados": [
+        "public/admin.html",
+        "public/js/admin-plan-entitlements.js (nuevo)",
+        "firestore: config_precios_perfiles, config_plan_entitlements/global"
+      ],
+      "firestoreRules": [
+        "config_plan_entitlements/**: write admin only",
+        "Historial append-only config_plan_entitlements_historial"
+      ],
+      "storageRules": [],
+      "functions": [
+        "adminUpdatePlanEntitlements (callable, admin claim, valida schema)"
+      ],
+      "objetivo": "Operaciones puede ajustar cupos sin deploy código.",
+      "alcance": [
+        "Editar precio por plan (sync config_precios_perfiles — política precio congelado intacta)",
+        "Editar cupos por plan: fotos, videos, GB, chat, estados, lives, packs",
+        "Activar/desactivar beneficios boolean (adjuntosChat.video, lives.habilitado)",
+        "Preview diff antes de guardar",
+        "No afecta contratos activos (precio congelado); cupos nuevos aplican forward-only salvo flag force"
+      ],
+      "criteriosAceptacion": [
+        "Solo admin/moderador",
+        "Validación contra config-plan-entitlements-schema.json",
+        "Audit log autor + timestamp + motivo"
+      ],
+      "riesgoSiNoImplementa": "Cambios de cupos requieren deploy — lento ante abuso detectado.",
+      "estimacion": "5-8 días"
+    },
+    {
+      "id": "ENT-031",
+      "epica": "ENT-E3",
+      "title": "Admin — overrides por categoría/subcategoría",
+      "clasificacion": "bloqueador_sostenibilidad",
+      "prioridad": "P0",
+      "dependencias": ["ENT-030", "ENT-001"],
+      "bloquea": ["ENT-050", "ENT-051"],
+      "archivosAfectados": [
+        "public/js/admin-plan-overrides.js (nuevo)",
+        "firestore: config_plan_entitlements/overrides_categoria/{id}",
+        "scripts/auditoria-monetizacion-categorias-462.json (seed import opcional)"
+      ],
+      "firestoreRules": [],
+      "storageRules": [],
+      "functions": [
+        "importOverridesFromAuditoria (one-shot admin, 462 filas → overrides agrupados)"
+      ],
+      "objetivo": "Codificar reglas especiales adultos/creadores/eventos sin hardcode en Functions.",
+      "alcance": [
+        "Scope: subcategoriaId | sectorId | formularioId | arquetipo",
+        "Campos: planMinimoRequerido, limitesDelta (merge parcial)",
+        "Prioridad resolución documentada en ENT-002",
+        "UI: buscar subcategoría, ver plan recomendado auditoría vs override admin"
+      ],
+      "criteriosAceptacion": [
+        "Override adultos-alto-consumo → planMinimo vip",
+        "Override restaurante-bar activo",
+        "Desactivar override no borra histórico"
+      ],
+      "riesgoSiNoImplementa": "25 subs rojas auditoría siguen vendibles en plan inferior.",
+      "estimacion": "4-6 días"
+    },
+    {
+      "id": "ENT-032",
+      "epica": "ENT-E3",
+      "title": "Admin — excepciones por perfil",
+      "clasificacion": "importante_post_lanzamiento",
+      "prioridad": "P1",
+      "dependencias": ["ENT-030"],
+      "bloquea": [],
+      "archivosAfectados": [
+        "firestore: config_plan_entitlements/excepciones_perfil/{perfilId}",
+        "public/js/admin-plan-excepciones.js (nuevo)"
+      ],
+      "firestoreRules": [],
+      "storageRules": [],
+      "functions": [],
+      "objetivo": "Soporte comercial: cupo extra temporal sin cambiar plan global.",
+      "alcance": [
+        "excepcion: limitesDelta + fechaExpiracion + motivo + autorAdmin",
+        "Máx techo hardCap (ej. +5 fotos, +1 GB, nunca ilimitado)",
+        "Visible en dashboard-uso-plan como badge Excepción"
+      ],
+      "criteriosAceptacion": [
+        "Expira automáticamente",
+        "Audit trail",
+        "No bypass planMinimoRequerido legal (adultos) sin flag super_admin"
+      ],
+      "riesgoSiNoImplementa": "Workarounds manuales en Storage/Firestore sin auditoría.",
+      "estimacion": "2-4 días"
+    },
+    {
+      "id": "ENT-040",
+      "epica": "ENT-E4",
+      "title": "Job cleanup — estados vencidos",
+      "clasificacion": "importante_post_lanzamiento",
+      "prioridad": "P1",
+      "dependencias": ["ENT-001", "ENT-003"],
+      "bloquea": [],
+      "archivosAfectados": [
+        "functions/cleanup/estados-vencidos.js",
+        "functions/index.js",
+        "firestore: perfiles/{perfilId}/estados/{estadoId}",
+        "storage: perfiles/{perfilId}/estados/**"
+      ],
+      "firestoreRules": [],
+      "storageRules": [],
+      "functions": [
+        "purgeEstadosVencidos (scheduler every 6h)",
+        "Soft-delete → hard-delete tras retencionDias según plan"
+      ],
+      "objetivo": "Estados temporales no acumulan storage/egress indefinido.",
+      "alcance": [
+        "Query estados where expiresAt < now",
+        "Decrement estadosActivos en usage/current",
+        "Borrar objetos Storage asociados",
+        "Log purge_events"
+      ],
+      "criteriosAceptacion": [
+        "Estado 24h premium eliminado a las 24h + retencion 14d archivado",
+        "No borrar estados en moderación pendiente"
+      ],
+      "riesgoSiNoImplementa": "Egress recurrente por media expirada aún servible por URL.",
+      "estimacion": "3-4 días"
+    },
+    {
+      "id": "ENT-041",
+      "epica": "ENT-E4",
+      "title": "Job cleanup — lives temporales vencidos",
+      "clasificacion": "mejora_futura",
+      "prioridad": "P2",
+      "dependencias": ["ENT-040", "StoriesLivesEngine"],
+      "bloquea": [],
+      "archivosAfectados": [
+        "functions/cleanup/lives-vencidos.js",
+        "firestore: perfiles/{perfilId}/lives/{liveId}",
+        "storage: perfiles/{perfilId}/lives/**"
+      ],
+      "firestoreRules": [],
+      "storageRules": [],
+      "functions": [
+        "purgeLivesVencidos (scheduler every 1h)",
+        "Actualizar livesMinutosMes en usage"
+      ],
+      "objetivo": "Retención lives según plan (48h–168h).",
+      "criteriosAceptacion": [
+        "Grabación live borrada post retencionHoras",
+        "Contador minutosMes consistente"
+      ],
+      "riesgoSiNoImplementa": "Alto solo cuando lives estén en producción.",
+      "estimacion": "3-4 días (post StoriesLivesEngine)"
+    },
+    {
+      "id": "ENT-042",
+      "epica": "ENT-E4",
+      "title": "Job cleanup — archivos huérfanos Storage",
+      "clasificacion": "bloqueador_sostenibilidad",
+      "prioridad": "P0",
+      "dependencias": ["ENT-011", "ENT-003"],
+      "bloquea": [],
+      "archivosAfectados": [
+        "functions/cleanup/orphan-storage.js",
+        "functions/index.js",
+        "storage: perfiles/**"
+      ],
+      "firestoreRules": [],
+      "storageRules": [],
+      "functions": [
+        "scanOrphanStorage (scheduler weekly)",
+        "onUploadTokenExpired → delete pending objects",
+        "Reconciliar usage vs listAll Storage"
+      ],
+      "objetivo": "Objetos subidos sin uploadComplete o sin referencia Firestore.",
+      "alcance": [
+        "Pending uploads >24h sin finalize → delete",
+        "Objeto en Storage sin doc media_registry → quarantine → delete 7d",
+        "Reporte admin orphans_pending"
+      ],
+      "criteriosAceptacion": [
+        "No borrar objetos referenciados en perfil publicado",
+        "Dry-run mode para admin"
+      ],
+      "riesgoSiNoImplementa": "Abuso: llenar bucket con uploads abandonados; costo storage crece silencioso.",
+      "estimacion": "4-6 días"
+    },
+    {
+      "id": "ENT-043",
+      "epica": "ENT-E4",
+      "title": "Retención media perfiles vencidos — N días",
+      "clasificacion": "importante_post_lanzamiento",
+      "prioridad": "P1",
+      "dependencias": ["ENT-042", "ECO-040", "vencerPerfiles"],
+      "bloquea": [],
+      "archivosAfectados": [
+        "functions/cleanup/perfil-vencido-media.js",
+        "functions/index.js (extender vencerPerfiles)",
+        "storage.rules (read deny post-purge)"
+      ],
+      "firestoreRules": [
+        "perfil estado vencido: read publico denegado tras purge"
+      ],
+      "storageRules": [
+        "perfiles/{perfilId}/public/**: read false si perfil.vencido && purgeCompleto"
+      ],
+      "functions": [
+        "purgePerfilVencidoMedia (N=30 días configurable admin)",
+        "Notificación pre-purge 7 días"
+      ],
+      "objetivo": "Perfil impago no sirve CDN indefinido.",
+      "alcance": [
+        "Tras vencerPerfiles: grace period N días → soft hide → delete media public",
+        "Mantener KYC en verificaciones/ según política privacidad",
+        "Opción reactivación dentro grace sin re-upload"
+      ],
+      "criteriosAceptacion": [
+        "Config N en config_plan_entitlements/global.retencionPerfilVencidoDias",
+        "Banner impago: conversaciones bloqueadas (TICKET-052) + media purge coordinado"
+      ],
+      "riesgoSiNoImplementa": "Perfiles vencidos siguen consumiendo egress si URL compartida.",
+      "estimacion": "4-5 días"
+    },
+    {
+      "id": "ENT-050",
+      "epica": "ENT-E5",
+      "title": "Matriz enforcement categoría — plan mínimo + límites delta",
+      "clasificacion": "bloqueador_sostenibilidad",
+      "prioridad": "P0",
+      "dependencias": ["ENT-002", "ENT-031"],
+      "bloquea": ["ENT-051"],
+      "archivosAfectados": [
+        "functions/lib/category-enforcement.js",
+        "scripts/config-plan-entitlements-schema.json",
+        "scripts/auditoria-sostenibilidad-planes-462.csv"
+      ],
+      "firestoreRules": [],
+      "storageRules": [],
+      "functions": [
+        "assertPlanMinimoForSubcategoria(subcategoriaId, planIdActivo)",
+        "Integrado en uploadGate + resolveEntitlements"
+      ],
+      "objetivo": "Aplicar reglas auditoría 462 subs en runtime.",
+      "alcance": [
+        "Generadores contenido (persona_creador): packs + vip mínimo",
+        "Adultos alto consumo (24 subs): vip mínimo (auditoría Premium→Especial)",
+        "Eventos: lives premium+; venues especiales",
+        "Producción audiovisual: video/storage extendido vip",
+        "restaurante-bar: vip mínimo",
+        "Premium/Especial marcados en auditoría: validar plan >= recomendado en checkout"
+      ],
+      "criteriosAceptacion": [
+        "Escort en premium activo → upload/chat bloqueado con mensaje upgrade Especial",
+        "Contenido en vip → packs habilitados",
+        "Tests fixture por sectorId"
+      ],
+      "riesgoSiNoImplementa": "Conclusión auditoría no operativa — riesgo comercial y de costo viral.",
+      "estimacion": "3-5 días"
+    },
+    {
+      "id": "ENT-051",
+      "epica": "ENT-E5",
+      "title": "Gate checkout — plan mínimo por subcategoría",
+      "clasificacion": "bloqueador_sostenibilidad",
+      "prioridad": "P0",
+      "dependencias": ["ENT-050", "ECO-010"],
+      "bloquea": [],
+      "archivosAfectados": [
+        "public/js/carihub-publicacion-pagos.js",
+        "functions/payments/create-checkout-session.js",
+        "firestore: ordenes_pago"
+      ],
+      "firestoreRules": [],
+      "storageRules": [],
+      "functions": [
+        "validateCheckoutPlan({ subcategoriaId, planId, periodo }) server-side"
+      ],
+      "objetivo": "Imposible comprar plan inferior al mínimo sostenible de la categoría.",
+      "alcance": [
+        "UI registro/checkout: ocultar/deshabilitar tiers inferiores",
+        "Server: rechazar orden si planId < planMinimoRequerido",
+        "Mapeo estrategia→schema: Básico=basico, Profesional=destacado, Premium=premium, Especial=vip"
+      ],
+      "criteriosAceptacion": [
+        "adultos/escort no checkout basico",
+        "persona_independiente/yoga sí checkout basico",
+        "Override admin puede bajar mínimo solo super_admin + audit"
+      ],
+      "riesgoSiNoImplementa": "Usuario paga $249 básico en categoría que auditoría marca vip — abuso desde día 1.",
+      "estimacion": "3-4 días"
+    },
+    {
+      "id": "ENT-052",
+      "epica": "ENT-E5",
+      "title": "Enforcement packs / venta digital (creadores)",
+      "clasificacion": "mejora_futura",
+      "prioridad": "P2",
+      "dependencias": ["ENT-050", "ENT-011", "PremiumContentGate"],
+      "bloquea": [],
+      "archivosAfectados": [
+        "functions/upload/pack-upload-gate.js",
+        "firestore: perfiles/{perfilId}/packs/{packId}",
+        "storage: perfiles/{perfilId}/packs/**"
+      ],
+      "firestoreRules": [
+        "packs: read pagadores only (PremiumContentGate)"
+      ],
+      "storageRules": [
+        "packs/**: read auth + purchase claim; write uploadGate vip+"
+      ],
+      "functions": [
+        "packUploadGate, packPurchaseVerify"
+      ],
+      "objetivo": "Storage packs acotado a vip/creadores; egress solo compradores.",
+      "criteriosAceptacion": [
+        "contenido adultos + creador-de-contenido-digital: gbMax 2",
+        "Download rate limit"
+      ],
+      "riesgoSiNoImplementa": "Medio-alto cuando venta digital lance; priorizar antes de PremiumContentGate prod.",
+      "estimacion": "8-12 días"
+    },
+    {
+      "id": "ENT-053",
+      "epica": "ENT-E5",
+      "title": "Playbook QA — categorías alto riesgo auditoría",
+      "clasificacion": "importante_post_lanzamiento",
+      "prioridad": "P1",
+      "dependencias": ["ENT-050", "ENT-051", "ENT-010"],
+      "bloquea": [],
+      "archivosAfectados": [
+        "scripts/qa-plan-entitlements-alto-riesgo.md (nuevo)",
+        "scripts/fixtures-plan-entitlements-golden.json (nuevo)"
+      ],
+      "firestoreRules": [],
+      "storageRules": [],
+      "functions": [],
+      "objetivo": "Test plan manual+auto para top 20 riesgo auditoría.",
+      "alcance": [
+        "Casos: escort, contenido, creador-de-contenido-digital, restaurante-bar, salon-de-eventos",
+        "Escenarios: uso típico, límite exacto, +1 upload, viral simulado",
+        "Golden fixtures para CI emulador"
+      ],
+      "criteriosAceptacion": [
+        "Checklist 100% verde antes de abrir adjuntos chat producción",
+        "Vinculado a AUDITORIA-SOSTENIBILIDAD-PLANES-RESUMEN top 20"
+      ],
+      "riesgoSiNoImplementa": "Regresiones en categorías de mayor costo viral.",
+      "estimacion": "2-3 días"
+    },
+    {
+      "id": "ENT-054",
+      "epica": "ENT-E5",
+      "title": "Promo onboarding — trial Destacado (nunca Básico)",
+      "clasificacion": "importante_post_lanzamiento",
+      "prioridad": "P1",
+      "dependencias": ["ENT-002", "ENT-051", "ECO-010", "ECO-040"],
+      "bloquea": [],
+      "archivosAfectados": [
+        "scripts/POLITICA-ONBOARDING-PLANES.md",
+        "public/js/carihub-publicacion-pagos.js",
+        "functions/lib/plan-entitlements-resolver.js",
+        "functions/index.js (trial expiry)",
+        "public/js/dashboard-uso-plan.js",
+        "firestore: perfiles/{perfilId} campos trialDestacadoHasta, origenPlan"
+      ],
+      "firestoreRules": [],
+      "storageRules": [],
+      "functions": [
+        "activarTrialDestacado (on registro completado o post-KYC)",
+        "onTrialExpiring (notif 7d/1d)",
+        "onTrialExpired → estado trial_expirado (no auto-basico)"
+      ],
+      "objetivo": "Primer mes experiencia completa en Destacado; Básico solo opt-in post-trial.",
+      "alcance": [
+        "Variante default: 30 días Destacado $0 (o $1 MXN simbólico opcional)",
+        "Alternativa campaña: 15d Premium + 15d Destacado (flag admin)",
+        "planId efectivo durante trial = destacado; origenPlan = trial_destacado",
+        "Prohibido: checkout/activación inicial planId basico salvo categoría exenta y opt-in explícito",
+        "Post-trial: checkout plan recomendado categoría; downgrade a basico solo confirmado por usuario",
+        "Presupuesto infra: alerta admin Firebase billing USD 40; cap trials/mes configurable",
+        "Duración subsidio producto: 2-3 meses post-lanzamiento (operativo, no código)"
+      ],
+      "criteriosAceptacion": [
+        "Nuevo anunciante nunca ve 'mes gratis básico' en UI",
+        "Dashboard muestra días restantes trial + CTA renovación",
+        "Tras trial sin pago: perfil oculto grace 7d, no downgrade silencioso a basico",
+        "Entitlements trial = cupos destacado completos (6 fotos, 1 video, estados, chat img)"
+      ],
+      "riesgoSiNoImplementa": "Churn alto: usuario prueba Básico (3 fotos), no siente valor, no renueva — falso ahorro infra.",
+      "estimacion": "3-5 días",
+      "referenciaProducto": "scripts/POLITICA-ONBOARDING-PLANES.md"
+    }
+  ],
+  "politicaOnboarding": {
+    "decision": "No trial en plan Básico",
+    "trialDefault": { "planId": "destacado", "duracionDias": 30, "precioSimbolicoMXN": 0 },
+    "alternativaCampana": { "planIdSecuencia": ["premium", "destacado"], "duracionDiasCada": 15 },
+    "presupuestoInfraSubsidioUSD": 50,
+    "mesesSubsidio": 3,
+    "basicoPostTrial": "solo opt-in explícito; nunca default"
+  },
+  "grafoDependencias": {
+    "fase1_bloqueadores": ["ENT-001", "ENT-003", "ENT-002", "ENT-011", "ENT-012", "ENT-042", "ENT-050", "ENT-051", "ENT-031"],
+    "fase2_post_launch": ["ENT-010", "ENT-013", "ENT-020", "ENT-030", "ENT-032", "ENT-040", "ENT-043", "ENT-053", "ENT-054"],
+    "fase3_futuro": ["ENT-021", "ENT-041", "ENT-052"],
+    "externos_criticos": ["TICKET-003", "ECO-010", "ECO-030", "ECO-040", "TICKET-052"]
+  },
+  "ordenImplementacionRecomendado": [
+    "ENT-001 → ENT-003 → ENT-002",
+    "ENT-011 + ENT-012 (paralelo tras ENT-002)",
+    "ENT-050 + ENT-031 + ENT-051",
+    "ENT-010 + ENT-013",
+    "ENT-042",
+    "ENT-020 + ENT-030",
+    "ENT-040 + ENT-043",
+    "ENT-053",
+    "ENT-041 + ENT-052 + ENT-021 (cuando existan lives/packs prod)"
+  ],
+  "resumenRiesgosGlobales": {
+    "sinPlanEntitlements": "Perfil Básico sube 15 fotos + videos + adjuntos chat → costo viral 8×; margen neto sigue positivo en spreadsheet pero egress real puede escalar a cientos de MXN/mes por perfil.",
+    "soloClienteSinFunction": "Bypass SDK Storage directo.",
+    "soloRulesSinUsageDoc": "Rules no pueden contar fotos existentes sin Firestore authoritative.",
+    "sinCleanup": "Storage creep + URLs zombie post-vencimiento.",
+    "sinCategoryGate": "25 categorías rojas auditoría vendibles en tier inferior."
+  }
+}

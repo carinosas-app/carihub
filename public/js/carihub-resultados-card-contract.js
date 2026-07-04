@@ -145,11 +145,101 @@
     return false;
   }
 
+  function esPerfilMascotasSector(pres, u) {
+    var R = registryApi();
+    if (R) return isModernSectorPerfil(pres, u, R.SECTOR_CONTRACTS.mascotas);
+    if (pres && pres.sectorId === 'mascotas') return true;
+    if (u && u.sectorId === 'mascotas' && u.mascotasPerfil) return true;
+    return false;
+  }
+
+  function esPerfilHogarSector(pres, u) {
+    var R = registryApi();
+    if (R) return isModernSectorPerfil(pres, u, R.SECTOR_CONTRACTS.hogar);
+    if (pres && pres.sectorId === 'hogar') return true;
+    if (u && u.sectorId === 'hogar' && u.hogarPerfil) return true;
+    return false;
+  }
+
+  function esPerfilSaludSector(pres, u) {
+    var R = registryApi();
+    if (R) return isModernSectorPerfil(pres, u, R.SECTOR_CONTRACTS.salud);
+    if (pres && pres.sectorId === 'salud') return true;
+    if (u && u.sectorId === 'salud' && u.saludPerfil) return true;
+    return false;
+  }
+
+  function esPerfilTecnologiaSector(pres, u) {
+    var R = registryApi();
+    if (R) return isModernSectorPerfil(pres, u, R.SECTOR_CONTRACTS.tecnologia);
+    if (pres && pres.sectorId === 'tecnologia') return true;
+    if (u && u.sectorId === 'tecnologia' && u.tecnologiaPerfil) return true;
+    return false;
+  }
+
+  function esPerfilAutomotrizSector(pres, u) {
+    var R = registryApi();
+    if (R) return isModernSectorPerfil(pres, u, R.SECTOR_CONTRACTS.automotriz);
+    if (pres && pres.sectorId === 'automotriz') return true;
+    if (u && u.sectorId === 'automotriz' && u.automotrizPerfil) return true;
+    return false;
+  }
+
+  function esPerfilTransporteSector(pres, u) {
+    var R = registryApi();
+    if (R) return isModernSectorPerfil(pres, u, R.SECTOR_CONTRACTS.transporte);
+    if (pres && pres.sectorId === 'transporte') return true;
+    if (u && u.sectorId === 'transporte' && u.transportePerfil) return true;
+    return false;
+  }
+
+  function esPerfilComercioSector(pres, u) {
+    var R = registryApi();
+    if (R) return isModernSectorPerfil(pres, u, R.SECTOR_CONTRACTS.comercio);
+    if (pres && pres.sectorId === 'comercio') return true;
+    if (u && u.sectorId === 'comercio' && u.comercioPerfil) return true;
+    return false;
+  }
+
+  function esPerfilEducacionSector(pres, u) {
+    var R = registryApi();
+    if (R) return isModernSectorPerfil(pres, u, R.SECTOR_CONTRACTS.educacion);
+    if (pres && pres.sectorId === 'educacion') return true;
+    if (u && u.sectorId === 'educacion' && u.educacionPerfil) return true;
+    return false;
+  }
+
+  function esPerfilIndustriaSector(pres, u) {
+    var R = registryApi();
+    if (R) return isModernSectorPerfil(pres, u, R.SECTOR_CONTRACTS.industria);
+    if (pres && pres.sectorId === 'industria') return true;
+    if (u && u.sectorId === 'industria' && u.industriaPerfil) return true;
+    return false;
+  }
+
+  function esPerfilBienesRaicesSector(pres, u) {
+    var R = registryApi();
+    if (R) return isModernSectorPerfil(pres, u, R.SECTOR_CONTRACTS['bienes-raices']);
+    if (pres && pres.sectorId === 'bienes-raices') return true;
+    if (u && u.sectorId === 'bienes-raices' && u.bienesRaicesPerfil) return true;
+    return false;
+  }
+
   function isAnyModernSectorPerfil(pres, u) {
     return esPerfilProfesionalesSector(pres, u) ||
       esPerfilBienestarSector(pres, u) ||
       esPerfilEventosSector(pres, u) ||
-      esPerfilGastronomiaSector(pres, u);
+      esPerfilGastronomiaSector(pres, u) ||
+      esPerfilMascotasSector(pres, u) ||
+      esPerfilHogarSector(pres, u) ||
+      esPerfilSaludSector(pres, u) ||
+      esPerfilTecnologiaSector(pres, u) ||
+      esPerfilAutomotrizSector(pres, u) ||
+      esPerfilTransporteSector(pres, u) ||
+      esPerfilComercioSector(pres, u) ||
+      esPerfilEducacionSector(pres, u) ||
+      esPerfilIndustriaSector(pres, u) ||
+      esPerfilBienesRaicesSector(pres, u);
   }
 
   /** Elimina campos que no corresponden al componente de la tarjeta. */

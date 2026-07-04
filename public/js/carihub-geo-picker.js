@@ -384,7 +384,9 @@
       if (subtitle) {
         if (document.body.getAttribute('data-page') === 'home' && global.__homeGeoPaisHint) {
           global.__homeGeoPaisHint = false;
-          subtitle.textContent = 'Categoría seleccionada. Elige un país para seguir (× arriba para cerrar).';
+          subtitle.textContent =
+            'Categoría seleccionada. Para una búsqueda más profunda, selecciona también un estado y una ciudad, y después presiona Buscar. ' +
+            'Para una búsqueda a nivel país, solo selecciona el país, después presiona Buscar.';
         } else {
           subtitle.textContent = 'Explora perfiles, negocios, experiencias cerca de ti';
         }
@@ -417,9 +419,10 @@
       }
       if (title) title.textContent = picker.state.pais || 'País';
       if (subtitle) {
-        if (document.body.getAttribute('data-page') === 'home' && !localStorage.getItem('carihub_home_geo_estado_hint')) {
-          subtitle.textContent = 'Opcional: elige un estado para afinar tu búsqueda';
-          localStorage.setItem('carihub_home_geo_estado_hint', '1');
+        if (document.body.getAttribute('data-page') === 'home') {
+          subtitle.textContent =
+            'Selecciona un estado. Para una búsqueda más profunda, selecciona también una ciudad y después presiona Buscar. ' +
+            'Para una búsqueda a nivel estatal, solo selecciona el estado, después presiona Buscar.';
         } else {
           subtitle.textContent = 'Selecciona un estado';
         }
@@ -450,9 +453,8 @@
           : (picker.state.estado || 'Estado');
       }
       if (subtitle) {
-        if (document.body.getAttribute('data-page') === 'home' && !localStorage.getItem('carihub_home_geo_ciudad_hint')) {
-          subtitle.textContent = 'Opcional: elige una ciudad para mayor precisión';
-          localStorage.setItem('carihub_home_geo_ciudad_hint', '1');
+        if (document.body.getAttribute('data-page') === 'home') {
+          subtitle.textContent = 'Selecciona una ciudad, después presiona Buscar.';
         } else {
           subtitle.textContent = 'Selecciona una ciudad';
         }

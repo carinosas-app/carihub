@@ -32,7 +32,7 @@
       sectorId: 'eventos',
       nestedProfileKey: 'eventosPerfil',
       componenteResultados: 'ResultCardNegocio',
-      demoBuilder: null,
+      demoBuilder: 'plantillaDemoEventos',
       sanitizeNestedKeys: [
         'eventosPerfil', 'deltaPack', 'canonSubcategoriaId', 'blockTitle',
         'cotizacionDesde', 'unidadCotizacion'
@@ -43,12 +43,122 @@
       sectorId: 'restaurantes',
       nestedProfileKey: 'gastronomiaPerfil',
       componenteResultados: 'ResultCardNegocio',
-      demoBuilder: null,
+      demoBuilder: 'plantillaDemoGastronomia',
       sanitizeNestedKeys: [
         'gastronomiaPerfil', 'deltaPack', 'canonSubcategoriaId', 'blockTitle',
         'precioDesdeMx', 'precioPromedioMx'
       ],
       sectorAliases: ['gastronomia']
+    },
+    mascotas: {
+      sectorId: 'mascotas',
+      nestedProfileKey: 'mascotasPerfil',
+      componenteResultados: 'ResultCardServicio',
+      demoBuilder: 'plantillaDemoMascotas',
+      sanitizeNestedKeys: [
+        'mascotasPerfil', 'deltaPack', 'canonSubcategoriaId', 'blockTitle',
+        'tarifaDesde', 'precioConsulta'
+      ],
+      sectorAliases: []
+    },
+    hogar: {
+      sectorId: 'hogar',
+      nestedProfileKey: 'hogarPerfil',
+      componenteResultados: 'ResultCardServicio',
+      demoBuilder: 'plantillaDemoHogar',
+      sanitizeNestedKeys: [
+        'hogarPerfil', 'deltaPack', 'canonSubcategoriaId', 'blockTitle',
+        'tarifaDesde'
+      ],
+      sectorAliases: []
+    },
+    salud: {
+      sectorId: 'salud',
+      nestedProfileKey: 'saludPerfil',
+      componenteResultados: 'ResultCardServicio',
+      demoBuilder: 'plantillaDemoSalud',
+      sanitizeNestedKeys: [
+        'saludPerfil', 'deltaPack', 'canonSubcategoriaId', 'blockTitle',
+        'precioConsulta', 'tarifaDesde', 'requiresCedula'
+      ],
+      sectorAliases: []
+    },
+    tecnologia: {
+      sectorId: 'tecnologia',
+      nestedProfileKey: 'tecnologiaPerfil',
+      componenteResultados: 'ResultCardServicio',
+      demoBuilder: 'plantillaDemoTecnologia',
+      sanitizeNestedKeys: [
+        'tecnologiaPerfil', 'deltaPack', 'canonSubcategoriaId', 'blockTitle',
+        'tarifaDesde'
+      ],
+      sectorAliases: []
+    },
+    automotriz: {
+      sectorId: 'automotriz',
+      nestedProfileKey: 'automotrizPerfil',
+      componenteResultados: 'ResultCardServicio',
+      demoBuilder: 'plantillaDemoAutomotriz',
+      sanitizeNestedKeys: [
+        'automotrizPerfil', 'deltaPack', 'canonSubcategoriaId', 'blockTitle',
+        'tarifaDesde'
+      ],
+      sectorAliases: []
+    },
+    transporte: {
+      sectorId: 'transporte',
+      nestedProfileKey: 'transportePerfil',
+      componenteResultados: 'ResultCardServicio',
+      demoBuilder: 'plantillaDemoTransporte',
+      sanitizeNestedKeys: [
+        'transportePerfil', 'deltaPack', 'canonSubcategoriaId', 'blockTitle',
+        'tarifaDesde'
+      ],
+      sectorAliases: []
+    },
+    comercio: {
+      sectorId: 'comercio',
+      nestedProfileKey: 'comercioPerfil',
+      componenteResultados: 'ResultCardNegocio',
+      demoBuilder: 'plantillaDemoComercio',
+      sanitizeNestedKeys: [
+        'comercioPerfil', 'deltaPack', 'canonSubcategoriaId', 'blockTitle',
+        'tarifaDesde'
+      ],
+      sectorAliases: []
+    },
+    educacion: {
+      sectorId: 'educacion',
+      nestedProfileKey: 'educacionPerfil',
+      componenteResultados: 'ResultCardServicio',
+      demoBuilder: 'plantillaDemoEducacion',
+      sanitizeNestedKeys: [
+        'educacionPerfil', 'deltaPack', 'canonSubcategoriaId', 'blockTitle',
+        'tarifaDesde', 'precioConsulta', 'requiresCedula'
+      ],
+      sectorAliases: []
+    },
+    industria: {
+      sectorId: 'industria',
+      nestedProfileKey: 'industriaPerfil',
+      componenteResultados: 'ResultCardServicio',
+      demoBuilder: 'plantillaDemoIndustria',
+      sanitizeNestedKeys: [
+        'industriaPerfil', 'deltaPack', 'canonSubcategoriaId', 'blockTitle',
+        'tarifaDesde', 'precioConsulta', 'requiresCedula'
+      ],
+      sectorAliases: []
+    },
+    'bienes-raices': {
+      sectorId: 'bienes-raices',
+      nestedProfileKey: 'bienesRaicesPerfil',
+      componenteResultados: 'ResultCardServicio',
+      demoBuilder: 'plantillaDemoBienesRaices',
+      sanitizeNestedKeys: [
+        'bienesRaicesPerfil', 'deltaPack', 'canonSubcategoriaId', 'blockTitle',
+        'tarifaDesde', 'rangoPrecioInmobiliario'
+      ],
+      sectorAliases: []
     }
   };
 

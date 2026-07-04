@@ -626,6 +626,43 @@
   }
 
   var pendingOtrosSectoresFlow = false;
+  var adultosCatSearchCtl = null;
+
+  function handleAdultosSearchPick(cat, sector) {
+    if (!cat || !sector) return;
+    pendingOtrosSectoresFlow = true;
+    selectSubcategoria(cat, sector);
+  }
+
+  function mountAdultosCatSearch() {
+    if (adultosCatSearchCtl || !window.CariHubSectorCatSearch || !window.CariHubSectorCatSearch.mount) return;
+    adultosCatSearchCtl = window.CariHubSectorCatSearch.mount({
+      mode: 'browse',
+      excludeAdultos: false,
+      ids: {
+        input: 'homeAdultosCatSearch',
+        bar: 'homeAdultosCatSearchBar',
+        submit: 'homeAdultosCatSearchSubmit',
+        hint: 'homeAdultosCatSearchHint',
+        suggest: 'homeAdultosCatSearchSuggest',
+        panel: 'homeAdultosCatSearchPanel',
+        catalog: 'homeAdultosCatCatalog'
+      },
+      onPickSubcat: function (sector, sub) {
+        handleAdultosSearchPick(sub, sector);
+      },
+      onPickSector: function (sector) {
+        if (!sector || !sector.id) return;
+        if (adultosCatSearchCtl && adultosCatSearchCtl.clear) adultosCatSearchCtl.clear(false);
+        if (sector.id === 'adultos') return;
+        openSubcatPicker(sector.id, { showBack: true });
+      }
+    });
+  }
+
+  function clearAdultosCatSearch() {
+    if (adultosCatSearchCtl && adultosCatSearchCtl.clear) adultosCatSearchCtl.clear(false);
+  }
 
   function abrirSelectorGeoHome(tipo, opts) {
     opts = opts || {};
@@ -750,6 +787,7 @@
       if (titleAdultos && sector) titleAdultos.textContent = sector.nombre;
       if (countAdultos) countAdultos.textContent = pickerSubcategorias.length + ' categorías · desliza para ver todas';
       if (listAdultos) {
+        mountAdultosCatSearch();
         window.CariHubAdultosCatPicker.renderList(listAdultos, pickerSubcategorias, {
           selectedId: selectedCategoriaId,
           skipWatermark: true,
@@ -927,6 +965,7 @@
     }
     if (field) field.setAttribute('aria-expanded', 'false');
     pendingOtrosSectoresFlow = false;
+    clearAdultosCatSearch();
     closeModal(modal);
   }
 
@@ -1252,6 +1291,7 @@
   initCategorySlots();
   initSectorCards();
   bindSectoresExpandToggle();
+  mountAdultosCatSearch();
   startHomeVisualRotation();
 
 })();

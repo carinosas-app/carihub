@@ -45,7 +45,27 @@ function loadPublicBlocks(ctx) {
     'data/registro-bienestar-sub-deltas.js',
     'data/registro-bienestar-blocks.js',
     'data/registro-eventos-blocks.js',
-    'data/registro-gastronomia-blocks.js'
+    'data/registro-gastronomia-blocks.js',
+    'data/registro-mascotas-sub-deltas.js',
+    'data/registro-mascotas-blocks.js',
+    'data/registro-hogar-sub-deltas.js',
+    'data/registro-hogar-blocks.js',
+    'data/registro-salud-sub-deltas.js',
+    'data/registro-salud-blocks.js',
+    'data/registro-tecnologia-sub-deltas.js',
+    'data/registro-tecnologia-blocks.js',
+    'data/registro-automotriz-sub-deltas.js',
+    'data/registro-automotriz-blocks.js',
+    'data/registro-transporte-sub-deltas.js',
+    'data/registro-transporte-blocks.js',
+    'data/registro-comercio-sub-deltas.js',
+    'data/registro-comercio-blocks.js',
+    'data/registro-educacion-sub-deltas.js',
+    'data/registro-educacion-blocks.js',
+    'data/registro-industria-sub-deltas.js',
+    'data/registro-industria-blocks.js',
+    'data/registro-bienes-raices-sub-deltas.js',
+    'data/registro-bienes-raices-blocks.js'
   ];
   dataFiles.forEach((f) => {
     const p = path.join(js, f);
@@ -59,6 +79,16 @@ ok('PROFILE_NESTED_KEYS incluye bienestarHolisticoPerfil', /bienestarHolisticoPe
 ok('PROFILE_NESTED_KEYS incluye profesionalesPerfil', /profesionalesPerfil/.test(pubSrc));
 ok('PROFILE_NESTED_KEYS incluye eventosPerfil', /'eventosPerfil'/.test(pubSrc));
 ok('PROFILE_NESTED_KEYS incluye gastronomiaPerfil', /'gastronomiaPerfil'/.test(pubSrc));
+ok('PROFILE_NESTED_KEYS incluye mascotasPerfil', /'mascotasPerfil'/.test(pubSrc));
+ok('PROFILE_NESTED_KEYS incluye hogarPerfil', /'hogarPerfil'/.test(pubSrc));
+ok('PROFILE_NESTED_KEYS incluye saludPerfil', /'saludPerfil'/.test(pubSrc));
+ok('PROFILE_NESTED_KEYS incluye tecnologiaPerfil', /'tecnologiaPerfil'/.test(pubSrc));
+ok('PROFILE_NESTED_KEYS incluye automotrizPerfil', /'automotrizPerfil'/.test(pubSrc));
+ok('PROFILE_NESTED_KEYS incluye transportePerfil', /'transportePerfil'/.test(pubSrc));
+ok('PROFILE_NESTED_KEYS incluye comercioPerfil', /'comercioPerfil'/.test(pubSrc));
+ok('PROFILE_NESTED_KEYS incluye educacionPerfil', /'educacionPerfil'/.test(pubSrc));
+ok('PROFILE_NESTED_KEYS incluye industriaPerfil', /'industriaPerfil'/.test(pubSrc));
+ok('PROFILE_NESTED_KEYS incluye bienesRaicesPerfil', /'bienesRaicesPerfil'/.test(pubSrc));
 ok('applyCrossSectorPublicFields definido', /function applyCrossSectorPublicFields/.test(pubSrc));
 
 const cardSrc = fs.readFileSync(path.join(js, 'carihub-resultados-card-contract.js'), 'utf8');
@@ -86,11 +116,31 @@ const Contract = ctx.CariHubResultadosCardContract;
 const Registry = ctx.CariHubSectorContractRegistry;
 
 ok('CariHubSectorContractRegistry cargado', !!Registry && !!Registry.SECTOR_CONTRACTS);
-ok('registry 4 sectores modernos', Object.keys(Registry.SECTOR_CONTRACTS || {}).length === 4);
+ok('registry 14 sectores modernos', Object.keys(Registry.SECTOR_CONTRACTS || {}).length === 14);
 ok('registry nested profesionales', Registry.resolveNestedKey('profesionales') === 'profesionalesPerfil');
+ok('registry nested mascotas', Registry.resolveNestedKey('mascotas') === 'mascotasPerfil');
+ok('registry nested hogar', Registry.resolveNestedKey('hogar') === 'hogarPerfil');
+ok('registry nested salud', Registry.resolveNestedKey('salud') === 'saludPerfil');
+ok('registry nested tecnologia', Registry.resolveNestedKey('tecnologia') === 'tecnologiaPerfil');
+ok('registry nested automotriz', Registry.resolveNestedKey('automotriz') === 'automotrizPerfil');
+ok('registry nested transporte', Registry.resolveNestedKey('transporte') === 'transportePerfil');
+ok('registry nested comercio', Registry.resolveNestedKey('comercio') === 'comercioPerfil');
+ok('registry nested educacion', Registry.resolveNestedKey('educacion') === 'educacionPerfil');
+ok('registry nested industria', Registry.resolveNestedKey('industria') === 'industriaPerfil');
+ok('registry nested bienes-raices', Registry.resolveNestedKey('bienes-raices') === 'bienesRaicesPerfil');
 ok('registry alias gastronomia', Registry.resolveContract('gastronomia').sectorId === 'restaurantes');
 ok('registry demoBuilder bienestar', Registry.resolveDemoBuilder('bienestar') === 'plantillaDemoBienestar');
-ok('registry allModernNestedKeys', (Registry.allModernNestedProfileKeys() || []).length === 4);
+ok('registry demoBuilder mascotas', Registry.resolveDemoBuilder('mascotas') === 'plantillaDemoMascotas');
+ok('registry demoBuilder hogar', Registry.resolveDemoBuilder('hogar') === 'plantillaDemoHogar');
+ok('registry demoBuilder salud', Registry.resolveDemoBuilder('salud') === 'plantillaDemoSalud');
+ok('registry demoBuilder tecnologia', Registry.resolveDemoBuilder('tecnologia') === 'plantillaDemoTecnologia');
+ok('registry demoBuilder automotriz', Registry.resolveDemoBuilder('automotriz') === 'plantillaDemoAutomotriz');
+ok('registry demoBuilder transporte', Registry.resolveDemoBuilder('transporte') === 'plantillaDemoTransporte');
+ok('registry demoBuilder comercio', Registry.resolveDemoBuilder('comercio') === 'plantillaDemoComercio');
+ok('registry demoBuilder educacion', Registry.resolveDemoBuilder('educacion') === 'plantillaDemoEducacion');
+ok('registry demoBuilder industria', Registry.resolveDemoBuilder('industria') === 'plantillaDemoIndustria');
+ok('registry demoBuilder bienes-raices', Registry.resolveDemoBuilder('bienes-raices') === 'plantillaDemoBienesRaices');
+ok('registry allModernNestedKeys', (Registry.allModernNestedProfileKeys() || []).length === 14);
 
 ok('CariHubRegistroPublicBlocks cargado', !!PB && !!PB.mapToPerfil);
 ok('CariHubRegistroPerfilSubmit cargado', !!Submit && !!Submit.buildUsuarioDoc);
@@ -150,6 +200,167 @@ const SECTOR_CASES = [
       colaboracionContenido: 'No'
     },
     nestedKey: 'gastronomiaPerfil'
+  },
+  {
+    key: 'mascotas',
+    ctx: { sectorId: 'mascotas', subcategoriaId: 'paseador-de-perros', formularioId: 'persona_independiente' },
+    bloques: {
+      alias: 'Paseos Demo QA',
+      tagline: 'Paseos con reporte',
+      deltaPack: 'A',
+      canonSubcategoriaId: 'paseador-de-perros',
+      serviciosMascotas: ['Paseo'],
+      tarifaDesde: '150',
+      colaboracionContenido: 'Sí',
+      mostrarColaboracionContenidoPublico: 'Sí'
+    },
+    nestedKey: 'mascotasPerfil'
+  },
+  {
+    key: 'hogar',
+    ctx: { sectorId: 'hogar', subcategoriaId: 'plomeros', formularioId: 'persona_independiente' },
+    bloques: {
+      alias: 'Plomero Demo QA',
+      tagline: 'Plomería con garantía',
+      deltaPack: 'A',
+      canonSubcategoriaId: 'plomeros',
+      serviciosHogar: ['Fugas'],
+      tarifaDesde: '300',
+      colaboracionContenido: 'Sí',
+      mostrarColaboracionContenidoPublico: 'Sí'
+    },
+    nestedKey: 'hogarPerfil'
+  },
+  {
+    key: 'salud',
+    ctx: { sectorId: 'salud', subcategoriaId: 'medicos-generales', formularioId: 'profesionista_cedula' },
+    bloques: {
+      nombreProfesional: 'Dra. Demo QA',
+      tagline: 'Medicina general',
+      deltaPack: 'A',
+      canonSubcategoriaId: 'medicos-generales',
+      especialidad: 'Medicina general',
+      serviciosProfesionales: ['Consulta'],
+      precioConsulta: '800',
+      horarioAtencion: 'Lun–Vie',
+      segurosAceptados: 'Particular',
+      colaboracionContenido: 'Sí',
+      mostrarColaboracionContenidoPublico: 'Sí'
+    },
+    nestedKey: 'saludPerfil'
+  },
+  {
+    key: 'tecnologia',
+    ctx: { sectorId: 'tecnologia', subcategoriaId: 'programador', formularioId: 'persona_independiente' },
+    bloques: {
+      alias: 'Dev Demo QA',
+      tagline: 'Desarrollo web',
+      deltaPack: 'A',
+      canonSubcategoriaId: 'programador',
+      stackTecnologico: ['React'],
+      serviciosDesarrollo: ['Web'],
+      modalidadServicioTI: 'remoto',
+      tarifaDesde: '1200',
+      colaboracionContenido: 'Sí',
+      mostrarColaboracionContenidoPublico: 'Sí'
+    },
+    nestedKey: 'tecnologiaPerfil'
+  },
+  {
+    key: 'automotriz',
+    ctx: { sectorId: 'automotriz', subcategoriaId: 'talleres-mecanicos', formularioId: 'persona_independiente' },
+    bloques: {
+      alias: 'Taller Demo QA',
+      tagline: 'Mecánica general',
+      deltaPack: 'A',
+      canonSubcategoriaId: 'talleres-mecanicos',
+      serviciosMecanica: ['Afinación'],
+      modalidadServicioAuto: 'taller_fijo',
+      tarifaDesde: '500',
+      colaboracionContenido: 'Sí',
+      mostrarColaboracionContenidoPublico: 'Sí'
+    },
+    nestedKey: 'automotrizPerfil'
+  },
+  {
+    key: 'transporte',
+    ctx: { sectorId: 'transporte', subcategoriaId: 'chofer-privado', formularioId: 'persona_independiente' },
+    bloques: {
+      alias: 'Chofer Demo QA',
+      tagline: 'Traslados ejecutivos',
+      deltaPack: 'A',
+      canonSubcategoriaId: 'chofer-privado',
+      serviciosTransportePersonas: ['Traslados'],
+      modalidadServicioTransporte: 'metropolitana',
+      tarifaDesde: '600',
+      colaboracionContenido: 'Sí',
+      mostrarColaboracionContenidoPublico: 'Sí'
+    },
+    nestedKey: 'transportePerfil'
+  },
+  {
+    key: 'comercio',
+    ctx: { sectorId: 'comercio', subcategoriaId: 'abarrotes', formularioId: 'persona_independiente' },
+    bloques: {
+      alias: 'Abarrotes Demo QA',
+      tagline: 'Surte diario',
+      deltaPack: 'A',
+      canonSubcategoriaId: 'abarrotes',
+      categoriasProducto: ['Abarrotes'],
+      modalidadVentaComercio: 'tienda_fisica',
+      tarifaDesde: '25',
+      colaboracionContenido: 'Sí',
+      mostrarColaboracionContenidoPublico: 'Sí'
+    },
+    nestedKey: 'comercioPerfil'
+  },
+  {
+    key: 'educacion',
+    ctx: { sectorId: 'educacion', subcategoriaId: 'maestro-particular', formularioId: 'persona_independiente' },
+    bloques: {
+      alias: 'Maestro Demo QA',
+      tagline: 'Clases personalizadas',
+      deltaPack: 'A',
+      canonSubcategoriaId: 'maestro-particular',
+      serviciosEducacion: ['Clases particulares'],
+      modalidadEducacion: 'hibrido',
+      tarifaDesde: '350',
+      colaboracionContenido: 'Sí',
+      mostrarColaboracionContenidoPublico: 'Sí'
+    },
+    nestedKey: 'educacionPerfil'
+  },
+  {
+    key: 'industria',
+    ctx: { sectorId: 'industria', subcategoriaId: 'consultor-empresarial-independiente', formularioId: 'persona_independiente' },
+    bloques: {
+      alias: 'Consultor Demo QA',
+      tagline: 'Optimización de procesos',
+      deltaPack: 'A',
+      canonSubcategoriaId: 'consultor-empresarial-independiente',
+      serviciosIndustriales: ['Consultoría'],
+      modalidadServicioIndustrial: 'mixto',
+      tarifaDesde: '1200',
+      colaboracionContenido: 'Sí',
+      mostrarColaboracionContenidoPublico: 'Sí'
+    },
+    nestedKey: 'industriaPerfil'
+  },
+  {
+    key: 'bienes-raices',
+    ctx: { sectorId: 'bienes-raices', subcategoriaId: 'agente-inmobiliario-independiente', formularioId: 'persona_independiente' },
+    bloques: {
+      alias: 'Agente Demo QA',
+      tagline: 'Venta y renta',
+      deltaPack: 'A',
+      canonSubcategoriaId: 'agente-inmobiliario-independiente',
+      serviciosInmobiliarios: ['Asesoría'],
+      modalidadOperacionInmobiliaria: 'venta_y_renta',
+      tarifaDesde: 'Consultar',
+      colaboracionContenido: 'Sí',
+      mostrarColaboracionContenidoPublico: 'Sí'
+    },
+    nestedKey: 'bienesRaicesPerfil'
   }
 ];
 
@@ -185,12 +396,16 @@ const profMapped = PB.mapToPerfil({}, {
   profesionalesPerfil: { deltaPack: 'A', nombreProfesional: 'Lic. Cross' },
   eventosPerfil: { alias: 'leak' },
   gastronomiaPerfil: { nombreComercial: 'leak' },
-  bienestarHolisticoPerfil: { alias: 'leak' }
+  bienestarHolisticoPerfil: { alias: 'leak' },
+  mascotasPerfil: { alias: 'leak' },
+  hogarPerfil: { alias: 'leak' }
 }, { sectorId: 'profesionales', subcategoriaId: 'abogados', formularioId: 'profesionista_cedula' });
 
 ok('anti-contam map profesionales sin eventosPerfil', !profMapped.eventosPerfil);
 ok('anti-contam map profesionales sin gastronomiaPerfil', !profMapped.gastronomiaPerfil);
 ok('anti-contam map profesionales sin bienestarHolisticoPerfil', !profMapped.bienestarHolisticoPerfil);
+ok('anti-contam map profesionales sin mascotasPerfil', !profMapped.mascotasPerfil);
+ok('anti-contam map profesionales sin hogarPerfil', !profMapped.hogarPerfil);
 ok('anti-contam map profesionales conserva profesionalesPerfil', !!profMapped.profesionalesPerfil);
 
 const dirty = {
@@ -200,12 +415,16 @@ const dirty = {
   profesionalesPerfil: { nombreProfesional: 'leak' },
   eventosPerfil: { alias: 'leak' },
   bienestarHolisticoPerfil: { alias: 'leak' },
+  mascotasPerfil: { alias: 'leak' },
+  hogarPerfil: { alias: 'leak' },
   modalidades: ['recibe']
 };
 Contract.sanitizePerfil(dirty, { sectorId: 'restaurantes', subcategoriaId: 'restaurantes-tradicional' });
 ok('sanitize gastronomia quita profesionalesPerfil', !dirty.profesionalesPerfil);
 ok('sanitize gastronomia quita eventosPerfil', !dirty.eventosPerfil);
 ok('sanitize gastronomia quita bienestarHolisticoPerfil', !dirty.bienestarHolisticoPerfil);
+ok('sanitize gastronomia quita mascotasPerfil', !dirty.mascotasPerfil);
+ok('sanitize gastronomia quita hogarPerfil', !dirty.hogarPerfil);
 ok('sanitize gastronomia conserva gastronomiaPerfil', !!dirty.gastronomiaPerfil);
 ok('sanitize gastronomia quita modalidades adultas', !dirty.modalidades);
 

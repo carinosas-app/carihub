@@ -1,0 +1,5800 @@
+{
+  "repo": "carinosas-app/carihub",
+  "planId": "master-v2",
+  "version": "2.1.0",
+  "generatedAt": "2026-06-20",
+  "descripcion": "Backlog maestro consolidado CariHub post-Sprint 1 (PR #60). v2.1: correcciones deps, dashboard faltante, admin consolidado, bodies expandidos.",
+  "sprint1Reference": {
+    "pr": 60,
+    "mergeCommit": "a51666c"
+  },
+  "ordenRecomendadoBloques": [
+    "A-foundation-messenger-mvp",
+    "B-estados-lives",
+    "C-economico-core",
+    "D-comunidades-vip",
+    "E-adjuntos-permisos",
+    "F-notificaciones-moderacion",
+    "G-crypto-post-fiat",
+    "H-passkeys-v1.1"
+  ],
+  "bloqueInmediatoPostSprint1": [
+    "MSG-000",
+    "TICKET-001",
+    "TICKET-003",
+    "MSG-010",
+    "MSG-024",
+    "MSG-011",
+    "TICKET-049",
+    "TICKET-050",
+    "TICKET-012",
+    "TICKET-013",
+    "MSG-043",
+    "MSG-082"
+  ],
+  "dependenciasCriticas": [
+    "ECO-030 bloquea activación automática de todos los productos (launch blocker)",
+    "VIP-050 depende de ECO-070 suscripciones",
+    "EST-030 y LIVE-020 dependen de ECO-020 checkout",
+    "CRY-* depende de ECO-030 fiat estable",
+    "MSG-043 depende de MSG-024 (solicitud conversación) — ambos P1 en v2.1",
+    "TICKET-012/013 dependen de TICKET-001 y TICKET-003 (partial)",
+    "MSG-050 consolidado como duplicateOf TICKET-050 — no crear issue duplicado",
+    "MSG-100–103 son reference — ver ADM-010, MSG-091, MSG-092"
+  ],
+  "globalDoNotTouch": [
+    "Shell 3 columnas dashboard-rentero (base congelada)",
+    "Migrar conversaciones/mensajes a inglés o inbox plano",
+    "App messenger separada",
+    "Migración BLK perfiles sin plan",
+    "Custodia crypto / wallets propias",
+    "Admin lee chats completos rutinario",
+    "Activación pagos desde frontend sin webhook",
+    "Presencia/en línea por defecto"
+  ],
+  "labels": [
+    "messenger",
+    "dashboard",
+    "backend",
+    "ux",
+    "admin",
+    "security",
+    "payments",
+    "crypto",
+    "vip",
+    "estados",
+    "lives",
+    "notifications",
+    "audit",
+    "p0-blocker",
+    "p1-next",
+    "p2-later",
+    "p3-future"
+  ],
+  "statistics": {
+    "total": 158,
+    "byBlock": {
+      "Admin": 12,
+      "Auditoría": 6,
+      "Crypto": 6,
+      "ECO / PAY": 12,
+      "Estados": 7,
+      "Lives": 8,
+      "Messenger": 68,
+      "Notificaciones": 6,
+      "Seguridad / Passkeys": 6,
+      "Foundation": 18,
+      "VIP / Comunidades": 9
+    },
+    "byPriority": {
+      "P1": 63,
+      "P2": 71,
+      "P3": 11,
+      "P0": 13
+    },
+    "byStatus": {
+      "done": 29,
+      "partial": 8,
+      "pending": 116,
+      "reference": 5
+    },
+    "done": 29,
+    "partial": 8,
+    "pending": 116,
+    "reference": 5,
+    "launchBlockers": 13,
+    "criticalRisks": 19,
+    "brokenDependencies": 0
+  },
+  "issues": [
+    {
+      "id": "ADM-010",
+      "title": "[P1] Admin denuncias messenger",
+      "body": "## Objetivo\nPanel admin para denuncias messenger (reportes_mensajeria) con workflow.\n\n## Alcance\nadmin.html módulo: listar, filtrar, asignar, resolver reportes. Integra MSG-021 schema DONE.\n\n## Dependencias\n- MSG-021\n\n## Archivos afectados\n- public/admin.html\n\n## Qué NO tocar\n- Admin lee chats completos rutinario\n\n## Criterios de aceptación\n- [ ] Admin ve reportes sin dump masivo de chats\n- [ ] Workflow estados: pendiente/en_revision/resuelto\n- [ ] Acciones acotadas según SPEC admin\n\n## Riesgo si se implementa mal\nModeración sin trazabilidad o acceso excesivo a mensajes privados.\n\n## Notas de implementación\nSupersedes MSG-101 (reference). Pipeline completo requiere MSG-090/091.",
+      "labels": [
+        "admin",
+        "messenger",
+        "p1-next"
+      ],
+      "priority": "P1",
+      "phase": "8-admin",
+      "block": "Admin",
+      "dependencies": [
+        "MSG-021"
+      ],
+      "affectedFiles": [
+        "public/admin.html"
+      ],
+      "riskLevel": "medium",
+      "status": "pending",
+      "doNotTouch": [],
+      "supersedes": [
+        "MSG-101"
+      ],
+      "duplicateOf": null,
+      "blockedBy": [],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "ADM-030",
+      "title": "[P2] Admin pagos conciliación",
+      "body": "Fallidos, pendientes, reembolsos.",
+      "labels": [
+        "admin",
+        "payments",
+        "p2-later"
+      ],
+      "priority": "P2",
+      "phase": "8-admin",
+      "block": "Admin",
+      "dependencies": [
+        "ECO-030"
+      ],
+      "affectedFiles": [
+        "public/admin.html"
+      ],
+      "riskLevel": "high",
+      "status": "pending",
+      "doNotTouch": [],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "ECO-030"
+      ],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "ADM-040",
+      "title": "[P2] Admin VIP suscripciones",
+      "body": "Disputas, acceso membresía.",
+      "labels": [
+        "admin",
+        "vip",
+        "p2-later"
+      ],
+      "priority": "P2",
+      "phase": "8-admin",
+      "block": "Admin",
+      "dependencies": [
+        "VIP-050"
+      ],
+      "affectedFiles": [
+        "public/admin.html"
+      ],
+      "riskLevel": "medium",
+      "status": "pending",
+      "doNotTouch": [],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "VIP-050"
+      ],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "ADM-050",
+      "title": "[P2] Admin seguridad accesos",
+      "body": "Dispositivos, cerrar sesiones, bloquear cuenta.",
+      "labels": [
+        "admin",
+        "security",
+        "p2-later"
+      ],
+      "priority": "P2",
+      "phase": "8-admin",
+      "block": "Admin",
+      "dependencies": [
+        "SEC-030"
+      ],
+      "affectedFiles": [
+        "public/admin.html"
+      ],
+      "riskLevel": "high",
+      "status": "pending",
+      "doNotTouch": [],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "SEC-030"
+      ],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "AUD-010",
+      "title": "[P2] Schema audit_logs unificado",
+      "body": "Messenger, económico, seguridad.",
+      "labels": [
+        "audit",
+        "p2-later"
+      ],
+      "priority": "P2",
+      "phase": "9-audit",
+      "block": "Auditoría",
+      "dependencies": [
+        "MSG-027"
+      ],
+      "affectedFiles": [
+        "firestore.rules"
+      ],
+      "riskLevel": "medium",
+      "status": "pending",
+      "doNotTouch": [],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "MSG-027"
+      ],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "AUD-020",
+      "title": "[P2] Auditoría económica",
+      "body": "## Objetivo\nAuditoría económica\n\n## Alcance\nLog webhooks, activaciones, retiros.\n\n## Dependencias\n- ECO-030\n\n## Archivos afectados\n- functions/\n- firestore.rules\n\n## Qué NO tocar\n- Rediseño shell 3 columnas dashboard-rentero.html\n- Migrar a app messenger separada\n- Colecciones conversations/messages en inglés\n\n## Criterios de aceptación\n- [ ] Definir en sprint\n\n## Riesgo si se implementa mal\nVer riskLevel del ticket.",
+      "labels": [
+        "audit",
+        "payments",
+        "p2-later"
+      ],
+      "priority": "P2",
+      "phase": "9-audit",
+      "block": "Auditoría",
+      "dependencies": [
+        "ECO-030"
+      ],
+      "affectedFiles": [
+        "functions/",
+        "firestore.rules"
+      ],
+      "riskLevel": "critical",
+      "status": "pending",
+      "doNotTouch": [],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "ECO-030"
+      ],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "AUD-030",
+      "title": "[P2] Auditoría seguridad accesos",
+      "body": "historial_accesos, passkeys, alertas.",
+      "labels": [
+        "audit",
+        "security",
+        "p2-later"
+      ],
+      "priority": "P2",
+      "phase": "9-audit",
+      "block": "Auditoría",
+      "dependencies": [
+        "SEC-030"
+      ],
+      "affectedFiles": [
+        "firestore.rules"
+      ],
+      "riskLevel": "high",
+      "status": "pending",
+      "doNotTouch": [],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "SEC-030"
+      ],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "CRY-000",
+      "title": "[P2] Acta crypto no custodial",
+      "body": "## Objetivo\nActa crypto post-fiat: sin custodia propia, proveedor externo.\n\n## Alcance\nSolo después ECO-030 fiat estable. Documentar alcance v1 crypto.\n\n## Dependencias\n- ECO-030\n\n## Archivos afectados\n- scripts/ANEXO-CRIPTOMONEDAS-PAGOS-CONTRATOS.json\n\n## Qué NO tocar\n- Custodia crypto\n- Activar desde frontend\n\n## Criterios de aceptación\n- [ ] No wallets custodia CariHub\n- [ ] Dependencia ECO-030 documentada\n\n## Riesgo si se implementa mal\nRegulación, custodia, fraude.",
+      "labels": [
+        "crypto",
+        "payments",
+        "p2-later"
+      ],
+      "priority": "P2",
+      "phase": "6-crypto",
+      "block": "Crypto",
+      "dependencies": [
+        "ECO-030"
+      ],
+      "affectedFiles": [
+        "scripts/ANEXO-CRIPTOMONEDAS-PAGOS-CONTRATOS.json"
+      ],
+      "riskLevel": "critical",
+      "status": "pending",
+      "doNotTouch": [
+        "Custodia crypto",
+        "Activar desde frontend"
+      ],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "ECO-030"
+      ],
+      "acceptanceCriteria": [
+        "No wallets custodia CariHub",
+        "Dependencia ECO-030 documentada"
+      ],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "Alto — crypto requiere marco fiscal explícito.",
+      "launchBlocker": false
+    },
+    {
+      "id": "CRY-010",
+      "title": "[P2] Análisis proveedor y monedas MVP",
+      "body": "## Objetivo\nAnálisis proveedor y monedas MVP\n\n## Alcance\nUSDT TRC20 + USDC. NOWPayments vs Coinbase Commerce.\n\n## Dependencias\n- CRY-000\n\n## Archivos afectados\n- scripts/\n\n## Qué NO tocar\n- Rediseño shell 3 columnas dashboard-rentero.html\n- Migrar a app messenger separada\n- Colecciones conversations/messages en inglés\n\n## Criterios de aceptación\n- [ ] Definir en sprint\n\n## Riesgo si se implementa mal\nVer riskLevel del ticket.",
+      "labels": [
+        "crypto",
+        "p2-later"
+      ],
+      "priority": "P2",
+      "phase": "6-crypto",
+      "block": "Crypto",
+      "dependencies": [
+        "CRY-000"
+      ],
+      "affectedFiles": [
+        "scripts/"
+      ],
+      "riskLevel": "high",
+      "status": "pending",
+      "doNotTouch": [],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "CRY-000"
+      ],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "CRY-020",
+      "title": "[P2] Schema crypto_orders + webhooks",
+      "body": "## Objetivo\nSchema crypto_orders + webhooks\n\n## Alcance\nExpiración, txid, tolerancia sub/sobrepago.\n\n## Dependencias\n- CRY-010\n\n## Archivos afectados\n- firestore.rules\n\n## Qué NO tocar\n- Rediseño shell 3 columnas dashboard-rentero.html\n- Migrar a app messenger separada\n- Colecciones conversations/messages en inglés\n\n## Criterios de aceptación\n- [ ] Definir en sprint\n\n## Riesgo si se implementa mal\nVer riskLevel del ticket.",
+      "labels": [
+        "crypto",
+        "backend",
+        "p2-later"
+      ],
+      "priority": "P2",
+      "phase": "6-crypto",
+      "block": "Crypto",
+      "dependencies": [
+        "CRY-010"
+      ],
+      "affectedFiles": [
+        "firestore.rules"
+      ],
+      "riskLevel": "high",
+      "status": "pending",
+      "doNotTouch": [],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "CRY-010"
+      ],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "CRY-030",
+      "title": "[P2] Checkout crypto en ECO-020",
+      "body": "## Objetivo\nCheckout crypto en ECO-020\n\n## Alcance\n4º método en checkout unificado.\n\n## Dependencias\n- CRY-020\n- ECO-020\n\n## Archivos afectados\n- public/checkout.html\n\n## Qué NO tocar\n- Rediseño shell 3 columnas dashboard-rentero.html\n- Migrar a app messenger separada\n- Colecciones conversations/messages en inglés\n\n## Criterios de aceptación\n- [ ] Definir en sprint\n\n## Riesgo si se implementa mal\nVer riskLevel del ticket.",
+      "labels": [
+        "crypto",
+        "ux",
+        "p2-later"
+      ],
+      "priority": "P2",
+      "phase": "6-crypto",
+      "block": "Crypto",
+      "dependencies": [
+        "CRY-020",
+        "ECO-020"
+      ],
+      "affectedFiles": [
+        "public/checkout.html"
+      ],
+      "riskLevel": "high",
+      "status": "pending",
+      "doNotTouch": [],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "CRY-020",
+        "ECO-020"
+      ],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "CRY-040",
+      "title": "[P2] Functions webhook crypto",
+      "body": "## Objetivo\nFunctions webhook crypto\n\n## Alcance\nValidar firma, activar vía ECO-040.\n\n## Dependencias\n- CRY-020\n\n## Archivos afectados\n- functions/payments/\n\n## Qué NO tocar\n- Rediseño shell 3 columnas dashboard-rentero.html\n- Migrar a app messenger separada\n- Colecciones conversations/messages en inglés\n\n## Criterios de aceptación\n- [ ] Definir en sprint\n\n## Riesgo si se implementa mal\nVer riskLevel del ticket.",
+      "labels": [
+        "crypto",
+        "backend",
+        "p2-later"
+      ],
+      "priority": "P2",
+      "phase": "6-crypto",
+      "block": "Crypto",
+      "dependencies": [
+        "CRY-020"
+      ],
+      "affectedFiles": [
+        "functions/payments/"
+      ],
+      "riskLevel": "critical",
+      "status": "pending",
+      "doNotTouch": [],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "CRY-020"
+      ],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "CRY-050",
+      "title": "[P3] Análisis fiscal SAT crypto",
+      "body": "## Objetivo\nAnálisis fiscal SAT crypto\n\n## Alcance\nRiesgos regulatorios México.\n\n## Dependencias\n- CRY-000\n\n## Archivos afectados\n- scripts/\n\n## Qué NO tocar\n- Rediseño shell 3 columnas dashboard-rentero.html\n- Migrar a app messenger separada\n- Colecciones conversations/messages en inglés\n\n## Criterios de aceptación\n- [ ] Definir en sprint\n\n## Riesgo si se implementa mal\nVer riskLevel del ticket.",
+      "labels": [
+        "crypto",
+        "p3-future"
+      ],
+      "priority": "P3",
+      "phase": "6-crypto",
+      "block": "Crypto",
+      "dependencies": [
+        "CRY-000"
+      ],
+      "affectedFiles": [
+        "scripts/"
+      ],
+      "riskLevel": "critical",
+      "status": "pending",
+      "doNotTouch": [],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "CRY-000"
+      ],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "ECO-000",
+      "title": "[P0] Acta mapa económico unificado",
+      "body": "## Objetivo\nActa mapa económico: ordenes_pago unificada, webhook activa servicio, ref SPEC-PAGOS-CONTRATOS.\n\n## Alcance\nTipos producto: perfil, banner, estado, live, VIP suscripción. Flujo checkout → webhook → activación → vencimiento.\n\n## Dependencias\n- MSG-000\n\n## Archivos afectados\n- scripts/SPEC-PAGOS-CONTRATOS.json\n\n## Qué NO tocar\n- Activación pagos desde frontend\n\n## Criterios de aceptación\n- [ ] Documento alineado scripts/SPEC-PAGOS-CONTRATOS.json\n- [ ] Sin activación desde frontend sin webhook\n- [ ] Mapa de estados orden: pendiente/pagado/fallido/vencido\n\n## Riesgo si se implementa mal\nPagos manuales, fraude, productos activos sin cobro.",
+      "labels": [
+        "payments",
+        "backend",
+        "p0-blocker"
+      ],
+      "priority": "P0",
+      "phase": "5-economico",
+      "block": "ECO / PAY",
+      "dependencies": [
+        "MSG-000"
+      ],
+      "affectedFiles": [
+        "scripts/SPEC-PAGOS-CONTRATOS.json"
+      ],
+      "riskLevel": "critical",
+      "status": "pending",
+      "doNotTouch": [
+        "Activación pagos desde frontend"
+      ],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "MSG-000"
+      ],
+      "acceptanceCriteria": [
+        "Documento alineado scripts/SPEC-PAGOS-CONTRATOS.json",
+        "Sin activación desde frontend sin webhook",
+        "Mapa de estados orden: pendiente/pagado/fallido/vencido"
+      ],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "Base de toda monetización fiat.",
+      "fiscalRisk": "Sin conciliación ordenes_pago = imposible auditar ingresos.",
+      "launchBlocker": true
+    },
+    {
+      "id": "ECO-010",
+      "title": "[P0] Schema ordenes_pago + estados",
+      "body": "## Objetivo\nSchema Firestore ordenes_pago con scoped producto y auditoría.\n\n## Alcance\ntipo, scoped perfilId/bannerId, montos, comisiones, webhookId, vencimiento, proveedor Stripe/MP.\n\n## Dependencias\n- ECO-000\n\n## Archivos afectados\n- firestore.rules\n\n## Qué NO tocar\n- Rediseño shell 3 columnas dashboard-rentero.html\n- Migrar a app messenger separada\n- Colecciones conversations/messages en inglés\n\n## Criterios de aceptación\n- [ ] Rules: solo owner y admin leen su orden\n- [ ] Índices por uid + estado + createdAt\n- [ ] Campos suficientes para conciliación ADM-030\n\n## Riesgo si se implementa mal\nDoble activación, órdenes huérfanas, fraude.",
+      "labels": [
+        "payments",
+        "backend",
+        "p0-blocker"
+      ],
+      "priority": "P0",
+      "phase": "5-economico",
+      "block": "ECO / PAY",
+      "dependencies": [
+        "ECO-000"
+      ],
+      "affectedFiles": [
+        "firestore.rules"
+      ],
+      "riskLevel": "critical",
+      "status": "pending",
+      "doNotTouch": [],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "ECO-000"
+      ],
+      "acceptanceCriteria": [
+        "Rules: solo owner y admin leen su orden",
+        "Índices por uid + estado + createdAt",
+        "Campos suficientes para conciliación ADM-030"
+      ],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "Crítico — sin schema no hay checkout confiable.",
+      "fiscalRisk": "Alto — registros incompletos para facturación.",
+      "launchBlocker": true
+    },
+    {
+      "id": "ECO-020",
+      "title": "[P0] Checkout unificado",
+      "body": "## Objetivo\nCheckout unificado /checkout/:tipo/:id para Stripe y Mercado Pago.\n\n## Alcance\ncheckout.html crea ordenes_pago, redirige a proveedor, retorno con ordenId.\n\n## Dependencias\n- ECO-010\n\n## Archivos afectados\n- public/checkout.html\n\n## Qué NO tocar\n- Rediseño shell 3 columnas dashboard-rentero.html\n- Migrar a app messenger separada\n- Colecciones conversations/messages en inglés\n\n## Criterios de aceptación\n- [ ] Un flujo para banner, estado, live, VIP\n- [ ] No activar producto en cliente al retorno\n- [ ] Pendiente hasta webhook ECO-030/031\n\n## Riesgo si se implementa mal\nActivación falsa en cliente; UX inconsistente entre productos.",
+      "labels": [
+        "payments",
+        "ux",
+        "p0-blocker"
+      ],
+      "priority": "P0",
+      "phase": "5-economico",
+      "block": "ECO / PAY",
+      "dependencies": [
+        "ECO-010"
+      ],
+      "affectedFiles": [
+        "public/checkout.html"
+      ],
+      "riskLevel": "high",
+      "status": "pending",
+      "doNotTouch": [],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "ECO-010"
+      ],
+      "acceptanceCriteria": [
+        "Un flujo para banner, estado, live, VIP",
+        "No activar producto en cliente al retorno",
+        "Pendiente hasta webhook ECO-030/031"
+      ],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "Gateway a ingresos recurrentes y one-shot.",
+      "fiscalRisk": "",
+      "launchBlocker": true
+    },
+    {
+      "id": "ECO-030",
+      "title": "[P0] Webhook Stripe + activación",
+      "body": "## Objetivo\nWebhook Stripe con firma, idempotencia y activación automática de servicio.\n\n## Alcance\nfunctions/payments/ stripeWebhook. Actualiza ordenes_pago, activa perfil/banner/estado/live/VIP según tipo.\n\n## Dependencias\n- ECO-010\n\n## Archivos afectados\n- functions/payments/\n\n## Qué NO tocar\n- Confirmar pago en cliente\n\n## Criterios de aceptación\n- [ ] Firma Stripe verificada\n- [ ] Idempotencia por event id\n- [ ] audit log de activación\n- [ ] Falla segura: no activar sin pago confirmado\n\n## Riesgo si se implementa mal\nActivación sin pago = pérdida directa + fraude.",
+      "labels": [
+        "payments",
+        "backend",
+        "p0-blocker"
+      ],
+      "priority": "P0",
+      "phase": "5-economico",
+      "block": "ECO / PAY",
+      "dependencies": [
+        "ECO-010"
+      ],
+      "affectedFiles": [
+        "functions/payments/"
+      ],
+      "riskLevel": "critical",
+      "status": "pending",
+      "doNotTouch": [
+        "Confirmar pago en cliente"
+      ],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "ECO-010"
+      ],
+      "acceptanceCriteria": [
+        "Firma Stripe verificada",
+        "Idempotencia por event id",
+        "audit log de activación",
+        "Falla segura: no activar sin pago confirmado"
+      ],
+      "implementationNotes": "",
+      "securityNotes": "Secret en Functions config; nunca en frontend.",
+      "economicImpact": "Crítico — núcleo monetización.",
+      "fiscalRisk": "Crítico — conciliación bancaria depende de webhooks.",
+      "launchBlocker": true
+    },
+    {
+      "id": "ECO-031",
+      "title": "[P0] Webhook Mercado Pago",
+      "body": "## Objetivo\nWebhook Mercado Pago equivalente a ECO-030.\n\n## Alcance\nMisma lógica activación; proveedor MP para LATAM.\n\n## Dependencias\n- ECO-030\n\n## Archivos afectados\n- functions/payments/\n\n## Qué NO tocar\n- Rediseño shell 3 columnas dashboard-rentero.html\n- Migrar a app messenger separada\n- Colecciones conversations/messages en inglés\n\n## Criterios de aceptación\n- [ ] Paridad funcional con ECO-030\n- [ ] Idempotencia MP notification id\n\n## Riesgo si se implementa mal\nMitad del mercado sin activación automática.",
+      "labels": [
+        "payments",
+        "backend",
+        "p0-blocker"
+      ],
+      "priority": "P0",
+      "phase": "5-economico",
+      "block": "ECO / PAY",
+      "dependencies": [
+        "ECO-030"
+      ],
+      "affectedFiles": [
+        "functions/payments/"
+      ],
+      "riskLevel": "critical",
+      "status": "pending",
+      "doNotTouch": [],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "ECO-030"
+      ],
+      "acceptanceCriteria": [
+        "Paridad funcional con ECO-030",
+        "Idempotencia MP notification id"
+      ],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": true
+    },
+    {
+      "id": "ECO-040",
+      "title": "[P0] Activar/desactivar por vencimiento",
+      "body": "## Objetivo\nScheduler/Function desactiva productos vencidos (perfil, banner, estado, live, VIP).\n\n## Alcance\nExtender vencerPerfiles en functions/index.js. Bloquea chats banner impago (TICKET-052).\n\n## Dependencias\n- ECO-030\n\n## Archivos afectados\n- functions/index.js\n\n## Qué NO tocar\n- Rediseño shell 3 columnas dashboard-rentero.html\n- Migrar a app messenger separada\n- Colecciones conversations/messages en inglés\n\n## Criterios de aceptación\n- [ ] Producto vencido → estado inactivo en Firestore\n- [ ] Banner impago bloquea conversaciones\n- [ ] Notificación opcional pre-vencimiento\n\n## Riesgo si se implementa mal\nServicios gratis post-vencimiento; ingresos perdidos.",
+      "labels": [
+        "payments",
+        "backend",
+        "p0-blocker"
+      ],
+      "priority": "P0",
+      "phase": "5-economico",
+      "block": "ECO / PAY",
+      "dependencies": [
+        "ECO-030"
+      ],
+      "affectedFiles": [
+        "functions/index.js"
+      ],
+      "riskLevel": "critical",
+      "status": "pending",
+      "doNotTouch": [],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "ECO-030"
+      ],
+      "acceptanceCriteria": [
+        "Producto vencido → estado inactivo en Firestore",
+        "Banner impago bloquea conversaciones",
+        "Notificación opcional pre-vencimiento"
+      ],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "Cierra ciclo cobro → activación → vencimiento.",
+      "fiscalRisk": "",
+      "launchBlocker": true
+    },
+    {
+      "id": "ECO-050",
+      "title": "[P1] Avisos pago y vencimiento",
+      "body": "## Objetivo\nAvisos pago y vencimiento\n\n## Alcance\nPor vencer, vencido, fallido → notificaciones.\n\n## Dependencias\n- ECO-040\n- NOT-010\n\n## Archivos afectados\n- functions/\n- public/js/dashboard-avisos.js\n\n## Qué NO tocar\n- Rediseño shell 3 columnas dashboard-rentero.html\n- Migrar a app messenger separada\n- Colecciones conversations/messages en inglés\n\n## Criterios de aceptación\n- [ ] Definir en sprint\n\n## Riesgo si se implementa mal\nVer riskLevel del ticket.",
+      "labels": [
+        "payments",
+        "notifications",
+        "p1-next"
+      ],
+      "priority": "P1",
+      "phase": "5-economico",
+      "block": "ECO / PAY",
+      "dependencies": [
+        "ECO-040",
+        "NOT-010"
+      ],
+      "affectedFiles": [
+        "functions/",
+        "public/js/dashboard-avisos.js"
+      ],
+      "riskLevel": "medium",
+      "status": "pending",
+      "doNotTouch": [],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "ECO-040",
+        "NOT-010"
+      ],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "ECO-060",
+      "title": "[P1] Donaciones y regalos",
+      "body": "## Objetivo\nDonaciones y regalos\n\n## Alcance\nComisión, saldo rentero, historial. Reemplazar stub gratificaciones.\n\n## Dependencias\n- ECO-030\n\n## Archivos afectados\n- public/js/carihub-gratificaciones.js\n\n## Qué NO tocar\n- Rediseño shell 3 columnas dashboard-rentero.html\n- Migrar a app messenger separada\n- Colecciones conversations/messages en inglés\n\n## Criterios de aceptación\n- [ ] Definir en sprint\n\n## Riesgo si se implementa mal\nVer riskLevel del ticket.",
+      "labels": [
+        "payments",
+        "p1-next"
+      ],
+      "priority": "P1",
+      "phase": "5-economico",
+      "block": "ECO / PAY",
+      "dependencies": [
+        "ECO-030"
+      ],
+      "affectedFiles": [
+        "public/js/carihub-gratificaciones.js"
+      ],
+      "riskLevel": "high",
+      "status": "pending",
+      "doNotTouch": [],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "ECO-030"
+      ],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "ECO-070",
+      "title": "[P1] Suscripciones recurrentes VIP",
+      "body": "## Objetivo\nSuscripciones VIP recurrentes vía Stripe Billing / MP subscriptions.\n\n## Alcance\nordenes_pago tipo suscripcion_vip, webhooks renewal/cancel, VIP-050 depende.\n\n## Dependencias\n- ECO-030\n- VIP-010\n\n## Archivos afectados\n- functions/payments/\n\n## Qué NO tocar\n- Rediseño shell 3 columnas dashboard-rentero.html\n- Migrar a app messenger separada\n- Colecciones conversations/messages en inglés\n\n## Criterios de aceptación\n- [ ] Renovación automática\n- [ ] Cancelación respeta periodo\n- [ ] VIP-050 integrado\n\n## Riesgo si se implementa mal\nRegresión en contexto scoped o exposición de datos entre perfiles/banners.",
+      "labels": [
+        "payments",
+        "vip",
+        "p1-next"
+      ],
+      "priority": "P1",
+      "phase": "5-economico",
+      "block": "ECO / PAY",
+      "dependencies": [
+        "ECO-030",
+        "VIP-010"
+      ],
+      "affectedFiles": [
+        "functions/payments/"
+      ],
+      "riskLevel": "critical",
+      "status": "pending",
+      "doNotTouch": [],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "ECO-030",
+        "VIP-010"
+      ],
+      "acceptanceCriteria": [
+        "Renovación automática",
+        "Cancelación respeta periodo",
+        "VIP-050 integrado"
+      ],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "Ingreso recurrente comunidades VIP.",
+      "fiscalRisk": "Suscripciones requieren trazabilidad renewal.",
+      "launchBlocker": false
+    },
+    {
+      "id": "ECO-080",
+      "title": "[P1] Dashboard pagos servicios activos",
+      "body": "## Objetivo\nDashboard pagos servicios activos\n\n## Alcance\nResumen económico, renovar, historial.\n\n## Dependencias\n- ECO-040\n\n## Archivos afectados\n- public/dashboard-rentero.html\n\n## Qué NO tocar\n- Rediseño shell 3 columnas dashboard-rentero.html\n- Migrar a app messenger separada\n- Colecciones conversations/messages en inglés\n\n## Criterios de aceptación\n- [ ] Definir en sprint\n\n## Riesgo si se implementa mal\nVer riskLevel del ticket.",
+      "labels": [
+        "payments",
+        "dashboard",
+        "p1-next"
+      ],
+      "priority": "P1",
+      "phase": "5-economico",
+      "block": "ECO / PAY",
+      "dependencies": [
+        "ECO-040"
+      ],
+      "affectedFiles": [
+        "public/dashboard-rentero.html"
+      ],
+      "riskLevel": "medium",
+      "status": "pending",
+      "doNotTouch": [
+        "Rediseño shell 3 columnas dashboard-rentero.html",
+        "Migrar a app messenger separada",
+        "Colecciones conversations/messages en inglés"
+      ],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "ECO-040"
+      ],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "ECO-090",
+      "title": "[P2] Saldos retiros rentero",
+      "body": "## Objetivo\nSaldos retiros rentero\n\n## Alcance\nSaldo disponible, solicitar retiro, admin aprueba.\n\n## Dependencias\n- ECO-060\n\n## Archivos afectados\n- firestore.rules\n- functions/\n\n## Qué NO tocar\n- Rediseño shell 3 columnas dashboard-rentero.html\n- Migrar a app messenger separada\n- Colecciones conversations/messages en inglés\n\n## Criterios de aceptación\n- [ ] Definir en sprint\n\n## Riesgo si se implementa mal\nVer riskLevel del ticket.",
+      "labels": [
+        "payments",
+        "p2-later"
+      ],
+      "priority": "P2",
+      "phase": "5-economico",
+      "block": "ECO / PAY",
+      "dependencies": [
+        "ECO-060"
+      ],
+      "affectedFiles": [
+        "firestore.rules",
+        "functions/"
+      ],
+      "riskLevel": "critical",
+      "status": "pending",
+      "doNotTouch": [],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "ECO-060"
+      ],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "ECO-100",
+      "title": "[P3] Análisis facturación Timbradísimo",
+      "body": "## Objetivo\nAnálisis facturación Timbradísimo\n\n## Alcance\nSolo análisis fiscal CFDI. No implementar.\n\n## Dependencias\n- ECO-000\n\n## Archivos afectados\n- scripts/\n\n## Qué NO tocar\n- Facturar sin asesor fiscal\n\n## Criterios de aceptación\n- [ ] Definir en sprint\n\n## Riesgo si se implementa mal\nVer riskLevel del ticket.",
+      "labels": [
+        "payments",
+        "p3-future"
+      ],
+      "priority": "P3",
+      "phase": "5-economico",
+      "block": "ECO / PAY",
+      "dependencies": [
+        "ECO-000"
+      ],
+      "affectedFiles": [
+        "scripts/"
+      ],
+      "riskLevel": "critical",
+      "status": "pending",
+      "doNotTouch": [
+        "Facturar sin asesor fiscal"
+      ],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "ECO-000"
+      ],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "EST-000",
+      "title": "[P0] Acta módulo Estados scoped perfil",
+      "body": "## Objetivo\nActa módulo Estados publicados scoped por perfil.\n\n## Alcance\nIntegración strip mensajes, perfil público, checkout ECO para estados pagados.\n\n## Dependencias\n- MSG-000\n\n## Archivos afectados\n- scripts/\n\n## Qué NO tocar\n- Rediseño shell 3 columnas dashboard-rentero.html\n- Migrar a app messenger separada\n- Colecciones conversations/messages en inglés\n\n## Criterios de aceptación\n- [ ] Estados por contexto perfil\n- [ ] No mezclar perfiles\n- [ ] Doc en scripts/\n\n## Riesgo si se implementa mal\nRegresión en contexto scoped o exposición de datos entre perfiles/banners.",
+      "labels": [
+        "estados",
+        "backend",
+        "p0-blocker"
+      ],
+      "priority": "P0",
+      "phase": "3-estados",
+      "block": "Estados",
+      "dependencies": [
+        "MSG-000"
+      ],
+      "affectedFiles": [
+        "scripts/"
+      ],
+      "riskLevel": "high",
+      "status": "pending",
+      "doNotTouch": [
+        "Rediseño shell 3 columnas dashboard-rentero.html",
+        "Migrar a app messenger separada",
+        "Colecciones conversations/messages en inglés"
+      ],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "MSG-000"
+      ],
+      "acceptanceCriteria": [
+        "Estados por contexto perfil",
+        "No mezclar perfiles",
+        "Doc en scripts/"
+      ],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": true
+    },
+    {
+      "id": "EST-010",
+      "title": "[P1] Schema publicaciones_perfil estados",
+      "body": "tipo estado, visibilidad, venceEn, scoped.",
+      "labels": [
+        "estados",
+        "backend",
+        "p1-next"
+      ],
+      "priority": "P1",
+      "phase": "3-estados",
+      "block": "Estados",
+      "dependencies": [
+        "EST-000"
+      ],
+      "affectedFiles": [
+        "firestore.rules"
+      ],
+      "riskLevel": "medium",
+      "status": "pending",
+      "doNotTouch": [
+        "Migración BLK perfiles a colección perfiles/",
+        "Rehacer conversaciones scoped existentes"
+      ],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "EST-000"
+      ],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "EST-020",
+      "title": "[P1] UI crear/publicar estado dashboard",
+      "body": "Reemplazar MOCK feed estados.",
+      "labels": [
+        "estados",
+        "dashboard",
+        "ux",
+        "p1-next"
+      ],
+      "priority": "P1",
+      "phase": "3-estados",
+      "block": "Estados",
+      "dependencies": [
+        "EST-010",
+        "TICKET-013"
+      ],
+      "affectedFiles": [
+        "public/js/dashboard-rentero-nav.js"
+      ],
+      "riskLevel": "medium",
+      "status": "pending",
+      "doNotTouch": [
+        "Rediseño shell 3 columnas dashboard-rentero.html",
+        "Migrar a app messenger separada",
+        "Colecciones conversations/messages en inglés"
+      ],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "EST-010",
+        "TICKET-013"
+      ],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "EST-030",
+      "title": "[P1] Estado pagado checkout",
+      "body": "Duración → ECO checkout → publicar → vencer.",
+      "labels": [
+        "estados",
+        "payments",
+        "p1-next"
+      ],
+      "priority": "P1",
+      "phase": "3-estados",
+      "block": "Estados",
+      "dependencies": [
+        "EST-020",
+        "ECO-020"
+      ],
+      "affectedFiles": [
+        "public/js/"
+      ],
+      "riskLevel": "high",
+      "status": "pending",
+      "doNotTouch": [],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "EST-020",
+        "ECO-020"
+      ],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "EST-040",
+      "title": "[P2] Vencimiento automático estados",
+      "body": "Function scheduler.",
+      "labels": [
+        "estados",
+        "backend",
+        "p2-later"
+      ],
+      "priority": "P2",
+      "phase": "3-estados",
+      "block": "Estados",
+      "dependencies": [
+        "EST-030",
+        "ECO-040"
+      ],
+      "affectedFiles": [
+        "functions/index.js"
+      ],
+      "riskLevel": "medium",
+      "status": "pending",
+      "doNotTouch": [],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "EST-030",
+        "ECO-040"
+      ],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "EST-050",
+      "title": "[P2] Estados exclusivos VIP",
+      "body": "Gate membresía activa.",
+      "labels": [
+        "estados",
+        "vip",
+        "p2-later"
+      ],
+      "priority": "P2",
+      "phase": "3-estados",
+      "block": "Estados",
+      "dependencies": [
+        "VIP-040"
+      ],
+      "affectedFiles": [
+        "firestore.rules"
+      ],
+      "riskLevel": "medium",
+      "status": "pending",
+      "doNotTouch": [],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "VIP-040"
+      ],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "EST-070",
+      "title": "[P2] Reportar estado",
+      "body": "Reporte scoped.",
+      "labels": [
+        "estados",
+        "security",
+        "p2-later"
+      ],
+      "priority": "P2",
+      "phase": "3-estados",
+      "block": "Estados",
+      "dependencies": [
+        "MSG-080"
+      ],
+      "affectedFiles": [
+        "public/admin.html"
+      ],
+      "riskLevel": "medium",
+      "status": "pending",
+      "doNotTouch": [],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "LIVE-000",
+      "title": "[P0] Acta módulo Lives scoped",
+      "body": "## Objetivo\nActa módulo Lives scoped por perfil — promo, NO presencia.\n\n## Alcance\nRail lives, checkout, vencimiento. Sin indicador en línea.\n\n## Dependencias\n- MSG-000\n\n## Archivos afectados\n- scripts/\n\n## Qué NO tocar\n- Indicador en línea en lives\n\n## Criterios de aceptación\n- [ ] Lives = oferta/promo\n- [ ] 0 presencia websocket\n- [ ] Scoped perfilId\n\n## Riesgo si se implementa mal\nRegresión en contexto scoped o exposición de datos entre perfiles/banners.",
+      "labels": [
+        "lives",
+        "backend",
+        "p0-blocker"
+      ],
+      "priority": "P0",
+      "phase": "3-lives",
+      "block": "Lives",
+      "dependencies": [
+        "MSG-000"
+      ],
+      "affectedFiles": [
+        "scripts/"
+      ],
+      "riskLevel": "high",
+      "status": "pending",
+      "doNotTouch": [
+        "Indicador en línea en lives"
+      ],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "MSG-000"
+      ],
+      "acceptanceCriteria": [
+        "Lives = oferta/promo",
+        "0 presencia websocket",
+        "Scoped perfilId"
+      ],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": true
+    },
+    {
+      "id": "LIVE-010",
+      "title": "[P1] UI Transmitir live dashboard",
+      "body": "Reemplazar mock transmitir-live.",
+      "labels": [
+        "lives",
+        "dashboard",
+        "p1-next"
+      ],
+      "priority": "P1",
+      "phase": "3-lives",
+      "block": "Lives",
+      "dependencies": [
+        "LIVE-000",
+        "TICKET-013"
+      ],
+      "affectedFiles": [
+        "public/js/dashboard-rentero-nav.js"
+      ],
+      "riskLevel": "medium",
+      "status": "pending",
+      "doNotTouch": [
+        "Rediseño shell 3 columnas dashboard-rentero.html",
+        "Migrar a app messenger separada",
+        "Colecciones conversations/messages en inglés"
+      ],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "LIVE-000",
+        "TICKET-013"
+      ],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "LIVE-020",
+      "title": "[P1] Live pagado por minutos",
+      "body": "Comprar minutos → activar → métricas.",
+      "labels": [
+        "lives",
+        "payments",
+        "p1-next"
+      ],
+      "priority": "P1",
+      "phase": "3-lives",
+      "block": "Lives",
+      "dependencies": [
+        "LIVE-010",
+        "ECO-020"
+      ],
+      "affectedFiles": [
+        "functions/"
+      ],
+      "riskLevel": "high",
+      "status": "pending",
+      "doNotTouch": [],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "LIVE-010",
+        "ECO-020"
+      ],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "LIVE-030",
+      "title": "[P2] Lives exclusivos VIP",
+      "body": "Gate membresía.",
+      "labels": [
+        "lives",
+        "vip",
+        "p2-later"
+      ],
+      "priority": "P2",
+      "phase": "3-lives",
+      "block": "Lives",
+      "dependencies": [
+        "VIP-040"
+      ],
+      "affectedFiles": [
+        "firestore.rules"
+      ],
+      "riskLevel": "medium",
+      "status": "pending",
+      "doNotTouch": [],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "VIP-040"
+      ],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "LIVE-040",
+      "title": "[P2] Donaciones en live",
+      "body": "ECO-060 en sesión live.",
+      "labels": [
+        "lives",
+        "payments",
+        "p2-later"
+      ],
+      "priority": "P2",
+      "phase": "3-lives",
+      "block": "Lives",
+      "dependencies": [
+        "ECO-060"
+      ],
+      "affectedFiles": [
+        "public/js/"
+      ],
+      "riskLevel": "high",
+      "status": "pending",
+      "doNotTouch": [],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "ECO-060"
+      ],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "LIVE-050",
+      "title": "[P2] Notificación live programado",
+      "body": "Aviso seguidores/miembros VIP.",
+      "labels": [
+        "lives",
+        "notifications",
+        "p2-later"
+      ],
+      "priority": "P2",
+      "phase": "3-lives",
+      "block": "Lives",
+      "dependencies": [
+        "NOT-010"
+      ],
+      "affectedFiles": [
+        "functions/notifications/"
+      ],
+      "riskLevel": "low",
+      "status": "pending",
+      "doNotTouch": [],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "NOT-010"
+      ],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "MSG-000",
+      "title": "[P0] Acta arquitectura messenger v2",
+      "body": "## Objetivo\nActa formal: messenger embebido en dashboard 3 columnas es la decisión final vs app separada.\n\n## Alcance\nMapa runtime (conversaciones/mensajes scoped) vs SPEC-MESSENGER*. Lista qué está DONE Sprint 1 y qué falta MVP.\n\n## Dependencias\nSin dependencias previas.\n\n## Archivos afectados\n- scripts/SPEC-MESSENGER.json\n- .cursor/rules/dashboard-mensajes-vision.mdc\n\n## Qué NO tocar\n- Rediseño shell 3 columnas dashboard-rentero.html\n- Migrar a app messenger separada\n- Colecciones conversations/messages en inglés\n\n## Criterios de aceptación\n- [ ] Documento en scripts/ o Notion referenciado en SPEC\n- [ ] Decisión explícita: NO app messenger separada\n- [ ] Mapa colecciones runtime vs SPEC con gaps\n- [ ] Checklist MVP pre-lanzamiento firmado\n\n## Riesgo si se implementa mal\nRe-arquitectura costosa, inbox plano, duplicación de UI mensajes.\n\n## Notas de implementación\nBase congelada en .cursor/rules/dashboard-mensajes-vision.mdc",
+      "labels": [
+        "messenger",
+        "backend",
+        "p0-blocker"
+      ],
+      "priority": "P0",
+      "phase": "2-messenger",
+      "block": "Messenger",
+      "dependencies": [],
+      "affectedFiles": [
+        "scripts/SPEC-MESSENGER.json",
+        ".cursor/rules/dashboard-mensajes-vision.mdc"
+      ],
+      "riskLevel": "critical",
+      "status": "pending",
+      "doNotTouch": [
+        "Rediseño shell 3 columnas dashboard-rentero.html",
+        "Migrar a app messenger separada",
+        "Colecciones conversations/messages en inglés"
+      ],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [],
+      "acceptanceCriteria": [
+        "Documento en scripts/ o Notion referenciado en SPEC",
+        "Decisión explícita: NO app messenger separada",
+        "Mapa colecciones runtime vs SPEC con gaps",
+        "Checklist MVP pre-lanzamiento firmado"
+      ],
+      "implementationNotes": "Base congelada en .cursor/rules/dashboard-mensajes-vision.mdc",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": true
+    },
+    {
+      "id": "MSG-001",
+      "title": "[P0] Mapa rutas + dependencias ecosistema",
+      "body": "## Objetivo\nDiagrama de dependencias cruzadas: mensajes ↔ estados ↔ lives ↔ banners ↔ VIP ↔ ECO ↔ admin.\n\n## Alcance\nRutas, eventos, Functions, colecciones. Input para orden de sprints post-Sprint 1.\n\n## Dependencias\n- MSG-000\n\n## Archivos afectados\n- scripts/\n\n## Qué NO tocar\n- Rediseño shell 3 columnas dashboard-rentero.html\n- Migrar a app messenger separada\n- Colecciones conversations/messages en inglés\n\n## Criterios de aceptación\n- [ ] Diagrama o tabla de rutas dashboard/admin/público\n- [ ] Lista eventos sistema faltantes\n- [ ] Functions propuestas con trigger y colección destino\n\n## Riesgo si se implementa mal\nImplementar pagos sin webhook, VIP sin suscripción, estados sin vencimiento.",
+      "labels": [
+        "messenger",
+        "backend",
+        "p0-blocker"
+      ],
+      "priority": "P0",
+      "phase": "2-messenger",
+      "block": "Messenger",
+      "dependencies": [
+        "MSG-000"
+      ],
+      "affectedFiles": [
+        "scripts/"
+      ],
+      "riskLevel": "high",
+      "status": "pending",
+      "doNotTouch": [
+        "Rediseño shell 3 columnas dashboard-rentero.html",
+        "Migrar a app messenger separada",
+        "Colecciones conversations/messages en inglés"
+      ],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "MSG-000"
+      ],
+      "acceptanceCriteria": [
+        "Diagrama o tabla de rutas dashboard/admin/público",
+        "Lista eventos sistema faltantes",
+        "Functions propuestas con trigger y colección destino"
+      ],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": true
+    },
+    {
+      "id": "MSG-010",
+      "title": "[PARTIAL] Colecciones Firestore messenger complementarias",
+      "body": "## Objetivo\nColecciones Firestore messenger complementarias al core conversaciones/mensajes.\n\n## Alcance\nreportes_mensajeria, usuarios/{uid}/bloqueos, privacidad_mensajes (DONE Sprint 1). Pendiente: moderation_alerts, admin_review_cases (diseño + stub rules).\n\n## Dependencias\n- MSG-000\n- TICKET-030\n\n## Archivos afectados\n- firestore.rules\n- scripts/config-*-schema.json\n\n## Qué NO tocar\n- Rehacer conversaciones/mensajes scoped existentes\n- Migración BLK perfiles sin plan\n\n## Criterios de aceptación\n- [ ] reportes_mensajeria operativo (DONE)\n- [ ] bloqueos y privacidad operativos (DONE)\n- [ ] Schemas JSON en scripts/config-*-schema.json\n- [ ] Stub rules para moderation_alerts y admin_review_cases\n- [ ] MSG-026 puede depender sin ID faltante\n\n## Riesgo si se implementa mal\nMSG-026 y pipeline moderación sin schema; admin sin casos de revisión.\n\n## Notas de implementación\nSprint 1 cerró núcleo; este ticket cierra diseño moderación/admin cases.",
+      "labels": [
+        "messenger",
+        "backend",
+        "p1-next"
+      ],
+      "priority": "P1",
+      "phase": "2-messenger",
+      "block": "Messenger",
+      "dependencies": [
+        "MSG-000",
+        "TICKET-030"
+      ],
+      "affectedFiles": [
+        "firestore.rules",
+        "scripts/config-*-schema.json"
+      ],
+      "riskLevel": "high",
+      "status": "partial",
+      "doNotTouch": [
+        "Rehacer conversaciones/mensajes scoped existentes",
+        "Migración BLK perfiles sin plan"
+      ],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "MSG-000"
+      ],
+      "acceptanceCriteria": [
+        "reportes_mensajeria operativo (DONE)",
+        "bloqueos y privacidad operativos (DONE)",
+        "Schemas JSON en scripts/config-*-schema.json",
+        "Stub rules para moderation_alerts y admin_review_cases",
+        "MSG-026 puede depender sin ID faltante"
+      ],
+      "implementationNotes": "Sprint 1 cerró núcleo; este ticket cierra diseño moderación/admin cases.",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "MSG-011",
+      "title": "[P1] Storage adjuntos mensajes + rules",
+      "body": "## Objetivo\nFirebase Storage para adjuntos de mensajes con rules que solo permiten participantes de la conversación.\n\n## Alcance\nPaths: mensajes/{conversacionId}/{mensajeId}/ o equivalente scoped. Límites tamaño. Deploy storage.rules.\n\n## Dependencias\n- MSG-000\n\n## Archivos afectados\n- storage.rules\n\n## Qué NO tocar\n- Colección raíz message_attachments\n\n## Criterios de aceptación\n- [ ] storage.rules desplegadas (firebase deploy --only storage)\n- [ ] Participante A puede subir/leer en su conversación\n- [ ] Usuario no participante denegado\n- [ ] MSG-044 adjunto imagen puede implementarse después\n\n## Riesgo si se implementa mal\nAdjuntos públicos, lectura cross-cuenta, abuso de almacenamiento.",
+      "labels": [
+        "messenger",
+        "backend",
+        "p1-next"
+      ],
+      "priority": "P1",
+      "phase": "2-messenger",
+      "block": "Messenger",
+      "dependencies": [
+        "MSG-000"
+      ],
+      "affectedFiles": [
+        "storage.rules"
+      ],
+      "riskLevel": "high",
+      "status": "pending",
+      "doNotTouch": [
+        "Colección raíz message_attachments"
+      ],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "MSG-000"
+      ],
+      "acceptanceCriteria": [
+        "storage.rules desplegadas (firebase deploy --only storage)",
+        "Participante A puede subir/leer en su conversación",
+        "Usuario no participante denegado",
+        "MSG-044 adjunto imagen puede implementarse después"
+      ],
+      "implementationNotes": "",
+      "securityNotes": "Validar tamaño y mime en rules o Function; no URLs públicas permanentes sin auth.",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "MSG-012",
+      "title": "[P1] Rules messenger v2 — extensión",
+      "body": "## Objetivo\nExtender firestore.rules messenger: reportes, bloqueos, privacidad, visitanteUid.\n\n## Alcance\nBase Sprint 1 (22 tests). Extender sin romper scoped conversaciones/mensajes.\n\n## Dependencias\n- MSG-021\n- MSG-022\n\n## Archivos afectados\n- firestore.rules\n- scripts/messenger-rules.test.mjs\n\n## Qué NO tocar\n- Migración BLK perfiles a colección perfiles/\n- Rehacer conversaciones scoped existentes\n\n## Criterios de aceptación\n- [ ] scripts/messenger-rules.test.mjs pasa ampliado\n- [ ] Sin cross-cuenta en nuevas colecciones\n- [ ] visitanteUid queries indexadas\n\n## Riesgo si se implementa mal\nLeak conversaciones entre cuentas o contextos.",
+      "labels": [
+        "messenger",
+        "security",
+        "p1-next"
+      ],
+      "priority": "P1",
+      "phase": "2-messenger",
+      "block": "Messenger",
+      "dependencies": [
+        "MSG-021",
+        "MSG-022"
+      ],
+      "affectedFiles": [
+        "firestore.rules",
+        "scripts/messenger-rules.test.mjs"
+      ],
+      "riskLevel": "high",
+      "status": "partial",
+      "doNotTouch": [
+        "Migración BLK perfiles a colección perfiles/",
+        "Rehacer conversaciones scoped existentes"
+      ],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [],
+      "acceptanceCriteria": [
+        "scripts/messenger-rules.test.mjs pasa ampliado",
+        "Sin cross-cuenta en nuevas colecciones",
+        "visitanteUid queries indexadas"
+      ],
+      "implementationNotes": "",
+      "securityNotes": "Cada regla debe validar cuentaUid + participantes.",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "MSG-013",
+      "title": "[P1] Índices messenger adicionales",
+      "body": "visitanteUid+updatedAt (done). moderation_alerts futuro.",
+      "labels": [
+        "messenger",
+        "backend",
+        "p1-next"
+      ],
+      "priority": "P1",
+      "phase": "2-messenger",
+      "block": "Messenger",
+      "dependencies": [
+        "MSG-012"
+      ],
+      "affectedFiles": [
+        "firestore.indexes.json"
+      ],
+      "riskLevel": "medium",
+      "status": "partial",
+      "doNotTouch": [],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "MSG-012"
+      ],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "MSG-014",
+      "title": "[P2] Eventos sistema messenger",
+      "body": "mensaje_enviado, leido, bloqueo, reporte → analytics_eventos.",
+      "labels": [
+        "messenger",
+        "backend",
+        "audit",
+        "p2-later"
+      ],
+      "priority": "P2",
+      "phase": "2-messenger",
+      "block": "Messenger",
+      "dependencies": [
+        "MSG-000"
+      ],
+      "affectedFiles": [
+        "firestore.rules",
+        "functions/index.js"
+      ],
+      "riskLevel": "medium",
+      "status": "pending",
+      "doNotTouch": [],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "MSG-000"
+      ],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "MSG-015",
+      "title": "[P2] Functions skeleton functions/messages/",
+      "body": "onMensajeCreate, rateLimit, moderationSignal stub.",
+      "labels": [
+        "messenger",
+        "backend",
+        "p2-later"
+      ],
+      "priority": "P2",
+      "phase": "2-messenger",
+      "block": "Messenger",
+      "dependencies": [
+        "MSG-012"
+      ],
+      "affectedFiles": [
+        "functions/index.js"
+      ],
+      "riskLevel": "medium",
+      "status": "pending",
+      "doNotTouch": [],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "MSG-012"
+      ],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "MSG-020",
+      "title": "[DONE] Schema privacidad_mensajes",
+      "body": "Cerrado Sprint 1 / PR #60 (merge a51666c). Referencia; no reimplementar.\n\n## Entregable\nSchema privacidad_mensajes",
+      "labels": [
+        "p1-next"
+      ],
+      "priority": "P1",
+      "phase": "2-messenger",
+      "block": "Messenger",
+      "dependencies": [],
+      "affectedFiles": [
+        "carihub-messenger-privacidad-schema.js"
+      ],
+      "riskLevel": "low",
+      "status": "done",
+      "doNotTouch": [
+        "Rediseño shell 3 columnas dashboard-rentero.html",
+        "Migrar a app messenger separada",
+        "Colecciones conversations/messages en inglés"
+      ],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "MSG-021",
+      "title": "[DONE] Schema reportes_mensajeria",
+      "body": "Cerrado Sprint 1 / PR #60 (merge a51666c). Referencia; no reimplementar.\n\n## Entregable\nSchema reportes_mensajeria",
+      "labels": [
+        "p1-next"
+      ],
+      "priority": "P1",
+      "phase": "2-messenger",
+      "block": "Messenger",
+      "dependencies": [],
+      "affectedFiles": [
+        "config-reportes-mensajeria-schema.json"
+      ],
+      "riskLevel": "low",
+      "status": "done",
+      "doNotTouch": [
+        "Rediseño shell 3 columnas dashboard-rentero.html",
+        "Migrar a app messenger separada",
+        "Colecciones conversations/messages en inglés"
+      ],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "MSG-022",
+      "title": "[DONE] Schema bloqueos messenger",
+      "body": "Cerrado Sprint 1 / PR #60 (merge a51666c). Referencia; no reimplementar.\n\n## Entregable\nSchema bloqueos messenger",
+      "labels": [
+        "p1-next"
+      ],
+      "priority": "P1",
+      "phase": "2-messenger",
+      "block": "Messenger",
+      "dependencies": [],
+      "affectedFiles": [
+        "carihub-messenger-bloqueos.js"
+      ],
+      "riskLevel": "low",
+      "status": "done",
+      "doNotTouch": [
+        "Rediseño shell 3 columnas dashboard-rentero.html",
+        "Migrar a app messenger separada",
+        "Colecciones conversations/messages en inglés"
+      ],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "MSG-023",
+      "title": "[P2] Schema adjuntos en mensaje",
+      "body": "Ref Storage en mensaje. No colección duplicada.",
+      "labels": [
+        "messenger",
+        "backend",
+        "p2-later"
+      ],
+      "priority": "P2",
+      "phase": "2-messenger",
+      "block": "Messenger",
+      "dependencies": [
+        "MSG-011"
+      ],
+      "affectedFiles": [
+        "public/js/carihub-messenger-schema.js"
+      ],
+      "riskLevel": "medium",
+      "status": "pending",
+      "doNotTouch": [
+        "message_attachments colección raíz"
+      ],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "MSG-011"
+      ],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "MSG-024",
+      "title": "[P1] Schema solicitud_conversacion",
+      "body": "## Objetivo\nSchema y estados de solicitud_conversacion alineado a SPEC conversacion_iniciar_solicitud.\n\n## Alcance\nCampos en conversaciones: solicitudEstado (enviada/aceptada/rechazada), timestamps, actor. Rules para transiciones.\n\n## Dependencias\n- MSG-000\n\n## Archivos afectados\n- scripts/SPEC-MESSENGER.json\n- firestore.rules\n\n## Qué NO tocar\n- Migración BLK perfiles a colección perfiles/\n- Rehacer conversaciones scoped existentes\n\n## Criterios de aceptación\n- [ ] Visitante puede iniciar solicitud sin mensaje libre si privacidad exige\n- [ ] Anunciante ve solicitud pendiente\n- [ ] MSG-043 UI aceptar/rechazar opera sobre este schema\n- [ ] Sin mezclar solicitudes entre contextos perfil/banner\n\n## Riesgo si se implementa mal\nMSG-043 bloqueado; spam de mensajes si solicitud no enforced.\n\n## Notas de implementación\nElevado a P1 porque bloquea MSG-043 (aceptar/rechazar).",
+      "labels": [
+        "messenger",
+        "backend",
+        "p1-next"
+      ],
+      "priority": "P1",
+      "phase": "2-messenger",
+      "block": "Messenger",
+      "dependencies": [
+        "MSG-000"
+      ],
+      "affectedFiles": [
+        "scripts/SPEC-MESSENGER.json",
+        "firestore.rules"
+      ],
+      "riskLevel": "medium",
+      "status": "pending",
+      "doNotTouch": [
+        "Migración BLK perfiles a colección perfiles/",
+        "Rehacer conversaciones scoped existentes"
+      ],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "MSG-000"
+      ],
+      "acceptanceCriteria": [
+        "Visitante puede iniciar solicitud sin mensaje libre si privacidad exige",
+        "Anunciante ve solicitud pendiente",
+        "MSG-043 UI aceptar/rechazar opera sobre este schema",
+        "Sin mezclar solicitudes entre contextos perfil/banner"
+      ],
+      "implementationNotes": "Elevado a P1 porque bloquea MSG-043 (aceptar/rechazar).",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "MSG-025",
+      "title": "[P2] Schema shared_locations 3 modos",
+      "body": "Puntual, temporizada, en vivo hasta detener. Nunca automático.",
+      "labels": [
+        "messenger",
+        "backend",
+        "p2-later"
+      ],
+      "priority": "P2",
+      "phase": "2-messenger",
+      "block": "Messenger",
+      "dependencies": [
+        "MSG-020"
+      ],
+      "affectedFiles": [
+        "scripts/"
+      ],
+      "riskLevel": "high",
+      "status": "pending",
+      "doNotTouch": [
+        "Ubicación automática"
+      ],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "MSG-026",
+      "title": "[P2] Schema moderation_alerts + review_cases",
+      "body": "## Objetivo\nSchema moderation_alerts + review_cases\n\n## Alcance\nNivel 1 sin dump. Nivel 3 evidencia acotada.\n\n## Dependencias\n- MSG-010\n\n## Archivos afectados\n- firestore.rules\n\n## Qué NO tocar\n- Monitoreo masivo chats\n\n## Criterios de aceptación\n- [ ] Definir en sprint\n\n## Riesgo si se implementa mal\nVer riskLevel del ticket.",
+      "labels": [
+        "messenger",
+        "security",
+        "admin",
+        "p2-later"
+      ],
+      "priority": "P2",
+      "phase": "8-admin",
+      "block": "Admin",
+      "dependencies": [
+        "MSG-010"
+      ],
+      "affectedFiles": [
+        "firestore.rules"
+      ],
+      "riskLevel": "critical",
+      "status": "pending",
+      "doNotTouch": [
+        "Monitoreo masivo chats"
+      ],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "MSG-010"
+      ],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "MSG-027",
+      "title": "[P2] Schema audit_logs messenger",
+      "body": "Ver AUD-010. Privacidad, reportes, bloqueos.",
+      "labels": [
+        "audit",
+        "messenger",
+        "p2-later"
+      ],
+      "priority": "P2",
+      "phase": "9-audit",
+      "block": "Auditoría",
+      "dependencies": [
+        "MSG-014"
+      ],
+      "affectedFiles": [
+        "firestore.rules"
+      ],
+      "riskLevel": "medium",
+      "status": "pending",
+      "doNotTouch": [],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "MSG-014"
+      ],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "MSG-030",
+      "title": "[P2] carihub-device-permissions.js",
+      "body": "request/getStatus. mic, camera, gallery, files, location, notifications. On-demand.",
+      "labels": [
+        "messenger",
+        "ux",
+        "p2-later"
+      ],
+      "priority": "P2",
+      "phase": "2-messenger",
+      "block": "Messenger",
+      "dependencies": [
+        "MSG-000"
+      ],
+      "affectedFiles": [
+        "public/js/carihub-device-permissions.js"
+      ],
+      "riskLevel": "medium",
+      "status": "pending",
+      "doNotTouch": [
+        "Pedir permisos en registro/wizard"
+      ],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "MSG-000"
+      ],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "MSG-031",
+      "title": "[P2] Permiso micrófono on-demand",
+      "body": "Notas de voz, llamadas, lives. Texto UX acordado.",
+      "labels": [
+        "messenger",
+        "ux",
+        "p2-later"
+      ],
+      "priority": "P2",
+      "phase": "2-messenger",
+      "block": "Messenger",
+      "dependencies": [
+        "MSG-030"
+      ],
+      "affectedFiles": [
+        "public/js/carihub-device-permissions.js"
+      ],
+      "riskLevel": "low",
+      "status": "pending",
+      "doNotTouch": [],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "MSG-030"
+      ],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "MSG-032",
+      "title": "[P2] Permiso cámara on-demand",
+      "body": "Fotos, video, videollamada, lives.",
+      "labels": [
+        "messenger",
+        "ux",
+        "p2-later"
+      ],
+      "priority": "P2",
+      "phase": "2-messenger",
+      "block": "Messenger",
+      "dependencies": [
+        "MSG-030"
+      ],
+      "affectedFiles": [
+        "public/js/carihub-device-permissions.js"
+      ],
+      "riskLevel": "low",
+      "status": "pending",
+      "doNotTouch": [],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "MSG-030"
+      ],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "MSG-033",
+      "title": "[P2] Permiso galería on-demand",
+      "body": "Adjuntar media, estados, banners.",
+      "labels": [
+        "messenger",
+        "ux",
+        "p2-later"
+      ],
+      "priority": "P2",
+      "phase": "2-messenger",
+      "block": "Messenger",
+      "dependencies": [
+        "MSG-030"
+      ],
+      "affectedFiles": [
+        "public/js/carihub-device-permissions.js"
+      ],
+      "riskLevel": "low",
+      "status": "pending",
+      "doNotTouch": [],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "MSG-030"
+      ],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "MSG-034",
+      "title": "[P2] Permiso archivos PDF/docs",
+      "body": "PDF, contratos, comprobantes.",
+      "labels": [
+        "messenger",
+        "ux",
+        "p2-later"
+      ],
+      "priority": "P2",
+      "phase": "2-messenger",
+      "block": "Messenger",
+      "dependencies": [
+        "MSG-030"
+      ],
+      "affectedFiles": [
+        "public/js/carihub-device-permissions.js"
+      ],
+      "riskLevel": "low",
+      "status": "pending",
+      "doNotTouch": [],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "MSG-030"
+      ],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "MSG-035",
+      "title": "[P2] Permiso ubicación 3 modos",
+      "body": "Confirmación explícita siempre.",
+      "labels": [
+        "messenger",
+        "ux",
+        "p2-later"
+      ],
+      "priority": "P2",
+      "phase": "2-messenger",
+      "block": "Messenger",
+      "dependencies": [
+        "MSG-025",
+        "MSG-030"
+      ],
+      "affectedFiles": [
+        "public/js/carihub-device-permissions.js"
+      ],
+      "riskLevel": "high",
+      "status": "pending",
+      "doNotTouch": [
+        "Compartir ubicación automática"
+      ],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "MSG-025",
+        "MSG-030"
+      ],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "MSG-036",
+      "title": "[P2] Permiso notificaciones",
+      "body": "Push FCM + in-app opt-in.",
+      "labels": [
+        "notifications",
+        "messenger",
+        "p2-later"
+      ],
+      "priority": "P2",
+      "phase": "8-notifications",
+      "block": "Notificaciones",
+      "dependencies": [
+        "MSG-030"
+      ],
+      "affectedFiles": [
+        "functions/notifications/"
+      ],
+      "riskLevel": "medium",
+      "status": "pending",
+      "doNotTouch": [],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "MSG-030"
+      ],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "MSG-037",
+      "title": "[P2] Panel permisos dispositivo dashboard",
+      "body": "Estado permisos + reintentar en configuración.",
+      "labels": [
+        "dashboard",
+        "ux",
+        "p2-later"
+      ],
+      "priority": "P2",
+      "phase": "2-messenger",
+      "block": "Messenger",
+      "dependencies": [
+        "MSG-030"
+      ],
+      "affectedFiles": [
+        "public/dashboard-rentero.html"
+      ],
+      "riskLevel": "low",
+      "status": "pending",
+      "doNotTouch": [
+        "Rediseño shell 3 columnas dashboard-rentero.html",
+        "Migrar a app messenger separada",
+        "Colecciones conversations/messages en inglés"
+      ],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "MSG-030"
+      ],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "MSG-040",
+      "title": "[DONE] Inbox visitante home",
+      "body": "Cerrado Sprint 1 / PR #60 (merge a51666c). Referencia; no reimplementar.\n\n## Entregable\nInbox visitante home",
+      "labels": [
+        "p1-next"
+      ],
+      "priority": "P1",
+      "phase": "2-messenger",
+      "block": "Messenger",
+      "dependencies": [],
+      "affectedFiles": [
+        "home-mensajes.js"
+      ],
+      "riskLevel": "low",
+      "status": "done",
+      "doNotTouch": [
+        "Rediseño shell 3 columnas dashboard-rentero.html",
+        "Migrar a app messenger separada",
+        "Colecciones conversations/messages en inglés"
+      ],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "MSG-041",
+      "title": "[P2] Buscador conversaciones",
+      "body": "Buscar por alias, preview, contexto activo.",
+      "labels": [
+        "messenger",
+        "ux",
+        "p2-later"
+      ],
+      "priority": "P2",
+      "phase": "2-messenger",
+      "block": "Messenger",
+      "dependencies": [
+        "MSG-040"
+      ],
+      "affectedFiles": [
+        "public/js/dashboard-rentero-nav.js"
+      ],
+      "riskLevel": "low",
+      "status": "pending",
+      "doNotTouch": [
+        "Rediseño shell 3 columnas dashboard-rentero.html",
+        "Migrar a app messenger separada",
+        "Colecciones conversations/messages en inglés"
+      ],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "MSG-042",
+      "title": "[P2] Archivar silenciar fijar conversación",
+      "body": "Acciones por hilo scoped.",
+      "labels": [
+        "messenger",
+        "ux",
+        "p2-later"
+      ],
+      "priority": "P2",
+      "phase": "2-messenger",
+      "block": "Messenger",
+      "dependencies": [
+        "MSG-040"
+      ],
+      "affectedFiles": [
+        "public/js/dashboard-messenger.js",
+        "firestore.rules"
+      ],
+      "riskLevel": "medium",
+      "status": "pending",
+      "doNotTouch": [
+        "Migración BLK perfiles a colección perfiles/",
+        "Rehacer conversaciones scoped existentes"
+      ],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "MSG-043",
+      "title": "[P1] Solicitudes de mensaje aceptar/rechazar",
+      "body": "## Objetivo\nUI inbox anunciante para aceptar/rechazar solicitudes de conversación pendientes.\n\n## Alcance\ndashboard-messenger.js: lista solicitudes, acciones aceptar/rechazar, actualiza conversación y notifica visitante.\n\n## Dependencias\n- MSG-024\n- MSG-077\n\n## Archivos afectados\n- public/js/dashboard-messenger.js\n\n## Qué NO tocar\n- Migración BLK perfiles a colección perfiles/\n- Rehacer conversaciones scoped existentes\n\n## Criterios de aceptación\n- [ ] Solicitud pendiente visible en módulo Mensajes del contexto correcto\n- [ ] Aceptar habilita composer; rechazar cierra/archiva según SPEC\n- [ ] Scoped por cuentaUid + contextoTipo + contextoId\n\n## Riesgo si se implementa mal\nPrivacidad bypass, solicitudes cruzadas entre perfiles.",
+      "labels": [
+        "messenger",
+        "p1-next"
+      ],
+      "priority": "P1",
+      "phase": "2-messenger",
+      "block": "Messenger",
+      "dependencies": [
+        "MSG-024",
+        "MSG-077"
+      ],
+      "affectedFiles": [
+        "public/js/dashboard-messenger.js"
+      ],
+      "riskLevel": "medium",
+      "status": "pending",
+      "doNotTouch": [
+        "Migración BLK perfiles a colección perfiles/",
+        "Rehacer conversaciones scoped existentes"
+      ],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "MSG-024"
+      ],
+      "acceptanceCriteria": [
+        "Solicitud pendiente visible en módulo Mensajes del contexto correcto",
+        "Aceptar habilita composer; rechazar cierra/archiva según SPEC",
+        "Scoped por cuentaUid + contextoTipo + contextoId"
+      ],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "MSG-044",
+      "title": "[P2] Adjunto imagen",
+      "body": "Upload Storage + mensaje tipo imagen.",
+      "labels": [
+        "messenger",
+        "p2-later"
+      ],
+      "priority": "P2",
+      "phase": "2-messenger",
+      "block": "Messenger",
+      "dependencies": [
+        "MSG-011",
+        "MSG-023",
+        "MSG-033"
+      ],
+      "affectedFiles": [
+        "public/js/dashboard-messenger.js",
+        "storage.rules"
+      ],
+      "riskLevel": "high",
+      "status": "pending",
+      "doNotTouch": [],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "MSG-011",
+        "MSG-023",
+        "MSG-033"
+      ],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "MSG-045",
+      "title": "[P2] Adjunto audio",
+      "body": "Nota de voz grabada.",
+      "labels": [
+        "messenger",
+        "p2-later"
+      ],
+      "priority": "P2",
+      "phase": "2-messenger",
+      "block": "Messenger",
+      "dependencies": [
+        "MSG-044",
+        "MSG-031"
+      ],
+      "affectedFiles": [
+        "public/js/dashboard-messenger.js"
+      ],
+      "riskLevel": "medium",
+      "status": "pending",
+      "doNotTouch": [],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "MSG-044",
+        "MSG-031"
+      ],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "MSG-046",
+      "title": "[P2] Adjunto video",
+      "body": "Video con límite y compresión opcional.",
+      "labels": [
+        "messenger",
+        "p2-later"
+      ],
+      "priority": "P2",
+      "phase": "2-messenger",
+      "block": "Messenger",
+      "dependencies": [
+        "MSG-044",
+        "MSG-032"
+      ],
+      "affectedFiles": [
+        "public/js/dashboard-messenger.js"
+      ],
+      "riskLevel": "high",
+      "status": "pending",
+      "doNotTouch": [],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "MSG-044",
+        "MSG-032"
+      ],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "MSG-047",
+      "title": "[P2] Adjunto archivo PDF",
+      "body": "Whitelist mime.",
+      "labels": [
+        "messenger",
+        "p2-later"
+      ],
+      "priority": "P2",
+      "phase": "2-messenger",
+      "block": "Messenger",
+      "dependencies": [
+        "MSG-044",
+        "MSG-034"
+      ],
+      "affectedFiles": [
+        "public/js/dashboard-messenger.js"
+      ],
+      "riskLevel": "medium",
+      "status": "pending",
+      "doNotTouch": [],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "MSG-044",
+        "MSG-034"
+      ],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "MSG-048",
+      "title": "[P2] Compartir ubicación en chat",
+      "body": "3 modos + enforcement privacidad.",
+      "labels": [
+        "messenger",
+        "p2-later"
+      ],
+      "priority": "P2",
+      "phase": "2-messenger",
+      "block": "Messenger",
+      "dependencies": [
+        "MSG-025",
+        "MSG-035",
+        "MSG-076"
+      ],
+      "affectedFiles": [
+        "public/js/dashboard-messenger.js"
+      ],
+      "riskLevel": "high",
+      "status": "pending",
+      "doNotTouch": [
+        "Ubicación sin confirmación"
+      ],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "MSG-025",
+        "MSG-035",
+        "MSG-076"
+      ],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "MSG-049",
+      "title": "[P2] Eliminar/ocultar conversación",
+      "body": "Archivar vs eliminar. Scoped contexto.",
+      "labels": [
+        "messenger",
+        "p2-later"
+      ],
+      "priority": "P2",
+      "phase": "2-messenger",
+      "block": "Messenger",
+      "dependencies": [
+        "MSG-042"
+      ],
+      "affectedFiles": [
+        "public/js/dashboard-messenger.js"
+      ],
+      "riskLevel": "medium",
+      "status": "pending",
+      "doNotTouch": [],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "MSG-042"
+      ],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "MSG-050",
+      "title": "[DUPLICATE→TICKET-050] Sin MOCK mensajes en prod",
+      "body": "## Relación duplicateOf\nEste ticket es sub-ámbito de **TICKET-050** (demo/MOCK solo ?preview=1).\n\n## Alcance específico mensajes\n- usesMockMensajes en dashboard-rentero-nav.js\n- MOCK conversaciones/mensajes en prod\n\n## Ticket principal\nImplementar bajo TICKET-050; no crear issue GitHub separado para MSG-050.\n\n## Estado Sprint 1\nParcial — messenger real existe pero pueden quedar flags MOCK.",
+      "labels": [
+        "messenger",
+        "p1-next"
+      ],
+      "priority": "P1",
+      "phase": "2-messenger",
+      "block": "Messenger",
+      "dependencies": [
+        "MSG-040",
+        "TICKET-050"
+      ],
+      "affectedFiles": [
+        "public/js/dashboard-rentero-nav.js"
+      ],
+      "riskLevel": "high",
+      "status": "reference",
+      "doNotTouch": [],
+      "duplicateOf": "TICKET-050",
+      "implementationNotes": "Sub-ámbito de TICKET-050: usesMockMensajes y MOCK conversaciones. Implementar solo vía TICKET-050.",
+      "supersedes": [],
+      "blockedBy": [
+        "TICKET-050"
+      ],
+      "acceptanceCriteria": [],
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "MSG-056",
+      "title": "[DONE] Deprecar chMensajesOutbox",
+      "body": "Cerrado Sprint 1 / PR #60 (merge a51666c). Referencia; no reimplementar.\n\n## Entregable\nDeprecar chMensajesOutbox",
+      "labels": [
+        "p1-next"
+      ],
+      "priority": "P1",
+      "phase": "2-messenger",
+      "block": "Messenger",
+      "dependencies": [],
+      "affectedFiles": [
+        "home-mensajes.js"
+      ],
+      "riskLevel": "low",
+      "status": "done",
+      "doNotTouch": [
+        "Rediseño shell 3 columnas dashboard-rentero.html",
+        "Migrar a app messenger separada",
+        "Colecciones conversations/messages en inglés"
+      ],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "MSG-060",
+      "title": "[P3] Llamada voz WebRTC",
+      "body": "Post-lanzamiento v1.1.",
+      "labels": [
+        "messenger",
+        "p3-future"
+      ],
+      "priority": "P3",
+      "phase": "2-messenger",
+      "block": "Messenger",
+      "dependencies": [
+        "MSG-031",
+        "MSG-075"
+      ],
+      "affectedFiles": [
+        "functions/calls/"
+      ],
+      "riskLevel": "high",
+      "status": "pending",
+      "doNotTouch": [],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "MSG-031"
+      ],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "MSG-061",
+      "title": "[P3] Videollamada",
+      "body": "Mensaje si faltan permisos cámara/mic.",
+      "labels": [
+        "messenger",
+        "p3-future"
+      ],
+      "priority": "P3",
+      "phase": "2-messenger",
+      "block": "Messenger",
+      "dependencies": [
+        "MSG-060"
+      ],
+      "affectedFiles": [
+        "public/js/"
+      ],
+      "riskLevel": "high",
+      "status": "pending",
+      "doNotTouch": [],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "MSG-060"
+      ],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "MSG-070",
+      "title": "[DONE] UI Privacidad de Mensajes",
+      "body": "Cerrado Sprint 1 / PR #60 (merge a51666c). Referencia; no reimplementar.\n\n## Entregable\nUI Privacidad de Mensajes",
+      "labels": [
+        "p1-next"
+      ],
+      "priority": "P1",
+      "phase": "2-messenger",
+      "block": "Messenger",
+      "dependencies": [],
+      "affectedFiles": [
+        "dashboard-privacidad-mensajes.js"
+      ],
+      "riskLevel": "low",
+      "status": "done",
+      "doNotTouch": [
+        "Rediseño shell 3 columnas dashboard-rentero.html",
+        "Migrar a app messenger separada",
+        "Colecciones conversations/messages en inglés"
+      ],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "MSG-071",
+      "title": "[DONE] Estado en línea opt-in oculto",
+      "body": "Cerrado Sprint 1 / PR #60 (merge a51666c). Referencia; no reimplementar.\n\n## Entregable\nEstado en línea opt-in oculto",
+      "labels": [
+        "p1-next"
+      ],
+      "priority": "P1",
+      "phase": "2-messenger",
+      "block": "Messenger",
+      "dependencies": [],
+      "affectedFiles": [
+        "carihub-messenger-privacidad-schema.js"
+      ],
+      "riskLevel": "low",
+      "status": "done",
+      "doNotTouch": [
+        "Rediseño shell 3 columnas dashboard-rentero.html",
+        "Migrar a app messenger separada",
+        "Colecciones conversations/messages en inglés"
+      ],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "MSG-072",
+      "title": "[DONE] Última conexión opt-in",
+      "body": "Cerrado Sprint 1 / PR #60 (merge a51666c). Referencia; no reimplementar.\n\n## Entregable\nÚltima conexión opt-in",
+      "labels": [
+        "p1-next"
+      ],
+      "priority": "P1",
+      "phase": "2-messenger",
+      "block": "Messenger",
+      "dependencies": [],
+      "affectedFiles": [
+        "carihub-messenger-privacidad-schema.js"
+      ],
+      "riskLevel": "low",
+      "status": "done",
+      "doNotTouch": [
+        "Rediseño shell 3 columnas dashboard-rentero.html",
+        "Migrar a app messenger separada",
+        "Colecciones conversations/messages en inglés"
+      ],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "MSG-073",
+      "title": "[DONE] Confirmación Visto en rules",
+      "body": "Cerrado Sprint 1 / PR #60 (merge a51666c). Referencia; no reimplementar.\n\n## Entregable\nConfirmación Visto en rules",
+      "labels": [
+        "p1-next"
+      ],
+      "priority": "P1",
+      "phase": "2-messenger",
+      "block": "Messenger",
+      "dependencies": [],
+      "affectedFiles": [
+        "firestore.rules"
+      ],
+      "riskLevel": "low",
+      "status": "done",
+      "doNotTouch": [
+        "Rediseño shell 3 columnas dashboard-rentero.html",
+        "Migrar a app messenger separada",
+        "Colecciones conversations/messages en inglés"
+      ],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "MSG-074",
+      "title": "[P2] Disponibilidad sin presencia real",
+      "body": "Preferencia disponible/ocupado/invisible. NO websocket presencia.",
+      "labels": [
+        "messenger",
+        "p2-later"
+      ],
+      "priority": "P2",
+      "phase": "2-messenger",
+      "block": "Messenger",
+      "dependencies": [
+        "MSG-070"
+      ],
+      "affectedFiles": [
+        "public/js/dashboard-privacidad-mensajes.js"
+      ],
+      "riskLevel": "medium",
+      "status": "partial",
+      "doNotTouch": [
+        "Mostrar en línea real"
+      ],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "MSG-075",
+      "title": "[DONE] Audiencias mensaje/llamada/archivos",
+      "body": "Cerrado Sprint 1 / PR #60 (merge a51666c). Referencia; no reimplementar.\n\n## Entregable\nAudiencias mensaje/llamada/archivos",
+      "labels": [
+        "p1-next"
+      ],
+      "priority": "P1",
+      "phase": "2-messenger",
+      "block": "Messenger",
+      "dependencies": [],
+      "affectedFiles": [
+        "dashboard-privacidad-mensajes.js"
+      ],
+      "riskLevel": "low",
+      "status": "done",
+      "doNotTouch": [
+        "Rediseño shell 3 columnas dashboard-rentero.html",
+        "Migrar a app messenger separada",
+        "Colecciones conversations/messages en inglés"
+      ],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "MSG-076",
+      "title": "[P2] Política ubicación UI completa",
+      "body": "nunca/manual/tiempo real/preguntar en privacidad UI.",
+      "labels": [
+        "messenger",
+        "p2-later"
+      ],
+      "priority": "P2",
+      "phase": "2-messenger",
+      "block": "Messenger",
+      "dependencies": [
+        "MSG-070",
+        "MSG-025"
+      ],
+      "affectedFiles": [
+        "public/js/dashboard-privacidad-mensajes.js"
+      ],
+      "riskLevel": "medium",
+      "status": "pending",
+      "doNotTouch": [],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "MSG-025"
+      ],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "MSG-077",
+      "title": "[DONE] Enforcement privacidad en send",
+      "body": "Cerrado Sprint 1 / PR #60 (merge a51666c). Referencia; no reimplementar.\n\n## Entregable\nEnforcement privacidad en send",
+      "labels": [
+        "p1-next"
+      ],
+      "priority": "P1",
+      "phase": "2-messenger",
+      "block": "Messenger",
+      "dependencies": [],
+      "affectedFiles": [
+        "carihub-messenger-privacidad-enforcement.js"
+      ],
+      "riskLevel": "low",
+      "status": "done",
+      "doNotTouch": [
+        "Rediseño shell 3 columnas dashboard-rentero.html",
+        "Migrar a app messenger separada",
+        "Colecciones conversations/messages en inglés"
+      ],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "MSG-080",
+      "title": "[DONE] UI reportar conversación/mensaje",
+      "body": "Cerrado Sprint 1 / PR #60 (merge a51666c). Referencia; no reimplementar.\n\n## Entregable\nUI reportar conversación/mensaje",
+      "labels": [
+        "p1-next"
+      ],
+      "priority": "P1",
+      "phase": "2-messenger",
+      "block": "Messenger",
+      "dependencies": [],
+      "affectedFiles": [
+        "carihub-messenger-reportes-ui.js"
+      ],
+      "riskLevel": "low",
+      "status": "done",
+      "doNotTouch": [
+        "Rediseño shell 3 columnas dashboard-rentero.html",
+        "Migrar a app messenger separada",
+        "Colecciones conversations/messages en inglés"
+      ],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "MSG-081",
+      "title": "[DONE] Bloquear/desbloquear usuario",
+      "body": "Cerrado Sprint 1 / PR #60 (merge a51666c). Referencia; no reimplementar.\n\n## Entregable\nBloquear/desbloquear usuario",
+      "labels": [
+        "p1-next"
+      ],
+      "priority": "P1",
+      "phase": "2-messenger",
+      "block": "Messenger",
+      "dependencies": [],
+      "affectedFiles": [
+        "carihub-messenger-bloqueos.js"
+      ],
+      "riskLevel": "low",
+      "status": "done",
+      "doNotTouch": [
+        "Rediseño shell 3 columnas dashboard-rentero.html",
+        "Migrar a app messenger separada",
+        "Colecciones conversations/messages en inglés"
+      ],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "MSG-082",
+      "title": "[P1] Ocultar estados de usuarios bloqueados",
+      "body": "## Objetivo\nUsuarios bloqueados no aparecen en feeds de estados/lives del bloqueador en contexto scoped.\n\n## Alcance\nExtender carihub-messenger-bloqueos.js para filtrar estados/lives en dashboard y visitante.\n\n## Dependencias\n- MSG-081\n\n## Archivos afectados\n- public/js/carihub-messenger-bloqueos.js\n\n## Qué NO tocar\n- Rediseño shell 3 columnas dashboard-rentero.html\n- Migrar a app messenger separada\n- Colecciones conversations/messages en inglés\n\n## Criterios de aceptación\n- [ ] Bloquear usuario oculta sus estados en feeds del bloqueador\n- [ ] No afecta otros perfiles del mismo anunciante\n- [ ] Coherente con bloqueo de mensajes (MSG-081 DONE)\n\n## Riesgo si se implementa mal\nBloqueo incompleto; usuario bloqueado sigue visible en promo/estados.",
+      "labels": [
+        "messenger",
+        "security",
+        "p1-next"
+      ],
+      "priority": "P1",
+      "phase": "2-messenger",
+      "block": "Messenger",
+      "dependencies": [
+        "MSG-081"
+      ],
+      "affectedFiles": [
+        "public/js/carihub-messenger-bloqueos.js"
+      ],
+      "riskLevel": "medium",
+      "status": "pending",
+      "doNotTouch": [],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [],
+      "acceptanceCriteria": [
+        "Bloquear usuario oculta sus estados en feeds del bloqueador",
+        "No afecta otros perfiles del mismo anunciante",
+        "Coherente con bloqueo de mensajes (MSG-081 DONE)"
+      ],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "MSG-083",
+      "title": "[P2] Rate limiting antispam",
+      "body": "Function rate limit mensajes.",
+      "labels": [
+        "messenger",
+        "security",
+        "backend",
+        "p2-later"
+      ],
+      "priority": "P2",
+      "phase": "2-messenger",
+      "block": "Messenger",
+      "dependencies": [
+        "MSG-015"
+      ],
+      "affectedFiles": [
+        "functions/"
+      ],
+      "riskLevel": "high",
+      "status": "pending",
+      "doNotTouch": [],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "MSG-015"
+      ],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "MSG-090",
+      "title": "[P2] Pipeline señales → alerts",
+      "body": "## Objetivo\nPipeline señales → alerts\n\n## Alcance\nScore + tipo riesgo. Revisión legal.\n\n## Dependencias\n- MSG-026\n\n## Archivos afectados\n- functions/moderation/\n\n## Qué NO tocar\n- Rediseño shell 3 columnas dashboard-rentero.html\n- Migrar a app messenger separada\n- Colecciones conversations/messages en inglés\n\n## Criterios de aceptación\n- [ ] Definir en sprint\n\n## Riesgo si se implementa mal\nVer riskLevel del ticket.",
+      "labels": [
+        "messenger",
+        "security",
+        "p2-later"
+      ],
+      "priority": "P2",
+      "phase": "8-admin",
+      "block": "Admin",
+      "dependencies": [
+        "MSG-026"
+      ],
+      "affectedFiles": [
+        "functions/moderation/"
+      ],
+      "riskLevel": "critical",
+      "status": "pending",
+      "doNotTouch": [],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "MSG-026"
+      ],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "MSG-091",
+      "title": "[P2] Cola admin moderación Nivel 2",
+      "body": "## Objetivo\nCola admin moderación Nivel 2\n\n## Alcance\nWorkflow pendiente/en_revision/escalada.\n\n## Dependencias\n- MSG-090\n\n## Archivos afectados\n- public/admin.html\n\n## Qué NO tocar\n- Rediseño shell 3 columnas dashboard-rentero.html\n- Migrar a app messenger separada\n- Colecciones conversations/messages en inglés\n\n## Criterios de aceptación\n- [ ] Definir en sprint\n\n## Riesgo si se implementa mal\nVer riskLevel del ticket.",
+      "labels": [
+        "admin",
+        "security",
+        "p2-later"
+      ],
+      "priority": "P2",
+      "phase": "8-admin",
+      "block": "Admin",
+      "dependencies": [
+        "MSG-090"
+      ],
+      "affectedFiles": [
+        "public/admin.html"
+      ],
+      "riskLevel": "critical",
+      "status": "pending",
+      "doNotTouch": [],
+      "supersedes": [
+        "MSG-100",
+        "MSG-103"
+      ],
+      "implementationNotes": "Supersedes MSG-100 (alertas panel) y MSG-103 (acciones workflow).",
+      "duplicateOf": null,
+      "blockedBy": [
+        "MSG-090"
+      ],
+      "acceptanceCriteria": [],
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "MSG-092",
+      "title": "[P3] Evidencia acotada Nivel 3",
+      "body": "## Objetivo\nEvidencia acotada Nivel 3\n\n## Alcance\nSolo denuncia/crítica/legal.\n\n## Dependencias\n- MSG-091\n\n## Archivos afectados\n- public/admin.html\n\n## Qué NO tocar\n- Rediseño shell 3 columnas dashboard-rentero.html\n- Migrar a app messenger separada\n- Colecciones conversations/messages en inglés\n\n## Criterios de aceptación\n- [ ] Definir en sprint\n\n## Riesgo si se implementa mal\nVer riskLevel del ticket.",
+      "labels": [
+        "admin",
+        "security",
+        "p3-future"
+      ],
+      "priority": "P3",
+      "phase": "8-admin",
+      "block": "Admin",
+      "dependencies": [
+        "MSG-091"
+      ],
+      "affectedFiles": [
+        "public/admin.html"
+      ],
+      "riskLevel": "critical",
+      "status": "pending",
+      "doNotTouch": [],
+      "supersedes": [
+        "MSG-102"
+      ],
+      "implementationNotes": "Supersedes MSG-102 (casos revisión + notas Nivel 3).",
+      "duplicateOf": null,
+      "blockedBy": [
+        "MSG-091"
+      ],
+      "acceptanceCriteria": [],
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "MSG-100",
+      "title": "[REFERENCE] Admin panel alertas preventivas",
+      "body": "## Estado\nTicket de referencia — NO implementar como issue independiente.\n\n## Consolidación v2.1\nConsolidado en master v2.1: implementación en MSG-091 (cola moderación Nivel 2) + MSG-090 (pipeline señales). No crear issue duplicado en GitHub.\n\n## Supersedido por\nMSG-091\n\n## Qué NO tocar\n- Crear duplicado en GitHub para este ID\n- Reabrir inbox plano messenger",
+      "labels": [
+        "admin",
+        "messenger",
+        "p2-later"
+      ],
+      "priority": "P2",
+      "phase": "8-admin",
+      "block": "Admin",
+      "dependencies": [],
+      "affectedFiles": [
+        "public/admin.html"
+      ],
+      "riskLevel": "low",
+      "status": "reference",
+      "doNotTouch": [
+        "Crear issue GitHub duplicado"
+      ],
+      "duplicateOf": null,
+      "supersedes": [
+        "MSG-091"
+      ],
+      "blockedBy": [],
+      "acceptanceCriteria": [
+        "Referencia documentada en master-v2.1"
+      ],
+      "implementationNotes": "Supersedido por MSG-091",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "MSG-101",
+      "title": "[REFERENCE] Admin denuncias messenger",
+      "body": "## Estado\nTicket de referencia — NO implementar como issue independiente.\n\n## Consolidación v2.1\nConsolidado en ADM-010 Admin denuncias messenger. MSG-080/MSG-021 DONE Sprint 1.\n\n## Supersedido por\nADM-010\n\n## Qué NO tocar\n- Crear duplicado en GitHub para este ID\n- Reabrir inbox plano messenger",
+      "labels": [
+        "admin",
+        "messenger",
+        "p2-later"
+      ],
+      "priority": "P2",
+      "phase": "8-admin",
+      "block": "Admin",
+      "dependencies": [],
+      "affectedFiles": [
+        "public/admin.html"
+      ],
+      "riskLevel": "low",
+      "status": "reference",
+      "doNotTouch": [
+        "Crear issue GitHub duplicado"
+      ],
+      "duplicateOf": null,
+      "supersedes": [
+        "ADM-010"
+      ],
+      "blockedBy": [],
+      "acceptanceCriteria": [
+        "Referencia documentada en master-v2.1"
+      ],
+      "implementationNotes": "Supersedido por ADM-010",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "MSG-102",
+      "title": "[REFERENCE] Admin casos revisión + notas",
+      "body": "## Estado\nTicket de referencia — NO implementar como issue independiente.\n\n## Consolidación v2.1\nConsolidado en MSG-092 (evidencia acotada Nivel 3) + MSG-091 workflow.\n\n## Supersedido por\nMSG-092\n\n## Qué NO tocar\n- Crear duplicado en GitHub para este ID\n- Reabrir inbox plano messenger",
+      "labels": [
+        "admin",
+        "messenger",
+        "p2-later"
+      ],
+      "priority": "P2",
+      "phase": "8-admin",
+      "block": "Admin",
+      "dependencies": [],
+      "affectedFiles": [
+        "public/admin.html"
+      ],
+      "riskLevel": "low",
+      "status": "reference",
+      "doNotTouch": [
+        "Crear issue GitHub duplicado"
+      ],
+      "duplicateOf": null,
+      "supersedes": [
+        "MSG-092"
+      ],
+      "blockedBy": [],
+      "acceptanceCriteria": [
+        "Referencia documentada en master-v2.1"
+      ],
+      "implementationNotes": "Supersedido por MSG-092",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "MSG-103",
+      "title": "[REFERENCE] Admin acciones cerrar conv / suspender",
+      "body": "## Estado\nTicket de referencia — NO implementar como issue independiente.\n\n## Consolidación v2.1\nAcciones admin messenger en workflow MSG-091/092; SPEC admin_messenger_* acciones. No ticket separado.\n\n## Supersedido por\nMSG-091\n\n## Qué NO tocar\n- Crear duplicado en GitHub para este ID\n- Reabrir inbox plano messenger",
+      "labels": [
+        "admin",
+        "messenger",
+        "p2-later"
+      ],
+      "priority": "P2",
+      "phase": "8-admin",
+      "block": "Admin",
+      "dependencies": [],
+      "affectedFiles": [
+        "public/admin.html"
+      ],
+      "riskLevel": "low",
+      "status": "reference",
+      "doNotTouch": [
+        "Crear issue GitHub duplicado"
+      ],
+      "duplicateOf": null,
+      "supersedes": [
+        "MSG-091"
+      ],
+      "blockedBy": [],
+      "acceptanceCriteria": [
+        "Referencia documentada en master-v2.1"
+      ],
+      "implementationNotes": "Supersedido por MSG-091",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "MSG-110",
+      "title": "[P2] Implementar logs privacidad/reportes",
+      "body": "Functions + escritura audit_logs.",
+      "labels": [
+        "audit",
+        "messenger",
+        "p2-later"
+      ],
+      "priority": "P2",
+      "phase": "9-audit",
+      "block": "Auditoría",
+      "dependencies": [
+        "AUD-010"
+      ],
+      "affectedFiles": [
+        "functions/"
+      ],
+      "riskLevel": "medium",
+      "status": "pending",
+      "doNotTouch": [],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "AUD-010"
+      ],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "MSG-111",
+      "title": "[P3] Historial admin usuario/conversación",
+      "body": "Vista admin permisos estrictos.",
+      "labels": [
+        "audit",
+        "admin",
+        "p3-future"
+      ],
+      "priority": "P3",
+      "phase": "9-audit",
+      "block": "Auditoría",
+      "dependencies": [
+        "MSG-110"
+      ],
+      "affectedFiles": [
+        "public/admin.html"
+      ],
+      "riskLevel": "high",
+      "status": "pending",
+      "doNotTouch": [],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "MSG-110"
+      ],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "MSG-120",
+      "title": "[P2] Compartir estado/live/banner/perfil en chat",
+      "body": "Rich cards en mensaje.",
+      "labels": [
+        "messenger",
+        "p2-later"
+      ],
+      "priority": "P2",
+      "phase": "2-messenger",
+      "block": "Messenger",
+      "dependencies": [
+        "EST-010",
+        "LIVE-010"
+      ],
+      "affectedFiles": [
+        "public/js/dashboard-messenger.js"
+      ],
+      "riskLevel": "medium",
+      "status": "pending",
+      "doNotTouch": [],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "EST-010",
+        "LIVE-010"
+      ],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "MSG-121",
+      "title": "[P2] Responder estado desde mensaje",
+      "body": "Reply-to estado.",
+      "labels": [
+        "messenger",
+        "p2-later"
+      ],
+      "priority": "P2",
+      "phase": "2-messenger",
+      "block": "Messenger",
+      "dependencies": [
+        "MSG-120"
+      ],
+      "affectedFiles": [
+        "public/js/dashboard-messenger.js"
+      ],
+      "riskLevel": "medium",
+      "status": "pending",
+      "doNotTouch": [],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "MSG-120"
+      ],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "MSG-122",
+      "title": "[P2] Invitación live desde chat",
+      "body": "Compartir live privado.",
+      "labels": [
+        "messenger",
+        "lives",
+        "p2-later"
+      ],
+      "priority": "P2",
+      "phase": "3-lives",
+      "block": "Lives",
+      "dependencies": [
+        "LIVE-020",
+        "MSG-120"
+      ],
+      "affectedFiles": [
+        "public/js/dashboard-messenger.js"
+      ],
+      "riskLevel": "medium",
+      "status": "pending",
+      "doNotTouch": [],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "LIVE-020",
+        "MSG-120"
+      ],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "MSG-123",
+      "title": "[P2] Solicitud negocio desde chat",
+      "body": "Crear solicitud tipada desde hilo.",
+      "labels": [
+        "messenger",
+        "dashboard",
+        "p2-later"
+      ],
+      "priority": "P2",
+      "phase": "2-messenger",
+      "block": "Messenger",
+      "dependencies": [
+        "TICKET-043"
+      ],
+      "affectedFiles": [
+        "public/js/dashboard-solicitudes-negocio.js"
+      ],
+      "riskLevel": "medium",
+      "status": "pending",
+      "doNotTouch": [],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "MSG-124",
+      "title": "[P3] Cotizaciones en hilo",
+      "body": "Presupuestos comerciales en chat.",
+      "labels": [
+        "messenger",
+        "p3-future"
+      ],
+      "priority": "P3",
+      "phase": "2-messenger",
+      "block": "Messenger",
+      "dependencies": [
+        "MSG-123"
+      ],
+      "affectedFiles": [
+        "public/js/"
+      ],
+      "riskLevel": "low",
+      "status": "pending",
+      "doNotTouch": [],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "MSG-123"
+      ],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "MSG-125",
+      "title": "[P2] Centro notificaciones categorías",
+      "body": "Extiende avisos. Filtros por categoría.",
+      "labels": [
+        "notifications",
+        "dashboard",
+        "p2-later"
+      ],
+      "priority": "P2",
+      "phase": "8-notifications",
+      "block": "Notificaciones",
+      "dependencies": [
+        "NOT-010"
+      ],
+      "affectedFiles": [
+        "public/js/dashboard-avisos.js"
+      ],
+      "riskLevel": "low",
+      "status": "pending",
+      "doNotTouch": [],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "NOT-010"
+      ],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "MSG-126",
+      "title": "[P3] Privacidad capturas reenvíos descargas",
+      "body": "Configurable por rentero.",
+      "labels": [
+        "messenger",
+        "security",
+        "p3-future"
+      ],
+      "priority": "P3",
+      "phase": "2-messenger",
+      "block": "Messenger",
+      "dependencies": [
+        "MSG-070"
+      ],
+      "affectedFiles": [
+        "public/js/dashboard-privacidad-mensajes.js"
+      ],
+      "riskLevel": "medium",
+      "status": "pending",
+      "doNotTouch": [],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "MSG-127",
+      "title": "[P2] Métricas messenger",
+      "body": "Tiempo respuesta, conversión socio.",
+      "labels": [
+        "messenger",
+        "dashboard",
+        "p2-later"
+      ],
+      "priority": "P2",
+      "phase": "2-messenger",
+      "block": "Messenger",
+      "dependencies": [
+        "MSG-014"
+      ],
+      "affectedFiles": [
+        "public/js/dashboard-rentero-nav.js"
+      ],
+      "riskLevel": "low",
+      "status": "pending",
+      "doNotTouch": [],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "MSG-014"
+      ],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "NOT-000",
+      "title": "[P1] Acta centro notificaciones",
+      "body": "In-app por categoría scoped. Extender notificaciones existente.",
+      "labels": [
+        "notifications",
+        "p1-next"
+      ],
+      "priority": "P1",
+      "phase": "8-notifications",
+      "block": "Notificaciones",
+      "dependencies": [
+        "TICKET-042"
+      ],
+      "affectedFiles": [
+        "public/js/dashboard-avisos.js"
+      ],
+      "riskLevel": "medium",
+      "status": "pending",
+      "doNotTouch": [],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "NOT-010",
+      "title": "[P1] Centro notificaciones UI dashboard",
+      "body": "Categorías: mensajes, solicitudes, pagos, estados, lives, VIP, seguridad.",
+      "labels": [
+        "notifications",
+        "dashboard",
+        "p1-next"
+      ],
+      "priority": "P1",
+      "phase": "8-notifications",
+      "block": "Notificaciones",
+      "dependencies": [
+        "NOT-000"
+      ],
+      "affectedFiles": [
+        "public/dashboard-rentero.html"
+      ],
+      "riskLevel": "medium",
+      "status": "pending",
+      "doNotTouch": [
+        "Rediseño shell 3 columnas dashboard-rentero.html",
+        "Migrar a app messenger separada",
+        "Colecciones conversations/messages en inglés"
+      ],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "NOT-000"
+      ],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "NOT-020",
+      "title": "[P2] Push FCM",
+      "body": "Tokens, envío por evento, opt-in.",
+      "labels": [
+        "notifications",
+        "backend",
+        "p2-later"
+      ],
+      "priority": "P2",
+      "phase": "8-notifications",
+      "block": "Notificaciones",
+      "dependencies": [
+        "MSG-036"
+      ],
+      "affectedFiles": [
+        "functions/notifications/"
+      ],
+      "riskLevel": "medium",
+      "status": "pending",
+      "doNotTouch": [],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "MSG-036"
+      ],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "SEC-000",
+      "title": "[P1] Acta Passkeys/WebAuthn",
+      "body": "## Objetivo\nActa Passkeys/WebAuthn\n\n## Alcance\nNo guardar biometría. Credenciales públicas passkey.\n\n## Dependencias\n- TICKET-001\n\n## Archivos afectados\n- scripts/config-seguridad-mvp-schema.json\n\n## Qué NO tocar\n- Guardar huella/rostro en servidor\n\n## Criterios de aceptación\n- [ ] Definir en sprint\n\n## Riesgo si se implementa mal\nVer riskLevel del ticket.",
+      "labels": [
+        "security",
+        "p1-next"
+      ],
+      "priority": "P1",
+      "phase": "7-security",
+      "block": "Seguridad / Passkeys",
+      "dependencies": [
+        "TICKET-001"
+      ],
+      "affectedFiles": [
+        "scripts/config-seguridad-mvp-schema.json"
+      ],
+      "riskLevel": "high",
+      "status": "pending",
+      "doNotTouch": [
+        "Guardar huella/rostro en servidor"
+      ],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "TICKET-001"
+      ],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "SEC-010",
+      "title": "[P2] Registro y login Passkey",
+      "body": "## Objetivo\nRegistro y login Passkey\n\n## Alcance\nusuarios/{uid}/passkeys.\n\n## Dependencias\n- SEC-000\n\n## Archivos afectados\n- public/index.html\n- functions/security/\n\n## Qué NO tocar\n- Rediseño shell 3 columnas dashboard-rentero.html\n- Migrar a app messenger separada\n- Colecciones conversations/messages en inglés\n\n## Criterios de aceptación\n- [ ] Definir en sprint\n\n## Riesgo si se implementa mal\nVer riskLevel del ticket.",
+      "labels": [
+        "security",
+        "p2-later"
+      ],
+      "priority": "P2",
+      "phase": "7-security",
+      "block": "Seguridad / Passkeys",
+      "dependencies": [
+        "SEC-000"
+      ],
+      "affectedFiles": [
+        "public/index.html",
+        "functions/security/"
+      ],
+      "riskLevel": "high",
+      "status": "pending",
+      "doNotTouch": [],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "SEC-000"
+      ],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "SEC-020",
+      "title": "[P2] Revalidación acciones sensibles",
+      "body": "## Objetivo\nRevalidación acciones sensibles\n\n## Alcance\nRetiros, fiscal, wallets, email, privacidad cobro.\n\n## Dependencias\n- SEC-010\n\n## Archivos afectados\n- public/dashboard-rentero.html\n\n## Qué NO tocar\n- Rediseño shell 3 columnas dashboard-rentero.html\n- Migrar a app messenger separada\n- Colecciones conversations/messages en inglés\n\n## Criterios de aceptación\n- [ ] Definir en sprint\n\n## Riesgo si se implementa mal\nVer riskLevel del ticket.",
+      "labels": [
+        "security",
+        "p2-later"
+      ],
+      "priority": "P2",
+      "phase": "7-security",
+      "block": "Seguridad / Passkeys",
+      "dependencies": [
+        "SEC-010"
+      ],
+      "affectedFiles": [
+        "public/dashboard-rentero.html"
+      ],
+      "riskLevel": "high",
+      "status": "pending",
+      "doNotTouch": [],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "SEC-010"
+      ],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "SEC-030",
+      "title": "[P2] Dispositivos confiables y sesiones",
+      "body": "## Objetivo\nDispositivos confiables y sesiones\n\n## Alcance\nSesiones activas, cerrar remoto, alerta nuevo dispositivo.\n\n## Dependencias\n- SEC-010\n\n## Archivos afectados\n- firestore.rules\n\n## Qué NO tocar\n- Rediseño shell 3 columnas dashboard-rentero.html\n- Migrar a app messenger separada\n- Colecciones conversations/messages en inglés\n\n## Criterios de aceptación\n- [ ] Definir en sprint\n\n## Riesgo si se implementa mal\nVer riskLevel del ticket.",
+      "labels": [
+        "security",
+        "p2-later"
+      ],
+      "priority": "P2",
+      "phase": "7-security",
+      "block": "Seguridad / Passkeys",
+      "dependencies": [
+        "SEC-010"
+      ],
+      "affectedFiles": [
+        "firestore.rules"
+      ],
+      "riskLevel": "medium",
+      "status": "pending",
+      "doNotTouch": [],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "SEC-010"
+      ],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "SEC-040",
+      "title": "[P2] App Check + rate limit auth",
+      "body": "## Objetivo\nApp Check + rate limit auth\n\n## Alcance\nApp Check prod. Límite intentos login.\n\n## Dependencias\n- TICKET-001\n\n## Archivos afectados\n- firebase.json\n- functions/\n\n## Qué NO tocar\n- Rediseño shell 3 columnas dashboard-rentero.html\n- Migrar a app messenger separada\n- Colecciones conversations/messages en inglés\n\n## Criterios de aceptación\n- [ ] Definir en sprint\n\n## Riesgo si se implementa mal\nVer riskLevel del ticket.",
+      "labels": [
+        "security",
+        "backend",
+        "p2-later"
+      ],
+      "priority": "P2",
+      "phase": "7-security",
+      "block": "Seguridad / Passkeys",
+      "dependencies": [
+        "TICKET-001"
+      ],
+      "affectedFiles": [
+        "firebase.json",
+        "functions/"
+      ],
+      "riskLevel": "high",
+      "status": "pending",
+      "doNotTouch": [],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "TICKET-001"
+      ],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "SEC-050",
+      "title": "[P3] Análisis anti-phishing copia sitio",
+      "body": "## Objetivo\nAnálisis anti-phishing copia sitio\n\n## Alcance\nProtección amen, sitios falsos.\n\n## Dependencias\nSin dependencias previas.\n\n## Archivos afectados\n- scripts/\n\n## Qué NO tocar\n- Rediseño shell 3 columnas dashboard-rentero.html\n- Migrar a app messenger separada\n- Colecciones conversations/messages en inglés\n\n## Criterios de aceptación\n- [ ] Definir en sprint\n\n## Riesgo si se implementa mal\nVer riskLevel del ticket.",
+      "labels": [
+        "security",
+        "p3-future"
+      ],
+      "priority": "P3",
+      "phase": "7-security",
+      "block": "Seguridad / Passkeys",
+      "dependencies": [],
+      "affectedFiles": [
+        "scripts/"
+      ],
+      "riskLevel": "medium",
+      "status": "pending",
+      "doNotTouch": [],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "TICKET-001",
+      "title": "[P0] carihub-core.js init Firebase único",
+      "body": "## Objetivo\nUn solo módulo Firebase (`carihub-core.js`) para todo el sitio: auth, Firestore, Storage.\n\n## Alcance\nEliminar `firebaseConfig` duplicados en HTML/JS. Exportar `initFirebase()`, `core.auth`, `core.db`, `core.storage`. Helpers `requireAuth` / `onAuthStateChanged`.\n\n## Dependencias\nSin dependencias previas.\n\n## Archivos afectados\n- public/js/carihub-core.js\n- public/index.html\n- public/dashboard-rentero.html\n\n## Qué NO tocar\n- Rediseño shell 3 columnas dashboard-rentero.html\n- Migrar a app messenger separada\n- Colecciones conversations/messages en inglés\n\n## Criterios de aceptación\n- [ ] 0 inicializaciones Firebase duplicadas en producción\n- [ ] Dashboard, registro, resultados y perfil público usan el mismo core\n- [ ] Errores de init visibles en consola/UI, no silenciosos\n- [ ] Rail y messenger cargan después de auth resuelta\n\n## Riesgo si se implementa mal\nSesiones cruzadas, doble listeners, race conditions en messenger y registro multi-perfil.\n\n## Notas de implementación\nParcial: existe carihub-core.js pero algunos HTML aún pueden tener config legacy. Auditar con grep firebaseConfig.",
+      "labels": [
+        "dashboard",
+        "backend",
+        "p0-blocker"
+      ],
+      "priority": "P0",
+      "phase": "0-foundation",
+      "block": "Foundation",
+      "dependencies": [],
+      "affectedFiles": [
+        "public/js/carihub-core.js",
+        "public/index.html",
+        "public/dashboard-rentero.html"
+      ],
+      "riskLevel": "high",
+      "status": "partial",
+      "doNotTouch": [
+        "Rediseño shell 3 columnas dashboard-rentero.html",
+        "Migrar a app messenger separada",
+        "Colecciones conversations/messages en inglés"
+      ],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [],
+      "acceptanceCriteria": [
+        "0 inicializaciones Firebase duplicadas en producción",
+        "Dashboard, registro, resultados y perfil público usan el mismo core",
+        "Errores de init visibles en consola/UI, no silenciosos",
+        "Rail y messenger cargan después de auth resuelta"
+      ],
+      "implementationNotes": "Parcial: existe carihub-core.js pero algunos HTML aún pueden tener config legacy. Auditar con grep firebaseConfig.",
+      "securityNotes": "No exponer API keys distintas por página; una sola app Firebase.",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": true
+    },
+    {
+      "id": "TICKET-002",
+      "title": "[DONE] storage.rules base",
+      "body": "Cerrado Sprint 1 / PR #60 (merge a51666c). Referencia; no reimplementar.\n\n## Entregable\nstorage.rules base",
+      "labels": [
+        "p1-next"
+      ],
+      "priority": "P1",
+      "phase": "0-foundation",
+      "block": "Foundation",
+      "dependencies": [],
+      "affectedFiles": [
+        "storage.rules"
+      ],
+      "riskLevel": "low",
+      "status": "done",
+      "doNotTouch": [
+        "Rediseño shell 3 columnas dashboard-rentero.html",
+        "Migrar a app messenger separada",
+        "Colecciones conversations/messages en inglés"
+      ],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "TICKET-003",
+      "title": "[P0] Multi-perfil runtime usuarios/{uid}",
+      "body": "## Objetivo\nRuntime Firestore soporta N perfiles por cuenta (`usuarios/{uid}`) sin sobrescribir.\n\n## Alcance\nShape: perfilesVinculados[], perfilActivoId. Segundo registro-perfil agrega perfil. Dashboard lista todos.\n\n## Dependencias\n- TICKET-001\n\n## Archivos afectados\n- public/js/registro-perfil-submit.js\n\n## Qué NO tocar\n- Migración BLK perfiles a colección perfiles/ sin plan de migración\n\n## Criterios de aceptación\n- [ ] Segundo perfil no borra el primero\n- [ ] perfilActivoId persiste y se restaura al login\n- [ ] Rail puede listar N perfiles (con TICKET-013)\n\n## Riesgo si se implementa mal\nMensajes mezclados, contexto incorrecto, pérdida de perfiles publicados.",
+      "labels": [
+        "dashboard",
+        "backend",
+        "p0-blocker"
+      ],
+      "priority": "P0",
+      "phase": "0-foundation",
+      "block": "Foundation",
+      "dependencies": [
+        "TICKET-001"
+      ],
+      "affectedFiles": [
+        "public/js/registro-perfil-submit.js"
+      ],
+      "riskLevel": "high",
+      "status": "partial",
+      "doNotTouch": [
+        "Migración BLK perfiles a colección perfiles/ sin plan de migración"
+      ],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "TICKET-001"
+      ],
+      "acceptanceCriteria": [
+        "Segundo perfil no borra el primero",
+        "perfilActivoId persiste y se restaura al login",
+        "Rail puede listar N perfiles (con TICKET-013)"
+      ],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": true
+    },
+    {
+      "id": "TICKET-010",
+      "title": "[DONE] Rail activos columna izquierda",
+      "body": "Cerrado Sprint 1 / PR #60 (merge a51666c). Referencia; no reimplementar.\n\n## Entregable\nRail activos columna izquierda",
+      "labels": [
+        "p1-next"
+      ],
+      "priority": "P1",
+      "phase": "1-foundation",
+      "block": "Foundation",
+      "dependencies": [],
+      "affectedFiles": [
+        "dashboard-activos-rail.js"
+      ],
+      "riskLevel": "low",
+      "status": "done",
+      "doNotTouch": [
+        "Rediseño shell 3 columnas dashboard-rentero.html",
+        "Migrar a app messenger separada",
+        "Colecciones conversations/messages en inglés"
+      ],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "TICKET-011",
+      "title": "[DONE] dashboard-context.js",
+      "body": "Cerrado Sprint 1 / PR #60 (merge a51666c). Referencia; no reimplementar.\n\n## Entregable\ndashboard-context.js",
+      "labels": [
+        "p1-next"
+      ],
+      "priority": "P1",
+      "phase": "1-foundation",
+      "block": "Foundation",
+      "dependencies": [],
+      "affectedFiles": [
+        "dashboard-context.js"
+      ],
+      "riskLevel": "low",
+      "status": "done",
+      "doNotTouch": [
+        "Rediseño shell 3 columnas dashboard-rentero.html",
+        "Migrar a app messenger separada",
+        "Colecciones conversations/messages en inglés"
+      ],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "TICKET-012",
+      "title": "[P1] Banners reales rail desde solicitudes_anuncios",
+      "body": "## Objetivo\nRail izquierdo muestra banners reales desde solicitudes_anuncios, no MOCK_BANNERS.\n\n## Alcance\nQuery uidAnunciante + estado aprobado/activo. Tiles con thumb, badge unread, tap cambia contexto.\n\n## Dependencias\n- TICKET-001\n- TICKET-010\n\n## Archivos afectados\n- public/dashboard-rentero.html\n- public/js/dashboard-publicaciones.js\n\n## Qué NO tocar\n- Rediseño shell 3 columnas dashboard-rentero.html\n- Migrar a app messenger separada\n- Colecciones conversations/messages en inglés\n\n## Criterios de aceptación\n- [ ] 0 MOCK_BANNERS en producción sin ?preview=1\n- [ ] Empty state con CTA registro-banner\n- [ ] Banner impago muestra estado bloqueado (TICKET-052 DONE)\n\n## Riesgo si se implementa mal\nRail desconectado de datos reales; mensajes de banner incorrecto.",
+      "labels": [
+        "dashboard",
+        "backend",
+        "p1-next"
+      ],
+      "priority": "P1",
+      "phase": "1-foundation",
+      "block": "Foundation",
+      "dependencies": [
+        "TICKET-001",
+        "TICKET-010"
+      ],
+      "affectedFiles": [
+        "public/dashboard-rentero.html",
+        "public/js/dashboard-publicaciones.js"
+      ],
+      "riskLevel": "medium",
+      "status": "pending",
+      "doNotTouch": [
+        "Rediseño shell 3 columnas dashboard-rentero.html",
+        "Migrar a app messenger separada",
+        "Colecciones conversations/messages en inglés"
+      ],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "TICKET-001"
+      ],
+      "acceptanceCriteria": [
+        "0 MOCK_BANNERS en producción sin ?preview=1",
+        "Empty state con CTA registro-banner",
+        "Banner impago muestra estado bloqueado (TICKET-052 DONE)"
+      ],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "TICKET-013",
+      "title": "[P1] Perfiles reales en rail",
+      "body": "## Objetivo\nCírculos del rail = perfiles Firestore del uid; botón + Nuevo perfil funcional.\n\n## Alcance\nLeer perfilesVinculados o colección perfiles según runtime. Selección inicial perfilActivoId.\n\n## Dependencias\n- TICKET-003\n- TICKET-010\n\n## Archivos afectados\n- public/dashboard-rentero.html\n\n## Qué NO tocar\n- Rediseño shell 3 columnas dashboard-rentero.html\n- Migrar a app messenger separada\n- Colecciones conversations/messages en inglés\n\n## Criterios de aceptación\n- [ ] N perfiles visibles como círculos\n- [ ] + Nuevo perfil → registro-perfil.html\n- [ ] Tap cambia contexto global (dashboard-context.js)\n\n## Riesgo si se implementa mal\nContexto mensajes incorrecto al cambiar perfil.",
+      "labels": [
+        "dashboard",
+        "p1-next"
+      ],
+      "priority": "P1",
+      "phase": "1-foundation",
+      "block": "Foundation",
+      "dependencies": [
+        "TICKET-003",
+        "TICKET-010"
+      ],
+      "affectedFiles": [
+        "public/dashboard-rentero.html"
+      ],
+      "riskLevel": "medium",
+      "status": "pending",
+      "doNotTouch": [
+        "Rediseño shell 3 columnas dashboard-rentero.html",
+        "Migrar a app messenger separada",
+        "Colecciones conversations/messages en inglés"
+      ],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "TICKET-003"
+      ],
+      "acceptanceCriteria": [
+        "N perfiles visibles como círculos",
+        "+ Nuevo perfil → registro-perfil.html",
+        "Tap cambia contexto global (dashboard-context.js)"
+      ],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "TICKET-020",
+      "title": "[P1] Favoritos dashboard → Firestore real",
+      "body": "## Objetivo\nMódulo Favoritos del dashboard con datos Firestore reales.\n\n## Alcance\nReemplazar MOCK_FAVORITOS. Reutilizar carihub-favoritos.js. Cuenta hub sin publicar puede usar favoritos.\n\n## Dependencias\n- TICKET-001\n\n## Archivos afectados\n- public/js/dashboard-rentero-nav.js\n- public/js/carihub-favoritos.js\n\n## Qué NO tocar\n- Rediseño shell 3 columnas dashboard-rentero.html\n- Migrar a app messenger separada\n- Colecciones conversations/messages en inglés\n\n## Criterios de aceptación\n- [ ] Lista desde usuarios/{uid}/favoritos\n- [ ] Empty state\n- [ ] Sin MOCK en prod\n\n## Riesgo si se implementa mal\nFavoritos perdidos o mock confunde QA.",
+      "labels": [
+        "dashboard",
+        "backend",
+        "p1-next"
+      ],
+      "priority": "P1",
+      "phase": "1-foundation",
+      "block": "Foundation",
+      "dependencies": [
+        "TICKET-001"
+      ],
+      "affectedFiles": [
+        "public/js/dashboard-rentero-nav.js",
+        "public/js/carihub-favoritos.js"
+      ],
+      "riskLevel": "medium",
+      "status": "pending",
+      "doNotTouch": [
+        "Rediseño shell 3 columnas dashboard-rentero.html",
+        "Migrar a app messenger separada",
+        "Colecciones conversations/messages en inglés"
+      ],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "TICKET-001"
+      ],
+      "acceptanceCriteria": [
+        "Lista desde usuarios/{uid}/favoritos",
+        "Empty state",
+        "Sin MOCK en prod"
+      ],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "TICKET-021",
+      "title": "[P1] Módulo publicaciones — cablear y quitar MOCK",
+      "body": "## Objetivo\nMódulo publicaciones cableado en nav y con datos Firestore.\n\n## Alcance\nRegistrar en MODULES, conectar DOM data-module=publicaciones, quitar MOCK.\n\n## Dependencias\n- TICKET-003\n- TICKET-011\n\n## Archivos afectados\n- public/js/dashboard-rentero-nav.js\n- public/dashboard-rentero.html\n\n## Qué NO tocar\n- Rediseño shell 3 columnas dashboard-rentero.html\n- Migrar a app messenger separada\n- Colecciones conversations/messages en inglés\n\n## Criterios de aceptación\n- [ ] Nav accede al módulo\n- [ ] 0 DOM huérfano\n- [ ] Datos scoped al perfil activo\n\n## Riesgo si se implementa mal\nRegresión en contexto scoped o exposición de datos entre perfiles/banners.",
+      "labels": [
+        "dashboard",
+        "p1-next"
+      ],
+      "priority": "P1",
+      "phase": "1-foundation",
+      "block": "Foundation",
+      "dependencies": [
+        "TICKET-003",
+        "TICKET-011"
+      ],
+      "affectedFiles": [
+        "public/js/dashboard-rentero-nav.js",
+        "public/dashboard-rentero.html"
+      ],
+      "riskLevel": "medium",
+      "status": "pending",
+      "doNotTouch": [
+        "Rediseño shell 3 columnas dashboard-rentero.html",
+        "Migrar a app messenger separada",
+        "Colecciones conversations/messages en inglés"
+      ],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "TICKET-003"
+      ],
+      "acceptanceCriteria": [
+        "Nav accede al módulo",
+        "0 DOM huérfano",
+        "Datos scoped al perfil activo"
+      ],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "TICKET-022",
+      "title": "[P1] Info pública — guardar Firestore (quitar alert mock)",
+      "body": "## Objetivo\nGuardar info pública del perfil activo en Firestore.\n\n## Alcance\nbtnGuardarInfo persiste campos; quitar alert mock 'Firebase en fase posterior'.\n\n## Dependencias\n- TICKET-011\n\n## Archivos afectados\n- public/js/dashboard-rentero-nav.js\n- public/dashboard-rentero.html\n\n## Qué NO tocar\n- Rediseño shell 3 columnas dashboard-rentero.html\n- Migrar a app messenger separada\n- Colecciones conversations/messages en inglés\n\n## Criterios de aceptación\n- [ ] Guardar persiste y recarga correctamente\n- [ ] Scoped al perfil activo del contexto\n\n## Riesgo si se implementa mal\nRegresión en contexto scoped o exposición de datos entre perfiles/banners.",
+      "labels": [
+        "dashboard",
+        "backend",
+        "p1-next"
+      ],
+      "priority": "P1",
+      "phase": "1-foundation",
+      "block": "Foundation",
+      "dependencies": [
+        "TICKET-011"
+      ],
+      "affectedFiles": [
+        "public/js/dashboard-rentero-nav.js",
+        "public/dashboard-rentero.html"
+      ],
+      "riskLevel": "medium",
+      "status": "pending",
+      "doNotTouch": [
+        "Rediseño shell 3 columnas dashboard-rentero.html",
+        "Migrar a app messenger separada",
+        "Colecciones conversations/messages en inglés"
+      ],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [],
+      "acceptanceCriteria": [
+        "Guardar persiste y recarga correctamente",
+        "Scoped al perfil activo del contexto"
+      ],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "TICKET-023",
+      "title": "[P2] Solicitud live/anuncio Firestore real",
+      "body": "Quitar alert mock en transmitir-live.",
+      "labels": [
+        "dashboard",
+        "lives",
+        "p2-later"
+      ],
+      "priority": "P2",
+      "phase": "3-lives",
+      "block": "Lives",
+      "dependencies": [
+        "LIVE-010"
+      ],
+      "affectedFiles": [
+        "public/js/dashboard-rentero-nav.js"
+      ],
+      "riskLevel": "low",
+      "status": "pending",
+      "doNotTouch": [],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "LIVE-010"
+      ],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "TICKET-024",
+      "title": "[P2] Buscar directorio query real",
+      "body": "Reemplazar MOCK_DIRECTORIO en dashboard-buscar.",
+      "labels": [
+        "dashboard",
+        "backend",
+        "p2-later"
+      ],
+      "priority": "P2",
+      "phase": "1-foundation",
+      "block": "Foundation",
+      "dependencies": [
+        "TICKET-001"
+      ],
+      "affectedFiles": [
+        "public/js/dashboard-buscar.js"
+      ],
+      "riskLevel": "medium",
+      "status": "partial",
+      "doNotTouch": [],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "TICKET-001"
+      ],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "TICKET-025",
+      "title": "[P2] Limpieza nav derecho — sin duplicar rail",
+      "body": "## Tareas\n- Si banners/perfiles están en rail izquierdo, ocultar o renombrar ítems duplicados (Anuncios, Banners nav confuso)\n- Alinear label módulo `banners` con \"conversaciones por banner\"\n- Documentar mapa nav vs rail\n\n## Dep\nTICKET-010\n\n## Épica\nE2",
+      "labels": [
+        "dashboard",
+        "ux",
+        "p2-later"
+      ],
+      "priority": "P2",
+      "phase": "1-foundation",
+      "block": "Foundation",
+      "dependencies": [
+        "TICKET-010"
+      ],
+      "affectedFiles": [
+        "public/js/dashboard-rentero-nav.js",
+        "public/dashboard-rentero.html"
+      ],
+      "riskLevel": "low",
+      "status": "pending",
+      "doNotTouch": [
+        "Rediseño shell 3 columnas dashboard-rentero.html",
+        "Migrar a app messenger separada",
+        "Colecciones conversations/messages en inglés"
+      ],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [],
+      "acceptanceCriteria": [
+        "Sin duplicación confusa perfiles/banners en nav y rail",
+        "Label módulo banners alineado a 'conversaciones por banner'"
+      ],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "TICKET-026",
+      "title": "[P2] Módulos huérfanos — feed-red, directorio, medios-contacto",
+      "body": "## Por cada módulo\n(A) nav, (B) fusionar, o (C) eliminar DOM\n\n## Criterio\n0 módulos con DOM sin acceso\n\n## Épica\nE2",
+      "labels": [
+        "dashboard",
+        "p2-later"
+      ],
+      "priority": "P2",
+      "phase": "1-foundation",
+      "block": "Foundation",
+      "dependencies": [],
+      "affectedFiles": [
+        "public/js/dashboard-rentero-nav.js",
+        "public/dashboard-rentero.html"
+      ],
+      "riskLevel": "low",
+      "status": "pending",
+      "doNotTouch": [
+        "Rediseño shell 3 columnas dashboard-rentero.html",
+        "Migrar a app messenger separada",
+        "Colecciones conversations/messages en inglés"
+      ],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [],
+      "acceptanceCriteria": [
+        "0 módulos con DOM sin acceso desde nav"
+      ],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "TICKET-030",
+      "title": "[DONE] Messenger schema + API anunciante",
+      "body": "Cerrado Sprint 1 / PR #60 (merge a51666c). Referencia; no reimplementar.\n\n## Entregable\nMessenger schema + API anunciante",
+      "labels": [
+        "p1-next"
+      ],
+      "priority": "P1",
+      "phase": "2-messenger",
+      "block": "Messenger",
+      "dependencies": [],
+      "affectedFiles": [
+        "dashboard-messenger.js"
+      ],
+      "riskLevel": "low",
+      "status": "done",
+      "doNotTouch": [
+        "Rediseño shell 3 columnas dashboard-rentero.html",
+        "Migrar a app messenger separada",
+        "Colecciones conversations/messages en inglés"
+      ],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "TICKET-031",
+      "title": "[DONE] Rules messenger + 22 tests emulador",
+      "body": "Cerrado Sprint 1 / PR #60 (merge a51666c). Referencia; no reimplementar.\n\n## Entregable\nRules messenger + 22 tests emulador",
+      "labels": [
+        "p1-next"
+      ],
+      "priority": "P1",
+      "phase": "2-messenger",
+      "block": "Messenger",
+      "dependencies": [],
+      "affectedFiles": [
+        "messenger-rules.test.mjs"
+      ],
+      "riskLevel": "low",
+      "status": "done",
+      "doNotTouch": [
+        "Rediseño shell 3 columnas dashboard-rentero.html",
+        "Migrar a app messenger separada",
+        "Colecciones conversations/messages en inglés"
+      ],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "TICKET-032",
+      "title": "[DONE] Firestore conversaciones/mensajes",
+      "body": "Cerrado Sprint 1 / PR #60 (merge a51666c). Referencia; no reimplementar.\n\n## Entregable\nFirestore conversaciones/mensajes",
+      "labels": [
+        "p1-next"
+      ],
+      "priority": "P1",
+      "phase": "2-messenger",
+      "block": "Messenger",
+      "dependencies": [],
+      "affectedFiles": [
+        "firestore.rules"
+      ],
+      "riskLevel": "low",
+      "status": "done",
+      "doNotTouch": [
+        "Rediseño shell 3 columnas dashboard-rentero.html",
+        "Migrar a app messenger separada",
+        "Colecciones conversations/messages en inglés"
+      ],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "TICKET-033",
+      "title": "[DONE] Badges unread rail scoped",
+      "body": "Cerrado Sprint 1 / PR #60 (merge a51666c). Referencia; no reimplementar.\n\n## Entregable\nBadges unread rail scoped",
+      "labels": [
+        "p1-next"
+      ],
+      "priority": "P1",
+      "phase": "2-messenger",
+      "block": "Messenger",
+      "dependencies": [],
+      "affectedFiles": [
+        "dashboard-rentero.html"
+      ],
+      "riskLevel": "low",
+      "status": "done",
+      "doNotTouch": [
+        "Rediseño shell 3 columnas dashboard-rentero.html",
+        "Migrar a app messenger separada",
+        "Colecciones conversations/messages en inglés"
+      ],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "TICKET-040",
+      "title": "[DONE] Layout mensajes dashboard",
+      "body": "Cerrado Sprint 1 / PR #60 (merge a51666c). Referencia; no reimplementar.\n\n## Entregable\nLayout mensajes dashboard",
+      "labels": [
+        "p1-next"
+      ],
+      "priority": "P1",
+      "phase": "2-messenger",
+      "block": "Messenger",
+      "dependencies": [],
+      "affectedFiles": [
+        "dashboard-rentero-nav.js"
+      ],
+      "riskLevel": "low",
+      "status": "done",
+      "doNotTouch": [
+        "Rediseño shell 3 columnas dashboard-rentero.html",
+        "Migrar a app messenger separada",
+        "Colecciones conversations/messages en inglés"
+      ],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "TICKET-041",
+      "title": "[DONE] Conversación desde perfil/home",
+      "body": "Cerrado Sprint 1 / PR #60 (merge a51666c). Referencia; no reimplementar.\n\n## Entregable\nConversación desde perfil/home",
+      "labels": [
+        "p1-next"
+      ],
+      "priority": "P1",
+      "phase": "2-messenger",
+      "block": "Messenger",
+      "dependencies": [],
+      "affectedFiles": [
+        "home-messenger.js"
+      ],
+      "riskLevel": "low",
+      "status": "done",
+      "doNotTouch": [
+        "Rediseño shell 3 columnas dashboard-rentero.html",
+        "Migrar a app messenger separada",
+        "Colecciones conversations/messages en inglés"
+      ],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "TICKET-042",
+      "title": "[DONE] Avisos scoped + badge rail",
+      "body": "Cerrado Sprint 1 / PR #60 (merge a51666c). Referencia; no reimplementar.\n\n## Entregable\nAvisos scoped + badge rail",
+      "labels": [
+        "p1-next"
+      ],
+      "priority": "P1",
+      "phase": "2-messenger",
+      "block": "Notificaciones",
+      "dependencies": [],
+      "affectedFiles": [
+        "dashboard-avisos.js"
+      ],
+      "riskLevel": "low",
+      "status": "done",
+      "doNotTouch": [
+        "Rediseño shell 3 columnas dashboard-rentero.html",
+        "Migrar a app messenger separada",
+        "Colecciones conversations/messages en inglés"
+      ],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "TICKET-043",
+      "title": "[DONE] Solicitudes negocio scoped",
+      "body": "Cerrado Sprint 1 / PR #60 (merge a51666c). Referencia; no reimplementar.\n\n## Entregable\nSolicitudes negocio scoped",
+      "labels": [
+        "p1-next"
+      ],
+      "priority": "P1",
+      "phase": "2-messenger",
+      "block": "Messenger",
+      "dependencies": [],
+      "affectedFiles": [
+        "dashboard-solicitudes-negocio.js"
+      ],
+      "riskLevel": "low",
+      "status": "done",
+      "doNotTouch": [
+        "Rediseño shell 3 columnas dashboard-rentero.html",
+        "Migrar a app messenger separada",
+        "Colecciones conversations/messages en inglés"
+      ],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "TICKET-044",
+      "title": "[P2] Banner tap — métricas secundarias",
+      "body": "Tap → chats. Long-press/icono → métricas sheet.",
+      "labels": [
+        "messenger",
+        "dashboard",
+        "ux",
+        "p2-later"
+      ],
+      "priority": "P2",
+      "phase": "2-messenger",
+      "block": "Messenger",
+      "dependencies": [
+        "TICKET-045"
+      ],
+      "affectedFiles": [
+        "public/js/dashboard-banner-metrics.js"
+      ],
+      "riskLevel": "low",
+      "status": "pending",
+      "doNotTouch": [
+        "Rediseño shell 3 columnas dashboard-rentero.html",
+        "Migrar a app messenger separada",
+        "Colecciones conversations/messages en inglés"
+      ],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "TICKET-045",
+      "title": "[DONE] Rail context-aware",
+      "body": "Cerrado Sprint 1 / PR #60 (merge a51666c). Referencia; no reimplementar.\n\n## Entregable\nRail context-aware",
+      "labels": [
+        "p1-next"
+      ],
+      "priority": "P1",
+      "phase": "2-messenger",
+      "block": "Messenger",
+      "dependencies": [],
+      "affectedFiles": [
+        "dashboard-activos-rail.js"
+      ],
+      "riskLevel": "low",
+      "status": "done",
+      "doNotTouch": [
+        "Rediseño shell 3 columnas dashboard-rentero.html",
+        "Migrar a app messenger separada",
+        "Colecciones conversations/messages en inglés"
+      ],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "TICKET-046",
+      "title": "[DONE] Modo mensajes expandido",
+      "body": "Cerrado Sprint 1 / PR #60 (merge a51666c). Referencia; no reimplementar.\n\n## Entregable\nModo mensajes expandido",
+      "labels": [
+        "p1-next"
+      ],
+      "priority": "P1",
+      "phase": "2-messenger",
+      "block": "Messenger",
+      "dependencies": [],
+      "affectedFiles": [
+        "dashboard-rentero-nav.js"
+      ],
+      "riskLevel": "low",
+      "status": "done",
+      "doNotTouch": [
+        "Rediseño shell 3 columnas dashboard-rentero.html",
+        "Migrar a app messenger separada",
+        "Colecciones conversations/messages en inglés"
+      ],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "TICKET-047",
+      "title": "[DONE] Strip anuncios en mensajes",
+      "body": "Cerrado Sprint 1 / PR #60 (merge a51666c). Referencia; no reimplementar.\n\n## Entregable\nStrip anuncios en mensajes",
+      "labels": [
+        "p1-next"
+      ],
+      "priority": "P1",
+      "phase": "2-messenger",
+      "block": "Messenger",
+      "dependencies": [],
+      "affectedFiles": [
+        "dashboard-mensajes-strip.js"
+      ],
+      "riskLevel": "low",
+      "status": "done",
+      "doNotTouch": [
+        "Rediseño shell 3 columnas dashboard-rentero.html",
+        "Migrar a app messenger separada",
+        "Colecciones conversations/messages en inglés"
+      ],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "TICKET-048",
+      "title": "[DONE] Canal dual anuncios",
+      "body": "Cerrado Sprint 1 / PR #60 (merge a51666c). Referencia; no reimplementar.\n\n## Entregable\nCanal dual anuncios",
+      "labels": [
+        "p1-next"
+      ],
+      "priority": "P1",
+      "phase": "2-messenger",
+      "block": "Messenger",
+      "dependencies": [],
+      "affectedFiles": [
+        "dashboard-anuncios-mensajes.js"
+      ],
+      "riskLevel": "low",
+      "status": "done",
+      "doNotTouch": [
+        "Rediseño shell 3 columnas dashboard-rentero.html",
+        "Migrar a app messenger separada",
+        "Colecciones conversations/messages en inglés"
+      ],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "TICKET-049",
+      "title": "[P1] Eliminar copy presencia/en línea en prod",
+      "body": "## Objetivo\nEliminar toda UI/copy de presencia/en línea del anunciante y visitante.\n\n## Alcance\nperfil-publico.html, dashboard, CSS .pro-online, demos 'En línea'. Lives = promo, no conexión.\n\n## Dependencias\n- MSG-071\n\n## Archivos afectados\n- public/perfil-publico.html\n\n## Qué NO tocar\n- Mostrar estado en línea por defecto\n\n## Criterios de aceptación\n- [ ] 0 texto 'en línea' / 'conectado' / 'activo ahora' en prod\n- [ ] Lives en rail sin badge online\n- [ ] MSG-071 privacidad coherente\n\n## Riesgo si se implementa mal\nViolación regla producto privacidad; expectativa de presencia real.",
+      "labels": [
+        "messenger",
+        "dashboard",
+        "ux",
+        "p1-next"
+      ],
+      "priority": "P1",
+      "phase": "2-messenger",
+      "block": "Messenger",
+      "dependencies": [
+        "MSG-071"
+      ],
+      "affectedFiles": [
+        "public/perfil-publico.html"
+      ],
+      "riskLevel": "medium",
+      "status": "partial",
+      "doNotTouch": [
+        "Mostrar estado en línea por defecto"
+      ],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [],
+      "acceptanceCriteria": [
+        "0 texto 'en línea' / 'conectado' / 'activo ahora' en prod",
+        "Lives en rail sin badge online",
+        "MSG-071 privacidad coherente"
+      ],
+      "implementationNotes": "",
+      "securityNotes": "No implementar websocket presencia como efecto lateral.",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "TICKET-050",
+      "title": "[P1] MOCK/demo solo ?preview=1",
+      "body": "## Objetivo\nTicket principal: datos MOCK/demo solo con flag explícito (?preview=1 o dev).\n\n## Alcance\nresultados-demo.js, dashboard-rentero-nav.js MOCK_* (avisos, solicitudes, directorio, mensajes). Flag centralizado.\n\n## Dependencias\n- TICKET-042\n\n## Archivos afectados\n- public/js/dashboard-rentero-nav.js\n- public/js/resultados-demo.js\n\n## Qué NO tocar\n- Rediseño shell 3 columnas dashboard-rentero.html\n- Migrar a app messenger separada\n- Colecciones conversations/messages en inglés\n\n## Criterios de aceptación\n- [ ] Prod sin query preview = 0 datos demo inyectados\n- [ ] ?preview=1 muestra demos para diseño/QA\n- [ ] MSG-050 es sub-ámbito mensajes (ver duplicateOf inverso)\n\n## Riesgo si se implementa mal\nUsuarios ven conversaciones/avisos falsos en producción.\n\n## Notas de implementación\nTicket principal MOCK/demo. MSG-050 duplicateOf este ticket (solo mensajes).",
+      "labels": [
+        "dashboard",
+        "p1-next"
+      ],
+      "priority": "P1",
+      "phase": "2-messenger",
+      "block": "Messenger",
+      "dependencies": [
+        "TICKET-042"
+      ],
+      "affectedFiles": [
+        "public/js/dashboard-rentero-nav.js",
+        "public/js/resultados-demo.js"
+      ],
+      "riskLevel": "high",
+      "status": "pending",
+      "doNotTouch": [
+        "Rediseño shell 3 columnas dashboard-rentero.html",
+        "Migrar a app messenger separada",
+        "Colecciones conversations/messages en inglés"
+      ],
+      "implementationNotes": "Ticket principal MOCK/demo. MSG-050 duplicateOf este ticket (solo mensajes).",
+      "supersedes": [
+        "MSG-050"
+      ],
+      "duplicateOf": null,
+      "blockedBy": [],
+      "acceptanceCriteria": [
+        "Prod sin query preview = 0 datos demo inyectados",
+        "?preview=1 muestra demos para diseño/QA",
+        "MSG-050 es sub-ámbito mensajes (ver duplicateOf inverso)"
+      ],
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "TICKET-051",
+      "title": "[P1] Regresión responsive móvil 3 columnas",
+      "body": "≤768px grid 25/50/25, rail, mensajes expandido.",
+      "labels": [
+        "dashboard",
+        "ux",
+        "p1-next"
+      ],
+      "priority": "P1",
+      "phase": "1-foundation",
+      "block": "Foundation",
+      "dependencies": [
+        "TICKET-010"
+      ],
+      "affectedFiles": [
+        "public/css/dashboard-rentero-pro.css"
+      ],
+      "riskLevel": "medium",
+      "status": "pending",
+      "doNotTouch": [
+        "Rediseño shell 3 columnas dashboard-rentero.html",
+        "Migrar a app messenger separada",
+        "Colecciones conversations/messages en inglés"
+      ],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "TICKET-052",
+      "title": "[DONE] Banner impago bloquea chats",
+      "body": "Cerrado Sprint 1 / PR #60 (merge a51666c). Referencia; no reimplementar.\n\n## Entregable\nBanner impago bloquea chats",
+      "labels": [
+        "p1-next"
+      ],
+      "priority": "P1",
+      "phase": "2-messenger",
+      "block": "Messenger",
+      "dependencies": [],
+      "affectedFiles": [
+        "dashboard-banner-mensajes.js"
+      ],
+      "riskLevel": "low",
+      "status": "done",
+      "doNotTouch": [
+        "Rediseño shell 3 columnas dashboard-rentero.html",
+        "Migrar a app messenger separada",
+        "Colecciones conversations/messages en inglés"
+      ],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "TICKET-053",
+      "title": "[P2] Flags cuenta hub vs publicador",
+      "body": "canPublishProfile, canRentBanner, isHubAccount.",
+      "labels": [
+        "dashboard",
+        "p2-later"
+      ],
+      "priority": "P2",
+      "phase": "1-foundation",
+      "block": "Foundation",
+      "dependencies": [
+        "TICKET-003"
+      ],
+      "affectedFiles": [
+        "public/js/dashboard-account-capabilities.js"
+      ],
+      "riskLevel": "medium",
+      "status": "pending",
+      "doNotTouch": [],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "TICKET-003"
+      ],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "TICKET-054",
+      "title": "[P2] Métodos de contacto — compartidos vs por perfil",
+      "body": "## Decisión producto\nMétodos de contacto **interior** pueden ser iguales entre perfiles (mismo WhatsApp/tel).\nMensajes siguen separados por contexto.\n\n## Tareas\n- Documentar en schema\n- UI: editar contacto a nivel cuenta o heredar en perfil hijo\n\n## Dep\nTICKET-022\n\n## Épica\nE2",
+      "labels": [
+        "dashboard",
+        "p2-later"
+      ],
+      "priority": "P2",
+      "phase": "1-foundation",
+      "block": "Foundation",
+      "dependencies": [
+        "TICKET-022"
+      ],
+      "affectedFiles": [
+        "public/js/dashboard-rentero-nav.js",
+        "public/dashboard-rentero.html"
+      ],
+      "riskLevel": "low",
+      "status": "pending",
+      "doNotTouch": [
+        "Rediseño shell 3 columnas dashboard-rentero.html",
+        "Migrar a app messenger separada",
+        "Colecciones conversations/messages en inglés"
+      ],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "TICKET-022"
+      ],
+      "acceptanceCriteria": [
+        "Schema documentado",
+        "UI clara: editar a nivel cuenta o heredar en perfil hijo"
+      ],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "TICKET-055",
+      "title": "[P3] Rewrites hosting rutas canónicas",
+      "body": "firebase.json /cuenta/* rewrites.",
+      "labels": [
+        "dashboard",
+        "p3-future"
+      ],
+      "priority": "P3",
+      "phase": "1-foundation",
+      "block": "Foundation",
+      "dependencies": [
+        "MSG-001"
+      ],
+      "affectedFiles": [
+        "firebase.json"
+      ],
+      "riskLevel": "low",
+      "status": "pending",
+      "doNotTouch": [],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "MSG-001"
+      ],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "TICKET-056",
+      "title": "[P3] Deprecar home-mensajes localStorage",
+      "body": "## Tareas\nRedirigir intención mensaje de home a Messenger real / dashboard deep link\n\n## Dep\nTICKET-040\n\n## Épica\nE5",
+      "labels": [
+        "messenger",
+        "p3-future"
+      ],
+      "priority": "P3",
+      "phase": "1-foundation",
+      "block": "Foundation",
+      "dependencies": [
+        "TICKET-040"
+      ],
+      "affectedFiles": [
+        "public/js/home-mensajes.js",
+        "public/js/home-messenger.js"
+      ],
+      "riskLevel": "low",
+      "status": "pending",
+      "doNotTouch": [
+        "Rediseño shell 3 columnas dashboard-rentero.html",
+        "Migrar a app messenger separada",
+        "Colecciones conversations/messages en inglés"
+      ],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [],
+      "acceptanceCriteria": [
+        "Sin localStorage como source of truth mensajes",
+        "Deep link mantiene contexto perfil"
+      ],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "VIP-000",
+      "title": "[P0] Acta Comunidad VIP por perfil",
+      "body": "## Objetivo\nActa: Comunidad VIP pertenece al PERFIL, no a la cuenta global.\n\n## Alcance\n3 tarjetas UX: Estándar / Pro / Enterprise (oculto). Modelo membresía scoped perfilId.\n\n## Dependencias\n- MSG-000\n- ECO-000\n\n## Archivos afectados\n- scripts/\n\n## Qué NO tocar\n- Suscripción nivel cuenta\n- 4 modelos comisión visibles\n\n## Criterios de aceptación\n- [ ] Documento explícito: VIP por perfil\n- [ ] No inbox VIP global mezclado\n- [ ] Alineado dashboard-mensajes-vision.mdc\n\n## Riesgo si se implementa mal\nMonetización en cuenta equivocada; mensajes VIP mezclados.",
+      "labels": [
+        "vip",
+        "backend",
+        "p0-blocker"
+      ],
+      "priority": "P0",
+      "phase": "4-vip",
+      "block": "VIP / Comunidades",
+      "dependencies": [
+        "MSG-000",
+        "ECO-000"
+      ],
+      "affectedFiles": [
+        "scripts/"
+      ],
+      "riskLevel": "critical",
+      "status": "pending",
+      "doNotTouch": [
+        "Suscripción nivel cuenta",
+        "4 modelos comisión visibles"
+      ],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "MSG-000",
+        "ECO-000"
+      ],
+      "acceptanceCriteria": [
+        "Documento explícito: VIP por perfil",
+        "No inbox VIP global mezclado",
+        "Alineado dashboard-mensajes-vision.mdc"
+      ],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "Define producto premium por publicación.",
+      "fiscalRisk": "",
+      "launchBlocker": true
+    },
+    {
+      "id": "VIP-010",
+      "title": "[P1] Schema comunidades_vip + miembros",
+      "body": "## Objetivo\nSchema comunidades_vip + miembros\n\n## Alcance\ncuentaUid+contextoTipo=perfil+contextoId.\n\n## Dependencias\n- VIP-000\n\n## Archivos afectados\n- scripts/config-comunidades-vip-schema.json\n- firestore.rules\n\n## Qué NO tocar\n- Migración BLK perfiles a colección perfiles/\n- Rehacer conversaciones scoped existentes\n\n## Criterios de aceptación\n- [ ] Definir en sprint\n\n## Riesgo si se implementa mal\nVer riskLevel del ticket.",
+      "labels": [
+        "vip",
+        "backend",
+        "p1-next"
+      ],
+      "priority": "P1",
+      "phase": "4-vip",
+      "block": "VIP / Comunidades",
+      "dependencies": [
+        "VIP-000"
+      ],
+      "affectedFiles": [
+        "scripts/config-comunidades-vip-schema.json",
+        "firestore.rules"
+      ],
+      "riskLevel": "high",
+      "status": "pending",
+      "doNotTouch": [
+        "Migración BLK perfiles a colección perfiles/",
+        "Rehacer conversaciones scoped existentes"
+      ],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "VIP-000"
+      ],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "VIP-020",
+      "title": "[P1] Rules índices membresía VIP",
+      "body": "## Objetivo\nRules índices membresía VIP\n\n## Alcance\nSolo miembros activos leen exclusivo.\n\n## Dependencias\n- VIP-010\n\n## Archivos afectados\n- firestore.rules\n- firestore.indexes.json\n\n## Qué NO tocar\n- Rediseño shell 3 columnas dashboard-rentero.html\n- Migrar a app messenger separada\n- Colecciones conversations/messages en inglés\n\n## Criterios de aceptación\n- [ ] Definir en sprint\n\n## Riesgo si se implementa mal\nVer riskLevel del ticket.",
+      "labels": [
+        "vip",
+        "security",
+        "p1-next"
+      ],
+      "priority": "P1",
+      "phase": "4-vip",
+      "block": "VIP / Comunidades",
+      "dependencies": [
+        "VIP-010"
+      ],
+      "affectedFiles": [
+        "firestore.rules",
+        "firestore.indexes.json"
+      ],
+      "riskLevel": "high",
+      "status": "pending",
+      "doNotTouch": [],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "VIP-010"
+      ],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "VIP-030",
+      "title": "[P1] UI Activar Comunidad — 3 tarjetas",
+      "body": "## Objetivo\nUI Activar Comunidad — 3 tarjetas\n\n## Alcance\nEstándar (comisión), Pro (cuota+comisión), Enterprise (contactar).\n\n## Dependencias\n- VIP-010\n- TICKET-011\n\n## Archivos afectados\n- public/dashboard-rentero.html\n\n## Qué NO tocar\n- Rediseño shell 3 columnas dashboard-rentero.html\n- Migrar a app messenger separada\n- Colecciones conversations/messages en inglés\n\n## Criterios de aceptación\n- [ ] Definir en sprint\n\n## Riesgo si se implementa mal\nVer riskLevel del ticket.",
+      "labels": [
+        "vip",
+        "dashboard",
+        "ux",
+        "p1-next"
+      ],
+      "priority": "P1",
+      "phase": "4-vip",
+      "block": "VIP / Comunidades",
+      "dependencies": [
+        "VIP-010",
+        "TICKET-011"
+      ],
+      "affectedFiles": [
+        "public/dashboard-rentero.html"
+      ],
+      "riskLevel": "medium",
+      "status": "pending",
+      "doNotTouch": [
+        "Rediseño shell 3 columnas dashboard-rentero.html",
+        "Migrar a app messenger separada",
+        "Colecciones conversations/messages en inglés"
+      ],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "VIP-010"
+      ],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "VIP-040",
+      "title": "[P1] Gates contenido exclusivo VIP",
+      "body": "## Objetivo\nGates contenido exclusivo VIP\n\n## Alcance\nEstados/lives/posts/mensajes opcional miembros.\n\n## Dependencias\n- VIP-020\n\n## Archivos afectados\n- firestore.rules\n\n## Qué NO tocar\n- Rediseño shell 3 columnas dashboard-rentero.html\n- Migrar a app messenger separada\n- Colecciones conversations/messages en inglés\n\n## Criterios de aceptación\n- [ ] Definir en sprint\n\n## Riesgo si se implementa mal\nVer riskLevel del ticket.",
+      "labels": [
+        "vip",
+        "backend",
+        "p1-next"
+      ],
+      "priority": "P1",
+      "phase": "4-vip",
+      "block": "VIP / Comunidades",
+      "dependencies": [
+        "VIP-020"
+      ],
+      "affectedFiles": [
+        "firestore.rules"
+      ],
+      "riskLevel": "high",
+      "status": "pending",
+      "doNotTouch": [],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "VIP-020"
+      ],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "VIP-050",
+      "title": "[P1] Checkout suscripción comunidad",
+      "body": "## Objetivo\nFlujo suscripción VIP activa membresía en perfil vía ECO-070.\n\n## Alcance\nCheckout → webhook → membresía activa en perfil. Gate contenido VIP.\n\n## Dependencias\n- ECO-070\n- VIP-030\n\n## Archivos afectados\n- public/\n\n## Qué NO tocar\n- Rediseño shell 3 columnas dashboard-rentero.html\n- Migrar a app messenger separada\n- Colecciones conversations/messages en inglés\n\n## Criterios de aceptación\n- [ ] Membresía activa tras pago\n- [ ] Vencimiento desactiva acceso\n- [ ] ADM-040 puede disputas\n\n## Riesgo si se implementa mal\nRegresión en contexto scoped o exposición de datos entre perfiles/banners.",
+      "labels": [
+        "vip",
+        "payments",
+        "p1-next"
+      ],
+      "priority": "P1",
+      "phase": "4-vip",
+      "block": "VIP / Comunidades",
+      "dependencies": [
+        "ECO-070",
+        "VIP-030"
+      ],
+      "affectedFiles": [
+        "public/"
+      ],
+      "riskLevel": "critical",
+      "status": "pending",
+      "doNotTouch": [],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "ECO-070",
+        "VIP-030"
+      ],
+      "acceptanceCriteria": [
+        "Membresía activa tras pago",
+        "Vencimiento desactiva acceso",
+        "ADM-040 puede disputas"
+      ],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "Producto premium principal post-MVP.",
+      "fiscalRisk": "Suscripciones deben conciliar con ECO.",
+      "launchBlocker": false
+    },
+    {
+      "id": "VIP-060",
+      "title": "[P2] Panel miembros suscriptores",
+      "body": "## Objetivo\nPanel miembros suscriptores\n\n## Alcance\nLista miembros, cancelar acceso.\n\n## Dependencias\n- VIP-050\n\n## Archivos afectados\n- public/dashboard-rentero.html\n\n## Qué NO tocar\n- Rediseño shell 3 columnas dashboard-rentero.html\n- Migrar a app messenger separada\n- Colecciones conversations/messages en inglés\n\n## Criterios de aceptación\n- [ ] Definir en sprint\n\n## Riesgo si se implementa mal\nVer riskLevel del ticket.",
+      "labels": [
+        "vip",
+        "dashboard",
+        "p2-later"
+      ],
+      "priority": "P2",
+      "phase": "4-vip",
+      "block": "VIP / Comunidades",
+      "dependencies": [
+        "VIP-050"
+      ],
+      "affectedFiles": [
+        "public/dashboard-rentero.html"
+      ],
+      "riskLevel": "medium",
+      "status": "pending",
+      "doNotTouch": [
+        "Rediseño shell 3 columnas dashboard-rentero.html",
+        "Migrar a app messenger separada",
+        "Colecciones conversations/messages en inglés"
+      ],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "VIP-050"
+      ],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "VIP-070",
+      "title": "[P2] Estadísticas MRR churn",
+      "body": "## Objetivo\nEstadísticas MRR churn\n\n## Alcance\nMiembros activos, ingresos, renovaciones.\n\n## Dependencias\n- VIP-060\n- ECO-080\n\n## Archivos afectados\n- public/js/\n\n## Qué NO tocar\n- Rediseño shell 3 columnas dashboard-rentero.html\n- Migrar a app messenger separada\n- Colecciones conversations/messages en inglés\n\n## Criterios de aceptación\n- [ ] Definir en sprint\n\n## Riesgo si se implementa mal\nVer riskLevel del ticket.",
+      "labels": [
+        "vip",
+        "dashboard",
+        "p2-later"
+      ],
+      "priority": "P2",
+      "phase": "4-vip",
+      "block": "VIP / Comunidades",
+      "dependencies": [
+        "VIP-060",
+        "ECO-080"
+      ],
+      "affectedFiles": [
+        "public/js/"
+      ],
+      "riskLevel": "low",
+      "status": "pending",
+      "doNotTouch": [],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "VIP-060",
+        "ECO-080"
+      ],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    },
+    {
+      "id": "VIP-080",
+      "title": "[P2] Doc modelos monetización VIP",
+      "body": "## Objetivo\nDoc modelos monetización VIP\n\n## Alcance\nComisión 20%/10%/0% enterprise. Solo documentación.\n\n## Dependencias\n- VIP-000\n\n## Archivos afectados\n- scripts/\n\n## Qué NO tocar\n- Rediseño shell 3 columnas dashboard-rentero.html\n- Migrar a app messenger separada\n- Colecciones conversations/messages en inglés\n\n## Criterios de aceptación\n- [ ] Definir en sprint\n\n## Riesgo si se implementa mal\nVer riskLevel del ticket.",
+      "labels": [
+        "vip",
+        "payments",
+        "p2-later"
+      ],
+      "priority": "P2",
+      "phase": "4-vip",
+      "block": "VIP / Comunidades",
+      "dependencies": [
+        "VIP-000"
+      ],
+      "affectedFiles": [
+        "scripts/"
+      ],
+      "riskLevel": "medium",
+      "status": "pending",
+      "doNotTouch": [],
+      "duplicateOf": null,
+      "supersedes": [],
+      "blockedBy": [
+        "VIP-000"
+      ],
+      "acceptanceCriteria": [],
+      "implementationNotes": "",
+      "securityNotes": "",
+      "economicImpact": "",
+      "fiscalRisk": "",
+      "launchBlocker": false
+    }
+  ],
+  "changelogV21": {
+    "added": [
+      "MSG-010",
+      "TICKET-020",
+      "TICKET-021",
+      "TICKET-022",
+      "TICKET-025",
+      "TICKET-026",
+      "TICKET-054",
+      "TICKET-056",
+      "MSG-100",
+      "MSG-101",
+      "MSG-102",
+      "MSG-103"
+    ],
+    "modified": [
+      "TICKET-010",
+      "TICKET-011",
+      "TICKET-030",
+      "TICKET-032",
+      "TICKET-033",
+      "TICKET-040",
+      "TICKET-041",
+      "TICKET-045",
+      "TICKET-046",
+      "TICKET-047",
+      "TICKET-048",
+      "TICKET-031",
+      "TICKET-042",
+      "TICKET-043",
+      "TICKET-052",
+      "TICKET-002",
+      "MSG-020",
+      "MSG-021",
+      "MSG-022",
+      "MSG-040",
+      "MSG-056",
+      "MSG-070",
+      "MSG-071",
+      "MSG-072",
+      "MSG-073",
+      "MSG-075",
+      "MSG-077",
+      "MSG-080",
+      "MSG-081",
+      "TICKET-001",
+      "TICKET-003",
+      "TICKET-012",
+      "TICKET-013",
+      "TICKET-049",
+      "TICKET-050",
+      "TICKET-044",
+      "TICKET-051",
+      "TICKET-024",
+      "TICKET-023",
+      "TICKET-053",
+      "TICKET-055",
+      "MSG-000",
+      "MSG-001",
+      "MSG-011",
+      "MSG-012",
+      "MSG-013",
+      "MSG-014",
+      "MSG-015",
+      "MSG-023",
+      "MSG-024 (P1)",
+      "MSG-024",
+      "MSG-025",
+      "MSG-030",
+      "MSG-031",
+      "MSG-032",
+      "MSG-033",
+      "MSG-034",
+      "MSG-035",
+      "MSG-036",
+      "MSG-037",
+      "MSG-041",
+      "MSG-042",
+      "MSG-043",
+      "MSG-044",
+      "MSG-045",
+      "MSG-046",
+      "MSG-047",
+      "MSG-048",
+      "MSG-049",
+      "MSG-050",
+      "MSG-074",
+      "MSG-076",
+      "MSG-082",
+      "MSG-083",
+      "MSG-060",
+      "MSG-061",
+      "MSG-120",
+      "MSG-121",
+      "MSG-122",
+      "MSG-123",
+      "MSG-124",
+      "MSG-125",
+      "MSG-126",
+      "MSG-127",
+      "MSG-026",
+      "MSG-090",
+      "MSG-091",
+      "MSG-092",
+      "MSG-027",
+      "MSG-110",
+      "MSG-111",
+      "EST-000",
+      "EST-010",
+      "EST-020",
+      "EST-030",
+      "EST-040",
+      "EST-050",
+      "EST-070",
+      "LIVE-000",
+      "LIVE-010",
+      "LIVE-020",
+      "LIVE-030",
+      "LIVE-040",
+      "LIVE-050",
+      "VIP-000",
+      "VIP-010",
+      "VIP-020",
+      "VIP-030",
+      "VIP-040",
+      "VIP-050",
+      "VIP-060",
+      "VIP-070",
+      "VIP-080",
+      "ECO-000",
+      "ECO-010",
+      "ECO-020",
+      "ECO-030",
+      "ECO-031",
+      "ECO-040",
+      "ECO-050",
+      "ECO-060",
+      "ECO-070",
+      "ECO-080",
+      "ECO-090",
+      "ECO-100",
+      "CRY-000",
+      "CRY-010",
+      "CRY-020",
+      "CRY-030",
+      "CRY-040",
+      "CRY-050",
+      "SEC-000",
+      "SEC-010",
+      "SEC-020",
+      "SEC-030",
+      "SEC-040",
+      "SEC-050",
+      "ADM-010",
+      "ADM-030",
+      "ADM-040",
+      "ADM-050",
+      "NOT-000",
+      "NOT-010",
+      "NOT-020",
+      "AUD-010",
+      "AUD-020",
+      "AUD-030"
+    ],
+    "duplicatesMarked": [
+      {
+        "id": "MSG-050",
+        "duplicateOf": "TICKET-050"
+      }
+    ],
+    "brokenDepsFixed": [
+      "MSG-026 → MSG-010 agregado como partial"
+    ],
+    "priorityAligned": [
+      "MSG-024 elevado a P1"
+    ]
+  },
+  "launchBlockers": [
+    "ECO-000",
+    "ECO-010",
+    "ECO-020",
+    "ECO-030",
+    "ECO-031",
+    "ECO-040",
+    "EST-000",
+    "LIVE-000",
+    "MSG-000",
+    "MSG-001",
+    "TICKET-001",
+    "TICKET-003",
+    "VIP-000"
+  ],
+  "criticalRisks": [
+    "AUD-020",
+    "CRY-000",
+    "CRY-040",
+    "CRY-050",
+    "ECO-000",
+    "ECO-010",
+    "ECO-030",
+    "ECO-031",
+    "ECO-040",
+    "ECO-070",
+    "ECO-090",
+    "ECO-100",
+    "MSG-000",
+    "MSG-026",
+    "MSG-090",
+    "MSG-091",
+    "MSG-092",
+    "VIP-000",
+    "VIP-050"
+  ],
+  "siguienteSprintRecomendado": {
+    "id": "S2-A",
+    "nombre": "Cerrar MVP messenger + rail real + cuenta hub",
+    "tickets": [
+      "MSG-000",
+      "TICKET-001",
+      "TICKET-003",
+      "MSG-010",
+      "MSG-024",
+      "MSG-011",
+      "TICKET-049",
+      "TICKET-050",
+      "TICKET-012",
+      "TICKET-013",
+      "MSG-043",
+      "MSG-082",
+      "TICKET-020",
+      "TICKET-021",
+      "TICKET-022"
+    ],
+    "objetivo": "Sin MOCK en prod, rail real, solicitudes mensaje, storage adjuntos, favoritos/publicaciones"
+  }
+}

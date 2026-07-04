@@ -25,6 +25,18 @@
 <script src="js/catalogos-carihub.js"></script>
 <script src="js/carihub-bienestar-sector-render.js?v=20260630f3"></script>
 <script src="js/carihub-eventos-sector-render.js?v=20260627e3"></script>
+<script src="js/carihub-gastronomia-sector-render.js?v=20260702gast1"></script>
+<script src="js/carihub-profesionales-sector-render.js?v=20260702prof1"></script>
+<script src="js/carihub-mascotas-sector-render.js?v=20260702masc1"></script>
+<script src="js/carihub-hogar-sector-render.js?v=20260702hog1"></script>
+<script src="js/carihub-salud-sector-render.js?v=20260703sal1"></script>
+<script src="js/carihub-tecnologia-sector-render.js?v=20260703tec1"></script>
+<script src="js/carihub-automotriz-sector-render.js?v=20260703auto1"></script>
+<script src="js/carihub-transporte-sector-render.js?v=20260703trans1"></script>
+<script src="js/carihub-comercio-sector-render.js?v=20260703com1"></script>
+<script src="js/carihub-educacion-sector-render.js?v=20260703edu1"></script>
+<script src="js/carihub-industria-sector-render.js?v=20260703ind1"></script>
+<script src="js/carihub-bienes-raices-sector-render.js?v=20260703inmo1"></script>
 <script src="js/carihub-public-render-lite.js?v=20260627e3"></script>
 <script src="js/resultados-demo.js"></script>
 <script src="js/perfil-publico-init.js"></script>
@@ -4768,27 +4780,12 @@ function shell(tipo, inner, u){
   u = u || window.__perfilActual || {};
   var t = THEME[tipo] || THEME.adult;
   var esCari=CARINOSAS_TIPOS.indexOf(tipo)>=0;
-  var pinSVG = '<svg width="22" height="22" viewBox="0 0 24 24"><path d="M12 2c-3.9 0-7 3.1-7 7 0 5 7 13 7 13s7-8 7-13c0-3.9-3.1-7-7-7z" fill="'+(esCari?"#ec2d7a":"#2563eb")+'"/><circle cx="12" cy="9" r="2.6" fill="#fff"/></svg>';
   var banners = bannersHTML(tipo);
-  var nav = t.nav.map(function(n,i){
-    var onCls=(esCari||PRO_LAYOUTS.indexOf(tipo)>=0)?"":(i===0?"on":"");
-    return '<a class="'+onCls+'" href="#">'+
-      '<span class="pnav__ic">'+svgIcon(n[0])+'</span>'+
-      '<span class="pnav__label">'+safe(n[1])+'</span>'+
-      (n[2]?'<span class="bdg">'+n[2]+'</span>':'')+
-    '</a>';
-  }).join("");
-  var closeBtn=window.CariHubNavQuick?CariHubNavQuick.closeButtonHTML("perfil"):"";
   var qPerfil=window.CariHubPerfilPublico?CariHubPerfilPublico.queryPerfilPublico():{};
   var backHref=window.CariHubPerfilPublico?CariHubPerfilPublico.resultadosVolverHref(qPerfil):
     (window.CariHubNavQuick?CariHubNavQuick.resultadosHrefFromQuery(qPerfil):"#");
-  var brandBlock = '<div class="pbrand__wordmark"><div class="pbrand__name">'+safe(t.brand)+'</div><div class="pbrand__tag">'+safe(t.tag)+'</div></div>';
   return ''+
     banners+
-    '<div class="pbrand pbrand--with-close">'+closeBtn+
-      '<div class="pbrand__logo">'+(esCari?"":pinSVG)+brandBlock+'</div>'+
-      '<nav class="pnav">'+nav+'</nav>'+
-      (esCari||PRO_LAYOUTS.indexOf(tipo)>=0?"":'<button class="pbtn">＋ '+safe(t.publicar)+'</button>')+'</div>'+
     '<div class="profile-toolbar">'+
       '<div class="profile-toolbar-left">'+
         '<a class="toolbar-action back-action" href="'+backHref+'">'+profileBackArrow()+'<span>Volver a resultados</span></a>'+
@@ -4981,6 +4978,19 @@ function escortPrefPublico(u, valor, visibilityKey){
   if(u[visibilityKey]!=null && String(u[visibilityKey]).trim()!=='') return String(u[visibilityKey]).trim()==='Sí';
   return true;
 }
+function colaboracionContenidoTexto(val){
+  var pol=window.CARIHUB_COLABORACION_CONTENIDO_POLICY;
+  if(pol&&pol.etiquetaValor) return pol.etiquetaValor(val);
+  var v=String(val||'').trim();
+  if(v==='Sí') return 'Sí, colaboro para contenido';
+  if(v==='Bajo acuerdo previo') return 'A convenir';
+  if(v==='No') return 'No colaboro';
+  return safe(v);
+}
+function colaboracionContenidoFichaRow(u){
+  if(!escortPrefPublico(u, u.colaboracionContenido, 'mostrarColaboracionContenidoPublico')) return '';
+  return row(pico("camera"),"Colaboraciones en redes sociales",colaboracionContenidoTexto(u.colaboracionContenido));
+}
 function dotadosAtencionPublica(u, valorKey, visibilityKey, label){
   if(!u[valorKey]) return '';
   if(String(u[visibilityKey]||'').trim()!=='Sí') return '';
@@ -5168,7 +5178,9 @@ function adultoFichaHTML(u){
   else if(!isUnicornSubFicha(u)&&u.buscan) html+=row(pico("heart"),"Participa en",safe(u.buscan));
   if(Array.isArray(u.tipoCitaPreferida)&&u.tipoCitaPreferida.length) html+=row(pico("briefcase"),"Tipo de cita preferida",safe(u.tipoCitaPreferida.join(", ")));
   if(Array.isArray(u.dinamicasParticipa)&&u.dinamicasParticipa.length) html+=row(pico("heart"),"Dinámicas en las que participas",safe(u.dinamicasParticipa.join(", ")));
-  if(escortPrefPublico(u, u.colaboracionContenido, 'mostrarColaboracionContenidoPublico')) html+=row(pico("camera"),"Colaboración para contenido",safe(u.colaboracionContenido));
+  if(escortPrefPublico(u, u.colaboracionContenido, 'mostrarColaboracionContenidoPublico')) {
+    html+=row(pico("camera"),"Colaboraciones en redes sociales",colaboracionContenidoTexto(u.colaboracionContenido));
+  }
   if(escortPrefPublico(u, u.realizaTrios, 'mostrarRealizaTriosPublico')) html+=row(pico("heart"),"Tríos",safe(u.realizaTrios));
   if(Array.isArray(u.tiposTrios)&&u.tiposTrios.length) html+=row(pico("heart"),"Tipo de trío",safe(u.tiposTrios.join(", ")));
   if(u.esBisexual) html+=row(pico("gender"),"Bisexual",safe(u.esBisexual));
@@ -6687,10 +6699,18 @@ function negocioFichaRow(iconKey,label,value,multiline){
 }
 function negocioFichaFilas(u){
   var aq=u.arquetipo||"bienestar";
+  var colabRow=null;
+  if(escortPrefPublico(u, u.colaboracionContenido, 'mostrarColaboracionContenidoPublico')){
+    colabRow=["camera","Colaboraciones en redes:",colaboracionContenidoTexto(u.colaboracionContenido)];
+  }
+  function withColab(rows){
+    if(colabRow) rows.push(colabRow);
+    return rows;
+  }
   if(aq==="hospedaje"){
     var checkVal=safe(u.checkIn||"")+(u.checkOut?'<br>'+safe(u.checkOut):"");
     var pagosFicha=(u.metodosPagoFicha||u.metodosPago||[]).slice(0,3).join(", ");
-    return [
+    return withColab([
       ["user","Categoría:",safe(u.categoriaFicha||"Entretenimiento para adultos")],
       ["corp","Tipo de empresa:",safe(u.tipoEmpresa||"—")],
       ["flame","Años en el mercado:",safe(u.anosMercado||"—")],
@@ -6702,7 +6722,7 @@ function negocioFichaFilas(u){
       ["parking","Estacionamiento:",safe(u.estacionamiento||"—")],
       ["wallet","Métodos de pago:",safe(pagosFicha||"—")],
       ["invoice","Facturación:",safe(u.facturacion||"—")]
-    ];
+    ]);
   }
   if(aq==="bienestar"){
     var rows=[
@@ -6719,10 +6739,10 @@ function negocioFichaFilas(u){
       ["wallet","Métodos de pago:",safe((u.metodosPago||[]).join(", "))],
       ["invoice","Facturación:",safe(u.facturacion||"—")]
     );
-    return rows;
+    return withColab(rows);
   }
   if(aq==="retail"){
-    return [
+    return withColab([
       ["user","Categoría:",categoriaEtiquetaNegocio(u)],
       ["corp","Tipo de empresa:",safe(u.tipoEmpresa||"—")],
       ["briefcase","Productos:",safe(u.categoriasProducto||"—")],
@@ -6730,9 +6750,9 @@ function negocioFichaFilas(u){
       ["globe","Envío:",safe((u.envioDomicilio?"Envío a domicilio":"Sin envío")+(u.tiendaOnline?", tienda en línea":""))],
       ["wallet","Métodos de pago:",safe((u.metodosPago||[]).join(", "))],
       ["invoice","Facturación:",safe(u.facturacion||"—")]
-    ];
+    ]);
   }
-  return [
+  return withColab([
     ["user","Categoría:",categoriaEtiquetaNegocio(u)],
     ["corp","Tipo de empresa:",safe(u.tipoEmpresa||"—")],
     ["money","Precio entrada:",safe(u.precioEntrada||("$"+u.precio+" MXN"))],
@@ -6741,7 +6761,7 @@ function negocioFichaFilas(u){
     ["pin","Áreas:",safe(u.areasVenue||"—")],
     ["wallet","Métodos de pago:",safe((u.metodosPago||[]).join(", "))],
     ["invoice","Facturación:",safe(u.facturacion||"—")]
-  ];
+  ]);
 }
 function negocioFichaHTML(u){
   var rows=negocioFichaFilas(u).map(function(r){
@@ -7093,7 +7113,8 @@ function renderMedicoProfesional(u){
     row("🕐","Horario",safe(u.horarioAtencion||u.horario),"horario"),
     row("📍","Atención",safe(u.atencion)),
     row("🗣️","Idiomas",safe(u.idiomas)),
-    row("🗺️","Zona",safe(u.zonaCobertura))
+    row("🗺️","Zona",safe(u.zonaCobertura)),
+    colaboracionContenidoFichaRow(u)
   ].join("");
 
   var right=''+
@@ -7137,6 +7158,78 @@ function applyEventosSectorHydrate(u){
   }
   return u||{};
 }
+function applyGastronomiaSectorHydrate(u){
+  if(window.CariHubGastronomiaSectorRender&&CariHubGastronomiaSectorRender.hydrateDisplayFields){
+    return CariHubGastronomiaSectorRender.hydrateDisplayFields(u||{});
+  }
+  return u||{};
+}
+function applyProfesionalesSectorHydrate(u){
+  if(window.CariHubProfesionalesSectorRender&&CariHubProfesionalesSectorRender.hydrateDisplayFields){
+    return CariHubProfesionalesSectorRender.hydrateDisplayFields(u||{});
+  }
+  return u||{};
+}
+function applyMascotasSectorHydrate(u){
+  if(window.CariHubMascotasSectorRender&&CariHubMascotasSectorRender.hydrateDisplayFields){
+    return CariHubMascotasSectorRender.hydrateDisplayFields(u||{});
+  }
+  return u||{};
+}
+function applyHogarSectorHydrate(u){
+  if(window.CariHubHogarSectorRender&&CariHubHogarSectorRender.hydrateDisplayFields){
+    return CariHubHogarSectorRender.hydrateDisplayFields(u||{});
+  }
+  return u||{};
+}
+function applySaludSectorHydrate(u){
+  if(window.CariHubSaludSectorRender&&CariHubSaludSectorRender.hydrateDisplayFields){
+    return CariHubSaludSectorRender.hydrateDisplayFields(u||{});
+  }
+  return u||{};
+}
+function applyTecnologiaSectorHydrate(u){
+  if(window.CariHubTecnologiaSectorRender&&CariHubTecnologiaSectorRender.hydrateDisplayFields){
+    return CariHubTecnologiaSectorRender.hydrateDisplayFields(u||{});
+  }
+  return u||{};
+}
+function applyAutomotrizSectorHydrate(u){
+  if(window.CariHubAutomotrizSectorRender&&CariHubAutomotrizSectorRender.hydrateDisplayFields){
+    return CariHubAutomotrizSectorRender.hydrateDisplayFields(u||{});
+  }
+  return u||{};
+}
+function applyTransporteSectorHydrate(u){
+  if(window.CariHubTransporteSectorRender&&CariHubTransporteSectorRender.hydrateDisplayFields){
+    return CariHubTransporteSectorRender.hydrateDisplayFields(u||{});
+  }
+  return u||{};
+}
+function applyComercioSectorHydrate(u){
+  if(window.CariHubComercioSectorRender&&CariHubComercioSectorRender.hydrateDisplayFields){
+    return CariHubComercioSectorRender.hydrateDisplayFields(u||{});
+  }
+  return u||{};
+}
+function applyEducacionSectorHydrate(u){
+  if(window.CariHubEducacionSectorRender&&CariHubEducacionSectorRender.hydrateDisplayFields){
+    return CariHubEducacionSectorRender.hydrateDisplayFields(u||{});
+  }
+  return u||{};
+}
+function applyIndustriaSectorHydrate(u){
+  if(window.CariHubIndustriaSectorRender&&CariHubIndustriaSectorRender.hydrateDisplayFields){
+    return CariHubIndustriaSectorRender.hydrateDisplayFields(u||{});
+  }
+  return u||{};
+}
+function applyBienesRaicesSectorHydrate(u){
+  if(window.CariHubBienesRaicesSectorRender&&CariHubBienesRaicesSectorRender.hydrateDisplayFields){
+    return CariHubBienesRaicesSectorRender.hydrateDisplayFields(u||{});
+  }
+  return u||{};
+}
 function bienestarBadgesHTML(u){
   if(!u||!Array.isArray(u.__bienestarBadges)||!u.__bienestarBadges.length) return "";
   return u.__bienestarBadges.map(function(b){
@@ -7149,6 +7242,78 @@ function eventosBadgesHTML(u){
     return '<span class="res-badge '+safe(b.cls)+'">'+safe(b.text)+'</span>';
   }).join("");
 }
+function gastronomiaBadgesHTML(u){
+  if(!u||!Array.isArray(u.__gastronomiaBadges)||!u.__gastronomiaBadges.length) return "";
+  return u.__gastronomiaBadges.map(function(b){
+    return '<span class="res-badge '+safe(b.cls)+'">'+safe(b.text)+'</span>';
+  }).join("");
+}
+function profesionalesBadgesHTML(u){
+  if(!u||!Array.isArray(u.__profesionalesBadges)||!u.__profesionalesBadges.length) return "";
+  return u.__profesionalesBadges.map(function(b){
+    return '<span class="res-badge '+safe(b.cls)+'">'+safe(b.text)+'</span>';
+  }).join("");
+}
+function mascotasBadgesHTML(u){
+  if(!u||!Array.isArray(u.__mascotasBadges)||!u.__mascotasBadges.length) return "";
+  return u.__mascotasBadges.map(function(b){
+    return '<span class="res-badge '+safe(b.cls)+'">'+safe(b.text)+'</span>';
+  }).join("");
+}
+function hogarBadgesHTML(u){
+  if(!u||!Array.isArray(u.__hogarBadges)||!u.__hogarBadges.length) return "";
+  return u.__hogarBadges.map(function(b){
+    return '<span class="res-badge '+safe(b.cls)+'">'+safe(b.text)+'</span>';
+  }).join("");
+}
+function saludBadgesHTML(u){
+  if(!u||!Array.isArray(u.__saludBadges)||!u.__saludBadges.length) return "";
+  return u.__saludBadges.map(function(b){
+    return '<span class="res-badge '+safe(b.cls)+'">'+safe(b.text)+'</span>';
+  }).join("");
+}
+function tecnologiaBadgesHTML(u){
+  if(!u||!Array.isArray(u.__tecnologiaBadges)||!u.__tecnologiaBadges.length) return "";
+  return u.__tecnologiaBadges.map(function(b){
+    return '<span class="res-badge '+safe(b.cls)+'">'+safe(b.text)+'</span>';
+  }).join("");
+}
+function automotrizBadgesHTML(u){
+  if(!u||!Array.isArray(u.__automotrizBadges)||!u.__automotrizBadges.length) return "";
+  return u.__automotrizBadges.map(function(b){
+    return '<span class="res-badge '+safe(b.cls)+'">'+safe(b.text)+'</span>';
+  }).join("");
+}
+function transporteBadgesHTML(u){
+  if(!u||!Array.isArray(u.__transporteBadges)||!u.__transporteBadges.length) return "";
+  return u.__transporteBadges.map(function(b){
+    return '<span class="res-badge '+safe(b.cls)+'">'+safe(b.text)+'</span>';
+  }).join("");
+}
+function comercioBadgesHTML(u){
+  if(!u||!Array.isArray(u.__comercioBadges)||!u.__comercioBadges.length) return "";
+  return u.__comercioBadges.map(function(b){
+    return '<span class="res-badge '+safe(b.cls)+'">'+safe(b.text)+'</span>';
+  }).join("");
+}
+function educacionBadgesHTML(u){
+  if(!u||!Array.isArray(u.__educacionBadges)||!u.__educacionBadges.length) return "";
+  return u.__educacionBadges.map(function(b){
+    return '<span class="res-badge '+safe(b.cls)+'">'+safe(b.text)+'</span>';
+  }).join("");
+}
+function industriaBadgesHTML(u){
+  if(!u||!Array.isArray(u.__industriaBadges)||!u.__industriaBadges.length) return "";
+  return u.__industriaBadges.map(function(b){
+    return '<span class="res-badge '+safe(b.cls)+'">'+safe(b.text)+'</span>';
+  }).join("");
+}
+function bienesRaicesBadgesHTML(u){
+  if(!u||!Array.isArray(u.__bienesRaicesBadges)||!u.__bienesRaicesBadges.length) return "";
+  return u.__bienesRaicesBadges.map(function(b){
+    return '<span class="res-badge '+safe(b.cls)+'">'+safe(b.text)+'</span>';
+  }).join("");
+}
 function bienestarPackHNoticeHTML(u){
   if(!u||!u.__bienestarPackHNotice) return "";
   return '<div class="pcard bienestar-pack-h-notice" role="note"><div class="pcard__h">⚖️ Aviso legal</div><p style="margin:0;font-size:13px;line-height:1.5;color:#6b6170">'+safe(u.__bienestarPackHNotice)+'</p></div>';
@@ -7157,6 +7322,10 @@ function eventosReguladaNoticeHTML(u){
   if(!u||!u.__eventosReguladaNotice) return "";
   return '<div class="pcard eventos-regulada-notice" role="note"><div class="pcard__h">⚖️ Aviso regulado</div><p style="margin:0;font-size:13px;line-height:1.5;color:#6b6170">'+safe(u.__eventosReguladaNotice)+'</p></div>';
 }
+function gastronomiaReguladaNoticeHTML(u){
+  if(!u||!u.__gastronomiaReguladaNotice) return "";
+  return '<div class="pcard gastronomia-regulada-notice" role="note"><div class="pcard__h">⚖️ Aviso declarativo</div><p style="margin:0;font-size:13px;line-height:1.5;color:#6b6170">'+safe(u.__gastronomiaReguladaNotice)+'</p></div>';
+}
 function bienestarPackHCtaHTML(u){
   if(!u||!u.__bienestarPackHCta) return "";
   return '<button type="button" class="pro-cta-cita bienestar-pack-h-cta">'+safe(u.__bienestarPackHCta)+'</button>';
@@ -7164,12 +7333,49 @@ function bienestarPackHCtaHTML(u){
 function renderProEmpresa(u, esEmpresa){
   u=applyBienestarSectorHydrate(u);
   u=applyEventosSectorHydrate(u);
+  u=applyGastronomiaSectorHydrate(u);
+  u=applyProfesionalesSectorHydrate(u);
+  u=applyMascotasSectorHydrate(u);
+  u=applyHogarSectorHydrate(u);
+  u=applySaludSectorHydrate(u);
+  u=applyTecnologiaSectorHydrate(u);
+  u=applyAutomotrizSectorHydrate(u);
+  u=applyTransporteSectorHydrate(u);
+  u=applyComercioSectorHydrate(u);
+  u=applyEducacionSectorHydrate(u);
+  u=applyIndustriaSectorHydrate(u);
+  u=applyBienesRaicesSectorHydrate(u);
   var isBs=!!u.__bienestarPack;
   var isEv=!!u.__eventosPack;
+  var isGast=!!u.__gastronomiaPack;
+  var isProf=!!u.__profesionalesPack;
+  var isMasc=!!u.__mascotasPack;
+  var isHog=!!u.__hogarPack;
+  var isSal=!!u.__saludPack;
+  var isTec=!!u.__tecnologiaPack;
+  var isAuto=!!u.__automotrizPack;
+  var isTrans=!!u.__transportePack;
+  var isCom=!!u.__comercioPack;
+  var isEdu=!!u.__educacionPack;
+  var isInd=!!u.__industriaPack;
+  var isInmo=!!u.__bienesRaicesPack;
   var loc=[u.ciudad,u.estado].filter(Boolean).join(", ");
   var verLabel = esEmpresa ? "Empresa verificada" : "Verificado";
 
-  var datos = (isEv && u.__eventosDatos && u.__eventosDatos.length) ? u.__eventosDatos : (isBs && u.__bienestarDatos && u.__bienestarDatos.length) ? u.__bienestarDatos : (esEmpresa ? [
+  var datos = (isInmo && u.__bienesRaicesDatos && u.__bienesRaicesDatos.length) ? u.__bienesRaicesDatos
+    : (isInd && u.__industriaDatos && u.__industriaDatos.length) ? u.__industriaDatos
+    : (isEdu && u.__educacionDatos && u.__educacionDatos.length) ? u.__educacionDatos
+    : (isCom && u.__comercioDatos && u.__comercioDatos.length) ? u.__comercioDatos
+    : (isTrans && u.__transporteDatos && u.__transporteDatos.length) ? u.__transporteDatos
+    : (isAuto && u.__automotrizDatos && u.__automotrizDatos.length) ? u.__automotrizDatos
+    : (isTec && u.__tecnologiaDatos && u.__tecnologiaDatos.length) ? u.__tecnologiaDatos
+    : (isSal && u.__saludDatos && u.__saludDatos.length) ? u.__saludDatos
+    : (isHog && u.__hogarDatos && u.__hogarDatos.length) ? u.__hogarDatos
+    : (isMasc && u.__mascotasDatos && u.__mascotasDatos.length) ? u.__mascotasDatos
+    : (isProf && u.__profesionalesDatos && u.__profesionalesDatos.length) ? u.__profesionalesDatos
+    : (isGast && u.__gastronomiaDatos && u.__gastronomiaDatos.length) ? u.__gastronomiaDatos
+    : (isEv && u.__eventosDatos && u.__eventosDatos.length) ? u.__eventosDatos
+    : (isBs && u.__bienestarDatos && u.__bienestarDatos.length) ? u.__bienestarDatos : (esEmpresa ? [
     ["🏷️","Categoría",u.categoria],["🏢","Tipo de empresa",u.tipoEmpresa],["📅","Años en el mercado",u.aniosMercado],
     ["👥","Empleados",u.empleados],["🕐","Horario",u.horario],["📍","Zona de cobertura",u.zonaCobertura],
     ["🛠️","Atención",u.atencion],["💳","Formas de pago",(u.formasPago||[]).join(", ")],["🧾","Facturación",u.facturacion]
@@ -7186,11 +7392,24 @@ function renderProEmpresa(u, esEmpresa){
   var tabs = esEmpresa
     ? ["Plomería","Mantenimiento","Instalaciones","Residencial","Comercial"]
     : ["Servicio","Plomería","Categoría","Hogar",u.experiencia];
-  var tabsHTML = (isBs || isEv) ? '' : tabs.map(function(t,i){return '<span class="tb '+(i===1?"on":"")+'">'+safe(t)+'</span>';}).join("");
+  var tabsHTML = (isBs || isEv || isGast || isProf || isMasc || isHog || isSal || isTec || isAuto || isTrans || isCom || isEdu || isInd || isInmo) ? '' : tabs.map(function(t,i){return '<span class="tb '+(i===1?"on":"")+'">'+safe(t)+'</span>';}).join("");
 
   var pagos = esEmpresa ? u.formasPago : u.metodosPago;
-  var priceLbl = (isEv && u.__eventosPriceLabel) ? u.__eventosPriceLabel : (isBs && u.__bienestarPriceLabel) ? u.__bienestarPriceLabel : 'Desde';
-  var serviciosTitulo = isEv ? '✅ Servicios para tu evento' : isBs ? '✅ Servicios / enfoque' : (esEmpresa ? '✅ Servicios principales' : '✅ Servicios incluidos');
+  var priceLbl = (isInmo && u.__bienesRaicesPriceLabel) ? u.__bienesRaicesPriceLabel
+    : (isInd && u.__industriaPriceLabel) ? u.__industriaPriceLabel
+    : (isEdu && u.__educacionPriceLabel) ? u.__educacionPriceLabel
+    : (isCom && u.__comercioPriceLabel) ? u.__comercioPriceLabel
+    : (isTrans && u.__transportePriceLabel) ? u.__transportePriceLabel
+    : (isAuto && u.__automotrizPriceLabel) ? u.__automotrizPriceLabel
+    : (isTec && u.__tecnologiaPriceLabel) ? u.__tecnologiaPriceLabel
+    : (isSal && u.__saludPriceLabel) ? u.__saludPriceLabel
+    : (isHog && u.__hogarPriceLabel) ? u.__hogarPriceLabel
+    : (isMasc && u.__mascotasPriceLabel) ? u.__mascotasPriceLabel
+    : (isProf && u.__profesionalesPriceLabel) ? u.__profesionalesPriceLabel
+    : (isGast && u.__gastronomiaPriceLabel) ? u.__gastronomiaPriceLabel
+    : (isEv && u.__eventosPriceLabel) ? u.__eventosPriceLabel
+    : (isBs && u.__bienestarPriceLabel) ? u.__bienestarPriceLabel : 'Desde';
+  var serviciosTitulo = isInmo ? '✅ Servicios inmobiliarios' : isInd ? '✅ Servicios industriales' : isEdu ? '✅ Servicios educativos' : isCom ? '✅ Productos y servicios' : isTrans ? '✅ Servicios de transporte' : isAuto ? '✅ Servicios automotrices' : isTec ? '✅ Servicios de tecnología' : isSal ? '✅ Servicios de salud' : isHog ? '✅ Servicios para el hogar' : isMasc ? '✅ Servicios para mascotas' : isProf ? '✅ Servicios profesionales' : isGast ? '✅ Especialidad y servicios' : isEv ? '✅ Servicios para tu evento' : isBs ? '✅ Servicios / enfoque' : (esEmpresa ? '✅ Servicios principales' : '✅ Servicios incluidos');
   var certBlock = u.certificaciones ? '<div class="pcard"><div class="pcard__h">🎖️ Certificaciones</div><div class="svc">'+
       u.certificaciones.map(function(c){return '<div><span class="ok">🏅</span><div><b>'+safe(c[0])+'</b><br><span style="color:var(--muted);font-size:12px">Emitido por: '+safe(c[1])+'</span></div></div>';}).join("")+'</div></div>' : '';
 
@@ -7218,7 +7437,7 @@ function renderProEmpresa(u, esEmpresa){
       '<div class="stats">'+u.stats.map(function(s){return '<div class="st"><b>'+safe(s[0])+'</b><span>'+safe(s[1])+'</span></div>';}).join("")+'</div>'+
     '</div>'+
     certBlock+
-    (isBs || isEv ? '' : ('<div class="pcard"><div class="pcard__h">⭐ Opiniones de clientes <a class="lnk" href="#">Ver todas</a></div>'+
+    (isBs || isEv || isGast || isProf || isMasc || isHog ? '' : ('<div class="pcard"><div class="pcard__h">⭐ Opiniones de clientes <a class="lnk" href="#">Ver todas</a></div>'+
       '<div class="rating"><span class="num">'+safe(u.rating)+'</span>'+stars(5)+'<span style="color:var(--muted);font-size:13px">('+u.opiniones+' opiniones)</span></div>'+
       u.reviews.map(function(r){return '<div class="review"><div class="av">'+safe(r[0].slice(0,1))+'</div><div class="rb"><div class="rn">'+safe(r[0])+' '+stars(r[1])+'</div><div class="rt">'+safe(r[2])+'</div></div><div class="rd">'+safe(r[3])+'</div></div>';}).join("")+
     '</div>'))+
@@ -7228,7 +7447,7 @@ function renderProEmpresa(u, esEmpresa){
 
   var right=''+
     '<div class="pcard">'+
-      '<div class="idhead"><h1>'+safe(u.nombre)+'</h1>'+verificadoBadge(verLabel)+bienestarBadgesHTML(u)+eventosBadgesHTML(u)+(u.edad?'<span class="age" data-pub-block="edad">'+u.edad+' años</span>':'')+'</div>'+
+      '<div class="idhead"><h1>'+safe(u.nombre)+'</h1>'+verificadoBadge(verLabel)+bienestarBadgesHTML(u)+eventosBadgesHTML(u)+gastronomiaBadgesHTML(u)+profesionalesBadgesHTML(u)+mascotasBadgesHTML(u)+hogarBadgesHTML(u)+saludBadgesHTML(u)+tecnologiaBadgesHTML(u)+automotrizBadgesHTML(u)+transporteBadgesHTML(u)+comercioBadgesHTML(u)+educacionBadgesHTML(u)+industriaBadgesHTML(u)+bienesRaicesBadgesHTML(u)+(u.edad?'<span class="age" data-pub-block="edad">'+u.edad+' años</span>':'')+'</div>'+
       '<div class="idsub">'+safe(u.titulo)+'</div>'+
       idlocUbicacionHTML(u, loc)+
       (tabsHTML ? '<div class="tabs">'+tabsHTML+'</div>' : '')+
@@ -7239,8 +7458,8 @@ function renderProEmpresa(u, esEmpresa){
     panelLive(u, esEmpresa)+
     '<div class="pcard" data-pub-block="servicios"><div class="pcard__h" data-pub-label="servicios">'+serviciosTitulo+'</div><div class="svc">'+
       (u.serviciosIncluidos||[]).map(function(s){return '<div><span class="ok">✔</span> '+safe(s)+'</div>';}).join("")+'</div></div>'+
-    (isEv ? eventosReguladaNoticeHTML(u) : (isBs && u.__bienestarPack==='H' ? bienestarPackHNoticeHTML(u) : ''))+
-    '<div class="pcard"><div class="pcard__h">⛔ '+(isEv?'No incluido / no ofrecido':(isBs?'No incluido / no ofrecido':'Servicios no incluidos'))+'</div><div class="svc">'+
+    (isGast ? gastronomiaReguladaNoticeHTML(u) : isEv ? eventosReguladaNoticeHTML(u) : (isBs && u.__bienestarPack==='H' ? bienestarPackHNoticeHTML(u) : ''))+
+    '<div class="pcard"><div class="pcard__h">⛔ '+(isEv||isGast||isProf?'No incluido / no ofrecido':(isBs?'No incluido / no ofrecido':'Servicios no incluidos'))+'</div><div class="svc">'+
       (u.noIncluidos||[]).map(function(s){return '<div><span class="no">✕</span> '+safe(s)+'</div>';}).join("")+'</div></div>'+
     '<div class="pcard"><div class="pcard__h">🗺️ Zona de cobertura</div>'+
       '<div class="mapwrap"><div class="mapbox">'+S.chMapa(u.ciudad)+'</div>'+
@@ -7313,6 +7532,14 @@ function resolverVistaPerfil(u,q){
     if(window.CariHubEventosSectorRender&&CariHubEventosSectorRender.resolveVistaPerfil){
       var evVista=CariHubEventosSectorRender.resolveVistaPerfil(u);
       if(evVista) vista=evVista;
+    }
+    if(window.CariHubGastronomiaSectorRender&&CariHubGastronomiaSectorRender.resolveVistaPerfil){
+      var gastVista=CariHubGastronomiaSectorRender.resolveVistaPerfil(u);
+      if(gastVista) vista=gastVista;
+    }
+    if(window.CariHubProfesionalesSectorRender&&CariHubProfesionalesSectorRender.resolveVistaPerfil){
+      var profVista=CariHubProfesionalesSectorRender.resolveVistaPerfil(u);
+      if(profVista) vista=profVista;
     }
   }
   if(!vista&&u&&window.CariHubResultadosDemo&&CariHubResultadosDemo.vistaDeCategoria){
@@ -7608,6 +7835,12 @@ function aplicarPerfilDesdeRegistro(vista,u){
   }
   if(window.CariHubEventosSectorRender&&CariHubEventosSectorRender.hydrateDisplayFields){
     clean=CariHubEventosSectorRender.hydrateDisplayFields(clean);
+  }
+  if(window.CariHubGastronomiaSectorRender&&CariHubGastronomiaSectorRender.hydrateDisplayFields){
+    clean=CariHubGastronomiaSectorRender.hydrateDisplayFields(clean);
+  }
+  if(window.CariHubProfesionalesSectorRender&&CariHubProfesionalesSectorRender.hydrateDisplayFields){
+    clean=CariHubProfesionalesSectorRender.hydrateDisplayFields(clean);
   }
   var catVis=resolveCategoriaVisibleFicha(clean);
   if(catVis){

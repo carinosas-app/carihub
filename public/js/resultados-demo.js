@@ -213,7 +213,9 @@
         { nombreComercial: 'Spa Sensual Monterrey', precio: '800', tagline: 'Masajes, jacuzzi y habitaciones privadas.', horario: 'Lun–Dom 10:00–22:00', categoriaPublica: 'Spa', verificada: true }
       ],
       'hotel motel': [
-        { nombreComercial: 'Hotel & Suites Valle', precio: '890', tagline: 'Habitaciones temáticas y total discreción.', horario: '24 horas', categoriaPublica: 'Hotel / Motel', verificada: true }
+        { nombreComercial: 'Hotel & Suites Valle', precio: '890', tagline: 'Habitaciones temáticas y total discreción.', horario: '24 horas', categoriaPublica: 'Hotel / Motel', verificada: true, colaboracionContenido: 'Sí', mostrarColaboracionContenidoPublico: 'Sí' },
+        { nombreComercial: 'Motel Luna Rosa', precio: '650', tagline: 'Entrada discreta, jacuzzi y estacionamiento privado.', horario: '24 horas', categoriaPublica: 'Hotel / Motel', verificada: true },
+        { nombreComercial: 'Suites Express MTY', precio: '720', tagline: 'Habitaciones por horas y noche, Wi‑Fi y room service.', horario: '24 horas', categoriaPublica: 'Hotel / Motel', verificada: true }
       ],
       default: [
         { nombreComercial: 'Negocio demo local', precio: 'Consultar', tagline: 'Anuncio de demostración para negocios.', horario: 'Horario público en perfil', verificada: true },
@@ -369,7 +371,25 @@
     return { componenteResultados: 'ResultCardAdultos', vistaPerfil: vistaDeCategoriaLegacy(valor), esAdultoPersona: true };
   }
 
+  /** Dato demo cross-sector: colaboración para contenido en redes.
+     Se aplica a todas las subcategorías (dato universal) para que el badge sea
+     visible en la vista previa. Determinístico: la mayoría «Sí», algunas «a convenir». */
+  function aplicarDemoColaboracion(u) {
+    if (!u || !u.__demo) return;
+    var actual = String(u.colaboracionContenido || '').trim();
+    if (actual) {
+      if (u.mostrarColaboracionContenidoPublico == null) u.mostrarColaboracionContenidoPublico = 'Sí';
+      return;
+    }
+    var s = String(u.__id || u.nombre || u.alias || u.nombreComercial || '');
+    var h = 0;
+    for (var i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
+    u.colaboracionContenido = (h % 4 === 0) ? 'Bajo acuerdo previo' : 'Sí';
+    u.mostrarColaboracionContenidoPublico = 'Sí';
+  }
+
   function enriquecerPerfil(u, Q) {
+    aplicarDemoColaboracion(u);
     if (global.CariHubFieldEngineLite && CariHubFieldEngineLite.enriquecerPerfilPublico) {
       u = CariHubFieldEngineLite.enriquecerPerfilPublico(u, {
         categoria: (Q && Q.categoria) || u.categoria || u.categoriaPublica,
@@ -433,6 +453,51 @@
     return PERFILES_CANON.concat([PERFIL_CANON_CUARTO, PERFIL_CANON_QUINTO]).map(function (p) {
       return clonarPerfil(p, Q);
     });
+  }
+
+  /**
+   * Vista previa "con resultados" respetando la categoría buscada.
+   * Solo las categorías de persona adulta usan el pool canónico adulto;
+   * el resto usa el generador sectorial (gastronomía, salud, hogar, etc.)
+   * para evitar contaminación de datos entre subcategorías.
+   */
+  /** Sector real de la búsqueda (usa el resolvedor oficial de resultados). */
+  function sectorDeBusqueda(Q) {
+    if (global.CariHubResultadosSector && CariHubResultadosSector.sectorDeCategoria) {
+      try { return CariHubResultadosSector.sectorDeCategoria((Q && Q.categoria) || ''); }
+      catch (e) { /* fallback abajo */ }
+    }
+    return '';
+  }
+
+  /**
+   * ¿La búsqueda corresponde a una persona adulta (escort, trans, femboy…)?
+   * Anti-contaminación: el pool canónico escort SOLO aplica a ResultCardAdultos.
+   * Negocios del sector adultos (hotel/motel, spa, antro…) usan su demo de negocio.
+   */
+  function esBusquedaAdulta(Q, pres) {
+    pres = pres || presentacionDeCategoria((Q && Q.categoria) || '');
+    if (pres && pres.esAdultoPersona === true) return true;
+    if (pres && pres.componenteResultados === 'ResultCardAdultos') return true;
+    var cat = (Q && Q.categoria) ? String(Q.categoria).trim() : '';
+    if (!cat) return false;
+    var canonId = idCategoria(cat);
+    if (canonId) {
+      var presCanon = presentacionDeCategoria(canonId);
+      if (presCanon && (presCanon.esAdultoPersona || presCanon.componenteResultados === 'ResultCardAdultos')) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  function perfilesPreviewPorCategoria(Q, incluirQuinto) {
+    Q = Q || {};
+    var pres = presentacionDeCategoria(Q.categoria);
+    if (!esBusquedaAdulta(Q, pres)) {
+      return plantillaDemoSchema(Q, pres);
+    }
+    return incluirQuinto ? perfilesCanonicosCinco(Q) : perfilesCanonicosCuatro(Q);
   }
 
   function armarPerfil(base, idx, Q, catLabel, catId, vistaDef) {
@@ -582,6 +647,162 @@
     var subId = pres.subcategoriaId || idCategoria(Q.categoria);
     return poolDemoBienestar(subId).map(function (base, idx) {
       return armarPerfilBienestar(base, idx, Q, pres);
+    });
+  }
+
+  var GASTRONOMIA_PACK_POR_SUB = {
+    'restaurantes-tradicional': 'LOCAL_DINE', marisquerias: 'LOCAL_DINE', 'cocina-economica': 'LOCAL_DINE',
+    taquerias: 'FAST_CASUAL', 'comida-rapida': 'FAST_CASUAL', loncherias: 'FAST_CASUAL',
+    panaderias: 'BAKERY_DESSERT', pastelerias: 'BAKERY_DESSERT', neverias: 'BAKERY_DESSERT',
+    cafeterias: 'CAFE', 'jugos-y-licuados': 'CAFE', 'cafe-de-especialidad': 'CAFE',
+    'food-trucks-gastronomia': 'MOBILE', 'comida-a-domicilio': 'DELIVERY', 'dark-kitchen': 'DELIVERY',
+    bares: 'BAR_BEBIDAS', cervecerias: 'BAR_BEBIDAS', 'cantinas-vinotecas': 'BAR_BEBIDAS',
+    'buffet-comedor': 'BUFFET', 'chef-cocinero-domicilio': 'PRO_SERVICE', 'bartender-servicio': 'PRO_SERVICE',
+    'distribuidoras-alimentos-bebidas': 'B2B_DIST'
+  };
+
+  var DEMO_GASTRONOMIA_BY_PACK = {
+    LOCAL_DINE: [
+      { nombreComercial: 'La Cocina de Monterrey', precio: '180', tagline: 'Cocina regional norteña, terraza y reservaciones.', horario: 'Mar–Dom 13:00–23:00', tipoCocinaPrincipal: ['mexicana', 'regional'], capacidadComensales: 80, servicioMesa: true, aceptaReservaciones: true, terrazaPatio: true, menuDelDia: true, precioPromedioMx: 180, especialidadCasa: 'Cabrito al pastor', ventaAlcohol: true, permisoManipulacionAlimentos: true, verificada: true },
+      { nombreComercial: 'El Asador del Norte', precio: '250', tagline: 'Cortes premium y parrilla al carbón.', horario: 'Lun–Dom 12:00–00:00', tipoCocinaPrincipal: ['mexicana'], capacidadComensales: 120, servicioMesa: true, aceptaReservaciones: true, precioPromedioMx: 250, chefVisible: true, maridajeVinos: true, verificada: true },
+      { nombreComercial: 'Mariscos del Golfo', precio: '220', tagline: 'Pescado del día y barra de ostiones.', horario: 'Mié–Dom 11:00–22:00', tipoCocinaPrincipal: ['mexicana'], especialidadMar: 'Camarón y pulpo', capacidadComensales: 60, barraOstiones: true, pescadoDelDia: true, precioPromedioMx: 220, verificada: true }
+    ],
+    FAST_CASUAL: [
+      { nombreComercial: 'Tacos Don Memo', precio: '85', tagline: 'Tacos de guisado, bistec y pastor al carbón.', horario: 'Lun–Sáb 8:00–23:00', tipoCocinaPrincipal: ['mexicana'], servicioMostrador: true, paraLlevar: true, precioPromedioMx: 85, especialidadCasa: 'Pastor', verificada: true },
+      { nombreComercial: 'Burger & Fries MTY', precio: '120', tagline: 'Hamburguesas artesanales y papas cargadas.', horario: 'Lun–Dom 11:00–23:00', tipoCocinaPrincipal: ['internacional'], servicioMostrador: true, driveThru: true, precioPromedioMx: 120, verificada: true }
+    ],
+    BAKERY_DESSERT: [
+      { nombreComercial: 'Panadería La Espiga', precio: '45', tagline: 'Pan dulce, bolillos y repostería diaria.', horario: 'Lun–Dom 6:00–21:00', productosEstrella: ['Conchas', 'Bolillos', 'Orejas'], horneadoDiario: true, precioPromedioMx: 45, verificada: true },
+      { nombreComercial: 'Nevería La Frida', precio: '55', tagline: 'Nieves artesanales y paletas de temporada.', horario: 'Lun–Dom 11:00–22:00', saboresTemporada: true, opcionesSinAzucar: true, precioPromedioMx: 55, verificada: true }
+    ],
+    CAFE: [
+      { nombreComercial: 'Café de Barrio', precio: '65', tagline: 'Espresso, filtrado y repostería de autor.', horario: 'Lun–Sáb 7:00–20:00', tipoCafe: ['Espresso', 'Filtrado'], wifiClientes: true, terrazaPatio: true, precioPromedioMx: 65, verificada: true }
+    ],
+    MOBILE: [
+      { nombreComercial: 'Food Truck Norteño', precio: '95', tagline: 'Tacos y hamburguesas en puntos fijos rotativos.', horario: 'Mar–Sáb 18:00–00:00', tipoUnidadFood: 'food_truck', puntosFijosRotacion: 'San Pedro · Centro · Cumbres', precioPromedioMx: 95, verificada: true }
+    ],
+    DELIVERY: [
+      { nombreComercial: 'Cocina Express Delivery', precio: '110', tagline: 'Comida casera empacada y entrega en 45 min.', horario: 'Lun–Dom 11:00–22:00', radioEntregaKm: 8, tiempoEntregaOrientativo: '35–50 min', precioPromedioMx: 110, verificada: true },
+      { alias: 'Chef a tu casa', precio: '1,800', tagline: 'Menú de 3 tiempos preparado en tu cocina.', horario: 'Con reservación', cotizacionDesde: '1800', unidadCotizacion: 'evento', experienciaChef: '8 años', tipoServicioChef: 'Cena privada', verificada: true }
+    ],
+    BAR_BEBIDAS: [
+      { nombreComercial: 'Bar La Catarina', precio: '150', tagline: 'Coctelería de autor y botanas gourmet.', horario: 'Jue–Dom 19:00–02:00', ventaAlcohol: true, cartaCocteles: true, musicaEnVivo: true, precioPromedioMx: 150, permisoManipulacionAlimentos: true, verificada: true }
+    ],
+    BUFFET: [
+      { nombreComercial: 'Buffet del Valle', precio: '99', tagline: 'Comida corrida y buffet por kilo.', horario: 'Lun–Vie 7:00–16:00', modalidadBuffet: 'por_kilo', incluyeBebida: true, precioPromedioMx: 99, verificada: true }
+    ],
+    PRO_SERVICE: [
+      { alias: 'Chef Roberto Vega', precio: '2,200', tagline: 'Experiencias gastronómicas privadas y cenas de autor.', horario: 'Con cita', cotizacionDesde: '2200', unidadCotizacion: 'evento', experienciaChef: '12 años', tipoServicioChef: 'Cena degustación', verificada: true },
+      { alias: 'Barra Móvil MX', precio: '1,500', tagline: 'Bartender y barra para eventos sociales.', horario: 'Fines de semana', cotizacionDesde: '1500', unidadCotizacion: 'evento', tipoServicioBartender: 'Barra móvil', verificada: true }
+    ],
+    B2B_DIST: [
+      { nombreComercial: 'Distribuidora Alimentos del Norte', precio: 'Consultar', tagline: 'Mayoreo de abarrotes, lácteos y bebidas.', horario: 'Lun–Sáb 6:00–18:00', tipoClienteB2b: ['Restaurantes', 'Hoteles'], coberturaEntregaB2b: 'Nuevo León y Coahuila', verificada: true }
+    ]
+  };
+
+  var DEMO_GASTRONOMIA = {
+    'restaurantes-tradicional': DEMO_GASTRONOMIA_BY_PACK.LOCAL_DINE,
+    taquerias: DEMO_GASTRONOMIA_BY_PACK.FAST_CASUAL,
+    bares: DEMO_GASTRONOMIA_BY_PACK.BAR_BEBIDAS,
+    'chef-cocinero-domicilio': DEMO_GASTRONOMIA_BY_PACK.PRO_SERVICE
+  };
+
+  function gastronomiaPackDeSub(subId) {
+    var key = String(subId || '').trim().toLowerCase().replace(/_/g, '-');
+    if (GASTRONOMIA_PACK_POR_SUB[key]) return GASTRONOMIA_PACK_POR_SUB[key];
+    if (global.CARIHUB_REGISTRO_GASTRONOMIA_SECTOR_BLOCKS && CARIHUB_REGISTRO_GASTRONOMIA_SECTOR_BLOCKS.resolvePack) {
+      return CARIHUB_REGISTRO_GASTRONOMIA_SECTOR_BLOCKS.resolvePack(key);
+    }
+    return 'LOCAL_DINE';
+  }
+
+  function buildGastronomiaPerfilDemo(base, subId, pack) {
+    pack = String(pack || 'LOCAL_DINE').toUpperCase();
+    var p = {
+      deltaPack: pack,
+      canonSubcategoriaId: subId,
+      tagline: base.tagline || '',
+      horarioAtencionComercial: base.horario || base.horarioAtencionComercial || '',
+      precioPromedioMx: base.precioPromedioMx || (base.precio && !isNaN(String(base.precio).replace(/,/g, '')) ? String(base.precio).replace(/,/g, '') : ''),
+      cotizacionDesde: base.cotizacionDesde || base.precio || '',
+      unidadCotizacion: base.unidadCotizacion || ''
+    };
+    var keys = [
+      'nombreComercial', 'alias', 'tipoCocinaPrincipal', 'capacidadComensales', 'servicioMesa',
+      'aceptaReservaciones', 'terrazaPatio', 'menuDelDia', 'especialidadCasa', 'chefVisible',
+      'maridajeVinos', 'ventaAlcohol', 'permisoManipulacionAlimentos', 'especialidadMar',
+      'barraOstiones', 'pescadoDelDia', 'servicioMostrador', 'paraLlevar', 'driveThru',
+      'productosEstrella', 'horneadoDiario', 'saboresTemporada', 'opcionesSinAzucar',
+      'tipoCafe', 'wifiClientes', 'tipoUnidadFood', 'puntosFijosRotacion', 'radioEntregaKm',
+      'tiempoEntregaOrientativo', 'cartaCocteles', 'musicaEnVivo', 'modalidadBuffet',
+      'incluyeBebida', 'experienciaChef', 'tipoServicioChef', 'tipoServicioBartender',
+      'tipoClienteB2b', 'coberturaEntregaB2b', 'opcionesDieteticas', 'diferenciadorProfesional'
+    ];
+    keys.forEach(function (k) {
+      if (base[k] != null && base[k] !== '') p[k] = base[k];
+    });
+    return p;
+  }
+
+  function armarPerfilGastronomia(base, idx, Q, pres) {
+    var subId = pres.subcategoriaId || idCategoria(Q.categoria);
+    var catLabel = base.categoriaPublica || labelCategoria(Q.categoria);
+    var pack = base.deltaPack || gastronomiaPackDeSub(subId);
+    var personaSubs = ['comida-a-domicilio', 'chef-cocinero-domicilio', 'bartender-servicio'];
+    var esNegocio = personaSubs.indexOf(subId) < 0;
+    var nombre = base.nombreComercial || base.alias || base.nombre || 'Local demo';
+    var gastronomia = buildGastronomiaPerfilDemo(base, subId, pack);
+    var id = 'demo-gastronomia-' + subId + '-' + slug(nombre) + '-' + idx;
+    var tarifa = base.precio || gastronomia.precioPromedioMx || gastronomia.cotizacionDesde || 'Consultar';
+
+    var u = {
+      __id: id,
+      __demo: true,
+      __vista: esNegocio ? 'empresa' : 'pro',
+      sectorId: 'restaurantes',
+      subcategoriaId: subId,
+      arquetipo: esNegocio ? 'negocio_alimentos' : 'persona_servicio_profesional',
+      tipoPerfil: esNegocio ? 'negocio' : 'persona',
+      categoria: catLabel,
+      categoriaPublica: catLabel,
+      nombre: nombre,
+      nombreComercial: esNegocio ? nombre : '',
+      alias: esNegocio ? '' : nombre,
+      precio: tarifa,
+      tagline: base.tagline || '',
+      horario: base.horario || gastronomia.horarioAtencionComercial || 'Consultar',
+      pais: Q.pais,
+      estado: Q.estado || 'Nuevo León',
+      ciudad: Q.ciudad || 'Monterrey',
+      zona: zonaNombre(idx),
+      verificada: base.verificada !== false,
+      verificado: base.verificada !== false,
+      respuestaRapida: base.respuestaRapida !== false,
+      fotoURL: foto(idx),
+      fotosExtraURL: ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'],
+      deltaPack: pack,
+      gastronomiaPerfil: gastronomia
+    };
+
+    if (base.colaboracionContenido) u.colaboracionContenido = base.colaboracionContenido;
+    if (base.mostrarColaboracionContenidoPublico) {
+      u.mostrarColaboracionContenidoPublico = base.mostrarColaboracionContenidoPublico;
+    }
+
+    return enriquecerPerfil(u, Q);
+  }
+
+  function poolDemoGastronomia(subId) {
+    if (DEMO_GASTRONOMIA[subId]) return DEMO_GASTRONOMIA[subId];
+    var pack = gastronomiaPackDeSub(subId);
+    return DEMO_GASTRONOMIA_BY_PACK[pack] || DEMO_GASTRONOMIA_BY_PACK.LOCAL_DINE;
+  }
+
+  function plantillaDemoGastronomia(Q, pres) {
+    pres = pres || presentacionDeCategoria(Q.categoria);
+    var subId = pres.subcategoriaId || idCategoria(Q.categoria);
+    return poolDemoGastronomia(subId).map(function (base, idx) {
+      return armarPerfilGastronomia(base, idx, Q, pres);
     });
   }
 
@@ -767,8 +988,1582 @@
     });
   }
 
+  var MASCOTAS_PACK_POR_SUB = {
+    'paseador-de-perros': 'A', 'cuidador-de-mascotas': 'A', 'guarderia-para-mascotas': 'A', 'hotel-para-mascotas': 'A',
+    'entrenador-canino': 'B', adiestrador: 'B', 'centro-de-entrenamiento-canino': 'B',
+    groomer: 'C', 'estetica-canina': 'C', 'fotografo-de-mascotas': 'C',
+    'medico-veterinario': 'D', 'veterinario-especialista': 'D', 'cirujano-veterinario': 'D',
+    'clinica-veterinaria': 'D', 'hospital-veterinario': 'D', 'farmacia-veterinaria': 'D',
+    'tienda-de-mascotas': 'E', 'criadero-autorizado': 'E', 'rescatista-independiente': 'E',
+    'servicio-funerario-para-mascotas': 'E'
+  };
+
+  var MASCOTAS_CEDULA_SUBS = [
+    'medico-veterinario', 'veterinario-especialista', 'cirujano-veterinario', 'farmacia-veterinaria'
+  ];
+
+  var MASCOTAS_NEGOCIO_SUBS = [
+    'clinica-veterinaria', 'hospital-veterinario', 'estetica-canina', 'centro-de-entrenamiento-canino'
+  ];
+
+  var DEMO_MASCOTAS_BY_PACK = {
+    A: [
+      { alias: 'Paseos Caninos MTY', precio: '150', tagline: 'Paseos diarios, socialización y reporte con fotos.', serviciosMascotas: ['Paseo', 'Cuidado básico', 'Socialización'], especiesAtendidas: ['perros'], tamanoMascotasAtendidas: ['pequeno', 'mediano', 'grande'], modalidadServicioMascotas: 'domicilio', tarifaDesde: '150', tiempoRespuestaMascotas: 'mismo_dia', coberturaGeografica: 'Monterrey centro y sur', horario: 'Lun–Sáb 6:00–20:00', verificada: true },
+      { alias: 'Cuidado Hogar Pet', precio: '280', tagline: 'Cuidado en casa, alimentación y medicación básica.', serviciosMascotas: ['Cuidado en casa', 'Alimentación', 'Medicación'], especiesAtendidas: ['perros', 'gatos'], modalidadServicioMascotas: 'domicilio', tarifaDesde: '280', tiempoRespuestaMascotas: '24_48h', horario: 'Lun–Dom', verificada: true }
+    ],
+    B: [
+      { alias: 'Adiestramiento Alfa', precio: '450', tagline: 'Obediencia básica, corrección y socialización.', serviciosMascotas: ['Obediencia básica', 'Corrección conductual'], especiesAtendidas: ['perros'], modalidadServicioMascotas: 'ambos', tarifaDesde: '450', diferenciadorMascotas: 'Método positivo certificado', horario: 'Lun–Sáb', verificada: true },
+      { alias: 'Coach Canino Pro', precio: '380', tagline: 'Entrenamiento a domicilio y en parque.', serviciosMascotas: ['Entrenamiento', 'Paseo educativo'], especiesAtendidas: ['perros'], modalidadServicioMascotas: 'domicilio', tarifaDesde: '380', horario: 'Con cita', verificada: true }
+    ],
+    C: [
+      { alias: 'Groom & Style Pets', precio: '320', tagline: 'Baño, corte y spa para perros y gatos.', serviciosMascotas: ['Baño', 'Corte', 'Spa'], especiesAtendidas: ['perros', 'gatos'], modalidadServicioMascotas: 'instalaciones', tarifaDesde: '320', horario: 'Mar–Sáb 9:00–19:00', verificada: true },
+      { alias: 'Foto Mascotas Studio', precio: '1,200', tagline: 'Sesiones fotográficas en estudio y exteriores.', serviciosMascotas: ['Sesión fotográfica', 'Retoque'], especiesAtendidas: ['perros', 'gatos', 'otros'], modalidadServicioMascotas: 'ambos', tarifaDesde: '1200', horario: 'Con cita', verificada: true }
+    ],
+    D: [
+      { nombreProfesional: 'Dra. Vet. Laura Soto', precio: '550', tagline: 'Medicina general, vacunas y consultas preventivas.', especialidadVeterinaria: 'Medicina general', serviciosVeterinarios: ['Consulta', 'Vacunación', 'Desparasitación'], especiesAtendidas: ['perros', 'gatos'], modalidadServicioMascotas: 'consultorio', precioConsulta: '550', emergenciasMascotas: 'si_horario', cedulaVerificada: true, horario: 'Lun–Vie 9:00–19:00', verificada: true },
+      { nombreComercial: 'Clínica Veterinaria del Valle', precio: 'Consultar', tagline: 'Hospitalización, cirugía y laboratorio en sitio.', serviciosEmpresaMascotas: ['Consulta', 'Cirugía', 'Hospitalización', 'Laboratorio'], especialidadesEmpresaMascotas: 'Medicina interna · Cirugía', capacidadInstalacion: '12 camas', emergenciasMascotas: 'si_24h', modalidadServicioMascotas: 'clinica', tarifaDesde: 'Consultar', horario: '24 horas', verificada: true }
+    ],
+    E: [
+      { nombreComercial: 'Mundo Mascota Shop', precio: 'Consultar', tagline: 'Alimento premium, accesorios y asesoría nutricional.', serviciosEmpresaMascotas: ['Venta', 'Asesoría'], especiesAtendidas: ['perros', 'gatos', 'aves'], modalidadServicioMascotas: 'instalaciones', tarifaDesde: 'Consultar', horario: 'Lun–Dom 10:00–20:00', verificada: true },
+      { alias: 'Rescate Animal NL', precio: 'Donación', tagline: 'Rescate, rehabilitación y adopción responsable.', serviciosMascotas: ['Rescate', 'Rehabilitación', 'Adopción'], especiesAtendidas: ['perros', 'gatos'], modalidadServicioMascotas: 'instalaciones', tarifaDesde: 'Donación', colaboracionesComerciales: 'si_activo', horario: 'Lun–Sáb', verificada: true }
+    ]
+  };
+
+  var DEMO_MASCOTAS = {
+    'paseador-de-perros': DEMO_MASCOTAS_BY_PACK.A,
+    'entrenador-canino': DEMO_MASCOTAS_BY_PACK.B,
+    groomer: DEMO_MASCOTAS_BY_PACK.C,
+    'medico-veterinario': [DEMO_MASCOTAS_BY_PACK.D[0]],
+    'clinica-veterinaria': [DEMO_MASCOTAS_BY_PACK.D[1]],
+    'tienda-de-mascotas': DEMO_MASCOTAS_BY_PACK.E
+  };
+
+  function mascotasPackDeSub(subId) {
+    var key = String(subId || '').trim().toLowerCase().replace(/_/g, '-');
+    if (MASCOTAS_PACK_POR_SUB[key]) return MASCOTAS_PACK_POR_SUB[key];
+    if (global.CARIHUB_REGISTRO_MASCOTAS_SECTOR_BLOCKS && CARIHUB_REGISTRO_MASCOTAS_SECTOR_BLOCKS.resolvePack) {
+      return CARIHUB_REGISTRO_MASCOTAS_SECTOR_BLOCKS.resolvePack(key);
+    }
+    return 'A';
+  }
+
+  function buildMascotasPerfilDemo(base, subId, pack) {
+    pack = String(pack || 'A').toUpperCase();
+    var p = {
+      deltaPack: pack,
+      canonSubcategoriaId: subId,
+      tagline: base.tagline || '',
+      modalidadServicioMascotas: base.modalidadServicioMascotas || '',
+      tarifaDesde: base.precio || base.tarifaDesde || 'Consultar',
+      precioConsulta: base.precio || base.precioConsulta || 'Consultar',
+      tiempoRespuestaMascotas: base.tiempoRespuestaMascotas || '',
+      coberturaGeografica: base.coberturaGeografica || base.zonaCobertura || '',
+      colaboracionesComerciales: base.colaboracionesComerciales || ''
+    };
+    var keys = [
+      'nombreProfesional', 'alias', 'nombreComercial', 'serviciosMascotas', 'especiesAtendidas',
+      'tamanoMascotasAtendidas', 'especialidadVeterinaria', 'serviciosVeterinarios',
+      'especialidadesVeterinarias', 'emergenciasMascotas', 'serviciosEmpresaMascotas',
+      'especialidadesEmpresaMascotas', 'capacidadInstalacion', 'diferenciadorMascotas',
+      'tiposColaboracionComercial'
+    ];
+    keys.forEach(function (k) {
+      if (base[k] != null && base[k] !== '') p[k] = base[k];
+    });
+    return p;
+  }
+
+  function armarPerfilMascotas(base, idx, Q, pres) {
+    var subId = pres.subcategoriaId || idCategoria(Q.categoria);
+    var catLabel = base.categoriaPublica || labelCategoria(Q.categoria);
+    var pack = base.deltaPack || mascotasPackDeSub(subId);
+    var perfil = buildMascotasPerfilDemo(base, subId, pack);
+    var esCedula = MASCOTAS_CEDULA_SUBS.indexOf(subId) >= 0;
+    var esNegocio = MASCOTAS_NEGOCIO_SUBS.indexOf(subId) >= 0;
+    var nombre = perfil.nombreProfesional || perfil.nombreComercial || perfil.alias || 'Proveedor demo';
+    var id = 'demo-mascotas-' + subId + '-' + slug(nombre) + '-' + idx;
+    var precio = base.precio || perfil.precioConsulta || perfil.tarifaDesde || 'Consultar';
+
+    var u = {
+      __id: id,
+      __demo: true,
+      sectorId: 'mascotas',
+      subcategoriaId: subId,
+      categoria: catLabel,
+      categoriaPublica: catLabel,
+      precio: precio,
+      tagline: base.tagline || '',
+      horario: base.horario || 'Consultar',
+      pais: Q.pais,
+      estado: Q.estado || 'Nuevo León',
+      ciudad: Q.ciudad || 'Monterrey',
+      zona: zonaNombre(idx),
+      verificada: base.verificada !== false,
+      verificado: base.verificada !== false,
+      cedulaVerificada: base.cedulaVerificada === true || esCedula,
+      respuestaRapida: base.respuestaRapida !== false,
+      fotoURL: foto(idx),
+      fotosExtraURL: ['a', 'b', 'c', 'd', 'e', 'f'],
+      deltaPack: pack,
+      mascotasPerfil: perfil
+    };
+
+    if (esNegocio) {
+      u.tipoPerfil = 'negocio';
+      u.tipoCuenta = 'negocio';
+      u.nombreComercial = perfil.nombreComercial || nombre;
+      u.nombre = u.nombreComercial;
+    } else if (esCedula) {
+      u.nombreProfesional = perfil.nombreProfesional || nombre;
+      u.nombre = u.nombreProfesional;
+      u.alias = u.nombre;
+      u.especialidad = perfil.especialidadVeterinaria || base.especialidad || '';
+    } else {
+      u.alias = perfil.alias || nombre;
+      u.nombre = u.alias;
+      u.especialidad = (perfil.serviciosMascotas && perfil.serviciosMascotas[0]) || base.especialidad || '';
+    }
+
+    return enriquecerPerfil(u, Q);
+  }
+
+  function poolDemoMascotas(subId) {
+    if (DEMO_MASCOTAS[subId]) return DEMO_MASCOTAS[subId];
+    var pack = mascotasPackDeSub(subId);
+    return DEMO_MASCOTAS_BY_PACK[pack] || DEMO_MASCOTAS_BY_PACK.A;
+  }
+
+  function plantillaDemoMascotas(Q, pres) {
+    pres = pres || presentacionDeCategoria(Q.categoria);
+    var subId = pres.subcategoriaId || idCategoria(Q.categoria);
+    return poolDemoMascotas(subId).map(function (base, idx) {
+      return armarPerfilMascotas(base, idx, Q, pres);
+    });
+  }
+
+  var HOGAR_PACK_POR_SUB = {
+    plomeros: 'A', albaniles: 'A', impermeabilizadores: 'A',
+    electricistas: 'B', 'tecnicos-en-clima-hvac': 'B', 'instaladores-de-paneles-solares': 'B',
+    'tecnicos-en-camaras-de-seguridad': 'B', 'domotica-casa-inteligente': 'B',
+    carpinteros: 'C', herreros: 'C', 'instaladores-de-pisos': 'C', cerrajeros: 'C',
+    pintores: 'D', jardineria: 'D', fumigacion: 'D', 'limpieza-del-hogar': 'D', 'mantenimiento-general': 'D'
+  };
+
+  var DEMO_HOGAR_BY_PACK = {
+    A: [
+      { alias: 'Plomería Express MTY', precio: '300', tagline: 'Plomería residencial y comercial con garantía.', serviciosHogar: ['Fugas', 'Instalaciones', 'Destapes'], modalidadServicioHogar: 'domicilio', tiposInmueble: ['casa', 'departamento'], tarifaDesde: '300', tiempoRespuestaHogar: 'mismo_dia', garantiaServicioHogar: '30 días en mano de obra', coberturaGeografica: 'Monterrey y área metropolitana', horario: 'Lun–Dom 7:00–22:00', verificada: true },
+      { alias: 'Albañilería del Norte', precio: '450', tagline: 'Remodelaciones, muros y acabados en obra.', serviciosHogar: ['Muros', 'Remodelación', 'Aplanados'], modalidadServicioHogar: 'domicilio', tarifaDesde: '450', anosExperienciaHogar: '8_15', horario: 'Lun–Sáb', verificada: true }
+    ],
+    B: [
+      { alias: 'Electricista Pro MTY', precio: '350', tagline: 'Instalaciones eléctricas y tableros residenciales.', serviciosHogar: ['Instalación', 'Reparación', 'Tableros'], especialidadesHogar: ['Residencial', 'Comercial'], modalidadServicioHogar: 'domicilio', tarifaDesde: '350', tiempoRespuestaHogar: '24_48h', horario: 'Lun–Sáb 8:00–20:00', verificada: true },
+      { alias: 'Clima & HVAC Norte', precio: '500', tagline: 'Minisplits, mantenimiento y carga de gas.', serviciosHogar: ['Instalación minisplit', 'Mantenimiento', 'Reparación'], especialidadesHogar: ['HVAC', 'Refrigeración'], modalidadServicioHogar: 'domicilio', tarifaDesde: '500', horario: 'Lun–Dom', verificada: true }
+    ],
+    C: [
+      { alias: 'Carpintería a Medida', precio: '800', tagline: 'Muebles, closets y carpintería fina.', serviciosHogar: ['Closets', 'Muebles', 'Puertas'], tiposTrabajoHogar: ['A medida', 'Reparación'], materialesIncluidos: 'convenir', modalidadServicioHogar: 'ambos', tarifaDesde: '800', horario: 'Con cita', verificada: true },
+      { alias: 'Herrería y Estructuras', precio: '600', tagline: 'Portones, barandales y estructuras metálicas.', serviciosHogar: ['Portones', 'Barandales', 'Estructuras'], tiposTrabajoHogar: ['Fabricación', 'Instalación'], modalidadServicioHogar: 'domicilio', tarifaDesde: '600', horario: 'Lun–Sáb', verificada: true }
+    ],
+    D: [
+      { alias: 'Pintura Profesional MTY', precio: '280', tagline: 'Interiores, exteriores y acabados decorativos.', serviciosHogar: ['Interiores', 'Exteriores', 'Texturizados'], modalidadServicioHogar: 'domicilio', tiposInmueble: ['casa', 'departamento', 'local'], tarifaDesde: '280', horario: 'Lun–Sáb 8:00–19:00', verificada: true },
+      { alias: 'Jardinería Verde', precio: '400', tagline: 'Diseño, poda y mantenimiento de jardines.', serviciosHogar: ['Diseño', 'Poda', 'Mantenimiento'], modalidadServicioHogar: 'domicilio', tarifaDesde: '400', coberturaGeografica: 'Monterrey sur y Carretera Nacional', horario: 'Mar–Dom', verificada: true }
+    ]
+  };
+
+  var DEMO_HOGAR = {
+    plomeros: DEMO_HOGAR_BY_PACK.A,
+    electricistas: DEMO_HOGAR_BY_PACK.B,
+    carpinteros: DEMO_HOGAR_BY_PACK.C,
+    pintores: DEMO_HOGAR_BY_PACK.D,
+    jardineria: [DEMO_HOGAR_BY_PACK.D[1]]
+  };
+
+  function hogarPackDeSub(subId) {
+    var key = String(subId || '').trim().toLowerCase().replace(/_/g, '-');
+    if (HOGAR_PACK_POR_SUB[key]) return HOGAR_PACK_POR_SUB[key];
+    if (global.CARIHUB_REGISTRO_HOGAR_SECTOR_BLOCKS && CARIHUB_REGISTRO_HOGAR_SECTOR_BLOCKS.resolvePack) {
+      return CARIHUB_REGISTRO_HOGAR_SECTOR_BLOCKS.resolvePack(key);
+    }
+    return 'A';
+  }
+
+  function buildHogarPerfilDemo(base, subId, pack) {
+    pack = String(pack || 'A').toUpperCase();
+    var p = {
+      deltaPack: pack,
+      canonSubcategoriaId: subId,
+      tagline: base.tagline || '',
+      modalidadServicioHogar: base.modalidadServicioHogar || '',
+      tarifaDesde: base.precio || base.tarifaDesde || 'Consultar',
+      tiempoRespuestaHogar: base.tiempoRespuestaHogar || '',
+      garantiaServicioHogar: base.garantiaServicioHogar || '',
+      coberturaGeografica: base.coberturaGeografica || base.zonaCobertura || '',
+      colaboracionesComerciales: base.colaboracionesComerciales || ''
+    };
+    var keys = [
+      'alias', 'serviciosHogar', 'especialidadesHogar', 'tiposTrabajoHogar', 'tiposInmueble',
+      'anosExperienciaHogar', 'materialesIncluidos', 'diferenciadorHogar', 'certificaciones',
+      'tiposColaboracionComercial', 'horarioDetalle'
+    ];
+    keys.forEach(function (k) {
+      if (base[k] != null && base[k] !== '') p[k] = base[k];
+    });
+    return p;
+  }
+
+  function armarPerfilHogar(base, idx, Q, pres) {
+    var subId = pres.subcategoriaId || idCategoria(Q.categoria);
+    var catLabel = base.categoriaPublica || labelCategoria(Q.categoria);
+    var pack = base.deltaPack || hogarPackDeSub(subId);
+    var perfil = buildHogarPerfilDemo(base, subId, pack);
+    var nombre = perfil.alias || base.alias || 'Proveedor demo';
+    var id = 'demo-hogar-' + subId + '-' + slug(nombre) + '-' + idx;
+    var precio = base.precio || perfil.tarifaDesde || 'Consultar';
+
+    var u = {
+      __id: id,
+      __demo: true,
+      sectorId: 'hogar',
+      subcategoriaId: subId,
+      categoria: catLabel,
+      categoriaPublica: catLabel,
+      precio: precio,
+      tagline: base.tagline || '',
+      horario: base.horario || perfil.horarioDetalle || 'Consultar',
+      pais: Q.pais,
+      estado: Q.estado || 'Nuevo León',
+      ciudad: Q.ciudad || 'Monterrey',
+      zona: zonaNombre(idx),
+      verificada: base.verificada !== false,
+      verificado: base.verificada !== false,
+      respuestaRapida: base.respuestaRapida !== false,
+      fotoURL: foto(idx),
+      fotosExtraURL: ['a', 'b', 'c', 'd', 'e', 'f'],
+      deltaPack: pack,
+      hogarPerfil: perfil,
+      alias: perfil.alias || nombre,
+      nombre: perfil.alias || nombre,
+      especialidad: (perfil.serviciosHogar && perfil.serviciosHogar[0]) || base.especialidad || ''
+    };
+
+    return enriquecerPerfil(u, Q);
+  }
+
+  function poolDemoHogar(subId) {
+    if (DEMO_HOGAR[subId]) return DEMO_HOGAR[subId];
+    var pack = hogarPackDeSub(subId);
+    return DEMO_HOGAR_BY_PACK[pack] || DEMO_HOGAR_BY_PACK.A;
+  }
+
+  function plantillaDemoHogar(Q, pres) {
+    pres = pres || presentacionDeCategoria(Q.categoria);
+    var subId = pres.subcategoriaId || idCategoria(Q.categoria);
+    return poolDemoHogar(subId).map(function (base, idx) {
+      return armarPerfilHogar(base, idx, Q, pres);
+    });
+  }
+
+  var SALUD_CEDULA_SUBS = [
+    'medicos-generales', 'especialistas-medicos', 'psicologos', 'ambulancias-y-traslado-medico',
+    'equipo-medico', 'examenes-medicos-para-empresas', 'servicios-medicos-empresariales',
+    'seguros-medicos', 'gastos-medicos-mayores'
+  ];
+
+  var SALUD_NEGOCIO_SUBS = [
+    'clinicas-medicas', 'centros-de-rehabilitacion', 'centros-de-salud-mental',
+    'clinicas-de-adicciones', 'clinicas-de-fertilidad', 'seguridad-e-higiene-industrial',
+    'hospitales-privados', 'casas-de-retiro', 'asilos-y-residencias-asistidas', 'servicios-funerarios'
+  ];
+
+  var DEMO_SALUD_BY_PACK = {
+    A: [
+      { nombreProfesional: 'Dra. Ana Lucía Méndez', precio: '800', tagline: 'Medicina general, check-ups y seguimiento.', especialidad: 'Medicina general', serviciosProfesionales: ['Consulta general', 'Control crónico', 'Certificados'], segurosAceptados: 'GNP · MetLife · Particular', consultaEnLinea: true, precioConsulta: '800', horarioAtencion: 'Lun–Vie 9:00–19:00', horario: 'Lun–Vie 9:00–19:00', cedulaVerificada: true, verificada: true },
+      { nombreProfesional: 'Dr. Roberto Sánchez', precio: '750', tagline: 'Atención integral, urgencias menores y recetas.', especialidad: 'Medicina familiar', serviciosProfesionales: ['Consulta', 'Urgencias menores', 'Recetas'], segurosAceptados: 'Particular', precioConsulta: '750', horarioAtencion: 'Lun–Sáb 8:00–20:00', horario: 'Lun–Sáb 8:00–20:00', cedulaVerificada: true, verificada: true }
+    ],
+    B: [
+      { alias: 'Dr. García · Dermatología', precio: '950', tagline: 'Dermatología clínica y estética ambulatoria.', especialidadServicio: 'Dermatología', modalidadConsulta: 'hibrido', segurosAceptadosSalud: ['GNP', 'Particular'], tarifaDesde: '950', certificaciones: 'Especialidad en dermatología', horario: 'Mar–Sáb 10:00–19:00', verificada: true },
+      { alias: 'Nutrióloga Claudia Ruiz', precio: '600', tagline: 'Nutrición clínica y planes personalizados.', especialidadServicio: 'Nutrición clínica', modalidadConsulta: 'videollamada', tarifaDesde: '600', certificaciones: 'Lic. en Nutrición', horario: 'Lun–Vie 9:00–18:00', verificada: true }
+    ],
+    C: [
+      { alias: 'Enfermería a Domicilio MTY', precio: '500', tagline: 'Curaciones, medicación y cuidados en casa.', serviciosCuidado: ['Curaciones', 'Medicación', 'Signos vitales'], atencionDomicilioSalud: 'Sí', coberturaDomicilioZona: 'Monterrey y área metropolitana', tarifaDesde: '500', certificaciones: 'Enfermería general titulada', horario: '24 horas con cita', verificada: true },
+      { alias: 'Cuidado Adulto Mayor Norte', precio: '450', tagline: 'Acompañamiento y cuidados geriátricos.', serviciosCuidado: ['Acompañamiento', 'Higiene', 'Medicación'], atencionDomicilioSalud: 'Sí', tarifaDesde: '450', horario: 'Lun–Dom', verificada: true }
+    ],
+    D: [
+      { alias: 'Laboratorio Clínico Norte', precio: 'Consultar', tagline: 'Análisis clínicos con resultados en 24 h.', estudiosOfrecidos: ['Biometría', 'Química sanguínea', 'Perfil tiroideo'], tiempoEntregaResultados: '24–48 h', tomaMuestrasDomicilio: true, horario: 'Lun–Sáb 7:00–14:00', verificada: true },
+      { alias: 'Imagen Diagnóstica MTY', precio: 'Consultar', tagline: 'Ultrasonido, rayos X y estudios de imagen.', estudiosOfrecidos: ['Ultrasonido', 'Rayos X', 'Mastografía'], tiempoEntregaResultados: 'Mismo día', horario: 'Lun–Vie 8:00–20:00', verificada: true }
+    ],
+    E: [
+      { alias: 'Farmacia del Centro', precio: 'Consultar', tagline: 'Medicamentos de patente y genéricos.', categoriasFarmacia: ['Patente', 'Genéricos', 'Dermatológicos'], surtidoFarmaceutico: 'Amplio surtido', ventaConReceta: 'Sí', horario: 'Lun–Dom 8:00–22:00', verificada: true },
+      { alias: 'Farmacia Especializada Onco', precio: 'Consultar', tagline: 'Medicamentos de alta especialidad con receta.', categoriasFarmacia: ['Oncológicos', 'Controlados'], surtidoFarmaceutico: 'Alta especialidad', ventaConReceta: 'Sí', horario: 'Lun–Sáb 9:00–19:00', verificada: true }
+    ],
+    F: [
+      { nombreComercial: 'Clínica Integral Sur', precio: 'Consultar', tagline: 'Consulta externa, urgencias y estudios básicos.', serviciosClinica: ['Consulta externa', 'Urgencias', 'Laboratorio'], especialidadesClinica: 'Medicina general · Pediatría', urgencias24h: true, direccion: 'Col. Del Valle, Monterrey', horario: '24 horas', verificada: true },
+      { nombreComercial: 'Centro de Rehabilitación Activa', precio: 'Consultar', tagline: 'Fisioterapia, terapia ocupacional y rehabilitación.', serviciosClinica: ['Fisioterapia', 'Terapia ocupacional'], especialidadesClinica: 'Rehabilitación física', direccion: 'San Pedro, N.L.', horario: 'Lun–Sáb 8:00–20:00', verificada: true }
+    ],
+    G: [
+      { nombreComercial: 'Hospital Privado Las Palmas', precio: 'Consultar', tagline: 'Hospitalización, urgencias y cirugía.', serviciosHospital: ['Urgencias', 'Hospitalización', 'Cirugía'], nivelesAtencion: ['Segundo nivel', 'Tercer nivel'], urgencias24h: true, direccion: 'Monterrey, N.L.', horario: '24 horas', verificada: true },
+      { nombreComercial: 'Residencia Geriátrica Serenity', precio: 'Consultar', tagline: 'Residencia asistida para adultos mayores.', serviciosResidencia: ['Hospedaje', 'Cuidados', 'Terapia'], capacidadResidentes: '40', direccion: 'Carretera Nacional', horario: '24 horas', verificada: true }
+    ],
+    H: [
+      { alias: 'Salud Ocupacional MX', precio: 'Consultar', tagline: 'Exámenes médicos y programas para empresas.', serviciosCorporativos: ['Examen médico ingreso', 'Periódico', 'NOM-035'], coberturaEmpresas: 'Nuevo León y Coahuila', certificaciones: 'STPS · medicina del trabajo', tarifaDesde: 'Consultar', horario: 'Lun–Vie 8:00–18:00', verificada: true },
+      { alias: 'Medicina del Trabajo Norte', precio: 'Consultar', tagline: 'Programas de salud ocupacional y ergonomía.', serviciosCorporativos: ['Ergonomía', 'Capacitación', 'Auditorías'], coberturaEmpresas: 'Monterrey y área metropolitana', tarifaDesde: 'Consultar', horario: 'Lun–Vie', verificada: true }
+    ]
+  };
+
+  var DEMO_SALUD = {
+    'medicos-generales': DEMO_SALUD_BY_PACK.A,
+    dermatologia: DEMO_SALUD_BY_PACK.B,
+    'enfermeria-a-domicilio': DEMO_SALUD_BY_PACK.C,
+    'laboratorios-clinicos': DEMO_SALUD_BY_PACK.D,
+    farmacias: DEMO_SALUD_BY_PACK.E,
+    'clinicas-medicas': DEMO_SALUD_BY_PACK.F,
+    'hospitales-privados': DEMO_SALUD_BY_PACK.G,
+    'salud-ocupacional': DEMO_SALUD_BY_PACK.H
+  };
+
+  function saludPackDeSub(subId) {
+    var key = String(subId || '').trim().toLowerCase().replace(/_/g, '-');
+    if (global.CARIHUB_REGISTRO_SALUD_SECTOR_BLOCKS && CARIHUB_REGISTRO_SALUD_SECTOR_BLOCKS.resolvePack) {
+      return CARIHUB_REGISTRO_SALUD_SECTOR_BLOCKS.resolvePack(key);
+    }
+    return 'B';
+  }
+
+  function buildSaludPerfilDemo(base, subId, pack) {
+    pack = String(pack || 'A').toUpperCase();
+    var p = {
+      deltaPack: pack,
+      canonSubcategoriaId: subId,
+      tagline: base.tagline || '',
+      tarifaDesde: base.precio || base.tarifaDesde || 'Consultar',
+      precioConsulta: base.precio || base.precioConsulta || 'Consultar',
+      horarioAtencion: base.horarioAtencion || base.horario || '',
+      horarioDetalle: base.horarioDetalle || base.horario || '',
+      diferenciadorSalud: base.diferenciadorSalud || ''
+    };
+    var keys = [
+      'nombreProfesional', 'alias', 'nombreComercial', 'especialidad', 'subespecialidad',
+      'serviciosProfesionales', 'segurosAceptados', 'consultaEnLinea', 'unidadConsulta',
+      'especialidadServicio', 'modalidadConsulta', 'segurosAceptadosSalud', 'atencionDomicilioSalud',
+      'serviciosCuidado', 'coberturaDomicilioZona', 'estudiosOfrecidos', 'tiempoEntregaResultados',
+      'tomaMuestrasDomicilio', 'categoriasFarmacia', 'surtidoFarmaceutico', 'ventaConReceta',
+      'serviciosClinica', 'especialidadesClinica', 'urgencias24h', 'direccion',
+      'serviciosHospital', 'nivelesAtencion', 'serviciosResidencia', 'capacidadResidentes',
+      'serviciosFunerarios', 'serviciosCorporativos', 'coberturaEmpresas', 'certificaciones',
+      'modalidadAtencionProfesional', 'coberturaAtencionSalud', 'idiomasAtencion'
+    ];
+    keys.forEach(function (k) {
+      if (base[k] != null && base[k] !== '') p[k] = base[k];
+    });
+    return p;
+  }
+
+  function armarPerfilSalud(base, idx, Q, pres) {
+    var subId = pres.subcategoriaId || idCategoria(Q.categoria);
+    var catLabel = base.categoriaPublica || labelCategoria(Q.categoria);
+    var pack = base.deltaPack || saludPackDeSub(subId);
+    var perfil = buildSaludPerfilDemo(base, subId, pack);
+    var esCedula = SALUD_CEDULA_SUBS.indexOf(subId) >= 0;
+    var esNegocio = SALUD_NEGOCIO_SUBS.indexOf(subId) >= 0;
+    var nombre = perfil.nombreProfesional || perfil.nombreComercial || perfil.alias || 'Proveedor demo';
+    var id = 'demo-salud-' + subId + '-' + slug(nombre) + '-' + idx;
+    var precio = base.precio || perfil.precioConsulta || perfil.tarifaDesde || 'Consultar';
+
+    var u = {
+      __id: id,
+      __demo: true,
+      sectorId: 'salud',
+      subcategoriaId: subId,
+      categoria: catLabel,
+      categoriaPublica: catLabel,
+      precio: precio,
+      tagline: base.tagline || '',
+      horario: base.horario || perfil.horarioAtencion || perfil.horarioDetalle || 'Consultar',
+      pais: Q.pais,
+      estado: Q.estado || 'Nuevo León',
+      ciudad: Q.ciudad || 'Monterrey',
+      zona: zonaNombre(idx),
+      verificada: base.verificada !== false,
+      verificado: base.verificada !== false,
+      cedulaVerificada: base.cedulaVerificada === true || esCedula,
+      requiresCedula: esCedula,
+      respuestaRapida: base.respuestaRapida !== false,
+      fotoURL: foto(idx),
+      fotosExtraURL: ['a', 'b', 'c', 'd', 'e', 'f'],
+      deltaPack: pack,
+      saludPerfil: perfil
+    };
+
+    if (esNegocio) {
+      u.tipoPerfil = 'negocio';
+      u.tipoCuenta = 'negocio';
+      u.nombreComercial = perfil.nombreComercial || nombre;
+      u.nombre = u.nombreComercial;
+    } else if (esCedula) {
+      u.nombreProfesional = perfil.nombreProfesional || nombre;
+      u.nombre = u.nombreProfesional;
+      u.alias = u.nombre;
+      u.especialidad = perfil.especialidad || base.especialidad || '';
+    } else {
+      u.alias = perfil.alias || nombre;
+      u.nombre = u.alias;
+      u.especialidad = perfil.especialidadServicio || base.especialidad || '';
+    }
+
+    return enriquecerPerfil(u, Q);
+  }
+
+  function poolDemoSalud(subId) {
+    if (DEMO_SALUD[subId]) return DEMO_SALUD[subId];
+    var pack = saludPackDeSub(subId);
+    return DEMO_SALUD_BY_PACK[pack] || DEMO_SALUD_BY_PACK.B;
+  }
+
+  function plantillaDemoSalud(Q, pres) {
+    pres = pres || presentacionDeCategoria(Q.categoria);
+    var subId = pres.subcategoriaId || idCategoria(Q.categoria);
+    return poolDemoSalud(subId).map(function (base, idx) {
+      return armarPerfilSalud(base, idx, Q, pres);
+    });
+  }
+
+  var TECNOLOGIA_NEGOCIO_SUBS = [
+    'agencia-de-marketing-digital', 'agencia-seo', 'agencia-de-publicidad-digital',
+    'hosting-y-dominios', 'ciberseguridad-empresarial', 'soporte-empresarial-ti',
+    'venta-de-equipo-de-computo'
+  ];
+
+  var DEMO_TECNOLOGIA_BY_PACK = {
+    A: [
+      { alias: 'Dev Full Stack MTY', precio: '1,200', tagline: 'React, Node y APIs para PyME.', stackTecnologico: ['React', 'Node.js', 'PostgreSQL'], serviciosDesarrollo: ['Web', 'APIs', 'Mantenimiento'], modalidadServicioTI: 'hibrido', tarifaDesde: '1200', horario: 'Lun–Vie 9:00–18:00', verificada: true },
+      { alias: 'Apps Móviles Norte', precio: '1,500', tagline: 'Desarrollo iOS y Android con entregas iterativas.', stackTecnologico: ['Flutter', 'Firebase'], serviciosDesarrollo: ['Apps móviles', 'MVP'], modalidadServicioTI: 'remoto', tarifaDesde: '1500', horario: 'Con cita', verificada: true }
+    ],
+    B: [
+      { alias: 'Soporte TI Express', precio: '450', tagline: 'Soporte a PC, redes y respaldo de datos.', serviciosSoporteTI: ['Helpdesk', 'Mantenimiento', 'Recuperación de datos'], tiposEquipoSoporte: ['PC', 'Mac', 'Impresoras'], modalidadServicioTI: 'visita_cliente', tiempoRespuestaSoporte: 'mismo_dia', coberturaGeografica: 'Monterrey', tarifaDesde: '450', horario: 'Lun–Sáb 8:00–20:00', verificada: true },
+      { alias: 'Técnico en Computadoras', precio: '350', tagline: 'Reparación, limpieza y optimización.', serviciosReparacion: ['Limpieza', 'Formateo', 'Upgrade'], tiposEquipoSoporte: ['PC', 'Laptop'], modalidadServicioTI: 'domicilio', tarifaDesde: '350', horario: 'Lun–Dom', verificada: true }
+    ],
+    C: [
+      { alias: 'Community Manager Pro', precio: '600', tagline: 'Redes sociales, contenido y pauta básica.', serviciosMarketingDigital: ['Community management', 'Contenido', 'Pauta'], canalesMarketing: ['Instagram', 'Facebook', 'TikTok'], modalidadServicioTI: 'remoto', tarifaDesde: '600', horario: 'Lun–Vie', verificada: true },
+      { alias: 'SEO Local MTY', precio: '800', tagline: 'Posicionamiento orgánico y auditorías SEO.', serviciosMarketingDigital: ['SEO', 'Auditoría web'], canalesMarketing: ['Google'], modalidadServicioTI: 'hibrido', tarifaDesde: '800', horario: 'Lun–Vie 9:00–17:00', verificada: true }
+    ],
+    D: [
+      { alias: 'Consultor IT Estratega', precio: '1,800', tagline: 'Consultoría tecnológica y roadmap digital.', serviciosConsultoriaTI: ['Diagnóstico', 'Roadmap', 'Implementación'], areasConsultoriaTI: ['Infraestructura', 'Software'], modalidadServicioTI: 'hibrido', tarifaDesde: '1800', horario: 'Con cita', verificada: true },
+      { alias: 'Ciberseguridad MX', precio: '2,200', tagline: 'Auditorías, hardening y respuesta a incidentes.', serviciosCiberseguridad: ['Auditoría', 'Pentest básico', 'Capacitación'], certificacionesSeguridad: ['CompTIA Security+'], modalidadServicioTI: 'remoto', tarifaDesde: '2200', horario: 'Lun–Vie', verificada: true }
+    ],
+    E: [
+      { nombreComercial: 'Agencia Digital Impulso', precio: 'Consultar', tagline: 'Marketing digital, SEO y desarrollo web.', serviciosEmpresaTI: ['Marketing', 'Desarrollo web', 'SEO'], especialidadesEmpresaTI: 'PyME y mediana empresa', direccion: 'San Pedro, N.L.', horario: 'Lun–Vie 9:00–19:00', verificada: true },
+      { nombreComercial: 'TI Empresarial Norte', precio: 'Consultar', tagline: 'Soporte empresarial, helpdesk y infraestructura.', serviciosEmpresaTI: ['Helpdesk', 'Servidores', 'Redes'], tamanoEmpresaAtendida: ['PyME', 'Mediana'], direccion: 'Monterrey', horario: '24/7 con contrato', verificada: true }
+    ],
+    F: [
+      { alias: 'UX/UI Studio MTY', precio: '900', tagline: 'Diseño de interfaces y prototipos Figma.', serviciosCreativosTI: ['UX/UI', 'Prototipos', 'Design system'], especialidadCreativaTI: ['Web', 'Apps'], portfolioURL: 'https://ejemplo.com', modalidadServicioTI: 'remoto', tarifaDesde: '900', horario: 'Lun–Vie', verificada: true },
+      { alias: 'Cloud & Hosting MX', precio: 'Consultar', tagline: 'Hosting, dominios y servicios cloud.', serviciosInfraTI: ['Hosting', 'Dominios', 'Correo'], plataformasInfra: ['AWS', 'Google Cloud'], modalidadServicioTI: 'remoto', tarifaDesde: 'Consultar', horario: 'Lun–Dom', verificada: true }
+    ]
+  };
+
+  var DEMO_TECNOLOGIA = {
+    programador: DEMO_TECNOLOGIA_BY_PACK.A,
+    'soporte-tecnico-independiente': DEMO_TECNOLOGIA_BY_PACK.B,
+    'community-manager': DEMO_TECNOLOGIA_BY_PACK.C,
+    'consultor-it': DEMO_TECNOLOGIA_BY_PACK.D,
+    'agencia-de-marketing-digital': DEMO_TECNOLOGIA_BY_PACK.E,
+    'disenador-ux-ui': DEMO_TECNOLOGIA_BY_PACK.F
+  };
+
+  function tecnologiaPackDeSub(subId) {
+    var key = String(subId || '').trim().toLowerCase().replace(/_/g, '-');
+    if (global.CARIHUB_REGISTRO_TECNOLOGIA_SECTOR_BLOCKS && CARIHUB_REGISTRO_TECNOLOGIA_SECTOR_BLOCKS.resolvePack) {
+      return CARIHUB_REGISTRO_TECNOLOGIA_SECTOR_BLOCKS.resolvePack(key);
+    }
+    return 'A';
+  }
+
+  function buildTecnologiaPerfilDemo(base, subId, pack) {
+    pack = String(pack || 'A').toUpperCase();
+    var p = {
+      deltaPack: pack,
+      canonSubcategoriaId: subId,
+      tagline: base.tagline || '',
+      tarifaDesde: base.precio || base.tarifaDesde || 'Consultar',
+      horarioDetalle: base.horarioDetalle || base.horario || '',
+      modalidadServicioTI: base.modalidadServicioTI || '',
+      coberturaGeografica: base.coberturaGeografica || base.zonaCobertura || '',
+      colaboracionesComerciales: base.colaboracionesComerciales || ''
+    };
+    var keys = [
+      'alias', 'nombreComercial', 'stackTecnologico', 'serviciosDesarrollo', 'lenguajesFrameworks',
+      'serviciosSoporteTI', 'tiposEquipoSoporte', 'serviciosReparacion', 'tiempoRespuestaSoporte',
+      'garantiaServicio', 'serviciosMarketingDigital', 'canalesMarketing', 'serviciosConsultoriaTI',
+      'areasConsultoriaTI', 'serviciosCiberseguridad', 'certificacionesSeguridad',
+      'serviciosEmpresaTI', 'especialidadesEmpresaTI', 'tamanoEmpresaAtendida',
+      'serviciosCreativosTI', 'especialidadCreativaTI', 'serviciosInfraTI', 'plataformasInfra',
+      'portfolioURL', 'certificaciones', 'diferenciadorProfesional', 'direccion'
+    ];
+    keys.forEach(function (k) {
+      if (base[k] != null && base[k] !== '') p[k] = base[k];
+    });
+    return p;
+  }
+
+  function armarPerfilTecnologia(base, idx, Q, pres) {
+    var subId = pres.subcategoriaId || idCategoria(Q.categoria);
+    var catLabel = base.categoriaPublica || labelCategoria(Q.categoria);
+    var pack = base.deltaPack || tecnologiaPackDeSub(subId);
+    var perfil = buildTecnologiaPerfilDemo(base, subId, pack);
+    var esNegocio = TECNOLOGIA_NEGOCIO_SUBS.indexOf(subId) >= 0;
+    var nombre = perfil.nombreComercial || perfil.alias || 'Proveedor demo';
+    var id = 'demo-tecnologia-' + subId + '-' + slug(nombre) + '-' + idx;
+    var precio = base.precio || perfil.tarifaDesde || 'Consultar';
+
+    var u = {
+      __id: id,
+      __demo: true,
+      sectorId: 'tecnologia',
+      subcategoriaId: subId,
+      categoria: catLabel,
+      categoriaPublica: catLabel,
+      precio: precio,
+      tagline: base.tagline || '',
+      horario: base.horario || perfil.horarioDetalle || 'Consultar',
+      pais: Q.pais,
+      estado: Q.estado || 'Nuevo León',
+      ciudad: Q.ciudad || 'Monterrey',
+      zona: zonaNombre(idx),
+      verificada: base.verificada !== false,
+      verificado: base.verificada !== false,
+      respuestaRapida: base.respuestaRapida !== false,
+      fotoURL: foto(idx),
+      fotosExtraURL: ['a', 'b', 'c', 'd', 'e', 'f'],
+      deltaPack: pack,
+      tecnologiaPerfil: perfil
+    };
+
+    if (esNegocio) {
+      u.tipoPerfil = 'negocio';
+      u.tipoCuenta = 'negocio';
+      u.nombreComercial = perfil.nombreComercial || nombre;
+      u.nombre = u.nombreComercial;
+    } else {
+      u.alias = perfil.alias || nombre;
+      u.nombre = u.alias;
+      u.especialidad = (perfil.stackTecnologico && perfil.stackTecnologico[0]) || (perfil.serviciosDesarrollo && perfil.serviciosDesarrollo[0]) || base.especialidad || '';
+    }
+
+    return enriquecerPerfil(u, Q);
+  }
+
+  function poolDemoTecnologia(subId) {
+    if (DEMO_TECNOLOGIA[subId]) return DEMO_TECNOLOGIA[subId];
+    var pack = tecnologiaPackDeSub(subId);
+    return DEMO_TECNOLOGIA_BY_PACK[pack] || DEMO_TECNOLOGIA_BY_PACK.A;
+  }
+
+  function plantillaDemoTecnologia(Q, pres) {
+    pres = pres || presentacionDeCategoria(Q.categoria);
+    var subId = pres.subcategoriaId || idCategoria(Q.categoria);
+    return poolDemoTecnologia(subId).map(function (base, idx) {
+      return armarPerfilTecnologia(base, idx, Q, pres);
+    });
+  }
+
+  var AUTOMOTRIZ_NEGOCIO_SUBS = ['agencias-de-autos'];
+
+  var DEMO_AUTOMOTRIZ_BY_PACK = {
+    A: [
+      { alias: 'Taller Mecánico del Norte', precio: '500', tagline: 'Mecánica general, frenos y suspensión.', serviciosMecanica: ['Afinación', 'Frenos', 'Suspensión'], especialidadesMecanica: ['Motor', 'Transmisión'], marcasAtendidas: ['Chevrolet', 'Nissan', 'Ford'], modalidadServicioAuto: 'taller_fijo', tarifaDesde: '500', coberturaGeografica: 'Monterrey norte', horario: 'Lun–Sáb 8:00–19:00', verificada: true },
+      { alias: 'Mecánico a Domicilio MTY', precio: '400', tagline: 'Diagnóstico y reparaciones en tu domicilio.', serviciosMecanica: ['Diagnóstico', 'Batería', 'Fugas'], modalidadServicioAuto: 'domicilio', tiempoRespuestaAuto: 'mismo_dia', tarifaDesde: '400', horario: 'Lun–Dom', verificada: true }
+    ],
+    B: [
+      { alias: 'Vulcanizadora Rápida', precio: '350', tagline: 'Llantas, balanceo y alineación.', serviciosLlantas: ['Venta', 'Montaje', 'Balanceo', 'Alineación'], tiposLlantas: ['Radial', 'Run flat'], modalidadServicioAuto: 'taller_fijo', tarifaDesde: '350', horario: 'Lun–Sáb 8:00–20:00', verificada: true }
+    ],
+    C: [
+      { alias: 'Detailing Premium MTY', precio: '800', tagline: 'Lavado, pulido y protección cerámica.', serviciosEsteticaAuto: ['Lavado', 'Detailing', 'Cerámico'], serviciosCarroceria: ['Pulido'], modalidadServicioAuto: 'taller_fijo', tarifaDesde: '800', horario: 'Mar–Dom', verificada: true },
+      { alias: 'Hojalatería y Pintura Sur', precio: 'Consultar', tagline: 'Reparación de carrocería y pintura automotriz.', serviciosCarroceria: ['Hojalatería', 'Pintura'], modalidadServicioAuto: 'taller_fijo', tarifaDesde: 'Consultar', horario: 'Lun–Vie', verificada: true }
+    ],
+    D: [
+      { alias: 'Refaccionaria Central', precio: 'Consultar', tagline: 'Refacciones originales y genéricas.', serviciosRefacciones: ['Venta', 'Pedido especial'], lineasRefacciones: ['Frenos', 'Suspensión', 'Motor'], modalidadServicioAuto: 'taller_fijo', tarifaDesde: 'Consultar', horario: 'Lun–Sáb 9:00–19:00', verificada: true },
+      { alias: 'A/C Automotriz Pro', precio: '600', tagline: 'Carga de gas, diagnóstico y reparación de A/C.', serviciosEspecialidadAuto: ['A/C', 'Diagnóstico eléctrico'], modalidadServicioAuto: 'ambos', tarifaDesde: '600', horario: 'Lun–Sáb', verificada: true }
+    ],
+    E: [
+      { nombreComercial: 'Autos Seminuevos MTY', precio: 'Consultar', tagline: 'Seminuevos certificados con financiamiento.', serviciosVentaAutos: ['Seminuevos', 'Contado', 'Crédito'], tiposVehiculoVenta: ['Sedán', 'SUV', 'Pickup'], financiamientoDisponible: 'Sí', inventarioAproximado: '40 unidades', horario: 'Lun–Sáb 10:00–20:00', verificada: true },
+      { alias: 'Lote de Autos del Valle', precio: 'Consultar', tagline: 'Venta de usados con revisión mecánica.', serviciosVentaAutos: ['Usados', 'Consignación'], tiposVehiculoVenta: ['Económicos', 'SUV'], financiamientoDisponible: 'Parcial', tarifaDesde: 'Consultar', horario: 'Lun–Dom', verificada: true }
+    ],
+    F: [
+      { alias: 'Grúa 24 h Norte', precio: '800', tagline: 'Grúa y auxilio vial en carretera y ciudad.', serviciosGrua: ['Grúa', 'Paso de corriente', 'Cambio de llanta'], modalidadServicioAuto: 'unidad_movil', coberturaCarretera: '100 km radio MTY', tiempoRespuestaAuto: 'emergencia_30min', tarifaDesde: '800', horario: '24 horas', verificada: true }
+    ]
+  };
+
+  var DEMO_AUTOMOTRIZ = {
+    'talleres-mecanicos': DEMO_AUTOMOTRIZ_BY_PACK.A,
+    vulcanizadoras: DEMO_AUTOMOTRIZ_BY_PACK.B,
+    'lavado-de-autos': DEMO_AUTOMOTRIZ_BY_PACK.C,
+    refaccionarias: DEMO_AUTOMOTRIZ_BY_PACK.D,
+    'agencias-de-autos': DEMO_AUTOMOTRIZ_BY_PACK.E,
+    'gruas-y-auxilio-vial': DEMO_AUTOMOTRIZ_BY_PACK.F
+  };
+
+  function automotrizPackDeSub(subId) {
+    var key = String(subId || '').trim().toLowerCase().replace(/_/g, '-');
+    if (global.CARIHUB_REGISTRO_AUTOMOTRIZ_SECTOR_BLOCKS && CARIHUB_REGISTRO_AUTOMOTRIZ_SECTOR_BLOCKS.resolvePack) {
+      return CARIHUB_REGISTRO_AUTOMOTRIZ_SECTOR_BLOCKS.resolvePack(key);
+    }
+    return 'A';
+  }
+
+  function buildAutomotrizPerfilDemo(base, subId, pack) {
+    pack = String(pack || 'A').toUpperCase();
+    var p = {
+      deltaPack: pack,
+      canonSubcategoriaId: subId,
+      tagline: base.tagline || '',
+      tarifaDesde: base.precio || base.tarifaDesde || 'Consultar',
+      horarioDetalle: base.horarioDetalle || base.horario || '',
+      modalidadServicioAuto: base.modalidadServicioAuto || '',
+      coberturaGeografica: base.coberturaGeografica || base.zonaCobertura || '',
+      colaboracionesComerciales: base.colaboracionesComerciales || ''
+    };
+    var keys = [
+      'alias', 'nombreComercial', 'serviciosMecanica', 'especialidadesMecanica', 'marcasAtendidas',
+      'tiposVehiculoAtendidos', 'garantiaServicioAuto', 'tiempoRespuestaAuto', 'serviciosLlantas',
+      'tiposLlantas', 'serviciosCarroceria', 'serviciosEsteticaAuto', 'serviciosRefacciones',
+      'lineasRefacciones', 'serviciosEspecialidadAuto', 'serviciosVentaAutos', 'tiposVehiculoVenta',
+      'financiamientoDisponible', 'inventarioAproximado', 'serviciosGrua', 'coberturaCarretera',
+      'certificaciones', 'diferenciadorAutomotriz', 'direccion'
+    ];
+    keys.forEach(function (k) {
+      if (base[k] != null && base[k] !== '') p[k] = base[k];
+    });
+    return p;
+  }
+
+  function armarPerfilAutomotriz(base, idx, Q, pres) {
+    var subId = pres.subcategoriaId || idCategoria(Q.categoria);
+    var catLabel = base.categoriaPublica || labelCategoria(Q.categoria);
+    var pack = base.deltaPack || automotrizPackDeSub(subId);
+    var perfil = buildAutomotrizPerfilDemo(base, subId, pack);
+    var esNegocio = AUTOMOTRIZ_NEGOCIO_SUBS.indexOf(subId) >= 0;
+    var nombre = perfil.nombreComercial || perfil.alias || 'Proveedor demo';
+    var id = 'demo-automotriz-' + subId + '-' + slug(nombre) + '-' + idx;
+    var precio = base.precio || perfil.tarifaDesde || 'Consultar';
+
+    var u = {
+      __id: id,
+      __demo: true,
+      sectorId: 'automotriz',
+      subcategoriaId: subId,
+      categoria: catLabel,
+      categoriaPublica: catLabel,
+      precio: precio,
+      tagline: base.tagline || '',
+      horario: base.horario || perfil.horarioDetalle || 'Consultar',
+      pais: Q.pais,
+      estado: Q.estado || 'Nuevo León',
+      ciudad: Q.ciudad || 'Monterrey',
+      zona: zonaNombre(idx),
+      verificada: base.verificada !== false,
+      verificado: base.verificada !== false,
+      respuestaRapida: base.respuestaRapida !== false,
+      fotoURL: foto(idx),
+      fotosExtraURL: ['a', 'b', 'c', 'd', 'e', 'f'],
+      deltaPack: pack,
+      automotrizPerfil: perfil
+    };
+
+    if (esNegocio) {
+      u.tipoPerfil = 'negocio';
+      u.tipoCuenta = 'negocio';
+      u.nombreComercial = perfil.nombreComercial || nombre;
+      u.nombre = u.nombreComercial;
+    } else {
+      u.alias = perfil.alias || nombre;
+      u.nombre = u.alias;
+      u.especialidad = (perfil.serviciosMecanica && perfil.serviciosMecanica[0]) || (perfil.serviciosLlantas && perfil.serviciosLlantas[0]) || base.especialidad || '';
+    }
+
+    return enriquecerPerfil(u, Q);
+  }
+
+  function poolDemoAutomotriz(subId) {
+    if (DEMO_AUTOMOTRIZ[subId]) return DEMO_AUTOMOTRIZ[subId];
+    var pack = automotrizPackDeSub(subId);
+    return DEMO_AUTOMOTRIZ_BY_PACK[pack] || DEMO_AUTOMOTRIZ_BY_PACK.A;
+  }
+
+  function plantillaDemoAutomotriz(Q, pres) {
+    pres = pres || presentacionDeCategoria(Q.categoria);
+    var subId = pres.subcategoriaId || idCategoria(Q.categoria);
+    return poolDemoAutomotriz(subId).map(function (base, idx) {
+      return armarPerfilAutomotriz(base, idx, Q, pres);
+    });
+  }
+
+  var TRANSPORTE_NEGOCIO_SUBS = [
+    'mudanzas-pequenas', 'mudanzas', 'empresa-de-mensajeria',
+    'empresa-de-paqueteria', 'empresa-de-logistica', 'renta-de-camionetas'
+  ];
+
+  var DEMO_TRANSPORTE_BY_PACK = {
+    A: [
+      { alias: 'Chofer Privado MTY', precio: '600', tagline: 'Traslados ejecutivos y turísticos con puntualidad.', serviciosTransportePersonas: ['Traslados', 'Ejecutivo', 'Turismo'], tipoVehiculoPasajeros: ['Sedán', 'SUV'], modalidadServicioTransporte: 'metropolitana', tarifaDesde: '600', coberturaGeografica: 'Monterrey y área metropolitana', horario: 'Lun–Dom con cita', verificada: true },
+      { alias: 'Transporte Escolar Seguro', precio: 'Consultar', tagline: 'Rutas escolares con permisos y seguro vigente.', serviciosTransportePersonas: ['Escolar'], tipoVehiculoPasajeros: ['Van', 'Microbús'], modalidadServicioTransporte: 'local_ciudad', tarifaDesde: 'Consultar', permisosLicencias: 'Permiso escolar vigente', horario: 'Lun–Vie', verificada: true }
+    ],
+    B: [
+      { alias: 'Mensajero Express Norte', precio: '120', tagline: 'Entregas el mismo día en zona metropolitana.', serviciosMensajeria: ['Paquetería', 'Documentos', 'Última milla'], tiposEnvio: ['Documentos', 'Paquetes pequeños'], tipoVehiculoMensajeria: ['Moto', 'Auto'], modalidadServicioTransporte: 'metropolitana', tiempoRespuestaTransporte: 'mismo_dia', tarifaDesde: '120', horario: 'Lun–Sáb', verificada: true },
+      { alias: 'Moto Mensajería 24 h', precio: '90', tagline: 'Envíos urgentes con respuesta inmediata.', serviciosMensajeria: ['Urgente', 'Documentos'], tiposEnvio: ['Urgente'], tipoVehiculoMensajeria: ['Moto'], modalidadServicioTransporte: 'local_ciudad', tiempoRespuestaTransporte: 'inmediato_30min', tarifaDesde: '90', horario: '24 horas', verificada: true }
+    ],
+    C: [
+      { alias: 'Fletes Ligeros del Valle', precio: '450', tagline: 'Fletes urbanos y mudanzas pequeñas.', serviciosFleteMudanza: ['Flete ligero', 'Mudanza pequeña'], tiposMercancia: ['Muebles', 'Electrodomésticos'], capacidadCarga: '1.5 ton', incluyePersonalCarga: 'opcional', modalidadServicioTransporte: 'local_ciudad', tarifaDesde: '450', horario: 'Lun–Sáb', verificada: true },
+      { alias: 'Mudanzas Express MTY', precio: '1,800', tagline: 'Mudanzas locales con personal de carga.', serviciosFleteMudanza: ['Mudanza completa', 'Embalaje'], tiposMercancia: ['Hogar', 'Oficina'], capacidadCarga: '3.5 ton', incluyePersonalCarga: 'si', modalidadServicioTransporte: 'metropolitana', tarifaDesde: '1800', horario: 'Lun–Dom', verificada: true }
+    ],
+    D: [
+      { alias: 'Carga Pesada Norte', precio: 'Consultar', tagline: 'Transporte de carga en rutas regionales.', serviciosLogistica: ['Carga general', 'Distribución'], tiposCarga: ['General', 'Paletizada'], coberturaRutas: 'MTY–Saltillo–Monclova', modalidadServicioTransporte: 'regional', tarifaDesde: 'Consultar', horario: 'Lun–Sáb', verificada: true },
+      { alias: 'Refrigerados MTY', precio: 'Consultar', tagline: 'Cadena de frío para alimentos y medicinas.', serviciosLogistica: ['Refrigerado', 'Distribución'], tiposCarga: ['Refrigerada'], coberturaRutas: 'Nuevo León y Coahuila', modalidadServicioTransporte: 'regional', tarifaDesde: 'Consultar', horario: '24 horas', verificada: true }
+    ],
+    E: [
+      { nombreComercial: 'Mensajería Rápida del Norte', precio: 'Consultar', tagline: 'Paquetería y última milla para empresas.', serviciosEmpresaTransporte: ['Mensajería', 'Paquetería', 'Última milla'], tamanoClienteTransporte: ['PyME', 'Corporativo'], flotaAproximada: '25 unidades', modalidadServicioTransporte: 'nacional', horario: 'Lun–Sáb 7:00–22:00', verificada: true },
+      { nombreComercial: 'Logística Integral MTY', precio: 'Consultar', tagline: 'Distribución, almacenaje y rutas programadas.', serviciosEmpresaTransporte: ['Logística', 'Distribución', 'Almacenaje'], especialidadesEmpresaTransporte: 'Cadena de suministro local', flotaAproximada: '40 unidades', modalidadServicioTransporte: 'nacional', horario: 'Lun–Vie', verificada: true }
+    ],
+    F: [
+      { nombreComercial: 'Renta de Camionetas MTY', precio: '800', tagline: 'Camionetas con y sin chofer para obra y mudanza.', serviciosEspecialidadTransporte: ['Renta con chofer', 'Renta sin chofer'], tiposVehiculoRenta: ['Pickup', '3.5 ton', 'Van'], modalidadServicioTransporte: 'local_ciudad', tarifaDesde: '800', horario: 'Lun–Dom', verificada: true },
+      { alias: 'Logística Internacional Norte', precio: 'Consultar', tagline: 'Cruce fronterizo y rutas internacionales.', serviciosEspecialidadTransporte: ['Internacional', 'Aduanas'], coberturaInternacional: 'México–EE.UU.', modalidadServicioTransporte: 'internacional', tarifaDesde: 'Consultar', horario: 'Lun–Vie', verificada: true }
+    ]
+  };
+
+  var DEMO_TRANSPORTE = {
+    'chofer-privado': DEMO_TRANSPORTE_BY_PACK.A,
+    mensajero: DEMO_TRANSPORTE_BY_PACK.B,
+    'flete-ligero': DEMO_TRANSPORTE_BY_PACK.C,
+    'transporte-de-carga': DEMO_TRANSPORTE_BY_PACK.D,
+    'empresa-de-mensajeria': DEMO_TRANSPORTE_BY_PACK.E,
+    'renta-de-camionetas': DEMO_TRANSPORTE_BY_PACK.F
+  };
+
+  function transportePackDeSub(subId) {
+    var key = String(subId || '').trim().toLowerCase().replace(/_/g, '-');
+    if (global.CARIHUB_REGISTRO_TRANSPORTE_SECTOR_BLOCKS && CARIHUB_REGISTRO_TRANSPORTE_SECTOR_BLOCKS.resolvePack) {
+      return CARIHUB_REGISTRO_TRANSPORTE_SECTOR_BLOCKS.resolvePack(key);
+    }
+    return 'A';
+  }
+
+  function buildTransportePerfilDemo(base, subId, pack) {
+    pack = String(pack || 'A').toUpperCase();
+    var p = {
+      deltaPack: pack,
+      canonSubcategoriaId: subId,
+      tagline: base.tagline || '',
+      tarifaDesde: base.precio || base.tarifaDesde || 'Consultar',
+      horarioDetalle: base.horarioDetalle || base.horario || '',
+      modalidadServicioTransporte: base.modalidadServicioTransporte || '',
+      coberturaGeografica: base.coberturaGeografica || base.zonaCobertura || '',
+      colaboracionesComerciales: base.colaboracionesComerciales || ''
+    };
+    var keys = [
+      'alias', 'nombreComercial', 'serviciosTransportePersonas', 'tipoVehiculoPasajeros', 'tiposClientesTransporte',
+      'serviciosMensajeria', 'tiposEnvio', 'tipoVehiculoMensajeria', 'serviciosFleteMudanza', 'capacidadCarga',
+      'tiposMercancia', 'incluyePersonalCarga', 'serviciosLogistica', 'tiposCarga', 'coberturaRutas',
+      'serviciosEmpresaTransporte', 'especialidadesEmpresaTransporte', 'tamanoClienteTransporte', 'flotaAproximada',
+      'serviciosEspecialidadTransporte', 'coberturaInternacional', 'tiposVehiculoRenta', 'permisosLicencias',
+      'tiempoRespuestaTransporte', 'certificaciones', 'diferenciadorTransporte', 'direccion'
+    ];
+    keys.forEach(function (k) {
+      if (base[k] != null && base[k] !== '') p[k] = base[k];
+    });
+    return p;
+  }
+
+  function armarPerfilTransporte(base, idx, Q, pres) {
+    var subId = pres.subcategoriaId || idCategoria(Q.categoria);
+    var catLabel = base.categoriaPublica || labelCategoria(Q.categoria);
+    var pack = base.deltaPack || transportePackDeSub(subId);
+    var perfil = buildTransportePerfilDemo(base, subId, pack);
+    var esNegocio = TRANSPORTE_NEGOCIO_SUBS.indexOf(subId) >= 0;
+    var nombre = perfil.nombreComercial || perfil.alias || 'Proveedor demo';
+    var id = 'demo-transporte-' + subId + '-' + slug(nombre) + '-' + idx;
+    var precio = base.precio || perfil.tarifaDesde || 'Consultar';
+
+    var u = {
+      __id: id,
+      __demo: true,
+      sectorId: 'transporte',
+      subcategoriaId: subId,
+      categoria: catLabel,
+      categoriaPublica: catLabel,
+      precio: precio,
+      tagline: base.tagline || '',
+      horario: base.horario || perfil.horarioDetalle || 'Consultar',
+      pais: Q.pais,
+      estado: Q.estado || 'Nuevo León',
+      ciudad: Q.ciudad || 'Monterrey',
+      zona: zonaNombre(idx),
+      verificada: base.verificada !== false,
+      verificado: base.verificada !== false,
+      respuestaRapida: base.respuestaRapida !== false,
+      fotoURL: foto(idx),
+      fotosExtraURL: ['a', 'b', 'c', 'd', 'e', 'f'],
+      deltaPack: pack,
+      transportePerfil: perfil
+    };
+
+    if (esNegocio) {
+      u.tipoPerfil = 'negocio';
+      u.tipoCuenta = 'negocio';
+      u.nombreComercial = perfil.nombreComercial || nombre;
+      u.nombre = u.nombreComercial;
+    } else {
+      u.alias = perfil.alias || nombre;
+      u.nombre = u.alias;
+      u.especialidad = (perfil.serviciosTransportePersonas && perfil.serviciosTransportePersonas[0]) ||
+        (perfil.serviciosMensajeria && perfil.serviciosMensajeria[0]) ||
+        (perfil.serviciosFleteMudanza && perfil.serviciosFleteMudanza[0]) || base.especialidad || '';
+    }
+
+    return enriquecerPerfil(u, Q);
+  }
+
+  function poolDemoTransporte(subId) {
+    if (DEMO_TRANSPORTE[subId]) return DEMO_TRANSPORTE[subId];
+    var pack = transportePackDeSub(subId);
+    return DEMO_TRANSPORTE_BY_PACK[pack] || DEMO_TRANSPORTE_BY_PACK.A;
+  }
+
+  function plantillaDemoTransporte(Q, pres) {
+    pres = pres || presentacionDeCategoria(Q.categoria);
+    var subId = pres.subcategoriaId || idCategoria(Q.categoria);
+    return poolDemoTransporte(subId).map(function (base, idx) {
+      return armarPerfilTransporte(base, idx, Q, pres);
+    });
+  }
+
+  var COMERCIO_NEGOCIO_SUBS = ['distribuidoras'];
+
+  var DEMO_COMERCIO_BY_PACK = {
+    A: [
+      { alias: 'Abarrotes La Esquina', precio: '25', tagline: 'Surte diario y productos de primera necesidad.', categoriasProducto: ['Abarrotes', 'Bebidas', 'Snacks'], serviciosComercio: ['Apartado', 'Pedidos'], modalidadVentaComercio: 'tienda_fisica', formasPagoComercio: ['Efectivo', 'Tarjeta'], entregaDomicilio: 'solo_zona', tarifaDesde: '25', coberturaGeografica: 'Col. Centro y alrededores', horario: 'Lun–Dom 7:00–22:00', verificada: true },
+      { alias: 'Mini Súper del Valle', precio: 'Consultar', tagline: 'Conveniencia y surtido básico cerca de ti.', categoriasProducto: ['Conveniencia', 'Lácteos'], modalidadVentaComercio: 'tienda_fisica', formasPagoComercio: ['Efectivo', 'Transferencia'], tarifaDesde: 'Consultar', horario: 'Lun–Dom 24 h', verificada: true }
+    ],
+    B: [
+      { alias: 'Moda Urbana MTY', precio: '299', tagline: 'Ropa casual y accesorios para toda la familia.', categoriasProducto: ['Ropa casual', 'Accesorios'], generosModa: ['Dama', 'Caballero', 'Joven'], marcasComercializadas: ['Nacionales', 'Importadas'], modalidadVentaComercio: 'ambos', formasPagoComercio: ['Efectivo', 'Tarjeta', 'MSI'], tarifaDesde: '299', horario: 'Lun–Sáb 10:00–20:00', verificada: true },
+      { alias: 'Zapatería El Camino', precio: '450', tagline: 'Calzado escolar, casual y de trabajo.', categoriasProducto: ['Calzado'], generosModa: ['Niño', 'Dama', 'Caballero'], modalidadVentaComercio: 'tienda_fisica', formasPagoComercio: ['Efectivo', 'Tarjeta'], tarifaDesde: '450', horario: 'Lun–Sáb', verificada: true }
+    ],
+    C: [
+      { alias: 'Ferretería El Martillo', precio: '50', tagline: 'Herramientas, plomería y materiales eléctricos.', categoriasProducto: ['Herramientas', 'Plomería', 'Eléctrico'], serviciosComercio: ['Cortes', 'Asesoría'], modalidadVentaComercio: 'tienda_fisica', formasPagoComercio: ['Efectivo', 'Tarjeta'], tarifaDesde: '50', horario: 'Lun–Sáb 8:00–19:00', verificada: true },
+      { alias: 'Farmacia del Barrio', precio: 'Consultar', tagline: 'Medicamentos y productos de salud cotidianos.', categoriasProducto: ['Medicamentos', 'Higiene'], serviciosComercio: ['Entrega local'], modalidadVentaComercio: 'tienda_fisica', entregaDomicilio: 'solo_zona', formasPagoComercio: ['Efectivo', 'Tarjeta'], tarifaDesde: 'Consultar', horario: 'Lun–Dom', verificada: true }
+    ],
+    D: [
+      { alias: 'Mayoreo El Centro', precio: 'Consultar', tagline: 'Surtido a negocios con pedido mínimo.', serviciosMayoreo: ['Mayoreo', 'Surtido'], volumenMinimoPedido: '$1,500', tiposClientesComercio: ['Tienditas', 'Restaurantes'], modalidadVentaComercio: 'tienda_fisica', coberturaGeografica: 'Monterrey y área metropolitana', tarifaDesde: 'Consultar', horario: 'Lun–Sáb 6:00–18:00', verificada: true },
+      { nombreComercial: 'Distribuidora Norte SA', precio: 'Consultar', tagline: 'Distribución y rutas programadas para retail.', serviciosEmpresaComercio: ['Distribución', 'Rutas', 'Crédito'], especialidadesEmpresaComercio: 'Abarrotes y bebidas', tiposClientesComercio: ['Tienditas', 'Mayoristas'], flotaEntrega: '12 unidades', modalidadVentaComercio: 'ambos', horario: 'Lun–Vie', verificada: true }
+    ]
+  };
+
+  var DEMO_COMERCIO = {
+    abarrotes: DEMO_COMERCIO_BY_PACK.A,
+    zapaterias: DEMO_COMERCIO_BY_PACK.B,
+    ferreterias: DEMO_COMERCIO_BY_PACK.C,
+    mayoreo: DEMO_COMERCIO_BY_PACK.D,
+    distribuidoras: DEMO_COMERCIO_BY_PACK.D
+  };
+
+  function comercioPackDeSub(subId) {
+    var key = String(subId || '').trim().toLowerCase().replace(/_/g, '-');
+    if (global.CARIHUB_REGISTRO_COMERCIO_SECTOR_BLOCKS && CARIHUB_REGISTRO_COMERCIO_SECTOR_BLOCKS.resolvePack) {
+      return CARIHUB_REGISTRO_COMERCIO_SECTOR_BLOCKS.resolvePack(key);
+    }
+    return 'A';
+  }
+
+  function buildComercioPerfilDemo(base, subId, pack) {
+    pack = String(pack || 'A').toUpperCase();
+    var p = {
+      deltaPack: pack,
+      canonSubcategoriaId: subId,
+      tagline: base.tagline || '',
+      tarifaDesde: base.precio || base.tarifaDesde || 'Consultar',
+      horarioDetalle: base.horarioDetalle || base.horario || '',
+      modalidadVentaComercio: base.modalidadVentaComercio || '',
+      coberturaGeografica: base.coberturaGeografica || base.zonaCobertura || '',
+      colaboracionesComerciales: base.colaboracionesComerciales || ''
+    };
+    var keys = [
+      'alias', 'nombreComercial', 'categoriasProducto', 'serviciosComercio', 'formasPagoComercio',
+      'entregaDomicilio', 'generosModa', 'marcasComercializadas', 'serviciosMayoreo', 'volumenMinimoPedido',
+      'tiposClientesComercio', 'serviciosEmpresaComercio', 'especialidadesEmpresaComercio', 'flotaEntrega',
+      'certificaciones', 'diferenciadorComercio', 'direccion'
+    ];
+    keys.forEach(function (k) {
+      if (base[k] != null && base[k] !== '') p[k] = base[k];
+    });
+    return p;
+  }
+
+  function armarPerfilComercio(base, idx, Q, pres) {
+    var subId = pres.subcategoriaId || idCategoria(Q.categoria);
+    var catLabel = base.categoriaPublica || labelCategoria(Q.categoria);
+    var pack = base.deltaPack || comercioPackDeSub(subId);
+    var perfil = buildComercioPerfilDemo(base, subId, pack);
+    var esNegocio = COMERCIO_NEGOCIO_SUBS.indexOf(subId) >= 0;
+    var nombre = perfil.nombreComercial || perfil.alias || 'Comercio demo';
+    var id = 'demo-comercio-' + subId + '-' + slug(nombre) + '-' + idx;
+    var precio = base.precio || perfil.tarifaDesde || 'Consultar';
+
+    var u = {
+      __id: id,
+      __demo: true,
+      sectorId: 'comercio',
+      subcategoriaId: subId,
+      categoria: catLabel,
+      categoriaPublica: catLabel,
+      precio: precio,
+      tagline: base.tagline || '',
+      horario: base.horario || perfil.horarioDetalle || 'Consultar',
+      pais: Q.pais,
+      estado: Q.estado || 'Nuevo León',
+      ciudad: Q.ciudad || 'Monterrey',
+      zona: zonaNombre(idx),
+      verificada: base.verificada !== false,
+      verificado: base.verificada !== false,
+      respuestaRapida: base.respuestaRapida !== false,
+      fotoURL: foto(idx),
+      fotosExtraURL: ['a', 'b', 'c', 'd', 'e', 'f'],
+      deltaPack: pack,
+      comercioPerfil: perfil
+    };
+
+    if (esNegocio) {
+      u.tipoPerfil = 'negocio';
+      u.tipoCuenta = 'negocio';
+      u.nombreComercial = perfil.nombreComercial || nombre;
+      u.nombre = u.nombreComercial;
+    } else {
+      u.alias = perfil.alias || nombre;
+      u.nombre = u.alias;
+      u.especialidad = (perfil.categoriasProducto && perfil.categoriasProducto[0]) || base.especialidad || '';
+    }
+
+    return enriquecerPerfil(u, Q);
+  }
+
+  function poolDemoComercio(subId) {
+    if (DEMO_COMERCIO[subId]) return DEMO_COMERCIO[subId];
+    var pack = comercioPackDeSub(subId);
+    return DEMO_COMERCIO_BY_PACK[pack] || DEMO_COMERCIO_BY_PACK.A;
+  }
+
+  function plantillaDemoComercio(Q, pres) {
+    pres = pres || presentacionDeCategoria(Q.categoria);
+    var subId = pres.subcategoriaId || idCategoria(Q.categoria);
+    return poolDemoComercio(subId).map(function (base, idx) {
+      return armarPerfilComercio(base, idx, Q, pres);
+    });
+  }
+
+  var EDUCACION_CEDULA_SUBS = ['psicopedagogo', 'pedagogo', 'docente-certificado', 'especialista-en-educacion-especial'];
+  var EDUCACION_NEGOCIO_SUBS = [
+    'capacitador-empresarial', 'academia-de-idiomas', 'escuela-de-musica', 'escuela-de-arte',
+    'centro-de-capacitacion', 'instituto-educativo', 'escuela-tecnica', 'escuela-de-manejo',
+    'centro-de-certificaciones', 'plataforma-educativa', 'escuelas'
+  ];
+
+  var DEMO_EDUCACION_BY_PACK = {
+    A: [
+      { alias: 'Maestro Particular MTY', precio: '350', tagline: 'Clases personalizadas de primaria y secundaria.', serviciosEducacion: ['Clases particulares', 'Refuerzo escolar'], materiasEducativas: ['Matemáticas', 'Español'], modalidadEducacion: 'hibrido', formatoClase: ['Individual', 'Grupo pequeño'], tarifaDesde: '350', coberturaGeografica: 'Monterrey sur', horario: 'Lun–Sáb', verificada: true },
+      { alias: 'Profesor de Idiomas Norte', precio: '400', tagline: 'Inglés conversacional y preparación de exámenes.', serviciosEducacion: ['Idiomas', 'Conversación'], materiasEducativas: ['Inglés'], idiomasEnsenanza: ['Inglés'], modalidadEducacion: 'online', tarifaDesde: '400', horario: 'Flexible', verificada: true }
+    ],
+    B: [
+      { nombreProfesional: 'Lic. Ana Psicopedagoga', precio: '600', tagline: 'Evaluación y apoyo psicopedagógico.', serviciosProfesionalesEducacion: ['Evaluación', 'Terapia de aprendizaje'], especialidadEducativa: 'Psicopedagogía', materiasEducativas: ['Apoyo escolar'], modalidadEducacion: 'presencial', precioConsulta: '600', horarioAtencion: 'Lun–Vie', verificada: true }
+    ],
+    C: [
+      { nombreComercial: 'Academia de Idiomas Global', precio: 'Consultar', tagline: 'Inglés, francés y certificaciones internacionales.', serviciosEmpresaEducacion: ['Idiomas', 'Certificación'], materiasEducativas: ['Inglés', 'Francés'], modalidadEducacion: 'hibrido', formatoClase: ['Grupo', 'Intensivo'], horario: 'Lun–Sáb', verificada: true }
+    ],
+    D: [
+      { nombreComercial: 'Centro de Capacitación Pro', precio: 'Consultar', tagline: 'Cursos técnicos y certificaciones laborales.', serviciosEmpresaEducacion: ['Capacitación', 'Certificación'], nivelesEducativos: ['Técnico', 'Laboral'], certificacionesEducativas: 'DC3 y constancias', modalidadEducacion: 'presencial', horario: 'Lun–Vie', verificada: true }
+    ],
+    E: [
+      { alias: 'Preparatoria Alternativa Norte', precio: 'Consultar', tagline: 'Bachillerato con modalidad flexible.', serviciosEducacion: ['Preparatoria', 'Bachillerato'], nivelesEducativos: ['Preparatoria'], edadesAtendidas: ['15–18 años'], modalidadEducacion: 'hibrido', tarifaDesde: 'Consultar', horario: 'Matutino y vespertino', verificada: true }
+    ]
+  };
+
+  var DEMO_EDUCACION = {
+    'maestro-particular': DEMO_EDUCACION_BY_PACK.A,
+    psicopedagogo: DEMO_EDUCACION_BY_PACK.B,
+    'academia-de-idiomas': DEMO_EDUCACION_BY_PACK.C,
+    'centro-de-capacitacion': DEMO_EDUCACION_BY_PACK.D,
+    universidades: DEMO_EDUCACION_BY_PACK.E
+  };
+
+  function educacionPackDeSub(subId) {
+    var key = String(subId || '').trim().toLowerCase().replace(/_/g, '-');
+    if (global.CARIHUB_REGISTRO_EDUCACION_SECTOR_BLOCKS && CARIHUB_REGISTRO_EDUCACION_SECTOR_BLOCKS.resolvePack) {
+      return CARIHUB_REGISTRO_EDUCACION_SECTOR_BLOCKS.resolvePack(key);
+    }
+    return 'A';
+  }
+
+  function buildEducacionPerfilDemo(base, subId, pack) {
+    pack = String(pack || 'A').toUpperCase();
+    var p = {
+      deltaPack: pack,
+      canonSubcategoriaId: subId,
+      tagline: base.tagline || '',
+      tarifaDesde: base.precio || base.tarifaDesde || 'Consultar',
+      precioConsulta: base.precioConsulta || base.precio || '',
+      horarioDetalle: base.horarioDetalle || base.horario || '',
+      horarioAtencion: base.horarioAtencion || base.horario || '',
+      modalidadEducacion: base.modalidadEducacion || '',
+      coberturaGeografica: base.coberturaGeografica || base.zonaCobertura || '',
+      colaboracionesComerciales: base.colaboracionesComerciales || ''
+    };
+    var keys = [
+      'alias', 'nombreProfesional', 'nombreComercial', 'serviciosEducacion', 'serviciosEmpresaEducacion',
+      'serviciosProfesionalesEducacion', 'materiasEducativas', 'nivelesEducativos', 'edadesAtendidas',
+      'formatoClase', 'especialidadEducativa', 'idiomasEnsenanza', 'certificacionesEducativas',
+      'tiempoRespuestaEducacion', 'certificaciones', 'diferenciadorEducacion', 'direccion'
+    ];
+    keys.forEach(function (k) {
+      if (base[k] != null && base[k] !== '') p[k] = base[k];
+    });
+    return p;
+  }
+
+  function armarPerfilEducacion(base, idx, Q, pres) {
+    var subId = pres.subcategoriaId || idCategoria(Q.categoria);
+    var catLabel = base.categoriaPublica || labelCategoria(Q.categoria);
+    var pack = base.deltaPack || educacionPackDeSub(subId);
+    var perfil = buildEducacionPerfilDemo(base, subId, pack);
+    var esCedula = EDUCACION_CEDULA_SUBS.indexOf(subId) >= 0;
+    var esNegocio = EDUCACION_NEGOCIO_SUBS.indexOf(subId) >= 0;
+    var nombre = perfil.nombreProfesional || perfil.nombreComercial || perfil.alias || 'Educador demo';
+    var id = 'demo-educacion-' + subId + '-' + slug(nombre) + '-' + idx;
+    var precio = base.precio || perfil.precioConsulta || perfil.tarifaDesde || 'Consultar';
+
+    var u = {
+      __id: id,
+      __demo: true,
+      sectorId: 'educacion',
+      subcategoriaId: subId,
+      categoria: catLabel,
+      categoriaPublica: catLabel,
+      precio: precio,
+      tagline: base.tagline || '',
+      horario: base.horario || perfil.horarioAtencion || perfil.horarioDetalle || 'Consultar',
+      pais: Q.pais,
+      estado: Q.estado || 'Nuevo León',
+      ciudad: Q.ciudad || 'Monterrey',
+      zona: zonaNombre(idx),
+      verificada: base.verificada !== false,
+      verificado: base.verificada !== false,
+      respuestaRapida: base.respuestaRapida !== false,
+      fotoURL: foto(idx),
+      fotosExtraURL: ['a', 'b', 'c', 'd', 'e', 'f'],
+      deltaPack: pack,
+      educacionPerfil: perfil
+    };
+
+    if (esCedula) {
+      u.nombreProfesional = perfil.nombreProfesional || nombre;
+      u.nombre = u.nombreProfesional;
+      u.requiresCedula = true;
+      u.cedulaVerificada = true;
+      u.especialidad = perfil.especialidadEducativa || (perfil.materiasEducativas && perfil.materiasEducativas[0]) || '';
+    } else if (esNegocio) {
+      u.tipoPerfil = 'negocio';
+      u.tipoCuenta = 'negocio';
+      u.nombreComercial = perfil.nombreComercial || nombre;
+      u.nombre = u.nombreComercial;
+    } else {
+      u.alias = perfil.alias || nombre;
+      u.nombre = u.alias;
+      u.especialidad = (perfil.materiasEducativas && perfil.materiasEducativas[0]) || (perfil.serviciosEducacion && perfil.serviciosEducacion[0]) || base.especialidad || '';
+    }
+
+    return enriquecerPerfil(u, Q);
+  }
+
+  function poolDemoEducacion(subId) {
+    if (DEMO_EDUCACION[subId]) return DEMO_EDUCACION[subId];
+    var pack = educacionPackDeSub(subId);
+    return DEMO_EDUCACION_BY_PACK[pack] || DEMO_EDUCACION_BY_PACK.A;
+  }
+
+  function plantillaDemoEducacion(Q, pres) {
+    pres = pres || presentacionDeCategoria(Q.categoria);
+    var subId = pres.subcategoriaId || idCategoria(Q.categoria);
+    return poolDemoEducacion(subId).map(function (base, idx) {
+      return armarPerfilEducacion(base, idx, Q, pres);
+    });
+  }
+
+  var INDUSTRIA_CEDULA_SUBS = [
+    'contador-publico', 'administrador-de-empresas', 'ingeniero-industrial',
+    'ingeniero-en-procesos', 'especialista-en-seguridad-industrial'
+  ];
+
+  var INDUSTRIA_NEGOCIO_SUBS = [
+    'supervisor-industrial', 'tecnico-industrial', 'outsourcing', 'seguridad-industrial',
+    'call-center', 'centro-de-negocios-empresarial', 'manufactura', 'maquila',
+    'automatizacion-industrial', 'ingenieria-industrial', 'maquinaria-industrial',
+    'mantenimiento-industrial', 'soldadura-industrial', 'limpieza-industrial'
+  ];
+
+  var DEMO_INDUSTRIA_BY_PACK = {
+    A: [
+      { alias: 'Consultor Lean MTY', precio: '1,200', tagline: 'Optimización de procesos y mejora continua.', serviciosIndustriales: ['Consultoría', 'Lean manufacturing'], sectoresIndustriales: ['Manufactura', 'Logística'], modalidadServicioIndustrial: 'mixto', tarifaDesde: '1200', coberturaGeografica: 'Monterrey y área metropolitana', horario: 'Lun–Vie', verificada: true },
+      { alias: 'Asesor ISO Norte', precio: 'Consultar', tagline: 'Implementación y auditoría de sistemas de calidad.', serviciosIndustriales: ['ISO 9001', 'Auditoría interna'], sectoresIndustriales: ['Industria', 'Servicios'], modalidadServicioIndustrial: 'sitio_cliente', tarifaDesde: 'Consultar', horario: 'Con cita', verificada: true }
+    ],
+    B: [
+      { nombreProfesional: 'Ing. Carlos Procesos', precio: '1,800', tagline: 'Ingeniería industrial y layout de planta.', serviciosProfesionalesIndustrial: ['Layout', 'Balanceo de líneas'], especialidadIndustrial: 'Ingeniería industrial', sectoresIndustriales: ['Manufactura'], modalidadServicioIndustrial: 'sitio_cliente', precioConsulta: '1800', horarioAtencion: 'Lun–Vie', verificada: true }
+    ],
+    C: [
+      { nombreComercial: 'Manufactura del Norte', precio: 'Consultar', tagline: 'Maquinado y ensamble de componentes metálicos.', serviciosEmpresaIndustrial: ['Maquinado CNC', 'Ensamble'], procesosIndustriales: ['Torneado', 'Fresado'], capacidadProduccion: '500 piezas/mes', certificacionesIndustriales: ['ISO 9001'], horario: 'Lun–Sáb', verificada: true }
+    ],
+    D: [
+      { nombreComercial: 'Mantenimiento Industrial Pro', precio: 'Consultar', tagline: 'Mantenimiento preventivo y correctivo en planta.', serviciosEmpresaIndustrial: ['Preventivo', 'Correctivo'], procesosIndustriales: ['Mecánica', 'Eléctrica'], modalidadServicioIndustrial: 'planta', certificacionesIndustriales: ['NOM-022'], horario: '24 h', verificada: true }
+    ],
+    E: [
+      { nombreComercial: 'Outsourcing Operativo MX', precio: 'Consultar', tagline: 'Tercerización de procesos administrativos y operativos.', serviciosEmpresaIndustrial: ['Outsourcing', 'Back office'], sectoresIndustriales: ['Manufactura', 'Servicios'], modalidadServicioIndustrial: 'instalaciones', horario: 'Lun–Vie', verificada: true }
+    ]
+  };
+
+  var DEMO_INDUSTRIA = {
+    'consultor-empresarial-independiente': DEMO_INDUSTRIA_BY_PACK.A,
+    'ingeniero-industrial': DEMO_INDUSTRIA_BY_PACK.B,
+    manufactura: DEMO_INDUSTRIA_BY_PACK.C,
+    'mantenimiento-industrial': DEMO_INDUSTRIA_BY_PACK.D,
+    outsourcing: DEMO_INDUSTRIA_BY_PACK.E
+  };
+
+  function industriaPackDeSub(subId) {
+    var key = String(subId || '').trim().toLowerCase().replace(/_/g, '-');
+    if (global.CARIHUB_REGISTRO_INDUSTRIA_SECTOR_BLOCKS && CARIHUB_REGISTRO_INDUSTRIA_SECTOR_BLOCKS.resolvePack) {
+      return CARIHUB_REGISTRO_INDUSTRIA_SECTOR_BLOCKS.resolvePack(key);
+    }
+    return 'A';
+  }
+
+  function buildIndustriaPerfilDemo(base, subId, pack) {
+    pack = String(pack || 'A').toUpperCase();
+    var p = {
+      deltaPack: pack,
+      canonSubcategoriaId: subId,
+      tagline: base.tagline || '',
+      tarifaDesde: base.precio || base.tarifaDesde || 'Consultar',
+      precioConsulta: base.precioConsulta || base.precio || '',
+      horarioDetalle: base.horarioDetalle || base.horario || '',
+      horarioAtencion: base.horarioAtencion || base.horario || '',
+      modalidadServicioIndustrial: base.modalidadServicioIndustrial || '',
+      coberturaGeografica: base.coberturaGeografica || base.zonaCobertura || '',
+      colaboracionesComerciales: base.colaboracionesComerciales || ''
+    };
+    var keys = [
+      'alias', 'nombreProfesional', 'nombreComercial', 'serviciosIndustriales', 'serviciosEmpresaIndustrial',
+      'serviciosProfesionalesIndustrial', 'sectoresIndustriales', 'procesosIndustriales',
+      'certificacionesIndustriales', 'capacidadProduccion', 'equipamientoIndustrial',
+      'especialidadIndustrial', 'tiempoRespuestaIndustrial', 'certificaciones', 'diferenciadorIndustrial', 'direccion'
+    ];
+    keys.forEach(function (k) {
+      if (base[k] != null && base[k] !== '') p[k] = base[k];
+    });
+    return p;
+  }
+
+  function armarPerfilIndustria(base, idx, Q, pres) {
+    var subId = pres.subcategoriaId || idCategoria(Q.categoria);
+    var catLabel = base.categoriaPublica || labelCategoria(Q.categoria);
+    var pack = base.deltaPack || industriaPackDeSub(subId);
+    var perfil = buildIndustriaPerfilDemo(base, subId, pack);
+    var esCedula = INDUSTRIA_CEDULA_SUBS.indexOf(subId) >= 0;
+    var esNegocio = INDUSTRIA_NEGOCIO_SUBS.indexOf(subId) >= 0;
+    var nombre = perfil.nombreProfesional || perfil.nombreComercial || perfil.alias || 'Industria demo';
+    var id = 'demo-industria-' + subId + '-' + slug(nombre) + '-' + idx;
+    var precio = base.precio || perfil.precioConsulta || perfil.tarifaDesde || 'Consultar';
+
+    var u = {
+      __id: id,
+      __demo: true,
+      sectorId: 'industria',
+      subcategoriaId: subId,
+      categoria: catLabel,
+      categoriaPublica: catLabel,
+      precio: precio,
+      tagline: base.tagline || '',
+      horario: base.horario || perfil.horarioAtencion || perfil.horarioDetalle || 'Consultar',
+      pais: Q.pais,
+      estado: Q.estado || 'Nuevo León',
+      ciudad: Q.ciudad || 'Monterrey',
+      zona: zonaNombre(idx),
+      verificada: base.verificada !== false,
+      verificado: base.verificada !== false,
+      respuestaRapida: base.respuestaRapida !== false,
+      fotoURL: foto(idx),
+      fotosExtraURL: ['a', 'b', 'c', 'd', 'e', 'f'],
+      deltaPack: pack,
+      industriaPerfil: perfil
+    };
+
+    if (esCedula) {
+      u.nombreProfesional = perfil.nombreProfesional || nombre;
+      u.nombre = u.nombreProfesional;
+      u.requiresCedula = true;
+      u.cedulaVerificada = true;
+      u.especialidad = perfil.especialidadIndustrial || (perfil.sectoresIndustriales && perfil.sectoresIndustriales[0]) || '';
+    } else if (esNegocio) {
+      u.tipoPerfil = 'negocio';
+      u.tipoCuenta = 'negocio';
+      u.nombreComercial = perfil.nombreComercial || nombre;
+      u.nombre = u.nombreComercial;
+    } else {
+      u.alias = perfil.alias || nombre;
+      u.nombre = u.alias;
+      u.especialidad = (perfil.sectoresIndustriales && perfil.sectoresIndustriales[0]) || (perfil.serviciosIndustriales && perfil.serviciosIndustriales[0]) || base.especialidad || '';
+    }
+
+    return enriquecerPerfil(u, Q);
+  }
+
+  function poolDemoIndustria(subId) {
+    if (DEMO_INDUSTRIA[subId]) return DEMO_INDUSTRIA[subId];
+    var pack = industriaPackDeSub(subId);
+    return DEMO_INDUSTRIA_BY_PACK[pack] || DEMO_INDUSTRIA_BY_PACK.A;
+  }
+
+  function plantillaDemoIndustria(Q, pres) {
+    pres = pres || presentacionDeCategoria(Q.categoria);
+    var subId = pres.subcategoriaId || idCategoria(Q.categoria);
+    return poolDemoIndustria(subId).map(function (base, idx) {
+      return armarPerfilIndustria(base, idx, Q, pres);
+    });
+  }
+
+  var INMO_NEGOCIO_SUBS = [
+    'inmobiliaria', 'agencia-de-bienes-raices', 'desarrolladora-inmobiliaria', 'constructora',
+    'administracion-de-condominios', 'venta-de-casas', 'venta-de-departamentos', 'venta-de-terrenos',
+    'venta-de-locales-comerciales', 'venta-de-bodegas', 'venta-de-oficinas', 'renta-de-casas',
+    'renta-de-departamentos', 'renta-de-locales-comerciales', 'renta-de-bodegas', 'renta-de-oficinas',
+    'renta-vacacional', 'coworking', 'centros-de-negocios-y-oficinas'
+  ];
+
+  var DEMO_INMO_BY_PACK = {
+    A: [
+      { alias: 'Agente Inmobiliario MTY', precio: 'Consultar', tagline: 'Venta y renta residencial en zona sur.', serviciosInmobiliarios: ['Asesoría', 'Acompañamiento'], tiposInmuebleInmobiliario: ['Casas', 'Departamentos'], modalidadOperacionInmobiliaria: 'venta_y_renta', tarifaDesde: 'Consultar', coberturaGeografica: 'Monterrey sur', horario: 'Lun–Sáb', verificada: true },
+      { alias: 'Corredor Residencial Norte', precio: 'Consultar', tagline: 'Especialista en compraventa de casas.', serviciosInmobiliarios: ['Compraventa', 'Valuación'], tiposInmuebleInmobiliario: ['Casas'], modalidadOperacionInmobiliaria: 'venta', tarifaDesde: 'Consultar', horario: 'Con cita', verificada: true }
+    ],
+    B: [
+      { nombreComercial: 'Inmobiliaria del Valle', precio: 'Consultar', tagline: 'Venta, renta y administración de inmuebles.', serviciosEmpresaInmobiliaria: ['Venta', 'Renta', 'Administración'], tiposInmuebleInmobiliario: ['Casas', 'Departamentos', 'Locales'], modalidadOperacionInmobiliaria: 'venta_y_renta', horario: 'Lun–Vie', verificada: true }
+    ],
+    C: [
+      { nombreComercial: 'Casas Residenciales MTY', precio: '2.5M – 8M', tagline: 'Venta de casas en fraccionamientos premium.', operacionInmobiliaria: 'venta', tiposInmuebleInmobiliario: ['Casas'], rangoPrecioInmobiliario: '$2.5M – $8M', amenidadesInmueble: ['Jardín', 'Cochera'], horario: 'Lun–Sáb', verificada: true }
+    ],
+    D: [
+      { nombreComercial: 'Renta Departamentos Centro', precio: '$12,000 – $25,000', tagline: 'Departamentos amueblados y sin amueblar.', operacionInmobiliaria: 'renta', tiposInmuebleInmobiliario: ['Departamentos'], rangoPrecioInmobiliario: '$12,000 – $25,000/mes', amenidadesInmueble: ['Elevador', 'Seguridad'], horario: 'Lun–Vie', verificada: true }
+    ],
+    E: [
+      { nombreComercial: 'Coworking Hub Norte', precio: '$3,500/mes', tagline: 'Oficinas flexibles y salas de juntas.', serviciosEmpresaInmobiliaria: ['Coworking', 'Oficinas privadas'], operacionInmobiliaria: 'coworking', amenidadesInmueble: ['Internet', 'Cafetería'], rangoPrecioInmobiliario: 'Desde $3,500/mes', horario: 'Lun–Dom', verificada: true }
+    ]
+  };
+
+  var DEMO_INMO = {
+    'agente-inmobiliario-independiente': DEMO_INMO_BY_PACK.A,
+    inmobiliaria: DEMO_INMO_BY_PACK.B,
+    'venta-de-casas': DEMO_INMO_BY_PACK.C,
+    'renta-de-departamentos': DEMO_INMO_BY_PACK.D,
+    coworking: DEMO_INMO_BY_PACK.E
+  };
+
+  function inmoPackDeSub(subId) {
+    var key = String(subId || '').trim().toLowerCase().replace(/_/g, '-');
+    if (global.CARIHUB_REGISTRO_BIENES_RAICES_SECTOR_BLOCKS && CARIHUB_REGISTRO_BIENES_RAICES_SECTOR_BLOCKS.resolvePack) {
+      return CARIHUB_REGISTRO_BIENES_RAICES_SECTOR_BLOCKS.resolvePack(key);
+    }
+    return 'A';
+  }
+
+  function buildBienesRaicesPerfilDemo(base, subId, pack) {
+    pack = String(pack || 'A').toUpperCase();
+    var p = {
+      deltaPack: pack,
+      canonSubcategoriaId: subId,
+      tagline: base.tagline || '',
+      tarifaDesde: base.precio || base.tarifaDesde || 'Consultar',
+      rangoPrecioInmobiliario: base.rangoPrecioInmobiliario || base.precio || '',
+      horarioDetalle: base.horarioDetalle || base.horario || '',
+      modalidadOperacionInmobiliaria: base.modalidadOperacionInmobiliaria || '',
+      operacionInmobiliaria: base.operacionInmobiliaria || '',
+      coberturaGeografica: base.coberturaGeografica || base.zonaCobertura || '',
+      colaboracionesComerciales: base.colaboracionesComerciales || ''
+    };
+    var keys = [
+      'alias', 'nombreComercial', 'serviciosInmobiliarios', 'serviciosEmpresaInmobiliaria',
+      'tiposInmuebleInmobiliario', 'especialidadesInmobiliarias', 'especialidadesEmpresaInmobiliaria',
+      'amenidadesInmueble', 'caracteristicasInmueble', 'tiempoRespuestaInmobiliaria',
+      'certificaciones', 'diferenciadorInmobiliario', 'direccion'
+    ];
+    keys.forEach(function (k) {
+      if (base[k] != null && base[k] !== '') p[k] = base[k];
+    });
+    return p;
+  }
+
+  function armarPerfilBienesRaices(base, idx, Q, pres) {
+    var subId = pres.subcategoriaId || idCategoria(Q.categoria);
+    var catLabel = base.categoriaPublica || labelCategoria(Q.categoria);
+    var pack = base.deltaPack || inmoPackDeSub(subId);
+    var perfil = buildBienesRaicesPerfilDemo(base, subId, pack);
+    var esNegocio = INMO_NEGOCIO_SUBS.indexOf(subId) >= 0;
+    var nombre = perfil.nombreComercial || perfil.alias || 'Inmobiliario demo';
+    var id = 'demo-inmo-' + subId + '-' + slug(nombre) + '-' + idx;
+    var precio = base.precio || perfil.rangoPrecioInmobiliario || perfil.tarifaDesde || 'Consultar';
+
+    var u = {
+      __id: id,
+      __demo: true,
+      sectorId: 'bienes-raices',
+      subcategoriaId: subId,
+      categoria: catLabel,
+      categoriaPublica: catLabel,
+      precio: precio,
+      tagline: base.tagline || '',
+      horario: base.horario || perfil.horarioDetalle || 'Consultar',
+      pais: Q.pais,
+      estado: Q.estado || 'Nuevo León',
+      ciudad: Q.ciudad || 'Monterrey',
+      zona: zonaNombre(idx),
+      verificada: base.verificada !== false,
+      verificado: base.verificada !== false,
+      respuestaRapida: base.respuestaRapida !== false,
+      fotoURL: foto(idx),
+      fotosExtraURL: ['a', 'b', 'c', 'd', 'e', 'f'],
+      deltaPack: pack,
+      bienesRaicesPerfil: perfil
+    };
+
+    if (esNegocio) {
+      u.tipoPerfil = 'negocio';
+      u.tipoCuenta = 'negocio';
+      u.nombreComercial = perfil.nombreComercial || nombre;
+      u.nombre = u.nombreComercial;
+    } else {
+      u.alias = perfil.alias || nombre;
+      u.nombre = u.alias;
+      u.especialidad = (perfil.tiposInmuebleInmobiliario && perfil.tiposInmuebleInmobiliario[0]) || (perfil.serviciosInmobiliarios && perfil.serviciosInmobiliarios[0]) || base.especialidad || '';
+    }
+
+    return enriquecerPerfil(u, Q);
+  }
+
+  function poolDemoBienesRaices(subId) {
+    if (DEMO_INMO[subId]) return DEMO_INMO[subId];
+    var pack = inmoPackDeSub(subId);
+    return DEMO_INMO_BY_PACK[pack] || DEMO_INMO_BY_PACK.A;
+  }
+
+  function plantillaDemoBienesRaices(Q, pres) {
+    pres = pres || presentacionDeCategoria(Q.categoria);
+    var subId = pres.subcategoriaId || idCategoria(Q.categoria);
+    return poolDemoBienesRaices(subId).map(function (base, idx) {
+      return armarPerfilBienesRaices(base, idx, Q, pres);
+    });
+  }
+
+  var EVENTOS_PACK_POR_SUB = {
+    'espacios-para-eventos': 'VENUE',
+    'organizadores-produccion-eventos': 'PROD',
+    'decoracion-ambientacion-eventos': 'CREATIVE',
+    'fotografia-video-eventos': 'CREATIVE',
+    'invitaciones-papeleria-eventos': 'CREATIVE',
+    'djs-eventos': 'MUSIC',
+    'grupos-musicales-eventos': 'MUSIC',
+    'animadores-maestros-ceremonia': 'SHOW',
+    'shows-para-eventos': 'SHOW',
+    'banquetes-catering-eventos': 'FOOD',
+    'food-trucks-carritos-eventos': 'FOOD',
+    'pasteles-reposteria-eventos': 'FOOD',
+    'renta-mobiliario-eventos': 'RENTAL',
+    'renta-equipo-eventos': 'RENTAL',
+    'florerias-eventos': 'FLORAL',
+    'pirotecnia-efectos-especiales': 'FX',
+    'seguridad-eventos': 'SECURITY',
+    'valet-parking-eventos': 'VALET',
+    'transporte-eventos': 'TRANSPORT'
+  };
+
+  var EVENTOS_NEGOCIO_SUBS = [
+    'espacios-para-eventos', 'banquetes-catering-eventos', 'renta-mobiliario-eventos',
+    'renta-equipo-eventos', 'food-trucks-carritos-eventos', 'pasteles-reposteria-eventos',
+    'florerias-eventos', 'pirotecnia-efectos-especiales', 'seguridad-eventos',
+    'valet-parking-eventos', 'transporte-eventos'
+  ];
+
+  var DEMO_EVENTOS_BY_PACK = {
+    VENUE: [
+      { nombreComercial: 'Salón Jardín Monterrey', precio: '25,000', tagline: 'Bodas, XV años y eventos corporativos con jardín.', tiposEspacio: ['salon', 'jardin'], tiposEventoAceptados: ['bodas', 'xv_anos'], capacidadMin: 50, capacidadMax: 300, estacionamientoCupo: 80, cateringPolitica: 'externo_permitido', permiteMusicaEnVivo: true, cotizacionDesde: '25000', unidadCotizacion: 'evento', horario: 'Con cita previa', verificada: true },
+      { nombreComercial: 'Terraza Sky Events', precio: '18,000', tagline: 'Vista panorámica para cócteles y celebraciones.', tiposEspacio: ['terraza', 'salon'], capacidadMax: 150, cotizacionDesde: '18000', unidadCotizacion: 'evento', verificada: true }
+    ],
+    PROD: [
+      { alias: 'Producción Total MX', precio: '35,000', tagline: 'Coordinación integral de bodas y eventos corporativos.', serviciosProduccion: ['Coordinación', 'Cronograma', 'Proveedores'], tamanoEventoAtendido: 'mediano', cotizacionDesde: '35000', unidadCotizacion: 'evento', horario: 'Lun–Sáb', verificada: true }
+    ],
+    CREATIVE: [
+      { alias: 'Lens & Frame Studio', precio: '15,000', tagline: 'Foto, video y cobertura con dron para bodas.', serviciosAudiovisual: ['foto', 'video', 'dron'], especialidadesEvento: ['bodas', 'corporativo'], horasCobertura: 8, licenciaDron: true, cotizacionDesde: '15000', unidadCotizacion: 'evento', verificada: true },
+      { alias: 'Decor Ambient', precio: '8,500', tagline: 'Ambientación temática y montaje floral básico.', serviciosDecoracion: ['Montaje', 'Iluminación'], cotizacionDesde: '8500', unidadCotizacion: 'evento', verificada: true }
+    ],
+    MUSIC: [
+      { alias: 'Fara Fara del Norte', precio: '18,000', tagline: 'Formato tradicional con trompeta y tambora.', tipoAgrupacion: 'fara_fara', descripcionFormatoFaraFara: 'Show de 90 min con repertorio regional.', numeroIntegrantes: 8, repertorioPrincipal: 'Regional mexicano', duracionSetMinutos: 90, incluyeSonidoMusica: true, cotizacionDesde: '18000', unidadCotizacion: 'evento', verificada: true },
+      { alias: 'DJ Pulse MTY', precio: '6,500', tagline: 'DJ para fiestas, bodas y eventos corporativos.', tipoAgrupacion: 'dj', duracionSetMinutos: 240, incluyeSonidoMusica: true, cotizacionDesde: '6500', unidadCotizacion: 'evento', verificada: true }
+    ],
+    SHOW: [
+      { alias: 'Mago Corporativo Alex', precio: '8,500', tagline: 'Magia de escena para adultos y familias.', tipoShow: ['mago'], publicoObjetivo: 'familiar', duracionShowMinutos: 45, numeroArtistas: 1, cotizacionDesde: '8500', unidadCotizacion: 'evento', verificada: true },
+      { alias: 'MC Dinámica Pro', precio: '5,500', tagline: 'Maestro de ceremonias y animación de eventos.', rolPrincipal: 'mc', publicoObjetivo: 'familiar', duracionShowMinutos: 180, cotizacionDesde: '5500', unidadCotizacion: 'evento', verificada: true }
+    ],
+    FOOD: [
+      { nombreComercial: 'Tacos Rodantes Eventos', precio: '9,500', tagline: 'Food truck para fiestas y eventos al aire libre.', tipoUnidadFood: 'food_truck', cartaPrincipal: 'Tacos y quesadillas', comensalesPorHora: 120, permisoManipulacionAlimentos: true, cotizacionDesde: '9500', unidadCotizacion: 'evento', verificada: true },
+      { nombreComercial: 'Banquetes Elegance', precio: 'Consultar', tagline: 'Buffet y servicio de meseros para bodas.', tipoServicioBanquete: 'buffet', capacidadBanquete: 250, cotizacionDesde: 'Consultar', unidadCotizacion: 'persona', verificada: true }
+    ],
+    RENTAL: [
+      { nombreComercial: 'Mobiliario Fiesta', precio: '4,200', tagline: 'Mesas, sillas y mantelería para eventos.', inventarioMobiliario: ['Mesas', 'Sillas', 'Mantelería'], cotizacionDesde: '4200', unidadCotizacion: 'evento', verificada: true }
+    ],
+    FLORAL: [
+      { nombreComercial: 'Flores & Eventos', precio: '7,800', tagline: 'Arreglos florales e instalaciones para bodas.', estilosFlorales: ['Romántico', 'Minimalista'], cotizacionDesde: '7800', unidadCotizacion: 'evento', verificada: true }
+    ],
+    FX: [
+      { nombreComercial: 'FX Pirotecnia Norte', precio: 'Consultar', tagline: 'Fuegos artificiales con permisos declarativos.', tipoEfectoPirotecnia: ['fuegos_artificiales'], ambientePirotecnia: 'exterior', licenciaPirotecnia: true, disclaimerReguladoEventos: true, cotizacionDesde: 'Consultar', unidadCotizacion: 'evento', verificada: true }
+    ],
+    SECURITY: [
+      { nombreComercial: 'Guardia Eventos MTY', precio: '6,000', tagline: 'Seguridad privada para eventos sociales y masivos.', elementosSeguridad: 12, controlAcceso: true, licenciaSeguridadPrivada: true, disclaimerReguladoEventos: true, cotizacionDesde: '6000', unidadCotizacion: 'evento', verificada: true }
+    ],
+    VALET: [
+      { nombreComercial: 'Valet Premium', precio: '4,500', tagline: 'Estacionamiento asistido para bodas y galas.', vehiculosPorHora: 40, elementosValet: 6, polizaResponsabilidadValet: true, cotizacionDesde: '4500', unidadCotizacion: 'evento', verificada: true }
+    ],
+    TRANSPORT: [
+      { nombreComercial: 'Shuttle Invitados', precio: '7,800', tagline: 'Transporte de invitados en sprinter y autobús.', tipoFlotaTransporte: ['sprinter', 'autobus'], capacidadPasajeros: 45, incluyeChofer: true, radioServicioKm: 80, cotizacionDesde: '7800', unidadCotizacion: 'evento', verificada: true }
+    ]
+  };
+
+  var DEMO_EVENTOS = {
+    'espacios-para-eventos': DEMO_EVENTOS_BY_PACK.VENUE,
+    'grupos-musicales-eventos': DEMO_EVENTOS_BY_PACK.MUSIC,
+    'shows-para-eventos': DEMO_EVENTOS_BY_PACK.SHOW,
+    'fotografia-video-eventos': DEMO_EVENTOS_BY_PACK.CREATIVE
+  };
+
+  function eventosPackDeSub(subId) {
+    var key = String(subId || '').trim().toLowerCase().replace(/_/g, '-');
+    if (EVENTOS_PACK_POR_SUB[key]) return EVENTOS_PACK_POR_SUB[key];
+    if (global.CARIHUB_REGISTRO_EVENTOS_SECTOR_BLOCKS && CARIHUB_REGISTRO_EVENTOS_SECTOR_BLOCKS.resolvePack) {
+      return CARIHUB_REGISTRO_EVENTOS_SECTOR_BLOCKS.resolvePack(key);
+    }
+    return 'PROD';
+  }
+
+  function buildEventosPerfilDemo(base, subId, pack) {
+    pack = String(pack || 'PROD').toUpperCase();
+    var p = {
+      deltaPack: pack,
+      canonSubcategoriaId: subId,
+      tagline: base.tagline || '',
+      cotizacionDesde: base.cotizacionDesde || base.precio || 'Consultar',
+      unidadCotizacion: base.unidadCotizacion || 'evento',
+      horarioAtencionComercial: base.horario || base.horarioAtencionComercial || ''
+    };
+    var keys = [
+      'nombreComercial', 'alias', 'tiposEspacio', 'tiposEventoAceptados', 'capacidadMin', 'capacidadMax',
+      'estacionamientoCupo', 'cateringPolitica', 'permiteMusicaEnVivo', 'permitePirotecnia', 'restriccionRuido',
+      'serviciosProduccion', 'tamanoEventoAtendido', 'serviciosAudiovisual', 'especialidadesEvento', 'horasCobertura',
+      'licenciaDron', 'serviciosDecoracion', 'tipoAgrupacion', 'descripcionFormatoFaraFara', 'numeroIntegrantes',
+      'repertorioPrincipal', 'duracionSetMinutos', 'incluyeSonidoMusica', 'tipoShow', 'publicoObjetivo',
+      'contenidoSensible', 'duracionShowMinutos', 'numeroArtistas', 'rolPrincipal', 'tipoUnidadFood',
+      'cartaPrincipal', 'comensalesPorHora', 'permisoManipulacionAlimentos', 'tipoServicioBanquete',
+      'capacidadBanquete', 'inventarioMobiliario', 'estilosFlorales', 'tipoEfectoPirotecnia', 'ambientePirotecnia',
+      'licenciaPirotecnia', 'disclaimerReguladoEventos', 'elementosSeguridad', 'controlAcceso', 'licenciaSeguridadPrivada',
+      'vehiculosPorHora', 'elementosValet', 'polizaResponsabilidadValet', 'tipoFlotaTransporte', 'capacidadPasajeros',
+      'incluyeChofer', 'radioServicioKm', 'colaboracionesComerciales', 'mostrarColaboracionContenidoPublico'
+    ];
+    keys.forEach(function (k) {
+      if (base[k] != null && base[k] !== '') p[k] = base[k];
+    });
+    return p;
+  }
+
+  function armarPerfilEventos(base, idx, Q, pres) {
+    var subId = pres.subcategoriaId || idCategoria(Q.categoria);
+    var catLabel = base.categoriaPublica || labelCategoria(Q.categoria);
+    var pack = base.deltaPack || eventosPackDeSub(subId);
+    var esNegocio = EVENTOS_NEGOCIO_SUBS.indexOf(subId) >= 0;
+    var eventos = buildEventosPerfilDemo(base, subId, pack);
+    var nombre = base.nombreComercial || base.alias || base.nombre || 'Proveedor demo';
+    var id = 'demo-eventos-' + subId + '-' + slug(nombre) + '-' + idx;
+    var precio = base.precio || eventos.cotizacionDesde || 'Consultar';
+
+    var u = {
+      __id: id,
+      __demo: true,
+      __vista: esNegocio ? 'empresa' : 'pro',
+      sectorId: 'eventos',
+      subcategoriaId: subId,
+      arquetipo: esNegocio ? 'negocio_venue' : 'persona_servicio_profesional',
+      tipoPerfil: esNegocio ? 'negocio' : 'persona',
+      categoria: catLabel,
+      categoriaPublica: catLabel,
+      precio: precio,
+      tagline: base.tagline || '',
+      horario: base.horario || eventos.horarioAtencionComercial || 'Consultar',
+      pais: Q.pais,
+      estado: Q.estado || 'Nuevo León',
+      ciudad: Q.ciudad || 'Monterrey',
+      zona: zonaNombre(idx),
+      verificada: base.verificada !== false,
+      verificado: base.verificada !== false,
+      respuestaRapida: base.respuestaRapida !== false,
+      fotoURL: foto(idx),
+      fotosExtraURL: ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'],
+      deltaPack: pack,
+      eventosPerfil: eventos
+    };
+
+    if (esNegocio) {
+      u.nombreComercial = eventos.nombreComercial || nombre;
+      u.nombre = u.nombreComercial;
+    } else {
+      u.alias = eventos.alias || nombre;
+      u.nombre = u.alias;
+    }
+
+    if (base.contenidoSensible === true || (Array.isArray(base.tipoShow) && base.tipoShow.indexOf('strippers') >= 0)) {
+      u.sensible = true;
+      u.requiresAdminReview = true;
+    }
+    if (pack === 'FX' || pack === 'SECURITY') {
+      u.regulada = true;
+      u.requiresAdminReview = true;
+    }
+    if (base.colaboracionContenido) u.colaboracionContenido = base.colaboracionContenido;
+    if (base.mostrarColaboracionContenidoPublico) {
+      u.mostrarColaboracionContenidoPublico = base.mostrarColaboracionContenidoPublico;
+    }
+
+    return enriquecerPerfil(u, Q);
+  }
+
+  function poolDemoEventos(subId) {
+    if (DEMO_EVENTOS[subId]) return DEMO_EVENTOS[subId];
+    var pack = eventosPackDeSub(subId);
+    return DEMO_EVENTOS_BY_PACK[pack] || DEMO_EVENTOS_BY_PACK.PROD;
+  }
+
+  function plantillaDemoEventos(Q, pres) {
+    pres = pres || presentacionDeCategoria(Q.categoria);
+    var subId = pres.subcategoriaId || idCategoria(Q.categoria);
+    return poolDemoEventos(subId).map(function (base, idx) {
+      return armarPerfilEventos(base, idx, Q, pres);
+    });
+  }
+
   function plantillaDemoSchema(Q, pres) {
     pres = pres || presentacionDeCategoria(Q.categoria);
+    /* Si el schema no resolvió el sector (subcategoría con nombre no canónico),
+       derivarlo con el resolvedor de resultados para enrutar al builder correcto
+       del sector y no caer en pool genérico/vacío. */
+    if (!pres.sectorId) {
+      var sid = sectorDeBusqueda(Q);
+      if (sid && sid !== 'adultos') {
+        pres = Object.assign({}, pres, { sectorId: sid });
+      }
+    }
     var R = global.CariHubSectorContractRegistry;
     if (R && R.resolveDemoBuilder) {
       var builderId = R.resolveDemoBuilder(pres.sectorId);
@@ -777,6 +2572,42 @@
       }
       if (builderId === 'plantillaDemoBienestar' && typeof plantillaDemoBienestar === 'function') {
         if (!pres.esAdultoPersona) return plantillaDemoBienestar(Q, pres);
+      }
+      if (builderId === 'plantillaDemoGastronomia' && typeof plantillaDemoGastronomia === 'function') {
+        return plantillaDemoGastronomia(Q, pres);
+      }
+      if (builderId === 'plantillaDemoEventos' && typeof plantillaDemoEventos === 'function') {
+        return plantillaDemoEventos(Q, pres);
+      }
+      if (builderId === 'plantillaDemoMascotas' && typeof plantillaDemoMascotas === 'function') {
+        return plantillaDemoMascotas(Q, pres);
+      }
+      if (builderId === 'plantillaDemoHogar' && typeof plantillaDemoHogar === 'function') {
+        return plantillaDemoHogar(Q, pres);
+      }
+      if (builderId === 'plantillaDemoSalud' && typeof plantillaDemoSalud === 'function') {
+        return plantillaDemoSalud(Q, pres);
+      }
+      if (builderId === 'plantillaDemoTecnologia' && typeof plantillaDemoTecnologia === 'function') {
+        return plantillaDemoTecnologia(Q, pres);
+      }
+      if (builderId === 'plantillaDemoAutomotriz' && typeof plantillaDemoAutomotriz === 'function') {
+        return plantillaDemoAutomotriz(Q, pres);
+      }
+      if (builderId === 'plantillaDemoTransporte' && typeof plantillaDemoTransporte === 'function') {
+        return plantillaDemoTransporte(Q, pres);
+      }
+      if (builderId === 'plantillaDemoComercio' && typeof plantillaDemoComercio === 'function') {
+        return plantillaDemoComercio(Q, pres);
+      }
+      if (builderId === 'plantillaDemoEducacion' && typeof plantillaDemoEducacion === 'function') {
+        return plantillaDemoEducacion(Q, pres);
+      }
+      if (builderId === 'plantillaDemoIndustria' && typeof plantillaDemoIndustria === 'function') {
+        return plantillaDemoIndustria(Q, pres);
+      }
+      if (builderId === 'plantillaDemoBienesRaices' && typeof plantillaDemoBienesRaices === 'function') {
+        return plantillaDemoBienesRaices(Q, pres);
       }
     }
     var comp = pres.componenteResultados || 'ResultCardAdultos';
@@ -861,7 +2692,7 @@
     var modo = vistaPreviaModo();
     if (modo === 'con-resultados-4') {
       return {
-        perfiles: perfilesCanonicosCinco(Q).slice(),
+        perfiles: perfilesPreviewPorCategoria(Q, true).slice(),
         meta: {
           vacio: false,
           totalRegistrados: 0,
@@ -872,7 +2703,7 @@
     }
     if (modo === 'con-resultados') {
       return {
-        perfiles: perfilesCanonicosCinco(Q).slice(),
+        perfiles: perfilesPreviewPorCategoria(Q, true).slice(),
         meta: {
           vacio: false,
           totalRegistrados: 0,
@@ -1004,14 +2835,9 @@
   function vacioResultadosHTML(Q) {
     Q = Q || {};
     return '' +
-      '<div class="res-vacio res-vacio--inline" role="status" aria-live="polite">' +
-        '<span class="res-vacio__sparkles" aria-hidden="true"></span>' +
-        '<div class="res-vacio__inner">' +
-          '<div class="res-vacio__brand">Cariñosas</div>' +
-          '<p class="res-vacio__tag">Encuentra tu compañía ideal</p>' +
-          '<h2 class="res-vacio__title">' + safeTxt(tituloVacio()) + '</h2>' +
-          '<p class="res-vacio__sub">' + safeTxt(SUB_SIN_RESULTADOS) + '</p>' +
-        '</div>' +
+      '<div class="res-empty res-empty--inline" role="status" aria-live="polite">' +
+        '<h2 class="res-empty__title">' + safeTxt(tituloVacio()) + '</h2>' +
+        '<p class="res-empty__sub">' + safeTxt(SUB_SIN_RESULTADOS) + '</p>' +
       '</div>';
   }
 
@@ -1339,14 +3165,7 @@
 
   function syncBannersVista(esVacio, Q) {
     Q = Q || queryFromLocation();
-    if (global.CariHubPublicidadActiva && typeof global.CariHubPublicidadActiva.syncBannersResultados === 'function') {
-      global.CariHubPublicidadActiva.syncBannersResultados(esVacio, { Q: Q });
-      return;
-    }
-    if (esVacio && global.CariHubBannerSinResultados && global.CariHubBannerSinResultados.syncResultadosPage) {
-      global.CariHubBannerSinResultados.syncResultadosPage(true);
-      return;
-    }
+    /* Misma pantalla de resultados con o sin perfiles: banners del sector activo. */
     if (global.CariHubBannerSinResultados && global.CariHubBannerSinResultados.syncResultadosPage) {
       global.CariHubBannerSinResultados.syncResultadosPage(false);
     }
@@ -1391,6 +3210,7 @@
     vistaPreviaModo: vistaPreviaModo,
     componerListaResultados: componerListaResultados,
     vacioResultadosHTML: vacioResultadosHTML,
+    syncBannersVista: syncBannersVista,
     generarPerfiles: generarPerfiles,
     renderProfiles: renderProfiles,
     cardHTML: cardHTML,
@@ -1411,6 +3231,19 @@
     urlPerfil: urlPerfil,
     urlPerfilPublico: urlPerfilPublico,
     urlPerfilDemo: urlPerfilDemo,
-    perfilPorId: perfilPorId
+    perfilPorId: perfilPorId,
+    plantillaDemoGastronomia: plantillaDemoGastronomia,
+    plantillaDemoProfesionales: plantillaDemoProfesionales,
+    plantillaDemoEventos: plantillaDemoEventos,
+    plantillaDemoMascotas: plantillaDemoMascotas,
+    plantillaDemoHogar: plantillaDemoHogar,
+    plantillaDemoSalud: plantillaDemoSalud,
+    plantillaDemoTecnologia: plantillaDemoTecnologia,
+    plantillaDemoAutomotriz: plantillaDemoAutomotriz,
+    plantillaDemoTransporte: plantillaDemoTransporte,
+    plantillaDemoComercio: plantillaDemoComercio,
+    plantillaDemoEducacion: plantillaDemoEducacion,
+    plantillaDemoIndustria: plantillaDemoIndustria,
+    plantillaDemoBienesRaices: plantillaDemoBienesRaices
   };
 })(typeof window !== 'undefined' ? window : globalThis);

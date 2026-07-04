@@ -126,13 +126,7 @@
     opts = opts || {};
     if (!esPaginaResultados()) return;
 
-    if (esVacio) {
-      if (global.CariHubBannerSinResultados && global.CariHubBannerSinResultados.syncResultadosPage) {
-        global.CariHubBannerSinResultados.syncResultadosPage(true);
-      }
-      return;
-    }
-
+    /* Lista vacía = misma shell de resultados; no intercambiar a inventario sin-resultados. */
     if (global.CariHubBannerSinResultados && global.CariHubBannerSinResultados.syncResultadosPage) {
       global.CariHubBannerSinResultados.syncResultadosPage(false);
     }
@@ -144,9 +138,32 @@
     }
   }
 
+  function queryResultadosQ() {
+    if (global.CariHubResultadosDemo && global.CariHubResultadosDemo.queryFromLocation) {
+      return global.CariHubResultadosDemo.queryFromLocation();
+    }
+    try {
+      var p = new URL(global.location.href).searchParams;
+      return {
+        categoria: p.get('categoria') || 'Cariñosas',
+        pais: p.get('pais') || 'México',
+        estado: p.get('estado') || '',
+        ciudad: p.get('ciudad') || ''
+      };
+    } catch (e) {
+      return { categoria: 'Cariñosas', pais: 'México', estado: '', ciudad: '' };
+    }
+  }
+
   function remontarResultados() {
     if (!esPaginaResultados()) return;
-    syncBannersResultados(esListaVaciaResultados());
+    var Q = queryResultadosQ();
+    try {
+      if (global.CariHubResultadosSector && Q && Q.categoria) {
+        global.CariHubResultadosSector.aplicarTemaSector(Q.categoria);
+      }
+    } catch (e) { /* tema opcional */ }
+    syncBannersResultados(esListaVaciaResultados(), { Q: Q, force: true });
   }
 
   function remontarHomeLaterales() {

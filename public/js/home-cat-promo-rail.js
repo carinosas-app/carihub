@@ -5,13 +5,23 @@
   'use strict';
 
   var SLOT_CATEGORIAS = 'home_categorias';
-  var CAT_RAIL_BG_DEFAULT = 'img/home/banners/ad-banner-pink-01.png';
+  var CAT_RAIL_BG_DEFAULT = 'img/home/banners/ad-banner-categorias-explora-01.png';
 
   var CAT_RAIL_BG_BY_SECTOR = {
-    restaurantes: 'img/home/banners/ad-banner-gastronomia-01.svg',
-    eventos: 'img/home/banners/ad-banner-pink-01.png',
-    salud: 'img/home/banners/ad-banner-pink-02.png',
-    bienestar: 'img/home/banners/ad-banner-pink-03.png'
+    bienestar: 'img/home/banners/ad-banner-bienestar-01.png',
+    eventos: 'img/home/banners/ad-banner-eventos-01.png',
+    restaurantes: 'img/home/banners/ad-banner-restaurantes-01.png',
+    salud: 'img/home/banners/ad-banner-salud-01.png',
+    profesionales: 'img/home/banners/ad-banner-profesionales-01.png',
+    tecnologia: 'img/home/banners/ad-banner-tecnologia-01.png',
+    automotriz: 'img/home/banners/ad-banner-automotriz-01.png',
+    transporte: 'img/home/banners/ad-banner-transporte-01.png',
+    comercio: 'img/home/banners/ad-banner-comercio-01.png',
+    hogar: 'img/home/banners/ad-banner-hogar-01.png',
+    mascotas: 'img/home/banners/ad-banner-mascotas-01.png',
+    'bienes-raices': 'img/home/banners/ad-banner-bienes-raices-01.png',
+    educacion: 'img/home/banners/ad-banner-educacion-01.png',
+    industria: 'img/home/banners/ad-banner-industria-01.png'
   };
 
   function $(sel, root) {
@@ -62,8 +72,11 @@
       );
     }
 
+    var themed = !opts.sectorId || !!CAT_RAIL_BG_BY_SECTOR[opts.sectorId];
+
     return (
       '<a class="registro-pb registro-pb--rail-cat registro-pb--rail-vacant' +
+        (themed ? ' registro-pb--rail-themed' : '') +
         (opts.sectorId ? ' registro-pb--rail-vacant-' + esc(opts.sectorId) : '') +
         '" href="' + esc(href) + '" data-registro-slot="' + esc(SLOT_CATEGORIAS) + '" aria-label="Anúnciate aquí — banner selector de categorías">' +
         '<div class="registro-pb__stage">' +

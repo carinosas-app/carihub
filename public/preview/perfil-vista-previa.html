@@ -4004,27 +4004,12 @@ var PRO_LAYOUTS=["pro","empresa","medico"];
 function shell(tipo, inner){
   var t = THEME[tipo];
   var esCari=CARINOSAS_TIPOS.indexOf(tipo)>=0;
-  var pinSVG = '<svg width="22" height="22" viewBox="0 0 24 24"><path d="M12 2c-3.9 0-7 3.1-7 7 0 5 7 13 7 13s7-8 7-13c0-3.9-3.1-7-7-7z" fill="'+(esCari?"#ec2d7a":"#2563eb")+'"/><circle cx="12" cy="9" r="2.6" fill="#fff"/></svg>';
   var banners = bannersHTML(tipo);
-  var nav = t.nav.map(function(n,i){
-    var onCls=(esCari||PRO_LAYOUTS.indexOf(tipo)>=0)?"":(i===0?"on":"");
-    return '<a class="'+onCls+'" href="#">'+
-      '<span class="pnav__ic">'+svgIcon(n[0])+'</span>'+
-      '<span class="pnav__label">'+safe(n[1])+'</span>'+
-      (n[2]?'<span class="bdg">'+n[2]+'</span>':'')+
-    '</a>';
-  }).join("");
-  var closeBtn=window.CariHubNavQuick?CariHubNavQuick.closeButtonHTML("perfil"):"";
   var qPerfil=window.CariHubPerfilPublico?CariHubPerfilPublico.queryPerfilPublico():{};
   var backHref=window.CariHubPerfilPublico?CariHubPerfilPublico.resultadosVolverHref(qPerfil):
     (window.CariHubNavQuick?CariHubNavQuick.resultadosHrefFromQuery(qPerfil):"#");
-  var brandBlock = '<div class="pbrand__wordmark"><div class="pbrand__name">'+safe(t.brand)+'</div><div class="pbrand__tag">'+safe(t.tag)+'</div></div>';
   return ''+
     banners+
-    '<div class="pbrand pbrand--with-close">'+closeBtn+
-      '<div class="pbrand__logo">'+(esCari?"":pinSVG)+brandBlock+'</div>'+
-      '<nav class="pnav">'+nav+'</nav>'+
-      (esCari||PRO_LAYOUTS.indexOf(tipo)>=0?"":'<button class="pbtn">＋ '+safe(t.publicar)+'</button>')+'</div>'+
     '<div class="profile-toolbar">'+
       '<div class="profile-toolbar-left">'+
         '<a class="toolbar-action back-action" href="'+backHref+'">'+profileBackArrow()+'<span>Volver a resultados</span></a>'+

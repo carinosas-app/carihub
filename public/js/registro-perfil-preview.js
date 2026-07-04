@@ -209,6 +209,54 @@
       u = CariHubEventosSectorRender.hydrateDisplayFields(u);
     }
 
+    if (global.CariHubGastronomiaSectorRender && CariHubGastronomiaSectorRender.hydrateDisplayFields) {
+      u = CariHubGastronomiaSectorRender.hydrateDisplayFields(u);
+    }
+
+    if (global.CariHubProfesionalesSectorRender && CariHubProfesionalesSectorRender.hydrateDisplayFields) {
+      u = CariHubProfesionalesSectorRender.hydrateDisplayFields(u);
+    }
+
+    if (global.CariHubMascotasSectorRender && CariHubMascotasSectorRender.hydrateDisplayFields) {
+      u = CariHubMascotasSectorRender.hydrateDisplayFields(u);
+    }
+
+    if (global.CariHubHogarSectorRender && CariHubHogarSectorRender.hydrateDisplayFields) {
+      u = CariHubHogarSectorRender.hydrateDisplayFields(u);
+    }
+
+    if (global.CariHubSaludSectorRender && CariHubSaludSectorRender.hydrateDisplayFields) {
+      u = CariHubSaludSectorRender.hydrateDisplayFields(u);
+    }
+
+    if (global.CariHubTecnologiaSectorRender && CariHubTecnologiaSectorRender.hydrateDisplayFields) {
+      u = CariHubTecnologiaSectorRender.hydrateDisplayFields(u);
+    }
+
+    if (global.CariHubAutomotrizSectorRender && CariHubAutomotrizSectorRender.hydrateDisplayFields) {
+      u = CariHubAutomotrizSectorRender.hydrateDisplayFields(u);
+    }
+
+    if (global.CariHubTransporteSectorRender && CariHubTransporteSectorRender.hydrateDisplayFields) {
+      u = CariHubTransporteSectorRender.hydrateDisplayFields(u);
+    }
+
+    if (global.CariHubComercioSectorRender && CariHubComercioSectorRender.hydrateDisplayFields) {
+      u = CariHubComercioSectorRender.hydrateDisplayFields(u);
+    }
+
+    if (global.CariHubEducacionSectorRender && CariHubEducacionSectorRender.hydrateDisplayFields) {
+      u = CariHubEducacionSectorRender.hydrateDisplayFields(u);
+    }
+
+    if (global.CariHubIndustriaSectorRender && CariHubIndustriaSectorRender.hydrateDisplayFields) {
+      u = CariHubIndustriaSectorRender.hydrateDisplayFields(u);
+    }
+
+    if (global.CariHubBienesRaicesSectorRender && CariHubBienesRaicesSectorRender.hydrateDisplayFields) {
+      u = CariHubBienesRaicesSectorRender.hydrateDisplayFields(u);
+    }
+
     if (global.CariHubSubcategoriaLabels && CariHubSubcategoriaLabels.resolveVisibleCategoria) {
       var visibleCat = CariHubSubcategoriaLabels.resolveVisibleCategoria(subName || catName, subId);
       if (visibleCat) {
@@ -230,6 +278,54 @@
     if (global.CariHubEventosSectorRender && CariHubEventosSectorRender.resolveVistaPerfil) {
       var evVista = CariHubEventosSectorRender.resolveVistaPerfil(u);
       if (evVista) vistaPerfil = evVista;
+    }
+    if (global.CariHubGastronomiaSectorRender && CariHubGastronomiaSectorRender.resolveVistaPerfil) {
+      var gastVista = CariHubGastronomiaSectorRender.resolveVistaPerfil(u);
+      if (gastVista) vistaPerfil = gastVista;
+    }
+    if (global.CariHubProfesionalesSectorRender && CariHubProfesionalesSectorRender.resolveVistaPerfil) {
+      var profVista = CariHubProfesionalesSectorRender.resolveVistaPerfil(u);
+      if (profVista) vistaPerfil = profVista;
+    }
+    if (global.CariHubMascotasSectorRender && CariHubMascotasSectorRender.resolveVistaPerfil) {
+      var mascVista = CariHubMascotasSectorRender.resolveVistaPerfil(u);
+      if (mascVista) vistaPerfil = mascVista;
+    }
+    if (global.CariHubHogarSectorRender && CariHubHogarSectorRender.resolveVistaPerfil) {
+      var hogVista = CariHubHogarSectorRender.resolveVistaPerfil(u);
+      if (hogVista) vistaPerfil = hogVista;
+    }
+    if (global.CariHubSaludSectorRender && CariHubSaludSectorRender.resolveVistaPerfil) {
+      var salVista = CariHubSaludSectorRender.resolveVistaPerfil(u);
+      if (salVista) vistaPerfil = salVista;
+    }
+    if (global.CariHubTecnologiaSectorRender && CariHubTecnologiaSectorRender.resolveVistaPerfil) {
+      var tecVista = CariHubTecnologiaSectorRender.resolveVistaPerfil(u);
+      if (tecVista) vistaPerfil = tecVista;
+    }
+    if (global.CariHubAutomotrizSectorRender && CariHubAutomotrizSectorRender.resolveVistaPerfil) {
+      var autoVista = CariHubAutomotrizSectorRender.resolveVistaPerfil(u);
+      if (autoVista) vistaPerfil = autoVista;
+    }
+    if (global.CariHubTransporteSectorRender && CariHubTransporteSectorRender.resolveVistaPerfil) {
+      var transVista = CariHubTransporteSectorRender.resolveVistaPerfil(u);
+      if (transVista) vistaPerfil = transVista;
+    }
+    if (global.CariHubComercioSectorRender && CariHubComercioSectorRender.resolveVistaPerfil) {
+      var comVista = CariHubComercioSectorRender.resolveVistaPerfil(u);
+      if (comVista) vistaPerfil = comVista;
+    }
+    if (global.CariHubEducacionSectorRender && CariHubEducacionSectorRender.resolveVistaPerfil) {
+      var eduVista = CariHubEducacionSectorRender.resolveVistaPerfil(u);
+      if (eduVista) vistaPerfil = eduVista;
+    }
+    if (global.CariHubIndustriaSectorRender && CariHubIndustriaSectorRender.resolveVistaPerfil) {
+      var indVista = CariHubIndustriaSectorRender.resolveVistaPerfil(u);
+      if (indVista) vistaPerfil = indVista;
+    }
+    if (global.CariHubBienesRaicesSectorRender && CariHubBienesRaicesSectorRender.resolveVistaPerfil) {
+      var inmoVista = CariHubBienesRaicesSectorRender.resolveVistaPerfil(u);
+      if (inmoVista) vistaPerfil = inmoVista;
     }
 
     return {

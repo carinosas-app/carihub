@@ -356,7 +356,7 @@
     u.saludPerfil = Object.assign({}, perfil);
     u = applySaludSectorPerfilFields(u, perfil);
     u.sectorId = 'salud';
-    return u;
+    return applyCrossSectorPublicFields(u, bloques);
   }
 
   function validateSaludSectorValues(cfg, values, missing, ctx) {
@@ -711,7 +711,7 @@
     u.tecnologiaPerfil = Object.assign({}, perfil);
     u = applyTecnologiaSectorPerfilFields(u, perfil);
     u.sectorId = 'tecnologia';
-    return u;
+    return applyCrossSectorPublicFields(u, bloques);
   }
 
   function validateTecnologiaSectorValues(cfg, values, missing, ctx) {
@@ -865,7 +865,7 @@
     u.automotrizPerfil = Object.assign({}, perfil);
     u = applyAutomotrizSectorPerfilFields(u, perfil);
     u.sectorId = 'automotriz';
-    return u;
+    return applyCrossSectorPublicFields(u, bloques);
   }
 
   function validateAutomotrizSectorValues(cfg, values, missing, ctx) {
@@ -1020,7 +1020,7 @@
     u.transportePerfil = Object.assign({}, perfil);
     u = applyTransporteSectorPerfilFields(u, perfil);
     u.sectorId = 'transporte';
-    return u;
+    return applyCrossSectorPublicFields(u, bloques);
   }
 
   function validateTransporteSectorValues(cfg, values, missing, ctx) {
@@ -1165,7 +1165,7 @@
     u.comercioPerfil = Object.assign({}, perfil);
     u = applyComercioSectorPerfilFields(u, perfil);
     u.sectorId = 'comercio';
-    return u;
+    return applyCrossSectorPublicFields(u, bloques);
   }
 
   function validateComercioSectorValues(cfg, values, missing, ctx) {
@@ -1298,7 +1298,7 @@
     u.hogarPerfil = Object.assign({}, perfil);
     u = applyHogarSectorPerfilFields(u, perfil);
     u.sectorId = 'hogar';
-    return u;
+    return applyCrossSectorPublicFields(u, bloques);
   }
 
   function validateHogarSectorValues(cfg, values, missing, ctx) {
@@ -1454,7 +1454,7 @@
     u.mascotasPerfil = Object.assign({}, perfil);
     u = applyMascotasSectorPerfilFields(u, perfil);
     u.sectorId = 'mascotas';
-    return u;
+    return applyCrossSectorPublicFields(u, bloques);
   }
 
   function validateMascotasSectorValues(cfg, values, missing, ctx) {
@@ -1614,7 +1614,7 @@
     u.bienesRaicesPerfil = Object.assign({}, perfil);
     u = applyBienesRaicesSectorPerfilFields(u, perfil);
     u.sectorId = 'bienes-raices';
-    return u;
+    return applyCrossSectorPublicFields(u, bloques);
   }
 
   function validateBienesRaicesSectorValues(cfg, values, missing, ctx) {
@@ -1778,7 +1778,7 @@
     u.educacionPerfil = Object.assign({}, perfil);
     u = applyEducacionSectorPerfilFields(u, perfil);
     u.sectorId = 'educacion';
-    return u;
+    return applyCrossSectorPublicFields(u, bloques);
   }
 
   function validateEducacionSectorValues(cfg, values, missing, ctx) {
@@ -1947,7 +1947,7 @@
     u.industriaPerfil = Object.assign({}, perfil);
     u = applyIndustriaSectorPerfilFields(u, perfil);
     u.sectorId = 'industria';
-    return u;
+    return applyCrossSectorPublicFields(u, bloques);
   }
 
   function validateIndustriaSectorValues(cfg, values, missing, ctx) {
@@ -3550,7 +3550,16 @@
     'eventosPerfil',
     'gastronomiaPerfil',
     'profesionalesPerfil',
+    'mascotasPerfil',
+    'hogarPerfil',
     'saludPerfil',
+    'tecnologiaPerfil',
+    'automotrizPerfil',
+    'transportePerfil',
+    'comercioPerfil',
+    'educacionPerfil',
+    'industriaPerfil',
+    'bienesRaicesPerfil',
     'hospedajePerfil',
     'swingerPerfil',
     'unicornPerfil',

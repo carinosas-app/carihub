@@ -7,7 +7,8 @@
   var POSITIONS = [
     [6, 14], [14, 72], [28, 32], [38, 58], [52, 18],
     [62, 78], [74, 42], [84, 24], [22, 48], [48, 66],
-    [88, 52], [12, 38], [56, 44], [70, 12]
+    [88, 52], [12, 38], [56, 44], [70, 12], [32, 8],
+    [46, 92], [8, 62], [94, 38], [18, 26], [78, 68]
   ];
 
   var SECTOR_SPARK = {
@@ -24,7 +25,8 @@
     comercio: '#6a1b9a',
     hogar: '#ef6c00',
     automotriz: '#37474f',
-    industria: '#5d4037'
+    industria: '#5d4037',
+    lgbt: '#8f39c9'
   };
 
   function esc(t) {
@@ -79,6 +81,10 @@
     if (!page) return;
     if (!sectorId || sectorId === 'adultos') {
       page.style.removeProperty('--ch-sector-spark-color');
+      return;
+    }
+    /* Resultados: el color viene de --res-accent vía carihub-page-sector-sparkles.css */
+    if (page.hasAttribute('data-sector') && page.getAttribute('data-sector') !== 'adultos') {
       return;
     }
     page.style.setProperty('--ch-sector-spark-color', sparkColor(sectorId));

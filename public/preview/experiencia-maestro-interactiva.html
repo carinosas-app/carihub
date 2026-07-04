@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Experiencia maestro interactiva · Vista previa · CariHub</title>
+<link rel="stylesheet" href="experiencia-maestro-interactiva.css">
+</head>
+<body>
+
+<div class="exp-hub">
+  <header class="exp-top">
+    <div class="exp-top__brand">CariHub <span>· Experiencia maestro (preview)</span></div>
+    <select class="exp-persona-select" id="personaSelect" aria-label="Persona de prueba"></select>
+    <p class="exp-top__hint">No modifica producción. Navega por la izquierda o usa los botones de cada pantalla.</p>
+  </header>
+
+  <div class="exp-body">
+    <nav class="exp-journey" id="journeyNav" aria-label="Recorrido"></nav>
+
+    <main class="exp-main">
+
+      <!-- HOME -->
+      <section class="screen is-active" data-screen="home">
+        <div class="card home-hero">
+          <h1>Cariñosas / CariHub</h1>
+          <p>Busca servicios, crea cuenta hub o publica tu perfil — experiencia conectada (mock).</p>
+          <div class="home-search">
+            <input type="search" id="homeSearch" placeholder="Busca enfermera, plomero, hotel…" value="enfermera">
+            <button type="button" id="btnHomeBuscar">Buscar</button>
+          </div>
+          <div class="home-actions">
+            <button type="button" class="btn" id="btnHomePublicar">+ Publicar perfil</button>
+            <button type="button" class="btn btn--ghost" id="btnHomeCuenta">Crear cuenta (solo mensajes)</button>
+            <button type="button" class="btn btn--ghost" id="btnHomeOfertas">Ofertas y promociones</button>
+          </div>
+        </div>
+        <div class="card">
+          <h2>Destinos de botones (producción futura)</h2>
+          <p><strong>Buscar</strong> → resultados.html con geo + categoría · <strong>Publicar</strong> → modal promo → registro-perfil.html · <strong>Cuenta hub</strong> → registro visitante → dashboard hub · <strong>Ofertas</strong> → ofertas-promociones.html</p>
+        </div>
+      </section>
+
+      <!-- HUB REGISTRO -->
+      <section class="screen" data-screen="hub-registro">
+        <div class="card">
+          <span class="hub-badge">Cuenta hub</span>
+          <h1>Solo dashboard: mensajes, favoritos, donaciones</h1>
+          <p>Sin perfil publicado ni banner. 1 mes gratis de uso del dashboard si capturas RFC (1× por RFC).</p>
+          <div class="rfc-gate" id="rfcGateHub">
+            <span class="rfc-gate__text">Sin RFC no hay mes gratis hub</span>
+          </div>
+          <div class="field-row">
+            <label>Correo</label>
+            <input type="email" value="maria@ejemplo.com">
+          </div>
+          <div class="field-row">
+            <label>Ciudad</label>
+            <input type="text" value="Monterrey, NL">
+          </div>
+          <div class="btn-row">
+            <button type="button" class="btn" id="btnHubContinuar">Activar mes gratis hub (mock)</button>
+            <button type="button" class="btn btn--ghost" data-goto="registro-privado">Agregar RFC primero</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- CATEGORÍA NUBE -->
+      <section class="screen" data-screen="registro-cat">
+        <div class="card">
+          <span class="cat-cloud-badge">Catálogo en nube · 12 KB por categoría</span>
+          <h1>Elige tu categoría</h1>
+          <p>Al seleccionar, se descarga solo el schema de esa subcategoría (no el JSON de 462 filas).</p>
+          <div class="cat-grid">
+            <button type="button" class="cat-tile is-selected" data-cat="enfermera">
+              <span>Salud</span>
+              <b>Enfermera</b>
+            </button>
+            <button type="button" class="cat-tile" data-cat="plomero">
+              <span>Hogar</span>
+              <b>Plomero</b>
+            </button>
+          </div>
+          <p style="margin-top:12px">Seleccionada: <strong id="catSelectedLabel">Enfermera a domicilio</strong></p>
+          <div class="btn-row">
+            <button type="button" class="btn" id="btnCatSiguiente">Siguiente: datos públicos</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- DATOS PÚBLICOS -->
+      <section class="screen" data-screen="registro-publico">
+        <div class="card">
+          <h1>Datos públicos — solo tu ramo</h1>
+          <p>Preguntas traídas de <code>experiencias_ui/{categoria}</code>. Nada de campos de hotel en enfermera.</p>
+          <div class="field-list" id="fieldsPublicos"></div>
+          <div class="btn-row">
+            <button type="button" class="btn" id="btnPublicoSiguiente">Siguiente: datos privados</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- DATOS PRIVADOS PERSONALIZADOS -->
+      <section class="screen" data-screen="registro-privado">
+        <div class="card">
+          <h1>Datos privados — también personalizables</h1>
+          <p>Te identificas más si eliges qué guardar en tu carpeta privada (admin solo ve lo obligatorio).</p>
+          <div class="rfc-gate" id="rfcGateRegistro">
+            <span class="rfc-gate__text">Sin RFC no hay mes gratis ni 50%</span>
+          </div>
+          <div class="privado-zone">
+            <h3>Tu carpeta privada</h3>
+            <div class="field-list" id="fieldsPrivados"></div>
+          </div>
+          <div class="btn-row">
+            <button type="button" class="btn" id="btnPrivadoSiguiente">Siguiente: IA y vista previa</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- IA PREVIEW -->
+      <section class="screen" data-screen="registro-ia">
+        <div class="card">
+          <h1>IA + vista previa antes de enviar</h1>
+          <p>La IA sugiere textos y orden; tú apruebas. Solo campos públicos elegidos aparecen abajo.</p>
+          <div class="btn-row" style="margin-bottom:14px">
+            <button type="button" class="btn btn--ghost" id="btnIaGenerar">Generar con IA (mock)</button>
+          </div>
+          <div class="ia-split">
+            <div>
+              <h2>Tarjeta resultados</h2>
+              <div class="mini-resultado" id="iaPreviewResultados"></div>
+            </div>
+            <div>
+              <h2>Perfil público</h2>
+              <div class="mini-perfil" id="iaPreviewPublic"></div>
+            </div>
+          </div>
+          <div class="btn-row">
+            <button type="button" class="btn" id="btnIaEnviar">Enviar solicitud (mock API)</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- PROMO MODAL (también overlay) -->
+      <section class="screen" data-screen="promo-modal">
+        <div class="card">
+          <h1>Modal antes de + Nuevo perfil</h1>
+          <p>En producción esto aparece encima del dashboard o al pulsar Publicar.</p>
+          <div id="promoModalText"></div>
+          <div class="btn-row">
+            <button type="button" class="btn" id="btnPromoContinuar">Continuar al registro</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- PAGO -->
+      <section class="screen" data-screen="pago">
+        <div class="card">
+          <h1>Pago publicación</h1>
+          <p>2.º perfil durante mes gratis del 1.º: <strong>debe pagar ya</strong> para circular.</p>
+          <div id="pagoLines"></div>
+          <p class="pago-total" id="pagoTotal">$499 MXN</p>
+          <div class="btn-row">
+            <button type="button" class="btn btn--ok" id="btnPagar">Pagar (demo) → Dashboard</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- DASHBOARD INICIO -->
+      <section class="screen" data-screen="dash-inicio">
+        <div class="dash-shell">
+          <aside class="dash-col-l">
+            <p style="font-size:11px;font-weight:800;color:var(--muted);margin:0 0 8px">RAIL · PERFILES</p>
+            <div class="rail-row">
+              <div class="rail-circle is-active"><img src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=80" alt=""></div>
+              <div class="rail-circle"><img src="https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=80" alt=""></div>
+            </div>
+            <button type="button" class="btn btn--ghost" style="width:100%;margin-bottom:12px" id="btnNuevoPerfil">+ Nuevo perfil</button>
+            <button type="button" class="dash-nav-btn is-active">Inicio</button>
+            <button type="button" class="dash-nav-btn" id="btnDashModPerfil">Vista perfil</button>
+            <button type="button" class="dash-nav-btn" id="btnDashModResultados">Tarjeta resultados</button>
+            <button type="button" class="dash-nav-btn">Mensajes</button>
+            <button type="button" class="dash-nav-btn" data-goto="ofertas">Ofertas</button>
+          </aside>
+          <div class="dash-col-m">
+            <div class="dash-aviso dash-aviso--sector-salud" id="dashAviso"></div>
+            <h2 style="margin:0 0 8px;font-size:16px">Inicio</h2>
+            <p style="color:var(--muted);font-size:13px">Centro de control. Selecciona módulo en sidebar o rail.</p>
+          </div>
+          <aside class="dash-col-r">
+            <h3 style="margin:0 0 8px;font-size:13px">Anti-trampas (demo)</h3>
+            <ul class="trap-log" id="trapLog"></ul>
+          </aside>
+        </div>
+      </section>
+
+      <!-- DASHBOARD VISTA PERFIL -->
+      <section class="screen" data-screen="dash-perfil">
+        <div class="dash-shell">
+          <aside class="dash-col-l">
+            <button type="button" class="dash-nav-btn" data-goto="dash-inicio">← Inicio</button>
+            <button type="button" class="dash-nav-btn is-active">Vista perfil</button>
+            <button type="button" class="dash-nav-btn" id="btnDashModResultados">Tarjeta resultados</button>
+          </aside>
+          <div class="dash-col-m">
+            <h2 style="margin:0 0 10px;font-size:16px">Vista en vivo — perfil público</h2>
+            <div class="live-preview-wrap">
+              <span class="live-preview-wrap__label">En vivo</span>
+              <div class="profile-mock-grid" id="profileMockGrid">
+                <div class="profile-block blk-photos" data-block-id="fotos">
+                  <div class="profile-block__title">Fotos principales</div>
+                  <div class="photo-strip">
+                    <div style="background-image:url(https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=200)"></div>
+                    <div style="background-image:url(https://images.unsplash.com/photo-1576091160399?w=200)"></div>
+                    <div style="background-image:url(https://images.unsplash.com/photo-1582750433449-648ed127bb54?w=200)"></div>
+                  </div>
+                  <span class="resize-handle resize-handle--br"></span>
+                </div>
+                <div class="profile-block blk-name" data-block-id="nombre">
+                  <div class="profile-block__title">Nombre</div>
+                  <b>Enf. Laura M.</b><br><small>Monterrey · Verificada</small>
+                  <span class="resize-handle resize-handle--br"></span>
+                </div>
+                <div class="profile-block blk-price" data-block-id="precio">
+                  <div class="profile-block__title">Precio</div>
+                  Desde $599
+                  <span class="resize-handle resize-handle--br"></span>
+                </div>
+                <div class="profile-block blk-live" data-block-id="live">
+                  <div class="profile-block__title">En vivos</div>
+                  LIVE<br><span>Próximo: hoy 8pm</span>
+                  <span class="resize-handle resize-handle--br"></span>
+                </div>
+                <div class="profile-block" data-block-id="servicios" style="grid-column:1">
+                  <div class="profile-block__title">Servicios</div>
+                  Curaciones · Toma de signos · Adulto mayor
+                  <span class="resize-handle resize-handle--br"></span>
+                </div>
+                <div class="profile-block" data-block-id="contacto" style="grid-column:1">
+                  <div class="profile-block__title">Contacto</div>
+                  WhatsApp · Mensaje interno
+                  <span class="resize-handle resize-handle--br"></span>
+                </div>
+              </div>
+              <button type="button" class="live-preview-fs-btn" id="btnOpenFs" title="Pantalla completa">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3"/></svg>
+              </button>
+            </div>
+            <p style="font-size:12px;color:var(--muted);margin-top:10px">
+              El botón de pantalla completa está <strong>dentro</strong> de la vista previa (esquina inferior derecha), no arriba del módulo.
+            </p>
+            <p style="font-size:12px;color:var(--muted)">
+              En preview embebida: mantén presionado un bloque ~0.5s para despegarlo. En pantalla completa: arrastra, redimensiona esquina, doble clic para anclar.
+            </p>
+          </div>
+          <aside class="dash-col-r">
+            <h3 style="font-size:13px">Módulo Art</h3>
+            <p style="font-size:12px;color:var(--muted)">Personaliza distribución solo en pantalla completa. Guardar → Firestore <code>layoutPerfil</code>.</p>
+          </aside>
+        </div>
+      </section>
+
+      <!-- TARJETA RESULTADOS -->
+      <section class="screen" data-screen="dash-resultados">
+        <div class="card">
+          <h1>Tarjeta en resultados</h1>
+          <p>Mismo módulo dashboard, otra pestaña — solo campos del ramo.</p>
+          <div class="result-card-mock">
+            <img src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=120" alt="">
+            <div>
+              <b>Enfermera a domicilio</b><br>
+              <span>Desde $599 · Monterrey</span><br>
+              <small>Curaciones · Signos vitales</small>
+            </div>
+          </div>
+          <div class="btn-row">
+            <button type="button" class="btn btn--ghost" id="btnDashModPerfil">Ver perfil completo</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- OFERTAS -->
+      <section class="screen" data-screen="ofertas">
+        <div class="card">
+          <h1>Ofertas y promociones</h1>
+          <p>Página compartida Home + Dashboard. Texto dinámico según tu cuenta (persona selector arriba).</p>
+          <ul style="font-size:13px;color:var(--muted)">
+            <li>Mes gratis publicación — 1× por RFC</li>
+            <li>Mes gratis dashboard hub — 1× por RFC</li>
+            <li>50% primer periodo perfil/banner extra — con cadena de activos</li>
+            <li>Sin RFC → sin promos</li>
+            <li>1.er perfil vencido → crear sí, precio lista</li>
+          </ul>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<!-- Overlay promo -->
+<div class="modal-overlay" id="promoOverlay">
+  <div class="modal-box">
+    <h2>Oferta para ti</h2>
+    <div id="promoModalText"></div>
+    <div class="btn-row">
+      <button type="button" class="btn" id="btnPromoContinuar">Continuar</button>
+      <button type="button" class="btn btn--ghost" id="btnPromoCerrar">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Fullscreen layout editor -->
+<div class="fs-editor" id="fsEditor">
+  <div class="fs-editor__bar">
+    <h2>Personalizar espacios del perfil</h2>
+    <button type="button" class="btn btn--ghost" id="btnFsOriginal">Original</button>
+    <button type="button" class="btn btn--ghost" id="btnFsCancelar">Cancelar</button>
+    <button type="button" class="btn" id="btnFsGuardar">Guardar</button>
+    <button type="button" class="btn btn--ghost" id="btnFsCerrar">Salir</button>
+  </div>
+  <p class="fs-editor__hint">
+    Mantén presionado un bloque para despegarlo · Arrastra · Redimensiona la esquina · <kbd>Doble clic</kbd> para anclar de nuevo · El texto interno conserva su distribución; cambia el tamaño del contenedor.
+  </p>
+  <div class="fs-editor__canvas" id="fsCanvas"></div>
+</div>
+
+<div class="exp-toast" id="expToast" role="status"></div>
+
+<script src="experiencia-maestro-interactiva.js"></script>
+</body>
+</html>
