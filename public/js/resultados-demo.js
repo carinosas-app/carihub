@@ -2638,24 +2638,16 @@
   }
 
   function campoCoincide(valorPerfil, valorBusqueda, opts) {
-    opts = opts || {};
-    var b = norm(valorBusqueda);
-    if (!b) return true;
-    var p = norm(valorPerfil);
-    if (!p) return !!opts.opcional;
-    if (p === b) return true;
-    if (opts.parcial) return p.indexOf(b) !== -1 || b.indexOf(p) !== -1;
-    return false;
+    var F = global.CariHubPerfilBusquedaFiltro;
+    if (F && F.campoCoincide) return F.campoCoincide(valorPerfil, valorBusqueda, opts);
+    return true;
   }
 
   function coincideBusqueda(u, Q) {
     if (!u || !Q) return false;
-    var catId = idCategoria(u.categoria || u.categoriaPublica);
-    var qId = idCategoria(Q.categoria);
-    if (catId !== qId && !campoCoincide(u.categoria || u.categoriaPublica, Q.categoria, { parcial: true })) return false;
-    return campoCoincide(u.pais, Q.pais, { opcional: !Q.pais }) &&
-      campoCoincide(u.estado, Q.estado, { parcial: true, opcional: !Q.estado }) &&
-      campoCoincide([u.ciudad, u.zona].filter(Boolean).join(' '), Q.ciudad, { parcial: true, opcional: !Q.ciudad });
+    var F = global.CariHubPerfilBusquedaFiltro;
+    if (F && F.perfilCoincideFiltros) return F.perfilCoincideFiltros(u, Q);
+    return false;
   }
 
   function coincideDemo(u, Q) {
