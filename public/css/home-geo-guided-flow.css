@@ -1,0 +1,271 @@
+/**
+ * Home — flujo geo guiado (SearchJourneySession + CariHubGeoPicker guided mode)
+ */
+
+/* —— Breadcrumb escalable —— */
+.ch-geo-context-trail {
+  width: 100%;
+  margin: 0 0 6px;
+  padding: 0;
+}
+
+.ch-geo-context-trail__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-items: flex-start;
+}
+
+.ch-geo-context-trail__item {
+  margin: 0;
+  padding: 0;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.25;
+  color: color-mix(in srgb, var(--rp-form-accent, #e91e63) 82%, #1a1a1a);
+  letter-spacing: 0.01em;
+}
+
+.ch-geo-context-trail__item--subcat {
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.ch-geo-context-trail__item--geo {
+  font-size: 12px;
+  font-weight: 600;
+  opacity: 0.88;
+}
+
+.ch-geo-modal--guided .ch-geo-sheet__heading {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+/* —— Footer guiado —— */
+.ch-geo-guided-footer {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  margin: 0 0 10px;
+}
+
+.ch-geo-guided-footer--row {
+  flex-direction: row;
+  align-items: stretch;
+  gap: 10px;
+}
+
+.ch-geo-guided-footer--row .ch-geo-guided-btn {
+  flex: 1 1 0;
+  min-width: 0;
+  font-size: 14px;
+  padding: 12px 10px;
+}
+
+.ch-geo-guided-footer--single .ch-geo-guided-btn--search {
+  width: 100%;
+}
+
+.ch-geo-modal--guided .ch-geo-sheet__section-title[hidden] {
+  display: none !important;
+  margin: 0;
+  padding: 0;
+  height: 0;
+}
+
+.ch-geo-guided-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 52px;
+  padding: 14px 18px;
+  border: none;
+  border-radius: 999px;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 0.15s ease, opacity 0.15s ease, box-shadow 0.15s ease;
+}
+
+.ch-geo-guided-btn:disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.ch-geo-guided-btn--search {
+  background: var(--geo-grad, linear-gradient(180deg, #ff5c9a 0%, #e91e63 52%, #d81b7a 100%));
+  color: #fff;
+  box-shadow: var(--geo-shadow, 0 8px 24px rgba(233, 30, 99, 0.38));
+}
+
+.ch-geo-guided-btn--search:not(:disabled):active {
+  transform: scale(0.98);
+}
+
+.ch-geo-guided-btn--next {
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--rp-form-accent, #e91e63);
+  border: 2px solid color-mix(in srgb, var(--rp-form-accent, #e91e63) 35%, transparent);
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--rp-form-accent, #e91e63) 12%, transparent);
+}
+
+.ch-geo-guided-btn--next:not(:disabled):active {
+  transform: scale(0.98);
+}
+
+/* —— Tarjeta seleccionada —— */
+html .ch-geo-modal.ch-geo-modal--guided .ch-geo-card.is-selected {
+  outline: 3px solid color-mix(in srgb, var(--rp-form-accent, #e91e63) 55%, #fff);
+  outline-offset: 2px;
+  box-shadow:
+    0 8px 26px color-mix(in srgb, var(--rp-form-accent, #e91e63) 22%, transparent),
+    inset 0 0 0 1px color-mix(in srgb, var(--rp-form-accent, #e91e63) 18%, transparent);
+}
+
+/* —— Transiciones País → Estado → Ciudad —— */
+.ch-geo-sheet__panel {
+  transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.28s ease;
+}
+
+.ch-geo-sheet__panel.ch-geo-slide-forward.ch-geo-slide-active {
+  animation: chGeoSlideForward 0.34s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.ch-geo-sheet__panel.ch-geo-slide-back.ch-geo-slide-active {
+  animation: chGeoSlideBack 0.34s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes chGeoSlideForward {
+  from {
+    opacity: 0.55;
+    transform: translateX(28px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes chGeoSlideBack {
+  from {
+    opacity: 0.55;
+    transform: translateX(-28px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ch-geo-sheet__panel,
+  .ch-geo-sheet__panel.ch-geo-slide-forward.ch-geo-slide-active,
+  .ch-geo-sheet__panel.ch-geo-slide-back.ch-geo-slide-active {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* —— Tema sectorial (guided = mismas variables que registro geo) —— */
+html .ch-geo-modal.ch-geo-modal--home.ch-geo-modal--guided:not([data-rp-sector="adultos"]) {
+  background: var(
+    --geo-premium-shell,
+    linear-gradient(165deg, #fff8f0 0%, #ffe0b2 28%, #ffcc80 52%, #fff3e0 100%)
+  ) !important;
+}
+
+html .ch-geo-modal.ch-geo-modal--home.ch-geo-modal--guided:not([data-rp-sector="adultos"])::before {
+  background:
+    radial-gradient(ellipse 78% 58% at 12% 6%, rgba(255, 255, 255, 0.58) 0%, transparent 62%),
+    radial-gradient(
+      ellipse 62% 48% at 90% 10%,
+      color-mix(in srgb, var(--rp-form-accent, #e65100) 28%, #fff) 0%,
+      transparent 58%
+    ),
+    radial-gradient(
+      circle at 50% 100%,
+      color-mix(in srgb, var(--rp-form-accent, #e65100) 14%, transparent) 0%,
+      transparent 55%
+    );
+}
+
+html .ch-geo-modal.ch-geo-modal--home.ch-geo-modal--guided:not([data-rp-sector="adultos"]) .ch-geo-sheet__panel {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.94) 0%,
+    color-mix(in srgb, var(--rp-form-accent, #e65100) 4%, #fff) 48%,
+    color-mix(in srgb, var(--rp-form-accent, #e65100) 8%, #fff) 100%
+  );
+  box-shadow:
+    0 -14px 44px color-mix(in srgb, var(--rp-form-accent, #e65100) 18%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.85);
+}
+
+html .ch-geo-modal.ch-geo-modal--home.ch-geo-modal--guided:not([data-rp-sector="adultos"]) .ch-geo-sheet__close,
+html .ch-geo-modal.ch-geo-modal--home.ch-geo-modal--guided:not([data-rp-sector="adultos"]) .ch-geo-sheet__nav {
+  color: var(--rp-form-accent, #e65100);
+  border-color: color-mix(in srgb, var(--rp-form-accent, #e65100) 22%, #dde3e8);
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--rp-form-accent, #e65100) 10%, transparent);
+}
+
+html .ch-geo-modal.ch-geo-modal--home.ch-geo-modal--guided:not([data-rp-sector="adultos"]) .ch-geo-sheet__search {
+  border-color: color-mix(in srgb, var(--rp-form-accent, #e65100) 24%, #dde3e8);
+}
+
+html .ch-geo-modal.ch-geo-modal--home.ch-geo-modal--guided:not([data-rp-sector="adultos"]) .ch-geo-sheet__search-icon,
+html .ch-geo-modal.ch-geo-modal--home.ch-geo-modal--guided:not([data-rp-sector="adultos"]) .ch-geo-sheet__section-title {
+  color: var(--rp-form-accent, #e65100);
+}
+
+html .ch-geo-modal.ch-geo-modal--home.ch-geo-modal--guided:not([data-rp-sector="adultos"]) .ch-geo-card.ch-geo-card--glass {
+  border-color: color-mix(in srgb, var(--rp-form-accent, #e65100) 13%, transparent);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.96) 0%,
+    color-mix(in srgb, var(--rp-form-accent, #e65100) 5%, #fff) 100%
+  );
+  box-shadow:
+    0 8px 26px color-mix(in srgb, var(--rp-form-accent, #e65100) 14%, transparent),
+    0 2px 8px color-mix(in srgb, var(--rp-form-accent, #e65100) 12%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+html .ch-geo-modal.ch-geo-modal--home.ch-geo-modal--guided:not([data-rp-sector="adultos"]) .ch-geo-card--glass .ch-geo-card__title {
+  color: var(--rp-form-accent, #e65100);
+}
+
+html .ch-geo-modal.ch-geo-modal--home.ch-geo-modal--guided:not([data-rp-sector="adultos"]) .ch-geo-card--glass .ch-geo-card__go--float {
+  background: var(--geo-grad, linear-gradient(180deg, color-mix(in srgb, var(--rp-form-accent, #e65100) 70%, #fff) 0%, var(--rp-form-accent, #e65100) 100%));
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--rp-form-accent, #e65100) 28%, transparent);
+}
+
+html .ch-geo-modal.ch-geo-modal--home.ch-geo-modal--guided[data-rp-sector="restaurantes"] {
+  --rp-form-accent: #e65100;
+}
+
+html .ch-geo-modal.ch-geo-modal--home.ch-geo-modal--guided[data-rp-sector="bienestar"] {
+  --rp-form-accent: #33691e;
+}
+
+html .ch-geo-modal.ch-geo-modal--home.ch-geo-modal--guided[data-rp-sector="mascotas"] {
+  --rp-form-accent: #2e7d32;
+}
+
+html .ch-geo-modal.ch-geo-modal--home.ch-geo-modal--guided[data-rp-sector="salud"] {
+  --rp-form-accent: #0d47a1;
+}
+
+html .ch-geo-modal.ch-geo-modal--home.ch-geo-modal--guided[data-rp-sector="automotriz"] {
+  --rp-form-accent: #1565c0;
+}

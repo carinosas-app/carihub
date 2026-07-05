@@ -597,11 +597,30 @@
   function handleOtrosSectoresSubcatSelect(cat, sector) {
     if (!cat || !sector) return;
     pendingOtrosSectoresFlow = true;
-    if (window.CariHubHomeOtrosSectoresPicker) {
-      window.CariHubHomeOtrosSectoresPicker.close();
-    }
     selectSubcategoria(cat, sector);
   }
+
+  window.__carihubOtrosSubcatHandler = handleOtrosSectoresSubcatSelect;
+
+  window.__carihubJourneyBackToSubcat = function (sess) {
+    if (!sess || !sess.sectorId) return;
+    if (sess.origin === 'explora-categorias') {
+      if (window.CariHubSearchJourneySession) window.CariHubSearchJourneySession.clear();
+      if (window.CariHubGeoPicker && typeof window.CariHubGeoPicker.setFlowMode === 'function') {
+        window.CariHubGeoPicker.setFlowMode('field-sync');
+      }
+      return;
+    }
+    if (window.CariHubHomeOtrosSectoresPicker) {
+      window.CariHubHomeOtrosSectoresPicker.open({
+        step: 'subcats',
+        sectorId: sess.sectorId,
+        onSelectSubcat: handleOtrosSectoresSubcatSelect
+      });
+      return;
+    }
+    openSubcatPicker(sess.sectorId, { fromOtrosSectores: true });
+  };
 
   function openOtrosSectoresModal() {
     if (window.CariHubHomeOtrosSectoresPicker) {
@@ -616,34 +635,120 @@
   function closeOtrosSectoresModal() {
     if (window.CariHubHomeOtrosSectoresPicker) {
       window.CariHubHomeOtrosSectoresPicker.close();
-      return;
+    } else {
+      var modal = document.getElementById('modal-otros-sectores');
+      if (modal) modal.classList.remove('is-open');
+      if (!shouldKeepHomePageLocked() && !document.querySelector('.home-modal.is-open')) {
+        document.body.style.overflow = '';
+      }
     }
-    var modal = document.getElementById('modal-otros-sectores');
-    if (modal) modal.classList.remove('is-open');
-    if (!document.querySelector('.home-modal.is-open')) {
-      document.body.style.overflow = '';
+    if (window.CariHubSearchJourneySession && window.CariHubSearchJourneySession.isActive()) {
+      window.CariHubSearchJourneySession.clear();
+      if (window.CariHubGeoPicker && typeof window.CariHubGeoPicker.setFlowMode === 'function') {
+        window.CariHubGeoPicker.setFlowMode('field-sync');
+      }
     }
   }
 
   var pendingOtrosSectoresFlow = false;
+  var adultosCatSearchCtl = null;
+
+  function handleAdultosSearchPick(cat, sector) {
+    if (!cat || !sector) return;
+    pendingOtrosSectoresFlow = true;
+    selectSubcategoria(cat, sector);
+  }
+
+  function mountAdultosCatSearch() {
+    if (adultosCatSearchCtl || !window.CariHubSectorCatSearch || !window.CariHubSectorCatSearch.mount) return;
+    adultosCatSearchCtl = window.CariHubSectorCatSearch.mount({
+      mode: 'browse',
+      excludeAdultos: false,
+      ids: {
+        input: 'homeAdultosCatSearch',
+        bar: 'homeAdultosCatSearchBar',
+        submit: 'homeAdultosCatSearchSubmit',
+        hint: 'homeAdultosCatSearchHint',
+        suggest: 'homeAdultosCatSearchSuggest',
+        panel: 'homeAdultosCatSearchPanel',
+        catalog: 'homeAdultosCatCatalog'
+      },
+      onPickSubcat: function (sector, sub) {
+        handleAdultosSearchPick(sub, sector);
+      },
+      onPickSector: function (sector) {
+        if (!sector || !sector.id) return;
+        if (adultosCatSearchCtl && adultosCatSearchCtl.clear) adultosCatSearchCtl.clear(false);
+        if (sector.id === 'adultos') return;
+        openSubcatPicker(sector.id, { showBack: true });
+      }
+    });
+  }
+
+  function syncAdultosSubcatsAmbience() {
+    var sparks = document.getElementById('homeAdultosSubcatsSparkles');
+    if (!sparks || !window.CariHubSectorSparkles || !window.CariHubSectorSparkles.buildHtml) return;
+    sparks.innerHTML = window.CariHubSectorSparkles.buildHtml('adultos', { color: '#f48fb1' });
+  }
+
+  function clearAdultosCatSearch() {
+    if (adultosCatSearchCtl && adultosCatSearchCtl.clear) adultosCatSearchCtl.clear(false);
+  }
+
+  function shouldKeepHomePageLocked() {
+    return window.CariHubSearchJourneySession &&
+      typeof window.CariHubSearchJourneySession.shouldKeepPageLocked === 'function' &&
+      window.CariHubSearchJourneySession.shouldKeepPageLocked();
+  }
 
   function abrirSelectorGeoHome(tipo, opts) {
     opts = opts || {};
+    var guided = !!opts.guided;
     if (opts.fromCategoria) {
       window.__homeGeoPaisHint = true;
     }
     if (window.CariHubGeoPicker && typeof window.CariHubGeoPicker.bootHome === 'function') {
       window.CariHubGeoPicker.bootHome(window.syncHomeGeoFromPicker || null);
     }
-    var search = document.querySelector('.home-search');
-    if (search) search.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    window.setTimeout(function () {
-      if (typeof window.openHomeGeoPicker === 'function') {
+    if (window.CariHubGeoPicker && typeof window.CariHubGeoPicker.setFlowMode === 'function') {
+      window.CariHubGeoPicker.setFlowMode(guided ? 'guided' : 'field-sync');
+    }
+    if (!guided) {
+      var search = document.querySelector('.home-search');
+      if (search) search.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function launchGeo() {
+      var onOpen = function () {
+        if (window.CariHubHomeOtrosSectoresPicker &&
+            typeof window.CariHubHomeOtrosSectoresPicker.dismissForGeoTransition === 'function') {
+          window.CariHubHomeOtrosSectoresPicker.dismissForGeoTransition();
+        }
+        if (window.CariHubSearchJourneySession &&
+            typeof window.CariHubSearchJourneySession.endGeoTransition === 'function') {
+          window.CariHubSearchJourneySession.endGeoTransition();
+        }
+      };
+      if (window.CariHubGeoPicker && typeof window.CariHubGeoPicker.openHomeStep === 'function') {
+        window.CariHubGeoPicker.openHomeStep(tipo || 'pais', { onOpen: onOpen });
+      } else if (typeof window.openHomeGeoPicker === 'function') {
         window.openHomeGeoPicker(tipo || 'pais');
+        onOpen();
       } else if (typeof window.homeGeoClick === 'function') {
         window.homeGeoClick(tipo || 'pais');
+        onOpen();
       }
-    }, 380);
+    }
+
+    if (guided) {
+      if (window.CariHubSearchJourneySession &&
+          typeof window.CariHubSearchJourneySession.beginGeoTransition === 'function') {
+        window.CariHubSearchJourneySession.beginGeoTransition();
+      }
+      launchGeo();
+      return;
+    }
+    window.setTimeout(launchGeo, 380);
   }
 
   function seleccionarSectorParaBusqueda(sectorId) {
@@ -737,29 +842,43 @@
 
     pickerSubcategorias = items || [];
 
-    if (isAdultos && window.CariHubAdultosCatPicker) {
+    if (isAdultos && window.CariHubSectorCatalogUI) {
       if (window.CariHubHomeSectorSubcatScreen) {
         window.CariHubHomeSectorSubcatScreen.hide();
       }
-      if (modal) modal.classList.toggle('home-modal--adultos-premium', true);
+      if (modal) {
+        modal.classList.remove('home-modal--adultos-premium');
+        modal.classList.add('home-modal--adultos-subcats', 'rp-sector-subcats');
+        modal.setAttribute('data-rp-sector', 'adultos');
+      }
       if (classic) classic.hidden = true;
       if (adultos) adultos.hidden = false;
       var titleAdultos = document.getElementById('modal-categorias-title-adultos');
       var countAdultos = document.getElementById('catPickerCountAdultos');
       var listAdultos = document.getElementById('catPickerListAdultos');
       if (titleAdultos && sector) titleAdultos.textContent = sector.nombre;
-      if (countAdultos) countAdultos.textContent = pickerSubcategorias.length + ' categorías · desliza para ver todas';
+      if (countAdultos) {
+        countAdultos.textContent = pickerSubcategorias.length + ' subcategorías · elige una para continuar';
+      }
       if (listAdultos) {
-        window.CariHubAdultosCatPicker.renderList(listAdultos, pickerSubcategorias, {
+        mountAdultosCatSearch();
+        window.CariHubSectorCatalogUI.renderSubcatList(listAdultos, pickerSubcategorias, {
+          sectorId: 'adultos',
           selectedId: selectedCategoriaId,
-          skipWatermark: true,
+          extraListClass: 'home-adultos-subcats__list',
           onSelect: function (cat) { selectSubcategoria(cat, sector); }
         });
       }
       if (window.CariHubHomeCatPromoRail) {
         var adultosRail = document.querySelector('#catPickerAdultos .home-cat-promo-rail');
-        if (adultosRail) window.CariHubHomeCatPromoRail.mountRail(adultosRail, {});
+        if (adultosRail) {
+          window.CariHubHomeCatPromoRail.mountRail(adultosRail, {
+            sectorId: 'adultos',
+            sectorName: sector ? sector.nombre : ''
+          });
+        }
       }
+      syncAdultosSubcatsAmbience();
       return;
     }
 
@@ -823,8 +942,8 @@
       }
       return;
     }
-    if (modal && modal.classList.contains('home-modal--adultos-premium')) {
-      document.querySelectorAll('#catPickerListAdultos .ap-card').forEach(function (btn) {
+    if (modal && modal.classList.contains('home-modal--adultos-subcats')) {
+      document.querySelectorAll('#catPickerListAdultos .rp-subcat-card').forEach(function (btn) {
         var on = btn.getAttribute('data-cat-id') === selectedCategoriaId;
         btn.classList.toggle('is-selected', on);
         btn.setAttribute('aria-selected', on ? 'true' : 'false');
@@ -859,7 +978,15 @@
     closeCatPickerModal(document.getElementById('modal-categorias'));
     if (typeof window.setCategoriaHome === 'function') window.setCategoriaHome(displayName);
     if (fromOtrosSectores) {
-      abrirSelectorGeoHome('pais', { fromCategoria: true });
+      if (window.CariHubSearchJourneySession) {
+        window.CariHubSearchJourneySession.start({
+          origin: 'otros-sectores',
+          sectorId: selectedSectorId,
+          sector: sector,
+          subcat: cat
+        });
+      }
+      abrirSelectorGeoHome('pais', { fromCategoria: true, guided: true });
     }
   }
 
@@ -908,7 +1035,7 @@
   function closeSectorModal() {
     var modal = document.getElementById('modal-sectores');
     if (modal) modal.classList.remove('is-open');
-    if (!document.querySelector('.home-modal.is-open')) {
+    if (!shouldKeepHomePageLocked() && !document.querySelector('.home-modal.is-open')) {
       document.body.style.overflow = '';
     }
   }
@@ -919,14 +1046,18 @@
     if (back) back.hidden = true;
     if (modal) {
       modal.classList.remove('home-modal--adultos-premium');
+      modal.classList.remove('home-modal--adultos-subcats');
+      modal.classList.remove('rp-sector-subcats');
       modal.classList.remove('home-modal--sector-fullscreen');
       modal.classList.remove('home-modal--sector-subcat-premium');
+      modal.removeAttribute('data-rp-sector');
     }
     if (window.CariHubHomeSectorSubcatScreen) {
       window.CariHubHomeSectorSubcatScreen.hide();
     }
     if (field) field.setAttribute('aria-expanded', 'false');
     pendingOtrosSectoresFlow = false;
+    clearAdultosCatSearch();
     closeModal(modal);
   }
 
@@ -1020,7 +1151,7 @@
 
   function closeModal(modal) {
     modal.classList.remove('is-open');
-    if (!document.querySelector('.home-modal.is-open')) {
+    if (!shouldKeepHomePageLocked() && !document.querySelector('.home-modal.is-open')) {
       document.body.style.overflow = '';
     }
   }
@@ -1073,19 +1204,38 @@
   function iniciarFlujoExploraCategorias(catMeta) {
     var meta = typeof catMeta === 'string' ? { nombre: catMeta, id: '' } : (catMeta || null);
     if (!meta || !meta.nombre) return;
+    var cat = null;
+    if (meta.id) {
+      cat = CATEGORIAS.find(function (c) { return c.id === meta.id; });
+    }
+    if (!cat) {
+      cat = CATEGORIAS.find(function (c) {
+        return c.nombre === meta.nombre || (c.nombreCorto || c.nombre) === meta.nombre;
+      });
+    }
+    if (!cat) cat = { id: meta.id || '', nombre: meta.nombre };
+    var sector = window.CariHubSectores && window.CariHubSectores.sectorPorId('adultos');
     selectedSectorId = 'adultos';
     window.sectorSeleccionado = 'adultos';
-    if (meta.id) selectedCategoriaId = meta.id;
+    selectedCategoriaId = cat.id || meta.id || '';
     if (typeof window.setCategoriaHome === 'function') {
-      window.setCategoriaHome(meta.nombre);
+      window.setCategoriaHome(cat.nombre);
     } else {
-      window.categoriaSeleccionada = meta.nombre;
+      window.categoriaSeleccionada = cat.nombre;
       var catLabel = document.getElementById('fieldCategoriaLabel');
       var catField = document.getElementById('fieldCategoria');
-      if (catLabel) catLabel.textContent = meta.nombre;
+      if (catLabel) catLabel.textContent = cat.nombre;
       if (catField) catField.classList.add('is-selected');
     }
-    abrirSelectorGeoHome('pais', { fromCategoria: true });
+    if (window.CariHubSearchJourneySession) {
+      window.CariHubSearchJourneySession.start({
+        origin: 'explora-categorias',
+        sectorId: 'adultos',
+        sector: sector,
+        subcat: cat
+      });
+    }
+    abrirSelectorGeoHome('pais', { fromCategoria: true, guided: true });
   }
 
   document.querySelectorAll('.home-categorias .home-cat-card').forEach(function (btn) {
@@ -1252,6 +1402,7 @@
   initCategorySlots();
   initSectorCards();
   bindSectoresExpandToggle();
+  mountAdultosCatSearch();
   startHomeVisualRotation();
 
 })();

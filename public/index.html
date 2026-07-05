@@ -31,7 +31,7 @@
 <link rel="stylesheet" href="css/home-modals.css">
 <link rel="stylesheet" href="css/carihub-sector-sparkles.css?v=20260628b">
 <link rel="stylesheet" href="css/home-cat-promo-rail.css?v=20260628b">
-<link rel="stylesheet" href="css/home-adultos-cat-picker.css?v=20260630hf3">
+<link rel="stylesheet" href="css/home-adultos-cat-picker.css?v=20260705proamb1">
 <link rel="stylesheet" href="css/home-sector-subcat.css?v=20260630hf1">
 <link rel="stylesheet" href="css/ch-slot-dock.css">
 <link rel="stylesheet" href="css/carihub-media-placeholders.css?v=20260630hf1">
@@ -40,6 +40,7 @@
 <link rel="stylesheet" href="css/home-otros-registro-bridge.css?v=20260627a">
 <link rel="stylesheet" href="css/registro-perfil-geo-modal.css?v=20260624j">
 <link rel="stylesheet" href="css/home-geo-pais-premium.css?v=20260625c">
+<link rel="stylesheet" href="css/home-geo-guided-flow.css?v=20260705journey2">
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
@@ -566,24 +567,15 @@ const CATEGORIAS_BUSCADOR = [
       <ul class="home-cat-picker__list" id="catPickerList" role="listbox" aria-label="Categorías del sector"></ul>
     </div>
 
-    <div class="home-adultos-picker" id="catPickerAdultos" hidden>
-      <div class="home-adultos-picker__flashes" aria-hidden="true">
-        <span class="ap-bg-flash ap-bg-flash--pink ap-bg-flash--p1"></span>
-        <span class="ap-bg-flash ap-bg-flash--pink ap-bg-flash--p2"></span>
-        <span class="ap-bg-flash ap-bg-flash--pink ap-bg-flash--p3"></span>
-        <span class="ap-bg-flash ap-bg-flash--pink ap-bg-flash--p4"></span>
-        <span class="ap-bg-flash ap-bg-flash--pink ap-bg-flash--p5"></span>
-        <span class="ap-bg-flash ap-bg-flash--white ap-bg-flash--1"></span>
-        <span class="ap-bg-flash ap-bg-flash--white ap-bg-flash--2"></span>
-        <span class="ap-bg-flash ap-bg-flash--white ap-bg-flash--3"></span>
-        <span class="ap-bg-flash ap-bg-flash--white ap-bg-flash--4"></span>
-        <span class="ap-bg-flash ap-bg-flash--white ap-bg-flash--5"></span>
+    <div class="home-adultos-subcats-step" id="catPickerAdultos" hidden>
+      <div class="home-adultos-subcats-ambience" aria-hidden="true">
+        <div class="home-adultos-subcats-ambience__base"></div>
+        <div class="home-adultos-subcats-ambience__brillo"></div>
+        <div class="home-adultos-subcats-ambience__drift"></div>
+        <div class="home-adultos-subcats-ambience__sweep"></div>
+        <div class="home-adultos-subcats-ambience__sparks ch-sector-sparkles" id="homeAdultosSubcatsSparkles"></div>
       </div>
-      <header class="home-adultos-picker__head">
-        <h3 class="home-adultos-picker__title" id="modal-categorias-title-adultos">Adultos y Entretenimiento para Adultos</h3>
-        <p class="home-adultos-picker__hint" id="catPickerCountAdultos"></p>
-      </header>
-      <header class="home-cat-promo-rail home-adultos-picker__promo" aria-label="Espacios publicitarios">
+      <header class="home-cat-promo-rail home-adultos-subcats__promo" aria-label="Espacios publicitarios">
         <div class="home-cat-promo-rail__slot home-cat-promo-rail__slot--side">
           <div id="homeAdultosPromoEstados" data-promo-slot="home_estados"></div>
         </div>
@@ -596,7 +588,15 @@ const CATEGORIAS_BUSCADOR = [
           <div id="homeAdultosPromoLibe" data-promo-slot="home_libe"></div>
         </div>
       </header>
-      <ul class="home-adultos-picker__grid" id="catPickerListAdultos" role="listbox" aria-label="Categorías Adultos"></ul>
+      <div class="home-adultos-subcats-scroll">
+        <header class="home-adultos-picker__head home-otros-subcats__head">
+          <h3 class="home-adultos-picker__title" id="modal-categorias-title-adultos">Adultos y Entretenimiento para Adultos</h3>
+          <p class="home-adultos-picker__hint" id="catPickerCountAdultos"></p>
+        </header>
+        <div class="home-adultos-subcats-catalog" id="homeAdultosCatCatalog">
+          <ul class="rp-subcat-geo-list home-otros-subcats__list home-adultos-subcats__list" id="catPickerListAdultos" role="listbox" aria-label="Categorías Adultos"></ul>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -2820,7 +2820,7 @@ const params = new URLSearchParams(window.location.search);
 <script src="js/sector-subcat-picker.js?v=20260701gast-img"></script>
 <script src="js/sector-catalog-ui.js?v=20260701gast-img"></script>
 <script src="js/sector-category-watermarks.js?v=20260627d"></script>
-<script src="js/home-otros-sectores-picker.js?v=20260701gast-img"></script>
+<script src="js/home-otros-sectores-picker.js?v=20260705journey2"></script>
 <script src="js/home-sector-cards.js"></script>
 <script src="js/home-sector-scroll.js"></script>
 <script src="js/home-vcards.js?v=20260624q"></script>
@@ -2833,14 +2833,15 @@ const params = new URLSearchParams(window.location.search);
 <script src="js/carihub-slot-preview-images.js?v=20260630ph1"></script>
 <script src="js/carihub-sector-sparkles.js?v=20260628b"></script>
 <script src="js/carihub-ui-notices.js?v=20260629v3"></script>
-<script src="js/carihub-geo-picker.js?v=20260630geo1"></script>
+<script src="js/carihub-search-journey-session.js?v=20260705journey2"></script>
+<script src="js/carihub-geo-picker.js?v=20260705journey3"></script>
 <script src="js/ch-slot-dock.js?v=20260628b"></script>
 <script src="js/banner-home-laterales.js"></script>
 <script src="js/resultados-demo.js"></script>
 <script src="js/carihub-cuenta-social.js"></script>
 <script src="js/carihub-gratificaciones.js"></script>
 <script src="js/home-bridge.js"></script>
-<script src="js/home-ui.js?v=20260630hf3"></script>
+<script src="js/home-ui.js?v=20260705journey4"></script>
 <script src="js/home-intenciones.js"></script>
 <script src="js/carihub-messenger-schema.js"></script>
 <script src="js/carihub-messenger-privacidad-schema.js"></script>

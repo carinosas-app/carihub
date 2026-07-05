@@ -12,7 +12,7 @@
 <link rel="stylesheet" href="css/carihub-page-sector-sparkles.css?v=20260704spark2">
 <link rel="stylesheet" href="css/carihub-sector-pro-background.css?v=20260704secpro1">
 <link rel="stylesheet" href="css/carihub-nav-quick.css">
-<link rel="stylesheet" href="css/resultados.css?v=20260704res31">
+<link rel="stylesheet" href="css/resultados.css?v=20260705resclose1">
 <link rel="stylesheet" href="css/carihub-media-placeholders.css?v=20260630hf1">
 </head>
 <body data-tema="adult">
@@ -48,6 +48,8 @@
   } catch (e) { /* tema temprano opcional */ }
 })();
 </script>
+
+<a class="res-float-close" id="resFloatClose" href="index.html" aria-label="Volver al inicio" title="Volver al inicio">×</a>
 
 <div id="fitOuter"><div id="fitSpacer"><div id="fitRoot">
 <div class="wrap resultados-wrap">
@@ -1331,11 +1333,23 @@
   }
 
   function mountCloseBtn() {
-    if (!window.CariHubNavQuick) return;
-    var bar = document.getElementById('brandbar');
-    if (!bar || bar.querySelector('.ch-nav-close')) return;
-    bar.classList.add('pbrand--with-close', 'brandbar--with-close');
-    bar.insertAdjacentHTML('afterbegin', CariHubNavQuick.closeButtonHTML('resultados'));
+    var btn = document.getElementById('resFloatClose');
+    if (!btn) return;
+    var href = 'index.html';
+    if (window.CariHubNavQuick && CariHubNavQuick.closeHref) {
+      href = CariHubNavQuick.closeHref('resultados');
+    }
+    btn.href = href;
+    if (btn.dataset.resFloatWired === '1') return;
+    btn.dataset.resFloatWired = '1';
+    btn.addEventListener('click', function (e) {
+      e.preventDefault();
+      if (typeof resVolverInicio === 'function') {
+        resVolverInicio();
+      } else {
+        location.href = 'index.html';
+      }
+    });
   }
 
   function vistaPreviaActiva() {

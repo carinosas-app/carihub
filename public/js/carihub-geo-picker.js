@@ -44,6 +44,7 @@
   var lastGeoFieldId = null;
   var homePickerInstance = null;
   var geoModalOpenedAt = 0;
+  var homeFlowMode = 'field-sync';
 
   var DATA = global.CariHubGeoPickerData || {};
   var CATALOG = global.CariHubGeoCatalog || null;
@@ -100,19 +101,209 @@
     modal.style.setProperty('z-index', '100001', 'important');
   }
 
+  function isGuidedFlow() {
+    return homeFlowMode === 'guided' &&
+      global.CariHubSearchJourneySession &&
+      global.CariHubSearchJourneySession.isActive();
+  }
+
+  function syncGeoSectionTitle(section, guided, text) {
+    if (!section) return;
+    if (guided) {
+      section.hidden = true;
+      return;
+    }
+    section.hidden = false;
+    section.textContent = text;
+  }
+
   function onGeoCloseClick(e) {
     if (e) {
       e.preventDefault();
       e.stopPropagation();
     }
     if (Date.now() - geoModalOpenedAt < 320) return;
+    if (isGuidedFlow()) {
+      handleGuidedBack();
+      return;
+    }
     closeModal();
+  }
+
+  function handleGuidedBack() {
+    var picker = activePicker || homePickerInstance;
+    if (!picker || !isGuidedFlow()) {
+      closeModal();
+      return;
+    }
+    var tipo = selectorTipo;
+    if (tipo === 'ciudad') {
+      picker.open('estado', { slideDir: 'back' });
+      return;
+    }
+    if (tipo === 'estado') {
+      picker.open('pais', { slideDir: 'back' });
+      return;
+    }
+    if (tipo === 'pais') {
+      var Journey = global.CariHubSearchJourneySession;
+      if (Journey && typeof Journey.beginGeoTransition === 'function') {
+        Journey.beginGeoTransition();
+      }
+      closeModal({ keepJourney: true });
+      var sess = Journey ? Journey.get() : null;
+      if (typeof global.__carihubJourneyBackToSubcat === 'function') {
+        global.__carihubJourneyBackToSubcat(sess);
+      } else if (sess && sess.origin === 'otros-sectores' && global.CariHubHomeOtrosSectoresPicker) {
+        global.CariHubHomeOtrosSectoresPicker.open({
+          step: 'subcats',
+          sectorId: sess.sectorId,
+          onSelectSubcat: global.__carihubOtrosSubcatHandler || null
+        });
+      }
+      if (Journey && typeof Journey.endGeoTransition === 'function') {
+        Journey.endGeoTransition();
+      }
+    }
+  }
+
+  function handleGuidedSearch(picker) {
+    if (!picker) return;
+    var Journey = global.CariHubSearchJourneySession;
+    if (Journey) Journey.updateGeo(picker.getValues());
+    if (typeof global.syncHomeGeoFromPicker === 'function') {
+      global.syncHomeGeoFromPicker(picker.getValues());
+    }
+    if (typeof global.buscarPerfilesFiltrados === 'function') {
+      global.buscarPerfilesFiltrados();
+    }
+    /* No closeModal: assign() is async; closing geo first exposes Home one frame. */
+    homeFlowMode = 'field-sync';
+    if (Journey) Journey.clear();
+  }
+
+  function handleGuidedNext(picker, targetTipo) {
+    if (!picker || !targetTipo) return;
+    picker.open(targetTipo, { slideDir: 'forward' });
+  }
+
+  function highlightSelectedCard(tipo, value) {
+    var list = document.getElementById('chGeoModalList');
+    if (!list) return;
+    list.querySelectorAll('.ch-geo-card').forEach(function (card) {
+      var match = card.getAttribute('data-value') === value;
+      card.classList.toggle('is-selected', !!match && !!value);
+      card.setAttribute('aria-pressed', match && value ? 'true' : 'false');
+    });
+  }
+
+  function renderContextTrail() {
+    var el = document.getElementById('chGeoContextTrail');
+    if (!el) return;
+    var Journey = global.CariHubSearchJourneySession;
+    if (!isGuidedFlow() || !Journey) {
+      el.hidden = true;
+      el.innerHTML = '';
+      return;
+    }
+    Journey.renderBreadcrumbEl(el, {
+      visibleKinds: Journey.DEFAULT_VISIBLE_KINDS,
+      includeGeo: false
+    });
+  }
+
+  function geoScopeLabel(picker, tipo) {
+    if (!picker) return '';
+    if (tipo === 'pais') return picker.state.pais || '';
+    if (tipo === 'estado') return picker.state.estado || '';
+    if (tipo === 'ciudad') return picker.state.ciudad || '';
+    return '';
+  }
+
+  function renderGuidedFooter(picker, tipo) {
+    var footer = document.getElementById('chGeoGuidedFooter');
+    var legacyBack = document.getElementById('chGeoModalBack');
+    var searchBtn = document.getElementById('chGeoGuidedSearch');
+    var nextBtn = document.getElementById('chGeoGuidedNext');
+    if (!footer || !searchBtn) return;
+
+    var guided = isGuidedFlow();
+    footer.hidden = !guided;
+    if (legacyBack) legacyBack.hidden = guided;
+
+    if (!guided) return;
+
+    footer.classList.remove('ch-geo-guided-footer--stack', 'ch-geo-guided-footer--row', 'ch-geo-guided-footer--single');
+    if (tipo === 'pais') footer.classList.add('ch-geo-guided-footer--stack');
+    else if (tipo === 'estado') footer.classList.add('ch-geo-guided-footer--row');
+    else footer.classList.add('ch-geo-guided-footer--single');
+
+    var scope = geoScopeLabel(picker, tipo);
+    var hasScope = !!scope;
+
+    if (tipo === 'pais') {
+      searchBtn.textContent = hasScope
+        ? '\uD83D\uDD0D Buscar en todo ' + scope
+        : '\uD83D\uDD0D Buscar en el pa\u00eds seleccionado';
+      searchBtn.disabled = !hasScope;
+      if (nextBtn) {
+        nextBtn.hidden = false;
+        nextBtn.textContent = '\u27A1 Seleccionar Estado';
+        nextBtn.disabled = !hasScope;
+      }
+    } else if (tipo === 'estado') {
+      searchBtn.textContent = hasScope
+        ? '\uD83D\uDD0D Buscar en ' + scope
+        : '\uD83D\uDD0D Buscar en el estado seleccionado';
+      searchBtn.disabled = !hasScope;
+      if (nextBtn) {
+        nextBtn.hidden = false;
+        nextBtn.textContent = '\u27A1 Seleccionar Ciudad';
+        nextBtn.disabled = !hasScope;
+      }
+    } else if (tipo === 'ciudad') {
+      searchBtn.textContent = hasScope
+        ? '\uD83D\uDD0D Buscar en ' + scope
+        : '\uD83D\uDD0D Buscar en la ciudad seleccionada';
+      searchBtn.disabled = !hasScope;
+      if (nextBtn) nextBtn.hidden = true;
+    }
+  }
+
+  function syncGuidedGeoTheme(modal) {
+    if (!modal) return;
+    var Journey = global.CariHubSearchJourneySession;
+    var sess = Journey ? Journey.get() : null;
+    var sector = (sess && sess.sectorId) || 'adultos';
+    var accent = Journey ? Journey.getSectorAccent(sector) : '#e91e63';
+
+    modal.classList.add('ch-geo-modal--home', 'ch-geo-modal--guided');
+    modal.classList.remove('ch-geo-modal--registro');
+    modal.removeAttribute('data-subtema');
+    modal.setAttribute('data-rp-sector', sector);
+
+    modal.style.setProperty('--rp-form-accent', accent);
+    if (sector === 'adultos') {
+      modal.style.setProperty('--geo-grad', 'linear-gradient(180deg, #ff2d6f 0%, #ec1458 45%, #c8004a 100%)');
+      modal.style.setProperty('--geo-shadow', '0 8px 24px rgba(233, 30, 99, 0.38)');
+      modal.style.removeProperty('--geo-premium-shell');
+    } else {
+      var grad = 'linear-gradient(180deg, color-mix(in srgb, ' + accent + ' 70%, #fff) 0%, ' +
+        accent + ' 52%, color-mix(in srgb, ' + accent + ' 88%, #000) 100%)';
+      modal.style.setProperty('--geo-grad', grad);
+      modal.style.setProperty('--geo-premium-shell', buildPremiumShellFromAccent(accent));
+      modal.style.setProperty('--geo-shadow', '0 8px 24px color-mix(in srgb, ' + accent + ' 38%, transparent)');
+    }
+    syncGeoSparkles(modal);
+    syncGeoBannerImage(modal, sector);
   }
 
   function wireModalListeners() {
     var closeBtn = document.getElementById('chGeoClose');
     var backBtn = document.getElementById('chGeoModalBack');
     var navBtn = document.getElementById('chGeoNavBack');
+    var searchBtn = document.getElementById('chGeoGuidedSearch');
+    var nextBtn = document.getElementById('chGeoGuidedNext');
     var input = document.getElementById('chGeoModalInput');
     if (closeBtn && closeBtn.dataset.chGeoWired !== '1') {
       closeBtn.dataset.chGeoWired = '1';
@@ -125,6 +316,23 @@
     if (navBtn && navBtn.dataset.chGeoWired !== '1') {
       navBtn.dataset.chGeoWired = '1';
       navBtn.addEventListener('click', onGeoCloseClick);
+    }
+    if (searchBtn && searchBtn.dataset.chGeoWired !== '1') {
+      searchBtn.dataset.chGeoWired = '1';
+      searchBtn.addEventListener('click', function () {
+        var picker = activePicker || homePickerInstance;
+        if (!picker || searchBtn.disabled) return;
+        handleGuidedSearch(picker);
+      });
+    }
+    if (nextBtn && nextBtn.dataset.chGeoWired !== '1') {
+      nextBtn.dataset.chGeoWired = '1';
+      nextBtn.addEventListener('click', function () {
+        var picker = activePicker || homePickerInstance;
+        if (!picker || nextBtn.disabled) return;
+        var target = selectorTipo === 'pais' ? 'estado' : (selectorTipo === 'estado' ? 'ciudad' : '');
+        if (target) handleGuidedNext(picker, target);
+      });
     }
     if (input && input.dataset.chGeoWired !== '1') {
       input.dataset.chGeoWired = '1';
@@ -148,7 +356,8 @@
 
   function ensureModal() {
     var stale = document.getElementById('chGeoModal');
-    if (stale && (!stale.querySelector('.ch-geo-sheet__crest') || !stale.querySelector('.ch-geo-glow-divider'))) {
+    if (stale && (!stale.querySelector('.ch-geo-sheet__crest') || !stale.querySelector('.ch-geo-glow-divider') ||
+        !stale.querySelector('.ch-geo-sheet__panel[data-geo-layout="guided-v2"]'))) {
       stale.remove();
       modalReady = false;
     }
@@ -171,7 +380,7 @@
             '<button type="button" class="ch-geo-sheet__close" id="chGeoClose" aria-label="Cerrar">×</button>' +
           '</div>' +
         '</div>' +
-        '<div class="ch-geo-sheet__panel">' +
+        '<div class="ch-geo-sheet__panel" data-geo-layout="guided-v2">' +
           '<div class="ch-geo-bg-sparkles" id="chGeoBgSparkles" aria-hidden="true"></div>' +
           '<header class="ch-geo-sheet__head ch-geo-sheet__head--pais">' +
             '<div class="ch-geo-head-deco" id="chGeoHeadDeco" aria-hidden="true" hidden>' +
@@ -186,8 +395,9 @@
               '<span class="ch-geo-world-map" aria-hidden="true"></span>' +
             '</div>' +
             '<div class="ch-geo-sheet__heading" id="chGeoHeadingRow">' +
+              '<nav class="ch-geo-context-trail" id="chGeoContextTrail" aria-label="Contexto de b\u00fasqueda" hidden></nav>' +
               '<span class="ch-geo-sheet__icon" id="chGeoHeadIcon" aria-hidden="true" hidden></span>' +
-              '<h2 class="ch-geo-sheet__title" id="chGeoModalTitle">Selecciona tu país</h2>' +
+              '<h2 class="ch-geo-sheet__title" id="chGeoModalTitle">Selecciona tu pa\u00eds</h2>' +
             '</div>' +
             '<div class="ch-geo-glow-divider" id="chGeoGlowDivider" aria-hidden="true" hidden>' +
               '<span class="ch-geo-glow-divider__line"></span>' +
@@ -207,11 +417,15 @@
             ICON_SEARCH +
             '<input type="search" id="chGeoModalInput" autocomplete="off">' +
           '</label>' +
+          '<div class="ch-geo-guided-footer" id="chGeoGuidedFooter" hidden>' +
+            '<button type="button" class="ch-geo-guided-btn ch-geo-guided-btn--search" id="chGeoGuidedSearch" disabled>\uD83D\uDD0D Buscar</button>' +
+            '<button type="button" class="ch-geo-guided-btn ch-geo-guided-btn--next" id="chGeoGuidedNext" hidden>\u27A1 Continuar</button>' +
+          '</div>' +
           '<div class="ch-geo-sheet__scroll">' +
             '<h3 class="ch-geo-sheet__section-title" id="chGeoSectionTitle">🔥 Más populares</h3>' +
             '<div class="ch-geo-sheet__list" id="chGeoModalList"></div>' +
           '</div>' +
-          '<button type="button" class="ch-geo-sheet__footer" id="chGeoModalBack">← Volver</button>' +
+          '<button type="button" class="ch-geo-sheet__footer" id="chGeoModalBack">\u2190 Volver</button>' +
         '</div>' +
       '</div>';
 
@@ -251,7 +465,10 @@
     var y = geoScrollLockY;
     document.body.classList.remove('ch-geo-modal-open');
     docEl.style.overflow = '';
-    if (!document.querySelector('.home-modal.is-open')) {
+    var keepLocked = global.CariHubSearchJourneySession &&
+      typeof global.CariHubSearchJourneySession.shouldKeepPageLocked === 'function' &&
+      global.CariHubSearchJourneySession.shouldKeepPageLocked();
+    if (!keepLocked && !document.querySelector('.home-modal.is-open')) {
       document.body.style.overflow = '';
     }
     restorePageScrollY(y);
@@ -268,7 +485,8 @@
     }
   }
 
-  function closeModal() {
+  function closeModal(opts) {
+    opts = opts || {};
     var modal = document.getElementById('chGeoModal');
     if (!modal) return;
     var restoreField = lastGeoFieldId;
@@ -276,11 +494,17 @@
     if (active && modal.contains(active) && typeof active.blur === 'function') {
       active.blur();
     }
-    modal.classList.remove('is-open');
+    modal.classList.remove('is-open', 'ch-geo-modal--guided');
     unlockPageScroll();
     selectorTipo = null;
     showAllPaises = false;
     lastGeoFieldId = null;
+    if (!opts.keepJourney) {
+      /* field-sync: no journey. guided search clears journey in handleGuidedSearch */
+    }
+    if (!isGuidedFlow() && !opts.keepJourney) {
+      homeFlowMode = 'field-sync';
+    }
     focusGeoField(restoreField);
   }
 
@@ -321,8 +545,21 @@
     var S = global.CariHubSectorSparkles;
     if (!S) return;
     var panel = modal.querySelector('.ch-geo-sheet__panel');
+    var lgbt = document.body.getAttribute('data-subtema') === 'lgbt' ||
+      modal.getAttribute('data-subtema') === 'lgbt';
+    if (lgbt && usesRegistroGeoShell()) {
+      S.syncBody('lgbt');
+      if (panel) S.ensureLayer(panel, 'lgbt');
+      return;
+    }
     var sector = modal.getAttribute('data-rp-sector') || document.body.getAttribute('data-rp-sector') || '';
-    if (usesRegistroGeoShell() && sector && sector !== 'adultos') {
+    if (isGuidedFlow() && sector && sector !== 'adultos') {
+      S.syncBody(sector);
+      if (panel) S.ensureLayer(panel, sector);
+    } else if (isGuidedFlow() && sector === 'adultos') {
+      S.syncBody('');
+      if (panel) S.ensureLayer(panel, '');
+    } else if (usesRegistroGeoShell() && sector && sector !== 'adultos') {
       S.syncBody(sector);
       if (panel) S.ensureLayer(panel, sector);
     } else if (usesHomePaisPremium()) {
@@ -347,6 +584,7 @@
     var divider = document.getElementById('chGeoGlowDivider');
     var isHome = usesHomePaisPremium();
     var showDeco = shouldShowGeoDeco();
+    var guided = isGuidedFlow();
 
     if (modal) {
       modal.classList.remove('ch-geo-modal--pais', 'ch-geo-modal--estado', 'ch-geo-modal--ciudad');
@@ -382,18 +620,31 @@
         title.classList.toggle('ch-geo-sheet__title--gradient', isHome);
       }
       if (subtitle) {
-        if (document.body.getAttribute('data-page') === 'home' && global.__homeGeoPaisHint) {
-          global.__homeGeoPaisHint = false;
-          subtitle.textContent = 'Categoría seleccionada. Elige un país para seguir (× arriba para cerrar).';
+        if (guided) {
+          subtitle.textContent = 'Elige un pa\u00eds o contin\u00faa con estado y ciudad para afinar tu b\u00fasqueda.';
+          subtitle.style.display = '';
         } else {
-          subtitle.textContent = 'Explora perfiles, negocios, experiencias cerca de ti';
+          var isRegistroPais = usesRegistroGeoShell() &&
+            document.body.getAttribute('data-page') !== 'home';
+          if (isRegistroPais) {
+            subtitle.textContent = '';
+            subtitle.style.display = 'none';
+          } else if (document.body.getAttribute('data-page') === 'home' && global.__homeGeoPaisHint) {
+            global.__homeGeoPaisHint = false;
+            subtitle.textContent =
+              'Categor\u00eda seleccionada. Para una b\u00fasqueda m\u00e1s profunda, selecciona tambi\u00e9n un estado y una ciudad, y despu\u00e9s presiona Buscar. ' +
+              'Para una b\u00fasqueda a nivel pa\u00eds, solo selecciona el pa\u00eds, despu\u00e9s presiona Buscar.';
+            subtitle.style.display = '';
+          } else {
+            subtitle.textContent = 'Explora perfiles, negocios, experiencias cerca de ti';
+            subtitle.style.display = '';
+          }
         }
-        subtitle.style.display = '';
       }
-      if (section) section.textContent = '🔥 Más populares';
+      if (section) syncGeoSectionTitle(section, guided, '\uD83D\uDD25 M\u00e1s populares');
       if (input) input.placeholder = GEO_SEARCH.pais;
-      if (nav) nav.style.visibility = 'hidden';
-      if (closeBtn) closeBtn.style.visibility = 'visible';
+      if (nav) nav.style.visibility = guided ? 'visible' : 'hidden';
+      if (closeBtn) closeBtn.style.visibility = guided ? 'hidden' : 'visible';
     } else if (tipo === 'estado') {
       if (deco) {
         deco.hidden = !showDeco;
@@ -417,15 +668,20 @@
       }
       if (title) title.textContent = picker.state.pais || 'País';
       if (subtitle) {
-        if (document.body.getAttribute('data-page') === 'home' && !localStorage.getItem('carihub_home_geo_estado_hint')) {
-          subtitle.textContent = 'Opcional: elige un estado para afinar tu búsqueda';
-          localStorage.setItem('carihub_home_geo_estado_hint', '1');
+        if (guided) {
+          subtitle.textContent = 'Puedes buscar en todo el estado o elegir una ciudad.';
+          subtitle.style.display = '';
+        } else if (document.body.getAttribute('data-page') === 'home') {
+          subtitle.textContent =
+            'Selecciona un estado. Para una búsqueda más profunda, selecciona también una ciudad y después presiona Buscar. ' +
+            'Para una búsqueda a nivel estatal, solo selecciona el estado, después presiona Buscar.';
+          subtitle.style.display = '';
         } else {
           subtitle.textContent = 'Selecciona un estado';
+          subtitle.style.display = '';
         }
-        subtitle.style.display = '';
       }
-      if (section) section.textContent = '🔥 Más populares';
+      if (section) syncGeoSectionTitle(section, guided, '\uD83D\uDD25 M\u00e1s populares');
       if (input) input.placeholder = GEO_SEARCH.estado;
       if (nav) nav.style.visibility = 'visible';
       if (closeBtn) closeBtn.style.visibility = 'hidden';
@@ -450,15 +706,18 @@
           : (picker.state.estado || 'Estado');
       }
       if (subtitle) {
-        if (document.body.getAttribute('data-page') === 'home' && !localStorage.getItem('carihub_home_geo_ciudad_hint')) {
-          subtitle.textContent = 'Opcional: elige una ciudad para mayor precisión';
-          localStorage.setItem('carihub_home_geo_ciudad_hint', '1');
+        if (guided) {
+          subtitle.textContent = 'Elige la ciudad para completar tu b\u00fasqueda.';
+          subtitle.style.display = '';
+        } else if (document.body.getAttribute('data-page') === 'home') {
+          subtitle.textContent = 'Selecciona una ciudad, después presiona Buscar.';
+          subtitle.style.display = '';
         } else {
           subtitle.textContent = 'Selecciona una ciudad';
+          subtitle.style.display = '';
         }
-        subtitle.style.display = '';
       }
-      if (section) section.textContent = '🔥 Más populares';
+      if (section) syncGeoSectionTitle(section, guided, '\uD83D\uDD25 M\u00e1s populares');
       if (input) input.placeholder = GEO_SEARCH.ciudad;
       if (nav) nav.style.visibility = 'visible';
       if (closeBtn) closeBtn.style.visibility = 'hidden';
@@ -466,23 +725,35 @@
     applyHeadLandmark(picker, tipo);
   }
 
-  function openModal(picker, tipo) {
+  function openModal(picker, tipo, slideDir, afterOpen) {
     ensureModal();
     activePicker = picker;
     selectorTipo = tipo;
     showAllPaises = false;
     var modal = document.getElementById('chGeoModal');
     var input = document.getElementById('chGeoModalInput');
+    var panel = modal ? modal.querySelector('.ch-geo-sheet__panel') : null;
     var ids = picker.ids(tipo);
     lastGeoFieldId = ids.field;
+    lockPageScroll();
     updateSheetHeader(picker, tipo);
     syncRegistroGeoTheme(modal);
+    renderContextTrail();
+    renderGuidedFooter(picker, tipo);
     if (input) input.value = '';
     picker.renderList();
     raiseGeoModal(modal);
-    lockPageScroll();
     geoModalOpenedAt = Date.now();
     modal.classList.add('is-open');
+    if (typeof afterOpen === 'function') afterOpen();
+    if (slideDir && panel) {
+      panel.classList.remove('ch-geo-slide-forward', 'ch-geo-slide-back', 'ch-geo-slide-active');
+      void panel.offsetWidth;
+      panel.classList.add('ch-geo-slide-' + slideDir, 'ch-geo-slide-active');
+      window.setTimeout(function () {
+        panel.classList.remove('ch-geo-slide-forward', 'ch-geo-slide-back', 'ch-geo-slide-active');
+      }, 340);
+    }
     setTimeout(function () {
       if (input) {
         try { input.focus({ preventScroll: true }); } catch (e) { input.focus(); }
@@ -742,16 +1013,21 @@
 
   var GEO_BANNER_BY_SECTOR = {
     restaurantes: 'img/home/banners/ad-banner-gastronomia-01.svg',
-    adultos: 'img/home/banners/ad-banner-pink-01.png'
+    adultos: 'img/home/banners/ad-banner-pink-01.png',
+    lgbt: 'img/home/banners/ad-banner-lgbt-resultados-01.png'
   };
+
+  var GEO_LGBT_GRAD = 'linear-gradient(90deg, #ef3b3b 0%, #ff8a1e 18%, #ffd21e 36%, #29b563 54%, #2b7fe0 72%, #8f39c9 90%, #ef3b3b 100%)';
 
   function syncGeoBannerImage(modal, sector) {
     if (!modal) return;
     var img = modal.querySelector('#chGeoBanner img');
     if (!img) return;
-    var src = GEO_BANNER_BY_SECTOR[sector] ||
+    var lgbt = modal.getAttribute('data-subtema') === 'lgbt';
+    var src = lgbt ? GEO_BANNER_BY_SECTOR.lgbt :
+      (GEO_BANNER_BY_SECTOR[sector] ||
       ((global.CariHubBannerGeneral && global.CariHubBannerGeneral.pickGeneralBanner()) ||
-        'img/home/banners/ad-banner-pink-01.png');
+        'img/home/banners/ad-banner-pink-01.png'));
     if (sector && sector !== 'adultos' && !GEO_BANNER_BY_SECTOR[sector]) {
       src = 'img/home/banners/ad-banner-pink-02.png';
     }
@@ -760,18 +1036,43 @@
 
   function syncRegistroGeoTheme(modal) {
     if (!modal) return;
+    if (isGuidedFlow()) {
+      syncGuidedGeoTheme(modal);
+      return;
+    }
     var isRegistro = usesRegistroGeoShell();
     var isUnifiedShell = usesHomePaisPremium();
     modal.classList.toggle('ch-geo-modal--home', isUnifiedShell);
     modal.classList.toggle('ch-geo-modal--registro', isRegistro);
+    modal.classList.remove('ch-geo-modal--guided');
     if (!isRegistro) {
       modal.removeAttribute('data-rp-sector');
+      modal.removeAttribute('data-subtema');
       modal.style.removeProperty('--rp-form-accent');
       modal.style.removeProperty('--geo-grad');
       modal.style.removeProperty('--geo-shadow');
       modal.style.removeProperty('--geo-premium-shell');
       return;
     }
+    var lgbt = document.body.getAttribute('data-subtema') === 'lgbt';
+    if (lgbt) {
+      modal.setAttribute('data-subtema', 'lgbt');
+      modal.setAttribute('data-rp-sector', 'adultos');
+      modal.style.setProperty('--rp-form-accent', '#8f39c9');
+      modal.style.setProperty('--geo-grad', GEO_LGBT_GRAD);
+      modal.style.setProperty('--geo-shadow', '0 8px 24px color-mix(in srgb, #8f39c9 38%, transparent)');
+      modal.style.setProperty('--geo-premium-shell',
+        'linear-gradient(165deg, ' +
+        'color-mix(in srgb, #ef3b3b 22%, #fff) 0%, ' +
+        'color-mix(in srgb, #ffd21e 18%, #fff) 35%, ' +
+        'color-mix(in srgb, #29b563 18%, #fff) 55%, ' +
+        'color-mix(in srgb, #2b7fe0 20%, #fff) 75%, ' +
+        'color-mix(in srgb, #8f39c9 22%, #fff) 100%)');
+      syncGeoSparkles(modal);
+      syncGeoBannerImage(modal, 'adultos');
+      return;
+    }
+    modal.removeAttribute('data-subtema');
     var sector = document.body.getAttribute('data-rp-sector') || '';
     if (document.body.getAttribute('data-page') === 'home') {
       sector = 'adultos';
@@ -1141,6 +1442,15 @@
       this.updateFieldUi('ciudad', valor);
     }
     this.syncHidden();
+    var Journey = global.CariHubSearchJourneySession;
+    if (isGuidedFlow()) {
+      if (Journey) Journey.updateGeo(this.getValues());
+      highlightSelectedCard(tipo, valor);
+      renderContextTrail();
+      renderGuidedFooter(this, tipo);
+      if (this.onChange) this.onChange(this.getValues());
+      return;
+    }
     closeModal();
     if (this.onChange) this.onChange(this.getValues());
   };
@@ -1189,6 +1499,12 @@
         wireListCardClicks(self, list);
       }
 
+      if (isGuidedFlow() && activePicker && selectorTipo) {
+        var curVal = activePicker.state[selectorTipo];
+        if (curVal) highlightSelectedCard(selectorTipo, curVal);
+        renderGuidedFooter(activePicker, selectorTipo);
+      }
+
       if (selectorTipo === 'pais' && !listaPersonalizada && !showAllPaises && !hasQuery) {
         var more = document.createElement('button');
         more.type = 'button';
@@ -1197,7 +1513,9 @@
         more.addEventListener('click', function () {
           showAllPaises = true;
           var section = document.getElementById('chGeoSectionTitle');
-          if (section) section.textContent = '🌎 Todos los países';
+          if (section && !isGuidedFlow()) {
+            section.textContent = '🌎 Todos los países';
+          }
           self.renderList();
         });
         list.appendChild(more);
@@ -1208,10 +1526,11 @@
     });
   };
 
-  GeoPicker.prototype.open = function (tipo) {
+  GeoPicker.prototype.open = function (tipo, opts) {
     var self = this;
+    opts = opts || {};
     var modal = document.getElementById('chGeoModal');
-    if (modal && modal.classList.contains('is-open') && selectorTipo === tipo) return;
+    if (modal && modal.classList.contains('is-open') && selectorTipo === tipo && !opts.slideDir) return;
     if (tipo === 'estado' && !this.state.pais) {
       if (global.CariHubUiNotices && CariHubUiNotices.showInfoModal) {
         CariHubUiNotices.showInfoModal({
@@ -1234,9 +1553,14 @@
       }
       return;
     }
-    loadGeoScripts().then(function () {
-      openModal(self, tipo);
-    }).catch(function () {
+    var runOpen = function () {
+      openModal(self, tipo, opts.slideDir || null, opts.onOpen);
+    };
+    if (scriptsLoaded || typeof PAISES_PRINCIPALES !== 'undefined') {
+      runOpen();
+      return;
+    }
+    loadGeoScripts().then(runOpen).catch(function () {
       if (global.CariHubUiNotices && CariHubUiNotices.showInfoModal) {
         CariHubUiNotices.showInfoModal({
           title: 'Ubicaciones no disponibles',
@@ -1273,7 +1597,8 @@
     var modal = document.getElementById('chGeoModal');
     if (!modal || !modal.classList.contains('is-open')) return;
     e.preventDefault();
-    closeModal();
+    if (isGuidedFlow()) handleGuidedBack();
+    else closeModal();
   });
 
   function bootHomeGeoPicker(onChange) {
@@ -1309,9 +1634,25 @@
     initHomePageGeo();
   }
 
+  function openHomeStep(tipo, opts) {
+    opts = opts || {};
+    if (!homePickerInstance) {
+      bootHomeGeoPicker(global.syncHomeGeoFromPicker || null);
+    }
+    if (!homePickerInstance) return;
+    homePickerInstance.open(tipo || 'pais', opts);
+  }
+
   global.CariHubGeoPicker = {
     mount: mount,
     loadGeoScripts: loadGeoScripts,
-    bootHome: bootHomeGeoPicker
+    bootHome: bootHomeGeoPicker,
+    openHomeStep: openHomeStep,
+    setFlowMode: function (mode) {
+      homeFlowMode = mode === 'guided' ? 'guided' : 'field-sync';
+    },
+    getFlowMode: function () {
+      return homeFlowMode;
+    }
   };
 })(typeof window !== 'undefined' ? window : globalThis);
