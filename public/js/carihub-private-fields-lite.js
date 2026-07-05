@@ -259,6 +259,18 @@
       accept: 'image/*,.pdf', obligatorio: true
     },
     cedulaEstado: { label: 'Estado de la república (cédula)', tipo: 'text', bloque: 'cedula', obligatorio: false },
+    certificacionesTI: {
+      label: 'Certificaciones técnicas (opcional)', tipo: 'textarea', bloque: 'verificacion',
+      placeholder: 'Ej. CompTIA, AWS, Cisco, Microsoft — solo admin', rows: 2, obligatorio: false
+    },
+    portfolioPrivado: {
+      label: 'Portafolio privado / repos (opcional)', tipo: 'url', bloque: 'verificacion',
+      placeholder: 'GitHub, Behance o drive privado para revisión admin', obligatorio: false
+    },
+    polizaResponsabilidadCivil: {
+      label: 'Póliza de responsabilidad civil (eventos)', tipo: 'file', bloque: 'fiscal',
+      accept: 'image/*,.pdf', obligatorio: false
+    },
     ineFrente: {
       label: 'INE — frente', tipo: 'file', bloque: 'verificacion',
       accept: 'image/*,.pdf', obligatorio: true
@@ -456,6 +468,12 @@
       extras = mergeUnique(extras, IDENTITY_FIELDS);
     }
     var fieldIds = mergeUnique(base, extras);
+    var sectorId = ident.sectorId || ctx.sectorId || '';
+    var sectorExtras = global.CARIHUB_SECTOR_PRIVATE_EXTRAS &&
+      global.CARIHUB_SECTOR_PRIVATE_EXTRAS[sectorId];
+    if (Array.isArray(sectorExtras) && sectorExtras.length) {
+      fieldIds = mergeUnique(fieldIds, sectorExtras);
+    }
     if (CFDI_FORMS[formularioId] && fieldIds.indexOf('deseoFacturar') >= 0) {
       fieldIds = mergeUnique(fieldIds, cfdiFieldsToMerge(formularioId));
     }

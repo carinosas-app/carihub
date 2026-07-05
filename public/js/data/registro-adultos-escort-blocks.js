@@ -333,7 +333,7 @@
           realizaTrios: 'Indica si ofreces tríos.',
           mostrarRealizaTriosPublico: 'Controla si esto se ve en tu ficha pública.',
           colaboracionContenido: 'Indica si colaboras en contenido para redes o plataformas.',
-          mostrarColaboracionContenidoPublico: 'Controla si esto se ve en tu ficha pública.'
+          mostrarColaboracionContenidoPublico: 'Controla si aparece el badge en resultados y la fila en tu perfil público.'
         }
       }
     },
@@ -473,7 +473,7 @@
           },
           {
             id: 'colaboracionContenido',
-            label: 'Colaboración para contenido',
+            label: '¿Haces colaboraciones para contenido en redes sociales?',
             type: 'select',
             required: false,
             options: ['Sí', 'No', 'Bajo acuerdo previo']
@@ -549,7 +549,7 @@
           },
           {
             id: 'colaboracionContenido',
-            label: 'Colaboración para contenido',
+            label: '¿Haces colaboraciones para contenido en redes sociales?',
             type: 'select',
             required: false,
             options: OPCIONES_SI_NO_ACUERDO.slice()
@@ -617,7 +617,7 @@
           },
           {
             id: 'colaboracionContenido',
-            label: 'Colaboración para contenido',
+            label: '¿Haces colaboraciones para contenido en redes sociales?',
             type: 'select',
             required: false,
             options: OPCIONES_SI_NO_ACUERDO.slice()
@@ -799,14 +799,14 @@
           },
           {
             id: 'colaboracionContenido',
-            label: 'Colaboración para contenido',
+            label: '¿Haces colaboraciones para contenido en redes sociales?',
             type: 'select',
             required: false,
             options: OPCIONES_SI_NO_ACUERDO.slice()
           },
           {
             id: 'mostrarColaboracionContenidoPublico',
-            label: 'Mostrar colaboración para contenido en perfil',
+            label: '¿Mostrar en resultados y perfil público?',
             type: 'select',
             required: false,
             options: OPCIONES_SI_NO.slice()
@@ -828,7 +828,7 @@
           },
           {
             id: 'colaboracionContenido',
-            label: 'Colaboración para contenido',
+            label: '¿Haces colaboraciones para contenido en redes sociales?',
             type: 'select',
             required: false,
             options: OPCIONES_SI_NO_ACUERDO.slice()

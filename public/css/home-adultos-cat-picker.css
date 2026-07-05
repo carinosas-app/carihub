@@ -75,9 +75,45 @@
 
 .home-adultos-picker__head,
 .home-adultos-picker__anuncio,
+.home-adultos-picker__search-wrap,
+.home-adultos-picker__catalog,
 .home-adultos-picker__grid {
   position: relative;
   z-index: 1;
+}
+
+.home-adultos-picker__search-wrap {
+  flex-shrink: 0;
+  margin: 0 0 8px;
+  padding: 0 2px;
+}
+
+.home-adultos-picker .rp-cat0-search-suggest,
+.home-adultos-picker .rp-cat0-search-panel {
+  position: relative;
+  z-index: 3;
+  flex-shrink: 0;
+}
+
+.home-adultos-picker__catalog {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+body.rp-cat-search-active .home-adultos-picker__catalog {
+  opacity: 0.38;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+body.rp-cat-search-typing .home-adultos-picker__catalog {
+  opacity: 0.55;
+}
+
+.home-modal--adultos-premium .rp-cat0-search-hint {
+  color: #9a6b7d;
 }
 
 .home-adultos-picker__head {
@@ -166,10 +202,10 @@
 .home-adultos-picker__grid {
   list-style: none;
   margin: 0;
-  padding: 2px 2px 8px;
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 7px;
+  padding: 2px 4px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
   overflow-y: auto;
   flex: 1;
   min-height: 0;
@@ -177,11 +213,11 @@
   scroll-behavior: smooth;
 }
 
-/* Refuerzo layout — anula fugas de ch-geo-card / rp-subcat en Home index */
+/* Lista vertical — una subcategoría por fila */
 .home-modal--adultos-premium .home-adultos-picker__grid {
-  display: grid !important;
-  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-  flex-direction: unset !important;
+  display: flex !important;
+  flex-direction: column !important;
+  grid-template-columns: unset !important;
 }
 
 .home-modal--adultos-premium .home-adultos-picker__grid > li {
@@ -194,10 +230,23 @@
   align-items: stretch !important;
   width: 100%;
   max-width: 100%;
-  height: 58px;
-  min-height: 54px;
-  max-height: 64px;
+  height: 48px;
+  min-height: 44px;
+  max-height: 52px;
   overflow: hidden;
+}
+
+/* Solo nombre de subcategoría — columna única armónica */
+.home-modal--adultos-premium .ap-card__visual {
+  display: none !important;
+}
+
+.home-modal--adultos-premium .ap-card__name,
+#catPickerAdultos .ap-card__name {
+  flex: 1 1 100% !important;
+  max-width: 100% !important;
+  border-radius: 12px;
+  padding: 8px 14px;
 }
 
 .home-modal--adultos-premium .ap-card__visual {

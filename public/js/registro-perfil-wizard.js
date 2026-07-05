@@ -189,8 +189,27 @@
     return backBtnModeForSector(sectorId);
   }
 
+  var LGBT_SUB_IDS = [
+    'escort gay', 'antro restaurant bar lgbt', 'trans', 'femboy',
+    'lesbians', 'tom boy', 'tom fem'
+  ];
+
+  function normSubcatId(id) {
+    return String(id || '').toLowerCase().trim();
+  }
+
+  function isLgbtSubcategoria(sub) {
+    if (!sub || !sub.id) return false;
+    var id = normSubcatId(sub.id);
+    for (var i = 0; i < LGBT_SUB_IDS.length; i++) {
+      if (normSubcatId(LGBT_SUB_IDS[i]) === id) return true;
+    }
+    return false;
+  }
+
   function shouldUsePinkSheen() {
     if (!state.sector || state.sector.id !== 'adultos') return false;
+    if (isLgbtSubcategoria(state.subcategoria)) return false;
     return state.screen === 'screen0b-adultos' ||
       state.screen === 'screen1' ||
       state.screen === 'screen4';
@@ -324,6 +343,11 @@
     } else {
       document.body.removeAttribute('data-rp-sector');
     }
+    if (isLgbtSubcategoria(state.subcategoria)) {
+      document.body.setAttribute('data-subtema', 'lgbt');
+    } else {
+      document.body.removeAttribute('data-subtema');
+    }
     if (isSubcat && state.sector && global.CariHubSectores) {
       var subCount = (global.CariHubSectores.subcategoriasDeSector(state.sector.id) || []).length;
       document.body.setAttribute('data-rp-sub-count', String(subCount));
@@ -337,9 +361,13 @@
       el.classList.toggle('is-active', el.id === id);
     });
     state.screen = id;
+    if (id !== 'screen0b-adultos') {
+      clearAdultosSubcatSearch(false);
+    }
     applyBodyScreenClasses();
     applyFormScreenTheme();
     if (id === 'screen0b-adultos') {
+      mountAdultosSubcatSearch();
       refreshSubcatPromoRail(state.sector);
       if (state.sector && state.sector.id !== 'adultos') {
         syncSectorSparkles(state.sector.id, $('rpSubcatWrap'));
@@ -746,6 +774,39 @@
 
   function renderAdultosSubcats() {
     renderSectorSubcats({ id: 'adultos', nombre: 'Adultos y Entretenimiento para Adultos' });
+  }
+
+  var adultosSubcatSearchCtl = null;
+
+  function mountAdultosSubcatSearch() {
+    if (adultosSubcatSearchCtl || !global.CariHubSectorCatSearch || !global.CariHubSectorCatSearch.mount) return;
+    adultosSubcatSearchCtl = global.CariHubSectorCatSearch.mount({
+      mode: 'register',
+      excludeAdultos: false,
+      ids: {
+        input: 'rpAdultosSubcatSearch',
+        bar: 'rpAdultosSubcatSearchBar',
+        submit: 'rpAdultosSubcatSearchSubmit',
+        hint: 'rpAdultosSubcatSearchHint',
+        suggest: 'rpAdultosSubcatSearchSuggest',
+        panel: 'rpAdultosSubcatSearchPanel',
+        catalog: 'rpAdultosSubcatCatalog'
+      },
+      onPickSubcat: function (sector, sub) {
+        pickSubcatAndAdvance(sector, sub);
+      },
+      onPickSector: function (sector) {
+        if (!sector || !sector.id) return;
+        clearAdultosSubcatSearch(false);
+        openSectorSubcats(sector);
+      }
+    });
+  }
+
+  function clearAdultosSubcatSearch(focusInput) {
+    if (adultosSubcatSearchCtl && adultosSubcatSearchCtl.clear) {
+      adultosSubcatSearchCtl.clear(!!focusInput);
+    }
   }
 
   function openSectorSubcats(sector) {
@@ -1248,7 +1309,24 @@
     }
   }
 
+  function hideEscortLegacyShell(ctx, resolved) {
+    var showEscort = global.CariHubFieldEngineLite &&
+      CariHubFieldEngineLite.shouldShowEscortLegacyModalidad &&
+      CariHubFieldEngineLite.shouldShowEscortLegacyModalidad(ctx, resolved);
+    var modWrap = $('wrapModalidad');
+    var edadWrap = $('wrapEdad');
+    var svcWrap = $('wrapServicios');
+    if (modWrap) modWrap.classList.toggle('rp-hidden', !showEscort);
+    if (edadWrap) edadWrap.classList.toggle('rp-hidden', !showEscort);
+    if (svcWrap && ctx && ctx.sectorId && ctx.sectorId !== 'adultos') {
+      svcWrap.classList.toggle('rp-hidden', true);
+    }
+  }
+
   function advanceToScreen1() {
+    if (state.sector && state.sector.id) {
+      document.body.setAttribute('data-rp-sector', state.sector.id);
+    }
     ensureGeoReady(function () {
       fillScreen1();
       showScreen('screen1');
@@ -1262,6 +1340,7 @@
     state.contexto = buildContexto(sector, subcat, extras || {});
     applySectorAmbience(sector);
     clearCatSearch(false);
+    clearAdultosSubcatSearch(false);
     advanceToScreen1();
   }
 
@@ -1646,7 +1725,10 @@
       } else if (fotosMin === 6) {
         hint.textContent = 'Modelos: foto principal y mínimo 5 fotos más (6 en total).';
       } else {
-        hint.textContent = 'Foto principal y hasta 3 fotos extra para galería.';
+        var sectorId = ctx.sectorId || (ctx.sector && ctx.sector.id) || '';
+        var hints = global.CARIHUB_REGISTRO_GALLERY_HINTS || {};
+        hint.textContent = hints[sectorId] || hints.generico ||
+          'Foto principal y hasta 3 fotos extra para galería.';
       }
     }
     if (label) {
@@ -1704,9 +1786,11 @@
       var edadWrap = $('wrapEdad');
       var modWrap = $('wrapModalidad');
       var isNegocio = NEGOCIO_SUBCATS.indexOf(ctx.subcategoriaId) >= 0;
-      if (edadWrap) edadWrap.classList.toggle('rp-hidden', isNegocio);
-      if (modWrap) modWrap.classList.toggle('rp-hidden', isNegocio);
+      var isSaludBienestar = ctx.sectorId === 'salud' || ctx.sectorId === 'bienestar';
+      if (edadWrap) edadWrap.classList.toggle('rp-hidden', isNegocio || isSaludBienestar);
+      if (modWrap) modWrap.classList.toggle('rp-hidden', isNegocio || isSaludBienestar);
     }
+    hideEscortLegacyShell(ctx, resolved);
     if (global.CariHubRegistroPublicBlocks && CariHubRegistroPublicBlocks.applyFieldLabels) {
       CariHubRegistroPublicBlocks.applyFieldLabels(ctx, resolved);
     }
@@ -2249,12 +2333,13 @@
       if ($('fldModalidad')) $('fldModalidad').value = c.modalidad || '';
       $('fldHorario').value = c.horarioPublico || '';
       $('fldServicios').value = c.serviciosPrincipales || '';
+      var ctxRestore = state.contexto || buildContexto(state.sector, state.subcategoria);
+      var resolvedRestore = global.CariHubFieldEngineLite && CariHubFieldEngineLite.resolveRegistrationSchema
+        ? CariHubFieldEngineLite.resolveRegistrationSchema(ctxRestore) : null;
       if (global.CariHubRegistroPublicBlocks && CariHubRegistroPublicBlocks.apply && c.bloquesPublicos) {
-        var ctxRestore = state.contexto || buildContexto(state.sector, state.subcategoria);
-        var resolvedRestore = global.CariHubFieldEngineLite && CariHubFieldEngineLite.resolveRegistrationSchema
-          ? CariHubFieldEngineLite.resolveRegistrationSchema(ctxRestore) : null;
         CariHubRegistroPublicBlocks.apply(ctxRestore, resolvedRestore, c.bloquesPublicos);
       }
+      hideEscortLegacyShell(ctxRestore, resolvedRestore);
       $('fldWhatsapp').value = c.whatsappPublico || '';
       $('fldTelegram').value = c.telegramPublico || '';
       if ($('fldInstagram')) $('fldInstagram').value = c.instagramPublico || '';
@@ -2400,6 +2485,7 @@
     bindContactToggles();
     bindMensajeContacto();
     bindCatSearch();
+    mountAdultosSubcatSearch();
     updateProgress();
     syncActionsBar();
     syncCat0Foot();

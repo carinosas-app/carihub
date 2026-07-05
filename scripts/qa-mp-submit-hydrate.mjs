@@ -55,6 +55,7 @@ const BLOCKS = [
   'data/registro-adultos-hospedaje-blocks.js',
   'carihub-registro-public-blocks.js',
   'carihub-field-engine-lite.js',
+  'data/registro-sector-contract-registry.js',
   'carihub-public-render-lite.js',
   'resultados-registrados.js',
 ];
@@ -246,6 +247,7 @@ const CASES = [
 console.log('\n=== QA MP-SUBMIT-HYDRATE — read-path ===\n');
 
 ok('hydratePerfilFromFirestoreDoc exportado', typeof Reg.hydratePerfilFromFirestoreDoc === 'function', 'API');
+ok('enriquecerMetadataFirestore exportado', typeof Reg.enriquecerMetadataFirestore === 'function', 'API');
 ok('mapToPerfil disponible en VM', typeof RP.mapToPerfil === 'function', 'blocks');
 
 for (const cfg of CASES) {
@@ -282,6 +284,35 @@ ok('legacy sin bloquesPublicos — precio', uLegacy.precio === '$500', uLegacy.p
 ok('legacy sin bloquesPublicos — sin estiloDominacion', !hasVal(uLegacy.estiloDominacion), 'ok');
 ok('legacy sin bloquesPublicos — sin __hydratedFromBloques', !uLegacy.__hydratedFromBloques, String(uLegacy.__hydratedFromBloques));
 
+// Legacy sector salud — nested saludPerfil sin bloquesPublicos (RES-P0-01)
+const saludLegacyDoc = {
+  uid: 'salud_legacy_uid',
+  nombre: 'Dr. Legacy QA',
+  categoria: 'Doctor General',
+  subcategoriaId: 'doctor general',
+  arquetipo: 'profesional_salud',
+  sectorId: 'salud',
+  tipoPerfil: 'persona',
+  precio: '$800',
+  ciudad: 'Monterrey',
+  estado: 'Nuevo León',
+  pais: 'México',
+  descripcion: 'Consulta general sin bloques',
+  saludPerfil: {
+    especialidad: 'Medicina general',
+    precioConsulta: '$800',
+    cedulaProfesional: '1234567',
+  },
+  aprobado: true,
+};
+const uSaludLegacy = Reg.normalizar({ id: 'salud_legacy_uid', exists: true, data: () => saludLegacyDoc });
+ok('salud legacy — sectorId', uSaludLegacy.sectorId === 'salud', uSaludLegacy.sectorId);
+ok('salud legacy — subcategoriaId', !!uSaludLegacy.subcategoriaId, uSaludLegacy.subcategoriaId);
+ok('salud legacy — saludPerfil nested', hasVal(uSaludLegacy.saludPerfil), 'saludPerfil');
+ok('salud legacy — especialidad nested', uSaludLegacy.saludPerfil?.especialidad === 'Medicina general', uSaludLegacy.saludPerfil?.especialidad);
+ok('salud legacy — sin __hydratedFromBloques', !uSaludLegacy.__hydratedFromBloques, String(uSaludLegacy.__hydratedFromBloques));
+ok('salud legacy — componente resultados', uSaludLegacy.__componenteResultados === 'ResultCardServicio', uSaludLegacy.__componenteResultados);
+
 // Fallback sin mapToPerfil
 const ctxNoBlocks = makeCtx();
 load('resultados-registrados.js', ctxNoBlocks);
@@ -292,6 +323,7 @@ ok('fallback sin mapToPerfil devuelve base', !hasVal(fb.estiloDominacion) && fb.
 
 const rrJs = fs.readFileSync(path.join(root, 'resultados-registrados.js'), 'utf8');
 ok('resultados-registrados invoca hydrate', rrJs.includes('hydratePerfilFromFirestoreDoc'), 'hydrate');
+ok('resultados-registrados exporta enriquecerMetadataFirestore', rrJs.includes('enriquecerMetadataFirestore'), 'metadata');
 ok('resultados-registrados usa mapToPerfil', rrJs.includes('mapToPerfil'), 'mapToPerfil');
 
 const resHtml = fs.readFileSync(path.join(repo, 'public', 'resultados.html'), 'utf8');

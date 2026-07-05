@@ -38,6 +38,36 @@
 
   var HUB_ONLY_KEYS = ['perfilesDetalle', 'perfilesVinculados', 'perfilActivoId'];
 
+  function registryApi() {
+    return global.CariHubSectorContractRegistry || null;
+  }
+
+  function pickSectorNestedPayload(mappedBloques, ctx) {
+    var R = registryApi();
+    if (R && R.pickNestedPayload) return R.pickNestedPayload(mappedBloques, ctx);
+    return {};
+  }
+
+  function buildSectorNestedDocFields(sectorNestedPayload) {
+    var R = registryApi();
+    if (R && R.buildNestedDocFields) return R.buildNestedDocFields(sectorNestedPayload);
+    return {};
+  }
+
+  function resolveColaboracionFields(mappedBloques, bloques) {
+    var R = registryApi();
+    if (R && R.resolveColaboracionFromBloques) {
+      return R.resolveColaboracionFromBloques(mappedBloques, bloques);
+    }
+    mappedBloques = mappedBloques || {};
+    bloques = bloques || {};
+    return {
+      colaboracionContenido: mappedBloques.colaboracionContenido || bloques.colaboracionContenido || '',
+      mostrarColaboracionContenidoPublico: mappedBloques.mostrarColaboracionContenidoPublico ||
+        bloques.mostrarColaboracionContenidoPublico || ''
+    };
+  }
+
   function isDataUrlString(value) {
     return typeof value === 'string' && value.indexOf('data:image/') === 0;
   }
@@ -240,7 +270,16 @@
         || mappedBloques.tipoPublico
         || (Array.isArray(mappedBloques.buscan) ? mappedBloques.buscan : (mappedBloques.buscan || '')));
 
-    return {
+    var sectorNestedPayload = pickSectorNestedPayload(mappedBloques, ctx);
+    var R = registryApi();
+    var sectorIdResolved = R && R.resolveSectorId
+      ? R.resolveSectorId(mappedBloques, ctx)
+      : (mappedBloques.sectorId || ctx.sectorId || '');
+    var hasSectorNested = Object.keys(sectorNestedPayload).length > 0;
+    var colaboracionFields = resolveColaboracionFields(mappedBloques, bloques || {});
+    var sectorNestedDocFields = buildSectorNestedDocFields(sectorNestedPayload);
+
+    return Object.assign({
       uid: uid,
       cuentaUid: uid,
       nombre: esParejaGrupo ? (aliasPareja || cp.alias || '') : (cp.alias || ''),
@@ -254,8 +293,12 @@
       zona: cp.zona || '',
       categoria: ctx.categoriaPrincipal || ctx.categoriaSolicitada || '',
       subcategoria: ctx.subcategoria || ctx.subcategoriaSolicitada || '',
-      subcategoriaId: subcategoriaIdCanon,
-      sectorId: ctx.sectorId || '',
+      subcategoriaId: hasSectorNested && mappedBloques.subcategoriaId
+        ? mappedBloques.subcategoriaId
+        : subcategoriaIdCanon,
+      sectorId: sectorIdResolved,
+      deltaPack: mappedBloques.deltaPack || '',
+      canonSubcategoriaId: mappedBloques.canonSubcategoriaId || '',
       formularioId: (draft.schemaResuelto && draft.schemaResuelto.identidad &&
         draft.schemaResuelto.identidad.formularioId) || ctx.formularioId || '',
       arquetipo: esUnicornLifestyle ? 'persona_lifestyle' : (esCuckoldHotwife ? 'pareja_grupo' : ((draft.schemaResuelto && draft.schemaResuelto.identidad &&
@@ -328,7 +371,7 @@
       personalidadPredominante: mappedBloques.personalidadPredominante || '',
       estiloPersonal: mappedBloques.estiloPersonal || '',
       dinamicasParticipa: mappedBloques.dinamicasParticipa || [],
-      colaboracionContenido: mappedBloques.colaboracionContenido || '',
+      colaboracionContenido: colaboracionFields.colaboracionContenido || '',
       realizaTrios: mappedBloques.realizaTrios || '',
       tiposTrios: mappedBloques.tiposTrios || [],
       esBisexual: mappedBloques.esBisexual || '',
@@ -355,7 +398,7 @@
       atencionTrans: mappedBloques.atencionTrans || '',
       mostrarAtencionTransPublico: mappedBloques.mostrarAtencionTransPublico || '',
       mostrarRealizaTriosPublico: mappedBloques.mostrarRealizaTriosPublico || '',
-      mostrarColaboracionContenidoPublico: mappedBloques.mostrarColaboracionContenidoPublico || '',
+      mostrarColaboracionContenidoPublico: colaboracionFields.mostrarColaboracionContenidoPublico || '',
       eventosDisponibles: mappedBloques.eventosDisponibles === true,
       portfolioURL: mappedBloques.portfolioURL || '',
       experienciaProfesional: mappedBloques.experienciaProfesional || '',
@@ -433,7 +476,7 @@
       fechaVencimiento: null,
       fecha: new Date(),
       fechaSolicitud: new Date().toISOString()
-    };
+    }, sectorNestedDocFields);
   }
 
   function buildUsuarioHubDoc(accountUid, perfilId, profileDoc) {

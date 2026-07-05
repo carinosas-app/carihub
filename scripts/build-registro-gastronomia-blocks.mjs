@@ -17,6 +17,11 @@ import {
   UI_NEG_GASTRONOMIA,
   PACK_IDS,
 } from './gastronomia-packs-v1.mjs';
+import { mergeEnrichmentV2 } from './gastronomia-sub-enrichment-v2.mjs';
+import {
+  mergeHideAdultLeaks,
+  COLABORACIONES_COMERCIALES_OPTIONS,
+} from './registro-cross-sector-policy.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const outPath = path.join(root, 'public/js/data/registro-gastronomia-blocks.js');
@@ -53,14 +58,37 @@ const canonMeta = Object.fromEntries(
 );
 
 const subDeltasLite = Object.fromEntries(
-  Object.entries(SUB_DELTAS).map(([k, v]) => [
-    k,
-    {
-      deltaFields: v.deltaFields,
-      obligatoriosDelta: v.obligatoriosDelta,
-      textosAyuda: v.textosAyuda || {},
-    },
-  ])
+  Object.entries(SUB_DELTAS).map(([k, v]) => {
+    const profile = mergeEnrichmentV2(
+      {
+        blockHint: v.blockHint || '',
+        fieldLabels: v.fieldLabels || {},
+        textosAyuda: v.textosAyuda || {},
+        extraFields: v.extraFields || [],
+        hideFields: v.hideFields || [],
+      },
+      k
+    );
+    const extraFields = [
+      ...new Set([...(profile.extraFields || []), 'colaboracionesComerciales', 'diferenciadorProfesional']),
+    ];
+    const hideFields = mergeHideAdultLeaks(profile.hideFields || []);
+    return [
+      k,
+      {
+        deltaFields: v.deltaFields,
+        obligatoriosDelta: v.obligatoriosDelta,
+        textosAyuda: profile.textosAyuda || {},
+        fieldLabels: profile.fieldLabels || {},
+        blockHint: profile.blockHint || '',
+        extraFields,
+        hideFields,
+        fieldOptions: {
+          colaboracionesComerciales: COLABORACIONES_COMERCIALES_OPTIONS,
+        },
+      },
+    ];
+  })
 );
 
 const fieldEntries = {};
@@ -172,12 +200,49 @@ const body = `/**
     if (reg.rows) field.rows = reg.rows;
     if (reg.options && reg.options.length) field.options = reg.options.slice();
     var delta = SUB_DELTAS[canonId];
+    if (delta && delta.fieldLabels && delta.fieldLabels[fieldId]) {
+      field.label = delta.fieldLabels[fieldId];
+    }
     if (delta && delta.textosAyuda && delta.textosAyuda[fieldId]) {
-      field.placeholder = delta.textosAyuda[fieldId];
+      var ayuda = delta.textosAyuda[fieldId];
+      if (field.type === 'checklist' || field.type === 'select' || field.type === 'boolean') {
+        field.hint = ayuda;
+      } else {
+        field.placeholder = ayuda;
+      }
     }
     var sw = showWhenForField(fieldId, canonId);
     if (sw) field.showWhen = sw;
     return field;
+  }
+
+  function extraFieldFromId(fieldId, required, canonId) {
+    var delta = SUB_DELTAS[canonId];
+    if (fieldId === 'colaboracionesComerciales') {
+      var opts = (delta && delta.fieldOptions && delta.fieldOptions.colaboracionesComerciales) || [];
+      return {
+        id: fieldId,
+        label: '¿Colaboras con otros negocios o chefs?',
+        type: 'select',
+        required: !!required,
+        options: opts.length ? opts.slice() : [
+          { value: 'si_activo', label: 'Sí, colaboro activamente' },
+          { value: 'ocasional', label: 'Ocasionalmente' },
+          { value: 'convenir', label: 'A convenir por proyecto' },
+          { value: 'no', label: 'No por ahora' },
+        ],
+      };
+    }
+    if (fieldId === 'diferenciadorProfesional') {
+      return {
+        id: fieldId,
+        label: 'Tu sello / lo que te distingue',
+        type: 'text',
+        required: !!required,
+        placeholder: 'Ej. Ingredientes locales · Horno de leña',
+      };
+    }
+    return null;
   }
 
   function personaIdentityBlock() {
@@ -232,8 +297,14 @@ const body = `/**
     (delta.deltaFields || []).forEach(function (fid) {
       if (GENERIC_FORBIDDEN_IDS.indexOf(fid) >= 0) return;
       if (fid === 'precioPromedioMx' || fid === 'precioDesdeMx') return;
+      if (delta.hideFields && delta.hideFields.indexOf(fid) >= 0) return;
       var f = fieldFromRegistry(fid, !!oblSet[fid], canonId);
       if (f) fields.push(f);
+    });
+    (delta.extraFields || []).forEach(function (fid) {
+      if (fields.some(function (x) { return x.id === fid; })) return;
+      var ef = extraFieldFromId(fid, !!oblSet[fid], canonId);
+      if (ef) fields.push(ef);
     });
     if (BAR_CANON.indexOf(canonId) >= 0) {
       var discBar = fieldFromRegistry('disclaimerReguladoGastronomia', false, canonId);
@@ -246,7 +317,7 @@ const body = `/**
     return {
       id: 'gastronomiaDelta_' + canonId,
       title: meta.blockTitle,
-      hint: meta.nombre,
+      hint: delta.blockHint || meta.blockTitle,
       fields: fields,
     };
   }

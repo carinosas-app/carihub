@@ -77,44 +77,115 @@
     };
   }
 
+  /** Copia nested *Perfil persistidos en el doc (sin inventar campos). */
+  function copiarNestedPerfilDesdeDoc(data, target) {
+    if (!data || !target) return target;
+    Object.keys(data).forEach(function (key) {
+      if (!/Perfil$/i.test(key)) return;
+      var val = data[key];
+      if (!val || typeof val !== 'object' || Array.isArray(val)) return;
+      target[key] = Object.assign({}, val);
+    });
+    return target;
+  }
+
+  function copiarColaboracionDesdeDoc(data, target) {
+    var cp = data.camposPublicos || {};
+    if (cp.colaboracionContenido) target.colaboracionContenido = cp.colaboracionContenido;
+    if (cp.mostrarColaboracionContenidoPublico) {
+      target.mostrarColaboracionContenidoPublico = cp.mostrarColaboracionContenidoPublico;
+    }
+    if (data.colaboracionContenido) target.colaboracionContenido = data.colaboracionContenido;
+    if (data.mostrarColaboracionContenidoPublico) {
+      target.mostrarColaboracionContenidoPublico = data.mostrarColaboracionContenidoPublico;
+    }
+    return target;
+  }
+
+  function resolverPresentacionDesdeDoc(data) {
+    data = data || {};
+    var fe = global.CariHubFieldEngineLite;
+    if (!fe || !fe.resolvePublicPresentation) return null;
+    return fe.resolvePublicPresentation({
+      subcategoriaId: data.subcategoriaId,
+      subcategoria: data.subcategoria,
+      categoria: data.categoria || data.categoriaPublica
+    });
+  }
+
   /**
-   * MP-SUBMIT-HYDRATE — reconstruye perfil público desde camposPublicos.bloquesPublicos.
-   * Fallback: devuelve base sin cambios si no hay bloques o mapToPerfil no está cargado.
+   * RES-P0-01 — metadata + nested *Perfil para docs sin bloquesPublicos.
+   * Punto único: Resultados (listar) y Perfil (normalizar vía perfil-publico-init).
    */
-  function hydratePerfilFromFirestoreDoc(data, base) {
+  function enriquecerMetadataFirestore(data, base) {
     base = base || {};
     data = data || {};
-    var cp = data.camposPublicos;
-    var bloques = cp && cp.bloquesPublicos;
-    if (!bloques) return base;
-    var blocks = global.CariHubRegistroPublicBlocks;
-    if (!blocks || typeof blocks.mapToPerfil !== 'function') return base;
+    var u = {};
+    var k;
+    for (k in base) {
+      if (Object.prototype.hasOwnProperty.call(base, k)) u[k] = base[k];
+    }
 
-    var ctx = ctxHydrateFromFirestore(data);
-    var seed = {
-      __id: base.__id,
-      uid: base.uid,
-      __demo: base.__demo,
-      __registrado: base.__registrado,
-      nombre: base.nombre,
-      alias: data.alias || data.nombre || base.nombre,
-      edad: base.edad,
-      categoria: base.categoria,
-      categoriaPublica: base.categoriaPublica,
-      pais: base.pais,
-      estado: base.estado,
-      ciudad: base.ciudad,
-      zona: base.zona,
-      fotoURL: base.fotoURL,
-      subcategoriaId: data.subcategoriaId || '',
-      arquetipo: data.arquetipo || '',
-      tipoPerfil: data.tipoPerfil || '',
-      precio: base.precio,
-      tagline: base.tagline,
-      descripcion: base.descripcion
-    };
+    if (data.subcategoriaId) u.subcategoriaId = data.subcategoriaId;
+    if (data.subcategoria) u.subcategoria = data.subcategoria;
+    if (data.arquetipo) u.arquetipo = data.arquetipo;
+    if (data.tipoPerfil) u.tipoPerfil = data.tipoPerfil;
+    if (data.sectorId) u.sectorId = data.sectorId;
+    if (data.formularioId) u.formularioId = data.formularioId;
+    if (data.alias) u.alias = data.alias;
+    if (data.categoria) {
+      u.categoria = data.categoria;
+      if (!u.categoriaPublica) u.categoriaPublica = data.categoria;
+    }
+    if (data.categoriaPublica) u.categoriaPublica = data.categoriaPublica;
 
-    var hydrated = blocks.mapToPerfil(seed, bloques, ctx);
+    copiarNestedPerfilDesdeDoc(data, u);
+    copiarColaboracionDesdeDoc(data, u);
+
+    var pres = resolverPresentacionDesdeDoc(data);
+    if (pres) {
+      if (!u.subcategoriaId && pres.subcategoriaId) u.subcategoriaId = pres.subcategoriaId;
+      if (!u.subcategoria && pres.subcategoria) u.subcategoria = pres.subcategoria;
+      if (!u.arquetipo && pres.arquetipo) u.arquetipo = pres.arquetipo;
+      if (!u.tipoPerfil && pres.tipoPerfil) u.tipoPerfil = pres.tipoPerfil;
+      if (!u.sectorId && pres.sectorId) u.sectorId = pres.sectorId;
+      if (!u.formularioId && pres.formularioId) u.formularioId = pres.formularioId;
+      if (!u.categoriaPublica && pres.subcategoria) u.categoriaPublica = pres.subcategoria;
+      u.__componenteResultados = pres.componenteResultados;
+      u.__componentePerfil = pres.componentePerfil;
+      u.__vista = pres.vistaPerfil;
+    }
+
+    var fe = global.CariHubFieldEngineLite;
+    if (fe && fe.enriquecerPerfilPublico) {
+      fe.enriquecerPerfilPublico(u, {
+        subcategoriaId: u.subcategoriaId,
+        categoria: u.categoria || u.categoriaPublica
+      });
+    }
+
+    aplicarComponenteSectorSiConocido(u);
+
+    return u;
+  }
+
+  /** Si el doc trae sectorId/nested conocido, alinear componente con registry (sin pipeline paralelo). */
+  function aplicarComponenteSectorSiConocido(u) {
+    if (!u || !u.sectorId) return u;
+    var reg = global.CariHubSectorContractRegistry;
+    if (!reg || !reg.resolveContract) return u;
+    var contract = reg.resolveContract(u.sectorId);
+    if (!contract || !contract.componenteResultados) return u;
+    var nestedKey = contract.nestedProfileKey;
+    if (nestedKey && u[nestedKey]) {
+      u.__componenteResultados = contract.componenteResultados;
+    } else if (u.sectorId !== 'adultos') {
+      u.__componenteResultados = contract.componenteResultados;
+    }
+    return u;
+  }
+
+  function mergeHydrateBase(hydrated, base, data) {
     hydrated.__id = base.__id;
     hydrated.uid = base.uid;
     hydrated.__demo = base.__demo;
@@ -138,6 +209,59 @@
     if (!hydrated.subcategoriaId && data.subcategoriaId) hydrated.subcategoriaId = data.subcategoriaId;
     if (!hydrated.arquetipo && data.arquetipo) hydrated.arquetipo = data.arquetipo;
     if (!hydrated.tipoPerfil && data.tipoPerfil) hydrated.tipoPerfil = data.tipoPerfil;
+    if (!hydrated.sectorId && data.sectorId) hydrated.sectorId = data.sectorId;
+    return hydrated;
+  }
+
+  /**
+   * MP-SUBMIT-HYDRATE — reconstruye perfil público desde camposPublicos.bloquesPublicos.
+   * Sin bloques: enriquecerMetadataFirestore (legacy + nested *Perfil en doc).
+   */
+  function hydratePerfilFromFirestoreDoc(data, base) {
+    base = base || {};
+    data = data || {};
+    var enriched = enriquecerMetadataFirestore(data, base);
+    var cp = data.camposPublicos;
+    var bloques = cp && cp.bloquesPublicos;
+    if (!bloques) return enriched;
+    var blocks = global.CariHubRegistroPublicBlocks;
+    if (!blocks || typeof blocks.mapToPerfil !== 'function') return enriched;
+
+    var ctx = ctxHydrateFromFirestore(data);
+    var seed = {
+      __id: enriched.__id,
+      uid: enriched.uid,
+      __demo: enriched.__demo,
+      __registrado: enriched.__registrado,
+      nombre: enriched.nombre,
+      alias: data.alias || data.nombre || enriched.nombre,
+      edad: enriched.edad,
+      categoria: enriched.categoria,
+      categoriaPublica: enriched.categoriaPublica,
+      pais: enriched.pais,
+      estado: enriched.estado,
+      ciudad: enriched.ciudad,
+      zona: enriched.zona,
+      fotoURL: enriched.fotoURL,
+      subcategoriaId: enriched.subcategoriaId || data.subcategoriaId || '',
+      arquetipo: enriched.arquetipo || data.arquetipo || '',
+      tipoPerfil: enriched.tipoPerfil || data.tipoPerfil || '',
+      sectorId: enriched.sectorId || data.sectorId || '',
+      formularioId: enriched.formularioId || data.formularioId || '',
+      precio: enriched.precio,
+      tagline: enriched.tagline,
+      descripcion: enriched.descripcion
+    };
+    var nk;
+    for (nk in enriched) {
+      if (!Object.prototype.hasOwnProperty.call(enriched, nk)) continue;
+      if (/Perfil$/i.test(nk) && enriched[nk] && typeof enriched[nk] === 'object') {
+        seed[nk] = Object.assign({}, enriched[nk]);
+      }
+    }
+
+    var hydrated = blocks.mapToPerfil(seed, bloques, ctx);
+    mergeHydrateBase(hydrated, base, data);
     hydrated.__hydratedFromBloques = true;
     return hydrated;
   }
@@ -253,25 +377,9 @@
   }
 
   function filtrarPerfiles(items, filtros) {
-    filtros = filtros || {};
-    items = items || [];
-    return items.filter(function (p) {
-      if (filtros.categoria && filtros.categoria !== 'Todas') {
-        if (normTxt(p.categoria) !== normTxt(filtros.categoria)) return false;
-      }
-      if (filtros.pais) {
-        if (normTxt(p.pais) !== normTxt(filtros.pais)) return false;
-      }
-      if (filtros.estado && filtros.estado !== 'Todos') {
-        if (normTxt(p.estado) !== normTxt(filtros.estado)) return false;
-      }
-      if (filtros.ciudad && filtros.ciudad !== 'Todas') {
-        var pc = normTxt(p.ciudad);
-        var fc = normTxt(filtros.ciudad);
-        if (pc !== fc && pc.indexOf(fc) < 0 && fc.indexOf(pc) < 0) return false;
-      }
-      return true;
-    });
+    var F = global.CariHubPerfilBusquedaFiltro;
+    if (F && F.filtrarPerfiles) return F.filtrarPerfiles(items, filtros);
+    return items || [];
   }
 
   function paginar(items, page, pageSize) {
@@ -339,6 +447,7 @@
     listar: listar,
     totalPublicos: totalPublicos,
     normalizar: normalizarPerfilFirestore,
+    enriquecerMetadataFirestore: enriquecerMetadataFirestore,
     hydratePerfilFromFirestoreDoc: hydratePerfilFromFirestoreDoc,
     baseNormalizadoPerfilFirestore: baseNormalizadoPerfilFirestore,
     urlPerfil: urlPerfil,

@@ -95,8 +95,53 @@
     return 'registro-banner.html?slot=' + encodeURIComponent(slotId);
   }
 
-  function imagenesPlaceholder(espacio) {
+  function imagenesPlaceholder(espacio, Q) {
+    Q = Q || queryFromLocation();
+    var sectorMod = global.CariHubResultadosSector;
+    if (sectorMod && sectorMod.bannersDeSector) {
+      var imgs = sectorMod.bannersDeSector(Q.categoria);
+      if (imgs && imgs.length) {
+        /* Cada slot (izq/centro/der) arranca en un banner distinto para que roten los 3. */
+        var slotOffset = { izquierda: 0, centro: 1, derecha: 2, inferior: 0 };
+        var off = slotOffset[espacio] || 0;
+        var out = [];
+        for (var i = 0; i < imgs.length; i++) {
+          out.push(imgs[(i + off) % imgs.length]);
+        }
+        return out;
+      }
+    }
+    if (sectorMod && sectorMod.bannerDeSector) {
+      var sectorImg = sectorMod.bannerDeSector(Q.categoria);
+      if (sectorImg) return [sectorImg];
+    }
     return (PLACEHOLDERS[espacio] || PLACEHOLDERS.izquierda).slice();
+  }
+
+  function labelsDeSector(Q) {
+    Q = Q || queryFromLocation();
+    var sectorMod = global.CariHubResultadosSector;
+    if (sectorMod && sectorMod.esSubcategoriaLgbt && sectorMod.esSubcategoriaLgbt(Q.categoria)) {
+      return Object.assign({}, LABELS, global.CARIHUB_LGBT_BANNER_LABELS || {
+        izquierda: 'Anúnciate aquí',
+        centro: 'Anúnciate aquí',
+        derecha: 'Anúnciate aquí',
+        inferior: 'Promociona tu perfil — Anúnciate aquí'
+      });
+    }
+    if (!sectorMod || !sectorMod.sectorDeCategoria) return LABELS;
+    var sector = sectorMod.sectorDeCategoria(Q.categoria);
+    if (sector === 'adultos') return LABELS;
+    var custom = global.CARIHUB_SECTOR_BANNER_LABELS;
+    if (custom && custom[sector]) {
+      return Object.assign({}, LABELS, custom[sector]);
+    }
+    return {
+      izquierda: 'Anuncia tu negocio aquí',
+      centro: 'Destaca tu servicio en CariHub',
+      derecha: 'Registra tu perfil profesional',
+      inferior: 'Promociona tu servicio en CariHub'
+    };
   }
 
   function buildDots(count) {
@@ -128,7 +173,8 @@
     var prefijo = prefijoSlots(Q);
     var id = slotId(prefijo, espacio);
     var rental = obtenerRenta(Q, espacio);
-    var alt = opts.alt || LABELS[espacio] || 'Espacio publicitario';
+    var labels = labelsDeSector(Q);
+    var alt = opts.alt || labels[espacio] || LABELS[espacio] || 'Espacio publicitario';
     var w = opts.center ? 620 : 380;
     var h = 158;
     var slides = '';
@@ -139,7 +185,7 @@
       slides = slideRentado(rental, alt, w, h);
       href = rental.url || href;
     } else {
-      var imgs = imagenesPlaceholder(espacio);
+      var imgs = imagenesPlaceholder(espacio, Q);
       imgs.forEach(function (src, i) {
         var active = i === 0 ? ' is-active' : '';
         var hidden = i === 0 ? 'false' : 'true';
@@ -153,7 +199,7 @@
     return {
       slotId: id,
       slides: slides,
-      count: rental && rental.imagen ? 1 : imagenesPlaceholder(espacio).length,
+      count: rental && rental.imagen ? 1 : imagenesPlaceholder(espacio, Q).length,
       href: href,
       vacantClass: vacantClass,
       alt: alt
@@ -183,22 +229,38 @@
     bottom.setAttribute('data-resultados-slot', id);
     bottom.classList.toggle('res-bottom--sr-vacant', !(rental && rental.imagen));
 
+    var sectorMod = global.CariHubResultadosSector;
     var photo = bottom.querySelector('.res-bottom__photo img');
     if (photo) {
       if (rental && rental.imagen) {
         photo.src = rental.imagen;
         photo.alt = rental.titulo || LABELS.inferior;
-      } else if (!photo.getAttribute('data-default-src')) {
-        photo.setAttribute('data-default-src', photo.src || 'img/resultados-demo/violeta-2.png');
-      } else if (!rental) {
-        photo.src = photo.getAttribute('data-default-src');
-        photo.alt = '';
+      } else {
+        var sectorModInner = sectorMod;
+        var sectorImg = sectorModInner && sectorModInner.bannerDeSector
+          ? sectorModInner.bannerDeSector(Q.categoria)
+          : null;
+        if (sectorImg) {
+          photo.src = sectorImg;
+          photo.alt = (labelsDeSector(Q).inferior) || LABELS.inferior;
+        } else if (!photo.getAttribute('data-default-src')) {
+          photo.setAttribute('data-default-src', photo.src || 'img/resultados-demo/violeta-2.png');
+        } else if (!rental) {
+          photo.src = photo.getAttribute('data-default-src');
+          photo.alt = '';
+        }
       }
     }
 
     if (rental && rental.titulo) {
       var h = bottom.querySelector('.res-bottom__h');
       if (h) h.textContent = rental.titulo;
+    } else {
+      var labels = labelsDeSector(Q);
+      var h2 = bottom.querySelector('.res-bottom__h');
+      if (h2 && labels.inferior && sectorMod && sectorMod.bannerDeSector(Q.categoria)) {
+        h2.textContent = labels.inferior;
+      }
     }
   }
 
@@ -215,12 +277,13 @@
     if (!wrap) return;
 
     var Q = opts.Q || queryFromLocation();
+    var labels = labelsDeSector(Q);
     var pb = wrap.querySelector('.pb');
     if (pb) {
       pb.innerHTML =
-        buildPbSlotHTML(Q, 'izquierda', { alt: LABELS.izquierda }) +
-        buildPbSlotHTML(Q, 'centro', { alt: LABELS.centro, center: true }) +
-        buildPbSlotHTML(Q, 'derecha', { alt: LABELS.derecha });
+        buildPbSlotHTML(Q, 'izquierda', { alt: labels.izquierda }) +
+        buildPbSlotHTML(Q, 'centro', { alt: labels.centro, center: true }) +
+        buildPbSlotHTML(Q, 'derecha', { alt: labels.derecha });
     }
 
     aplicarInferior(Q);
@@ -243,13 +306,5 @@
     linkRegistro: linkRegistro
   };
 
-  function boot() {
-    mount();
-  }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', boot);
-  } else {
-    boot();
-  }
+  /* Montaje coordinado desde resultados.html (refreshQ) para respetar ?categoria= de la URL. */
 })(typeof window !== 'undefined' ? window : globalThis);

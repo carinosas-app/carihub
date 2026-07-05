@@ -30,8 +30,39 @@
     onSelectSubcat: null
   };
 
+  var catSearchCtl = null;
+
   function $(id) {
     return document.getElementById(id);
+  }
+
+  function mountCatSearch() {
+    if (!global.CariHubSectorCatSearch || !global.CariHubSectorCatSearch.mount) return;
+    catSearchCtl = global.CariHubSectorCatSearch.mount({
+      mode: 'browse',
+      excludeAdultos: false,
+      ids: {
+        input: 'homeOtrosCatSearch',
+        bar: 'homeOtrosCatSearchBar',
+        submit: 'homeOtrosCatSearchSubmit',
+        hint: 'homeOtrosCatSearchHint',
+        suggest: 'homeOtrosCatSearchSuggest',
+        panel: 'homeOtrosCatSearchPanel',
+        catalog: 'homeOtrosCatCatalog'
+      },
+      onPickSubcat: function (sector, sub) {
+        if (typeof state.onSelectSubcat === 'function') {
+          state.onSelectSubcat(sub, sector);
+        }
+      },
+      onPickSector: function (sector) {
+        openSubcats(sector);
+      }
+    });
+  }
+
+  function clearCatSearch() {
+    if (catSearchCtl && catSearchCtl.clear) catSearchCtl.clear(false);
   }
 
   function sectorsForHome() {
@@ -141,6 +172,7 @@
     var cats = $('homeOtrosStepCats');
     var subcats = $('homeOtrosStepSubcats');
     state.step = step;
+    if (step === 'cats') clearCatSearch();
     if (cats) cats.hidden = step !== 'cats';
     if (subcats) subcats.hidden = step !== 'subcats';
     if (modal) {
@@ -207,6 +239,7 @@
 
   function close() {
     var modal = $('modal-otros-sectores');
+    clearCatSearch();
     if (modal) {
       modal.classList.remove('is-open', 'is-step-cats', 'is-step-subcats', 'rp-sector-subcats');
       modal.removeAttribute('data-rp-sector');
@@ -220,6 +253,7 @@
   }
 
   function bind() {
+    mountCatSearch();
     var back = $('homeOtrosBackToCats');
     var modal = $('modal-otros-sectores');
     if (back) {

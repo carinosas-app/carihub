@@ -353,6 +353,24 @@ ok('perfil-publico applyEventosSectorHydrate', perfilHtml.includes('applyEventos
 const regHtml = fs.readFileSync(path.join(repoRoot, 'public', 'registro-perfil.html'), 'utf8');
 ok('registro-perfil includes eventos render', regHtml.includes('carihub-eventos-sector-render.js'));
 
+const resHtml = fs.readFileSync(path.join(repoRoot, 'public', 'resultados.html'), 'utf8');
+ok('resultados.html includes eventos render', resHtml.includes('carihub-eventos-sector-render.js'));
+
+const demoQ = { categoria: 'espacios-para-eventos', pais: 'México', estado: 'Nuevo León', ciudad: 'Monterrey' };
+if (ctx.CariHubResultadosDemo && typeof ctx.CariHubResultadosDemo.plantillaDemoEventos === 'function') {
+  const demos = ctx.CariHubResultadosDemo.plantillaDemoEventos(demoQ, {
+    sectorId: 'eventos',
+    subcategoriaId: 'espacios-para-eventos',
+    componenteResultados: 'ResultCardNegocio',
+  });
+  ok('plantillaDemoEventos genera perfiles', Array.isArray(demos) && demos.length >= 1, String(demos && demos.length));
+  if (demos && demos[0]) {
+    ok('demo nested eventosPerfil', !!demos[0].eventosPerfil && demos[0].eventosPerfil.deltaPack);
+    const demoCard = PR.cardHTML(demos[0], { categoria: 'Espacios para Eventos' });
+    ok('demo card sectorial eventos', demoCard.includes('res-card--eventos'));
+  }
+}
+
 const homeHtml = fs.readFileSync(path.join(repoRoot, 'public', 'index.html'), 'utf8').slice(0, 5000);
 ok('Home no tocado (eventos render ausente en index)', !homeHtml.includes('carihub-eventos-sector-render.js'));
 

@@ -248,7 +248,68 @@
     ],
     "textosAyuda": {
       "tiposEspacio": "Incluye quinta, salón, jardín, viñedo — elige todo lo que aplique.",
-      "cateringPolitica": "Si eres exclusivo, el cliente debe contratar tu banquete."
+      "cateringPolitica": "Si eres exclusivo, el cliente debe contratar tu banquete.",
+      "especialidadesEvento": "Bodas, XV, corporativos, infantiles — marca todo lo que sí haces.",
+      "cotizacionDesde": "Precio orientativo — filtra clientes sin prometer paquete fijo.",
+      "colaboracionesComerciales": "¿Trabajas con otros proveedores de eventos en paquetes conjuntos?",
+      "diferenciadorProfesional": "Ej. Respuesta en 24 h · Equipo propio · Experiencia en bodas destino"
+    },
+    "fieldLabels": {
+      "tiposEspacio": "Tipos de espacio que ofreces",
+      "cateringPolitica": "Política de catering externo",
+      "tiposEventoAceptados": "Eventos que aceptas"
+    },
+    "blockHint": "Tu salón, quinta o jardín — capacidad, políticas de catering y ruido.",
+    "extraFields": [
+      "colaboracionesComerciales",
+      "diferenciadorProfesional"
+    ],
+    "hideFields": [
+      "nivelServicio",
+      "modalidades",
+      "precioDesde",
+      "medidas",
+      "talla",
+      "orientacion",
+      "serviciosAdultos",
+      "disponibilidadAgenda",
+      "nivelPremium",
+      "realizaTrios",
+      "haceColaboraciones",
+      "colaboraCon",
+      "mostrarColaboraciones",
+      "colaboracionContenido",
+      "videoPresentacion",
+      "tipoCitaPreferida",
+      "disponiblePara",
+      "buscanConocer",
+      "experienciaVip",
+      "distintivosVip",
+      "presentacionFemboy",
+      "presentacionTom",
+      "estiloPredominante",
+      "atiendoA",
+      "mostrarAtiendoA"
+    ],
+    "fieldOptions": {
+      "colaboracionesComerciales": [
+        {
+          "value": "si_activo",
+          "label": "Sí, colaboro activamente"
+        },
+        {
+          "value": "ocasional",
+          "label": "Ocasionalmente"
+        },
+        {
+          "value": "convenir",
+          "label": "A convenir por proyecto"
+        },
+        {
+          "value": "no",
+          "label": "No por ahora"
+        }
+      ]
     }
   },
   "organizadores-produccion-eventos": {
@@ -272,7 +333,67 @@
     ],
     "textosAyuda": {
       "rolProduccion": "Marca todo lo que realmente coordinas — no solo 'organizo fiestas'.",
-      "presupuestoMinimoMxn": "Filtra clientes; puedes poner 0 si aceptas cualquier tamaño."
+      "presupuestoMinimoMxn": "Filtra clientes; puedes poner 0 si aceptas cualquier tamaño.",
+      "especialidadesEvento": "Bodas, XV, corporativos, infantiles — marca todo lo que sí haces.",
+      "cotizacionDesde": "Precio orientativo — filtra clientes sin prometer paquete fijo.",
+      "colaboracionesComerciales": "¿Trabajas con otros proveedores de eventos en paquetes conjuntos?",
+      "diferenciadorProfesional": "Ej. Respuesta en 24 h · Equipo propio · Experiencia en bodas destino"
+    },
+    "fieldLabels": {
+      "rolProduccion": "¿Qué coordinas en el evento?",
+      "presupuestoMinimoMxn": "Presupuesto mínimo de proyecto (MXN)"
+    },
+    "blockHint": "Producción integral — rol real, tamaño de evento y presupuesto mínimo.",
+    "extraFields": [
+      "colaboracionesComerciales",
+      "diferenciadorProfesional"
+    ],
+    "hideFields": [
+      "nivelServicio",
+      "modalidades",
+      "precioDesde",
+      "medidas",
+      "talla",
+      "orientacion",
+      "serviciosAdultos",
+      "disponibilidadAgenda",
+      "nivelPremium",
+      "realizaTrios",
+      "haceColaboraciones",
+      "colaboraCon",
+      "mostrarColaboraciones",
+      "colaboracionContenido",
+      "videoPresentacion",
+      "tipoCitaPreferida",
+      "disponiblePara",
+      "buscanConocer",
+      "experienciaVip",
+      "distintivosVip",
+      "presentacionFemboy",
+      "presentacionTom",
+      "estiloPredominante",
+      "atiendoA",
+      "mostrarAtiendoA"
+    ],
+    "fieldOptions": {
+      "colaboracionesComerciales": [
+        {
+          "value": "si_activo",
+          "label": "Sí, colaboro activamente"
+        },
+        {
+          "value": "ocasional",
+          "label": "Ocasionalmente"
+        },
+        {
+          "value": "convenir",
+          "label": "A convenir por proyecto"
+        },
+        {
+          "value": "no",
+          "label": "No por ahora"
+        }
+      ]
     }
   },
   "decoracion-ambientacion-eventos": {
@@ -292,7 +413,66 @@
       "requiereVisitaVenue"
     ],
     "textosAyuda": {
-      "especialidadesDecoracion": "Piñatas y festejos van aquí — distinto de florería producto floral."
+      "especialidadesDecoracion": "Piñatas y festejos van aquí — distinto de florería producto floral.",
+      "especialidadesEvento": "Bodas, XV, corporativos, infantiles — marca todo lo que sí haces.",
+      "cotizacionDesde": "Precio orientativo — filtra clientes sin prometer paquete fijo.",
+      "colaboracionesComerciales": "¿Trabajas con otros proveedores de eventos en paquetes conjuntos?",
+      "diferenciadorProfesional": "Ej. Respuesta en 24 h · Equipo propio · Experiencia en bodas destino"
+    },
+    "fieldLabels": {
+      "especialidadesDecoracion": "Especialidades de decoración"
+    },
+    "blockHint": "Decoración y ambientación — montaje, estilo visual y visita al venue.",
+    "extraFields": [
+      "colaboracionesComerciales",
+      "diferenciadorProfesional"
+    ],
+    "hideFields": [
+      "nivelServicio",
+      "modalidades",
+      "precioDesde",
+      "medidas",
+      "talla",
+      "orientacion",
+      "serviciosAdultos",
+      "disponibilidadAgenda",
+      "nivelPremium",
+      "realizaTrios",
+      "haceColaboraciones",
+      "colaboraCon",
+      "mostrarColaboraciones",
+      "colaboracionContenido",
+      "videoPresentacion",
+      "tipoCitaPreferida",
+      "disponiblePara",
+      "buscanConocer",
+      "experienciaVip",
+      "distintivosVip",
+      "presentacionFemboy",
+      "presentacionTom",
+      "estiloPredominante",
+      "atiendoA",
+      "mostrarAtiendoA"
+    ],
+    "fieldOptions": {
+      "colaboracionesComerciales": [
+        {
+          "value": "si_activo",
+          "label": "Sí, colaboro activamente"
+        },
+        {
+          "value": "ocasional",
+          "label": "Ocasionalmente"
+        },
+        {
+          "value": "convenir",
+          "label": "A convenir por proyecto"
+        },
+        {
+          "value": "no",
+          "label": "No por ahora"
+        }
+      ]
     }
   },
   "fotografia-video-eventos": {
@@ -312,7 +492,67 @@
       "horasCobertura",
       "tiempoEntregaDias"
     ],
-    "textosAyuda": {}
+    "textosAyuda": {
+      "especialidadesEvento": "Bodas, XV, corporativos, infantiles — marca todo lo que sí haces.",
+      "cotizacionDesde": "Precio orientativo — filtra clientes sin prometer paquete fijo.",
+      "colaboracionesComerciales": "¿Trabajas con otros proveedores de eventos en paquetes conjuntos?",
+      "diferenciadorProfesional": "Ej. Respuesta en 24 h · Equipo propio · Experiencia en bodas destino"
+    },
+    "fieldLabels": {
+      "serviciosAudiovisual": "Servicios audiovisuales"
+    },
+    "blockHint": "Foto y video — horas de cobertura, entrega y dron si aplica.",
+    "extraFields": [
+      "colaboracionesComerciales",
+      "diferenciadorProfesional"
+    ],
+    "hideFields": [
+      "nivelServicio",
+      "modalidades",
+      "precioDesde",
+      "medidas",
+      "talla",
+      "orientacion",
+      "serviciosAdultos",
+      "disponibilidadAgenda",
+      "nivelPremium",
+      "realizaTrios",
+      "haceColaboraciones",
+      "colaboraCon",
+      "mostrarColaboraciones",
+      "colaboracionContenido",
+      "videoPresentacion",
+      "tipoCitaPreferida",
+      "disponiblePara",
+      "buscanConocer",
+      "experienciaVip",
+      "distintivosVip",
+      "presentacionFemboy",
+      "presentacionTom",
+      "estiloPredominante",
+      "atiendoA",
+      "mostrarAtiendoA"
+    ],
+    "fieldOptions": {
+      "colaboracionesComerciales": [
+        {
+          "value": "si_activo",
+          "label": "Sí, colaboro activamente"
+        },
+        {
+          "value": "ocasional",
+          "label": "Ocasionalmente"
+        },
+        {
+          "value": "convenir",
+          "label": "A convenir por proyecto"
+        },
+        {
+          "value": "no",
+          "label": "No por ahora"
+        }
+      ]
+    }
   },
   "djs-eventos": {
     "deltaFields": [
@@ -335,7 +575,67 @@
     ],
     "textosAyuda": {
       "duracionSetMinimaHoras": "Set mínimo que cobras — no confundir con horario de tu local.",
-      "incluyeEquipoDj": "Audio, luces, pantalla — lo que traes en tu rider básico."
+      "incluyeEquipoDj": "Audio, luces, pantalla — lo que traes en tu rider básico.",
+      "especialidadesEvento": "Bodas, XV, corporativos, infantiles — marca todo lo que sí haces.",
+      "cotizacionDesde": "Precio orientativo — filtra clientes sin prometer paquete fijo.",
+      "colaboracionesComerciales": "¿Trabajas con otros proveedores de eventos en paquetes conjuntos?",
+      "diferenciadorProfesional": "Ej. Respuesta en 24 h · Equipo propio · Experiencia en bodas destino"
+    },
+    "fieldLabels": {
+      "generosMusicales": "Géneros que manejas",
+      "incluyeEquipoSonido": "¿Incluyes equipo de sonido?"
+    },
+    "blockHint": "DJ para fiestas — géneros, equipo propio y traslado fuera de ciudad.",
+    "extraFields": [
+      "colaboracionesComerciales",
+      "diferenciadorProfesional"
+    ],
+    "hideFields": [
+      "nivelServicio",
+      "modalidades",
+      "precioDesde",
+      "medidas",
+      "talla",
+      "orientacion",
+      "serviciosAdultos",
+      "disponibilidadAgenda",
+      "nivelPremium",
+      "realizaTrios",
+      "haceColaboraciones",
+      "colaboraCon",
+      "mostrarColaboraciones",
+      "colaboracionContenido",
+      "videoPresentacion",
+      "tipoCitaPreferida",
+      "disponiblePara",
+      "buscanConocer",
+      "experienciaVip",
+      "distintivosVip",
+      "presentacionFemboy",
+      "presentacionTom",
+      "estiloPredominante",
+      "atiendoA",
+      "mostrarAtiendoA"
+    ],
+    "fieldOptions": {
+      "colaboracionesComerciales": [
+        {
+          "value": "si_activo",
+          "label": "Sí, colaboro activamente"
+        },
+        {
+          "value": "ocasional",
+          "label": "Ocasionalmente"
+        },
+        {
+          "value": "convenir",
+          "label": "A convenir por proyecto"
+        },
+        {
+          "value": "no",
+          "label": "No por ahora"
+        }
+      ]
     }
   },
   "grupos-musicales-eventos": {
@@ -363,7 +663,66 @@
       "experienciaEnEventos"
     ],
     "textosAyuda": {
-      "tipoAgrupacion": "Fara Fara es formato propio — selecciónalo si ese es tu show."
+      "tipoAgrupacion": "Fara Fara es formato propio — selecciónalo si ese es tu show.",
+      "especialidadesEvento": "Bodas, XV, corporativos, infantiles — marca todo lo que sí haces.",
+      "cotizacionDesde": "Precio orientativo — filtra clientes sin prometer paquete fijo.",
+      "colaboracionesComerciales": "¿Trabajas con otros proveedores de eventos en paquetes conjuntos?",
+      "diferenciadorProfesional": "Ej. Respuesta en 24 h · Equipo propio · Experiencia en bodas destino"
+    },
+    "fieldLabels": {
+      "tipoAgrupacion": "Tipo de agrupación"
+    },
+    "blockHint": "Grupo musical — formación, repertorio y formato Fara Fara si aplica.",
+    "extraFields": [
+      "colaboracionesComerciales",
+      "diferenciadorProfesional"
+    ],
+    "hideFields": [
+      "nivelServicio",
+      "modalidades",
+      "precioDesde",
+      "medidas",
+      "talla",
+      "orientacion",
+      "serviciosAdultos",
+      "disponibilidadAgenda",
+      "nivelPremium",
+      "realizaTrios",
+      "haceColaboraciones",
+      "colaboraCon",
+      "mostrarColaboraciones",
+      "colaboracionContenido",
+      "videoPresentacion",
+      "tipoCitaPreferida",
+      "disponiblePara",
+      "buscanConocer",
+      "experienciaVip",
+      "distintivosVip",
+      "presentacionFemboy",
+      "presentacionTom",
+      "estiloPredominante",
+      "atiendoA",
+      "mostrarAtiendoA"
+    ],
+    "fieldOptions": {
+      "colaboracionesComerciales": [
+        {
+          "value": "si_activo",
+          "label": "Sí, colaboro activamente"
+        },
+        {
+          "value": "ocasional",
+          "label": "Ocasionalmente"
+        },
+        {
+          "value": "convenir",
+          "label": "A convenir por proyecto"
+        },
+        {
+          "value": "no",
+          "label": "No por ahora"
+        }
+      ]
     }
   },
   "animadores-maestros-ceremonia": {
@@ -384,7 +743,68 @@
       "especialidadesEvento",
       "duracionShowMinutos"
     ],
-    "textosAyuda": {}
+    "textosAyuda": {
+      "especialidadesEvento": "Bodas, XV, corporativos, infantiles — marca todo lo que sí haces.",
+      "cotizacionDesde": "Precio orientativo — filtra clientes sin prometer paquete fijo.",
+      "colaboracionesComerciales": "¿Trabajas con otros proveedores de eventos en paquetes conjuntos?",
+      "diferenciadorProfesional": "Ej. Respuesta en 24 h · Equipo propio · Experiencia en bodas destino",
+      "rolPrincipal": "MC, animador o mixto — define qué campos aplican."
+    },
+    "fieldLabels": {
+      "rolPrincipal": "Tu rol principal en el evento"
+    },
+    "blockHint": "Animación y MC — rol principal, dinámicas y protección de menores.",
+    "extraFields": [
+      "colaboracionesComerciales",
+      "diferenciadorProfesional"
+    ],
+    "hideFields": [
+      "nivelServicio",
+      "modalidades",
+      "precioDesde",
+      "medidas",
+      "talla",
+      "orientacion",
+      "serviciosAdultos",
+      "disponibilidadAgenda",
+      "nivelPremium",
+      "realizaTrios",
+      "haceColaboraciones",
+      "colaboraCon",
+      "mostrarColaboraciones",
+      "colaboracionContenido",
+      "videoPresentacion",
+      "tipoCitaPreferida",
+      "disponiblePara",
+      "buscanConocer",
+      "experienciaVip",
+      "distintivosVip",
+      "presentacionFemboy",
+      "presentacionTom",
+      "estiloPredominante",
+      "atiendoA",
+      "mostrarAtiendoA"
+    ],
+    "fieldOptions": {
+      "colaboracionesComerciales": [
+        {
+          "value": "si_activo",
+          "label": "Sí, colaboro activamente"
+        },
+        {
+          "value": "ocasional",
+          "label": "Ocasionalmente"
+        },
+        {
+          "value": "convenir",
+          "label": "A convenir por proyecto"
+        },
+        {
+          "value": "no",
+          "label": "No por ahora"
+        }
+      ]
+    }
   },
   "shows-para-eventos": {
     "deltaFields": [
@@ -413,7 +833,66 @@
     ],
     "textosAyuda": {
       "publicoObjetivo": "Evento para adultos no significa show con desnudez.",
-      "contenidoSensible": "Marca sí solo si hay desnudez, striptease o contenido explícito."
+      "contenidoSensible": "Marca si incluye contenido para adultos — activa revisión.",
+      "especialidadesEvento": "Bodas, XV, corporativos, infantiles — marca todo lo que sí haces.",
+      "cotizacionDesde": "Precio orientativo — filtra clientes sin prometer paquete fijo.",
+      "colaboracionesComerciales": "¿Trabajas con otros proveedores de eventos en paquetes conjuntos?",
+      "diferenciadorProfesional": "Ej. Respuesta en 24 h · Equipo propio · Experiencia en bodas destino"
+    },
+    "fieldLabels": {
+      "tipoShow": "Tipos de show que ofreces"
+    },
+    "blockHint": "Show escénico — tipo de show, público objetivo y contenido sensible si aplica.",
+    "extraFields": [
+      "colaboracionesComerciales",
+      "diferenciadorProfesional"
+    ],
+    "hideFields": [
+      "nivelServicio",
+      "modalidades",
+      "precioDesde",
+      "medidas",
+      "talla",
+      "orientacion",
+      "serviciosAdultos",
+      "disponibilidadAgenda",
+      "nivelPremium",
+      "realizaTrios",
+      "haceColaboraciones",
+      "colaboraCon",
+      "mostrarColaboraciones",
+      "colaboracionContenido",
+      "videoPresentacion",
+      "tipoCitaPreferida",
+      "disponiblePara",
+      "buscanConocer",
+      "experienciaVip",
+      "distintivosVip",
+      "presentacionFemboy",
+      "presentacionTom",
+      "estiloPredominante",
+      "atiendoA",
+      "mostrarAtiendoA"
+    ],
+    "fieldOptions": {
+      "colaboracionesComerciales": [
+        {
+          "value": "si_activo",
+          "label": "Sí, colaboro activamente"
+        },
+        {
+          "value": "ocasional",
+          "label": "Ocasionalmente"
+        },
+        {
+          "value": "convenir",
+          "label": "A convenir por proyecto"
+        },
+        {
+          "value": "no",
+          "label": "No por ahora"
+        }
+      ]
     }
   },
   "banquetes-catering-eventos": {
@@ -433,7 +912,68 @@
       "permisoManipulacionAlimentos",
       "especialidadesEvento"
     ],
-    "textosAyuda": {}
+    "textosAyuda": {
+      "especialidadesEvento": "Bodas, XV, corporativos, infantiles — marca todo lo que sí haces.",
+      "cotizacionDesde": "Precio orientativo — filtra clientes sin prometer paquete fijo.",
+      "colaboracionesComerciales": "¿Trabajas con otros proveedores de eventos en paquetes conjuntos?",
+      "diferenciadorProfesional": "Ej. Respuesta en 24 h · Equipo propio · Experiencia en bodas destino"
+    },
+    "fieldLabels": {
+      "comensalesMax": "Capacidad máxima de comensales",
+      "dietasEspeciales": "Dietas y alergias que cubres"
+    },
+    "blockHint": "Banquetes y catering — comensales máximos, dietas especiales y permisos.",
+    "extraFields": [
+      "colaboracionesComerciales",
+      "diferenciadorProfesional"
+    ],
+    "hideFields": [
+      "nivelServicio",
+      "modalidades",
+      "precioDesde",
+      "medidas",
+      "talla",
+      "orientacion",
+      "serviciosAdultos",
+      "disponibilidadAgenda",
+      "nivelPremium",
+      "realizaTrios",
+      "haceColaboraciones",
+      "colaboraCon",
+      "mostrarColaboraciones",
+      "colaboracionContenido",
+      "videoPresentacion",
+      "tipoCitaPreferida",
+      "disponiblePara",
+      "buscanConocer",
+      "experienciaVip",
+      "distintivosVip",
+      "presentacionFemboy",
+      "presentacionTom",
+      "estiloPredominante",
+      "atiendoA",
+      "mostrarAtiendoA"
+    ],
+    "fieldOptions": {
+      "colaboracionesComerciales": [
+        {
+          "value": "si_activo",
+          "label": "Sí, colaboro activamente"
+        },
+        {
+          "value": "ocasional",
+          "label": "Ocasionalmente"
+        },
+        {
+          "value": "convenir",
+          "label": "A convenir por proyecto"
+        },
+        {
+          "value": "no",
+          "label": "No por ahora"
+        }
+      ]
+    }
   },
   "renta-mobiliario-eventos": {
     "deltaFields": [
@@ -449,7 +989,67 @@
       "minimoRentaMobiliario",
       "especialidadesEvento"
     ],
-    "textosAyuda": {}
+    "textosAyuda": {
+      "especialidadesEvento": "Bodas, XV, corporativos, infantiles — marca todo lo que sí haces.",
+      "cotizacionDesde": "Precio orientativo — filtra clientes sin prometer paquete fijo.",
+      "colaboracionesComerciales": "¿Trabajas con otros proveedores de eventos en paquetes conjuntos?",
+      "diferenciadorProfesional": "Ej. Respuesta en 24 h · Equipo propio · Experiencia en bodas destino"
+    },
+    "fieldLabels": {
+      "tiposMobiliario": "Mobiliario que rentas"
+    },
+    "blockHint": "Renta de mobiliario — sillas, mesas, lonas y montaje.",
+    "extraFields": [
+      "colaboracionesComerciales",
+      "diferenciadorProfesional"
+    ],
+    "hideFields": [
+      "nivelServicio",
+      "modalidades",
+      "precioDesde",
+      "medidas",
+      "talla",
+      "orientacion",
+      "serviciosAdultos",
+      "disponibilidadAgenda",
+      "nivelPremium",
+      "realizaTrios",
+      "haceColaboraciones",
+      "colaboraCon",
+      "mostrarColaboraciones",
+      "colaboracionContenido",
+      "videoPresentacion",
+      "tipoCitaPreferida",
+      "disponiblePara",
+      "buscanConocer",
+      "experienciaVip",
+      "distintivosVip",
+      "presentacionFemboy",
+      "presentacionTom",
+      "estiloPredominante",
+      "atiendoA",
+      "mostrarAtiendoA"
+    ],
+    "fieldOptions": {
+      "colaboracionesComerciales": [
+        {
+          "value": "si_activo",
+          "label": "Sí, colaboro activamente"
+        },
+        {
+          "value": "ocasional",
+          "label": "Ocasionalmente"
+        },
+        {
+          "value": "convenir",
+          "label": "A convenir por proyecto"
+        },
+        {
+          "value": "no",
+          "label": "No por ahora"
+        }
+      ]
+    }
   },
   "renta-equipo-eventos": {
     "deltaFields": [
@@ -466,7 +1066,67 @@
       "requerimientosElectricos",
       "especialidadesEvento"
     ],
-    "textosAyuda": {}
+    "textosAyuda": {
+      "especialidadesEvento": "Bodas, XV, corporativos, infantiles — marca todo lo que sí haces.",
+      "cotizacionDesde": "Precio orientativo — filtra clientes sin prometer paquete fijo.",
+      "colaboracionesComerciales": "¿Trabajas con otros proveedores de eventos en paquetes conjuntos?",
+      "diferenciadorProfesional": "Ej. Respuesta en 24 h · Equipo propio · Experiencia en bodas destino"
+    },
+    "fieldLabels": {
+      "tiposEquipoRenta": "Equipo que rentas"
+    },
+    "blockHint": "Audio, iluminación y escenarios — inventario y operación técnica.",
+    "extraFields": [
+      "colaboracionesComerciales",
+      "diferenciadorProfesional"
+    ],
+    "hideFields": [
+      "nivelServicio",
+      "modalidades",
+      "precioDesde",
+      "medidas",
+      "talla",
+      "orientacion",
+      "serviciosAdultos",
+      "disponibilidadAgenda",
+      "nivelPremium",
+      "realizaTrios",
+      "haceColaboraciones",
+      "colaboraCon",
+      "mostrarColaboraciones",
+      "colaboracionContenido",
+      "videoPresentacion",
+      "tipoCitaPreferida",
+      "disponiblePara",
+      "buscanConocer",
+      "experienciaVip",
+      "distintivosVip",
+      "presentacionFemboy",
+      "presentacionTom",
+      "estiloPredominante",
+      "atiendoA",
+      "mostrarAtiendoA"
+    ],
+    "fieldOptions": {
+      "colaboracionesComerciales": [
+        {
+          "value": "si_activo",
+          "label": "Sí, colaboro activamente"
+        },
+        {
+          "value": "ocasional",
+          "label": "Ocasionalmente"
+        },
+        {
+          "value": "convenir",
+          "label": "A convenir por proyecto"
+        },
+        {
+          "value": "no",
+          "label": "No por ahora"
+        }
+      ]
+    }
   },
   "food-trucks-carritos-eventos": {
     "deltaFields": [
@@ -485,7 +1145,67 @@
       "permisoManipulacionAlimentos",
       "requiereAguaLuz"
     ],
-    "textosAyuda": {}
+    "textosAyuda": {
+      "especialidadesEvento": "Bodas, XV, corporativos, infantiles — marca todo lo que sí haces.",
+      "cotizacionDesde": "Precio orientativo — filtra clientes sin prometer paquete fijo.",
+      "colaboracionesComerciales": "¿Trabajas con otros proveedores de eventos en paquetes conjuntos?",
+      "diferenciadorProfesional": "Ej. Respuesta en 24 h · Equipo propio · Experiencia en bodas destino"
+    },
+    "fieldLabels": {
+      "tipoCocinaFoodTruck": "Tipo de cocina del carrito"
+    },
+    "blockHint": "Food truck para eventos — menú, capacidad por hora y permisos.",
+    "extraFields": [
+      "colaboracionesComerciales",
+      "diferenciadorProfesional"
+    ],
+    "hideFields": [
+      "nivelServicio",
+      "modalidades",
+      "precioDesde",
+      "medidas",
+      "talla",
+      "orientacion",
+      "serviciosAdultos",
+      "disponibilidadAgenda",
+      "nivelPremium",
+      "realizaTrios",
+      "haceColaboraciones",
+      "colaboraCon",
+      "mostrarColaboraciones",
+      "colaboracionContenido",
+      "videoPresentacion",
+      "tipoCitaPreferida",
+      "disponiblePara",
+      "buscanConocer",
+      "experienciaVip",
+      "distintivosVip",
+      "presentacionFemboy",
+      "presentacionTom",
+      "estiloPredominante",
+      "atiendoA",
+      "mostrarAtiendoA"
+    ],
+    "fieldOptions": {
+      "colaboracionesComerciales": [
+        {
+          "value": "si_activo",
+          "label": "Sí, colaboro activamente"
+        },
+        {
+          "value": "ocasional",
+          "label": "Ocasionalmente"
+        },
+        {
+          "value": "convenir",
+          "label": "A convenir por proyecto"
+        },
+        {
+          "value": "no",
+          "label": "No por ahora"
+        }
+      ]
+    }
   },
   "pasteles-reposteria-eventos": {
     "deltaFields": [
@@ -502,7 +1222,67 @@
       "permisoManipulacionAlimentos",
       "especialidadesEvento"
     ],
-    "textosAyuda": {}
+    "textosAyuda": {
+      "especialidadesEvento": "Bodas, XV, corporativos, infantiles — marca todo lo que sí haces.",
+      "cotizacionDesde": "Precio orientativo — filtra clientes sin prometer paquete fijo.",
+      "colaboracionesComerciales": "¿Trabajas con otros proveedores de eventos en paquetes conjuntos?",
+      "diferenciadorProfesional": "Ej. Respuesta en 24 h · Equipo propio · Experiencia en bodas destino"
+    },
+    "fieldLabels": {
+      "productosReposteriaEventos": "Productos de repostería para eventos"
+    },
+    "blockHint": "Pasteles y mesa de postres — pedidos personalizados y entrega.",
+    "extraFields": [
+      "colaboracionesComerciales",
+      "diferenciadorProfesional"
+    ],
+    "hideFields": [
+      "nivelServicio",
+      "modalidades",
+      "precioDesde",
+      "medidas",
+      "talla",
+      "orientacion",
+      "serviciosAdultos",
+      "disponibilidadAgenda",
+      "nivelPremium",
+      "realizaTrios",
+      "haceColaboraciones",
+      "colaboraCon",
+      "mostrarColaboraciones",
+      "colaboracionContenido",
+      "videoPresentacion",
+      "tipoCitaPreferida",
+      "disponiblePara",
+      "buscanConocer",
+      "experienciaVip",
+      "distintivosVip",
+      "presentacionFemboy",
+      "presentacionTom",
+      "estiloPredominante",
+      "atiendoA",
+      "mostrarAtiendoA"
+    ],
+    "fieldOptions": {
+      "colaboracionesComerciales": [
+        {
+          "value": "si_activo",
+          "label": "Sí, colaboro activamente"
+        },
+        {
+          "value": "ocasional",
+          "label": "Ocasionalmente"
+        },
+        {
+          "value": "convenir",
+          "label": "A convenir por proyecto"
+        },
+        {
+          "value": "no",
+          "label": "No por ahora"
+        }
+      ]
+    }
   },
   "invitaciones-papeleria-eventos": {
     "deltaFields": [
@@ -520,7 +1300,67 @@
       "entregaFormato",
       "incluyeDiseno"
     ],
-    "textosAyuda": {}
+    "textosAyuda": {
+      "especialidadesEvento": "Bodas, XV, corporativos, infantiles — marca todo lo que sí haces.",
+      "cotizacionDesde": "Precio orientativo — filtra clientes sin prometer paquete fijo.",
+      "colaboracionesComerciales": "¿Trabajas con otros proveedores de eventos en paquetes conjuntos?",
+      "diferenciadorProfesional": "Ej. Respuesta en 24 h · Equipo propio · Experiencia en bodas destino"
+    },
+    "fieldLabels": {
+      "serviciosPapeleria": "Servicios de papelería e invitaciones"
+    },
+    "blockHint": "Invitaciones y papelería — diseño, impresión y entregables digitales.",
+    "extraFields": [
+      "colaboracionesComerciales",
+      "diferenciadorProfesional"
+    ],
+    "hideFields": [
+      "nivelServicio",
+      "modalidades",
+      "precioDesde",
+      "medidas",
+      "talla",
+      "orientacion",
+      "serviciosAdultos",
+      "disponibilidadAgenda",
+      "nivelPremium",
+      "realizaTrios",
+      "haceColaboraciones",
+      "colaboraCon",
+      "mostrarColaboraciones",
+      "colaboracionContenido",
+      "videoPresentacion",
+      "tipoCitaPreferida",
+      "disponiblePara",
+      "buscanConocer",
+      "experienciaVip",
+      "distintivosVip",
+      "presentacionFemboy",
+      "presentacionTom",
+      "estiloPredominante",
+      "atiendoA",
+      "mostrarAtiendoA"
+    ],
+    "fieldOptions": {
+      "colaboracionesComerciales": [
+        {
+          "value": "si_activo",
+          "label": "Sí, colaboro activamente"
+        },
+        {
+          "value": "ocasional",
+          "label": "Ocasionalmente"
+        },
+        {
+          "value": "convenir",
+          "label": "A convenir por proyecto"
+        },
+        {
+          "value": "no",
+          "label": "No por ahora"
+        }
+      ]
+    }
   },
   "florerias-eventos": {
     "deltaFields": [
@@ -537,7 +1377,66 @@
       "requiereVisitaVenue"
     ],
     "textosAyuda": {
-      "productosFlorales": "Producto floral e instalación — distinto de decoración globos/temática."
+      "productosFlorales": "Producto floral e instalación — distinto de decoración globos/temática.",
+      "especialidadesEvento": "Bodas, XV, corporativos, infantiles — marca todo lo que sí haces.",
+      "cotizacionDesde": "Precio orientativo — filtra clientes sin prometer paquete fijo.",
+      "colaboracionesComerciales": "¿Trabajas con otros proveedores de eventos en paquetes conjuntos?",
+      "diferenciadorProfesional": "Ej. Respuesta en 24 h · Equipo propio · Experiencia en bodas destino"
+    },
+    "fieldLabels": {
+      "serviciosFlorales": "Servicios florales para eventos"
+    },
+    "blockHint": "Florería para eventos — arreglos, instalación y desmontaje.",
+    "extraFields": [
+      "colaboracionesComerciales",
+      "diferenciadorProfesional"
+    ],
+    "hideFields": [
+      "nivelServicio",
+      "modalidades",
+      "precioDesde",
+      "medidas",
+      "talla",
+      "orientacion",
+      "serviciosAdultos",
+      "disponibilidadAgenda",
+      "nivelPremium",
+      "realizaTrios",
+      "haceColaboraciones",
+      "colaboraCon",
+      "mostrarColaboraciones",
+      "colaboracionContenido",
+      "videoPresentacion",
+      "tipoCitaPreferida",
+      "disponiblePara",
+      "buscanConocer",
+      "experienciaVip",
+      "distintivosVip",
+      "presentacionFemboy",
+      "presentacionTom",
+      "estiloPredominante",
+      "atiendoA",
+      "mostrarAtiendoA"
+    ],
+    "fieldOptions": {
+      "colaboracionesComerciales": [
+        {
+          "value": "si_activo",
+          "label": "Sí, colaboro activamente"
+        },
+        {
+          "value": "ocasional",
+          "label": "Ocasionalmente"
+        },
+        {
+          "value": "convenir",
+          "label": "A convenir por proyecto"
+        },
+        {
+          "value": "no",
+          "label": "No por ahora"
+        }
+      ]
     }
   },
   "pirotecnia-efectos-especiales": {
@@ -560,7 +1459,68 @@
       "polizaSeguroPirotecnia",
       "disclaimerReguladoEventos"
     ],
-    "textosAyuda": {}
+    "textosAyuda": {
+      "especialidadesEvento": "Bodas, XV, corporativos, infantiles — marca todo lo que sí haces.",
+      "cotizacionDesde": "Precio orientativo — filtra clientes sin prometer paquete fijo.",
+      "colaboracionesComerciales": "¿Trabajas con otros proveedores de eventos en paquetes conjuntos?",
+      "diferenciadorProfesional": "Ej. Respuesta en 24 h · Equipo propio · Experiencia en bodas destino",
+      "disclaimerReguladoEventos": "Servicio regulado — revisión administrativa."
+    },
+    "fieldLabels": {
+      "tipoEfectoPirotecnia": "Tipos de efectos pirotécnicos"
+    },
+    "blockHint": "Pirotecnia regulada — licencias, jurisdicción y póliza obligatorias.",
+    "extraFields": [
+      "colaboracionesComerciales",
+      "diferenciadorProfesional"
+    ],
+    "hideFields": [
+      "nivelServicio",
+      "modalidades",
+      "precioDesde",
+      "medidas",
+      "talla",
+      "orientacion",
+      "serviciosAdultos",
+      "disponibilidadAgenda",
+      "nivelPremium",
+      "realizaTrios",
+      "haceColaboraciones",
+      "colaboraCon",
+      "mostrarColaboraciones",
+      "colaboracionContenido",
+      "videoPresentacion",
+      "tipoCitaPreferida",
+      "disponiblePara",
+      "buscanConocer",
+      "experienciaVip",
+      "distintivosVip",
+      "presentacionFemboy",
+      "presentacionTom",
+      "estiloPredominante",
+      "atiendoA",
+      "mostrarAtiendoA"
+    ],
+    "fieldOptions": {
+      "colaboracionesComerciales": [
+        {
+          "value": "si_activo",
+          "label": "Sí, colaboro activamente"
+        },
+        {
+          "value": "ocasional",
+          "label": "Ocasionalmente"
+        },
+        {
+          "value": "convenir",
+          "label": "A convenir por proyecto"
+        },
+        {
+          "value": "no",
+          "label": "No por ahora"
+        }
+      ]
+    }
   },
   "seguridad-eventos": {
     "deltaFields": [
@@ -577,7 +1537,68 @@
       "licenciaSeguridadPrivada",
       "disclaimerReguladoEventos"
     ],
-    "textosAyuda": {}
+    "textosAyuda": {
+      "especialidadesEvento": "Bodas, XV, corporativos, infantiles — marca todo lo que sí haces.",
+      "cotizacionDesde": "Precio orientativo — filtra clientes sin prometer paquete fijo.",
+      "colaboracionesComerciales": "¿Trabajas con otros proveedores de eventos en paquetes conjuntos?",
+      "diferenciadorProfesional": "Ej. Respuesta en 24 h · Equipo propio · Experiencia en bodas destino",
+      "licenciaSeguridadPrivada": "Licencia vigente obligatoria."
+    },
+    "fieldLabels": {
+      "elementosSeguridad": "Número de elementos de seguridad"
+    },
+    "blockHint": "Seguridad privada — licencia, elementos y cobertura del evento.",
+    "extraFields": [
+      "colaboracionesComerciales",
+      "diferenciadorProfesional"
+    ],
+    "hideFields": [
+      "nivelServicio",
+      "modalidades",
+      "precioDesde",
+      "medidas",
+      "talla",
+      "orientacion",
+      "serviciosAdultos",
+      "disponibilidadAgenda",
+      "nivelPremium",
+      "realizaTrios",
+      "haceColaboraciones",
+      "colaboraCon",
+      "mostrarColaboraciones",
+      "colaboracionContenido",
+      "videoPresentacion",
+      "tipoCitaPreferida",
+      "disponiblePara",
+      "buscanConocer",
+      "experienciaVip",
+      "distintivosVip",
+      "presentacionFemboy",
+      "presentacionTom",
+      "estiloPredominante",
+      "atiendoA",
+      "mostrarAtiendoA"
+    ],
+    "fieldOptions": {
+      "colaboracionesComerciales": [
+        {
+          "value": "si_activo",
+          "label": "Sí, colaboro activamente"
+        },
+        {
+          "value": "ocasional",
+          "label": "Ocasionalmente"
+        },
+        {
+          "value": "convenir",
+          "label": "A convenir por proyecto"
+        },
+        {
+          "value": "no",
+          "label": "No por ahora"
+        }
+      ]
+    }
   },
   "valet-parking-eventos": {
     "deltaFields": [
@@ -595,7 +1616,67 @@
       "uniformeProfesionalValet",
       "coordinacionConVenue"
     ],
-    "textosAyuda": {}
+    "textosAyuda": {
+      "especialidadesEvento": "Bodas, XV, corporativos, infantiles — marca todo lo que sí haces.",
+      "cotizacionDesde": "Precio orientativo — filtra clientes sin prometer paquete fijo.",
+      "colaboracionesComerciales": "¿Trabajas con otros proveedores de eventos en paquetes conjuntos?",
+      "diferenciadorProfesional": "Ej. Respuesta en 24 h · Equipo propio · Experiencia en bodas destino"
+    },
+    "fieldLabels": {
+      "vehiculosPorHora": "Vehículos atendidos por hora"
+    },
+    "blockHint": "Valet parking — capacidad por hora y póliza de responsabilidad.",
+    "extraFields": [
+      "colaboracionesComerciales",
+      "diferenciadorProfesional"
+    ],
+    "hideFields": [
+      "nivelServicio",
+      "modalidades",
+      "precioDesde",
+      "medidas",
+      "talla",
+      "orientacion",
+      "serviciosAdultos",
+      "disponibilidadAgenda",
+      "nivelPremium",
+      "realizaTrios",
+      "haceColaboraciones",
+      "colaboraCon",
+      "mostrarColaboraciones",
+      "colaboracionContenido",
+      "videoPresentacion",
+      "tipoCitaPreferida",
+      "disponiblePara",
+      "buscanConocer",
+      "experienciaVip",
+      "distintivosVip",
+      "presentacionFemboy",
+      "presentacionTom",
+      "estiloPredominante",
+      "atiendoA",
+      "mostrarAtiendoA"
+    ],
+    "fieldOptions": {
+      "colaboracionesComerciales": [
+        {
+          "value": "si_activo",
+          "label": "Sí, colaboro activamente"
+        },
+        {
+          "value": "ocasional",
+          "label": "Ocasionalmente"
+        },
+        {
+          "value": "convenir",
+          "label": "A convenir por proyecto"
+        },
+        {
+          "value": "no",
+          "label": "No por ahora"
+        }
+      ]
+    }
   },
   "transporte-eventos": {
     "deltaFields": [
@@ -615,7 +1696,67 @@
       "polizaTransporte",
       "usoTransporte"
     ],
-    "textosAyuda": {}
+    "textosAyuda": {
+      "especialidadesEvento": "Bodas, XV, corporativos, infantiles — marca todo lo que sí haces.",
+      "cotizacionDesde": "Precio orientativo — filtra clientes sin prometer paquete fijo.",
+      "colaboracionesComerciales": "¿Trabajas con otros proveedores de eventos en paquetes conjuntos?",
+      "diferenciadorProfesional": "Ej. Respuesta en 24 h · Equipo propio · Experiencia en bodas destino"
+    },
+    "fieldLabels": {
+      "capacidadPasajeros": "Capacidad de pasajeros por unidad"
+    },
+    "blockHint": "Transporte de invitados — permisos, póliza y capacidad.",
+    "extraFields": [
+      "colaboracionesComerciales",
+      "diferenciadorProfesional"
+    ],
+    "hideFields": [
+      "nivelServicio",
+      "modalidades",
+      "precioDesde",
+      "medidas",
+      "talla",
+      "orientacion",
+      "serviciosAdultos",
+      "disponibilidadAgenda",
+      "nivelPremium",
+      "realizaTrios",
+      "haceColaboraciones",
+      "colaboraCon",
+      "mostrarColaboraciones",
+      "colaboracionContenido",
+      "videoPresentacion",
+      "tipoCitaPreferida",
+      "disponiblePara",
+      "buscanConocer",
+      "experienciaVip",
+      "distintivosVip",
+      "presentacionFemboy",
+      "presentacionTom",
+      "estiloPredominante",
+      "atiendoA",
+      "mostrarAtiendoA"
+    ],
+    "fieldOptions": {
+      "colaboracionesComerciales": [
+        {
+          "value": "si_activo",
+          "label": "Sí, colaboro activamente"
+        },
+        {
+          "value": "ocasional",
+          "label": "Ocasionalmente"
+        },
+        {
+          "value": "convenir",
+          "label": "A convenir por proyecto"
+        },
+        {
+          "value": "no",
+          "label": "No por ahora"
+        }
+      ]
+    }
   },
   "renta-vestuario-disfraces-eventos": {
     "deltaFields": [
@@ -631,7 +1772,67 @@
       "higienizacionVestuario",
       "especialidadesEvento"
     ],
-    "textosAyuda": {}
+    "textosAyuda": {
+      "especialidadesEvento": "Bodas, XV, corporativos, infantiles — marca todo lo que sí haces.",
+      "cotizacionDesde": "Precio orientativo — filtra clientes sin prometer paquete fijo.",
+      "colaboracionesComerciales": "¿Trabajas con otros proveedores de eventos en paquetes conjuntos?",
+      "diferenciadorProfesional": "Ej. Respuesta en 24 h · Equipo propio · Experiencia en bodas destino"
+    },
+    "fieldLabels": {
+      "tiposVestuario": "Tipos de vestuario / disfraces"
+    },
+    "blockHint": "Renta de vestuario y disfraces — catálogo, tallas y entrega.",
+    "extraFields": [
+      "colaboracionesComerciales",
+      "diferenciadorProfesional"
+    ],
+    "hideFields": [
+      "nivelServicio",
+      "modalidades",
+      "precioDesde",
+      "medidas",
+      "talla",
+      "orientacion",
+      "serviciosAdultos",
+      "disponibilidadAgenda",
+      "nivelPremium",
+      "realizaTrios",
+      "haceColaboraciones",
+      "colaboraCon",
+      "mostrarColaboraciones",
+      "colaboracionContenido",
+      "videoPresentacion",
+      "tipoCitaPreferida",
+      "disponiblePara",
+      "buscanConocer",
+      "experienciaVip",
+      "distintivosVip",
+      "presentacionFemboy",
+      "presentacionTom",
+      "estiloPredominante",
+      "atiendoA",
+      "mostrarAtiendoA"
+    ],
+    "fieldOptions": {
+      "colaboracionesComerciales": [
+        {
+          "value": "si_activo",
+          "label": "Sí, colaboro activamente"
+        },
+        {
+          "value": "ocasional",
+          "label": "Ocasionalmente"
+        },
+        {
+          "value": "convenir",
+          "label": "A convenir por proyecto"
+        },
+        {
+          "value": "no",
+          "label": "No por ahora"
+        }
+      ]
+    }
   }
 };
 
@@ -2489,12 +3690,49 @@
     if (reg.rows) field.rows = reg.rows;
     if (reg.options && reg.options.length) field.options = reg.options.slice();
     var delta = SUB_DELTAS[canonId];
+    if (delta && delta.fieldLabels && delta.fieldLabels[fieldId]) {
+      field.label = delta.fieldLabels[fieldId];
+    }
     if (delta && delta.textosAyuda && delta.textosAyuda[fieldId]) {
-      field.placeholder = delta.textosAyuda[fieldId];
+      var ayuda = delta.textosAyuda[fieldId];
+      if (field.type === 'checklist' || field.type === 'select' || field.type === 'boolean') {
+        field.hint = ayuda;
+      } else {
+        field.placeholder = ayuda;
+      }
     }
     var sw = showWhenForField(fieldId);
     if (sw) field.showWhen = sw;
     return field;
+  }
+
+  function extraFieldFromId(fieldId, required, canonId) {
+    var delta = SUB_DELTAS[canonId];
+    if (fieldId === 'colaboracionesComerciales') {
+      var opts = (delta && delta.fieldOptions && delta.fieldOptions.colaboracionesComerciales) || [];
+      return {
+        id: fieldId,
+        label: '¿Colaboras con otros proveedores de eventos?',
+        type: 'select',
+        required: !!required,
+        options: opts.length ? opts.slice() : [
+          { value: 'si_activo', label: 'Sí, colaboro activamente' },
+          { value: 'ocasional', label: 'Ocasionalmente' },
+          { value: 'convenir', label: 'A convenir por proyecto' },
+          { value: 'no', label: 'No por ahora' },
+        ],
+      };
+    }
+    if (fieldId === 'diferenciadorProfesional') {
+      return {
+        id: fieldId,
+        label: 'Tu sello / lo que te distingue',
+        type: 'text',
+        required: !!required,
+        placeholder: 'Ej. Respuesta en 24 h · Equipo propio',
+      };
+    }
+    return null;
   }
 
   function personaIdentityBlock() {
@@ -2579,8 +3817,14 @@
     var fields = [];
     (delta.deltaFields || []).forEach(function (fid) {
       if (GENERIC_FORBIDDEN_IDS.indexOf(fid) >= 0) return;
+      if (delta.hideFields && delta.hideFields.indexOf(fid) >= 0) return;
       var f = fieldFromRegistry(fid, !!oblSet[fid], canonId);
       if (f) fields.push(f);
+    });
+    (delta.extraFields || []).forEach(function (fid) {
+      if (fields.some(function (x) { return x.id === fid; })) return;
+      var ef = extraFieldFromId(fid, !!oblSet[fid], canonId);
+      if (ef) fields.push(ef);
     });
     if (canonId === 'pirotecnia-efectos-especiales' || canonId === 'seguridad-eventos') {
       var disc = fieldFromRegistry('disclaimerReguladoEventos', true, canonId);
@@ -2593,7 +3837,7 @@
     return {
       id: 'eventosDelta_' + canonId,
       title: meta.blockTitle,
-      hint: meta.nombre,
+      hint: delta.blockHint || meta.blockTitle,
       fields: fields,
     };
   }

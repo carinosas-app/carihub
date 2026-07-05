@@ -315,6 +315,22 @@
     if (pub.labels) {
       Object.keys(pub.labels).forEach(function (k) { labels[k] = pub.labels[k]; });
     }
+    var subCopy = global.CARIHUB_GENERIC_SUB_PUBLIC_COPY;
+    var subId = row && row.subcategoriaId;
+    if (subCopy && subId && subCopy[subId]) {
+      var sc = subCopy[subId];
+      if (sc.labels) {
+        Object.keys(sc.labels).forEach(function (k) {
+          if (sc.labels[k]) labels[k] = sc.labels[k];
+        });
+      }
+      if (sc.placeholders) {
+        labels._placeholders = labels._placeholders || {};
+        Object.keys(sc.placeholders).forEach(function (k) {
+          labels._placeholders[k] = sc.placeholders[k];
+        });
+      }
+    }
     return {
       titulo: (experiencia && experiencia.titulo) || base.titulo || 'Registro público',
       formularioUiId: experiencia && experiencia.formularioUiId,
@@ -323,7 +339,7 @@
       labels: labels,
       obligatoriosUi: pub.obligatoriosUi || base.obligatoriosUi || ['alias'],
       obligatoriosExtra: pub.obligatoriosExtra || [],
-      notaPublica: pub.nota || pub.notaPublica || ''
+      notaPublica: (subCopy && subId && subCopy[subId] && subCopy[subId].notaPublica) || pub.nota || pub.notaPublica || ''
     };
   }
 
@@ -486,11 +502,30 @@
         lbl.textContent = stripRequiredMarker(labelText) +
           (obligSet && obligSet[blockKey] && visible ? ' *' : '');
       }
-      if (input && block.defaultPlaceholder) {
-        input.placeholder = (labels && labels[blockKey + 'Placeholder']) ||
+      if (input && (block.defaultPlaceholder || (labels && labels._placeholders && labels._placeholders[blockKey]))) {
+        input.placeholder = (labels && labels._placeholders && labels._placeholders[blockKey]) ||
+          (labels && labels[blockKey + 'Placeholder']) ||
           block.defaultPlaceholder;
       }
     }
+  }
+
+  function shouldShowEscortLegacyModalidad(ctx, resolved) {
+    ctx = ctx || {};
+    var sectorId = String(
+      ctx.sectorId ||
+      (ctx.sector && ctx.sector.id) ||
+      (resolved && resolved.identidad && resolved.identidad.sectorId) ||
+      ''
+    ).trim();
+    if (sectorId && sectorId !== 'adultos') return false;
+    var uiKey = resolved && resolved.uiProfileKey;
+    var arq = (resolved && resolved.identidad && resolved.identidad.arquetipo) ||
+      ctx.arquetipo || '';
+    if (uiKey === 'persona_acompanante' || arq === 'persona_acompanante') {
+      return sectorId === 'adultos';
+    }
+    return false;
   }
 
   function applyRegistrationSchemaToScreen(ctx) {
@@ -507,6 +542,12 @@
       var visible = fieldIsVisible(key, show, hide);
       setFieldVisible(key, visible, labels, obligSet);
     });
+
+    if (!shouldShowEscortLegacyModalidad(ctx, resolved)) {
+      ['modalidad', 'edad'].forEach(function (key) {
+        setFieldVisible(key, false, labels, obligSet);
+      });
+    }
 
     syncCardVisibility(show, hide);
 
@@ -696,6 +737,7 @@
     return {
       subcategoriaId: subId,
       subcategoria: ident.subcategoria || ctx.subcategoria || '',
+      sectorId: ident.sectorId || (row && row.sectorId) || '',
       formularioId: ident.formularioId || '',
       arquetipo: ident.arquetipo || '',
       tipoPerfil: ident.tipoPerfil || '',
@@ -806,6 +848,7 @@
     enriquecerPerfilPublico: enriquecerPerfilPublico,
     applyRegistrationSchemaToScreen: applyRegistrationSchemaToScreen,
     validatePublicDraft: validatePublicDraft,
+    shouldShowEscortLegacyModalidad: shouldShowEscortLegacyModalidad,
     getSpecOnlyFields: getSpecOnlyFields,
     getComparisonMatrix: getComparisonMatrix,
     UI_BY_ARQUETIPO: UI_BY_ARQUETIPO

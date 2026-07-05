@@ -297,6 +297,7 @@
     u.__bienestarPack = pack;
     u.sectorId = u.sectorId || 'bienestar';
     u.titulo = u.titulo || PACK_TITLES[pack] || 'Bienestar holístico';
+    if (p.blockTitle) u.titulo = p.blockTitle;
     u.especialidad = u.especialidad || u.titulo;
     u.servicios = u.servicios || u.titulo;
     u.tagline = u.tagline || p.tagline || u.frase || '';

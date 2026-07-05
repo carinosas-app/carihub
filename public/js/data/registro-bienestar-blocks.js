@@ -387,6 +387,156 @@
     ]
   };
 
+  function getSubDeltaApi() {
+    return {
+      meta: global.CARIHUB_BIENESTAR_SUB_CANON_META || {},
+      deltas: global.CARIHUB_BIENESTAR_SUB_DELTAS || {}
+    };
+  }
+
+  function resolveCanonSubId(raw) {
+    var key = slugSubId(raw);
+    var api = getSubDeltaApi();
+    if (api.deltas[key]) return key;
+    return key;
+  }
+
+  function cloneBlocks(blocks) {
+    return JSON.parse(JSON.stringify(blocks || []));
+  }
+
+  function applyFieldPatch(field, delta, subId) {
+    if (!field || !delta) return field;
+    var opts = delta.fieldOptions && delta.fieldOptions[field.id];
+    if (opts && opts.length) {
+      if (field.type === 'checklist' || field.type === 'select') {
+        field.options = opts.slice();
+      }
+    }
+    if (delta.fieldLabels && delta.fieldLabels[field.id]) {
+      field.label = delta.fieldLabels[field.id];
+    }
+    if (delta.textosAyuda && delta.textosAyuda[field.id]) {
+      var ayuda = delta.textosAyuda[field.id];
+      if (field.type === 'checklist' || field.type === 'select' || field.type === 'boolean') {
+        field.hint = ayuda;
+      } else {
+        field.placeholder = ayuda;
+      }
+    }
+    if (field.id === 'surtidoPrincipal' && delta.surtidoPlaceholder) {
+      field.placeholder = delta.surtidoPlaceholder;
+    }
+    return field;
+  }
+
+  function buildBienestarExtraField(fieldId, delta, required) {
+    var select = function (label, options) {
+      return { id: fieldId, label: label, type: 'select', required: !!required, options: options || MODALIDAD_CLASE };
+    };
+    var checklist = function (label, options) {
+      return { id: fieldId, label: label, type: 'checklist', required: !!required, options: options || [] };
+    };
+    var text = function (label, ph) {
+      return { id: fieldId, label: label, type: 'text', required: !!required, placeholder: ph || '' };
+    };
+    var map = {
+      modalidadSesionEnergetica: select('Modalidad de sesión', MODALIDAD_CLASE),
+      modalidadSesionCoaching: select('Modalidad de sesión', MODALIDAD_CLASE),
+      modalidadSesionTerapia: select('Modalidad de sesión', [
+        { value: 'presencial', label: 'Presencial en consultorio / espacio' },
+        { value: 'domicilio', label: 'Visita a domicilio del cliente' },
+        { value: 'hibrido', label: 'Ambas modalidades' }
+      ]),
+      modalidadLecturaDetalle: select('Modalidad de lectura', MODALIDAD_CLASE),
+      certificacionReiki: text('Certificación / linaje Reiki', 'Ej. Usui Shiki Ryoho — nivel II'),
+      formatoClaseYoga: select('Formato de clase', [
+        { value: 'grupal', label: 'Clase grupal' },
+        { value: 'privada', label: 'Clase privada' },
+        { value: 'ambas', label: 'Ambas' },
+        { value: 'retiros', label: 'Retiros / talleres' }
+      ]),
+      estilosYogaDetalle: checklist('Estilos que impartes', ['Hatha', 'Vinyasa', 'Yin', 'Restaurativo', 'Prenatal', 'Otra']),
+      equipamientoPilates: checklist('Equipamiento', ['Mat', 'Reformer', 'Cadillac', 'Otros']),
+      duracionMeditacion: select('Duración típica', DURACION_OPTS),
+      experienciaMeditacion: checklist('Experiencia ofrecida', ['Principiantes', 'Intermedio', 'Avanzado', 'Todos']),
+      areasCoachingDetalle: checklist('Áreas de acompañamiento', ['Propósito', 'Metas', 'Hábitos', 'Transiciones', 'Otro']),
+      capacidadTemazcal: text('Capacidad del temazcal (personas)', 'Ej. 8–12'),
+      serviciosTemazcal: checklist('Servicios del temazcal', ['Ceremonia grupal', 'Ceremonia privada', 'Integración post-ceremonia']),
+      reservacionTemazcal: select('Reservación', [
+        { value: 'cita_previa', label: 'Cita previa obligatoria' },
+        { value: 'eventos', label: 'Eventos programados' },
+        { value: 'ambos', label: 'Ambos' }
+      ]),
+      zonaCorporalMasaje: checklist('Zonas corporales', ['Espalda', 'Cuello', 'Piernas', 'Cuerpo completo', 'Otro']),
+      barajasTarot: checklist('Barajas / oráculos', ['Rider Waite', 'Marsella', 'Oráculos', 'Otra']),
+      colaboracionesComerciales: select('¿Colaboras con otros profesionales o centros?', [
+        { value: 'si_activo', label: 'Sí, colaboro activamente' },
+        { value: 'ocasional', label: 'Ocasionalmente' },
+        { value: 'convenir', label: 'A convenir' },
+        { value: 'no', label: 'No por ahora' }
+      ]),
+      diferenciadorProfesional: text('Tu sello / enfoque', 'Ej. Sesiones bilingües · Espacio acogedor'),
+      coberturaGeografica: text('Zona de atención', 'Ej. CDMX sur · También en línea')
+    };
+    var field = map[fieldId];
+    if (!field) return null;
+    field = JSON.parse(JSON.stringify(field));
+    applyFieldPatch(field, delta, '');
+    return field;
+  }
+
+  function applySubDeltaToBlocks(blocks, subId, negocioRetail) {
+    var api = getSubDeltaApi();
+    var delta = api.deltas[subId];
+    if (!delta) return blocks;
+    var oblSet = {};
+    (delta.obligatoriosDelta || []).forEach(function (fid) { oblSet[fid] = true; });
+    var out = cloneBlocks(blocks);
+    out.forEach(function (block) {
+      if (block.id === 'bienestarBase') {
+        block.fields.forEach(function (field) {
+          if (field.id === 'alias' && delta.aliasPlaceholder) {
+            field.placeholder = delta.aliasPlaceholder;
+          }
+        });
+        return;
+      }
+      if (block.id && block.id.indexOf('pack') === 0) {
+        block.title = delta.blockTitle || block.title;
+        if (delta.blockHint) block.hint = delta.blockHint;
+      }
+      if (delta.hideFields && delta.hideFields.length && block.fields) {
+        block.fields = block.fields.filter(function (f) {
+          return delta.hideFields.indexOf(f.id) < 0;
+        });
+      }
+      (block.fields || []).forEach(function (field) {
+        applyFieldPatch(field, delta, subId);
+      });
+      if (delta.extraFields && delta.extraFields.length && block.id && block.id.indexOf('pack') === 0) {
+        delta.extraFields.forEach(function (fid) {
+          if ((block.fields || []).some(function (f) { return f.id === fid; })) return;
+          var extra = buildBienestarExtraField(fid, delta, !!oblSet[fid]);
+          if (extra) block.fields.push(extra);
+        });
+      }
+    });
+    return out;
+  }
+
+  function mergeObligatoriosFromDelta(packOblig, subId) {
+    var api = getSubDeltaApi();
+    var delta = api.deltas[subId];
+    var list = (packOblig || []).slice();
+    if (!delta || !Array.isArray(delta.obligatoriosDelta)) return list;
+    delta.obligatoriosDelta.forEach(function (fid) {
+      if (fid === 'geo') return;
+      if (list.indexOf(fid) < 0) list.push(fid);
+    });
+    return list;
+  }
+
   function appendPackBlocks(pack, negocioRetail) {
     if (pack === 'D') return packBlocksD(negocioRetail);
     var fn = PACK_BUILDERS[pack] || packBlocksA;
@@ -395,18 +545,21 @@
 
   function buildConfig(ctx) {
     ctx = ctx || {};
-    var pack = resolvePack(ctx.subcategoriaId);
-    var negocioRetail = isNegocioRetailSub(ctx.subcategoriaId) && String(ctx.formularioId || '') === 'negocio_empresa';
+    var canonId = resolveCanonSubId(ctx.subcategoriaId || ctx.subcategoria || '');
+    var pack = resolvePack(canonId);
+    var negocioRetail = isNegocioRetailSub(canonId) && String(ctx.formularioId || '') === 'negocio_empresa';
     var blocks = negocioRetail ? appendPackBlocks('D', true) : personaBaseBlocks().concat(appendPackBlocks(pack, false));
+    blocks = applySubDeltaToBlocks(blocks, canonId, negocioRetail);
     var obligKey = negocioRetail ? 'D_NEGOCIO' : pack;
     return {
       id: 'bienestar_pack_' + pack.toLowerCase(),
       deltaPack: pack,
+      canonSubcategoriaId: canonId,
       sectorId: 'bienestar',
       formularioId: negocioRetail ? 'negocio_empresa' : 'persona_independiente',
       uiIds: ['ui_ind_bienestar', 'ui_ind_coach', 'ui_neg_comercio'],
       fotosMin: pack === 'H' ? 3 : 2,
-      obligatorios: (PACK_OBLIGATORIOS[obligKey] || PACK_OBLIGATORIOS.A).slice(),
+      obligatorios: mergeObligatoriosFromDelta(PACK_OBLIGATORIOS[obligKey] || PACK_OBLIGATORIOS.A, canonId),
       blocks: blocks,
       packFlags: pack === 'H' ? {
         sensible: true,
@@ -459,6 +612,8 @@
     subToPack: SUB_TO_PACK,
     retailNegocioSubs: RETAIL_NEGOCIO_SUBS,
     resolvePack: resolvePack,
+    resolveCanonSubId: resolveCanonSubId,
+    applySubDeltaToBlocks: applySubDeltaToBlocks,
     buildConfig: buildConfig,
     validatePackH: validatePackH,
     scanPackHCommercialText: scanPackHCommercialText,

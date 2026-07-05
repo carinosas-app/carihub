@@ -37,31 +37,10 @@
     return isPreviewMode() && !hasAuth();
   }
 
-  function normTxt(t) {
-    return String(t || "")
-      .trim()
-      .toLowerCase()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "");
-  }
-
   function filtrarMock(filtros) {
-    filtros = filtros || {};
-    return MOCK_DIRECTORIO.filter(function (d) {
-      if (filtros.categoria && filtros.categoria !== "Todas") {
-        if (normTxt(d.categoria) !== normTxt(filtros.categoria)) return false;
-      }
-      if (filtros.pais && normTxt(d.pais) !== normTxt(filtros.pais)) return false;
-      if (filtros.estado && filtros.estado !== "Todos") {
-        if (normTxt(d.estado) !== normTxt(filtros.estado)) return false;
-      }
-      if (filtros.ciudad && filtros.ciudad !== "Todas") {
-        var pc = normTxt(d.ciudad);
-        var fc = normTxt(filtros.ciudad);
-        if (pc !== fc && pc.indexOf(fc) < 0 && fc.indexOf(pc) < 0) return false;
-      }
-      return true;
-    });
+    var F = global.CariHubPerfilBusquedaFiltro;
+    if (F && F.filtrarPerfiles) return F.filtrarPerfiles(MOCK_DIRECTORIO, filtros || {});
+    return MOCK_DIRECTORIO;
   }
 
   function paginarMock(items, page, pageSize) {

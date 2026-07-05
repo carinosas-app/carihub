@@ -1013,6 +1013,7 @@
   </div>
 </div>
 
+  <script src="js/carihub-perfil-busqueda-filtro.js"></script>
   <script src="js/resultados-registrados.js"></script>
   <script src="js/dashboard-buscar.js"></script>
   <script src="js/dashboard-publicaciones.js"></script>
@@ -1742,6 +1743,14 @@
       return [pub.ciudad,pub.estado].filter(Boolean).join(", ")||pub.pais||"Sin ubicación";
     }
 
+    function rawPubCampo(pub, key){
+      if(!pub) return '';
+      if(pub[key]) return pub[key];
+      if(pub._raw && pub._raw[key]) return pub._raw[key];
+      if(pub.camposPublicos && pub.camposPublicos[key]) return pub.camposPublicos[key];
+      return '';
+    }
+
     function datosPublicosPublicacion(pub){
       return {
         "Nombre público":pub.nombrePublico,
@@ -1754,7 +1763,9 @@
         "Horario":pub.horario,
         "Tarifas":pub.tarifas,
         "Modalidad":pub.modalidad,
-        "Zona":pub.zona
+        "Zona":pub.zona,
+        "Colaboración en redes sociales":rawPubCampo(pub,"colaboracionContenido"),
+        "Visible en resultados y perfil":rawPubCampo(pub,"mostrarColaboracionContenidoPublico")||"Sí"
       };
     }
 
@@ -1786,6 +1797,8 @@
         precio:valores["Tarifas"]||"",
         tarifas:valores["Tarifas"]||"",
         modalidad:valores["Modalidad"]||"",
+        colaboracionContenido:valores["Colaboración en redes sociales"]||"",
+        mostrarColaboracionContenidoPublico:valores["Visible en resultados y perfil"]||"Sí",
         datos:datos,
         camposPublicos:{
           alias:nombre,
@@ -1797,7 +1810,9 @@
           serviciosPrincipales:valores["Servicios"]||"",
           horarioPublico:valores["Horario"]||"",
           precioDesde:valores["Tarifas"]||"",
-          modalidad:valores["Modalidad"]||""
+          modalidad:valores["Modalidad"]||"",
+          colaboracionContenido:valores["Colaboración contenido"]||"",
+          mostrarColaboracionContenidoPublico:valores["Mostrar colaboración contenido"]||"Sí"
         }
       };
     }
@@ -1816,6 +1831,8 @@
       pub.horario=valores["Horario"]||pub.horario||"";
       pub.tarifas=valores["Tarifas"]||pub.tarifas||"";
       pub.modalidad=valores["Modalidad"]||pub.modalidad||"";
+      pub.colaboracionContenido=valores["Colaboración en redes sociales"]||pub.colaboracionContenido||"";
+      pub.mostrarColaboracionContenidoPublico=valores["Visible en resultados y perfil"]||pub.mostrarColaboracionContenidoPublico||"Sí";
       pub._raw=Object.assign({},pub._raw||{},buildPatchInfoPerfil(valores),{
         estadoRevision:"actualizacion_pendiente",
         actualizacionPendiente:true
@@ -4250,12 +4267,33 @@
     function pintarInformacion(){
       const cont=document.getElementById("infoGrid");
       if(!cont) return;
-      cont.innerHTML=Object.entries(datosPublicosPublicacion(publicacionActual)).map(([campo,valor])=>`
+      cont.innerHTML=Object.entries(datosPublicosPublicacion(publicacionActual)).map(([campo,valor])=>{
+        if(campo==="Visible en resultados y perfil"){
+          return `<label class="field-card field-card--edit">
+            <small>${textoSeguro(campo)}</small>
+            <select class="field-input" data-field="${textoSeguro(campo)}">
+              <option value="Sí"${valor==="Sí"?" selected":""}>Sí, mostrar badge en resultados y fila en perfil</option>
+              <option value="No"${valor==="No"?" selected":""}>No mostrar</option>
+            </select>
+          </label>`;
+        }
+        if(campo==="Colaboración en redes sociales"){
+          return `<label class="field-card field-card--edit">
+            <small>${textoSeguro(campo)}</small>
+            <select class="field-input" data-field="${textoSeguro(campo)}">
+              <option value=""${!valor?" selected":""}>— Sin indicar —</option>
+              <option value="Sí"${valor==="Sí"?" selected":""}>Sí, colaboro para contenido</option>
+              <option value="No"${valor==="No"?" selected":""}>No colaboro</option>
+              <option value="Bajo acuerdo previo"${valor==="Bajo acuerdo previo"?" selected":""}>A convenir</option>
+            </select>
+          </label>`;
+        }
+        return `
         <label class="field-card field-card--edit ${campo==="Descripción"||campo==="Servicios"?"wide":""}">
           <small>${textoSeguro(campo)}</small>
           <input type="text" class="field-input" data-field="${textoSeguro(campo)}" value="${textoSeguro(valor)}" ${campo==="Descripción"||campo==="Servicios"?"":"readonly"}>
         </label>
-      `).join("");
+      `}).join("");
     }
 
     function pintarCabeceraCuenta(){

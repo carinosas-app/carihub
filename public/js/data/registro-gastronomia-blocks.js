@@ -286,7 +286,68 @@
     "textosAyuda": {
       "especialidadCasa": "Detalla especialidadCasa con datos verificables — evita promesas falsas.",
       "chefVisible": "Detalla chefVisible con datos verificables — evita promesas falsas.",
-      "maridajeVinos": "Detalla maridajeVinos con datos verificables — evita promesas falsas."
+      "maridajeVinos": "Detalla maridajeVinos con datos verificables — evita promesas falsas.",
+      "tipoCocinaPrincipal": "Mexicana, mariscos, italiana, fusión — sé específico.",
+      "precioPromedioMx": "Ticket promedio por persona — orientativo.",
+      "permisoManipulacionAlimentos": "Declara si cuentas con permiso vigente.",
+      "colaboracionesComerciales": "¿Colaboras con otros negocios, chefs o marcas?",
+      "diferenciadorProfesional": "Ej. Ingredientes locales · Horno de leña · Menú degustación",
+      "ventaAlcohol": "Si vendes alcohol, declara permisos y política de menores."
+    },
+    "fieldLabels": {
+      "tipoCocinaPrincipal": "Tipo de cocina principal"
+    },
+    "blockHint": "Restaurante con mesa — cocina, capacidad, reservaciones y precio promedio.",
+    "extraFields": [
+      "colaboracionesComerciales",
+      "diferenciadorProfesional"
+    ],
+    "hideFields": [
+      "nivelServicio",
+      "modalidades",
+      "precioDesde",
+      "medidas",
+      "talla",
+      "orientacion",
+      "serviciosAdultos",
+      "disponibilidadAgenda",
+      "nivelPremium",
+      "realizaTrios",
+      "haceColaboraciones",
+      "colaboraCon",
+      "mostrarColaboraciones",
+      "colaboracionContenido",
+      "videoPresentacion",
+      "tipoCitaPreferida",
+      "disponiblePara",
+      "buscanConocer",
+      "experienciaVip",
+      "distintivosVip",
+      "presentacionFemboy",
+      "presentacionTom",
+      "estiloPredominante",
+      "atiendoA",
+      "mostrarAtiendoA"
+    ],
+    "fieldOptions": {
+      "colaboracionesComerciales": [
+        {
+          "value": "si_activo",
+          "label": "Sí, colaboro activamente"
+        },
+        {
+          "value": "ocasional",
+          "label": "Ocasionalmente"
+        },
+        {
+          "value": "convenir",
+          "label": "A convenir por proyecto"
+        },
+        {
+          "value": "no",
+          "label": "No por ahora"
+        }
+      ]
     }
   },
   "marisquerias": {
@@ -338,7 +399,68 @@
     "textosAyuda": {
       "especialidadMar": "Detalla especialidadMar con datos verificables — evita promesas falsas.",
       "pescadoDelDia": "Detalla pescadoDelDia con datos verificables — evita promesas falsas.",
-      "barraOstiones": "Detalla barraOstiones con datos verificables — evita promesas falsas."
+      "barraOstiones": "Detalla barraOstiones con datos verificables — evita promesas falsas.",
+      "tipoCocinaPrincipal": "Mexicana, mariscos, italiana, fusión — sé específico.",
+      "precioPromedioMx": "Ticket promedio por persona — orientativo.",
+      "permisoManipulacionAlimentos": "Declara si cuentas con permiso vigente.",
+      "colaboracionesComerciales": "¿Colaboras con otros negocios, chefs o marcas?",
+      "diferenciadorProfesional": "Ej. Ingredientes locales · Horno de leña · Menú degustación",
+      "ventaAlcohol": "Si vendes alcohol, declara permisos y política de menores."
+    },
+    "fieldLabels": {
+      "tipoCocinaPrincipal": "Especialidad de mariscos"
+    },
+    "blockHint": "Marisquería — especialidad del mar, capacidad y horario de cocina.",
+    "extraFields": [
+      "colaboracionesComerciales",
+      "diferenciadorProfesional"
+    ],
+    "hideFields": [
+      "nivelServicio",
+      "modalidades",
+      "precioDesde",
+      "medidas",
+      "talla",
+      "orientacion",
+      "serviciosAdultos",
+      "disponibilidadAgenda",
+      "nivelPremium",
+      "realizaTrios",
+      "haceColaboraciones",
+      "colaboraCon",
+      "mostrarColaboraciones",
+      "colaboracionContenido",
+      "videoPresentacion",
+      "tipoCitaPreferida",
+      "disponiblePara",
+      "buscanConocer",
+      "experienciaVip",
+      "distintivosVip",
+      "presentacionFemboy",
+      "presentacionTom",
+      "estiloPredominante",
+      "atiendoA",
+      "mostrarAtiendoA"
+    ],
+    "fieldOptions": {
+      "colaboracionesComerciales": [
+        {
+          "value": "si_activo",
+          "label": "Sí, colaboro activamente"
+        },
+        {
+          "value": "ocasional",
+          "label": "Ocasionalmente"
+        },
+        {
+          "value": "convenir",
+          "label": "A convenir por proyecto"
+        },
+        {
+          "value": "no",
+          "label": "No por ahora"
+        }
+      ]
     }
   },
   "cocina-economica": {
@@ -382,7 +504,68 @@
     "textosAyuda": {
       "menuCorrida": "Detalla menuCorrida con datos verificables — evita promesas falsas.",
       "precioMenuCorridaMx": "Detalla precioMenuCorridaMx con datos verificables — evita promesas falsas.",
-      "incluyeBebidaMenu": "Detalla incluyeBebidaMenu con datos verificables — evita promesas falsas."
+      "incluyeBebidaMenu": "Detalla incluyeBebidaMenu con datos verificables — evita promesas falsas.",
+      "tipoCocinaPrincipal": "Mexicana, mariscos, italiana, fusión — sé específico.",
+      "precioPromedioMx": "Ticket promedio por persona — orientativo.",
+      "permisoManipulacionAlimentos": "Declara si cuentas con permiso vigente.",
+      "colaboracionesComerciales": "¿Colaboras con otros negocios, chefs o marcas?",
+      "diferenciadorProfesional": "Ej. Ingredientes locales · Horno de leña · Menú degustación",
+      "ventaAlcohol": "Si vendes alcohol, declara permisos y política de menores."
+    },
+    "fieldLabels": {
+      "menuDelDia": "¿Ofreces menú del día?"
+    },
+    "blockHint": "Comida corrida accesible — menú del día, precio y horario.",
+    "extraFields": [
+      "colaboracionesComerciales",
+      "diferenciadorProfesional"
+    ],
+    "hideFields": [
+      "nivelServicio",
+      "modalidades",
+      "precioDesde",
+      "medidas",
+      "talla",
+      "orientacion",
+      "serviciosAdultos",
+      "disponibilidadAgenda",
+      "nivelPremium",
+      "realizaTrios",
+      "haceColaboraciones",
+      "colaboraCon",
+      "mostrarColaboraciones",
+      "colaboracionContenido",
+      "videoPresentacion",
+      "tipoCitaPreferida",
+      "disponiblePara",
+      "buscanConocer",
+      "experienciaVip",
+      "distintivosVip",
+      "presentacionFemboy",
+      "presentacionTom",
+      "estiloPredominante",
+      "atiendoA",
+      "mostrarAtiendoA"
+    ],
+    "fieldOptions": {
+      "colaboracionesComerciales": [
+        {
+          "value": "si_activo",
+          "label": "Sí, colaboro activamente"
+        },
+        {
+          "value": "ocasional",
+          "label": "Ocasionalmente"
+        },
+        {
+          "value": "convenir",
+          "label": "A convenir por proyecto"
+        },
+        {
+          "value": "no",
+          "label": "No por ahora"
+        }
+      ]
     }
   },
   "taquerias": {
@@ -428,7 +611,68 @@
     "textosAyuda": {
       "tipoTortilla": "Detalla tipoTortilla con datos verificables — evita promesas falsas.",
       "especialidadTaco": "Detalla especialidadTaco con datos verificables — evita promesas falsas.",
-      "salsasCasa": "Detalla salsasCasa con datos verificables — evita promesas falsas."
+      "salsasCasa": "Detalla salsasCasa con datos verificables — evita promesas falsas.",
+      "tipoCocinaPrincipal": "Mexicana, mariscos, italiana, fusión — sé específico.",
+      "precioPromedioMx": "Ticket promedio por persona — orientativo.",
+      "permisoManipulacionAlimentos": "Declara si cuentas con permiso vigente.",
+      "colaboracionesComerciales": "¿Colaboras con otros negocios, chefs o marcas?",
+      "diferenciadorProfesional": "Ej. Ingredientes locales · Horno de leña · Menú degustación",
+      "ventaAlcohol": "Si vendes alcohol, declara permisos y política de menores."
+    },
+    "fieldLabels": {
+      "tipoServicioRapido": "Modalidad de servicio"
+    },
+    "blockHint": "Taquería — tipo de servicio, para llevar y tiempo de preparación.",
+    "extraFields": [
+      "colaboracionesComerciales",
+      "diferenciadorProfesional"
+    ],
+    "hideFields": [
+      "nivelServicio",
+      "modalidades",
+      "precioDesde",
+      "medidas",
+      "talla",
+      "orientacion",
+      "serviciosAdultos",
+      "disponibilidadAgenda",
+      "nivelPremium",
+      "realizaTrios",
+      "haceColaboraciones",
+      "colaboraCon",
+      "mostrarColaboraciones",
+      "colaboracionContenido",
+      "videoPresentacion",
+      "tipoCitaPreferida",
+      "disponiblePara",
+      "buscanConocer",
+      "experienciaVip",
+      "distintivosVip",
+      "presentacionFemboy",
+      "presentacionTom",
+      "estiloPredominante",
+      "atiendoA",
+      "mostrarAtiendoA"
+    ],
+    "fieldOptions": {
+      "colaboracionesComerciales": [
+        {
+          "value": "si_activo",
+          "label": "Sí, colaboro activamente"
+        },
+        {
+          "value": "ocasional",
+          "label": "Ocasionalmente"
+        },
+        {
+          "value": "convenir",
+          "label": "A convenir por proyecto"
+        },
+        {
+          "value": "no",
+          "label": "No por ahora"
+        }
+      ]
     }
   },
   "hamburgueserias": {
@@ -473,7 +717,68 @@
     "textosAyuda": {
       "tipoCarne": "Detalla tipoCarne con datos verificables — evita promesas falsas.",
       "panArtesanal": "Detalla panArtesanal con datos verificables — evita promesas falsas.",
-      "papasCasa": "Detalla papasCasa con datos verificables — evita promesas falsas."
+      "papasCasa": "Detalla papasCasa con datos verificables — evita promesas falsas.",
+      "tipoCocinaPrincipal": "Mexicana, mariscos, italiana, fusión — sé específico.",
+      "precioPromedioMx": "Ticket promedio por persona — orientativo.",
+      "permisoManipulacionAlimentos": "Declara si cuentas con permiso vigente.",
+      "colaboracionesComerciales": "¿Colaboras con otros negocios, chefs o marcas?",
+      "diferenciadorProfesional": "Ej. Ingredientes locales · Horno de leña · Menú degustación",
+      "ventaAlcohol": "Si vendes alcohol, declara permisos y política de menores."
+    },
+    "fieldLabels": {
+      "combosPromociones": "Combos o promociones destacadas"
+    },
+    "blockHint": "Hamburguesería — smash, combos y delivery propio.",
+    "extraFields": [
+      "colaboracionesComerciales",
+      "diferenciadorProfesional"
+    ],
+    "hideFields": [
+      "nivelServicio",
+      "modalidades",
+      "precioDesde",
+      "medidas",
+      "talla",
+      "orientacion",
+      "serviciosAdultos",
+      "disponibilidadAgenda",
+      "nivelPremium",
+      "realizaTrios",
+      "haceColaboraciones",
+      "colaboraCon",
+      "mostrarColaboraciones",
+      "colaboracionContenido",
+      "videoPresentacion",
+      "tipoCitaPreferida",
+      "disponiblePara",
+      "buscanConocer",
+      "experienciaVip",
+      "distintivosVip",
+      "presentacionFemboy",
+      "presentacionTom",
+      "estiloPredominante",
+      "atiendoA",
+      "mostrarAtiendoA"
+    ],
+    "fieldOptions": {
+      "colaboracionesComerciales": [
+        {
+          "value": "si_activo",
+          "label": "Sí, colaboro activamente"
+        },
+        {
+          "value": "ocasional",
+          "label": "Ocasionalmente"
+        },
+        {
+          "value": "convenir",
+          "label": "A convenir por proyecto"
+        },
+        {
+          "value": "no",
+          "label": "No por ahora"
+        }
+      ]
     }
   },
   "pizzerias": {
@@ -518,7 +823,68 @@
     "textosAyuda": {
       "tipoHorno": "Detalla tipoHorno con datos verificables — evita promesas falsas.",
       "masaFermentacion": "Detalla masaFermentacion con datos verificables — evita promesas falsas.",
-      "tamanosPizza": "Detalla tamanosPizza con datos verificables — evita promesas falsas."
+      "tamanosPizza": "Detalla tamanosPizza con datos verificables — evita promesas falsas.",
+      "tipoCocinaPrincipal": "Mexicana, mariscos, italiana, fusión — sé específico.",
+      "precioPromedioMx": "Ticket promedio por persona — orientativo.",
+      "permisoManipulacionAlimentos": "Declara si cuentas con permiso vigente.",
+      "colaboracionesComerciales": "¿Colaboras con otros negocios, chefs o marcas?",
+      "diferenciadorProfesional": "Ej. Ingredientes locales · Horno de leña · Menú degustación",
+      "ventaAlcohol": "Si vendes alcohol, declara permisos y política de menores."
+    },
+    "fieldLabels": {
+      "tipoServicioRapido": "Servicio: mostrador, delivery o ambos"
+    },
+    "blockHint": "Pizzería — horno, delivery y opciones dietéticas.",
+    "extraFields": [
+      "colaboracionesComerciales",
+      "diferenciadorProfesional"
+    ],
+    "hideFields": [
+      "nivelServicio",
+      "modalidades",
+      "precioDesde",
+      "medidas",
+      "talla",
+      "orientacion",
+      "serviciosAdultos",
+      "disponibilidadAgenda",
+      "nivelPremium",
+      "realizaTrios",
+      "haceColaboraciones",
+      "colaboraCon",
+      "mostrarColaboraciones",
+      "colaboracionContenido",
+      "videoPresentacion",
+      "tipoCitaPreferida",
+      "disponiblePara",
+      "buscanConocer",
+      "experienciaVip",
+      "distintivosVip",
+      "presentacionFemboy",
+      "presentacionTom",
+      "estiloPredominante",
+      "atiendoA",
+      "mostrarAtiendoA"
+    ],
+    "fieldOptions": {
+      "colaboracionesComerciales": [
+        {
+          "value": "si_activo",
+          "label": "Sí, colaboro activamente"
+        },
+        {
+          "value": "ocasional",
+          "label": "Ocasionalmente"
+        },
+        {
+          "value": "convenir",
+          "label": "A convenir por proyecto"
+        },
+        {
+          "value": "no",
+          "label": "No por ahora"
+        }
+      ]
     }
   },
   "polleryas-alitas": {
@@ -563,7 +929,68 @@
     "textosAyuda": {
       "cortePollo": "Detalla cortePollo con datos verificables — evita promesas falsas.",
       "salsasAlitas": "Detalla salsasAlitas con datos verificables — evita promesas falsas.",
-      "combosFamiliares": "Detalla combosFamiliares con datos verificables — evita promesas falsas."
+      "combosFamiliares": "Detalla combosFamiliares con datos verificables — evita promesas falsas.",
+      "tipoCocinaPrincipal": "Mexicana, mariscos, italiana, fusión — sé específico.",
+      "precioPromedioMx": "Ticket promedio por persona — orientativo.",
+      "permisoManipulacionAlimentos": "Declara si cuentas con permiso vigente.",
+      "colaboracionesComerciales": "¿Colaboras con otros negocios, chefs o marcas?",
+      "diferenciadorProfesional": "Ej. Ingredientes locales · Horno de leña · Menú degustación",
+      "ventaAlcohol": "Si vendes alcohol, declara permisos y política de menores."
+    },
+    "fieldLabels": {
+      "tipoCocinaPrincipal": "Especialidad de pollo / alitas"
+    },
+    "blockHint": "Pollería y alitas — estilo, combos y capacidad.",
+    "extraFields": [
+      "colaboracionesComerciales",
+      "diferenciadorProfesional"
+    ],
+    "hideFields": [
+      "nivelServicio",
+      "modalidades",
+      "precioDesde",
+      "medidas",
+      "talla",
+      "orientacion",
+      "serviciosAdultos",
+      "disponibilidadAgenda",
+      "nivelPremium",
+      "realizaTrios",
+      "haceColaboraciones",
+      "colaboraCon",
+      "mostrarColaboraciones",
+      "colaboracionContenido",
+      "videoPresentacion",
+      "tipoCitaPreferida",
+      "disponiblePara",
+      "buscanConocer",
+      "experienciaVip",
+      "distintivosVip",
+      "presentacionFemboy",
+      "presentacionTom",
+      "estiloPredominante",
+      "atiendoA",
+      "mostrarAtiendoA"
+    ],
+    "fieldOptions": {
+      "colaboracionesComerciales": [
+        {
+          "value": "si_activo",
+          "label": "Sí, colaboro activamente"
+        },
+        {
+          "value": "ocasional",
+          "label": "Ocasionalmente"
+        },
+        {
+          "value": "convenir",
+          "label": "A convenir por proyecto"
+        },
+        {
+          "value": "no",
+          "label": "No por ahora"
+        }
+      ]
     }
   },
   "sushi-cocina-asiatica": {
@@ -610,7 +1037,68 @@
     "textosAyuda": {
       "estiloAsiatico": "Detalla estiloAsiatico con datos verificables — evita promesas falsas.",
       "barraSushi": "Detalla barraSushi con datos verificables — evita promesas falsas.",
-      "opcionesCrudo": "Detalla opcionesCrudo con datos verificables — evita promesas falsas."
+      "opcionesCrudo": "Detalla opcionesCrudo con datos verificables — evita promesas falsas.",
+      "tipoCocinaPrincipal": "Mexicana, mariscos, italiana, fusión — sé específico.",
+      "precioPromedioMx": "Ticket promedio por persona — orientativo.",
+      "permisoManipulacionAlimentos": "Declara si cuentas con permiso vigente.",
+      "colaboracionesComerciales": "¿Colaboras con otros negocios, chefs o marcas?",
+      "diferenciadorProfesional": "Ej. Ingredientes locales · Horno de leña · Menú degustación",
+      "ventaAlcohol": "Si vendes alcohol, declara permisos y política de menores."
+    },
+    "fieldLabels": {
+      "tipoCocinaPrincipal": "Especialidad asiática"
+    },
+    "blockHint": "Sushi y cocina asiática — especialidad, barra y delivery.",
+    "extraFields": [
+      "colaboracionesComerciales",
+      "diferenciadorProfesional"
+    ],
+    "hideFields": [
+      "nivelServicio",
+      "modalidades",
+      "precioDesde",
+      "medidas",
+      "talla",
+      "orientacion",
+      "serviciosAdultos",
+      "disponibilidadAgenda",
+      "nivelPremium",
+      "realizaTrios",
+      "haceColaboraciones",
+      "colaboraCon",
+      "mostrarColaboraciones",
+      "colaboracionContenido",
+      "videoPresentacion",
+      "tipoCitaPreferida",
+      "disponiblePara",
+      "buscanConocer",
+      "experienciaVip",
+      "distintivosVip",
+      "presentacionFemboy",
+      "presentacionTom",
+      "estiloPredominante",
+      "atiendoA",
+      "mostrarAtiendoA"
+    ],
+    "fieldOptions": {
+      "colaboracionesComerciales": [
+        {
+          "value": "si_activo",
+          "label": "Sí, colaboro activamente"
+        },
+        {
+          "value": "ocasional",
+          "label": "Ocasionalmente"
+        },
+        {
+          "value": "convenir",
+          "label": "A convenir por proyecto"
+        },
+        {
+          "value": "no",
+          "label": "No por ahora"
+        }
+      ]
     }
   },
   "carnes-asadas-parrilla": {
@@ -656,7 +1144,68 @@
     "textosAyuda": {
       "tipoParrilla": "Detalla tipoParrilla con datos verificables — evita promesas falsas.",
       "cortesEspecialidad": "Detalla cortesEspecialidad con datos verificables — evita promesas falsas.",
-      "marinadosCasa": "Detalla marinadosCasa con datos verificables — evita promesas falsas."
+      "marinadosCasa": "Detalla marinadosCasa con datos verificables — evita promesas falsas.",
+      "tipoCocinaPrincipal": "Mexicana, mariscos, italiana, fusión — sé específico.",
+      "precioPromedioMx": "Ticket promedio por persona — orientativo.",
+      "permisoManipulacionAlimentos": "Declara si cuentas con permiso vigente.",
+      "colaboracionesComerciales": "¿Colaboras con otros negocios, chefs o marcas?",
+      "diferenciadorProfesional": "Ej. Ingredientes locales · Horno de leña · Menú degustación",
+      "ventaAlcohol": "Si vendes alcohol, declara permisos y política de menores."
+    },
+    "fieldLabels": {
+      "tipoCocinaPrincipal": "Estilo de parrilla / cortes"
+    },
+    "blockHint": "Parrilla y cortes — asador, terraza y precio promedio.",
+    "extraFields": [
+      "colaboracionesComerciales",
+      "diferenciadorProfesional"
+    ],
+    "hideFields": [
+      "nivelServicio",
+      "modalidades",
+      "precioDesde",
+      "medidas",
+      "talla",
+      "orientacion",
+      "serviciosAdultos",
+      "disponibilidadAgenda",
+      "nivelPremium",
+      "realizaTrios",
+      "haceColaboraciones",
+      "colaboraCon",
+      "mostrarColaboraciones",
+      "colaboracionContenido",
+      "videoPresentacion",
+      "tipoCitaPreferida",
+      "disponiblePara",
+      "buscanConocer",
+      "experienciaVip",
+      "distintivosVip",
+      "presentacionFemboy",
+      "presentacionTom",
+      "estiloPredominante",
+      "atiendoA",
+      "mostrarAtiendoA"
+    ],
+    "fieldOptions": {
+      "colaboracionesComerciales": [
+        {
+          "value": "si_activo",
+          "label": "Sí, colaboro activamente"
+        },
+        {
+          "value": "ocasional",
+          "label": "Ocasionalmente"
+        },
+        {
+          "value": "convenir",
+          "label": "A convenir por proyecto"
+        },
+        {
+          "value": "no",
+          "label": "No por ahora"
+        }
+      ]
     }
   },
   "cafeterias": {
@@ -705,7 +1254,68 @@
     "textosAyuda": {
       "metodosPreparacion": "Detalla metodosPreparacion con datos verificables — evita promesas falsas.",
       "pastelesLigeros": "Detalla pastelesLigeros con datos verificables — evita promesas falsas.",
-      "desayunos": "Detalla desayunos con datos verificables — evita promesas falsas."
+      "desayunos": "Detalla desayunos con datos verificables — evita promesas falsas.",
+      "tipoCocinaPrincipal": "Mexicana, mariscos, italiana, fusión — sé específico.",
+      "precioPromedioMx": "Ticket promedio por persona — orientativo.",
+      "permisoManipulacionAlimentos": "Declara si cuentas con permiso vigente.",
+      "colaboracionesComerciales": "¿Colaboras con otros negocios, chefs o marcas?",
+      "diferenciadorProfesional": "Ej. Ingredientes locales · Horno de leña · Menú degustación",
+      "ventaAlcohol": "Si vendes alcohol, declara permisos y política de menores."
+    },
+    "fieldLabels": {
+      "tipoBebidaPrincipal": "Bebidas principales"
+    },
+    "blockHint": "Cafetería — café de especialidad, repostería y ambiente.",
+    "extraFields": [
+      "colaboracionesComerciales",
+      "diferenciadorProfesional"
+    ],
+    "hideFields": [
+      "nivelServicio",
+      "modalidades",
+      "precioDesde",
+      "medidas",
+      "talla",
+      "orientacion",
+      "serviciosAdultos",
+      "disponibilidadAgenda",
+      "nivelPremium",
+      "realizaTrios",
+      "haceColaboraciones",
+      "colaboraCon",
+      "mostrarColaboraciones",
+      "colaboracionContenido",
+      "videoPresentacion",
+      "tipoCitaPreferida",
+      "disponiblePara",
+      "buscanConocer",
+      "experienciaVip",
+      "distintivosVip",
+      "presentacionFemboy",
+      "presentacionTom",
+      "estiloPredominante",
+      "atiendoA",
+      "mostrarAtiendoA"
+    ],
+    "fieldOptions": {
+      "colaboracionesComerciales": [
+        {
+          "value": "si_activo",
+          "label": "Sí, colaboro activamente"
+        },
+        {
+          "value": "ocasional",
+          "label": "Ocasionalmente"
+        },
+        {
+          "value": "convenir",
+          "label": "A convenir por proyecto"
+        },
+        {
+          "value": "no",
+          "label": "No por ahora"
+        }
+      ]
     }
   },
   "panaderias": {
@@ -749,7 +1359,68 @@
     "textosAyuda": {
       "tiposPan": "Detalla tiposPan con datos verificables — evita promesas falsas.",
       "hornoTipo": "Detalla hornoTipo con datos verificables — evita promesas falsas.",
-      "panDelDia": "Detalla panDelDia con datos verificables — evita promesas falsas."
+      "panDelDia": "Detalla panDelDia con datos verificables — evita promesas falsas.",
+      "tipoCocinaPrincipal": "Mexicana, mariscos, italiana, fusión — sé específico.",
+      "precioPromedioMx": "Ticket promedio por persona — orientativo.",
+      "permisoManipulacionAlimentos": "Declara si cuentas con permiso vigente.",
+      "colaboracionesComerciales": "¿Colaboras con otros negocios, chefs o marcas?",
+      "diferenciadorProfesional": "Ej. Ingredientes locales · Horno de leña · Menú degustación",
+      "ventaAlcohol": "Si vendes alcohol, declara permisos y política de menores."
+    },
+    "fieldLabels": {
+      "productosHorneados": "Productos horneados principales"
+    },
+    "blockHint": "Panadería — productos horneados, pedidos y horario de horneado.",
+    "extraFields": [
+      "colaboracionesComerciales",
+      "diferenciadorProfesional"
+    ],
+    "hideFields": [
+      "nivelServicio",
+      "modalidades",
+      "precioDesde",
+      "medidas",
+      "talla",
+      "orientacion",
+      "serviciosAdultos",
+      "disponibilidadAgenda",
+      "nivelPremium",
+      "realizaTrios",
+      "haceColaboraciones",
+      "colaboraCon",
+      "mostrarColaboraciones",
+      "colaboracionContenido",
+      "videoPresentacion",
+      "tipoCitaPreferida",
+      "disponiblePara",
+      "buscanConocer",
+      "experienciaVip",
+      "distintivosVip",
+      "presentacionFemboy",
+      "presentacionTom",
+      "estiloPredominante",
+      "atiendoA",
+      "mostrarAtiendoA"
+    ],
+    "fieldOptions": {
+      "colaboracionesComerciales": [
+        {
+          "value": "si_activo",
+          "label": "Sí, colaboro activamente"
+        },
+        {
+          "value": "ocasional",
+          "label": "Ocasionalmente"
+        },
+        {
+          "value": "convenir",
+          "label": "A convenir por proyecto"
+        },
+        {
+          "value": "no",
+          "label": "No por ahora"
+        }
+      ]
     }
   },
   "pastelerias-reposteria": {
@@ -795,7 +1466,68 @@
     "textosAyuda": {
       "pastelesPersonalizados": "Detalla pastelesPersonalizados con datos verificables — evita promesas falsas.",
       "reposteriaFina": "Detalla reposteriaFina con datos verificables — evita promesas falsas.",
-      "tematicasPasteles": "Detalla tematicasPasteles con datos verificables — evita promesas falsas."
+      "tematicasPasteles": "Detalla tematicasPasteles con datos verificables — evita promesas falsas.",
+      "tipoCocinaPrincipal": "Mexicana, mariscos, italiana, fusión — sé específico.",
+      "precioPromedioMx": "Ticket promedio por persona — orientativo.",
+      "permisoManipulacionAlimentos": "Declara si cuentas con permiso vigente.",
+      "colaboracionesComerciales": "¿Colaboras con otros negocios, chefs o marcas?",
+      "diferenciadorProfesional": "Ej. Ingredientes locales · Horno de leña · Menú degustación",
+      "ventaAlcohol": "Si vendes alcohol, declara permisos y política de menores."
+    },
+    "fieldLabels": {
+      "pedidosPersonalizados": "¿Aceptas pedidos personalizados?"
+    },
+    "blockHint": "Pastelería — pasteles personalizados, entrega y opciones dietéticas.",
+    "extraFields": [
+      "colaboracionesComerciales",
+      "diferenciadorProfesional"
+    ],
+    "hideFields": [
+      "nivelServicio",
+      "modalidades",
+      "precioDesde",
+      "medidas",
+      "talla",
+      "orientacion",
+      "serviciosAdultos",
+      "disponibilidadAgenda",
+      "nivelPremium",
+      "realizaTrios",
+      "haceColaboraciones",
+      "colaboraCon",
+      "mostrarColaboraciones",
+      "colaboracionContenido",
+      "videoPresentacion",
+      "tipoCitaPreferida",
+      "disponiblePara",
+      "buscanConocer",
+      "experienciaVip",
+      "distintivosVip",
+      "presentacionFemboy",
+      "presentacionTom",
+      "estiloPredominante",
+      "atiendoA",
+      "mostrarAtiendoA"
+    ],
+    "fieldOptions": {
+      "colaboracionesComerciales": [
+        {
+          "value": "si_activo",
+          "label": "Sí, colaboro activamente"
+        },
+        {
+          "value": "ocasional",
+          "label": "Ocasionalmente"
+        },
+        {
+          "value": "convenir",
+          "label": "A convenir por proyecto"
+        },
+        {
+          "value": "no",
+          "label": "No por ahora"
+        }
+      ]
     }
   },
   "neverias-heladerias": {
@@ -837,7 +1569,68 @@
     "textosAyuda": {
       "baseHelado": "Detalla baseHelado con datos verificables — evita promesas falsas.",
       "saboresEstacion": "Detalla saboresEstacion con datos verificables — evita promesas falsas.",
-      "paletasArtesanales": "Detalla paletasArtesanales con datos verificables — evita promesas falsas."
+      "paletasArtesanales": "Detalla paletasArtesanales con datos verificables — evita promesas falsas.",
+      "tipoCocinaPrincipal": "Mexicana, mariscos, italiana, fusión — sé específico.",
+      "precioPromedioMx": "Ticket promedio por persona — orientativo.",
+      "permisoManipulacionAlimentos": "Declara si cuentas con permiso vigente.",
+      "colaboracionesComerciales": "¿Colaboras con otros negocios, chefs o marcas?",
+      "diferenciadorProfesional": "Ej. Ingredientes locales · Horno de leña · Menú degustación",
+      "ventaAlcohol": "Si vendes alcohol, declara permisos y política de menores."
+    },
+    "fieldLabels": {
+      "productosHorneados": "Productos fríos principales"
+    },
+    "blockHint": "Nevería — sabores, producción diaria y mostrador.",
+    "extraFields": [
+      "colaboracionesComerciales",
+      "diferenciadorProfesional"
+    ],
+    "hideFields": [
+      "nivelServicio",
+      "modalidades",
+      "precioDesde",
+      "medidas",
+      "talla",
+      "orientacion",
+      "serviciosAdultos",
+      "disponibilidadAgenda",
+      "nivelPremium",
+      "realizaTrios",
+      "haceColaboraciones",
+      "colaboraCon",
+      "mostrarColaboraciones",
+      "colaboracionContenido",
+      "videoPresentacion",
+      "tipoCitaPreferida",
+      "disponiblePara",
+      "buscanConocer",
+      "experienciaVip",
+      "distintivosVip",
+      "presentacionFemboy",
+      "presentacionTom",
+      "estiloPredominante",
+      "atiendoA",
+      "mostrarAtiendoA"
+    ],
+    "fieldOptions": {
+      "colaboracionesComerciales": [
+        {
+          "value": "si_activo",
+          "label": "Sí, colaboro activamente"
+        },
+        {
+          "value": "ocasional",
+          "label": "Ocasionalmente"
+        },
+        {
+          "value": "convenir",
+          "label": "A convenir por proyecto"
+        },
+        {
+          "value": "no",
+          "label": "No por ahora"
+        }
+      ]
     }
   },
   "juguerias": {
@@ -878,7 +1671,68 @@
     "textosAyuda": {
       "frutasEstacion": "Detalla frutasEstacion con datos verificables — evita promesas falsas.",
       "boostProteina": "Detalla boostProteina con datos verificables — evita promesas falsas.",
-      "jugosDetox": "Detalla jugosDetox con datos verificables — evita promesas falsas."
+      "jugosDetox": "Detalla jugosDetox con datos verificables — evita promesas falsas.",
+      "tipoCocinaPrincipal": "Mexicana, mariscos, italiana, fusión — sé específico.",
+      "precioPromedioMx": "Ticket promedio por persona — orientativo.",
+      "permisoManipulacionAlimentos": "Declara si cuentas con permiso vigente.",
+      "colaboracionesComerciales": "¿Colaboras con otros negocios, chefs o marcas?",
+      "diferenciadorProfesional": "Ej. Ingredientes locales · Horno de leña · Menú degustación",
+      "ventaAlcohol": "Si vendes alcohol, declara permisos y política de menores."
+    },
+    "fieldLabels": {
+      "tipoBebidaPrincipal": "Bebidas que preparas"
+    },
+    "blockHint": "Juguería — jugos, licuados y smoothies.",
+    "extraFields": [
+      "colaboracionesComerciales",
+      "diferenciadorProfesional"
+    ],
+    "hideFields": [
+      "nivelServicio",
+      "modalidades",
+      "precioDesde",
+      "medidas",
+      "talla",
+      "orientacion",
+      "serviciosAdultos",
+      "disponibilidadAgenda",
+      "nivelPremium",
+      "realizaTrios",
+      "haceColaboraciones",
+      "colaboraCon",
+      "mostrarColaboraciones",
+      "colaboracionContenido",
+      "videoPresentacion",
+      "tipoCitaPreferida",
+      "disponiblePara",
+      "buscanConocer",
+      "experienciaVip",
+      "distintivosVip",
+      "presentacionFemboy",
+      "presentacionTom",
+      "estiloPredominante",
+      "atiendoA",
+      "mostrarAtiendoA"
+    ],
+    "fieldOptions": {
+      "colaboracionesComerciales": [
+        {
+          "value": "si_activo",
+          "label": "Sí, colaboro activamente"
+        },
+        {
+          "value": "ocasional",
+          "label": "Ocasionalmente"
+        },
+        {
+          "value": "convenir",
+          "label": "A convenir por proyecto"
+        },
+        {
+          "value": "no",
+          "label": "No por ahora"
+        }
+      ]
     }
   },
   "food-trucks-gastronomia": {
@@ -923,7 +1777,68 @@
     "textosAyuda": {
       "especialidadTruck": "Detalla especialidadTruck con datos verificables — evita promesas falsas.",
       "puntosFijosSemana": "Detalla puntosFijosSemana con datos verificables — evita promesas falsas.",
-      "publicaUbicacionDiaria": "Detalla publicaUbicacionDiaria con datos verificables — evita promesas falsas."
+      "publicaUbicacionDiaria": "Detalla publicaUbicacionDiaria con datos verificables — evita promesas falsas.",
+      "tipoCocinaPrincipal": "Mexicana, mariscos, italiana, fusión — sé específico.",
+      "precioPromedioMx": "Ticket promedio por persona — orientativo.",
+      "permisoManipulacionAlimentos": "Declara si cuentas con permiso vigente.",
+      "colaboracionesComerciales": "¿Colaboras con otros negocios, chefs o marcas?",
+      "diferenciadorProfesional": "Ej. Ingredientes locales · Horno de leña · Menú degustación",
+      "ventaAlcohol": "Si vendes alcohol, declara permisos y política de menores."
+    },
+    "fieldLabels": {
+      "ubicacionesRecurrentes": "Zonas donde operas"
+    },
+    "blockHint": "Food truck recurrente — ubicaciones, eventos privados y menú.",
+    "extraFields": [
+      "colaboracionesComerciales",
+      "diferenciadorProfesional"
+    ],
+    "hideFields": [
+      "nivelServicio",
+      "modalidades",
+      "precioDesde",
+      "medidas",
+      "talla",
+      "orientacion",
+      "serviciosAdultos",
+      "disponibilidadAgenda",
+      "nivelPremium",
+      "realizaTrios",
+      "haceColaboraciones",
+      "colaboraCon",
+      "mostrarColaboraciones",
+      "colaboracionContenido",
+      "videoPresentacion",
+      "tipoCitaPreferida",
+      "disponiblePara",
+      "buscanConocer",
+      "experienciaVip",
+      "distintivosVip",
+      "presentacionFemboy",
+      "presentacionTom",
+      "estiloPredominante",
+      "atiendoA",
+      "mostrarAtiendoA"
+    ],
+    "fieldOptions": {
+      "colaboracionesComerciales": [
+        {
+          "value": "si_activo",
+          "label": "Sí, colaboro activamente"
+        },
+        {
+          "value": "ocasional",
+          "label": "Ocasionalmente"
+        },
+        {
+          "value": "convenir",
+          "label": "A convenir por proyecto"
+        },
+        {
+          "value": "no",
+          "label": "No por ahora"
+        }
+      ]
     }
   },
   "comida-a-domicilio": {
@@ -969,7 +1884,69 @@
     "textosAyuda": {
       "tipoComidaDomicilio": "Detalla tipoComidaDomicilio con datos verificables — evita promesas falsas.",
       "menuSemanal": "Detalla menuSemanal con datos verificables — evita promesas falsas.",
-      "diasEntrega": "Detalla diasEntrega con datos verificables — evita promesas falsas."
+      "diasEntrega": "Detalla diasEntrega con datos verificables — evita promesas falsas.",
+      "tipoCocinaPrincipal": "Mexicana, mariscos, italiana, fusión — sé específico.",
+      "precioPromedioMx": "Ticket promedio por persona — orientativo.",
+      "permisoManipulacionAlimentos": "Declara si cuentas con permiso vigente.",
+      "colaboracionesComerciales": "¿Colaboras con otros negocios, chefs o marcas?",
+      "diferenciadorProfesional": "Ej. Ingredientes locales · Horno de leña · Menú degustación",
+      "ventaAlcohol": "Si vendes alcohol, declara permisos y política de menores."
+    },
+    "fieldLabels": {
+      "tipoCocinaDomicilio": "Tipo de cocina que preparas",
+      "zonaEntregaDomicilio": "Zona de entrega"
+    },
+    "blockHint": "Comida preparada a domicilio — menú, zona de entrega y pedido mínimo.",
+    "extraFields": [
+      "colaboracionesComerciales",
+      "diferenciadorProfesional"
+    ],
+    "hideFields": [
+      "nivelServicio",
+      "modalidades",
+      "precioDesde",
+      "medidas",
+      "talla",
+      "orientacion",
+      "serviciosAdultos",
+      "disponibilidadAgenda",
+      "nivelPremium",
+      "realizaTrios",
+      "haceColaboraciones",
+      "colaboraCon",
+      "mostrarColaboraciones",
+      "colaboracionContenido",
+      "videoPresentacion",
+      "tipoCitaPreferida",
+      "disponiblePara",
+      "buscanConocer",
+      "experienciaVip",
+      "distintivosVip",
+      "presentacionFemboy",
+      "presentacionTom",
+      "estiloPredominante",
+      "atiendoA",
+      "mostrarAtiendoA"
+    ],
+    "fieldOptions": {
+      "colaboracionesComerciales": [
+        {
+          "value": "si_activo",
+          "label": "Sí, colaboro activamente"
+        },
+        {
+          "value": "ocasional",
+          "label": "Ocasionalmente"
+        },
+        {
+          "value": "convenir",
+          "label": "A convenir por proyecto"
+        },
+        {
+          "value": "no",
+          "label": "No por ahora"
+        }
+      ]
     }
   },
   "dark-kitchen": {
@@ -1012,7 +1989,69 @@
     "textosAyuda": {
       "marcasVirtuales": "Detalla marcasVirtuales con datos verificables — evita promesas falsas.",
       "appsDelivery": "Detalla appsDelivery con datos verificables — evita promesas falsas.",
-      "cocinaCompartida": "Detalla cocinaCompartida con datos verificables — evita promesas falsas."
+      "cocinaCompartida": "Detalla cocinaCompartida con datos verificables — evita promesas falsas.",
+      "tipoCocinaPrincipal": "Mexicana, mariscos, italiana, fusión — sé específico.",
+      "precioPromedioMx": "Ticket promedio por persona — orientativo.",
+      "permisoManipulacionAlimentos": "Declara si cuentas con permiso vigente.",
+      "colaboracionesComerciales": "¿Colaboras con otros negocios, chefs o marcas?",
+      "diferenciadorProfesional": "Ej. Ingredientes locales · Horno de leña · Menú degustación",
+      "ventaAlcohol": "Si vendes alcohol, declara permisos y política de menores.",
+      "mostrarSoloZonaPublica": "No publiques dirección exacta del local."
+    },
+    "fieldLabels": {
+      "modeloOperacion": "Modelo de operación"
+    },
+    "blockHint": "Dark kitchen — solo delivery; dirección privada y apps de pedido.",
+    "extraFields": [
+      "colaboracionesComerciales",
+      "diferenciadorProfesional"
+    ],
+    "hideFields": [
+      "nivelServicio",
+      "modalidades",
+      "precioDesde",
+      "medidas",
+      "talla",
+      "orientacion",
+      "serviciosAdultos",
+      "disponibilidadAgenda",
+      "nivelPremium",
+      "realizaTrios",
+      "haceColaboraciones",
+      "colaboraCon",
+      "mostrarColaboraciones",
+      "colaboracionContenido",
+      "videoPresentacion",
+      "tipoCitaPreferida",
+      "disponiblePara",
+      "buscanConocer",
+      "experienciaVip",
+      "distintivosVip",
+      "presentacionFemboy",
+      "presentacionTom",
+      "estiloPredominante",
+      "atiendoA",
+      "mostrarAtiendoA"
+    ],
+    "fieldOptions": {
+      "colaboracionesComerciales": [
+        {
+          "value": "si_activo",
+          "label": "Sí, colaboro activamente"
+        },
+        {
+          "value": "ocasional",
+          "label": "Ocasionalmente"
+        },
+        {
+          "value": "convenir",
+          "label": "A convenir por proyecto"
+        },
+        {
+          "value": "no",
+          "label": "No por ahora"
+        }
+      ]
     }
   },
   "bares": {
@@ -1060,7 +2099,68 @@
     "textosAyuda": {
       "cartelesCocteles": "Detalla cartelesCocteles con datos verificables — evita promesas falsas.",
       "botanasDestacadas": "Detalla botanasDestacadas con datos verificables — evita promesas falsas.",
-      "barraMixologia": "Detalla barraMixologia con datos verificables — evita promesas falsas."
+      "barraMixologia": "Detalla barraMixologia con datos verificables — evita promesas falsas.",
+      "tipoCocinaPrincipal": "Mexicana, mariscos, italiana, fusión — sé específico.",
+      "precioPromedioMx": "Ticket promedio por persona — orientativo.",
+      "permisoManipulacionAlimentos": "Declara si cuentas con permiso vigente.",
+      "colaboracionesComerciales": "¿Colaboras con otros negocios, chefs o marcas?",
+      "diferenciadorProfesional": "Ej. Ingredientes locales · Horno de leña · Menú degustación",
+      "ventaAlcohol": "Si vendes alcohol, declara permisos y política de menores."
+    },
+    "fieldLabels": {
+      "ventaAlcohol": "¿Vendes bebidas alcohólicas?"
+    },
+    "blockHint": "Bar gastronómico — comida, coctelería y permiso de alcohol.",
+    "extraFields": [
+      "colaboracionesComerciales",
+      "diferenciadorProfesional"
+    ],
+    "hideFields": [
+      "nivelServicio",
+      "modalidades",
+      "precioDesde",
+      "medidas",
+      "talla",
+      "orientacion",
+      "serviciosAdultos",
+      "disponibilidadAgenda",
+      "nivelPremium",
+      "realizaTrios",
+      "haceColaboraciones",
+      "colaboraCon",
+      "mostrarColaboraciones",
+      "colaboracionContenido",
+      "videoPresentacion",
+      "tipoCitaPreferida",
+      "disponiblePara",
+      "buscanConocer",
+      "experienciaVip",
+      "distintivosVip",
+      "presentacionFemboy",
+      "presentacionTom",
+      "estiloPredominante",
+      "atiendoA",
+      "mostrarAtiendoA"
+    ],
+    "fieldOptions": {
+      "colaboracionesComerciales": [
+        {
+          "value": "si_activo",
+          "label": "Sí, colaboro activamente"
+        },
+        {
+          "value": "ocasional",
+          "label": "Ocasionalmente"
+        },
+        {
+          "value": "convenir",
+          "label": "A convenir por proyecto"
+        },
+        {
+          "value": "no",
+          "label": "No por ahora"
+        }
+      ]
     }
   },
   "cervecerias": {
@@ -1104,7 +2204,68 @@
     "textosAyuda": {
       "estilosCerveza": "Detalla estilosCerveza con datos verificables — evita promesas falsas.",
       "produccionPropia": "Detalla produccionPropia con datos verificables — evita promesas falsas.",
-      "maridajeCerveza": "Detalla maridajeCerveza con datos verificables — evita promesas falsas."
+      "maridajeCerveza": "Detalla maridajeCerveza con datos verificables — evita promesas falsas.",
+      "tipoCocinaPrincipal": "Mexicana, mariscos, italiana, fusión — sé específico.",
+      "precioPromedioMx": "Ticket promedio por persona — orientativo.",
+      "permisoManipulacionAlimentos": "Declara si cuentas con permiso vigente.",
+      "colaboracionesComerciales": "¿Colaboras con otros negocios, chefs o marcas?",
+      "diferenciadorProfesional": "Ej. Ingredientes locales · Horno de leña · Menú degustación",
+      "ventaAlcohol": "Si vendes alcohol, declara permisos y política de menores."
+    },
+    "fieldLabels": {
+      "estilosCerveza": "Estilos de cerveza"
+    },
+    "blockHint": "Cervecería — estilos propios, taproom y comida.",
+    "extraFields": [
+      "colaboracionesComerciales",
+      "diferenciadorProfesional"
+    ],
+    "hideFields": [
+      "nivelServicio",
+      "modalidades",
+      "precioDesde",
+      "medidas",
+      "talla",
+      "orientacion",
+      "serviciosAdultos",
+      "disponibilidadAgenda",
+      "nivelPremium",
+      "realizaTrios",
+      "haceColaboraciones",
+      "colaboraCon",
+      "mostrarColaboraciones",
+      "colaboracionContenido",
+      "videoPresentacion",
+      "tipoCitaPreferida",
+      "disponiblePara",
+      "buscanConocer",
+      "experienciaVip",
+      "distintivosVip",
+      "presentacionFemboy",
+      "presentacionTom",
+      "estiloPredominante",
+      "atiendoA",
+      "mostrarAtiendoA"
+    ],
+    "fieldOptions": {
+      "colaboracionesComerciales": [
+        {
+          "value": "si_activo",
+          "label": "Sí, colaboro activamente"
+        },
+        {
+          "value": "ocasional",
+          "label": "Ocasionalmente"
+        },
+        {
+          "value": "convenir",
+          "label": "A convenir por proyecto"
+        },
+        {
+          "value": "no",
+          "label": "No por ahora"
+        }
+      ]
     }
   },
   "cantinas-vinotecas": {
@@ -1149,7 +2310,68 @@
     "textosAyuda": {
       "botellasDestacadas": "Detalla botellasDestacadas con datos verificables — evita promesas falsas.",
       "cavaVinos": "Detalla cavaVinos con datos verificables — evita promesas falsas.",
-      "botanasCantina": "Detalla botanasCantina con datos verificables — evita promesas falsas."
+      "botanasCantina": "Detalla botanasCantina con datos verificables — evita promesas falsas.",
+      "tipoCocinaPrincipal": "Mexicana, mariscos, italiana, fusión — sé específico.",
+      "precioPromedioMx": "Ticket promedio por persona — orientativo.",
+      "permisoManipulacionAlimentos": "Declara si cuentas con permiso vigente.",
+      "colaboracionesComerciales": "¿Colaboras con otros negocios, chefs o marcas?",
+      "diferenciadorProfesional": "Ej. Ingredientes locales · Horno de leña · Menú degustación",
+      "ventaAlcohol": "Si vendes alcohol, declara permisos y política de menores."
+    },
+    "fieldLabels": {
+      "ventaAlcohol": "Venta de alcohol y vinos"
+    },
+    "blockHint": "Cantina o vinoteca — vinos, botanas y permisos.",
+    "extraFields": [
+      "colaboracionesComerciales",
+      "diferenciadorProfesional"
+    ],
+    "hideFields": [
+      "nivelServicio",
+      "modalidades",
+      "precioDesde",
+      "medidas",
+      "talla",
+      "orientacion",
+      "serviciosAdultos",
+      "disponibilidadAgenda",
+      "nivelPremium",
+      "realizaTrios",
+      "haceColaboraciones",
+      "colaboraCon",
+      "mostrarColaboraciones",
+      "colaboracionContenido",
+      "videoPresentacion",
+      "tipoCitaPreferida",
+      "disponiblePara",
+      "buscanConocer",
+      "experienciaVip",
+      "distintivosVip",
+      "presentacionFemboy",
+      "presentacionTom",
+      "estiloPredominante",
+      "atiendoA",
+      "mostrarAtiendoA"
+    ],
+    "fieldOptions": {
+      "colaboracionesComerciales": [
+        {
+          "value": "si_activo",
+          "label": "Sí, colaboro activamente"
+        },
+        {
+          "value": "ocasional",
+          "label": "Ocasionalmente"
+        },
+        {
+          "value": "convenir",
+          "label": "A convenir por proyecto"
+        },
+        {
+          "value": "no",
+          "label": "No por ahora"
+        }
+      ]
     }
   },
   "buffet-comedor": {
@@ -1194,7 +2416,68 @@
     "textosAyuda": {
       "rotacionPlatos": "Detalla rotacionPlatos con datos verificables — evita promesas falsas.",
       "estacionesBuffet": "Detalla estacionesBuffet con datos verificables — evita promesas falsas.",
-      "comedorEmpresarial": "Detalla comedorEmpresarial con datos verificables — evita promesas falsas."
+      "comedorEmpresarial": "Detalla comedorEmpresarial con datos verificables — evita promesas falsas.",
+      "tipoCocinaPrincipal": "Mexicana, mariscos, italiana, fusión — sé específico.",
+      "precioPromedioMx": "Ticket promedio por persona — orientativo.",
+      "permisoManipulacionAlimentos": "Declara si cuentas con permiso vigente.",
+      "colaboracionesComerciales": "¿Colaboras con otros negocios, chefs o marcas?",
+      "diferenciadorProfesional": "Ej. Ingredientes locales · Horno de leña · Menú degustación",
+      "ventaAlcohol": "Si vendes alcohol, declara permisos y política de menores."
+    },
+    "fieldLabels": {
+      "tipoBuffet": "Modalidad de buffet / comedor"
+    },
+    "blockHint": "Buffet o comedor por peso — capacidad, horarios y tipo de comida.",
+    "extraFields": [
+      "colaboracionesComerciales",
+      "diferenciadorProfesional"
+    ],
+    "hideFields": [
+      "nivelServicio",
+      "modalidades",
+      "precioDesde",
+      "medidas",
+      "talla",
+      "orientacion",
+      "serviciosAdultos",
+      "disponibilidadAgenda",
+      "nivelPremium",
+      "realizaTrios",
+      "haceColaboraciones",
+      "colaboraCon",
+      "mostrarColaboraciones",
+      "colaboracionContenido",
+      "videoPresentacion",
+      "tipoCitaPreferida",
+      "disponiblePara",
+      "buscanConocer",
+      "experienciaVip",
+      "distintivosVip",
+      "presentacionFemboy",
+      "presentacionTom",
+      "estiloPredominante",
+      "atiendoA",
+      "mostrarAtiendoA"
+    ],
+    "fieldOptions": {
+      "colaboracionesComerciales": [
+        {
+          "value": "si_activo",
+          "label": "Sí, colaboro activamente"
+        },
+        {
+          "value": "ocasional",
+          "label": "Ocasionalmente"
+        },
+        {
+          "value": "convenir",
+          "label": "A convenir por proyecto"
+        },
+        {
+          "value": "no",
+          "label": "No por ahora"
+        }
+      ]
     }
   },
   "chef-cocinero-domicilio": {
@@ -1238,7 +2521,69 @@
     "textosAyuda": {
       "tipoExperienciaChef": "Detalla tipoExperienciaChef con datos verificables — evita promesas falsas.",
       "menuPersonalizado": "Detalla menuPersonalizado con datos verificables — evita promesas falsas.",
-      "cenasPrivadas": "Detalla cenasPrivadas con datos verificables — evita promesas falsas."
+      "cenasPrivadas": "Detalla cenasPrivadas con datos verificables — evita promesas falsas.",
+      "tipoCocinaPrincipal": "Mexicana, mariscos, italiana, fusión — sé específico.",
+      "precioPromedioMx": "Ticket promedio por persona — orientativo.",
+      "permisoManipulacionAlimentos": "Declara si cuentas con permiso vigente.",
+      "colaboracionesComerciales": "¿Colaboras con otros negocios, chefs o marcas?",
+      "diferenciadorProfesional": "Ej. Ingredientes locales · Horno de leña · Menú degustación",
+      "ventaAlcohol": "Si vendes alcohol, declara permisos y política de menores."
+    },
+    "fieldLabels": {
+      "tipoExperienciaChef": "Experiencias que ofreces",
+      "comensalesMaxChef": "Comensales máximos por servicio"
+    },
+    "blockHint": "Chef a domicilio — experiencias, menú degustación y zona de servicio.",
+    "extraFields": [
+      "colaboracionesComerciales",
+      "diferenciadorProfesional"
+    ],
+    "hideFields": [
+      "nivelServicio",
+      "modalidades",
+      "precioDesde",
+      "medidas",
+      "talla",
+      "orientacion",
+      "serviciosAdultos",
+      "disponibilidadAgenda",
+      "nivelPremium",
+      "realizaTrios",
+      "haceColaboraciones",
+      "colaboraCon",
+      "mostrarColaboraciones",
+      "colaboracionContenido",
+      "videoPresentacion",
+      "tipoCitaPreferida",
+      "disponiblePara",
+      "buscanConocer",
+      "experienciaVip",
+      "distintivosVip",
+      "presentacionFemboy",
+      "presentacionTom",
+      "estiloPredominante",
+      "atiendoA",
+      "mostrarAtiendoA"
+    ],
+    "fieldOptions": {
+      "colaboracionesComerciales": [
+        {
+          "value": "si_activo",
+          "label": "Sí, colaboro activamente"
+        },
+        {
+          "value": "ocasional",
+          "label": "Ocasionalmente"
+        },
+        {
+          "value": "convenir",
+          "label": "A convenir por proyecto"
+        },
+        {
+          "value": "no",
+          "label": "No por ahora"
+        }
+      ]
     }
   },
   "bartender-servicio": {
@@ -1280,7 +2625,68 @@
     "textosAyuda": {
       "tipoEventoBar": "Detalla tipoEventoBar con datos verificables — evita promesas falsas.",
       "coctelesSignature": "Detalla coctelesSignature con datos verificables — evita promesas falsas.",
-      "barraMovilIncluida": "Detalla barraMovilIncluida con datos verificables — evita promesas falsas."
+      "barraMovilIncluida": "Detalla barraMovilIncluida con datos verificables — evita promesas falsas.",
+      "tipoCocinaPrincipal": "Mexicana, mariscos, italiana, fusión — sé específico.",
+      "precioPromedioMx": "Ticket promedio por persona — orientativo.",
+      "permisoManipulacionAlimentos": "Declara si cuentas con permiso vigente.",
+      "colaboracionesComerciales": "¿Colaboras con otros negocios, chefs o marcas?",
+      "diferenciadorProfesional": "Ej. Ingredientes locales · Horno de leña · Menú degustación",
+      "ventaAlcohol": "Si vendes alcohol, declara permisos y política de menores."
+    },
+    "fieldLabels": {
+      "serviciosBarraMovil": "Servicios de barra móvil"
+    },
+    "blockHint": "Bartender móvil — barra, cocteles y eventos privados.",
+    "extraFields": [
+      "colaboracionesComerciales",
+      "diferenciadorProfesional"
+    ],
+    "hideFields": [
+      "nivelServicio",
+      "modalidades",
+      "precioDesde",
+      "medidas",
+      "talla",
+      "orientacion",
+      "serviciosAdultos",
+      "disponibilidadAgenda",
+      "nivelPremium",
+      "realizaTrios",
+      "haceColaboraciones",
+      "colaboraCon",
+      "mostrarColaboraciones",
+      "colaboracionContenido",
+      "videoPresentacion",
+      "tipoCitaPreferida",
+      "disponiblePara",
+      "buscanConocer",
+      "experienciaVip",
+      "distintivosVip",
+      "presentacionFemboy",
+      "presentacionTom",
+      "estiloPredominante",
+      "atiendoA",
+      "mostrarAtiendoA"
+    ],
+    "fieldOptions": {
+      "colaboracionesComerciales": [
+        {
+          "value": "si_activo",
+          "label": "Sí, colaboro activamente"
+        },
+        {
+          "value": "ocasional",
+          "label": "Ocasionalmente"
+        },
+        {
+          "value": "convenir",
+          "label": "A convenir por proyecto"
+        },
+        {
+          "value": "no",
+          "label": "No por ahora"
+        }
+      ]
     }
   },
   "distribuidoras-alimentos-bebidas": {
@@ -1322,7 +2728,70 @@
     "textosAyuda": {
       "catalogoMayoreo": "Detalla catalogoMayoreo con datos verificables — evita promesas falsas.",
       "entregaRefrigerada": "Detalla entregaRefrigerada con datos verificables — evita promesas falsas.",
-      "creditoComercial": "Detalla creditoComercial con datos verificables — evita promesas falsas."
+      "creditoComercial": "Detalla creditoComercial con datos verificables — evita promesas falsas.",
+      "tipoCocinaPrincipal": "Mexicana, mariscos, italiana, fusión — sé específico.",
+      "precioPromedioMx": "Ticket promedio por persona — orientativo.",
+      "permisoManipulacionAlimentos": "Declara si cuentas con permiso vigente.",
+      "colaboracionesComerciales": "¿Colaboras con otros negocios, chefs o marcas?",
+      "diferenciadorProfesional": "Ej. Ingredientes locales · Horno de leña · Menú degustación",
+      "ventaAlcohol": "Si vendes alcohol, declara permisos y política de menores.",
+      "disclaimerReguladoGastronomia": "Mayoreo B2B — cumple normativa aplicable."
+    },
+    "fieldLabels": {
+      "categoriasDistribucion": "Categorías que distribuyes",
+      "coberturaDistribucion": "Zona de cobertura"
+    },
+    "blockHint": "Distribución B2B — categorías, cobertura y pedido mínimo.",
+    "extraFields": [
+      "colaboracionesComerciales",
+      "diferenciadorProfesional"
+    ],
+    "hideFields": [
+      "nivelServicio",
+      "modalidades",
+      "precioDesde",
+      "medidas",
+      "talla",
+      "orientacion",
+      "serviciosAdultos",
+      "disponibilidadAgenda",
+      "nivelPremium",
+      "realizaTrios",
+      "haceColaboraciones",
+      "colaboraCon",
+      "mostrarColaboraciones",
+      "colaboracionContenido",
+      "videoPresentacion",
+      "tipoCitaPreferida",
+      "disponiblePara",
+      "buscanConocer",
+      "experienciaVip",
+      "distintivosVip",
+      "presentacionFemboy",
+      "presentacionTom",
+      "estiloPredominante",
+      "atiendoA",
+      "mostrarAtiendoA"
+    ],
+    "fieldOptions": {
+      "colaboracionesComerciales": [
+        {
+          "value": "si_activo",
+          "label": "Sí, colaboro activamente"
+        },
+        {
+          "value": "ocasional",
+          "label": "Ocasionalmente"
+        },
+        {
+          "value": "convenir",
+          "label": "A convenir por proyecto"
+        },
+        {
+          "value": "no",
+          "label": "No por ahora"
+        }
+      ]
     }
   }
 };
@@ -5039,12 +6508,49 @@
     if (reg.rows) field.rows = reg.rows;
     if (reg.options && reg.options.length) field.options = reg.options.slice();
     var delta = SUB_DELTAS[canonId];
+    if (delta && delta.fieldLabels && delta.fieldLabels[fieldId]) {
+      field.label = delta.fieldLabels[fieldId];
+    }
     if (delta && delta.textosAyuda && delta.textosAyuda[fieldId]) {
-      field.placeholder = delta.textosAyuda[fieldId];
+      var ayuda = delta.textosAyuda[fieldId];
+      if (field.type === 'checklist' || field.type === 'select' || field.type === 'boolean') {
+        field.hint = ayuda;
+      } else {
+        field.placeholder = ayuda;
+      }
     }
     var sw = showWhenForField(fieldId, canonId);
     if (sw) field.showWhen = sw;
     return field;
+  }
+
+  function extraFieldFromId(fieldId, required, canonId) {
+    var delta = SUB_DELTAS[canonId];
+    if (fieldId === 'colaboracionesComerciales') {
+      var opts = (delta && delta.fieldOptions && delta.fieldOptions.colaboracionesComerciales) || [];
+      return {
+        id: fieldId,
+        label: '¿Colaboras con otros negocios o chefs?',
+        type: 'select',
+        required: !!required,
+        options: opts.length ? opts.slice() : [
+          { value: 'si_activo', label: 'Sí, colaboro activamente' },
+          { value: 'ocasional', label: 'Ocasionalmente' },
+          { value: 'convenir', label: 'A convenir por proyecto' },
+          { value: 'no', label: 'No por ahora' },
+        ],
+      };
+    }
+    if (fieldId === 'diferenciadorProfesional') {
+      return {
+        id: fieldId,
+        label: 'Tu sello / lo que te distingue',
+        type: 'text',
+        required: !!required,
+        placeholder: 'Ej. Ingredientes locales · Horno de leña',
+      };
+    }
+    return null;
   }
 
   function personaIdentityBlock() {
@@ -5099,8 +6605,14 @@
     (delta.deltaFields || []).forEach(function (fid) {
       if (GENERIC_FORBIDDEN_IDS.indexOf(fid) >= 0) return;
       if (fid === 'precioPromedioMx' || fid === 'precioDesdeMx') return;
+      if (delta.hideFields && delta.hideFields.indexOf(fid) >= 0) return;
       var f = fieldFromRegistry(fid, !!oblSet[fid], canonId);
       if (f) fields.push(f);
+    });
+    (delta.extraFields || []).forEach(function (fid) {
+      if (fields.some(function (x) { return x.id === fid; })) return;
+      var ef = extraFieldFromId(fid, !!oblSet[fid], canonId);
+      if (ef) fields.push(ef);
     });
     if (BAR_CANON.indexOf(canonId) >= 0) {
       var discBar = fieldFromRegistry('disclaimerReguladoGastronomia', false, canonId);
@@ -5113,7 +6625,7 @@
     return {
       id: 'gastronomiaDelta_' + canonId,
       title: meta.blockTitle,
-      hint: meta.nombre,
+      hint: delta.blockHint || meta.blockTitle,
       fields: fields,
     };
   }
