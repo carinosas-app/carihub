@@ -13,21 +13,22 @@
 
   var SECTOR_SPARK = {
     salud: '#1976d2',
-    profesionales: '#455a64',
-    'bienes-raices': '#7b1fa2',
+    profesionales: '#37474f',
+    'bienes-raices': '#6d4c41',
     transporte: '#0288d1',
-    educacion: '#00897b',
-    tecnologia: '#1565c0',
-    mascotas: '#558b2f',
-    restaurantes: '#e65100',
-    bienestar: '#689f38',
-    eventos: '#c2185b',
-    comercio: '#6a1b9a',
-    hogar: '#ef6c00',
-    automotriz: '#37474f',
-    industria: '#5d4037',
-    lgbt: '#8f39c9'
+    educacion: '#5c6bc0',
+    tecnologia: '#3949ab',
+    mascotas: '#43a047',
+    restaurantes: '#f4511e',
+    bienestar: '#7cb342',
+    eventos: '#ff8f00',
+    comercio: '#00897b',
+    hogar: '#e64a19',
+    automotriz: '#1976d2',
+    industria: '#455a64'
   };
+
+  var LGBT_SPARK = ['#ef3b3b', '#ff8a1e', '#ffd21e', '#29b563', '#2b7fe0', '#8f39c9'];
 
   function esc(t) {
     return String(t == null ? '' : t)
@@ -36,15 +37,21 @@
   }
 
   function sparkColor(sectorId) {
+    if (sectorId === 'lgbt') return LGBT_SPARK[0];
     return SECTOR_SPARK[sectorId] || '#e91e63';
   }
 
   function buildHtml(sectorId, opts) {
     opts = opts || {};
     var positions = opts.positions || POSITIONS;
-    var color = opts.color || sparkColor(sectorId);
     var html = '';
     positions.forEach(function (p, i) {
+      var color;
+      if (sectorId === 'lgbt') {
+        color = LGBT_SPARK[i % LGBT_SPARK.length];
+      } else {
+        color = opts.color || sparkColor(sectorId);
+      }
       var size = 5 + (i % 4);
       html +=
         '<span class="ch-sector-spark" style="' +
@@ -79,7 +86,11 @@
   function syncBody(sectorId) {
     var page = document.body;
     if (!page) return;
-    if (!sectorId || sectorId === 'adultos') {
+    if (!sectorId || sectorId === 'adultos' || sectorId === 'lgbt') {
+      page.style.removeProperty('--ch-sector-spark-color');
+      return;
+    }
+    if (page.getAttribute('data-subtema') === 'lgbt') {
       page.style.removeProperty('--ch-sector-spark-color');
       return;
     }

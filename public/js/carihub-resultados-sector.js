@@ -299,10 +299,17 @@
     syncSubtemaLgbt(cat);
     var ss = global.CariHubSectorSparkles;
     if (ss && ss.syncBody) {
-      if (esSubcategoriaLgbt(cat)) ss.syncBody('');
+      if (esSubcategoriaLgbt(cat)) ss.syncBody('lgbt');
       else ss.syncBody(sector);
     }
     syncPageSheen(sector, cat);
+    try {
+      if (global.document && typeof global.CustomEvent === 'function') {
+        document.dispatchEvent(new CustomEvent('carihub:resultados-tema', {
+          detail: { sector: sector, categoria: cat, lgbt: esSubcategoriaLgbt(cat) }
+        }));
+      }
+    } catch (e) { /* opcional */ }
     return sector;
   }
 

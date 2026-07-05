@@ -189,8 +189,27 @@
     return backBtnModeForSector(sectorId);
   }
 
+  var LGBT_SUB_IDS = [
+    'escort gay', 'antro restaurant bar lgbt', 'trans', 'femboy',
+    'lesbians', 'tom boy', 'tom fem'
+  ];
+
+  function normSubcatId(id) {
+    return String(id || '').toLowerCase().trim();
+  }
+
+  function isLgbtSubcategoria(sub) {
+    if (!sub || !sub.id) return false;
+    var id = normSubcatId(sub.id);
+    for (var i = 0; i < LGBT_SUB_IDS.length; i++) {
+      if (normSubcatId(LGBT_SUB_IDS[i]) === id) return true;
+    }
+    return false;
+  }
+
   function shouldUsePinkSheen() {
     if (!state.sector || state.sector.id !== 'adultos') return false;
+    if (isLgbtSubcategoria(state.subcategoria)) return false;
     return state.screen === 'screen0b-adultos' ||
       state.screen === 'screen1' ||
       state.screen === 'screen4';
@@ -323,6 +342,11 @@
       document.body.setAttribute('data-rp-sector', state.sector.id);
     } else {
       document.body.removeAttribute('data-rp-sector');
+    }
+    if (isLgbtSubcategoria(state.subcategoria)) {
+      document.body.setAttribute('data-subtema', 'lgbt');
+    } else {
+      document.body.removeAttribute('data-subtema');
     }
     if (isSubcat && state.sector && global.CariHubSectores) {
       var subCount = (global.CariHubSectores.subcategoriasDeSector(state.sector.id) || []).length;

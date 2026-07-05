@@ -321,6 +321,13 @@
     var S = global.CariHubSectorSparkles;
     if (!S) return;
     var panel = modal.querySelector('.ch-geo-sheet__panel');
+    var lgbt = document.body.getAttribute('data-subtema') === 'lgbt' ||
+      modal.getAttribute('data-subtema') === 'lgbt';
+    if (lgbt && usesRegistroGeoShell()) {
+      S.syncBody('lgbt');
+      if (panel) S.ensureLayer(panel, 'lgbt');
+      return;
+    }
     var sector = modal.getAttribute('data-rp-sector') || document.body.getAttribute('data-rp-sector') || '';
     if (usesRegistroGeoShell() && sector && sector !== 'adultos') {
       S.syncBody(sector);
@@ -382,15 +389,21 @@
         title.classList.toggle('ch-geo-sheet__title--gradient', isHome);
       }
       if (subtitle) {
-        if (document.body.getAttribute('data-page') === 'home' && global.__homeGeoPaisHint) {
+        var isRegistroPais = usesRegistroGeoShell() &&
+          document.body.getAttribute('data-page') !== 'home';
+        if (isRegistroPais) {
+          subtitle.textContent = '';
+          subtitle.style.display = 'none';
+        } else if (document.body.getAttribute('data-page') === 'home' && global.__homeGeoPaisHint) {
           global.__homeGeoPaisHint = false;
           subtitle.textContent =
             'Categoría seleccionada. Para una búsqueda más profunda, selecciona también un estado y una ciudad, y después presiona Buscar. ' +
             'Para una búsqueda a nivel país, solo selecciona el país, después presiona Buscar.';
+          subtitle.style.display = '';
         } else {
           subtitle.textContent = 'Explora perfiles, negocios, experiencias cerca de ti';
+          subtitle.style.display = '';
         }
-        subtitle.style.display = '';
       }
       if (section) section.textContent = '🔥 Más populares';
       if (input) input.placeholder = GEO_SEARCH.pais;
@@ -744,16 +757,21 @@
 
   var GEO_BANNER_BY_SECTOR = {
     restaurantes: 'img/home/banners/ad-banner-gastronomia-01.svg',
-    adultos: 'img/home/banners/ad-banner-pink-01.png'
+    adultos: 'img/home/banners/ad-banner-pink-01.png',
+    lgbt: 'img/home/banners/ad-banner-lgbt-resultados-01.png'
   };
+
+  var GEO_LGBT_GRAD = 'linear-gradient(90deg, #ef3b3b 0%, #ff8a1e 18%, #ffd21e 36%, #29b563 54%, #2b7fe0 72%, #8f39c9 90%, #ef3b3b 100%)';
 
   function syncGeoBannerImage(modal, sector) {
     if (!modal) return;
     var img = modal.querySelector('#chGeoBanner img');
     if (!img) return;
-    var src = GEO_BANNER_BY_SECTOR[sector] ||
+    var lgbt = modal.getAttribute('data-subtema') === 'lgbt';
+    var src = lgbt ? GEO_BANNER_BY_SECTOR.lgbt :
+      (GEO_BANNER_BY_SECTOR[sector] ||
       ((global.CariHubBannerGeneral && global.CariHubBannerGeneral.pickGeneralBanner()) ||
-        'img/home/banners/ad-banner-pink-01.png');
+        'img/home/banners/ad-banner-pink-01.png'));
     if (sector && sector !== 'adultos' && !GEO_BANNER_BY_SECTOR[sector]) {
       src = 'img/home/banners/ad-banner-pink-02.png';
     }
@@ -768,12 +786,32 @@
     modal.classList.toggle('ch-geo-modal--registro', isRegistro);
     if (!isRegistro) {
       modal.removeAttribute('data-rp-sector');
+      modal.removeAttribute('data-subtema');
       modal.style.removeProperty('--rp-form-accent');
       modal.style.removeProperty('--geo-grad');
       modal.style.removeProperty('--geo-shadow');
       modal.style.removeProperty('--geo-premium-shell');
       return;
     }
+    var lgbt = document.body.getAttribute('data-subtema') === 'lgbt';
+    if (lgbt) {
+      modal.setAttribute('data-subtema', 'lgbt');
+      modal.setAttribute('data-rp-sector', 'adultos');
+      modal.style.setProperty('--rp-form-accent', '#8f39c9');
+      modal.style.setProperty('--geo-grad', GEO_LGBT_GRAD);
+      modal.style.setProperty('--geo-shadow', '0 8px 24px color-mix(in srgb, #8f39c9 38%, transparent)');
+      modal.style.setProperty('--geo-premium-shell',
+        'linear-gradient(165deg, ' +
+        'color-mix(in srgb, #ef3b3b 22%, #fff) 0%, ' +
+        'color-mix(in srgb, #ffd21e 18%, #fff) 35%, ' +
+        'color-mix(in srgb, #29b563 18%, #fff) 55%, ' +
+        'color-mix(in srgb, #2b7fe0 20%, #fff) 75%, ' +
+        'color-mix(in srgb, #8f39c9 22%, #fff) 100%)');
+      syncGeoSparkles(modal);
+      syncGeoBannerImage(modal, 'adultos');
+      return;
+    }
+    modal.removeAttribute('data-subtema');
     var sector = document.body.getAttribute('data-rp-sector') || '';
     if (document.body.getAttribute('data-page') === 'home') {
       sector = 'adultos';
