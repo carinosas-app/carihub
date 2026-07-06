@@ -105,6 +105,23 @@
     sparkColor: sparkColor,
     buildHtml: buildHtml,
     ensureLayer: ensureLayer,
+    ensureAdultProLayer: function (container, opts) {
+      if (!container) return null;
+      opts = opts || {};
+      var layer = container.querySelector('.ch-sector-sparkles');
+      if (!layer) {
+        layer = document.createElement('div');
+        layer.className = 'ch-sector-sparkles';
+        layer.setAttribute('aria-hidden', 'true');
+        container.insertBefore(layer, container.firstChild);
+      }
+      layer.hidden = false;
+      layer.innerHTML = buildHtml('adultos', {
+        color: opts.color || '#f48fb1',
+        positions: opts.positions
+      });
+      return layer;
+    },
     syncBody: syncBody
   };
 })(typeof window !== 'undefined' ? window : globalThis);

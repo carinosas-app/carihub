@@ -31,7 +31,7 @@
 <link rel="stylesheet" href="css/home-modals.css">
 <link rel="stylesheet" href="css/carihub-sector-sparkles.css?v=20260628b">
 <link rel="stylesheet" href="css/home-cat-promo-rail.css?v=20260628b">
-<link rel="stylesheet" href="css/home-adultos-cat-picker.css?v=20260630hf3">
+<link rel="stylesheet" href="css/home-adultos-cat-picker.css?v=20260705proamb1">
 <link rel="stylesheet" href="css/home-sector-subcat.css?v=20260630hf1">
 <link rel="stylesheet" href="css/ch-slot-dock.css">
 <link rel="stylesheet" href="css/carihub-media-placeholders.css?v=20260630hf1">
@@ -40,6 +40,7 @@
 <link rel="stylesheet" href="css/home-otros-registro-bridge.css?v=20260627a">
 <link rel="stylesheet" href="css/registro-perfil-geo-modal.css?v=20260624j">
 <link rel="stylesheet" href="css/home-geo-pais-premium.css?v=20260625c">
+<link rel="stylesheet" href="css/home-geo-guided-flow.css?v=20260705journey2">
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
@@ -80,9 +81,9 @@ let visitasHoy = 0;
 let usuariosOnline = 0;
 var categoriaSeleccionada = "";
 var sectorSeleccionado = "";
-let paisSeleccionado = "";
-let estadoSeleccionado = "";
-let ciudadSeleccionada = "";
+var paisSeleccionado = "";
+var estadoSeleccionado = "";
+var ciudadSeleccionada = "";
 let selectorActual = "";
 
 const CATEGORIAS_BUSCADOR = [
@@ -566,24 +567,15 @@ const CATEGORIAS_BUSCADOR = [
       <ul class="home-cat-picker__list" id="catPickerList" role="listbox" aria-label="Categorías del sector"></ul>
     </div>
 
-    <div class="home-adultos-picker" id="catPickerAdultos" hidden>
-      <div class="home-adultos-picker__flashes" aria-hidden="true">
-        <span class="ap-bg-flash ap-bg-flash--pink ap-bg-flash--p1"></span>
-        <span class="ap-bg-flash ap-bg-flash--pink ap-bg-flash--p2"></span>
-        <span class="ap-bg-flash ap-bg-flash--pink ap-bg-flash--p3"></span>
-        <span class="ap-bg-flash ap-bg-flash--pink ap-bg-flash--p4"></span>
-        <span class="ap-bg-flash ap-bg-flash--pink ap-bg-flash--p5"></span>
-        <span class="ap-bg-flash ap-bg-flash--white ap-bg-flash--1"></span>
-        <span class="ap-bg-flash ap-bg-flash--white ap-bg-flash--2"></span>
-        <span class="ap-bg-flash ap-bg-flash--white ap-bg-flash--3"></span>
-        <span class="ap-bg-flash ap-bg-flash--white ap-bg-flash--4"></span>
-        <span class="ap-bg-flash ap-bg-flash--white ap-bg-flash--5"></span>
+    <div class="home-adultos-subcats-step" id="catPickerAdultos" hidden>
+      <div class="home-adultos-subcats-ambience" aria-hidden="true">
+        <div class="home-adultos-subcats-ambience__base"></div>
+        <div class="home-adultos-subcats-ambience__brillo"></div>
+        <div class="home-adultos-subcats-ambience__drift"></div>
+        <div class="home-adultos-subcats-ambience__sweep"></div>
+        <div class="home-adultos-subcats-ambience__sparks ch-sector-sparkles" id="homeAdultosSubcatsSparkles"></div>
       </div>
-      <header class="home-adultos-picker__head">
-        <h3 class="home-adultos-picker__title" id="modal-categorias-title-adultos">Adultos y Entretenimiento para Adultos</h3>
-        <p class="home-adultos-picker__hint" id="catPickerCountAdultos"></p>
-      </header>
-      <header class="home-cat-promo-rail home-adultos-picker__promo" aria-label="Espacios publicitarios">
+      <header class="home-cat-promo-rail home-adultos-subcats__promo" aria-label="Espacios publicitarios">
         <div class="home-cat-promo-rail__slot home-cat-promo-rail__slot--side">
           <div id="homeAdultosPromoEstados" data-promo-slot="home_estados"></div>
         </div>
@@ -596,7 +588,15 @@ const CATEGORIAS_BUSCADOR = [
           <div id="homeAdultosPromoLibe" data-promo-slot="home_libe"></div>
         </div>
       </header>
-      <ul class="home-adultos-picker__grid" id="catPickerListAdultos" role="listbox" aria-label="Categorías Adultos"></ul>
+      <div class="home-adultos-subcats-scroll">
+        <header class="home-adultos-picker__head home-otros-subcats__head">
+          <h3 class="home-adultos-picker__title" id="modal-categorias-title-adultos">Adultos y Entretenimiento para Adultos</h3>
+          <p class="home-adultos-picker__hint" id="catPickerCountAdultos"></p>
+        </header>
+        <div class="home-adultos-subcats-catalog" id="homeAdultosCatCatalog">
+          <ul class="rp-subcat-geo-list home-otros-subcats__list home-adultos-subcats__list" id="catPickerListAdultos" role="listbox" aria-label="Categorías Adultos"></ul>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -1505,24 +1505,53 @@ function buscarCiudadRapida(ciudad){
   buscarPerfilesFiltrados();
 }
 
+function urlBusquedaResultados(params) {
+  var qs = params.toString();
+  if (location.protocol === 'file:') {
+    return new URL('resultados.html?' + qs, location.href).href;
+  }
+  return new URL('resultados?' + qs, location.href).href;
+}
+
 function buscarPerfilesFiltrados(){
-  if(!categoriaSeleccionada){
+  var ov = window.__guidedSearchOverride;
+  var cat = (ov && ov.categoria) || window.categoriaSeleccionada || categoriaSeleccionada || "";
+  var pais = (ov && ov.pais) || window.paisSeleccionado || paisSeleccionado || "";
+  var estado = (ov && ov.estado) || window.estadoSeleccionado || estadoSeleccionado || "";
+  var ciudad = (ov && ov.ciudad) || window.ciudadSeleccionada || ciudadSeleccionada || "";
+
+  if (!ov && window.CariHubSearchJourneySession && CariHubSearchJourneySession.isActive && CariHubSearchJourneySession.isActive()) {
+    if (typeof CariHubSearchJourneySession.syncHomeGlobals === "function") {
+      CariHubSearchJourneySession.syncHomeGlobals();
+    }
+    var j = CariHubSearchJourneySession.get ? CariHubSearchJourneySession.get() : null;
+    if (j) {
+      if (j.subcatNombre) cat = j.subcatNombre;
+      if (j.geo) {
+        if (j.geo.pais) pais = j.geo.pais;
+        if (j.geo.estado) estado = j.geo.estado;
+        if (j.geo.ciudad) ciudad = j.geo.ciudad;
+      }
+    }
+  }
+
+  if(!cat){
     alert("Selecciona una categoría.");
     return;
   }
-  if(!paisSeleccionado){
+  if(!pais){
     alert("Selecciona un país para buscar.");
     return;
   }
 
-  const url = new URL("./resultados.html", window.location.href);
-  url.searchParams.set("categoria", categoriaSeleccionada);
-  url.searchParams.set("pais", paisSeleccionado);
-  if(estadoSeleccionado) url.searchParams.set("estado", estadoSeleccionado);
-  if(ciudadSeleccionada) url.searchParams.set("ciudad", ciudadSeleccionada);
-  url.searchParams.set("v", String(Date.now()));
+  var params = new URLSearchParams();
+  params.set("categoria", cat);
+  params.set("pais", pais);
+  if (estado) params.set("estado", estado);
+  if (ciudad) params.set("ciudad", ciudad);
+  params.set("v", String(Date.now()));
 
-  window.location.assign(url.toString());
+  window.location.assign(urlBusquedaResultados(params));
 }
 
 function volverInicio(){
@@ -2815,12 +2844,12 @@ const params = new URLSearchParams(window.location.search);
 <script src="js/carihub-pink-sheen.js"></script>
 <script src="js/hero-home.js"></script>
 <script src="js/sector-scroll-data.js"></script>
-<script src="js/sector-card-images.js?v=20260624q"></script>
+<script src="js/sector-card-images.js?v=20260706sec1"></script>
 <script src="js/sector-card-templates.js"></script>
 <script src="js/sector-subcat-picker.js?v=20260701gast-img"></script>
 <script src="js/sector-catalog-ui.js?v=20260701gast-img"></script>
 <script src="js/sector-category-watermarks.js?v=20260627d"></script>
-<script src="js/home-otros-sectores-picker.js?v=20260701gast-img"></script>
+<script src="js/home-otros-sectores-picker.js?v=20260705journey2"></script>
 <script src="js/home-sector-cards.js"></script>
 <script src="js/home-sector-scroll.js"></script>
 <script src="js/home-vcards.js?v=20260624q"></script>
@@ -2833,14 +2862,16 @@ const params = new URLSearchParams(window.location.search);
 <script src="js/carihub-slot-preview-images.js?v=20260630ph1"></script>
 <script src="js/carihub-sector-sparkles.js?v=20260628b"></script>
 <script src="js/carihub-ui-notices.js?v=20260629v3"></script>
-<script src="js/carihub-geo-picker.js?v=20260630geo1"></script>
+<script src="js/carihub-search-journey-session.js?v=20260705journey2"></script>
+<script src="js/carihub-resultados-sector.js?v=20260706geo1"></script>
+<script src="js/carihub-geo-picker.js?v=20260706geo1"></script>
 <script src="js/ch-slot-dock.js?v=20260628b"></script>
 <script src="js/banner-home-laterales.js"></script>
 <script src="js/resultados-demo.js"></script>
 <script src="js/carihub-cuenta-social.js"></script>
 <script src="js/carihub-gratificaciones.js"></script>
 <script src="js/home-bridge.js"></script>
-<script src="js/home-ui.js?v=20260630hf3"></script>
+<script src="js/home-ui.js?v=20260705journey4"></script>
 <script src="js/home-intenciones.js"></script>
 <script src="js/carihub-messenger-schema.js"></script>
 <script src="js/carihub-messenger-privacidad-schema.js"></script>

@@ -30,8 +30,39 @@
     onSelectSubcat: null
   };
 
+  var catSearchCtl = null;
+
   function $(id) {
     return document.getElementById(id);
+  }
+
+  function mountCatSearch() {
+    if (!global.CariHubSectorCatSearch || !global.CariHubSectorCatSearch.mount) return;
+    catSearchCtl = global.CariHubSectorCatSearch.mount({
+      mode: 'browse',
+      excludeAdultos: false,
+      ids: {
+        input: 'homeOtrosCatSearch',
+        bar: 'homeOtrosCatSearchBar',
+        submit: 'homeOtrosCatSearchSubmit',
+        hint: 'homeOtrosCatSearchHint',
+        suggest: 'homeOtrosCatSearchSuggest',
+        panel: 'homeOtrosCatSearchPanel',
+        catalog: 'homeOtrosCatCatalog'
+      },
+      onPickSubcat: function (sector, sub) {
+        if (typeof state.onSelectSubcat === 'function') {
+          state.onSelectSubcat(sub, sector);
+        }
+      },
+      onPickSector: function (sector) {
+        openSubcats(sector);
+      }
+    });
+  }
+
+  function clearCatSearch() {
+    if (catSearchCtl && catSearchCtl.clear) catSearchCtl.clear(false);
   }
 
   function sectorsForHome() {
@@ -141,6 +172,7 @@
     var cats = $('homeOtrosStepCats');
     var subcats = $('homeOtrosStepSubcats');
     state.step = step;
+    if (step === 'cats') clearCatSearch();
     if (cats) cats.hidden = step !== 'cats';
     if (subcats) subcats.hidden = step !== 'subcats';
     if (modal) {
@@ -205,8 +237,20 @@
     document.body.style.overflow = 'hidden';
   }
 
-  function close() {
+  function releasePageScrollIfAllowed() {
+    if (global.CariHubSearchJourneySession &&
+        typeof global.CariHubSearchJourneySession.shouldKeepPageLocked === 'function' &&
+        global.CariHubSearchJourneySession.shouldKeepPageLocked()) {
+      return;
+    }
+    if (!document.querySelector('.home-modal.is-open')) {
+      document.body.style.overflow = '';
+    }
+  }
+
+  function dismissForGeoTransition() {
     var modal = $('modal-otros-sectores');
+    clearCatSearch();
     if (modal) {
       modal.classList.remove('is-open', 'is-step-cats', 'is-step-subcats', 'rp-sector-subcats');
       modal.removeAttribute('data-rp-sector');
@@ -214,12 +258,22 @@
     state.sector = null;
     state.step = 'cats';
     syncBodyClasses();
-    if (!document.querySelector('.home-modal.is-open')) {
-      document.body.style.overflow = '';
+  }
+
+  function close(opts) {
+    opts = opts || {};
+    dismissForGeoTransition();
+    releasePageScrollIfAllowed();
+    if (!opts.preserveJourney && global.CariHubSearchJourneySession && global.CariHubSearchJourneySession.isActive()) {
+      global.CariHubSearchJourneySession.clear();
+      if (global.CariHubGeoPicker && typeof global.CariHubGeoPicker.setFlowMode === 'function') {
+        global.CariHubGeoPicker.setFlowMode('field-sync');
+      }
     }
   }
 
   function bind() {
+    mountCatSearch();
     var back = $('homeOtrosBackToCats');
     var modal = $('modal-otros-sectores');
     if (back) {
@@ -240,6 +294,7 @@
   global.CariHubHomeOtrosSectoresPicker = {
     open: open,
     close: close,
+    dismissForGeoTransition: dismissForGeoTransition,
     openSubcats: openSubcats,
     showStep: showStep
   };

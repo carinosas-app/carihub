@@ -10,9 +10,15 @@
 
   function syncHomeGeoGlobals(values) {
     values = values || {};
-    if (typeof paisSeleccionado !== 'undefined') paisSeleccionado = values.pais || '';
-    if (typeof estadoSeleccionado !== 'undefined') estadoSeleccionado = values.estado || '';
-    if (typeof ciudadSeleccionada !== 'undefined') ciudadSeleccionada = values.ciudad || '';
+    var pais = values.pais || '';
+    var estado = values.estado || '';
+    var ciudad = values.ciudad || '';
+    try { if (typeof paisSeleccionado !== 'undefined') paisSeleccionado = pais; } catch (e) { /* noop */ }
+    try { if (typeof estadoSeleccionado !== 'undefined') estadoSeleccionado = estado; } catch (e) { /* noop */ }
+    try { if (typeof ciudadSeleccionada !== 'undefined') ciudadSeleccionada = ciudad; } catch (e) { /* noop */ }
+    window.paisSeleccionado = pais;
+    window.estadoSeleccionado = estado;
+    window.ciudadSeleccionada = ciudad;
 
     if (typeof mostrarTextoSeleccionado === 'function' && typeof limpiarTextoSeleccionado === 'function') {
       if (values.pais) mostrarTextoSeleccionado('textoPais', values.pais);
@@ -22,6 +28,24 @@
       if (values.ciudad) mostrarTextoSeleccionado('textoCiudad', values.ciudad);
       else limpiarTextoSeleccionado('textoCiudad');
     }
+  }
+
+  function resetClassicGeoFlow() {
+    if (window.CariHubGeoPicker && typeof window.CariHubGeoPicker.setFlowMode === 'function') {
+      window.CariHubGeoPicker.setFlowMode('field-sync');
+    }
+    var Journey = window.CariHubSearchJourneySession;
+    if (!Journey) return;
+    var keepLocked = typeof Journey.shouldKeepPageLocked === 'function' && Journey.shouldKeepPageLocked();
+    if (!keepLocked && typeof Journey.isActive === 'function' && Journey.isActive() && typeof Journey.clear === 'function') {
+      Journey.clear();
+    }
+  }
+
+  function openHomeGeoPickerClassic(tipo) {
+    resetClassicGeoFlow();
+    var picker = initHomeGeoPicker();
+    if (picker) picker.open(tipo);
   }
 
   function initHomeGeoPicker() {
@@ -43,16 +67,10 @@
       ciudad: readHiddenGeo('textoCiudad')
     });
     window.__homeGeoPicker = homeGeoPicker;
-    window.openHomeGeoPicker = function (tipo) {
-      if (homeGeoPicker) homeGeoPicker.open(tipo);
-    };
     return homeGeoPicker;
   }
 
-  window.openHomeGeoPicker = function (tipo) {
-    var picker = initHomeGeoPicker();
-    if (picker) picker.open(tipo);
-  };
+  window.openHomeGeoPicker = openHomeGeoPickerClassic;
 
   window.homeGeoClick = function (tipo, e) {
     if (e) {
@@ -154,7 +172,8 @@
   };
 
   window.setCategoriaHome = function (nombre) {
-    categoriaSeleccionada = nombre;
+    window.categoriaSeleccionada = nombre;
+    try { categoriaSeleccionada = nombre; } catch (e) { /* global var opcional */ }
     if (typeof mostrarTextoSeleccionado === 'function') {
       mostrarTextoSeleccionado('textoCategoria', nombre);
     }
@@ -241,6 +260,9 @@
   function bindHomeBridge() {
     if (window.__homeBridgeBound) return;
     window.__homeBridgeBound = true;
+
+    /* bootHomeGeoPicker (DOMContentLoaded en geo-picker) puede sobrescribir este wrapper */
+    window.openHomeGeoPicker = openHomeGeoPickerClassic;
 
     patchLimpiarTextoSeleccionado();
     patchMostrarTextoSeleccionado();
