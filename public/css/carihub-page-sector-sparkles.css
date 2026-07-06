@@ -1,0 +1,115 @@
+/**
+ * Destellos profesionales de página completa — color del sector activo.
+ * Resultados: body[data-sector] (no adultos, no LGBT — LGBT tiene su propio arcoíris).
+ * Registro / modales: body[data-rp-sector] (no adultos; adultos usa pink sheen).
+ */
+
+/* Resultados: color de destello = acento del sector ya definido en resultados.css */
+body[data-sector]:not([data-sector="adultos"]):not([data-subtema="lgbt"]) {
+  --ch-sector-spark-color: var(--res-accent);
+  --ch-sector-spark-soft: var(--res-accent-light);
+}
+
+/* Capas fijas de destellos — no bloquean clics */
+body[data-sector]:not([data-sector="adultos"]):not([data-subtema="lgbt"])::before,
+body[data-sector]:not([data-sector="adultos"]):not([data-subtema="lgbt"])::after,
+body[data-rp-sector]:not([data-rp-sector="adultos"])::before,
+body[data-rp-sector]:not([data-rp-sector="adultos"])::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+body[data-sector]:not([data-sector="adultos"]):not([data-subtema="lgbt"])::before,
+body[data-rp-sector]:not([data-rp-sector="adultos"])::before {
+  background:
+    radial-gradient(circle at 8% 14%, color-mix(in srgb, #fff 88%, var(--ch-sector-spark-color)) 0 2px, transparent 4px),
+    radial-gradient(circle at 22% 68%, color-mix(in srgb, var(--ch-sector-spark-color) 82%, #fff) 0 1.5px, transparent 3px),
+    radial-gradient(circle at 36% 24%, color-mix(in srgb, var(--ch-sector-spark-soft, var(--ch-sector-spark-color)) 78%, #fff) 0 1.8px, transparent 3.6px),
+    radial-gradient(circle at 50% 84%, color-mix(in srgb, var(--ch-sector-spark-color) 75%, #fff) 0 1.6px, transparent 3.2px),
+    radial-gradient(circle at 64% 12%, color-mix(in srgb, #fff 90%, var(--ch-sector-spark-color)) 0 2px, transparent 4px),
+    radial-gradient(circle at 76% 56%, color-mix(in srgb, var(--ch-sector-spark-color) 80%, #fff) 0 1.7px, transparent 3.4px),
+    radial-gradient(circle at 90% 34%, color-mix(in srgb, #fff 92%, var(--ch-sector-spark-color)) 0 1.4px, transparent 2.8px),
+    radial-gradient(circle at 12% 46%, color-mix(in srgb, var(--ch-sector-spark-color) 72%, #fff) 0 1.5px, transparent 3px),
+    radial-gradient(circle at 44% 50%, color-mix(in srgb, #fff 85%, var(--ch-sector-spark-color)) 0 2.1px, transparent 4.2px),
+    radial-gradient(circle at 70% 88%, color-mix(in srgb, var(--ch-sector-spark-soft, var(--ch-sector-spark-color)) 70%, #fff) 0 1.3px, transparent 2.6px),
+    radial-gradient(circle at 92% 74%, color-mix(in srgb, var(--ch-sector-spark-color) 68%, #fff) 0 1.4px, transparent 2.8px),
+    radial-gradient(circle at 30% 90%, color-mix(in srgb, var(--ch-sector-spark-color) 76%, #fff) 0 1.6px, transparent 3.2px),
+    radial-gradient(circle at 56% 36%, color-mix(in srgb, #fff 80%, var(--ch-sector-spark-color)) 0 1.2px, transparent 2.4px),
+    radial-gradient(circle at 16% 82%, color-mix(in srgb, var(--ch-sector-spark-color) 65%, #fff) 0 1.3px, transparent 2.6px),
+    radial-gradient(circle at 4% 58%, color-mix(in srgb, var(--ch-sector-spark-soft, var(--ch-sector-spark-color)) 74%, #fff) 0 1.5px, transparent 3px),
+    radial-gradient(circle at 82% 8%, color-mix(in srgb, #fff 86%, var(--ch-sector-spark-color)) 0 1.6px, transparent 3.2px);
+  animation: chPageSparkDrift 4.4s ease-in-out infinite;
+  opacity: .94;
+}
+
+body[data-sector]:not([data-sector="adultos"]):not([data-subtema="lgbt"])::after,
+body[data-rp-sector]:not([data-rp-sector="adultos"])::after {
+  inset: -28%;
+  background:
+    linear-gradient(
+      118deg,
+      transparent 34%,
+      color-mix(in srgb, #fff 55%, var(--ch-sector-spark-color)) 46%,
+      color-mix(in srgb, var(--ch-sector-spark-soft, var(--ch-sector-spark-color)) 35%, transparent) 52%,
+      transparent 66%
+    ),
+    radial-gradient(circle at 20% 60%, color-mix(in srgb, #fff 70%, var(--ch-sector-spark-color)) 0 2px, transparent 4px),
+    radial-gradient(circle at 60% 20%, color-mix(in srgb, var(--ch-sector-spark-color) 55%, #fff) 0 1.8px, transparent 3.6px),
+    radial-gradient(circle at 82% 46%, color-mix(in srgb, var(--ch-sector-spark-soft, var(--ch-sector-spark-color)) 50%, #fff) 0 2.2px, transparent 4.4px),
+    radial-gradient(ellipse 40% 26% at 74% 16%, color-mix(in srgb, var(--ch-sector-spark-color) 16%, transparent) 0%, transparent 72%),
+    radial-gradient(ellipse 36% 22% at 14% 76%, color-mix(in srgb, var(--ch-sector-spark-soft, var(--ch-sector-spark-color)) 14%, transparent) 0%, transparent 70%),
+    radial-gradient(ellipse 32% 20% at 50% 44%, color-mix(in srgb, var(--ch-sector-spark-color) 12%, transparent) 0%, transparent 68%);
+  animation: chPageShineSweep 3.9s ease-in-out infinite, chPageSparkTwinkle 2.7s ease-in-out infinite alternate;
+  opacity: .88;
+}
+
+/* Contenido por encima de destellos */
+body[data-sector]:not([data-sector="adultos"]):not([data-subtema="lgbt"]) > :not(.carihub-page-sheen),
+body[data-rp-sector]:not([data-rp-sector="adultos"]) > :not(.carihub-page-sheen) {
+  position: relative;
+  z-index: 1;
+}
+
+body[data-sector]:not([data-sector="adultos"]):not([data-subtema="lgbt"]) #fitOuter,
+body[data-sector]:not([data-sector="adultos"]):not([data-subtema="lgbt"]) #fitSpacer,
+body[data-sector]:not([data-sector="adultos"]):not([data-subtema="lgbt"]) #fitRoot {
+  position: relative;
+  z-index: 1;
+}
+
+body.rp-page[data-rp-sector]:not([data-rp-sector="adultos"]) .rp-shell,
+body.rp-page[data-rp-sector]:not([data-rp-sector="adultos"]) .rp-screen.is-active {
+  position: relative;
+  z-index: 1;
+}
+
+@keyframes chPageSparkDrift {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: .86; }
+  33% { transform: translate(3px, -2px) scale(1.02); opacity: 1; }
+  66% { transform: translate(-2px, 3px) scale(.98); opacity: .92; }
+}
+
+@keyframes chPageShineSweep {
+  0%, 100% { transform: translateX(-40%) rotate(10deg); opacity: 0; }
+  28% { opacity: .68; }
+  52% { transform: translateX(46%) rotate(10deg); opacity: .48; }
+  72% { opacity: 0; }
+}
+
+@keyframes chPageSparkTwinkle {
+  0%, 100% { opacity: .5; filter: brightness(1); }
+  50% { opacity: 1; filter: brightness(1.28); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body[data-sector]:not([data-sector="adultos"]):not([data-subtema="lgbt"])::before,
+  body[data-sector]:not([data-sector="adultos"]):not([data-subtema="lgbt"])::after,
+  body[data-rp-sector]:not([data-rp-sector="adultos"])::before,
+  body[data-rp-sector]:not([data-rp-sector="adultos"])::after {
+    animation: none;
+    opacity: .65;
+  }
+}

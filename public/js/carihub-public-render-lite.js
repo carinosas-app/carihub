@@ -24,6 +24,7 @@
       car: '<path d="M5 11l1.4-4.2A2 2 0 0 1 8.3 5.4h7.4a2 2 0 0 1 1.9 1.4L19 11"/><rect x="3.2" y="11" width="17.6" height="6" rx="2"/><circle cx="7.5" cy="17.5" r="1.4"/><circle cx="16.5" cy="17.5" r="1.4"/>',
       heart: '<path d="M12 20.2l-.9-.8C6.8 15.2 4.5 12.6 4.5 9.8 4.5 7 6.6 5 9.4 5c1.6 0 3.1.8 4 2.1.9-1.3 2.4-2.1 4-2.1 2.8 0 4.9 2 4.9 4.8 0 2.8-2.3 5.4-6.6 9.4l-.9.9z" fill="currentColor" stroke="none"/>',
       camera: '<path d="M4 8.5h3l1.6-2.2h6.8L17 8.5h3a2 2 0 012 2v7a2 2 0 01-2 2H4a2 2 0 01-2-2v-7a2 2 0 012-2z"/><circle cx="12" cy="13" r="3.2"/>',
+      share: '<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 3.9M15.4 6.5l-6.8 3.9"/>',
       clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
       briefcase: '<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2"/>',
       plane: '<path d="M16 10l4-2-2 6-2-1-2 3-1-5-5-1 1-3h4l2-3z"/>',
@@ -329,14 +330,90 @@
     return { clase: 'neutral', txt: d || 'Consultar disponibilidad', busy: false };
   }
 
+  function observacionesLista(u) {
+    if (Array.isArray(u.observaciones) && u.observaciones.length) {
+      return u.observaciones.map(function (t) { return String(t || '').trim(); }).filter(Boolean);
+    }
+    if (u.observaciones) {
+      return String(u.observaciones).split(/[,·|]/).map(function (t) { return t.trim(); }).filter(Boolean);
+    }
+    return [];
+  }
+
+  function taglineHTML(u) {
+    var txt = String(u.descripcion || u.tagline || u.descripcionPublica || '').trim();
+    if (!txt) return '';
+    return '<p class="res-card__tagline">' + safeTxt(txt) + '</p>';
+  }
+
+  function traitsChipsHTML(u) {
+    var items = observacionesLista(u);
+    if (!items.length) return '';
+    return '<div class="res-card__traits">' +
+      items.map(function (t) {
+        return '<span class="res-card__trait">' + safeTxt(t) + '</span>';
+      }).join('') +
+      '</div>';
+  }
+
   function descripcionCompactHTML(u, label) {
-    label = label || 'Descripción';
     var txt = String(u.descripcion || u.tagline || u.descripcionPublica || u.serviciosPrincipales || '').trim();
     if (!txt) return '';
+    if (label === false) return taglineHTML(u);
+    label = label || 'Descripción';
     return '<p class="res-card__desc">' +
       '<span class="res-card__desc-label">' + safeTxt(label) + '</span>' +
       '<span class="res-card__desc-txt">' + safeTxt(txt) + '</span>' +
       '</p>';
+  }
+
+  function colaboracionContenidoPublica(u) {
+    var pol = global.CARIHUB_COLABORACION_CONTENIDO_POLICY;
+    if (pol && pol.esPublica) return pol.esPublica(u);
+    var val = String((u && u.colaboracionContenido) || '').trim();
+    if (!val || val === 'No') return false;
+    var vis = u && u.mostrarColaboracionContenidoPublico;
+    if (vis != null && String(vis).trim() !== '' && String(vis).trim() !== 'Sí') return false;
+    return true;
+  }
+
+  function colaboracionContenidoDetalle(u) {
+    if (!colaboracionContenidoPublica(u)) return null;
+    var pol = global.CARIHUB_COLABORACION_CONTENIDO_POLICY;
+    var raw = String((u && u.colaboracionContenido) || '').trim();
+    var valor = pol && pol.etiquetaValor ? pol.etiquetaValor(raw) : raw;
+    if (valor === 'Sí, colaboro para contenido') valor = 'Sí';
+    return {
+      label: 'Colabora en redes',
+      valor: valor
+    };
+  }
+
+  function colaboracionContenidoBadgeHTML(u) {
+    var det = colaboracionContenidoDetalle(u);
+    if (!det) return '';
+    return '<span class="res-badge res-badge--colab">' + safeTxt(det.label) + '</span>';
+  }
+
+  /** Fila destacada dorada — colaboración para contenido en redes (cross-sector). */
+  function colaboracionContenidoRowHTML(u) {
+    var det = colaboracionContenidoDetalle(u);
+    if (!det) return '';
+    var valorCls = 'res-card__colab-valor';
+    if (det.valor === 'Sí') valorCls += ' res-card__colab-valor--si';
+    else if (det.valor === 'A convenir') valorCls += ' res-card__colab-valor--acuerdo';
+    return (
+      '<div class="res-card__row res-card__row--colab">' +
+        '<div class="res-card__colab" role="status" aria-label="' + safeTxt(det.label + ' — ' + det.valor) + '">' +
+          svgIco('share', 'res-card__colab-ic') +
+          '<span class="res-card__colab-copy">' +
+            '<span class="res-card__colab-label">' + safeTxt(det.label) + '</span>' +
+            '<span class="res-card__colab-sep" aria-hidden="true">·</span>' +
+            '<span class="' + valorCls + '">' + safeTxt(det.valor) + '</span>' +
+          '</span>' +
+        '</div>' +
+      '</div>'
+    );
   }
 
   function badgesCompactHTML(u, opts) {
@@ -496,7 +573,7 @@
       cardClass: 'res-card--adult res-card--stripper',
       headExtra: edad ? '<span class="age">' + safeTxt(edad) + '</span>' : '',
       metaRight: mods,
-      descBlock: descripcionCompactHTML(u),
+      descBlock: taglineHTML(u),
       priceLabel: 'Show desde',
       catLabel: catLabel,
       badges: badgesCompactHTML(u, {
@@ -514,7 +591,7 @@
     return cardShell(u, Q, {
       cardClass: 'res-card--adult res-card--tabledance',
       metaRight: mods,
-      descBlock: descripcionCompactHTML(u),
+      descBlock: taglineHTML(u),
       priceLabel: 'Show desde',
       catLabel: catLabel,
       badges: badgesCompactHTML(u, {
@@ -539,7 +616,7 @@
       cardClass: 'res-card--adult res-card--creador',
       headExtra: edad ? '<span class="age">' + safeTxt(edad) + '</span>' : '',
       metaRight: mods,
-      descBlock: descripcionCompactHTML(u),
+      descBlock: taglineHTML(u),
       priceLabel: 'Suscripción desde',
       catLabel: catLabel,
       badges: badgesCompactHTML(u, {
@@ -565,7 +642,8 @@
     var extraClass = opts.cardClass || '';
     var headExtra = opts.headExtra || '';
     var metaRight = opts.metaRight || '';
-    var descBlock = opts.descBlock != null ? opts.descBlock : descripcionCompactHTML(u);
+    var descBlock = opts.descBlock != null ? opts.descBlock : taglineHTML(u);
+    var traitsBlock = opts.hideTraits ? '' : traitsChipsHTML(u);
     var priceLabel = opts.priceLabel || 'Desde';
     var precioVal = precioTexto(u);
     var priceBlock = precioVal
@@ -581,21 +659,41 @@
           '<span class="res-dot res-dot--' + disp.clase + '" aria-hidden="true"></span>' +
           safeTxt(disp.txt) +
         '</span>';
-    var metaRow = '';
-    if (loc || metaRight) {
-      metaRow = '<div class="res-card__row res-card__row--meta">' +
-        (loc ? '<div class="res-card__loc">' + svgIco('pin', 'res-card__loc-ic') + '<span>' + safeTxt(loc) + '</span></div>' : '<span class="res-card__loc-spacer" aria-hidden="true"></span>') +
-        (metaRight ? '<div class="res-card__mods">' + metaRight + '</div>' : '') +
-      '</div>';
-    }
-    var footer = '';
     var badges = opts.badges || '';
-    if (catLabel || badges) {
-      footer = '<div class="res-card__row res-card__row--foot">' +
-        (catLabel ? '<div class="res-card__cat">' + svgIco(opts.catIcon || 'heart', 'res-card__cat-ic') + '<span>' + safeTxt(catLabel) + '</span></div>' : '<span class="res-card__cat-spacer" aria-hidden="true"></span>') +
-        (badges ? '<div class="res-card__badges">' + badges + '</div>' : '') +
+    var colabRow = colaboracionContenidoRowHTML(u);
+    var identityRow =
+      '<div class="res-card__row res-card__row--identity">' +
+        '<div class="res-card__head">' +
+          '<h2 class="res-card__name">' + safeTxt(nombre) + '</h2>' +
+          (verificada ? verificadoIconHTML(verLabel) : '') +
+          headExtra +
+        '</div>' +
+        favBtn +
+      '</div>';
+    var commerceRow = '';
+    if (priceBlock || availBlock) {
+      commerceRow =
+        '<div class="res-card__row res-card__row--commerce">' +
+          (priceBlock || '<span class="res-card__price-spacer" aria-hidden="true"></span>') +
+          availBlock +
         '</div>';
     }
+    var attrsInner = traitsBlock +
+      (metaRight ? '<div class="res-card__mods modchips">' + metaRight + '</div>' : '');
+    var attrsRow = attrsInner
+      ? '<div class="res-card__row res-card__row--attrs">' + attrsInner + '</div>'
+      : '';
+    var contextRow = '';
+    if (loc || catLabel) {
+      contextRow =
+        '<div class="res-card__row res-card__row--context">' +
+          (loc ? '<div class="res-card__loc">' + svgIco('pin', 'res-card__loc-ic') + '<span>' + safeTxt(loc) + '</span></div>' : '<span class="res-card__loc-spacer" aria-hidden="true"></span>') +
+          (catLabel ? '<div class="res-card__cat">' + svgIco(opts.catIcon || 'heart', 'res-card__cat-ic') + '<span>' + safeTxt(catLabel) + '</span></div>' : '') +
+        '</div>';
+    }
+    var trustRow = badges
+      ? '<div class="res-card__row res-card__row--trust"><div class="res-card__badges">' + badges + '</div></div>'
+      : '';
     var imgSrc = u.fotoURL || (u.__previewRegistro ? '' : 'img/resultados-demo/violeta-1.png');
     var mediaInner = imgSrc
       ? '<img src="' + safeTxt(imgSrc) + '" alt="Foto de ' + safeTxt(nombre) + '" width="360" height="210" loading="lazy" decoding="async">'
@@ -609,19 +707,13 @@
         '</div>' +
         '<div class="res-card__body">' +
           '<div class="res-card__main">' +
-            '<div class="res-card__row res-card__row--head">' +
-              '<div class="res-card__head">' +
-                '<h2 class="res-card__name">' + safeTxt(nombre) + '</h2>' +
-                (verificada ? verificadoIconHTML(verLabel) : '') +
-                headExtra +
-              '</div>' +
-              favBtn +
-              availBlock +
-              priceBlock +
-            '</div>' +
+            identityRow +
+            commerceRow +
             descBlock +
-            metaRow +
-            footer +
+            attrsRow +
+            contextRow +
+            colabRow +
+            trustRow +
           '</div>' +
           '<button class="res-card__ver-btn" type="button" aria-label="Ver perfil de ' + safeTxt(nombre) + '" onclick="abrirPerfil(\'' + safeTxt(perfilId) + '\')">' +
             '<span class="res-card__ver-btn-txt">Ver perfil ›</span>' +
@@ -651,7 +743,7 @@
       cardClass: 'res-card--adult res-card--dominatrix',
       headExtra: edad ? '<span class="age">' + safeTxt(edad) + '</span>' : '',
       metaRight: mods,
-      descBlock: descripcionCompactHTML(u),
+      descBlock: taglineHTML(u),
       catLabel: catLabel,
       badges: badgesCompactHTML(u, {
         respRapida: !u.__previewRegistro && u.respuestaRapida === true
@@ -673,7 +765,7 @@
       cardClass: 'res-card--adult',
       headExtra: edad ? '<span class="age">' + safeTxt(edad) + '</span>' : '',
       metaRight: mods,
-      descBlock: descripcionCompactHTML(u) + viajesLine,
+      descBlock: taglineHTML(u) + viajesLine,
       catLabel: catLabel,
       badges: badgesCompactHTML(u, {
         vip: vip,
@@ -687,6 +779,16 @@
   function cardHTMLNegocio(u, Q) {
     if (isEventosSectorPerfil(u)) return cardHTMLEventosSector(u, Q);
     if (isBienestarSectorPerfil(u)) return cardHTMLBienestarSector(u, Q);
+    if (isGastronomiaSectorPerfil(u)) return cardHTMLGastronomiaSector(u, Q);
+    if (isMascotasSectorPerfil(u)) return cardHTMLMascotasSector(u, Q);
+    if (isSaludSectorPerfil(u)) return cardHTMLSaludSector(u, Q);
+    if (isTecnologiaSectorPerfil(u)) return cardHTMLTecnologiaSector(u, Q);
+    if (isAutomotrizSectorPerfil(u)) return cardHTMLAutomotrizSector(u, Q);
+    if (isTransporteSectorPerfil(u)) return cardHTMLTransporteSector(u, Q);
+    if (isComercioSectorPerfil(u)) return cardHTMLComercioSector(u, Q);
+    if (isEducacionSectorPerfil(u)) return cardHTMLEducacionSector(u, Q);
+    if (isIndustriaSectorPerfil(u)) return cardHTMLIndustriaSector(u, Q);
+    if (isBienesRaicesSectorPerfil(u)) return cardHTMLBienesRaicesSector(u, Q);
     Q = Q || {};
     var horario = String(u.horario || u.horarioPublico || '').trim();
     var metaRight = horario
@@ -1129,6 +1231,66 @@
       CariHubEventosSectorRender.isEventosSectorPerfil(u);
   }
 
+  function isGastronomiaSectorPerfil(u) {
+    return global.CariHubGastronomiaSectorRender &&
+      CariHubGastronomiaSectorRender.isGastronomiaSectorPerfil(u);
+  }
+
+  function isProfesionalesSectorPerfil(u) {
+    return global.CariHubProfesionalesSectorRender &&
+      CariHubProfesionalesSectorRender.isProfesionalesSectorPerfil(u);
+  }
+
+  function isMascotasSectorPerfil(u) {
+    return global.CariHubMascotasSectorRender &&
+      CariHubMascotasSectorRender.isMascotasSectorPerfil(u);
+  }
+
+  function isHogarSectorPerfil(u) {
+    return global.CariHubHogarSectorRender &&
+      CariHubHogarSectorRender.isHogarSectorPerfil(u);
+  }
+
+  function isSaludSectorPerfil(u) {
+    return global.CariHubSaludSectorRender &&
+      CariHubSaludSectorRender.isSaludSectorPerfil(u);
+  }
+
+  function isTecnologiaSectorPerfil(u) {
+    return global.CariHubTecnologiaSectorRender &&
+      CariHubTecnologiaSectorRender.isTecnologiaSectorPerfil(u);
+  }
+
+  function isAutomotrizSectorPerfil(u) {
+    return global.CariHubAutomotrizSectorRender &&
+      CariHubAutomotrizSectorRender.isAutomotrizSectorPerfil(u);
+  }
+
+  function isTransporteSectorPerfil(u) {
+    return global.CariHubTransporteSectorRender &&
+      CariHubTransporteSectorRender.isTransporteSectorPerfil(u);
+  }
+
+  function isComercioSectorPerfil(u) {
+    return global.CariHubComercioSectorRender &&
+      CariHubComercioSectorRender.isComercioSectorPerfil(u);
+  }
+
+  function isEducacionSectorPerfil(u) {
+    return global.CariHubEducacionSectorRender &&
+      CariHubEducacionSectorRender.isEducacionSectorPerfil(u);
+  }
+
+  function isIndustriaSectorPerfil(u) {
+    return global.CariHubIndustriaSectorRender &&
+      CariHubIndustriaSectorRender.isIndustriaSectorPerfil(u);
+  }
+
+  function isBienesRaicesSectorPerfil(u) {
+    return global.CariHubBienesRaicesSectorRender &&
+      CariHubBienesRaicesSectorRender.isBienesRaicesSectorPerfil(u);
+  }
+
   function eventosSectorBadgesHTML(u) {
     var base = badgesCompactHTML(u, { respRapida: false });
     if (!global.CariHubEventosSectorRender) return base;
@@ -1206,9 +1368,518 @@
     });
   }
 
+  function gastronomiaSectorBadgesHTML(u) {
+    var base = badgesCompactHTML(u, { respRapida: false, negocio: u.verificada !== false });
+    if (!global.CariHubGastronomiaSectorRender) return base;
+    var hydrated = CariHubGastronomiaSectorRender.hydrateDisplayFields(Object.assign({}, u));
+    var extra = (hydrated.__gastronomiaBadges || []).map(function (b) {
+      return '<span class="res-badge ' + safeTxt(b.cls) + '">' + safeTxt(b.text) + '</span>';
+    }).join('');
+    return base + extra;
+  }
+
+  function cardHTMLGastronomiaSector(u, Q) {
+    Q = Q || {};
+    var GS = global.CariHubGastronomiaSectorRender;
+    var hydrated = GS ? GS.hydrateDisplayFields(Object.assign({}, u)) : (u || {});
+    var chips = GS ? GS.cardMetaChips(hydrated) : [];
+    var mods = '';
+    chips.forEach(function (ch, i) {
+      var txtChip = String(ch || '');
+      if (txtChip.length > 28) txtChip = txtChip.slice(0, 26) + '…';
+      mods += '<span class="modchip ' + (i % 2 ? 'mc-purple' : 'mc-pink') + '">' +
+        svgIco(i === 0 ? 'briefcase' : 'clock') + safeTxt(txtChip) + '</span>';
+    });
+    var esp = hydrated.titulo || hydrated.especialidad || '';
+    var priceLabel = hydrated.__gastronomiaPriceLabel || 'Precio promedio';
+    var pack = String(hydrated.__gastronomiaPack || 'local_dine').toLowerCase().replace(/_/g, '-');
+    var cardExtra = ' res-card--gastronomia-sector res-card--gast-' + safeTxt(pack);
+    return cardShell(hydrated, Q, {
+      cardClass: 'res-card--negocio res-card--gastronomia' + cardExtra,
+      nombre: hydrated.nombreComercial || hydrated.nombre || hydrated.alias,
+      catIcon: 'briefcase',
+      catLabel: hydrated.categoriaPublica || hydrated.categoria || Q.categoria,
+      metaRight: mods,
+      descBlock: descripcionCompactHTML(Object.assign({}, hydrated, { tagline: hydrated.tagline || esp }), 'Especialidad'),
+      priceLabel: priceLabel,
+      badges: gastronomiaSectorBadgesHTML(hydrated)
+    });
+  }
+
+  function profesionalesSectorBadgesHTML(u) {
+    var base = badgesCompactHTML(u, { respRapida: false, cedula: false });
+    if (!global.CariHubProfesionalesSectorRender) return base;
+    var hydrated = CariHubProfesionalesSectorRender.hydrateDisplayFields(Object.assign({}, u));
+    var extra = (hydrated.__profesionalesBadges || []).map(function (b) {
+      return '<span class="res-badge ' + safeTxt(b.cls) + '">' + safeTxt(b.text) + '</span>';
+    }).join('');
+    return base + extra;
+  }
+
+  function cardHTMLProfesionalesSector(u, Q) {
+    Q = Q || {};
+    var PS = global.CariHubProfesionalesSectorRender;
+    var hydrated = PS ? PS.hydrateDisplayFields(Object.assign({}, u)) : (u || {});
+    var chips = PS ? PS.cardMetaChips(hydrated) : [];
+    var mods = '';
+    chips.forEach(function (ch, i) {
+      var txtChip = String(ch || '');
+      if (txtChip.length > 28) txtChip = txtChip.slice(0, 26) + '…';
+      mods += '<span class="modchip ' + (i % 2 ? 'mc-purple' : 'mc-pink') + '">' +
+        svgIco(i === 0 ? 'shield' : 'briefcase') + safeTxt(txtChip) + '</span>';
+    });
+    var esp = hydrated.especialidad || hydrated.titulo || '';
+    var priceLabel = hydrated.__profesionalesPriceLabel || 'Consulta desde';
+    var pack = String(hydrated.__profesionalesPack || 'a').toLowerCase();
+    var cardExtra = ' res-card--profesionales-sector res-card--prof-pack-' + safeTxt(pack);
+    return cardShell(hydrated, Q, {
+      cardClass: 'res-card--profesional res-card--profesionales' + cardExtra,
+      nombre: hydrated.nombre || hydrated.nombreProfesional || hydrated.nombreComercial || hydrated.alias,
+      catIcon: 'shield',
+      catLabel: hydrated.categoriaPublica || hydrated.categoria || Q.categoria,
+      metaRight: mods,
+      descBlock: descripcionCompactHTML(Object.assign({}, hydrated, { tagline: hydrated.tagline || esp }), 'Especialidad'),
+      priceLabel: priceLabel,
+      verLabel: 'Profesional verificado',
+      badges: profesionalesSectorBadgesHTML(hydrated)
+    });
+  }
+
+  function mascotasSectorBadgesHTML(u) {
+    var base = badgesCompactHTML(u, { respRapida: false, cedula: false });
+    if (!global.CariHubMascotasSectorRender) return base;
+    var hydrated = CariHubMascotasSectorRender.hydrateDisplayFields(Object.assign({}, u));
+    var extra = (hydrated.__mascotasBadges || []).map(function (b) {
+      return '<span class="res-badge ' + safeTxt(b.cls) + '">' + safeTxt(b.text) + '</span>';
+    }).join('');
+    return base + extra;
+  }
+
+  function hogarSectorBadgesHTML(u) {
+    var base = badgesCompactHTML(u, { respRapida: u.respuestaRapida !== false, cedula: false });
+    if (!global.CariHubHogarSectorRender) return base;
+    var hydrated = CariHubHogarSectorRender.hydrateDisplayFields(Object.assign({}, u));
+    var extra = (hydrated.__hogarBadges || []).map(function (b) {
+      return '<span class="res-badge ' + safeTxt(b.cls) + '">' + safeTxt(b.text) + '</span>';
+    }).join('');
+    return base + extra;
+  }
+
+  function saludSectorBadgesHTML(u) {
+    var base = badgesCompactHTML(u, {
+      respRapida: u.respuestaRapida !== false,
+      cedula: u.cedulaVerificada === true || u.requiresCedula === true
+    });
+    if (!global.CariHubSaludSectorRender) return base;
+    var hydrated = CariHubSaludSectorRender.hydrateDisplayFields(Object.assign({}, u));
+    var extra = (hydrated.__saludBadges || []).map(function (b) {
+      return '<span class="res-badge ' + safeTxt(b.cls) + '">' + safeTxt(b.text) + '</span>';
+    }).join('');
+    return base + extra;
+  }
+
+  function cardHTMLHogarSector(u, Q) {
+    Q = Q || {};
+    var HS = global.CariHubHogarSectorRender;
+    var hydrated = HS ? HS.hydrateDisplayFields(Object.assign({}, u)) : (u || {});
+    var chips = HS ? HS.cardMetaChips(hydrated) : [];
+    var mods = '';
+    chips.forEach(function (ch, i) {
+      var txtChip = String(ch || '');
+      if (txtChip.length > 28) txtChip = txtChip.slice(0, 26) + '…';
+      mods += '<span class="modchip ' + (i % 2 ? 'mc-orange' : 'mc-purple') + '">' +
+        svgIco(i === 0 ? 'briefcase' : 'clock') + safeTxt(txtChip) + '</span>';
+    });
+    var esp = hydrated.especialidad || hydrated.titulo || '';
+    var priceLabel = hydrated.__hogarPriceLabel || 'Tarifa desde';
+    var pack = String(hydrated.__hogarPack || 'a').toLowerCase();
+    var cardExtra = ' res-card--hogar-sector res-card--hog-pack-' + safeTxt(pack);
+    return cardShell(hydrated, Q, {
+      cardClass: 'res-card--servicio res-card--hogar' + cardExtra,
+      nombre: hydrated.nombre || hydrated.alias,
+      catIcon: 'briefcase',
+      catLabel: hydrated.categoriaPublica || hydrated.categoria || Q.categoria,
+      metaRight: mods,
+      descBlock: descripcionCompactHTML(Object.assign({}, hydrated, { tagline: hydrated.tagline || esp }), 'Servicios'),
+      priceLabel: priceLabel,
+      verLabel: 'Verificado',
+      badges: hogarSectorBadgesHTML(hydrated)
+    });
+  }
+
+  function cardHTMLSaludSector(u, Q) {
+    Q = Q || {};
+    var SS = global.CariHubSaludSectorRender;
+    var hydrated = SS ? SS.hydrateDisplayFields(Object.assign({}, u)) : (u || {});
+    var chips = SS ? SS.cardMetaChips(hydrated) : [];
+    var mods = '';
+    chips.forEach(function (ch, i) {
+      var txtChip = String(ch || '');
+      if (txtChip.length > 28) txtChip = txtChip.slice(0, 26) + '…';
+      mods += '<span class="modchip ' + (i % 2 ? 'mc-teal' : 'mc-purple') + '">' +
+        svgIco(i === 0 ? 'shield' : 'clock') + safeTxt(txtChip) + '</span>';
+    });
+    var esp = hydrated.especialidad || hydrated.titulo || '';
+    var priceLabel = hydrated.__saludPriceLabel || 'Tarifa desde';
+    var pack = String(hydrated.__saludPack || 'a').toLowerCase();
+    var cardExtra = ' res-card--salud-sector res-card--sal-pack-' + safeTxt(pack);
+    var esNegocio = SS && SS.isSaludNegocioPerfil(hydrated);
+    var esCedula = SS && SS.isSaludCedulaPerfil(hydrated);
+    var cardBase = esNegocio ? 'res-card--negocio' : (esCedula ? 'res-card--profesional' : 'res-card--servicio');
+    return cardShell(hydrated, Q, {
+      cardClass: cardBase + ' res-card--salud' + cardExtra,
+      nombre: hydrated.nombre || hydrated.nombreProfesional || hydrated.nombreComercial || hydrated.alias,
+      catIcon: esCedula ? 'shield' : 'briefcase',
+      catLabel: hydrated.categoriaPublica || hydrated.categoria || Q.categoria,
+      metaRight: mods,
+      descBlock: descripcionCompactHTML(Object.assign({}, hydrated, { tagline: hydrated.tagline || esp }), 'Servicios'),
+      priceLabel: priceLabel,
+      verLabel: esCedula ? 'Profesional verificado' : 'Verificado',
+      badges: saludSectorBadgesHTML(hydrated)
+    });
+  }
+
+  function tecnologiaSectorBadgesHTML(u) {
+    var base = badgesCompactHTML(u, { respRapida: u.respuestaRapida !== false, cedula: false });
+    if (!global.CariHubTecnologiaSectorRender) return base;
+    var hydrated = CariHubTecnologiaSectorRender.hydrateDisplayFields(Object.assign({}, u));
+    var extra = (hydrated.__tecnologiaBadges || []).map(function (b) {
+      return '<span class="res-badge ' + safeTxt(b.cls) + '">' + safeTxt(b.text) + '</span>';
+    }).join('');
+    return base + extra;
+  }
+
+  function automotrizSectorBadgesHTML(u) {
+    var base = badgesCompactHTML(u, { respRapida: u.respuestaRapida !== false, cedula: false });
+    if (!global.CariHubAutomotrizSectorRender) return base;
+    var hydrated = CariHubAutomotrizSectorRender.hydrateDisplayFields(Object.assign({}, u));
+    var extra = (hydrated.__automotrizBadges || []).map(function (b) {
+      return '<span class="res-badge ' + safeTxt(b.cls) + '">' + safeTxt(b.text) + '</span>';
+    }).join('');
+    return base + extra;
+  }
+
+  function cardHTMLTecnologiaSector(u, Q) {
+    Q = Q || {};
+    var TS = global.CariHubTecnologiaSectorRender;
+    var hydrated = TS ? TS.hydrateDisplayFields(Object.assign({}, u)) : (u || {});
+    var chips = TS ? TS.cardMetaChips(hydrated) : [];
+    var mods = '';
+    chips.forEach(function (ch, i) {
+      var txtChip = String(ch || '');
+      if (txtChip.length > 28) txtChip = txtChip.slice(0, 26) + '…';
+      mods += '<span class="modchip ' + (i % 2 ? 'mc-blue' : 'mc-purple') + '">' +
+        svgIco(i === 0 ? 'briefcase' : 'clock') + safeTxt(txtChip) + '</span>';
+    });
+    var esp = hydrated.especialidad || hydrated.titulo || '';
+    var priceLabel = hydrated.__tecnologiaPriceLabel || 'Tarifa desde';
+    var pack = String(hydrated.__tecnologiaPack || 'a').toLowerCase();
+    var cardExtra = ' res-card--tecnologia-sector res-card--tec-pack-' + safeTxt(pack);
+    var esNegocio = TS && TS.isTecnologiaNegocioPerfil(hydrated);
+    var cardBase = esNegocio ? 'res-card--negocio' : 'res-card--servicio';
+    return cardShell(hydrated, Q, {
+      cardClass: cardBase + ' res-card--tecnologia' + cardExtra,
+      nombre: hydrated.nombre || hydrated.nombreComercial || hydrated.alias,
+      catIcon: 'briefcase',
+      catLabel: hydrated.categoriaPublica || hydrated.categoria || Q.categoria,
+      metaRight: mods,
+      descBlock: descripcionCompactHTML(Object.assign({}, hydrated, { tagline: hydrated.tagline || esp }), 'Servicios'),
+      priceLabel: priceLabel,
+      verLabel: 'Verificado',
+      badges: tecnologiaSectorBadgesHTML(hydrated)
+    });
+  }
+
+  function cardHTMLAutomotrizSector(u, Q) {
+    Q = Q || {};
+    var AS = global.CariHubAutomotrizSectorRender;
+    var hydrated = AS ? AS.hydrateDisplayFields(Object.assign({}, u)) : (u || {});
+    var chips = AS ? AS.cardMetaChips(hydrated) : [];
+    var mods = '';
+    chips.forEach(function (ch, i) {
+      var txtChip = String(ch || '');
+      if (txtChip.length > 28) txtChip = txtChip.slice(0, 26) + '…';
+      mods += '<span class="modchip ' + (i % 2 ? 'mc-orange' : 'mc-purple') + '">' +
+        svgIco(i === 0 ? 'car' : 'clock') + safeTxt(txtChip) + '</span>';
+    });
+    var esp = hydrated.especialidad || hydrated.titulo || '';
+    var priceLabel = hydrated.__automotrizPriceLabel || 'Tarifa desde';
+    var pack = String(hydrated.__automotrizPack || 'a').toLowerCase();
+    var cardExtra = ' res-card--automotriz-sector res-card--auto-pack-' + safeTxt(pack);
+    var esNegocio = AS && AS.isAutomotrizNegocioPerfil(hydrated);
+    var cardBase = esNegocio ? 'res-card--negocio' : 'res-card--servicio';
+    return cardShell(hydrated, Q, {
+      cardClass: cardBase + ' res-card--automotriz' + cardExtra,
+      nombre: hydrated.nombre || hydrated.nombreComercial || hydrated.alias,
+      catIcon: esNegocio ? 'briefcase' : 'car',
+      catLabel: hydrated.categoriaPublica || hydrated.categoria || Q.categoria,
+      metaRight: mods,
+      descBlock: descripcionCompactHTML(Object.assign({}, hydrated, { tagline: hydrated.tagline || esp }), 'Servicios'),
+      priceLabel: priceLabel,
+      verLabel: 'Verificado',
+      badges: automotrizSectorBadgesHTML(hydrated)
+    });
+  }
+
+  function transporteSectorBadgesHTML(u) {
+    var base = badgesCompactHTML(u, { respRapida: u.respuestaRapida !== false, cedula: false });
+    if (!global.CariHubTransporteSectorRender) return base;
+    var hydrated = CariHubTransporteSectorRender.hydrateDisplayFields(Object.assign({}, u));
+    var extra = (hydrated.__transporteBadges || []).map(function (b) {
+      return '<span class="res-badge ' + safeTxt(b.cls) + '">' + safeTxt(b.text) + '</span>';
+    }).join('');
+    return base + extra;
+  }
+
+  function cardHTMLTransporteSector(u, Q) {
+    Q = Q || {};
+    var TR = global.CariHubTransporteSectorRender;
+    var hydrated = TR ? TR.hydrateDisplayFields(Object.assign({}, u)) : (u || {});
+    var chips = TR ? TR.cardMetaChips(hydrated) : [];
+    var mods = '';
+    chips.forEach(function (ch, i) {
+      var txtChip = String(ch || '');
+      if (txtChip.length > 28) txtChip = txtChip.slice(0, 26) + '…';
+      mods += '<span class="modchip ' + (i % 2 ? 'mc-blue' : 'mc-orange') + '">' +
+        svgIco(i === 0 ? 'car' : 'clock') + safeTxt(txtChip) + '</span>';
+    });
+    var esp = hydrated.especialidad || hydrated.titulo || '';
+    var priceLabel = hydrated.__transportePriceLabel || 'Tarifa desde';
+    var pack = String(hydrated.__transportePack || 'a').toLowerCase();
+    var cardExtra = ' res-card--transporte-sector res-card--trans-pack-' + safeTxt(pack);
+    var esNegocio = TR && TR.isTransporteNegocioPerfil(hydrated);
+    var cardBase = esNegocio ? 'res-card--negocio' : 'res-card--servicio';
+    return cardShell(hydrated, Q, {
+      cardClass: cardBase + ' res-card--transporte' + cardExtra,
+      nombre: hydrated.nombre || hydrated.nombreComercial || hydrated.alias,
+      catIcon: esNegocio ? 'briefcase' : 'car',
+      catLabel: hydrated.categoriaPublica || hydrated.categoria || Q.categoria,
+      metaRight: mods,
+      descBlock: descripcionCompactHTML(Object.assign({}, hydrated, { tagline: hydrated.tagline || esp }), 'Servicios'),
+      priceLabel: priceLabel,
+      verLabel: 'Verificado',
+      badges: transporteSectorBadgesHTML(hydrated)
+    });
+  }
+
+  function comercioSectorBadgesHTML(u) {
+    var base = badgesCompactHTML(u, { respRapida: u.respuestaRapida !== false, cedula: false, negocio: true });
+    if (!global.CariHubComercioSectorRender) return base;
+    var hydrated = CariHubComercioSectorRender.hydrateDisplayFields(Object.assign({}, u));
+    var extra = (hydrated.__comercioBadges || []).map(function (b) {
+      return '<span class="res-badge ' + safeTxt(b.cls) + '">' + safeTxt(b.text) + '</span>';
+    }).join('');
+    return base + extra;
+  }
+
+  function cardHTMLComercioSector(u, Q) {
+    Q = Q || {};
+    var CR = global.CariHubComercioSectorRender;
+    var hydrated = CR ? CR.hydrateDisplayFields(Object.assign({}, u)) : (u || {});
+    var chips = CR ? CR.cardMetaChips(hydrated) : [];
+    var mods = '';
+    chips.forEach(function (ch, i) {
+      var txtChip = String(ch || '');
+      if (txtChip.length > 28) txtChip = txtChip.slice(0, 26) + '…';
+      mods += '<span class="modchip ' + (i % 2 ? 'mc-pink' : 'mc-purple') + '">' +
+        svgIco(i === 0 ? 'briefcase' : 'clock') + safeTxt(txtChip) + '</span>';
+    });
+    var esp = hydrated.especialidad || hydrated.titulo || '';
+    var priceLabel = hydrated.__comercioPriceLabel || 'Precio desde';
+    var pack = String(hydrated.__comercioPack || 'a').toLowerCase();
+    var cardExtra = ' res-card--comercio-sector res-card--com-pack-' + safeTxt(pack);
+    var esNegocio = CR && CR.isComercioNegocioPerfil(hydrated);
+    var cardBase = esNegocio ? 'res-card--negocio' : 'res-card--servicio';
+    return cardShell(hydrated, Q, {
+      cardClass: cardBase + ' res-card--comercio' + cardExtra,
+      nombre: hydrated.nombre || hydrated.nombreComercial || hydrated.alias,
+      catIcon: 'briefcase',
+      catLabel: hydrated.categoriaPublica || hydrated.categoria || Q.categoria,
+      metaRight: mods,
+      descBlock: descripcionCompactHTML(Object.assign({}, hydrated, { tagline: hydrated.tagline || esp }), 'Productos'),
+      priceLabel: priceLabel,
+      verLabel: 'Verificado',
+      badges: comercioSectorBadgesHTML(hydrated)
+    });
+  }
+
+  function educacionSectorBadgesHTML(u) {
+    var base = badgesCompactHTML(u, {
+      respRapida: u.respuestaRapida !== false,
+      cedula: u.cedulaVerificada === true || u.requiresCedula === true
+    });
+    if (!global.CariHubEducacionSectorRender) return base;
+    var hydrated = CariHubEducacionSectorRender.hydrateDisplayFields(Object.assign({}, u));
+    var extra = (hydrated.__educacionBadges || []).map(function (b) {
+      return '<span class="res-badge ' + safeTxt(b.cls) + '">' + safeTxt(b.text) + '</span>';
+    }).join('');
+    return base + extra;
+  }
+
+  function cardHTMLEducacionSector(u, Q) {
+    Q = Q || {};
+    var ES = global.CariHubEducacionSectorRender;
+    var hydrated = ES ? ES.hydrateDisplayFields(Object.assign({}, u)) : (u || {});
+    var chips = ES ? ES.cardMetaChips(hydrated) : [];
+    var mods = '';
+    chips.forEach(function (ch, i) {
+      var txtChip = String(ch || '');
+      if (txtChip.length > 28) txtChip = txtChip.slice(0, 26) + '…';
+      mods += '<span class="modchip ' + (i % 2 ? 'mc-teal' : 'mc-purple') + '">' +
+        svgIco(i === 0 ? 'shield' : 'clock') + safeTxt(txtChip) + '</span>';
+    });
+    var esp = hydrated.especialidad || hydrated.titulo || '';
+    var priceLabel = hydrated.__educacionPriceLabel || 'Tarifa desde';
+    var pack = String(hydrated.__educacionPack || 'a').toLowerCase();
+    var cardExtra = ' res-card--educacion-sector res-card--edu-pack-' + safeTxt(pack);
+    var esNegocio = ES && ES.isEducacionNegocioPerfil(hydrated);
+    var esCedula = ES && ES.isEducacionCedulaPerfil(hydrated);
+    var cardBase = esNegocio ? 'res-card--negocio' : (esCedula ? 'res-card--profesional' : 'res-card--servicio');
+    return cardShell(hydrated, Q, {
+      cardClass: cardBase + ' res-card--educacion' + cardExtra,
+      nombre: hydrated.nombre || hydrated.nombreProfesional || hydrated.nombreComercial || hydrated.alias,
+      catIcon: esCedula ? 'shield' : 'briefcase',
+      catLabel: hydrated.categoriaPublica || hydrated.categoria || Q.categoria,
+      metaRight: mods,
+      descBlock: descripcionCompactHTML(Object.assign({}, hydrated, { tagline: hydrated.tagline || esp }), 'Servicios'),
+      priceLabel: priceLabel,
+      verLabel: esCedula ? 'Profesional verificado' : 'Verificado',
+      badges: educacionSectorBadgesHTML(hydrated)
+    });
+  }
+
+  function industriaSectorBadgesHTML(u) {
+    var base = badgesCompactHTML(u, {
+      respRapida: u.respuestaRapida !== false,
+      cedula: u.cedulaVerificada === true || u.requiresCedula === true
+    });
+    if (!global.CariHubIndustriaSectorRender) return base;
+    var hydrated = CariHubIndustriaSectorRender.hydrateDisplayFields(Object.assign({}, u));
+    var extra = (hydrated.__industriaBadges || []).map(function (b) {
+      return '<span class="res-badge ' + safeTxt(b.cls) + '">' + safeTxt(b.text) + '</span>';
+    }).join('');
+    return base + extra;
+  }
+
+  function cardHTMLIndustriaSector(u, Q) {
+    Q = Q || {};
+    var IS = global.CariHubIndustriaSectorRender;
+    var hydrated = IS ? IS.hydrateDisplayFields(Object.assign({}, u)) : (u || {});
+    var chips = IS ? IS.cardMetaChips(hydrated) : [];
+    var mods = '';
+    chips.forEach(function (ch, i) {
+      var txtChip = String(ch || '');
+      if (txtChip.length > 28) txtChip = txtChip.slice(0, 26) + '…';
+      mods += '<span class="modchip ' + (i % 2 ? 'mc-teal' : 'mc-purple') + '">' +
+        svgIco(i === 0 ? 'shield' : 'clock') + safeTxt(txtChip) + '</span>';
+    });
+    var esp = hydrated.especialidad || hydrated.titulo || '';
+    var priceLabel = hydrated.__industriaPriceLabel || 'Tarifa desde';
+    var pack = String(hydrated.__industriaPack || 'a').toLowerCase();
+    var cardExtra = ' res-card--industria-sector res-card--ind-pack-' + safeTxt(pack);
+    var esNegocio = IS && IS.isIndustriaNegocioPerfil(hydrated);
+    var esCedula = IS && IS.isIndustriaCedulaPerfil(hydrated);
+    var cardBase = esNegocio ? 'res-card--negocio' : (esCedula ? 'res-card--profesional' : 'res-card--servicio');
+    return cardShell(hydrated, Q, {
+      cardClass: cardBase + ' res-card--industria' + cardExtra,
+      nombre: hydrated.nombre || hydrated.nombreProfesional || hydrated.nombreComercial || hydrated.alias,
+      catIcon: esCedula ? 'shield' : 'briefcase',
+      catLabel: hydrated.categoriaPublica || hydrated.categoria || Q.categoria,
+      metaRight: mods,
+      descBlock: descripcionCompactHTML(Object.assign({}, hydrated, { tagline: hydrated.tagline || esp }), 'Servicios'),
+      priceLabel: priceLabel,
+      verLabel: esCedula ? 'Profesional verificado' : 'Verificado',
+      badges: industriaSectorBadgesHTML(hydrated)
+    });
+  }
+
+  function bienesRaicesSectorBadgesHTML(u) {
+    var base = badgesCompactHTML(u, { respRapida: u.respuestaRapida !== false });
+    if (!global.CariHubBienesRaicesSectorRender) return base;
+    var hydrated = CariHubBienesRaicesSectorRender.hydrateDisplayFields(Object.assign({}, u));
+    var extra = (hydrated.__bienesRaicesBadges || []).map(function (b) {
+      return '<span class="res-badge ' + safeTxt(b.cls) + '">' + safeTxt(b.text) + '</span>';
+    }).join('');
+    return base + extra;
+  }
+
+  function cardHTMLBienesRaicesSector(u, Q) {
+    Q = Q || {};
+    var BR = global.CariHubBienesRaicesSectorRender;
+    var hydrated = BR ? BR.hydrateDisplayFields(Object.assign({}, u)) : (u || {});
+    var chips = BR ? BR.cardMetaChips(hydrated) : [];
+    var mods = '';
+    chips.forEach(function (ch, i) {
+      var txtChip = String(ch || '');
+      if (txtChip.length > 28) txtChip = txtChip.slice(0, 26) + '…';
+      mods += '<span class="modchip ' + (i % 2 ? 'mc-teal' : 'mc-purple') + '">' +
+        svgIco(i === 0 ? 'briefcase' : 'clock') + safeTxt(txtChip) + '</span>';
+    });
+    var esp = hydrated.especialidad || hydrated.titulo || '';
+    var priceLabel = hydrated.__bienesRaicesPriceLabel || 'Tarifa desde';
+    var pack = String(hydrated.__bienesRaicesPack || 'a').toLowerCase();
+    var cardExtra = ' res-card--bienes-raices-sector res-card--inmo-pack-' + safeTxt(pack);
+    var esNegocio = BR && BR.isBienesRaicesNegocioPerfil(hydrated);
+    var cardBase = esNegocio ? 'res-card--negocio' : 'res-card--servicio';
+    return cardShell(hydrated, Q, {
+      cardClass: cardBase + ' res-card--inmobiliario' + cardExtra,
+      nombre: hydrated.nombre || hydrated.nombreComercial || hydrated.alias,
+      catIcon: 'briefcase',
+      catLabel: hydrated.categoriaPublica || hydrated.categoria || Q.categoria,
+      metaRight: mods,
+      descBlock: descripcionCompactHTML(Object.assign({}, hydrated, { tagline: hydrated.tagline || esp }), 'Servicios'),
+      priceLabel: priceLabel,
+      verLabel: 'Verificado',
+      badges: bienesRaicesSectorBadgesHTML(hydrated)
+    });
+  }
+
+  function cardHTMLMascotasSector(u, Q) {
+    Q = Q || {};
+    var MS = global.CariHubMascotasSectorRender;
+    var hydrated = MS ? MS.hydrateDisplayFields(Object.assign({}, u)) : (u || {});
+    var chips = MS ? MS.cardMetaChips(hydrated) : [];
+    var mods = '';
+    chips.forEach(function (ch, i) {
+      var txtChip = String(ch || '');
+      if (txtChip.length > 28) txtChip = txtChip.slice(0, 26) + '…';
+      mods += '<span class="modchip ' + (i % 2 ? 'mc-purple' : 'mc-pink') + '">' +
+        svgIco(i === 0 ? 'briefcase' : 'clock') + safeTxt(txtChip) + '</span>';
+    });
+    var esp = hydrated.especialidad || hydrated.titulo || '';
+    var priceLabel = hydrated.__mascotasPriceLabel || 'Tarifa desde';
+    var pack = String(hydrated.__mascotasPack || 'a').toLowerCase();
+    var cardExtra = ' res-card--mascotas-sector res-card--masc-pack-' + safeTxt(pack);
+    var esNegocio = MS && MS.isMascotasNegocioPerfil(hydrated);
+    var esCedula = MS && MS.isMascotasCedulaPerfil(hydrated);
+    var cardBase = esNegocio ? 'res-card--negocio' : (esCedula ? 'res-card--profesional' : 'res-card--servicio');
+    return cardShell(hydrated, Q, {
+      cardClass: cardBase + ' res-card--mascotas' + cardExtra,
+      nombre: hydrated.nombre || hydrated.nombreProfesional || hydrated.nombreComercial || hydrated.alias,
+      catIcon: esCedula ? 'shield' : 'briefcase',
+      catLabel: hydrated.categoriaPublica || hydrated.categoria || Q.categoria,
+      metaRight: mods,
+      descBlock: descripcionCompactHTML(Object.assign({}, hydrated, { tagline: hydrated.tagline || esp }), 'Servicios'),
+      priceLabel: priceLabel,
+      verLabel: esCedula ? 'Profesional verificado' : 'Verificado',
+      badges: mascotasSectorBadgesHTML(hydrated)
+    });
+  }
+
   function cardHTMLServicio(u, Q) {
     if (isEventosSectorPerfil(u)) return cardHTMLEventosSector(u, Q);
     if (isBienestarSectorPerfil(u)) return cardHTMLBienestarSector(u, Q);
+    if (isGastronomiaSectorPerfil(u)) return cardHTMLGastronomiaSector(u, Q);
+    if (isMascotasSectorPerfil(u)) return cardHTMLMascotasSector(u, Q);
+    if (isHogarSectorPerfil(u)) return cardHTMLHogarSector(u, Q);
+    if (isSaludSectorPerfil(u)) return cardHTMLSaludSector(u, Q);
+    if (isTecnologiaSectorPerfil(u)) return cardHTMLTecnologiaSector(u, Q);
+    if (isAutomotrizSectorPerfil(u)) return cardHTMLAutomotrizSector(u, Q);
+    if (isTransporteSectorPerfil(u)) return cardHTMLTransporteSector(u, Q);
+    if (isComercioSectorPerfil(u)) return cardHTMLComercioSector(u, Q);
+    if (isEducacionSectorPerfil(u)) return cardHTMLEducacionSector(u, Q);
+    if (isIndustriaSectorPerfil(u)) return cardHTMLIndustriaSector(u, Q);
+    if (isBienesRaicesSectorPerfil(u)) return cardHTMLBienesRaicesSector(u, Q);
     Q = Q || {};
     var cobertura = String(u.zonaCobertura || u.zona || u.serviciosPrincipales || 'A domicilio').trim();
     var metaRight = '<span class="modchip mc-orange">' + svgIco('car') + safeTxt(cobertura.length > 24 ? cobertura.slice(0, 22) + '…' : cobertura) + '</span>';
@@ -1225,6 +1896,16 @@
   }
 
   function cardHTMLProfesional(u, Q) {
+    if (isProfesionalesSectorPerfil(u)) return cardHTMLProfesionalesSector(u, Q);
+    if (isMascotasSectorPerfil(u)) return cardHTMLMascotasSector(u, Q);
+    if (isSaludSectorPerfil(u)) return cardHTMLSaludSector(u, Q);
+    if (isTecnologiaSectorPerfil(u)) return cardHTMLTecnologiaSector(u, Q);
+    if (isAutomotrizSectorPerfil(u)) return cardHTMLAutomotrizSector(u, Q);
+    if (isTransporteSectorPerfil(u)) return cardHTMLTransporteSector(u, Q);
+    if (isComercioSectorPerfil(u)) return cardHTMLComercioSector(u, Q);
+    if (isEducacionSectorPerfil(u)) return cardHTMLEducacionSector(u, Q);
+    if (isIndustriaSectorPerfil(u)) return cardHTMLIndustriaSector(u, Q);
+    if (isBienesRaicesSectorPerfil(u)) return cardHTMLBienesRaicesSector(u, Q);
     Q = Q || {};
     var esp = u.especialidad || u.serviciosPrincipales || u.titulo || u.profesion || '';
     var metaRight = esp
@@ -1271,6 +1952,12 @@
   }
 
   function cardHTML(u, Q) {
+    if (global.CariHubResultadosCardContract && CariHubResultadosCardContract.sanitizePerfil) {
+      CariHubResultadosCardContract.sanitizePerfil(u, {
+        categoria: Q && Q.categoria,
+        subcategoriaId: u && u.subcategoriaId
+      });
+    }
     if (global.CariHubFieldEngineLite && CariHubFieldEngineLite.enriquecerPerfilPublico) {
       CariHubFieldEngineLite.enriquecerPerfilPublico(u, {
         categoria: Q && Q.categoria,
