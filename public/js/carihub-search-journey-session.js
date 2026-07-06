@@ -135,12 +135,25 @@
   }
 
   function syncHomeGlobals() {
-    if (session.subcatNombre) global.categoriaSeleccionada = session.subcatNombre;
+    if (session.subcatNombre) {
+      if (typeof global.setCategoriaHome === 'function') {
+        global.setCategoriaHome(session.subcatNombre);
+      } else {
+        global.categoriaSeleccionada = session.subcatNombre;
+      }
+    }
     if (session.sectorId) global.sectorSeleccionado = session.sectorId;
-    global.paisSeleccionado = session.geo.pais || '';
-    global.estadoSeleccionado = session.geo.estado || '';
-    global.ciudadSeleccionada = session.geo.ciudad || '';
-
+    if (typeof global.syncHomeGeoFromPicker === 'function') {
+      global.syncHomeGeoFromPicker({
+        pais: session.geo.pais || '',
+        estado: session.geo.estado || '',
+        ciudad: session.geo.ciudad || ''
+      });
+    } else {
+      global.paisSeleccionado = session.geo.pais || '';
+      global.estadoSeleccionado = session.geo.estado || '';
+      global.ciudadSeleccionada = session.geo.ciudad || '';
+    }
     if (typeof global.syncHomeGeoPickerFromGlobals === 'function') {
       global.syncHomeGeoPickerFromGlobals();
     }

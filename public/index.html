@@ -81,9 +81,9 @@ let visitasHoy = 0;
 let usuariosOnline = 0;
 var categoriaSeleccionada = "";
 var sectorSeleccionado = "";
-let paisSeleccionado = "";
-let estadoSeleccionado = "";
-let ciudadSeleccionada = "";
+var paisSeleccionado = "";
+var estadoSeleccionado = "";
+var ciudadSeleccionada = "";
 let selectorActual = "";
 
 const CATEGORIAS_BUSCADOR = [
@@ -1505,24 +1505,53 @@ function buscarCiudadRapida(ciudad){
   buscarPerfilesFiltrados();
 }
 
+function urlBusquedaResultados(params) {
+  var qs = params.toString();
+  if (location.protocol === 'file:') {
+    return new URL('resultados.html?' + qs, location.href).href;
+  }
+  return new URL('resultados?' + qs, location.href).href;
+}
+
 function buscarPerfilesFiltrados(){
-  if(!categoriaSeleccionada){
+  var ov = window.__guidedSearchOverride;
+  var cat = (ov && ov.categoria) || window.categoriaSeleccionada || categoriaSeleccionada || "";
+  var pais = (ov && ov.pais) || window.paisSeleccionado || paisSeleccionado || "";
+  var estado = (ov && ov.estado) || window.estadoSeleccionado || estadoSeleccionado || "";
+  var ciudad = (ov && ov.ciudad) || window.ciudadSeleccionada || ciudadSeleccionada || "";
+
+  if (!ov && window.CariHubSearchJourneySession && CariHubSearchJourneySession.isActive && CariHubSearchJourneySession.isActive()) {
+    if (typeof CariHubSearchJourneySession.syncHomeGlobals === "function") {
+      CariHubSearchJourneySession.syncHomeGlobals();
+    }
+    var j = CariHubSearchJourneySession.get ? CariHubSearchJourneySession.get() : null;
+    if (j) {
+      if (j.subcatNombre) cat = j.subcatNombre;
+      if (j.geo) {
+        if (j.geo.pais) pais = j.geo.pais;
+        if (j.geo.estado) estado = j.geo.estado;
+        if (j.geo.ciudad) ciudad = j.geo.ciudad;
+      }
+    }
+  }
+
+  if(!cat){
     alert("Selecciona una categoría.");
     return;
   }
-  if(!paisSeleccionado){
+  if(!pais){
     alert("Selecciona un país para buscar.");
     return;
   }
 
-  const url = new URL("./resultados.html", window.location.href);
-  url.searchParams.set("categoria", categoriaSeleccionada);
-  url.searchParams.set("pais", paisSeleccionado);
-  if(estadoSeleccionado) url.searchParams.set("estado", estadoSeleccionado);
-  if(ciudadSeleccionada) url.searchParams.set("ciudad", ciudadSeleccionada);
-  url.searchParams.set("v", String(Date.now()));
+  var params = new URLSearchParams();
+  params.set("categoria", cat);
+  params.set("pais", pais);
+  if (estado) params.set("estado", estado);
+  if (ciudad) params.set("ciudad", ciudad);
+  params.set("v", String(Date.now()));
 
-  window.location.assign(url.toString());
+  window.location.assign(urlBusquedaResultados(params));
 }
 
 function volverInicio(){
@@ -2815,7 +2844,7 @@ const params = new URLSearchParams(window.location.search);
 <script src="js/carihub-pink-sheen.js"></script>
 <script src="js/hero-home.js"></script>
 <script src="js/sector-scroll-data.js"></script>
-<script src="js/sector-card-images.js?v=20260624q"></script>
+<script src="js/sector-card-images.js?v=20260706sec1"></script>
 <script src="js/sector-card-templates.js"></script>
 <script src="js/sector-subcat-picker.js?v=20260701gast-img"></script>
 <script src="js/sector-catalog-ui.js?v=20260701gast-img"></script>
@@ -2834,7 +2863,8 @@ const params = new URLSearchParams(window.location.search);
 <script src="js/carihub-sector-sparkles.js?v=20260628b"></script>
 <script src="js/carihub-ui-notices.js?v=20260629v3"></script>
 <script src="js/carihub-search-journey-session.js?v=20260705journey2"></script>
-<script src="js/carihub-geo-picker.js?v=20260705journey3"></script>
+<script src="js/carihub-resultados-sector.js?v=20260706geo1"></script>
+<script src="js/carihub-geo-picker.js?v=20260706geo1"></script>
 <script src="js/ch-slot-dock.js?v=20260628b"></script>
 <script src="js/banner-home-laterales.js"></script>
 <script src="js/resultados-demo.js"></script>

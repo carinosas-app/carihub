@@ -170,13 +170,29 @@
   function handleGuidedSearch(picker) {
     if (!picker) return;
     var Journey = global.CariHubSearchJourneySession;
-    if (Journey) Journey.updateGeo(picker.getValues());
+    var geo = picker.getValues();
+    if (Journey) {
+      Journey.updateGeo(geo);
+      if (Journey.isActive && Journey.isActive() && typeof Journey.syncHomeGlobals === 'function') {
+        Journey.syncHomeGlobals();
+      }
+    }
     if (typeof global.syncHomeGeoFromPicker === 'function') {
-      global.syncHomeGeoFromPicker(picker.getValues());
+      global.syncHomeGeoFromPicker(geo);
+    }
+    var snap = Journey && typeof Journey.get === 'function' ? Journey.get() : null;
+    if (snap && snap.subcatNombre) {
+      global.__guidedSearchOverride = {
+        categoria: snap.subcatNombre,
+        pais: geo.pais || (snap.geo && snap.geo.pais) || '',
+        estado: geo.estado || (snap.geo && snap.geo.estado) || '',
+        ciudad: geo.ciudad || (snap.geo && snap.geo.ciudad) || ''
+      };
     }
     if (typeof global.buscarPerfilesFiltrados === 'function') {
       global.buscarPerfilesFiltrados();
     }
+    try { delete global.__guidedSearchOverride; } catch (e) { global.__guidedSearchOverride = null; }
     /* No closeModal: assign() is async; closing geo first exposes Home one frame. */
     homeFlowMode = 'field-sync';
     if (Journey) Journey.clear();
@@ -230,8 +246,12 @@
     var guided = isGuidedFlow();
     footer.hidden = !guided;
     if (legacyBack) legacyBack.hidden = guided;
+    if (nextBtn) nextBtn.hidden = !guided;
 
-    if (!guided) return;
+    if (!guided) {
+      if (searchBtn) searchBtn.disabled = true;
+      return;
+    }
 
     footer.classList.remove('ch-geo-guided-footer--stack', 'ch-geo-guided-footer--row', 'ch-geo-guided-footer--single');
     if (tipo === 'pais') footer.classList.add('ch-geo-guided-footer--stack');
@@ -1019,18 +1039,30 @@
 
   var GEO_LGBT_GRAD = 'linear-gradient(90deg, #ef3b3b 0%, #ff8a1e 18%, #ffd21e 36%, #29b563 54%, #2b7fe0 72%, #8f39c9 90%, #ef3b3b 100%)';
 
+  function resolveGeoBannerSrc(modal, sector) {
+    if (!modal) return '';
+    var lgbt = modal.getAttribute('data-subtema') === 'lgbt';
+    if (lgbt) return GEO_BANNER_BY_SECTOR.lgbt;
+    if (sector === 'adultos') {
+      return GEO_BANNER_BY_SECTOR.adultos ||
+        ((global.CariHubBannerGeneral && global.CariHubBannerGeneral.pickGeneralBanner()) ||
+          'img/home/banners/ad-banner-pink-01.png');
+    }
+    var RS = global.CariHubResultadosSector;
+    if (RS && typeof RS.bannerDeSector === 'function') {
+      var themed = RS.bannerDeSector(sector);
+      if (themed) return themed;
+    }
+    if (GEO_BANNER_BY_SECTOR[sector]) return GEO_BANNER_BY_SECTOR[sector];
+    return '';
+  }
+
   function syncGeoBannerImage(modal, sector) {
     if (!modal) return;
     var img = modal.querySelector('#chGeoBanner img');
     if (!img) return;
-    var lgbt = modal.getAttribute('data-subtema') === 'lgbt';
-    var src = lgbt ? GEO_BANNER_BY_SECTOR.lgbt :
-      (GEO_BANNER_BY_SECTOR[sector] ||
-      ((global.CariHubBannerGeneral && global.CariHubBannerGeneral.pickGeneralBanner()) ||
-        'img/home/banners/ad-banner-pink-01.png'));
-    if (sector && sector !== 'adultos' && !GEO_BANNER_BY_SECTOR[sector]) {
-      src = 'img/home/banners/ad-banner-pink-02.png';
-    }
+    var src = resolveGeoBannerSrc(modal, sector);
+    if (!src) return;
     if (img.getAttribute('src') !== src) img.src = src;
   }
 
@@ -1615,9 +1647,11 @@
     });
     homePickerInstance.mounted = true;
     global.__homeGeoPicker = homePickerInstance;
-    global.openHomeGeoPicker = function (tipo) {
-      if (homePickerInstance) homePickerInstance.open(tipo);
-    };
+    if (typeof global.openHomeGeoPicker !== 'function') {
+      global.openHomeGeoPicker = function (tipo) {
+        if (homePickerInstance) homePickerInstance.open(tipo);
+      };
+    }
     return homePickerInstance;
   }
 
