@@ -35,6 +35,8 @@
   ];
 
   const ALIASES={
+    "carinosas":"escort",
+    "carinosas vip":"escort vip",
     "acompanante":"escort",
     "acompañante":"escort",
     "escort vip":"escort vip",

@@ -20,17 +20,44 @@
   background: var(--ss-color, var(--ch-sector-spark-color, #e91e63));
   clip-path: polygon(50% 0%, 65% 35%, 100% 50%, 65% 65%, 50% 100%, 35% 65%, 0% 50%, 35% 35%);
   box-shadow:
-    0 0 calc(var(--ss-size, 6px) * 0.9) color-mix(in srgb, var(--ss-color, #e91e63) 55%, transparent),
-    0 0 calc(var(--ss-size, 6px) * 1.6) color-mix(in srgb, var(--ss-color, #e91e63) 28%, transparent);
+    0 0 calc(var(--ss-size, 6px) * 1.1) color-mix(in srgb, var(--ss-color, #e91e63) 62%, transparent),
+    0 0 calc(var(--ss-size, 6px) * 2) color-mix(in srgb, var(--ss-color, #e91e63) 32%, transparent),
+    0 0 calc(var(--ss-size, 6px) * 3.2) color-mix(in srgb, #fff 28%, var(--ss-color, #e91e63) 12%);
   opacity: 0;
   animation: ch-sector-spark-twinkle var(--ss-dur, 3s) ease-in-out infinite;
   animation-delay: var(--ss-delay, 0s);
 }
 
+/* Barrido de brillo sobre contenedores (registro, geo, home modal) */
+.ch-sector-sparkles::after {
+  content: "";
+  position: absolute;
+  inset: -30%;
+  pointer-events: none;
+  z-index: 0;
+  background: linear-gradient(
+    118deg,
+    transparent 36%,
+    color-mix(in srgb, #fff 52%, var(--ch-sector-spark-color, #e91e63)) 47%,
+    color-mix(in srgb, var(--ch-sector-spark-color, #e91e63) 22%, transparent) 53%,
+    transparent 64%
+  );
+  animation: ch-sector-shine-sweep 4s ease-in-out infinite;
+  opacity: .55;
+}
+
 @keyframes ch-sector-spark-twinkle {
-  0%, 100% { opacity: 0; transform: translate(-50%, -50%) rotate(45deg) scale(0.65); }
-  45% { opacity: 0.92; transform: translate(-50%, -50%) rotate(45deg) scale(1); }
-  62% { opacity: 0.55; transform: translate(-50%, -50%) rotate(45deg) scale(0.82); }
+  0%, 100% { opacity: 0; transform: translate(-50%, -50%) rotate(45deg) scale(0.6); }
+  42% { opacity: 0.96; transform: translate(-50%, -50%) rotate(45deg) scale(1.05); }
+  58% { opacity: 0.62; transform: translate(-50%, -50%) rotate(45deg) scale(0.88); }
+  72% { opacity: 1; transform: translate(-50%, -50%) rotate(45deg) scale(1.12); }
+}
+
+@keyframes ch-sector-shine-sweep {
+  0%, 100% { transform: translateX(-38%) rotate(9deg); opacity: 0; }
+  30% { opacity: .75; }
+  52% { transform: translateX(42%) rotate(9deg); opacity: .5; }
+  70% { opacity: 0; }
 }
 
 /* —— Registro: pantalla categorías —— */
@@ -166,6 +193,7 @@ body[data-rp-sector="industria"] { --ch-sector-spark-color: #5d4037; }
 
 @media (prefers-reduced-motion: reduce) {
   .ch-sector-spark,
+  .ch-sector-sparkles::after,
   .ch-geo-modal:not([data-rp-sector="adultos"]) .ch-geo-sparkle {
     animation: none;
     opacity: 0.45;
