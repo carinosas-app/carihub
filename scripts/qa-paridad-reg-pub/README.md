@@ -82,9 +82,27 @@ node scripts/qa-paridad-reg-pub-render.mjs --out agent-tools/qa-paridad-reports/
 - `summary-phase-c.md`
 - `screenshots/{sub}/full-desktop.png`, `hero.png`, `section-derstack.png`
 
-Inyección: `sessionStorage` (`carihub_rp_public_preview`) → fallback `page.evaluate`.
+Inyección: `sessionStorage` (`carihub_rp_public_preview`) → fallback `page.evaluate` + parche `applyProfileToPage`.
 
 Exit code 1 si hay bloqueadores o subs FAIL.
+
+### Fase C — modo `--strict` (medición producción)
+
+Mide el runtime real **sin** enriquecimiento de payload ni parche post-render del agente.
+
+```bash
+# Smoke strict (3 subs) — salida fija en fase-c-strict/
+node scripts/qa-paridad-reg-pub-render.mjs --strict
+
+# Alias equivalente
+node scripts/qa-paridad-reg-pub-render.mjs --production-path
+
+# Comparar contra baseline normal custom
+node scripts/qa-paridad-reg-pub-render.mjs --strict --compare-with agent-tools/qa-paridad-reports/analisis-perfil-publico/render-summary.json
+```
+
+**Strict:** solo `sessionStorage` → `leerPreviewRegistro` → `aplicarPerfilDesdeRegistro` → `setVista` → render.  
+**Salida extra:** `strict-vs-normal.json` (vs baseline normal por defecto).
 
 ## Fases pendientes
 

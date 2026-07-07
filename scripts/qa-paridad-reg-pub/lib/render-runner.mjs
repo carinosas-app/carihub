@@ -108,7 +108,7 @@ function mapEntryForSub(subcategoriaId, nestedProfileKey) {
  * @param {object} opts
  */
 export async function runSubRender(opts) {
-  const { ctx, schemaEntry, session, shotsDir } = opts;
+  const { ctx, schemaEntry, session, shotsDir, strict = false } = opts;
   const subSlug = slugSubId(schemaEntry.subcategoriaId);
   const started = Date.now();
 
@@ -146,14 +146,31 @@ export async function runSubRender(opts) {
 
   const mapWithNested = { ...mapEntry, nestedProfileKey: artifacts.nestedProfileKey };
 
-  const payload = buildPreviewPayload(mapEntry, artifacts.hydrated);
+  const payload = buildPreviewPayload(mapEntry, artifacts.hydrated, {}, { strict });
+  if (strict) base.strictMode = true;
 
   const page = await newPage(session);
   try {
-    const nav = await navigateAndPaint(session, page, payload, mapEntry);
+    const nav = await navigateAndPaint(session, page, payload, mapEntry, { strict });
     base.injectionMode = nav.injectionMode;
     base.pipelineOk = true;
     base.url = nav.url;
+    base.paintOk = nav.paintOk !== false;
+    if (nav.pageErrors?.length) base.pageErrors = nav.pageErrors;
+    if (nav.consoleErrors?.length) base.consoleErrors = nav.consoleErrors;
+
+    if (strict && (nav.pageErrors?.length || nav.paintOk === false)) {
+      const errMsg = nav.pageErrors?.[0]?.message || nav.paintError || 'paint timeout';
+      base.runtimeCrash = {
+        message: errMsg,
+        stack: nav.pageErrors?.[0]?.stack || null,
+        pageErrors: nav.pageErrors || [],
+        consoleErrors: nav.consoleErrors || [],
+        paintOk: nav.paintOk === true,
+        paintError: nav.paintError || null,
+        sessionStoragePresent: nav.sessionStoragePresent === true,
+      };
+    }
 
     const extractFn = domExtractorSource();
     const dom = await page.evaluate(extractFn, {
@@ -187,6 +204,19 @@ export async function runSubRender(opts) {
     });
 
     base.renderResults = [...presenceAndLocation, ...privacy.filter((p) => p.blockFieldId !== '*' || p.status === 'fail')];
+
+    if (base.runtimeCrash) {
+      base.renderResults.unshift({
+        subcategoriaId: schemaEntry.subcategoriaId,
+        check: 'runtime',
+        status: 'fail',
+        severity: 'bloqueador',
+        reason: `Runtime crash or incomplete paint: ${base.runtimeCrash.message}`,
+        blockFieldId: '*',
+        stack: base.runtimeCrash.stack,
+      });
+    }
+
     base.summary = aggregateRenderStatus(base.renderResults);
     base.status = base.summary.subStatus;
 
@@ -219,6 +249,7 @@ export function aggregateRenderResults(subResults) {
     locationFail: 0,
     duplicateWarn: 0,
     privacyDomViolations: 0,
+    runtimeCrashes: 0,
     blockers: 0,
     screenshotsCaptured: 0,
   };
@@ -246,6 +277,21 @@ export function aggregateRenderResults(subResults) {
     if (sub.status === 'pass') summary.subsPass++;
     else summary.subsFail++;
 
+    if (sub.runtimeCrash) {
+      summary.runtimeCrashes++;
+      failures.push({
+        subcategoriaId: sub.subcategoriaId,
+        sectorId: sub.sectorId,
+        check: 'runtime',
+        status: 'fail',
+        severity: 'bloqueador',
+        reason: sub.runtimeCrash.message,
+        stack: sub.runtimeCrash.stack,
+        pageErrors: sub.runtimeCrash.pageErrors,
+        consoleErrors: sub.runtimeCrash.consoleErrors,
+      });
+    }
+
     if (sub.screenshots?.full) summary.screenshotsCaptured++;
 
     for (const r of sub.renderResults || []) {
@@ -267,7 +313,10 @@ export function aggregateRenderResults(subResults) {
         summary.blockers++;
         failures.push(r);
       }
-      if (r.severity === 'bloqueador' && r.status === 'fail') summary.blockers++;
+      if (r.check === 'runtime' && r.status === 'fail') {
+        summary.blockers++;
+      }
+      if (r.severity === 'bloqueador' && r.status === 'fail' && r.check !== 'runtime') summary.blockers++;
     }
   }
 
