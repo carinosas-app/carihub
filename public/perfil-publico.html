@@ -7077,14 +7077,14 @@ function renderMedicoProfesional(u){
     '</div>'+
     '<div class="pcard"><div class="pcard__h">📄 Sobre mí</div>'+
       '<p style="margin:0 0 12px;font-size:14px;font-weight:400;line-height:1.5;color:#212121">'+safe(u.sobreMi)+'</p>'+
-      '<div class="stats">'+u.stats.map(function(s){return '<div class="st"><b>'+safe(s[0])+'</b><span>'+safe(s[1])+'</span></div>';}).join("")+'</div>'+
+      '<div class="stats">'+(u.stats||[]).map(function(s){return '<div class="st"><b>'+safe(s[0])+'</b><span>'+safe(s[1])+'</span></div>';}).join("")+'</div>'+
     '</div>'+
     '<div class="pcard"><div class="pcard__h">⭐ Opiniones de pacientes <a class="lnk" href="#">Ver todas</a></div>'+
       '<div class="rating"><span class="num">'+safe(u.rating)+'</span>'+stars(5)+'<span style="color:var(--muted);font-size:13px">('+u.opiniones+' opiniones)</span></div>'+
-      u.reviews.map(function(r){return '<div class="review"><div class="av">'+safe(r[0].slice(0,1))+'</div><div class="rb"><div class="rn">'+safe(r[0])+' '+stars(r[1])+'</div><div class="rt">'+safe(r[2])+'</div></div><div class="rd">'+safe(r[3])+'</div></div>';}).join("")+
+      (u.reviews||[]).map(function(r){return '<div class="review"><div class="av">'+safe(r[0].slice(0,1))+'</div><div class="rb"><div class="rn">'+safe(r[0])+' '+stars(r[1])+'</div><div class="rt">'+safe(r[2])+'</div></div><div class="rd">'+safe(r[3])+'</div></div>';}).join("")+
     '</div>'+
     '<div class="pcard faq"><div class="pcard__h">❓ Preguntas frecuentes</div>'+
-      u.faq.map(function(q){return '<div class="q">'+safe(q)+'<span class="chev">⌄</span></div>';}).join("")+
+      (u.faq||[]).map(function(q){return '<div class="q">'+safe(q)+'<span class="chev">⌄</span></div>';}).join("")+
     '</div>';
 
   var datosHTML=[
@@ -7113,7 +7113,7 @@ function renderMedicoProfesional(u){
       u.noIncluidos.map(function(s){return '<div><span class="no">✕</span> '+safe(s)+'</div>';}).join("")+'</div></div>':"")+
     '<div class="pcard"><div class="pcard__h">🗺️ Zona de atención</div>'+
       '<div class="mapwrap"><div class="mapbox">'+S.chMapa(u.ciudad)+'</div>'+
-      '<div class="coberlist">'+u.cobertura.map(function(c){return '<div>📍 '+safe(c)+'</div>';}).join("")+'</div></div>'+
+      '<div class="coberlist">'+(u.cobertura||[]).map(function(c){return '<div>📍 '+safe(c)+'</div>';}).join("")+'</div></div>'+
     '</div>'+
     '<div class="pcard"><div class="trust">'+
       '<div class="ti"><div class="em">🎓</div>Cédula profesional verificada</div>'+
@@ -7365,6 +7365,66 @@ function demoAssetDesdeResultados(src){
   if(/^(\.\.|\/|https?:)/.test(s)) return s;
   return ""+s.replace(/^\.\//,"");
 }
+function mergeSaludMedicoDesdeRegistro(merged,u){
+  if(!merged||!u) return merged;
+  var sp=u.saludPerfil||{};
+  if(u.saludPerfil) merged.saludPerfil=Object.assign({},u.saludPerfil);
+  if(!merged.sectorId&&u.sectorId) merged.sectorId=u.sectorId;
+  if(sp.nombreProfesional||u.nombreProfesional){
+    merged.nombreProfesional=sp.nombreProfesional||u.nombreProfesional;
+    merged.nombre=merged.nombreProfesional;
+  }
+  if(sp.especialidad||u.especialidad) merged.especialidad=sp.especialidad||u.especialidad;
+  if(sp.subespecialidad||u.subespecialidad) merged.subespecialidad=sp.subespecialidad||u.subespecialidad;
+  if(sp.blockTitle) merged.titulo=sp.blockTitle;
+  else if(merged.especialidad&&!merged.titulo) merged.titulo=merged.especialidad;
+  if(!merged.profesion&&merged.especialidad) merged.profesion=merged.especialidad;
+  if(sp.precioConsulta||u.precioConsulta){
+    merged.precioConsulta=sp.precioConsulta||u.precioConsulta;
+    merged.precio=merged.precioConsulta;
+  }else if(sp.tarifaDesde){
+    merged.precioConsulta=sp.tarifaDesde;
+    merged.precio=sp.tarifaDesde;
+  }
+  if(sp.unidadConsulta) merged.unidadConsulta=sp.unidadConsulta;
+  if(sp.horarioAtencion||u.horarioAtencion){
+    merged.horarioAtencion=sp.horarioAtencion||u.horarioAtencion;
+    merged.horario=merged.horarioAtencion;
+  }else if(sp.horarioDetalle){
+    merged.horarioAtencion=sp.horarioDetalle;
+    merged.horario=sp.horarioDetalle;
+  }
+  if(Array.isArray(sp.serviciosProfesionales)&&sp.serviciosProfesionales.length){
+    merged.serviciosProfesionales=sp.serviciosProfesionales.slice();
+    merged.serviciosIncluidos=merged.serviciosProfesionales.slice();
+  }else if(Array.isArray(u.serviciosProfesionales)&&u.serviciosProfesionales.length){
+    merged.serviciosProfesionales=u.serviciosProfesionales.slice();
+    merged.serviciosIncluidos=merged.serviciosProfesionales.slice();
+  }
+  if(Array.isArray(sp.segurosAceptadosSalud)&&sp.segurosAceptadosSalud.length){
+    merged.segurosAceptados=sp.segurosAceptadosSalud.slice();
+  }else if(Array.isArray(u.segurosAceptados)&&u.segurosAceptados.length){
+    merged.segurosAceptados=u.segurosAceptados.slice();
+  }else if(sp.segurosAceptados){
+    merged.segurosAceptados=String(sp.segurosAceptados).split(/[·,;|/]+/).map(function(x){return x.trim();}).filter(Boolean);
+  }
+  if(sp.consultaEnLinea===true||u.consultaEnLinea===true){
+    merged.consultaEnLinea=true;
+    merged.consultaEnLineaTexto=merged.consultaEnLineaTexto||"Consulta en línea disponible";
+  }
+  if(u.colaboracionContenido) merged.colaboracionContenido=u.colaboracionContenido;
+  if(u.cedulaVerificada===true||sp.deltaPack==="A") merged.cedulaVerificada=true;
+  if(merged.cedulaVerificada) merged.verificado=true;
+  if(!Array.isArray(merged.cobertura)||!merged.cobertura.length){
+    var loc=[merged.zona,merged.ciudad,merged.estado].filter(Boolean);
+    if(loc.length) merged.cobertura=loc;
+    else if(sp.coberturaAtencionSalud) merged.cobertura=[sp.coberturaAtencionSalud];
+    else if(sp.coberturaDomicilioZona) merged.cobertura=[sp.coberturaDomicilioZona];
+  }
+  if(sp.coberturaAtencionSalud&&!merged.zonaCobertura) merged.zonaCobertura=sp.coberturaAtencionSalud;
+  if(sp.idiomasAtencion&&!merged.idiomas) merged.idiomas=sp.idiomasAtencion;
+  return merged;
+}
 function aplicarPerfilDesdeRegistro(vista,u){
   if(!u||!DEMO[vista]) return;
   var galeria=[];
@@ -7615,7 +7675,13 @@ function aplicarPerfilDesdeRegistro(vista,u){
     clean.categoria=catVis;
     clean.categoriaPublica=catVis;
   }
-  DEMO[vista]=clean;
+  if(vista==="medico"||clean.sectorId==="salud"||u.sectorId==="salud"){
+    var mergedMedico=Object.assign({},DEMO[vista],clean);
+    mergeSaludMedicoDesdeRegistro(mergedMedico,u);
+    DEMO[vista]=mergedMedico;
+  }else{
+    DEMO[vista]=clean;
+  }
 }
 function aplicarPerfilResultadosEnDemo(vista,u){
   if(!u||!DEMO[vista]) return;
