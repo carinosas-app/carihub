@@ -145,3 +145,84 @@ function stripSubDetail(sub) {
     durationMs: sub.durationMs,
   };
 }
+
+export function buildMarkdownSummaryPhaseC(report) {
+  const m = report.meta;
+  const s = report.summary;
+  const lines = [
+    '# QA Paridad Registro ↔ Perfil Público — Fase C (render browser)',
+    '',
+    `**Run:** ${m.runId} · **Commit:** ${m.gitCommit || 'n/a'} · **Agent:** ${m.agentVersion}`,
+    `**Base:** ${m.qaBase || 'n/a'} · **Inyección:** ${m.defaultInjection || 'sessionStorage'}`,
+    '',
+    '## Resumen',
+    '',
+    '| Métrica | Valor |',
+    '|---------|------:|',
+    `| Subcategorías | ${s.totalSubs} |`,
+    `| Procesadas | ${s.processed} |`,
+    `| Subs PASS | ${s.subsPass} |`,
+    `| Subs FAIL | ${s.subsFail} |`,
+    `| Checks render | ${s.renderChecksTotal} |`,
+    `| Presencia PASS | ${s.presencePass} |`,
+    `| Presencia FAIL | ${s.presenceFail} |`,
+    `| Ubicación FAIL | ${s.locationFail} |`,
+    `| Duplicados WARN | ${s.duplicateWarn} |`,
+    `| Privacy DOM | ${s.privacyDomViolations} |`,
+    `| Bloqueadores | ${s.blockers} |`,
+    `| Screenshots | ${s.screenshotsCaptured} |`,
+    '',
+  ];
+
+  if (report.topFailures?.length) {
+    lines.push('## Top fallos', '');
+    report.topFailures.forEach((t) => {
+      lines.push(`- **${t.subcategoriaId}** (${t.failCount} fails)`);
+      (t.topReasons || []).forEach((r) => lines.push(`  - ${r}`));
+    });
+    lines.push('');
+  }
+
+  if (report.failures?.length) {
+    lines.push('## Muestra failures-render (≤15)', '');
+    report.failures.slice(0, 15).forEach((f) => {
+      lines.push(`- **${f.subcategoriaId}** \`${f.blockFieldId}\` [${f.check}] — ${f.reason}`);
+    });
+    lines.push('');
+  }
+
+  lines.push('---', '_Fase C — render perfil público vía Playwright. Medición únicamente._');
+  return lines.join('\n');
+}
+
+export function writePhaseCReports(outBase, payload) {
+  writeJson(path.join(outBase, 'render-summary.json'), {
+    meta: payload.meta,
+    summary: payload.summary,
+    topFailures: payload.topFailures,
+    subResults: payload.subResults?.map(stripRenderSub),
+  });
+  writeJson(path.join(outBase, 'failures-render.json'), payload.failures);
+  if (payload.subResultsDetailed) {
+    writeJson(path.join(outBase, 'render-detail.json'), payload.subResultsDetailed);
+  }
+  ensureDir(outBase);
+  fs.writeFileSync(path.join(outBase, 'summary-phase-c.md'), buildMarkdownSummaryPhaseC(payload), 'utf8');
+}
+
+function stripRenderSub(sub) {
+  return {
+    subcategoriaId: sub.subcategoriaId,
+    sectorId: sub.sectorId,
+    status: sub.status,
+    injectionMode: sub.injectionMode,
+    pipelineOk: sub.pipelineOk,
+    dataVista: sub.dataVista,
+    dataTema: sub.dataTema,
+    pcardCount: sub.pcardCount,
+    summary: sub.summary,
+    screenshots: sub.screenshots,
+    durationMs: sub.durationMs,
+    pipelineError: sub.pipelineError,
+  };
+}

@@ -58,7 +58,35 @@ node scripts/qa-paridad-reg-pub-vm.mjs --out agent-tools/qa-paridad-reports/manu
 
 Exit code 1 si hay subs FAIL o bloqueadores privacy/contaminación.
 
+## Fase C (implementada — smoke v1)
+
+Render browser: hydrated Fase B → sessionStorage → `perfil-publico.html` → asserts DOM + screenshots.
+
+```bash
+# Smoke obligatorio (3 subs)
+node scripts/qa-paridad-reg-pub-render.mjs
+
+# Una sub
+node scripts/qa-paridad-reg-pub-render.mjs --sub medicos-generales
+
+# Salida custom
+node scripts/qa-paridad-reg-pub-render.mjs --out agent-tools/qa-paridad-reports/manual-c
+```
+
+**Prerequisito:** Playwright instalado; el script levanta servidor estático local en `127.0.0.1:5199` si `QA_BASE` no está definido.
+
+**Salida Fase C:**
+- `render-summary.json`
+- `failures-render.json`
+- `render-detail.json`
+- `summary-phase-c.md`
+- `screenshots/{sub}/full-desktop.png`, `hero.png`, `section-derstack.png`
+
+Inyección: `sessionStorage` (`carihub_rp_public_preview`) → fallback `page.evaluate`.
+
+Exit code 1 si hay bloqueadores o subs FAIL.
+
 ## Fases pendientes
 
-- **C** — Playwright render
+- **C-full** — extender render-map a 443 subs
 - **D** — Reporte priorizado
