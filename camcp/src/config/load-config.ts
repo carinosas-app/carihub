@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { CamcpConfig } from '../policy/permissions.js';
+import type { IntelligenceConfig } from '../intelligence/types.js';
 
 const CAMCP_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 
@@ -9,6 +10,12 @@ export function loadConfig(): CamcpConfig {
   const configPath = path.join(CAMCP_ROOT, 'config', 'camcp.config.json');
   const raw = fs.readFileSync(configPath, 'utf8');
   return JSON.parse(raw) as CamcpConfig;
+}
+
+export function loadIntelligenceConfig(): IntelligenceConfig {
+  const configPath = path.join(CAMCP_ROOT, 'config', 'intelligence.config.json');
+  const raw = fs.readFileSync(configPath, 'utf8');
+  return JSON.parse(raw) as IntelligenceConfig;
 }
 
 export function resolveRepoRoot(config: CamcpConfig): string {
