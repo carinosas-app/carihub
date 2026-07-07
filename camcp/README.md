@@ -2,9 +2,9 @@
 
 Servidor MCP local **read-only / report-only** para auditoría, gobernanza y orquestación QA de CariHub.
 
-**Fase 1:** filesystem + git · **Fase 2:** namespace `qa.*` · **Fase 3A:** Intelligence Core + `intel.*` · **Fase 3B.1:** `parity.*` · **Fase 3B.2:** `data.*`
+**Fase 1:** filesystem + git · **Fase 2:** namespace `qa.*` · **Fase 3A:** Intelligence Core + `intel.*` · **Fase 3B.1:** `parity.*` · **Fase 3B.2:** `data.*` · **Fase 3B.3:** `arch.*`
 
-**Baseline:** 29 tools · 0 write-capable
+**Baseline:** 32 tools · 0 write-capable · `main` @ `28888e6`
 
 | Documento | Contenido |
 |-----------|-----------|
@@ -12,6 +12,8 @@ Servidor MCP local **read-only / report-only** para auditoría, gobernanza y orq
 | [docs/FASE-3A-CIERRE.md](./docs/FASE-3A-CIERRE.md) | Cierre Fase 3A |
 | [docs/FASE-3B-1-PARITY-SPEC.md](./docs/FASE-3B-1-PARITY-SPEC.md) | SPEC 3B.1 parity |
 | [docs/FASE-3B-2-DATA-SPEC.md](./docs/FASE-3B-2-DATA-SPEC.md) | SPEC 3B.2 data |
+| [docs/FASE-3B-3-ARCH-SPEC.md](./docs/FASE-3B-3-ARCH-SPEC.md) | SPEC 3B.3 arch |
+| [docs/FASE-3B-3-CIERRE.md](./docs/FASE-3B-3-CIERRE.md) | Cierre Fase 3B.3 |
 | [docs/FASE-3B-SPEC.md](./docs/FASE-3B-SPEC.md) | SPEC 3B completo |
 
 ## Requisitos
@@ -59,6 +61,7 @@ npm run smoke:qa
 npm run smoke:intel
 npm run smoke:parity
 npm run smoke:data
+npm run smoke:arch
 ```
 
 ## Configuración
@@ -72,7 +75,9 @@ npm run smoke:data
 | `denyWritePaths` | Rutas protegidas (incluye `public/`) |
 | `gitAllowedSubcommands` | Allowlist git |
 
-## Tools (29)
+Namespaces con config dedicada: `intelligence.config.json`, `parity.config.json`, `data.config.json`, `arch.config.json`.
+
+## Tools (32)
 
 | Namespace | Tools | Capability |
 |-----------|-------|------------|
@@ -82,8 +87,10 @@ npm run smoke:data
 | intel | list_domains, graph, impact, run_module, cache_status, parse_report | read-only / report-only |
 | parity | static, vm, render_strict | report-only |
 | data | pipeline_status, persist_audit, hydrate_audit, schema_alignment | report-only |
+| arch | frozen_violations, scan_duplicates, domain_boundaries | read-only / report-only |
 
-Ver [docs/FASE-3B-2-DATA-SPEC.md](./docs/FASE-3B-2-DATA-SPEC.md) para detalle `data.*`.
+Ver [docs/FASE-3B-3-ARCH-SPEC.md](./docs/FASE-3B-3-ARCH-SPEC.md) para detalle `arch.*`.  
+**Pospuesto:** `arch.dependencies` (P4), `parity.visual`.
 
 ## Cursor (Fase 8 — pendiente)
 
@@ -103,11 +110,11 @@ Ver [docs/FASE-3B-2-DATA-SPEC.md](./docs/FASE-3B-2-DATA-SPEC.md) para detalle `d
 
 ## Seguridad
 
-- Policy Engine: `mode=read-only`
+- Policy Engine: `mode=report-only`
 - Path Guard: lecturas solo bajo repo root; escapes bloqueados
 - Command Guard: git subcommands en allowlist; `push`/`commit`/`deploy` bloqueados
-- Fase 1 **no escribe** fuera de `camcp/` (solo archivos nuevos del scaffold)
+- **0 write-capable tools** — reportes solo en `agent-tools/camcp-reports/`
 
 ## Reportes
 
-Fase 2+ escribirá en `agent-tools/camcp-reports/` (gitignored). Fase 1 no genera reportes en runtime MCP.
+Salida en `agent-tools/camcp-reports/` (gitignored). Formato **CAMCP REPORT** vía Reports Engine.

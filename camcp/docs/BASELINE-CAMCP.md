@@ -3,7 +3,7 @@
 Documento de referencia del estado mergeado de **CariHub Architecture MCP**.
 
 **Última actualización:** 2026-07-07  
-**Rama canónica:** `main` @ **`a5fb451`**
+**Rama canónica:** `main` @ **`28888e6`**
 
 ---
 
@@ -15,15 +15,15 @@ Documento de referencia del estado mergeado de **CariHub Architecture MCP**.
 | 2 — namespace `qa.*` | #115 | `f46e2d3` | 16 | CERRADA |
 | 3A — Intelligence Core + `intel.*` | #116 | `b365c11` | 22 | CERRADA |
 | 3B.1 — `parity.*` | #118 | `d383e4e` | 25 | CERRADA |
-| 3B.2 — `data.*` | #119 | `a5fb451` | **29** | **CERRADA** |
-| 3B.3 — `arch.*` | — | — | ~34 (obj.) | No iniciada |
+| 3B.2 — `data.*` | #119 | `a5fb451` | 29 | CERRADA |
+| 3B.3 — `arch.*` | #121 | `28888e6` | **32** | **CERRADA** |
 | 3C — `perf.*` | — | — | — | No iniciada |
 | 3D — `seo.*` + `ads.*` | — | — | — | No iniciada |
 | 3E — CI GitHub Actions | — | — | — | No iniciada |
 
 ---
 
-## Baseline mergeado en `main` (`a5fb451`)
+## Baseline mergeado en `main` (`28888e6`)
 
 ### Capacidades
 
@@ -44,13 +44,14 @@ CAMCP Core
 │
 ├── parity.* (3) — report-only → qa.tools.ts → scripts paridad (Fase 3B.1)
 ├── data.* (4) — report-only → qa.tools.ts → scripts QA pipeline (Fase 3B.2)
+├── arch.* (3) — read-only / report-only → SSOT ACTA/MAPA/intel (Fase 3B.3)
 │
 └── Reports Engine
     ├── schema · parser · writer · aggregator
     └── salida: agent-tools/camcp-reports/
 ```
 
-### Inventario de tools (29)
+### Inventario de tools (32)
 
 | Namespace | Count | Capability |
 |-----------|-------|------------|
@@ -60,7 +61,18 @@ CAMCP Core
 | `intel` | 6 | 3 read-only + 3 report-only |
 | `parity` | 3 | report-only |
 | `data` | 4 | report-only |
-| **Total** | **29** | **0 write-capable** |
+| `arch` | 3 | 1 read-only + 2 report-only |
+| **Total** | **32** | **0 write-capable** |
+
+### Tools `arch.*` (Fase 3B.3)
+
+| Tool | Capability | SSOT |
+|------|------------|------|
+| `arch.frozen_violations` | report-only | ACTA-CONGELAMIENTO + `.cursor/rules` + git diff |
+| `arch.scan_duplicates` | report-only | repo source (vía `filesystem.search`) |
+| `arch.domain_boundaries` | read-only | MAPA-MAESTRO + `intelligence.config.json` + `docs/gpt-knowledge/` |
+
+**Pospuesto:** `arch.dependencies` (P4 condicional — sin segundo grafo; consume `intel.graph` SSOT si se implementa).
 
 ### Tools `data.*` (Fase 3B.2)
 
@@ -79,6 +91,7 @@ CAMCP Core
 | `camcp/config/intelligence.config.json` | Dominios, anclas, módulos QA, cache TTL |
 | `camcp/config/parity.config.json` | Tools parity, deferredTools (`parity.visual`) |
 | `camcp/config/data.config.json` | Tools data, `reuses[]` por tool |
+| `camcp/config/arch.config.json` | Tools arch, `ssot[]` y `reuses[]` por tool |
 
 ### Smokes obligatorios
 
@@ -90,6 +103,7 @@ npm run smoke:qa       # 9 checks
 npm run smoke:intel    # 12 checks
 npm run smoke:parity   # 14 checks (Fase 3B.1)
 npm run smoke:data     # 18 checks (Fase 3B.2)
+npm run smoke:arch     # 18 checks (Fase 3B.3)
 ```
 
 ### Restricciones permanentes
@@ -99,8 +113,9 @@ npm run smoke:data     # 18 checks (Fase 3B.2)
 - No modificar `public/`, Firestore, Firebase, runtime CariHub desde CAMCP
 - No deploy CAMCP como servicio de producción
 - Reutilizar QA y contratos existentes — no pipelines paralelos
-- **Regla 1 (3B.2+):** ninguna tool `data.*` implementa validación propia del pipeline — solo delega a QA/adapters
+- **Regla 1 (3B.2+):** ninguna tool `data.*` / `arch.*` implementa validación propia del pipeline — solo delega
 - **Regla 2 (3B.2+):** toda tool nueva declara qué reutiliza (`reuses[]` en config, descriptions, docs)
+- **Regla 3 (3B.3+):** toda tool `arch.*` declara SSOT explícito; prohibido conocimiento paralelo (mapas, grafos, registries persistidos)
 - **Regla general (aprobada 2026-07-07):** toda nueva tool debe justificar claramente el valor que aporta y reutilizar la arquitectura existente. No se implementarán herramientas que dupliquen QA, contratos, renderizadores o lógica ya existente.
 
 ---
@@ -108,11 +123,14 @@ npm run smoke:data     # 18 checks (Fase 3B.2)
 ## Commits de referencia
 
 ```
+28888e6  Merge PR #121 — Fase 3B.3 arch.*
+4eaaecd  feat(camcp): agrega namespace arch.* Fase 3B.3
+dd00847  Merge PR #120 — docs 3B.2 cierre + baseline
+429885e  docs(camcp): cierra documentalmente Fase 3B.2 data.*
 a5fb451  Merge PR #119 — Fase 3B.2 data.*
 1116c9a  feat(camcp): agrega namespace data.* Fase 3B.2
 d383e4e  Merge PR #118 — Fase 3B.1 parity.*
 848f917  feat(camcp): agrega namespace parity.* Fase 3B.1
-4c2594c  Merge PR #117 — docs 3A cierre + baseline + SPEC 3B
 b365c11  Merge PR #116 — Fase 3A Intelligence Core
 f46e2d3  Merge PR #115 — Fase 1+2 QA namespace
 de37fd6  feat(camcp): Fase 1 filesystem + git
@@ -131,6 +149,8 @@ de37fd6  feat(camcp): Fase 1 filesystem + git
 | [FASE-3B-1-CIERRE.md](./FASE-3B-1-CIERRE.md) | Cierre 3B.1 |
 | [FASE-3B-2-DATA-SPEC.md](./FASE-3B-2-DATA-SPEC.md) | SPEC 3B.2 data |
 | [FASE-3B-2-CIERRE.md](./FASE-3B-2-CIERRE.md) | Acta de cierre 3B.2 |
+| [FASE-3B-3-ARCH-SPEC.md](./FASE-3B-3-ARCH-SPEC.md) | SPEC 3B.3 arch |
+| [FASE-3B-3-CIERRE.md](./FASE-3B-3-CIERRE.md) | Acta de cierre 3B.3 |
 | [../README.md](../README.md) | Guía operativa CAMCP |
 
 ---
@@ -138,18 +158,19 @@ de37fd6  feat(camcp): Fase 1 filesystem + git
 ## Observaciones activas del baseline
 
 1. **`fondos_static ok=false`** — script QA heredado; ticket independiente.
-2. **CI remoto** — pendiente Fase 3E.
-3. **Grafo intelligence** — monitorear rendimiento con catálogo QA creciente.
-4. **Side-effect `validar-schemas`** — `data.schema_alignment` puede modificar `scripts/validacion-schemas-report.json` al ejecutarse; revertir localmente tras smokes.
+2. **CI remoto** — pendiente Fase 3E (**no iniciada**).
+3. **`arch.dependencies`** — pospuesto P4; no implementar sin valor demostrable sobre `intel.graph`.
+4. **Grafo intelligence** — monitorear rendimiento con catálogo QA creciente.
+5. **Side-effect `validar-schemas`** — `data.schema_alignment` puede modificar `scripts/validacion-schemas-report.json` al ejecutarse; revertir localmente tras smokes.
 
 ---
 
 ## Verificación rápida
 
 ```bash
-git rev-parse HEAD origin/main   # deben coincidir en main limpio @ a5fb451
+git rev-parse HEAD origin/main   # deben coincidir en main limpio @ 28888e6
 cd camcp && npm run build
 npm run smoke && npm run smoke:extended && npm run smoke:qa
-npm run smoke:intel && npm run smoke:parity && npm run smoke:data
-# main @ a5fb451: tools=29 · 0 write-capable
+npm run smoke:intel && npm run smoke:parity && npm run smoke:data && npm run smoke:arch
+# main @ 28888e6: tools=32 · 0 write-capable
 ```
