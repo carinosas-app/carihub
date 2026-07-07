@@ -25,6 +25,8 @@
 <script src="js/catalogos-carihub.js"></script>
 <script src="js/carihub-bienestar-sector-render.js?v=20260630f3"></script>
 <script src="js/carihub-eventos-sector-render.js?v=20260627e3"></script>
+<script src="js/data/registro-sector-contract-registry.js?v=20260702reg-v1"></script>
+<script src="js/carihub-gastronomia-sector-render.js?v=20260702gast1"></script>
 <script src="js/carihub-public-render-lite.js?v=20260627e3"></script>
 <script src="js/resultados-demo.js"></script>
 <script src="js/perfil-publico-init.js"></script>
@@ -7365,6 +7367,65 @@ function demoAssetDesdeResultados(src){
   if(/^(\.\.|\/|https?:)/.test(s)) return s;
   return ""+s.replace(/^\.\//,"");
 }
+var PERFIL_SECTOR_BRIDGE_EXCLUDED={salud:1,profesionales:1,bienestar:1,eventos:1};
+var PERFIL_SECTOR_BRIDGE_RENDER={restaurantes:{global:"CariHubGastronomiaSectorRender"}};
+function perfilBridgeUserHasField(u,key){
+  if(!u) return false;
+  if(key==="stats"||key==="faq"||key==="reviews"||key==="feats"||key==="noIncluidos"||key==="metodosPago"){
+    return Array.isArray(u[key])&&u[key].length>0;
+  }
+  if(key==="rating") return u.rating!=null&&String(u.rating).trim()!==""&&String(u.rating)!=="—";
+  if(key==="opiniones") return u.opiniones!=null&&Number(u.opiniones)>0;
+  return u[key]!=null&&u[key]!=="";
+}
+function stripSyntheticDemoFields(clean,u){
+  if(!clean||!clean.__previewRegistro) return clean;
+  u=u||{};
+  ["stats","faq","reviews","feats","noIncluidos"].forEach(function(k){
+    if(!perfilBridgeUserHasField(u,k)) clean[k]=[];
+  });
+  if(!perfilBridgeUserHasField(u,"metodosPago")) clean.metodosPago=[];
+  if(!perfilBridgeUserHasField(u,"rating")) clean.rating="—";
+  if(!perfilBridgeUserHasField(u,"opiniones")) clean.opiniones=0;
+  return clean;
+}
+function resolveSectorBridgeRenderModule(sectorId){
+  var Registry=window.CariHubSectorContractRegistry;
+  if(!Registry||typeof Registry.resolveContract!=="function") return null;
+  var contract=Registry.resolveContract(sectorId);
+  if(!contract||PERFIL_SECTOR_BRIDGE_EXCLUDED[contract.sectorId]) return null;
+  var pilot=PERFIL_SECTOR_BRIDGE_RENDER[contract.sectorId];
+  if(!pilot) return null;
+  var mod=window[pilot.global];
+  if(!mod||typeof mod.hydrateDisplayFields!=="function") return null;
+  return {contract:contract,mod:mod};
+}
+function shouldApplySectorBridge(vista,clean,u){
+  if(vista!=="pro"&&vista!=="empresa") return false;
+  var sid=String((clean&&clean.sectorId)||(u&&u.sectorId)||"").trim();
+  if(!sid) return false;
+  if(PERFIL_SECTOR_BRIDGE_EXCLUDED[sid]) return false;
+  return !!resolveSectorBridgeRenderModule(sid);
+}
+function applySectorBridgeFromRegistry(clean,u){
+  if(!clean||!u) return clean;
+  var bridge=resolveSectorBridgeRenderModule(clean.sectorId||u.sectorId);
+  if(!bridge) return clean;
+  var contract=bridge.contract;
+  var nestedKey=contract.nestedProfileKey;
+  if(u[nestedKey]) clean[nestedKey]=Object.assign({},u[nestedKey]);
+  else if(!clean[nestedKey]) clean[nestedKey]={};
+  var nested=clean[nestedKey]||{};
+  if(u.deltaPack&&!clean.deltaPack) clean.deltaPack=u.deltaPack;
+  if(u.canonSubcategoriaId&&!clean.canonSubcategoriaId) clean.canonSubcategoriaId=u.canonSubcategoriaId;
+  if(nested.deltaPack&&!clean.deltaPack) clean.deltaPack=nested.deltaPack;
+  if(nested.canonSubcategoriaId&&!clean.subcategoriaId) clean.subcategoriaId=nested.canonSubcategoriaId;
+  if(nested.blockTitle&&!clean.titulo) clean.titulo=nested.blockTitle;
+  if(!clean.sectorId) clean.sectorId=contract.sectorId;
+  clean=bridge.mod.hydrateDisplayFields(clean);
+  clean=stripSyntheticDemoFields(clean,u);
+  return clean;
+}
 function mergeSaludMedicoDesdeRegistro(merged,u){
   if(!merged||!u) return merged;
   var sp=u.saludPerfil||{};
@@ -7733,6 +7794,9 @@ function aplicarPerfilDesdeRegistro(vista,u){
     DEMO[vista]=mergedMedico;
   }else if((vista==="pro"||vista==="empresa")&&(clean.sectorId==="profesionales"||u.sectorId==="profesionales"||u.profesionalesPerfil)){
     mergeProfesionalesDesdeRegistro(clean,u);
+    DEMO[vista]=clean;
+  }else if((vista==="pro"||vista==="empresa")&&shouldApplySectorBridge(vista,clean,u)){
+    applySectorBridgeFromRegistry(clean,u);
     DEMO[vista]=clean;
   }else{
     DEMO[vista]=clean;

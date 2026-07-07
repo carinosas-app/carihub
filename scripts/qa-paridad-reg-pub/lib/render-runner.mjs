@@ -9,7 +9,7 @@ import { buildMockBloques } from './mock-generator.mjs';
 import { extractFieldContracts } from './field-extractor.mjs';
 import { createPlaywrightSession, newPage } from './playwright-context.mjs';
 import { navigateAndPaint, buildPreviewPayload } from './fixture-injector.mjs';
-import { domExtractorSource, extractSectionTexts } from './dom-extractor.mjs';
+import { domExtractorSource, extractSectionTexts, findTextMatches } from './dom-extractor.mjs';
 import { runRenderChecks } from './render-checker.mjs';
 import { runRenderPrivacyChecks } from './render-privacy-checker.mjs';
 import { captureScreenshots } from './screenshot-capture.mjs';
@@ -203,7 +203,23 @@ export async function runSubRender(opts) {
       subcategoriaId: schemaEntry.subcategoriaId,
     });
 
-    base.renderResults = [...presenceAndLocation, ...privacy.filter((p) => p.blockFieldId !== '*' || p.status === 'fail')];
+    const demoForbidden = [];
+    for (const needle of mapEntry.demoForbiddenNeedles || []) {
+      const match = findTextMatches(dom, [needle], sectionTexts);
+      if (match.count > 0) {
+        demoForbidden.push({
+          subcategoriaId: schemaEntry.subcategoriaId,
+          check: 'demo-forbidden',
+          status: 'fail',
+          severity: 'bloqueador',
+          reason: `contenido demo sintético visible: ${needle}`,
+          blockFieldId: '*',
+          expectedText: needle,
+        });
+      }
+    }
+
+    base.renderResults = [...presenceAndLocation, ...privacy.filter((p) => p.blockFieldId !== '*' || p.status === 'fail'), ...demoForbidden];
 
     if (base.runtimeCrash) {
       base.renderResults.unshift({

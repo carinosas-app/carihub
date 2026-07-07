@@ -52,6 +52,17 @@ const SUB_OVERRIDES = {
     anosExperienciaProfesional: '10',
     tagline: 'Asesoría jurídica QA',
   },
+  pizzerias: {
+    nombreComercial: 'Pizzeria QA Test',
+    tagline: 'Pizza artesanal QA',
+    precioPromedioMx: '250',
+    horarioAtencionComercial: 'Lun-Dom 12-22',
+    pizzasEstrella: 'Hawaiana Suprema',
+    deliveryPropio: 'si',
+    permisoManipulacionAlimentos: 'si_vigente',
+    tipoCocinaPrincipal: 'italiana',
+    horarioCocina: '12:00-23:00',
+  },
 };
 
 function isTruthy(val) {
