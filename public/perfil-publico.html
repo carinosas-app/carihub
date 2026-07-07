@@ -25,6 +25,8 @@
 <script src="js/catalogos-carihub.js"></script>
 <script src="js/carihub-bienestar-sector-render.js?v=20260630f3"></script>
 <script src="js/carihub-eventos-sector-render.js?v=20260627e3"></script>
+<script src="js/data/registro-sector-contract-registry.js?v=20260702reg-v1"></script>
+<script src="js/carihub-gastronomia-sector-render.js?v=20260702gast1"></script>
 <script src="js/carihub-public-render-lite.js?v=20260627e3"></script>
 <script src="js/resultados-demo.js"></script>
 <script src="js/perfil-publico-init.js"></script>
@@ -7077,14 +7079,14 @@ function renderMedicoProfesional(u){
     '</div>'+
     '<div class="pcard"><div class="pcard__h">📄 Sobre mí</div>'+
       '<p style="margin:0 0 12px;font-size:14px;font-weight:400;line-height:1.5;color:#212121">'+safe(u.sobreMi)+'</p>'+
-      '<div class="stats">'+u.stats.map(function(s){return '<div class="st"><b>'+safe(s[0])+'</b><span>'+safe(s[1])+'</span></div>';}).join("")+'</div>'+
+      '<div class="stats">'+(u.stats||[]).map(function(s){return '<div class="st"><b>'+safe(s[0])+'</b><span>'+safe(s[1])+'</span></div>';}).join("")+'</div>'+
     '</div>'+
     '<div class="pcard"><div class="pcard__h">⭐ Opiniones de pacientes <a class="lnk" href="#">Ver todas</a></div>'+
       '<div class="rating"><span class="num">'+safe(u.rating)+'</span>'+stars(5)+'<span style="color:var(--muted);font-size:13px">('+u.opiniones+' opiniones)</span></div>'+
-      u.reviews.map(function(r){return '<div class="review"><div class="av">'+safe(r[0].slice(0,1))+'</div><div class="rb"><div class="rn">'+safe(r[0])+' '+stars(r[1])+'</div><div class="rt">'+safe(r[2])+'</div></div><div class="rd">'+safe(r[3])+'</div></div>';}).join("")+
+      (u.reviews||[]).map(function(r){return '<div class="review"><div class="av">'+safe(r[0].slice(0,1))+'</div><div class="rb"><div class="rn">'+safe(r[0])+' '+stars(r[1])+'</div><div class="rt">'+safe(r[2])+'</div></div><div class="rd">'+safe(r[3])+'</div></div>';}).join("")+
     '</div>'+
     '<div class="pcard faq"><div class="pcard__h">❓ Preguntas frecuentes</div>'+
-      u.faq.map(function(q){return '<div class="q">'+safe(q)+'<span class="chev">⌄</span></div>';}).join("")+
+      (u.faq||[]).map(function(q){return '<div class="q">'+safe(q)+'<span class="chev">⌄</span></div>';}).join("")+
     '</div>';
 
   var datosHTML=[
@@ -7113,7 +7115,7 @@ function renderMedicoProfesional(u){
       u.noIncluidos.map(function(s){return '<div><span class="no">✕</span> '+safe(s)+'</div>';}).join("")+'</div></div>':"")+
     '<div class="pcard"><div class="pcard__h">🗺️ Zona de atención</div>'+
       '<div class="mapwrap"><div class="mapbox">'+S.chMapa(u.ciudad)+'</div>'+
-      '<div class="coberlist">'+u.cobertura.map(function(c){return '<div>📍 '+safe(c)+'</div>';}).join("")+'</div></div>'+
+      '<div class="coberlist">'+(u.cobertura||[]).map(function(c){return '<div>📍 '+safe(c)+'</div>';}).join("")+'</div></div>'+
     '</div>'+
     '<div class="pcard"><div class="trust">'+
       '<div class="ti"><div class="em">🎓</div>Cédula profesional verificada</div>'+
@@ -7216,15 +7218,15 @@ function renderProEmpresa(u, esEmpresa){
     '</div>'+
     '<div class="pcard"><div class="pcard__h">'+(esEmpresa?"📄 Sobre nosotros":"📄 Sobre mí")+'</div>'+
       '<p style="margin:0 0 12px;font-size:14px;font-weight:400;line-height:1.5;color:#212121">'+safe(esEmpresa?u.sobreNosotros:u.sobreMi)+'</p>'+
-      '<div class="stats">'+u.stats.map(function(s){return '<div class="st"><b>'+safe(s[0])+'</b><span>'+safe(s[1])+'</span></div>';}).join("")+'</div>'+
+      '<div class="stats">'+(u.stats||[]).map(function(s){return '<div class="st"><b>'+safe(s[0])+'</b><span>'+safe(s[1])+'</span></div>';}).join("")+'</div>'+
     '</div>'+
     certBlock+
     (isBs || isEv ? '' : ('<div class="pcard"><div class="pcard__h">⭐ Opiniones de clientes <a class="lnk" href="#">Ver todas</a></div>'+
       '<div class="rating"><span class="num">'+safe(u.rating)+'</span>'+stars(5)+'<span style="color:var(--muted);font-size:13px">('+u.opiniones+' opiniones)</span></div>'+
-      u.reviews.map(function(r){return '<div class="review"><div class="av">'+safe(r[0].slice(0,1))+'</div><div class="rb"><div class="rn">'+safe(r[0])+' '+stars(r[1])+'</div><div class="rt">'+safe(r[2])+'</div></div><div class="rd">'+safe(r[3])+'</div></div>';}).join("")+
+      (u.reviews||[]).map(function(r){return '<div class="review"><div class="av">'+safe(r[0].slice(0,1))+'</div><div class="rb"><div class="rn">'+safe(r[0])+' '+stars(r[1])+'</div><div class="rt">'+safe(r[2])+'</div></div><div class="rd">'+safe(r[3])+'</div></div>';}).join("")+
     '</div>'))+
     '<div class="pcard faq"><div class="pcard__h">❓ Preguntas frecuentes</div>'+
-      u.faq.map(function(q){return '<div class="q">'+safe(q)+'<span class="chev">⌄</span></div>';}).join("")+
+      (u.faq||[]).map(function(q){return '<div class="q">'+safe(q)+'<span class="chev">⌄</span></div>';}).join("")+
     '</div>';
 
   var right=''+
@@ -7364,6 +7366,177 @@ function demoAssetDesdeResultados(src){
   if(!s) return s;
   if(/^(\.\.|\/|https?:)/.test(s)) return s;
   return ""+s.replace(/^\.\//,"");
+}
+var PERFIL_SECTOR_BRIDGE_EXCLUDED={salud:1,profesionales:1,bienestar:1,eventos:1};
+var PERFIL_SECTOR_BRIDGE_RENDER={restaurantes:{global:"CariHubGastronomiaSectorRender"}};
+function perfilBridgeUserHasField(u,key){
+  if(!u) return false;
+  if(key==="stats"||key==="faq"||key==="reviews"||key==="feats"||key==="noIncluidos"||key==="metodosPago"){
+    return Array.isArray(u[key])&&u[key].length>0;
+  }
+  if(key==="rating") return u.rating!=null&&String(u.rating).trim()!==""&&String(u.rating)!=="—";
+  if(key==="opiniones") return u.opiniones!=null&&Number(u.opiniones)>0;
+  return u[key]!=null&&u[key]!=="";
+}
+function stripSyntheticDemoFields(clean,u){
+  if(!clean||!clean.__previewRegistro) return clean;
+  u=u||{};
+  ["stats","faq","reviews","feats","noIncluidos"].forEach(function(k){
+    if(!perfilBridgeUserHasField(u,k)) clean[k]=[];
+  });
+  if(!perfilBridgeUserHasField(u,"metodosPago")) clean.metodosPago=[];
+  if(!perfilBridgeUserHasField(u,"rating")) clean.rating="—";
+  if(!perfilBridgeUserHasField(u,"opiniones")) clean.opiniones=0;
+  return clean;
+}
+function resolveSectorBridgeRenderModule(sectorId){
+  var Registry=window.CariHubSectorContractRegistry;
+  if(!Registry||typeof Registry.resolveContract!=="function") return null;
+  var contract=Registry.resolveContract(sectorId);
+  if(!contract||PERFIL_SECTOR_BRIDGE_EXCLUDED[contract.sectorId]) return null;
+  var pilot=PERFIL_SECTOR_BRIDGE_RENDER[contract.sectorId];
+  if(!pilot) return null;
+  var mod=window[pilot.global];
+  if(!mod||typeof mod.hydrateDisplayFields!=="function") return null;
+  return {contract:contract,mod:mod};
+}
+function shouldApplySectorBridge(vista,clean,u){
+  if(vista!=="pro"&&vista!=="empresa") return false;
+  var sid=String((clean&&clean.sectorId)||(u&&u.sectorId)||"").trim();
+  if(!sid) return false;
+  if(PERFIL_SECTOR_BRIDGE_EXCLUDED[sid]) return false;
+  return !!resolveSectorBridgeRenderModule(sid);
+}
+function applySectorBridgeFromRegistry(clean,u){
+  if(!clean||!u) return clean;
+  var bridge=resolveSectorBridgeRenderModule(clean.sectorId||u.sectorId);
+  if(!bridge) return clean;
+  var contract=bridge.contract;
+  var nestedKey=contract.nestedProfileKey;
+  if(u[nestedKey]) clean[nestedKey]=Object.assign({},u[nestedKey]);
+  else if(!clean[nestedKey]) clean[nestedKey]={};
+  var nested=clean[nestedKey]||{};
+  if(u.deltaPack&&!clean.deltaPack) clean.deltaPack=u.deltaPack;
+  if(u.canonSubcategoriaId&&!clean.canonSubcategoriaId) clean.canonSubcategoriaId=u.canonSubcategoriaId;
+  if(nested.deltaPack&&!clean.deltaPack) clean.deltaPack=nested.deltaPack;
+  if(nested.canonSubcategoriaId&&!clean.subcategoriaId) clean.subcategoriaId=nested.canonSubcategoriaId;
+  if(nested.blockTitle&&!clean.titulo) clean.titulo=nested.blockTitle;
+  if(!clean.sectorId) clean.sectorId=contract.sectorId;
+  clean=bridge.mod.hydrateDisplayFields(clean);
+  clean=stripSyntheticDemoFields(clean,u);
+  return clean;
+}
+function mergeSaludMedicoDesdeRegistro(merged,u){
+  if(!merged||!u) return merged;
+  var sp=u.saludPerfil||{};
+  if(u.saludPerfil) merged.saludPerfil=Object.assign({},u.saludPerfil);
+  if(!merged.sectorId&&u.sectorId) merged.sectorId=u.sectorId;
+  if(sp.nombreProfesional||u.nombreProfesional){
+    merged.nombreProfesional=sp.nombreProfesional||u.nombreProfesional;
+    merged.nombre=merged.nombreProfesional;
+  }
+  if(sp.especialidad||u.especialidad) merged.especialidad=sp.especialidad||u.especialidad;
+  if(sp.subespecialidad||u.subespecialidad) merged.subespecialidad=sp.subespecialidad||u.subespecialidad;
+  if(sp.blockTitle) merged.titulo=sp.blockTitle;
+  else if(merged.especialidad&&!merged.titulo) merged.titulo=merged.especialidad;
+  if(!merged.profesion&&merged.especialidad) merged.profesion=merged.especialidad;
+  if(sp.precioConsulta||u.precioConsulta){
+    merged.precioConsulta=sp.precioConsulta||u.precioConsulta;
+    merged.precio=merged.precioConsulta;
+  }else if(sp.tarifaDesde){
+    merged.precioConsulta=sp.tarifaDesde;
+    merged.precio=sp.tarifaDesde;
+  }
+  if(sp.unidadConsulta) merged.unidadConsulta=sp.unidadConsulta;
+  if(sp.horarioAtencion||u.horarioAtencion){
+    merged.horarioAtencion=sp.horarioAtencion||u.horarioAtencion;
+    merged.horario=merged.horarioAtencion;
+  }else if(sp.horarioDetalle){
+    merged.horarioAtencion=sp.horarioDetalle;
+    merged.horario=sp.horarioDetalle;
+  }
+  if(Array.isArray(sp.serviciosProfesionales)&&sp.serviciosProfesionales.length){
+    merged.serviciosProfesionales=sp.serviciosProfesionales.slice();
+    merged.serviciosIncluidos=merged.serviciosProfesionales.slice();
+  }else if(Array.isArray(u.serviciosProfesionales)&&u.serviciosProfesionales.length){
+    merged.serviciosProfesionales=u.serviciosProfesionales.slice();
+    merged.serviciosIncluidos=merged.serviciosProfesionales.slice();
+  }
+  if(Array.isArray(sp.segurosAceptadosSalud)&&sp.segurosAceptadosSalud.length){
+    merged.segurosAceptados=sp.segurosAceptadosSalud.slice();
+  }else if(Array.isArray(u.segurosAceptados)&&u.segurosAceptados.length){
+    merged.segurosAceptados=u.segurosAceptados.slice();
+  }else if(sp.segurosAceptados){
+    merged.segurosAceptados=String(sp.segurosAceptados).split(/[·,;|/]+/).map(function(x){return x.trim();}).filter(Boolean);
+  }
+  if(sp.consultaEnLinea===true||u.consultaEnLinea===true){
+    merged.consultaEnLinea=true;
+    merged.consultaEnLineaTexto=merged.consultaEnLineaTexto||"Consulta en línea disponible";
+  }
+  if(u.colaboracionContenido) merged.colaboracionContenido=u.colaboracionContenido;
+  if(u.cedulaVerificada===true||sp.deltaPack==="A") merged.cedulaVerificada=true;
+  if(merged.cedulaVerificada) merged.verificado=true;
+  if(!Array.isArray(merged.cobertura)||!merged.cobertura.length){
+    var loc=[merged.zona,merged.ciudad,merged.estado].filter(Boolean);
+    if(loc.length) merged.cobertura=loc;
+    else if(sp.coberturaAtencionSalud) merged.cobertura=[sp.coberturaAtencionSalud];
+    else if(sp.coberturaDomicilioZona) merged.cobertura=[sp.coberturaDomicilioZona];
+  }
+  if(sp.coberturaAtencionSalud&&!merged.zonaCobertura) merged.zonaCobertura=sp.coberturaAtencionSalud;
+  if(sp.idiomasAtencion&&!merged.idiomas) merged.idiomas=sp.idiomasAtencion;
+  return merged;
+}
+function mergeProfesionalesDesdeRegistro(merged,u){
+  if(!merged||!u) return merged;
+  var pp=u.profesionalesPerfil||{};
+  if(u.profesionalesPerfil) merged.profesionalesPerfil=Object.assign({},u.profesionalesPerfil);
+  if(!merged.sectorId&&u.sectorId) merged.sectorId=u.sectorId;
+  if(pp.nombreProfesional||u.nombreProfesional){
+    merged.nombreProfesional=pp.nombreProfesional||u.nombreProfesional;
+    merged.nombre=merged.nombreProfesional;
+  }
+  var espProf=pp.especialidadProfesional||u.especialidadProfesional||"";
+  if(u.especialidad||espProf){
+    if(espProf) merged.especialidadProfesional=espProf;
+    merged.especialidad=u.especialidad||espProf;
+    if(Array.isArray(merged.especialidad)) merged.especialidad=merged.especialidad.join(", ");
+  }
+  if(pp.blockTitle) merged.titulo=pp.blockTitle;
+  else if(u.titulo) merged.titulo=u.titulo;
+  else if(merged.especialidad&&!merged.titulo) merged.titulo=merged.especialidad;
+  if(pp.precioConsulta||u.precioConsulta){
+    merged.precioConsulta=pp.precioConsulta||u.precioConsulta;
+    merged.precio=merged.precioConsulta;
+  }else if(pp.tarifaDesde||u.tarifaDesde){
+    merged.precioConsulta=pp.tarifaDesde||u.tarifaDesde;
+    merged.precio=merged.precioConsulta;
+  }
+  if(pp.unidadConsulta||u.unidadConsulta) merged.unidadConsulta=pp.unidadConsulta||u.unidadConsulta;
+  if(pp.horarioAtencion||u.horarioAtencion){
+    merged.horarioAtencion=pp.horarioAtencion||u.horarioAtencion;
+    merged.horario=merged.horarioAtencion;
+  }else if(pp.horarioDetalle||u.horarioDetalle){
+    merged.horarioAtencion=pp.horarioDetalle||u.horarioDetalle;
+    merged.horario=merged.horarioAtencion;
+  }
+  if(Array.isArray(pp.serviciosProfesionales)&&pp.serviciosProfesionales.length){
+    merged.serviciosProfesionales=pp.serviciosProfesionales.slice();
+    merged.serviciosIncluidos=merged.serviciosProfesionales.slice();
+  }else if(Array.isArray(u.serviciosProfesionales)&&u.serviciosProfesionales.length){
+    merged.serviciosProfesionales=u.serviciosProfesionales.slice();
+    merged.serviciosIncluidos=merged.serviciosProfesionales.slice();
+  }
+  if(Array.isArray(merged.serviciosIncluidos)&&merged.serviciosIncluidos.length){
+    merged.servicios=merged.serviciosIncluidos.join(", ");
+  }
+  var mod=pp.modalidadAtencionProfesional||u.modalidadAtencionProfesional||"";
+  if(mod){
+    merged.modalidadAtencionProfesional=mod;
+    var modLbl={consultorio:"Consultorio",hibrido:"Híbrido",domicilio:"A domicilio",visita_cliente:"Visita al cliente",remoto:"En línea",en_linea:"En línea"};
+    merged.atencion=merged.atencion||modLbl[String(mod).toLowerCase()]||String(mod).replace(/_/g," ");
+  }
+  if(pp.tagline&&!merged.tagline) merged.tagline=pp.tagline;
+  return merged;
 }
 function aplicarPerfilDesdeRegistro(vista,u){
   if(!u||!DEMO[vista]) return;
@@ -7615,7 +7788,19 @@ function aplicarPerfilDesdeRegistro(vista,u){
     clean.categoria=catVis;
     clean.categoriaPublica=catVis;
   }
-  DEMO[vista]=clean;
+  if(vista==="medico"||clean.sectorId==="salud"||u.sectorId==="salud"){
+    var mergedMedico=Object.assign({},DEMO[vista],clean);
+    mergeSaludMedicoDesdeRegistro(mergedMedico,u);
+    DEMO[vista]=mergedMedico;
+  }else if((vista==="pro"||vista==="empresa")&&(clean.sectorId==="profesionales"||u.sectorId==="profesionales"||u.profesionalesPerfil)){
+    mergeProfesionalesDesdeRegistro(clean,u);
+    DEMO[vista]=clean;
+  }else if((vista==="pro"||vista==="empresa")&&shouldApplySectorBridge(vista,clean,u)){
+    applySectorBridgeFromRegistry(clean,u);
+    DEMO[vista]=clean;
+  }else{
+    DEMO[vista]=clean;
+  }
 }
 function aplicarPerfilResultadosEnDemo(vista,u){
   if(!u||!DEMO[vista]) return;

@@ -113,26 +113,32 @@ function mergeUnicornFlatFields(perfil) {
   return perfil;
 }
 
-export function buildPreviewPayload(mapEntry, hydrated, query = {}) {
+export function buildPreviewPayload(mapEntry, hydrated, query = {}, options = {}) {
+  const strict = options.strict === true;
   let perfil = sanitizePerfilForBrowser(hydrated);
-  perfil = enrichPerfilForRender(perfil, mapEntry);
-  perfil = mergeSaludFlatFields(perfil);
-  perfil = mergeDominatrixFlatFields(perfil);
-  perfil = mergeUnicornFlatFields(perfil);
+  if (!strict) {
+    perfil = enrichPerfilForRender(perfil, mapEntry);
+    perfil = mergeSaludFlatFields(perfil);
+    perfil = mergeDominatrixFlatFields(perfil);
+    perfil = mergeUnicornFlatFields(perfil);
+
+    if (perfil.saludPerfil?.nombreProfesional) {
+      perfil.nombre = perfil.saludPerfil.nombreProfesional;
+      perfil.nombreProfesional = perfil.saludPerfil.nombreProfesional;
+    }
+    if (perfil.dominatrixPerfil?.estiloDominacion) {
+      perfil.estiloDominacion = perfil.dominatrixPerfil.estiloDominacion;
+    }
+    if (perfil.unicornPerfil?.tipoUnicornio) {
+      perfil.tipoUnicornio = perfil.unicornPerfil.tipoUnicornio;
+    }
+  }
+
   perfil.__previewRegistro = true;
   perfil.__id = perfil.__id || 'qa-preview-c';
-  perfil.__hydratedFromBloques = true;
-
-  if (perfil.saludPerfil?.nombreProfesional) {
-    perfil.nombre = perfil.saludPerfil.nombreProfesional;
-    perfil.nombreProfesional = perfil.saludPerfil.nombreProfesional;
-  }
-  if (perfil.dominatrixPerfil?.estiloDominacion) {
-    perfil.estiloDominacion = perfil.dominatrixPerfil.estiloDominacion;
-  }
-  if (perfil.unicornPerfil?.tipoUnicornio) {
-    perfil.tipoUnicornio = perfil.unicornPerfil.tipoUnicornio;
-  }
+  perfil.__hydratedFromBloques = strict
+    ? hydrated.__hydratedFromBloques === true
+    : true;
 
   return {
     vista: mapEntry.vista,
@@ -303,12 +309,47 @@ export async function paintProfileEvaluate(page, payload) {
   await applyProfileToPage(page, payload);
 }
 
-export async function navigateAndPaint(session, page, payload, mapEntry) {
+export async function navigateAndPaint(session, page, payload, mapEntry, options = {}) {
+  const strict = options.strict === true;
   const fullUrl = buildPreviewUrl(session.baseUrl, mapEntry, payload);
   await injectViaSessionStorage(page, payload);
 
+  const pageErrors = [];
+  const onPageError = (err) => {
+    pageErrors.push({
+      message: String(err?.message || err),
+      stack: err?.stack || null,
+    });
+  };
+  page.on('pageerror', onPageError);
+
   await page.goto(fullUrl, { waitUntil: 'domcontentloaded', timeout: 90000 });
-  await page.waitForTimeout(2500);
+  await page.waitForTimeout(strict ? 4000 : 2500);
+
+  if (strict) {
+    let paintOk = false;
+    let paintError = null;
+    try {
+      await waitForPaint(page, mapEntry, 45000);
+      paintOk = true;
+    } catch (e) {
+      paintError = e?.message || String(e);
+    }
+
+    page.off('pageerror', onPageError);
+    const stored = await page.evaluate((key) => sessionStorage.getItem(key), STORAGE_KEY);
+
+    return {
+      injectionMode: 'sessionStorage-strict',
+      url: fullUrl,
+      strict: true,
+      paintOk,
+      paintError,
+      sessionStoragePresent: !!stored,
+      pageErrors: [...pageErrors],
+      consoleErrors: [...(page.__consoleErrors || [])],
+    };
+  }
 
   let injectionMode = 'sessionStorage';
   const stored = await page.evaluate((key) => sessionStorage.getItem(key), STORAGE_KEY);
@@ -348,7 +389,14 @@ export async function navigateAndPaint(session, page, payload, mapEntry) {
     await waitForPaint(page, mapEntry, 45000);
   }
 
-  return { injectionMode, url: fullUrl };
+  page.off('pageerror', onPageError);
+
+  return {
+    injectionMode,
+    url: fullUrl,
+    pageErrors: [...pageErrors],
+    consoleErrors: [...(page.__consoleErrors || [])],
+  };
 }
 
 export { STORAGE_KEY };

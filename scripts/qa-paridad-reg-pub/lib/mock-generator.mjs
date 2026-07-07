@@ -42,6 +42,27 @@ const SUB_OVERRIDES = {
     mostrarObjetivosPerfil: 'Sí',
     mostrarColaboraciones: 'Sí',
   },
+  abogados: {
+    nombreProfesional: 'Lic. QA Abogado',
+    especialidadProfesional: 'Derecho familiar',
+    serviciosProfesionales: ['Consulta legal'],
+    modalidadAtencionProfesional: 'hibrido',
+    precioConsulta: '1200',
+    horarioAtencion: 'Lun-Vie 9-18',
+    anosExperienciaProfesional: '10',
+    tagline: 'Asesoría jurídica QA',
+  },
+  pizzerias: {
+    nombreComercial: 'Pizzeria QA Test',
+    tagline: 'Pizza artesanal QA',
+    precioPromedioMx: '250',
+    horarioAtencionComercial: 'Lun-Dom 12-22',
+    pizzasEstrella: 'Hawaiana Suprema',
+    deliveryPropio: 'si',
+    permisoManipulacionAlimentos: 'si_vigente',
+    tipoCocinaPrincipal: 'italiana',
+    horarioCocina: '12:00-23:00',
+  },
 };
 
 function isTruthy(val) {

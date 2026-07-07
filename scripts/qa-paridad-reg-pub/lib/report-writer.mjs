@@ -169,6 +169,7 @@ export function buildMarkdownSummaryPhaseC(report) {
     `| Ubicación FAIL | ${s.locationFail} |`,
     `| Duplicados WARN | ${s.duplicateWarn} |`,
     `| Privacy DOM | ${s.privacyDomViolations} |`,
+    `| Runtime crashes | ${s.runtimeCrashes ?? 0} |`,
     `| Bloqueadores | ${s.blockers} |`,
     `| Screenshots | ${s.screenshotsCaptured} |`,
     '',
@@ -186,8 +187,24 @@ export function buildMarkdownSummaryPhaseC(report) {
   if (report.failures?.length) {
     lines.push('## Muestra failures-render (≤15)', '');
     report.failures.slice(0, 15).forEach((f) => {
-      lines.push(`- **${f.subcategoriaId}** \`${f.blockFieldId}\` [${f.check}] — ${f.reason}`);
+      const stackNote = f.stack ? ` — stack: \`${String(f.stack).split('\n')[0]}\`` : '';
+      lines.push(`- **${f.subcategoriaId}** \`${f.blockFieldId || '*'}\` [${f.check}] — ${f.reason}${stackNote}`);
     });
+    lines.push('');
+  }
+
+  if (report.strictComparison?.baselineFound) {
+    const c = report.strictComparison;
+    lines.push('## Comparación strict vs normal', '');
+    lines.push(`Baseline: \`${c.baselinePath}\` (${c.baselineRunId || 'n/a'})`, '');
+    lines.push('| Sub | Normal | Strict | Δ pcard | Crash |');
+    lines.push('|-----|--------|--------|--------:|-------|');
+    for (const row of c.rows || []) {
+      const crash = row.strict.runtimeCrash ? 'Sí' : 'No';
+      lines.push(
+        `| ${row.subcategoriaId} | ${row.normal?.status || 'n/a'} | ${row.strict.status} | ${row.delta.pcardDelta ?? 'n/a'} | ${crash} |`
+      );
+    }
     lines.push('');
   }
 
@@ -201,8 +218,12 @@ export function writePhaseCReports(outBase, payload) {
     summary: payload.summary,
     topFailures: payload.topFailures,
     subResults: payload.subResults?.map(stripRenderSub),
+    strictComparison: payload.strictComparison || undefined,
   });
   writeJson(path.join(outBase, 'failures-render.json'), payload.failures);
+  if (payload.strictComparison) {
+    writeJson(path.join(outBase, 'strict-vs-normal.json'), payload.strictComparison);
+  }
   if (payload.subResultsDetailed) {
     writeJson(path.join(outBase, 'render-detail.json'), payload.subResultsDetailed);
   }
@@ -215,12 +236,21 @@ function stripRenderSub(sub) {
     subcategoriaId: sub.subcategoriaId,
     sectorId: sub.sectorId,
     status: sub.status,
+    strictMode: sub.strictMode || false,
     injectionMode: sub.injectionMode,
     pipelineOk: sub.pipelineOk,
+    paintOk: sub.paintOk,
     dataVista: sub.dataVista,
     dataTema: sub.dataTema,
     pcardCount: sub.pcardCount,
     summary: sub.summary,
+    runtimeCrash: sub.runtimeCrash
+      ? {
+          message: sub.runtimeCrash.message,
+          stack: sub.runtimeCrash.stack,
+          paintOk: sub.runtimeCrash.paintOk,
+        }
+      : undefined,
     screenshots: sub.screenshots,
     durationMs: sub.durationMs,
     pipelineError: sub.pipelineError,
