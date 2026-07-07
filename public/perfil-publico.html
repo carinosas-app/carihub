@@ -7425,6 +7425,58 @@ function mergeSaludMedicoDesdeRegistro(merged,u){
   if(sp.idiomasAtencion&&!merged.idiomas) merged.idiomas=sp.idiomasAtencion;
   return merged;
 }
+function mergeProfesionalesDesdeRegistro(merged,u){
+  if(!merged||!u) return merged;
+  var pp=u.profesionalesPerfil||{};
+  if(u.profesionalesPerfil) merged.profesionalesPerfil=Object.assign({},u.profesionalesPerfil);
+  if(!merged.sectorId&&u.sectorId) merged.sectorId=u.sectorId;
+  if(pp.nombreProfesional||u.nombreProfesional){
+    merged.nombreProfesional=pp.nombreProfesional||u.nombreProfesional;
+    merged.nombre=merged.nombreProfesional;
+  }
+  var espProf=pp.especialidadProfesional||u.especialidadProfesional||"";
+  if(u.especialidad||espProf){
+    if(espProf) merged.especialidadProfesional=espProf;
+    merged.especialidad=u.especialidad||espProf;
+    if(Array.isArray(merged.especialidad)) merged.especialidad=merged.especialidad.join(", ");
+  }
+  if(pp.blockTitle) merged.titulo=pp.blockTitle;
+  else if(u.titulo) merged.titulo=u.titulo;
+  else if(merged.especialidad&&!merged.titulo) merged.titulo=merged.especialidad;
+  if(pp.precioConsulta||u.precioConsulta){
+    merged.precioConsulta=pp.precioConsulta||u.precioConsulta;
+    merged.precio=merged.precioConsulta;
+  }else if(pp.tarifaDesde||u.tarifaDesde){
+    merged.precioConsulta=pp.tarifaDesde||u.tarifaDesde;
+    merged.precio=merged.precioConsulta;
+  }
+  if(pp.unidadConsulta||u.unidadConsulta) merged.unidadConsulta=pp.unidadConsulta||u.unidadConsulta;
+  if(pp.horarioAtencion||u.horarioAtencion){
+    merged.horarioAtencion=pp.horarioAtencion||u.horarioAtencion;
+    merged.horario=merged.horarioAtencion;
+  }else if(pp.horarioDetalle||u.horarioDetalle){
+    merged.horarioAtencion=pp.horarioDetalle||u.horarioDetalle;
+    merged.horario=merged.horarioAtencion;
+  }
+  if(Array.isArray(pp.serviciosProfesionales)&&pp.serviciosProfesionales.length){
+    merged.serviciosProfesionales=pp.serviciosProfesionales.slice();
+    merged.serviciosIncluidos=merged.serviciosProfesionales.slice();
+  }else if(Array.isArray(u.serviciosProfesionales)&&u.serviciosProfesionales.length){
+    merged.serviciosProfesionales=u.serviciosProfesionales.slice();
+    merged.serviciosIncluidos=merged.serviciosProfesionales.slice();
+  }
+  if(Array.isArray(merged.serviciosIncluidos)&&merged.serviciosIncluidos.length){
+    merged.servicios=merged.serviciosIncluidos.join(", ");
+  }
+  var mod=pp.modalidadAtencionProfesional||u.modalidadAtencionProfesional||"";
+  if(mod){
+    merged.modalidadAtencionProfesional=mod;
+    var modLbl={consultorio:"Consultorio",hibrido:"Híbrido",domicilio:"A domicilio",visita_cliente:"Visita al cliente",remoto:"En línea",en_linea:"En línea"};
+    merged.atencion=merged.atencion||modLbl[String(mod).toLowerCase()]||String(mod).replace(/_/g," ");
+  }
+  if(pp.tagline&&!merged.tagline) merged.tagline=pp.tagline;
+  return merged;
+}
 function aplicarPerfilDesdeRegistro(vista,u){
   if(!u||!DEMO[vista]) return;
   var galeria=[];
@@ -7679,6 +7731,9 @@ function aplicarPerfilDesdeRegistro(vista,u){
     var mergedMedico=Object.assign({},DEMO[vista],clean);
     mergeSaludMedicoDesdeRegistro(mergedMedico,u);
     DEMO[vista]=mergedMedico;
+  }else if((vista==="pro"||vista==="empresa")&&(clean.sectorId==="profesionales"||u.sectorId==="profesionales"||u.profesionalesPerfil)){
+    mergeProfesionalesDesdeRegistro(clean,u);
+    DEMO[vista]=clean;
   }else{
     DEMO[vista]=clean;
   }
