@@ -42,6 +42,16 @@ const SUB_OVERRIDES = {
     mostrarObjetivosPerfil: 'Sí',
     mostrarColaboraciones: 'Sí',
   },
+  abogados: {
+    nombreProfesional: 'Lic. QA Abogado',
+    especialidadProfesional: 'Derecho familiar',
+    serviciosProfesionales: ['Consulta legal'],
+    modalidadAtencionProfesional: 'hibrido',
+    precioConsulta: '1200',
+    horarioAtencion: 'Lun-Vie 9-18',
+    anosExperienciaProfesional: '10',
+    tagline: 'Asesoría jurídica QA',
+  },
 };
 
 function isTruthy(val) {
