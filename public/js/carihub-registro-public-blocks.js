@@ -3567,6 +3567,19 @@
     'parejaGrupoPerfil'
   ];
 
+  /** Nested *Perfil generados por mapToPerfil — fuente única para persist en submit. */
+  function pickPersistedNestedProfiles(mapped) {
+    var out = {};
+    if (!mapped) return out;
+    PROFILE_NESTED_KEYS.forEach(function (key) {
+      var val = mapped[key];
+      if (val && typeof val === 'object' && !Array.isArray(val)) {
+        out[key] = Object.assign({}, val);
+      }
+    });
+    return out;
+  }
+
   var PROFILE_INCOMPATIBLE_KEYS = ['modalidades', 'edad', 'viaja'];
 
   /** Colaboración en redes — campos cross-sector en pantalla pública. */
@@ -5829,6 +5842,8 @@
     applySwingerPerfilFields: applySwingerPerfilFields,
     applyUnicornPerfilFields: applyUnicornPerfilFields,
     applyCuckoldHotwifePerfilFields: applyCuckoldHotwifePerfilFields,
-    dinamicaCuckoldHotwifeLabel: dinamicaCuckoldHotwifeLabel
+    dinamicaCuckoldHotwifeLabel: dinamicaCuckoldHotwifeLabel,
+    PROFILE_NESTED_KEYS: PROFILE_NESTED_KEYS.slice(),
+    pickPersistedNestedProfiles: pickPersistedNestedProfiles
   };
 })(typeof window !== 'undefined' ? window : globalThis);

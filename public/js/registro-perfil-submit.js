@@ -73,11 +73,20 @@
     return out;
   }
 
+  function slimCamposPublicosSnapshot(cp) {
+    if (!cp || !cp.bloquesPublicos) return undefined;
+    var bloques = stripDataUrls(cp.bloquesPublicos);
+    if (!bloques || typeof bloques !== 'object') return undefined;
+    return { bloquesPublicos: bloques };
+  }
+
   function slimProfileForFirestore(profileDoc) {
     var slim = stripDataUrls(Object.assign({}, profileDoc || {}));
+    var cpSnapshot = slimCamposPublicosSnapshot(profileDoc && profileDoc.camposPublicos);
     delete slim.schemaResuelto;
     delete slim.camposPrivados;
     delete slim.camposPublicos;
+    if (cpSnapshot) slim.camposPublicos = cpSnapshot;
     HUB_ONLY_KEYS.forEach(function (key) { delete slim[key]; });
     return slim;
   }
@@ -240,7 +249,16 @@
         || mappedBloques.tipoPublico
         || (Array.isArray(mappedBloques.buscan) ? mappedBloques.buscan : (mappedBloques.buscan || '')));
 
-    return {
+    var nestedPick = {};
+    if (global.CariHubRegistroPublicBlocks && CariHubRegistroPublicBlocks.pickPersistedNestedProfiles) {
+      nestedPick = CariHubRegistroPublicBlocks.pickPersistedNestedProfiles(mappedBloques);
+    }
+    var MANUAL_NESTED_KEYS = [
+      'parejaGrupoPerfil', 'swingerPerfil', 'unicornPerfil', 'cuckoldHotwifePerfil',
+      'edecanPerfil', 'modelosPerfil'
+    ];
+
+    var doc = {
       uid: uid,
       cuentaUid: uid,
       nombre: esParejaGrupo ? (aliasPareja || cp.alias || '') : (cp.alias || ''),
@@ -434,6 +452,13 @@
       fecha: new Date(),
       fechaSolicitud: new Date().toISOString()
     };
+
+    Object.keys(nestedPick).forEach(function (key) {
+      if (MANUAL_NESTED_KEYS.indexOf(key) >= 0) return;
+      if (doc[key] == null) doc[key] = nestedPick[key];
+    });
+
+    return doc;
   }
 
   function buildUsuarioHubDoc(accountUid, perfilId, profileDoc) {
