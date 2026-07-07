@@ -2,9 +2,16 @@
 
 Servidor MCP local **read-only / report-only** para auditoría, gobernanza y orquestación QA de CariHub.
 
-**Fase 1:** filesystem + git · **Fase 2:** namespace `qa.*` · **Fase 3A:** Intelligence Core + `intel.*`
+**Fase 1:** filesystem + git · **Fase 2:** namespace `qa.*` · **Fase 3A:** Intelligence Core + `intel.*` (cerrada)
 
-Documentación Fase 3A: [docs/FASE-3A-INTELLIGENCE-CORE.md](./docs/FASE-3A-INTELLIGENCE-CORE.md)
+**Baseline:** `main` @ `b365c11` · 22 tools · 0 write-capable
+
+| Documento | Contenido |
+|-----------|-----------|
+| [docs/BASELINE-CAMCP.md](./docs/BASELINE-CAMCP.md) | Baseline oficial |
+| [docs/FASE-3A-CIERRE.md](./docs/FASE-3A-CIERRE.md) | Cierre Fase 3A |
+| [docs/FASE-3A-INTELLIGENCE-CORE.md](./docs/FASE-3A-INTELLIGENCE-CORE.md) | Diseño 3A |
+| [docs/FASE-3B-SPEC.md](./docs/FASE-3B-SPEC.md) | SPEC 3B (pendiente aprobación) |
 
 ## Requisitos
 
