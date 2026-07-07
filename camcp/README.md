@@ -2,15 +2,16 @@
 
 Servidor MCP local **read-only / report-only** para auditoría, gobernanza y orquestación QA de CariHub.
 
-**Fase 1:** filesystem + git · **Fase 2:** namespace `qa.*` · **Fase 3A:** Intelligence Core + `intel.*` · **Fase 3B.1:** `parity.*`
+**Fase 1:** filesystem + git · **Fase 2:** namespace `qa.*` · **Fase 3A:** Intelligence Core + `intel.*` · **Fase 3B.1:** `parity.*` · **Fase 3B.2:** `data.*`
 
-**Baseline:** 25 tools · 0 write-capable
+**Baseline:** 29 tools · 0 write-capable
 
 | Documento | Contenido |
 |-----------|-----------|
 | [docs/BASELINE-CAMCP.md](./docs/BASELINE-CAMCP.md) | Baseline oficial |
 | [docs/FASE-3A-CIERRE.md](./docs/FASE-3A-CIERRE.md) | Cierre Fase 3A |
 | [docs/FASE-3B-1-PARITY-SPEC.md](./docs/FASE-3B-1-PARITY-SPEC.md) | SPEC 3B.1 parity |
+| [docs/FASE-3B-2-DATA-SPEC.md](./docs/FASE-3B-2-DATA-SPEC.md) | SPEC 3B.2 data |
 | [docs/FASE-3B-SPEC.md](./docs/FASE-3B-SPEC.md) | SPEC 3B completo |
 
 ## Requisitos
@@ -57,6 +58,7 @@ npm run smoke:extended
 npm run smoke:qa
 npm run smoke:intel
 npm run smoke:parity
+npm run smoke:data
 ```
 
 ## Configuración
@@ -70,7 +72,7 @@ npm run smoke:parity
 | `denyWritePaths` | Rutas protegidas (incluye `public/`) |
 | `gitAllowedSubcommands` | Allowlist git |
 
-## Tools (25)
+## Tools (29)
 
 | Namespace | Tools | Capability |
 |-----------|-------|------------|
@@ -79,8 +81,9 @@ npm run smoke:parity
 | qa | list_catalog, run_paridad_*, run_fondos_static, run_pack, parse_last_report | report-only |
 | intel | list_domains, graph, impact, run_module, cache_status, parse_report | read-only / report-only |
 | parity | static, vm, render_strict | report-only |
+| data | pipeline_status, persist_audit, hydrate_audit, schema_alignment | report-only |
 
-Ver [docs/FASE-3B-1-PARITY-SPEC.md](./docs/FASE-3B-1-PARITY-SPEC.md) para detalle `parity.*`.
+Ver [docs/FASE-3B-2-DATA-SPEC.md](./docs/FASE-3B-2-DATA-SPEC.md) para detalle `data.*`.
 
 ## Cursor (Fase 8 — pendiente)
 

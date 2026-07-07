@@ -80,6 +80,28 @@ export function qaRunFondosStatic(repoRoot: string, config: CamcpConfig) {
   return runQaScript(repoRoot, config, 'qa.run_fondos_static', 'scripts/qa-fondos-static.mjs');
 }
 
+export function qaRunP0PersistPrivacy(repoRoot: string, config: CamcpConfig) {
+  return runQaScript(
+    repoRoot,
+    config,
+    'qa.run_p0_persist_privacy',
+    'scripts/qa-p0-reg-persist-privacy.mjs'
+  );
+}
+
+export function qaRunSubmitHydrate(repoRoot: string, config: CamcpConfig) {
+  return runQaScript(repoRoot, config, 'qa.run_submit_hydrate', 'scripts/qa-mp-submit-hydrate.mjs');
+}
+
+export function qaRunValidarSchemas(repoRoot: string, config: CamcpConfig) {
+  return runQaScript(
+    repoRoot,
+    config,
+    'qa.run_validar_schemas',
+    'scripts/validar-schemas-registro.mjs'
+  );
+}
+
 export function qaRunPack(
   repoRoot: string,
   config: CamcpConfig,

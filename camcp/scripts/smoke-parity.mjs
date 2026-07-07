@@ -43,10 +43,10 @@ function main() {
     pass('policy-write-capable', '0 write-capable tools');
   }
 
-  if (ALL_TOOL_DEFINITIONS.length !== 25) {
-    fail('policy-tool-count', `expected 25, got ${ALL_TOOL_DEFINITIONS.length}`);
+  if (ALL_TOOL_DEFINITIONS.length !== 29) {
+    fail('policy-tool-count', `expected 29, got ${ALL_TOOL_DEFINITIONS.length}`);
   } else {
-    pass('policy-tool-count', '25 tools total');
+    pass('policy-tool-count', '29 tools total');
   }
 
   if (!allToolsNonDestructive(toolMeta)) {

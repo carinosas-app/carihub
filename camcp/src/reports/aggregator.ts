@@ -83,4 +83,24 @@ export function aggregateParityReport(input: {
   });
 }
 
+export function aggregateDataReport(input: {
+  module: string;
+  qaTool: string;
+  gitCommit: string | null;
+  durationMs: number;
+  summary: string;
+  findings: ReportFinding[];
+  evidencePaths?: string[];
+}): CamcpReport {
+  return buildReportFromFindings({
+    module: input.module,
+    gitCommit: input.gitCommit,
+    durationMs: input.durationMs,
+    summary: input.summary,
+    findings: input.findings,
+    evidencePaths: input.evidencePaths ?? [],
+    suggestedQa: [input.qaTool],
+  });
+}
+
 export { writeCamcpReport } from './writer.js';
