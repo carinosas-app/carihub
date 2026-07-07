@@ -58,4 +58,29 @@ export function aggregateQaRunIntoReport(input: {
   });
 }
 
+export function aggregateParityReport(input: {
+  module: string;
+  qaTool: string;
+  gitCommit: string | null;
+  durationMs: number;
+  summary: string;
+  findings: ReportFinding[];
+  evidencePaths?: string[];
+  extra?: { coveragePercent?: number };
+}): CamcpReport {
+  let summary = input.summary;
+  if (input.extra?.coveragePercent != null) {
+    summary += ` Coverage: ${input.extra.coveragePercent}%.`;
+  }
+  return buildReportFromFindings({
+    module: input.module,
+    gitCommit: input.gitCommit,
+    durationMs: input.durationMs,
+    summary,
+    findings: input.findings,
+    evidencePaths: input.evidencePaths ?? [],
+    suggestedQa: [input.qaTool],
+  });
+}
+
 export { writeCamcpReport } from './writer.js';

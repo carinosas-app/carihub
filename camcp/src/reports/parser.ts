@@ -54,18 +54,46 @@ function findLatestManifest(reportsRoot: string): QaRunManifest | null {
   return latestManifest;
 }
 
+function findLatestParityReportMd(reportsRoot: string, repoRoot: string): string | null {
+  if (!fs.existsSync(reportsRoot)) return null;
+  let latest: string | null = null;
+  let latestMtime = 0;
+  for (const ns of fs.readdirSync(reportsRoot, { withFileTypes: true })) {
+    if (!ns.isDirectory() || !ns.name.startsWith('parity.')) continue;
+    const nsPath = path.join(reportsRoot, ns.name);
+    for (const run of fs.readdirSync(nsPath, { withFileTypes: true })) {
+      if (!run.isDirectory()) continue;
+      const md = path.join(nsPath, run.name, 'report.md');
+      if (!fs.existsSync(md)) continue;
+      const mtime = fs.statSync(md).mtimeMs;
+      if (mtime > latestMtime) {
+        latestMtime = mtime;
+        latest = path.relative(repoRoot, md).replace(/\\/g, '/');
+      }
+    }
+  }
+  return latest;
+}
+
 export function parseLastReport(repoRoot: string, config: CamcpConfig): ParsedReportSummary {
   const reportsRoot = resolveReportsRoot(repoRoot, config);
   const manifest = findLatestManifest(reportsRoot);
+  const parityReportMd = findLatestParityReportMd(reportsRoot, repoRoot);
+
   if (!manifest) {
+    const camcpReports: Array<{ path: string; preview: string }> = [];
+    if (parityReportMd && fs.existsSync(path.join(repoRoot, parityReportMd))) {
+      const text = fs.readFileSync(path.join(repoRoot, parityReportMd), 'utf8');
+      camcpReports.push({ path: parityReportMd, preview: text.slice(0, 500) });
+    }
     return {
       manifest: null,
       reportDir: null,
       jsonReports: [],
       markdownReports: [],
-      camcpReports: [],
+      camcpReports,
       stdoutPreview: null,
-      ok: null,
+      ok: camcpReports.length ? camcpReports[0]!.preview.includes('Estado | PASS') : null,
     };
   }
 
@@ -96,6 +124,13 @@ export function parseLastReport(repoRoot: string, config: CamcpConfig): ParsedRe
       }
     };
     walk(reportDirAbs);
+  }
+
+  if (parityReportMd && fs.existsSync(path.join(repoRoot, parityReportMd))) {
+    const text = fs.readFileSync(path.join(repoRoot, parityReportMd), 'utf8');
+    if (!camcpReports.some((r) => r.path === parityReportMd)) {
+      camcpReports.unshift({ path: parityReportMd, preview: text.slice(0, 500) });
+    }
   }
 
   let stdoutPreview: string | null = null;

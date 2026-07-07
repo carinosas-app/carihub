@@ -3,7 +3,7 @@
 Documento de referencia del estado mergeado de **CariHub Architecture MCP**.
 
 **Última actualización:** 2026-07-07  
-**Rama canónica:** `main` @ **`b365c11`**
+**Rama canónica:** `main` @ **`4c2594c`**
 
 ---
 
@@ -13,15 +13,17 @@ Documento de referencia del estado mergeado de **CariHub Architecture MCP**.
 |------|-----|-------|-------|--------|
 | 1 — filesystem + git | — | `de37fd6` | 9 | CERRADA |
 | 2 — namespace `qa.*` | #115 | `f46e2d3` | 16 | CERRADA |
-| 3A — Intelligence Core + `intel.*` | #116 | `b365c11` | **22** | **CERRADA** |
-| 3B — `arch.*` + `data.*` + `parity.*` | — | — | ~34 (objetivo) | SPEC pendiente |
+| 3A — Intelligence Core + `intel.*` | #116 | `b365c11` | 22 | CERRADA |
+| 3B.1 — `parity.*` | — | — | **25** | **En rama** |
+| 3B.2 — `data.*` | — | — | ~29 (obj.) | No iniciada |
+| 3B.3 — `arch.*` | — | — | ~34 (obj.) | No iniciada |
 | 3C — `perf.*` | — | — | — | No iniciada |
 | 3D — `seo.*` + `ads.*` | — | — | — | No iniciada |
 | 3E — CI GitHub Actions | — | — | — | No iniciada |
 
 ---
 
-## Baseline actual (`main` @ `b365c11`)
+## Baseline mergeado en `main` (`4c2594c`, pre-3B.1)
 
 ### Capacidades
 
@@ -70,6 +72,7 @@ npm run smoke          # 14 checks
 npm run smoke:extended # 27 checks
 npm run smoke:qa       # 9 checks
 npm run smoke:intel    # 12 checks
+npm run smoke:parity   # 14 checks (Fase 3B.1+)
 ```
 
 ### Restricciones permanentes
@@ -79,12 +82,14 @@ npm run smoke:intel    # 12 checks
 - No modificar `public/`, Firestore, Firebase, runtime CariHub desde CAMCP
 - No deploy CAMCP como servicio de producción
 - Reutilizar QA y contratos existentes — no pipelines paralelos
+- **Regla nuevas tools (aprobada 2026-07-07):** toda nueva tool debe justificar claramente el valor que aporta y reutilizar la arquitectura existente. No se implementarán herramientas que dupliquen QA, contratos, renderizadores o lógica ya existente.
 
 ---
 
 ## Commits de referencia
 
 ```
+4c2594c  Merge PR #117 — docs 3A cierre + baseline + SPEC 3B
 b365c11  Merge PR #116 — Fase 3A Intelligence Core
 4342cb9  feat(camcp): Intelligence Core + intel.*
 f46e2d3  Merge PR #115 — Fase 1+2 QA namespace
@@ -100,7 +105,9 @@ de37fd6  feat(camcp): Fase 1 filesystem + git
 |-----------|-----------|
 | [FASE-3A-INTELLIGENCE-CORE.md](./FASE-3A-INTELLIGENCE-CORE.md) | Diseño e implementación 3A |
 | [FASE-3A-CIERRE.md](./FASE-3A-CIERRE.md) | Acta de cierre 3A |
-| [FASE-3B-SPEC.md](./FASE-3B-SPEC.md) | SPEC técnico 3B (pendiente aprobación) |
+| [FASE-3B-SPEC.md](./FASE-3B-SPEC.md) | SPEC 3B (dirección técnica aprobada) |
+| [FASE-3B-1-PARITY-SPEC.md](./FASE-3B-1-PARITY-SPEC.md) | SPEC 3B.1 parity |
+| [FASE-3B-1-CIERRE.md](./FASE-3B-1-CIERRE.md) | Cierre 3B.1 (pre-PR) |
 | [../README.md](../README.md) | Guía operativa CAMCP |
 
 ---
@@ -117,6 +124,6 @@ de37fd6  feat(camcp): Fase 1 filesystem + git
 
 ```bash
 git rev-parse HEAD origin/main   # deben coincidir en main limpio
-cd camcp && npm run smoke && npm run smoke:intel
-# Esperado: tools=22, 0 write-capable
+cd camcp && npm run smoke && npm run smoke:intel && npm run smoke:parity
+# main pre-3B.1: tools=22 · rama 3B.1: tools=25 · 0 write-capable
 ```

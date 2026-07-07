@@ -2,16 +2,16 @@
 
 Servidor MCP local **read-only / report-only** para auditoría, gobernanza y orquestación QA de CariHub.
 
-**Fase 1:** filesystem + git · **Fase 2:** namespace `qa.*` · **Fase 3A:** Intelligence Core + `intel.*` (cerrada)
+**Fase 1:** filesystem + git · **Fase 2:** namespace `qa.*` · **Fase 3A:** Intelligence Core + `intel.*` · **Fase 3B.1:** `parity.*`
 
-**Baseline:** `main` @ `b365c11` · 22 tools · 0 write-capable
+**Baseline:** 25 tools · 0 write-capable
 
 | Documento | Contenido |
 |-----------|-----------|
 | [docs/BASELINE-CAMCP.md](./docs/BASELINE-CAMCP.md) | Baseline oficial |
 | [docs/FASE-3A-CIERRE.md](./docs/FASE-3A-CIERRE.md) | Cierre Fase 3A |
-| [docs/FASE-3A-INTELLIGENCE-CORE.md](./docs/FASE-3A-INTELLIGENCE-CORE.md) | Diseño 3A |
-| [docs/FASE-3B-SPEC.md](./docs/FASE-3B-SPEC.md) | SPEC 3B (pendiente aprobación) |
+| [docs/FASE-3B-1-PARITY-SPEC.md](./docs/FASE-3B-1-PARITY-SPEC.md) | SPEC 3B.1 parity |
+| [docs/FASE-3B-SPEC.md](./docs/FASE-3B-SPEC.md) | SPEC 3B completo |
 
 ## Requisitos
 
@@ -56,6 +56,7 @@ npm run smoke
 npm run smoke:extended
 npm run smoke:qa
 npm run smoke:intel
+npm run smoke:parity
 ```
 
 ## Configuración
@@ -69,7 +70,7 @@ npm run smoke:intel
 | `denyWritePaths` | Rutas protegidas (incluye `public/`) |
 | `gitAllowedSubcommands` | Allowlist git |
 
-## Tools (22)
+## Tools (25)
 
 | Namespace | Tools | Capability |
 |-----------|-------|------------|
@@ -77,8 +78,9 @@ npm run smoke:intel
 | git | status, log, diff, branch, scope_check | read-only |
 | qa | list_catalog, run_paridad_*, run_fondos_static, run_pack, parse_last_report | report-only |
 | intel | list_domains, graph, impact, run_module, cache_status, parse_report | read-only / report-only |
+| parity | static, vm, render_strict | report-only |
 
-Ver [docs/FASE-3A-INTELLIGENCE-CORE.md](./docs/FASE-3A-INTELLIGENCE-CORE.md) para detalle `intel.*`.
+Ver [docs/FASE-3B-1-PARITY-SPEC.md](./docs/FASE-3B-1-PARITY-SPEC.md) para detalle `parity.*`.
 
 ## Cursor (Fase 8 — pendiente)
 
