@@ -223,9 +223,11 @@
     var enriched = enriquecerMetadataFirestore(data, base);
     var cp = data.camposPublicos;
     var bloques = cp && cp.bloquesPublicos;
-    if (!bloques) return enriched;
+    if (!bloques) return applyPublicPrivacyGuard(enriched, data);
     var blocks = global.CariHubRegistroPublicBlocks;
-    if (!blocks || typeof blocks.mapToPerfil !== 'function') return enriched;
+    if (!blocks || typeof blocks.mapToPerfil !== 'function') {
+      return applyPublicPrivacyGuard(enriched, data);
+    }
 
     var ctx = ctxHydrateFromFirestore(data);
     var seed = {
@@ -263,7 +265,14 @@
     var hydrated = blocks.mapToPerfil(seed, bloques, ctx);
     mergeHydrateBase(hydrated, base, data);
     hydrated.__hydratedFromBloques = true;
-    return hydrated;
+    return applyPublicPrivacyGuard(hydrated, data);
+  }
+
+  function applyPublicPrivacyGuard(u, data) {
+    if (global.CariHubPublicPrivacyGuard && CariHubPublicPrivacyGuard.sanitizePerfilPublico) {
+      return CariHubPublicPrivacyGuard.sanitizePerfilPublico(u, data);
+    }
+    return u;
   }
 
   function baseNormalizadoPerfilFirestore(data, id) {

@@ -57,6 +57,7 @@ const BLOCKS = [
   'carihub-field-engine-lite.js',
   'data/registro-sector-contract-registry.js',
   'carihub-public-render-lite.js',
+  'carihub-public-privacy-guard.js',
   'resultados-registrados.js',
 ];
 
@@ -252,7 +253,10 @@ ok('mapToPerfil disponible en VM', typeof RP.mapToPerfil === 'function', 'blocks
 
 for (const cfg of CASES) {
   const doc = buildDoc(cfg);
-  const u = readPath(doc);
+  const slim = Submit.slimProfileForFirestore(doc);
+  ok(`${cfg.id} slim conserva bloquesPublicos`, !!slim.camposPublicos?.bloquesPublicos, 'camposPublicos.bloquesPublicos');
+  ok(`${cfg.id} slim sin camposPrivados`, !slim.camposPrivados, 'camposPrivados');
+  const u = readPath(slim);
   const html = Render.cardHTML(u, { categoria: u.categoria || doc.categoria });
   ok(`${cfg.id} subcategoriaId en u`, u.subcategoriaId === doc.subcategoriaId, u.subcategoriaId);
   ok(`${cfg.id} hidratado desde bloques`, u.__hydratedFromBloques === true, '__hydratedFromBloques');
