@@ -1,0 +1,74 @@
+{
+  "version": "0.1.0",
+  "cacheTtlMs": 86400000,
+  "graphCacheSubdir": ".cache/graph",
+  "modules": [
+    {
+      "id": "paridad_static",
+      "label": "Paridad Fase A — catálogo estático",
+      "qaTool": "qa.run_paridad_static"
+    },
+    {
+      "id": "paridad_vm",
+      "label": "Paridad Fase B — pipeline VM",
+      "qaTool": "qa.run_paridad_vm"
+    },
+    {
+      "id": "paridad_render_strict",
+      "label": "Paridad Fase C — render strict",
+      "qaTool": "qa.run_paridad_render_strict"
+    },
+    {
+      "id": "fondos_static",
+      "label": "Fondos — validación CSS/HTML",
+      "qaTool": "qa.run_fondos_static"
+    },
+    {
+      "id": "pack",
+      "label": "Domain pack QA",
+      "qaTool": "qa.run_pack",
+      "requiresPackId": true
+    }
+  ],
+  "domainAnchors": {
+    "APP_PUBLICA": [
+      "public/index.html",
+      "public/resultados.html",
+      "public/perfil-publico.html",
+      "public/js/home-ui.js",
+      "public/js/carihub-resultados-sector.js",
+      "public/js/carihub-public-render-lite.js"
+    ],
+    "APP_REGISTRO": [
+      "public/registro-perfil.html",
+      "public/js/registro-perfil-wizard.js",
+      "public/js/registro-perfil-submit.js",
+      "public/js/carihub-registro-public-blocks.js",
+      "public/js/carihub-field-engine-lite.js",
+      "public/js/data/registro-schema-index.js"
+    ],
+    "APP_DASHBOARD": [
+      "public/dashboard-rentero.html",
+      "public/js/dashboard-rentero-nav.js"
+    ],
+    "APP_ADMIN": ["public/admin.html", "public/js/admin-revision-cola.js"],
+    "APP_BANNERS": [
+      "public/js/slots-catalog.js",
+      "public/js/publicidad-activa.js",
+      "public/registro-banner.html"
+    ],
+    "APP_PAGOS": ["public/js/carihub-publicacion-pagos.js", "functions/payments/"],
+    "APP_SEO": ["scripts/PLAN-MAESTRO-SEO-LANDINGS.json", "docs/gpt-knowledge/SEO-PROGRAMATICO.md"],
+    "SHARED_CORE": [
+      "public/js/carihub-geo-picker.js",
+      "public/js/carihub-field-engine-lite.js",
+      "scripts/MAPA-MAESTRO-CARIHUB.json"
+    ]
+  },
+  "impactQaHints": {
+    "APP_REGISTRO": ["paridad_vm", "paridad_render_strict", "paridad_static"],
+    "APP_PUBLICA": ["fondos_static", "paridad_render_strict"],
+    "APP_BANNERS": ["fondos_static"],
+    "default": ["fondos_static"]
+  }
+}
