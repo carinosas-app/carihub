@@ -87,7 +87,7 @@ export function assertReadPathAllowed(repoRoot: string, absolutePath: string): v
   resolveRepoPath(repoRoot, absolutePath);
 }
 
-export function assertWritePathAllowed(
+export function assertReportWritePathAllowed(
   repoRoot: string,
   absolutePath: string,
   config: CamcpConfig
@@ -95,6 +95,11 @@ export function assertWritePathAllowed(
   const rootReal = realpathSafe(path.resolve(repoRoot));
   const resolved = resolveRepoPath(repoRoot, absolutePath);
   const rel = normalizeSlashes(path.relative(rootReal, resolved));
+  const reportsPrefix = normalizeSlashes(config.reportsDir.replace(/^\.\//, '').replace(/\/$/, ''));
+
+  if (rel !== reportsPrefix && !rel.startsWith(`${reportsPrefix}/`)) {
+    throw new PathGuardError(`Report writes limited to ${reportsPrefix}/: ${rel}`);
+  }
 
   for (const denied of config.denyWritePaths) {
     const d = normalizeSlashes(denied.replace(/^\.\//, ''));
@@ -102,12 +107,14 @@ export function assertWritePathAllowed(
       throw new PathGuardError(`Write denied to protected path: ${rel}`);
     }
   }
+}
 
-  const camcpRel = normalizeSlashes(path.relative(path.join(repoRoot, 'camcp'), resolved));
-  const insideCamcp = !camcpRel.startsWith('..') && !path.isAbsolute(camcpRel);
-  if (!insideCamcp) {
-    throw new PathGuardError(`Fase 1 writes limited to camcp/: ${rel}`);
-  }
+export function assertWritePathAllowed(
+  repoRoot: string,
+  absolutePath: string,
+  config: CamcpConfig
+): void {
+  assertReportWritePathAllowed(repoRoot, absolutePath, config);
 }
 
 export function isUnderRepo(repoRoot: string, absolutePath: string): boolean {

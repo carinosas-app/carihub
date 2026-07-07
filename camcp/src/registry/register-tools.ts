@@ -1,6 +1,6 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { CamcpConfig, ToolCapability } from '../policy/permissions.js';
-import { allToolsReadOnly } from '../policy/permissions.js';
+import { allToolsNonDestructive } from '../policy/permissions.js';
 import { PathGuardError } from '../policy/path-guard.js';
 import { CommandGuardError } from '../policy/command-guard.js';
 import { getMetaGitCommit, makeToolError, makeToolResult } from '../utils/tool-result.js';
@@ -58,19 +58,20 @@ export function registerToolDefinitions(
   server: McpServer,
   tools: ToolDefinition[],
   ctx: ToolContext,
-  options: { requireReadOnly?: boolean } = {}
+  options: { requireNonDestructive?: boolean; requireReadOnly?: boolean } = {}
 ): void {
   assertToolDefinitionsValid(tools);
 
-  if (options.requireReadOnly) {
+  const requireSafe = options.requireNonDestructive ?? options.requireReadOnly ?? false;
+  if (requireSafe) {
     const meta = tools.map((t) => ({
       name: t.name,
       capability: t.capability,
       namespace: t.namespace,
       description: t.description,
     }));
-    if (!allToolsReadOnly(meta)) {
-      throw new Error('All registered tools must be read-only in Fase 1');
+    if (!allToolsNonDestructive(meta)) {
+      throw new Error('All registered tools must be read-only or report-only');
     }
   }
 

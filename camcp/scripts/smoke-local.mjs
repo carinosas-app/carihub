@@ -5,7 +5,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { loadConfig, resolveRepoRoot } from '../dist/config/load-config.js';
-import { assertReadOnlyMode, allToolsReadOnly } from '../dist/policy/permissions.js';
+import { assertReadOnlyMode, allToolsNonDestructive } from '../dist/policy/permissions.js';
 import { toolMetaFromDefinitions } from '../dist/registry/tool-definition.js';
 import { ALL_TOOL_DEFINITIONS } from '../dist/tools/index.js';
 import { filesystemList, filesystemRead, filesystemSearch, filesystemTree } from '../dist/tools/filesystem.tools.js';
@@ -28,18 +28,20 @@ function fail(tool, detail) {
 }
 
 async function main() {
-  console.log('[CAMCP smoke] Fase 1 read-only + registry\n');
+  console.log('[CAMCP smoke] Fase 1+2 registry + guards\n');
 
   const config = loadConfig();
   assertReadOnlyMode(config);
   const repoRoot = resolveRepoRoot(config);
   const toolMeta = toolMetaFromDefinitions(ALL_TOOL_DEFINITIONS);
 
-  if (!allToolsReadOnly(toolMeta)) {
-    fail('policy', 'Not all tools are read-only');
+  if (!allToolsNonDestructive(toolMeta)) {
+    fail('policy', 'Not all tools are read-only or report-only');
     process.exit(1);
   }
-  pass('policy', `mode=${config.mode}, tools=${ALL_TOOL_DEFINITIONS.length}`);
+  const readOnly = toolMeta.filter((t) => t.capability === 'read-only').length;
+  const reportOnly = toolMeta.filter((t) => t.capability === 'report-only').length;
+  pass('policy', `mode=${config.mode}, tools=${ALL_TOOL_DEFINITIONS.length} (${readOnly} read-only, ${reportOnly} report-only)`);
 
   if (serverSource.includes('switch (meta.name)')) {
     fail('registry-server', 'server.ts still contains switch(meta.name)');

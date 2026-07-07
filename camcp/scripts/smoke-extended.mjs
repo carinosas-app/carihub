@@ -6,7 +6,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { loadConfig, resolveRepoRoot } from '../dist/config/load-config.js';
 import {
-  allToolsReadOnly,
+  allToolsNonDestructive,
   assertReadOnlyMode,
 } from '../dist/policy/permissions.js';
 import { toolMetaFromDefinitions } from '../dist/registry/tool-definition.js';
@@ -70,7 +70,7 @@ console.log('=== CAMCP extended validation ===\n');
 console.log('repoRoot:', repoRoot);
 console.log('mode:', config.mode);
 console.log('tools:', ALL_TOOL_DEFINITIONS.length);
-console.log('all read-only:', allToolsReadOnly(toolMetaFromDefinitions(ALL_TOOL_DEFINITIONS)));
+console.log('all non-destructive:', allToolsNonDestructive(toolMetaFromDefinitions(ALL_TOOL_DEFINITIONS)));
 console.log('namespaces:', [...new Set(ALL_TOOL_DEFINITIONS.map((t) => t.namespace))].join(', '));
 console.log('');
 
@@ -81,7 +81,14 @@ tryPathGuard('write public/', () => assertWritePathAllowed(repoRoot, path.join(r
 tryPathGuard('write firestore.rules', () => assertWritePathAllowed(repoRoot, path.join(repoRoot, 'firestore.rules'), config));
 tryPathGuard('write firebase.json', () => assertWritePathAllowed(repoRoot, path.join(repoRoot, 'firebase.json'), config));
 tryPathGuard('write storage.rules', () => assertWritePathAllowed(repoRoot, path.join(repoRoot, 'storage.rules'), config));
-tryPathGuard('write outside camcp (scripts/)', () => assertWritePathAllowed(repoRoot, path.join(repoRoot, 'scripts/foo.mjs'), config));
+tryPathGuard('write outside camcp-reports (scripts/)', () => assertWritePathAllowed(repoRoot, path.join(repoRoot, 'scripts/foo.mjs'), config));
+try {
+  const reportProbe = path.join(repoRoot, config.reportsDir, '_smoke-probe.txt');
+  assertWritePathAllowed(repoRoot, reportProbe, config);
+  record('write camcp-reports/', 'allowed', config.reportsDir, true);
+} catch (e) {
+  record('write camcp-reports/', 'allowed', String(e), false);
+}
 
 // Read public/ — currently ALLOWED (read-only phase)
 try {
