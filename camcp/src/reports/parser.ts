@@ -87,11 +87,16 @@ function findLatestDataReportMd(reportsRoot: string, repoRoot: string): string |
   return findLatestCamcpReportMd(reportsRoot, repoRoot, 'data.');
 }
 
+function findLatestArchReportMd(reportsRoot: string, repoRoot: string): string | null {
+  return findLatestCamcpReportMd(reportsRoot, repoRoot, 'arch.');
+}
+
 export function parseLastReport(repoRoot: string, config: CamcpConfig): ParsedReportSummary {
   const reportsRoot = resolveReportsRoot(repoRoot, config);
   const manifest = findLatestManifest(reportsRoot);
   const parityReportMd = findLatestParityReportMd(reportsRoot, repoRoot);
   const dataReportMd = findLatestDataReportMd(reportsRoot, repoRoot);
+  const archReportMd = findLatestArchReportMd(reportsRoot, repoRoot);
 
   if (!manifest) {
     const camcpReports: Array<{ path: string; preview: string }> = [];
@@ -102,6 +107,10 @@ export function parseLastReport(repoRoot: string, config: CamcpConfig): ParsedRe
     if (dataReportMd && fs.existsSync(path.join(repoRoot, dataReportMd))) {
       const text = fs.readFileSync(path.join(repoRoot, dataReportMd), 'utf8');
       camcpReports.push({ path: dataReportMd, preview: text.slice(0, 500) });
+    }
+    if (archReportMd && fs.existsSync(path.join(repoRoot, archReportMd))) {
+      const text = fs.readFileSync(path.join(repoRoot, archReportMd), 'utf8');
+      camcpReports.push({ path: archReportMd, preview: text.slice(0, 500) });
     }
     return {
       manifest: null,
@@ -154,6 +163,13 @@ export function parseLastReport(repoRoot: string, config: CamcpConfig): ParsedRe
     const text = fs.readFileSync(path.join(repoRoot, dataReportMd), 'utf8');
     if (!camcpReports.some((r) => r.path === dataReportMd)) {
       camcpReports.unshift({ path: dataReportMd, preview: text.slice(0, 500) });
+    }
+  }
+
+  if (archReportMd && fs.existsSync(path.join(repoRoot, archReportMd))) {
+    const text = fs.readFileSync(path.join(repoRoot, archReportMd), 'utf8');
+    if (!camcpReports.some((r) => r.path === archReportMd)) {
+      camcpReports.unshift({ path: archReportMd, preview: text.slice(0, 500) });
     }
   }
 

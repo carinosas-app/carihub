@@ -1,0 +1,39 @@
+{
+  "version": "0.1.0",
+  "tools": {
+    "arch.frozen_violations": {
+      "priority": "P1",
+      "ssot": ["scripts/ACTA-CONGELAMIENTO-*.json", ".cursor/rules/*.mdc", "git diff"],
+      "reuses": ["runGitAllowed", "arch/frozen-registry", "scripts/ACTA-CONGELAMIENTO-*.json", "reports/aggregator"],
+      "actaGlob": "scripts/ACTA-CONGELAMIENTO-*.json",
+      "rulesGlob": ".cursor/rules/*.mdc",
+      "camcpFrozenPaths": [
+        "camcp/src/parity/",
+        "camcp/src/data/",
+        "camcp/config/parity.config.json",
+        "camcp/config/data.config.json"
+      ]
+    },
+    "arch.scan_duplicates": {
+      "priority": "P2",
+      "ssot": ["repo source files in scope"],
+      "reuses": ["filesystem.search", "reports/aggregator"],
+      "patterns": ["function finalize", "mapToPerfil", "normalizarPerfil", "slimProfile"],
+      "defaultScope": [
+        "public/js/carihub-registro-public-blocks.js",
+        "public/js/registro-perfil-submit.js",
+        "public/js/carihub-public-render-lite.js",
+        "public/js/resultados-registrados.js"
+      ]
+    },
+    "arch.domain_boundaries": {
+      "priority": "P3",
+      "ssot": [
+        "scripts/MAPA-MAESTRO-CARIHUB.json",
+        "camcp/config/intelligence.config.json",
+        "docs/gpt-knowledge/"
+      ],
+      "reuses": ["intelligence/contracts/loader", "intelligence.config.json"]
+    }
+  }
+}

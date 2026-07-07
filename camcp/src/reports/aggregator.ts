@@ -103,4 +103,27 @@ export function aggregateDataReport(input: {
   });
 }
 
+export function aggregateArchReport(input: {
+  module: string;
+  gitCommit: string | null;
+  durationMs: number;
+  summary: string;
+  findings: ReportFinding[];
+  evidencePaths?: string[];
+  ssot?: string[];
+}): CamcpReport {
+  let summary = input.summary;
+  if (input.ssot?.length) {
+    summary += ` SSOT: ${input.ssot.join(', ')}.`;
+  }
+  return buildReportFromFindings({
+    module: input.module,
+    gitCommit: input.gitCommit,
+    durationMs: input.durationMs,
+    summary,
+    findings: input.findings,
+    evidencePaths: input.evidencePaths ?? [],
+  });
+}
+
 export { writeCamcpReport } from './writer.js';
