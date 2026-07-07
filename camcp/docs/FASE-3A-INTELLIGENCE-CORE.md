@@ -1,7 +1,8 @@
 # CAMCP Fase 3A — Intelligence Core + Reports Engine
 
-**Estado:** implementado en rama `feat/camcp-fase-3a-intelligence-core`  
-**Baseline previo:** Fase 1+2 merge `f46e2d3` (PR #115)
+**Estado:** **CERRADA** — merge `b365c11` (PR #116)  
+**Baseline previo:** Fase 1+2 merge `f46e2d3` (PR #115)  
+**Cierre formal:** [FASE-3A-CIERRE.md](./FASE-3A-CIERRE.md)
 
 ## Objetivo
 
@@ -98,9 +99,11 @@ npm run build
 npm run smoke:intel
 ```
 
-## Extensiones futuras (no 3A)
+## Extensiones futuras
 
-- Fase 3B: `arch.*`, `data.*`, `parity.*`
+- **Fase 3B (SPEC pendiente aprobación):** `arch.*`, `data.*`, `parity.*` — [FASE-3B-SPEC.md](./FASE-3B-SPEC.md)
 - Fase 3C: `perf.*`
 - Fase 3D: `seo.*`, `ads.*`
 - Fase 3E: CI GitHub Actions
+
+Ver [BASELINE-CAMCP.md](./BASELINE-CAMCP.md) para estado canónico del proyecto.
