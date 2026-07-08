@@ -38,6 +38,95 @@
 
   var HUB_ONLY_KEYS = ['perfilesDetalle', 'perfilesVinculados', 'perfilActivoId'];
 
+  var NEGOCIO_FISCAL_PRIVATE_KEYS = [
+    'rfc', 'razonSocial', 'notasInternas', 'telefonoContacto', 'licenciaOperacion', 'documentos'
+  ];
+
+  function hasPersistValue(val) {
+    if (val == null) return false;
+    if (typeof val === 'string') return val.trim() !== '';
+    return true;
+  }
+
+  function stripNegocioFiscalFromObject(obj) {
+    if (!obj || typeof obj !== 'object') return obj;
+    NEGOCIO_FISCAL_PRIVATE_KEYS.forEach(function (key) { delete obj[key]; });
+    return obj;
+  }
+
+  function stripNegocioFiscalFromBloques(bloques) {
+    if (!bloques || typeof bloques !== 'object') return bloques;
+    var out = stripDataUrls(bloques);
+    if (!out || typeof out !== 'object') return out;
+    stripNegocioFiscalFromObject(out);
+    Object.keys(out).forEach(function (key) {
+      if (/Perfil$/i.test(key) && out[key] && typeof out[key] === 'object') {
+        out[key] = stripNegocioFiscalFromObject(Object.assign({}, out[key]));
+      }
+    });
+    return out;
+  }
+
+  function extractNegocioFiscalFromBloques(bloques) {
+    var out = {};
+    if (!bloques || typeof bloques !== 'object') return out;
+    NEGOCIO_FISCAL_PRIVATE_KEYS.forEach(function (key) {
+      if (hasPersistValue(bloques[key])) out[key] = bloques[key];
+    });
+    Object.keys(bloques).forEach(function (nestedKey) {
+      if (!/Perfil$/i.test(nestedKey) || !bloques[nestedKey] || typeof bloques[nestedKey] !== 'object') return;
+      NEGOCIO_FISCAL_PRIVATE_KEYS.forEach(function (key) {
+        if (!hasPersistValue(out[key]) && hasPersistValue(bloques[nestedKey][key])) {
+          out[key] = bloques[nestedKey][key];
+        }
+      });
+    });
+    return out;
+  }
+
+  function mergeNegocioFiscalDatosPrivados(base, fiscal) {
+    base = base || {};
+    if (!fiscal || !Object.keys(fiscal).length) return base;
+    var datosPrivados = Object.assign({}, base);
+    var facturacion = datosPrivados.facturacion && typeof datosPrivados.facturacion === 'object'
+      ? Object.assign({}, datosPrivados.facturacion)
+      : null;
+    if (hasPersistValue(fiscal.rfc)) {
+      facturacion = facturacion || {};
+      facturacion.rfc = fiscal.rfc;
+    }
+    if (hasPersistValue(fiscal.razonSocial)) {
+      facturacion = facturacion || {};
+      facturacion.razonSocial = fiscal.razonSocial;
+    }
+    if (facturacion) datosPrivados.facturacion = facturacion;
+    var administracion = datosPrivados.administracion && typeof datosPrivados.administracion === 'object'
+      ? Object.assign({}, datosPrivados.administracion)
+      : {};
+    if (hasPersistValue(fiscal.telefonoContacto)) administracion.telefonoContacto = fiscal.telefonoContacto;
+    if (hasPersistValue(fiscal.licenciaOperacion)) administracion.licenciaOperacion = fiscal.licenciaOperacion;
+    if (hasPersistValue(fiscal.documentos)) administracion.documentos = fiscal.documentos;
+    if (hasPersistValue(fiscal.notasInternas)) administracion.notasInternas = fiscal.notasInternas;
+    if (Object.keys(administracion).length) datosPrivados.administracion = administracion;
+    return datosPrivados;
+  }
+
+  function stripNegocioFiscalFromSlimProfile(slim) {
+    if (!slim || typeof slim !== 'object') return slim;
+    stripNegocioFiscalFromObject(slim);
+    Object.keys(slim).forEach(function (key) {
+      if (/Perfil$/i.test(key) && slim[key] && typeof slim[key] === 'object') {
+        slim[key] = stripNegocioFiscalFromObject(Object.assign({}, slim[key]));
+      }
+    });
+    if (slim.camposPublicos && slim.camposPublicos.bloquesPublicos) {
+      slim.camposPublicos = {
+        bloquesPublicos: stripNegocioFiscalFromBloques(slim.camposPublicos.bloquesPublicos)
+      };
+    }
+    return slim;
+  }
+
   function isDataUrlString(value) {
     return typeof value === 'string' && value.indexOf('data:image/') === 0;
   }
@@ -75,7 +164,7 @@
 
   function slimCamposPublicosSnapshot(cp) {
     if (!cp || !cp.bloquesPublicos) return undefined;
-    var bloques = stripDataUrls(cp.bloquesPublicos);
+    var bloques = stripNegocioFiscalFromBloques(cp.bloquesPublicos);
     if (!bloques || typeof bloques !== 'object') return undefined;
     return { bloquesPublicos: bloques };
   }
@@ -88,7 +177,7 @@
     delete slim.camposPublicos;
     if (cpSnapshot) slim.camposPublicos = cpSnapshot;
     HUB_ONLY_KEYS.forEach(function (key) { delete slim[key]; });
-    return slim;
+    return stripNegocioFiscalFromSlimProfile(slim);
   }
 
   function buildHubRootShim(accountUid, perfilId, slimProfile) {
@@ -185,6 +274,7 @@
     ver.fecha = new Date();
 
     var bloques = cp.bloquesPublicos || null;
+    var fiscalNegocio = extractNegocioFiscalFromBloques(bloques);
     var mappedBloques = {};
     if (bloques && global.CariHubRegistroPublicBlocks && CariHubRegistroPublicBlocks.mapToPerfil) {
       mappedBloques = CariHubRegistroPublicBlocks.mapToPerfil({}, bloques, ctx);
@@ -236,6 +326,10 @@
     if (esCuckoldHotwife || cuckoldHotwifePerfil) {
       swingerPerfil = null;
       unicornPerfil = null;
+    }
+
+    if (swingerPerfil || cuckoldHotwifePerfil) {
+      parejaGrupoPerfil = null;
     }
 
     var subcategoriaIdCanon = esCuckoldHotwife
@@ -415,7 +509,7 @@
       camposPrivados: global.CariHubPrivateFieldsLite
         ? CariHubPrivateFieldsLite.sanitizePrivateForStorage(priv)
         : {},
-      datosPrivados: {
+      datosPrivados: mergeNegocioFiscalDatosPrivados({
         domicilio: priv.domicilioPrivado || '',
         correoPrivado: priv.correoContactoAdmin || priv.correoAcceso || '',
         telefonoPrivado: priv.telefonoPrivado || priv.telefonoContacto || '',
@@ -433,7 +527,7 @@
           derechosImagenes: !!priv.validacionDerechosImagenes,
           contenidoLegal: !!priv.validacionContenidoLegal
         }
-      },
+      }, fiscalNegocio),
       verificacion: ver,
       registroWizard: 'registro-perfil-v2',
       aprobado: false,

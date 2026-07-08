@@ -32,7 +32,16 @@
     'notasRevisionAdmin'
   ];
 
-  var VERIFICACION_URL_SUFFIX = /URL$/i;
+  /** URLs de verificación/comprobantes — nunca en nested público (no usar regex /URL$/i). */
+  var NESTED_PRIVATE_URL_KEYS = [
+    'ineFrenteURL',
+    'ineReversoURL',
+    'selfieVerificacionURL',
+    'cedulaComprobanteURL',
+    'cedulaProfesionalURL',
+    'cedulaProfesionURL',
+    'comprobanteDomicilioURL'
+  ];
 
   function stripNestedPerfilObject(nested) {
     if (!nested || typeof nested !== 'object' || Array.isArray(nested)) return nested;
@@ -40,8 +49,8 @@
     NESTED_STRIP.forEach(function (key) {
       delete out[key];
     });
-    Object.keys(out).forEach(function (key) {
-      if (VERIFICACION_URL_SUFFIX.test(key)) delete out[key];
+    NESTED_PRIVATE_URL_KEYS.forEach(function (key) {
+      delete out[key];
     });
     return out;
   }
@@ -69,6 +78,7 @@
   global.CariHubPublicPrivacyGuard = {
     sanitizePerfilPublico: sanitizePerfilPublico,
     ROOT_STRIP: ROOT_STRIP.slice(),
-    NESTED_STRIP: NESTED_STRIP.slice()
+    NESTED_STRIP: NESTED_STRIP.slice(),
+    NESTED_PRIVATE_URL_KEYS: NESTED_PRIVATE_URL_KEYS.slice()
   };
 })(typeof window !== 'undefined' ? window : globalThis);

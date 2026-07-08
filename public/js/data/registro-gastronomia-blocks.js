@@ -6853,6 +6853,9 @@
     (delta && delta.deltaFields ? delta.deltaFields : []).forEach(function (fid) {
       perfil[fid] = copyFieldValue(values, fid);
     });
+    (delta && delta.extraFields ? delta.extraFields : []).forEach(function (fid) {
+      perfil[fid] = copyFieldValue(values, fid);
+    });
     if (values.disclaimerReguladoGastronomia != null) {
       perfil.disclaimerReguladoGastronomia = values.disclaimerReguladoGastronomia === true;
     }
