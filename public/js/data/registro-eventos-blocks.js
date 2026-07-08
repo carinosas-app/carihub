@@ -4092,6 +4092,9 @@
     (delta && delta.deltaFields ? delta.deltaFields : []).forEach(function (fid) {
       perfil[fid] = copyFieldValue(values, fid);
     });
+    (delta && delta.extraFields ? delta.extraFields : []).forEach(function (fid) {
+      perfil[fid] = copyFieldValue(values, fid);
+    });
     if (values.disclaimerReguladoEventos != null) {
       perfil.disclaimerReguladoEventos = values.disclaimerReguladoEventos === true;
     }
