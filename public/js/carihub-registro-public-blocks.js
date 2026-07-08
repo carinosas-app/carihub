@@ -3906,10 +3906,7 @@
       horarioDetalle: values.horarioDetalle || '',
       metodosPago: Array.isArray(values.metodosPago) ? values.metodosPago.slice() : [],
       sobreMi: values.sobreMi || '',
-      disponibilidad: values.disponibilidad || '',
-      rfc: values.rfc || '',
-      razonSocial: values.razonSocial || '',
-      licenciaOperacion: values.licenciaOperacion || ''
+      disponibilidad: values.disponibilidad || ''
     };
   }
 
@@ -4057,13 +4054,7 @@
       horarioDetalle: values.horarioDetalle || '',
       metodosPago: Array.isArray(values.metodosPago) ? values.metodosPago.slice() : [],
       sobreMi: values.sobreMi || '',
-      disponibilidad: values.disponibilidad || '',
-      rfc: values.rfc || '',
-      razonSocial: values.razonSocial || '',
-      telefonoContacto: values.telefonoContacto || '',
-      licenciaOperacion: values.licenciaOperacion || '',
-      documentos: values.documentos || '',
-      notasInternas: values.notasInternas || ''
+      disponibilidad: values.disponibilidad || ''
     };
   }
 
@@ -4286,13 +4277,7 @@
       horarioDetalle: values.horarioDetalle || '',
       metodosPago: Array.isArray(values.metodosPago) ? values.metodosPago.slice() : [],
       sobreMi: values.sobreMi || '',
-      disponibilidad: values.disponibilidad || '',
-      rfc: values.rfc || '',
-      razonSocial: values.razonSocial || '',
-      telefonoContacto: values.telefonoContacto || '',
-      licenciaOperacion: values.licenciaOperacion || '',
-      documentos: values.documentos || '',
-      notasInternas: values.notasInternas || ''
+      disponibilidad: values.disponibilidad || ''
     };
   }
 
@@ -4448,13 +4433,7 @@
       horarioDetalle: values.horarioDetalle || '',
       metodosPago: Array.isArray(values.metodosPago) ? values.metodosPago.slice() : [],
       sobreMi: values.sobreMi || '',
-      disponibilidad: values.disponibilidad || '',
-      rfc: values.rfc || '',
-      razonSocial: values.razonSocial || '',
-      telefonoContacto: values.telefonoContacto || '',
-      licenciaOperacion: values.licenciaOperacion || '',
-      documentos: values.documentos || '',
-      notasInternas: values.notasInternas || ''
+      disponibilidad: values.disponibilidad || ''
     };
   }
 
