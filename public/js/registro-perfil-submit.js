@@ -328,6 +328,10 @@
       unicornPerfil = null;
     }
 
+    if (swingerPerfil || cuckoldHotwifePerfil) {
+      parejaGrupoPerfil = null;
+    }
+
     var subcategoriaIdCanon = esCuckoldHotwife
       ? 'cuckold_hotwife'
       : (ctx.subcategoriaId || '');

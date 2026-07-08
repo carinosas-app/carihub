@@ -3142,8 +3142,20 @@
     return values;
   }
 
-  function finalizeParejaGrupoValues(values) {
+  function finalizeParejaGrupoValues(values, ctx) {
     if (!values || (!values.configuracionGrupo && !Array.isArray(values.miembros))) return values;
+    ctx = ctx || {};
+    if (isSwingerSubcategoria(ctx) || isCuckoldHotwifeSubcategoria(ctx) || isUnicornSubcategoria(ctx)) {
+      return values;
+    }
+    if (values.swingerPerfil || values.cuckoldHotwifePerfil || values.unicornPerfil) {
+      return values;
+    }
+    var parejaSub = normalizeParejaSubId(values.subcategoriaId || values.canonSubcategoriaId || '');
+    var lifestyleSub = normalizeLifestyleSubId(values.subcategoriaId || values.canonSubcategoriaId || '');
+    if (parejaSub === 'swinger' || parejaSub === 'cuckold hotwife' || lifestyleSub === 'unicorns') {
+      return values;
+    }
     var aliasEl = $('fldAlias');
     var alias = aliasEl ? String(aliasEl.value || '').trim() : String(values.aliasPareja || values.alias || '').trim();
     if (alias) {
@@ -5095,7 +5107,7 @@
     values = finalizeEducacionSectorValues(values, ctx);
     values = finalizeIndustriaSectorValues(values, ctx);
     values = finalizeHospedajeValues(values, ctx);
-    values = finalizeParejaGrupoValues(values);
+    values = finalizeParejaGrupoValues(values, ctx);
     return values;
   }
 
@@ -5570,7 +5582,14 @@
       u.miembrosEdad = u.miembrosResumen;
     }
     if (bloques.reglasAcceso) u.reglasAcceso = bloques.reglasAcceso;
-    if (bloques.parejaGrupoPerfil) u.parejaGrupoPerfil = Object.assign({}, bloques.parejaGrupoPerfil);
+    if (
+      bloques.parejaGrupoPerfil
+      && !isSwingerSubcategoria(ctx)
+      && !isCuckoldHotwifeSubcategoria(ctx)
+      && !isUnicornSubcategoria(ctx)
+    ) {
+      u.parejaGrupoPerfil = Object.assign({}, bloques.parejaGrupoPerfil);
+    }
     if (bloques.tipoPerfil === 'pareja_grupo' || (ctx && matchesPareja(ctx, null))) {
       u.tipoPerfil = 'pareja_grupo';
     }
