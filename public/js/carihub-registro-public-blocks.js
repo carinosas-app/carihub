@@ -3274,6 +3274,7 @@
       modalidadesTerapia: Array.isArray(values.modalidadesTerapia) ? values.modalidadesTerapia.slice() : [],
       duracionSesionMinutos: values.duracionSesionMinutos || '',
       contraindicacionesGenerales: values.contraindicacionesGenerales || '',
+      atencionDomicilio: values.atencionDomicilio || 'No',
       tipoPractica: values.tipoPractica || '',
       modalidadClase: values.modalidadClase || '',
       nivelesAtendidos: values.nivelesAtendidos || '',
