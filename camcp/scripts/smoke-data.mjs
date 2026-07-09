@@ -168,7 +168,7 @@ function main() {
   if (schMd) {
     const text = fs.readFileSync(path.join(repoRoot, schMd), 'utf8');
     if (text.includes('# CAMCP REPORT') && text.includes('data.schema_alignment')) {
-      pass('reports-engine-format', 'CAMCP REPORT data.schema_alignment');
+      pass('reports-engine-format', 'CAMCP REPORT data.schema_alignment (v1/v2)');
     } else {
       fail('reports-engine-format', 'invalid report content');
     }
