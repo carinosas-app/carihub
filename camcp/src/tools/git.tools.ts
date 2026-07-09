@@ -159,6 +159,14 @@ export function gitScopeCheck(repoRoot: string, input: ScopeCheckInput, config: 
   };
 }
 
+export function gitWorktreeList(repoRoot: string, config: CamcpConfig) {
+  const result = runGitAllowed(repoRoot, 'worktree', ['list', '--porcelain'], config);
+  return {
+    raw: result.stdout.trim(),
+    exitCode: result.exitCode,
+  };
+}
+
 export function gitResolvePath(repoRoot: string, p: string): string {
   return resolveRepoPath(repoRoot, p);
 }

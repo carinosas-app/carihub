@@ -1,0 +1,128 @@
+{
+  "schemaVersion": "1.0.0",
+  "registryVersion": "1.0.0",
+  "facades": [
+    {
+      "facadeId": "catalog.audit",
+      "registrations": [
+        {
+          "watchId": "ssot.registro-schema-index",
+          "kind": "ssot",
+          "ssotId": "registro-schema-index",
+          "invalidates": ["*"],
+          "completedCheckPattern": "catalog.audit:*"
+        }
+      ]
+    },
+    {
+      "facadeId": "profile.audit",
+      "registrations": [
+        {
+          "watchId": "ssot.registro-schema-index",
+          "kind": "ssot",
+          "ssotId": "registro-schema-index",
+          "invalidates": ["*"],
+          "completedCheckPattern": "profile.audit:*"
+        },
+        {
+          "watchId": "file.perfil-publico",
+          "kind": "file",
+          "path": "public/perfil-publico.html",
+          "hash": true,
+          "invalidates": ["render", "public_fields", "full"],
+          "completedCheckPattern": "profile.audit:{render,public_fields,full}"
+        },
+        {
+          "watchId": "config.parity",
+          "kind": "config",
+          "path": "camcp/config/parity.config.json",
+          "versionField": "version",
+          "invalidates": ["parity", "render", "full"],
+          "completedCheckPattern": "profile.audit:{parity,render,full}"
+        },
+        {
+          "watchId": "config.data",
+          "kind": "config",
+          "path": "camcp/config/data.config.json",
+          "versionField": "version",
+          "invalidates": ["registration", "private_fields", "full"],
+          "completedCheckPattern": "profile.audit:{registration,private_fields,full}"
+        },
+        {
+          "watchId": "git.head",
+          "kind": "git",
+          "source": "git.head",
+          "invalidates": ["*"],
+          "completedCheckPattern": "profile.audit:*|arch.review:*|git.worktree:*"
+        },
+        {
+          "watchId": "git.branch",
+          "kind": "git",
+          "source": "git.branch",
+          "invalidates": ["*"],
+          "completedCheckPattern": "profile.audit:*|arch.review:*|git.worktree:*"
+        }
+      ]
+    },
+    {
+      "facadeId": "arch.review",
+      "registrations": [
+        {
+          "watchId": "ssot.mapa-maestro",
+          "kind": "ssot",
+          "ssotId": "mapa-maestro",
+          "invalidates": ["boundaries", "full"],
+          "completedCheckPattern": "arch.review:{boundaries,full}"
+        },
+        {
+          "watchId": "ssot.intelligence-config",
+          "kind": "ssot",
+          "ssotId": "intelligence-config",
+          "invalidates": ["boundaries", "full"],
+          "completedCheckPattern": "arch.review:{boundaries,full}"
+        },
+        {
+          "watchId": "ssot.arch-config",
+          "kind": "ssot",
+          "ssotId": "arch-config",
+          "invalidates": ["frozen", "duplicates", "full"],
+          "completedCheckPattern": "arch.review:{frozen,duplicates,full}"
+        },
+        {
+          "watchId": "glob.acta-congelamiento",
+          "kind": "glob",
+          "pathGlob": "scripts/ACTA-CONGELAMIENTO-*.json",
+          "hash": true,
+          "invalidates": ["frozen", "full"],
+          "completedCheckPattern": "arch.review:{frozen,full}"
+        },
+        {
+          "watchId": "git.head",
+          "kind": "git",
+          "source": "git.head",
+          "invalidates": ["*"],
+          "completedCheckPattern": "arch.review:*|git.worktree:*"
+        }
+      ]
+    },
+    {
+      "facadeId": "git.worktree",
+      "registrations": [
+        {
+          "watchId": "git.head",
+          "kind": "git",
+          "source": "git.head",
+          "invalidates": ["*"],
+          "completedCheckPattern": "git.worktree:*"
+        },
+        {
+          "watchId": "git.branch",
+          "kind": "git",
+          "source": "git.branch",
+          "invalidates": ["*"],
+          "completedCheckPattern": "git.worktree:*"
+        }
+      ]
+    }
+  ]
+}

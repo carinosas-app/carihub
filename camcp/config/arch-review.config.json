@@ -1,0 +1,35 @@
+{
+  "version": "1.0.0",
+  "schemaVersion": "1.0.0",
+  "defaults": {
+    "maxFindingsPerFacet": 500,
+    "maxAgeMs": 3600000,
+    "gitContextMaxAgeMs": 86400000,
+    "failOnBlocker": true
+  },
+  "delegation": {
+    "boundaries": { "toolId": "arch.domain_boundaries", "module": "arch.domain_boundaries" },
+    "frozen": { "toolId": "arch.frozen_violations", "module": "arch.frozen_violations" },
+    "duplicates": { "toolId": "arch.scan_duplicates", "module": "arch.scan_duplicates" },
+    "impact": { "toolId": "intel.impact", "module": "intel.impact" },
+    "graph": { "toolId": "intel.graph", "module": "intel.graph" }
+  },
+  "handoffPriorities": [
+    "arch.review:summary",
+    "arch.review:frozen",
+    "arch.review:boundaries",
+    "arch.review:impact",
+    "arch.review:full",
+    "context.handoff:summarize"
+  ],
+  "archReviewHealthGraph": {
+    "ssotValid": { "dependsOn": ["contract-gate"] },
+    "gitContextFresh": { "dependsOn": ["git-context"] },
+    "scopeValid": { "dependsOn": ["scope"] },
+    "boundariesValid": { "dependsOn": ["boundaries"] },
+    "frozenValid": { "dependsOn": ["frozen"] },
+    "duplicatesValid": { "dependsOn": ["duplicates"] },
+    "impactValid": { "dependsOn": ["impact"] },
+    "graphValid": { "dependsOn": ["graph"] }
+  }
+}
