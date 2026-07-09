@@ -5618,6 +5618,7 @@
       u.serviciosIncluidos = bloques.serviciosIncluidos.slice();
     }
     if (Array.isArray(bloques.serviciosNoRealizo) && bloques.serviciosNoRealizo.length) {
+      u.serviciosNoRealizo = bloques.serviciosNoRealizo.slice();
       u.noRealiza = bloques.serviciosNoRealizo.slice();
     }
     if (Array.isArray(bloques.metodosPago) && bloques.metodosPago.length) {
