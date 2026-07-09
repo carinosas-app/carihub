@@ -1,0 +1,67 @@
+{
+  "version": "1.0.0",
+  "schemaVersion": "1.0.0",
+  "defaults": {
+    "strictRender": true,
+    "includePrivacy": true,
+    "maxFindingsPerFacet": 500,
+    "maxAgeMs": 3600000,
+    "failOnBlocker": true
+  },
+  "ssot": {
+    "schemaIndexPath": "public/js/data/registro-schema-index.json",
+    "perfilPublicoPath": "public/perfil-publico.html",
+    "supportedVersions": ["2026-06-10"]
+  },
+  "delegation": {
+    "registration": { "toolId": "data.schema_alignment", "module": "data.schema_alignment" },
+    "parity": { "toolId": "parity.vm", "module": "parity.vm" },
+    "public_fields": { "toolId": "data.hydrate_audit", "module": "data.hydrate_audit" },
+    "private_fields": { "toolId": "data.persist_audit", "module": "data.persist_audit" },
+    "render": { "toolId": "parity.render_strict", "module": "parity.render_strict" }
+  },
+  "handoffPriorities": [
+    "profile.audit:summary",
+    "profile.audit:registration",
+    "profile.audit:parity",
+    "profile.audit:private_fields",
+    "profile.audit:public_fields",
+    "profile.audit:render",
+    "profile.audit:full",
+    "context.handoff:summarize"
+  ],
+  "profileHealthGraph": {
+    "ssotValid": { "dependsOn": ["contract-gate"] },
+    "scopeValid": { "dependsOn": ["scope-resolver"] },
+    "registrationValid": { "dependsOn": ["registration"] },
+    "parityValid": { "dependsOn": ["parity"] },
+    "privacyValid": { "dependsOn": ["private_fields"] },
+    "renderValid": { "dependsOn": ["render"] },
+    "lifecycleValid": { "dependsOn": ["lifecycle"] },
+    "verificationValid": { "dependsOn": ["verification"] }
+  },
+  "lifecycleRuleset": {
+    "rulesetId": "profile-lifecycle-rules-v1",
+    "nestedPerfilKeysBySector": {
+      "adultos": ["adultosPerfil"],
+      "restaurantes": ["gastronomiaPerfil"],
+      "salud": ["saludPerfil"],
+      "profesionales": ["profesionalesPerfil"]
+    }
+  },
+  "verificationRuleset": {
+    "rulesetId": "profile-verification-rules-v1",
+    "professionalArquetipos": [
+      "persona_profesional",
+      "persona_servicio_profesional",
+      "negocio_profesional"
+    ],
+    "cedulaRequiredSectors": ["profesionales", "salud"]
+  },
+  "reservedFacets": {
+    "profile.visual.audit": {
+      "code": "PROFILE.VISUAL.NOT_IMPLEMENTED",
+      "message": "profile.visual.audit is RESERVED — no runtime in v1"
+    }
+  }
+}
