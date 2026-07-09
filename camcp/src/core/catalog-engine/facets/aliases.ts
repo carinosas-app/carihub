@@ -1,6 +1,7 @@
 import { loadAliasDocuments } from '../loader.js';
 import { catalogFinding } from '../findings.js';
 import { normId } from '../normalize.js';
+import { isIntentionalRedirectOnlyLegacy } from './aliases-intentional.js';
 import type { CatalogEngineContext, CatalogEntry } from '../types.js';
 import type { ReportFinding } from '../../../reports/schema.js';
 
@@ -55,19 +56,52 @@ export function runAliasesFacet(ctx: CatalogEngineContext): ReportFinding[] {
           }
 
           if (!byId[aliasId] && aliasId !== targetId) {
-            findings.push(
-              catalogFinding(
-                'CATALOG.ALIAS.LEGACY_ORPHAN',
-                'IMPORTANTE',
-                'Legacy alias without schema entry',
-                `Legacy id ${aliasId} redirects to ${targetId} but has no byId entry`,
-                'aliases',
-                {
-                  subject: { type: 'alias', aliasId, targetId },
-                  evidenceRefs: [{ kind: 'file', path, label: 'legacy alias orphan' }],
-                }
-              )
-            );
+            const intentional = isIntentionalRedirectOnlyLegacy(ctx, path, aliasId, targetId);
+            if (intentional.intentional) {
+              findings.push(
+                catalogFinding(
+                  'CATALOG.ALIAS.INTENTIONAL_REDIRECT',
+                  'PASS',
+                  'Acta-backed redirect-only legacy alias',
+                  `Legacy id ${aliasId} → ${targetId} is redirect-only (no schema byId expected per acta)`,
+                  'aliases',
+                  {
+                    subject: { type: 'alias', aliasId, targetId, redirectOnly: true },
+                    evidenceRefs: [
+                      { kind: 'file', path, label: 'legacyToCanon' },
+                      {
+                        kind: 'file',
+                        path: intentional.evidence!.actaPath,
+                        label: 'acta legacy→canon table',
+                      },
+                      ...intentional.evidence!.runtimePaths.map((runtimePath) => ({
+                        kind: 'file' as const,
+                        path: runtimePath,
+                        label: 'runtime LEGACY_TO_CANON',
+                      })),
+                    ],
+                    recommendation: {
+                      action: 'maintain',
+                      hint: 'Redirect via resolveCanonSubId; do not add legacy row to schema-index',
+                    },
+                  }
+                )
+              );
+            } else {
+              findings.push(
+                catalogFinding(
+                  'CATALOG.ALIAS.LEGACY_ORPHAN',
+                  'IMPORTANTE',
+                  'Legacy alias without schema entry',
+                  `Legacy id ${aliasId} redirects to ${targetId} but has no byId entry`,
+                  'aliases',
+                  {
+                    subject: { type: 'alias', aliasId, targetId },
+                    evidenceRefs: [{ kind: 'file', path, label: 'legacy alias orphan' }],
+                  }
+                )
+              );
+            }
           }
 
           if (aliasEntrySectorDrift(byId[aliasId], target)) {

@@ -5,7 +5,17 @@ import { fileURLToPath } from 'node:url';
 export interface CatalogConfig {
   version: string;
   schemaVersion: string;
-  rulesetIds: { gaps: string; placement: string };
+  rulesetIds: { gaps: string; placement: string; aliases?: string };
+  aliasRuleset?: {
+    rulesetId: string;
+    version: string;
+    intentionalRedirectBundles: Array<{
+      bundleId: string;
+      aliasDocumentPath: string;
+      actaPath: string;
+      runtimeLegacyMapPaths: string[];
+    }>;
+  };
   ssot: {
     schemaIndexPath: string;
     schemaIndexMirrorPath: string;
