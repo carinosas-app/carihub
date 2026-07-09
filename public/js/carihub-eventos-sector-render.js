@@ -79,7 +79,9 @@
       "cateringPolitica",
       "permiteMusicaEnVivo",
       "permitePirotecnia",
-      "horarioMaximoEvento"
+      "horarioMaximoEvento",
+      "colaboracionesComerciales",
+      "diferenciadorProfesional"
     ],
     "faq": [
       "restriccionRuido",
@@ -97,7 +99,9 @@
     ],
     "rows": [
       "rolProduccion",
-      "incluyeDirectorEvento"
+      "incluyeDirectorEvento",
+      "colaboracionesComerciales",
+      "diferenciadorProfesional"
     ]
   },
   "decoracion-ambientacion-eventos": {
@@ -108,7 +112,9 @@
     "rows": [
       "incluyeMontajeDesmontaje",
       "estructurasPropias",
-      "tiempoMontajeHoras"
+      "tiempoMontajeHoras",
+      "colaboracionesComerciales",
+      "diferenciadorProfesional"
     ]
   },
   "fotografia-video-eventos": {
@@ -122,7 +128,9 @@
     ],
     "rows": [
       "incluyeSegundoOperador",
-      "licenciaDron"
+      "licenciaDron",
+      "colaboracionesComerciales",
+      "diferenciadorProfesional"
     ]
   },
   "djs-eventos": {
@@ -136,7 +144,9 @@
     "rows": [
       "incluyeEquipoDj",
       "aceptaPeticionesEnVivo",
-      "viajaFueraCiudad"
+      "viajaFueraCiudad",
+      "colaboracionesComerciales",
+      "diferenciadorProfesional"
     ]
   },
   "grupos-musicales-eventos": {
@@ -151,7 +161,9 @@
     "rows": [
       "incluyeSonidoMusica",
       "aceptaPeticiones",
-      "experienciaEnEventos"
+      "experienciaEnEventos",
+      "colaboracionesComerciales",
+      "diferenciadorProfesional"
     ]
   },
   "animadores-maestros-ceremonia": {
@@ -163,7 +175,9 @@
       "rangoEdadPublico",
       "dinamicasOfrecidas",
       "estiloCeremonia",
-      "idiomasAnimacion"
+      "idiomasAnimacion",
+      "colaboracionesComerciales",
+      "diferenciadorProfesional"
     ]
   },
   "shows-para-eventos": {
@@ -178,7 +192,9 @@
     "rows": [
       "requiereEspacioMinimo",
       "incluyeAudioShow",
-      "viajaFueraCiudad"
+      "viajaFueraCiudad",
+      "colaboracionesComerciales",
+      "diferenciadorProfesional"
     ],
     "badge": "contenidoSensible"
   },
@@ -192,7 +208,9 @@
     ],
     "rows": [
       "incluyeMeseros",
-      "menuMuestraDisponible"
+      "menuMuestraDisponible",
+      "colaboracionesComerciales",
+      "diferenciadorProfesional"
     ]
   },
   "renta-mobiliario-eventos": {
@@ -202,7 +220,9 @@
     "rows": [
       "incluyeEntregaRecoleccion",
       "depositoGarantiaMobiliario",
-      "minimoRentaMobiliario"
+      "minimoRentaMobiliario",
+      "colaboracionesComerciales",
+      "diferenciadorProfesional"
     ]
   },
   "renta-equipo-eventos": {
@@ -214,7 +234,9 @@
     ],
     "rows": [
       "incluyeOperadorTecnico",
-      "requerimientosElectricos"
+      "requerimientosElectricos",
+      "colaboracionesComerciales",
+      "diferenciadorProfesional"
     ]
   },
   "food-trucks-carritos-eventos": {
@@ -227,7 +249,9 @@
     ],
     "rows": [
       "requiereAguaLuz",
-      "radioServicioKm"
+      "radioServicioKm",
+      "colaboracionesComerciales",
+      "diferenciadorProfesional"
     ]
   },
   "pasteles-reposteria-eventos": {
@@ -239,7 +263,9 @@
     ],
     "rows": [
       "incluyeDegustacion",
-      "incluyeMontajeMesaPostres"
+      "incluyeMontajeMesaPostres",
+      "colaboracionesComerciales",
+      "diferenciadorProfesional"
     ]
   },
   "invitaciones-papeleria-eventos": {
@@ -250,6 +276,10 @@
     "stats": [
       "tiempoProduccionDias",
       "revisionesIncluidas"
+    ],
+    "rows": [
+      "colaboracionesComerciales",
+      "diferenciadorProfesional"
     ]
   },
   "florerias-eventos": {
@@ -258,7 +288,9 @@
     ],
     "rows": [
       "incluyeInstalacionFloral",
-      "requiereVisitaVenue"
+      "requiereVisitaVenue",
+      "colaboracionesComerciales",
+      "diferenciadorProfesional"
     ]
   },
   "pirotecnia-efectos-especiales": {
@@ -268,7 +300,9 @@
     "rows": [
       "ambientePirotecnia",
       "distanciaSeguridadMetros",
-      "jurisdiccionPirotecnia"
+      "jurisdiccionPirotecnia",
+      "colaboracionesComerciales",
+      "diferenciadorProfesional"
     ],
     "badge": "regulada"
   },
@@ -279,7 +313,9 @@
     "rows": [
       "controlAcceso",
       "eventosMasivos",
-      "licenciaSeguridadPrivada"
+      "licenciaSeguridadPrivada",
+      "colaboracionesComerciales",
+      "diferenciadorProfesional"
     ],
     "badge": "regulada"
   },
@@ -290,7 +326,9 @@
     ],
     "rows": [
       "polizaResponsabilidadValet",
-      "coordinacionConVenue"
+      "coordinacionConVenue",
+      "colaboracionesComerciales",
+      "diferenciadorProfesional"
     ]
   },
   "transporte-eventos": {
@@ -303,7 +341,9 @@
     ],
     "rows": [
       "incluyeChofer",
-      "permisoTransporte"
+      "permisoTransporte",
+      "colaboracionesComerciales",
+      "diferenciadorProfesional"
     ]
   },
   "renta-vestuario-disfraces-eventos": {
@@ -313,7 +353,9 @@
     "rows": [
       "tallasDisponibles",
       "higienizacionVestuario",
-      "depositoVestuario"
+      "depositoVestuario",
+      "colaboracionesComerciales",
+      "diferenciadorProfesional"
     ]
   }
 };
@@ -441,7 +483,9 @@
   "unidadCotizacion": "Cotizas por",
   "cotizacionDesde": "Cotización desde (MXN)",
   "tagline": "Frase que vende tu servicio",
-  "disclaimerReguladoEventos": "Acepto avisos legales y limitaciones del servicio regulado"
+  "disclaimerReguladoEventos": "Acepto avisos legales y limitaciones del servicio regulado",
+  "colaboracionesComerciales": "¿Trabajas con otros proveedores de eventos en paquetes conjuntos?",
+  "diferenciadorProfesional": "Tu sello / lo que te distingue"
 };
 
   var FIELD_TYPES = {
@@ -567,7 +611,9 @@
   "unidadCotizacion": "enum",
   "cotizacionDesde": "number",
   "tagline": "text",
-  "disclaimerReguladoEventos": "boolean"
+  "disclaimerReguladoEventos": "boolean",
+  "colaboracionesComerciales": "enum",
+  "diferenciadorProfesional": "text"
 };
 
   var CANON_BLOCK_TITLES = {

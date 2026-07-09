@@ -778,6 +778,19 @@ export const EVENTOS_FIELD_REGISTRY = {
     tipo: "boolean",
     privado: false,
   },
+  colaboracionesComerciales: {
+    id: "colaboracionesComerciales",
+    label: "¿Trabajas con otros proveedores de eventos en paquetes conjuntos?",
+    tipo: "enum",
+    opciones: ["si_activo", "ocasional", "convenir", "no"],
+  },
+  diferenciadorProfesional: {
+    id: "diferenciadorProfesional",
+    label: "Tu sello / lo que te distingue",
+    tipo: "text",
+    maxLength: 120,
+    iaCopy: true,
+  },
 };
 
 /** Subniveles / especialidades por canon (checklists dentro del formulario, no subs hijas). */
@@ -1131,7 +1144,14 @@ export const SUB_DELTAS = {
     previewFicha: {
       chips: ["tiposEspacio", "tiposEventoAceptados"],
       stats: ["capacidadMin", "capacidadMax", "estacionamientoCupo"],
-      rows: ["cateringPolitica", "permiteMusicaEnVivo", "permitePirotecnia", "horarioMaximoEvento"],
+      rows: [
+        "cateringPolitica",
+        "permiteMusicaEnVivo",
+        "permitePirotecnia",
+        "horarioMaximoEvento",
+        "colaboracionesComerciales",
+        "diferenciadorProfesional",
+      ],
       faq: ["restriccionRuido", "mobiliarioIncluido"],
     },
   },
@@ -1161,7 +1181,12 @@ export const SUB_DELTAS = {
     previewFicha: {
       chips: ["especialidadesEvento", "tamanoEventoAtendido"],
       stats: ["presupuestoMinimoMxn", "experienciaAnios"],
-      rows: ["rolProduccion", "incluyeDirectorEvento"],
+      rows: [
+        "rolProduccion",
+        "incluyeDirectorEvento",
+        "colaboracionesComerciales",
+        "diferenciadorProfesional",
+      ],
     },
   },
   "decoracion-ambientacion-eventos": {
@@ -1185,7 +1210,13 @@ export const SUB_DELTAS = {
     },
     previewFicha: {
       chips: ["especialidadesDecoracion", "estiloVisual"],
-      rows: ["incluyeMontajeDesmontaje", "estructurasPropias", "tiempoMontajeHoras"],
+      rows: [
+        "incluyeMontajeDesmontaje",
+        "estructurasPropias",
+        "tiempoMontajeHoras",
+        "colaboracionesComerciales",
+        "diferenciadorProfesional",
+      ],
     },
   },
   "fotografia-video-eventos": {
@@ -1203,7 +1234,12 @@ export const SUB_DELTAS = {
     previewFicha: {
       chips: ["serviciosAudiovisual", "especialidadesEvento"],
       stats: ["horasCobertura", "tiempoEntregaDias"],
-      rows: ["incluyeSegundoOperador", "licenciaDron"],
+      rows: [
+        "incluyeSegundoOperador",
+        "licenciaDron",
+        "colaboracionesComerciales",
+        "diferenciadorProfesional",
+      ],
     },
   },
   "djs-eventos": {
@@ -1232,7 +1268,13 @@ export const SUB_DELTAS = {
     previewFicha: {
       chips: ["generosMusicales", "especialidadesDj"],
       stats: ["duracionSetMinimaHoras"],
-      rows: ["incluyeEquipoDj", "aceptaPeticionesEnVivo", "viajaFueraCiudad"],
+      rows: [
+        "incluyeEquipoDj",
+        "aceptaPeticionesEnVivo",
+        "viajaFueraCiudad",
+        "colaboracionesComerciales",
+        "diferenciadorProfesional",
+      ],
     },
   },
   "grupos-musicales-eventos": {
@@ -1265,7 +1307,13 @@ export const SUB_DELTAS = {
     previewFicha: {
       chips: ["tipoAgrupacion", "repertorioPrincipal"],
       stats: ["numeroIntegrantes", "duracionSetMinutos"],
-      rows: ["incluyeSonidoMusica", "aceptaPeticiones", "experienciaEnEventos"],
+      rows: [
+        "incluyeSonidoMusica",
+        "aceptaPeticiones",
+        "experienciaEnEventos",
+        "colaboracionesComerciales",
+        "diferenciadorProfesional",
+      ],
     },
   },
   "animadores-maestros-ceremonia": {
@@ -1283,7 +1331,14 @@ export const SUB_DELTAS = {
     obligatoriosDelta: ["rolPrincipal", "idiomasAnimacion", "especialidadesEvento", "duracionShowMinutos"],
     previewFicha: {
       chips: ["rolPrincipal", "especialidadesEvento"],
-      rows: ["rangoEdadPublico", "dinamicasOfrecidas", "estiloCeremonia", "idiomasAnimacion"],
+      rows: [
+        "rangoEdadPublico",
+        "dinamicasOfrecidas",
+        "estiloCeremonia",
+        "idiomasAnimacion",
+        "colaboracionesComerciales",
+        "diferenciadorProfesional",
+      ],
     },
   },
   "shows-para-eventos": {
@@ -1318,7 +1373,13 @@ export const SUB_DELTAS = {
     previewFicha: {
       chips: ["tipoShow", "publicoObjetivo"],
       stats: ["duracionShowMinutos", "numeroArtistas"],
-      rows: ["requiereEspacioMinimo", "incluyeAudioShow", "viajaFueraCiudad"],
+      rows: [
+        "requiereEspacioMinimo",
+        "incluyeAudioShow",
+        "viajaFueraCiudad",
+        "colaboracionesComerciales",
+        "diferenciadorProfesional",
+      ],
       badge: "contenidoSensible",
     },
   },
@@ -1342,7 +1403,12 @@ export const SUB_DELTAS = {
     previewFicha: {
       chips: ["formatoBanquete", "dietasEspeciales"],
       stats: ["comensalesMax"],
-      rows: ["incluyeMeseros", "menuMuestraDisponible"],
+      rows: [
+        "incluyeMeseros",
+        "menuMuestraDisponible",
+        "colaboracionesComerciales",
+        "diferenciadorProfesional",
+      ],
     },
   },
   "renta-mobiliario-eventos": {
@@ -1356,7 +1422,13 @@ export const SUB_DELTAS = {
     obligatoriosDelta: ["inventarioMobiliario", "incluyeEntregaRecoleccion", "minimoRentaMobiliario", "especialidadesEvento"],
     previewFicha: {
       chips: ["inventarioMobiliario"],
-      rows: ["incluyeEntregaRecoleccion", "depositoGarantiaMobiliario", "minimoRentaMobiliario"],
+      rows: [
+        "incluyeEntregaRecoleccion",
+        "depositoGarantiaMobiliario",
+        "minimoRentaMobiliario",
+        "colaboracionesComerciales",
+        "diferenciadorProfesional",
+      ],
     },
   },
   "renta-equipo-eventos": {
@@ -1372,7 +1444,12 @@ export const SUB_DELTAS = {
     previewFicha: {
       chips: ["tipoEquipoRenta"],
       stats: ["potenciaAudioWatts"],
-      rows: ["incluyeOperadorTecnico", "requerimientosElectricos"],
+      rows: [
+        "incluyeOperadorTecnico",
+        "requerimientosElectricos",
+        "colaboracionesComerciales",
+        "diferenciadorProfesional",
+      ],
     },
   },
   "food-trucks-carritos-eventos": {
@@ -1395,7 +1472,12 @@ export const SUB_DELTAS = {
     previewFicha: {
       chips: ["cartaPrincipal", "tipoUnidadFood"],
       stats: ["comensalesPorHora"],
-      rows: ["requiereAguaLuz", "radioServicioKm"],
+      rows: [
+        "requiereAguaLuz",
+        "radioServicioKm",
+        "colaboracionesComerciales",
+        "diferenciadorProfesional",
+      ],
     },
   },
   "pasteles-reposteria-eventos": {
@@ -1416,7 +1498,12 @@ export const SUB_DELTAS = {
     previewFicha: {
       chips: ["productosReposteria"],
       stats: ["tiempoPedidoAnticipacionDias"],
-      rows: ["incluyeDegustacion", "incluyeMontajeMesaPostres"],
+      rows: [
+        "incluyeDegustacion",
+        "incluyeMontajeMesaPostres",
+        "colaboracionesComerciales",
+        "diferenciadorProfesional",
+      ],
     },
   },
   "invitaciones-papeleria-eventos": {
@@ -1438,6 +1525,7 @@ export const SUB_DELTAS = {
     previewFicha: {
       chips: ["productosPapeleria", "entregaFormato"],
       stats: ["tiempoProduccionDias", "revisionesIncluidas"],
+      rows: ["colaboracionesComerciales", "diferenciadorProfesional"],
     },
   },
   "florerias-eventos": {
@@ -1459,7 +1547,12 @@ export const SUB_DELTAS = {
     },
     previewFicha: {
       chips: ["productosFlorales"],
-      rows: ["incluyeInstalacionFloral", "requiereVisitaVenue"],
+      rows: [
+        "incluyeInstalacionFloral",
+        "requiereVisitaVenue",
+        "colaboracionesComerciales",
+        "diferenciadorProfesional",
+      ],
     },
   },
   "pirotecnia-efectos-especiales": {
@@ -1484,7 +1577,13 @@ export const SUB_DELTAS = {
     ],
     previewFicha: {
       chips: ["tipoEfectoPirotecnia"],
-      rows: ["ambientePirotecnia", "distanciaSeguridadMetros", "jurisdiccionPirotecnia"],
+      rows: [
+        "ambientePirotecnia",
+        "distanciaSeguridadMetros",
+        "jurisdiccionPirotecnia",
+        "colaboracionesComerciales",
+        "diferenciadorProfesional",
+      ],
       badge: "regulada",
     },
   },
@@ -1505,7 +1604,13 @@ export const SUB_DELTAS = {
     ],
     previewFicha: {
       stats: ["elementosSeguridad"],
-      rows: ["controlAcceso", "eventosMasivos", "licenciaSeguridadPrivada"],
+      rows: [
+        "controlAcceso",
+        "eventosMasivos",
+        "licenciaSeguridadPrivada",
+        "colaboracionesComerciales",
+        "diferenciadorProfesional",
+      ],
       badge: "regulada",
     },
   },
@@ -1527,7 +1632,12 @@ export const SUB_DELTAS = {
     ],
     previewFicha: {
       stats: ["vehiculosPorHora", "elementosValet"],
-      rows: ["polizaResponsabilidadValet", "coordinacionConVenue"],
+      rows: [
+        "polizaResponsabilidadValet",
+        "coordinacionConVenue",
+        "colaboracionesComerciales",
+        "diferenciadorProfesional",
+      ],
     },
   },
   "transporte-eventos": {
@@ -1551,7 +1661,12 @@ export const SUB_DELTAS = {
     previewFicha: {
       chips: ["tipoFlotaTransporte", "usoTransporte"],
       stats: ["capacidadPasajeros"],
-      rows: ["incluyeChofer", "permisoTransporte"],
+      rows: [
+        "incluyeChofer",
+        "permisoTransporte",
+        "colaboracionesComerciales",
+        "diferenciadorProfesional",
+      ],
     },
   },
   "renta-vestuario-disfraces-eventos": {
@@ -1565,7 +1680,13 @@ export const SUB_DELTAS = {
     obligatoriosDelta: ["categoriasVestuario", "tallasDisponibles", "higienizacionVestuario", "especialidadesEvento"],
     previewFicha: {
       chips: ["categoriasVestuario"],
-      rows: ["tallasDisponibles", "higienizacionVestuario", "depositoVestuario"],
+      rows: [
+        "tallasDisponibles",
+        "higienizacionVestuario",
+        "depositoVestuario",
+        "colaboracionesComerciales",
+        "diferenciadorProfesional",
+      ],
     },
   },
 };

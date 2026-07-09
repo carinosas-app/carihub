@@ -73,7 +73,8 @@
       "terrazaPatio",
       "estacionamientoClientes",
       "menuDelDia",
-      "precioPromedioMx"
+      "precioPromedioMx",
+      "colaboracionesComerciales"
     ],
     "faq": [
       "brunchDisponible",
@@ -98,7 +99,8 @@
       "terrazaPatio",
       "estacionamientoClientes",
       "menuDelDia",
-      "precioPromedioMx"
+      "precioPromedioMx",
+      "colaboracionesComerciales"
     ],
     "faq": [
       "platosEstrellaMar",
@@ -123,7 +125,8 @@
       "terrazaPatio",
       "estacionamientoClientes",
       "menuDelDia",
-      "precioPromedioMx"
+      "precioPromedioMx",
+      "colaboracionesComerciales"
     ],
     "faq": [
       "platosRotativos",
@@ -148,7 +151,8 @@
       "tiempoPreparacionMin",
       "precioPromedioMx",
       "horarioCocina",
-      "permisoManipulacionAlimentos"
+      "permisoManipulacionAlimentos",
+      "colaboracionesComerciales"
     ],
     "faq": [
       "hornoTortillas",
@@ -173,7 +177,8 @@
       "tiempoPreparacionMin",
       "precioPromedioMx",
       "horarioCocina",
-      "permisoManipulacionAlimentos"
+      "permisoManipulacionAlimentos",
+      "colaboracionesComerciales"
     ],
     "faq": [
       "burgersEstrella",
@@ -198,7 +203,8 @@
       "tiempoPreparacionMin",
       "precioPromedioMx",
       "horarioCocina",
-      "permisoManipulacionAlimentos"
+      "permisoManipulacionAlimentos",
+      "colaboracionesComerciales"
     ],
     "faq": [
       "pizzasEstrella",
@@ -223,7 +229,8 @@
       "tiempoPreparacionMin",
       "precioPromedioMx",
       "horarioCocina",
-      "permisoManipulacionAlimentos"
+      "permisoManipulacionAlimentos",
+      "colaboracionesComerciales"
     ],
     "faq": [
       "rostizadoHorario",
@@ -248,7 +255,8 @@
       "tiempoPreparacionMin",
       "precioPromedioMx",
       "horarioCocina",
-      "permisoManipulacionAlimentos"
+      "permisoManipulacionAlimentos",
+      "colaboracionesComerciales"
     ],
     "faq": [
       "platosAsiaticosEstrella",
@@ -273,7 +281,8 @@
       "terrazaPatio",
       "estacionamientoClientes",
       "menuDelDia",
-      "precioPromedioMx"
+      "precioPromedioMx",
+      "colaboracionesComerciales"
     ],
     "faq": [
       "servicioAsadorMesa",
@@ -298,7 +307,8 @@
       "horarioBarista",
       "precioPromedioMx",
       "permisoManipulacionAlimentos",
-      "wifiClientes"
+      "wifiClientes",
+      "colaboracionesComerciales"
     ],
     "faq": [
       "latteArt",
@@ -322,7 +332,8 @@
       "precioPromedioMx",
       "permisoManipulacionAlimentos",
       "opcionesSinGluten",
-      "opcionesVeganas"
+      "opcionesVeganas",
+      "colaboracionesComerciales"
     ],
     "faq": [
       "pedidosPorKilo",
@@ -346,7 +357,8 @@
       "precioPromedioMx",
       "permisoManipulacionAlimentos",
       "opcionesSinGluten",
-      "opcionesVeganas"
+      "opcionesVeganas",
+      "colaboracionesComerciales"
     ],
     "faq": [
       "degustacionDisponible",
@@ -370,7 +382,8 @@
       "precioPromedioMx",
       "permisoManipulacionAlimentos",
       "opcionesSinGluten",
-      "opcionesVeganas"
+      "opcionesVeganas",
+      "colaboracionesComerciales"
     ],
     "faq": [
       "opcionesVeganasHelado",
@@ -395,7 +408,8 @@
       "horarioBarista",
       "precioPromedioMx",
       "permisoManipulacionAlimentos",
-      "wifiClientes"
+      "wifiClientes",
+      "colaboracionesComerciales"
     ],
     "faq": [
       "combinacionesEstrella",
@@ -419,7 +433,8 @@
       "aceptaEventosPrivados",
       "radioServicioKm",
       "permisoManipulacionAlimentos",
-      "requiereAguaLuz"
+      "requiereAguaLuz",
+      "colaboracionesComerciales"
     ],
     "faq": [
       "eventosPrivadosTruck",
@@ -444,7 +459,8 @@
       "tiempoEntregaMin",
       "horarioEntregas",
       "permisoManipulacionAlimentos",
-      "direccionOperacionPrivada"
+      "direccionOperacionPrivada",
+      "colaboracionesComerciales"
     ],
     "faq": [
       "embalajeTermico",
@@ -469,7 +485,8 @@
       "tiempoEntregaMin",
       "horarioEntregas",
       "permisoManipulacionAlimentos",
-      "direccionOperacionPrivada"
+      "direccionOperacionPrivada",
+      "colaboracionesComerciales"
     ],
     "faq": [
       "direccionOperacionPrivada",
@@ -494,7 +511,8 @@
       "capacidadComensales",
       "comidaEnMenu",
       "musicaAmbiente",
-      "politicaMenoresAlcohol"
+      "politicaMenoresAlcohol",
+      "colaboracionesComerciales"
     ],
     "faq": [
       "ambienteBar",
@@ -519,7 +537,8 @@
       "capacidadComensales",
       "comidaEnMenu",
       "musicaAmbiente",
-      "politicaMenoresAlcohol"
+      "politicaMenoresAlcohol",
+      "colaboracionesComerciales"
     ],
     "faq": [
       "tapListRotativa",
@@ -544,7 +563,8 @@
       "capacidadComensales",
       "comidaEnMenu",
       "musicaAmbiente",
-      "politicaMenoresAlcohol"
+      "politicaMenoresAlcohol",
+      "colaboracionesComerciales"
     ],
     "faq": [
       "maridajeVinos",
@@ -568,7 +588,8 @@
       "incluyeBebidas",
       "postresIncluidos",
       "opcionesVegetarianas",
-      "permisoManipulacionAlimentos"
+      "permisoManipulacionAlimentos",
+      "colaboracionesComerciales"
     ],
     "faq": [
       "controlPorciones",
@@ -592,7 +613,8 @@
       "incluyeLimpieza",
       "radioServicioKm",
       "precioDesdeMx",
-      "anticipoRequerido"
+      "anticipoRequerido",
+      "colaboracionesComerciales"
     ],
     "faq": [
       "clasesCocina",
@@ -616,7 +638,8 @@
       "incluyeLimpieza",
       "radioServicioKm",
       "precioDesdeMx",
-      "anticipoRequerido"
+      "anticipoRequerido",
+      "colaboracionesComerciales"
     ],
     "faq": [
       "hieloInsumos",
@@ -638,7 +661,8 @@
       "cadenaFrio",
       "permisoManipulacionAlimentos",
       "permisoVentaAlcohol",
-      "facturacionDisponible"
+      "facturacionDisponible",
+      "colaboracionesComerciales"
     ],
     "faq": [
       "rotacionInventario",
@@ -1003,7 +1027,9 @@
   "buenoParaGrupos": "Bueno para grupos",
   "certificacionHalalKosher": "Certificación halal / kosher (declarativo)",
   "cienPorCientoSinGluten": "100% sin gluten (declarativo)",
-  "cocacolaFria": "cocacolaFria"
+  "cocacolaFria": "cocacolaFria",
+  "colaboracionesComerciales": "¿Colaboras con otros negocios, chefs o marcas?",
+  "diferenciadorProfesional": "Tu sello / lo que te distingue"
 };
 
   var FIELD_TYPES = {
@@ -1362,7 +1388,9 @@
   "buenoParaGrupos": "boolean",
   "certificacionHalalKosher": "enum",
   "cienPorCientoSinGluten": "boolean",
-  "cocacolaFria": "text"
+  "cocacolaFria": "text",
+  "colaboracionesComerciales": "enum",
+  "diferenciadorProfesional": "text"
 };
 
   var CANON_BLOCK_TITLES = {
@@ -1561,8 +1589,14 @@
     "kosher": "Kosher",
     "halal_y_kosher": "Halal Y Kosher",
     "otra_declarativa": "Otra Declarativa"
-  }
-};
+  },
+  "colaboracionesComerciales": {
+    "si_activo": "Sí, colaboro activamente",
+    "ocasional": "Ocasionalmente",
+    "convenir": "A convenir por proyecto",
+    "no": "No por ahora"
+  },
+  };;;
 
   var SECTOR_IDS = ['restaurantes', 'gastronomia'];
 

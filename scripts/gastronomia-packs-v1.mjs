@@ -2779,6 +2779,24 @@ export const GASTRONOMIA_FIELD_REGISTRY = {
     "tipo": "text",
     "maxLength": 120,
     "sanitizeHtml": true
+  },
+  "colaboracionesComerciales": {
+    "id": "colaboracionesComerciales",
+    "label": "¿Colaboras con otros negocios, chefs o marcas?",
+    "tipo": "enum",
+    "opciones": [
+      "si_activo",
+      "ocasional",
+      "convenir",
+      "no"
+    ]
+  },
+  "diferenciadorProfesional": {
+    "id": "diferenciadorProfesional",
+    "label": "Tu sello / lo que te distingue",
+    "tipo": "text",
+    "maxLength": 120,
+    "iaCopy": true
   }
 };
 
@@ -2873,7 +2891,8 @@ export const SUB_DELTAS = {
         "terrazaPatio",
         "estacionamientoClientes",
         "menuDelDia",
-        "precioPromedioMx"
+        "precioPromedioMx",
+        "colaboracionesComerciales"
       ],
       "faq": [
         "brunchDisponible",
@@ -2969,7 +2988,8 @@ export const SUB_DELTAS = {
         "terrazaPatio",
         "estacionamientoClientes",
         "menuDelDia",
-        "precioPromedioMx"
+        "precioPromedioMx",
+        "colaboracionesComerciales"
       ],
       "faq": [
         "platosEstrellaMar",
@@ -3057,7 +3077,8 @@ export const SUB_DELTAS = {
         "terrazaPatio",
         "estacionamientoClientes",
         "menuDelDia",
-        "precioPromedioMx"
+        "precioPromedioMx",
+        "colaboracionesComerciales"
       ],
       "faq": [
         "platosRotativos",
@@ -3147,7 +3168,8 @@ export const SUB_DELTAS = {
         "tiempoPreparacionMin",
         "precioPromedioMx",
         "horarioCocina",
-        "permisoManipulacionAlimentos"
+        "permisoManipulacionAlimentos",
+        "colaboracionesComerciales"
       ],
       "faq": [
         "hornoTortillas",
@@ -3236,7 +3258,8 @@ export const SUB_DELTAS = {
         "tiempoPreparacionMin",
         "precioPromedioMx",
         "horarioCocina",
-        "permisoManipulacionAlimentos"
+        "permisoManipulacionAlimentos",
+        "colaboracionesComerciales"
       ],
       "faq": [
         "burgersEstrella",
@@ -3325,7 +3348,8 @@ export const SUB_DELTAS = {
         "tiempoPreparacionMin",
         "precioPromedioMx",
         "horarioCocina",
-        "permisoManipulacionAlimentos"
+        "permisoManipulacionAlimentos",
+        "colaboracionesComerciales"
       ],
       "faq": [
         "pizzasEstrella",
@@ -3414,7 +3438,8 @@ export const SUB_DELTAS = {
         "tiempoPreparacionMin",
         "precioPromedioMx",
         "horarioCocina",
-        "permisoManipulacionAlimentos"
+        "permisoManipulacionAlimentos",
+        "colaboracionesComerciales"
       ],
       "faq": [
         "rostizadoHorario",
@@ -3505,7 +3530,8 @@ export const SUB_DELTAS = {
         "tiempoPreparacionMin",
         "precioPromedioMx",
         "horarioCocina",
-        "permisoManipulacionAlimentos"
+        "permisoManipulacionAlimentos",
+        "colaboracionesComerciales"
       ],
       "faq": [
         "platosAsiaticosEstrella",
@@ -3595,7 +3621,8 @@ export const SUB_DELTAS = {
         "terrazaPatio",
         "estacionamientoClientes",
         "menuDelDia",
-        "precioPromedioMx"
+        "precioPromedioMx",
+        "colaboracionesComerciales"
       ],
       "faq": [
         "servicioAsadorMesa",
@@ -3688,7 +3715,8 @@ export const SUB_DELTAS = {
         "horarioBarista",
         "precioPromedioMx",
         "permisoManipulacionAlimentos",
-        "wifiClientes"
+        "wifiClientes",
+        "colaboracionesComerciales"
       ],
       "faq": [
         "latteArt",
@@ -3775,7 +3803,8 @@ export const SUB_DELTAS = {
         "precioPromedioMx",
         "permisoManipulacionAlimentos",
         "opcionesSinGluten",
-        "opcionesVeganas"
+        "opcionesVeganas",
+        "colaboracionesComerciales"
       ],
       "faq": [
         "pedidosPorKilo",
@@ -3864,7 +3893,8 @@ export const SUB_DELTAS = {
         "precioPromedioMx",
         "permisoManipulacionAlimentos",
         "opcionesSinGluten",
-        "opcionesVeganas"
+        "opcionesVeganas",
+        "colaboracionesComerciales"
       ],
       "faq": [
         "degustacionDisponible",
@@ -3949,7 +3979,8 @@ export const SUB_DELTAS = {
         "precioPromedioMx",
         "permisoManipulacionAlimentos",
         "opcionesSinGluten",
-        "opcionesVeganas"
+        "opcionesVeganas",
+        "colaboracionesComerciales"
       ],
       "faq": [
         "opcionesVeganasHelado",
@@ -4034,7 +4065,8 @@ export const SUB_DELTAS = {
         "horarioBarista",
         "precioPromedioMx",
         "permisoManipulacionAlimentos",
-        "wifiClientes"
+        "wifiClientes",
+        "colaboracionesComerciales"
       ],
       "faq": [
         "combinacionesEstrella",
@@ -4122,7 +4154,8 @@ export const SUB_DELTAS = {
         "aceptaEventosPrivados",
         "radioServicioKm",
         "permisoManipulacionAlimentos",
-        "requiereAguaLuz"
+        "requiereAguaLuz",
+        "colaboracionesComerciales"
       ],
       "faq": [
         "eventosPrivadosTruck",
@@ -4214,7 +4247,8 @@ export const SUB_DELTAS = {
         "tiempoEntregaMin",
         "horarioEntregas",
         "permisoManipulacionAlimentos",
-        "direccionOperacionPrivada"
+        "direccionOperacionPrivada",
+        "colaboracionesComerciales"
       ],
       "faq": [
         "embalajeTermico",
@@ -4303,7 +4337,8 @@ export const SUB_DELTAS = {
         "tiempoEntregaMin",
         "horarioEntregas",
         "permisoManipulacionAlimentos",
-        "direccionOperacionPrivada"
+        "direccionOperacionPrivada",
+        "colaboracionesComerciales"
       ],
       "faq": [
         "direccionOperacionPrivada",
@@ -4396,7 +4431,8 @@ export const SUB_DELTAS = {
         "capacidadComensales",
         "comidaEnMenu",
         "musicaAmbiente",
-        "politicaMenoresAlcohol"
+        "politicaMenoresAlcohol",
+        "colaboracionesComerciales"
       ],
       "faq": [
         "ambienteBar",
@@ -4485,7 +4521,8 @@ export const SUB_DELTAS = {
         "capacidadComensales",
         "comidaEnMenu",
         "musicaAmbiente",
-        "politicaMenoresAlcohol"
+        "politicaMenoresAlcohol",
+        "colaboracionesComerciales"
       ],
       "faq": [
         "tapListRotativa",
@@ -4575,7 +4612,8 @@ export const SUB_DELTAS = {
         "capacidadComensales",
         "comidaEnMenu",
         "musicaAmbiente",
-        "politicaMenoresAlcohol"
+        "politicaMenoresAlcohol",
+        "colaboracionesComerciales"
       ],
       "faq": [
         "maridajeVinos",
@@ -4663,7 +4701,8 @@ export const SUB_DELTAS = {
         "incluyeBebidas",
         "postresIncluidos",
         "opcionesVegetarianas",
-        "permisoManipulacionAlimentos"
+        "permisoManipulacionAlimentos",
+        "colaboracionesComerciales"
       ],
       "faq": [
         "controlPorciones",
@@ -4750,7 +4789,8 @@ export const SUB_DELTAS = {
         "incluyeLimpieza",
         "radioServicioKm",
         "precioDesdeMx",
-        "anticipoRequerido"
+        "anticipoRequerido",
+        "colaboracionesComerciales"
       ],
       "faq": [
         "clasesCocina",
@@ -4835,7 +4875,8 @@ export const SUB_DELTAS = {
         "incluyeLimpieza",
         "radioServicioKm",
         "precioDesdeMx",
-        "anticipoRequerido"
+        "anticipoRequerido",
+        "colaboracionesComerciales"
       ],
       "faq": [
         "hieloInsumos",
@@ -4919,7 +4960,8 @@ export const SUB_DELTAS = {
         "cadenaFrio",
         "permisoManipulacionAlimentos",
         "permisoVentaAlcohol",
-        "facturacionDisponible"
+        "facturacionDisponible",
+        "colaboracionesComerciales"
       ],
       "faq": [
         "rotacionInventario",
