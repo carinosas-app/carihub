@@ -23,7 +23,8 @@
     app: null,
     auth: null,
     db: null,
-    storage: null
+    storage: null,
+    appCheck: null
   };
 
   function renderInitErrorBanner(message) {
@@ -89,6 +90,24 @@
       }
 
       state.app = global.firebase.app();
+
+      if (global.CariHubAppCheck && typeof global.CariHubAppCheck.initAppCheck === 'function') {
+        try {
+          state.appCheck = global.CariHubAppCheck.initAppCheck(global.firebase, state.app);
+        } catch (appCheckErr) {
+          console.warn('[CariHub Core] App Check init falló (fail-open)', appCheckErr);
+          state.appCheck = {
+            status: 'error',
+            mode: 'off',
+            enabled: false,
+            activated: false,
+            error: appCheckErr && appCheckErr.message ? appCheckErr.message : 'init_failed'
+          };
+        }
+      } else {
+        state.appCheck = { status: 'off', mode: 'off', enabled: false, activated: false, error: null };
+      }
+
       state.db = global.firebase.firestore();
       state.auth = global.firebase.auth();
       if (typeof global.firebase.storage === 'function') {
@@ -172,6 +191,7 @@
     get app() { return initFirebase().app; },
     get auth() { return initFirebase().auth; },
     get db() { return initFirebase().db; },
-    get storage() { return initFirebase().storage; }
+    get storage() { return initFirebase().storage; },
+    get appCheck() { return initFirebase().appCheck; }
   };
 })(typeof window !== 'undefined' ? window : this);
