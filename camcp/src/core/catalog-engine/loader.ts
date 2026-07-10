@@ -96,6 +96,21 @@ export function loadAliasDocuments(
   return out;
 }
 
+/** Walk root for a bounded glob (parent dir when wildcard is inside a filename segment). */
+export function resolveGlobWalkBase(pattern: string): string {
+  const normalized = pattern.replace(/\\/g, '/');
+  const wildcardIndex = normalized.search(/[*?[{]/);
+  if (wildcardIndex === -1) {
+    return path.dirname(normalized);
+  }
+  const beforeWildcard = normalized.slice(0, wildcardIndex);
+  const lastSlash = beforeWildcard.lastIndexOf('/');
+  if (lastSlash === -1) {
+    return '.';
+  }
+  return beforeWildcard.slice(0, lastSlash);
+}
+
 export function globFilesBounded(
   repoRoot: string,
   pattern: string,
@@ -104,10 +119,9 @@ export function globFilesBounded(
   if (!allowedGlobs.includes(pattern)) {
     throw new Error(`Glob pattern not allowlisted: ${pattern}`);
   }
-  const baseDir = pattern.includes('*')
-    ? path.resolve(repoRoot, pattern.split('*')[0] ?? '.')
-    : path.resolve(repoRoot, path.dirname(pattern));
-  const prefix = path.relative(repoRoot, baseDir).replace(/\\/g, '/');
+  const walkBaseRel = resolveGlobWalkBase(pattern);
+  const baseDir = path.resolve(repoRoot, walkBaseRel);
+  const prefix = walkBaseRel === '.' ? '' : walkBaseRel.replace(/\\/g, '/');
   if (!fs.existsSync(baseDir)) return [];
 
   const regex = globToRegex(pattern);
@@ -119,14 +133,14 @@ export function globFilesBounded(
       const rel = path.relative(repoRoot, abs).replace(/\\/g, '/');
       const stat = fs.statSync(abs);
       if (stat.isDirectory()) {
-        if (rel.startsWith(prefix) || prefix.startsWith(rel)) walk(abs);
+        if (!prefix || rel.startsWith(prefix) || prefix.startsWith(rel)) walk(abs);
       } else if (regex.test(rel)) {
         results.push(rel);
       }
     }
   }
 
-  walk(baseDir.startsWith(repoRoot) ? baseDir : path.resolve(repoRoot, baseDir));
+  walk(baseDir);
   return results.sort();
 }
 

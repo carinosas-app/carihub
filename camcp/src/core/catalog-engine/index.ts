@@ -14,7 +14,12 @@ export {
   buildSsotInvalidFinding,
   dedupeFindingsByPairKey,
 } from './findings.js';
-export { loadSchemaIndex, loadAliasDocuments, globFilesBounded } from './loader.js';
+export {
+  loadSchemaIndex,
+  loadAliasDocuments,
+  globFilesBounded,
+  resolveGlobWalkBase,
+} from './loader.js';
 export { findPreviousFullRun, shouldSkipExpensiveFacets } from './skip.js';
 export {
   CATALOG_AUDIT_INPUT_SCHEMA_VERSION,
