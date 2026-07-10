@@ -1,7 +1,10 @@
 const { onSchedule } = require("firebase-functions/v2/scheduler");
 const admin = require("firebase-admin");
+const { createVerifyTurnstileCallable } = require("./turnstile/verify-turnstile");
 
 admin.initializeApp();
+
+exports.verifyTurnstile = createVerifyTurnstileCallable();
 
 exports.vencerPerfiles = onSchedule(
   {

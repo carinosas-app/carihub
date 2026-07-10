@@ -624,6 +624,16 @@
     });
   }
 
+  function turnstileGateRegistration() {
+    if (!global.CariHubTurnstile || typeof CariHubTurnstile.gateAction !== 'function') {
+      return Promise.resolve();
+    }
+    return CariHubTurnstile.gateAction('registration').then(function (result) {
+      if (result && result.ok) return;
+      throw new Error('Verificación de seguridad requerida. Inténtalo de nuevo.');
+    });
+  }
+
   function submitRegistroPerfil(draft, priv, onProgress) {
     var fb = getFirebase();
     if (!fb) return Promise.reject(new Error('Firebase no está disponible en esta página.'));
@@ -639,7 +649,10 @@
       if (typeof onProgress === 'function') onProgress(msg);
     }
 
-    return ensureAuthSession(fb, email, password)
+    return turnstileGateRegistration()
+      .then(function () {
+        return ensureAuthSession(fb, email, password);
+      })
       .then(function (session) {
         uid = session.uid;
         progress('Subiendo fotos públicas…');
