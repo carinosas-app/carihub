@@ -90,4 +90,39 @@ for (const page of criticalPages) {
   }
 }
 console.log('OK: páginas críticas cargan carihub-app-check.js antes de core');
+
+const turnstileSrc = readFileSync(join(PUBLIC, 'js/carihub-turnstile.js'), 'utf8');
+if (!/enabled:\s*false/.test(turnstileSrc) || !/mode:\s*'off'/.test(turnstileSrc)) {
+  console.error('FAIL: carihub-turnstile.js sin defaults seguros off/false');
+  process.exit(1);
+}
+if (!/login:\s*false/.test(turnstileSrc) || !/registration:\s*false/.test(turnstileSrc)) {
+  console.error('FAIL: carihub-turnstile.js surfaces no están en false por defecto');
+  process.exit(1);
+}
+console.log('OK: carihub-turnstile.js defaults off/false');
+
+const authTurnstilePages = ['index.html', 'registro-perfil.html'];
+for (const page of authTurnstilePages) {
+  const src = readFileSync(join(PUBLIC, page), 'utf8');
+  if (!/carihub-turnstile\.js/.test(src)) {
+    console.error('FAIL: falta carihub-turnstile.js en', page);
+    process.exit(1);
+  }
+  const turnstileIdx = src.indexOf('carihub-turnstile.js');
+  const coreIdx = src.indexOf('carihub-core.js');
+  if (turnstileIdx < 0 || coreIdx < 0 || turnstileIdx >= coreIdx) {
+    console.error('FAIL: orden turnstile/core incorrecto en', page);
+    process.exit(1);
+  }
+}
+console.log('OK: páginas auth cargan carihub-turnstile.js antes de core');
+
+const functionsIndex = readFileSync(join(process.cwd(), 'functions/index.js'), 'utf8');
+if (!/exports\.verifyTurnstile/.test(functionsIndex)) {
+  console.error('FAIL: functions/index.js no exporta verifyTurnstile');
+  process.exit(1);
+}
+console.log('OK: functions exporta verifyTurnstile (scaffold)');
+
 process.exit(0);
