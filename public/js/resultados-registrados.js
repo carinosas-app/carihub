@@ -324,6 +324,50 @@
     return hydratePerfilFromFirestoreDoc(data, base);
   }
 
+  /**
+   * BLK-01 Phase 1C-a — bridge resolver hit into existing hydrate pipeline.
+   * Expects deep-sanitized profile payload from BLK-01 resolver.
+   *
+   * @param {object} resolverResult — structured resolveProfile() result
+   * @returns {object|null}
+   */
+  function normalizarFromBlk01Resolver(resolverResult) {
+    resolverResult = resolverResult || {};
+    if (!resolverResult.found || !resolverResult.profile) return null;
+    var perfilId = String(resolverResult.perfilId || resolverResult.normalizedPerfilId || '').trim();
+    if (!perfilId) return null;
+    var profile = resolverResult.profile;
+    if (!profile || typeof profile !== 'object') return null;
+
+    var usuarioId = resolverResult.usuarioId
+      || profile.usuarioId
+      || profile.ownerUid
+      || profile.uid
+      || null;
+    usuarioId = usuarioId ? String(usuarioId).trim() : null;
+
+    var data = Object.assign({}, profile);
+    if (usuarioId) {
+      if (!data.uid) data.uid = usuarioId;
+      if (!data.usuarioId) data.usuarioId = usuarioId;
+    }
+    if (!data.perfilId) data.perfilId = perfilId;
+
+    var base = baseNormalizadoPerfilFirestore(data, perfilId);
+    base.__id = perfilId;
+    base.perfilId = perfilId;
+    base.uid = usuarioId || base.uid || perfilId;
+
+    var hydrated = hydratePerfilFromFirestoreDoc(data, base);
+    if (hydrated && typeof hydrated === 'object') {
+      hydrated.__blk01Source = resolverResult.source || 'none';
+      if (Array.isArray(resolverResult.reasons)) {
+        hydrated.__blk01Reasons = resolverResult.reasons.slice();
+      }
+    }
+    return hydrated;
+  }
+
   function consultarPublicos() {
     var firestore = db();
     if (!firestore) {
@@ -456,6 +500,7 @@
     listar: listar,
     totalPublicos: totalPublicos,
     normalizar: normalizarPerfilFirestore,
+    normalizarFromBlk01Resolver: normalizarFromBlk01Resolver,
     enriquecerMetadataFirestore: enriquecerMetadataFirestore,
     hydratePerfilFromFirestoreDoc: hydratePerfilFromFirestoreDoc,
     baseNormalizadoPerfilFirestore: baseNormalizadoPerfilFirestore,

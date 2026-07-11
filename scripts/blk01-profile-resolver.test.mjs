@@ -421,22 +421,44 @@ describe('BLK-01 profile resolver — security & determinism', () => {
   });
 });
 
-describe('BLK-01 Phase 1A — no consumer integration', () => {
-  const CONSUMER_FILES = [
-    'public/js/perfil-publico-init.js',
-    'public/js/resultados-registrados.js',
-    'public/js/carihub-favoritos.js'
-  ];
+describe('BLK-01 Phase 1C-a — consumer wiring scope', () => {
+  test('favoritos does not reference resolver stack', () => {
+    const src = readFileSync(join(ROOT, 'public/js/carihub-favoritos.js'), 'utf8');
+    assert.ok(!src.includes('CariHubProfileResolver'));
+    assert.ok(!src.includes('carihub-profile-resolver'));
+    assert.ok(!src.includes('carihub-blk01-hub-adapter'));
+    assert.ok(!src.includes('carihub-blk01-profile-sanitize'));
+  });
 
-  for (const rel of CONSUMER_FILES) {
-    test(rel + ' does not reference CariHubProfileResolver', () => {
-      const src = readFileSync(join(ROOT, rel), 'utf8');
-      assert.ok(!src.includes('CariHubProfileResolver'));
-      assert.ok(!src.includes('carihub-profile-resolver'));
-      assert.ok(!src.includes('carihub-blk01-hub-adapter'));
-      assert.ok(!src.includes('carihub-blk01-profile-sanitize'));
-    });
-  }
+  test('resultados-registrados does not load resolver module directly', () => {
+    const src = readFileSync(join(ROOT, 'public/js/resultados-registrados.js'), 'utf8');
+    assert.ok(!src.includes('CariHubProfileResolver'));
+    assert.ok(!src.includes('carihub-profile-resolver.js'));
+    assert.ok(src.includes('normalizarFromBlk01Resolver'));
+  });
+
+  test('perfil-publico-init wires resolver at load choke point', () => {
+    const src = readFileSync(join(ROOT, 'public/js/perfil-publico-init.js'), 'utf8');
+    assert.ok(src.includes('CariHubProfileResolver'));
+    assert.ok(src.includes('cargarPerfilFirestoreLegacy'));
+    assert.ok(src.includes('deepSanitizeAvailable'));
+  });
+
+  test('perfil-publico.html includes BLK-01 stack before init', () => {
+    const html = readFileSync(join(ROOT, 'public/perfil-publico.html'), 'utf8');
+    const idxMulti = html.indexOf('carihub-multi-perfil.js');
+    const idxSan = html.indexOf('carihub-blk01-profile-sanitize.js');
+    const idxAdapter = html.indexOf('carihub-blk01-hub-adapter.js');
+    const idxConfig = html.indexOf('carihub-blk01-config.js');
+    const idxResolver = html.indexOf('carihub-profile-resolver.js');
+    const idxInit = html.indexOf('perfil-publico-init.js');
+    assert.ok(idxMulti >= 0 && idxSan > idxMulti);
+    assert.ok(idxAdapter > idxSan);
+    assert.ok(idxConfig > idxAdapter);
+    assert.ok(idxResolver > idxConfig);
+    assert.ok(idxInit > idxResolver);
+    assert.ok(!html.includes('__CARIHUB_FLAGS__'));
+  });
 });
 
 describe('BLK-01 Phase 1B-prep — W2 hub adapter contract', () => {
