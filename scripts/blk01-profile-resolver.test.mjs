@@ -1,5 +1,5 @@
 /**
- * BLK-01 Phase 1A — profile resolver + flag contract tests.
+ * BLK-01 Phase 1A/1B-prep — profile resolver, adapter, sanitize tests.
  * Uso: node --test scripts/blk01-profile-resolver.test.mjs
  */
 import { readFileSync } from 'node:fs';
@@ -11,6 +11,8 @@ import vm from 'node:vm';
 const ROOT = process.cwd();
 const PUBLIC_JS = join(ROOT, 'public', 'js');
 const CONFIG_SRC = readFileSync(join(PUBLIC_JS, 'carihub-blk01-config.js'), 'utf8');
+const SANITIZE_SRC = readFileSync(join(PUBLIC_JS, 'carihub-blk01-profile-sanitize.js'), 'utf8');
+const ADAPTER_SRC = readFileSync(join(PUBLIC_JS, 'carihub-blk01-hub-adapter.js'), 'utf8');
 const RESOLVER_SRC = readFileSync(join(PUBLIC_JS, 'carihub-profile-resolver.js'), 'utf8');
 const MULTI_SRC = readFileSync(join(PUBLIC_JS, 'carihub-multi-perfil.js'), 'utf8');
 
@@ -22,11 +24,14 @@ function createSandbox(extra) {
     Array,
     String,
     RegExp,
+    WeakSet,
     globalThis: {},
     window: null,
     CariHubMultiPerfil: undefined,
     CariHubBlk01Config: undefined,
     CariHubBlk01RuntimeConfig: undefined,
+    CariHubBlk01ProfileSanitize: undefined,
+    CariHubBlk01HubAdapter: undefined,
     CariHubProfileResolver: undefined,
     __CARIHUB_FLAGS__: undefined
   };
@@ -37,8 +42,17 @@ function createSandbox(extra) {
   return sandbox;
 }
 
-function loadModules(sandbox, flags) {
-  vm.runInContext(MULTI_SRC, sandbox, { filename: 'carihub-multi-perfil.js' });
+function loadModules(sandbox, flags, opts) {
+  opts = opts || {};
+  if (opts.multi !== false) {
+    vm.runInContext(MULTI_SRC, sandbox, { filename: 'carihub-multi-perfil.js' });
+  }
+  if (opts.sanitize !== false) {
+    vm.runInContext(SANITIZE_SRC, sandbox, { filename: 'carihub-blk01-profile-sanitize.js' });
+  }
+  if (opts.adapter !== false) {
+    vm.runInContext(ADAPTER_SRC, sandbox, { filename: 'carihub-blk01-hub-adapter.js' });
+  }
   vm.runInContext(CONFIG_SRC, sandbox, { filename: 'carihub-blk01-config.js' });
   vm.runInContext(RESOLVER_SRC, sandbox, { filename: 'carihub-profile-resolver.js' });
   if (flags) {
@@ -46,6 +60,8 @@ function loadModules(sandbox, flags) {
   }
   return {
     Config: sandbox.CariHubBlk01Config,
+    Sanitize: sandbox.CariHubBlk01ProfileSanitize,
+    Adapter: sandbox.CariHubBlk01HubAdapter,
     Resolver: sandbox.CariHubProfileResolver,
     Multi: sandbox.CariHubMultiPerfil
   };
@@ -328,6 +344,54 @@ describe('BLK-01 profile resolver — security & determinism', () => {
     assert.ok(out.strippedFields.includes('verificacion'));
   });
 
+  test('recursive nested denylist removal (W3)', () => {
+    const sandbox = createSandbox();
+    const { Sanitize } = loadModules(sandbox);
+    const raw = {
+      nombre: 'Public',
+      contacto: { email: 'nested@test.com', telefono: '555' },
+      fotos: [{ url: 'ok.jpg', meta: { email: 'hide@x.com' } }]
+    };
+    const out = Sanitize.sanitizePublicProfileDeep(raw);
+    assert.equal(out.profile.nombre, 'Public');
+    assert.equal(out.profile.contacto.email, undefined);
+    assert.equal(out.profile.contacto.telefono, '555');
+    assert.equal(out.profile.fotos[0].url, 'ok.jpg');
+    assert.equal(out.profile.fotos[0].meta.email, undefined);
+    assert.ok(out.strippedFields.some((p) => p.indexOf('email') >= 0));
+  });
+
+  test('immutable input behavior (W3)', () => {
+    const sandbox = createSandbox();
+    const { Sanitize } = loadModules(sandbox);
+    const raw = { nombre: 'A', nested: { email: 'secret@test.com' } };
+    const snapshot = JSON.stringify(raw);
+    Sanitize.sanitizePublicProfileDeep(raw);
+    assert.equal(JSON.stringify(raw), snapshot);
+  });
+
+  test('prototype-pollution keys removed (W3)', () => {
+    const sandbox = createSandbox();
+    const { Sanitize } = loadModules(sandbox);
+    const raw = JSON.parse('{"nombre":"Ok","__proto__":{"admin":true},"constructor":{"x":1},"prototype":{"y":2}}');
+    const out = Sanitize.sanitizePublicProfileDeep(raw);
+    assert.equal(out.profile.nombre, 'Ok');
+    assert.equal(Object.prototype.hasOwnProperty.call(out.profile, '__proto__'), false);
+    assert.equal(Object.prototype.hasOwnProperty.call(out.profile, 'constructor'), false);
+    assert.equal(Object.prototype.hasOwnProperty.call(out.profile, 'prototype'), false);
+  });
+
+  test('circular reference deterministic behavior (W3)', () => {
+    const sandbox = createSandbox();
+    const { Sanitize } = loadModules(sandbox);
+    const raw = { nombre: 'Loop' };
+    raw.self = raw;
+    const out = Sanitize.sanitizePublicProfileDeep(raw);
+    assert.equal(out.profile.nombre, 'Loop');
+    assert.equal(out.profile.self, null);
+    assert.ok(out.strippedFields.some((p) => p.endsWith('[circular]')));
+  });
+
   test('deterministic structured response shape', async () => {
     const sandbox = createSandbox();
     const { Resolver } = loadModules(sandbox);
@@ -369,6 +433,108 @@ describe('BLK-01 Phase 1A — no consumer integration', () => {
       const src = readFileSync(join(ROOT, rel), 'utf8');
       assert.ok(!src.includes('CariHubProfileResolver'));
       assert.ok(!src.includes('carihub-profile-resolver'));
+      assert.ok(!src.includes('carihub-blk01-hub-adapter'));
+      assert.ok(!src.includes('carihub-blk01-profile-sanitize'));
     });
   }
+});
+
+describe('BLK-01 Phase 1B-prep — W2 hub adapter contract', () => {
+  test('TICKET-003 exports legacyPerfilId for adapter', () => {
+    const sandbox = createSandbox();
+    const { Multi } = loadModules(sandbox, null, { adapter: false, sanitize: false });
+    assert.equal(typeof Multi.legacyPerfilId, 'function');
+  });
+
+  test('adapter contract requires minimum MultiPerfil methods', () => {
+    const sandbox = createSandbox();
+    const { Adapter } = loadModules(sandbox, null, { multi: false });
+    const bad = Adapter.assertMultiPerfilContract({});
+    assert.equal(bad.ok, false);
+    assert.ok(bad.missing.includes('expandPerfilesFromHub'));
+    const { Multi, Adapter: A2 } = loadModules(createSandbox());
+    const good = A2.assertMultiPerfilContract(Multi);
+    assert.equal(good.ok, true);
+  });
+
+  test('load-order independence via injected hubAdapter', async () => {
+    const sandbox = createSandbox();
+    vm.runInContext(MULTI_SRC, sandbox, { filename: 'carihub-multi-perfil.js' });
+    vm.runInContext(SANITIZE_SRC, sandbox, { filename: 'carihub-blk01-profile-sanitize.js' });
+    vm.runInContext(ADAPTER_SRC, sandbox, { filename: 'carihub-blk01-hub-adapter.js' });
+    const Multi = sandbox.CariHubMultiPerfil;
+    const Adapter = sandbox.CariHubBlk01HubAdapter;
+    const injected = Adapter.create(Multi);
+    sandbox.CariHubMultiPerfil = undefined;
+    vm.runInContext(CONFIG_SRC, sandbox, { filename: 'carihub-blk01-config.js' });
+    vm.runInContext(RESOLVER_SRC, sandbox, { filename: 'carihub-profile-resolver.js' });
+    const Resolver = sandbox.CariHubProfileResolver;
+    const uid = 'uid_inject_only';
+    const hub = {
+      uid,
+      perfilesDetalle: { perfil_x: { perfilId: 'perfil_x', nombre: 'Injected' } },
+      perfilesVinculados: [{ perfilId: 'perfil_x' }],
+      perfilActivoId: 'perfil_x'
+    };
+    const result = await Resolver.resolveProfile('perfil_x', {
+      configOverride: { blk01DualReadFallback: true },
+      hintUsuarioId: uid,
+      hubAdapter: injected,
+      firestore: {
+        getPerfilDoc: () => Promise.resolve({ exists: false, data: null }),
+        getUsuarioDoc: (id) => id === uid
+          ? Promise.resolve({ exists: true, data: hub })
+          : Promise.resolve({ exists: false, data: null })
+      }
+    });
+    assert.equal(result.found, true);
+    assert.equal(result.profile.nombre, 'Injected');
+    assert.equal(result.wrote, false);
+  });
+
+  test('opaque multi-profile ID not collapsed to uid via adapter', () => {
+    const sandbox = createSandbox();
+    const { Multi, Adapter } = loadModules(sandbox);
+    const uid = 'uid_multi';
+    const opaque = 'perfil_lxyzabc_aaa111';
+    const hub = {
+      uid,
+      perfilesDetalle: {
+        [opaque]: { perfilId: opaque, nombre: 'Opaque A' },
+        perfil_lxyzabc_bbb222: { perfilId: 'perfil_lxyzabc_bbb222', nombre: 'Opaque B' }
+      },
+      perfilesVinculados: [{ perfilId: opaque }, { perfilId: 'perfil_lxyzabc_bbb222' }],
+      perfilActivoId: opaque
+    };
+    const hit = Adapter.findProfileInHub(Multi, hub, opaque, uid);
+    assert.ok(hit);
+    assert.equal(hit.data.perfilId, opaque);
+    assert.equal(hit.data.nombre, 'Opaque A');
+    const miss = Adapter.findProfileInHub(Multi, hub, uid, uid);
+    assert.equal(miss, null);
+  });
+
+  test('legacy uid bridge via adapter legacy flat hub', () => {
+    const sandbox = createSandbox();
+    const { Multi, Adapter } = loadModules(sandbox);
+    const uid = 'firebaseUid28charsEx';
+    const hub = {
+      uid,
+      perfilId: uid,
+      nombre: 'Legacy Root',
+      categoria: 'salud'
+    };
+    const hit = Adapter.findProfileInHub(Multi, hub, uid, uid);
+    assert.ok(hit);
+    assert.equal(hit.source, 'usuarios_legacy_flat');
+    assert.equal(hit.data.nombre, 'Legacy Root');
+  });
+
+  test('LOAD_ORDER documents script sequence', () => {
+    const sandbox = createSandbox();
+    const { Adapter } = loadModules(sandbox, null, { multi: false, sanitize: false });
+    assert.ok(Array.isArray(Adapter.LOAD_ORDER));
+    assert.equal(Adapter.LOAD_ORDER[0], 'carihub-multi-perfil.js');
+    assert.ok(Adapter.LOAD_ORDER.includes('carihub-profile-resolver.js'));
+  });
 });

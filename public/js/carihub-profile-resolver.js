@@ -1,11 +1,18 @@
 /**
- * BLK-01 Phase 1A — Read-only profile resolver scaffold (default inactive).
+ * BLK-01 Phase 1A/1B-prep — Read-only profile resolver scaffold (default inactive).
  *
  * Future read order when flags ON:
  *   perfiles/{perfilId} → usuarios/{uid} fallback (dual-read only)
  *
  * Never writes. Never exposes denylisted / KYC fields.
- * No production consumer integration in Phase 1A.
+ * No production consumer integration.
+ *
+ * Load order (HTML, when not using DI):
+ *   1. carihub-multi-perfil.js
+ *   2. carihub-blk01-profile-sanitize.js
+ *   3. carihub-blk01-hub-adapter.js
+ *   4. carihub-blk01-config.js
+ *   5. carihub-profile-resolver.js
  */
 (function (global) {
   'use strict';
@@ -36,8 +43,6 @@
     'password', 'token', 'refreshToken', 'apiKey',
     'perfilesDetalle', 'perfilesVinculados'
   ];
-
-  var HUB_ONLY_KEYS = ['perfilesDetalle', 'perfilesVinculados', 'perfilActivoId'];
 
   function getBlk01Config() {
     return global.CariHubBlk01Config || null;
@@ -127,34 +132,36 @@
     return candidates;
   }
 
-  function stripDenylist(data, stripped) {
-    data = data || {};
-    stripped = stripped || [];
-    var out = {};
-    Object.keys(data).forEach(function (key) {
-      if (DENYLIST_KEYS.indexOf(key) >= 0 || HUB_ONLY_KEYS.indexOf(key) >= 0) {
-        stripped.push(key);
-        return;
-      }
-      var val = data[key];
-      if (val && typeof val === 'object' && !Array.isArray(val) && key !== 'geo' && key !== 'fotos') {
-        if (key === 'verificacion' || key === 'kyc') {
-          stripped.push(key);
-          return;
-        }
-      }
-      out[key] = val;
-    });
-    return out;
+  function getSanitizer(deps) {
+    deps = deps || {};
+    if (deps.sanitize && typeof deps.sanitize.sanitizePublicProfileDeep === 'function') {
+      return deps.sanitize;
+    }
+    return global.CariHubBlk01ProfileSanitize || null;
   }
 
-  function sanitizePublicProfile(data) {
-    var stripped = [];
-    var profile = stripDenylist(data, stripped);
-    if (stripped.length) {
-      return { profile: profile, strippedFields: stripped, reasons: [REASON.DENYLIST_FIELDS_STRIPPED] };
+  function getHubAdapter(deps) {
+    deps = deps || {};
+    if (deps.hubAdapter && typeof deps.hubAdapter.findProfileInHub === 'function') {
+      return deps.hubAdapter;
     }
-    return { profile: profile, strippedFields: [], reasons: [] };
+    var Adapter = global.CariHubBlk01HubAdapter;
+    if (Adapter && typeof Adapter.fromGlobal === 'function') {
+      return Adapter.fromGlobal(global);
+    }
+    return null;
+  }
+
+  function sanitizePublicProfile(data, deps) {
+    var San = getSanitizer(deps);
+    if (San && typeof San.sanitizePublicProfileDeep === 'function') {
+      var deep = San.sanitizePublicProfileDeep(data);
+      var reasons = deep.reasons && deep.reasons.length
+        ? [REASON.DENYLIST_FIELDS_STRIPPED]
+        : [];
+      return { profile: deep.profile, strippedFields: deep.strippedFields || [], reasons: reasons };
+    }
+    return { profile: data || null, strippedFields: [], reasons: [] };
   }
 
   function emptyResult(base) {
@@ -183,51 +190,18 @@
     }), fields, { wrote: false });
   }
 
-  function extractFromHubFallback(hubData, perfilId, cuentaUid) {
-    hubData = hubData || {};
-    cuentaUid = cuentaUid || hubData.uid || hubData.cuentaUid || perfilId;
-    var mp = global.CariHubMultiPerfil;
-
-    var detalle = hubData.perfilesDetalle;
-    if (detalle && typeof detalle === 'object' && detalle[perfilId]) {
-      return {
-        data: Object.assign({ perfilId: perfilId, usuarioId: cuentaUid, cuentaUid: cuentaUid }, detalle[perfilId]),
-        source: 'usuarios_perfilesDetalle',
-        reason: REASON.READ_PERFILES_DETALLE_HIT
-      };
-    }
-
-    if (mp && typeof mp.expandPerfilesFromHub === 'function') {
-      var expanded = mp.expandPerfilesFromHub(hubData, cuentaUid);
-      for (var i = 0; i < expanded.length; i++) {
-        var row = expanded[i];
-        if (row && (row.perfilId === perfilId || row.id === perfilId) && row._raw) {
-          return {
-            data: Object.assign({ perfilId: perfilId, usuarioId: cuentaUid }, row._raw),
-            source: 'usuarios_perfilesDetalle',
-            reason: REASON.READ_PERFILES_DETALLE_HIT
-          };
-        }
-      }
-    }
-
-    if (mp && typeof mp.hasLegacyFlatPerfil === 'function' && mp.hasLegacyFlatPerfil(hubData)) {
-      var legacyId = mp.legacyPerfilId
-        ? mp.legacyPerfilId(hubData, cuentaUid)
-        : (hubData.perfilId || ('perfil_' + cuentaUid));
-      if (legacyId === perfilId || cuentaUid === perfilId || legacyId === 'perfil_' + perfilId) {
-        var payload = mp.extractProfilePayload
-          ? mp.extractProfilePayload(hubData)
-          : {};
-        return {
-          data: Object.assign({ perfilId: legacyId, usuarioId: cuentaUid, cuentaUid: cuentaUid }, payload),
-          source: 'usuarios_legacy_flat',
-          reason: REASON.READ_LEGACY_FLAT_HIT
-        };
-      }
-    }
-
-    return null;
+  function extractFromHubFallback(hubData, perfilId, cuentaUid, deps) {
+    var adapter = getHubAdapter(deps);
+    if (!adapter) return null;
+    var hit = adapter.findProfileInHub(hubData, perfilId, cuentaUid);
+    if (!hit) return null;
+    return {
+      data: hit.data,
+      source: hit.source,
+      reason: hit.reason === 'read_usuarios_legacy_flat_hit'
+        ? REASON.READ_LEGACY_FLAT_HIT
+        : REASON.READ_PERFILES_DETALLE_HIT
+    };
   }
 
   function defaultFirestoreDeps() {
@@ -262,6 +236,8 @@
    * @param {string} rawPerfilId
    * @param {object} [deps]
    * @param {object} [deps.firestore] — { getPerfilDoc(id), getUsuarioDoc(uid) }
+   * @param {object} [deps.hubAdapter] — { findProfileInHub(hub, perfilId, uid) }
+   * @param {object} [deps.sanitize] — { sanitizePublicProfileDeep(data) }
    * @param {object} [deps.configOverride] — flag overrides for tests
    * @param {string} [deps.hintUsuarioId] — optional owner uid hint
    * @returns {Promise<object>}
@@ -300,7 +276,7 @@
 
     return fs.getPerfilDoc(perfilId).then(function (perfilSnap) {
       if (perfilSnap && perfilSnap.exists && perfilSnap.data) {
-        var sanitized = sanitizePublicProfile(perfilSnap.data);
+        var sanitized = sanitizePublicProfile(perfilSnap.data, deps);
         return buildFoundResult({
           perfilId: perfilId,
           normalizedPerfilId: perfilId,
@@ -340,7 +316,7 @@
             if (!usuarioSnap || !usuarioSnap.exists || !usuarioSnap.data) {
               return null;
             }
-            var hit = extractFromHubFallback(usuarioSnap.data, perfilId, uid);
+            var hit = extractFromHubFallback(usuarioSnap.data, perfilId, uid, deps);
             if (hit) {
               return {
                 usuarioId: uid,
@@ -356,7 +332,7 @@
 
       return chain.then(function (fallbackHit) {
         if (fallbackHit) {
-          var fbSanitized = sanitizePublicProfile(fallbackHit.data);
+          var fbSanitized = sanitizePublicProfile(fallbackHit.data, deps);
           return buildFoundResult({
             perfilId: perfilId,
             normalizedPerfilId: perfilId,
@@ -393,6 +369,7 @@
     normalizePerfilId: normalizePerfilId,
     bridgeUsuarioCandidates: bridgeUsuarioCandidates,
     sanitizePublicProfile: sanitizePublicProfile,
+    getHubAdapter: getHubAdapter,
     isResolverActive: isResolverActive,
     resolveProfile: resolveProfile,
     emptyResult: emptyResult
