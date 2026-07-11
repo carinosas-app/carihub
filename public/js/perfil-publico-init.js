@@ -1,9 +1,18 @@
 /**
  * Perfil público — query de búsqueda, volver a resultados y carga Firestore.
- * BLK-01 Phase 1C-a: resolver wiring (inactive by default; legacy path preserved).
+ * BLK-01 Phase 1C-a/1C-c: resolver wiring + owner-hint provider (inactive by default).
  */
 (function (global) {
   'use strict';
+
+  var AUTH_HINT_LISTENER_BOUND = false;
+  var LAST_AUTH_UID = undefined;
+
+  var VERIFIED_CACHE_SOURCES = {
+    perfiles: true,
+    usuarios_perfilesDetalle: true,
+    usuarios_legacy_flat: true
+  };
 
   var VISTAS_RESULTADOS = {
     'con-resultados': true,
@@ -164,6 +173,54 @@
     return null;
   }
 
+  function ownerHintProviderAvailable() {
+    var P = global.CariHubOwnerHintProvider;
+    return !!(P && typeof P.deriveOwnerHint === 'function' && typeof P.setOwnerHint === 'function');
+  }
+
+  function deriveOwnerHintForResolve(perfilId) {
+    if (!ownerHintProviderAvailable()) return null;
+    return global.CariHubOwnerHintProvider.deriveOwnerHint(perfilId, { explicitHint: null }) || null;
+  }
+
+  function isVerifiedResolverSource(source) {
+    return !!(source && VERIFIED_CACHE_SOURCES[source]);
+  }
+
+  function maybeCacheVerifiedOwnerHint(perfilId, result) {
+    if (!ownerHintProviderAvailable() || !result || !result.found || !result.profile) return;
+    if (!isVerifiedResolverSource(result.source)) return;
+    var usuarioId = result.usuarioId
+      || (result.profile && (result.profile.usuarioId || result.profile.ownerUid || result.profile.uid));
+    if (!usuarioId) return;
+    global.CariHubOwnerHintProvider.setOwnerHint(perfilId, String(usuarioId).trim());
+  }
+
+  function maybeInvalidateOwnerHint(perfilId, hintUsed, result) {
+    if (!ownerHintProviderAvailable() || !hintUsed || !perfilId) return;
+    if (!result || !result.active || result.found) return;
+    global.CariHubOwnerHintProvider.clearOwnerHint(perfilId);
+  }
+
+  function bindAuthHintCleanupOnce() {
+    if (AUTH_HINT_LISTENER_BOUND || !ownerHintProviderAvailable()) return;
+    if (!global.firebase || typeof global.firebase.auth !== 'function') return;
+    var auth = global.firebase.auth();
+    if (!auth || typeof auth.onAuthStateChanged !== 'function') return;
+    AUTH_HINT_LISTENER_BOUND = true;
+    auth.onAuthStateChanged(function (user) {
+      var nextUid = user && user.uid ? String(user.uid) : null;
+      if (LAST_AUTH_UID === undefined) {
+        LAST_AUTH_UID = nextUid;
+        return;
+      }
+      if (nextUid !== LAST_AUTH_UID) {
+        global.CariHubOwnerHintProvider.clearAll();
+        LAST_AUTH_UID = nextUid;
+      }
+    });
+  }
+
   function cargarPerfilFirestore(id, q) {
     q = q || queryPerfilPublico();
     if (!id || esIdDemo(id)) return Promise.resolve(null);
@@ -183,22 +240,29 @@
       return cargarPerfilFirestoreLegacy(id);
     }
 
+    bindAuthHintCleanupOnce();
+
     var telemetry = { perfilesReads: 0, usuariosReads: 0, errors: [] };
     var firestoreDeps = createResolverFirestoreDeps(fs, telemetry);
-
-    return Resolver.resolveProfile(id, {
+    var hintUsed = deriveOwnerHintForResolve(id);
+    var resolveDeps = {
       firestore: firestoreDeps,
       sanitize: global.CariHubBlk01ProfileSanitize
-    }).then(function (result) {
+    };
+    if (hintUsed) resolveDeps.hintUsuarioId = hintUsed;
+
+    return Resolver.resolveProfile(id, resolveDeps).then(function (result) {
       if (result.error === 'invalid_perfil_id') {
         return null;
       }
       if (result.found && result.profile) {
+        maybeCacheVerifiedOwnerHint(id, result);
         var normalized = normalizarDesdeResolver(result);
         if (normalized) return normalized;
         return cargarPerfilFirestoreLegacy(id);
       }
       if (result.active && !result.found) {
+        maybeInvalidateOwnerHint(id, hintUsed, result);
         return null;
       }
       if (shouldFallbackToLegacyAfterResolver(result, telemetry)) {

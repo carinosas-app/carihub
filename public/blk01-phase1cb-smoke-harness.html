@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BLK-01 Phase 1C-b Smoke Harness (emulator only)</title>
+  <title>BLK-01 Phase 1C-c Smoke Harness (emulator only)</title>
 </head>
 <body>
   <div id="smoke-root">loading…</div>
@@ -13,8 +13,17 @@
       var params = new URLSearchParams(location.search);
       var profileId = params.get('id') || '';
       var flagsOn = params.get('emuFlags') === 'on';
-      var hintUid = params.get('hintUid') || '';
-      window.__P1CB_SMOKE__ = { phase: '1C-b', flagsOn: flagsOn, profileId: profileId, hintUid: hintUid, reads: { perfiles: 0, usuarios: 0, legacy: 0 } };
+      var cacheUid = params.get('cacheUid') || '';
+      var cacheMode = params.get('cacheMode') || '';
+      window.__P1CB_SMOKE__ = {
+        phase: '1C-c',
+        flagsOn: flagsOn,
+        profileId: profileId,
+        cacheUid: cacheUid,
+        cacheMode: cacheMode,
+        reads: { perfiles: 0, usuarios: 0, legacy: 0 },
+        provider: {}
+      };
 
       if (flagsOn) {
         window.__CARIHUB_FLAGS__ = {
@@ -46,6 +55,7 @@
   <script src="js/carihub-blk01-hub-adapter.js"></script>
   <script src="js/carihub-blk01-config.js"></script>
   <script src="js/carihub-profile-resolver.js"></script>
+  <script src="js/carihub-blk01-owner-hint-provider.js"></script>
   <script src="js/resultados-registrados.js"></script>
   <script src="js/perfil-publico-init.js"></script>
   <script>
@@ -55,6 +65,7 @@
       smoke.flags = flags;
       smoke.resolverActive = !!(window.CariHubProfileResolver && CariHubProfileResolver.isResolverActive());
       smoke.carihubCoreReady = !!window.CariHubPerfilPublico;
+      smoke.providerAvailable = !!window.CariHubOwnerHintProvider;
 
       var fs = firebase.firestore();
       var origCollection = fs.collection.bind(fs);
@@ -81,16 +92,39 @@
       if (!id) {
         smoke.error = 'missing id';
         document.getElementById('smoke-root').textContent = 'no id';
+        smoke.loaded = true;
         return;
       }
 
-      if (smoke.hintUid && smoke.resolverActive && window.CariHubProfileResolver) {
-        var origResolve = CariHubProfileResolver.resolveProfile.bind(CariHubProfileResolver);
-        CariHubProfileResolver.resolveProfile = function (pid, deps) {
-          deps = deps || {};
-          deps.hintUsuarioId = smoke.hintUid;
-          return origResolve(pid, deps);
-        };
+      if (window.CariHubOwnerHintProvider) {
+        if (smoke.cacheMode === 'corrupted') {
+          try {
+            sessionStorage.setItem(CariHubOwnerHintProvider.STORAGE_KEY, '{bad-json');
+          } catch (e) {
+            smoke.provider.seedError = String(e.message || e);
+          }
+          smoke.provider.action = 'seed-corrupted';
+        } else if (smoke.cacheMode === 'expired' && smoke.cacheUid) {
+          var expiredAt = Date.now() - 1000;
+          var storedAt = expiredAt - CariHubOwnerHintProvider.TTL_MS;
+          try {
+            sessionStorage.setItem(CariHubOwnerHintProvider.STORAGE_KEY, JSON.stringify({
+              version: CariHubOwnerHintProvider.VERSION,
+              entries: (function () {
+                var e = {};
+                e[id] = { usuarioId: smoke.cacheUid, storedAt: storedAt, expiresAt: expiredAt };
+                return e;
+              })()
+            }));
+          } catch (e) {
+            smoke.provider.seedError = String(e.message || e);
+          }
+          smoke.provider.action = 'seed-expired';
+        } else if (smoke.cacheUid) {
+          CariHubOwnerHintProvider.setOwnerHint(id, smoke.cacheUid);
+          smoke.provider.action = 'seed-cache';
+          smoke.provider.cacheRead = CariHubOwnerHintProvider.getOwnerHint(id);
+        }
       }
 
       CariHubPerfilPublico.cargarPerfilFirestore(id).then(function (profile) {
@@ -105,11 +139,15 @@
         } else {
           smoke.render = 'demo-fallback-null';
         }
+        if (window.CariHubOwnerHintProvider) {
+          smoke.provider.cacheAfter = CariHubOwnerHintProvider.getOwnerHint(id);
+        }
         var bodyText = profile ? JSON.stringify(profile) : '';
         smoke.kycLeak = /secret-ine|SECRETRFC|012345678901234567|kyc@private/i.test(bodyText);
         document.getElementById('smoke-root').textContent = profile ? (profile.nombre || profile.__id) : 'null-demo-path';
       }).catch(function (err) {
         smoke.error = String(err && err.message || err);
+        smoke.loaded = true;
         document.getElementById('smoke-root').textContent = 'error';
       });
     })();

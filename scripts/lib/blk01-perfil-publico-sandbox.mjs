@@ -14,10 +14,29 @@ const SRC = {
   adapter: readFileSync(join(PUBLIC_JS, 'carihub-blk01-hub-adapter.js'), 'utf8'),
   config: readFileSync(join(PUBLIC_JS, 'carihub-blk01-config.js'), 'utf8'),
   resolver: readFileSync(join(PUBLIC_JS, 'carihub-profile-resolver.js'), 'utf8'),
+  ownerHint: readFileSync(join(PUBLIC_JS, 'carihub-blk01-owner-hint-provider.js'), 'utf8'),
   privacy: readFileSync(join(PUBLIC_JS, 'carihub-public-privacy-guard.js'), 'utf8'),
   resultados: readFileSync(join(PUBLIC_JS, 'resultados-registrados.js'), 'utf8'),
   init: readFileSync(join(PUBLIC_JS, 'perfil-publico-init.js'), 'utf8')
 };
+
+export function createSessionStorageMock(initial) {
+  const map = new Map(Object.entries(initial || {}));
+  return {
+    getItem(key) {
+      return map.has(key) ? map.get(key) : null;
+    },
+    setItem(key, value) {
+      map.set(key, String(value));
+    },
+    removeItem(key) {
+      map.delete(key);
+    },
+    _dump() {
+      return Object.fromEntries(map.entries());
+    }
+  };
+}
 
 export function createSandbox(extra) {
   extra = extra || {};
@@ -89,12 +108,17 @@ export function createSandbox(extra) {
   return sandbox;
 }
 
+export function loadOwnerHintProvider(sandbox) {
+  vm.runInContext(SRC.ownerHint, sandbox, { filename: 'carihub-blk01-owner-hint-provider.js' });
+}
+
 export function loadBlk01Stack(sandbox, flags) {
   vm.runInContext(SRC.multi, sandbox, { filename: 'carihub-multi-perfil.js' });
   vm.runInContext(SRC.sanitize, sandbox, { filename: 'carihub-blk01-profile-sanitize.js' });
   vm.runInContext(SRC.adapter, sandbox, { filename: 'carihub-blk01-hub-adapter.js' });
   vm.runInContext(SRC.config, sandbox, { filename: 'carihub-blk01-config.js' });
   vm.runInContext(SRC.resolver, sandbox, { filename: 'carihub-profile-resolver.js' });
+  loadOwnerHintProvider(sandbox);
   if (flags) sandbox.__CARIHUB_FLAGS__ = flags;
 }
 

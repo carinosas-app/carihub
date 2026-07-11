@@ -195,6 +195,34 @@ describe('BLK-01 Phase 1C-b — VM integration (flags ON, fixture contract)', ()
     assert.equal(out.nombre, 'Hub Fallback Profile');
   });
 
+  test('D2 hub fallback via cargarPerfilFirestore + Provider cache', async () => {
+    const sandbox = createSandbox({
+      sessionStorage: {
+        _map: {},
+        getItem(k) {
+          return this._map[k] || null;
+        },
+        setItem(k, v) {
+          this._map[k] = String(v);
+        },
+        removeItem(k) {
+          delete this._map[k];
+        }
+      }
+    });
+    loadBlk01Stack(sandbox, FLAG_DUAL_READ);
+    loadResultadosAndInit(sandbox);
+    const fixtures = vmFixturesFromJson();
+    delete fixtures.perfiles[IDS.hubFallbackPerfilId];
+    seedStore(sandbox, fixtures);
+    sandbox.CariHubOwnerHintProvider.setOwnerHint(IDS.hubFallbackPerfilId, IDS.hubOwnerUid);
+    const out = await sandbox.CariHubPerfilPublico.cargarPerfilFirestore(IDS.hubFallbackPerfilId);
+    assert.ok(out);
+    assert.equal(out.__id, IDS.hubFallbackPerfilId);
+    assert.equal(out.uid, IDS.hubOwnerUid);
+    assert.equal(out.__blk01Source, 'usuarios_perfilesDetalle');
+  });
+
   test('E total miss — null for demo fallback path', async () => {
     const sandbox = createSandbox();
     loadBlk01Stack(sandbox, FLAG_DUAL_READ);

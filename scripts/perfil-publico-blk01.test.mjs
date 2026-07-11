@@ -16,9 +16,33 @@ const SANITIZE_SRC = readFileSync(join(PUBLIC_JS, 'carihub-blk01-profile-sanitiz
 const ADAPTER_SRC = readFileSync(join(PUBLIC_JS, 'carihub-blk01-hub-adapter.js'), 'utf8');
 const CONFIG_SRC = readFileSync(join(PUBLIC_JS, 'carihub-blk01-config.js'), 'utf8');
 const RESOLVER_SRC = readFileSync(join(PUBLIC_JS, 'carihub-profile-resolver.js'), 'utf8');
+const OWNER_HINT_SRC = readFileSync(join(PUBLIC_JS, 'carihub-blk01-owner-hint-provider.js'), 'utf8');
 const PRIVACY_SRC = readFileSync(join(PUBLIC_JS, 'carihub-public-privacy-guard.js'), 'utf8');
 const RESULTADOS_SRC = readFileSync(join(PUBLIC_JS, 'resultados-registrados.js'), 'utf8');
 const INIT_SRC = readFileSync(join(PUBLIC_JS, 'perfil-publico-init.js'), 'utf8');
+
+function createSessionStorageMock(initial) {
+  const map = new Map(Object.entries(initial || {}));
+  return {
+    getItem(key) {
+      return map.has(key) ? map.get(key) : null;
+    },
+    setItem(key, value) {
+      map.set(key, String(value));
+    },
+    removeItem(key) {
+      map.delete(key);
+    },
+    _dump() {
+      return Object.fromEntries(map.entries());
+    }
+  };
+}
+
+function readOwnerHintStore(sessionStorage) {
+  const raw = sessionStorage.getItem('carihub_blk01_owner_hint_v1');
+  return raw ? JSON.parse(raw) : null;
+}
 
 function createSandbox(extra) {
   extra = extra || {};
@@ -102,6 +126,7 @@ function loadBlk01Stack(sandbox, flags) {
   vm.runInContext(ADAPTER_SRC, sandbox, { filename: 'carihub-blk01-hub-adapter.js' });
   vm.runInContext(CONFIG_SRC, sandbox, { filename: 'carihub-blk01-config.js' });
   vm.runInContext(RESOLVER_SRC, sandbox, { filename: 'carihub-profile-resolver.js' });
+  vm.runInContext(OWNER_HINT_SRC, sandbox, { filename: 'carihub-blk01-owner-hint-provider.js' });
   if (flags) sandbox.__CARIHUB_FLAGS__ = flags;
 }
 
@@ -241,7 +266,7 @@ describe('BLK-01 Phase 1C-a — perfil-publico-init wiring', () => {
     assert.ok(sandbox.__reads.usuarios >= 1);
   });
 
-  test('active + opaque perfilId without owner hint → not found until hint wiring', async () => {
+  test('active + opaque perfilId without owner hint → not found (fail-closed)', async () => {
     const sandbox = createSandbox();
     loadBlk01Stack(sandbox, { blk01DualReadFallback: true });
     loadResultadosAndInit(sandbox);
@@ -257,6 +282,108 @@ describe('BLK-01 Phase 1C-a — perfil-publico-init wiring', () => {
     };
     const out = await sandbox.CariHubPerfilPublico.cargarPerfilFirestore(opaque);
     assert.equal(out, null);
+  });
+
+  test('active + valid cache hint → hub fallback via cargarPerfilFirestore', async () => {
+    const ss = createSessionStorageMock();
+    const sandbox = createSandbox({ sessionStorage: ss });
+    loadBlk01Stack(sandbox, { blk01DualReadFallback: true });
+    loadResultadosAndInit(sandbox);
+    const uid = 'uid_multi';
+    const opaque = 'perfil_lxyzabc_aaa111';
+    sandbox.__store.usuarios[uid] = {
+      uid,
+      perfilesDetalle: {
+        [opaque]: { perfilId: opaque, nombre: 'Opaque Hub Cached' }
+      },
+      perfilesVinculados: [{ perfilId: opaque }],
+      perfilActivoId: opaque
+    };
+    sandbox.CariHubOwnerHintProvider.setOwnerHint(opaque, uid);
+    const out = await sandbox.CariHubPerfilPublico.cargarPerfilFirestore(opaque);
+    assert.ok(out);
+    assert.equal(out.__id, opaque);
+    assert.equal(out.uid, uid);
+    assert.equal(out.nombre, 'Opaque Hub Cached');
+    assert.equal(out.__blk01Source, 'usuarios_perfilesDetalle');
+  });
+
+  test('flags OFF → zero Provider side effects on sessionStorage', async () => {
+    const ss = createSessionStorageMock();
+    const sandbox = createSandbox({ sessionStorage: ss });
+    loadBlk01Stack(sandbox);
+    loadResultadosAndInit(sandbox);
+    trackLegacyReads(sandbox);
+    sandbox.__store.usuarios.uid_legacy = { uid: 'uid_legacy', nombre: 'Legacy User', categoria: 'salud' };
+    sandbox.CariHubOwnerHintProvider.setOwnerHint('perfil_should_not_change', 'uid_legacy');
+    const before = readOwnerHintStore(ss);
+    const out = await sandbox.CariHubPerfilPublico.cargarPerfilFirestore('uid_legacy');
+    assert.ok(out);
+    assert.equal(sandbox.__reads.perfiles, 0);
+    assert.deepEqual(readOwnerHintStore(ss), before);
+  });
+
+  test('perfiles hit → verified pair cached', async () => {
+    const ss = createSessionStorageMock();
+    const sandbox = createSandbox({ sessionStorage: ss });
+    loadBlk01Stack(sandbox, { blk01DualReadFallback: true });
+    loadResultadosAndInit(sandbox);
+    const opaque = 'perfil_lxyzabc_aaa111';
+    sandbox.__store.perfiles[opaque] = {
+      perfilId: opaque,
+      usuarioId: 'uid_owner_abc',
+      nombre: 'From Perfiles',
+      categoria: 'salud'
+    };
+    const out = await sandbox.CariHubPerfilPublico.cargarPerfilFirestore(opaque);
+    assert.ok(out);
+    const stored = readOwnerHintStore(ss);
+    assert.equal(stored.entries[opaque].usuarioId, 'uid_owner_abc');
+  });
+
+  test('SA3 wrong owner cache → not found and cache invalidated', async () => {
+    const ss = createSessionStorageMock();
+    const sandbox = createSandbox({ sessionStorage: ss });
+    loadBlk01Stack(sandbox, { blk01DualReadFallback: true });
+    loadResultadosAndInit(sandbox);
+    const uid = 'uid_multi';
+    const wrongUid = 'uid_wrong_owner';
+    const opaque = 'perfil_lxyzabc_aaa111';
+    sandbox.__store.usuarios[uid] = {
+      uid,
+      perfilesDetalle: { [opaque]: { perfilId: opaque, nombre: 'Opaque Hub' } },
+      perfilesVinculados: [{ perfilId: opaque }]
+    };
+    sandbox.__store.usuarios[wrongUid] = { uid: wrongUid, nombre: 'Wrong Owner Hub' };
+    sandbox.CariHubOwnerHintProvider.setOwnerHint(opaque, wrongUid);
+    const out = await sandbox.CariHubPerfilPublico.cargarPerfilFirestore(opaque);
+    assert.equal(out, null);
+    assert.equal(sandbox.CariHubOwnerHintProvider.getOwnerHint(opaque), null);
+  });
+
+  test('SA1 forged explicit hint via Provider does not bypass verification alone', async () => {
+    const sandbox = createSandbox();
+    loadBlk01Stack(sandbox, { blk01DualReadFallback: true });
+    loadResultadosAndInit(sandbox);
+    const opaque = 'perfil_lxyzabc_aaa111';
+    const forged = 'uid_attacker_forge';
+    sandbox.__store.usuarios[forged] = { uid: forged, nombre: 'Attacker', perfilesDetalle: {} };
+    const hint = sandbox.CariHubOwnerHintProvider.deriveOwnerHint(opaque, { explicitHint: forged });
+    assert.equal(hint, forged);
+    const Resolver = sandbox.CariHubProfileResolver;
+    const result = await Resolver.resolveProfile(opaque, {
+      configOverride: { blk01DualReadFallback: true },
+      hintUsuarioId: hint,
+      firestore: {
+        getPerfilDoc: () => Promise.resolve({ exists: false, data: null }),
+        getUsuarioDoc: (id) => Promise.resolve({
+          exists: !!sandbox.__store.usuarios[id],
+          data: sandbox.__store.usuarios[id] || null
+        })
+      },
+      sanitize: sandbox.CariHubBlk01ProfileSanitize
+    });
+    assert.equal(result.found, false);
   });
 
   test('active + not-found → null (demo path)', async () => {
@@ -335,8 +462,16 @@ describe('BLK-01 Phase 1C-a — scope guards', () => {
   });
 
   test('no Firestore write APIs in perfil-publico-init', () => {
-    const src = INIT_SRC;
+    const src = readFileSync(join(PUBLIC_JS, 'perfil-publico-init.js'), 'utf8');
     assert.ok(!/writeBatch|addDoc|setDoc|updateDoc|\.collection\([^)]+\)\.doc\([^)]+\)\.set\(/.test(src));
+  });
+
+  test('no URL owner hint params in perfil-publico-init', () => {
+    const src = readFileSync(join(PUBLIC_JS, 'perfil-publico-init.js'), 'utf8');
+    assert.ok(!src.includes('hintUid'));
+    assert.ok(!/searchParams\.get\(['"]uid['"]\)/.test(src));
+    assert.ok(!/searchParams\.get\(['"]ownerUid['"]\)/.test(src));
+    assert.ok(!/searchParams\.get\(['"]hintUid['"]\)/.test(src));
   });
 
   test('no rules/functions/migration references in Phase 1C files', () => {
