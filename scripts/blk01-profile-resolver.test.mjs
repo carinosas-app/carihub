@@ -320,6 +320,70 @@ describe('BLK-01 profile resolver — read order when active', () => {
     assert.ok(result.reasons.includes(Resolver.REASON.PROFILE_NOT_FOUND));
     assert.equal(result.wrote, false);
   });
+
+  test('R1 wrong hintUsuarioId on hub fallback → PROFILE_NOT_FOUND', async () => {
+    const sandbox = createSandbox();
+    const { Resolver } = loadModules(sandbox);
+    const ownerUid = 'uid_real_owner';
+    const wrongUid = 'uid_wrong_owner';
+    const perfilId = 'perfil_lxyzabc_aaa111';
+    const hub = {
+      uid: ownerUid,
+      perfilesDetalle: {
+        [perfilId]: { perfilId, nombre: 'Real Profile', categoria: 'salud' }
+      },
+      perfilesVinculados: [{ perfilId }]
+    };
+    const result = await Resolver.resolveProfile(perfilId, {
+      configOverride: readFlags,
+      hintUsuarioId: wrongUid,
+      firestore: {
+        getPerfilDoc() {
+          return Promise.resolve({ exists: false, data: null });
+        },
+        getUsuarioDoc(id) {
+          if (id === wrongUid) {
+            return Promise.resolve({ exists: true, data: { uid: wrongUid, perfilesDetalle: {} } });
+          }
+          if (id === ownerUid) {
+            return Promise.resolve({ exists: true, data: hub });
+          }
+          return Promise.resolve({ exists: false, data: null });
+        }
+      }
+    });
+    assert.equal(result.found, false);
+    assert.ok(result.reasons.includes(Resolver.REASON.PROFILE_NOT_FOUND));
+  });
+
+  test('R3 perfiles hit owner fields are not overridden by hint', async () => {
+    const sandbox = createSandbox();
+    const { Resolver } = loadModules(sandbox);
+    const perfilId = 'perfil_lxyzabc_aaa111';
+    const result = await Resolver.resolveProfile(perfilId, {
+      configOverride: readFlags,
+      hintUsuarioId: 'uid_forged_hint',
+      firestore: {
+        getPerfilDoc() {
+          return Promise.resolve({
+            exists: true,
+            data: {
+              perfilId,
+              usuarioId: 'uid_authoritative',
+              ownerUid: 'uid_authoritative',
+              nombre: 'Authoritative'
+            }
+          });
+        },
+        getUsuarioDoc() {
+          return Promise.resolve({ exists: false, data: null });
+        }
+      }
+    });
+    assert.equal(result.found, true);
+    assert.equal(result.usuarioId, 'uid_authoritative');
+    assert.equal(result.source, 'perfiles');
+  });
 });
 
 describe('BLK-01 profile resolver — security & determinism', () => {
@@ -451,12 +515,14 @@ describe('BLK-01 Phase 1C-a — consumer wiring scope', () => {
     const idxAdapter = html.indexOf('carihub-blk01-hub-adapter.js');
     const idxConfig = html.indexOf('carihub-blk01-config.js');
     const idxResolver = html.indexOf('carihub-profile-resolver.js');
+    const idxOwnerHint = html.indexOf('carihub-blk01-owner-hint-provider.js');
     const idxInit = html.indexOf('perfil-publico-init.js');
     assert.ok(idxMulti >= 0 && idxSan > idxMulti);
     assert.ok(idxAdapter > idxSan);
     assert.ok(idxConfig > idxAdapter);
     assert.ok(idxResolver > idxConfig);
-    assert.ok(idxInit > idxResolver);
+    assert.ok(idxOwnerHint > idxResolver);
+    assert.ok(idxInit > idxOwnerHint);
     assert.ok(!html.includes('__CARIHUB_FLAGS__'));
   });
 });

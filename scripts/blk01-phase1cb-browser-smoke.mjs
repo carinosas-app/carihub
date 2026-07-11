@@ -1,14 +1,6 @@
 #!/usr/bin/env node
 /**
- * BLK-01 Phase 1C-b — emulator-only browser smoke (Edge/Chrome via playwright-core).
- *
- * Prerequisites:
- *   - Firestore emulator running on FIRESTORE_EMULATOR_HOST
- *   - Static server on P1CB_SMOKE_HTTP_PORT (default 8766)
- *   - Seed applied via rules-unit-testing in this script
- *
- * Usage:
- *   firebase emulators:exec --only firestore "node scripts/blk01-phase1cb-browser-smoke.mjs"
+ * BLK-01 Phase 1C-c — emulator-only browser smoke (Edge/Chrome via playwright-core).
  */
 import { readFileSync, writeFileSync, mkdirSync, createReadStream, statSync, existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
@@ -27,14 +19,13 @@ const IDS = FIXTURES.ids;
 const HTTP_PORT = Number(process.env.P1CB_SMOKE_HTTP_PORT || 8766);
 const OUT_PATH =
   process.env.P1CB_SMOKE_OUT ||
-  join(process.env.TEMP || process.env.TMP || '/tmp', 'blk01-phase1cb-smoke.json');
+  join(process.env.TEMP || process.env.TMP || '/tmp', 'blk01-phase1cc-smoke.json');
 
 if (process.env.FIRESTORE_EMULATOR_HOST) {
   process.env.GCLOUD_PROJECT = DEMO_PROJECT_ID;
 }
 
 assertEmulatorEnvironment();
-const emu = parseEmulatorHost();
 
 const MIME = {
   '.html': 'text/html',
@@ -113,6 +104,15 @@ function findBrowserExecutable(pw) {
   return null;
 }
 
+function buildUrl(baseUrl, spec) {
+  const q = new URLSearchParams();
+  q.set('id', spec.id);
+  q.set('emuFlags', spec.flagsOn ? 'on' : 'off');
+  if (spec.cacheUid) q.set('cacheUid', spec.cacheUid);
+  if (spec.cacheMode) q.set('cacheMode', spec.cacheMode);
+  return `${baseUrl}/blk01-phase1cb-smoke-harness.html?${q.toString()}`;
+}
+
 async function runCase(browser, baseUrl, spec) {
   const page = await browser.newPage();
   const errors = [];
@@ -121,7 +121,7 @@ async function runCase(browser, baseUrl, spec) {
     if (msg.type() === 'error') errors.push({ kind: 'console', text: msg.text() });
   });
 
-  const url = `${baseUrl}/blk01-phase1cb-smoke-harness.html?id=${encodeURIComponent(spec.id)}&emuFlags=${spec.flagsOn ? 'on' : 'off'}${spec.hintUid ? `&hintUid=${encodeURIComponent(spec.hintUid)}` : ''}`;
+  const url = buildUrl(baseUrl, spec);
   let navError = null;
   try {
     await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 45000 });
@@ -143,25 +143,45 @@ async function runCase(browser, baseUrl, spec) {
 
   await page.close();
 
+  const smoke = evalResult.smoke || {};
+  const pass = spec.validate ? spec.validate(smoke, errors) : !navError && !errors.length;
+  const nonFatal404 = errors.length === 1 && /404/.test(errors[0].text || '');
+  const effectivePass = pass && (errors.length === 0 || nonFatal404);
+
   return {
     case: spec.case,
     url,
     httpStatus: navError ? null : 200,
     navError,
     loadOk: !navError,
-    jsExecuted: !!evalResult.smoke,
+    jsExecuted: !!smoke,
     flagsOn: spec.flagsOn,
     evalResult,
     consoleErrors: errors,
-    blk01AttributedErrors: errors.filter((e) => /blk01|carihub-blk01|carihub-profile-resolver/i.test(e.text))
+    blk01AttributedErrors: errors.filter((e) => /blk01|carihub-blk01|carihub-profile-resolver|carihub-owner-hint/i.test(e.text)),
+    pass: effectivePass,
+    report: {
+      pageLoaded: !navError,
+      jsExecuted: !!smoke,
+      carihubCoreReady: !!smoke.carihubCoreReady,
+      firebaseApps: smoke.firebaseApps,
+      flagsState: smoke.flags,
+      providerAction: smoke.provider && smoke.provider.action,
+      resolverSource: smoke.source,
+      reads: smoke.reads,
+      ids: { __id: smoke.__id, perfilId: smoke.perfilId, uid: smoke.uid },
+      cacheAfter: smoke.provider && smoke.provider.cacheAfter,
+      kycLeak: smoke.kycLeak,
+      render: smoke.render || smoke.nombre || null
+    }
   };
 }
 
 async function main() {
-  console.log('[P1CB smoke] Seeding emulator fixtures…');
+  console.log('[P1CC smoke] Seeding emulator fixtures…');
   await seedEmulator();
 
-  console.log('[P1CB smoke] Starting static server on', HTTP_PORT);
+  console.log('[P1CC smoke] Starting static server on', HTTP_PORT);
   const server = await startStaticServer();
   const baseUrl = `http://127.0.0.1:${HTTP_PORT}`;
 
@@ -171,16 +191,98 @@ async function main() {
 
   const browser = await pw.chromium.launch({ executablePath: exe, headless: true });
   const cases = [
-    { case: 'legacy-bridge', id: IDS.legacyBridgeUid, flagsOn: true },
-    { case: 'opaque-perfil', id: IDS.opaquePerfilId, flagsOn: true },
-    { case: 'hub-fallback', id: IDS.hubFallbackPerfilId, flagsOn: true, hintUid: IDS.hubOwnerUid },
-    { case: 'missing-id', id: IDS.missingId, flagsOn: true },
-    { case: 'demo-flags-off', id: IDS.demoControlId, flagsOn: false }
+    {
+      case: 'flags-off-legacy',
+      id: IDS.legacyBridgeUid,
+      flagsOn: false,
+      validate(s) {
+        return !!s.profile && s.reads.perfiles === 0 && s.resolverActive === false;
+      }
+    },
+    {
+      case: 'opaque-perfiles-hit',
+      id: IDS.opaquePerfilId,
+      flagsOn: true,
+      validate(s) {
+        return !!s.profile && s.source === 'perfiles';
+      }
+    },
+    {
+      case: 'valid-cache-hub-fallback',
+      id: IDS.hubFallbackPerfilId,
+      flagsOn: true,
+      cacheUid: IDS.hubOwnerUid,
+      validate(s) {
+        return !!s.profile && s.source === 'usuarios_perfilesDetalle' && s.uid === IDS.hubOwnerUid;
+      }
+    },
+    {
+      case: 'hub-only-no-hint',
+      id: IDS.hubFallbackPerfilId,
+      flagsOn: true,
+      validate(s) {
+        return !s.profile && s.render === 'demo-fallback-null';
+      }
+    },
+    {
+      case: 'forged-cache',
+      id: IDS.hubFallbackPerfilId,
+      flagsOn: true,
+      cacheUid: 'uid_p1cb_owner_opaque1',
+      validate(s) {
+        return !s.profile;
+      }
+    },
+    {
+      case: 'wrong-owner',
+      id: IDS.hubFallbackPerfilId,
+      flagsOn: true,
+      cacheUid: 'uid_p1cb_owner_opaque1',
+      validate(s) {
+        return !s.profile && s.provider && s.provider.cacheAfter == null;
+      }
+    },
+    {
+      case: 'expired-cache',
+      id: IDS.hubFallbackPerfilId,
+      flagsOn: true,
+      cacheUid: IDS.hubOwnerUid,
+      cacheMode: 'expired',
+      validate(s) {
+        return !s.profile;
+      }
+    },
+    {
+      case: 'corrupted-cache',
+      id: IDS.hubFallbackPerfilId,
+      flagsOn: true,
+      cacheUid: IDS.hubOwnerUid,
+      cacheMode: 'corrupted',
+      validate(s) {
+        return !s.profile;
+      }
+    },
+    {
+      case: 'missing-profile',
+      id: IDS.missingId,
+      flagsOn: true,
+      validate(s) {
+        return !s.profile;
+      }
+    },
+    {
+      case: 'privacy-fixture',
+      id: IDS.privacyPerfilId,
+      flagsOn: true,
+      validate(s) {
+        return !!s.profile && s.kycLeak !== true;
+      }
+    }
   ];
 
   const results = [];
   for (const spec of cases) {
-    console.log('[P1CB smoke] Case:', spec.case);
+    console.log('[P1CC smoke] Case:', spec.case);
     results.push(await runCase(browser, baseUrl, spec));
   }
   await browser.close();
@@ -188,10 +290,13 @@ async function main() {
 
   mkdirSync(dirname(OUT_PATH), { recursive: true });
   writeFileSync(OUT_PATH, JSON.stringify(results, null, 2));
-  console.log('[P1CB smoke] Wrote', OUT_PATH);
+  console.log('[P1CC smoke] Wrote', OUT_PATH);
 
-  const failed = results.filter((r) => !r.loadOk || r.blk01AttributedErrors.length);
-  if (failed.length) process.exit(1);
+  const failed = results.filter((r) => !r.pass || r.blk01AttributedErrors.length);
+  if (failed.length) {
+    console.error('[P1CC smoke] Failed cases:', failed.map((f) => f.case).join(', '));
+    process.exit(1);
+  }
 }
 
 main().catch((err) => {
