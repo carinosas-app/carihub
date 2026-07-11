@@ -1,5 +1,6 @@
 /**
  * Perfil público — query de búsqueda, volver a resultados y carga Firestore.
+ * BLK-01 Phase 1C-a: resolver wiring (inactive by default; legacy path preserved).
  */
 (function (global) {
   'use strict';
@@ -73,9 +74,75 @@
     return null;
   }
 
-  function cargarPerfilFirestore(id, q) {
-    q = q || queryPerfilPublico();
-    if (!id || esIdDemo(id)) return Promise.resolve(null);
+  function resolverStackAvailable() {
+    var R = global.CariHubProfileResolver;
+    return !!(R && typeof R.resolveProfile === 'function' && typeof R.isResolverActive === 'function');
+  }
+
+  function deepSanitizeAvailable() {
+    var S = global.CariHubBlk01ProfileSanitize;
+    return !!(S && typeof S.sanitizePublicProfileDeep === 'function');
+  }
+
+  function firestoreErrorKind(err) {
+    if (!err) return 'unknown';
+    var code = String((err && err.code) || (err && err.message) || err).toLowerCase();
+    if (code.indexOf('permission') >= 0) return 'permission_denied';
+    if (code.indexOf('unavailable') >= 0) return 'unavailable';
+    if (code.indexOf('deadline') >= 0 || code.indexOf('timeout') >= 0) return 'timeout';
+    return 'unknown';
+  }
+
+  function createResolverFirestoreDeps(fs, telemetry) {
+    telemetry = telemetry || { perfilesReads: 0, usuariosReads: 0, errors: [] };
+
+    function wrapGet(promise, meta) {
+      return promise.then(function (doc) {
+        return {
+          exists: !!(doc && doc.exists),
+          id: doc && doc.id != null ? doc.id : meta.id,
+          data: doc && doc.exists && typeof doc.data === 'function' ? doc.data() : null,
+          error: null
+        };
+      }).catch(function (err) {
+        telemetry.errors.push({ path: meta.path, kind: firestoreErrorKind(err) });
+        return { exists: false, id: meta.id, data: null, error: firestoreErrorKind(err) };
+      });
+    }
+
+    return {
+      getPerfilDoc: function (perfilId) {
+        telemetry.perfilesReads += 1;
+        return wrapGet(
+          fs.collection('perfiles').doc(String(perfilId)).get(),
+          { path: 'perfiles/' + perfilId, id: perfilId }
+        );
+      },
+      getUsuarioDoc: function (uid) {
+        telemetry.usuariosReads += 1;
+        return wrapGet(
+          fs.collection('usuarios').doc(String(uid)).get(),
+          { path: 'usuarios/' + uid, id: uid }
+        );
+      },
+      telemetry: telemetry
+    };
+  }
+
+  function shouldFallbackToLegacyAfterResolver(result, telemetry) {
+    if (!result) return true;
+    if (result.error === 'invalid_perfil_id') return false;
+    if (result.found && result.profile) return false;
+    if (result.active && !result.found) return false;
+    if (telemetry && telemetry.errors && telemetry.errors.length) {
+      return telemetry.errors.some(function (e) {
+        return e.kind === 'permission_denied' || e.kind === 'unavailable' || e.kind === 'timeout';
+      });
+    }
+    return false;
+  }
+
+  function cargarPerfilFirestoreLegacy(id) {
     var fs = firestoreDb();
     if (!fs) return Promise.resolve(null);
     return fs.collection('usuarios').doc(String(id)).get()
@@ -87,6 +154,60 @@
         return null;
       })
       .catch(function () { return null; });
+  }
+
+  function normalizarDesdeResolver(resolverResult) {
+    var RR = global.CariHubResultadosRegistrados;
+    if (RR && typeof RR.normalizarFromBlk01Resolver === 'function') {
+      return RR.normalizarFromBlk01Resolver(resolverResult);
+    }
+    return null;
+  }
+
+  function cargarPerfilFirestore(id, q) {
+    q = q || queryPerfilPublico();
+    if (!id || esIdDemo(id)) return Promise.resolve(null);
+    var fs = firestoreDb();
+    if (!fs) return Promise.resolve(null);
+
+    if (!resolverStackAvailable()) {
+      return cargarPerfilFirestoreLegacy(id);
+    }
+
+    var Resolver = global.CariHubProfileResolver;
+    if (!Resolver.isResolverActive()) {
+      return cargarPerfilFirestoreLegacy(id);
+    }
+
+    if (!deepSanitizeAvailable()) {
+      return cargarPerfilFirestoreLegacy(id);
+    }
+
+    var telemetry = { perfilesReads: 0, usuariosReads: 0, errors: [] };
+    var firestoreDeps = createResolverFirestoreDeps(fs, telemetry);
+
+    return Resolver.resolveProfile(id, {
+      firestore: firestoreDeps,
+      sanitize: global.CariHubBlk01ProfileSanitize
+    }).then(function (result) {
+      if (result.error === 'invalid_perfil_id') {
+        return null;
+      }
+      if (result.found && result.profile) {
+        var normalized = normalizarDesdeResolver(result);
+        if (normalized) return normalized;
+        return cargarPerfilFirestoreLegacy(id);
+      }
+      if (result.active && !result.found) {
+        return null;
+      }
+      if (shouldFallbackToLegacyAfterResolver(result, telemetry)) {
+        return cargarPerfilFirestoreLegacy(id);
+      }
+      return null;
+    }).catch(function () {
+      return cargarPerfilFirestoreLegacy(id);
+    });
   }
 
   function initFirebaseIfNeeded() {
