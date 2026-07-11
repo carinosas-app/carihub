@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BLK-01 Phase 1C-b Smoke Harness (emulator only)</title>
+</head>
+<body>
+  <div id="smoke-root">loading…</div>
+  <script>
+    // EMULATOR TEST HARNESS ONLY — not production perfil-publico.html
+    (function () {
+      var params = new URLSearchParams(location.search);
+      var profileId = params.get('id') || '';
+      var flagsOn = params.get('emuFlags') === 'on';
+      var hintUid = params.get('hintUid') || '';
+      window.__P1CB_SMOKE__ = { phase: '1C-b', flagsOn: flagsOn, profileId: profileId, hintUid: hintUid, reads: { perfiles: 0, usuarios: 0, legacy: 0 } };
+
+      if (flagsOn) {
+        window.__CARIHUB_FLAGS__ = {
+          blk01DualReadFallback: true,
+          blk01PerfilesReadPrimary: false
+        };
+      }
+    })();
+  </script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+  <script>
+    (function () {
+      var host = window.__P1CB_EMULATOR_HOST__ || '127.0.0.1';
+      var port = window.__P1CB_EMULATOR_PORT__ || 8080;
+      var projectId = window.__P1CB_PROJECT_ID__ || 'demo-carihub';
+      if (!firebase.apps.length) {
+        firebase.initializeApp({ projectId: projectId });
+      }
+      var db = firebase.firestore();
+      db.useEmulator(host, port);
+      window.CariHubDB = db;
+      window.__P1CB_SMOKE__.firebaseApps = firebase.apps.length;
+    })();
+  </script>
+  <script src="js/carihub-public-privacy-guard.js"></script>
+  <script src="js/carihub-multi-perfil.js"></script>
+  <script src="js/carihub-blk01-profile-sanitize.js"></script>
+  <script src="js/carihub-blk01-hub-adapter.js"></script>
+  <script src="js/carihub-blk01-config.js"></script>
+  <script src="js/carihub-profile-resolver.js"></script>
+  <script src="js/resultados-registrados.js"></script>
+  <script src="js/perfil-publico-init.js"></script>
+  <script>
+    (function () {
+      var smoke = window.__P1CB_SMOKE__;
+      var flags = window.CariHubBlk01Config ? CariHubBlk01Config.resolveConfig() : {};
+      smoke.flags = flags;
+      smoke.resolverActive = !!(window.CariHubProfileResolver && CariHubProfileResolver.isResolverActive());
+      smoke.carihubCoreReady = !!window.CariHubPerfilPublico;
+
+      var fs = firebase.firestore();
+      var origCollection = fs.collection.bind(fs);
+      fs.collection = function (name) {
+        var col = origCollection(name);
+        if (name === 'perfiles' || name === 'usuarios') {
+          return {
+            doc: function (id) {
+              var ref = col.doc(id);
+              return {
+                get: function () {
+                  if (name === 'perfiles') smoke.reads.perfiles += 1;
+                  if (name === 'usuarios') smoke.reads.usuarios += 1;
+                  return ref.get();
+                }
+              };
+            }
+          };
+        }
+        return col;
+      };
+
+      var id = smoke.profileId;
+      if (!id) {
+        smoke.error = 'missing id';
+        document.getElementById('smoke-root').textContent = 'no id';
+        return;
+      }
+
+      if (smoke.hintUid && smoke.resolverActive && window.CariHubProfileResolver) {
+        var origResolve = CariHubProfileResolver.resolveProfile.bind(CariHubProfileResolver);
+        CariHubProfileResolver.resolveProfile = function (pid, deps) {
+          deps = deps || {};
+          deps.hintUsuarioId = smoke.hintUid;
+          return origResolve(pid, deps);
+        };
+      }
+
+      CariHubPerfilPublico.cargarPerfilFirestore(id).then(function (profile) {
+        smoke.profile = profile;
+        smoke.loaded = true;
+        if (profile) {
+          smoke.__id = profile.__id;
+          smoke.perfilId = profile.perfilId;
+          smoke.uid = profile.uid;
+          smoke.nombre = profile.nombre;
+          smoke.source = profile.__blk01Source || (smoke.resolverActive ? 'legacy-or-resolver' : 'legacy');
+        } else {
+          smoke.render = 'demo-fallback-null';
+        }
+        var bodyText = profile ? JSON.stringify(profile) : '';
+        smoke.kycLeak = /secret-ine|SECRETRFC|012345678901234567|kyc@private/i.test(bodyText);
+        document.getElementById('smoke-root').textContent = profile ? (profile.nombre || profile.__id) : 'null-demo-path';
+      }).catch(function (err) {
+        smoke.error = String(err && err.message || err);
+        document.getElementById('smoke-root').textContent = 'error';
+      });
+    })();
+  </script>
+</body>
+</html>
