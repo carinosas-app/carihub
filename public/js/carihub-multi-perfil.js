@@ -240,6 +240,7 @@
     buildPerfilVinculado: buildPerfilVinculado,
     hasNestedPerfiles: hasNestedPerfiles,
     hasLegacyFlatPerfil: hasLegacyFlatPerfil,
+    legacyPerfilId: legacyPerfilId,
     buildLegacyMigrationPatch: buildLegacyMigrationPatch,
     appendPerfilToHub: appendPerfilToHub,
     expandPerfilesFromHub: expandPerfilesFromHub,

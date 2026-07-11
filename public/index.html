@@ -45,6 +45,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-functions-compat.js"></script>
 <script src="paises.js"></script>
 <script src="estados.js"></script>
 <script src="ciudades.js"></script>
@@ -54,6 +55,8 @@
 <script src="js/carihub-favoritos.js"></script>
 <script src="js/categoria-iconos.js"></script>
 <script src="js/sectores-carihub.js"></script>
+<script src="js/carihub-app-check.js"></script>
+<script src="js/carihub-turnstile.js"></script>
 <script src="js/carihub-core.js"></script>
 <script>
 const db = CariHubCore.db;
@@ -800,6 +803,8 @@ const CATEGORIAS_BUSCADOR = [
       <p class="login-forgot-wrap">
         <button type="button" class="login-forgot-link" id="btnRecuperarContrasena" onclick="recuperarContrasenaSocial()">¿Olvidaste tu contraseña?</button>
       </p>
+      <div class="carihub-turnstile-slot" data-turnstile-action="login" hidden aria-hidden="true"></div>
+      <div class="carihub-turnstile-slot" data-turnstile-action="passwordReset" hidden aria-hidden="true"></div>
       <button type="button" class="btn btn-continuar" id="btnLoginEntrar" style="width:100%;margin-top:10px;" disabled onclick="loginMiPerfil()">Entrar</button>
       <button class="btn btn-atras" style="width:100%;margin-top:10px;" onclick="mostrarVistaCuenta('crear')">Crear cuenta</button>
     </div>
@@ -819,6 +824,7 @@ const CATEGORIAS_BUSCADOR = [
         <button type="button" class="login-inline-alert__close" aria-label="Cerrar aviso" onclick="closeModalAlert('cuentaPassword', event)">×</button>
         <div class="login-inline-alert__content"></div>
       </div>
+      <div class="carihub-turnstile-slot" data-turnstile-action="registration" hidden aria-hidden="true"></div>
       <button class="btn btn-continuar" style="width:100%;margin-top:10px;" onclick="crearCuentaMinima()">Crear cuenta</button>
       <button class="btn btn-atras" style="width:100%;margin-top:10px;" onclick="mostrarVistaCuenta('entrar')">Ya tengo cuenta</button>
     </div>
@@ -1169,6 +1175,14 @@ async function crearCuentaMinima(){
   }
 
   clearAllLoginModalAlerts();
+
+  if(window.CariHubTurnstile){
+    const ts=await CariHubTurnstile.gateAction("registration");
+    if(!ts||!ts.ok){
+      showModalAlert("cuentaPassword","❌ Verificación de seguridad requerida.","Inténtalo de nuevo.");
+      return;
+    }
+  }
 
   try{
     const cred=await auth.createUserWithEmailAndPassword(email,password);
@@ -1929,6 +1943,14 @@ async function recuperarContrasenaSocial(){
 
   clearAllLoginModalAlerts();
 
+  if(window.CariHubTurnstile){
+    const ts=await CariHubTurnstile.gateAction("passwordReset");
+    if(!ts||!ts.ok){
+      showModalAlert("loginEmail","❌ Verificación de seguridad requerida.","Inténtalo de nuevo.");
+      return;
+    }
+  }
+
   const labelOriginal=btn?btn.textContent:"";
   if(btn){
     btn.disabled=true;
@@ -2105,6 +2127,13 @@ async function loginMiPerfil(){
         "Usa el correo con el que registraste o completa el registro."
       );
       return;
+    }
+    if(window.CariHubTurnstile){
+      const ts=await CariHubTurnstile.gateAction("login");
+      if(!ts||!ts.ok){
+        showModalAlert("loginPassword","❌ Verificación de seguridad requerida.","Inténtalo de nuevo.");
+        return;
+      }
     }
     await ensureAuthPersistence();
     await withTimeout(
