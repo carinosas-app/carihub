@@ -5,6 +5,8 @@ import {
   runArchFrozenViolations,
   runArchScanDuplicates,
 } from '../arch/runner.js';
+import { runArchReview } from '../arch-review/runner.js';
+import type { ArchReviewInput } from '../core/arch-review-engine/types.js';
 
 export function archFrozenViolations(
   repoRoot: string,
@@ -35,3 +37,9 @@ export function archDomainBoundaries(
 ) {
   return runArchDomainBoundaries(repoRoot, config, opts);
 }
+
+export function archReview(repoRoot: string, config: CamcpConfig, input: ArchReviewInput = {}) {
+  return runArchReview(repoRoot, config, input);
+}
+
+export type { ArchReviewInput };

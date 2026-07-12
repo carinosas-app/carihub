@@ -3,6 +3,7 @@ import type { ToolDefinition } from '../registry/tool-definition.js';
 import {
   archDomainBoundaries,
   archFrozenViolations,
+  archReview,
   archScanDuplicates,
 } from './arch.tools.js';
 
@@ -50,6 +51,36 @@ export const ARCH_TOOL_DEFINITIONS: ToolDefinition[] = [
     handler: (ctx, input) => {
       const i = input as { domain?: string };
       return archDomainBoundaries(ctx.repoRoot, ctx.config, i);
+    },
+  },
+  {
+    name: 'arch.review',
+    namespace: 'arch',
+    capability: 'report-only',
+    description:
+      'Composite architecture review — reuses arch-review-engine; delegates arch.* + intel.*',
+    inputSchema: {
+      facet: z
+        .enum(['summary', 'scope', 'frozen', 'boundaries', 'duplicates', 'impact', 'graph', 'full'])
+        .optional()
+        .describe('Review facet (default summary)'),
+      scope: z
+        .object({
+          paths: z.array(z.string()).optional(),
+          domain: z.string().optional(),
+          baseRef: z.string().optional(),
+          headRef: z.string().optional(),
+        })
+        .optional(),
+      operator: z
+        .object({
+          forceRefresh: z.boolean().optional(),
+        })
+        .optional(),
+    },
+    handler: (ctx, input) => {
+      const i = input as Parameters<typeof archReview>[2];
+      return archReview(ctx.repoRoot, ctx.config, i);
     },
   },
 ];

@@ -17,6 +17,7 @@ Documento de referencia del estado mergeado de **CariHub Architecture MCP**.
 | 3B.1 — `parity.*` | #118 | `d383e4e` | 25 | CERRADA |
 | 3B.2 — `data.*` | #119 | `a5fb451` | 29 | CERRADA |
 | 3B.3 — `arch.*` | #121 | `28888e6` | **32** | **CERRADA** |
+| 3.0 — Engine Wiring | — | (pendiente) | **39** | En commit |
 | 3C — `perf.*` | — | — | — | No iniciada |
 | 3D — `seo.*` + `ads.*` | — | — | — | No iniciada |
 | 3E — CI GitHub Actions | — | — | — | No iniciada |
@@ -51,18 +52,37 @@ CAMCP Core
     └── salida: agent-tools/camcp-reports/
 ```
 
-### Inventario de tools (32)
+### Inventario de tools (39)
 
 | Namespace | Count | Capability |
 |-----------|-------|------------|
 | `filesystem` | 4 | read-only |
-| `git` | 5 | read-only |
+| `git` | 6 | 5 read-only + 1 report-only |
 | `qa` | 7 | report-only |
 | `intel` | 6 | 3 read-only + 3 report-only |
 | `parity` | 3 | report-only |
 | `data` | 4 | report-only |
-| `arch` | 3 | 1 read-only + 2 report-only |
-| **Total** | **32** | **0 write-capable** |
+| `arch` | 4 | 1 read-only + 3 report-only |
+| `catalog` | 1 | report-only |
+| `profile` | 1 | report-only |
+| `invalidation` | 3 | read-only |
+| **Total** | **39** | **16 read-only + 23 report-only · 0 write-capable** |
+
+### Tools Fase 3.0 — Engine Wiring (7 nuevas)
+
+Exponen engines ya existentes en `camcp/src/core/` al registro MCP. **Sin lógica nueva, sin engines nuevos, sin duplicar QA/contratos.**
+
+| Tool | Capability | Engine reutilizado |
+|------|------------|--------------------|
+| `git.worktree` | report-only | `git-context-engine` (`git-worktree/runner`) |
+| `catalog.audit` | report-only | `catalog-engine` (`catalog-audit/runner`) |
+| `profile.audit` | report-only | `profile-parity-engine` (`profile-audit/runner`) |
+| `arch.review` | report-only | `arch-review-engine` (`arch-review/runner`) |
+| `invalidation.watch_list` | read-only | `invalidation-registry` |
+| `invalidation.explain` | read-only | `invalidation-registry` |
+| `invalidation.evaluate` | read-only | `invalidation-registry` |
+
+**Runtime CariHub intacto:** el wiring solo toca `camcp/**`; cero cambios en `public/`, `firestore.rules`, `firebase.json`, `functions/`, `storage.rules`.
 
 ### Tools `arch.*` (Fase 3B.3)
 
