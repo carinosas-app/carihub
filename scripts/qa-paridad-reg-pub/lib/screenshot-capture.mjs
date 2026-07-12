@@ -12,10 +12,15 @@ export async function captureScreenshots(page, shotsDir, subSlug) {
   ensureDir(subDir);
 
   const files = {};
+  const shotTimeout = Number(process.env.QA_RENDER_SHOT_MS) || 15000;
 
   const fullPath = path.join(subDir, 'full-desktop.png');
-  await page.screenshot({ path: fullPath, fullPage: true });
-  files.full = fullPath;
+  try {
+    await page.screenshot({ path: fullPath, fullPage: true, timeout: shotTimeout });
+    files.full = fullPath;
+  } catch (e) {
+    files.fullError = String(e?.message || e);
+  }
 
   const hero = page.locator('.playout__tri, .gal, .playout__col--cen').first();
   if (await hero.count()) {

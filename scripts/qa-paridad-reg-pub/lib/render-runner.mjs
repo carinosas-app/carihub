@@ -15,6 +15,11 @@ import { runRenderPrivacyChecks } from './render-privacy-checker.mjs';
 import { captureScreenshots } from './screenshot-capture.mjs';
 import { aggregateRenderStatus, isBlocker } from './severity.mjs';
 import { slugSubId } from './slug.mjs';
+import {
+  MATRIX_SUBS,
+  validateRenderMatrixIntegrity,
+  loadRenderMatrix,
+} from './render-matrix.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const RENDER_MAP = JSON.parse(
@@ -353,3 +358,15 @@ export function aggregateRenderResults(subResults) {
 }
 
 export const SMOKE_SUBS = ['medicos-generales', 'dominatrix', 'unicorns'];
+export { MATRIX_SUBS, validateRenderMatrixIntegrity, loadRenderMatrix };
+
+export function assertRenderMatrixReady(ctx) {
+  const index = loadSchemaIndex(ctx);
+  const result = validateRenderMatrixIntegrity(index);
+  if (!result.ok) {
+    const err = new Error(`PP-02 render matrix integrity failed:\n${result.errors.join('\n')}`);
+    err.details = result;
+    throw err;
+  }
+  return result;
+}

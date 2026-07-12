@@ -11,7 +11,7 @@ import { fileURLToPath } from 'url';
 import { makePipelineCtx, REPO } from './qa-paridad-reg-pub/lib/vm-pipeline-context.mjs';
 import { loadSchemaIndex, listSubcategorias } from './qa-paridad-reg-pub/lib/catalog-loader.mjs';
 import { createPlaywrightSession } from './qa-paridad-reg-pub/lib/playwright-context.mjs';
-import { runSubRender, aggregateRenderResults, SMOKE_SUBS } from './qa-paridad-reg-pub/lib/render-runner.mjs';
+import { runSubRender, aggregateRenderResults, SMOKE_SUBS, MATRIX_SUBS, assertRenderMatrixReady } from './qa-paridad-reg-pub/lib/render-runner.mjs';
 import { writePhaseCReports } from './qa-paridad-reg-pub/lib/report-writer.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -24,14 +24,19 @@ const DEFAULT_NORMAL_BASELINE = path.join(
 );
 
 function parseArgs(argv) {
-  const out = { sub: null, outDir: null, allSmoke: true, strict: false, compareWith: null };
+  const out = { sub: null, outDir: null, allSmoke: true, strict: false, compareWith: null, matrix: false, integrityOnly: false };
   for (let i = 2; i < argv.length; i++) {
     if (argv[i] === '--sub' && argv[i + 1]) {
       out.sub = argv[++i];
       out.allSmoke = false;
+      out.matrix = false;
     } else if (argv[i] === '--out' && argv[i + 1]) out.outDir = argv[++i];
     else if (argv[i] === '--strict' || argv[i] === '--production-path') out.strict = true;
     else if (argv[i] === '--compare-with' && argv[i + 1]) out.compareWith = argv[++i];
+    else if (argv[i] === '--matrix' || argv[i] === '--pp02-matrix') {
+      out.matrix = true;
+      out.allSmoke = false;
+    } else if (argv[i] === '--integrity-only') out.integrityOnly = true;
   }
   return out;
 }
@@ -126,19 +131,40 @@ async function main() {
       REPO,
       'agent-tools',
       'qa-paridad-reports',
-      args.strict ? 'fase-c-strict' : runId
+      args.matrix
+        ? args.strict
+          ? 'pp02-matrix-strict'
+          : 'pp02-matrix'
+        : args.strict
+          ? 'fase-c-strict'
+          : runId
     );
   const shotsDir = path.join(outBase, 'screenshots');
   const t0 = Date.now();
 
-  const subs = args.allSmoke ? SMOKE_SUBS : [args.sub];
+  const { ctx } = makePipelineCtx();
+  const index = loadSchemaIndex(ctx);
 
-  console.log(`[Fase C${args.strict ? ' STRICT' : ''}] VM pipeline + Playwright…`);
+  if (args.integrityOnly) {
+    const integrity = assertRenderMatrixReady(ctx);
+    console.log('[PP-02] Matrix integrity PASS', integrity.coverage);
+    if (integrity.warnings?.length) {
+      console.log('[PP-02] warnings:', integrity.warnings.length);
+      integrity.warnings.slice(0, 10).forEach((w) => console.log('  ⚠', w));
+    }
+    process.exit(0);
+  }
+
+  if (args.matrix) {
+    assertRenderMatrixReady(ctx);
+  }
+
+  const subs = args.matrix ? MATRIX_SUBS : args.allSmoke ? SMOKE_SUBS : [args.sub];
+
+  console.log(`[Fase C${args.strict ? ' STRICT' : ''}${args.matrix ? ' PP-02 MATRIX' : ''}] VM pipeline + Playwright… (${subs.length} subs)`);
   if (args.strict) {
     console.log('[Fase C STRICT] Sin applyProfileToPage — solo sessionStorage + flujo real');
   }
-  const { ctx } = makePipelineCtx();
-  const index = loadSchemaIndex(ctx);
 
   const session = await createPlaywrightSession();
   console.log('[Fase C] QA_BASE:', session.baseUrl);
@@ -152,7 +178,18 @@ async function main() {
         continue;
       }
       const entry = entries[0];
-      const result = await runSubRender({ ctx, schemaEntry: entry, session, shotsDir, strict: args.strict });
+      let result;
+      try {
+        result = await runSubRender({ ctx, schemaEntry: entry, session, shotsDir, strict: args.strict });
+      } catch (e) {
+        result = {
+          subcategoriaId: entry.subcategoriaId,
+          sectorId: entry.sectorId,
+          status: 'error',
+          pipelineError: e.message,
+          summary: { pass: 0, fail: 1, blockers: 1 },
+        };
+      }
       subResults.push(result);
 
       const icon = result.status === 'pass' ? '✓' : result.status === 'skipped' ? '○' : '✗';
@@ -175,7 +212,13 @@ async function main() {
 
   const payload = {
     meta: {
-      agentVersion: args.strict ? '1.0.0-fase-c-strict' : '1.0.0-fase-c-smoke',
+      agentVersion: args.matrix
+        ? args.strict
+          ? '1.0.0-pp02-matrix-strict'
+          : '1.0.0-pp02-matrix'
+        : args.strict
+          ? '1.0.0-fase-c-strict'
+          : '1.0.0-fase-c-smoke',
       phase: 'C',
       runId,
       gitCommit: gitCommitShort(),
@@ -185,6 +228,9 @@ async function main() {
       defaultInjection: args.strict ? 'sessionStorage-strict' : 'sessionStorage',
       strictMode: args.strict,
       smokeSubs: subs,
+      matrixMode: args.matrix,
+      matrixCaseCount: args.matrix ? MATRIX_SUBS.length : undefined,
+      coveragePercent: args.matrix ? 100 : Math.round((subs.length / 443) * 1000) / 10,
     },
     summary,
     topFailures,
