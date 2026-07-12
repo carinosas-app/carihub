@@ -976,12 +976,46 @@ function isLegacyAdmin() {
         || (from == to);
     }
 
+    function adminTransitionTargetsPublicado(de, a) {
+      let from = normalizeEstado(de);
+      let to = normalizeEstado(a);
+      return to == 'publicado' && from != 'publicado';
+    }
+
+    function adminTransitionTargetsSuspendido(de, a) {
+      let from = normalizeEstado(de);
+      let to = normalizeEstado(a);
+      return to == 'suspendido' && from != 'suspendido';
+    }
+
+    // BLK-05 W1 — atomic public visibility bundle (mirror: blk05-perfiles-contract.mjs)
+    function perfilAdminPublishBundleValido() {
+      return request.resource.data.estadoPublicacion == 'publicado'
+        && request.resource.data.visible == true
+        && request.resource.data.publicado == true
+        && request.resource.data.tienePerfilPublico == true
+        && request.resource.data.suspendido == false
+        && request.resource.data.vencido == false;
+    }
+
+    function perfilAdminSuspendBundleValido() {
+      return request.resource.data.estadoPublicacion == 'suspendido'
+        && request.resource.data.visible == false
+        && request.resource.data.publicado == false
+        && request.resource.data.tienePerfilPublico == false
+        && request.resource.data.suspendido == true;
+    }
+
     function perfilAdminUpdateValido() {
-      return validEstadoTransition(resource.data.estadoPublicacion, request.resource.data.estadoPublicacion)
+      let de = resource.data.estadoPublicacion;
+      let a = request.resource.data.estadoPublicacion;
+      return validEstadoTransition(de, a)
         && ('revisadoPor' in request.resource.data)
         && request.resource.data.revisadoPor == request.auth.uid
         && ('decisionAdmin' in request.resource.data)
-        && perfilIdentityImmutable();
+        && perfilIdentityImmutable()
+        && (!adminTransitionTargetsPublicado(de, a) || perfilAdminPublishBundleValido())
+        && (!adminTransitionTargetsSuspendido(de, a) || perfilAdminSuspendBundleValido());
     }
 
     function ownerEstadoTransitionValido() {

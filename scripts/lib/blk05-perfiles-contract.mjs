@@ -68,6 +68,11 @@ export const TRANSICIONES_OWNER = Object.freeze([
   { de: 'pendiente', a: 'borrador' }
 ]);
 
+/** BLK-05 W1 — atomic public visibility bundle after admin publish. */
+export const ADMIN_PUBLISH_VISIBILITY_FIELDS = Object.freeze([
+  'estadoPublicacion', 'visible', 'publicado', 'tienePerfilPublico', 'suspendido', 'vencido'
+]);
+
 export function normalizeEstadoPublicacionLectura(estado) {
   if (estado == null) return 'borrador';
   const s = String(estado).trim();
@@ -90,6 +95,55 @@ export function forbiddenFieldsOnPerfil(obj) {
  * @param {object} perfil
  * @param {number} [nowMs] epoch ms for fechaVencimiento check
  */
+export function adminTransitionTargetsPublicado(fromEstado, toEstado) {
+  const from = normalizeEstadoPublicacionLectura(fromEstado);
+  const to = normalizeEstadoPublicacionLectura(toEstado);
+  return to === 'publicado' && from !== 'publicado';
+}
+
+export function adminTransitionTargetsSuspendido(fromEstado, toEstado) {
+  const from = normalizeEstadoPublicacionLectura(fromEstado);
+  const to = normalizeEstadoPublicacionLectura(toEstado);
+  return to === 'suspendido' && from !== 'suspendido';
+}
+
+/** Invariant: admin transition TO publicado must leave doc publicly consistent. */
+export function isAdminPublishBundle(perfil) {
+  if (!perfil || typeof perfil !== 'object') return false;
+  return perfil.estadoPublicacion === 'publicado'
+    && perfil.visible === true
+    && perfil.publicado === true
+    && perfil.tienePerfilPublico === true
+    && perfil.suspendido === false
+    && perfil.vencido === false;
+}
+
+/** Invariant: admin transition TO suspendido must hide public visibility. */
+export function isAdminSuspendBundle(perfil) {
+  if (!perfil || typeof perfil !== 'object') return false;
+  return perfil.estadoPublicacion === 'suspendido'
+    && perfil.visible === false
+    && perfil.publicado === false
+    && perfil.tienePerfilPublico === false
+    && perfil.suspendido === true;
+}
+
+/**
+ * Validates admin update result for estado transition side-effects (W1).
+ * @param {string} fromEstado
+ * @param {string} toEstado
+ * @param {object} nextDoc post-update document shape
+ */
+export function validateAdminTransitionBundle(fromEstado, toEstado, nextDoc) {
+  if (adminTransitionTargetsPublicado(fromEstado, toEstado)) {
+    return isAdminPublishBundle(nextDoc) ? [] : [{ code: 'admin_publish_bundle_incomplete' }];
+  }
+  if (adminTransitionTargetsSuspendido(fromEstado, toEstado)) {
+    return isAdminSuspendBundle(nextDoc) ? [] : [{ code: 'admin_suspend_bundle_incomplete' }];
+  }
+  return [];
+}
+
 export function isPerfilPublicoPredicate(perfil, nowMs) {
   if (!perfil || typeof perfil !== 'object') return false;
   if (hasForbiddenPerfilField(perfil)) return false;

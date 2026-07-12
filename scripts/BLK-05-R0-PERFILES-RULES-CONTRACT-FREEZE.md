@@ -122,7 +122,7 @@ Future RBAC roles: defined in `blk05-rbac-custom-claims-design.md` — enable in
 ### Admin transitions
 
 - `borrador` → `pendiente`
-- `pendiente` → `publicado` (must set `visible`, `publicado`, `tienePerfilPublico` true; `suspendido` false)
+- `pendiente` → `publicado` (must atomically set `estadoPublicacion='publicado'`, `visible`, `publicado`, `tienePerfilPublico` true; `suspendido` and `vencido` false — **enforced in rules via `perfilAdminPublishBundleValido()`**, BLK-05 W1)
 - `pendiente` → `borrador`
 - `publicado` → `suspendido`
 - `suspendido` → `publicado`
@@ -131,6 +131,28 @@ Future RBAC roles: defined in `blk05-rbac-custom-claims-design.md` — enable in
 - `eliminado` → * (terminal — deny)
 
 **Unresolved product decision (TBD-PD):** Owner `pendiente` → `borrador` after admin review started — allowed in Phase 1; confirm with PO.
+
+### W1 — Admin publish bundle (closed in emulator rules)
+
+When admin transitions **to** `publicado` (`pendiente`, `suspendido`, or `vencido` → `publicado`), rules require atomic bundle:
+
+```
+estadoPublicacion == 'publicado'
+&& visible == true && publicado == true && tienePerfilPublico == true
+&& suspendido == false && vencido == false
+```
+
+When admin transitions **to** `suspendido`, rules require:
+
+```
+estadoPublicacion == 'suspendido'
+&& visible == false && publicado == false && tienePerfilPublico == false
+&& suspendido == true
+```
+
+SSOT mirror: `scripts/lib/blk05-perfiles-contract.mjs` (`isAdminPublishBundle`, `validateAdminTransitionBundle`).
+
+**Pre-deploy note:** W1 is closed in emulator/candidate rules only until `firestore.rules` deploy is authorized.
 
 ---
 
