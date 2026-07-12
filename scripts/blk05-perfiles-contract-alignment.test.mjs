@@ -8,7 +8,11 @@ import {
   isPerfilPublicoPredicate,
   validatePerfilContract,
   esPerfilPublicoLegacy,
-  FORBIDDEN_PERFIL_FIELDS
+  FORBIDDEN_PERFIL_FIELDS,
+  isAdminPublishBundle,
+  isAdminSuspendBundle,
+  validateAdminTransitionBundle,
+  adminTransitionTargetsPublicado
 } from './lib/blk05-perfiles-contract.mjs';
 
 describe('BLK-05 contract — mapLegacyUsuarioToPerfil', () => {
@@ -81,5 +85,43 @@ describe('BLK-05 contract — validatePerfilContract', () => {
       kyc: {}
     });
     assert.ok(issues.some((i) => i.code === 'forbidden_field'));
+  });
+});
+
+describe('BLK-05 W1 — admin publish bundle', () => {
+  test('adminTransitionTargetsPublicado detects pendiente -> publicado', () => {
+    assert.equal(adminTransitionTargetsPublicado('pendiente', 'publicado'), true);
+    assert.equal(adminTransitionTargetsPublicado('publicado', 'publicado'), false);
+  });
+
+  test('isAdminPublishBundle requires atomic visibility fields', () => {
+    assert.equal(isAdminPublishBundle({
+      estadoPublicacion: 'publicado', visible: true, publicado: true,
+      tienePerfilPublico: true, suspendido: false, vencido: false
+    }), true);
+    assert.equal(isAdminPublishBundle({
+      estadoPublicacion: 'publicado', visible: true, publicado: true,
+      tienePerfilPublico: false, suspendido: false, vencido: false
+    }), false);
+  });
+
+  test('validateAdminTransitionBundle rejects incomplete publish', () => {
+    const issues = validateAdminTransitionBundle('pendiente', 'publicado', {
+      estadoPublicacion: 'publicado', visible: false, publicado: false,
+      tienePerfilPublico: false, suspendido: false, vencido: false
+    });
+    assert.ok(issues.some((i) => i.code === 'admin_publish_bundle_incomplete'));
+  });
+
+  test('validateAdminTransitionBundle accepts complete publish', () => {
+    const issues = validateAdminTransitionBundle('pendiente', 'publicado', {
+      estadoPublicacion: 'publicado', visible: true, publicado: true,
+      tienePerfilPublico: true, suspendido: false, vencido: false
+    });
+    assert.equal(issues.length, 0);
+    assert.equal(isAdminSuspendBundle({
+      estadoPublicacion: 'suspendido', visible: false, publicado: false,
+      tienePerfilPublico: false, suspendido: true
+    }), true);
   });
 });

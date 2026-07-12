@@ -214,6 +214,26 @@ describe('6. Update admin transitions', () => {
   test('fake role no admin update', async () => {
     await assertFails(updateDoc(doc(db(ctx('fake_admin')), 'perfiles/perfil_pendiente'), { estadoPublicacion: 'publicado', ...meta }));
   });
+  test('W1 niega pendiente -> publicado sin bundle visible', async () => {
+    await assertFails(updateDoc(doc(db(ctx('admin')), 'perfiles/perfil_pendiente'), {
+      estadoPublicacion: 'publicado', ...meta
+    }));
+  });
+  test('W1 niega pendiente -> publicado con bundle parcial', async () => {
+    await assertFails(updateDoc(doc(db(ctx('admin')), 'perfiles/perfil_pendiente'), {
+      estadoPublicacion: 'publicado', visible: true, publicado: true, tienePerfilPublico: false, ...meta
+    }));
+  });
+  test('W1 niega suspendido -> publicado sin bundle', async () => {
+    await assertFails(updateDoc(doc(db(ctx('admin')), 'perfiles/perfil_suspendido'), {
+      estadoPublicacion: 'publicado', ...meta
+    }));
+  });
+  test('W1 niega publicado -> suspendido sin bundle', async () => {
+    await assertFails(updateDoc(doc(db(ctx('admin')), 'perfiles/perfil_publico_canon'), {
+      estadoPublicacion: 'suspendido', ...meta
+    }));
+  });
 });
 
 describe('7. Delete y bypass', () => {
