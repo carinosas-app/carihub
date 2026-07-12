@@ -17,7 +17,7 @@ Documento de referencia del estado mergeado de **CariHub Architecture MCP**.
 | 3B.1 — `parity.*` | #118 | `d383e4e` | 25 | CERRADA |
 | 3B.2 — `data.*` | #119 | `a5fb451` | 29 | CERRADA |
 | 3B.3 — `arch.*` | #121 | `28888e6` | **32** | **CERRADA** |
-| 3.0 — Engine Wiring | — | (pendiente) | **39** | En commit |
+| 3.0 — Engine Wiring | #138 | `9f27482` | **39** | **CERRADA** |
 | 3C — `perf.*` | — | — | — | No iniciada |
 | 3D — `seo.*` + `ads.*` | — | — | — | No iniciada |
 | 3E — CI GitHub Actions | — | — | — | No iniciada |
@@ -188,9 +188,9 @@ de37fd6  feat(camcp): Fase 1 filesystem + git
 ## Verificación rápida
 
 ```bash
-git rev-parse HEAD origin/main   # deben coincidir en main limpio @ 28888e6
+git rev-parse HEAD   # branch limpia @ 9f27482 (Phase 3.0)
 cd camcp && npm run build
 npm run smoke && npm run smoke:extended && npm run smoke:qa
 npm run smoke:intel && npm run smoke:parity && npm run smoke:data && npm run smoke:arch
-# main @ 28888e6: tools=32 · 0 write-capable
+# Phase 3.0 @ 9f27482: tools=39 · 0 write-capable
 ```
