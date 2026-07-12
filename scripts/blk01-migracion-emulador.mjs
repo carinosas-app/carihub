@@ -36,8 +36,15 @@
 import { initializeApp, getApps } from 'firebase-admin/app';
 import { getFirestore, Timestamp, FieldValue } from 'firebase-admin/firestore';
 import { writeFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { dirname, join } from 'node:path';
+import { dirname } from 'node:path';
+import {
+  mapLegacyUsuarioToPerfil,
+  mapLegacyEstadoPublicacion,
+  esPerfilPublicoLegacy as esPerfilPublicoLegacyContract,
+  validatePerfilContract
+} from './lib/blk05-perfiles-contract.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPORT_PATH = join(__dirname, '_blk01-migracion-emulador-report.json');
@@ -134,49 +141,27 @@ function tieneDatosDePerfil(data) {
 }
 
 function esPerfilPublicoLegacy(data, ahora) {
-  const venc = data.fechaVencimiento;
-  const vigente = venc == null || !(venc instanceof Timestamp) || venc.toMillis() > ahora.toMillis();
-  return data.aprobado === true && data.activo === true && data.vencido !== true && vigente;
+  return esPerfilPublicoLegacyContract(data, ahora.toMillis());
 }
 
 function mapearEstadoPublicacion(data) {
-  if (data.vencido === true) return 'vencido';
-  if (data.aprobado === true && data.activo === true) return 'publicado';
-  if (data.estadoRevision === 'actualizacion_pendiente') return 'actualizacion_pendiente';
-  if (data.estadoRevision === 'registro_pendiente') return 'borrador';
-  return data.estadoRevision ?? 'borrador';
+  return mapLegacyEstadoPublicacion(data);
 }
 
 // ── Construcción del perfil objetivo (sin escribir) ────────────────────────
 function construirPerfil(uid, data, ahora, camposOmitidos) {
-  const estadoPublicacion = mapearEstadoPublicacion(data);
-  const tienePerfilPublico = esPerfilPublicoLegacy(data, ahora);
+  const perfilBase = mapLegacyUsuarioToPerfil(uid, data, { nowMs: ahora.toMillis() });
   const nombre = data.nombre ?? null;
   const slug = generarSlug(nombre, uid);
 
-  // Reporta campos sensibles presentes en el origen (no se copian al perfil).
   for (const s of CAMPOS_SENSIBLES) {
     if (data[s] !== undefined && data[s] !== null) camposOmitidos.add(s);
   }
 
-  return {
-    perfilId: uid,
-    usuarioId: uid,
-    ownerUid: uid,
+  const perfil = {
+    ...perfilBase,
     alias: nombre,
     slug,
-    tipoPerfil: data.tipoPerfil ?? null,
-    arquetipo: data.arquetipo ?? null,
-    sectorId: data.sectorId ?? null,
-    subcategoriaId: data.subcategoriaId ?? null,
-    formularioId: data.formularioId ?? null,
-    geo: data.geo ?? null,
-    descripcion: data.descripcion ?? null,
-    fotos: data.fotos ?? null,
-    estadoPublicacion,
-    estadoPago: data.estadoPago ?? null,
-    fechaVencimiento: data.fechaVencimiento ?? null,
-    tienePerfilPublico,
     schemaVersion: data.schemaVersion ?? SCHEMA_VERSION,
     createdAt: data.createdAt ?? null,
     updatedAt: data.updatedAt ?? null,
@@ -188,6 +173,15 @@ function construirPerfil(uid, data, ahora, camposOmitidos) {
       modo: MODO,
     },
   };
+
+  const contractIssues = validatePerfilContract(perfil);
+  if (contractIssues.length) {
+    for (const issue of contractIssues) {
+      if (issue.code === 'forbidden_field') camposOmitidos.add('contract:' + issue.fields.join(','));
+    }
+  }
+
+  return perfil;
 }
 
 function hubPatchConPerfil(uid, ahora) {

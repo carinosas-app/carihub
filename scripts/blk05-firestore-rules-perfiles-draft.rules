@@ -1,485 +1,239 @@
-// ============================================================================
-// SECCION 18 — ENCABEZADO DE SEGURIDAD
-// ============================================================================
-//
-//   ####  BORRADOR — NO DEPLOY — NO PRODUCCION  ####
-//
-//   Archivo: scripts/blk05-firestore-rules-perfiles-draft.rules
-//   Parte de: GAP-RULES-FIRESTORE-ALIGNMENT v1.0.0 (fase 2) / BLK-05
-//   Estado:  BORRADOR DE REFERENCIA — NO EJECUTABLE
-//
-//   ADVERTENCIAS OBLIGATORIAS:
-//     - BORRADOR: diseno conceptual, no es la regla productiva.
-//     - NO DEPLOY: no desplegar a Firebase.
-//     - NO PRODUCCION: no usar contra datos reales.
-//     - NO PEGAR DIRECTO EN firestore.rules: el archivo real sigue siendo legacy
-//       (monolito usuarios/{uid}); este borrador asume el modelo desacoplado.
-//     - REQUIERE REVISION: arquitectura + seguridad antes de cualquier uso.
-//     - REQUIERE EMULADOR: validar con suite de pruebas en emulador primero.
-//     - REQUIERE BLK-01: la coleccion perfiles/{perfilId} y el campo ownerUid
-//       NO existen hasta ejecutar la migracion BLK-01. Activar antes = romper.
-//
-//   ALINEACION (lectura, sin modificar):
-//     - GAP-RULES-FIRESTORE-ALIGNMENT-v1.0.0.json (RBAC, privacidad, ownership)
-//     - AUDITORIA-MAESTRA-COMPLETA-CARIHUB-v2.1
-//     - PLAN-CONSTRUCCION-BLK-01-MIGRACION-PERFILID v1.0.0 (bridge perfilId=uid)
-//     - blk01-inventario.mjs / blk01-dryrun-migracion.mjs (mapeo de estados)
-//     - MATRIZ-RUTAS-NAV-CANONICA v1.0.0
-//     - ACTA-CONGELAMIENTO-REGISTRO-CUENTA v1.0.0
-//     - ACTA-CONGELAMIENTO-PAGOS-CONTRATOS v1.0.0
-//     - ACTA-CONGELAMIENTO-PANEL-DASHBOARD v1.1.0 / SPEC-DASHBOARDS-OPERATIVOS
-//
-//   PRINCIPIO RECTOR: default-deny; owner escribe lo suyo bajo gates;
-//   admin/moderador concilian con trazabilidad; datos sensibles/financieros
-//   nunca publicos; las rules son la ultima frontera de ValidationEngine.
-// ============================================================================
-
+// BLK-05-R1 — perfiles/{perfilId} rules (EMULATOR / DRAFT — NO PRODUCTION DEPLOY)
+// Contract: scripts/BLK-05-R0-PERFILES-RULES-CONTRACT-FREEZE.md
 rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // ========================================================================
-    // SECCION 1 — HELPERS DE SEGURIDAD (conceptuales)
-    // ========================================================================
-    // NOTA BLK-05: isAdmin() legacy en firestore.rules real usa email unico
-    // (carinosas.anuncios@gmail.com). Este borrador asume RBAC via custom claims
-    // (request.auth.token.role / .roles[]). Eso DEPENDE de BLK-05 (asignacion de
-    // claims server-side) y NO funciona hasta habilitarlos.
+    // ── Phase 1 helpers ────────────────────────────────────────────────
 
-    function isSignedIn() {
+    function isAuthenticated() {
       return request.auth != null;
     }
 
     function isNonAnonymous() {
-      return isSignedIn()
+      return isAuthenticated()
         && request.auth.token.firebase.sign_in_provider != 'anonymous';
     }
 
-    // Rol unico declarado en custom claim (token.role) o lista (token.roles[]).
-    function hasRole(role) {
-      return isSignedIn() && (
-        (('role' in request.auth.token) && request.auth.token.role == role)
-        || (('roles' in request.auth.token) && (role in request.auth.token.roles))
+    function isLegacyAdmin() {
+      return isAuthenticated()
+        && request.auth.token.email == 'carinosas.anuncios@gmail.com';
+    }
+
+    function hasAdminClaim() {
+      return isAuthenticated() && (
+        (('role' in request.auth.token) && (request.auth.token.role == 'admin' || request.auth.token.role == 'super_admin'))
+        || (('roles' in request.auth.token) && request.auth.token.roles.hasAny(['admin', 'super_admin']))
       );
     }
 
-    function hasAnyRole(roles) {
-      return isSignedIn() && (
-        (('role' in request.auth.token) && (request.auth.token.role in roles))
-        || (
-          ('roles' in request.auth.token)
-          && request.auth.token.roles.hasAny(roles)
-        )
-      );
+    function isPhase1Admin() {
+      return isLegacyAdmin() || hasAdminClaim();
     }
 
-    function isAdmin()     { return hasAnyRole(['super_admin', 'admin']); }
-    function isModerator() { return hasRole('moderador') || isAdmin(); }
-    function isSupport()   { return hasRole('soporte') || isAdmin(); }
-    function isAuditor()   { return hasRole('auditor') || isAdmin(); }
-    // agente_ia: NUNCA escritura. Lectura controlada por seccion 4.
-    function isAgenteIA()  { return hasRole('agente_ia'); }
-    // sistema: backend/Cloud Functions con claim de servicio.
-    function isSystem()    { return hasRole('sistema'); }
-
-    // Owner por uid directo.
-    function isOwner(ownerUid) {
-      return isSignedIn() && request.auth.uid == ownerUid;
+    function perfilForbiddenFieldNames() {
+      return [
+        'verificacion', 'ine', 'ineFrente', 'ineReverso', 'selfie', 'selfieVerificacion',
+        'documentos', 'documentosPrivados', 'documentosInternos', 'curp', 'rfc', 'fiscal',
+        'datosFiscales', 'cuentaBancaria', 'clabe', 'payment', 'pagos', 'contratos',
+        'renovaciones', 'vencimientos', 'adeudos', 'comprobantes', 'referenciasPago',
+        'facturacion', 'datosBancarios', 'tokens', 'secrets', 'token', 'refreshToken',
+        'apiKey', 'password', 'perfilesDetalle', 'perfilesVinculados',
+        'nombreReal', 'fechaNacimiento', 'domicilio', 'correoPrivado', 'telefonoPrivado',
+        'kyc', 'notasAdmin', 'email', 'estadoPago', 'pagado', 'primerMesGratis',
+        'auditoria', 'decisionAdmin', 'revisadoPor', 'metadatosRevision'
+      ];
     }
 
-    // Owner del perfil:
-    //  (a) uid == perfiles/{perfilId}.ownerUid (modelo objetivo), o
-    //  (b) BRIDGE BLK-01: el hub usuarios/{uid} apunta al perfil.
-    // NOTA: el get() del bridge solo es seguro DESPUES de BLK-01 (cuando el hub
-    // ya tiene perfil.perfilPrincipalId / perfilIds). Antes de la migracion esta
-    // rama no debe activarse (ver seccion 14).
-    function isProfileOwner(perfilId) {
-      return isSignedIn() && (
-        (
-          'ownerUid' in resource.data
-          && resource.data.ownerUid == request.auth.uid
-        )
-        || bridgeOwnerValido(perfilId)
-      );
+    function perfilForbiddenFieldsAbsentOnResource() {
+      return !resource.data.keys().hasAny(perfilForbiddenFieldNames());
     }
 
-    function bridgeOwnerValido(perfilId) {
-      let hubPath = /databases/$(database)/documents/usuarios/$(request.auth.uid);
-      return exists(hubPath)
+    function perfilForbiddenFieldsAbsentOnCreate() {
+      return !request.resource.data.keys().hasAny(perfilForbiddenFieldNames());
+    }
+
+    function fechaVencimientoVigente() {
+      return !('fechaVencimiento' in resource.data)
+        || resource.data.fechaVencimiento == null
+        || resource.data.fechaVencimiento > request.time;
+    }
+
+    function estadoPublicacionEsPublicoCanonico() {
+      return resource.data.estadoPublicacion == 'publicado'
+        || resource.data.estadoPublicacion == 'activo';
+    }
+
+    function isPerfilPublico() {
+      return perfilForbiddenFieldsAbsentOnResource()
+        && resource.data.suspendido != true
+        && resource.data.eliminado != true
+        && resource.data.vencido != true
+        && fechaVencimientoVigente()
+        && resource.data.visible == true
+        && resource.data.publicado == true
+        && resource.data.tienePerfilPublico == true
+        && estadoPublicacionEsPublicoCanonico();
+    }
+
+    function hubDoc(uid) {
+      return get(/databases/$(database)/documents/usuarios/$(uid)).data;
+    }
+
+    function bridgeOwnerNested(hub, perfilId) {
+      return hub != null
+        && ('perfil' in hub)
+        && hub.perfil is map
         && (
-          get(hubPath).data.perfil.perfilPrincipalId == perfilId
-          || (perfilId in get(hubPath).data.perfil.perfilIds)
+          hub.perfil.perfilPrincipalId == perfilId
+          || (('perfilIds' in hub.perfil) && hub.perfil.perfilIds is list && perfilId in hub.perfil.perfilIds)
         );
     }
 
-    // Perfil visible al publico (espeja isPublicProfile legacy, modelo nuevo).
-    function isPublicProfile() {
-      return resource.data.estadoPublicacion == 'activo'
-        && resource.data.visible == true
-        && resource.data.publicado == true
-        && resource.data.suspendido != true
-        && resource.data.eliminado != true
-        && resource.data.vencido != true;
+    function bridgeOwnerFlat(hub, perfilId) {
+      return hub != null
+        && ('perfilesDetalle' in hub)
+        && hub.perfilesDetalle is map
+        && perfilId in hub.perfilesDetalle;
     }
 
-    // Ninguna escritura puede tocar campos sensibles/financieros/admin.
-    // (Listas en secciones 10 y 11.) Devuelve true si el diff NO los afecta.
-    function isSensitiveFieldProtected() {
-      return !request.resource.data.diff(resource.data)
-        .affectedKeys().hasAny(camposProtegidosTotales());
+    function bridgeOwnerValido(perfilId) {
+      let hub = hubDoc(request.auth.uid);
+      return bridgeOwnerNested(hub, perfilId) || bridgeOwnerFlat(hub, perfilId);
     }
 
-    // Transicion de estadoPublicacion permitida (matriz seccion 8).
-    function isValidStatusTransition(de, a) {
-      return (de == 'borrador'              && a in ['pendiente', 'eliminado'])
-        || (de == 'pendiente'              && a in ['correccion_solicitada', 'aprobado', 'eliminado'])
-        || (de == 'correccion_solicitada'  && a in ['pendiente', 'eliminado'])
-        || (de == 'aprobado'               && a in ['activo', 'suspendido', 'eliminado'])
-        || (de == 'activo'                 && a in ['suspendido', 'vencido', 'eliminado'])
-        || (de == 'suspendido'             && a in ['activo', 'eliminado'])
-        || (de == 'vencido'                && a in ['activo', 'eliminado'])
-        || (de == a); // no-op permitido
+    function isDirectPerfilOwner() {
+      return isAuthenticated()
+        && ('ownerUid' in resource.data)
+        && ('usuarioId' in resource.data)
+        && resource.data.ownerUid == request.auth.uid
+        && resource.data.usuarioId == request.auth.uid;
     }
 
-    // ---- Listas de campos (ver secciones 9, 10, 11) ----
-    function camposPublicosPermitidos() {
+    function isPerfilOwner(perfilId) {
+      return isDirectPerfilOwner() || bridgeOwnerValido(perfilId);
+    }
+
+    function perfilIdentityImmutable() {
+      return request.resource.data.ownerUid == resource.data.ownerUid
+        && request.resource.data.usuarioId == resource.data.usuarioId
+        && request.resource.data.perfilId == resource.data.perfilId;
+    }
+
+    function ownerPublicFieldNames() {
       return [
         'alias', 'slug', 'categoria', 'ciudad', 'estado', 'pais',
         'descripcionPublica', 'fotoPrincipalPublica', 'fotosPublicas',
         'serviciosPublicos', 'horario', 'zona', 'modalidad',
-        'precioPublico', 'contactosPublicos',
-        // metadatos no sensibles que el owner puede tocar:
+        'precioPublico', 'contactosPublicos', 'nombre', 'descripcion', 'fotos', 'geo',
         'updatedAt'
       ];
     }
 
-    function camposPrivadosProtegidos() {
-      return [
-        'nombreReal', 'ineFrente', 'ineReverso', 'selfieVerificacion',
-        'fechaNacimiento', 'datosPersonales', 'domicilio',
-        'correoPrivado', 'telefonoPrivado', 'kyc', 'notasAdmin',
-        'documentosInternos', 'verificacion'
-      ];
+    function perfilOwnerUpdateValido() {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(ownerPublicFieldNames())
+        && request.resource.data.estadoPublicacion == resource.data.estadoPublicacion
+        && request.resource.data.visible == resource.data.visible
+        && request.resource.data.publicado == resource.data.publicado
+        && request.resource.data.tienePerfilPublico == resource.data.tienePerfilPublico
+        && request.resource.data.suspendido == resource.data.suspendido
+        && request.resource.data.eliminado == resource.data.eliminado
+        && request.resource.data.vencido == resource.data.vencido;
     }
 
-    function camposFinancierosProtegidos() {
-      return [
-        'pagos', 'contratos', 'renovaciones', 'vencimientos', 'adeudos',
-        'comprobantes', 'referenciasPago', 'facturacion',
-        'estadoPago', 'pagado', 'primerMesGratis', 'fechaVencimiento'
-      ];
-    }
-
-    function camposAdminProtegidos() {
-      return [
-        'ownerUid', 'perfilId', 'usuarioId',
-        'estadoPublicacion', 'visible', 'publicado', 'suspendido',
-        'eliminado', 'vencido', 'aprobado',
-        'estadoRevision', 'fechaPublicacion', 'revisadoPor', 'decisionAdmin',
-        'auditoria'
-      ];
-    }
-
-    function camposProtegidosTotales() {
-      return camposPrivadosProtegidos()
-        .concat(camposFinancierosProtegidos())
-        .concat(camposAdminProtegidos());
-    }
-
-    // ========================================================================
-    // COLECCION RAIZ — perfiles/{perfilId}
-    // (NO declarar en firestore.rules real hasta BLK-01 — seccion 14)
-    // ========================================================================
-    match /perfiles/{perfilId} {
-
-      // --------------------------------------------------------------------
-      // SECCION 2 — LECTURA PUBLICA
-      // SECCION 3 — LECTURA PRIVADA OWNER
-      // SECCION 4 — LECTURA ADMIN / MODERADOR / SOPORTE / AUDITOR / IA
-      // --------------------------------------------------------------------
-      // Publico: solo perfil activo/visible/publicado y no suspendido/eliminado/
-      //          vencido. Los campos sensibles NO viven aqui (ver seccion 10/12),
-      //          por lo que la lectura publica del doc no expone KYC ni finanzas.
-      // Owner:   lectura completa de su propio perfil (uid==ownerUid o bridge).
-      // Roles:   admin/moderador/soporte/auditor lectura (alcance documentado);
-      //          agente_ia lectura read-only; sistema lectura.
-      allow read: if isPublicProfile()
-        || isProfileOwner(perfilId)
-        || isAdmin()        // lectura completa
-        || isModerator()    // lectura para revision
-        || isSupport()      // lectura limitada (atencion)
-        || isAuditor()      // lectura de trazabilidad, sin edicion
-        || isAgenteIA()     // lectura controlada, sin escritura
-        || isSystem();
-
-      // --------------------------------------------------------------------
-      // SECCION 5 — CREACION DE PERFIL (owner)
-      // --------------------------------------------------------------------
-      // Solo usuario autenticado no-anonimo; ownerUid == su uid; estado inicial
-      // limitado a borrador/pendiente; prohibido sembrar campos admin, de pago,
-      // de aprobacion, de verificacion final o de auditoria.
-      allow create: if isNonAnonymous()
+    function perfilCreateValido(perfilId) {
+      return isNonAnonymous()
         && request.resource.data.ownerUid == request.auth.uid
+        && request.resource.data.usuarioId == request.auth.uid
         && request.resource.data.perfilId == perfilId
         && request.resource.data.estadoPublicacion in ['borrador', 'pendiente']
-        && request.resource.data.publicado == false
         && request.resource.data.visible == false
+        && request.resource.data.publicado == false
+        && request.resource.data.tienePerfilPublico == false
         && request.resource.data.suspendido == false
         && request.resource.data.eliminado == false
         && request.resource.data.vencido == false
-        && !( ('aprobado' in request.resource.data) && request.resource.data.aprobado == true )
-        // No sembrar campos financieros ni KYC aprobado en el create.
-        && !request.resource.data.keys().hasAny(camposFinancierosProtegidos())
-        && !request.resource.data.keys().hasAny(['kyc', 'verificacion', 'notasAdmin', 'auditoria', 'decisionAdmin', 'revisadoPor']);
+        && perfilForbiddenFieldsAbsentOnCreate();
+    }
 
-      // --------------------------------------------------------------------
-      // SECCION 6 — ACTUALIZACION POR OWNER
-      // --------------------------------------------------------------------
-      // Owner puede editar SOLO campos publicos (whitelist). No puede cambiar
-      // ownerUid/perfilId, ni estados admin, ni KYC aprobado, ni pago/contrato,
-      // ni autoaprobarse/autopublicarse. Un cambio publico sensible debe pasar a
-      // revision: estadoPublicacion -> 'pendiente' (transicion validada).
-      allow update: if isProfileOwner(perfilId)
-        && request.resource.data.ownerUid == resource.data.ownerUid
-        && request.resource.data.perfilId == resource.data.perfilId
-        && isSensitiveFieldProtected()
-        // El owner no se auto-aprueba ni auto-publica:
-        && request.resource.data.estadoPublicacion == resource.data.estadoPublicacion
-        // Solo claves dentro de la whitelist publica pueden cambiar:
-        && request.resource.data.diff(resource.data)
-             .affectedKeys().hasOnly(camposPublicosPermitidos());
+    function normalizeEstado(estado) {
+      return estado == 'activo' ? 'publicado' : estado;
+    }
 
-      // Envio a revision (owner): unico cambio de estado permitido al owner,
-      // de borrador/correccion_solicitada -> pendiente, sin tocar protegidos.
-      // (Se documenta como variante; en deploy se unificaria en una funcion.)
-      // allow update: if isProfileOwner(perfilId)
-      //   && isSensitiveFieldProtected()
-      //   && resource.data.estadoPublicacion in ['borrador', 'correccion_solicitada']
-      //   && request.resource.data.estadoPublicacion == 'pendiente'
-      //   && isValidStatusTransition(resource.data.estadoPublicacion, 'pendiente');
+    function validEstadoTransition(de, a) {
+      let from = normalizeEstado(de);
+      let to = normalizeEstado(a);
+      return (from == 'borrador' && to == 'pendiente')
+        || (from == 'pendiente' && to == 'borrador')
+        || (from == 'pendiente' && to == 'publicado')
+        || (from == 'publicado' && to == 'suspendido')
+        || (from == 'suspendido' && to == 'publicado')
+        || (from == 'vencido' && to == 'publicado')
+        || (from != 'eliminado' && to == 'eliminado')
+        || (from == to);
+    }
 
-      // --------------------------------------------------------------------
-      // SECCION 7 — ACTUALIZACION POR ADMIN / MODERADOR
-      // --------------------------------------------------------------------
-      // Admin/moderador: aprobar, rechazar, suspender, marcar correccion,
-      // activar, vencer, restaurar; registrar revision/decision. Trazabilidad
-      // obligatoria: deben escribir revisadoPor y decisionAdmin, y respetar la
-      // matriz de transiciones (seccion 8).
-      allow update: if (isAdmin() || isModerator())
-        && request.resource.data.ownerUid == resource.data.ownerUid
-        && request.resource.data.perfilId == resource.data.perfilId
-        && isValidStatusTransition(resource.data.estadoPublicacion, request.resource.data.estadoPublicacion)
+    function perfilAdminUpdateValido() {
+      return validEstadoTransition(resource.data.estadoPublicacion, request.resource.data.estadoPublicacion)
+        && ('revisadoPor' in request.resource.data)
         && request.resource.data.revisadoPor == request.auth.uid
-        && ('decisionAdmin' in request.resource.data);
-
-      // --------------------------------------------------------------------
-      // SECCION 8 — ESTADOS PERMITIDOS Y TRANSICIONES
-      // --------------------------------------------------------------------
-      // Estados: borrador, pendiente, correccion_solicitada, aprobado, activo,
-      //          suspendido, vencido, eliminado.
-      // Transiciones PERMITIDAS (ver isValidStatusTransition):
-      //   borrador            -> pendiente | eliminado
-      //   pendiente           -> correccion_solicitada | aprobado | eliminado
-      //   correccion_solicitada -> pendiente | eliminado
-      //   aprobado            -> activo | suspendido | eliminado
-      //   activo              -> suspendido | vencido | eliminado
-      //   suspendido          -> activo | eliminado
-      //   vencido             -> activo | eliminado
-      // Transiciones PROHIBIDAS (ejemplos):
-      //   borrador            -> activo (sin revision) [PROHIBIDA]
-      //   * (owner)           -> aprobado/activo        [PROHIBIDA: solo admin]
-      //   eliminado           -> *                      [PROHIBIDA: terminal]
-      // owner SOLO puede llevar a 'pendiente' (seccion 6); el resto es admin.
-
-      // --------------------------------------------------------------------
-      // DELETE: borrado fisico prohibido; 'eliminado' es soft-delete por estado.
-      // --------------------------------------------------------------------
-      allow delete: if false; // usar estadoPublicacion='eliminado' (admin)
-
-      // ====================================================================
-      // SECCION 12 — SUBCOLECCIONES FUTURAS (conceptuales)
-      // ====================================================================
-      // NOTA: pagos y contratos NO viven aqui como subcoleccion en MVP; son
-      // colecciones RAIZ vinculadas por perfilId/usuarioId (ver bloque inferior),
-      // salvo decision futura. Aqui solo datos propios del perfil.
-
-      // 12.a Verificaciones/KYC (sensible) — owner sube, admin/moderador resuelve,
-      //      auditor lee con trazabilidad; agente_ia y publico: sin acceso.
-      match /verificaciones/{docId} {
-        allow read: if isProfileOwner(perfilId) || isAdmin() || isModerator() || isAuditor();
-        allow create: if isProfileOwner(perfilId)
-          && request.resource.data.estado in ['pendiente'];      // owner solo envia
-        allow update: if isAdmin() || isModerator();              // resolucion admin
-        allow delete: if false;                                   // inmutable
-      }
-
-      // 12.b Media (fotos/documentos del perfil). Publicas si el perfil es publico;
-      //      privadas/sensibles solo owner+admin. (Binarios reales => Storage rules,
-      //      ver seccion 17: Storage rules PENDIENTES.)
-      match /media/{mediaId} {
-        allow read: if (isPublicProfile() && resource.data.publica == true)
-          || isProfileOwner(perfilId) || isAdmin() || isModerator();
-        allow create, update: if isProfileOwner(perfilId)
-          && isSensitiveFieldProtected();
-        allow delete: if isProfileOwner(perfilId) || isAdmin();
-      }
-
-      // 12.c Estadisticas (metricas del perfil). Owner lee las suyas (agregado),
-      //      admin/auditor leen; escritura solo sistema (server-side).
-      match /estadisticas/{statId} {
-        allow read: if isProfileOwner(perfilId) || isAdmin() || isAuditor();
-        allow create, update: if isSystem();
-        allow delete: if false;
-      }
-
-      // 12.d Auditoria (append-only). Solo admin/auditor leen; crea sistema/admin;
-      //      nunca update/delete (inmutabilidad).
-      match /auditoria/{logId} {
-        allow read: if isAdmin() || isAuditor();
-        allow create: if isAdmin() || isSystem();
-        allow update, delete: if false;
-      }
+        && ('decisionAdmin' in request.resource.data)
+        && perfilIdentityImmutable();
     }
 
-    // ========================================================================
-    // COLECCIONES RAIZ VINCULADAS POR perfilId/usuarioId (referencia)
-    // SECCION 11 — campos financieros: pagos/contratos viven fuera de perfiles,
-    // escritura server-side, lectura owner + admin/auditor.
-    // ========================================================================
-    // BORRADOR: espeja el patron actual de firestore.rules (pagos create/update
-    // = false), ahora con lectura del owner por su usuarioId/perfilId.
-
-    match /contratos_perfiles/{contratoId} {
-      allow read: if isSignedIn() && (
-          resource.data.usuarioId == request.auth.uid
-          || isProfileOwner(resource.data.perfilId)
-        ) || isAdmin() || isAuditor();
-      allow create, update, delete: if false; // server-side / admin (BLK-05)
+    function ownerEstadoTransitionValido() {
+      let de = resource.data.estadoPublicacion;
+      let a = request.resource.data.estadoPublicacion;
+      return (de == 'borrador' && a == 'pendiente')
+        || (de == 'pendiente' && a == 'borrador');
     }
 
-    match /contratos_banners/{contratoBannerId} {
-      allow read: if isSignedIn()
-          && resource.data.anuncianteId == request.auth.uid
-        || isAdmin() || isAuditor();
-      allow create, update, delete: if false; // server-side / admin
+    function perfilOwnerEstadoUpdateValido() {
+      return ownerEstadoTransitionValido()
+        && perfilIdentityImmutable()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['estadoPublicacion', 'updatedAt']);
+    }
+
+    // Minimal usuarios read for bridge tests (production rules unchanged in candidate merge)
+    match /usuarios/{userId} {
+      allow read: if isAuthenticated() && request.auth.uid == userId;
+      allow write: if false;
+    }
+
+    match /perfiles/{perfilId} {
+
+      allow read: if isPerfilPublico()
+        || isPerfilOwner(perfilId)
+        || isPhase1Admin();
+
+      allow create: if perfilCreateValido(perfilId);
+
+      allow update: if perfilIdentityImmutable() && (
+        (isPerfilOwner(perfilId) && (perfilOwnerUpdateValido() || perfilOwnerEstadoUpdateValido()))
+        || (isPhase1Admin() && perfilAdminUpdateValido())
+      );
+
+      allow delete: if false;
     }
 
     match /pagos/{pagoId} {
-      allow read: if (isSignedIn() && resource.data.usuarioId == request.auth.uid)
-        || isAdmin() || isAuditor();
-      allow create, update, delete: if false; // ledger server-side (PAY)
+      allow read: if isAuthenticated() && resource.data.usuarioId == request.auth.uid;
+      allow write: if false;
     }
 
-    // ========================================================================
-    // SECCION 13 — INTEGRACION CON DASHBOARD / RUTAS (MATRIZ canon)
-    // ========================================================================
-    //  /perfil/{perfilId}/{slug}      -> read perfiles if isPublicProfile()       [publico, indexable]
-    //  /cuenta/perfil (DP-01)         -> read/update owner (whitelist publica)
-    //  /registro/editar/{perfilId}    -> update owner; bloquea protegidos; ->pendiente
-    //  /cuenta/banners (DA-01)        -> read contratos_banners/banners owner
-    //  /cuenta/pagos (DP-08)          -> read pagos where usuarioId==uid
-    //  /admin/revision (ADM-02)       -> admin/moderador update (aprobar/rechazar/...)
-    //  /admin/perfiles                -> admin read/listar; update estados
-    //  /admin/pagos                   -> admin read pagos; update server-side
-    //  /resultados                    -> query perfiles publicos (BLK-04 server-side + noindex)
-    //
-    // SECCION 14 — INTEGRACION CON BLK-01 (migracion perfilId)
-    // ------------------------------------------------------------------------
-    //  - Estas reglas dependen de ownerUid y perfilId en perfiles/{perfilId}.
-    //  - Bridge temporal: usuarios/{uid}.perfil.perfilPrincipalId / perfilIds[]
-    //    (BRIDGE-MIG-01, perfilId == usuarioId para cuentas legacy).
-    //  - Compatibilidad legacy: mientras exista lectura dual, el doc legacy
-    //    usuarios/{uid} sigue gobernado por firestore.rules real (NO tocar).
-    //  - NO ACTIVAR antes de BLK-01: si perfiles/ no esta poblada, bridgeOwnerValido
-    //    fallaria o leeria hub sin punteros. Habilitar el match /perfiles/ SOLO
-    //    despues de Fase 1-3 de BLK-01 (extraccion + punteros + bridge).
-    //
-    // SECCION 15 — INTEGRACION CON BLK-05 (deploy futuro)
-    // ------------------------------------------------------------------------
-    //  - DEPLOY FUTURO: este bloque /perfiles/ se fusionaria con firestore.rules
-    //    real solo tras revision + pruebas en emulador + BLK-01 ejecutada.
-    //  - DEPENDE DE CUSTOM CLAIMS: hasRole/hasAnyRole requieren claims server-side
-    //    (super_admin/admin/moderador/soporte/auditor/agente_ia/sistema). Sin
-    //    claims, solo isOwner funcionaria; isAdmin legacy seguiria siendo email.
-    //  - DEPENDE DE STORAGE RULES: binarios (INE/selfie/fotos) se controlan en
-    //    Storage, NO aqui (seccion 17).
-    //  - DEPENDE DE EMULADOR: validar allow/deny por rol antes de cualquier deploy.
+    match /contratos_perfiles/{contratoId} {
+      allow read: if isAuthenticated() && resource.data.usuarioId == request.auth.uid;
+      allow write: if false;
+    }
 
-    // ========================================================================
-    // SECCION 16 — RIESGOS CUBIERTOS POR ESTE BORRADOR
-    // ========================================================================
-    //  - Edicion cruzada: isOwner/isProfileOwner + ownerUid inmutable en update.
-    //  - Exposicion KYC: verificacion/KYC fuera del doc publico + subcol restringida.
-    //  - Autoaprobacion: owner no cambia estadoPublicacion a aprobado/activo.
-    //  - Autopublicacion: owner solo ->pendiente; activar es admin.
-    //  - Cambio de owner: ownerUid/perfilId inmutables en update (owner y admin).
-    //  - Acceso admin indebido: RBAC por claims; agente_ia sin escritura.
-    //  - Lectura de no publicados: isPublicProfile() estricto; resto requiere rol/owner.
-    //  - Escritura financiera por usuario: campos financieros en protegidos +
-    //    pagos/contratos create/update=false (server-side).
-    //
-    // SECCION 17 — RIESGOS NO CUBIERTOS (DECLARADOS)
-    // ------------------------------------------------------------------------
-    //  - Storage Rules: PENDIENTES (binarios INE/selfie/fotos no se cubren aqui).
-    //  - Custom claims: PENDIENTES (asignacion server-side de roles).
-    //  - Migracion BLK-01: NO EJECUTADA (perfiles/ y ownerUid aun no existen).
-    //  - Indices Firestore: NO VALIDADOS (perfiles por usuarioId/estado/sector).
-    //  - Emulador: NO EJECUTADO (sin suite de pruebas allow/deny).
-    //  - Deploy: NO AUTORIZADO.
+    match /contratos_banners/{contratoBannerId} {
+      allow read: if isAuthenticated() && resource.data.anuncianteId == request.auth.uid;
+      allow write: if false;
+    }
 
-    // ========================================================================
-    // DEFAULT-DENY GLOBAL (igual que firestore.rules real)
-    // En deploy real, este catch-all ya existe; aqui se documenta para que el
-    // borrador sea autocontenido. NO duplicar al fusionar.
-    // ========================================================================
     match /{document=**} {
       allow read, write: if false;
     }
   }
 }
-
-// ============================================================================
-// SECCION 19 — REPORTE FINAL (comentario)
-// ============================================================================
-//
-//   ARCHIVO CREADO: scripts/blk05-firestore-rules-perfiles-draft.rules (nuevo)
-//
-//   SECCIONES INCLUIDAS: 1-19 (las 19 del encargo).
-//
-//   QUE REGLAS CONTIENE:
-//     - Helpers RBAC por custom claims + isOwner/isProfileOwner con bridge BLK-01.
-//     - perfiles/{perfilId}: read publico/owner/rol; create owner gated;
-//       update owner (whitelist publica) y update admin/moderador (transiciones
-//       + trazabilidad); delete prohibido (soft-delete por estado).
-//     - Matriz de estados y transiciones (isValidStatusTransition).
-//     - Whitelist de campos publicos; campos privados/financieros/admin protegidos.
-//     - Subcolecciones: verificaciones, media, estadisticas, auditoria.
-//     - Colecciones raiz vinculadas: contratos_perfiles, contratos_banners, pagos
-//       (lectura owner + admin/auditor; escritura server-side).
-//     - Default-deny global.
-//
-//   QUE NO CONTIENE:
-//     - Reglas de Storage (binarios).
-//     - Logica de asignacion de custom claims.
-//     - Reglas para usuarios/{uid} legacy (siguen en firestore.rules real).
-//     - Indices Firestore.
-//
-//   QUE DEPENDE DE BLK-01:
-//     - Existencia de perfiles/{perfilId}, campo ownerUid, y bridge en hub
-//       (usuarios/{uid}.perfil.perfilPrincipalId / perfilIds). No activar antes.
-//
-//   QUE DEPENDE DE CUSTOM CLAIMS:
-//     - hasRole/hasAnyRole y todos los roles no-owner (admin/moderador/soporte/
-//       auditor/agente_ia/sistema).
-//
-//   QUE DEPENDE DE STORAGE RULES:
-//     - Lectura/escritura de INE, selfie y fotos (subcol media referencia metadatos).
-//
-//   QUE DEPENDE DE EMULADOR:
-//     - Validacion allow/deny por rol y por transicion de estado antes de deploy.
-//
-//   QUE NO DEBE EJECUTARSE TODAVIA:
-//     - Cualquier deploy, fusion con firestore.rules real, o uso en produccion.
-//       Requiere: revision + BLK-01 ejecutada + claims + Storage rules + emulador.
-// ============================================================================
