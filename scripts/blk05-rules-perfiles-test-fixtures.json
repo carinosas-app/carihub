@@ -1,37 +1,18 @@
 {
   "$meta": {
     "archivo": "scripts/blk05-rules-perfiles-test-fixtures.json",
-    "proposito": "Fixtures de referencia para la suite de pruebas de Firestore Rules del borrador perfiles/{perfilId}",
-    "parteDe": "BLK-05 / GAP-RULES-FIRESTORE-ALIGNMENT v1.0.0 (fase 2)",
-    "estado": "BORRADOR — NO EJECUTAR — SOLO EMULADOR EN EL FUTURO",
-    "alineadoCon": [
-      "scripts/blk05-firestore-rules-perfiles-draft.rules",
-      "scripts/GAP-RULES-FIRESTORE-ALIGNMENT-v1.0.0.json",
-      "scripts/PLAN-CONSTRUCCION-BLK-01-MIGRACION-PERFILID v1.0.0",
-      "scripts/config-cuentas-usuario-schema.json",
-      "scripts/MATRIZ-RUTAS-NAV-CANONICA.json"
-    ],
-    "advertencia": "No representa datos reales. No escribir en produccion. perfilId = ownerUid en bridge BLK-01."
+    "contrato": "scripts/BLK-05-R0-PERFILES-RULES-CONTRACT-FREEZE.md",
+    "estado": "BLK-05-R1 emulator fixtures"
   },
-
-  "roles": [
-    "publico", "owner", "otro_usuario", "admin", "super_admin",
-    "moderador", "soporte", "auditor", "agente_ia", "sistema"
-  ],
-
   "claims": {
-    "publico": null,
     "owner": { "uid": "uid_owner_1" },
     "otro_usuario": { "uid": "uid_otro_2" },
     "admin": { "uid": "uid_admin", "role": "admin" },
     "super_admin": { "uid": "uid_superadmin", "role": "super_admin" },
+    "legacy_admin": { "uid": "uid_legacy_admin", "email": "carinosas.anuncios@gmail.com" },
     "moderador": { "uid": "uid_mod", "role": "moderador" },
-    "soporte": { "uid": "uid_sop", "role": "soporte" },
-    "auditor": { "uid": "uid_aud", "role": "auditor" },
-    "agente_ia": { "uid": "uid_ia", "role": "agente_ia" },
-    "sistema": { "uid": "uid_sys", "role": "sistema" }
+    "fake_admin": { "uid": "uid_fake", "role": "moderador" }
   },
-
   "usuarios": {
     "uid_owner_1": {
       "usuarioId": "uid_owner_1",
@@ -43,10 +24,20 @@
       "email": "bridge@example.test",
       "perfil": { "perfilPrincipalId": "perfil_bridge_ok", "perfilIds": ["perfil_bridge_ok"], "tienePerfilPublico": true }
     },
+    "uid_owner_bridge_flat": {
+      "usuarioId": "uid_owner_bridge_flat",
+      "email": "bridgeflat@example.test",
+      "perfilActivoId": "perfil_bridge_flat",
+      "perfilesDetalle": {
+        "perfil_bridge_flat": { "perfilId": "perfil_bridge_flat", "nombre": "Flat Bridge" }
+      },
+      "perfilesVinculados": [{ "perfilId": "perfil_bridge_flat" }]
+    },
     "uid_owner_bridge_bad": {
       "usuarioId": "uid_owner_bridge_bad",
       "email": "bridgebad@example.test",
-      "perfil": { "perfilPrincipalId": "otro_perfil_distinto", "perfilIds": ["otro_perfil_distinto"], "tienePerfilPublico": true }
+      "perfil": { "perfilPrincipalId": "otro_perfil_distinto", "perfilIds": ["otro_perfil_distinto"], "tienePerfilPublico": true },
+      "perfilesVinculados": [{ "perfilId": "perfil_forged_vinculados" }]
     },
     "uid_otro_2": {
       "usuarioId": "uid_otro_2",
@@ -54,228 +45,93 @@
       "perfil": { "perfilPrincipalId": null, "perfilIds": [], "tienePerfilPublico": false }
     }
   },
-
   "perfiles": {
     "perfil_borrador": {
-      "perfilId": "perfil_borrador", "ownerUid": "uid_owner_1",
-      "estadoPublicacion": "borrador", "visible": false, "publicado": false,
+      "perfilId": "perfil_borrador", "ownerUid": "uid_owner_1", "usuarioId": "uid_owner_1",
+      "estadoPublicacion": "borrador", "visible": false, "publicado": false, "tienePerfilPublico": false,
       "suspendido": false, "eliminado": false, "vencido": false,
-      "alias": "Alias Borrador", "slug": "alias-borrador", "categoria": "independiente"
+      "alias": "Alias Borrador", "slug": "alias-borrador"
     },
     "perfil_pendiente": {
-      "perfilId": "perfil_pendiente", "ownerUid": "uid_owner_1",
-      "estadoPublicacion": "pendiente", "visible": false, "publicado": false,
-      "suspendido": false, "eliminado": false, "vencido": false,
-      "alias": "Pendiente", "slug": "pendiente"
-    },
-    "perfil_correccion": {
-      "perfilId": "perfil_correccion", "ownerUid": "uid_owner_1",
-      "estadoPublicacion": "correccion_solicitada", "visible": false, "publicado": false,
+      "perfilId": "perfil_pendiente", "ownerUid": "uid_owner_1", "usuarioId": "uid_owner_1",
+      "estadoPublicacion": "pendiente", "visible": false, "publicado": false, "tienePerfilPublico": false,
       "suspendido": false, "eliminado": false, "vencido": false
     },
-    "perfil_aprobado_no_publicado": {
-      "perfilId": "perfil_aprobado_no_publicado", "ownerUid": "uid_owner_1",
-      "estadoPublicacion": "aprobado", "visible": false, "publicado": false,
-      "suspendido": false, "eliminado": false, "vencido": false
-    },
-    "perfil_activo_publico": {
-      "perfilId": "perfil_activo_publico", "ownerUid": "uid_owner_1",
-      "estadoPublicacion": "activo", "visible": true, "publicado": true,
+    "perfil_publico_canon": {
+      "perfilId": "perfil_publico_canon", "ownerUid": "uid_owner_1", "usuarioId": "uid_owner_1",
+      "estadoPublicacion": "publicado", "visible": true, "publicado": true, "tienePerfilPublico": true,
       "suspendido": false, "eliminado": false, "vencido": false,
-      "alias": "Activo Publico", "slug": "activo-publico", "categoria": "independiente",
-      "ciudad": "Cancun", "estado": "Quintana Roo", "pais": "MX",
-      "descripcionPublica": "Perfil de ejemplo publico", "precioPublico": 500
+      "alias": "Publico Canon", "descripcionPublica": "Perfil publico canonico"
+    },
+    "perfil_publico_compat_activo": {
+      "perfilId": "perfil_publico_compat_activo", "ownerUid": "uid_owner_1", "usuarioId": "uid_owner_1",
+      "estadoPublicacion": "activo", "visible": true, "publicado": true, "tienePerfilPublico": true,
+      "suspendido": false, "eliminado": false, "vencido": false,
+      "alias": "Compat Activo Alias"
     },
     "perfil_suspendido": {
-      "perfilId": "perfil_suspendido", "ownerUid": "uid_owner_1",
-      "estadoPublicacion": "activo", "visible": true, "publicado": true,
+      "perfilId": "perfil_suspendido", "ownerUid": "uid_owner_1", "usuarioId": "uid_owner_1",
+      "estadoPublicacion": "suspendido", "visible": false, "publicado": false, "tienePerfilPublico": false,
       "suspendido": true, "eliminado": false, "vencido": false
     },
     "perfil_vencido": {
-      "perfilId": "perfil_vencido", "ownerUid": "uid_owner_1",
-      "estadoPublicacion": "activo", "visible": true, "publicado": true,
+      "perfilId": "perfil_vencido", "ownerUid": "uid_owner_1", "usuarioId": "uid_owner_1",
+      "estadoPublicacion": "vencido", "visible": false, "publicado": false, "tienePerfilPublico": false,
       "suspendido": false, "eliminado": false, "vencido": true
     },
+    "perfil_vencido_fecha": {
+      "perfilId": "perfil_vencido_fecha", "ownerUid": "uid_owner_1", "usuarioId": "uid_owner_1",
+      "estadoPublicacion": "publicado", "visible": true, "publicado": true, "tienePerfilPublico": true,
+      "suspendido": false, "eliminado": false, "vencido": false,
+      "fechaVencimiento": { "_seconds": 1, "_nanoseconds": 0 }
+    },
     "perfil_eliminado": {
-      "perfilId": "perfil_eliminado", "ownerUid": "uid_owner_1",
-      "estadoPublicacion": "eliminado", "visible": false, "publicado": false,
+      "perfilId": "perfil_eliminado", "ownerUid": "uid_owner_1", "usuarioId": "uid_owner_1",
+      "estadoPublicacion": "eliminado", "visible": false, "publicado": false, "tienePerfilPublico": false,
       "suspendido": false, "eliminado": true, "vencido": false
     },
     "perfil_con_kyc": {
-      "perfilId": "perfil_con_kyc", "ownerUid": "uid_owner_1",
-      "estadoPublicacion": "activo", "visible": true, "publicado": true,
+      "perfilId": "perfil_con_kyc", "ownerUid": "uid_owner_1", "usuarioId": "uid_owner_1",
+      "estadoPublicacion": "publicado", "visible": true, "publicado": true, "tienePerfilPublico": true,
       "suspendido": false, "eliminado": false, "vencido": false,
-      "alias": "Con KYC",
-      "kyc": { "ineFrente": "no-debe-existir-aqui" },
-      "nombreReal": "Nombre Real Privado", "notasAdmin": "no expuesto"
+      "kyc": { "ineFrente": "no-debe-existir-aqui" }
     },
     "perfil_con_financieros": {
-      "perfilId": "perfil_con_financieros", "ownerUid": "uid_owner_1",
-      "estadoPublicacion": "activo", "visible": true, "publicado": true,
+      "perfilId": "perfil_con_financieros", "ownerUid": "uid_owner_1", "usuarioId": "uid_owner_1",
+      "estadoPublicacion": "publicado", "visible": true, "publicado": true, "tienePerfilPublico": true,
       "suspendido": false, "eliminado": false, "vencido": false,
-      "pagos": [{ "monto": 500 }], "estadoPago": "confirmado", "facturacion": { "rfc": "XXXX" }
+      "pagos": [{ "monto": 500 }], "estadoPago": "confirmado"
     },
     "perfil_huerfano": {
       "perfilId": "perfil_huerfano",
-      "estadoPublicacion": "borrador", "visible": false, "publicado": false,
+      "estadoPublicacion": "borrador", "visible": false, "publicado": false, "tienePerfilPublico": false,
       "suspendido": false, "eliminado": false, "vencido": false
     },
     "perfil_bridge_ok": {
-      "perfilId": "perfil_bridge_ok", "ownerUid": "uid_owner_bridge",
-      "estadoPublicacion": "pendiente", "visible": false, "publicado": false,
+      "perfilId": "perfil_bridge_ok", "ownerUid": "uid_owner_bridge", "usuarioId": "uid_owner_bridge",
+      "estadoPublicacion": "pendiente", "visible": false, "publicado": false, "tienePerfilPublico": false,
+      "suspendido": false, "eliminado": false, "vencido": false
+    },
+    "perfil_bridge_flat": {
+      "perfilId": "perfil_bridge_flat", "ownerUid": "uid_owner_bridge_flat", "usuarioId": "uid_owner_bridge_flat",
+      "estadoPublicacion": "borrador", "visible": false, "publicado": false, "tienePerfilPublico": false,
       "suspendido": false, "eliminado": false, "vencido": false
     },
     "perfil_bridge_invalido": {
-      "perfilId": "perfil_bridge_invalido", "ownerUid": "uid_owner_bridge_bad",
-      "estadoPublicacion": "pendiente", "visible": false, "publicado": false,
+      "perfilId": "perfil_bridge_invalido", "ownerUid": "uid_owner_1", "usuarioId": "uid_owner_1",
+      "estadoPublicacion": "pendiente", "visible": false, "publicado": false, "tienePerfilPublico": false,
+      "suspendido": false, "eliminado": false, "vencido": false
+    },
+    "perfil_forged_vinculados": {
+      "perfilId": "perfil_forged_vinculados", "ownerUid": "uid_owner_1", "usuarioId": "uid_owner_1",
+      "estadoPublicacion": "borrador", "visible": false, "publicado": false, "tienePerfilPublico": false,
       "suspendido": false, "eliminado": false, "vencido": false
     }
   },
-
-  "estados": [
-    "borrador", "pendiente", "correccion_solicitada", "aprobado",
-    "activo", "suspendido", "vencido", "eliminado"
-  ],
-
-  "transiciones": {
-    "permitidas": [
-      { "de": "borrador", "a": "pendiente", "por": "owner|admin" },
-      { "de": "pendiente", "a": "aprobado", "por": "admin|moderador" },
-      { "de": "pendiente", "a": "correccion_solicitada", "por": "admin|moderador" },
-      { "de": "correccion_solicitada", "a": "pendiente", "por": "owner|admin" },
-      { "de": "aprobado", "a": "activo", "por": "admin|moderador" },
-      { "de": "activo", "a": "suspendido", "por": "admin|moderador" },
-      { "de": "activo", "a": "vencido", "por": "admin|sistema" },
-      { "de": "suspendido", "a": "activo", "por": "admin" },
-      { "de": "vencido", "a": "activo", "por": "admin", "condicion": "pago/renovacion documentada" },
-      { "de": "*", "a": "eliminado", "por": "admin" }
-    ],
-    "prohibidas": [
-      { "de": "borrador", "a": "activo", "motivo": "sin revision" },
-      { "de": "pendiente", "a": "activo", "motivo": "sin aprobacion" },
-      { "de": "vencido", "a": "activo", "motivo": "sin pago/renovacion" },
-      { "de": "eliminado", "a": "activo", "motivo": "requiere restauracion admin" },
-      { "de": "*", "a": "*", "por": "owner", "motivo": "owner no cambia estados admin (solo ->pendiente)" }
-    ]
-  },
-
-  "camposPublicosPermitidos": [
-    "alias", "slug", "categoria", "ciudad", "estado", "pais",
-    "descripcionPublica", "fotoPrincipalPublica", "fotosPublicas",
-    "serviciosPublicos", "horario", "zona", "modalidad",
-    "precioPublico", "contactosPublicos", "updatedAt"
-  ],
-
-  "camposPrivadosProtegidos": [
-    "nombreReal", "ineFrente", "ineReverso", "selfieVerificacion",
-    "fechaNacimiento", "datosPersonales", "domicilio",
-    "correoPrivado", "telefonoPrivado", "kyc", "notasAdmin",
-    "documentosInternos", "verificacion"
-  ],
-
-  "camposFinancierosProtegidos": [
-    "pagos", "contratos", "renovaciones", "vencimientos", "adeudos",
-    "comprobantes", "referenciasPago", "facturacion", "datosBancarios",
-    "estadoPago", "pagado", "primerMesGratis", "fechaVencimiento"
-  ],
-
-  "camposAdminProtegidos": [
-    "ownerUid", "perfilId", "usuarioId", "estadoPublicacion", "visible",
-    "publicado", "suspendido", "eliminado", "vencido", "aprobado",
-    "estadoRevision", "fechaPublicacion", "revisadoPor", "decisionAdmin",
-    "auditoria", "metadatosRevision"
-  ],
-
-  "subcolecciones": {
-    "verificaciones": {
-      "ruta": "perfiles/{perfilId}/verificaciones/{docId}",
-      "ejemplo": { "estado": "pendiente", "tipo": "ine" }
-    },
-    "media": {
-      "ruta": "perfiles/{perfilId}/media/{mediaId}",
-      "ejemploPublica": { "publica": true, "url": "ref-storage-publica" },
-      "ejemploPrivada": { "publica": false, "url": "ref-storage-privada" }
-    },
-    "estadisticas": {
-      "ruta": "perfiles/{perfilId}/estadisticas/{statId}",
-      "ejemplo": { "visitas": 10, "periodo": "2026-06" }
-    },
-    "auditoria": {
-      "ruta": "perfiles/{perfilId}/auditoria/{logId}",
-      "ejemplo": { "evento": "perfil_aprobar", "por": "uid_admin", "ts": "2026-06-11T00:00:00Z" }
-    }
-  },
-
+  "camposPrivadosProtegidos": ["nombreReal", "kyc", "verificacion", "notasAdmin"],
+  "camposFinancierosProtegidos": ["pagos", "estadoPago", "facturacion", "contratos"],
   "coleccionesRelacionadas": {
-    "pagos": {
-      "ruta": "pagos/{pagoId}",
-      "ejemplo": { "pagoId": "pago_1", "usuarioId": "uid_owner_1", "contratoId": "contrato_1", "monto": 500, "estado": "confirmado" }
-    },
-    "contratos_perfiles": {
-      "ruta": "contratos_perfiles/{contratoId}",
-      "ejemplo": { "contratoId": "contrato_1", "usuarioId": "uid_owner_1", "perfilId": "perfil_activo_publico", "estado": "activo" }
-    },
-    "contratos_banners": {
-      "ruta": "contratos_banners/{contratoBannerId}",
-      "ejemplo": { "contratoBannerId": "cb_1", "anuncianteId": "uid_owner_1", "estado": "activo" }
-    }
-  },
-
-  "casosAllow": [
-    { "id": "A01", "rol": "publico", "op": "read", "doc": "perfiles/perfil_activo_publico", "razon": "isPublicProfile()" },
-    { "id": "A02", "rol": "owner", "op": "read", "doc": "perfiles/perfil_borrador", "razon": "uid==ownerUid" },
-    { "id": "A03", "rol": "owner", "op": "read", "doc": "perfiles/perfil_bridge_ok", "claim": "uid_owner_bridge", "razon": "bridge BLK-01 valido" },
-    { "id": "A04", "rol": "admin", "op": "read", "doc": "perfiles/perfil_borrador", "razon": "admin lee todo" },
-    { "id": "A05", "rol": "moderador", "op": "read", "doc": "perfiles/perfil_pendiente", "razon": "revision" },
-    { "id": "A06", "rol": "auditor", "op": "read", "doc": "perfiles/perfil_activo_publico", "razon": "trazabilidad" },
-    { "id": "A07", "rol": "owner", "op": "create", "doc": "perfiles/nuevo_perfil_owner", "data": { "ownerUid": "uid_owner_1", "perfilId": "nuevo_perfil_owner", "estadoPublicacion": "borrador", "publicado": false, "visible": false, "suspendido": false, "eliminado": false, "vencido": false }, "razon": "create owner gated" },
-    { "id": "A08", "rol": "owner", "op": "update", "doc": "perfiles/perfil_borrador", "patch": { "alias": "Nuevo Alias" }, "razon": "campo whitelist" },
-    { "id": "A09", "rol": "admin", "op": "update", "doc": "perfiles/perfil_pendiente", "patch": { "estadoPublicacion": "aprobado", "revisadoPor": "uid_admin", "decisionAdmin": "ok" }, "razon": "transicion valida + trazabilidad" },
-    { "id": "A10", "rol": "owner", "op": "create", "doc": "perfiles/perfil_activo_publico/verificaciones/v1", "data": { "estado": "pendiente" }, "razon": "owner envia verificacion" },
-    { "id": "A11", "rol": "moderador", "op": "update", "doc": "perfiles/perfil_activo_publico/verificaciones/v1", "patch": { "estado": "aprobada" }, "razon": "resolucion admin" },
-    { "id": "A12", "rol": "publico", "op": "read", "doc": "perfiles/perfil_activo_publico/media/m_pub", "razon": "media publica de perfil publico" },
-    { "id": "A13", "rol": "owner", "op": "read", "doc": "perfiles/perfil_activo_publico/estadisticas/s1", "razon": "owner lee sus metricas" },
-    { "id": "A14", "rol": "auditor", "op": "read", "doc": "perfiles/perfil_activo_publico/auditoria/l1", "razon": "auditor lee" },
-    { "id": "A15", "rol": "owner", "op": "read", "doc": "pagos/pago_1", "razon": "owner lee pago vinculado a su usuarioId" }
-  ],
-
-  "casosDeny": [
-    { "id": "D01", "rol": "publico", "op": "read", "doc": "perfiles/perfil_borrador", "razon": "no publicado" },
-    { "id": "D02", "rol": "publico", "op": "read", "doc": "perfiles/perfil_suspendido", "razon": "suspendido" },
-    { "id": "D03", "rol": "publico", "op": "read", "doc": "perfiles/perfil_vencido", "razon": "vencido" },
-    { "id": "D04", "rol": "publico", "op": "read", "doc": "perfiles/perfil_eliminado", "razon": "eliminado" },
-    { "id": "D05", "rol": "publico", "op": "read", "doc": "perfiles/perfil_aprobado_no_publicado", "razon": "aprobado pero no publicado" },
-    { "id": "D06", "rol": "otro_usuario", "op": "read", "doc": "perfiles/perfil_borrador", "razon": "no owner, perfil privado" },
-    { "id": "D07", "rol": "publico", "op": "read", "doc": "perfiles/perfil_huerfano", "razon": "sin ownerUid y no publico" },
-    { "id": "D08", "rol": "owner", "op": "read", "doc": "perfiles/perfil_bridge_invalido", "claim": "uid_owner_bridge_bad", "razon": "bridge invalido (puntero a otro perfil)" },
-    { "id": "D09", "rol": "owner", "op": "create", "doc": "perfiles/p_activo_directo", "data": { "ownerUid": "uid_owner_1", "perfilId": "p_activo_directo", "estadoPublicacion": "activo", "publicado": true }, "razon": "no crear activo/publicado directo" },
-    { "id": "D10", "rol": "otro_usuario", "op": "create", "doc": "perfiles/p_ajeno", "data": { "ownerUid": "uid_owner_1", "perfilId": "p_ajeno", "estadoPublicacion": "borrador" }, "razon": "ownerUid ajeno" },
-    { "id": "D11", "rol": "owner", "op": "create", "doc": "perfiles/p_con_pago", "data": { "ownerUid": "uid_owner_1", "perfilId": "p_con_pago", "estadoPublicacion": "borrador", "publicado": false, "visible": false, "suspendido": false, "eliminado": false, "vencido": false, "estadoPago": "confirmado" }, "razon": "siembra campo financiero" },
-    { "id": "D12", "rol": "owner", "op": "update", "doc": "perfiles/perfil_borrador", "patch": { "ownerUid": "uid_otro_2" }, "razon": "cambiar ownerUid" },
-    { "id": "D13", "rol": "owner", "op": "update", "doc": "perfiles/perfil_pendiente", "patch": { "estadoPublicacion": "aprobado" }, "razon": "autoaprobacion" },
-    { "id": "D14", "rol": "owner", "op": "update", "doc": "perfiles/perfil_activo_publico", "patch": { "kyc": { "x": 1 } }, "razon": "owner toca KYC" },
-    { "id": "D15", "rol": "owner", "op": "update", "doc": "perfiles/perfil_activo_publico", "patch": { "pagos": [] }, "razon": "owner toca financiero" },
-    { "id": "D16", "rol": "owner", "op": "update", "doc": "perfiles/perfil_activo_publico", "patch": { "notasAdmin": "x" }, "razon": "owner toca notas admin" },
-    { "id": "D17", "rol": "moderador", "op": "update", "doc": "perfiles/perfil_borrador", "patch": { "estadoPublicacion": "activo", "revisadoPor": "uid_mod", "decisionAdmin": "x" }, "razon": "transicion invalida borrador->activo" },
-    { "id": "D18", "rol": "owner", "op": "delete", "doc": "perfiles/perfil_borrador", "razon": "delete fisico prohibido" },
-    { "id": "D19", "rol": "admin", "op": "delete", "doc": "perfiles/perfil_borrador", "razon": "delete fisico prohibido (soft-delete por estado)" },
-    { "id": "D20", "rol": "owner", "op": "update", "doc": "perfiles/perfil_activo_publico/verificaciones/v1", "patch": { "estado": "aprobada" }, "razon": "owner no aprueba su verificacion" },
-    { "id": "D21", "rol": "publico", "op": "read", "doc": "perfiles/perfil_activo_publico/verificaciones/v1", "razon": "publico no lee verificaciones" },
-    { "id": "D22", "rol": "publico", "op": "read", "doc": "perfiles/perfil_activo_publico/media/m_priv", "razon": "media privada" },
-    { "id": "D23", "rol": "owner", "op": "update", "doc": "perfiles/perfil_activo_publico/estadisticas/s1", "patch": { "visitas": 9999 }, "razon": "owner no manipula metricas" },
-    { "id": "D24", "rol": "owner", "op": "create", "doc": "perfiles/perfil_activo_publico/auditoria/l2", "data": { "evento": "x" }, "razon": "owner no escribe auditoria" },
-    { "id": "D25", "rol": "auditor", "op": "update", "doc": "perfiles/perfil_activo_publico/auditoria/l1", "patch": { "evento": "y" }, "razon": "auditoria inmutable" },
-    { "id": "D26", "rol": "otro_usuario", "op": "read", "doc": "pagos/pago_1", "razon": "usuario no vinculado" },
-    { "id": "D27", "rol": "owner", "op": "update", "doc": "pagos/pago_1", "patch": { "estado": "reembolsado" }, "razon": "owner no edita pagos" },
-    { "id": "D28", "rol": "owner", "op": "create", "doc": "contratos_perfiles/c_nuevo", "data": { "usuarioId": "uid_owner_1", "perfilId": "perfil_activo_publico" }, "razon": "owner no crea contratos" },
-    { "id": "D29", "rol": "agente_ia", "op": "update", "doc": "perfiles/perfil_activo_publico", "patch": { "alias": "ia" }, "razon": "agente IA sin escritura" }
-  ],
-
-  "notasDeUso": {
-    "ejecucion": "NO EJECUTAR en esta fase. Requiere emulador + @firebase/rules-unit-testing + FIRESTORE_EMULATOR_HOST.",
-    "seeding": "Los docs con ownerUid/estado se siembran con testEnv.withSecurityRulesDisabled antes de cada prueba.",
-    "bridge": "usuarios/{uid}.perfil.perfilPrincipalId / perfilIds[] habilitan isProfileOwner via bridge BLK-01.",
-    "claims": "admin/moderador/soporte/auditor/agente_ia/sistema dependen de custom claims (BLK-05).",
-    "pendiente": "Storage Rules (binarios INE/selfie/fotos) y la migracion BLK-01 no estan cubiertas aqui."
+    "pagos": { "ejemplo": { "pagoId": "pago_1", "usuarioId": "uid_owner_1", "monto": 500, "estado": "confirmado" } },
+    "contratos_perfiles": { "ejemplo": { "contratoId": "contrato_1", "usuarioId": "uid_owner_1", "perfilId": "perfil_publico_canon", "estado": "activo" } }
   }
 }
