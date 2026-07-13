@@ -1,9 +1,23 @@
 import { slugSubId } from './slug.mjs';
+import { getMatrixCases } from './render-matrix.mjs';
 
 const TOGGLE_PUBLIC_RE = /^mostrar.+Publico$/i;
 
+/** PP-02 baseline tagline needle for every matrix sub. */
+function buildMatrixBaselineOverrides() {
+  const out = {};
+  for (const c of getMatrixCases()) {
+    const slug = slugSubId(c.subcategoriaId);
+    out[slug] = {
+      tagline: `PP02 ${c.matrixId} ${c.subcategoriaId}`,
+      descripcionCorta: `PP02 ${c.matrixId} ${c.subcategoriaId}`,
+    };
+  }
+  return out;
+}
+
 /** Hand-tuned mocks for smoke / gold subs (aligned with qa-mp-submit-hydrate). */
-const SUB_OVERRIDES = {
+const HAND_TUNED_OVERRIDES = {
   'medicos-generales': {
     nombreProfesional: 'Dra. QA B',
     tagline: 'Medicina general',
@@ -63,7 +77,154 @@ const SUB_OVERRIDES = {
     tipoCocinaPrincipal: 'italiana',
     horarioCocina: '12:00-23:00',
   },
+  escort: {
+    serviciosIncluidos: ['Compañía social'],
+    modalidades: ['recibe'],
+    horarioDetalle: 'Con cita',
+    sobreMi: 'PP02 M06 escort QA',
+  },
+  'escort-gay': {
+    serviciosIncluidos: ['Compañía social'],
+    modalidades: ['recibe'],
+    horarioDetalle: 'Con cita',
+    sobreMi: 'PP02 M07 escort gay QA',
+  },
+  edecan: {
+    serviciosProfesionales: ['Eventos corporativos'],
+    restriccionesProfesionales: ['Sin contacto físico'],
+    sobreMi: 'PP02 M10 edecan QA',
+  },
+  stripper: {
+    serviciosIncluidos: ['Show privado'],
+    venueFijo: 'Monterrey Centro',
+    sobreMi: 'PP02 M11 stripper QA',
+  },
+  contenido: {
+    serviciosIncluidos: ['Suscripción mensual'],
+    sobreMi: 'PP02 M12 contenido QA',
+  },
+  swinger: {
+    serviciosLifestyle: ['Fiestas privadas'],
+    sobreMi: 'PP02 M13 swinger QA',
+  },
+  'club-sw': {
+    nombreComercial: 'Club SW QA',
+    venueFijo: 'Monterrey',
+    serviciosIncluidos: ['Acceso parejas'],
+    telefonoContacto: '8119999999',
+    licenciaOperacion: 'LIC-PRIV-QA',
+    documentos: 'DOC-PRIV-QA',
+  },
+  'antro-restaurant-bar-lgbt': {
+    nombreComercial: 'Antro LGBT QA',
+    venueFijo: 'Monterrey',
+    serviciosIncluidos: ['Pista'],
+    telefonoContacto: '8119999999',
+    licenciaOperacion: 'LIC-PRIV-QA',
+    documentos: 'DOC-PRIV-QA',
+  },
+  'cabinas-glory-holes': {
+    nombreComercial: 'Cabinas QA',
+    venueFijo: 'Monterrey',
+    serviciosIncluidos: ['Cabinas privadas'],
+    telefonoContacto: '8119999999',
+    licenciaOperacion: 'LIC-PRIV-QA',
+    documentos: 'DOC-PRIV-QA',
+  },
+  'sex-shop': {
+    nombreComercial: 'Sex Shop QA',
+    licenciaOperacion: 'LIC-PRIV-QA',
+  },
+  spa: {
+    nombreComercial: 'Spa QA',
+    serviciosIncluidos: ['Masaje relajante'],
+    telefonoContacto: '8119999999',
+    licenciaOperacion: 'LIC-PRIV-QA',
+    documentos: 'DOC-PRIV-QA',
+  },
+  bares: {
+    nombreComercial: 'Bar QA Test',
+    ventaAlcohol: true,
+    permisoVentaAlcohol: 'si_vigente',
+    tagline: 'Bar y coctelería QA',
+    horarioBar: '18:00-02:00',
+  },
+  abarrotes: {
+    nombreComercial: 'Abarrotes QA',
+    horarioAtencionComercial: 'Lun-Dom 8-21',
+  },
+  'chef-cocinero-domicilio': {
+    nombreProfesional: 'Chef QA Domicilio',
+    precioServicio: '1500',
+  },
+  refaccionarias: {
+    nombreComercial: 'Refaccionaria QA',
+    lineasRefacciones: ['OEM', 'Premium'],
+  },
+  'talleres-mecanicos': {
+    nombreComercial: 'Taller QA',
+  },
+  plomeros: {
+    nombreComercial: 'Plomero QA',
+    zonaServicio: 'Monterrey',
+  },
+  'terapias-holisticas': {
+    nombreComercial: 'Terapias QA',
+    modalidadTerapia: 'Presencial',
+  },
+  'editor-de-video': {
+    nombreComercial: 'Editor Video QA',
+    serviciosTecnologia: ['Edición 4K'],
+  },
+  inmobiliaria: {
+    nombreComercial: 'Inmobiliaria QA',
+    zonasOperacion: ['Monterrey'],
+  },
+  'agente-inmobiliario-independiente': {
+    nombreProfesional: 'Agente QA',
+    zonasOperacion: ['Monterrey'],
+  },
+  'dentistas-y-clinicas-dentales': {
+    nombreComercial: 'Dental QA',
+    especialidadDental: 'Odontología general',
+  },
+  'fotografia-video-eventos': {
+    nombreComercial: 'Foto Video QA',
+    serviciosEventos: ['Cobertura bodas'],
+  },
+  'banquetes-catering-eventos': {
+    nombreComercial: 'Banquetes QA',
+    capacidadEventos: '200',
+  },
+  'chofer-privado': {
+    nombreComercial: 'Chofer QA',
+    tipoVehiculo: 'Sedán ejecutivo',
+  },
+  'despachos-juridicos': {
+    nombreComercial: 'Despacho QA',
+    areasPractica: ['Mercantil'],
+  },
+  groomer: {
+    nombreComercial: 'Groomer QA',
+    serviciosGrooming: ['Baño y corte'],
+  },
+  psicopedagogo: {
+    nombreProfesional: 'Psicopedagogo QA',
+    especialidad: 'Educación especial',
+  },
+  'contador-publico': {
+    nombreProfesional: 'Contador QA',
+    especialidadProfesional: 'Contabilidad',
+    precioConsulta: '900',
+  },
+  'medico-veterinario': {
+    nombreProfesional: 'Dr. Vet QA',
+    especialidad: 'Medicina veterinaria',
+    precioConsulta: '600',
+  },
 };
+
+const SUB_OVERRIDES = { ...buildMatrixBaselineOverrides(), ...HAND_TUNED_OVERRIDES };
 
 function isTruthy(val) {
   if (val === true) return true;
