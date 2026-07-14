@@ -2,9 +2,11 @@
 
 Documentación maestra para GPT personalizado.
 
-**Generada:** 2026-07-04 · **Última actualización:** 2026-07-07 (post-merge PR #110–#113 en `main`)
+**Generada:** 2026-07-04 · **Última actualización:** 2026-07-14 (freeze Producto Fase 1 marketplace)
 
 **Regla:** solo documenta lo existente. Entradas marcadas «pendiente de confirmar» requieren verificación humana.
+
+**Producto Fase 1 (SSOT):** [PRODUCTO-FASE-1-MARKETPLACE.md](./PRODUCTO-FASE-1-MARKETPLACE.md) — Cariñosas = marketplace de perfiles; mensajería / lives / estados = Future Architecture. Acta: `scripts/ACTA-CONGELAMIENTO-PRODUCTO-FASE-1.md`.
 
 ---
 
@@ -12,6 +14,7 @@ Documentación maestra para GPT personalizado.
 
 | # | Archivo | Dominio |
 |---|---------|---------|
+| 0 | [PRODUCTO-FASE-1-MARKETPLACE.md](./PRODUCTO-FASE-1-MARKETPLACE.md) | **SSOT producto Fase 1** (marketplace vs Future Architecture) |
 | 1 | [ARQUITECTURA-GENERAL-CARIHUB.md](./ARQUITECTURA-GENERAL-CARIHUB.md) | Visión global, stack, reglas operativas |
 | 2 | [FIRESTORE-Y-DATOS.md](./FIRESTORE-Y-DATOS.md) | Colecciones, rules, flujos persistencia |
 | 3 | [HOME.md](./HOME.md) | Página entrada, sectores, slots |
@@ -47,7 +50,7 @@ Documentación maestra para GPT personalizado.
 3. **Slots huérfanos** — `home_estados`/`home_libe` en UI, no en `firestore.rules` ni `slots-catalog.js`.
 4. **SEO sin runtime** — no robots, sitemap, canonical, JSON-LD.
 5. **ECO-030 launch blocker** — webhook Stripe / activación automática pendiente.
-6. **Dashboard mensajes** — diseño congelado; MOCK coexistiendo con runtime real (TICKET-050).
+6. **Dashboard mensajes / lives / estados** — **Future Architecture** respecto a entrega Fase 1 (freeze 2026-07-14); diseño/código pueden existir; no son alcance de launch del marketplace.
 7. **Pipeline registro** — anti-contaminación entre arquetipos es contrato crítico.
 8. **LGBT vs adult-pro** — temas visuales separados; no mezclar.
 9. **QA-REG-PUB integrado** — agente paridad Registro↔Perfil (Fases A+B+C) en `scripts/qa-paridad-reg-pub-*` (PR #113, merge `b09030d`); reportes en `agent-tools/qa-paridad-reports/` (gitignored).

@@ -1,12 +1,13 @@
 # Admin y dashboards — CariHub
 
-**Última revisión documental:** 2026-07-07
+**Última revisión documental:** 2026-07-14  
+**Producto Fase 1:** [PRODUCTO-FASE-1-MARKETPLACE.md](./PRODUCTO-FASE-1-MARKETPLACE.md) — ops de ficha/banners = Fase 1; mensajes/estados/lives = Future Architecture.
 
 ---
 
 ## Propósito
 
-**Dashboard rentero:** centro de operación del anunciante (perfiles, banners, mensajes, solicitudes, publicaciones).  
+**Dashboard rentero:** centro de operación del anunciante (perfiles, banners, info pública, contactos públicos, favoritos, estadísticas básicas; módulos sociales = Future Architecture).  
 **Admin:** revisión de usuarios, solicitudes publicidad, moderación operativa.
 
 ---
