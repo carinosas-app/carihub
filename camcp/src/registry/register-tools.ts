@@ -23,8 +23,20 @@ function wrapToolResult(
   run: () => unknown
 ): { content: Array<{ type: 'text'; text: string }> } {
   const gitCommit = getMetaGitCommit(ctx.repoRoot, ctx.config);
+  const extras = {
+    namespace: tool.namespace,
+    camcpVersion: ctx.config.version,
+  };
   try {
-    const result = makeToolResult(tool.name, tool.capability, ctx.repoRoot, gitCommit, started, run());
+    const result = makeToolResult(
+      tool.name,
+      tool.capability,
+      ctx.repoRoot,
+      gitCommit,
+      started,
+      run(),
+      { ...extras, exitCode: 0 }
+    );
     return toolText(result);
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
@@ -41,7 +53,8 @@ function wrapToolResult(
       gitCommit,
       started,
       code,
-      message
+      message,
+      { ...extras, exitCode: 1 }
     );
     return toolText(result);
   }
