@@ -208,6 +208,18 @@ export interface CamcpReportDocument {
   };
 }
 
+/** Standardized CAMCP execution fields (consolidation kernel). */
+export interface ReportExecutionCore {
+  camcpVersion: string;
+  commit: string | null;
+  tool: string;
+  namespace: string;
+  capability: 'read-only' | 'report-only';
+  durationMs: number;
+  timestamp: string;
+  exitCode: number;
+}
+
 export interface ReportManifestDocument {
   schemaVersion: typeof REPORT_SCHEMA_VERSION;
   runId: string;
@@ -229,6 +241,8 @@ export interface ReportManifestDocument {
     ssotSnapshot: string;
   };
   delegatedRuns: Array<{ toolId: string; reportDir: string }>;
+  /** Standardized execution manifest (additive; camcp-execution-manifest@1.0.0). */
+  execution?: ReportExecutionCore;
 }
 
 export interface ReportSummaryDocument {

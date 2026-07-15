@@ -27,10 +27,14 @@ export interface CamcpToolResult<T = unknown> {
   data?: T;
   meta: {
     tool: string;
+    namespace?: string;
+    capability?: ToolCapability;
+    camcpVersion?: string;
     durationMs: number;
     gitCommit: string | null;
     timestamp: string;
     repoRoot: string;
+    exitCode?: number;
   };
   error?: { code: string; message: string };
 }

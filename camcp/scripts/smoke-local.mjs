@@ -12,6 +12,7 @@ import { filesystemList, filesystemRead, filesystemSearch, filesystemTree } from
 import { gitStatus, gitLog, gitDiff, gitBranch, gitScopeCheck } from '../dist/tools/git.tools.js';
 import { PathGuardError } from '../dist/policy/path-guard.js';
 import { CommandGuardError } from '../dist/policy/command-guard.js';
+import { camcpSelfCheck, camcpHealth, camcpListTools } from '../dist/tools/camcp.tools.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const serverSource = fs.readFileSync(path.join(__dirname, '../src/server.ts'), 'utf8');
@@ -133,6 +134,31 @@ async function main() {
   } catch (e) {
     if (e instanceof CommandGuardError) pass('command-guard-push', 'blocked');
     else fail('command-guard-push', String(e));
+  }
+
+  try {
+    const catalog = camcpListTools(repoRoot, config, ALL_TOOL_DEFINITIONS);
+    const hasCamcp = catalog.namespaces.includes('camcp') && catalog.byNamespace.camcp?.length === 5;
+    if (hasCamcp) pass('camcp.list_tools', `namespaces=${catalog.namespaces.length} tools=${catalog.toolCount}`);
+    else fail('camcp.list_tools', `camcp tools=${catalog.byNamespace.camcp?.length}`);
+  } catch (e) {
+    fail('camcp.list_tools', String(e));
+  }
+
+  try {
+    const self = camcpSelfCheck(repoRoot, config, ALL_TOOL_DEFINITIONS);
+    if (self.ok) pass('camcp.self_check', `${self.summary.pass}/${self.summary.total}`);
+    else fail('camcp.self_check', `${self.status} fail=${self.summary.fail}`);
+  } catch (e) {
+    fail('camcp.self_check', String(e));
+  }
+
+  try {
+    const health = camcpHealth(repoRoot, config, ALL_TOOL_DEFINITIONS);
+    if (health.ok && health.status === 'healthy') pass('camcp.health', health.status);
+    else fail('camcp.health', String(health.status));
+  } catch (e) {
+    fail('camcp.health', String(e));
   }
 
   const failed = results.filter((r) => !r.ok);

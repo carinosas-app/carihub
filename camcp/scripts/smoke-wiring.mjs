@@ -17,6 +17,11 @@ const EXPECTED_NEW_TOOLS = [
   'invalidation.watch_list',
   'invalidation.explain',
   'invalidation.evaluate',
+  'camcp.version',
+  'camcp.self_check',
+  'camcp.list_tools',
+  'camcp.validate_config',
+  'camcp.health',
 ];
 
 const BASELINE_TOOL_COUNT = 32;
@@ -73,7 +78,7 @@ function main() {
   }
 
   const namespaces = [...new Set(ALL_TOOL_DEFINITIONS.map((t) => t.namespace))].sort();
-  for (const ns of ['catalog', 'profile', 'invalidation']) {
+  for (const ns of ['catalog', 'profile', 'invalidation', 'camcp']) {
     if (namespaces.includes(ns)) pass(`namespace:${ns}`, 'present');
     else fail(`namespace:${ns}`, 'missing');
   }

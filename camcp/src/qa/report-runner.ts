@@ -3,6 +3,8 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import type { CamcpConfig } from '../policy/permissions.js';
 import { assertReportWritePathAllowed } from '../policy/path-guard.js';
+import { getGitCommitShort } from '../policy/command-guard.js';
+import { writeExecutionManifest, buildExecutionManifest } from '../core/camcp-core/execution-manifest.js';
 
 export interface QaRunManifest {
   tool: string;
@@ -19,6 +21,12 @@ export interface QaRunManifest {
   stderrPath: string;
   adapterOnly: boolean;
   reusedScript: string;
+  /** Standardized execution fields (camcp-execution-manifest@1.0.0). */
+  camcpVersion?: string;
+  commit?: string | null;
+  namespace?: string;
+  capability?: 'read-only' | 'report-only';
+  timestamp?: string;
 }
 
 export interface QaRunResult {
@@ -108,26 +116,52 @@ export function runQaScript(
   fs.writeFileSync(stdoutPath, stdout, 'utf8');
   fs.writeFileSync(stderrPath, stderr, 'utf8');
 
+  const finishedAt = new Date().toISOString();
+  const exitCode = result.status ?? 1;
+  const commit = getGitCommitShort(repoRoot, config);
+  const namespace = toolName.includes('.') ? toolName.split('.')[0]! : 'qa';
+  const capability = 'report-only' as const;
   const manifest: QaRunManifest = {
     tool: toolName,
     runId,
     reportDir: path.relative(repoRoot, reportDir).replace(/\\/g, '/'),
     scriptPath: scriptRelPath.replace(/\\/g, '/'),
     args: scriptArgs,
-    exitCode: result.status ?? 1,
+    exitCode,
     signal: result.signal,
     durationMs,
     startedAt,
-    finishedAt: new Date().toISOString(),
+    finishedAt,
     stdoutPath: path.relative(repoRoot, stdoutPath).replace(/\\/g, '/'),
     stderrPath: path.relative(repoRoot, stderrPath).replace(/\\/g, '/'),
     adapterOnly: true,
     reusedScript: scriptRelPath.replace(/\\/g, '/'),
+    camcpVersion: config.version,
+    commit,
+    namespace,
+    capability,
+    timestamp: finishedAt,
   };
 
   const manifestPath = path.join(reportDir, 'manifest.json');
   assertReportWritePathAllowed(repoRoot, manifestPath, config);
   fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2), 'utf8');
+  writeExecutionManifest(
+    repoRoot,
+    config,
+    reportDir,
+    buildExecutionManifest({
+      camcpVersion: config.version,
+      commit,
+      tool: toolName,
+      namespace,
+      capability,
+      durationMs,
+      timestamp: finishedAt,
+      exitCode,
+      runId,
+    })
+  );
   writeLastRunPointer(repoRoot, config, manifest);
 
   const reportFiles = listReportFiles(reportDir, repoRoot);

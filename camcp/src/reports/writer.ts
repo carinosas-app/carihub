@@ -307,6 +307,7 @@ export function writeCamcpReport(
     assertReportWritePathAllowed(repoRoot, p, config);
   }
 
+  const exitCode = doc.status === 'FAIL' ? 1 : 0;
   const manifest: ReportManifestDocument = {
     schemaVersion: REPORT_SCHEMA_VERSION,
     runId,
@@ -328,6 +329,16 @@ export function writeCamcpReport(
       ssotSnapshot: 'ssot-snapshot.json',
     },
     delegatedRuns: options?.delegatedRuns ?? [],
+    execution: {
+      camcpVersion: config.version,
+      commit: doc.git.commit,
+      tool: toolName,
+      namespace: doc.tool.namespace,
+      capability: doc.tool.capability,
+      durationMs: doc.timing.durationMs,
+      timestamp: doc.timing.generatedAt,
+      exitCode,
+    },
   };
 
   const summary: ReportSummaryDocument = {
