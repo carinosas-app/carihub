@@ -11,6 +11,7 @@
 | **Auditoría final** | [`AUDITORIA-FINAL-SPEC-MESSENGER.md`](./AUDITORIA-FINAL-SPEC-MESSENGER.md) — OB-MSG-1–8 cerrados |
 | **Validación diseño** | 21/21 PASS |
 | **Runtime** | **NO autorizado** |
+| **Producto Fase 1 (2026-07-14)** | Entrega messenger = **Future Architecture** — ver [`ACTA-CONGELAMIENTO-PRODUCTO-FASE-1.md`](./ACTA-CONGELAMIENTO-PRODUCTO-FASE-1.md) |
 
 Canónico: [`ACTA-CONGELAMIENTO-MESSENGER.json`](./ACTA-CONGELAMIENTO-MESSENGER.json)
 

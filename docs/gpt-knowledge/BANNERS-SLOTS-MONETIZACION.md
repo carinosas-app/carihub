@@ -1,6 +1,9 @@
 # Banners, slots y monetización — CariHub
 
-**Última revisión documental:** 2026-07-07
+**Última revisión documental:** 2026-07-14  
+**Producto Fase 1:** incluido (marketplace). SSOT: [PRODUCTO-FASE-1-MARKETPLACE.md](./PRODUCTO-FASE-1-MARKETPLACE.md)
+
+> Nota: IDs `home_estados`, `home_libe`, `resultados_*_estados`, `perfil_estados`, etc. son **plazas publicitarias**, no el producto orgánico States/Lives (Future Architecture).
 
 ---
 

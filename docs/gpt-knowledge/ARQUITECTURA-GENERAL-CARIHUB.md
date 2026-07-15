@@ -1,13 +1,14 @@
 # Arquitectura general — CariHub
 
-**Última revisión documental:** 2026-07-07  
-**Fuente:** código en repo + `scripts/MAPA-MAESTRO-CARIHUB.json` + reglas `.cursor/rules/`
+**Última revisión documental:** 2026-07-14  
+**Fuente:** código en repo + `scripts/MAPA-MAESTRO-CARIHUB.json` + reglas `.cursor/rules/`  
+**Producto Fase 1:** [PRODUCTO-FASE-1-MARKETPLACE.md](./PRODUCTO-FASE-1-MARKETPLACE.md)
 
 ---
 
 ## Propósito
 
-CariHub es una plataforma multipágina (monolito frontend estático) para directorio, registro de perfiles, resultados de búsqueda, perfil público, dashboard de anunciantes, banners publicitarios y mensajería. Corre sobre **Firebase** (Hosting, Firestore, Auth, Storage, Functions) con proyecto **`carihub-app`**.
+CariHub (marca Cariñosas) es una plataforma multipágina (monolito frontend estático). En **Fase 1** opera como **marketplace de perfiles**: directorio, registro, resultados, perfil público, dashboard de anunciantes, banners y contacto vía métodos públicos. Mensajería interna, estados y lives existen como **Future Architecture** (no alcance de entrega Fase 1). Corre sobre **Firebase** (Hosting, Firestore, Auth, Storage, Functions) con proyecto **`carihub-app`**.
 
 ---
 

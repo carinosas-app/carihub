@@ -1,6 +1,11 @@
 # Lives y estados — CariHub
 
-**Última revisión documental:** 2026-07-07
+**Última revisión documental:** 2026-07-14  
+**Alcance de producto:** **Future Architecture** (no es Cariñosas Fase 1).  
+**SSOT Fase 1:** [PRODUCTO-FASE-1-MARKETPLACE.md](./PRODUCTO-FASE-1-MARKETPLACE.md)
+
+> Fase 1 = marketplace de perfiles. States / Lives / feed social no se entregan como producto Phase 1.  
+> Los slots publicitarios `*_estados` / `*_libe` son **inventario de banners**, no este dominio orgánico — ver [BANNERS-SLOTS-MONETIZACION.md](./BANNERS-SLOTS-MONETIZACION.md).
 
 ---
 
