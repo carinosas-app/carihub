@@ -50,9 +50,19 @@
     return null;
   }
 
+  /**
+   * Preserve Directory Mode QA flags when syncing perfilId/bannerId into the URL.
+   * (serve cleanUrls + context sync previously dropped ?futureSocial / ?directoryMode.)
+   */
+  var QA_URL_KEYS = ['futureSocial', 'directoryMode', 'preview', 'hub', 'cuenta', 'desktop'];
+
   function syncUrl(current) {
     try {
       var p = new URLSearchParams(global.location.search);
+      var keep = {};
+      QA_URL_KEYS.forEach(function (k) {
+        if (p.has(k)) keep[k] = p.get(k);
+      });
       p.delete('perfilId');
       p.delete('bannerId');
       if (current.tipo === 'perfil' && current.perfilId) {
@@ -60,6 +70,9 @@
       } else if (current.tipo === 'banner' && current.bannerId) {
         p.set('bannerId', current.bannerId);
       }
+      Object.keys(keep).forEach(function (k) {
+        p.set(k, keep[k]);
+      });
       var qs = p.toString();
       var url = global.location.pathname + (qs ? '?' + qs : '') + (global.location.hash || '');
       global.history.replaceState(null, '', url);

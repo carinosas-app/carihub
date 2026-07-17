@@ -19,11 +19,78 @@
       window.addEventListener("resize", syncLayout);
     })();
   </script>
+  <script src="js/directory-mode.js"></script>
+  <script>
+    /* Capture QA override memo before DashContext URL sync; apply after body exists below. */
+    if (window.CarihubDirectoryMode) {
+      if (window.CarihubDirectoryMode.isDirectoryMode()) {
+        document.documentElement.classList.add("directory-mode");
+      } else {
+        document.documentElement.classList.add("future-social-enabled");
+      }
+    }
+  </script>
+  <style id="directory-mode-fouc">
+    /* Prevent social FOUC until full applyUI runs */
+    html.directory-mode [data-fase1-hide="social"] { display: none !important; }
+  </style>
   <link rel="stylesheet" href="fonts/fonts.css">
   <link rel="stylesheet" href="css/carihub-premium-theme.css">
   <link rel="stylesheet" href="css/resultados.css">
   <link rel="stylesheet" href="css/registro-perfil-preview.css">
   <link rel="stylesheet" href="css/dashboard-rentero-pro.css">
+  <!--
+    Micro-fix hueco Inicio (B0+B1) — después de dashboard-rentero-pro.css:
+    Causa: .dash-inicio-stack 50% preview + 50% lower. Con .dash-inicio-red en
+    display:none, lower seguía reservando ~50% → hueco. .dash-inicio-resumen
+    con flex:1 inflaba el hueco. En móvil, anular max-height del lower rompía
+    el clamp Phase-1 (22vh/140px) y elongaba la columna.
+    Fix: preview flex-grow; lower + resumen content-sized; móvil conserva clamp.
+    html.future-social-enabled (QA) no aplica → layout original.
+  -->
+  <style id="directory-mode-inicio-compact">
+    html.directory-mode .dash-module[data-module="inicio"] .dash-inicio-preview,
+    html.directory-mode .dash-module[data-module="inicio"].is-active .dash-inicio-preview{
+      flex: 1 1 auto !important;
+      max-height: none !important;
+      min-height: 220px !important;
+    }
+    html.directory-mode .dash-module[data-module="inicio"] .dash-inicio-lower,
+    html.directory-mode .dash-module[data-module="inicio"].is-active .dash-inicio-lower,
+    html.directory-mode .dashboard-shell.center-expanded .dash-module[data-module="inicio"].is-active .dash-inicio-lower{
+      flex: 0 1 auto !important;
+      /* Tope: evita que cuenta/resumen (sin red) ocupen todo el stack y aplasten preview.
+         flex-basis auto: si el contenido es menor, lower se encoge → sin hueco reservado. */
+      max-height: min(42%, 360px) !important;
+      min-height: 0 !important;
+      overflow-x: hidden !important;
+      overflow-y: auto !important;
+    }
+    html.directory-mode .dash-inicio-resumen{
+      flex: 0 0 auto !important;
+      min-height: 0 !important;
+    }
+    html.directory-mode .dash-inicio-lower > .dash-inicio-red[data-fase1-hide="social"]{
+      display: none !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      border: 0 !important;
+      min-height: 0 !important;
+      height: 0 !important;
+      overflow: hidden !important;
+      flex: none !important;
+    }
+    @media (max-width: 1199px){
+      html.directory-mode .dash-module[data-module="inicio"].is-active .dash-inicio-preview{
+        min-height: 0 !important;
+      }
+      html.directory-mode .dash-module[data-module="inicio"].is-active .dash-inicio-lower,
+      html.directory-mode .dashboard-shell.center-expanded .dash-module[data-module="inicio"].is-active .dash-inicio-lower{
+        max-height: min(22vh, 140px) !important;
+        flex: 0 0 auto !important;
+      }
+    }
+  </style>
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
   <script src="js/carihub-public-render-lite.js"></script>
   <script src="js/carihub-media-placeholders.js?v=20260630ph1"></script>
@@ -89,12 +156,12 @@
       <button class="btn dash-action-btn" type="button" onclick="location.href='registro-banner.html'">+ Agregar banner</button>
     </div>
 
-    <div class="dash-activos-section dash-activos-section--lives" id="livesPickerBlock" data-dash-cap="live">
+    <div class="dash-activos-section dash-activos-section--lives" id="livesPickerBlock" data-dash-cap="live" data-fase1-hide="social">
       <p class="profile-picker__label">Lives</p>
       <div class="dash-activos-tiles-host" id="livesListSide"></div>
     </div>
 
-    <div class="action-stack dash-nav-actions dash-nav-actions--live" data-dash-cap="live">
+    <div class="action-stack dash-nav-actions dash-nav-actions--live" data-dash-cap="live" data-fase1-hide="social">
       <button class="btn dash-action-btn" type="button" data-quick-module="transmitir-live">+ Nuevo live</button>
     </div>
 
@@ -122,7 +189,7 @@
       </div>
     </section>
 
-    <section class="dash-right-slot dash-right-slot--live panel glass" aria-label="Transmitir en vivo" data-dash-cap="live">
+    <section class="dash-right-slot dash-right-slot--live panel glass" aria-label="Transmitir en vivo" data-dash-cap="live" data-fase1-hide="social">
       <header class="dash-right-slot__head dash-right-slot__head--action">
         <button type="button" class="dash-right-slot__head-btn" id="btnRightTransmitirLive" data-quick-module="transmitir-live">
           <span class="dash-live-signal dash-live-signal--static" aria-hidden="true">
@@ -180,7 +247,7 @@
         <span class="dash-right-metrics__label">Favoritos</span>
         <b class="dash-right-metrics__val" id="metricFavoritos">128</b>
       </li>
-      <li class="dash-right-metrics__row">
+      <li class="dash-right-metrics__row" data-fase1-hide="social">
         <span class="dash-right-metrics__label">Mensajes</span>
         <b class="dash-right-metrics__val" id="metricMensajes">36</b>
       </li>
@@ -223,7 +290,7 @@
               <button class="btn btn--sm" type="button" id="btnEditarPerfilModulo">Editar perfil</button>
             </div>
             <div class="dash-inicio-preview__actions dash-toolbar-actions hidden" id="dashPreviewActionsBanner">
-              <button class="btn btn--sm" type="button" id="btnDashBannerMensajes">Mensajes del banner</button>
+              <button class="btn btn--sm" type="button" id="btnDashBannerMensajes" data-fase1-hide="social">Mensajes del banner</button>
               <button class="btn secondary btn--sm" type="button" id="btnDashBannerMetricas">Métricas</button>
               <a class="btn secondary btn--sm" id="btnDashBannerRenovar" href="registro-banner.html">Renovar</a>
               <a class="btn secondary btn--sm" id="btnDashBannerEditar" href="registro-banner.html">Editar campaña</a>
@@ -231,7 +298,7 @@
           </section>
 
           <div class="dash-inicio-lower" id="dashInicioLower">
-          <section class="dash-inicio-red panel glass" aria-label="Estados y lives de socios">
+          <section class="dash-inicio-red panel glass" aria-label="Estados y lives de socios" data-fase1-hide="social">
             <div class="dash-inicio-red__col dash-inicio-red__col--estados">
               <header class="dash-inicio-red__head">
                 <h3>Estados de socios</h3>
@@ -250,7 +317,7 @@
 
           <section class="dash-inicio-resumen" aria-label="Resumen y pendientes">
             <header class="dash-inicio-resumen__head">
-              <h2 class="dash-inicio-resumen__title">Mensajes, avisos y solicitudes</h2>
+              <h2 class="dash-inicio-resumen__title" id="dashInicioResumenTitle">Avisos y solicitudes</h2>
             </header>
             <div class="dash-inicio-resumen__grid" id="dashInicioResumen"></div>
           </section>
@@ -259,7 +326,7 @@
             <div class="dash-inicio-cuenta__grid">
               <div class="dash-inicio-cuenta__card dash-right-alerts panel glass">
                 <div class="section-title"><h3>Alertas</h3></div>
-                <div class="dash-alert-item"><span>💬</span><div><b>12 mensajes nuevos</b><button type="button" data-quick-module="mensajes">Ver</button></div></div>
+                <div class="dash-alert-item" data-fase1-hide="social"><span>💬</span><div><b>12 mensajes nuevos</b><button type="button" data-quick-module="mensajes">Ver</button></div></div>
                 <div class="dash-alert-item"><span>🤝</span><div><b>3 solicitudes pendientes</b><button type="button" data-quick-module="solicitudes">Ver</button></div></div>
                 <div class="dash-alert-item"><span>🔔</span><div><b>Revisión aprobada</b></div></div>
               </div>
@@ -268,7 +335,7 @@
                 <div class="section-title"><h3>Acceso rápido</h3></div>
                 <div class="action-stack">
                   <button class="btn secondary" type="button" data-quick-module="inicio">Ver perfil</button>
-                  <button class="btn secondary" type="button" data-quick-module="mensajes">Mensajes</button>
+                  <button class="btn secondary" type="button" data-quick-module="mensajes" data-fase1-hide="social">Mensajes</button>
                   <button class="btn secondary" type="button" data-quick-module="anunciar">Anunciar</button>
                   <button class="btn secondary" type="button" data-quick-module="tarjeta">Vista resultados</button>
                 </div>
@@ -314,7 +381,7 @@
                 <div class="pcard__stat"><span class="pcard__stat-ic">👁</span><b id="pcardStatViews">0</b><small>Vistas</small></div>
                 <div class="pcard__stat"><span class="pcard__stat-ic">📞</span><b id="pcardStatContacts">0</b><small>Contactos</small></div>
                 <div class="pcard__stat"><span class="pcard__stat-ic">❤️</span><b id="pcardStatFavs">0</b><small>Favoritos</small></div>
-                <div class="pcard__stat"><span class="pcard__stat-ic">💬</span><b id="pcardStatMsgs">0</b><small>Mensajes</small></div>
+                <div class="pcard__stat" data-fase1-hide="social"><span class="pcard__stat-ic">💬</span><b id="pcardStatMsgs">0</b><small>Mensajes</small></div>
               </div>
             </div>
           </div>
@@ -433,7 +500,7 @@
       </div>
 
       <!-- Anuncios canal mensajes — CRUD (TICKET-048) -->
-      <div class="dash-module" data-module="anuncios-mensajes" id="modulo-anuncios-mensajes">
+      <div class="dash-module" data-module="anuncios-mensajes" id="modulo-anuncios-mensajes" data-fase1-hide="social">
         <div class="dash-module-card">
           <div class="section-title">
             <div>
@@ -447,7 +514,7 @@
       </div>
 
       <!-- Estudio — publicar anuncio canal mensajes -->
-      <div class="dash-module" data-module="anunciar-mensajes" id="modulo-anunciar-mensajes">
+      <div class="dash-module" data-module="anunciar-mensajes" id="modulo-anunciar-mensajes" data-fase1-hide="social">
         <p class="dash-studio__note">Canal <b>mensajes</b>: solo en el strip horizontal de Mensajes. No se publica en tu perfil ni en resultados.</p>
         <div class="dash-studio__grid">
           <div class="dash-studio__stage panel glass">
@@ -481,7 +548,7 @@
       </div>
 
       <!-- Transmitir en vivo — cámara en columna central -->
-      <div class="dash-module" data-module="transmitir-live" id="modulo-transmitir-live">
+      <div class="dash-module" data-module="transmitir-live" id="modulo-transmitir-live" data-fase1-hide="social">
         <p class="dash-studio__note">Transmite desde el centro. Vistas, contactos, mensajes y alertas siguen en la columna derecha.</p>
         <p class="dash-studio__notice hidden" id="liveStudioFeedback" aria-live="polite"></p>
         <div class="dash-studio__grid dash-studio__grid--live">
@@ -512,7 +579,7 @@
       </div>
 
       <!-- Anuncios: tuyos arriba + red abajo (feed-red fusionado aquí, TICKET-026) -->
-      <div class="dash-module" data-module="estados" id="modulo-estados">
+      <div class="dash-module" data-module="estados" id="modulo-estados" data-fase1-hide="social">
         <section class="estados-mios panel glass">
           <div class="section-title">
             <div><h2>Mis anuncios</h2><p>Canal perfil — se ven en Cariñosas, resultados y dashboards de socios</p></div>
@@ -535,7 +602,7 @@
       </div>
 
       <!-- En vivos — socios transmitiendo -->
-      <div class="dash-module" data-module="lives" id="modulo-lives">
+      <div class="dash-module" data-module="lives" id="modulo-lives" data-fase1-hide="social">
         <div class="lives-socios-head">
           <p class="dash-hint">Transmisiones en vivo de tus socios y amistades de la red.</p>
         </div>
@@ -570,7 +637,7 @@
       </div>
 
       <!-- Módulo C: Mensajes -->
-      <div class="dash-module" data-module="mensajes" id="modulo-mensajes">
+      <div class="dash-module" data-module="mensajes" id="modulo-mensajes" data-fase1-hide="social">
         <div class="dash-msg-expand-bar" id="dashMsgExpandBar" aria-label="Vista de mensajes">
           <button class="btn secondary btn--sm" type="button" id="btnAmpliarMensajes" aria-pressed="false">Ampliar mensajes</button>
           <button class="btn secondary btn--sm hidden" type="button" id="btnRestaurarMensajes" aria-pressed="false">Ver columnas</button>
@@ -688,7 +755,7 @@
       <!-- Directorio legacy eliminado — usar módulo buscar (TICKET-026) -->
 
       <!-- Publicaciones / estados / lives admin -->
-      <div class="dash-module" data-module="publicaciones" id="modulo-publicaciones">
+      <div class="dash-module" data-module="publicaciones" id="modulo-publicaciones" data-fase1-hide="social">
         <div class="pro-tabs" data-pub-tabs>
           <button class="pro-tab on" type="button" data-tab="estados">Mis anuncios</button>
           <button class="pro-tab" type="button" data-tab="lives">Mis lives</button>
@@ -719,14 +786,14 @@
           <div class="stat"><small>Vistas totales</small><b id="statModVisitas">0</b></div>
           <div class="stat"><small>Contactos</small><b id="statModContactos">0</b></div>
           <div class="stat"><small>Favoritos</small><b id="statModFavoritos">0</b></div>
-          <div class="stat"><small>Mensajes</small><b id="statModMensajes">0</b></div>
+          <div class="stat" data-fase1-hide="social"><small>Mensajes</small><b id="statModMensajes">0</b></div>
           <div class="stat"><small>Clicks WhatsApp</small><b id="statModWa">0</b></div>
           <div class="stat"><small>Vistas perfil</small><b id="statModPerfil">0</b></div>
         </div>
       </div>
 
       <!-- Módulo: Privacidad de Mensajes -->
-      <div class="dash-module" data-module="privacidad-mensajes" id="modulo-privacidad-mensajes">
+      <div class="dash-module" data-module="privacidad-mensajes" id="modulo-privacidad-mensajes" data-fase1-hide="social">
         <div class="dash-module-card">
           <div class="section-title">
             <div>
@@ -747,7 +814,7 @@
           <button type="button" data-menu="config">⚙️ Configuración de cuenta</button>
           <button type="button" data-menu="apariencia">🎨 Apariencia del perfil</button>
           <button type="button" data-menu="notificaciones">🔔 Notificaciones</button>
-          <button type="button" data-menu="privacidad">🔒 Privacidad de mensajes</button>
+          <button type="button" data-menu="privacidad" data-fase1-hide="social">🔒 Privacidad de mensajes</button>
           <button type="button" data-menu="pagos">💳 Pagos y planes</button>
         </div>
         <div class="theme-picker" id="themePicker" aria-hidden="true">
@@ -807,7 +874,7 @@
         <span class="dash-nav-item__ic"><i data-lucide="home" class="dash-nav-item__icon" aria-hidden="true"></i></span>
         <span class="dash-nav-item__body"><span class="dash-nav-item__label">Inicio</span></span>
       </button>
-      <button class="dash-nav-item dash-nav-item--has-badge" type="button" data-module-nav="mensajes" id="btnNavMensajes">
+      <button class="dash-nav-item dash-nav-item--has-badge" type="button" data-module-nav="mensajes" id="btnNavMensajes" data-fase1-hide="social">
         <span class="dash-nav-item__ic"><i data-lucide="message-square-more" class="dash-nav-item__icon" aria-hidden="true"></i></span>
         <span class="dash-nav-item__body">
           <span class="dash-nav-item__label">Mensajes</span>
@@ -838,7 +905,7 @@
         <span class="dash-nav-item__ic"><i data-lucide="bar-chart-3" class="dash-nav-item__icon" aria-hidden="true"></i></span>
         <span class="dash-nav-item__body"><span class="dash-nav-item__label">Estadísticas</span></span>
       </button>
-      <button class="dash-nav-item dash-nav-item--nav-sm dash-nav-item--stack-label" type="button" data-module-nav="mensajes" data-msg-scope="banner" id="btnNavBannerMensajes" data-dash-cap="banner">
+      <button class="dash-nav-item dash-nav-item--nav-sm dash-nav-item--stack-label" type="button" data-module-nav="mensajes" data-msg-scope="banner" id="btnNavBannerMensajes" data-dash-cap="banner" data-fase1-hide="social">
         <span class="dash-nav-item__ic"><i data-lucide="messages-square" class="dash-nav-item__icon" aria-hidden="true"></i></span>
         <span class="dash-nav-item__body">
           <span class="dash-nav-item__label dash-nav-item__label--stack">
@@ -846,7 +913,7 @@
           </span>
         </span>
       </button>
-      <button class="dash-nav-item dash-nav-item--nav-sm dash-nav-item--stack-label" type="button" data-module-nav="publicaciones" data-dash-cap="publish">
+      <button class="dash-nav-item dash-nav-item--nav-sm dash-nav-item--stack-label" type="button" data-module-nav="publicaciones" data-dash-cap="publish" data-fase1-hide="social">
         <span class="dash-nav-item__ic"><i data-lucide="megaphone" class="dash-nav-item__icon" aria-hidden="true"></i></span>
         <span class="dash-nav-item__body">
           <span class="dash-nav-item__label dash-nav-item__label--stack">
@@ -854,7 +921,7 @@
           </span>
         </span>
       </button>
-      <button class="dash-nav-item dash-nav-item--nav-sm dash-nav-item--has-badge dash-nav-item--stack-label" type="button" data-module-nav="lives" data-dash-cap="live">
+      <button class="dash-nav-item dash-nav-item--nav-sm dash-nav-item--has-badge dash-nav-item--stack-label" type="button" data-module-nav="lives" data-dash-cap="live" data-fase1-hide="social">
         <span class="dash-nav-item__ic"><i data-lucide="video" class="dash-nav-item__icon" aria-hidden="true"></i></span>
         <span class="dash-nav-item__body">
           <span class="dash-nav-item__label dash-nav-item__label--stack">
@@ -871,7 +938,7 @@
           </span>
         </span>
       </button>
-      <button class="dash-nav-item dash-nav-item--nav-sm dash-nav-item--stack-label" type="button" data-module-nav="estados">
+      <button class="dash-nav-item dash-nav-item--nav-sm dash-nav-item--stack-label" type="button" data-module-nav="estados" data-fase1-hide="social">
         <span class="dash-nav-item__ic"><i data-lucide="users" class="dash-nav-item__icon" aria-hidden="true"></i></span>
         <span class="dash-nav-item__body">
           <span class="dash-nav-item__label dash-nav-item__label--stack">
@@ -915,7 +982,7 @@
           </span>
         </span>
       </button>
-      <button class="dash-nav-item dash-nav-item--nav-sm dash-nav-item--stack-label" type="button" data-module-nav="privacidad-mensajes">
+      <button class="dash-nav-item dash-nav-item--nav-sm dash-nav-item--stack-label" type="button" data-module-nav="privacidad-mensajes" data-fase1-hide="social">
         <span class="dash-nav-item__ic"><i data-lucide="shield" class="dash-nav-item__icon" aria-hidden="true"></i></span>
         <span class="dash-nav-item__body">
           <span class="dash-nav-item__label dash-nav-item__label--stack">
@@ -1021,6 +1088,9 @@
   <script src="js/dashboard-context.js"></script>
   <script src="js/carihub-multi-perfil.js"></script>
   <script src="js/dashboard-account-capabilities.js"></script>
+  <script>
+    if (window.CarihubDirectoryMode) window.CarihubDirectoryMode.applyUI();
+  </script>
   <script src="js/dashboard-rentero-personalize.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>

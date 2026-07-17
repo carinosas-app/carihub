@@ -1,6 +1,7 @@
 /**
  * Cuenta hub vs publicadora — permisos dashboard (TICKET-053).
  * Flags: isHubAccount, canPublishProfile, canRentBanner, canPublishLive
+ * Directory Mode (B0/B1): niega módulos Future Architecture vía CarihubDirectoryMode.
  */
 (function (global) {
   "use strict";
@@ -127,6 +128,15 @@
       var key = el.getAttribute("data-dash-cap");
       var flag = capKeyToFlag(key);
       var visible = !!caps[flag];
+      /* Directory Mode: live rail/slots stay hidden even if publisher canPublishLive */
+      if (
+        visible &&
+        key === "live" &&
+        global.CarihubDirectoryMode &&
+        global.CarihubDirectoryMode.isDirectoryMode()
+      ) {
+        visible = false;
+      }
       el.classList.toggle("hidden", !visible);
       if (el.tagName === "BUTTON" || el.tagName === "A") {
         el.toggleAttribute("disabled", !visible);
@@ -139,6 +149,10 @@
     var pickerLabel = global.document.getElementById("dashPerfilesRailLabel");
     if (pickerLabel) {
       pickerLabel.textContent = caps.isHubAccount ? "Tu cuenta" : "Tus perfiles";
+    }
+
+    if (global.CarihubDirectoryMode && typeof global.CarihubDirectoryMode.applyUI === "function") {
+      global.CarihubDirectoryMode.applyUI();
     }
   }
 
@@ -158,6 +172,13 @@
 
   function canOpenModule(moduleId, opts) {
     opts = opts || {};
+    if (
+      global.CarihubDirectoryMode &&
+      global.CarihubDirectoryMode.isDirectoryMode() &&
+      global.CarihubDirectoryMode.isSocialModule(moduleId)
+    ) {
+      return false;
+    }
     if (moduleId === "mensajes" && opts.msgScope === "banner") {
       return can("banner");
     }
