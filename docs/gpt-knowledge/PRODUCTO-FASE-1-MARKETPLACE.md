@@ -76,9 +76,10 @@ Los IDs de plaza publicitaria (`home_estados`, `home_libe`, `resultados_*_estado
 
 1. **Este documento + acta + regla Cursor** (P0 — fuente de verdad). ✅  
 2. **Cerrar PP-01** (contrato Registro ↔ mapToPerfil ↔ Perfil público) — ✅ (`ACTA-CIERRE-PP-01` / PR #142).  
-3. **Directory Mode Phase B** — capability gating / hide de superficies sociales (sin borrar código).  
-   - **B0+B1 (dashboard):** autorizado e implementado — ver `scripts/ACTA-DIRECTORY-MODE-HIDE-B0-B1.md`  
-   - **B2+** (home / perfil `msg` / toggles registro): pendiente de autorización  
+3. **Directory Mode Phase B** — capability gating / hide de superficies sociales (sin borrar código).
+   - **B0+B1 (dashboard):** **integrado en `main`** (PR #143, merge `dbe73d7…`) — ver `scripts/ACTA-DIRECTORY-MODE-HIDE-B0-B1.md`
+   - **B2 (Home / Perfil `msg` / Registro perfil+banner):** **implementado** en rama `feat/directory-mode-hide-b2`; **pendiente de integración mediante PR** — ver `scripts/ACTA-DIRECTORY-MODE-HIDE-B2.md`
+4. **Launch Readiness** — checklist de lanzamiento marketplace (sin nuevas funciones sociales / Future Architecture).
 
 **Prohibido por ahora:** borrar Firestore, Functions, rules o docs sociales; implementar messenger/lives/estados como Fase 1.
 

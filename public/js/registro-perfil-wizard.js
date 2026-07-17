@@ -1577,8 +1577,8 @@
       telefonoActivo: on('ctTelefono'),
       onlyFansActivo: on('ctOnlyfans'),
       googleMapsActivo: on('ctUbicacion'),
-      mensajesInternosActivo: on('ctMensajesInternos'),
-      mensajeInternoActivo: on('ctMensajesInternos'),
+      mensajesInternosActivo: (window.CarihubDirectoryMode && CarihubDirectoryMode.isDirectoryMode()) ? false : on('ctMensajesInternos'),
+      mensajeInternoActivo: (window.CarihubDirectoryMode && CarihubDirectoryMode.isDirectoryMode()) ? false : on('ctMensajesInternos'),
       whatsapp: $('fldWhatsapp') ? $('fldWhatsapp').value.trim() : '',
       telegram: $('fldTelegram') ? $('fldTelegram').value.trim() : '',
       instagram: $('fldInstagram') ? $('fldInstagram').value.trim() : '',
@@ -2280,8 +2280,12 @@
         if ($('ctOnlyfans')) $('ctOnlyfans').checked = !!(cp.onlyFansActivo || cp.onlyfansActivo);
         if ($('ctUbicacion')) $('ctUbicacion').checked = !!cp.googleMapsActivo;
         if ($('ctMensajesInternos')) {
-          $('ctMensajesInternos').checked = cp.mensajesInternosActivo !== false &&
-            cp.mensajeInternoActivo !== false;
+          if (window.CarihubDirectoryMode && CarihubDirectoryMode.isDirectoryMode()) {
+            $('ctMensajesInternos').checked = false;
+          } else {
+            $('ctMensajesInternos').checked = cp.mensajesInternosActivo !== false &&
+              cp.mensajeInternoActivo !== false;
+          }
         }
         syncContactOnlyfansVisibility();
         syncContactFieldsVisibility();

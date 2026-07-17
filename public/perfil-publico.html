@@ -3,6 +3,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Perfil - CariHub</title>
+<script src="js/directory-mode.js"></script>
+<style id="directory-mode-fouc">
+  html.directory-mode [data-fase1-hide="social"] { display: none !important; }
+  html.directory-mode .playout__feed-pair,
+  html.directory-mode .playout__estado,
+  html.directory-mode .live-card,
+  html.directory-mode .feed-grat-btn,
+  html.directory-mode .act-negocio.playout__estado,
+  html.directory-mode #gratModal { display: none !important; }
+</style>
 <link rel="stylesheet" href="fonts/fonts.css">
 <link rel="stylesheet" href="css/carihub-premium-theme.css">
 <link rel="stylesheet" href="css/carihub-pink-sheen.css">
@@ -4239,6 +4249,7 @@ function updateGratSplit(){
   if(pctEl) pctEl.textContent=String(Math.round(GRAT_COMISION*100));
 }
 function openGratificarModal(perfilId, source, nombreDisplay){
+  if(window.CarihubDirectoryMode && CarihubDirectoryMode.isDirectoryMode()) return;
   _gratState.perfil=perfilId||"";
   _gratState.nombre=nombreDisplay||perfilId||"";
   _gratState.source=source||"perfil";
@@ -4780,7 +4791,11 @@ function shell(tipo, inner, u){
   var esCari=CARINOSAS_TIPOS.indexOf(tipo)>=0;
   var pinSVG = '<svg width="22" height="22" viewBox="0 0 24 24"><path d="M12 2c-3.9 0-7 3.1-7 7 0 5 7 13 7 13s7-8 7-13c0-3.9-3.1-7-7-7z" fill="'+(esCari?"#ec2d7a":"#2563eb")+'"/><circle cx="12" cy="9" r="2.6" fill="#fff"/></svg>';
   var banners = bannersHTML(tipo);
-  var nav = t.nav.map(function(n,i){
+  var navSrc = t.nav || [];
+  if(window.CarihubDirectoryMode && CarihubDirectoryMode.isDirectoryMode()){
+    navSrc = navSrc.filter(function(n){ return !/mensaje/i.test(String(n[1]||"")); });
+  }
+  var nav = navSrc.map(function(n,i){
     var onCls=(esCari||PRO_LAYOUTS.indexOf(tipo)>=0)?"":(i===0?"on":"");
     return '<a class="'+onCls+'" href="#">'+
       '<span class="pnav__ic">'+svgIcon(n[0])+'</span>'+
@@ -4926,14 +4941,15 @@ function renderPlayoutAdultoRef(u, cfg){
   var contact=cfg.contact!=null?cfg.contact:adultoContactSimpleHTML(u);
   var sobrePersona=cfg.sobre!=null?cfg.sobre:sobrePerfilHTML(u);
   var derstack=cfg.derstack!=null?cfg.derstack:perfilDerstackHTML(u);
-  var feedPair=cfg.feedPair===false?"":('<div class="playout__feed-pair">'+panelActividadCompact(u,false)+panelLiveCompact(u)+'</div>');
+  var feedOff = cfg.feedPair===false || (window.CarihubDirectoryMode && CarihubDirectoryMode.isDirectoryMode());
+  var feedPair=feedOff?"":('<div class="playout__feed-pair">'+panelActividadCompact(u,false)+panelLiveCompact(u)+'</div>');
   var pieBottom=cfg.pieBottom||"";
   var extraCls=cfg.extraClass?" "+cfg.extraClass:"";
   var dataExtra=cfg.dataAttrs||"";
 
   var ubicIzq=negocioPieUbicCardHTML(u,"izq");
   var izq=galeria+tri+'<div class="playout__izq-stack">'+contact+sobrePersona+ubicIzq+'</div>';
-  var der=perfil+(u.donanteUltimo?avisoDonacion(u):"")+feedPair+ficha+stats+derstack;
+  var der=perfil+(u.donanteUltimo && !(window.CarihubDirectoryMode && CarihubDirectoryMode.isDirectoryMode())?avisoDonacion(u):"")+feedPair+ficha+stats+derstack;
   var bannerPie=(u&&u.__previewRegistro)?"":('<div class="playout__banner-adult">'+bottomBannerHTML(layoutKey)+'</div>');
 
   return '<div class="playout playout--'+safe(layoutKey).replace(/[^a-z0-9_-]/gi,"-")+extraCls+'" data-cat="'+safe(u.subcategoriaId||layoutKey)+'"'+dataExtra+'>'+

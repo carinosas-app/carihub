@@ -1,6 +1,7 @@
 /**
- * Directory Mode (Fase 1 marketplace) — B0/B1
- * When ON (default): hide Future Architecture social surfaces in dashboard.
+ * Directory Mode (Fase 1 marketplace) — B0/B1/B2
+ * When ON (default): hide Future Architecture social surfaces
+ * (dashboard + Home / Perfil público / Registro).
  * QA override (?futureSocial=1 / ?directoryMode=0) ONLY on local/dev hosts — never production.
  * Does NOT delete code, rules, or Functions.
  */
@@ -98,19 +99,30 @@
     return !isDirectoryMode();
   }
 
+  /** B2: internal messaging / inbox / msg contact (inverse of Directory Mode). */
+  function allowInternalMessaging() {
+    return !isDirectoryMode();
+  }
+
   function isSocialModule(moduleId) {
     return !!SOCIAL_MODULES[String(moduleId || "")];
   }
 
-  function applyUI() {
+  /** Sync html/body classes early (FOUC) — safe before body exists. */
+  function syncRootClasses() {
     var on = isDirectoryMode();
-    var root = global.document.documentElement;
-    var body = global.document.body;
-    var shell = global.document.querySelector(".dashboard-shell");
+    var root = global.document && global.document.documentElement;
     if (root) {
       root.classList.toggle("directory-mode", on);
       root.classList.toggle("future-social-enabled", !on);
     }
+    return on;
+  }
+
+  function applyUI() {
+    var on = syncRootClasses();
+    var body = global.document && global.document.body;
+    var shell = global.document && global.document.querySelector(".dashboard-shell");
     if (body) {
       body.classList.toggle("directory-mode", on);
       body.classList.toggle("future-social-enabled", !on);
@@ -120,20 +132,28 @@
       shell.classList.toggle("future-social-enabled", !on);
     }
 
-    global.document.querySelectorAll('[data-fase1-hide="social"]').forEach(function (el) {
-      el.classList.toggle("hidden", on);
-      if (el.tagName === "BUTTON" || el.tagName === "A") {
-        if (on) el.setAttribute("aria-hidden", "true");
-        else el.removeAttribute("aria-hidden");
-        if (on && (el.tagName === "BUTTON" || el.getAttribute("role") === "button")) {
-          el.setAttribute("tabindex", "-1");
-        } else if (el.tagName === "BUTTON") {
-          el.removeAttribute("tabindex");
+    if (global.document) {
+      global.document.querySelectorAll('[data-fase1-hide="social"]').forEach(function (el) {
+        el.classList.toggle("hidden", on);
+        if (el.tagName === "BUTTON" || el.tagName === "A") {
+          if (on) el.setAttribute("aria-hidden", "true");
+          else el.removeAttribute("aria-hidden");
+          if (on && (el.tagName === "BUTTON" || el.getAttribute("role") === "button")) {
+            el.setAttribute("tabindex", "-1");
+          } else if (el.tagName === "BUTTON") {
+            el.removeAttribute("tabindex");
+          }
         }
-      }
-    });
+        if (on) {
+          el.querySelectorAll('input[type="checkbox"]').forEach(function (inp) {
+            inp.checked = false;
+          });
+          if (el.tagName === "INPUT" && el.type === "checkbox") el.checked = false;
+        }
+      });
+    }
 
-    var hubText = global.document.querySelector(".dash-hub-notice__text");
+    var hubText = global.document && global.document.querySelector(".dash-hub-notice__text");
     if (hubText) {
       hubText.textContent = on
         ? "Favoritos y avisos sin publicar perfil ni banner."
@@ -151,13 +171,30 @@
     }
   }
 
+  function bootPublic() {
+    syncRootClasses();
+    if (!global.document) return;
+    if (global.document.readyState === "loading") {
+      global.document.addEventListener("DOMContentLoaded", function () {
+        applyUI();
+      });
+    } else {
+      applyUI();
+    }
+  }
+
+  syncRootClasses();
+  bootPublic();
+
   global.CarihubDirectoryMode = {
     EVENT: EVENT,
     SOCIAL_MODULES: SOCIAL_MODULES,
     isDirectoryMode: isDirectoryMode,
     isFutureSocialEnabled: isFutureSocialEnabled,
+    allowInternalMessaging: allowInternalMessaging,
     isSocialModule: isSocialModule,
     isQaOverrideHostAllowed: isQaOverrideHostAllowed,
+    syncRootClasses: syncRootClasses,
     applyUI: applyUI,
   };
 })(typeof window !== "undefined" ? window : globalThis);
