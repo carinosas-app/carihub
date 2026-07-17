@@ -786,6 +786,7 @@
     );
   }
 
+  function bindTerminosTriggers(host) {
     if (!host) return;
     host.querySelectorAll('[data-terminos-trigger]').forEach(function (btn) {
       if (btn.dataset.rpBound === '1') return;
