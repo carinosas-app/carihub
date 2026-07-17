@@ -5,6 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Cariñosas — Acompañantes independientes cerca de ti</title>
 <meta name="description" content="Encuentra acompañantes cariñosas cerca de ti. Perfiles reales, verificados y actualizados.">
+<script src="js/directory-mode.js"></script>
+<style id="directory-mode-fouc">
+  html.directory-mode [data-fase1-hide="social"] { display: none !important; }
+</style>
 <link href="https://fonts.googleapis.com/css2?family=Allura&family=Great+Vibes&family=Italianno&family=Montserrat:wght@500;600;700;800;900&family=Pinyon+Script&family=Sacramento&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="fonts/fonts.css">
 <link rel="stylesheet" href="css/carihub-premium-theme.css">
@@ -398,7 +402,7 @@ const CATEGORIAS_BUSCADOR = [
       <svg class="home-trust__icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2" stroke="currentColor" stroke-width="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3" stroke="currentColor" stroke-width="2"/></svg>
       <div><h4 class="home-trust__title">Privacidad</h4><p class="home-trust__text">Tu información está protegida</p></div>
     </button>
-    <button class="home-trust__item" type="button" data-modal="mensajes">
+    <button class="home-trust__item" type="button" data-modal="mensajes" data-fase1-hide="social">
       <svg class="home-trust__icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 6h16v10H7l-3 3V6z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
       <div><h4 class="home-trust__title">Contacto directo</h4><p class="home-trust__text">Comunícate por mensajes internos</p></div>
     </button>
@@ -432,7 +436,7 @@ const CATEGORIAS_BUSCADOR = [
   </div>
 </div>
 
-<div class="home-modal" id="modal-mensajes" role="dialog" aria-modal="true" aria-labelledby="modal-mensajes-title">
+<div class="home-modal" id="modal-mensajes" role="dialog" aria-modal="true" aria-labelledby="modal-mensajes-title" data-fase1-hide="social">
   <div class="home-modal__panel">
     <button class="home-modal__close" type="button" aria-label="Cerrar">&times;</button>
     <h3 class="home-modal__title" id="modal-mensajes-title">Comunícate por mensajes internos</h3>
@@ -786,7 +790,7 @@ const CATEGORIAS_BUSCADOR = [
     <h2 id="modalCuentaTitulo">Iniciar sesión</h2>
 
     <div id="vistaCuentaEntrar">
-      <p class="subtitulo">Entra con tu correo o teléfono y tu contraseña. Administra tu cuenta social, mensajes, favoritos y gratificaciones.</p>
+      <p class="subtitulo">Entra con tu correo o teléfono y tu contraseña. Administra tu cuenta, favoritos y avisos.</p>
       <input id="loginEmail" type="text" placeholder="Correo o teléfono" autocomplete="username">
       <div class="login-inline-alert hidden" id="loginEmailAlert" role="alert" aria-live="polite">
         <button type="button" class="login-inline-alert__close" aria-label="Cerrar aviso" onclick="closeModalAlert('loginEmail', event)">×</button>
@@ -810,7 +814,7 @@ const CATEGORIAS_BUSCADOR = [
     </div>
 
     <div id="vistaCuentaCrear" style="display:none;">
-      <p class="subtitulo">Crea tu cuenta social para mensajes, favoritos, seguir perfiles, gratificaciones y participar en la red de negocios. No aparece en el directorio.</p>
+      <p class="subtitulo">Crea tu cuenta para favoritos y avisos. No aparece en el directorio público.</p>
       <input id="cuentaEmail" type="email" placeholder="Correo">
       <div class="login-inline-alert hidden" id="cuentaEmailAlert" role="alert" aria-live="polite">
         <button type="button" class="login-inline-alert__close" aria-label="Cerrar aviso" onclick="closeModalAlert('cuentaEmail', event)">×</button>
@@ -1019,7 +1023,7 @@ function mostrarVistaCuenta(modo){
   entrar.style.display=modo==="crear"?"none":"block";
   crear.style.display=modo==="crear"?"block":"none";
   const titulo=document.getElementById("modalCuentaTitulo");
-  if(titulo) titulo.textContent=modo==="crear"?"Crear cuenta social":"Iniciar sesión";
+  if(titulo) titulo.textContent=modo==="crear"?"Crear cuenta":"Iniciar sesión";
   if(modo==="entrar"){
     clearAllLoginModalAlerts();
     syncLoginEntrar();
@@ -2854,11 +2858,14 @@ const params = new URLSearchParams(window.location.search);
   }
 
   if(abrir === "mensajes"){
-    setTimeout(function(){
-      if(window.CariHubHomeMensajes && CariHubHomeMensajes.abrirDesdeQuery){
-        CariHubHomeMensajes.abrirDesdeQuery(params);
-      }
-    },700);
+    var dmOn = window.CarihubDirectoryMode && CarihubDirectoryMode.isDirectoryMode();
+    if(!dmOn){
+      setTimeout(function(){
+        if(window.CariHubHomeMensajes && CariHubHomeMensajes.abrirDesdeQuery){
+          CariHubHomeMensajes.abrirDesdeQuery(params);
+        }
+      },700);
+    }
   }
 
   if(abrir === "favoritos"){

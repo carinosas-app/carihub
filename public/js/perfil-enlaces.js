@@ -138,6 +138,9 @@
   }
 
   function mensajesUrl(u) {
+    if (global.CarihubDirectoryMode && global.CarihubDirectoryMode.isDirectoryMode()) {
+      return '';
+    }
     var id = perfilId(u);
     return id
       ? indexHref({ abrir: 'mensajes', perfil: id })
@@ -268,12 +271,20 @@
 
   function wireNav(root, u) {
     var q = queryPerfil();
+    var dmOn = global.CarihubDirectoryMode && global.CarihubDirectoryMode.isDirectoryMode();
     root.querySelectorAll('.pnav a').forEach(function (a) {
       var labelEl = a.querySelector('.pnav__label');
       var label = (labelEl ? labelEl.textContent : a.textContent || '').trim().toLowerCase();
       if (/resultado/i.test(label)) aplicarEnlace(a, resultadosHref(q));
-      else if (/mensaje/i.test(label)) aplicarEnlace(a, mensajesUrl(u));
-      else if (/favorit/i.test(label)) {
+      else if (/mensaje/i.test(label)) {
+        if (dmOn) {
+          a.style.display = 'none';
+          a.setAttribute('aria-hidden', 'true');
+          a.removeAttribute('href');
+          return;
+        }
+        aplicarEnlace(a, mensajesUrl(u));
+      } else if (/favorit/i.test(label)) {
         aplicarEnlace(a, indexHref({ abrir: 'registro', intencion: 'favoritos', perfil: perfilId(u) }));
       } else if (/notific/i.test(label)) {
         aplicarEnlace(a, indexHref({ abrir: 'registro', intencion: 'notificaciones' }));

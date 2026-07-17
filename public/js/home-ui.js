@@ -1158,6 +1158,7 @@
     var modal = document.getElementById('modal-' + id);
     if (!modal) return;
     if (id === 'mensajes') {
+      if (window.CarihubDirectoryMode && CarihubDirectoryMode.isDirectoryMode()) return;
       updateMensajesModal();
       return;
     }
@@ -1173,6 +1174,7 @@
   }
 
   function updateMensajesModal() {
+    if (window.CarihubDirectoryMode && CarihubDirectoryMode.isDirectoryMode()) return;
     if (window.CariHubHomeMensajes && CariHubHomeMensajes.abrirInbox) {
       CariHubHomeMensajes.abrirInbox();
       return;

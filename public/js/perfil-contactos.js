@@ -44,6 +44,9 @@
   }
 
   function activo(u, key) {
+    if (key === 'msg' && global.CarihubDirectoryMode && global.CarihubDirectoryMode.isDirectoryMode()) {
+      return false;
+    }
     if (esDemo(u)) return true;
     var c = cp(u);
     if (key === 'wa') {
@@ -98,6 +101,9 @@
   }
 
   function buildHref(key, u) {
+    if (key === 'msg' && global.CarihubDirectoryMode && global.CarihubDirectoryMode.isDirectoryMode()) {
+      return '';
+    }
     if (esDemo(u)) return demoHref(key, u);
     if (!activo(u, key)) return '';
     var val = String(rawValor(u, key) || '').trim();
@@ -169,6 +175,9 @@
   function lista(u) {
     u = u || {};
     var keys = Array.isArray(u.contactos) && u.contactos.length ? u.contactos.slice() : CANON.slice();
+    if (global.CarihubDirectoryMode && global.CarihubDirectoryMode.isDirectoryMode()) {
+      keys = keys.filter(function (k) { return k !== 'msg'; });
+    }
     return keys.filter(function (k) {
       return !!buildHref(k, u);
     });

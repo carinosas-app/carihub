@@ -57,7 +57,7 @@
       onlyFans: val('fldOnlyfans'),
       googleMapsActivo: on('ctUbicacion'),
       googleMaps: val('fldGoogleMaps'),
-      mensajesInternosActivo: on('ctMensajesInternos'),
+      mensajesInternosActivo: (window.CarihubDirectoryMode && CarihubDirectoryMode.isDirectoryMode()) ? false : on('ctMensajesInternos'),
       mensajeContactoPublicidad: val('fldMensajeContacto')
     };
   }

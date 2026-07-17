@@ -450,7 +450,12 @@
       });
   }
 
+  function directoryBlocksMessaging() {
+    return !!(global.CarihubDirectoryMode && global.CarihubDirectoryMode.isDirectoryMode());
+  }
+
   function abrirInbox() {
+    if (directoryBlocksMessaging()) return;
     var modal = global.document.getElementById('modal-mensajes');
     if (!modal) return;
     if (!puedeEnviar()) {
@@ -671,6 +676,7 @@
   }
 
   function abrir(opts) {
+    if (directoryBlocksMessaging()) return;
     opts = opts || {};
     var modal = global.document.getElementById('modal-mensajes');
     if (!modal) return;
@@ -689,6 +695,7 @@
   }
 
   function abrirDesdeQuery(params) {
+    if (directoryBlocksMessaging()) return;
     params = params || new URLSearchParams(global.location.search);
     var perfil = params.get('perfil') || '';
     var convId = params.get('conv') || '';

@@ -7,6 +7,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>Publicidad Premium | Cariñosas</title>
+<script src="js/directory-mode.js"></script>
+<style id="directory-mode-fouc">
+  html.directory-mode [data-fase1-hide="social"] { display: none !important; }
+</style>
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/modal-carihub.css">
@@ -4193,7 +4197,7 @@ Con tu cuenta podrás:
 <li>Administrar tu perfil, negocio o anuncio desde un solo lugar.</li>
 <li>Recibir mensajes, favoritos, visitas y estadísticas de tu publicación.</li>
 <li>Activar o desactivar los métodos de contacto que deseas mostrar.</li>
-<li>Mostrar WhatsApp, Telegram, Instagram, TikTok, X/Twitter, llamadas, correo electrónico, ubicación y mensajes internos.</li>
+<li>Mostrar WhatsApp, Telegram, Instagram, TikTok, X/Twitter, llamadas, correo electrónico y ubicación.</li>
 <li>Crear y administrar múltiples perfiles, negocios, ciudades o campañas desde una misma cuenta.</li>
 <li>Obtener verificaciones, insignias, favoritos, destacados y mayor visibilidad dentro de Cariñosas.</li>
 <li>Actualizar imágenes, promociones, ubicación y datos de contacto cuando lo necesites.</li>
@@ -4537,7 +4541,7 @@ Selecciona el espacio que deseas rentar
 Elige qué botones y métodos de contacto quieres preparar. Podrás activarlos y desactivarlos desde tu cuenta; cambiar números, usuarios o ubicación puede requerir revisión.
 </p>
 <div class="switch-grid-publicidad">
-<label class="switch-publicidad"><span>Mensaje interno</span><input type="checkbox" id="mostrarMensajeInterno" name="mostrarContacto[]" value="mensaje-interno" checked><small>On</small></label>
+<label class="switch-publicidad" data-fase1-hide="social"><span>Mensaje interno</span><input type="checkbox" id="mostrarMensajeInterno" name="mostrarContacto[]" value="mensaje-interno" checked><small>On</small></label>
 <label class="switch-publicidad"><span>WhatsApp</span><input type="checkbox" id="mostrarWhatsApp" name="mostrarContacto[]" value="whatsapp" checked><small>On</small></label>
 <label class="switch-publicidad"><span>Telegram</span><input type="checkbox" id="mostrarTelegram" name="mostrarContacto[]" value="telegram"><small>Off</small></label>
 <label class="switch-publicidad"><span>Instagram</span><input type="checkbox" id="mostrarInstagram" name="mostrarContacto[]" value="instagram"><small>Off</small></label>
@@ -6846,7 +6850,8 @@ function actualizarSwitchesPublicidad(){
     });
   });
 
-  const mensajesActivos=Boolean(document.getElementById("mostrarMensajeInterno")?.checked);
+  const mensajesActivos=!(window.CarihubDirectoryMode && CarihubDirectoryMode.isDirectoryMode()) &&
+    Boolean(document.getElementById("mostrarMensajeInterno")?.checked);
   const texto=document.getElementById("estadoMensajeInternoTexto");
   if(texto)texto.textContent=mensajesActivos?"Mensajes internos activados":"Mensajes internos apagados";
 }
@@ -7311,7 +7316,8 @@ async function continuarPaso1Publicidad(event){
     precioAnuncio: document.getElementById("precioAnuncio")?.value || "",
     mensajeContactoPublicidad: document.getElementById("mensajeContactoPublicidad")?.value.trim() || "",
     contactoPublico: {
-      mensajeInternoActivo: Boolean(document.getElementById("mostrarMensajeInterno")?.checked),
+      mensajeInternoActivo: !(window.CarihubDirectoryMode && CarihubDirectoryMode.isDirectoryMode()) &&
+        Boolean(document.getElementById("mostrarMensajeInterno")?.checked),
       whatsappActivo: Boolean(document.getElementById("mostrarWhatsApp")?.checked),
       whatsapp: document.querySelector('[data-contact-field="whatsapp"]')?.value.trim() || "",
       telegramActivo: Boolean(document.getElementById("mostrarTelegram")?.checked),
