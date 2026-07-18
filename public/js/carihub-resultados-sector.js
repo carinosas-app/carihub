@@ -136,7 +136,10 @@
 
   global.CARIHUB_SECTOR_BANNER_LABELS = SECTOR_BANNER_LABELS;
 
-  /** Subcategorías adultas con tema arcoíris en resultados. */
+  /**
+   * Subcategorías adultas con tema arcoíris en resultados (SSOT canónico).
+   * FOUC en resultados.html debe usar la misma lista + normLgbtSlug (exact match).
+   */
   var LGBT_SUBCATEGORIAS = [
     'escort gay',
     'antro restaurant bar lgbt',
@@ -183,11 +186,34 @@
     return norm(cat);
   }
 
+  /**
+   * Normaliza categoría/subcategoría para detección LGBTQ+ (exact match).
+   * Equivalente al FOUC de resultados.html — no usar indexOf parcial.
+   * "escort-gay" / "escort_gay" / "Escort Gay" → "escort gay"
+   */
+  function normLgbtSlug(t) {
+    return String(t || '')
+      .trim()
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[-_]+/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
   function esSubcategoriaLgbt(cat) {
     if (!cat) return false;
-    var id = subcategoriaIdDe(cat);
+    var raw = normLgbtSlug(cat);
+    if (!raw) return false;
+    var looked = '';
+    var fe = global.CariHubFieldEngineLite;
+    if (fe && typeof fe.lookupSubcategoriaId === 'function') {
+      looked = normLgbtSlug(fe.lookupSubcategoriaId(cat) || '');
+    }
     for (var i = 0; i < LGBT_SUBCATEGORIAS.length; i++) {
-      if (norm(LGBT_SUBCATEGORIAS[i]) === id) return true;
+      var canon = normLgbtSlug(LGBT_SUBCATEGORIAS[i]);
+      if (canon === raw || (looked && canon === looked)) return true;
     }
     return false;
   }
@@ -336,6 +362,7 @@
     LGBT_SUBCATEGORIAS: LGBT_SUBCATEGORIAS,
     sectorDeCategoria: sectorDeCategoria,
     esSubcategoriaLgbt: esSubcategoriaLgbt,
+    normLgbtSlug: normLgbtSlug,
     bannerDeSubcategoria: bannerDeSubcategoria,
     aplicarTemaSector: aplicarTemaSector,
     syncPageSheen: syncPageSheen,
