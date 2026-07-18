@@ -17,6 +17,13 @@
   var INIT_ERROR_BANNER_ID = 'carihub-init-error-banner';
   var pendingBannerMessage = null;
 
+  /** Local Emulator Suite ports — must match firebase.json "emulators". */
+  var EMULATOR_PORTS = {
+    auth: 9099,
+    firestore: 8080,
+    storage: 9199
+  };
+
   var state = {
     ready: false,
     initError: null,
@@ -24,8 +31,88 @@
     auth: null,
     db: null,
     storage: null,
-    appCheck: null
+    appCheck: null,
+    usingEmulators: false
   };
+
+  /**
+   * Emulators ONLY on localhost/127.0.0.1 and only with explicit opt-in.
+   * Never on hosted/production hostnames.
+   *
+   * Opt-in (any one):
+   *   ?firebaseEmulator=1
+   *   localStorage carihub.firebaseEmulator=1
+   *   window.__CARIHUB_FIREBASE_EMULATOR__ === true
+   *
+   * Explicit off on localhost: ?firebaseEmulator=0
+   */
+  function shouldUseEmulators() {
+    if (typeof global.location === 'undefined') return false;
+    var hostname = String(global.location.hostname || '').toLowerCase();
+    if (hostname !== 'localhost' && hostname !== '127.0.0.1') return false;
+
+    if (global.__CARIHUB_FIREBASE_EMULATOR__ === true) return true;
+    if (global.__CARIHUB_FIREBASE_EMULATOR__ === false) return false;
+
+    try {
+      var params = new URLSearchParams(global.location.search || '');
+      var q = params.get('firebaseEmulator');
+      if (q === '0' || q === 'false') return false;
+      if (q === '1' || q === 'true') return true;
+    } catch (e) { /* ignore */ }
+
+    try {
+      if (global.localStorage) {
+        var ls = global.localStorage.getItem('carihub.firebaseEmulator');
+        if (ls === '0' || ls === 'false') return false;
+        if (ls === '1' || ls === 'true') return true;
+      }
+    } catch (e2) { /* ignore */ }
+
+    return false;
+  }
+
+  function connectEmulators(auth, db, storage) {
+    var host = '127.0.0.1';
+    if (auth && typeof auth.useEmulator === 'function') {
+      auth.useEmulator('http://' + host + ':' + EMULATOR_PORTS.auth, {
+        disableWarnings: true
+      });
+    }
+    if (db && typeof db.useEmulator === 'function') {
+      db.useEmulator(host, EMULATOR_PORTS.firestore);
+      // Headless browsers / some Windows hosts fail WebChannel to the emulator
+      // without long-polling; merge keeps defaults when already configured.
+      try {
+        db.settings({ experimentalForceLongPolling: true, merge: true });
+      } catch (settingsErr) {
+        console.warn('[CariHub Core] Firestore emulator settings', settingsErr);
+      }
+    }
+    // Storage emulator is optional: enable with ?firebaseEmulatorStorage=1 or
+    // localStorage carihub.firebaseEmulatorStorage=1 (avoids dead-port hangs
+    // when only Auth+Firestore are running).
+    var useStorageEmu = false;
+    try {
+      var sp = new URLSearchParams(global.location && global.location.search || '');
+      var sq = sp.get('firebaseEmulatorStorage');
+      if (sq === '1' || sq === 'true' || global.__CARIHUB_FIREBASE_EMULATOR_STORAGE__ === true) {
+        useStorageEmu = true;
+      } else if (global.localStorage && global.localStorage.getItem('carihub.firebaseEmulatorStorage') === '1') {
+        useStorageEmu = true;
+      }
+    } catch (e3) { /* ignore */ }
+    if (useStorageEmu && storage && typeof storage.useEmulator === 'function') {
+      storage.useEmulator(host, EMULATOR_PORTS.storage);
+    }
+    console.info(
+      '[CariHub Core] Firebase Emulator Suite — auth:' +
+        EMULATOR_PORTS.auth +
+        ' firestore:' +
+        EMULATOR_PORTS.firestore +
+        (useStorageEmu ? ' storage:' + EMULATOR_PORTS.storage : ' storage:skipped')
+    );
+  }
 
   function renderInitErrorBanner(message) {
     if (typeof document === 'undefined') return;
@@ -113,6 +200,14 @@
       if (typeof global.firebase.storage === 'function') {
         state.storage = global.firebase.storage();
       }
+
+      if (shouldUseEmulators()) {
+        connectEmulators(state.auth, state.db, state.storage);
+        state.usingEmulators = true;
+      } else {
+        state.usingEmulators = false;
+      }
+
       state.ready = true;
 
       global.CariHubDB = state.db;
@@ -181,6 +276,8 @@
 
   global.CariHubCore = {
     config: FIREBASE_CONFIG,
+    emulatorPorts: EMULATOR_PORTS,
+    shouldUseEmulators: shouldUseEmulators,
     initFirebase: initFirebase,
     requireAuth: requireAuth,
     onAuthStateChanged: onAuthStateChanged,
@@ -188,6 +285,7 @@
     assertReady: assertReady,
     get ready() { return initFirebase().ready; },
     get initError() { return initFirebase().initError; },
+    get usingEmulators() { return initFirebase().usingEmulators; },
     get app() { return initFirebase().app; },
     get auth() { return initFirebase().auth; },
     get db() { return initFirebase().db; },
