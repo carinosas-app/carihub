@@ -83,7 +83,7 @@ Referencia consolidada de trabajo pendiente, prioridades, dependencias y reglas 
 | TICKET-001 | Firebase core único |
 | TICKET-003 | Multi-perfil runtime |
 | ECO-030 | Webhook Stripe + activación |
-| **REG-SYNTAX-P0** | **Registro Perfil — SyntaxError por cabecera faltante `function bindTerminosTriggers(host) {`** en `public/js/carihub-private-fields-lite.js` (cuerpo huérfano tras `renderAccessConfirmBlock`; síntoma ~L806). Causa preexistente (`410904c`, no B2). **Fix Alternativa A** en rama `fix/registration-syntax-p0`: reinsertar solo esa línea. Estado: **implementado, pendiente commit/PR.** |
+| **REG-SYNTAX-P0** | **Registro Perfil — SyntaxError por cabecera faltante `function bindTerminosTriggers(host) {`** en `public/js/carihub-private-fields-lite.js` (cuerpo huérfano tras `renderAccessConfirmBlock`; síntoma ~L806). Causa preexistente (`410904c`, no B2). **Fix Alternativa A** en rama `fix/registration-syntax-p0`: reinsertar solo esa línea. Estado: **CLOSED / INTEGRATED** — PR #145, squash `60983614564ae8b83744b1d338c1d12a8d8a0522`. |
 
 ### Dashboard UX (P2)
 | ID | Título |
