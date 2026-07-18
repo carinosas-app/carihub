@@ -38,9 +38,26 @@
     else if (k.indexOf('industr') >= 0 || k.indexOf('maquin') >= 0) s = 'industria';
     else if (k.indexOf('inmobil') >= 0 || k.indexOf('bienes') >= 0 || k.indexOf('casa') >= 0 && k.indexOf('escort') < 0) s = 'bienes-raices';
     document.body.setAttribute('data-sector', s);
-    var lgbtHint = ['escort gay', 'antro restaurant bar lgbt', 'antro lgbt', 'trans', 'femboy', 'lesbians', 'tom boy', 'tom fem'];
-    for (var i = 0; i < lgbtHint.length; i++) {
-      if (k.indexOf(lgbtHint[i]) >= 0) {
+    /* LGBTQ+ FOUC — misma lista/norma que CariHubResultadosSector.esSubcategoriaLgbt (exact match). */
+    var lgbtCanon = [
+      'escort gay',
+      'antro restaurant bar lgbt',
+      'trans',
+      'femboy',
+      'lesbians',
+      'tom boy',
+      'tom fem'
+    ];
+    var lgbtKey = String(cat || '')
+      .trim()
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[-_]+/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+    for (var i = 0; i < lgbtCanon.length; i++) {
+      if (lgbtKey === lgbtCanon[i]) {
         document.body.setAttribute('data-subtema', 'lgbt');
         break;
       }
