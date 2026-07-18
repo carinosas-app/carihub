@@ -248,9 +248,28 @@
 
 <script>
 (function () {
-  /* Demo del IDE: solo localhost / ?preview=1 — producción usa perfiles reales de Firestore */
+  /* Demo del IDE: solo localhost / ?preview=1 — producción usa perfiles reales de Firestore.
+     Opt-in emulator (?firebaseEmulator=1 | localStorage | __CARIHUB_FIREBASE_EMULATOR__)
+     alinea con carihub-core.js: no forzar preview; permite perfiles registrados. */
   var p = new URLSearchParams(location.search);
   if (p.has('vista')) return;
+
+  var emuQ = p.get('firebaseEmulator');
+  if (emuQ === '1' || emuQ === 'true') return;
+  if (emuQ === '0' || emuQ === 'false') {
+    /* explicit off — keep local demo fallback below when on localhost */
+  } else {
+    try {
+      if (window.__CARIHUB_FIREBASE_EMULATOR__ === true) return;
+      if (window.__CARIHUB_FIREBASE_EMULATOR__ === false) {
+        /* explicit off via window flag */
+      } else if (window.localStorage) {
+        var ls = localStorage.getItem('carihub.firebaseEmulator');
+        if (ls === '1' || ls === 'true') return;
+      }
+    } catch (e) { /* ignore */ }
+  }
+
   var host = location.hostname;
   var esDev = host === 'localhost' || host === '127.0.0.1' || location.protocol === 'file:' || p.get('preview') === '1';
   if (!esDev) return;
