@@ -13,10 +13,30 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..');
 const require = createRequire(import.meta.url);
 
-if (!process.env.FIRESTORE_EMULATOR_HOST) {
-  console.error('[approve-roundtrip] ABORT: FIRESTORE_EMULATOR_HOST required');
-  process.exit(1);
+/** Same locality gate as e2e-emulator-approve-profile.mjs — before any seed/write. */
+function assertLocalEmulatorHost() {
+  const host = process.env.FIRESTORE_EMULATOR_HOST;
+  if (!host) {
+    console.error(
+      '[approve-roundtrip] ABORT: FIRESTORE_EMULATOR_HOST is required.\n' +
+        '  Example: $env:FIRESTORE_EMULATOR_HOST="127.0.0.1:8080"'
+    );
+    process.exit(1);
+  }
+  const normalized = String(host).toLowerCase();
+  if (
+    !normalized.startsWith('127.0.0.1:') &&
+    !normalized.startsWith('localhost:')
+  ) {
+    console.error(
+      `[approve-roundtrip] ABORT: FIRESTORE_EMULATOR_HOST="${host}" is not local.`
+    );
+    process.exit(1);
+  }
+  return host;
 }
+
+assertLocalEmulatorHost();
 
 let admin;
 try {
