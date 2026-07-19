@@ -1,46 +1,54 @@
 /**
  * Imágenes oficiales por subcategoría adulta — fuente única para Home y pickers con foto.
  * Las tarjetas «Explora categorías» y cualquier selector adulto con imagen usan este mapa.
+ * Pack fotográfico 2026-07: cat-cards/*-pro.png
  */
 (function (global) {
   'use strict';
 
+  var BASE = 'img/home/cat-cards/';
+
+  function pro(file) {
+    return BASE + file;
+  }
+
   var OFICIAL = {
-    escort: { src: 'img/home/cat-cards/escort.png', pos: 'center center' },
-    'escort gay': { src: 'img/home/hero-escort-gay.png', pos: 'center center' },
-    'escort vip': { src: 'img/home/hero-carinosa-motel-spa-runway.png', pos: 'center center' },
-    edecan: { src: 'img/home/hero-carinosa-motel-spa-runway.png', pos: 'center center' },
-    stripper: { src: 'img/home/cat-cards/stripper.png', pos: 'center center' },
-    modelos: { src: 'img/home/cat-cards/modelos.png', pos: 'center center' },
-    gigolo: { src: 'img/home/cat-cards/stripper.png', pos: 'center center' },
-    acompanante: { src: 'img/home/motel-spa-model.jpg', pos: 'center center' },
-    petit: { src: 'img/home/cat-cards/petit.png', pos: 'center center' },
-    contenido: { src: 'img/home/cat-cards/creadora-contenido.png', pos: 'center center' },
-    tabledance: { src: 'img/home/cat-cards/tabledance.png', pos: 'center center' },
-    'sex shop': { src: 'img/home/sexshop.jpg', pos: 'center center' },
-    spa: { src: 'img/home/cat-cards/spa.png', pos: 'center center' },
-    masajes: { src: 'img/home/cat-cards/spa.png', pos: 'center center' },
-    'club sw': { src: 'img/home/lounge-swinger.jpg', pos: 'center center' },
-    'antro restaurant bar': { src: 'img/home/cat-cards/antros.png', pos: 'center center' },
-    'antro restaurant bar lgbt': { src: 'img/home/cat-cards/antro-lgbt.png', pos: 'center center', fit: 'cover' },
-    'hotel motel': { src: 'img/home/motel-noche.jpg', pos: 'center center' },
-    'cabinas glory holes': { src: 'img/home/cat-cards/cabinas-glory-holes.png', pos: 'center center' },
-    trans: { src: 'img/home/cat-cards/trans.png', pos: 'center center' },
-    femboy: { src: 'img/home/cat-cards/femboy.png', pos: 'center center' },
-    'parejas swinger': { src: 'img/home/cat-cards/parejas-swinger.png', pos: 'center center', fit: 'contain', bg: '#121018' },
-    swinger: { src: 'img/home/cat-cards/parejas-swinger.png', pos: 'center center', fit: 'contain', bg: '#121018' },
-    unicorns: { src: 'img/home/lounge-swinger.jpg', pos: 'center center' },
-    'cuckold hotwife': { src: 'img/home/cat-cards/queen-of-spades.png', pos: 'center center', fit: 'contain', bg: '#ffffff' },
-    cuckold: { src: 'img/home/cat-cards/queen-of-spades.png', pos: 'center center', fit: 'contain', bg: '#ffffff' },
-    singles: { src: 'img/home/nightclub.jpg', pos: 'center center' },
-    lesbians: { src: 'img/home/cat-cards/lesbians.png', pos: 'center center' },
-    'tom boy': { src: 'img/home/escort-gay.jpg', pos: 'center center' },
-    'tom fem': { src: 'img/home/cat-cards/tom-fem.png', pos: 'center center' },
-    dotados: { src: 'img/home/cat-cards/stripper.png', pos: 'center center' },
-    fetiche: { src: 'img/home/cat-cards/dominatrix.png', pos: 'center center', fit: 'contain', bg: '#ffffff' },
-    sado: { src: 'img/home/cat-cards/dominatrix.png', pos: 'center center', fit: 'contain', bg: '#ffffff' },
-    dominatrix: { src: 'img/home/cat-cards/dominatrix.png', pos: 'center center', fit: 'contain', bg: '#ffffff' },
-    'cine xxx': { src: 'img/home/cat-cards/cine-xxx.png', pos: 'center center' }
+    escort: { src: pro('carinosas-pro.png'), pos: 'center center' },
+    'escort gay': { src: pro('escort-gay-pro.png'), pos: 'center center' },
+    'escort vip': { src: pro('carinosas-vip-pro.png'), pos: 'center center' },
+    edecan: { src: pro('edecan-pro.png'), pos: 'center center' },
+    stripper: { src: pro('stripper-pro.png'), pos: 'center center' },
+    modelos: { src: pro('modelos-pro.png'), pos: 'center center' },
+    gigolo: { src: pro('gigolo-pro.png'), pos: 'center center' },
+    acompanante: { src: pro('acompanante-pro.png'), pos: 'center center' },
+    petit: { src: pro('petit-pro.png'), pos: 'center center' },
+    contenido: { src: pro('contenido-pro.png'), pos: 'center center' },
+    tabledance: { src: pro('tabledance-pro.png'), pos: 'center center' },
+    'sex shop': { src: pro('sexshop-pro.png'), pos: 'center center' },
+    spa: { src: pro('spa-pro.png'), pos: 'center center' },
+    masajes: { src: pro('masajes-pro.png'), pos: 'center center' },
+    'club sw': { src: pro('club-sw-pro.png'), pos: 'center center' },
+    'antro restaurant bar': { src: pro('antros-pro.png'), pos: 'center center' },
+    'antro restaurant bar lgbt': { src: pro('antro-lgbt-pro.png'), pos: 'center center', fit: 'cover' },
+    'hotel motel': { src: pro('hotel-motel-pro.png'), pos: 'center center' },
+    'cabinas glory holes': { src: pro('cabinas-pro.png'), pos: 'center center' },
+    trans: { src: pro('trans-pro.png'), pos: 'center center' },
+    femboy: { src: pro('femboy-pro.png'), pos: 'center center' },
+    'parejas swinger': { src: pro('parejas-swinger-pro.png'), pos: 'center center' },
+    swinger: { src: pro('swinger-pro.png'), pos: 'center center' },
+    unicorns: { src: pro('unicorns-pro.png'), pos: 'center center' },
+    'cuckold hotwife': { src: pro('hotwife-pro.png'), pos: 'center center' },
+    cuckold: { src: pro('cuckold-pro.png'), pos: 'center center' },
+    hotwife: { src: pro('hotwife-pro.png'), pos: 'center center' },
+    singles: { src: pro('singles-pro.png'), pos: 'center center' },
+    lesbians: { src: pro('lesbians-pro.png'), pos: 'center center' },
+    'tom boy': { src: pro('tom-boy-pro.png'), pos: 'center center' },
+    'tom fem': { src: pro('tom-fem-pro.png'), pos: 'center center' },
+    dotados: { src: pro('dotados-pro.png'), pos: 'center center' },
+    fetiche: { src: pro('fetiche-pro.png'), pos: 'center center' },
+    sado: { src: pro('sado-pro.png'), pos: 'center center' },
+    dominatrix: { src: pro('dominatrix-pro.png'), pos: 'center center' },
+    'cine xxx': { src: pro('cine-xxx-pro.png'), pos: 'center center' }
   };
 
   function norm(id) {
@@ -71,11 +79,25 @@
     return vis;
   }
 
+  /** Lista de src pro únicos — para composición de rail (hasta 3). */
+  function allProSrcs() {
+    var seen = {};
+    var out = [];
+    Object.keys(OFICIAL).forEach(function (k) {
+      var src = OFICIAL[k] && OFICIAL[k].src;
+      if (!src || seen[src]) return;
+      seen[src] = true;
+      out.push(src);
+    });
+    return out;
+  }
+
   global.CARIHUB_CATEGORIA_IMAGENES_OFICIALES = OFICIAL;
   global.CariHubCategoriaImagenes = {
     get: get,
     applyCatVisual: applyCatVisual,
-    queenOfSpades: 'img/home/cat-cards/queen-of-spades.png',
-    parejasSwinger: 'img/home/cat-cards/parejas-swinger.png'
+    allProSrcs: allProSrcs,
+    queenOfSpades: pro('hotwife-pro.png'),
+    parejasSwinger: pro('parejas-swinger-pro.png')
   };
 })(typeof window !== 'undefined' ? window : globalThis);
