@@ -285,7 +285,30 @@
     );
   }
 
+  /** Phase 1: skip Estados/LIBE inject while Directory Mode is ON (FA code kept inactive). */
+  function isEstadosLibeHiddenByDirectoryMode() {
+    if (global.CarihubDirectoryMode && typeof global.CarihubDirectoryMode.isDirectoryMode === 'function') {
+      return !!global.CarihubDirectoryMode.isDirectoryMode();
+    }
+    /* Fail closed for public Phase 1 if directory-mode.js is missing. */
+    return true;
+  }
+
+  function clearMidbandFaHosts() {
+    ['resMidEstados', 'resMidLibe'].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (!el) return;
+      el.innerHTML = '';
+      el.setAttribute('hidden', '');
+      el.setAttribute('aria-hidden', 'true');
+    });
+  }
+
   function syncMidbandSinResultados() {
+    if (isEstadosLibeHiddenByDirectoryMode()) {
+      clearMidbandFaHosts();
+      return;
+    }
     var map = {
       resMidEstados: 'sin_resultados_estados',
       resMidLibe: 'sin_resultados_libe'
@@ -293,6 +316,8 @@
     Object.keys(map).forEach(function (id) {
       var el = document.getElementById(id);
       if (!el) return;
+      el.removeAttribute('hidden');
+      el.removeAttribute('aria-hidden');
       el.innerHTML = buildMidbandBannerHTML(map[id]);
     });
   }
@@ -334,18 +359,6 @@
         '<div class="pb-slot__stage" data-pb-stage>' + slides + '</div>' +
       '</a>'
     );
-  }
-
-  function syncMidbandSinResultados() {
-    var map = {
-      resMidEstados: 'sin_resultados_estados',
-      resMidLibe: 'sin_resultados_libe'
-    };
-    Object.keys(map).forEach(function (id) {
-      var el = document.getElementById(id);
-      if (!el) return;
-      el.innerHTML = buildMidbandBannerHTML(map[id]);
-    });
   }
 
   function restaurar(wrap) {

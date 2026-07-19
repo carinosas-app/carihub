@@ -140,8 +140,31 @@
     return !!(list && list.classList.contains('res-lista--vacio'));
   }
 
+  /** Phase 1: skip Estados/LIBE inject while Directory Mode is ON (FA code kept inactive). */
+  function isEstadosLibeHiddenByDirectoryMode() {
+    if (global.CarihubDirectoryMode && typeof global.CarihubDirectoryMode.isDirectoryMode === 'function') {
+      return !!global.CarihubDirectoryMode.isDirectoryMode();
+    }
+    /* Fail closed for public Phase 1 if directory-mode.js is missing. */
+    return true;
+  }
+
+  function clearMidbandFaHosts() {
+    ['resMidEstados', 'resMidLibe'].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (!el) return;
+      el.innerHTML = '';
+      el.setAttribute('hidden', '');
+      el.setAttribute('aria-hidden', 'true');
+    });
+  }
+
   function mount(opts) {
     opts = opts || {};
+    if (isEstadosLibeHiddenByDirectoryMode()) {
+      clearMidbandFaHosts();
+      return;
+    }
     if (!opts.force && esPaginaSinResultados()) return;
 
     var Q = opts.Q || queryFromLocation();
@@ -153,6 +176,8 @@
     Object.keys(map).forEach(function (id) {
       var el = document.getElementById(id);
       if (!el) return;
+      el.removeAttribute('hidden');
+      el.removeAttribute('aria-hidden');
       el.innerHTML = buildBannerHTML(map[id], Q);
     });
   }
