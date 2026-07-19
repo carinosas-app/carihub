@@ -12,10 +12,43 @@
   html.directory-mode .feed-grat-btn,
   html.directory-mode .act-negocio.playout__estado,
   html.directory-mode #gratModal { display: none !important; }
+  html.directory-mode [data-directory-hide="estados-libe-docks"],
+  html.directory-mode .ch-slot-dock--home,
+  html.directory-mode .ch-slot-dock--hero,
+  html.directory-mode .res-midband__slot--estados,
+  html.directory-mode .res-midband__slot--libe { display: none !important; }
+  html.directory-mode .res-midband { min-height: auto; height: auto; gap: 0; }
+  html.directory-mode .res-midband__center { flex: 1 1 auto; width: 100%; max-width: 100%; }
+  /* Sin hueco vertical donde iba el feed estados/en vivo; no estirar columna vacía */
+  html.directory-mode [data-tema="adult"] .playout__col--der .playout__derstack,
+  html.directory-mode [data-vista="adult"] .playout__col--der .playout__derstack,
+  html.directory-mode [data-vista="negocio"] .playout__col--der .playout__derstack {
+    margin-top: 0 !important;
+    flex: 0 0 auto;
+  }
+  [data-tema="adult"] .playout__derstack > .pcard:first-child,
+  [data-vista="adult"] .playout__derstack > .pcard:first-child,
+  [data-vista="negocio"] .playout__derstack > .pcard:first-child {
+    flex: 0 0 auto !important;
+  }
+  [data-tema="adult"] .playout__col--der,
+  [data-vista="adult"] .playout__col--der {
+    align-self: start;
+    justify-content: flex-start;
+  }
 </style>
 <link rel="stylesheet" href="fonts/fonts.css">
 <link rel="stylesheet" href="css/carihub-premium-theme.css">
 <link rel="stylesheet" href="css/carihub-pink-sheen.css">
+<link rel="stylesheet" href="css/carihub-sector-theme-vars.css?v=20260719perfil2">
+<link rel="stylesheet" href="css/carihub-adult-pro-background.css?v=20260719perfil2">
+<link rel="stylesheet" href="css/carihub-lgbt-theme.css?v=20260719f2">
+<link rel="stylesheet" href="css/carihub-sector-sparkles.css?v=20260719perfil2">
+<link rel="stylesheet" href="css/carihub-page-sector-sparkles.css?v=20260719perfil2">
+<link rel="stylesheet" href="css/carihub-sector-pro-background.css?v=20260719perfil2">
+<link rel="stylesheet" href="css/perfil-sector-visual.css?v=20260719pp2">
+<link rel="stylesheet" href="css/resultados.css?v=20260719pp-chrome1">
+<link rel="stylesheet" href="css/carihub-media-placeholders.css?v=20260630hf1">
 <link rel="stylesheet" href="css/carihub-nav-quick.css">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700&display=swap">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0&display=swap">
@@ -26,6 +59,9 @@
 <script src="js/carihub-core.js"></script>
 <script src="js/ch-ui.js"></script>
 <script src="js/carihub-pink-sheen.js"></script>
+<script src="js/carihub-sector-sparkles.js?v=20260719perfil1"></script>
+<script src="js/carihub-resultados-sector.js?v=20260719perfil1"></script>
+<script src="js/carihub-perfil-sector-visual.js?v=20260719perfil1"></script>
 <script src="js/carihub-nav-quick.js"></script>
 <script src="js/registro-negocio-adulto.js"></script>
 <script src="js/data/registro-schema-index.js"></script>
@@ -39,14 +75,14 @@
 <script src="js/data/registro-sector-contract-registry.js?v=20260702reg-v1"></script>
 <script src="js/carihub-gastronomia-sector-render.js?v=20260702gast1"></script>
 <script src="js/carihub-public-render-lite.js?v=20260627e3"></script>
-<script src="js/resultados-demo.js"></script>
+<script src="js/resultados-demo.js?v=20260719lgbt1"></script>
 <script src="js/carihub-multi-perfil.js"></script>
 <script src="js/carihub-blk01-profile-sanitize.js"></script>
 <script src="js/carihub-blk01-hub-adapter.js"></script>
 <script src="js/carihub-blk01-config.js"></script>
 <script src="js/carihub-profile-resolver.js"></script>
 <script src="js/carihub-blk01-owner-hint-provider.js"></script>
-<script src="js/perfil-publico-init.js"></script>
+<script src="js/perfil-publico-init.js?v=20260719pp3"></script>
   <script src="js/carihub-messenger-privacidad-ui.js"></script>
   <script src="js/carihub-messenger-privacidad-schema.js"></script>
   <script src="js/carihub-messenger-privacidad-enforcement.js"></script>
@@ -112,6 +148,7 @@ body.perfil-embed-dashboard{background:var(--bg);}
 body.perfil-embed-dashboard .pb,
 body.perfil-embed-dashboard .pbrand,
 body.perfil-embed-dashboard .profile-toolbar,
+body.perfil-embed-dashboard .perfil-res-chrome,
 body.perfil-embed-dashboard .playout__banner-adult,
 body.perfil-embed-dashboard .negocio-pie-wrap--bottom,
 body.perfil-embed-dashboard .ch-slot-dock,
@@ -181,6 +218,7 @@ body.perfil-embed-dashboard-inicio{background:var(--bg);}
 body.perfil-embed-dashboard-inicio .pb,
 body.perfil-embed-dashboard-inicio .pbrand,
 body.perfil-embed-dashboard-inicio .profile-toolbar,
+body.perfil-embed-dashboard-inicio .perfil-res-chrome,
 body.perfil-embed-dashboard-inicio .playout__banner-adult,
 body.perfil-embed-dashboard-inicio .negocio-pie-wrap--bottom,
 body.perfil-embed-dashboard-inicio .ch-slot-dock,
@@ -260,20 +298,80 @@ body.perfil-sheen-none::before{display:none!important;}
 @keyframes rain-fall-mini{0%{transform:translateY(-20%) rotate(0)}100%{transform:translateY(360%) rotate(360deg)}}
 @media (prefers-reduced-motion: reduce){.rain-coin,.rain-flash,.thumb .liverain i{animation:none !important}}
 
-.wrap{max-width:1100px;margin:0 auto;padding:16px 16px 88px;}
-body:not(.fit) .wrap{max-width:1100px;}
+/* Chrome Resultados reutilizado en perfil (midband + search dock) */
+body:not(.fit) .wrap{
+  max-width:var(--res-design-w,1120px);
+  margin-left:auto;
+  margin-right:auto;
+}
+body:not(.fit) .perfil-res-top{
+  width:100%;
+  max-width:100%;
+  display:flex;
+  flex-direction:column;
+  box-sizing:border-box;
+}
+body:not(.fit) .perfil-res-top > .pb,
+body:not(.fit) .perfil-res-top .perfil-res-chrome,
+body:not(.fit) .perfil-res-top .res-midband,
+body:not(.fit) .perfil-res-top .res-search-dock,
+body:not(.fit) .wrap > .playout{
+  width:100%;
+  max-width:100%;
+  box-sizing:border-box;
+}
+body:not(.fit) .perfil-res-chrome{
+  width:100%;
+  max-width:100%;
+  margin:0 0 14px;
+}
+body:not(.fit) .perfil-res-chrome .res-midband{
+  margin-bottom:10px;
+}
+body:not(.fit) .perfil-res-chrome .res-search-dock--top{
+  margin-bottom:12px;
+}
+/* Paridad con Resultados: slots imagen sin padding flex del .pb a legado */
+body:not(.fit) .pb > a.pb-slot{
+  padding:0 !important;
+  display:block !important;
+  align-items:stretch;
+  color:inherit;
+}
+body:not(.fit) .pb > a.pb-slot .pb-slot__stage,
+body:not(.fit) .pb > a.pb-slot .pb-slot__slide,
+body:not(.fit) .pb > a.pb-slot .pb-slot__slide img{
+  width:100%;
+  height:100%;
+  min-height:158px;
+  object-fit:cover;
+  display:block;
+}
+/* Evitar que .pb de Results CSS pelee con embeds */
+body.perfil-embed-dashboard .perfil-res-chrome,
+body.perfil-embed-dashboard-inicio .perfil-res-chrome,
+body.perfil-embed-dashboard .perfil-res-top,
+body.perfil-embed-dashboard-inicio .perfil-res-top{display:none !important;}
+
+body:not(.fit) #fitOuter,
+body:not(.fit) #fitSpacer,
+body:not(.fit) #fitRoot{
+  position:static;width:100%;max-width:none;margin:0;transform:none;min-height:0;
+}
+body:not(.fit) #fitRoot{width:100%;}
 
 /* ===== BANNERS ===== */
-.pb{display:flex;gap:12px;margin-bottom:16px;}
-.pb a{flex:1 1 0;position:relative;overflow:hidden;border-radius:16px;color:#fff;padding:14px 16px;min-height:108px;display:flex;align-items:center;box-shadow:var(--shadow);}
-.pb__imgbanner{padding:0;min-height:108px;display:block;border-radius:16px;overflow:hidden;box-shadow:var(--shadow);}
-.pb__imgbanner img{width:100%;height:100%;min-height:108px;object-fit:cover;object-position:center;display:block;}
+/* Fila superior: misma proporción visual que resultados (.pb), renta propia perfil_* */
+.pb{display:flex;gap:14px;margin-bottom:14px;flex-wrap:nowrap;}
+.pb a{flex:1 1 0;position:relative;overflow:hidden;border-radius:16px;color:#fff;padding:14px 16px;min-height:158px;display:flex;align-items:center;box-shadow:var(--shadow);}
+.pb__imgbanner{padding:0;min-height:158px;display:block;border-radius:16px;overflow:hidden;box-shadow:var(--shadow);}
+.pb__imgbanner img{width:100%;height:100%;min-height:158px;object-fit:cover;object-position:center;display:block;}
 .pb-slot{
   flex:1 1 0;position:relative;overflow:hidden;border-radius:16px;
-  min-height:108px;display:block;box-shadow:var(--shadow);
+  min-height:158px;display:block;box-shadow:var(--shadow);
   text-decoration:none;color:#fff;padding:0;
 }
-.pb-slot.pb--center{flex:1.55 1 0;}
+.pb-slot.pb--center,.pb--center{flex:1.55 1 0;}
 .pb-slot--bottom{
   display:block;width:100%;flex:none;
   min-height:128px;margin-top:36px;margin-bottom:12px;border-radius:20px;
@@ -282,29 +380,37 @@ body:not(.fit) .wrap{max-width:1100px;}
 .pb-slot--bottom .pb-slot__slide img{min-height:128px;}
 [data-tema="adult"] .pb-slot--bottom{min-height:140px;margin-top:16px;}
 [data-tema="adult"] .pb-slot--bottom .pb-slot__slide img{min-height:140px;}
-.pb-slot__stage{position:relative;width:100%;min-height:108px;height:100%;overflow:hidden;}
+.pb-slot__stage{position:relative;width:100%;min-height:158px;height:100%;overflow:hidden;}
+.pb-slot--bottom .pb-slot__stage{min-height:inherit;}
 .pb-slot__slide{
   position:absolute;inset:0;opacity:0;visibility:hidden;pointer-events:none;
-  transition:opacity .55s ease,visibility .55s ease;z-index:0;
+  transition:opacity .45s ease;z-index:0;
   overflow:hidden;
 }
 .pb-slot__slide.is-active{opacity:1;visibility:visible;pointer-events:auto;z-index:1;}
 .pb-slot__slide:not(.is-active){transform:translateX(0);clip-path:inset(0);}
 .pb-slot__slide img,
-.pb-slot__media{width:100%;height:100%;min-height:108px;object-fit:cover;object-position:center;display:block;}
-.pb-slot__slide--html{display:flex;align-items:center;padding:14px 16px;min-height:108px;}
+.pb-slot__media{width:100%;height:100%;min-height:158px;object-fit:cover;object-position:center;display:block;}
+.pb-slot--bottom .pb-slot__slide img,
+.pb-slot--bottom .pb-slot__media{min-height:128px;}
+.pb-slot__slide--html{display:flex;align-items:center;padding:14px 16px;min-height:158px;}
+.pb-slot--bottom .pb-slot__slide--html{min-height:128px;}
+/* Dots superiores: igual que resultados (esquina inferior derecha) */
+.pb .pb-slot:not(.pb-slot--bottom) .pb-slot__dots{
+  position:absolute;right:10px;bottom:8px;left:auto;z-index:2;
+  display:flex;justify-content:flex-end;gap:5px;pointer-events:none;
+}
 .pb-slot__dots{
   position:absolute;left:0;right:0;bottom:6px;z-index:3;
   display:flex;justify-content:center;gap:5px;pointer-events:none;
 }
 .pb-slot__dot{
-  width:5px;height:5px;border-radius:50%;
-  background:rgba(255,255,255,.42);
-  box-shadow:0 0 0 1px rgba(0,0,0,.22);
+  width:7px;height:7px;border-radius:50%;
+  background:rgba(255,255,255,.55);
+  box-shadow:0 0 0 1px rgba(0,0,0,.12);
   transition:transform .25s ease,background .25s ease;
 }
 .pb-slot__dot.is-on{background:#E91E63;transform:scale(1.35);}
-.pb--center{flex:1.55 1 0;}
 .pb__body{position:relative;z-index:2;max-width:72%;}
 .pb__kick{margin:0 0 3px;font-size:12px;font-weight:900;opacity:.92;text-transform:uppercase;letter-spacing:.3px;}
 .pb__k{font-size:17px;font-weight:900;line-height:1.06;margin:0;}
@@ -338,14 +444,14 @@ body:not(.fit) .wrap{max-width:1100px;}
 .b-pink3{background:linear-gradient(135deg,#9b2a66,#ff7fb3);}
 [data-tema="adult"] .pb__cta{background:#fff;color:#c0246b;border-color:#fff;}
 [data-tema="adult"] .pb{gap:14px;margin-bottom:14px;}
-[data-tema="adult"] .pb a,
-[data-tema="adult"] .pb-slot,
-[data-tema="adult"] .pb-slot__stage,
-[data-tema="adult"] .pb-slot__slide,
-[data-tema="adult"] .pb-slot__slide--html,
-[data-tema="adult"] .pb-slot__slide img,
-[data-tema="adult"] .pb__imgbanner,
-[data-tema="adult"] .pb__imgbanner img{min-height:158px;}
+[data-tema="adult"] .pb > a,
+[data-tema="adult"] .pb > .pb-slot:not(.pb-slot--bottom),
+[data-tema="adult"] .pb > .pb-slot:not(.pb-slot--bottom) .pb-slot__stage,
+[data-tema="adult"] .pb > .pb-slot:not(.pb-slot--bottom) .pb-slot__slide,
+[data-tema="adult"] .pb > .pb-slot:not(.pb-slot--bottom) .pb-slot__slide--html,
+[data-tema="adult"] .pb > .pb-slot:not(.pb-slot--bottom) .pb-slot__slide img,
+[data-tema="adult"] .pb .pb__imgbanner,
+[data-tema="adult"] .pb .pb__imgbanner img{min-height:158px;}
 
 /* ===== BRAND ===== */
 .pbrand{display:flex;align-items:center;gap:14px;background:var(--card);border:1px solid var(--card-border);border-radius:18px;padding:12px 16px;margin-bottom:14px;box-shadow:var(--shadow);}
@@ -575,21 +681,21 @@ body:not(.fit) .wrap{max-width:1100px;}
   display:grid;
   grid-template-columns:minmax(0,1fr) minmax(0,1fr);
   gap:14px 18px;
-  align-items:stretch;
+  align-items:start;
 }
 /* Perfil negocio legacy — ya no define columnas distintas; todo usa layout adulto */
 [data-vista="negocio"] .playout{
   grid-template-columns:minmax(0,1fr) minmax(0,1fr);
-  gap:14px 18px;align-items:stretch;
+  gap:14px 18px;align-items:start;
 }
 [data-vista="adult"] .playout__col,
 [data-vista="negocio"] .playout__col{gap:14px;}
 [data-vista="adult"] .playout__col--izq,
 [data-vista="negocio"] .playout__col--izq{
-  display:flex;flex-direction:column;min-height:100%;min-width:0;
+  display:flex;flex-direction:column;min-height:0;min-width:0;
 }
 [data-vista="adult"] .playout__col--der .playout__derstack,
-[data-vista="negocio"] .playout__col--der .playout__derstack{margin-top:auto;}
+[data-vista="negocio"] .playout__col--der .playout__derstack{margin-top:0;}
 [data-vista="adult"] .playout__izq-mid,
 [data-vista="negocio"] .playout__izq-mid{
   display:flex;flex-direction:column;gap:10px;min-width:0;width:100%;
@@ -633,11 +739,12 @@ body:not(.fit) .wrap{max-width:1100px;}
 [data-vista="adult"] .playout__derstack > .pcard,
 [data-vista="negocio"] .playout__derstack > .pcard{padding:14px 16px;}
 [data-vista="adult"] .playout__derstack > .pcard:first-child,
-[data-vista="negocio"] .playout__derstack > .pcard:first-child{flex:1 1 auto;}
+[data-vista="negocio"] .playout__derstack > .pcard:first-child{flex:0 0 auto;}
 [data-vista="adult"] .playout__derstack > .pcard:last-child,
 [data-vista="negocio"] .playout__derstack > .pcard:last-child{flex:0 0 auto;}
-[data-tema="adult"] .playout__col{display:flex;flex-direction:column;gap:14px;min-width:0;min-height:100%;}
-[data-tema="adult"] .playout__col--der .playout__derstack{margin-top:auto;}
+[data-tema="adult"] .playout__col{display:flex;flex-direction:column;gap:14px;min-width:0;min-height:0;}
+[data-tema="adult"] .playout__col--der .playout__derstack{margin-top:0;}
+[data-tema="adult"] .playout__col--der{align-self:start;justify-content:flex-start;}
 [data-tema="adult"] .playout__izq-contact{
   flex:1 1 auto;display:flex;flex-direction:column;min-height:0;
   width:100%;margin-bottom:10px;
@@ -675,10 +782,176 @@ body:not(.fit) .wrap{max-width:1100px;}
 [data-vista="adult"] .playout__izq-stack .negocio-pie-wrap--izq .negocio-ubic__body--pie{
   flex:1;min-height:72px;
 }
-[data-vista="adult"] .playout__banner-adult{
-  grid-column:1 / -1;margin-top:6px;width:100%;
+/* Rejilla inferior uniforme: celdas estiradas, sin huecos laterales */
+[data-vista="adult"] .playout__bottom-grid,
+[data-tema="adult"] .playout__bottom-grid,
+[data-vista="negocio"] .playout__bottom-grid{
+  grid-column:1 / -1;
+  width:100%;
+  max-width:100%;
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+  align-items:stretch;
+  margin-top:8px;
+  box-sizing:border-box;
 }
-[data-vista="adult"] .playout__banner-adult .pb-slot--bottom{margin-top:0;margin-bottom:0;width:100%;}
+[data-vista="adult"] .playout__bg,
+[data-tema="adult"] .playout__bg{
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+}
+[data-vista="adult"] .playout__bg > *,
+[data-tema="adult"] .playout__bg > *{
+  flex:1 1 auto;
+  width:100%;
+  height:100%;
+  margin:0;
+  box-sizing:border-box;
+}
+[data-vista="adult"] .playout__bg--span2,
+[data-tema="adult"] .playout__bg--span2{
+  grid-column:1 / -1;
+}
+[data-vista="adult"] .playout__bg .negocio-pie-wrap,
+[data-tema="adult"] .playout__bg .negocio-pie-wrap,
+[data-vista="adult"] .playout__bg .negocio-pie-card,
+[data-tema="adult"] .playout__bg .negocio-pie-card,
+[data-vista="adult"] .playout__bg .pcard,
+[data-tema="adult"] .playout__bg .pcard,
+[data-vista="adult"] .playout__bg .sobre-card,
+[data-tema="adult"] .playout__bg .sobre-card{
+  height:100%;
+  margin:0;
+}
+@media (max-width:900px){
+  [data-vista="adult"] .playout__bottom-grid,
+  [data-tema="adult"] .playout__bottom-grid{
+    grid-template-columns:1fr;
+  }
+  [data-vista="adult"] .playout__bg--span2,
+  [data-tema="adult"] .playout__bg--span2{
+    grid-column:auto;
+  }
+}
+[data-vista="adult"] .playout__banner-adult,
+[data-tema="adult"] .playout__banner-adult,
+[data-vista="negocio"] .playout__banner-adult{
+  grid-column:1 / -1 !important;
+  margin-top:12px;
+  width:100%;
+  max-width:100%;
+}
+[data-vista="adult"] .playout__banner-adult .pb-slot--bottom,
+[data-tema="adult"] .playout__banner-adult .pb-slot--bottom{margin-top:0;margin-bottom:0;width:100%;}
+/* Desktop: rellenar izq (precio/ubicación/stats) para equilibrar con la derecha */
+@media (min-width:901px){
+  body:not(.fit)[data-tema="adult"] .playout,
+  body:not(.fit)[data-vista="adult"] .playout{
+    align-items:stretch !important;
+  }
+  body:not(.fit)[data-tema="adult"] .playout__col,
+  body:not(.fit)[data-vista="adult"] .playout__col{
+    min-height:0 !important;
+    height:auto;
+  }
+  body:not(.fit)[data-tema="adult"] .pcard.gal,
+  body:not(.fit)[data-vista="adult"] .pcard.gal{
+    width:100%;
+    overflow:hidden;
+  }
+  body:not(.fit)[data-tema="adult"] .gal__main,
+  body:not(.fit)[data-vista="adult"] .gal__main{
+    width:100% !important;
+    max-width:100% !important;
+    max-height:none !important;
+    aspect-ratio:3/4;
+    margin:0;
+  }
+  body:not(.fit)[data-tema="adult"] .gal__main img,
+  body:not(.fit)[data-tema="adult"] .gal__main .ch-foto-ph,
+  body:not(.fit)[data-vista="adult"] .gal__main img,
+  body:not(.fit)[data-vista="adult"] .gal__main .ch-foto-ph{
+    max-height:none !important;
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    object-position:center top;
+  }
+  /* Solo la ficha (categoría/país/estado/ciudad…) baja hasta topar con contacto */
+  body:not(.fit)[data-tema="adult"] .playout__col--der,
+  body:not(.fit)[data-vista="adult"] .playout__col--der{
+    display:flex !important;
+    flex-direction:column;
+    gap:12px;
+    align-self:stretch !important;
+    justify-content:flex-start;
+    height:100%;
+  }
+  body:not(.fit)[data-tema="adult"] .playout__col--der > .pcard,
+  body:not(.fit)[data-vista="adult"] .playout__col--der > .pcard{
+    flex:0 0 auto;
+  }
+  body:not(.fit)[data-tema="adult"] .playout__col--der > .pcard--ficha-publica,
+  body:not(.fit)[data-vista="adult"] .playout__col--der > .pcard--ficha-publica{
+    flex:1 1 auto !important;
+    min-height:0;
+    display:flex;
+    flex-direction:column;
+  }
+  body:not(.fit)[data-tema="adult"] .playout__col--der > .pcard--ficha-publica > .dlist,
+  body:not(.fit)[data-vista="adult"] .playout__col--der > .pcard--ficha-publica > .dlist{
+    flex:1 1 auto;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+    gap:0;
+    min-height:100%;
+  }
+  body:not(.fit)[data-tema="adult"] .playout__col--der > .pcard--ficha-publica > .dlist > .drow,
+  body:not(.fit)[data-vista="adult"] .playout__col--der > .pcard--ficha-publica > .dlist > .drow{
+    flex:1 1 auto;
+    display:flex;
+    align-items:center;
+  }
+  body:not(.fit)[data-tema="adult"] .playout__col--izq,
+  body:not(.fit)[data-vista="adult"] .playout__col--izq{
+    position:static;
+    align-self:stretch !important;
+  }
+  body:not(.fit)[data-tema="adult"] .playout__tri,
+  body:not(.fit)[data-vista="adult"] .playout__tri{
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:10px;
+  }
+  body:not(.fit)[data-tema="adult"] .playout__izq-stack .negocio-ubic__body--pie,
+  body:not(.fit)[data-vista="adult"] .playout__izq-stack .negocio-ubic__body--pie{
+    display:grid;
+    grid-template-columns:minmax(96px,0.9fr) minmax(0,1.1fr);
+    gap:12px;
+    min-height:140px;
+    align-items:stretch;
+  }
+  body:not(.fit)[data-tema="adult"] .playout__izq-stack .negocio-ubic__map,
+  body:not(.fit)[data-vista="adult"] .playout__izq-stack .negocio-ubic__map{
+    min-height:120px;
+    height:100%;
+  }
+  body:not(.fit)[data-tema="adult"] .playout__col--izq .playout__derstack,
+  body:not(.fit)[data-vista="adult"] .playout__col--izq .playout__derstack{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    margin-top:0;
+  }
+  body:not(.fit)[data-tema="adult"] .playout__col--der,
+  body:not(.fit)[data-vista="adult"] .playout__col--der{
+    gap:10px;
+  }
+  body:not(.fit) .wrap{padding-bottom:40px;}
+}
+
 [data-tema="adult"] .playout__izq-stack{display:flex;flex-direction:column;gap:8px;min-width:0;width:100%;}
 [data-tema="adult"] .playout__feed-pair{display:flex;flex-direction:column;gap:10px;}
 [data-tema="adult"] .playout__feed-pair .act-card,
@@ -689,7 +962,7 @@ body:not(.fit) .wrap{max-width:1100px;}
 [data-tema="adult"] .playout__derstack{display:flex;flex-direction:column;gap:10px;min-width:0;width:100%;}
 [data-tema="adult"] .playout__derstack > .pcard{padding:14px 16px;}
 [data-tema="adult"] .playout__derstack > .pcard .pcard__h{margin-bottom:8px;}
-[data-tema="adult"] .playout__derstack > .pcard:first-child{flex:1 1 auto;}
+[data-tema="adult"] .playout__derstack > .pcard:first-child{flex:0 0 auto;}
 [data-tema="adult"] .playout__derstack > .pcard:last-child{flex:0 0 auto;}
 [data-tema="adult"] .playout__feed-slot .feed{display:grid;grid-template-columns:88px minmax(0,1fr);gap:12px;align-items:start;}
 [data-tema="adult"] .playout__feed-slot .thumb{position:relative;border-radius:12px;overflow:hidden;aspect-ratio:1/1;background:#ddd;}
@@ -2045,19 +2318,86 @@ body:not(.fit) .wrap{max-width:1100px;}
 [data-tema="adult"] .pcard--stats{align-self:stretch;display:flex;flex-direction:column;justify-content:center;}
 [data-tema="adult"] .pcard--stats .trio3{width:100%;}
 @media(max-width:900px){
-  body:not(.fit) [data-vista="negocio"] .playout{grid-template-columns:1fr;}
+  body:not(.fit)[data-vista="negocio"] .playout,
+  body:not(.fit)[data-tema="adult"] .playout,
+  body:not(.fit)[data-vista="adult"] .playout{
+    grid-template-columns:1fr !important;
+  }
+  body:not(.fit)[data-tema="adult"] .playout__col--izq,
+  body:not(.fit)[data-vista="adult"] .playout__col--izq,
+  body:not(.fit)[data-tema="adult"] .playout__col--der,
+  body:not(.fit)[data-vista="adult"] .playout__col--der{
+    width:100%;
+    max-width:100%;
+  }
+  /* Banners: no apilar 3 filas enormes */
+  body:not(.fit) .pb{
+    flex-wrap:nowrap;
+    gap:8px;
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+  }
+  body:not(.fit) .pb > a,
+  body:not(.fit) .pb > .pb-slot:not(.pb-slot--bottom){
+    flex:0 0 78%;
+    min-width:78%;
+    min-height:96px;
+  }
+  body:not(.fit) .pb > .pb-slot:not(.pb-slot--bottom) .pb-slot__stage,
+  body:not(.fit) .pb > .pb-slot:not(.pb-slot--bottom) .pb-slot__slide,
+  body:not(.fit) .pb > .pb-slot:not(.pb-slot--bottom) .pb-slot__slide img{
+    min-height:96px;
+  }
+  /* Brand + nav en una sola fila compacta */
+  body:not(.fit) .pbrand{
+    flex-wrap:nowrap;
+    gap:10px;
+    padding:10px 12px;
+    align-items:center;
+  }
+  body:not(.fit) .pbrand__name{font-size:22px;}
+  body:not(.fit) .pbrand__tag{font-size:10px;}
+  body:not(.fit) .pnav{
+    margin-left:auto;
+    width:auto;
+    order:0;
+    flex-wrap:nowrap;
+    gap:8px;
+    overflow-x:auto;
+  }
+  body:not(.fit) .pnav__label{display:none;}
+  body:not(.fit) .profile-toolbar{
+    grid-template-columns:1fr;
+    gap:10px;
+  }
+  body:not(.fit) .profile-toolbar-left,
+  body:not(.fit) .profile-toolbar-center,
+  body:not(.fit) .profile-toolbar-right{
+    justify-self:stretch;
+  }
+  body:not(.fit) .profile-toolbar-center{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:8px;
+  }
+  body:not(.fit) .profile-toolbar-right{justify-content:flex-start;flex-wrap:wrap;}
+  body:not(.fit)[data-tema="adult"] .gal__main{
+    max-height:min(62vh,420px);
+    aspect-ratio:3/4;
+  }
+  body:not(.fit)[data-tema="adult"] .playout__tri{
+    grid-template-columns:1fr;
+  }
 }
 @media(max-width:520px){
-  body:not(.fit) [data-tema="adult"] .playout{grid-template-columns:1fr;}
-  body:not(.fit) [data-tema="adult"] .feat-line{flex-wrap:wrap !important;}
-  body:not(.fit) [data-tema="adult"] .contact{grid-template-columns:repeat(3,minmax(0,1fr));}
+  body:not(.fit)[data-tema="adult"] .feat-line{flex-wrap:wrap !important;}
+  body:not(.fit)[data-tema="adult"] .contact{grid-template-columns:repeat(2,minmax(0,1fr));}
+  body:not(.fit) .profile-toolbar-center{grid-template-columns:1fr;}
 }
 @media(max-width:820px){
   .sobre-card__grid{grid-template-columns:1fr;gap:24px;}
   .sobre-sil{max-width:220px;margin:8px auto 0;}
   .pgrid{grid-template-columns:1fr;}
-  .pb{flex-wrap:wrap;} .pb a{flex:1 1 100%;min-height:74px;}
-  .pnav{width:100%;order:3;overflow-x:auto;}
   .stats,.trust{grid-template-columns:repeat(2,1fr);}
   .gal__thumbs{grid-template-columns:repeat(5,1fr);}
 }
@@ -2087,14 +2427,12 @@ body.fit #fitRoot{
 }
 body.fit .wrap{width:100%;max-width:1100px;margin:0;padding:16px 16px 56px;box-sizing:border-box;}
 body.fit .pgrid{grid-template-columns:minmax(0,1fr) minmax(0,1fr) !important;}
-body.fit .pb{flex-wrap:nowrap !important;}
-body.fit .pb a,body.fit .pb .pb-slot{flex:1 1 0 !important;min-height:108px !important;}
-body.fit [data-tema="adult"] .pb a,
-body.fit [data-tema="adult"] .pb .pb-slot,
-body.fit [data-tema="adult"] .pb-slot__stage,
-body.fit [data-tema="adult"] .pb-slot__slide,
-body.fit [data-tema="adult"] .pb-slot__slide img{min-height:158px !important;}
-body.fit .pb--center,body.fit .pb .pb-slot.pb--center{flex:1.55 1 0 !important;}
+body.fit .pb{flex-wrap:nowrap !important;gap:14px !important;margin-bottom:14px !important;}
+body.fit .pb > a,body.fit .pb > .pb-slot:not(.pb-slot--bottom){flex:1 1 0 !important;min-height:158px !important;}
+body.fit .pb > .pb-slot:not(.pb-slot--bottom) .pb-slot__stage,
+body.fit .pb > .pb-slot:not(.pb-slot--bottom) .pb-slot__slide,
+body.fit .pb > .pb-slot:not(.pb-slot--bottom) .pb-slot__slide img{min-height:158px !important;}
+body.fit .pb--center,body.fit .pb > .pb-slot.pb--center{flex:1.55 1 0 !important;}
 body.fit .pnav{width:auto !important;order:0 !important;overflow:visible !important;}
 body.fit .stats,body.fit .trust{grid-template-columns:repeat(4,1fr) !important;}
 body.fit [data-tema="adult"] .playout{grid-template-columns:minmax(0,1fr) minmax(0,1fr) !important;}
@@ -2164,6 +2502,45 @@ body:not(.fit) #fitOuter{min-height:calc(100vh - 52px);}
 </style>
 </head>
 <body data-tema="adult" class="perfil-publico perfil-desde-resultados">
+<script>
+(function () {
+  try {
+    var p = new URLSearchParams(location.search);
+    var cat = p.get('categoria') || p.get('subcategoria') || p.get('sector') || '';
+    if (!cat) return;
+    var k = cat.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    var s = 'adultos';
+    if (k.indexOf('restaur') >= 0 || k.indexOf('marisquer') >= 0 || k.indexOf('taquer') >= 0 || k.indexOf('gastronom') >= 0) s = 'restaurantes';
+    else if (k.indexOf('medic') >= 0 || k.indexOf('doctor') >= 0 || k.indexOf('enfermer') >= 0 || k.indexOf('dent') >= 0 || k.indexOf('salud') >= 0) s = 'salud';
+    else if (k.indexOf('bienestar') >= 0 || k.indexOf('yoga') >= 0 || (k.indexOf('masaje') >= 0 && k.indexOf('erot') < 0)) s = 'bienestar';
+    else if (k.indexOf('mecan') >= 0 || k.indexOf('vulcaniz') >= 0 || k.indexOf('automo') >= 0) s = 'automotriz';
+    else if (k.indexOf('abogad') >= 0 || k.indexOf('contador') >= 0 || k.indexOf('profesion') >= 0) s = 'profesionales';
+    else if (k.indexOf('plomer') >= 0 || k.indexOf('limpieza') >= 0 || k.indexOf('hogar') >= 0) s = 'hogar';
+    else if (k.indexOf('tienda') >= 0 || k.indexOf('comercio') >= 0) s = 'comercio';
+    else if (k.indexOf('veterin') >= 0 || k.indexOf('mascot') >= 0 || k.indexOf('pet') >= 0) s = 'mascotas';
+    else if (k.indexOf('evento') >= 0 || k.indexOf('banquet') >= 0 || k.indexOf('dj') >= 0) s = 'eventos';
+    else if (k.indexOf('escuela') >= 0 || k.indexOf('tutor') >= 0 || k.indexOf('educac') >= 0) s = 'educacion';
+    else if (k.indexOf('tecno') >= 0 || k.indexOf('comput') >= 0 || k.indexOf('software') >= 0) s = 'tecnologia';
+    else if (k.indexOf('mudanz') >= 0 || k.indexOf('flete') >= 0 || k.indexOf('transport') >= 0) s = 'transporte';
+    else if (k.indexOf('industr') >= 0 || k.indexOf('maquin') >= 0) s = 'industria';
+    else if (k.indexOf('inmobil') >= 0 || k.indexOf('bienes') >= 0 || (k.indexOf('casa') >= 0 && k.indexOf('escort') < 0)) s = 'bienes-raices';
+    document.body.setAttribute('data-sector', s);
+    var lgbtCanon = [
+      'escort gay', 'antro restaurant bar lgbt', 'trans', 'femboy',
+      'lesbians', 'tom boy', 'tom fem'
+    ];
+    var lgbtKey = String(cat || '')
+      .trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/[-_]+/g, ' ').replace(/\s+/g, ' ').trim();
+    for (var i = 0; i < lgbtCanon.length; i++) {
+      if (lgbtKey === lgbtCanon[i]) {
+        document.body.setAttribute('data-subtema', 'lgbt');
+        break;
+      }
+    }
+  } catch (e) { /* tema temprano opcional */ }
+})();
+</script>
 
 <div id="fitOuter"><div id="fitSpacer"><div id="fitRoot"><div class="wrap" id="wrap"></div></div></div></div>
 
@@ -2405,7 +2782,7 @@ const DEMO = {
     ubicacionPublica:"San Pedro, zona segura",
     direccionLineas:["San Pedro Garza García","Monterrey, Nuevo León"],
     ubicacionPerks:["Zona segura","Cerca de hoteles","Discreción garantizada"],
-    galeria:["img/violeta-1.png","img/violeta-2.png","img/violeta-3.png","img/violeta-4.png"],
+    galeria:["img/resultados-demo/violeta-1.png","img/resultados-demo/violeta-2.png","img/resultados-demo/violeta-3.png","img/resultados-demo/violeta-4.png"],
     fotos:15, contactos:["wa","tg","ig","fb","of","x","msg","tel","gmail"]
   },
   negocio:{
@@ -2937,7 +3314,7 @@ DEMO.escort={
   liveFecha:"Sábado 25 de mayo", liveHora:"8:00 PM",
   serviciosIncluidos:["Compañía","Besos","Caricias","Relaciones","Oral","Masaje relajante","Trato de novia"],
   noRealiza:["Sin protección","Menores de edad","Falta de respeto","Grabaciones no autorizadas"],
-  galeria:["img/violeta-1.png","img/violeta-2.png","img/violeta-3.png","img/violeta-4.png"],
+  galeria:["img/resultados-demo/violeta-1.png","img/resultados-demo/violeta-2.png","img/resultados-demo/violeta-3.png","img/resultados-demo/violeta-4.png"],
   fotos:16, contactos:["wa","tg","ig","fb","of","x","msg","tel","gmail"]
 };
 /* Escort Gay — schema: escort_gay */
@@ -2998,7 +3375,7 @@ DEMO.escortVip={
   liveFecha:"Sábado 25 de mayo", liveHora:"9:00 PM",
   serviciosIncluidos:["Trato de novia premium","Cena de acompañamiento","Overnight","Viajes cortos (consulta)","Lencería de diseñador","Champagne (bajo pedido)"],
   noRealiza:["Sin verificación previa","Menores","Sustancias","Grabaciones","Descuentos"],
-  galeria:["img/violeta-1.png","img/violeta-2.png","img/violeta-3.png","img/violeta-4.png"],
+  galeria:["img/resultados-demo/violeta-1.png","img/resultados-demo/violeta-2.png","img/resultados-demo/violeta-3.png","img/resultados-demo/violeta-4.png"],
   fotos:20, contactos:["wa","tg","ig","fb","of","x","msg","tel","gmail"]
 };
 /* Trans — schema: trans */
@@ -3917,9 +4294,11 @@ function sobreRow(k,lab,val){
 }
 function siluetaSobre(estatura){
   if(!estatura) return "";
+  var src=demoAssetDesdeResultados("img/silueta-estatura.png");
+  if(!src) return "";
   var alt="Silueta de estatura "+safe(estatura||"");
   return '<div class="sobre-sil" aria-hidden="true">'+
-    '<img class="sobre-sil__img" src="img/silueta-estatura.png" alt="'+alt+'" decoding="async">'+
+    '<img class="sobre-sil__img" src="'+src+'" alt="'+alt+'" decoding="async">'+
   '</div>';
 }
 function sobreMiHTML(u){
@@ -3948,7 +4327,11 @@ function sobreMiHTML(u){
   '</div>';
 }
 function tipoDe(u, esEmpresa){ return esEmpresa ? "empresa" : (S.tipoPerfil(u)==="adult" ? "adult" : "pro"); }
-function imgTag(src){ return '<img class="ch-foto-ph" src="'+src+'" alt="" loading="lazy">'; }
+function imgTag(src){
+  var resolved=demoAssetDesdeResultados(src);
+  if(!resolved) return "";
+  return '<img class="ch-foto-ph" src="'+resolved+'" alt="" loading="lazy">';
+}
 // Foto principal/miniatura: usa imagen real si hay galería; si no, dibujo SVG.
 function fotoOImg(u, tipo, idx, seed){
   if(u && u.galeria && u.galeria.length) return imgTag(u.galeria[idx % u.galeria.length]);
@@ -4347,7 +4730,7 @@ function actividadNegocioPosts(u){
   var base={
     when:u.actividadWhen||"Hoy, 10:45 AM",
     text:u.actividad||"Actualizó su perfil y compartió novedades del negocio.",
-    img:(u.galeria&&u.galeria[0])?u.galeria[0]:"img/violeta-1.png"
+    img:(u.galeria&&u.galeria[0])?u.galeria[0]:"img/resultados-demo/violeta-1.png"
   };
   return [base,base,base,base,base];
 }
@@ -4355,7 +4738,8 @@ function actividadNegocioHeartIcon(){
   return '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#fff" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>';
 }
 function actividadNegocioAvatarHTML(u){
-  var src=u.actividadAvatar||(u.galeria&&u.galeria[0])||"assets/adultos-user/img-01.jpg";
+  var src=demoAssetDesdeResultados(u.actividadAvatar||(u.galeria&&u.galeria[0])||"assets/adultos-user/img-01.jpg");
+  if(!src) return '<span class="act-negocio__avatar" aria-hidden="true"></span>';
   return '<span class="act-negocio__avatar"><img src="'+src+'" alt="" decoding="async"></span>';
 }
 function goActNegocioSlide(wrap,idx){
@@ -4575,6 +4959,7 @@ var PB_PERFIL = "banners/perfil/";
 var PB_RES = "banners/resultados/";
 var PB_ADULT_SLOTS = [
   {
+    slotId:"perfil_izquierda",
     label:"Banner superior izquierdo",
     href:"registro-banner.html?slot=perfil_izquierda",
     slides:[
@@ -4584,6 +4969,7 @@ var PB_ADULT_SLOTS = [
     ]
   },
   {
+    slotId:"perfil_centro",
     center:true,
     label:"Banner superior central",
     href:"registro-banner.html?slot=perfil_centro",
@@ -4594,6 +4980,7 @@ var PB_ADULT_SLOTS = [
     ]
   },
   {
+    slotId:"perfil_derecha",
     label:"Banner superior derecho",
     href:"registro-banner.html?slot=perfil_derecha",
     slides:[
@@ -4644,6 +5031,7 @@ var PB_BOTTOM_NEGOCIO = {
   ]
 };
 var PB_BOTTOM_ADULT = {
+  slotId:"perfil_inferior",
   label:"Banner inferior",
   href:"registro-banner.html?slot=perfil_inferior",
   bottom:true,
@@ -4705,14 +5093,25 @@ function pbRenderSlide(slide,isFirst){
   return '<div class="pb-slot__slide pb-slot__slide--html '+slide.cls+active+'" aria-hidden="'+ah+'">'+slide.html+'</div>';
 }
 function pbRotSlot(cfg){
-  if(window.CariHubBannerGeneral&&window.CariHubBannerGeneral.mixSlideObjects&&cfg.slides){
+  if(!cfg.noMixGeneral&&window.CariHubBannerGeneral&&window.CariHubBannerGeneral.mixSlideObjects&&cfg.slides){
     cfg=Object.assign({},cfg,{slides:window.CariHubBannerGeneral.mixSlideObjects(cfg.slides)});
   }
   var slides=cfg.slides||[];
   var body="";
   for(var i=0;i<slides.length;i++) body+=pbRenderSlide(slides[i],i===0);
   var cls="pb-slot"+(cfg.center?" pb--center":"")+(cfg.bottom?" pb-slot--bottom":"");
-  return '<a class="'+cls+'" href="'+safe(cfg.href||"#")+'" aria-label="'+safe(cfg.label||"Espacio publicitario")+'">'+
+  var slotId=cfg.slotId||"";
+  if(!slotId&&cfg.href){
+    try{
+      var m=String(cfg.href).match(/[?&]slot=([^&]+)/);
+      if(m) slotId=decodeURIComponent(m[1]);
+    }catch(eSlot){ slotId=""; }
+  }
+  /* Renta de perfil es inventario aparte de resultados_* */
+  var dataSlot=(slotId&&String(slotId).indexOf("perfil_")==0)
+    ?(' data-perfil-slot="'+safe(slotId)+'"')
+    :"";
+  return '<a class="'+cls+'" href="'+safe(cfg.href||"#")+'"'+dataSlot+' aria-label="'+safe(cfg.label||"Espacio publicitario")+'">'+
     '<div class="pb-slot__stage" data-pb-stage>'+body+pbSlideDots(slides.length)+'</div></a>';
 }
 function goPbSlide(stage,nextIdx){
@@ -4752,13 +5151,63 @@ function startPbBannerRotation(){
   if(window.CariHubBannerPerfil&&CariHubBannerPerfil.mount) CariHubBannerPerfil.mount();
 }
 
+function pbAdultSlotsAlineadosResultados(){
+  var q=window.CariHubPerfilPublico?CariHubPerfilPublico.queryPerfilPublico():{};
+  var u=window.__perfilActual||{};
+  var cat=q.categoria||u.categoriaPublica||u.categoria||u.subcategoria||u.subcategoriaId||"Cariñosas";
+  var RS=window.CariHubResultadosSector;
+  var thematic=RS&&RS.bannersDeSector?RS.bannersDeSector(cat):null;
+  var isLgbt=RS&&RS.esSubcategoriaLgbt&&RS.esSubcategoriaLgbt(cat);
+  var labels=isLgbt
+    ?Object.assign({
+      izquierda:"Anúnciate aquí",
+      centro:"Anúnciate aquí",
+      derecha:"Anúnciate aquí"
+    },window.CARIHUB_LGBT_BANNER_LABELS||{})
+    :{
+      izquierda:"¿Eres nueva? Regístrate ahora",
+      centro:"Haz crecer tu negocio",
+      derecha:"¿Eres nueva? Regístrate ahora"
+    };
+  var placeholders={
+    izquierda:[PB_RES+"resultados-es-nueva-izq.png",PB_RES+"resultados1.webp",PB_RES+"resultados3.webp"],
+    centro:[PB_RES+"resultados-crecer-centro.png",PB_RES+"resultados-centro-1.png",PB_RES+"resultados-centro-2.png",PB_RES+"resultados-centro-3.png"],
+    derecha:[PB_RES+"resultados-es-nueva-der.png",PB_RES+"resultados2.webp",PB_RES+"resultados1.webp"]
+  };
+  function imgsEspacio(espacio,offset){
+    if(thematic&&thematic.length){
+      var out=[],n=Math.max(3,thematic.length);
+      for(var i=0;i<n;i++) out.push(thematic[(i+offset)%thematic.length]);
+      return out;
+    }
+    return (placeholders[espacio]||placeholders.izquierda).slice();
+  }
+  function slot(espacio,center,offset,slotId){
+    var alt=labels[espacio]||"Espacio publicitario";
+    var imgs=imgsEspacio(espacio,offset);
+    return {
+      slotId:slotId,
+      center:!!center,
+      label:alt,
+      href:"registro-banner.html?slot="+slotId,
+      noMixGeneral:true,
+      slides:imgs.map(function(src){ return {t:"img",src:src,alt:alt}; })
+    };
+  }
+  return [
+    slot("izquierda",false,0,"perfil_izquierda"),
+    slot("centro",true,1,"perfil_centro"),
+    slot("derecha",false,2,"perfil_derecha")
+  ];
+}
 /* ---------------- banners por tema (3 arriba + 1 abajo, 3 slides c/u) ---------------- */
 function bannersHTML(tipo){
   if(tipo==="negocio"){
     return '<div class="pb">'+PB_NEGOCIO_SLOTS.map(pbRotSlot).join("")+'</div>';
   }
   if(["adult","escort","acompanante","petit","gigolo","lesbians","tomBoy","tomFem","dominatrix","masajeIndep","escortGay","escortVip","trans","edecan","modelos","dotados","femboy","singles"].indexOf(tipo)>=0){
-    return '<div class="pb">'+PB_ADULT_SLOTS.map(pbRotSlot).join("")+'</div>';
+    var slots=(!esPerfilEmbedChrome()?pbAdultSlotsAlineadosResultados():PB_ADULT_SLOTS);
+    return '<div class="pb">'+slots.map(pbRotSlot).join("")+'</div>';
   }
   return '<div class="pb">'+pbCarihubSlots(tipo).map(pbRotSlot).join("")+'</div>';
 }
@@ -4785,6 +5234,158 @@ var CARINOSAS_TIPOS=["adult","escort","acompanante","petit","gigolo","lesbians",
 var PRO_LAYOUTS=["pro","empresa","medico"];
 
 /* ---------------- shells ---------------- */
+function esPerfilEmbedChrome(){
+  return document.body.classList.contains("perfil-embed-dashboard")
+    || document.body.classList.contains("perfil-embed-dashboard-inicio")
+    || document.documentElement.classList.contains("perfil-embed-dashboard");
+}
+function perfilResSeoLine(u){
+  var q=window.CariHubPerfilPublico?CariHubPerfilPublico.queryPerfilPublico():{};
+  if(window.CariHubResultadosDemo&&CariHubResultadosDemo.textoSeoResultados){
+    return CariHubResultadosDemo.textoSeoResultados({
+      categoria:q.categoria||u.categoria||u.subcategoria||"",
+      pais:q.pais||u.pais||"",
+      estado:q.estado||u.estado||"",
+      ciudad:q.ciudad||u.ciudad||""
+    })||"";
+  }
+  var parts=[q.categoria||u.categoria||u.subcategoria, q.pais||u.pais, q.estado||u.estado, q.ciudad||u.ciudad]
+    .map(function(x){return String(x||"").trim();})
+    .filter(function(x){return x&&x!=="Todos los estados"&&x!=="Todas las ciudades";});
+  return parts.join(" · ");
+}
+function perfilResRegistroHref(u){
+  var q=window.CariHubPerfilPublico?CariHubPerfilPublico.queryPerfilPublico():{};
+  var p=new URLSearchParams();
+  p.set("abrir","registro");
+  var cat=q.categoria||u.categoria||u.subcategoria||"";
+  if(cat) p.set("categoria",cat);
+  if(q.pais||u.pais) p.set("pais",q.pais||u.pais);
+  if(q.estado||u.estado) p.set("estado",q.estado||u.estado);
+  if(q.ciudad||u.ciudad) p.set("ciudad",q.ciudad||u.ciudad);
+  return "index.html?"+p.toString();
+}
+function perfilResSearchDockHTML(u){
+  var q=window.CariHubPerfilPublico?CariHubPerfilPublico.queryPerfilPublico():{};
+  var cat=q.categoria||u.categoria||u.subcategoria||"Cariñosas";
+  var pais=q.pais||u.pais||"México";
+  var estado=q.estado||u.estado||"Todos";
+  var ciudad=q.ciudad||u.ciudad||"Todas";
+  function opt(val,sel){
+    return '<option value="'+safe(val)+'"'+(String(val)===String(sel)?' selected':'')+'>'+safe(val)+'</option>';
+  }
+  var catOpts=[cat,"Cariñosas","escort gay","Escort","Trans"].filter(function(v,i,a){
+    return v&&a.indexOf(v)===i;
+  }).map(function(v){return opt(v,cat);}).join("");
+  return '<div class="res-search-dock res-search-dock--top" id="perfilSearchDock">'+
+    '<p class="res-search-dock__hint">Cambiar búsqueda</p>'+
+    '<section class="res-search-bar" aria-label="Cambiar búsqueda">'+
+      '<label class="res-sbar-btn" data-sbar-field="cat">'+
+        '<span class="res-sbar-btn__sparkles" aria-hidden="true"></span>'+
+        '<span class="res-sbar-btn__label">Categoría</span>'+
+        '<span class="res-sbar-btn__value" id="perfilSbarCatLabel">'+safe(cat)+'</span>'+
+        '<select id="perfilSbarCat" class="res-sbar-btn__select" aria-label="Categoría">'+catOpts+'</select>'+
+      '</label>'+
+      '<label class="res-sbar-btn" data-sbar-field="pais">'+
+        '<span class="res-sbar-btn__sparkles" aria-hidden="true"></span>'+
+        '<span class="res-sbar-btn__label">País</span>'+
+        '<span class="res-sbar-btn__value" id="perfilSbarPaisLabel">'+safe(pais)+'</span>'+
+        '<select id="perfilSbarPais" class="res-sbar-btn__select" aria-label="País">'+opt(pais,pais)+opt("México","México")+'</select>'+
+      '</label>'+
+      '<label class="res-sbar-btn" data-sbar-field="estado">'+
+        '<span class="res-sbar-btn__sparkles" aria-hidden="true"></span>'+
+        '<span class="res-sbar-btn__label">Estado</span>'+
+        '<span class="res-sbar-btn__value" id="perfilSbarEstadoLabel">'+safe(estado||"Todos")+'</span>'+
+        '<select id="perfilSbarEstado" class="res-sbar-btn__select" aria-label="Estado">'+opt(estado||"Todos",estado||"Todos")+'</select>'+
+      '</label>'+
+      '<label class="res-sbar-btn" data-sbar-field="ciudad">'+
+        '<span class="res-sbar-btn__sparkles" aria-hidden="true"></span>'+
+        '<span class="res-sbar-btn__label">Ciudad</span>'+
+        '<span class="res-sbar-btn__value" id="perfilSbarCiudadLabel">'+safe(ciudad||"Todas")+'</span>'+
+        '<select id="perfilSbarCiudad" class="res-sbar-btn__select" aria-label="Ciudad">'+opt(ciudad||"Todas",ciudad||"Todas")+'</select>'+
+      '</label>'+
+      '<button type="button" class="res-sbar-btn res-sbar-btn--buscar" id="perfilSbarBuscar" aria-label="Buscar más">'+
+        '<span class="res-sbar-btn__sparkles" aria-hidden="true"></span>'+
+        '<span class="res-sbar-btn__txt">Buscar más</span>'+
+      '</button>'+
+    '</section>'+
+  '</div>';
+}
+function perfilResChromeHTML(u, backHref){
+  var seo=perfilResSeoLine(u);
+  var regHref=perfilResRegistroHref(u);
+  var volver=backHref&&backHref!=="#"?backHref:"resultados.html";
+  var cercaHref=volver.indexOf("?")>=0?volver+"&cerca=1":volver+"?cerca=1";
+  return '<div class="perfil-res-chrome">'+
+    '<div class="res-midband" aria-label="Resultados y acciones">'+
+      '<div class="res-midband__slot res-midband__slot--estados" id="perfilMidEstados" data-slot="perfil_estados" data-directory-hide="estados-libe-docks"></div>'+
+      '<div class="res-midband__center">'+
+        '<div class="res-midband__headline">'+
+          '<h1 class="res-midband__title">Perfil</h1>'+
+          '<p class="res-midband__seo" id="perfilSeoLine">'+safe(seo)+'</p>'+
+        '</div>'+
+        '<div class="res-midband__actions">'+
+          '<a class="res-midband__btn res-midband__btn--volver" id="perfilBtnVolver" href="'+safe(volver)+'">'+
+            '<span class="res-midband__btn-ic" aria-hidden="true">'+
+              '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>'+
+            '</span>'+
+            '<span class="res-midband__btn-txt">Volver</span>'+
+          '</a>'+
+          '<a class="res-midband__btn res-midband__btn--registro" id="perfilBtnRegistro" href="'+safe(regHref)+'">'+
+            '<span class="res-midband__btn-sparkles" aria-hidden="true"></span>'+
+            '<span class="res-midband__btn-ic" aria-hidden="true">'+
+              '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg>'+
+            '</span>'+
+            '<span class="res-midband__btn-txt">Registrarse</span>'+
+          '</a>'+
+          '<a class="res-midband__btn res-midband__btn--cerca" id="perfilBtnCerca" href="'+safe(cercaHref)+'">'+
+            '<span class="res-midband__btn-ic" aria-hidden="true">'+
+              '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-6.5-4.9-6.5-10a6.5 6.5 0 1113 0c0 5.1-6.5 10-6.5 10z"/><circle cx="12" cy="11" r="2.4"/></svg>'+
+            '</span>'+
+            '<span class="res-midband__btn-txt">Cerca de mí</span>'+
+          '</a>'+
+        '</div>'+
+      '</div>'+
+      '<div class="res-midband__slot res-midband__slot--libe" id="perfilMidLibe" data-slot="perfil_libe" data-directory-hide="estados-libe-docks"></div>'+
+    '</div>'+
+    perfilResSearchDockHTML(u)+
+  '</div>';
+}
+function bindPerfilResChrome(u){
+  if(!document.getElementById("perfilSearchDock")) return;
+  function syncLabel(selId,labId){
+    var sel=document.getElementById(selId);
+    var lab=document.getElementById(labId);
+    if(!sel||!lab) return;
+    lab.textContent=sel.options[sel.selectedIndex]?sel.options[sel.selectedIndex].text:sel.value;
+    sel.addEventListener("change",function(){
+      lab.textContent=sel.options[sel.selectedIndex]?sel.options[sel.selectedIndex].text:sel.value;
+    });
+  }
+  syncLabel("perfilSbarCat","perfilSbarCatLabel");
+  syncLabel("perfilSbarPais","perfilSbarPaisLabel");
+  syncLabel("perfilSbarEstado","perfilSbarEstadoLabel");
+  syncLabel("perfilSbarCiudad","perfilSbarCiudadLabel");
+  var btn=document.getElementById("perfilSbarBuscar");
+  if(btn&&!btn.dataset.bound){
+    btn.dataset.bound="1";
+    btn.addEventListener("click",function(){
+      var cat=document.getElementById("perfilSbarCat");
+      var pais=document.getElementById("perfilSbarPais");
+      var estado=document.getElementById("perfilSbarEstado");
+      var ciudad=document.getElementById("perfilSbarCiudad");
+      var p=new URLSearchParams();
+      if(cat&&cat.value) p.set("categoria",cat.value);
+      if(pais&&pais.value) p.set("pais",pais.value);
+      if(estado&&estado.value&&estado.value!=="Todos") p.set("estado",estado.value);
+      if(ciudad&&ciudad.value&&ciudad.value!=="Todas") p.set("ciudad",ciudad.value);
+      location.href="resultados.html?"+p.toString();
+    });
+  }
+  if(window.CariHubBannerPerfilLaterales&&CariHubBannerPerfilLaterales.mount){
+    CariHubBannerPerfilLaterales.mount();
+  }
+}
 function shell(tipo, inner, u){
   u = u || window.__perfilActual || {};
   var t = THEME[tipo] || THEME.adult;
@@ -4808,19 +5409,24 @@ function shell(tipo, inner, u){
   var backHref=window.CariHubPerfilPublico?CariHubPerfilPublico.resultadosVolverHref(qPerfil):
     (window.CariHubNavQuick?CariHubNavQuick.resultadosHrefFromQuery(qPerfil):"#");
   var brandBlock = '<div class="pbrand__wordmark"><div class="pbrand__name">'+safe(t.brand)+'</div><div class="pbrand__tag">'+safe(t.tag)+'</div></div>';
+  var useResChrome=esCari&&!esPerfilEmbedChrome();
+  var chrome=useResChrome
+    ? perfilResChromeHTML(u, backHref)
+    : ('<div class="pbrand pbrand--with-close">'+closeBtn+
+        '<div class="pbrand__logo">'+(esCari?"":pinSVG)+brandBlock+'</div>'+
+        '<nav class="pnav">'+nav+'</nav>'+
+        (esCari||PRO_LAYOUTS.indexOf(tipo)>=0?"":'<button class="pbtn">＋ '+safe(t.publicar)+'</button>')+'</div>'+
+      '<div class="profile-toolbar">'+
+        '<div class="profile-toolbar-left">'+
+          '<a class="toolbar-action back-action" href="'+backHref+'">'+profileBackArrow()+'<span>Volver a resultados</span></a>'+
+        '</div>'+
+        '<div class="profile-toolbar-center">'+profileCrumbQuickHTML()+'</div>'+
+        '<div class="profile-toolbar-right">'+profileActionsHTML(u)+'</div>'+
+      '</div>');
   return ''+
-    banners+
-    '<div class="pbrand pbrand--with-close">'+closeBtn+
-      '<div class="pbrand__logo">'+(esCari?"":pinSVG)+brandBlock+'</div>'+
-      '<nav class="pnav">'+nav+'</nav>'+
-      (esCari||PRO_LAYOUTS.indexOf(tipo)>=0?"":'<button class="pbtn">＋ '+safe(t.publicar)+'</button>')+'</div>'+
-    '<div class="profile-toolbar">'+
-      '<div class="profile-toolbar-left">'+
-        '<a class="toolbar-action back-action" href="'+backHref+'">'+profileBackArrow()+'<span>Volver a resultados</span></a>'+
-      '</div>'+
-      '<div class="profile-toolbar-center">'+profileCrumbQuickHTML()+'</div>'+
-      '<div class="profile-toolbar-right">'+profileActionsHTML(u)+'</div>'+
-    '</div>'+
+    (useResChrome
+      ? ('<div class="perfil-res-top">'+banners+chrome+'</div>')
+      : (banners+chrome))+
     (esCari ? inner : '<div class="pgrid">'+inner+'</div>')+
     (esCari ? "" : bottomBannerHTML(tipo));
 }
@@ -4883,19 +5489,23 @@ function perfilStatsHTML(u){
     }).join("")+
   '</div></div>';
 }
-function perfilDerstackHTML(u){
+function perfilDerstackParts(u){
   var svcTit=u.svcTitulo||"★ Servicios incluidos";
   var noTit=u.noTitulo||"⛔ No realiza";
   var incl=(u.serviciosIncluidos||[]);
   var no=u.noRealiza||[];
-  return '<div class="playout__derstack">'+
-    (incl.length?('<div class="pcard" data-pub-block="servicios"><div class="pcard__h" data-pub-label="servicios">'+safe(svcTit)+'</div><div class="svc">'+
-      incl.map(function(s){return '<div><span class="ok">✔</span> '+safe(s)+'</div>';}).join("")+
-    '</div></div>'):"")+
-    (no.length?('<div class="pcard"><div class="pcard__h">'+safe(noTit)+'</div><div class="svc svc--stack">'+
-      no.map(function(s){return '<div><span class="no">✕</span> '+safe(s)+'</div>';}).join("")+
-    '</div></div>'):"")+
-  '</div>';
+  var svc=incl.length?('<div class="pcard" data-pub-block="servicios"><div class="pcard__h" data-pub-label="servicios">'+safe(svcTit)+'</div><div class="svc">'+
+    incl.map(function(s){return '<div><span class="ok">✔</span> '+safe(s)+'</div>';}).join("")+
+  '</div></div>'):"";
+  var noHtml=no.length?('<div class="pcard"><div class="pcard__h">'+safe(noTit)+'</div><div class="svc svc--stack">'+
+    no.map(function(s){return '<div><span class="no">✕</span> '+safe(s)+'</div>';}).join("")+
+  '</div></div>'):"";
+  return {svc:svc,no:noHtml};
+}
+function perfilDerstackHTML(u){
+  var parts=perfilDerstackParts(u);
+  if(!parts.svc&&!parts.no) return "";
+  return '<div class="playout__derstack">'+parts.svc+parts.no+'</div>';
 }
 function sobrePerfilHTML(u){
   var hasFisico=!!(u.estatura||u.peso||u.complexion||u.cabello||u.ojos||u.tatuajes||u.piercings);
@@ -4921,6 +5531,11 @@ function playoutIzqPromoRowHTML(u){
   if(!isPerfilNegocio(u)) return "";
   if(!u.promoLimitado && !u.liveDesc && !u.promocion) return "";
   var deal=negocioTarifaDealCardHTML(u);
+  var dm=window.CarihubDirectoryMode&&CarihubDirectoryMode.isDirectoryMode();
+  if(dm){
+    return '<div class="negocio-promo-row playout__izq-promo playout__izq-promo--solo">'+
+      '<div class="negocio-promo-row__izq">'+deal+'</div></div>';
+  }
   var live=panelLiveNegocio(u, !u.liveImg);
   return '<div class="negocio-promo-row playout__izq-promo">'+
     '<div class="negocio-promo-row__izq">'+deal+'</div>'+
@@ -4948,13 +5563,31 @@ function renderPlayoutAdultoRef(u, cfg){
   var dataExtra=cfg.dataAttrs||"";
 
   var ubicIzq=negocioPieUbicCardHTML(u,"izq");
-  var izq=galeria+tri+'<div class="playout__izq-stack">'+contact+sobrePersona+ubicIzq+'</div>';
-  var der=perfil+(u.donanteUltimo && !(window.CarihubDirectoryMode && CarihubDirectoryMode.isDirectoryMode())?avisoDonacion(u):"")+feedPair+ficha+stats+derstack;
+  var svcParts=perfilDerstackParts(u);
+  /*
+    Distribución profesional (sin omitir datos públicos):
+    - Izq: galería (llena el ancho) + precio
+    - Der: identidad + ficha
+    - Rejilla inferior 2 columnas, celdas estiradas (sin huecos):
+      contacto (span2) · ubicación|stats · servicios|no realiza · sobre (span2)
+  */
+  var izq=galeria+tri;
+  var der=perfil+(u.donanteUltimo && !(window.CarihubDirectoryMode && CarihubDirectoryMode.isDirectoryMode())?avisoDonacion(u):"")+feedPair+ficha;
+  var bottomGrid=
+    '<div class="playout__bottom-grid">'+
+      (contact?'<div class="playout__bg playout__bg--span2">'+contact+'</div>':"")+
+      (ubicIzq?'<div class="playout__bg playout__bg--ubic">'+ubicIzq+'</div>':"")+
+      (stats?'<div class="playout__bg playout__bg--stats">'+stats+'</div>':"")+
+      (svcParts.svc?'<div class="playout__bg playout__bg--svc">'+svcParts.svc+'</div>':"")+
+      (svcParts.no?'<div class="playout__bg playout__bg--no">'+svcParts.no+'</div>':"")+
+      (sobrePersona?'<div class="playout__bg playout__bg--span2 playout__bg--sobre">'+sobrePersona+'</div>':"")+
+    '</div>';
   var bannerPie=(u&&u.__previewRegistro)?"":('<div class="playout__banner-adult">'+bottomBannerHTML(layoutKey)+'</div>');
 
   return '<div class="playout playout--'+safe(layoutKey).replace(/[^a-z0-9_-]/gi,"-")+extraCls+'" data-cat="'+safe(u.subcategoriaId||layoutKey)+'"'+dataExtra+'>'+
     '<div class="playout__col playout__col--izq">'+izq+'</div>'+
     '<div class="playout__col playout__col--der">'+der+'</div>'+
+    bottomGrid+
     bannerPie+
   '</div>'+pieBottom;
 }
@@ -5100,7 +5733,7 @@ function resolveCategoriaVisibleFicha(u){
 }
 function adultoFichaHTML(u){
   if(isDominatrixSubFicha(u)||u.especialidadBdsm){
-    var html='<div class="pcard"><div class="dlist">'+
+    var html='<div class="pcard pcard--ficha-publica"><div class="dlist">'+
         row(pico("user"),"Categoría",safe(u.categoria))+
       row(pico("briefcase"),"Especialidad BDSM",safe(u.especialidadBdsm||u.estiloDominacion))+
       row(pico("calendar"),"Experiencia",safe(u.experienciaBdsm))+
@@ -5236,7 +5869,7 @@ function adultoFichaHTML(u){
   (u.fichaExtra||[]).forEach(function(ex){
     html+=row(pico(ex[0]||"chat"),ex[1],safe(ex[2]));
   });
-  return '<div class="pcard"><div class="dlist">'+html+'</div></div>';
+  return '<div class="pcard pcard--ficha-publica"><div class="dlist">'+html+'</div></div>';
 }
 function renderPerfilCariñosas(u, tipo){
   return renderAdultoVariant(u, tipo||u.subcategoriaId||"adult");
@@ -6183,7 +6816,7 @@ DEMO.creador={
   actividadWhen:"Hoy, 12:45 PM",
   liveTitulo:"En vivo: sesión Q&A y preview de contenido nuevo",
   liveFecha:"Sábado 25 de mayo", liveHora:"8:30 PM",
-  galeria:["img/violeta-1.png","img/violeta-2.png","img/violeta-3.png","img/violeta-4.png"],
+  galeria:["img/resultados-demo/violeta-1.png","img/resultados-demo/violeta-2.png","img/resultados-demo/violeta-3.png","img/resultados-demo/violeta-4.png"],
   direccionLineas:["Monterrey, N.L.","Contenido 100% en línea"],
   ubicacionPerks:["Verificada","Contenido exclusivo","Lives semanales"],
   fotos:48, contactos:["wa","tg","ig","fb","of","x","msg","tel","gmail"]
@@ -6841,7 +7474,8 @@ function negocioReglasHTML(u){
     '<div class="pcard pcard--negocio-svc"><div class="negocio-svc-2col">'+items+'</div></div></div>';
 }
 function negocioMapaHTML(u){
-  var src=u.ubicacionImg||u.mapaImg||"";
+  var raw=u.ubicacionImg||u.mapaImg||"";
+  var src=demoAssetDesdeResultados(raw)||"";
   if(src){
     return '<img src="'+safe(src)+'" alt="Mapa de ubicación — '+safe(u.ciudad||"zona")+'" loading="lazy" decoding="async">';
   }
@@ -8019,11 +8653,22 @@ function aplicarPerfilResultadosEnDemo(vista,u){
   }
   if(u.fotoURL){
     var gal=(d.galeria||[]).slice();
-    gal[0]=demoAssetDesdeResultados(u.fotoURL);
+    var foto0=demoAssetDesdeResultados(u.fotoURL);
+    if(foto0 && /[\/.]/.test(foto0) && !/^(demo|[a-z])$/i.test(String(u.fotoURL).trim())){
+      gal[0]=foto0;
+    }
     if(Array.isArray(u.fotosExtraURL)&&u.fotosExtraURL.length){
-      u.fotosExtraURL.forEach(function(extra,i){
-        if(extra) gal[i+1]=demoAssetDesdeResultados(extra);
+      var extrasReales=[];
+      u.fotosExtraURL.forEach(function(extra){
+        if(!extra) return;
+        var raw=String(extra).trim();
+        if(/^(demo|[a-z])$/i.test(raw)) return;
+        var mapped=demoAssetDesdeResultados(raw);
+        if(mapped && /[\/.]/.test(mapped)) extrasReales.push(mapped);
       });
+      if(extrasReales.length){
+        extrasReales.forEach(function(extra,i){ gal[i+1]=extra; });
+      }
     }
     d.galeria=gal.filter(Boolean);
   }
@@ -8145,17 +8790,38 @@ function activarEmbedDashboard(){
   document.body.classList.add("perfil-embed-dashboard");
   document.documentElement.classList.add("perfil-embed-dashboard");
 }
+function showUnresolvedPerfilError(q){
+  q=q||{};
+  var wrap=document.getElementById("wrap");
+  if(!wrap) return;
+  document.body.setAttribute("data-tema","adult");
+  document.body.setAttribute("data-vista","adult");
+  document.body.setAttribute("data-perfil-tipo","unresolved");
+  var idTxt=safe(q.id||"(sin id)");
+  var catTxt=safe(q.categoria||"");
+  wrap.innerHTML=
+    '<div class="pcard" style="max-width:560px;margin:48px auto;padding:24px 22px;" role="alert" data-perfil-unresolved="1">'+
+      '<h1 style="margin:0 0 10px;font-size:22px;">Perfil no encontrado</h1>'+
+      '<p style="margin:0 0 8px;line-height:1.45;">No se pudo resolver el perfil solicitado. No se mostrará un perfil genérico de reemplazo.</p>'+
+      '<p style="margin:0 0 4px;font-size:13px;opacity:.85;"><b>id:</b> '+idTxt+'</p>'+
+      (catTxt?'<p style="margin:0 0 14px;font-size:13px;opacity:.85;"><b>categoría:</b> '+catTxt+'</p>':'<p style="margin:0 0 14px;"></p>')+
+      '<p style="margin:0;font-size:13px;"><a href="'+(window.CariHubPerfilPublico&&CariHubPerfilPublico.resultadosVolverHref?safe(CariHubPerfilPublico.resultadosVolverHref(q)):"resultados.html")+'">← Volver a resultados</a></p>'+
+    '</div>';
+  console.error("[CariHub] perfil no resuelto", { id:q.id, vista:q.vista, categoria:q.categoria, from:q.from });
+}
 function iniciarPerfilPreview(){
   if(window.CariHubPerfilPublico&&CariHubPerfilPublico.initFirebaseIfNeeded){
     CariHubPerfilPublico.initFirebaseIfNeeded();
   }
   var q=queryPerfilPreview();
-  if(q.previewSource==="registro"||q.from==="registro"){
+  var fromRegistro=q.previewSource==="registro"||q.from==="registro";
+  var fromResultados=q.from==="resultados";
+  if(fromRegistro){
     document.body.classList.add("perfil-desde-resultados");
     var swReg=document.querySelector(".switcher");
     if(swReg){ swReg.hidden=true; swReg.setAttribute("aria-hidden","true"); }
   }else{
-    ocultarSwitcherSiResultados(q.from==="resultados");
+    ocultarSwitcherSiResultados(fromResultados);
   }
   function pintar(resolved){
     if(resolved.perfil){
@@ -8176,10 +8842,12 @@ function iniciarPerfilPreview(){
     }
     setVista(resolved.vista);
   }
-  if(window.CariHubPerfilPublico&&CariHubPerfilPublico.leerPreviewRegistro){
+  /* Draft de registro SOLO cuando la entrada es explícitamente registro.
+     Nunca secuestrar navegación Results→Perfil ni IDs demo. */
+  if(fromRegistro&&window.CariHubPerfilPublico&&CariHubPerfilPublico.leerPreviewRegistro){
     var draftReg=CariHubPerfilPublico.leerPreviewRegistro();
-    var draftEsRegistro=draftReg&&draftReg.perfil&&(draftReg.perfil.__previewRegistro||draftReg.perfil.__id==="preview-registro"||q.previewSource==="registro"||q.from==="registro");
-    if(draftEsRegistro){
+    var draftOk=draftReg&&draftReg.perfil&&(draftReg.perfil.__previewRegistro||draftReg.perfil.__id==="preview-registro");
+    if(draftOk){
       var vistaDraft=draftReg.vista||q.vista||resolverVistaPerfil(draftReg.perfil,q)||"adult";
       pintar({vista:vistaDraft,perfil:draftReg.perfil});
       return;
@@ -8190,13 +8858,28 @@ function iniciarPerfilPreview(){
     CariHubPerfilPublico.cargarPerfilFirestore(q.id,q).then(function(u){
       if(u){
         pintar({vista:resolverVistaPerfil(u,q),perfil:u});
+      }else if(fromResultados||q.id){
+        showUnresolvedPerfilError(q);
       }else{
         pintar(resolverPerfilDesdeQuery(q));
       }
     });
     return;
   }
-  pintar(resolverPerfilDesdeQuery(q));
+  var resolved=resolverPerfilDesdeQuery(q);
+  if(q.id&&!resolved.perfil){
+    showUnresolvedPerfilError(q);
+    return;
+  }
+  /* Sin id: draft huérfano solo si NO venimos de resultados */
+  if(!q.id&&!fromResultados&&window.CariHubPerfilPublico&&CariHubPerfilPublico.leerPreviewRegistro){
+    var draftOrphan=CariHubPerfilPublico.leerPreviewRegistro();
+    if(draftOrphan&&draftOrphan.perfil&&(draftOrphan.perfil.__previewRegistro||draftOrphan.perfil.__id==="preview-registro")){
+      pintar({vista:draftOrphan.vista||"adult",perfil:draftOrphan.perfil});
+      return;
+    }
+  }
+  pintar(resolved);
 }
 
 /* ---------------- controlador ---------------- */
@@ -8215,10 +8898,36 @@ function setVista(tipo){
   var sel=document.getElementById("negocioTipo");
   if(sel) sel.style.display=tipo==="negocio"?"inline-block":"none";
   if(tipo==="negocio"){
-    applyNegocioPack((sel&&sel.value)||"hospedaje");
+    var packNeg=(sel&&sel.value)||"hospedaje";
+    var qNeg=queryPerfilPreview?queryPerfilPreview():{};
+    var catNeg=String(qNeg.categoria||"").toLowerCase();
+    if(/spa|masaje|bienestar|temazcal/.test(catNeg)) packNeg="bienestar";
+    else if(/hotel|motel|hospedaje/.test(catNeg)) packNeg="hospedaje";
+    applyNegocioPack(packNeg);
+    if(sel) sel.value=packNeg;
   }
   var u=DEMO[tipo];
+  if(u&&Array.isArray(u.galeria)){
+    u.galeria=u.galeria.map(function(s){ return demoAssetDesdeResultados(s)||""; }).filter(Boolean);
+  }
+  if(u&&u.actividadAvatar){
+    u.actividadAvatar=demoAssetDesdeResultados(u.actividadAvatar)||u.actividadAvatar;
+  }
   window.__perfilActual=u;
+  try{
+    var qTema={};
+    if(window.CariHubPerfilPublico&&CariHubPerfilPublico.queryPerfilPublico){
+      qTema=CariHubPerfilPublico.queryPerfilPublico()||{};
+    }else{
+      try{ qTema=Object.fromEntries(new URLSearchParams(location.search).entries()); }catch(eQ){ qTema={}; }
+    }
+    if(window.CariHubPerfilSectorVisual&&CariHubPerfilSectorVisual.sincronizar){
+      CariHubPerfilSectorVisual.sincronizar(u||{},qTema);
+    }else if(window.CariHubResultadosSector&&CariHubResultadosSector.aplicarTemaSector){
+      var catTema=(u&&(u.subcategoriaId||u.categoriaPublica||u.categoria))||qTema.categoria||qTema.subcategoria||"";
+      if(catTema||(u&&u.sectorId)) CariHubResultadosSector.aplicarTemaSector(catTema||u.sectorId);
+    }
+  }catch(eTema){ /* tema sector opcional */ }
   var inner;
   if(esCari) inner=(tipo==="pareja"?renderParejaLifestyle(u):renderPerfilCariñosas(u, tipo));
   else if(tipo==="medico") inner=renderMedicoProfesional(u);
@@ -8251,6 +8960,7 @@ function setVista(tipo){
   }
   aplicarAccionPerfilDesdeQuery(u);
   startPbBannerRotation();
+  bindPerfilResChrome(u);
   stopActividadNegocioRotation();
   window.scrollTo({top:0});
   bumpFitDelays();
@@ -8270,7 +8980,7 @@ function bumpFitDelays(){
 function openExternal(){
   window.open(location.href, "_blank", "noopener");
 }
-var FIT_DESIGN_W = 1100;
+var FIT_DESIGN_W = 980;
 var FIT_DESIGN_W_EMBED = 720;
 function readFitDesignW(availW){
   availW=availW||800;
@@ -8470,19 +9180,70 @@ if(window.ResizeObserver){
   bumpFitDelays();
 }
 
-document.documentElement.classList.add("fit");
 activarEmbedDashboard();
-document.body.classList.add("fit");
-if(window.CariHubPinkSheen) CariHubPinkSheen.mountPage(document.body);
+(function bootFitMode(){
+  var useFit=false;
+  try{
+    if(esEmbedDashboard()) useFit=true;
+    else{
+      var pFit=new URL(location.href).searchParams;
+      if(pFit.get("fit")==="1"||pFit.get("preview")==="1") useFit=true;
+    }
+  }catch(eFit){ useFit=false; }
+  if(useFit){
+    document.documentElement.classList.add("fit");
+    document.body.classList.add("fit");
+  }else{
+    document.documentElement.classList.remove("fit");
+    document.body.classList.remove("fit");
+  }
+})();
+(function syncPerfilPageSheenBoot(){
+  try{
+    var uBoot=window.__perfilActual||{};
+    var qBoot={};
+    try{ qBoot=Object.fromEntries(new URLSearchParams(location.search).entries()); }catch(eB){ qBoot={}; }
+    if(window.CariHubPerfilSectorVisual&&CariHubPerfilSectorVisual.sincronizar){
+      CariHubPerfilSectorVisual.sincronizar(uBoot,qBoot);
+      return;
+    }
+    var sec=document.body.getAttribute("data-sector")||"adultos";
+    var cat=qBoot.categoria||qBoot.subcategoria||"";
+    var isLgbt=document.body.getAttribute("data-subtema")==="lgbt";
+    if(window.CariHubResultadosSector){
+      if(CariHubResultadosSector.aplicarTemaSector&&(cat||uBoot.subcategoriaId)){
+        CariHubResultadosSector.aplicarTemaSector(cat||uBoot.subcategoriaId||sec);
+        return;
+      }
+      if(CariHubResultadosSector.syncPageSheen){
+        CariHubResultadosSector.syncPageSheen(sec,isLgbt?"escort gay":cat);
+        return;
+      }
+    }
+    if(window.CariHubPinkSheen&&sec==="adultos"&&!isLgbt){
+      CariHubPinkSheen.mountPage(document.body);
+    }else if(window.CariHubPinkSheen&&isLgbt&&CariHubPinkSheen.unmountPage){
+      CariHubPinkSheen.unmountPage(document.body);
+    }
+  }catch(eSheen){
+    /* Nunca forzar rosa si el boot temprano ya marcó LGBT */
+    if(window.CariHubPinkSheen&&document.body.getAttribute("data-subtema")!=="lgbt"){
+      CariHubPinkSheen.mountPage(document.body);
+    }
+  }
+})();
 iniciarPerfilPreview();
 window.addEventListener("message",function(ev){
   if(!ev.data) return;
   if(ev.data.type==="carihub-rp-preview-update"){
     if(!window.CariHubPerfilPublico||!CariHubPerfilPublico.leerPreviewRegistro) return;
+    var qGate={};
+    try{ qGate=queryPerfilPreview(); }catch(eGate){ qGate={}; }
+    /* No sobrescribir un perfil abierto desde Results con draft de registro */
+    if(qGate.from==="resultados"||(qGate.id&&qGate.from!=="registro"&&qGate.previewSource!=="registro")) return;
     var draft=CariHubPerfilPublico.leerPreviewRegistro();
     if(!draft||!draft.perfil) return;
-    var qUp={};
-    try{ qUp=queryPerfilPreview(); }catch(eUp){ qUp={}; }
+    var qUp=qGate;
     var vistaUp=draft.vista||qUp.vista||resolverVistaPerfil(draft.perfil,qUp)||"adult";
     if(draft.perfil.__previewRegistro||draft.perfil.__id==="preview-registro"){
       aplicarPerfilDesdeRegistro(vistaUp,draft.perfil);
