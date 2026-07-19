@@ -1,5 +1,6 @@
 /**
  * Monta el rail superior (Estados · banner categorías · LIBE) en pantallas de categorías Home.
+ * Adultos: vacant center banner rota hasta 3 fotos del mapa oficial (*-pro.png).
  */
 (function (global) {
   'use strict';
@@ -40,6 +41,83 @@
     return CAT_RAIL_BG_DEFAULT;
   }
 
+  function hashStr(s) {
+    var h = 0;
+    var str = String(s || '');
+    var i;
+    for (i = 0; i < str.length; i++) {
+      h = ((h << 5) - h) + str.charCodeAt(i);
+      h |= 0;
+    }
+    return Math.abs(h);
+  }
+
+  function officialAdultSrc(subcatId) {
+    if (!subcatId || !global.CariHubCategoriaImagenes || !global.CariHubCategoriaImagenes.get) return '';
+    var meta = global.CariHubCategoriaImagenes.get(subcatId);
+    return meta && meta.src ? meta.src : '';
+  }
+
+  /**
+   * Hasta 3 imágenes fotográficas Adultos desde el mapa oficial (*-pro).
+   * Otros sectores: una sola imagen de fondo (sin reescribir banners sectoriales).
+   */
+  function thematicRailImages(opts) {
+    opts = opts || {};
+    var out = [];
+    var seen = {};
+    function push(src) {
+      if (!src || seen[src]) return;
+      seen[src] = true;
+      out.push(src);
+    }
+
+    if (opts.sectorId === 'adultos') {
+      push(officialAdultSrc(opts.subcatId));
+      var pool =
+        global.CariHubCategoriaImagenes && global.CariHubCategoriaImagenes.allProSrcs
+          ? global.CariHubCategoriaImagenes.allProSrcs()
+          : [];
+      if (pool.length) {
+        var seed = hashStr(opts.subcatId || opts.sectorId || 'adultos');
+        var i;
+        for (i = 0; i < pool.length && out.length < 3; i++) {
+          push(pool[(seed + i * 7) % pool.length]);
+        }
+      }
+      return out.slice(0, 3);
+    }
+
+    push(railBgForSector(opts.sectorId));
+    if (!out.length) out.push(CAT_RAIL_BG_DEFAULT);
+    return out.slice(0, 1);
+  }
+
+  function buildVacantSlidesHtml(images) {
+    return images
+      .map(function (src, i) {
+        return (
+          '<div class="registro-pb__slide' +
+          (i === 0 ? ' is-active' : '') +
+          ' registro-pb__slide--rail-vacant" aria-hidden="' +
+          (i === 0 ? 'false' : 'true') +
+          '">' +
+          '<img class="registro-pb__rail-bg" src="' +
+          esc(src) +
+          '" alt="" decoding="async">' +
+          '<span class="registro-pb__rail-shade" aria-hidden="true"></span>' +
+          (i === 0
+            ? '<span class="registro-pb__rail-copy">' +
+              '<span class="registro-pb__rail-title">Anúnciate aquí</span>' +
+              '<span class="registro-pb__rail-hint">__HINT__</span>' +
+              '</span>'
+            : '') +
+          '</div>'
+        );
+      })
+      .join('');
+  }
+
   function buildCenterRailHtml(opts) {
     opts = opts || {};
     var rental = obtenerRentaCategorias();
@@ -47,37 +125,66 @@
     var sectorHint = opts.sectorName ? esc(opts.sectorName) + ' · ' : '';
     var subHint = opts.subcatName ? esc(opts.subcatName) + ' · ' : '';
     var hint = subHint + sectorHint + 'Banner selector de categorías';
-    var railBg = railBgForSector(opts.sectorId);
 
     if (rental && rental.imagen) {
       href = rental.url || href;
       return (
-        '<a class="registro-pb registro-pb--rail-cat" href="' + esc(href) + '" data-registro-slot="' + esc(SLOT_CATEGORIAS) + '" aria-label="' + esc(rental.titulo || 'Anuncio en selector de categorías') + '">' +
-          '<div class="registro-pb__stage">' +
-            '<div class="registro-pb__slide is-active" aria-hidden="false">' +
-              '<img src="' + esc(rental.imagen) + '" alt="' + esc(rental.titulo || 'Banner categorías') + '" decoding="async">' +
-            '</div>' +
-          '</div>' +
+        '<a class="registro-pb registro-pb--rail-cat" href="' +
+        esc(href) +
+        '" data-registro-slot="' +
+        esc(SLOT_CATEGORIAS) +
+        '" aria-label="' +
+        esc(rental.titulo || 'Anuncio en selector de categorías') +
+        '">' +
+        '<div class="registro-pb__stage">' +
+        '<div class="registro-pb__slide is-active" aria-hidden="false">' +
+        '<img src="' +
+        esc(rental.imagen) +
+        '" alt="' +
+        esc(rental.titulo || 'Banner categorías') +
+        '" decoding="async">' +
+        '</div>' +
+        '</div>' +
         '</a>'
       );
     }
 
+    var images = thematicRailImages(opts);
+    var slides = buildVacantSlidesHtml(images).replace('__HINT__', hint);
+
     return (
       '<a class="registro-pb registro-pb--rail-cat registro-pb--rail-vacant' +
-        (opts.sectorId ? ' registro-pb--rail-vacant-' + esc(opts.sectorId) : '') +
-        '" href="' + esc(href) + '" data-registro-slot="' + esc(SLOT_CATEGORIAS) + '" aria-label="Anúnciate aquí — banner selector de categorías">' +
-        '<div class="registro-pb__stage">' +
-          '<div class="registro-pb__slide is-active registro-pb__slide--rail-vacant" aria-hidden="false">' +
-            '<img class="registro-pb__rail-bg" src="' + esc(railBg) + '" alt="" decoding="async">' +
-            '<span class="registro-pb__rail-shade" aria-hidden="true"></span>' +
-            '<span class="registro-pb__rail-copy">' +
-              '<span class="registro-pb__rail-title">Anúnciate aquí</span>' +
-              '<span class="registro-pb__rail-hint">' + hint + '</span>' +
-            '</span>' +
-          '</div>' +
-        '</div>' +
+      (opts.sectorId ? ' registro-pb--rail-vacant-' + esc(opts.sectorId) : '') +
+      '" href="' +
+      esc(href) +
+      '" data-registro-slot="' +
+      esc(SLOT_CATEGORIAS) +
+      '" aria-label="Anúnciate aquí — banner selector de categorías">' +
+      '<div class="registro-pb__stage" data-rail-rotate="' +
+      images.length +
+      '">' +
+      slides +
+      '</div>' +
       '</a>'
     );
+  }
+
+  function startRailRotate(slot) {
+    var stage = slot && slot.querySelector('.registro-pb__stage[data-rail-rotate]');
+    if (!stage) return;
+    var n = Number(stage.getAttribute('data-rail-rotate') || 0);
+    if (n < 2) return;
+    if (stage._railTimer) clearInterval(stage._railTimer);
+    var idx = 0;
+    stage._railTimer = setInterval(function () {
+      var slides = stage.querySelectorAll('.registro-pb__slide');
+      if (!slides.length) return;
+      slides[idx].classList.remove('is-active');
+      slides[idx].setAttribute('aria-hidden', 'true');
+      idx = (idx + 1) % slides.length;
+      slides[idx].classList.add('is-active');
+      slides[idx].setAttribute('aria-hidden', 'false');
+    }, 4200);
   }
 
   function mountSideSlots(rail) {
@@ -101,16 +208,23 @@
     if (!slot) return;
     slot.innerHTML = buildCenterRailHtml(opts);
     slot.dataset.registroBannerMounted = '1';
+    startRailRotate(slot);
   }
 
   function mountRail(rail, opts) {
     if (!rail) return;
+    opts = opts || {};
     mountSideSlots(rail);
-    mountCenterBanner(rail, opts || {});
-    if (opts && opts.sectorId) {
+    mountCenterBanner(rail, opts);
+    if (opts.sectorId) {
       rail.setAttribute('data-rp-sector', opts.sectorId);
     } else {
       rail.removeAttribute('data-rp-sector');
+    }
+    if (opts.subcatId) {
+      rail.setAttribute('data-rp-subcat', opts.subcatId);
+    } else {
+      rail.removeAttribute('data-rp-subcat');
     }
     rail.dataset.promoMounted = '1';
   }
