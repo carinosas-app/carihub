@@ -64,11 +64,41 @@
     return qs ? base + '?' + qs : base;
   }
 
+  /**
+   * Remapea rutas demo rotas (preview-only / paths legacy) a assets públicos bajo /img.
+   * - img/violeta-N.png → img/resultados-demo/violeta-N.png
+   * - assets/adultos-user/* → img/adultos-cat/* (mismo basename)
+   * - img/motel-*.png → img/home motel/spa públicos
+   * - img/silueta-estatura.png → vacío (caller colapsa; no hay silueta en public/)
+   */
   function demoAssetPath(src) {
     var s = String(src || '').trim();
     if (!s) return s;
     if (/^(\.\.|\/|https?:|data:)/.test(s)) return s;
-    return assetBase() + s.replace(/^\.\//, '');
+    s = s.replace(/^\.\//, '');
+    var vio = s.match(/^img\/violeta-([1-4])\.png$/i);
+    if (vio) {
+      return assetBase() + 'img/resultados-demo/violeta-' + vio[1] + '.png';
+    }
+    if (/^img\/silueta-estatura\.png$/i.test(s)) {
+      return '';
+    }
+    var adultUser = s.match(/^assets\/adultos-user\/(.+)$/i);
+    if (adultUser) {
+      return assetBase() + 'img/adultos-cat/' + adultUser[1];
+    }
+    var motelMap = {
+      'img/motel-principal.png': 'img/home/motel-noche.jpg',
+      'img/motel-extra-1.png': 'img/home/motel-spa-model.jpg',
+      'img/motel-extra-2.png': 'img/adultos-cat/img-08.jpg',
+      'img/motel-live.png': 'img/resultados-demo/live-en-vivo-libe.png',
+      'img/motel-ubicacion.png': 'img/home/motel-noche.jpg'
+    };
+    var motelKey = s.toLowerCase();
+    if (motelMap[motelKey]) {
+      return assetBase() + motelMap[motelKey];
+    }
+    return assetBase() + s;
   }
 
   function esIdDemo(id) {

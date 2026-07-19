@@ -11,6 +11,52 @@
     'img/resultados-demo/violeta-4.png'
   ];
 
+  /** Pools de foto por subcategoría LGBT/adulta especializada (no reutilizar Violeta). */
+  var FOTOS_POR_SUB = {
+    'escort gay': [
+      'img/home/escort-gay.jpg',
+      'img/home/hero-escort-gay.png',
+      'img/home/hero-01-escort-gay.png',
+      'img/home/cat-cards/escort-gay-pro.png'
+    ],
+    trans: [
+      'img/home/cat-cards/femboy-pro.png',
+      'img/home/cat-cards/femboy.png',
+      'img/home/hero-lesbianas.png',
+      'img/home/cat-cards/antro-lgbt-pro.png'
+    ],
+    femboy: [
+      'img/home/cat-cards/femboy.png',
+      'img/home/cat-cards/femboy-pro.png',
+      'img/home/hero-01-escort-gay.png',
+      'img/home/escort-gay.jpg'
+    ],
+    lesbians: [
+      'img/home/hero-lesbianas.png',
+      'img/resultados-demo/violeta-2.png',
+      'img/resultados-demo/violeta-3.png',
+      'img/resultados-demo/violeta-4.png'
+    ],
+    'tom boy': [
+      'img/home/hero-lesbianas.png',
+      'img/home/cat-cards/femboy-pro.png',
+      'img/home/escort-gay.jpg',
+      'img/home/hero-escort-gay.png'
+    ],
+    'tom fem': [
+      'img/home/hero-lesbianas.png',
+      'img/resultados-demo/violeta-1.png',
+      'img/resultados-demo/violeta-3.png',
+      'img/home/cat-cards/femboy.png'
+    ],
+    'antro restaurant bar lgbt': [
+      'img/home/cat-cards/antro-lgbt.png',
+      'img/home/cat-cards/antro-lgbt-pro.png',
+      'img/home/banners/ad-banner-adult-antro-lgbt-01.png',
+      'img/home/hero-bar-neon.png'
+    ]
+  };
+
   var ZONAS = ['San Pedro', 'Centro', 'Valle Oriente', 'Cumbres', 'Mitras', 'Del Valle'];
 
   var VISTA_POR_CATEGORIA = {
@@ -260,6 +306,40 @@
       default: [
         { nombre: 'Prof. demo certificado', precio: '700', tagline: 'Profesionista con cédula verificada (demo).', especialidad: 'Consulta profesional', cedulaVerificada: true, verificada: true }
       ]
+    },
+    /* Personas adultas con demos propios (no reutilizar pool Violeta). */
+    ResultCardAdultos: {
+      'escort gay': [
+        { nombre: 'Mateo R.', edad: 26, precio: '1,800', tagline: 'Compañía masculina, discreción y trato de novio.', modalidades: ['recibe', 'hotel', 'domicilio'], verificada: true, nueva: true, badgeLgbt: true, categoriaPublica: 'Escort Gay' },
+        { nombre: 'Diego L.', edad: 28, precio: '2,000', tagline: 'Atlético, puntual y conversación agradable.', modalidades: ['hotel', 'domicilio'], verificada: true, badgeLgbt: true, categoriaPublica: 'Escort Gay' },
+        { nombre: 'Andrés V.', edad: 24, precio: '1,600', tagline: 'Perfil LGBT verificado, zonas centro y sur.', modalidades: ['recibe', 'hotel'], verificada: true, badgeLgbt: true, categoriaPublica: 'Escort Gay' },
+        { nombre: 'Leo M.', edad: 30, precio: '2,200', tagline: 'Experiencia premium y total confidencialidad.', modalidades: ['recibe', 'hotel', 'domicilio'], verificada: true, badgeLgbt: true, categoriaPublica: 'Escort Gay' }
+      ],
+      trans: [
+        { nombre: 'Valentina T.', edad: 25, precio: '2,200', tagline: 'Trans femenina elegante, discreta y muy atenta.', modalidades: ['recibe', 'hotel'], verificada: true, nueva: true, badgeTrans: true, badgeLgbt: true, categoriaPublica: 'Trans' },
+        { nombre: 'Camila Soft', edad: 27, precio: '2,000', tagline: 'Trato cariñoso y buena conversación.', modalidades: ['hotel', 'domicilio'], verificada: true, badgeTrans: true, badgeLgbt: true, categoriaPublica: 'Trans' },
+        { nombre: 'Nina Glow', edad: 23, precio: '1,900', tagline: 'Perfil trans verificado en Monterrey.', modalidades: ['recibe', 'hotel', 'domicilio'], verificada: true, badgeTrans: true, badgeLgbt: true, categoriaPublica: 'Trans' }
+      ],
+      femboy: [
+        { nombre: 'Alex Soft', edad: 22, precio: '1,700', tagline: 'Femboy cute, juguetón y con estilo propio.', modalidades: ['recibe', 'hotel'], verificada: true, nueva: true, badgeLgbt: true, categoriaPublica: 'Femboy' },
+        { nombre: 'Kai Pink', edad: 24, precio: '1,850', tagline: 'Looks andróginos y trato dulce.', modalidades: ['hotel', 'domicilio'], verificada: true, badgeLgbt: true, categoriaPublica: 'Femboy' },
+        { nombre: 'Ren M.', edad: 21, precio: '1,600', tagline: 'Femboy verificado, disponible con cita.', modalidades: ['recibe', 'hotel', 'domicilio'], verificada: true, badgeLgbt: true, categoriaPublica: 'Femboy' }
+      ],
+      lesbians: [
+        { nombre: 'Luna S.', edad: 26, precio: '1,900', tagline: 'Lesbiana verificada, atención a mujeres y parejas.', modalidades: ['recibe', 'hotel'], verificada: true, badgeLgbt: true, categoriaPublica: 'Lesbians' },
+        { nombre: 'Sara & Co', edad: 28, precio: '2,100', tagline: 'Estilo femenino, citas discretas y buena energía.', modalidades: ['hotel', 'domicilio'], verificada: true, badgeLgbt: true, categoriaPublica: 'Lesbians' },
+        { nombre: 'Meli R.', edad: 24, precio: '1,750', tagline: 'Perfil LGBT · Monterrey sur.', modalidades: ['recibe', 'hotel', 'domicilio'], verificada: true, nueva: true, badgeLgbt: true, categoriaPublica: 'Lesbians' }
+      ],
+      'tom boy': [
+        { nombre: 'Alexa Tom', edad: 25, precio: '1,800', tagline: 'Tom boy confiada, look casual y trato directo.', modalidades: ['recibe', 'hotel'], verificada: true, badgeLgbt: true, categoriaPublica: 'Tom Boy' },
+        { nombre: 'Javi T.', edad: 27, precio: '1,950', tagline: 'Estilo masculino suave y gran charla.', modalidades: ['hotel', 'domicilio'], verificada: true, badgeLgbt: true, categoriaPublica: 'Tom Boy' },
+        { nombre: 'Sam R.', edad: 23, precio: '1,700', tagline: 'Tom boy verificada, zonas cumbres y centro.', modalidades: ['recibe', 'hotel', 'domicilio'], verificada: true, badgeLgbt: true, categoriaPublica: 'Tom Boy' }
+      ],
+      'tom fem': [
+        { nombre: 'Nora Fem', edad: 26, precio: '1,850', tagline: 'Tom fem elegante: mezcla suave y feminidad.', modalidades: ['recibe', 'hotel'], verificada: true, badgeLgbt: true, categoriaPublica: 'Tom Fem' },
+        { nombre: 'Ivy Soft', edad: 24, precio: '1,900', tagline: 'Presentación cuidada y trato de novia.', modalidades: ['hotel', 'domicilio'], verificada: true, nueva: true, badgeLgbt: true, categoriaPublica: 'Tom Fem' },
+        { nombre: 'Dana M.', edad: 28, precio: '2,050', tagline: 'Tom fem verificada en San Pedro.', modalidades: ['recibe', 'hotel', 'domicilio'], verificada: true, badgeLgbt: true, categoriaPublica: 'Tom Fem' }
+      ]
     }
   };
 
@@ -412,7 +492,26 @@
   }
 
   function foto(i) {
-    return FOTOS[i % FOTOS.length];
+    return FOTOS[((i % FOTOS.length) + FOTOS.length) % FOTOS.length];
+  }
+
+  function normSubFotoKey(catId) {
+    return String(catId || '')
+      .trim()
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[_-]+/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  /** Foto del pool canónico O del pool LGBT/especializado de la subcategoría. */
+  function fotoPara(catId, i) {
+    var key = normSubFotoKey(catId);
+    var pool = FOTOS_POR_SUB[key];
+    if (!pool || !pool.length) return foto(i);
+    return pool[((i % pool.length) + pool.length) % pool.length];
   }
 
   function zonaNombre(i) {
@@ -425,13 +524,24 @@
     for (k in base) {
       if (Object.prototype.hasOwnProperty.call(base, k)) u[k] = base[k];
     }
-    u.categoria = base.categoria || Q.categoria || 'Cariñosas';
-    u.categoriaPublica = base.categoriaPublica || u.categoria;
+    /* La búsqueda manda: no reusar categoriaPublica fija del mock escort. */
+    if (Q && Q.categoria) {
+      u.categoria = Q.categoria;
+      u.categoriaPublica = labelCategoria(Q.categoria);
+      u.subcategoriaId = idCategoria(Q.categoria) || u.subcategoriaId;
+    } else {
+      u.categoria = base.categoria || 'Cariñosas';
+      u.categoriaPublica = base.categoriaPublica || u.categoria;
+    }
     u.pais = Q.pais || 'México';
     u.estado = u.estado || Q.estado || 'Nuevo León';
     u.ciudad = u.ciudad || Q.ciudad || 'Monterrey';
     if (u.fotosCount) {
-      u.fotosExtraURL = new Array(Math.max(0, u.fotosCount - 1)).fill('demo');
+      var extraN = Math.max(0, (u.fotosCount | 0) - 1);
+      u.fotosExtraURL = [];
+      for (var fi = 0; fi < extraN; fi++) {
+        u.fotosExtraURL.push(foto(fi + 1));
+      }
     }
     return enriquecerPerfil(u, Q);
   }
@@ -491,10 +601,25 @@
     return false;
   }
 
+  /** Hay pool demo específico de la subcategoría (LGBT, etc.) — no usar Violeta genérica. */
+  function tieneDemoAdultoEspecializado(pres, Q) {
+    var comp = (pres && pres.componenteResultados) || 'ResultCardAdultos';
+    if (comp !== 'ResultCardAdultos') return false;
+    var subId = (pres && pres.subcategoriaId) || idCategoria((Q && Q.categoria) || '');
+    var bucket = DEMO_POR_COMPONENTE.ResultCardAdultos;
+    if (!bucket || !subId) return false;
+    var key = String(subId).trim().toLowerCase().replace(/_/g, ' ');
+    var pool = bucket[key] || bucket[subId];
+    return !!(pool && pool.length);
+  }
+
   function perfilesPreviewPorCategoria(Q, incluirQuinto) {
     Q = Q || {};
     var pres = presentacionDeCategoria(Q.categoria);
     if (!esBusquedaAdulta(Q, pres)) {
+      return plantillaDemoSchema(Q, pres);
+    }
+    if (tieneDemoAdultoEspecializado(pres, Q)) {
       return plantillaDemoSchema(Q, pres);
     }
     return incluirQuinto ? perfilesCanonicosCinco(Q) : perfilesCanonicosCuatro(Q);
@@ -523,9 +648,13 @@
       disponibilidad: base.disponibilidad || 'Consultar disponibilidad',
       respuestaRapida: base.respuestaRapida !== false,
       nueva: !!base.nueva,
-      fotoURL: foto(idx),
-      fotosExtraURL: ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n']
+      fotoURL: fotoPara(catId, idx),
+      fotosExtraURL: [fotoPara(catId, idx + 1), fotoPara(catId, idx + 2), fotoPara(catId, idx + 3), fotoPara(catId, idx + 4)]
     };
+    if (base.badgeLgbt) u.badgeLgbt = true;
+    if (base.badgeTrans) u.badgeTrans = true;
+    if (base.badgeVip) u.badgeVip = true;
+    if (catId) u.subcategoriaId = String(catId).trim().toLowerCase().replace(/_/g, ' ');
 
     if (esNeg) {
       u.tipoPerfil = base.tipoPerfil || 'negocio';
@@ -2612,11 +2741,13 @@
     }
     var comp = pres.componenteResultados || 'ResultCardAdultos';
     var subId = pres.subcategoriaId || idCategoria(Q.categoria);
-    var pool = (DEMO_POR_COMPONENTE[comp] && (DEMO_POR_COMPONENTE[comp][subId] || DEMO_POR_COMPONENTE[comp].default)) || [];
+    var subKey = String(subId || '').trim().toLowerCase().replace(/_/g, ' ');
+    var compBucket = DEMO_POR_COMPONENTE[comp] || {};
+    var pool = compBucket[subId] || compBucket[subKey] || compBucket.default || [];
     var catLabel = labelCategoria(Q.categoria);
     var vistaDef = pres.vistaPerfil || vistaDeCategoria(Q.categoria);
     return pool.map(function (base, idx) {
-      return armarPerfil(base, idx, Q, catLabel, subId, vistaDef);
+      return armarPerfil(base, idx, Q, catLabel, subKey || subId, vistaDef);
     });
   }
 
@@ -2733,9 +2864,15 @@
     var pres = presentacionDeCategoria(Q.categoria);
     var demo = [];
     if (pres.esAdultoPersona) {
-      demo = perfilesCanonicosCuatro(Q).filter(function (u) {
-        return coincideBusqueda(u, Q);
-      });
+      if (tieneDemoAdultoEspecializado(pres, Q)) {
+        demo = plantillaDemoSchema(Q, pres).filter(function (u) {
+          return coincideBusqueda(u, Q);
+        });
+      } else {
+        demo = perfilesCanonicosCuatro(Q).filter(function (u) {
+          return coincideBusqueda(u, Q);
+        });
+      }
     }
     if (!demo.length) {
       demo = plantillaDemoSchema(Q, pres).filter(function (u) {
@@ -2860,15 +2997,55 @@
     return urlPerfilPublico(u, Q);
   }
 
-  /** Busca un perfil demo canónico por __id (p. ej. demo-violeta). */
+  /** Alias de IDs cortos usados en QA / URLs legacy → canónicos. */
+  var DEMO_ID_ALIAS = {
+    'demo-1': 'demo-violeta',
+    'demo-2': 'demo-mariana',
+    'demo-3': 'demo-sofia',
+    'demo-4': 'demo-valentina',
+    'demo-5': 'demo-camila'
+  };
+
+  /** Infiere categoría desde ids tipo demo-escort gay-mateo-r-0. */
+  function inferCategoriaFromDemoId(id) {
+    var rest = String(id || '').replace(/^demo-/i, '');
+    if (!rest) return '';
+    var keys = Object.keys((DEMO_POR_COMPONENTE && DEMO_POR_COMPONENTE.ResultCardAdultos) || {})
+      .sort(function (a, b) { return b.length - a.length; });
+    for (var i = 0; i < keys.length; i++) {
+      var k = keys[i];
+      if (rest === k || rest.indexOf(k + '-') === 0) return k;
+    }
+    return '';
+  }
+
+  /** Busca un perfil demo por __id (canónicos, alias y pools especializados LGBT/sector). */
   function perfilPorId(id, Q) {
     if (!id) return null;
     Q = Q || queryFromLocation();
+    id = DEMO_ID_ALIAS[id] || id;
     var todos = PERFILES_CANON.slice();
     if (PERFIL_CANON_CUARTO) todos.push(PERFIL_CANON_CUARTO);
     if (PERFIL_CANON_QUINTO) todos.push(PERFIL_CANON_QUINTO);
     var base = todos.find(function (p) { return p.__id === id; });
-    return base ? enriquecerPerfil(clonarPerfil(base, Q), Q) : null;
+    if (base) return enriquecerPerfil(clonarPerfil(base, Q), Q);
+
+    var q2 = Object.assign({}, Q);
+    if (!q2.categoria) {
+      var inferred = inferCategoriaFromDemoId(id);
+      if (inferred) q2.categoria = inferred;
+    }
+    if (!q2.categoria && Q.categoria) q2.categoria = Q.categoria;
+    if (!q2.categoria) return null;
+
+    var lista = [];
+    try {
+      lista = perfilesPreviewPorCategoria(q2, true) || [];
+    } catch (eLista) {
+      lista = [];
+    }
+    var hit = lista.find(function (p) { return p && p.__id === id; });
+    return hit || null;
   }
 
   function safeTxt(t) {
