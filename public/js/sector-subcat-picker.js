@@ -381,7 +381,17 @@
   function mobPath(src) {
     if (/registro-subcats\//.test(src)) return src;
     if (/\/sector-cards\//.test(src)) return src;
+    /* Oficiales *-pro (Home Adultos): un solo PNG; no existe variante mob/.jpg */
+    if (/\/cat-cards\//.test(src)) return src;
     return String(src).replace('/sectores/', '/sectores/mob/').replace(/\.png$/i, '.jpg');
+  }
+
+  /** Resolver oficial (SSOT Home) — mismo mapa que home-vcards / adultos-cat-picker. */
+  function officialCatMeta(subcatId) {
+    if (!global.CariHubCategoriaImagenes || typeof global.CariHubCategoriaImagenes.get !== 'function') {
+      return null;
+    }
+    return global.CariHubCategoriaImagenes.get(subcatId) || null;
   }
 
   function hashStr(s) {
@@ -418,6 +428,8 @@
   }
 
   function imageForSubcat(sectorId, subcatId, index) {
+    var official = officialCatMeta(subcatId);
+    if (official && official.src) return official.src;
     if (sectorId === 'restaurantes' && GASTRON_SUBCAT_IMAGES[subcatId]) {
       return GASTRON_SUBCAT_IMAGES[subcatId];
     }
@@ -438,7 +450,8 @@
 
   function thumbHtml(src, subcatId) {
     var png = esc(src);
-    var pos = POS_VARIANTS[hashStr(subcatId) % POS_VARIANTS.length];
+    var official = officialCatMeta(subcatId);
+    var pos = (official && official.pos) || POS_VARIANTS[hashStr(subcatId) % POS_VARIANTS.length];
     return (
       '<img class="rp-sector-card__img" src="' + esc(pickSrc(src)) + '" data-fallback="' + png + '" alt="" ' +
       'loading="lazy" decoding="async" style="object-position:' + pos + '" ' +
