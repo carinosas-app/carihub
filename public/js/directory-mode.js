@@ -9,6 +9,7 @@
   "use strict";
 
   var EVENT = "carihub:directory-mode-change";
+  var FASE1_SSOT_STYLE_ID = "directory-mode-fase1-ssot";
 
   /** Modules blocked while Directory Mode is active (B1 dashboard). */
   var SOCIAL_MODULES = {
@@ -22,6 +23,42 @@
     "feed-red": true,
     publicaciones: true,
   };
+
+  /**
+   * Single Source of Truth — hide public Estados/LIBE (States & Lives) placeholders
+   * while Directory Mode is ON. Preserves FA code for later activation (?futureSocial=1 on QA hosts only).
+   * Center «Anúnciate aquí» banner expands to full rail width.
+   */
+  var FASE1_ESTADOS_LIBE_CSS =
+    "html.directory-mode .ch-slot-dock--home," +
+    "html.directory-mode .ch-slot-dock--hero," +
+    "html.directory-mode .home-cat-promo-rail__slot--side," +
+    "html.directory-mode [data-directory-hide=\"estados-libe-docks\"]," +
+    "html.directory-mode .res-midband__slot--estados," +
+    "html.directory-mode .res-midband__slot--libe," +
+    "html.directory-mode .ch-slot-dock__item--fase1-hidden{" +
+    "display:none!important;visibility:hidden!important;pointer-events:none!important;" +
+    "width:0!important;min-width:0!important;max-width:0!important;height:0!important;" +
+    "min-height:0!important;max-height:0!important;margin:0!important;padding:0!important;" +
+    "border:0!important;overflow:hidden!important;flex:0 0 0!important;}" +
+    "html.directory-mode .home-cat-promo-rail{" +
+    "gap:0!important;justify-content:center!important;}" +
+    "html.directory-mode .home-cat-promo-rail__slot--center{" +
+    "flex:1 1 auto!important;width:100%!important;max-width:100%!important;min-width:0!important;}" +
+    "html.directory-mode .res-midband{min-height:auto!important;height:auto!important;gap:0!important;}" +
+    "html.directory-mode .res-midband__center{flex:1 1 auto!important;width:100%!important;max-width:100%!important;}";
+
+  function ensureFase1EstadosLibeStyles() {
+    var doc = global.document;
+    if (!doc) return;
+    var existing = doc.getElementById(FASE1_SSOT_STYLE_ID);
+    if (existing) return;
+    var style = doc.createElement("style");
+    style.id = FASE1_SSOT_STYLE_ID;
+    style.setAttribute("data-carihub-ssot", "fase1-hide-estados-libe");
+    style.textContent = FASE1_ESTADOS_LIBE_CSS;
+    (doc.head || doc.documentElement).appendChild(style);
+  }
 
   /**
    * Query override is QA-only. Public production hostnames must ignore it (P0).
@@ -116,7 +153,35 @@
       root.classList.toggle("directory-mode", on);
       root.classList.toggle("future-social-enabled", !on);
     }
+    ensureFase1EstadosLibeStyles();
     return on;
+  }
+
+  /** Defensive: neutralize leftover FA dock anchors if any were painted before CSS. */
+  function neutralizeEstadosLibeControls(on) {
+    var doc = global.document;
+    if (!doc || !on) return;
+    var sels = [
+      ".ch-slot-dock--home a",
+      ".ch-slot-dock--hero a",
+      ".home-cat-promo-rail__slot--side a",
+      "[data-directory-hide=\"estados-libe-docks\"] a",
+      ".res-midband__slot--estados a",
+      ".res-midband__slot--libe a",
+      "a[data-ch-slot$=\"_estados\"]",
+      "a[data-ch-slot$=\"_libe\"]",
+    ];
+    doc.querySelectorAll(sels.join(",")).forEach(function (a) {
+      a.setAttribute("tabindex", "-1");
+      a.setAttribute("aria-hidden", "true");
+      a.setAttribute("hidden", "");
+      a.style.pointerEvents = "none";
+      try {
+        a.removeAttribute("href");
+      } catch (e) {
+        /* ignore */
+      }
+    });
   }
 
   function applyUI() {
@@ -151,6 +216,7 @@
           if (el.tagName === "INPUT" && el.type === "checkbox") el.checked = false;
         }
       });
+      neutralizeEstadosLibeControls(on);
     }
 
     var hubText = global.document && global.document.querySelector(".dash-hub-notice__text");
@@ -196,5 +262,6 @@
     isQaOverrideHostAllowed: isQaOverrideHostAllowed,
     syncRootClasses: syncRootClasses,
     applyUI: applyUI,
+    ensureFase1EstadosLibeStyles: ensureFase1EstadosLibeStyles,
   };
 })(typeof window !== "undefined" ? window : globalThis);

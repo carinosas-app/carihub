@@ -78,16 +78,45 @@
     );
   }
 
+  /** Phase 1 marketplace: Estados/LIBE docks stay in code but must not render while Directory Mode is ON. */
+  function isEstadosLibeSurfaceHidden() {
+    if (global.CarihubDirectoryMode && typeof global.CarihubDirectoryMode.isDirectoryMode === 'function') {
+      return !!global.CarihubDirectoryMode.isDirectoryMode();
+    }
+    /* Fail closed for public Phase 1 if directory-mode.js is missing. */
+    return true;
+  }
+
+  function isEstadosOrLibeSlot(slotId) {
+    return /_(estados|libe)$/.test(String(slotId || ''));
+  }
+
+  function clearHost(el, layout) {
+    el.innerHTML = '';
+    el.className = 'ch-slot-dock__item ch-slot-dock__item--fase1-hidden' +
+      (layout === 'rail' ? ' ch-slot-dock__item--rail' : '');
+    el.setAttribute('hidden', '');
+    el.setAttribute('aria-hidden', 'true');
+    el.removeAttribute('tabindex');
+  }
+
   function mountDock(config) {
     config = config || {};
     var rentals = config.rentals || {};
     var map = config.map || {};
     var layout = config.layout || '';
+    var hideFa = isEstadosLibeSurfaceHidden();
 
     Object.keys(map).forEach(function (elId) {
       var slotId = map[elId];
       var el = document.getElementById(elId);
       if (!el) return;
+      if (hideFa && isEstadosOrLibeSlot(slotId)) {
+        clearHost(el, layout);
+        return;
+      }
+      el.removeAttribute('hidden');
+      el.removeAttribute('aria-hidden');
       el.className = 'ch-slot-dock__item' + (layout === 'rail' ? ' ch-slot-dock__item--rail' : '');
       el.innerHTML = buildBannerHTML(slotId, rentals[slotId] || null, { layout: layout });
     });
@@ -96,6 +125,7 @@
   global.CariHubSlotDock = {
     buildBannerHTML: buildBannerHTML,
     mountDock: mountDock,
-    linkRegistro: linkRegistro
+    linkRegistro: linkRegistro,
+    isEstadosLibeSurfaceHidden: isEstadosLibeSurfaceHidden
   };
 })(typeof window !== 'undefined' ? window : globalThis);
