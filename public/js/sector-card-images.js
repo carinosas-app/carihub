@@ -7,7 +7,7 @@
   'use strict';
 
   var BASE = 'img/home/sector-cards/';
-  var V = '20260718pro1';
+  var V = '20260720opt480';
 
   function src(file) {
     return BASE + file + '?v=' + V;
