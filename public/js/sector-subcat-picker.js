@@ -131,6 +131,17 @@
     PREFIX + 'industria/ind-08-limpieza.png'
   ];
 
+  var MASCOTAS_IMAGES = [
+    PREFIX + 'mascotas/masc-01-veterinarias.jpg',
+    PREFIX + 'mascotas/masc-02-clinicas.jpg',
+    PREFIX + 'mascotas/masc-03-peluqueria.jpg',
+    PREFIX + 'mascotas/masc-04-pet-shop.jpg',
+    PREFIX + 'mascotas/masc-05-adiestramiento.jpg',
+    PREFIX + 'mascotas/masc-06-pensiones.jpg',
+    PREFIX + 'mascotas/masc-07-guarderia.jpg',
+    PREFIX + 'mascotas/masc-08-crematorio.jpg'
+  ];
+
   var GASTRON_PREFIX = PREFIX + 'gastronomia/';
 
   var GASTRON_SUBCAT_IMAGES = {
@@ -199,9 +210,7 @@
       'img/registro-subcats/profesionales/prof-10-diseno.png',
       'img/registro-subcats/profesionales/prof-04-consultoria.png'
     ],
-    mascotas: [
-      'img/home/sector-cards/mascotas.png'
-    ],
+    mascotas: MASCOTAS_IMAGES,
     educacion: EDU_IMAGES,
     restaurantes: REST_IMAGES
   };
@@ -352,6 +361,18 @@
     { re: /talleres-creativos/, img: 5 }
   ];
 
+  /* Orden: clínicas antes que veterinarias (clinicas-veterinarias contiene "veterinarias"). */
+  var MASCOTAS_KEYWORD_RULES = [
+    { re: /clinicas-veterinarias|clinica/, img: 1 },
+    { re: /veterinarias|veterinar/, img: 0 },
+    { re: /peluqueria/, img: 2 },
+    { re: /pet-shop|petshop/, img: 3 },
+    { re: /adiestramiento/, img: 4 },
+    { re: /pensiones/, img: 5 },
+    { re: /guarderia/, img: 6 },
+    { re: /crematorio/, img: 7 }
+  ];
+
   var SECTOR_KEYWORD_RULES = {
     salud: SALUD_KEYWORD_RULES,
     profesionales: PROF_KEYWORD_RULES,
@@ -363,6 +384,7 @@
     automotriz: AUTO_KEYWORD_RULES,
     bienestar: BIEN_KEYWORD_RULES,
     industria: IND_KEYWORD_RULES,
+    mascotas: MASCOTAS_KEYWORD_RULES,
     restaurantes: REST_KEYWORD_RULES,
     educacion: EDU_KEYWORD_RULES
   };

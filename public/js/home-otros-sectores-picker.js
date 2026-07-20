@@ -204,7 +204,14 @@
     var modal = $('modal-otros-sectores');
     var rail = modal && modal.querySelector('.home-cat-promo-rail');
     if (!rail || !global.CariHubHomeCatPromoRail) return;
-    global.CariHubHomeCatPromoRail.mountRail(rail, opts || {});
+    opts = Object.assign({ surface: 'otros-categorias' }, opts || {});
+    if (!opts.sectorId) {
+      rail.removeAttribute('data-rp-sector');
+      rail.removeAttribute('data-rp-sector-name');
+      opts.sectorId = '';
+      opts.sectorName = '';
+    }
+    global.CariHubHomeCatPromoRail.mountRail(rail, opts);
   }
 
   function open(opts) {

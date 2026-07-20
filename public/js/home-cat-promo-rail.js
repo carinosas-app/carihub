@@ -6,13 +6,30 @@
   'use strict';
 
   var SLOT_CATEGORIAS = 'home_categorias';
+  /* Default Adultos/registro; «Ver otras categorías» usa surface + banners de sector. */
   var CAT_RAIL_BG_DEFAULT = 'img/home/banners/ad-banner-pink-01.png';
+  var OTROS_CATS_BANNER_DEFAULT = 'img/home/banners/ad-banner-categorias-explora-01.png';
+  var OTROS_CATS_BANNER_ROTATE = [
+    'img/home/banners/ad-banner-categorias-explora-01.png',
+    'img/home/banners/ad-banner-restaurantes-01.png',
+    'img/home/banners/ad-banner-profesionales-01.png'
+  ];
 
   var CAT_RAIL_BG_BY_SECTOR = {
-    restaurantes: 'img/home/banners/ad-banner-gastronomia-01.svg',
-    eventos: 'img/home/banners/ad-banner-pink-01.png',
-    salud: 'img/home/banners/ad-banner-pink-02.png',
-    bienestar: 'img/home/banners/ad-banner-pink-03.png'
+    restaurantes: 'img/home/banners/ad-banner-restaurantes-01.png',
+    eventos: 'img/home/banners/ad-banner-eventos-01.png',
+    salud: 'img/home/banners/ad-banner-salud-01.png',
+    bienestar: 'img/home/banners/ad-banner-bienestar-01.png',
+    automotriz: 'img/home/banners/ad-banner-automotriz-01.png',
+    profesionales: 'img/home/banners/ad-banner-profesionales-01.png',
+    hogar: 'img/home/banners/ad-banner-hogar-01.png',
+    comercio: 'img/home/banners/ad-banner-comercio-01.png',
+    mascotas: 'img/home/banners/ad-banner-mascotas-01.png',
+    educacion: 'img/home/banners/ad-banner-educacion-01.png',
+    tecnologia: 'img/home/banners/ad-banner-tecnologia-01.png',
+    transporte: 'img/home/banners/ad-banner-transporte-01.png',
+    industria: 'img/home/banners/ad-banner-industria-01.png',
+    'bienes-raices': 'img/home/banners/ad-banner-bienes-raices-01.png'
   };
 
   function $(sel, root) {
@@ -35,10 +52,14 @@
   }
 
   function railBgForSector(sectorId) {
-    if (sectorId && CAT_RAIL_BG_BY_SECTOR[sectorId]) {
-      return CAT_RAIL_BG_BY_SECTOR[sectorId];
+    if (!sectorId || sectorId === 'adultos') return '';
+    var RS = global.CariHubResultadosSector;
+    if (RS && typeof RS.bannerDeSector === 'function') {
+      var fromRs = RS.bannerDeSector(sectorId);
+      if (fromRs) return fromRs;
     }
-    return CAT_RAIL_BG_DEFAULT;
+    if (CAT_RAIL_BG_BY_SECTOR[sectorId]) return CAT_RAIL_BG_BY_SECTOR[sectorId];
+    return OTROS_CATS_BANNER_DEFAULT;
   }
 
   function hashStr(s) {
@@ -59,8 +80,8 @@
   }
 
   /**
-   * Adultos (Elegir categoría): banners LGBT existentes del inventario Home.
-   * Otros sectores: una sola imagen de fondo (sin reescribir banners sectoriales).
+   * Adultos (Elegir categoría): banners LGBT.
+   * Ver otras categorías: creativas de sector (nunca pink/hot Adultos).
    */
   function thematicRailImages(opts) {
     opts = opts || {};
@@ -73,14 +94,25 @@
     }
 
     if (opts.sectorId === 'adultos') {
-      /* Tres creativas LGBT distintas (pride-01/02 son el mismo archivo). */
       push('img/home/banners/ad-banner-lgbt-resultados-01.png');
       push('img/home/banners/ad-banner-lgbt-resultados-02.png');
       push('img/home/banners/ad-banner-lgbt-resultados-03.png');
       return out.slice(0, 3);
     }
 
-    push(railBgForSector(opts.sectorId));
+    if (opts.surface === 'otros-categorias') {
+      if (opts.sectorId) {
+        push(railBgForSector(opts.sectorId));
+        if (!out.length) push(OTROS_CATS_BANNER_DEFAULT);
+        return out.slice(0, 1);
+      }
+      OTROS_CATS_BANNER_ROTATE.forEach(push);
+      return out.slice(0, 3);
+    }
+
+    if (opts.sectorId) {
+      push(railBgForSector(opts.sectorId));
+    }
     if (!out.length) out.push(CAT_RAIL_BG_DEFAULT);
     return out.slice(0, 1);
   }
