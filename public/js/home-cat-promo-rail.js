@@ -1,6 +1,6 @@
 /**
  * Monta el rail superior (Estados · banner categorías · LIBE) en pantallas de categorías Home.
- * Adultos: vacant center banner rota hasta 3 fotos del mapa oficial (*-pro.png).
+ * Adultos: vacant center banner rota fotos LGBT del inventario Home (pride / antro LGBT).
  */
 (function (global) {
   'use strict';
@@ -59,7 +59,7 @@
   }
 
   /**
-   * Hasta 3 imágenes fotográficas Adultos desde el mapa oficial (*-pro).
+   * Adultos (Elegir categoría): banners LGBT existentes del inventario Home.
    * Otros sectores: una sola imagen de fondo (sin reescribir banners sectoriales).
    */
   function thematicRailImages(opts) {
@@ -73,18 +73,9 @@
     }
 
     if (opts.sectorId === 'adultos') {
-      push(officialAdultSrc(opts.subcatId));
-      var pool =
-        global.CariHubCategoriaImagenes && global.CariHubCategoriaImagenes.allProSrcs
-          ? global.CariHubCategoriaImagenes.allProSrcs()
-          : [];
-      if (pool.length) {
-        var seed = hashStr(opts.subcatId || opts.sectorId || 'adultos');
-        var i;
-        for (i = 0; i < pool.length && out.length < 3; i++) {
-          push(pool[(seed + i * 7) % pool.length]);
-        }
-      }
+      push('img/home/banners/ad-banner-lgbt-pride-01.png');
+      push('img/home/banners/ad-banner-lgbt-pride-02.png');
+      push('img/home/banners/ad-banner-adult-antro-lgbt-01.png');
       return out.slice(0, 3);
     }
 
