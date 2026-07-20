@@ -400,7 +400,8 @@
    * Overrides SOLO picker: evita duplicados visibles con la fila de abajo (no toca Explora categorías).
    */
   var ADULTOS_PICKER_PHOTO_ONLY = {
-    escort: { src: 'img/home/cat-cards/carinosas-pro.png', pos: 'center center', fit: 'cover' },
+    /* Cariñosas (escort) se deja como Explora categorías; VIP compartía foto con Edecán. */
+    'escort vip': { src: 'img/home/cat-cards/carinosas-vip-pro.png', pos: 'center center', fit: 'cover' },
     spa: { src: 'img/home/cat-cards/spa-pro.png', pos: 'center center', fit: 'cover' },
     fetiche: { src: 'img/home/cat-cards/fetiche-pro.png', pos: 'center center', fit: 'cover' }
   };
