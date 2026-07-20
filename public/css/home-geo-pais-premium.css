@@ -3,13 +3,13 @@
  * Cargar al final del head para ganar a estilos base/registro.
  */
 
-/* ── Fondo global rosa vivo ── */
-html .ch-geo-modal.ch-geo-modal--home {
+/* ── Fondo global rosa vivo (Adultos no LGBT) ── */
+html .ch-geo-modal.ch-geo-modal--home:not([data-subtema="lgbt"]) {
   background:
     linear-gradient(168deg, #ff9ec8 0%, #ff7eb3 22%, #ff6aaa 48%, #ffc2dc 78%, #ffe8f2 100%) !important;
 }
 
-html .ch-geo-modal.ch-geo-modal--home::before {
+html .ch-geo-modal.ch-geo-modal--home:not([data-subtema="lgbt"])::before {
   content: '';
   position: fixed;
   inset: 0;
@@ -21,12 +21,94 @@ html .ch-geo-modal.ch-geo-modal--home::before {
     radial-gradient(circle at 50% 100%, rgba(200, 0, 74, 0.18) 0%, transparent 52%);
 }
 
+/* ── Fondo LGBT cuando la subcategoría Adultos LGBT ya está elegida ── */
+html .ch-geo-modal.ch-geo-modal--home[data-subtema="lgbt"] {
+  background:
+    linear-gradient(
+      168deg,
+      color-mix(in srgb, #ef3b3b 42%, #fff) 0%,
+      color-mix(in srgb, #ff8a1e 38%, #fff) 18%,
+      color-mix(in srgb, #ffd21e 34%, #fff) 36%,
+      color-mix(in srgb, #29b563 34%, #fff) 54%,
+      color-mix(in srgb, #2b7fe0 38%, #fff) 72%,
+      color-mix(in srgb, #8f39c9 42%, #fff) 100%
+    ) !important;
+}
+
+html .ch-geo-modal.ch-geo-modal--home[data-subtema="lgbt"]::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(ellipse 90% 60% at 10% 4%, rgba(255, 255, 255, 0.5) 0%, transparent 58%),
+    radial-gradient(ellipse 70% 50% at 92% 8%, rgba(143, 57, 201, 0.28) 0%, transparent 55%),
+    radial-gradient(circle at 50% 100%, rgba(43, 127, 224, 0.18) 0%, transparent 52%);
+}
+
+html .ch-geo-modal.ch-geo-modal--home[data-subtema="lgbt"] .ch-geo-sheet__title,
+html .ch-geo-modal.ch-geo-modal--home[data-subtema="lgbt"] .ch-geo-sheet__title--gradient {
+  background: linear-gradient(135deg, #8f39c9 0%, #2b7fe0 48%, #ef3b3b 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+html .ch-geo-modal.ch-geo-modal--home[data-subtema="lgbt"] .ch-geo-card--glass .ch-geo-card__title {
+  color: #8f39c9;
+}
+
+html .ch-geo-modal.ch-geo-modal--home[data-subtema="lgbt"] .ch-geo-card--glass .ch-geo-card__go--float {
+  background: linear-gradient(145deg, #c4b0e0 0%, #8f39c9 52%, #6d1fa8 100%);
+  box-shadow:
+    0 4px 14px rgba(143, 57, 201, 0.4),
+    0 0 10px rgba(43, 127, 224, 0.28);
+}
+
+html .ch-geo-modal.ch-geo-modal--home[data-subtema="lgbt"] .ch-geo-sheet__close {
+  color: #8f39c9;
+  border-color: rgba(143, 57, 201, 0.2);
+}
+
 html .ch-geo-modal.ch-geo-modal--home .ch-geo-sheet {
   position: relative;
   z-index: 1;
 }
 
+/* Sin franja rosa arriba: título al tope; X sigue flotante */
+html .ch-geo-modal.ch-geo-modal--home .ch-geo-sheet__crest {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 0;
+  min-height: 0;
+  z-index: 40;
+  overflow: visible;
+  pointer-events: none;
+}
+
+html .ch-geo-modal.ch-geo-modal--home .ch-geo-sheet__topbar {
+  position: absolute;
+  top: max(8px, env(safe-area-inset-top, 0px));
+  right: max(10px, env(safe-area-inset-right, 0px));
+  left: auto;
+  width: auto;
+  height: 36px;
+  z-index: 41;
+  pointer-events: none;
+}
+
+html .ch-geo-modal.ch-geo-modal--home .ch-geo-sheet__close {
+  pointer-events: auto;
+  top: 0;
+  right: 0;
+}
+
 html .ch-geo-modal.ch-geo-modal--home .ch-geo-sheet__panel {
+  border-radius: 0;
+  padding-top: max(6px, env(safe-area-inset-top, 0px));
   background: linear-gradient(
     180deg,
     rgba(255, 255, 255, 0.9) 0%,
@@ -35,10 +117,16 @@ html .ch-geo-modal.ch-geo-modal--home .ch-geo-sheet__panel {
   );
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border-top: 1px solid rgba(255, 255, 255, 0.75);
-  box-shadow:
-    0 -16px 48px rgba(233, 30, 99, 0.22),
-    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  border-top: none;
+  box-shadow: none;
+}
+
+html .ch-geo-modal.ch-geo-modal--home.ch-geo-modal--pais .ch-geo-sheet__head,
+html .ch-geo-modal.ch-geo-modal--home.ch-geo-modal--estado .ch-geo-sheet__head,
+html .ch-geo-modal.ch-geo-modal--home.ch-geo-modal--ciudad .ch-geo-sheet__head {
+  padding-top: 4px;
+  padding-bottom: 4px;
+  margin-top: 0;
 }
 
 /* ── Lista ── */
@@ -83,18 +171,31 @@ html .ch-geo-modal.ch-geo-modal--home .ch-geo-head-deco__landmark[hidden] {
   display: none !important;
 }
 
-/* ── Tarjeta glass — todo contenido dentro del recuadro ── */
+/* ── Fila: imagen a la izquierda (fuera) + tarjeta glass ── */
+html .ch-geo-modal.ch-geo-modal--home .ch-geo-card-row {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  gap: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* ── Tarjeta glass — fondo / landmark sin cambios de diseño ── */
 html .ch-geo-modal.ch-geo-modal--home .ch-geo-card.ch-geo-card--glass {
   position: relative;
   display: flex;
   align-items: center;
-  width: 100%;
+  flex: 1 1 auto;
+  min-width: 0;
+  width: auto;
   min-height: 0;
   height: auto;
   padding: 8px 10px 8px 10px;
   margin: 0;
   border: 1px solid rgba(233, 30, 99, 0.13);
-  border-radius: 20px;
+  border-left: none;
+  border-radius: 0 20px 20px 0;
   background: linear-gradient(180deg, #ffffff 0%, #fff4fa 100%);
   box-shadow:
     0 8px 26px rgba(233, 30, 99, 0.14),
@@ -113,21 +214,26 @@ html .ch-geo-modal.ch-geo-modal--home .ch-geo-card.ch-geo-card--glass:active {
   transform: scale(0.985);
 }
 
-/* ── Bandera moneda circular (sin heredar .ch-geo-card__thumb) ── */
-html .ch-geo-modal.ch-geo-modal--home .ch-geo-card--glass .ch-geo-card__flag-float {
+/* ── Imagen fuera de la tarjeta, misma altura ── */
+html .ch-geo-modal.ch-geo-modal--home .ch-geo-card-row > .ch-geo-card__flag-float,
+html .ch-geo-modal.ch-geo-modal--home .ch-geo-card-row > .ch-geo-card__photo-float {
   position: relative;
-  flex: 0 0 auto;
-  align-self: center;
-  margin: 0 10px 0 0;
-  z-index: 3;
+  flex: 0 0 88px;
+  width: 88px;
+  align-self: stretch;
+  margin: 0;
+  z-index: 1;
 }
 
-html .ch-geo-modal.ch-geo-modal--home .ch-geo-card--glass .ch-geo-card__flag-coin {
+html .ch-geo-modal.ch-geo-modal--home .ch-geo-card-row .ch-geo-card__flag-coin,
+html .ch-geo-modal.ch-geo-modal--home .ch-geo-card-row .ch-geo-card__photo-coin {
   display: block;
-  width: 52px;
-  height: 52px;
-  border-radius: 50%;
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+  border-radius: 16px 0 0 16px;
   border: 3px solid #fff;
+  border-right: none;
   background-color: #fff;
   background-size: cover;
   background-position: center;
@@ -135,42 +241,16 @@ html .ch-geo-modal.ch-geo-modal--home .ch-geo-card--glass .ch-geo-card__flag-coi
   box-shadow:
     0 8px 24px rgba(0, 0, 0, 0.17),
     0 0 0 1px rgba(233, 30, 99, 0.1);
+  box-sizing: border-box;
 }
 
-html .ch-geo-modal.ch-geo-modal--home .ch-geo-card--glass .ch-geo-card__flag-coin--emoji {
+html .ch-geo-modal.ch-geo-modal--home .ch-geo-card-row .ch-geo-card__flag-coin--emoji,
+html .ch-geo-modal.ch-geo-modal--home .ch-geo-card-row .ch-geo-card__photo-coin--fallback {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 26px;
+  font-size: 36px;
   line-height: 1;
-  background: linear-gradient(165deg, #fff 0%, #ffe8f2 100%);
-}
-
-/* ── Foto moneda (estado / ciudad) ── */
-html .ch-geo-modal.ch-geo-modal--home .ch-geo-card--glass .ch-geo-card__photo-float {
-  position: relative;
-  flex: 0 0 auto;
-  align-self: center;
-  margin: 0 10px 0 0;
-  z-index: 3;
-}
-
-html .ch-geo-modal.ch-geo-modal--home .ch-geo-card--glass .ch-geo-card__photo-coin {
-  display: block;
-  width: 52px;
-  height: 52px;
-  border-radius: 14px;
-  border: 3px solid #fff;
-  background-color: #fff;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  box-shadow:
-    0 8px 24px rgba(0, 0, 0, 0.17),
-    0 0 0 1px rgba(233, 30, 99, 0.1);
-}
-
-html .ch-geo-modal.ch-geo-modal--home .ch-geo-card--glass .ch-geo-card__photo-coin--fallback {
   background: linear-gradient(165deg, #fff 0%, #ffe8f2 100%);
 }
 
@@ -303,10 +383,10 @@ html .ch-geo-modal.ch-geo-modal--home .ch-geo-card--glass .ch-geo-card__go--floa
 }
 
 @media (max-width: 380px) {
-  html .ch-geo-modal.ch-geo-modal--home .ch-geo-card--glass .ch-geo-card__flag-coin,
-  html .ch-geo-modal.ch-geo-modal--home .ch-geo-card--glass .ch-geo-card__photo-coin {
-    width: 46px;
-    height: 46px;
+  html .ch-geo-modal.ch-geo-modal--home .ch-geo-card-row > .ch-geo-card__flag-float,
+  html .ch-geo-modal.ch-geo-modal--home .ch-geo-card-row > .ch-geo-card__photo-float {
+    flex-basis: 72px;
+    width: 72px;
   }
 
   html .ch-geo-modal.ch-geo-modal--home .ch-geo-card--glass .ch-geo-card__go--float {

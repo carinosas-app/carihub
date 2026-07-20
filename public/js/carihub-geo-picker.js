@@ -426,12 +426,18 @@
             '</div>' +
             '<p class="ch-geo-sheet__subtitle" id="chGeoModalSubtitle">Explora perfiles, negocios y experiencias cerca de ti</p>' +
           '</header>' +
-          '<a class="ch-geo-sheet__banner" href="registro-banner.html?slot=home_categorias" id="chGeoBanner">' +
-            '<img src="' + ((global.CariHubBannerGeneral && global.CariHubBannerGeneral.pickGeneralBanner()) || 'img/home/banners/ad-banner-pink-01.png') + '" alt="" loading="lazy" decoding="async">' +
-            '<span class="ch-geo-sheet__banner-overlay">' +
-              '<span class="ch-geo-sheet__banner-title">¡ANÚNCIATE AQUÍ!</span>' +
-              '<span class="ch-geo-sheet__banner-cta">Conoce más</span>' +
-            '</span>' +
+          '<a class="ch-geo-sheet__banner" href="registro-banner.html?slot=home_categorias" id="chGeoBanner" aria-label="Anúnciate aquí">' +
+            '<div class="ch-geo-sheet__banner-stage" id="chGeoBannerStage" data-geo-banner-rotate="3">' +
+              '<div class="ch-geo-sheet__banner-slide is-active" aria-hidden="false">' +
+                '<img src="img/home/banners/ad-banner-lgbt-resultados-01.png" alt="" loading="lazy" decoding="async">' +
+              '</div>' +
+              '<div class="ch-geo-sheet__banner-slide" aria-hidden="true">' +
+                '<img src="img/home/banners/ad-banner-pink-01.png" alt="" loading="lazy" decoding="async">' +
+              '</div>' +
+              '<div class="ch-geo-sheet__banner-slide" aria-hidden="true">' +
+                '<img src="img/home/banners/ad-banner-pink-03.png" alt="" loading="lazy" decoding="async">' +
+              '</div>' +
+            '</div>' +
           '</a>' +
           '<label class="ch-geo-sheet__search">' +
             ICON_SEARCH +
@@ -515,6 +521,7 @@
       active.blur();
     }
     modal.classList.remove('is-open', 'ch-geo-modal--guided');
+    stopGeoBannerRotate();
     unlockPageScroll();
     selectorTipo = null;
     showAllPaises = false;
@@ -567,7 +574,7 @@
     var panel = modal.querySelector('.ch-geo-sheet__panel');
     var lgbt = document.body.getAttribute('data-subtema') === 'lgbt' ||
       modal.getAttribute('data-subtema') === 'lgbt';
-    if (lgbt && usesRegistroGeoShell()) {
+    if (lgbt && (usesRegistroGeoShell() || usesHomePaisPremium())) {
       S.syncBody('lgbt');
       if (panel) S.ensureLayer(panel, 'lgbt');
       return;
@@ -765,6 +772,10 @@
     raiseGeoModal(modal);
     geoModalOpenedAt = Date.now();
     modal.classList.add('is-open');
+    if (modal.classList.contains('ch-geo-modal--home') && !usesRegistroGeoShell()) {
+      ensureHomeGeoBannerSlides(modal);
+      startGeoBannerRotate(modal);
+    }
     if (typeof afterOpen === 'function') afterOpen();
     if (slideDir && panel) {
       panel.classList.remove('ch-geo-slide-forward', 'ch-geo-slide-back', 'ch-geo-slide-active');
@@ -956,9 +967,22 @@
     var scope = root || list;
     scope.querySelectorAll('.ch-geo-card:not([data-ch-wired])').forEach(function (btn) {
       btn.setAttribute('data-ch-wired', '1');
-      btn.addEventListener('click', function () {
+      function pick() {
         self.selectValue(selectorTipo, btn.getAttribute('data-value'));
-      });
+      }
+      btn.addEventListener('click', pick);
+      var row = btn.closest('.ch-geo-card-row');
+      if (row && !row.getAttribute('data-ch-wired')) {
+        row.setAttribute('data-ch-wired', '1');
+        var media = row.querySelector('.ch-geo-card__flag-float, .ch-geo-card__photo-float');
+        if (media) {
+          media.style.cursor = 'pointer';
+          media.addEventListener('click', function (e) {
+            e.preventDefault();
+            pick();
+          });
+        }
+      }
     });
   }
 
@@ -1037,7 +1061,129 @@
     lgbt: 'img/home/banners/ad-banner-lgbt-resultados-01.png'
   };
 
+  /* Home país/estado/ciudad: 3 creativas (adulto fucsia vs LGBT). */
+  var HOME_GEO_BANNER_SLIDES_ADULT = [
+    'img/home/banners/ad-banner-pink-01.png',
+    'img/home/banners/ad-banner-pink-03.png',
+    'img/home/banners/ad-banner-black-02.png'
+  ];
+  var HOME_GEO_BANNER_SLIDES_LGBT = [
+    'img/home/banners/ad-banner-lgbt-resultados-01.png',
+    'img/home/banners/ad-banner-lgbt-resultados-02.png',
+    'img/home/banners/ad-banner-lgbt-resultados-03.png'
+  ];
+
   var GEO_LGBT_GRAD = 'linear-gradient(90deg, #ef3b3b 0%, #ff8a1e 18%, #ffd21e 36%, #29b563 54%, #2b7fe0 72%, #8f39c9 90%, #ef3b3b 100%)';
+  var geoBannerRotateTimer = null;
+  var geoBannerRotateIdx = 0;
+
+  function resolveHomeSelectedCatHint() {
+    if (global.__homeSelectedCategoriaId) return String(global.__homeSelectedCategoriaId);
+    var Journey = global.CariHubSearchJourneySession;
+    if (Journey && typeof Journey.isActive === 'function' && Journey.isActive()) {
+      var snap = typeof Journey.get === 'function' ? Journey.get() : null;
+      if (snap) {
+        if (snap.subcatId) return snap.subcatId;
+        if (snap.subcatNombre) return snap.subcatNombre;
+      }
+    }
+    if (global.categoriaSeleccionada) return String(global.categoriaSeleccionada);
+    var label = document.getElementById('fieldCategoriaLabel');
+    if (label && label.textContent) {
+      var t = String(label.textContent).trim();
+      if (t && !/^selecciona|^elige|^categor/i.test(t)) return t;
+    }
+    return '';
+  }
+
+  function isHomeSelectedLgbt() {
+    var RS = global.CariHubResultadosSector;
+    var cat = resolveHomeSelectedCatHint();
+    if (cat && RS && typeof RS.esSubcategoriaLgbt === 'function') {
+      return !!RS.esSubcategoriaLgbt(cat);
+    }
+    return document.body.getAttribute('data-subtema') === 'lgbt';
+  }
+
+  function homeGeoBannerSlides() {
+    return isHomeSelectedLgbt() ? HOME_GEO_BANNER_SLIDES_LGBT : HOME_GEO_BANNER_SLIDES_ADULT;
+  }
+
+  function applyHomeLgbtThemeVars(modal) {
+    modal.setAttribute('data-subtema', 'lgbt');
+    modal.setAttribute('data-rp-sector', 'adultos');
+    modal.style.setProperty('--rp-form-accent', '#8f39c9');
+    modal.style.setProperty('--geo-grad', GEO_LGBT_GRAD);
+    modal.style.setProperty('--geo-shadow', '0 8px 24px color-mix(in srgb, #8f39c9 38%, transparent)');
+    modal.style.setProperty('--geo-premium-shell',
+      'linear-gradient(165deg, ' +
+      'color-mix(in srgb, #ef3b3b 22%, #fff) 0%, ' +
+      'color-mix(in srgb, #ffd21e 18%, #fff) 35%, ' +
+      'color-mix(in srgb, #29b563 18%, #fff) 55%, ' +
+      'color-mix(in srgb, #2b7fe0 20%, #fff) 75%, ' +
+      'color-mix(in srgb, #8f39c9 22%, #fff) 100%)');
+  }
+
+  function applyHomeAdultFuchsiaThemeVars(modal) {
+    modal.removeAttribute('data-subtema');
+    modal.setAttribute('data-rp-sector', 'adultos');
+    modal.style.setProperty('--rp-form-accent', '#e91e63');
+    modal.style.setProperty('--geo-grad', 'linear-gradient(180deg, #ff2d6f 0%, #ec1458 45%, #c8004a 100%)');
+    modal.style.setProperty('--geo-shadow', '0 8px 24px rgba(233, 30, 99, 0.38)');
+    modal.style.removeProperty('--geo-premium-shell');
+  }
+
+  function applyHomeFieldSyncTheme(modal) {
+    if (!modal) return;
+    modal.classList.add('ch-geo-modal--home');
+    modal.classList.remove('ch-geo-modal--registro', 'ch-geo-modal--guided');
+    if (isHomeSelectedLgbt()) applyHomeLgbtThemeVars(modal);
+    else applyHomeAdultFuchsiaThemeVars(modal);
+    syncGeoSparkles(modal);
+    syncGeoBannerImage(modal, 'adultos');
+  }
+
+  function stopGeoBannerRotate() {
+    if (geoBannerRotateTimer) {
+      clearInterval(geoBannerRotateTimer);
+      geoBannerRotateTimer = null;
+    }
+  }
+
+  function startGeoBannerRotate(modal) {
+    stopGeoBannerRotate();
+    if (!modal || !modal.classList.contains('ch-geo-modal--home')) return;
+    var stage = modal.querySelector('#chGeoBannerStage');
+    if (!stage) return;
+    var slides = stage.querySelectorAll('.ch-geo-sheet__banner-slide');
+    if (slides.length < 2) return;
+    geoBannerRotateIdx = 0;
+    slides.forEach(function (slide, i) {
+      var on = i === 0;
+      slide.classList.toggle('is-active', on);
+      slide.setAttribute('aria-hidden', on ? 'false' : 'true');
+    });
+    geoBannerRotateTimer = setInterval(function () {
+      slides = stage.querySelectorAll('.ch-geo-sheet__banner-slide');
+      if (slides.length < 2) return;
+      slides[geoBannerRotateIdx].classList.remove('is-active');
+      slides[geoBannerRotateIdx].setAttribute('aria-hidden', 'true');
+      geoBannerRotateIdx = (geoBannerRotateIdx + 1) % slides.length;
+      slides[geoBannerRotateIdx].classList.add('is-active');
+      slides[geoBannerRotateIdx].setAttribute('aria-hidden', 'false');
+    }, 3500);
+  }
+
+  function ensureHomeGeoBannerSlides(modal) {
+    if (!modal) return;
+    var stage = modal.querySelector('#chGeoBannerStage');
+    if (!stage) return;
+    var imgs = stage.querySelectorAll('.ch-geo-sheet__banner-slide img');
+    var pool = homeGeoBannerSlides();
+    pool.forEach(function (src, i) {
+      if (imgs[i] && imgs[i].getAttribute('src') !== src) imgs[i].src = src;
+    });
+  }
 
   function resolveGeoBannerSrc(modal, sector) {
     if (!modal) return '';
@@ -1059,17 +1205,42 @@
 
   function syncGeoBannerImage(modal, sector) {
     if (!modal) return;
-    var img = modal.querySelector('#chGeoBanner img');
-    if (!img) return;
+    /* Home: rotación fija de 3 espacios; no sustituir por un solo src de sector. */
+    if (modal.classList.contains('ch-geo-modal--home') && !usesRegistroGeoShell()) {
+      ensureHomeGeoBannerSlides(modal);
+      startGeoBannerRotate(modal);
+      return;
+    }
     var src = resolveGeoBannerSrc(modal, sector);
     if (!src) return;
+    var slides = modal.querySelectorAll('#chGeoBanner .ch-geo-sheet__banner-slide');
+    if (slides.length) {
+      stopGeoBannerRotate();
+      slides.forEach(function (slide, i) {
+        var img = slide.querySelector('img');
+        if (img) img.src = src;
+        var on = i === 0;
+        slide.classList.toggle('is-active', on);
+        slide.setAttribute('aria-hidden', on ? 'false' : 'true');
+      });
+      return;
+    }
+    var img = modal.querySelector('#chGeoBanner img');
+    if (!img) return;
     if (img.getAttribute('src') !== src) img.src = src;
+    stopGeoBannerRotate();
   }
 
   function syncRegistroGeoTheme(modal) {
     if (!modal) return;
     if (isGuidedFlow()) {
       syncGuidedGeoTheme(modal);
+      /* Guided Adultos: respetar subcat LGBT ya elegida en Home. */
+      if (isHomeSelectedLgbt()) {
+        applyHomeLgbtThemeVars(modal);
+        syncGeoSparkles(modal);
+        syncGeoBannerImage(modal, 'adultos');
+      }
       return;
     }
     var isRegistro = usesRegistroGeoShell();
@@ -1078,6 +1249,10 @@
     modal.classList.toggle('ch-geo-modal--registro', isRegistro);
     modal.classList.remove('ch-geo-modal--guided');
     if (!isRegistro) {
+      if (isUnifiedShell) {
+        applyHomeFieldSyncTheme(modal);
+        return;
+      }
       modal.removeAttribute('data-rp-sector');
       modal.removeAttribute('data-subtema');
       modal.style.removeProperty('--rp-form-accent');
@@ -1088,18 +1263,7 @@
     }
     var lgbt = document.body.getAttribute('data-subtema') === 'lgbt';
     if (lgbt) {
-      modal.setAttribute('data-subtema', 'lgbt');
-      modal.setAttribute('data-rp-sector', 'adultos');
-      modal.style.setProperty('--rp-form-accent', '#8f39c9');
-      modal.style.setProperty('--geo-grad', GEO_LGBT_GRAD);
-      modal.style.setProperty('--geo-shadow', '0 8px 24px color-mix(in srgb, #8f39c9 38%, transparent)');
-      modal.style.setProperty('--geo-premium-shell',
-        'linear-gradient(165deg, ' +
-        'color-mix(in srgb, #ef3b3b 22%, #fff) 0%, ' +
-        'color-mix(in srgb, #ffd21e 18%, #fff) 35%, ' +
-        'color-mix(in srgb, #29b563 18%, #fff) 55%, ' +
-        'color-mix(in srgb, #2b7fe0 20%, #fff) 75%, ' +
-        'color-mix(in srgb, #8f39c9 22%, #fff) 100%)');
+      applyHomeLgbtThemeVars(modal);
       syncGeoSparkles(modal);
       syncGeoBannerImage(modal, 'adultos');
       return;
@@ -1196,14 +1360,16 @@
     }
     var tipoClass = opts.tipo ? ' ch-geo-card--' + opts.tipo : '';
     return (
-      '<button type="button" class="ch-geo-card ch-geo-card--glass' + tipoClass + '" data-value="' + esc(opts.value) + '">' +
-        landmarkHtml +
+      '<div class="ch-geo-card-row">' +
         leftFloatHtml +
-        '<span class="ch-geo-card__body">' +
-          textBlock +
-          '<span class="ch-geo-card__go ch-geo-card__go--float" aria-hidden="true">' + ICON_GO + '</span>' +
-        '</span>' +
-      '</button>'
+        '<button type="button" class="ch-geo-card ch-geo-card--glass' + tipoClass + '" data-value="' + esc(opts.value) + '">' +
+          landmarkHtml +
+          '<span class="ch-geo-card__body">' +
+            textBlock +
+            '<span class="ch-geo-card__go ch-geo-card__go--float" aria-hidden="true">' + ICON_GO + '</span>' +
+          '</span>' +
+        '</button>' +
+      '</div>'
     );
   }
 
