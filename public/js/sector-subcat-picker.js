@@ -397,13 +397,24 @@
   /**
    * Fotos de «Explora categorías» (Home CAT_OVERRIDES vía CariHubVCard.catVisual).
    * El picker Adultos de Elegir categoría debe coincidir con esas tarjetas, no con *-pro.
+   * Overrides SOLO picker: evita duplicados visibles con la fila de abajo (no toca Explora categorías).
    */
+  var ADULTOS_PICKER_PHOTO_ONLY = {
+    escort: { src: 'img/home/cat-cards/carinosas-pro.png', pos: 'center center', fit: 'cover' },
+    spa: { src: 'img/home/cat-cards/spa-pro.png', pos: 'center center', fit: 'cover' },
+    fetiche: { src: 'img/home/cat-cards/fetiche-pro.png', pos: 'center center', fit: 'cover' }
+  };
+
   function exploraCategoriasMeta(subcatId, index) {
+    var id = String(subcatId || '').toLowerCase();
+    if (ADULTOS_PICKER_PHOTO_ONLY[id]) {
+      return ADULTOS_PICKER_PHOTO_ONLY[id];
+    }
     if (!global.CariHubVCard || typeof global.CariHubVCard.catVisual !== 'function') {
       return null;
     }
     var vis = global.CariHubVCard.catVisual(
-      { id: String(subcatId || '').toLowerCase(), nombre: '' },
+      { id: id, nombre: '' },
       index || 0
     );
     if (!vis || !vis.photo) return null;
