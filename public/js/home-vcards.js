@@ -414,9 +414,8 @@
       catId: id,
       catName: cat.nombre
     };
-    if (window.CariHubCategoriaImagenes && CariHubCategoriaImagenes.applyCatVisual) {
-      CariHubCategoriaImagenes.applyCatVisual(vis, id);
-    }
+    /* Explora categorías / hero sync: use CAT overlay photos (pre-#152 approved set).
+       Adult picker keeps *-pro via CariHubCategoriaImagenes.get() in sector-subcat-picker. */
     if (!vis.photo && ov.photo) {
       vis.photo = ov.photo;
       vis.gradient = null;
@@ -438,10 +437,9 @@
     var vis = catVisual({ id: id, nombre: slide.categoriaNombre || '' }, 0);
     return {
       src: vis.photo || null,
-      photoFit: vis.photoFit,
-      photoScale: vis.photoScale,
-      photoPos: vis.photoPos,
-      photoBg: vis.photoBg
+      /* En hero: cover (sin letterbox); posición de la tarjeta si existe. */
+      photoFit: 'cover',
+      photoPos: vis.photoPos || 'center center'
     };
   }
 

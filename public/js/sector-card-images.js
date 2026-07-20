@@ -1,11 +1,17 @@
 /**
  * Tarjetas visuales «Explora otras categorías» — imagen por sector.
  * Cada imagen enlaza al sector; al pulsar se elige el sector y se abre el selector de país.
+ * Visuales fotográficos profesionales 2026-07 (nombre en la imagen + escena representativa).
  */
 (function (global) {
   'use strict';
 
   var BASE = 'img/home/sector-cards/';
+  var V = '20260718pro1';
+
+  function src(file) {
+    return BASE + file + '?v=' + V;
+  }
 
   var SECTOR_CARD_IMAGES = {
     adultos: {
@@ -16,116 +22,102 @@
       bg: '#1a0818'
     },
     bienestar: {
-      src: BASE + 'bienestar.png',
+      src: src('bienestar.png'),
       alt: 'Bienestar, Espiritualidad y Terapias Alternativas',
-      fit: 'contain',
-      pos: 'center top',
-      bg: '#b8ddd4',
-      heroFraction: 0.44
+      fit: 'cover',
+      pos: 'center center',
+      bg: '#1b3d2e'
     },
     transporte: {
-      src: BASE + 'transporte.png',
+      src: src('transporte.png'),
       alt: 'Transporte, Logística y Mensajería',
-      fit: 'contain',
-      pos: 'center top',
-      bg: '#b5e8df',
-      heroFraction: 0.44
+      fit: 'cover',
+      pos: 'center center',
+      bg: '#1a3330'
     },
     mascotas: {
-      src: BASE + 'mascotas.png',
+      src: src('mascotas.png'),
       alt: 'Mascotas y Servicios Veterinarios',
-      fit: 'contain',
-      pos: 'center top',
-      bg: '#d6ead8',
-      heroFraction: 0.44
+      fit: 'cover',
+      pos: 'center center',
+      bg: '#2e4a32'
     },
     industria: {
-      src: BASE + 'industria.png',
+      src: src('industria.png'),
       alt: 'Industria y Servicios Empresariales',
-      fit: 'contain',
-      pos: 'center top',
-      bg: '#f5e6d8',
-      heroFraction: 0.44
+      fit: 'cover',
+      pos: 'center center',
+      bg: '#3a3228'
     },
     educacion: {
-      src: BASE + 'educacion.png',
+      src: src('educacion.png'),
       alt: 'Educación y Capacitación',
-      fit: 'contain',
-      pos: 'center top',
-      bg: '#d8e4f0',
-      heroFraction: 0.44
+      fit: 'cover',
+      pos: 'center center',
+      bg: '#243048'
     },
     comercio: {
-      src: BASE + 'comercio.png',
+      src: src('comercio.png'),
       alt: 'Comercio, Tiendas y Distribución',
-      fit: 'contain',
-      pos: 'center top',
-      bg: '#e8dff5',
-      heroFraction: 0.44
+      fit: 'cover',
+      pos: 'center center',
+      bg: '#3a2a48'
     },
     profesionales: {
-      src: BASE + 'profesionales.png',
+      src: src('profesionales.png'),
       alt: 'Servicios Profesionales',
-      fit: 'contain',
-      pos: 'center top',
-      bg: '#d4e0f2',
-      heroFraction: 0.44
+      fit: 'cover',
+      pos: 'center center',
+      bg: '#0d1b2a'
     },
     'bienes-raices': {
-      src: BASE + 'bienes-raices.png',
+      src: src('bienes-raices.png'),
       alt: 'Bienes Raíces',
-      fit: 'contain',
-      pos: 'center top',
-      bg: '#d4ead6',
-      heroFraction: 0.44
+      fit: 'cover',
+      pos: 'center center',
+      bg: '#2a4030'
     },
     hogar: {
-      src: BASE + 'hogar.png',
+      src: src('hogar.png'),
       alt: 'Hogar, Construcción y Mantenimiento',
-      fit: 'contain',
-      pos: 'center top',
-      bg: '#f5e8c8',
-      heroFraction: 0.44
+      fit: 'cover',
+      pos: 'center center',
+      bg: '#4a3420'
     },
     salud: {
-      src: BASE + 'salud.png',
+      src: src('salud.png'),
       alt: 'Salud y Bienestar',
-      fit: 'contain',
-      pos: 'center top',
-      bg: '#f5d4e0',
-      heroFraction: 0.44
+      fit: 'cover',
+      pos: 'center center',
+      bg: '#1a3a42'
     },
     eventos: {
-      src: BASE + 'eventos.png',
+      src: src('eventos.png'),
       alt: 'Eventos, Espectáculos y Fiestas',
-      fit: 'contain',
-      pos: 'center top',
-      bg: '#f8e4d0',
-      heroFraction: 0.44
+      fit: 'cover',
+      pos: 'center center',
+      bg: '#3a2030'
     },
     automotriz: {
-      src: BASE + 'automotriz.png',
+      src: src('automotriz.png'),
       alt: 'Vehículos y Servicios Automotrices',
-      fit: 'contain',
-      pos: 'center top',
-      bg: '#d0dff5',
-      heroFraction: 0.44
+      fit: 'cover',
+      pos: 'center center',
+      bg: '#263238'
     },
     tecnologia: {
-      src: BASE + 'tecnologia.png',
+      src: src('tecnologia.png'),
       alt: 'Tecnología y Servicios Digitales',
-      fit: 'contain',
-      pos: 'center top',
-      bg: '#e4dcf5',
-      heroFraction: 0.44
+      fit: 'cover',
+      pos: 'center center',
+      bg: '#1a1430'
     },
     restaurantes: {
-      src: BASE + 'restaurantes.png',
+      src: src('restaurantes.png'),
       alt: 'Restaurantes, Alimentos y Servicios',
-      fit: 'contain',
-      pos: 'center top',
-      bg: '#f5e8d4',
-      heroFraction: 0.44
+      fit: 'cover',
+      pos: 'center center',
+      bg: '#2a1810'
     }
   };
 
