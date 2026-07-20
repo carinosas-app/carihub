@@ -574,7 +574,7 @@
     var panel = modal.querySelector('.ch-geo-sheet__panel');
     var lgbt = document.body.getAttribute('data-subtema') === 'lgbt' ||
       modal.getAttribute('data-subtema') === 'lgbt';
-    if (lgbt && usesRegistroGeoShell()) {
+    if (lgbt && (usesRegistroGeoShell() || usesHomePaisPremium())) {
       S.syncBody('lgbt');
       if (panel) S.ensureLayer(panel, 'lgbt');
       return;
@@ -1061,16 +1061,87 @@
     lgbt: 'img/home/banners/ad-banner-lgbt-resultados-01.png'
   };
 
-  /* Home país/estado/ciudad: 3 creativas en rotación (LGBT · adulto · Anúnciate). */
-  var HOME_GEO_BANNER_SLIDES = [
-    'img/home/banners/ad-banner-lgbt-resultados-01.png',
+  /* Home país/estado/ciudad: 3 creativas (adulto fucsia vs LGBT). */
+  var HOME_GEO_BANNER_SLIDES_ADULT = [
     'img/home/banners/ad-banner-pink-01.png',
-    'img/home/banners/ad-banner-pink-03.png'
+    'img/home/banners/ad-banner-pink-03.png',
+    'img/home/banners/ad-banner-black-02.png'
+  ];
+  var HOME_GEO_BANNER_SLIDES_LGBT = [
+    'img/home/banners/ad-banner-lgbt-resultados-01.png',
+    'img/home/banners/ad-banner-lgbt-resultados-02.png',
+    'img/home/banners/ad-banner-lgbt-resultados-03.png'
   ];
 
   var GEO_LGBT_GRAD = 'linear-gradient(90deg, #ef3b3b 0%, #ff8a1e 18%, #ffd21e 36%, #29b563 54%, #2b7fe0 72%, #8f39c9 90%, #ef3b3b 100%)';
   var geoBannerRotateTimer = null;
   var geoBannerRotateIdx = 0;
+
+  function resolveHomeSelectedCatHint() {
+    if (global.__homeSelectedCategoriaId) return String(global.__homeSelectedCategoriaId);
+    var Journey = global.CariHubSearchJourneySession;
+    if (Journey && typeof Journey.isActive === 'function' && Journey.isActive()) {
+      var snap = typeof Journey.get === 'function' ? Journey.get() : null;
+      if (snap) {
+        if (snap.subcatId) return snap.subcatId;
+        if (snap.subcatNombre) return snap.subcatNombre;
+      }
+    }
+    if (global.categoriaSeleccionada) return String(global.categoriaSeleccionada);
+    var label = document.getElementById('fieldCategoriaLabel');
+    if (label && label.textContent) {
+      var t = String(label.textContent).trim();
+      if (t && !/^selecciona|^elige|^categor/i.test(t)) return t;
+    }
+    return '';
+  }
+
+  function isHomeSelectedLgbt() {
+    var RS = global.CariHubResultadosSector;
+    var cat = resolveHomeSelectedCatHint();
+    if (cat && RS && typeof RS.esSubcategoriaLgbt === 'function') {
+      return !!RS.esSubcategoriaLgbt(cat);
+    }
+    return document.body.getAttribute('data-subtema') === 'lgbt';
+  }
+
+  function homeGeoBannerSlides() {
+    return isHomeSelectedLgbt() ? HOME_GEO_BANNER_SLIDES_LGBT : HOME_GEO_BANNER_SLIDES_ADULT;
+  }
+
+  function applyHomeLgbtThemeVars(modal) {
+    modal.setAttribute('data-subtema', 'lgbt');
+    modal.setAttribute('data-rp-sector', 'adultos');
+    modal.style.setProperty('--rp-form-accent', '#8f39c9');
+    modal.style.setProperty('--geo-grad', GEO_LGBT_GRAD);
+    modal.style.setProperty('--geo-shadow', '0 8px 24px color-mix(in srgb, #8f39c9 38%, transparent)');
+    modal.style.setProperty('--geo-premium-shell',
+      'linear-gradient(165deg, ' +
+      'color-mix(in srgb, #ef3b3b 22%, #fff) 0%, ' +
+      'color-mix(in srgb, #ffd21e 18%, #fff) 35%, ' +
+      'color-mix(in srgb, #29b563 18%, #fff) 55%, ' +
+      'color-mix(in srgb, #2b7fe0 20%, #fff) 75%, ' +
+      'color-mix(in srgb, #8f39c9 22%, #fff) 100%)');
+  }
+
+  function applyHomeAdultFuchsiaThemeVars(modal) {
+    modal.removeAttribute('data-subtema');
+    modal.setAttribute('data-rp-sector', 'adultos');
+    modal.style.setProperty('--rp-form-accent', '#e91e63');
+    modal.style.setProperty('--geo-grad', 'linear-gradient(180deg, #ff2d6f 0%, #ec1458 45%, #c8004a 100%)');
+    modal.style.setProperty('--geo-shadow', '0 8px 24px rgba(233, 30, 99, 0.38)');
+    modal.style.removeProperty('--geo-premium-shell');
+  }
+
+  function applyHomeFieldSyncTheme(modal) {
+    if (!modal) return;
+    modal.classList.add('ch-geo-modal--home');
+    modal.classList.remove('ch-geo-modal--registro', 'ch-geo-modal--guided');
+    if (isHomeSelectedLgbt()) applyHomeLgbtThemeVars(modal);
+    else applyHomeAdultFuchsiaThemeVars(modal);
+    syncGeoSparkles(modal);
+    syncGeoBannerImage(modal, 'adultos');
+  }
 
   function stopGeoBannerRotate() {
     if (geoBannerRotateTimer) {
@@ -1108,7 +1179,8 @@
     var stage = modal.querySelector('#chGeoBannerStage');
     if (!stage) return;
     var imgs = stage.querySelectorAll('.ch-geo-sheet__banner-slide img');
-    HOME_GEO_BANNER_SLIDES.forEach(function (src, i) {
+    var pool = homeGeoBannerSlides();
+    pool.forEach(function (src, i) {
       if (imgs[i] && imgs[i].getAttribute('src') !== src) imgs[i].src = src;
     });
   }
@@ -1163,6 +1235,12 @@
     if (!modal) return;
     if (isGuidedFlow()) {
       syncGuidedGeoTheme(modal);
+      /* Guided Adultos: respetar subcat LGBT ya elegida en Home. */
+      if (isHomeSelectedLgbt()) {
+        applyHomeLgbtThemeVars(modal);
+        syncGeoSparkles(modal);
+        syncGeoBannerImage(modal, 'adultos');
+      }
       return;
     }
     var isRegistro = usesRegistroGeoShell();
@@ -1171,6 +1249,10 @@
     modal.classList.toggle('ch-geo-modal--registro', isRegistro);
     modal.classList.remove('ch-geo-modal--guided');
     if (!isRegistro) {
+      if (isUnifiedShell) {
+        applyHomeFieldSyncTheme(modal);
+        return;
+      }
       modal.removeAttribute('data-rp-sector');
       modal.removeAttribute('data-subtema');
       modal.style.removeProperty('--rp-form-accent');
@@ -1181,18 +1263,7 @@
     }
     var lgbt = document.body.getAttribute('data-subtema') === 'lgbt';
     if (lgbt) {
-      modal.setAttribute('data-subtema', 'lgbt');
-      modal.setAttribute('data-rp-sector', 'adultos');
-      modal.style.setProperty('--rp-form-accent', '#8f39c9');
-      modal.style.setProperty('--geo-grad', GEO_LGBT_GRAD);
-      modal.style.setProperty('--geo-shadow', '0 8px 24px color-mix(in srgb, #8f39c9 38%, transparent)');
-      modal.style.setProperty('--geo-premium-shell',
-        'linear-gradient(165deg, ' +
-        'color-mix(in srgb, #ef3b3b 22%, #fff) 0%, ' +
-        'color-mix(in srgb, #ffd21e 18%, #fff) 35%, ' +
-        'color-mix(in srgb, #29b563 18%, #fff) 55%, ' +
-        'color-mix(in srgb, #2b7fe0 20%, #fff) 75%, ' +
-        'color-mix(in srgb, #8f39c9 22%, #fff) 100%)');
+      applyHomeLgbtThemeVars(modal);
       syncGeoSparkles(modal);
       syncGeoBannerImage(modal, 'adultos');
       return;

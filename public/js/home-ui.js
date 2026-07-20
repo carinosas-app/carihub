@@ -767,6 +767,8 @@
     pendingOtrosSectoresFlow = false;
     selectedSectorId = sectorId;
     selectedCategoriaId = '';
+    window.__homeSelectedCategoriaId = '';
+    document.body.removeAttribute('data-subtema');
     window.sectorSeleccionado = sectorId;
     var displayName = sectorLabel(sector);
     if (typeof window.setCategoriaHome === 'function') {
@@ -976,6 +978,7 @@
     pendingOtrosSectoresFlow = false;
     selectedSectorId = sector ? sector.id : selectedSectorId;
     selectedCategoriaId = cat.id;
+    window.__homeSelectedCategoriaId = cat.id || '';
     window.sectorSeleccionado = selectedSectorId;
     var field = document.getElementById('fieldCategoria');
     var label = document.getElementById('fieldCategoriaLabel');
@@ -986,6 +989,13 @@
     }
     window.categoriaSeleccionada = displayName;
     try { categoriaSeleccionada = displayName; } catch (e) { /* global var */ }
+    if (window.CariHubResultadosSector && typeof window.CariHubResultadosSector.esSubcategoriaLgbt === 'function') {
+      if (window.CariHubResultadosSector.esSubcategoriaLgbt(cat.id || cat.nombre)) {
+        document.body.setAttribute('data-subtema', 'lgbt');
+      } else {
+        document.body.removeAttribute('data-subtema');
+      }
+    }
     closeSectorModal();
     closeCatPickerModal(document.getElementById('modal-categorias'));
     if (typeof window.setCategoriaHome === 'function') window.setCategoriaHome(displayName);
