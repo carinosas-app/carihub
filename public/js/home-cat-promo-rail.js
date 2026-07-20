@@ -1,6 +1,6 @@
 /**
  * Monta el rail superior (Estados · banner categorías · LIBE) en pantallas de categorías Home.
- * Adultos: vacant center banner rota hasta 3 fotos del mapa oficial (*-pro.png).
+ * Adultos: vacant center banner rota fotos LGBT del inventario Home (pride / antro LGBT).
  */
 (function (global) {
   'use strict';
@@ -59,7 +59,7 @@
   }
 
   /**
-   * Hasta 3 imágenes fotográficas Adultos desde el mapa oficial (*-pro).
+   * Adultos (Elegir categoría): banners LGBT existentes del inventario Home.
    * Otros sectores: una sola imagen de fondo (sin reescribir banners sectoriales).
    */
   function thematicRailImages(opts) {
@@ -73,18 +73,10 @@
     }
 
     if (opts.sectorId === 'adultos') {
-      push(officialAdultSrc(opts.subcatId));
-      var pool =
-        global.CariHubCategoriaImagenes && global.CariHubCategoriaImagenes.allProSrcs
-          ? global.CariHubCategoriaImagenes.allProSrcs()
-          : [];
-      if (pool.length) {
-        var seed = hashStr(opts.subcatId || opts.sectorId || 'adultos');
-        var i;
-        for (i = 0; i < pool.length && out.length < 3; i++) {
-          push(pool[(seed + i * 7) % pool.length]);
-        }
-      }
+      /* Tres creativas LGBT distintas (pride-01/02 son el mismo archivo). */
+      push('img/home/banners/ad-banner-lgbt-resultados-01.png');
+      push('img/home/banners/ad-banner-lgbt-resultados-02.png');
+      push('img/home/banners/ad-banner-lgbt-resultados-03.png');
       return out.slice(0, 3);
     }
 
@@ -105,13 +97,6 @@
           '<img class="registro-pb__rail-bg" src="' +
           esc(src) +
           '" alt="" decoding="async">' +
-          '<span class="registro-pb__rail-shade" aria-hidden="true"></span>' +
-          (i === 0
-            ? '<span class="registro-pb__rail-copy">' +
-              '<span class="registro-pb__rail-title">Anúnciate aquí</span>' +
-              '<span class="registro-pb__rail-hint">__HINT__</span>' +
-              '</span>'
-            : '') +
           '</div>'
         );
       })
@@ -122,9 +107,6 @@
     opts = opts || {};
     var rental = obtenerRentaCategorias();
     var href = linkCategorias();
-    var sectorHint = opts.sectorName ? esc(opts.sectorName) + ' · ' : '';
-    var subHint = opts.subcatName ? esc(opts.subcatName) + ' · ' : '';
-    var hint = subHint + sectorHint + 'Banner selector de categorías';
 
     if (rental && rental.imagen) {
       href = rental.url || href;
@@ -149,8 +131,9 @@
       );
     }
 
+    /* Sin texto HTML encima: la creativa LGBT ya incluye el copy. */
     var images = thematicRailImages(opts);
-    var slides = buildVacantSlidesHtml(images).replace('__HINT__', hint);
+    var slides = buildVacantSlidesHtml(images);
 
     return (
       '<a class="registro-pb registro-pb--rail-cat registro-pb--rail-vacant' +
@@ -176,15 +159,22 @@
     if (n < 2) return;
     if (stage._railTimer) clearInterval(stage._railTimer);
     var idx = 0;
+    var slides = stage.querySelectorAll('.registro-pb__slide');
+    /* Asegurar estado inicial: solo la primera visible. */
+    slides.forEach(function (slide, i) {
+      var on = i === 0;
+      slide.classList.toggle('is-active', on);
+      slide.setAttribute('aria-hidden', on ? 'false' : 'true');
+    });
     stage._railTimer = setInterval(function () {
-      var slides = stage.querySelectorAll('.registro-pb__slide');
-      if (!slides.length) return;
+      slides = stage.querySelectorAll('.registro-pb__slide');
+      if (slides.length < 2) return;
       slides[idx].classList.remove('is-active');
       slides[idx].setAttribute('aria-hidden', 'true');
       idx = (idx + 1) % slides.length;
       slides[idx].classList.add('is-active');
       slides[idx].setAttribute('aria-hidden', 'false');
-    }, 4200);
+    }, 3500);
   }
 
   function mountSideSlots(rail) {
@@ -213,13 +203,23 @@
 
   function mountRail(rail, opts) {
     if (!rail) return;
-    opts = opts || {};
+    opts = Object.assign({}, opts || {});
+    /* Conservar sector ya montado si un remount genérico no lo pasa (p. ej. Adultos). */
+    if (!opts.sectorId) {
+      opts.sectorId = rail.getAttribute('data-rp-sector') || '';
+    }
+    if (!opts.sectorName) {
+      opts.sectorName = rail.getAttribute('data-rp-sector-name') || '';
+    }
     mountSideSlots(rail);
     mountCenterBanner(rail, opts);
     if (opts.sectorId) {
       rail.setAttribute('data-rp-sector', opts.sectorId);
     } else {
       rail.removeAttribute('data-rp-sector');
+    }
+    if (opts.sectorName) {
+      rail.setAttribute('data-rp-sector-name', opts.sectorName);
     }
     if (opts.subcatId) {
       rail.setAttribute('data-rp-subcat', opts.subcatId);

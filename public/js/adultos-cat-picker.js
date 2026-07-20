@@ -6,6 +6,18 @@
   }
 
   function catImageMeta(catId) {
+    /* Misma foto que tarjetas «Explora categorías» en Home. */
+    if (window.CariHubVCard && typeof CariHubVCard.catVisual === 'function') {
+      var vis = CariHubVCard.catVisual({ id: catId, nombre: '' }, 0);
+      if (vis && vis.photo) {
+        return {
+          src: vis.photo,
+          pos: vis.photoPos || 'center center',
+          fit: vis.photoFit || 'cover',
+          bg: vis.photoBg || null
+        };
+      }
+    }
     if (window.CariHubCategoriaImagenes && CariHubCategoriaImagenes.get) {
       return CariHubCategoriaImagenes.get(catId);
     }
