@@ -967,9 +967,22 @@
     var scope = root || list;
     scope.querySelectorAll('.ch-geo-card:not([data-ch-wired])').forEach(function (btn) {
       btn.setAttribute('data-ch-wired', '1');
-      btn.addEventListener('click', function () {
+      function pick() {
         self.selectValue(selectorTipo, btn.getAttribute('data-value'));
-      });
+      }
+      btn.addEventListener('click', pick);
+      var row = btn.closest('.ch-geo-card-row');
+      if (row && !row.getAttribute('data-ch-wired')) {
+        row.setAttribute('data-ch-wired', '1');
+        var media = row.querySelector('.ch-geo-card__flag-float, .ch-geo-card__photo-float');
+        if (media) {
+          media.style.cursor = 'pointer';
+          media.addEventListener('click', function (e) {
+            e.preventDefault();
+            pick();
+          });
+        }
+      }
     });
   }
 
@@ -1276,14 +1289,16 @@
     }
     var tipoClass = opts.tipo ? ' ch-geo-card--' + opts.tipo : '';
     return (
-      '<button type="button" class="ch-geo-card ch-geo-card--glass' + tipoClass + '" data-value="' + esc(opts.value) + '">' +
-        landmarkHtml +
+      '<div class="ch-geo-card-row">' +
         leftFloatHtml +
-        '<span class="ch-geo-card__body">' +
-          textBlock +
-          '<span class="ch-geo-card__go ch-geo-card__go--float" aria-hidden="true">' + ICON_GO + '</span>' +
-        '</span>' +
-      '</button>'
+        '<button type="button" class="ch-geo-card ch-geo-card--glass' + tipoClass + '" data-value="' + esc(opts.value) + '">' +
+          landmarkHtml +
+          '<span class="ch-geo-card__body">' +
+            textBlock +
+            '<span class="ch-geo-card__go ch-geo-card__go--float" aria-hidden="true">' + ICON_GO + '</span>' +
+          '</span>' +
+        '</button>' +
+      '</div>'
     );
   }
 
