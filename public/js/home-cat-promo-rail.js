@@ -96,13 +96,6 @@
           '<img class="registro-pb__rail-bg" src="' +
           esc(src) +
           '" alt="" decoding="async">' +
-          '<span class="registro-pb__rail-shade" aria-hidden="true"></span>' +
-          (i === 0
-            ? '<span class="registro-pb__rail-copy">' +
-              '<span class="registro-pb__rail-title">Anúnciate aquí</span>' +
-              '<span class="registro-pb__rail-hint">__HINT__</span>' +
-              '</span>'
-            : '') +
           '</div>'
         );
       })
@@ -113,9 +106,6 @@
     opts = opts || {};
     var rental = obtenerRentaCategorias();
     var href = linkCategorias();
-    var sectorHint = opts.sectorName ? esc(opts.sectorName) + ' · ' : '';
-    var subHint = opts.subcatName ? esc(opts.subcatName) + ' · ' : '';
-    var hint = subHint + sectorHint + 'Banner selector de categorías';
 
     if (rental && rental.imagen) {
       href = rental.url || href;
@@ -140,8 +130,9 @@
       );
     }
 
+    /* Sin texto HTML encima: la creativa LGBT ya incluye el copy. */
     var images = thematicRailImages(opts);
-    var slides = buildVacantSlidesHtml(images).replace('__HINT__', hint);
+    var slides = buildVacantSlidesHtml(images);
 
     return (
       '<a class="registro-pb registro-pb--rail-cat registro-pb--rail-vacant' +
