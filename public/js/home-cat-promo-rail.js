@@ -73,9 +73,10 @@
     }
 
     if (opts.sectorId === 'adultos') {
-      push('img/home/banners/ad-banner-lgbt-pride-01.png');
-      push('img/home/banners/ad-banner-lgbt-pride-02.png');
-      push('img/home/banners/ad-banner-adult-antro-lgbt-01.png');
+      /* Tres creativas LGBT distintas (pride-01/02 son el mismo archivo). */
+      push('img/home/banners/ad-banner-lgbt-resultados-01.png');
+      push('img/home/banners/ad-banner-lgbt-resultados-02.png');
+      push('img/home/banners/ad-banner-lgbt-resultados-03.png');
       return out.slice(0, 3);
     }
 
@@ -158,15 +159,22 @@
     if (n < 2) return;
     if (stage._railTimer) clearInterval(stage._railTimer);
     var idx = 0;
+    var slides = stage.querySelectorAll('.registro-pb__slide');
+    /* Asegurar estado inicial: solo la primera visible. */
+    slides.forEach(function (slide, i) {
+      var on = i === 0;
+      slide.classList.toggle('is-active', on);
+      slide.setAttribute('aria-hidden', on ? 'false' : 'true');
+    });
     stage._railTimer = setInterval(function () {
-      var slides = stage.querySelectorAll('.registro-pb__slide');
-      if (!slides.length) return;
+      slides = stage.querySelectorAll('.registro-pb__slide');
+      if (slides.length < 2) return;
       slides[idx].classList.remove('is-active');
       slides[idx].setAttribute('aria-hidden', 'true');
       idx = (idx + 1) % slides.length;
       slides[idx].classList.add('is-active');
       slides[idx].setAttribute('aria-hidden', 'false');
-    }, 4200);
+    }, 3500);
   }
 
   function mountSideSlots(rail) {
@@ -195,13 +203,23 @@
 
   function mountRail(rail, opts) {
     if (!rail) return;
-    opts = opts || {};
+    opts = Object.assign({}, opts || {});
+    /* Conservar sector ya montado si un remount genérico no lo pasa (p. ej. Adultos). */
+    if (!opts.sectorId) {
+      opts.sectorId = rail.getAttribute('data-rp-sector') || '';
+    }
+    if (!opts.sectorName) {
+      opts.sectorName = rail.getAttribute('data-rp-sector-name') || '';
+    }
     mountSideSlots(rail);
     mountCenterBanner(rail, opts);
     if (opts.sectorId) {
       rail.setAttribute('data-rp-sector', opts.sectorId);
     } else {
       rail.removeAttribute('data-rp-sector');
+    }
+    if (opts.sectorName) {
+      rail.setAttribute('data-rp-sector-name', opts.sectorName);
     }
     if (opts.subcatId) {
       rail.setAttribute('data-rp-subcat', opts.subcatId);
