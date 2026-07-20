@@ -125,16 +125,12 @@
 
   function buildPreviewSlotHtml(slide, src, styleOpts) {
     styleOpts = styleOpts || {};
-    var fit = styleOpts.photoFit || 'cover';
+    /* Hero: cover + centro (sin zoom/top-crop que cortaba caras/cuerpo). */
+    var fit = 'cover';
     var pos = styleOpts.photoPos || 'center center';
-    var wrapStyle = styleOpts.photoBg ? ' style="background-color:' + styleOpts.photoBg + ';"' : '';
-    var imgExtra = '';
-    if (styleOpts.photoScale) {
-      imgExtra += 'transform:scale(' + styleOpts.photoScale + ');transform-origin:' + pos + ';';
-    }
-    var imgStyle = 'object-fit:' + fit + ';object-position:' + pos + ';' + imgExtra;
+    var imgStyle = 'object-fit:' + fit + ';object-position:' + pos + ';';
     return (
-      '<div class="home-hero__slot home-hero__slot--preview home-hero__slot--cat-sync" role="img" aria-label="' + slide.categoriaNombre + '"' + wrapStyle + '>' +
+      '<div class="home-hero__slot home-hero__slot--preview home-hero__slot--cat-sync" role="img" aria-label="' + slide.categoriaNombre + '">' +
         '<img class="home-hero__slot-preview-img" src="' + src + '" alt="" decoding="async" style="' + imgStyle + '">' +
       '</div>'
     );
