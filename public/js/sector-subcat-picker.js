@@ -394,6 +394,26 @@
     return global.CariHubCategoriaImagenes.get(subcatId) || null;
   }
 
+  /**
+   * Fotos de «Explora categorías» (Home CAT_OVERRIDES vía CariHubVCard.catVisual).
+   * El picker Adultos de Elegir categoría debe coincidir con esas tarjetas, no con *-pro.
+   */
+  function exploraCategoriasMeta(subcatId, index) {
+    if (!global.CariHubVCard || typeof global.CariHubVCard.catVisual !== 'function') {
+      return null;
+    }
+    var vis = global.CariHubVCard.catVisual(
+      { id: String(subcatId || '').toLowerCase(), nombre: '' },
+      index || 0
+    );
+    if (!vis || !vis.photo) return null;
+    return {
+      src: vis.photo,
+      pos: vis.photoPos || 'center center',
+      fit: vis.photoFit || 'cover'
+    };
+  }
+
   function hashStr(s) {
     var h = 0;
     var i;
@@ -428,6 +448,10 @@
   }
 
   function imageForSubcat(sectorId, subcatId, index) {
+    if (sectorId === 'adultos') {
+      var explora = exploraCategoriasMeta(subcatId, index);
+      if (explora && explora.src) return explora.src;
+    }
     var official = officialCatMeta(subcatId);
     if (official && official.src) return official.src;
     if (sectorId === 'restaurantes' && GASTRON_SUBCAT_IMAGES[subcatId]) {
@@ -448,13 +472,14 @@
     return path;
   }
 
-  function thumbHtml(src, subcatId) {
+  function thumbHtml(src, subcatId, sectorId) {
     var png = esc(src);
-    var official = officialCatMeta(subcatId);
-    var pos = (official && official.pos) || POS_VARIANTS[hashStr(subcatId) % POS_VARIANTS.length];
+    var meta = (sectorId === 'adultos' && exploraCategoriasMeta(subcatId)) || officialCatMeta(subcatId);
+    var pos = (meta && meta.pos) || POS_VARIANTS[hashStr(subcatId) % POS_VARIANTS.length];
+    var fit = (meta && meta.fit) || 'cover';
     return (
       '<img class="rp-sector-card__img" src="' + esc(pickSrc(src)) + '" data-fallback="' + png + '" alt="" ' +
-      'loading="lazy" decoding="async" style="object-position:' + pos + '" ' +
+      'loading="lazy" decoding="async" style="object-position:' + pos + ';object-fit:' + fit + '" ' +
       'onerror="if(this.dataset.fallback){this.src=this.dataset.fallback;this.removeAttribute(\'data-fallback\')}">'
     );
   }
@@ -479,7 +504,7 @@
       '<li role="presentation">' +
         '<button type="button" class="ch-geo-card rp-subcat-card' + (selected ? ' is-selected' : '') + '" ' +
           'role="option" data-cat-id="' + esc(cat.id) + '" aria-selected="' + (selected ? 'true' : 'false') + '">' +
-          '<span class="ch-geo-card__thumb">' + thumbHtml(img, cat.id) + '</span>' +
+          '<span class="ch-geo-card__thumb">' + thumbHtml(img, cat.id, sectorId) + '</span>' +
           '<span class="ch-geo-card__body">' +
             watermarkHtml(img, cat.id) +
             '<span class="ch-geo-card__text">' +
