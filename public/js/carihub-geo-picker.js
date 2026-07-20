@@ -1056,12 +1056,25 @@
   }
 
   var GEO_BANNER_BY_SECTOR = {
-    restaurantes: 'img/home/banners/ad-banner-gastronomia-01.svg',
+    restaurantes: 'img/home/banners/ad-banner-restaurantes-01.png',
+    salud: 'img/home/banners/ad-banner-salud-01.png',
+    bienestar: 'img/home/banners/ad-banner-bienestar-01.png',
+    automotriz: 'img/home/banners/ad-banner-automotriz-01.png',
+    profesionales: 'img/home/banners/ad-banner-profesionales-01.png',
+    hogar: 'img/home/banners/ad-banner-hogar-01.png',
+    comercio: 'img/home/banners/ad-banner-comercio-01.png',
+    mascotas: 'img/home/banners/ad-banner-mascotas-01.png',
+    eventos: 'img/home/banners/ad-banner-eventos-01.png',
+    educacion: 'img/home/banners/ad-banner-educacion-01.png',
+    tecnologia: 'img/home/banners/ad-banner-tecnologia-01.png',
+    transporte: 'img/home/banners/ad-banner-transporte-01.png',
+    industria: 'img/home/banners/ad-banner-industria-01.png',
+    'bienes-raices': 'img/home/banners/ad-banner-bienes-raices-01.png',
     adultos: 'img/home/banners/ad-banner-pink-01.png',
     lgbt: 'img/home/banners/ad-banner-lgbt-resultados-01.png'
   };
 
-  /* Home país/estado/ciudad: 3 creativas (adulto fucsia vs LGBT). */
+  /* Home país/estado/ciudad: 3 creativas (adulto fucsia vs LGBT vs sector). */
   var HOME_GEO_BANNER_SLIDES_ADULT = [
     'img/home/banners/ad-banner-pink-01.png',
     'img/home/banners/ad-banner-pink-03.png',
@@ -1071,6 +1084,11 @@
     'img/home/banners/ad-banner-lgbt-resultados-01.png',
     'img/home/banners/ad-banner-lgbt-resultados-02.png',
     'img/home/banners/ad-banner-lgbt-resultados-03.png'
+  ];
+  var HOME_GEO_BANNER_SECTOR_FALLBACK = [
+    'img/home/banners/ad-banner-categorias-explora-01.png',
+    'img/home/banners/ad-banner-profesionales-01.png',
+    'img/home/banners/ad-banner-comercio-01.png'
   ];
 
   var GEO_LGBT_GRAD = 'linear-gradient(90deg, #ef3b3b 0%, #ff8a1e 18%, #ffd21e 36%, #29b563 54%, #2b7fe0 72%, #8f39c9 90%, #ef3b3b 100%)';
@@ -1096,7 +1114,24 @@
     return '';
   }
 
+  function resolveHomeSelectedSectorId() {
+    var Journey = global.CariHubSearchJourneySession;
+    if (Journey && typeof Journey.isActive === 'function' && Journey.isActive()) {
+      var snap = typeof Journey.get === 'function' ? Journey.get() : null;
+      if (snap && snap.sectorId) return String(snap.sectorId);
+    }
+    if (global.sectorSeleccionado) return String(global.sectorSeleccionado);
+    var modal = document.getElementById('chGeoModal');
+    if (modal) {
+      var fromModal = modal.getAttribute('data-rp-sector');
+      if (fromModal) return String(fromModal);
+    }
+    return 'adultos';
+  }
+
   function isHomeSelectedLgbt() {
+    var sectorId = resolveHomeSelectedSectorId();
+    if (sectorId && sectorId !== 'adultos') return false;
     var RS = global.CariHubResultadosSector;
     var cat = resolveHomeSelectedCatHint();
     if (cat && RS && typeof RS.esSubcategoriaLgbt === 'function') {
@@ -1105,7 +1140,30 @@
     return document.body.getAttribute('data-subtema') === 'lgbt';
   }
 
+  function homeGeoBannerSlidesForSector(sectorId) {
+    var RS = global.CariHubResultadosSector;
+    var primary = '';
+    if (RS && typeof RS.bannerDeSector === 'function') {
+      primary = RS.bannerDeSector(sectorId) || '';
+    }
+    if (!primary && GEO_BANNER_BY_SECTOR[sectorId]) {
+      primary = GEO_BANNER_BY_SECTOR[sectorId];
+    }
+    if (!primary) primary = HOME_GEO_BANNER_SECTOR_FALLBACK[0];
+    var pool = [primary];
+    var i;
+    for (i = 0; i < HOME_GEO_BANNER_SECTOR_FALLBACK.length && pool.length < 3; i++) {
+      if (HOME_GEO_BANNER_SECTOR_FALLBACK[i] !== primary) pool.push(HOME_GEO_BANNER_SECTOR_FALLBACK[i]);
+    }
+    while (pool.length < 3) pool.push(primary);
+    return pool.slice(0, 3);
+  }
+
   function homeGeoBannerSlides() {
+    var sectorId = resolveHomeSelectedSectorId();
+    if (sectorId && sectorId !== 'adultos') {
+      return homeGeoBannerSlidesForSector(sectorId);
+    }
     return isHomeSelectedLgbt() ? HOME_GEO_BANNER_SLIDES_LGBT : HOME_GEO_BANNER_SLIDES_ADULT;
   }
 
@@ -1137,6 +1195,26 @@
     if (!modal) return;
     modal.classList.add('ch-geo-modal--home');
     modal.classList.remove('ch-geo-modal--registro', 'ch-geo-modal--guided');
+    var sectorId = resolveHomeSelectedSectorId();
+    if (sectorId && sectorId !== 'adultos') {
+      var Journey = global.CariHubSearchJourneySession;
+      var accent = Journey && typeof Journey.getSectorAccent === 'function'
+        ? Journey.getSectorAccent(sectorId)
+        : '#5c6bc0';
+      modal.removeAttribute('data-subtema');
+      modal.setAttribute('data-rp-sector', sectorId);
+      modal.style.setProperty('--rp-form-accent', accent);
+      modal.style.setProperty(
+        '--geo-grad',
+        'linear-gradient(180deg, color-mix(in srgb, ' + accent + ' 70%, #fff) 0%, ' +
+          accent + ' 52%, color-mix(in srgb, ' + accent + ' 88%, #000) 100%)'
+      );
+      modal.style.setProperty('--geo-premium-shell', buildPremiumShellFromAccent(accent));
+      modal.style.setProperty('--geo-shadow', '0 8px 24px color-mix(in srgb, ' + accent + ' 38%, transparent)');
+      syncGeoSparkles(modal);
+      syncGeoBannerImage(modal, sectorId);
+      return;
+    }
     if (isHomeSelectedLgbt()) applyHomeLgbtThemeVars(modal);
     else applyHomeAdultFuchsiaThemeVars(modal);
     syncGeoSparkles(modal);
