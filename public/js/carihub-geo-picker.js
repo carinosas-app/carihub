@@ -427,7 +427,17 @@
             '<p class="ch-geo-sheet__subtitle" id="chGeoModalSubtitle">Explora perfiles, negocios y experiencias cerca de ti</p>' +
           '</header>' +
           '<a class="ch-geo-sheet__banner" href="registro-banner.html?slot=home_categorias" id="chGeoBanner" aria-label="Anúnciate aquí">' +
-            '<img src="' + ((global.CariHubBannerGeneral && global.CariHubBannerGeneral.pickGeneralBanner()) || 'img/home/banners/ad-banner-pink-01.png') + '" alt="" loading="lazy" decoding="async">' +
+            '<div class="ch-geo-sheet__banner-stage" id="chGeoBannerStage" data-geo-banner-rotate="3">' +
+              '<div class="ch-geo-sheet__banner-slide is-active" aria-hidden="false">' +
+                '<img src="img/home/banners/ad-banner-lgbt-resultados-01.png" alt="" loading="lazy" decoding="async">' +
+              '</div>' +
+              '<div class="ch-geo-sheet__banner-slide" aria-hidden="true">' +
+                '<img src="img/home/banners/ad-banner-pink-01.png" alt="" loading="lazy" decoding="async">' +
+              '</div>' +
+              '<div class="ch-geo-sheet__banner-slide" aria-hidden="true">' +
+                '<img src="img/home/banners/ad-banner-pink-03.png" alt="" loading="lazy" decoding="async">' +
+              '</div>' +
+            '</div>' +
           '</a>' +
           '<label class="ch-geo-sheet__search">' +
             ICON_SEARCH +
@@ -511,6 +521,7 @@
       active.blur();
     }
     modal.classList.remove('is-open', 'ch-geo-modal--guided');
+    stopGeoBannerRotate();
     unlockPageScroll();
     selectorTipo = null;
     showAllPaises = false;
@@ -761,6 +772,10 @@
     raiseGeoModal(modal);
     geoModalOpenedAt = Date.now();
     modal.classList.add('is-open');
+    if (modal.classList.contains('ch-geo-modal--home') && !usesRegistroGeoShell()) {
+      ensureHomeGeoBannerSlides(modal);
+      startGeoBannerRotate(modal);
+    }
     if (typeof afterOpen === 'function') afterOpen();
     if (slideDir && panel) {
       panel.classList.remove('ch-geo-slide-forward', 'ch-geo-slide-back', 'ch-geo-slide-active');
@@ -1033,7 +1048,57 @@
     lgbt: 'img/home/banners/ad-banner-lgbt-resultados-01.png'
   };
 
+  /* Home país/estado/ciudad: 3 creativas en rotación (LGBT · adulto · Anúnciate). */
+  var HOME_GEO_BANNER_SLIDES = [
+    'img/home/banners/ad-banner-lgbt-resultados-01.png',
+    'img/home/banners/ad-banner-pink-01.png',
+    'img/home/banners/ad-banner-pink-03.png'
+  ];
+
   var GEO_LGBT_GRAD = 'linear-gradient(90deg, #ef3b3b 0%, #ff8a1e 18%, #ffd21e 36%, #29b563 54%, #2b7fe0 72%, #8f39c9 90%, #ef3b3b 100%)';
+  var geoBannerRotateTimer = null;
+  var geoBannerRotateIdx = 0;
+
+  function stopGeoBannerRotate() {
+    if (geoBannerRotateTimer) {
+      clearInterval(geoBannerRotateTimer);
+      geoBannerRotateTimer = null;
+    }
+  }
+
+  function startGeoBannerRotate(modal) {
+    stopGeoBannerRotate();
+    if (!modal || !modal.classList.contains('ch-geo-modal--home')) return;
+    var stage = modal.querySelector('#chGeoBannerStage');
+    if (!stage) return;
+    var slides = stage.querySelectorAll('.ch-geo-sheet__banner-slide');
+    if (slides.length < 2) return;
+    geoBannerRotateIdx = 0;
+    slides.forEach(function (slide, i) {
+      var on = i === 0;
+      slide.classList.toggle('is-active', on);
+      slide.setAttribute('aria-hidden', on ? 'false' : 'true');
+    });
+    geoBannerRotateTimer = setInterval(function () {
+      slides = stage.querySelectorAll('.ch-geo-sheet__banner-slide');
+      if (slides.length < 2) return;
+      slides[geoBannerRotateIdx].classList.remove('is-active');
+      slides[geoBannerRotateIdx].setAttribute('aria-hidden', 'true');
+      geoBannerRotateIdx = (geoBannerRotateIdx + 1) % slides.length;
+      slides[geoBannerRotateIdx].classList.add('is-active');
+      slides[geoBannerRotateIdx].setAttribute('aria-hidden', 'false');
+    }, 3500);
+  }
+
+  function ensureHomeGeoBannerSlides(modal) {
+    if (!modal) return;
+    var stage = modal.querySelector('#chGeoBannerStage');
+    if (!stage) return;
+    var imgs = stage.querySelectorAll('.ch-geo-sheet__banner-slide img');
+    HOME_GEO_BANNER_SLIDES.forEach(function (src, i) {
+      if (imgs[i] && imgs[i].getAttribute('src') !== src) imgs[i].src = src;
+    });
+  }
 
   function resolveGeoBannerSrc(modal, sector) {
     if (!modal) return '';
@@ -1055,11 +1120,30 @@
 
   function syncGeoBannerImage(modal, sector) {
     if (!modal) return;
-    var img = modal.querySelector('#chGeoBanner img');
-    if (!img) return;
+    /* Home: rotación fija de 3 espacios; no sustituir por un solo src de sector. */
+    if (modal.classList.contains('ch-geo-modal--home') && !usesRegistroGeoShell()) {
+      ensureHomeGeoBannerSlides(modal);
+      startGeoBannerRotate(modal);
+      return;
+    }
     var src = resolveGeoBannerSrc(modal, sector);
     if (!src) return;
+    var slides = modal.querySelectorAll('#chGeoBanner .ch-geo-sheet__banner-slide');
+    if (slides.length) {
+      stopGeoBannerRotate();
+      slides.forEach(function (slide, i) {
+        var img = slide.querySelector('img');
+        if (img) img.src = src;
+        var on = i === 0;
+        slide.classList.toggle('is-active', on);
+        slide.setAttribute('aria-hidden', on ? 'false' : 'true');
+      });
+      return;
+    }
+    var img = modal.querySelector('#chGeoBanner img');
+    if (!img) return;
     if (img.getAttribute('src') !== src) img.src = src;
+    stopGeoBannerRotate();
   }
 
   function syncRegistroGeoTheme(modal) {
