@@ -24,7 +24,7 @@
     cristaloterapia: 'E', 'tiendas-esotericas': 'D', 'productos-holisticos': 'D',
     'productos-naturistas': 'D', 'suplementos-naturales': 'D', herbolarios: 'D', naturistas: 'D',
     'venta-de-inciensos': 'D', 'venta-de-aceites-esenciales': 'D',
-    'ceremonias-ayahuasca-rape-plantas-de-poder': 'H', 'cacao-ceremonial': 'G',
+    'ceremonias-ayahuasca-rape-plantas-de-poder': 'H', 'ceremonias-ayahuasca': 'H', 'cacao-ceremonial': 'G',
     reflexologia: 'A', 'registros-akashicos': 'E', 'cosmetica-natural': 'D',
     'velas-esotericas': 'D', 'velas-aromaticas': 'D', sahumerios: 'D'
   };

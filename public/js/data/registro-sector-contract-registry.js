@@ -223,18 +223,29 @@
         if (pres.sectorId === contract.sectorAliases[i]) return true;
       }
     }
+    /* sectorId declarado en el perfil basta (nested puede ir a medias en demos). */
     if (u.sectorId === sid || (contract.sectorAliases || []).indexOf(u.sectorId) >= 0) {
-      var nestedKey = contract.nestedProfileKey;
-      if (u[nestedKey]) return true;
+      return true;
     }
     return false;
   }
 
   function sanitizeForeignNested(u, pres) {
     if (!u) return u;
+    var ownSector = String((u && u.sectorId) || (pres && pres.sectorId) || '').trim();
     Object.keys(SECTOR_CONTRACTS).forEach(function (id) {
       var contract = SECTOR_CONTRACTS[id];
       if (isSectorPerfil(contract, pres, u)) return;
+      /*
+        Si el perfil ya declara un sector moderno, otros contratos solo pueden
+        borrar su nested propio — no shared keys (deltaPack) del sector dueño.
+        Evita que profesionales/etc. borren deltaPack de un demo bienestar.
+      */
+      if (ownSector && SECTOR_CONTRACTS[ownSector] && id !== ownSector) {
+        var nk = contract.nestedProfileKey;
+        if (nk && Object.prototype.hasOwnProperty.call(u, nk)) delete u[nk];
+        return;
+      }
       (contract.sanitizeNestedKeys || []).forEach(function (key) {
         if (Object.prototype.hasOwnProperty.call(u, key)) delete u[key];
       });

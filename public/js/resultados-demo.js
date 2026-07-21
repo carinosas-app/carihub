@@ -396,7 +396,8 @@
     'venta-de-velas': 'D', 'venta-de-inciensos': 'D',
     'venta-de-aceites-esenciales': 'D', 'venta-de-aceites': 'D', tarot: 'E', astrologia: 'E', numerologia: 'E',
     'coaching-de-vida': 'F', 'coaching-espiritual': 'F', 'retiros-espirituales': 'G', 'turismo-espiritual': 'G',
-    'ceremonias-ayahuasca-rape-plantas-de-poder': 'H', chamanismo: 'H', 'medicina-ancestral': 'H'
+    'ceremonias-ayahuasca-rape-plantas-de-poder': 'H', 'ceremonias-ayahuasca': 'H',
+    chamanismo: 'H', 'medicina-ancestral': 'H'
   };
 
   var DEMO_BIENESTAR_BY_PACK = {
@@ -463,7 +464,8 @@
     'coaching-de-vida': DEMO_BIENESTAR_BY_PACK.F,
     'retiros-espirituales': DEMO_BIENESTAR_BY_PACK.G,
     'turismo-espiritual': DEMO_BIENESTAR_BY_PACK.G,
-    'ceremonias-ayahuasca-rape-plantas-de-poder': DEMO_BIENESTAR_BY_PACK.H
+    'ceremonias-ayahuasca-rape-plantas-de-poder': DEMO_BIENESTAR_BY_PACK.H,
+    'ceremonias-ayahuasca': DEMO_BIENESTAR_BY_PACK.H
   };
 
   function norm(t) {
@@ -844,8 +846,14 @@
     }
 
     u = enriquecerPerfil(u, Q);
+    /* Restaurar contrato bienestar tras enriquecer/sanitize (anti-contaminación FE). */
+    u.sectorId = 'bienestar';
+    u.deltaPack = pack;
+    u.bienestarHolisticoPerfil = holistico;
+    u.arquetipo = esRetail ? 'negocio_comercio' : 'persona_servicio_bienestar';
+    u.tipoPerfil = esRetail ? 'negocio' : (u.tipoPerfil || 'persona');
     /* Anti-contaminación: field-engine no debe dejar vista=negocio adulto. */
-    if (u.sectorId === 'bienestar' && (u.__vista === 'negocio' || u.__vista === 'hotelMotel' || u.__vista === 'spa' || u.__vista === 'masajesLocal')) {
+    if (u.__vista === 'negocio' || u.__vista === 'hotelMotel' || u.__vista === 'spa' || u.__vista === 'masajesLocal' || u.__vista === 'adult') {
       u.__vista = esRetail || pack === 'D' ? 'empresa' : 'pro';
     }
     if (global.CariHubBienestarSectorRender && CariHubBienestarSectorRender.resolveVistaPerfil) {

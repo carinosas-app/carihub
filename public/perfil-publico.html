@@ -73,7 +73,7 @@
 <script src="js/registro-negocio-adulto.js"></script>
 <script src="js/data/registro-schema-index.js"></script>
 <script src="js/data/registro-ui-index.js"></script>
-<script src="js/carihub-field-engine-lite.js?v=20260721bw2"></script>
+<script src="js/carihub-field-engine-lite.js?v=20260721faq2"></script>
 <script src="js/carihub-viajes-desplazamiento.js?v=20260620t"></script>
 <script src="js/carihub-subcategoria-labels.js?v=20260629v3"></script>
 <script src="js/catalogos-carihub.js"></script>
@@ -81,12 +81,12 @@
 <script src="estados.js"></script>
 <script src="ciudades.js"></script>
 <script src="js/perfil-res-sbar-picker.js?v=20260720sbar1"></script>
-<script src="js/carihub-bienestar-sector-render.js?v=20260721bw2"></script>
+<script src="js/carihub-bienestar-sector-render.js?v=20260721faq1"></script>
 <script src="js/carihub-eventos-sector-render.js?v=20260627e3"></script>
-<script src="js/data/registro-sector-contract-registry.js?v=20260702reg-v1"></script>
+<script src="js/data/registro-sector-contract-registry.js?v=20260721faq2"></script>
 <script src="js/carihub-gastronomia-sector-render.js?v=20260702gast1"></script>
 <script src="js/carihub-public-render-lite.js?v=20260627e3"></script>
-<script src="js/resultados-demo.js?v=20260721bw5"></script>
+<script src="js/resultados-demo.js?v=20260721faq2"></script>
 <script src="js/carihub-multi-perfil.js"></script>
 <script src="js/carihub-blk01-profile-sanitize.js"></script>
 <script src="js/carihub-blk01-hub-adapter.js"></script>
@@ -110,7 +110,7 @@
 <script src="js/data/registro-adultos-venue-blocks.js?v=20260627v1"></script>
 <script src="js/data/registro-adultos-bienestar-blocks.js?v=20260628b1"></script>
 <script src="js/data/registro-adultos-hospedaje-blocks.js?v=20260628h1"></script>
-<script src="js/data/registro-bienestar-blocks.js?v=20260630b2"></script>
+<script src="js/data/registro-bienestar-blocks.js?v=20260721faq2"></script>
 <script src="js/carihub-registro-public-blocks.js?v=20260630b2"></script>
 <script src="js/carihub-public-privacy-guard.js?v=20260706p0"></script>
 <script src="js/resultados-registrados.js"></script>
@@ -2688,10 +2688,21 @@ body.fit[data-vista="negocio"] .playout__col--der > .negocio-pie-wrap .negocio-u
 .review .rt{font-size:13px;color:#4b5563;margin-top:3px;line-height:1.4;}
 .review .rd{font-size:11px;color:var(--muted);white-space:nowrap;}
 
-/* faq */
-.faq .q{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-top:1px solid var(--line);font-size:14px;font-weight:700;color:#374151;}
-.faq .q:first-child{border-top:none;}
-.faq .q .chev{color:var(--muted);}
+/* faq accordion */
+.faq .faq-item{border-top:1px solid var(--line);}
+.faq .faq-item:first-of-type{border-top:none;}
+.faq .q{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;
+  padding:12px 0;border:0;background:transparent;cursor:pointer;text-align:left;
+  font:inherit;font-size:14px;font-weight:700;color:#374151;
+}
+.faq .q:hover{color:var(--acc);}
+.faq .q .chev{flex:0 0 auto;color:var(--muted);transition:transform .2s ease;}
+.faq .faq-item.is-open .q .chev{transform:rotate(180deg);}
+.faq .faq-a{
+  display:none;padding:0 0 12px;font-size:13px;font-weight:500;line-height:1.45;color:#4b5563;
+}
+.faq .faq-item.is-open .faq-a{display:block;}
 
 /* trust row */
 .trust{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;text-align:center;}
@@ -8609,11 +8620,56 @@ function proReviewsCardHTML(u, title){
     (u.reviews||[]).map(function(r){return '<div class="review"><div class="av">'+safe(String(r[0]||"?").slice(0,1))+'</div><div class="rb"><div class="rn">'+safe(r[0])+' '+stars(r[1])+'</div><div class="rt">'+safe(r[2])+'</div></div><div class="rd">'+safe(r[3])+'</div></div>';}).join("")+
   '</div>';
 }
+function proFaqNormItem(item){
+  if(item&&typeof item==="object"){
+    return {q:String(item.q||item.pregunta||""),a:String(item.a||item.respuesta||"")};
+  }
+  return {q:String(item||""),a:""};
+}
 function proFaqCardHTML(u){
   if(!u||!(u.faq||[]).length) return "";
-  return '<div class="pcard faq"><div class="pcard__h">❓ Preguntas frecuentes</div>'+
-    (u.faq||[]).map(function(q){return '<div class="q">'+safe(q)+'<span class="chev">⌄</span></div>';}).join("")+
+  return '<div class="pcard faq" data-faq-accordion="1"><div class="pcard__h">❓ Preguntas frecuentes</div>'+
+    (u.faq||[]).map(function(raw){
+      var it=proFaqNormItem(raw);
+      if(!it.q) return "";
+      var a=it.a||"Escríbenos por el contacto publicado y te respondemos con el detalle.";
+      return '<div class="faq-item">'+
+        '<button type="button" class="q" aria-expanded="false">'+safe(it.q)+'<span class="chev" aria-hidden="true">⌄</span></button>'+
+        '<div class="faq-a" hidden>'+safe(a)+'</div>'+
+      '</div>';
+    }).join("")+
   '</div>';
+}
+function bindProFaqAccordion(root){
+  var scope=root||document;
+  var cards=scope.querySelectorAll('[data-faq-accordion="1"]');
+  for(var c=0;c<cards.length;c++){
+    var card=cards[c];
+    if(card.getAttribute("data-faq-bound")==="1") continue;
+    card.setAttribute("data-faq-bound","1");
+    card.addEventListener("click",function(ev){
+      var host=ev.currentTarget;
+      var btn=ev.target&&ev.target.closest?ev.target.closest("button.q"):null;
+      if(!btn||!host.contains(btn)) return;
+      var item=btn.parentNode;
+      if(!item||!item.classList.contains("faq-item")) return;
+      var open=item.classList.contains("is-open");
+      var siblings=host.querySelectorAll(".faq-item.is-open");
+      for(var i=0;i<siblings.length;i++){
+        siblings[i].classList.remove("is-open");
+        var sb=siblings[i].querySelector("button.q");
+        var sa=siblings[i].querySelector(".faq-a");
+        if(sb) sb.setAttribute("aria-expanded","false");
+        if(sa) sa.hidden=true;
+      }
+      if(!open){
+        item.classList.add("is-open");
+        btn.setAttribute("aria-expanded","true");
+        var ans=item.querySelector(".faq-a");
+        if(ans) ans.hidden=false;
+      }
+    });
+  }
 }
 function proCoberturaCardHTML(u, title){
   var tit=title||"Zona de cobertura";
@@ -9456,8 +9512,14 @@ function aplicarPerfilResultadosEnDemo(vista,u){
     if(window.CariHubBienestarSectorRender&&CariHubBienestarSectorRender.isBienestarSectorPerfil){
       esBienestarHolo=!!CariHubBienestarSectorRender.isBienestarSectorPerfil(u);
     }
-    if(!esBienestarHolo&&(u.sectorId==="bienestar"||u.bienestarHolisticoPerfil)){
+    if(!esBienestarHolo&&(u.sectorId==="bienestar"||u.bienestarHolisticoPerfil||u.deltaPack)){
       esBienestarHolo=true;
+    }
+    if(!esBienestarHolo&&window.CariHubResultadosSector&&CariHubResultadosSector.sectorDeCategoria){
+      try{
+        var catBw=u.subcategoriaId||u.categoriaPublica||u.categoria||"";
+        if(CariHubResultadosSector.sectorDeCategoria(catBw)==="bienestar") esBienestarHolo=true;
+      }catch(eBwCat){ /* opcional */ }
     }
   }
   var esSaludSector=vista==="medico"||u.sectorId==="salud"||!!u.saludPerfil;
@@ -9969,6 +10031,7 @@ function setVista(tipo){
   bindPerfilResChrome(u);
   bindAdultoGaleria(document.getElementById("wrap"));
   bindAdultoUbicacionStretch(document.getElementById("wrap"));
+  bindProFaqAccordion(document.getElementById("wrap"));
   stopActividadNegocioRotation();
   window.scrollTo({top:0});
   bumpFitDelays();

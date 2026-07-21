@@ -287,16 +287,26 @@
   function packFaq(pack) {
     if (pack === 'H') {
       return [
-        '¿Cómo solicito información o fechas?',
-        '¿Cuáles son los requisitos previos?',
-        '¿Qué contraindicaciones debo considerar?',
-        '¿Se venden sustancias o productos?'
+        { q: '¿Cómo solicito información o fechas?', a: 'Escríbenos por WhatsApp o el contacto publicado con tu ciudad y la ceremonia de interés. Te respondemos con disponibilidad, requisitos y el siguiente paso.' },
+        { q: '¿Cuáles son los requisitos previos?', a: 'Edad legal, cuestionario de salud y, cuando aplique, entrevista previa. Cada facilitador indica preparación, ayuno o restricciones específicas.' },
+        { q: '¿Qué contraindicaciones debo considerar?', a: 'Condiciones médicas, medicamentos y embarazo pueden ser contraindicación. Decláralos con honestidad; si hay duda, consulta a tu médico antes de participar.' },
+        { q: '¿Se venden sustancias o productos?', a: 'No. Este perfil informa sobre facilitación y logística del encuentro. No comercializamos sustancias controladas ni las enviamos a domicilio.' }
       ];
     }
     if (pack === 'D') {
-      return ['¿Dónde está ubicada la tienda?', '¿Qué productos manejan?', '¿Hay venta en línea?', '¿Cuál es el horario?'];
+      return [
+        { q: '¿Dónde está ubicada la tienda?', a: 'La dirección y zona aparecen en la ficha y el mapa. Si necesitas referencias o horarios de visita, escríbenos por el contacto publicado.' },
+        { q: '¿Qué productos manejan?', a: 'El surtido depende del negocio (velas, inciensos, aceites, etc.). Consulta la lista de productos en el perfil o pregunta disponibilidad por WhatsApp.' },
+        { q: '¿Hay venta en línea?', a: 'Algunos locales ofrecen envío o pedido a distancia; otros solo venta presencial. Confírmalo en la ficha o al contactar al vendedor.' },
+        { q: '¿Cuál es el horario?', a: 'El horario publicado en la ficha es orientativo. Para visitas o entregas el mismo día, confirma por el medio de contacto.' }
+      ];
     }
-    return ['¿Cuál es la modalidad de atención?', '¿Cuánto dura una sesión?', '¿Emiten comprobante?', '¿Hay contraindicaciones?'];
+    return [
+      { q: '¿Cuál es la modalidad de atención?', a: 'Según la práctica: presencial en el espacio indicado y/o en línea cuando el formato lo permite. Lo aclaramos al agendar.' },
+      { q: '¿Cuánto dura una sesión?', a: 'Depende del servicio (suele ir de 45 a 90 minutos). La duración exacta aparece en la ficha o te la confirmamos al contactarte.' },
+      { q: '¿Emiten comprobante?', a: 'Sí, cuando el profesional lo ofrece. Indica al agendar si necesitas recibo o factura.' },
+      { q: '¿Hay contraindicaciones?', a: 'Algunas prácticas no son aptas en embarazo, lesiones o condiciones médicas. Compártelas al contactar; si hay duda, consulta a tu médico.' }
+    ];
   }
 
   function hydrateDisplayFields(u) {
@@ -333,7 +343,11 @@
     u.rating = u.rating != null ? u.rating : '—';
     u.opiniones = u.opiniones != null ? u.opiniones : 0;
     u.reviews = Array.isArray(u.reviews) ? u.reviews : [];
-    u.faq = Array.isArray(u.faq) && u.faq.length ? u.faq : packFaq(pack);
+    u.faq = (Array.isArray(u.faq) && u.faq.length && u.faq.every(function (item) {
+      return item && typeof item === 'object' && (item.q || item.pregunta) && (item.a || item.respuesta);
+    }))
+      ? u.faq
+      : packFaq(pack);
     u.noIncluidos = Array.isArray(u.noIncluidos) && u.noIncluidos.length
       ? u.noIncluidos
       : (pack === 'H'

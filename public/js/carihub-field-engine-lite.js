@@ -766,11 +766,17 @@
       subcategoriaId: u.subcategoriaId,
       categoria: u.categoria || u.categoriaPublica
     });
-    u.__componenteResultados = pres.componenteResultados;
-    u.__componentePerfil = pres.componentePerfil;
-    u.__vista = pres.vistaPerfil;
+    var preserveBienestar = u.sectorId === 'bienestar' || !!u.bienestarHolisticoPerfil;
+    u.__componenteResultados = preserveBienestar
+      ? (u.__componenteResultados || pres.componenteResultados)
+      : pres.componenteResultados;
+    u.__componentePerfil = preserveBienestar
+      ? (u.__componentePerfil || pres.componentePerfil)
+      : pres.componentePerfil;
+    /* No pisar vista/arquetipo de demos bienestar holístico (FE a veces cae en adult/general). */
+    if (!preserveBienestar || !u.__vista) u.__vista = pres.vistaPerfil;
     if (pres.subcategoriaId) u.subcategoriaId = pres.subcategoriaId;
-    if (pres.arquetipo) u.arquetipo = pres.arquetipo;
+    if (pres.arquetipo && !preserveBienestar) u.arquetipo = pres.arquetipo;
     if (pres.tipoPerfil && !u.tipoPerfil) u.tipoPerfil = pres.tipoPerfil;
     return u;
   }
