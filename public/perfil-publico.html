@@ -12,13 +12,20 @@
   html.directory-mode .feed-grat-btn,
   html.directory-mode .act-negocio.playout__estado,
   html.directory-mode #gratModal { display: none !important; }
-  html.directory-mode [data-directory-hide="estados-libe-docks"],
   html.directory-mode .ch-slot-dock--home,
-  html.directory-mode .ch-slot-dock--hero,
+  html.directory-mode .ch-slot-dock--hero { display: none !important; }
+  /* Espejo FOUC midband de resultados.html (no tocar Resultados). */
   html.directory-mode .res-midband__slot--estados,
-  html.directory-mode .res-midband__slot--libe { display: none !important; }
-  html.directory-mode .res-midband { min-height: auto; height: auto; gap: 0; }
-  html.directory-mode .res-midband__center { flex: 1 1 auto; width: 100%; max-width: 100%; }
+  html.directory-mode .res-midband__slot--libe,
+  html.directory-mode [data-directory-hide="estados-libe-docks"] {
+    display: none !important; visibility: hidden !important; pointer-events: none !important;
+    width: 0 !important; min-width: 0 !important; max-width: 0 !important;
+    height: 0 !important; min-height: 0 !important; max-height: 0 !important;
+    margin: 0 !important; padding: 0 !important; border: 0 !important;
+    overflow: hidden !important; flex: 0 0 0 !important;
+  }
+  html.directory-mode .res-midband { min-height: auto !important; height: auto !important; gap: 0 !important; }
+  html.directory-mode .res-midband__center { flex: 1 1 auto !important; width: 100% !important; max-width: 100% !important; }
   /* Sin hueco vertical donde iba el feed estados/en vivo; no estirar columna vacía */
   html.directory-mode [data-tema="adult"] .playout__col--der .playout__derstack,
   html.directory-mode [data-vista="adult"] .playout__col--der .playout__derstack,
@@ -33,7 +40,7 @@
   }
   [data-tema="adult"] .playout__col--der,
   [data-vista="adult"] .playout__col--der {
-    align-self: start;
+    align-self: stretch;
     justify-content: flex-start;
   }
 </style>
@@ -47,7 +54,7 @@
 <link rel="stylesheet" href="css/carihub-page-sector-sparkles.css?v=20260719perfil2">
 <link rel="stylesheet" href="css/carihub-sector-pro-background.css?v=20260719perfil2">
 <link rel="stylesheet" href="css/perfil-sector-visual.css?v=20260719pp2">
-<link rel="stylesheet" href="css/resultados.css?v=20260719pp-chrome1">
+<link rel="stylesheet" href="css/resultados.css?v=20260720pp-chrome2">
 <link rel="stylesheet" href="css/carihub-media-placeholders.css?v=20260630hf1">
 <link rel="stylesheet" href="css/carihub-nav-quick.css">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700&display=swap">
@@ -70,6 +77,10 @@
 <script src="js/carihub-viajes-desplazamiento.js?v=20260620t"></script>
 <script src="js/carihub-subcategoria-labels.js?v=20260629v3"></script>
 <script src="js/catalogos-carihub.js"></script>
+<script src="paises.js"></script>
+<script src="estados.js"></script>
+<script src="ciudades.js"></script>
+<script src="js/perfil-res-sbar-picker.js?v=20260720sbar1"></script>
 <script src="js/carihub-bienestar-sector-render.js?v=20260630f3"></script>
 <script src="js/carihub-eventos-sector-render.js?v=20260627e3"></script>
 <script src="js/data/registro-sector-contract-registry.js?v=20260702reg-v1"></script>
@@ -149,6 +160,7 @@ body.perfil-embed-dashboard .pb,
 body.perfil-embed-dashboard .pbrand,
 body.perfil-embed-dashboard .profile-toolbar,
 body.perfil-embed-dashboard .perfil-res-chrome,
+body.perfil-embed-dashboard .res-shell__top,
 body.perfil-embed-dashboard .playout__banner-adult,
 body.perfil-embed-dashboard .negocio-pie-wrap--bottom,
 body.perfil-embed-dashboard .ch-slot-dock,
@@ -219,6 +231,7 @@ body.perfil-embed-dashboard-inicio .pb,
 body.perfil-embed-dashboard-inicio .pbrand,
 body.perfil-embed-dashboard-inicio .profile-toolbar,
 body.perfil-embed-dashboard-inicio .perfil-res-chrome,
+body.perfil-embed-dashboard-inicio .res-shell__top,
 body.perfil-embed-dashboard-inicio .playout__banner-adult,
 body.perfil-embed-dashboard-inicio .negocio-pie-wrap--bottom,
 body.perfil-embed-dashboard-inicio .ch-slot-dock,
@@ -298,58 +311,21 @@ body.perfil-sheen-none::before{display:none!important;}
 @keyframes rain-fall-mini{0%{transform:translateY(-20%) rotate(0)}100%{transform:translateY(360%) rotate(360deg)}}
 @media (prefers-reduced-motion: reduce){.rain-coin,.rain-flash,.thumb .liverain i{animation:none !important}}
 
-/* Chrome Resultados reutilizado en perfil (midband + search dock) */
+/* Chrome Resultados pegado en perfil: estructura = res-shell / res-shell__top (ver shell()).
+   Medidas vienen de css/resultados.css + lienzo fit 1120 — no redefinir aquí. */
 body:not(.fit) .wrap{
   max-width:var(--res-design-w,1120px);
   margin-left:auto;
   margin-right:auto;
 }
-body:not(.fit) .perfil-res-top{
-  width:100%;
-  max-width:100%;
-  display:flex;
-  flex-direction:column;
-  box-sizing:border-box;
-}
-body:not(.fit) .perfil-res-top > .pb,
-body:not(.fit) .perfil-res-top .perfil-res-chrome,
-body:not(.fit) .perfil-res-top .res-midband,
-body:not(.fit) .perfil-res-top .res-search-dock,
 body:not(.fit) .wrap > .playout{
   width:100%;
   max-width:100%;
   box-sizing:border-box;
 }
-body:not(.fit) .perfil-res-chrome{
-  width:100%;
-  max-width:100%;
-  margin:0 0 14px;
-}
-body:not(.fit) .perfil-res-chrome .res-midband{
-  margin-bottom:10px;
-}
-body:not(.fit) .perfil-res-chrome .res-search-dock--top{
-  margin-bottom:12px;
-}
-/* Paridad con Resultados: slots imagen sin padding flex del .pb a legado */
-body:not(.fit) .pb > a.pb-slot{
-  padding:0 !important;
-  display:block !important;
-  align-items:stretch;
-  color:inherit;
-}
-body:not(.fit) .pb > a.pb-slot .pb-slot__stage,
-body:not(.fit) .pb > a.pb-slot .pb-slot__slide,
-body:not(.fit) .pb > a.pb-slot .pb-slot__slide img{
-  width:100%;
-  height:100%;
-  min-height:158px;
-  object-fit:cover;
-  display:block;
-}
-/* Evitar que .pb de Results CSS pelee con embeds */
-body.perfil-embed-dashboard .perfil-res-chrome,
-body.perfil-embed-dashboard-inicio .perfil-res-chrome,
+/* Evitar chrome Results en embeds dashboard */
+body.perfil-embed-dashboard .res-shell__top,
+body.perfil-embed-dashboard-inicio .res-shell__top,
 body.perfil-embed-dashboard .perfil-res-top,
 body.perfil-embed-dashboard-inicio .perfil-res-top{display:none !important;}
 
@@ -681,12 +657,12 @@ body:not(.fit) #fitRoot{width:100%;}
   display:grid;
   grid-template-columns:minmax(0,1fr) minmax(0,1fr);
   gap:14px 18px;
-  align-items:start;
+  align-items:stretch;
 }
 /* Perfil negocio legacy — ya no define columnas distintas; todo usa layout adulto */
 [data-vista="negocio"] .playout{
   grid-template-columns:minmax(0,1fr) minmax(0,1fr);
-  gap:14px 18px;align-items:start;
+  gap:14px 18px;align-items:stretch;
 }
 [data-vista="adult"] .playout__col,
 [data-vista="negocio"] .playout__col{gap:14px;}
@@ -744,7 +720,7 @@ body:not(.fit) #fitRoot{width:100%;}
 [data-vista="negocio"] .playout__derstack > .pcard:last-child{flex:0 0 auto;}
 [data-tema="adult"] .playout__col{display:flex;flex-direction:column;gap:14px;min-width:0;min-height:0;}
 [data-tema="adult"] .playout__col--der .playout__derstack{margin-top:0;}
-[data-tema="adult"] .playout__col--der{align-self:start;justify-content:flex-start;}
+[data-tema="adult"] .playout__col--der{align-self:stretch;justify-content:flex-start;}
 [data-tema="adult"] .playout__izq-contact{
   flex:1 1 auto;display:flex;flex-direction:column;min-height:0;
   width:100%;margin-bottom:10px;
@@ -839,12 +815,147 @@ body:not(.fit) #fitRoot{width:100%;}
 [data-tema="adult"] .playout__banner-adult,
 [data-vista="negocio"] .playout__banner-adult{
   grid-column:1 / -1 !important;
-  margin-top:12px;
+  margin-top:0;
   width:100%;
   max-width:100%;
 }
+/* Galería izq: principal + 2 fotos del MISMO tamaño, apiladas */
+[data-tema="adult"] .playout__col--izq .pcard.gal,
+[data-vista="adult"] .playout__col--izq .pcard.gal,
+[data-vista="negocio"] .playout__col--izq .pcard.gal{
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+  padding:0;
+  background:transparent;
+  border:none;
+  box-shadow:none;
+  overflow:visible;
+}
+[data-tema="adult"] .playout__col--izq .gal__main,
+[data-vista="adult"] .playout__col--izq .gal__main,
+[data-vista="negocio"] .playout__col--izq .gal__main,
+[data-tema="adult"] .playout__col--izq .gal__thumbs .t,
+[data-vista="adult"] .playout__col--izq .gal__thumbs .t,
+[data-vista="negocio"] .playout__col--izq .gal__thumbs .t{
+  position:relative;
+  width:100%;
+  aspect-ratio:3/4;
+  border-radius:16px;
+  overflow:hidden;
+  background:#ddd;
+  box-shadow:var(--shadow);
+}
+[data-tema="adult"] .playout__col--izq .gal__thumbs,
+[data-vista="adult"] .playout__col--izq .gal__thumbs,
+[data-vista="negocio"] .playout__col--izq .gal__thumbs{
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+  padding:0;
+  margin:0;
+  grid-template-columns:none;
+}
+[data-tema="adult"] .playout__col--izq .gal__thumbs .t img,
+[data-tema="adult"] .playout__col--izq .gal__thumbs .t .ch-foto-ph,
+[data-vista="adult"] .playout__col--izq .gal__thumbs .t img,
+[data-vista="adult"] .playout__col--izq .gal__thumbs .t .ch-foto-ph,
+[data-vista="negocio"] .playout__col--izq .gal__thumbs .t img,
+[data-vista="negocio"] .playout__col--izq .gal__thumbs .t .ch-foto-ph{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  object-position:center top;
+  display:block;
+  position:absolute;
+  inset:0;
+}
+[data-tema="adult"] .playout__izq-stack--gal-only,
+[data-vista="adult"] .playout__izq-stack--gal-only{
+  flex:0 0 auto;
+}
 [data-vista="adult"] .playout__banner-adult .pb-slot--bottom,
 [data-tema="adult"] .playout__banner-adult .pb-slot--bottom{margin-top:0;margin-bottom:0;width:100%;}
+/* Owner: tarjetas derecha estiran hasta topar con el banner largo (misma altura que galería izq). */
+@media (min-width:901px){
+  [data-tema="adult"] .playout,
+  [data-vista="adult"] .playout,
+  [data-vista="negocio"] .playout,
+  body.fit[data-tema="adult"] .playout,
+  body.fit[data-vista="adult"] .playout,
+  body.fit[data-vista="negocio"] .playout{
+    align-items:stretch !important;
+  }
+  [data-tema="adult"] .playout__col--der,
+  [data-vista="adult"] .playout__col--der,
+  [data-vista="negocio"] .playout__col--der{
+    display:flex !important;
+    flex-direction:column;
+    gap:14px;
+    align-self:stretch !important;
+    justify-content:flex-start;
+    min-height:100%;
+    height:auto;
+  }
+  [data-tema="adult"] .playout__col--der > .pcard,
+  [data-tema="adult"] .playout__col--der > .playout__tri,
+  [data-tema="adult"] .playout__col--der > .playout__derstack,
+  [data-tema="adult"] .playout__col--der > .negocio-pie-wrap,
+  [data-tema="adult"] .playout__col--der > .sobre-card,
+  [data-vista="adult"] .playout__col--der > .pcard,
+  [data-vista="adult"] .playout__col--der > .playout__tri,
+  [data-vista="adult"] .playout__col--der > .playout__derstack,
+  [data-vista="adult"] .playout__col--der > .negocio-pie-wrap,
+  [data-vista="adult"] .playout__col--der > .sobre-card,
+  [data-vista="negocio"] .playout__col--der > .pcard,
+  [data-vista="negocio"] .playout__col--der > .playout__tri,
+  [data-vista="negocio"] .playout__col--der > .playout__derstack,
+  [data-vista="negocio"] .playout__col--der > .negocio-pie-wrap,
+  [data-vista="negocio"] .playout__col--der > .sobre-card{
+    flex:1 1 0 !important;
+    min-height:0;
+    display:flex;
+    flex-direction:column;
+  }
+  [data-tema="adult"] .playout__col--der > .playout__derstack > .pcard,
+  [data-vista="adult"] .playout__col--der > .playout__derstack > .pcard,
+  [data-vista="negocio"] .playout__col--der > .playout__derstack > .pcard{
+    flex:1 1 0 !important;
+    min-height:0;
+    display:flex;
+    flex-direction:column;
+  }
+  [data-tema="adult"] .playout__col--der > .pcard--ficha-publica > .dlist,
+  [data-vista="adult"] .playout__col--der > .pcard--ficha-publica > .dlist{
+    flex:1 1 auto;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+    min-height:0;
+  }
+  [data-tema="adult"] .playout__col--der > .pcard--contact .contact,
+  [data-vista="adult"] .playout__col--der > .pcard--contact .contact{
+    flex:1 1 auto;
+  }
+  [data-tema="adult"] .playout__col--der > .sobre-card .sobre-card__desc,
+  [data-vista="adult"] .playout__col--der > .sobre-card .sobre-card__desc,
+  [data-tema="adult"] .playout__col--der > .sobre-card .sobre-card__grid,
+  [data-vista="adult"] .playout__col--der > .sobre-card .sobre-card__grid{
+    flex:1 1 auto;
+  }
+  [data-tema="adult"] .playout__col--der > .negocio-pie-wrap .negocio-pie-card,
+  [data-vista="adult"] .playout__col--der > .negocio-pie-wrap .negocio-pie-card,
+  [data-vista="negocio"] .playout__col--der > .negocio-pie-wrap .negocio-pie-card{
+    flex:1 1 auto;
+    display:flex;
+    flex-direction:column;
+    min-height:0;
+  }
+  [data-tema="adult"] .playout__col--der > .playout__tri > .pcard,
+  [data-vista="adult"] .playout__col--der > .playout__tri > .pcard{
+    height:100%;
+  }
+}
 /* Desktop: rellenar izq (precio/ubicación/stats) para equilibrar con la derecha */
 @media (min-width:901px){
   body:not(.fit)[data-tema="adult"] .playout,
@@ -2019,6 +2130,13 @@ body:not(.fit) #fitRoot{width:100%;}
 .gal__thumbs .t{position:relative;aspect-ratio:1/1;border-radius:10px;overflow:hidden;background:#ccc;}
 .gal__thumbs .t img,.gal__thumbs .t .ch-foto-ph{width:100%;height:100%;object-fit:cover;}
 .gal__thumbs .t.lock{display:flex;align-items:center;justify-content:center;background:#1f2937;color:#fff;font-size:12px;font-weight:900;flex-direction:column;gap:2px;}
+.gal__thumbs .t__more{
+  position:absolute;right:6px;bottom:6px;z-index:2;
+  min-width:28px;height:22px;padding:0 7px;border-radius:999px;
+  display:inline-flex;align-items:center;justify-content:center;
+  background:rgba(15,23,42,.78);color:#fff;font-size:11px;font-weight:800;
+  line-height:1;pointer-events:none;
+}
 
 /* ===== BLOQUE PRECIO/CONTACTO ===== */
 .tri{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;align-items:start;}
@@ -2330,24 +2448,6 @@ body:not(.fit) #fitRoot{width:100%;}
     width:100%;
     max-width:100%;
   }
-  /* Banners: no apilar 3 filas enormes */
-  body:not(.fit) .pb{
-    flex-wrap:nowrap;
-    gap:8px;
-    overflow-x:auto;
-    -webkit-overflow-scrolling:touch;
-  }
-  body:not(.fit) .pb > a,
-  body:not(.fit) .pb > .pb-slot:not(.pb-slot--bottom){
-    flex:0 0 78%;
-    min-width:78%;
-    min-height:96px;
-  }
-  body:not(.fit) .pb > .pb-slot:not(.pb-slot--bottom) .pb-slot__stage,
-  body:not(.fit) .pb > .pb-slot:not(.pb-slot--bottom) .pb-slot__slide,
-  body:not(.fit) .pb > .pb-slot:not(.pb-slot--bottom) .pb-slot__slide img{
-    min-height:96px;
-  }
   /* Brand + nav en una sola fila compacta */
   body:not(.fit) .pbrand{
     flex-wrap:nowrap;
@@ -2500,6 +2600,70 @@ body:not(.fit) #fitOuter{min-height:calc(100vh - 52px);}
   transition:box-shadow .2s ease,outline-color .2s ease;
 }
 </style>
+<!-- Reaplica resultados.css DESPUÉS del CSS monolito de perfil para que el chrome
+     (banners / midband / Cambiar búsqueda) use las mismas medidas que Resultados. -->
+<link rel="stylesheet" href="css/resultados.css?v=20260720pp-parity1">
+<style id="perfil-res-chrome-parity">
+  /* Lienzo idéntico a Resultados cuando el perfil trae chrome Results. */
+  body.fit .wrap.resultados-wrap{
+    width:100%;
+    max-width:var(--res-design-w,1120px);
+    min-width:0;
+    margin:0;
+    padding:14px var(--res-pad-x,18px) 14px !important;
+    height:100%;
+    min-height:0;
+    display:flex;
+    flex-direction:column;
+    box-sizing:border-box;
+  }
+  /* Mismo contenedor fit que Resultados: scroll dentro de .res-scroll, no en #fitOuter. */
+  body.fit:has(.wrap.resultados-wrap .res-shell) #fitOuter{
+    overflow:hidden !important;
+  }
+  body.fit:has(.res-shell) #fitRoot{
+    width:var(--res-design-w,1120px);
+    left:50%;
+    transform-origin:top center;
+  }
+  /* Anula reglas legado .pb a (padding flex) SOLO en el top pegado de Resultados. */
+  .res-shell__top .pb a,
+  .res-shell__top .pb .pb-slot,
+  .res-shell__top .pb .pb__imgbanner{
+    flex:1 1 0;
+    position:relative;
+    overflow:hidden;
+    border-radius:16px;
+    min-height:158px;
+    display:block !important;
+    box-shadow:var(--shadow);
+    text-decoration:none;
+    padding:0 !important;
+    color:inherit;
+    align-items:stretch;
+  }
+  /* En Resultados (directory-mode) los 3 slots quedan en tercios iguales:
+     .pb .pb-slot gana a .pb--center. Neutralizar 1.55 de perfil aquí. */
+  html.directory-mode .res-shell__top .pb > .pb-slot,
+  html.directory-mode .res-shell__top .pb > .pb-slot.pb--center,
+  html.directory-mode .res-shell__top .pb > .pb--center,
+  body.fit .res-shell__top .pb > .pb-slot,
+  body.fit .res-shell__top .pb > .pb-slot.pb--center,
+  body.fit .res-shell__top .pb > .pb--center,
+  .res-shell__top .pb > .pb-slot.pb--center,
+  .res-shell__top .pb > .pb--center{
+    flex:1 1 0 !important;
+  }
+  .res-shell__top .pb__imgbanner img,
+  .res-shell__top .pb-slot__slide img{
+    width:100%;
+    height:100%;
+    min-height:158px;
+    object-fit:cover;
+    object-position:center;
+    display:block;
+  }
+</style>
 </head>
 <body data-tema="adult" class="perfil-publico perfil-desde-resultados">
 <script>
@@ -2543,6 +2707,26 @@ body:not(.fit) #fitOuter{min-height:calc(100vh - 52px);}
 </script>
 
 <div id="fitOuter"><div id="fitSpacer"><div id="fitRoot"><div class="wrap" id="wrap"></div></div></div></div>
+
+<!-- Picker Cambiar búsqueda (fuera del lienzo fit; misma UX/tema que Resultados). -->
+<div class="res-sbar-picker" id="perfilSbarPicker" hidden aria-hidden="true">
+  <div class="res-sbar-picker__backdrop" data-perfil-sbar-picker-close tabindex="-1" aria-hidden="true"></div>
+  <div class="res-sbar-picker__panel carihub-pink-sheen" role="dialog" aria-modal="true" aria-labelledby="perfilSbarPickerTitle">
+    <div class="res-sbar-picker__head">
+      <h3 class="res-sbar-picker__title" id="perfilSbarPickerTitle">Elegir</h3>
+      <button type="button" class="res-sbar-picker__close" data-perfil-sbar-picker-close aria-label="Cerrar">×</button>
+    </div>
+    <div class="res-sbar-picker__search" id="perfilSbarPickerSearch" hidden>
+      <svg class="res-sbar-picker__search-ic" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2.4"/><path d="M20 20l-4-4" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+      <input type="search" id="perfilSbarPickerInput" class="res-sbar-picker__search-input" autocomplete="off" placeholder="Buscar…" aria-label="Buscar o escribir manualmente">
+      <button type="button" class="res-sbar-picker__search-go" id="perfilSbarPickerGo" aria-label="Guardar lo escrito" title="Guardar (Enter)">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 12h13M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+    <ul class="res-sbar-picker__list" id="perfilSbarPickerList" role="listbox"></ul>
+    <div class="res-sbar-picker__sheen" id="perfilSbarPickerSheen" aria-hidden="true"></div>
+  </div>
+</div>
 
 <div id="gratModal" class="grat-modal" aria-hidden="true">
   <div class="grat-modal__box" role="dialog" aria-labelledby="gratModalTitle">
@@ -4491,19 +4675,32 @@ function negocioContactCardHTML(u){
     '<div class="negocio-amen">'+negocioAmenidadesHTML(u)+'</div>'+
   '</div>';
 }
-function thumbs(n, seed, tipo, galeria, u){
+function thumbs(n, seed, tipo, galeria, u, maxExtras){
   var out="";
+  var limit=maxExtras!=null?Math.max(0,maxExtras|0):null;
+  function lockBadge(more){
+    return more>0?'<span class="t__more">+'+more+'</span>':"";
+  }
   if(galeria && galeria.length){
-    var extras = galeria.slice(1);                 // la primera es la principal
-    for(var k=0;k<extras.length;k++) out += '<div class="t">'+imgTag(extras[k])+'</div>';
+    var extrasAll = galeria.slice(1);                 // la primera es la principal
+    var extras = limit!=null?extrasAll.slice(0,limit):extrasAll;
     var shown = extras.length;
-    if(n>shown) out += '<div class="t lock">🔒<span>+'+(n-shown)+'</span></div>';
+    var moreCount=Math.max(0,(typeof n==="number"&&n>0?n:galeria.length)-1-shown);
+    for(var k=0;k<extras.length;k++){
+      var moreOnLast=(limit!=null && k===extras.length-1)?lockBadge(moreCount):"";
+      out += '<div class="t'+(moreOnLast?" t--has-more":"")+'">'+imgTag(extras[k])+moreOnLast+'</div>';
+    }
+    if(limit==null && moreCount>0) out += '<div class="t lock">🔒<span>+'+moreCount+'</span></div>';
     return out;
   }
   if(u && u.__previewRegistro) return "";
-  var vis=Math.min(4,n);
-  for(var i=0;i<vis;i++) out += '<div class="t">'+foto(seed+"-"+i, tipo)+'</div>';
-  if(n>vis) out += '<div class="t lock">🔒<span>+'+(n-vis)+'</span></div>';
+  var vis=limit!=null?Math.min(limit,n):Math.min(4,n);
+  var moreDemo=Math.max(0,n-vis);
+  for(var i=0;i<vis;i++){
+    var moreDemoOnLast=(limit!=null && i===vis-1)?lockBadge(moreDemo):"";
+    out += '<div class="t'+(moreDemoOnLast?" t--has-more":"")+'">'+foto(seed+"-"+i, tipo)+moreDemoOnLast+'</div>';
+  }
+  if(limit==null && n>vis) out += '<div class="t lock">🔒<span>+'+(n-vis)+'</span></div>';
   return out;
 }
 
@@ -5269,14 +5466,9 @@ function perfilResSearchDockHTML(u){
   var q=window.CariHubPerfilPublico?CariHubPerfilPublico.queryPerfilPublico():{};
   var cat=q.categoria||u.categoria||u.subcategoria||"Cariñosas";
   var pais=q.pais||u.pais||"México";
-  var estado=q.estado||u.estado||"Todos";
-  var ciudad=q.ciudad||u.ciudad||"Todas";
-  function opt(val,sel){
-    return '<option value="'+safe(val)+'"'+(String(val)===String(sel)?' selected':'')+'>'+safe(val)+'</option>';
-  }
-  var catOpts=[cat,"Cariñosas","escort gay","Escort","Trans"].filter(function(v,i,a){
-    return v&&a.indexOf(v)===i;
-  }).map(function(v){return opt(v,cat);}).join("");
+  var estado=q.estado||u.estado||"";
+  var ciudad=q.ciudad||u.ciudad||"";
+  /* Options se rellenan en CariHubPerfilResSbarPicker.mount (listas reales). */
   return '<div class="res-search-dock res-search-dock--top" id="perfilSearchDock">'+
     '<p class="res-search-dock__hint">Cambiar búsqueda</p>'+
     '<section class="res-search-bar" aria-label="Cambiar búsqueda">'+
@@ -5284,25 +5476,25 @@ function perfilResSearchDockHTML(u){
         '<span class="res-sbar-btn__sparkles" aria-hidden="true"></span>'+
         '<span class="res-sbar-btn__label">Categoría</span>'+
         '<span class="res-sbar-btn__value" id="perfilSbarCatLabel">'+safe(cat)+'</span>'+
-        '<select id="perfilSbarCat" class="res-sbar-btn__select" aria-label="Categoría">'+catOpts+'</select>'+
+        '<select id="perfilSbarCat" class="res-sbar-btn__select" aria-label="Categoría" tabindex="-1"></select>'+
       '</label>'+
       '<label class="res-sbar-btn" data-sbar-field="pais">'+
         '<span class="res-sbar-btn__sparkles" aria-hidden="true"></span>'+
         '<span class="res-sbar-btn__label">País</span>'+
         '<span class="res-sbar-btn__value" id="perfilSbarPaisLabel">'+safe(pais)+'</span>'+
-        '<select id="perfilSbarPais" class="res-sbar-btn__select" aria-label="País">'+opt(pais,pais)+opt("México","México")+'</select>'+
+        '<select id="perfilSbarPais" class="res-sbar-btn__select" aria-label="País" tabindex="-1"></select>'+
       '</label>'+
       '<label class="res-sbar-btn" data-sbar-field="estado">'+
         '<span class="res-sbar-btn__sparkles" aria-hidden="true"></span>'+
         '<span class="res-sbar-btn__label">Estado</span>'+
         '<span class="res-sbar-btn__value" id="perfilSbarEstadoLabel">'+safe(estado||"Todos")+'</span>'+
-        '<select id="perfilSbarEstado" class="res-sbar-btn__select" aria-label="Estado">'+opt(estado||"Todos",estado||"Todos")+'</select>'+
+        '<select id="perfilSbarEstado" class="res-sbar-btn__select" aria-label="Estado" tabindex="-1"></select>'+
       '</label>'+
       '<label class="res-sbar-btn" data-sbar-field="ciudad">'+
         '<span class="res-sbar-btn__sparkles" aria-hidden="true"></span>'+
         '<span class="res-sbar-btn__label">Ciudad</span>'+
         '<span class="res-sbar-btn__value" id="perfilSbarCiudadLabel">'+safe(ciudad||"Todas")+'</span>'+
-        '<select id="perfilSbarCiudad" class="res-sbar-btn__select" aria-label="Ciudad">'+opt(ciudad||"Todas",ciudad||"Todas")+'</select>'+
+        '<select id="perfilSbarCiudad" class="res-sbar-btn__select" aria-label="Ciudad" tabindex="-1"></select>'+
       '</label>'+
       '<button type="button" class="res-sbar-btn res-sbar-btn--buscar" id="perfilSbarBuscar" aria-label="Buscar más">'+
         '<span class="res-sbar-btn__sparkles" aria-hidden="true"></span>'+
@@ -5316,12 +5508,13 @@ function perfilResChromeHTML(u, backHref){
   var regHref=perfilResRegistroHref(u);
   var volver=backHref&&backHref!=="#"?backHref:"resultados.html";
   var cercaHref=volver.indexOf("?")>=0?volver+"&cerca=1":volver+"?cerca=1";
-  return '<div class="perfil-res-chrome">'+
-    '<div class="res-midband" aria-label="Resultados y acciones">'+
+  /* Misma estructura que resultados.html → .res-shell__top (sin wrapper propio). */
+  return ''+
+    '<div class="res-midband" aria-label="Datos del perfil y acciones">'+
       '<div class="res-midband__slot res-midband__slot--estados" id="perfilMidEstados" data-slot="perfil_estados" data-directory-hide="estados-libe-docks"></div>'+
       '<div class="res-midband__center">'+
         '<div class="res-midband__headline">'+
-          '<h1 class="res-midband__title">Perfil</h1>'+
+          '<h1 class="res-midband__title">Datos del perfil</h1>'+
           '<p class="res-midband__seo" id="perfilSeoLine">'+safe(seo)+'</p>'+
         '</div>'+
         '<div class="res-midband__actions">'+
@@ -5348,43 +5541,46 @@ function perfilResChromeHTML(u, backHref){
       '</div>'+
       '<div class="res-midband__slot res-midband__slot--libe" id="perfilMidLibe" data-slot="perfil_libe" data-directory-hide="estados-libe-docks"></div>'+
     '</div>'+
-    perfilResSearchDockHTML(u)+
-  '</div>';
+    perfilResSearchDockHTML(u);
 }
 function bindPerfilResChrome(u){
   if(!document.getElementById("perfilSearchDock")) return;
-  function syncLabel(selId,labId){
-    var sel=document.getElementById(selId);
-    var lab=document.getElementById(labId);
-    if(!sel||!lab) return;
-    lab.textContent=sel.options[sel.selectedIndex]?sel.options[sel.selectedIndex].text:sel.value;
-    sel.addEventListener("change",function(){
-      lab.textContent=sel.options[sel.selectedIndex]?sel.options[sel.selectedIndex].text:sel.value;
-    });
-  }
-  syncLabel("perfilSbarCat","perfilSbarCatLabel");
-  syncLabel("perfilSbarPais","perfilSbarPaisLabel");
-  syncLabel("perfilSbarEstado","perfilSbarEstadoLabel");
-  syncLabel("perfilSbarCiudad","perfilSbarCiudadLabel");
-  var btn=document.getElementById("perfilSbarBuscar");
-  if(btn&&!btn.dataset.bound){
-    btn.dataset.bound="1";
-    btn.addEventListener("click",function(){
-      var cat=document.getElementById("perfilSbarCat");
-      var pais=document.getElementById("perfilSbarPais");
-      var estado=document.getElementById("perfilSbarEstado");
-      var ciudad=document.getElementById("perfilSbarCiudad");
-      var p=new URLSearchParams();
-      if(cat&&cat.value) p.set("categoria",cat.value);
-      if(pais&&pais.value) p.set("pais",pais.value);
-      if(estado&&estado.value&&estado.value!=="Todos") p.set("estado",estado.value);
-      if(ciudad&&ciudad.value&&ciudad.value!=="Todas") p.set("ciudad",ciudad.value);
-      location.href="resultados.html?"+p.toString();
+  var q=window.CariHubPerfilPublico?CariHubPerfilPublico.queryPerfilPublico():{};
+  u=u||{};
+  if(window.CariHubPerfilResSbarPicker&&CariHubPerfilResSbarPicker.mount){
+    CariHubPerfilResSbarPicker.mount({
+      categoria:q.categoria||u.categoria||u.subcategoria||"Cariñosas",
+      pais:q.pais||u.pais||"México",
+      estado:q.estado||u.estado||"",
+      ciudad:q.ciudad||u.ciudad||""
     });
   }
   if(window.CariHubBannerPerfilLaterales&&CariHubBannerPerfilLaterales.mount){
     CariHubBannerPerfilLaterales.mount();
   }
+}
+function syncPerfilResWrapAfterShell(){
+  var wrapEl=document.getElementById("wrap");
+  if(!wrapEl) return false;
+  var hasResShell=!!wrapEl.querySelector(".res-shell");
+  wrapEl.className=hasResShell?"wrap resultados-wrap":"wrap";
+  if(hasResShell && !esPerfilEmbedChrome()){
+    document.documentElement.classList.add("fit");
+    document.body.classList.add("fit");
+    return true;
+  }
+  if(!esPerfilEmbedChrome()){
+    var keepFit=false;
+    try{
+      var pKeep=new URL(location.href).searchParams;
+      keepFit=pKeep.get("fit")==="1"||pKeep.get("preview")==="1";
+    }catch(eKeep){ keepFit=false; }
+    if(!keepFit){
+      document.documentElement.classList.remove("fit","res-mobile");
+      document.body.classList.remove("fit","res-mobile");
+    }
+  }
+  return hasResShell;
 }
 function shell(tipo, inner, u){
   u = u || window.__perfilActual || {};
@@ -5425,34 +5621,45 @@ function shell(tipo, inner, u){
       '</div>');
   return ''+
     (useResChrome
-      ? ('<div class="perfil-res-top">'+banners+chrome+'</div>')
-      : (banners+chrome))+
-    (esCari ? inner : '<div class="pgrid">'+inner+'</div>')+
-    (esCari ? "" : bottomBannerHTML(tipo));
+      ? ('<div class="res-shell"><div class="res-shell__top">'+banners+chrome+'</div><div class="res-scroll" id="perfilResScroll">'+(esCari ? inner : '<div class="pgrid">'+inner+'</div>')+'</div></div>')
+      : (banners+chrome+(esCari ? inner : '<div class="pgrid">'+inner+'</div>')+(esCari ? "" : bottomBannerHTML(tipo))));
 }
 
 /* ---------------- Layout referencia Adulto Cariñosas (todas las categorías) ---------------- */
 function adultoGaleriaHTML(u){
   var count=u.fotos||(u.galeria&&u.galeria.length)||0;
   var countHtml=count?('<span class="gal__count">📷 '+count+' fotos</span>'):"";
+  /* Owner: columna izq = foto principal + 2 fotos debajo (misma medida). */
   return '<div class="pcard gal">'+
       '<div class="gal__main">'+fotoOImg(u,"adult",0,u.nombre)+
       profileGalleryBadgesHTML(u)+
         '<button class="gal__arrow l">‹</button><button class="gal__arrow r">›</button>'+
         countHtml+'</div>'+
-      '<div class="gal__thumbs">'+thumbs(u.fotos,u.nombre,"adult",u.galeria,u)+'</div>'+
+      '<div class="gal__thumbs">'+thumbs(u.fotos,u.nombre,"adult",u.galeria,u,2)+'</div>'+
     '</div>';
 }
 function adultoTriPrecioHTML(u){
+  var parts=adultoPrecioPagosTiempoParts(u);
+  if(!parts.precio&&!parts.pagos&&!parts.tiempo) return "";
+  return '<div class="playout__tri">'+parts.precio+parts.pagos+parts.tiempo+'</div>';
+}
+/** Partes sueltas para repartir columnas (izq: pagos; der: precio+tiempo). */
+function adultoPrecioPagosTiempoParts(u){
   var precio=u.precio||u.precioDesde||"";
   var precioCard="";
   if(precio){
     precioCard='<div class="pcard pcard--mini pcard--precio" data-pub-block="precio"><div class="precio-block"><div class="precio-desde" data-pub-label="precio">Desde</div><div class="precio-big">$'+safe(precio)+'</div><div class="precio-sub">'+safe(u.moneda)+(u.tiempoMinimo?' · '+safe(u.tiempoMinimo):'')+'</div></div></div>';
   }
-  var pagos=metodosPagoCard(u.metodosPago);
-  var tiempo=tiempoMinimoCard(u.tiempoMinimo);
-  if(!precioCard&&!pagos&&!tiempo) return "";
-  return '<div class="playout__tri">'+precioCard+pagos+tiempo+'</div>';
+  return {
+    precio:precioCard,
+    pagos:metodosPagoCard(u.metodosPago)||"",
+    tiempo:tiempoMinimoCard(u.tiempoMinimo)||""
+  };
+}
+function adultoPrecioTiempoTriHTML(u){
+  var parts=adultoPrecioPagosTiempoParts(u);
+  if(!parts.precio&&!parts.tiempo) return "";
+  return '<div class="playout__tri playout__tri--precio-tiempo">'+parts.precio+parts.tiempo+'</div>';
 }
 function adultoContactSimpleHTML(u){
   return '<div class="pcard pcard--contact">'+
@@ -5549,45 +5756,47 @@ function renderPlayoutAdultoRef(u, cfg){
   cfg=cfg||{};
   var layoutKey=cfg.layoutKey||u.subcategoriaId||"adult";
   var galeria=cfg.galeria!=null?cfg.galeria:adultoGaleriaHTML(u);
-  var tri=cfg.tri!=null?cfg.tri:adultoTriPrecioHTML(u);
+  /* Derecha: Precio + métodos de pago + tiempo (tri completo). */
+  var triPrecio=cfg.tri!=null?cfg.tri:adultoTriPrecioHTML(u);
   var perfil=cfg.perfil||"";
   var ficha=cfg.ficha||adultoFichaHTML(u);
-  var stats=cfg.stats!=null?cfg.stats:perfilStatsHTML(u);
   var contact=cfg.contact!=null?cfg.contact:adultoContactSimpleHTML(u);
   var sobrePersona=cfg.sobre!=null?cfg.sobre:sobrePerfilHTML(u);
-  var derstack=cfg.derstack!=null?cfg.derstack:perfilDerstackHTML(u);
-  var feedOff = cfg.feedPair===false || (window.CarihubDirectoryMode && CarihubDirectoryMode.isDirectoryMode());
-  var feedPair=feedOff?"":('<div class="playout__feed-pair">'+panelActividadCompact(u,false)+panelLiveCompact(u)+'</div>');
+  /* Fase 1 / referencia Owner: sin estados ni lives en el playout. */
+  var feedPair="";
   var pieBottom=cfg.pieBottom||"";
   var extraCls=cfg.extraClass?" "+cfg.extraClass:"";
   var dataExtra=cfg.dataAttrs||"";
 
-  var ubicIzq=negocioPieUbicCardHTML(u,"izq");
+  var ubicCard=negocioPieUbicCardHTML(u,"der");
   var svcParts=perfilDerstackParts(u);
+  var svcStack=(svcParts.svc||svcParts.no)
+    ?('<div class="playout__derstack">'+svcParts.svc+svcParts.no+'</div>')
+    :"";
   /*
-    Distribución profesional (sin omitir datos públicos):
-    - Izq: galería (llena el ancho) + precio
-    - Der: identidad + ficha
-    - Rejilla inferior 2 columnas, celdas estiradas (sin huecos):
-      contacto (span2) · ubicación|stats · servicios|no realiza · sobre (span2)
+    Columnas (Owner):
+    - Izq: solo galería (principal + 2)
+    - Der: todas las tarjetas de información
+    - Abajo: banner largo a lo ancho de las 2 columnas
   */
-  var izq=galeria+tri;
-  var der=perfil+(u.donanteUltimo && !(window.CarihubDirectoryMode && CarihubDirectoryMode.isDirectoryMode())?avisoDonacion(u):"")+feedPair+ficha;
-  var bottomGrid=
-    '<div class="playout__bottom-grid">'+
-      (contact?'<div class="playout__bg playout__bg--span2">'+contact+'</div>':"")+
-      (ubicIzq?'<div class="playout__bg playout__bg--ubic">'+ubicIzq+'</div>':"")+
-      (stats?'<div class="playout__bg playout__bg--stats">'+stats+'</div>':"")+
-      (svcParts.svc?'<div class="playout__bg playout__bg--svc">'+svcParts.svc+'</div>':"")+
-      (svcParts.no?'<div class="playout__bg playout__bg--no">'+svcParts.no+'</div>':"")+
-      (sobrePersona?'<div class="playout__bg playout__bg--span2 playout__bg--sobre">'+sobrePersona+'</div>':"")+
-    '</div>';
   var bannerPie=(u&&u.__previewRegistro)?"":('<div class="playout__banner-adult">'+bottomBannerHTML(layoutKey)+'</div>');
+  var izq=
+    '<div class="playout__izq-stack playout__izq-stack--gal-only">'+
+      galeria+
+    '</div>';
+  var der=
+    perfil+
+    (u.donanteUltimo && !(window.CarihubDirectoryMode && CarihubDirectoryMode.isDirectoryMode())?avisoDonacion(u):"")+
+    (triPrecio||"")+
+    (contact||"")+
+    (sobrePersona||"")+
+    ficha+
+    (ubicCard||"")+
+    svcStack;
 
   return '<div class="playout playout--'+safe(layoutKey).replace(/[^a-z0-9_-]/gi,"-")+extraCls+'" data-cat="'+safe(u.subcategoriaId||layoutKey)+'"'+dataExtra+'>'+
     '<div class="playout__col playout__col--izq">'+izq+'</div>'+
     '<div class="playout__col playout__col--der">'+der+'</div>'+
-    bottomGrid+
     bannerPie+
   '</div>'+pieBottom;
 }
@@ -7689,7 +7898,9 @@ function cambiarTipoNegocio(){
   applyNegocioPack(sel?sel.value:"hospedaje");
   if(document.body.getAttribute("data-perfil-tipo")==="negocio"){
     document.getElementById("wrap").innerHTML=shell("negocio",renderNegocioAdulto(DEMO.negocio));
+    syncPerfilResWrapAfterShell();
     startPbBannerRotation();
+    bindPerfilResChrome(DEMO.negocio);
     bumpFitDelays();
   }
 }
@@ -8933,6 +9144,7 @@ function setVista(tipo){
   else if(tipo==="medico") inner=renderMedicoProfesional(u);
   else inner=renderProEmpresa(u, tipo==="empresa");
   document.getElementById("wrap").innerHTML = shell(tipo, inner, u);
+  syncPerfilResWrapAfterShell();
   if(window.CariHubPublicRenderLite&&CariHubPublicRenderLite.applyPublicProfilePresentation){
     CariHubPublicRenderLite.applyPublicProfilePresentation(document.getElementById("wrap"), u);
   }
@@ -8982,6 +9194,7 @@ function openExternal(){
 }
 var FIT_DESIGN_W = 980;
 var FIT_DESIGN_W_EMBED = 720;
+var FIT_DESIGN_W_RES = 1120;
 function readFitDesignW(availW){
   availW=availW||800;
   if(document.body.classList.contains("perfil-embed-dashboard-inicio")){
@@ -8994,6 +9207,8 @@ function readFitDesignW(availW){
     return FIT_DESIGN_W_EMBED;
   }
   if(document.body.classList.contains("perfil-embed-dashboard")) return FIT_DESIGN_W_EMBED;
+  /* Chrome Results pegado: mismo lienzo 1120 que resultados.html */
+  if(document.querySelector(".wrap.resultados-wrap .res-shell")) return FIT_DESIGN_W_RES;
   return FIT_DESIGN_W;
 }
 function recortarEmbedDashboard(scale){
@@ -9083,10 +9298,15 @@ function applyFit(){
   var root = document.getElementById("fitRoot");
   var hint = document.getElementById("fitHint");
   if(!outer || !spacer || !root) return;
+  var shell = document.querySelector(".wrap.resultados-wrap .res-shell");
+  var isResChromeFit = !!(shell && document.body.classList.contains("fit") &&
+    !document.body.classList.contains("perfil-embed-dashboard") &&
+    !document.body.classList.contains("perfil-embed-dashboard-inicio"));
   if(!document.body.classList.contains("fit")){
     document.documentElement.classList.remove("fit");
     root.style.cssText = "";
     spacer.style.cssText = "";
+    if(shell) shell.style.height = "";
     outer.scrollTop = 0;
     if(hint) hint.textContent = "";
     window.scrollTo(0, 0);
@@ -9095,12 +9315,46 @@ function applyFit(){
   document.documentElement.classList.add("fit");
   window.scrollTo(0, 0);
   outer.scrollTop = 0;
+
+  /* Paridad Resultados: mismo applyFit (lienzo 1120 + scale, scroll en .res-scroll). */
+  if(isResChromeFit){
+    var mobileRes = false;
+    try{ mobileRes = window.matchMedia("(max-width:720px)").matches; }catch(eMq){ mobileRes = false; }
+    document.body.classList.toggle("res-mobile", mobileRes);
+    document.documentElement.classList.toggle("res-mobile", mobileRes);
+    root.style.transform = "none";
+    root.style.zoom = "";
+    var designWRes = FIT_DESIGN_W_RES;
+    root.style.width = designWRes + "px";
+    root.style.left = "50%";
+    var vwRes = document.documentElement.clientWidth || window.innerWidth || 800;
+    var vhRes = window.visualViewport ? window.visualViewport.height : (window.innerHeight || document.documentElement.clientHeight || 800);
+    var rectOuter = outer.getBoundingClientRect();
+    var availWRes = Math.max(280, outer.clientWidth || rectOuter.width || vwRes);
+    var availHRes = Math.max(280, outer.clientHeight || rectOuter.height || vhRes);
+    var scaleRes = Math.min(1, (availWRes - 4) / designWRes);
+    scaleRes = Math.max(0.32, scaleRes);
+    var designHRes = Math.ceil(availHRes / scaleRes);
+    shell.style.height = designHRes + "px";
+    spacer.style.width = "100%";
+    spacer.style.height = Math.ceil(availHRes) + "px";
+    spacer.style.margin = "0";
+    root.style.height = designHRes + "px";
+    root.style.transformOrigin = "top center";
+    root.style.transform = "translateX(-50%) scale(" + scaleRes + ")";
+    if(hint){
+      hint.textContent = "Resultados · " + Math.round(availWRes) + "px · " + Math.round(scaleRes * 100) + "%";
+    }
+    return;
+  }
+
   root.style.transform = "none";
   root.style.zoom = "";
   var area = measureFitArea(outer);
   var pad = 2;
   var designW = readFitDesignW(area.availW);
   root.style.width = designW + "px";
+  root.style.left = "";
   var contentH = Math.max(1, root.scrollHeight || root.offsetHeight);
   var scaleW = Math.min(1, (area.availW - pad) / designW);
   var scale = scaleW;
@@ -9188,6 +9442,11 @@ activarEmbedDashboard();
     else{
       var pFit=new URL(location.href).searchParams;
       if(pFit.get("fit")==="1"||pFit.get("preview")==="1") useFit=true;
+      /* Perfil público Cariñosas: mismo fit que Resultados (chrome superior).
+         Se confirma tras render si hay .res-shell; aquí anticipamos para evitar FOUC de escala. */
+      else if(document.body.classList.contains("perfil-publico") && !document.body.classList.contains("perfil-embed-dashboard") && !document.body.classList.contains("perfil-embed-dashboard-inicio")){
+        useFit=true;
+      }
     }
   }catch(eFit){ useFit=false; }
   if(useFit){
