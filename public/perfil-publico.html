@@ -815,9 +815,16 @@ body:not(.fit) #fitRoot{width:100%;}
 [data-tema="adult"] .playout__banner-adult,
 [data-vista="negocio"] .playout__banner-adult{
   grid-column:1 / -1 !important;
-  margin-top:0;
+  margin-top:0 !important;
   width:100%;
   max-width:100%;
+}
+html.directory-mode [data-vista="adult"] .playout__banner-adult,
+html.directory-mode [data-tema="adult"] .playout__banner-adult,
+html.directory-mode [data-vista="negocio"] .playout__banner-adult,
+html.directory-mode [data-vista="adult"] .playout__banner-adult .pb-slot--bottom,
+html.directory-mode [data-tema="adult"] .playout__banner-adult .pb-slot--bottom{
+  margin-top:0 !important;
 }
 /* Galería izq: principal + 2 fotos del MISMO tamaño, apiladas */
 [data-tema="adult"] .playout__col--izq .pcard.gal,
@@ -967,16 +974,27 @@ body:not(.fit) #fitRoot{width:100%;}
 body.gal-lb-open{overflow:hidden;}
 [data-vista="adult"] .playout__banner-adult .pb-slot--bottom,
 [data-tema="adult"] .playout__banner-adult .pb-slot--bottom{margin-top:0;margin-bottom:0;width:100%;}
-/* Owner: tarjetas derecha estiran hasta topar con el banner largo (misma altura que galería izq). */
+/*
+  Owner: hueco entre «No permite» y banner.
+  Solo Ubicación crece hacia abajo. body.fit = 2 columnas aunque viewport <901px —
+  hay que estirar también en fit (escort/VIP/etc.); ficha larga (dominatrix/negocio/trans)
+  disimula el bug sin este bloque.
+*/
 @media (min-width:901px){
   [data-tema="adult"] .playout,
   [data-vista="adult"] .playout,
-  [data-vista="negocio"] .playout,
-  body.fit[data-tema="adult"] .playout,
-  body.fit[data-vista="adult"] .playout,
-  body.fit[data-vista="negocio"] .playout{
+  [data-vista="negocio"] .playout{
     align-items:stretch !important;
+    row-gap:8px;
   }
+}
+body.fit[data-tema="adult"] .playout,
+body.fit[data-vista="adult"] .playout,
+body.fit[data-vista="negocio"] .playout{
+  align-items:stretch !important;
+  row-gap:8px;
+}
+@media (min-width:901px){
   [data-tema="adult"] .playout__col--der,
   [data-vista="adult"] .playout__col--der,
   [data-vista="negocio"] .playout__col--der{
@@ -985,54 +1003,54 @@ body.gal-lb-open{overflow:hidden;}
     gap:14px;
     align-self:stretch !important;
     justify-content:flex-start;
-    min-height:100%;
-    height:auto;
   }
   [data-tema="adult"] .playout__col--der > .pcard,
   [data-tema="adult"] .playout__col--der > .playout__tri,
   [data-tema="adult"] .playout__col--der > .playout__derstack,
-  [data-tema="adult"] .playout__col--der > .negocio-pie-wrap,
   [data-tema="adult"] .playout__col--der > .sobre-card,
   [data-vista="adult"] .playout__col--der > .pcard,
   [data-vista="adult"] .playout__col--der > .playout__tri,
   [data-vista="adult"] .playout__col--der > .playout__derstack,
-  [data-vista="adult"] .playout__col--der > .negocio-pie-wrap,
   [data-vista="adult"] .playout__col--der > .sobre-card,
   [data-vista="negocio"] .playout__col--der > .pcard,
   [data-vista="negocio"] .playout__col--der > .playout__tri,
   [data-vista="negocio"] .playout__col--der > .playout__derstack,
-  [data-vista="negocio"] .playout__col--der > .negocio-pie-wrap,
   [data-vista="negocio"] .playout__col--der > .sobre-card{
-    flex:1 1 0 !important;
-    min-height:0;
-    display:flex;
-    flex-direction:column;
+    flex:0 0 auto !important;
+    min-height:auto !important;
+    height:auto !important;
+    overflow:visible !important;
+  }
+  [data-tema="adult"] .playout__col--der > .pcard--contact,
+  [data-vista="adult"] .playout__col--der > .pcard--contact,
+  [data-vista="negocio"] .playout__col--der > .pcard--contact{
+    flex:0 0 auto !important;
+    min-height:auto !important;
+    height:auto !important;
+    overflow:visible !important;
+    display:block !important;
+  }
+  [data-tema="adult"] .playout__col--der > .pcard--contact .contact,
+  [data-vista="adult"] .playout__col--der > .pcard--contact .contact,
+  [data-vista="negocio"] .playout__col--der > .pcard--contact .contact{
+    flex:none !important;
+    min-height:auto !important;
+    height:auto !important;
+    overflow:visible !important;
   }
   [data-tema="adult"] .playout__col--der > .playout__derstack > .pcard,
   [data-vista="adult"] .playout__col--der > .playout__derstack > .pcard,
   [data-vista="negocio"] .playout__col--der > .playout__derstack > .pcard{
-    flex:1 1 0 !important;
+    flex:0 0 auto !important;
+  }
+  [data-tema="adult"] .playout__col--der > .negocio-pie-wrap,
+  [data-vista="adult"] .playout__col--der > .negocio-pie-wrap,
+  [data-vista="negocio"] .playout__col--der > .negocio-pie-wrap{
+    flex:1 1 auto !important;
     min-height:0;
     display:flex;
     flex-direction:column;
-  }
-  [data-tema="adult"] .playout__col--der > .pcard--ficha-publica > .dlist,
-  [data-vista="adult"] .playout__col--der > .pcard--ficha-publica > .dlist{
-    flex:1 1 auto;
-    display:flex;
-    flex-direction:column;
-    justify-content:space-between;
-    min-height:0;
-  }
-  [data-tema="adult"] .playout__col--der > .pcard--contact .contact,
-  [data-vista="adult"] .playout__col--der > .pcard--contact .contact{
-    flex:1 1 auto;
-  }
-  [data-tema="adult"] .playout__col--der > .sobre-card .sobre-card__desc,
-  [data-vista="adult"] .playout__col--der > .sobre-card .sobre-card__desc,
-  [data-tema="adult"] .playout__col--der > .sobre-card .sobre-card__grid,
-  [data-vista="adult"] .playout__col--der > .sobre-card .sobre-card__grid{
-    flex:1 1 auto;
+    align-self:stretch;
   }
   [data-tema="adult"] .playout__col--der > .negocio-pie-wrap .negocio-pie-card,
   [data-vista="adult"] .playout__col--der > .negocio-pie-wrap .negocio-pie-card,
@@ -1041,11 +1059,109 @@ body.gal-lb-open{overflow:hidden;}
     display:flex;
     flex-direction:column;
     min-height:0;
+    height:100%;
+  }
+  [data-tema="adult"] .playout__col--der > .negocio-pie-wrap .negocio-pie-card__ubic,
+  [data-vista="adult"] .playout__col--der > .negocio-pie-wrap .negocio-pie-card__ubic,
+  [data-vista="negocio"] .playout__col--der > .negocio-pie-wrap .negocio-pie-card__ubic{
+    flex:1 1 auto;
+    min-height:0;
+    display:flex;
+    flex-direction:column;
+  }
+  [data-tema="adult"] .playout__col--der > .negocio-pie-wrap .negocio-ubic__body--pie,
+  [data-vista="adult"] .playout__col--der > .negocio-pie-wrap .negocio-ubic__body--pie,
+  [data-vista="negocio"] .playout__col--der > .negocio-pie-wrap .negocio-ubic__body--pie{
+    flex:1 1 auto;
+    min-height:120px;
+    height:auto;
   }
   [data-tema="adult"] .playout__col--der > .playout__tri > .pcard,
   [data-vista="adult"] .playout__col--der > .playout__tri > .pcard{
-    height:100%;
+    height:auto;
   }
+}
+/* Mismo estirado bajo body.fit (2 col forzada con viewport estrecho). */
+body.fit[data-tema="adult"] .playout__col--der,
+body.fit[data-vista="adult"] .playout__col--der,
+body.fit[data-vista="negocio"] .playout__col--der{
+  display:flex !important;
+  flex-direction:column;
+  gap:14px;
+  align-self:stretch !important;
+  justify-content:flex-start;
+}
+body.fit[data-tema="adult"] .playout__col--der > .pcard,
+body.fit[data-tema="adult"] .playout__col--der > .playout__tri,
+body.fit[data-tema="adult"] .playout__col--der > .playout__derstack,
+body.fit[data-tema="adult"] .playout__col--der > .sobre-card,
+body.fit[data-vista="adult"] .playout__col--der > .pcard,
+body.fit[data-vista="adult"] .playout__col--der > .playout__tri,
+body.fit[data-vista="adult"] .playout__col--der > .playout__derstack,
+body.fit[data-vista="adult"] .playout__col--der > .sobre-card,
+body.fit[data-vista="negocio"] .playout__col--der > .pcard,
+body.fit[data-vista="negocio"] .playout__col--der > .playout__tri,
+body.fit[data-vista="negocio"] .playout__col--der > .playout__derstack,
+body.fit[data-vista="negocio"] .playout__col--der > .sobre-card{
+  flex:0 0 auto !important;
+  min-height:auto !important;
+  height:auto !important;
+  overflow:visible !important;
+}
+body.fit[data-tema="adult"] .playout__col--der > .pcard--contact,
+body.fit[data-vista="adult"] .playout__col--der > .pcard--contact,
+body.fit[data-vista="negocio"] .playout__col--der > .pcard--contact{
+  flex:0 0 auto !important;
+  min-height:auto !important;
+  height:auto !important;
+  overflow:visible !important;
+  display:block !important;
+}
+body.fit[data-tema="adult"] .playout__col--der > .pcard--contact .contact,
+body.fit[data-vista="adult"] .playout__col--der > .pcard--contact .contact,
+body.fit[data-vista="negocio"] .playout__col--der > .pcard--contact .contact{
+  flex:none !important;
+  min-height:auto !important;
+  height:auto !important;
+  overflow:visible !important;
+}
+body.fit[data-tema="adult"] .playout__col--der > .playout__derstack > .pcard,
+body.fit[data-vista="adult"] .playout__col--der > .playout__derstack > .pcard,
+body.fit[data-vista="negocio"] .playout__col--der > .playout__derstack > .pcard{
+  flex:0 0 auto !important;
+}
+body.fit[data-tema="adult"] .playout__col--der > .negocio-pie-wrap,
+body.fit[data-vista="adult"] .playout__col--der > .negocio-pie-wrap,
+body.fit[data-vista="negocio"] .playout__col--der > .negocio-pie-wrap{
+  flex:1 1 auto !important;
+  min-height:0;
+  display:flex;
+  flex-direction:column;
+  align-self:stretch;
+}
+body.fit[data-tema="adult"] .playout__col--der > .negocio-pie-wrap .negocio-pie-card,
+body.fit[data-vista="adult"] .playout__col--der > .negocio-pie-wrap .negocio-pie-card,
+body.fit[data-vista="negocio"] .playout__col--der > .negocio-pie-wrap .negocio-pie-card{
+  flex:1 1 auto;
+  display:flex;
+  flex-direction:column;
+  min-height:0;
+  height:100%;
+}
+body.fit[data-tema="adult"] .playout__col--der > .negocio-pie-wrap .negocio-pie-card__ubic,
+body.fit[data-vista="adult"] .playout__col--der > .negocio-pie-wrap .negocio-pie-card__ubic,
+body.fit[data-vista="negocio"] .playout__col--der > .negocio-pie-wrap .negocio-pie-card__ubic{
+  flex:1 1 auto;
+  min-height:0;
+  display:flex;
+  flex-direction:column;
+}
+body.fit[data-tema="adult"] .playout__col--der > .negocio-pie-wrap .negocio-ubic__body--pie,
+body.fit[data-vista="adult"] .playout__col--der > .negocio-pie-wrap .negocio-ubic__body--pie,
+body.fit[data-vista="negocio"] .playout__col--der > .negocio-pie-wrap .negocio-ubic__body--pie{
+  flex:1 1 auto;
+  min-height:120px;
+  height:auto;
 }
 /* Desktop: rellenar izq (precio/ubicación/stats) para equilibrar con la derecha */
 @media (min-width:901px){
@@ -1056,7 +1172,10 @@ body.gal-lb-open{overflow:hidden;}
   body:not(.fit)[data-tema="adult"] .playout__col,
   body:not(.fit)[data-vista="adult"] .playout__col{
     min-height:0 !important;
-    height:auto;
+  }
+  body:not(.fit)[data-tema="adult"] .playout__col--der,
+  body:not(.fit)[data-vista="adult"] .playout__col--der{
+    align-self:stretch !important;
   }
   body:not(.fit)[data-tema="adult"] .pcard.gal,
   body:not(.fit)[data-vista="adult"] .pcard.gal{
@@ -1089,33 +1208,26 @@ body.gal-lb-open{overflow:hidden;}
     gap:12px;
     align-self:stretch !important;
     justify-content:flex-start;
-    height:100%;
   }
   body:not(.fit)[data-tema="adult"] .playout__col--der > .pcard,
   body:not(.fit)[data-vista="adult"] .playout__col--der > .pcard{
     flex:0 0 auto;
+    min-height:auto !important;
   }
+  body:not(.fit)[data-tema="adult"] .playout__col--der > .pcard--contact,
+  body:not(.fit)[data-vista="adult"] .playout__col--der > .pcard--contact{
+    flex:0 0 auto !important;
+    min-height:auto !important;
+    overflow:visible !important;
+  }
+  /* No estirar ficha: el hueco lo absorbe solo Ubicación (bloque min-width:901px). */
   body:not(.fit)[data-tema="adult"] .playout__col--der > .pcard--ficha-publica,
   body:not(.fit)[data-vista="adult"] .playout__col--der > .pcard--ficha-publica{
+    flex:0 0 auto !important;
+  }
+  body:not(.fit)[data-tema="adult"] .playout__col--der > .negocio-pie-wrap,
+  body:not(.fit)[data-vista="adult"] .playout__col--der > .negocio-pie-wrap{
     flex:1 1 auto !important;
-    min-height:0;
-    display:flex;
-    flex-direction:column;
-  }
-  body:not(.fit)[data-tema="adult"] .playout__col--der > .pcard--ficha-publica > .dlist,
-  body:not(.fit)[data-vista="adult"] .playout__col--der > .pcard--ficha-publica > .dlist{
-    flex:1 1 auto;
-    display:flex;
-    flex-direction:column;
-    justify-content:space-between;
-    gap:0;
-    min-height:100%;
-  }
-  body:not(.fit)[data-tema="adult"] .playout__col--der > .pcard--ficha-publica > .dlist > .drow,
-  body:not(.fit)[data-vista="adult"] .playout__col--der > .pcard--ficha-publica > .dlist > .drow{
-    flex:1 1 auto;
-    display:flex;
-    align-items:center;
   }
   body:not(.fit)[data-tema="adult"] .playout__col--izq,
   body:not(.fit)[data-vista="adult"] .playout__col--izq{
@@ -4424,6 +4536,18 @@ function contactos(u, adulto){
   u=u||{};
   var links=(window.CariHubPerfilContactos&&CariHubPerfilContactos.contactLinks)
     ?CariHubPerfilContactos.contactLinks(u):[];
+  /* Fixtures del switcher (DEMO.*) traen contactos[] pero sin tel/handles reales.
+     Sin __demo, contactLinks queda vacío → solo título + footer. No inventar enlaces
+     en perfiles registrados/hidratados sin datos de contacto. */
+  if(!links.length&&window.CariHubPerfilContactos&&Array.isArray(u.contactos)&&u.contactos.length){
+    var esFixture=u.__demo===true||(!u.__registrado&&!u.uid&&!u.__hydratedFromBloques);
+    if(esFixture){
+      var prevDemo=u.__demo;
+      u.__demo=true;
+      links=CariHubPerfilContactos.contactLinks(u);
+      u.__demo=prevDemo;
+    }
+  }
   function extAttr(key){
     return (key==="wa"||key==="tg"||key==="ig"||key==="fb"||key==="of"||key==="x"||key==="msg")
       ?' target="_blank" rel="noopener noreferrer"':'';
@@ -5854,6 +5978,94 @@ function bindAdultoGaleria(root){
       }
     });
   });
+}
+
+/**
+ * Owner: estirar Ubicación hacia abajo hasta que Servicios/No realiza topan el banner.
+ * Detecta 2 columnas por geometría (body.fit puede ser 2 col con viewport <901px).
+ */
+function adultoPlayoutEsDosColumnas(left, der){
+  if(!left||!der) return false;
+  var a=left.getBoundingClientRect();
+  var b=der.getBoundingClientRect();
+  if(!(a.width>40&&b.width>40)) return false;
+  return (b.left>=a.left+a.width*0.4)&&Math.abs(a.top-b.top)<120;
+}
+function syncAdultoUbicacionStretch(root){
+  var scope=root||document;
+  var playout=scope.querySelector(".playout");
+  if(!playout) return;
+  var left=playout.querySelector(".playout__col--izq");
+  var der=playout.querySelector(".playout__col--der");
+  var ubic=null;
+  if(der){
+    for(var i=0;i<der.children.length;i++){
+      if(der.children[i].classList&&der.children[i].classList.contains("negocio-pie-wrap")){
+        ubic=der.children[i];
+        break;
+      }
+    }
+  }
+  if(!left||!der||!ubic) return;
+
+  /* Nunca tocar estilos de Contacto ni otras tarjetas: solo minHeight de Ubicación. */
+  der.style.minHeight="";
+  if(!adultoPlayoutEsDosColumnas(left, der)){
+    ubic.style.minHeight="";
+    return;
+  }
+
+  ubic.style.minHeight="";
+  void der.offsetHeight;
+
+  var leftH=Math.max(left.offsetHeight||0, left.scrollHeight||0);
+  if(leftH<=0) return;
+
+  var gapStr=getComputedStyle(der).rowGap||getComputedStyle(der).gap||"14px";
+  var gap=parseFloat(String(gapStr).split(" ")[0])||14;
+  var used=0;
+  var n=der.children.length;
+  for(var k=0;k<n;k++){
+    var ch=der.children[k];
+    if(ch===ubic) continue;
+    used+=Math.max(ch.offsetHeight||0, ch.scrollHeight||0);
+  }
+  var gaps=Math.max(0,n-1)*gap;
+  var avail=Math.floor(leftH-used-gaps);
+  if(avail>0){
+    ubic.style.minHeight=avail+"px";
+  }
+}
+function bindAdultoUbicacionStretch(root){
+  var scope=root||document;
+  var playout=scope.querySelector(".playout");
+  if(!playout) return;
+  var left=playout.querySelector(".playout__col--izq");
+  if(!left) return;
+  if(window.__ubicStretchRO){
+    try{ window.__ubicStretchRO.disconnect(); }catch(eRo){}
+    window.__ubicStretchRO=null;
+  }
+  var timer=null;
+  function schedule(){
+    if(timer) clearTimeout(timer);
+    timer=setTimeout(function(){ syncAdultoUbicacionStretch(scope); }, 40);
+  }
+  if(window.ResizeObserver){
+    window.__ubicStretchRO=new ResizeObserver(schedule);
+    /* Solo observar galería izq — observar der provoca bucles y puede comprimir Contacto. */
+    window.__ubicStretchRO.observe(left);
+  }
+  left.querySelectorAll("img").forEach(function(img){
+    if(!img.complete){
+      img.addEventListener("load", schedule, {once:true});
+      img.addEventListener("error", schedule, {once:true});
+    }
+  });
+  schedule();
+  setTimeout(schedule, 200);
+  setTimeout(schedule, 700);
+  setTimeout(schedule, 1400);
 }
 function adultoTriPrecioHTML(u){
   var parts=adultoPrecioPagosTiempoParts(u);
@@ -8119,6 +8331,7 @@ function cambiarTipoNegocio(){
     startPbBannerRotation();
     bindPerfilResChrome(DEMO.negocio);
     bindAdultoGaleria(document.getElementById("wrap"));
+    bindAdultoUbicacionStretch(document.getElementById("wrap"));
     bumpFitDelays();
   }
 }
@@ -9336,6 +9549,11 @@ function setVista(tipo){
     if(sel) sel.value=packNeg;
   }
   var u=DEMO[tipo];
+  /* DEMOs del switcher: marcar __demo para que Métodos de contacto renderice iconos
+     (wa/tg/ig/…). Perfiles hidratados/registrados conservan __demo=false + datos reales. */
+  if(u&&!u.__registrado&&!u.__hydratedFromBloques){
+    u.__demo=true;
+  }
   if(u&&Array.isArray(u.galeria)){
     u.galeria=u.galeria.map(function(s){ return demoAssetDesdeResultados(s)||""; }).filter(Boolean);
   }
@@ -9392,6 +9610,7 @@ function setVista(tipo){
   startPbBannerRotation();
   bindPerfilResChrome(u);
   bindAdultoGaleria(document.getElementById("wrap"));
+  bindAdultoUbicacionStretch(document.getElementById("wrap"));
   stopActividadNegocioRotation();
   window.scrollTo({top:0});
   bumpFitDelays();
@@ -9405,8 +9624,14 @@ function scheduleFit(){
 function bumpFitDelays(){
   scheduleFit();
   setTimeout(scheduleFit, 80);
-  setTimeout(scheduleFit, 280);
-  setTimeout(scheduleFit, 720);
+  setTimeout(function(){
+    scheduleFit();
+    syncAdultoUbicacionStretch(document.getElementById("wrap"));
+  }, 280);
+  setTimeout(function(){
+    scheduleFit();
+    syncAdultoUbicacionStretch(document.getElementById("wrap"));
+  }, 720);
 }
 function openExternal(){
   window.open(location.href, "_blank", "noopener");
@@ -9564,6 +9789,7 @@ function applyFit(){
     if(hint){
       hint.textContent = "Resultados · " + Math.round(availWRes) + "px · " + Math.round(scaleRes * 100) + "%";
     }
+    syncAdultoUbicacionStretch(document.getElementById("wrap"));
     return;
   }
 
@@ -9627,6 +9853,7 @@ function applyFit(){
     hint.textContent = "Ancho panel · " + Math.round(area.availW) + "px · "
       + Math.round(scale * 100) + "% · scroll ↓";
   }
+  syncAdultoUbicacionStretch(document.getElementById("wrap"));
 }
 function toggleFit(){
   var on = document.body.classList.toggle("fit");
