@@ -874,6 +874,97 @@ body:not(.fit) #fitRoot{width:100%;}
 [data-vista="adult"] .playout__izq-stack--gal-only{
   flex:0 0 auto;
 }
+/* Fase 1: sin flechas laterales en principal; flechas solo en foto inferior (carrusel extras). */
+[data-tema="adult"] .playout .gal__main > .gal__arrow:not(.gal__arrow--bottom),
+[data-vista="adult"] .playout .gal__main > .gal__arrow:not(.gal__arrow--bottom),
+[data-vista="negocio"] .playout .gal__main > .gal__arrow:not(.gal__arrow--bottom){
+  display:none !important;
+}
+[data-tema="adult"] .playout .gal__shot,
+[data-vista="adult"] .playout .gal__shot,
+[data-vista="negocio"] .playout .gal__shot{
+  cursor:pointer;
+}
+[data-tema="adult"] .playout .gal__shot:focus-visible,
+[data-vista="adult"] .playout .gal__shot:focus-visible,
+[data-vista="negocio"] .playout .gal__shot:focus-visible{
+  outline:2px solid #E91E63;
+  outline-offset:2px;
+}
+[data-tema="adult"] .playout .gal__arrow--bottom,
+[data-vista="adult"] .playout .gal__arrow--bottom,
+[data-vista="negocio"] .playout .gal__arrow--bottom{
+  position:absolute;
+  top:auto;
+  bottom:10px;
+  transform:none;
+  width:36px;
+  height:36px;
+  border-radius:50%;
+  background:rgba(255,255,255,.9);
+  border:none;
+  color:#333;
+  z-index:3;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  box-shadow:0 1px 6px rgba(0,0,0,.18);
+}
+[data-tema="adult"] .playout .gal__arrow--bottom svg,
+[data-vista="adult"] .playout .gal__arrow--bottom svg,
+[data-vista="negocio"] .playout .gal__arrow--bottom svg{
+  width:18px;
+  height:18px;
+  display:block;
+}
+[data-tema="adult"] .playout .gal__arrow--bottom.l,
+[data-vista="adult"] .playout .gal__arrow--bottom.l,
+[data-vista="negocio"] .playout .gal__arrow--bottom.l{left:10px;right:auto;}
+[data-tema="adult"] .playout .gal__arrow--bottom.r,
+[data-vista="adult"] .playout .gal__arrow--bottom.r,
+[data-vista="negocio"] .playout .gal__arrow--bottom.r{right:10px;left:auto;}
+/* Lightbox galería adulta */
+.gal-lb{
+  position:fixed;
+  inset:0;
+  z-index:10050;
+  background:rgba(0,0,0,.94);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:56px 16px 16px;
+  box-sizing:border-box;
+}
+.gal-lb[hidden]{display:none !important;}
+.gal-lb__close{
+  position:absolute;
+  top:12px;
+  right:12px;
+  width:44px;
+  height:44px;
+  border:none;
+  border-radius:50%;
+  background:rgba(255,255,255,.16);
+  color:#fff;
+  font-size:28px;
+  line-height:1;
+  cursor:pointer;
+  z-index:2;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.gal-lb__close:hover{background:rgba(255,255,255,.28);}
+.gal-lb__img{
+  max-width:100%;
+  max-height:100%;
+  width:auto;
+  height:auto;
+  object-fit:contain;
+  border-radius:4px;
+}
+body.gal-lb-open{overflow:hidden;}
 [data-vista="adult"] .playout__banner-adult .pb-slot--bottom,
 [data-tema="adult"] .playout__banner-adult .pb-slot--bottom{margin-top:0;margin-bottom:0;width:100%;}
 /* Owner: tarjetas derecha estiran hasta topar con el banner largo (misma altura que galería izq). */
@@ -3498,7 +3589,7 @@ DEMO.escort={
   liveFecha:"Sábado 25 de mayo", liveHora:"8:00 PM",
   serviciosIncluidos:["Compañía","Besos","Caricias","Relaciones","Oral","Masaje relajante","Trato de novia"],
   noRealiza:["Sin protección","Menores de edad","Falta de respeto","Grabaciones no autorizadas"],
-  galeria:["img/resultados-demo/violeta-1.png","img/resultados-demo/violeta-2.png","img/resultados-demo/violeta-3.png","img/resultados-demo/violeta-4.png"],
+  galeria:["img/resultados-demo/violeta-1.png","img/resultados-demo/violeta-2.png","img/resultados-demo/violeta-3.png","img/resultados-demo/violeta-4.png","assets/adultos-user/img-01.jpg"],
   fotos:16, contactos:["wa","tg","ig","fb","of","x","msg","tel","gmail"]
 };
 /* Escort Gay — schema: escort_gay */
@@ -3559,7 +3650,7 @@ DEMO.escortVip={
   liveFecha:"Sábado 25 de mayo", liveHora:"9:00 PM",
   serviciosIncluidos:["Trato de novia premium","Cena de acompañamiento","Overnight","Viajes cortos (consulta)","Lencería de diseñador","Champagne (bajo pedido)"],
   noRealiza:["Sin verificación previa","Menores","Sustancias","Grabaciones","Descuentos"],
-  galeria:["img/resultados-demo/violeta-1.png","img/resultados-demo/violeta-2.png","img/resultados-demo/violeta-3.png","img/resultados-demo/violeta-4.png"],
+  galeria:["img/resultados-demo/violeta-1.png","img/resultados-demo/violeta-2.png","img/resultados-demo/violeta-3.png","img/resultados-demo/violeta-4.png","assets/adultos-user/img-01.jpg"],
   fotos:20, contactos:["wa","tg","ig","fb","of","x","msg","tel","gmail"]
 };
 /* Trans — schema: trans */
@@ -5626,17 +5717,143 @@ function shell(tipo, inner, u){
 }
 
 /* ---------------- Layout referencia Adulto Cariñosas (todas las categorías) ---------------- */
+/* Fase 1 UI: hasta 5 fotos; 3 visibles (principal + 2); extras ciclan en la inferior. */
+var ADULTO_GAL_MAX=5;
+function adultoGaleriaPool(u){
+  var out=[];
+  if(!u||!Array.isArray(u.galeria)) return out;
+  for(var i=0;i<u.galeria.length&&out.length<ADULTO_GAL_MAX;i++){
+    var src=demoAssetDesdeResultados(u.galeria[i])||u.galeria[i];
+    if(src) out.push(String(src));
+  }
+  return out;
+}
 function adultoGaleriaHTML(u){
-  var count=u.fotos||(u.galeria&&u.galeria.length)||0;
+  var pool=adultoGaleriaPool(u);
+  var count=pool.length||u.fotos||(u.galeria&&u.galeria.length)||0;
   var countHtml=count?('<span class="gal__count">📷 '+count+' fotos</span>'):"";
-  /* Owner: columna izq = foto principal + 2 fotos debajo (misma medida). */
-  return '<div class="pcard gal">'+
-      '<div class="gal__main">'+fotoOImg(u,"adult",0,u.nombre)+
-      profileGalleryBadgesHTML(u)+
-        '<button class="gal__arrow l">‹</button><button class="gal__arrow r">›</button>'+
-        countHtml+'</div>'+
-      '<div class="gal__thumbs">'+thumbs(u.fotos,u.nombre,"adult",u.galeria,u,2)+'</div>'+
+  var poolAttr=pool.length?' data-gal-pool="'+encodeURIComponent(JSON.stringify(pool))+'"':"";
+  var mainMedia=pool.length
+    ?('<img class="ch-foto-ph" src="'+safe(pool[0])+'" alt="" loading="lazy">')
+    :fotoOImg(u,"adult",0,u.nombre);
+  var thumbsHtml="";
+  if(pool.length>=2){
+    thumbsHtml+='<div class="t gal__shot" data-gal-idx="1" role="button" tabindex="0" aria-label="Ampliar foto">'+
+      '<img class="ch-foto-ph" src="'+safe(pool[1])+'" alt="" loading="lazy"></div>';
+  }
+  if(pool.length>=3){
+    var arrows=pool.length>3
+      ?('<button class="gal__arrow gal__arrow--bottom l" type="button" aria-label="Foto anterior">'+galArrowIcon("l")+'</button>'+
+        '<button class="gal__arrow gal__arrow--bottom r" type="button" aria-label="Foto siguiente">'+galArrowIcon("r")+'</button>')
+      :"";
+    thumbsHtml+='<div class="t gal__shot gal__shot--carousel" data-gal-idx="2" role="button" tabindex="0" aria-label="Ampliar foto">'+
+      '<img class="ch-foto-ph" src="'+safe(pool[2])+'" alt="" loading="lazy">'+arrows+'</div>';
+  }else if(!pool.length){
+    /* Sin URLs: fallback DEMO SVG / preview — sin flechas laterales. */
+    thumbsHtml=thumbs(u.fotos,u.nombre,"adult",u.galeria,u,2);
+  }
+  /* Owner: columna izq = foto principal + 2 debajo (misma medida); flechas solo en inferior. */
+  return '<div class="pcard gal gal--adulto"'+poolAttr+'>'+
+      '<div class="gal__main gal__shot" data-gal-idx="0" role="button" tabindex="0" aria-label="Ampliar foto principal">'+
+        mainMedia+profileGalleryBadgesHTML(u)+countHtml+
+      '</div>'+
+      '<div class="gal__thumbs">'+thumbsHtml+'</div>'+
     '</div>';
+}
+function ensureAdultoGaleriaLightbox(){
+  var lb=document.getElementById("galLb");
+  if(lb) return lb;
+  lb=document.createElement("div");
+  lb.id="galLb";
+  lb.className="gal-lb";
+  lb.hidden=true;
+  lb.setAttribute("role","dialog");
+  lb.setAttribute("aria-modal","true");
+  lb.setAttribute("aria-label","Foto ampliada");
+  lb.innerHTML='<button type="button" class="gal-lb__close" aria-label="Cerrar">×</button><img class="gal-lb__img" alt="">';
+  document.body.appendChild(lb);
+  var closeBtn=lb.querySelector(".gal-lb__close");
+  function closeLb(){
+    lb.hidden=true;
+    lb.querySelector(".gal-lb__img").removeAttribute("src");
+    document.body.classList.remove("gal-lb-open");
+  }
+  if(closeBtn) closeBtn.addEventListener("click",function(ev){ ev.stopPropagation(); closeLb(); });
+  lb.addEventListener("click",function(ev){ if(ev.target===lb) closeLb(); });
+  document.addEventListener("keydown",function(ev){
+    if(ev.key==="Escape"&&!lb.hidden) closeLb();
+  });
+  lb._close=closeLb;
+  return lb;
+}
+function openAdultoGaleriaLightbox(src){
+  if(!src) return;
+  var lb=ensureAdultoGaleriaLightbox();
+  var img=lb.querySelector(".gal-lb__img");
+  if(img) img.src=src;
+  lb.hidden=false;
+  document.body.classList.add("gal-lb-open");
+  var closeBtn=lb.querySelector(".gal-lb__close");
+  if(closeBtn) try{ closeBtn.focus(); }catch(eF){}
+}
+function bindAdultoGaleria(root){
+  var scope=root||document;
+  var gal=scope.querySelector(".playout .pcard.gal.gal--adulto");
+  if(!gal||gal.getAttribute("data-gal-bound")==="1") return;
+  gal.setAttribute("data-gal-bound","1");
+  var pool=[];
+  try{
+    var raw=gal.getAttribute("data-gal-pool");
+    if(raw) pool=JSON.parse(decodeURIComponent(raw))||[];
+  }catch(eP){ pool=[]; }
+  if(!Array.isArray(pool)) pool=[];
+  var carouselIdx=2;
+  var bottom=gal.querySelector(".gal__shot--carousel");
+  function setBottomSrc(idx){
+    if(!bottom||!pool.length) return;
+    carouselIdx=idx;
+    var img=bottom.querySelector("img.ch-foto-ph");
+    if(img&&pool[idx]) img.src=pool[idx];
+    bottom.setAttribute("data-gal-idx",String(idx));
+  }
+  function stepCarousel(delta){
+    if(pool.length<=3) return;
+    var min=2,max=pool.length-1;
+    var next=carouselIdx+delta;
+    if(next>max) next=min;
+    if(next<min) next=max;
+    setBottomSrc(next);
+  }
+  gal.querySelectorAll(".gal__arrow--bottom").forEach(function(btn){
+    btn.addEventListener("click",function(ev){
+      ev.preventDefault();
+      ev.stopPropagation();
+      stepCarousel(btn.classList.contains("l")?-1:1);
+    });
+  });
+  function shotSrc(shot){
+    if(!shot) return "";
+    var idx=parseInt(shot.getAttribute("data-gal-idx")||"",10);
+    if(pool.length&&isFinite(idx)&&pool[idx]) return pool[idx];
+    var img=shot.querySelector("img");
+    return img&&img.src?img.src:"";
+  }
+  function onShotActivate(shot){
+    var src=shotSrc(shot);
+    if(src) openAdultoGaleriaLightbox(src);
+  }
+  gal.querySelectorAll(".gal__shot").forEach(function(shot){
+    shot.addEventListener("click",function(ev){
+      if(ev.target.closest&&ev.target.closest(".gal__arrow")) return;
+      onShotActivate(shot);
+    });
+    shot.addEventListener("keydown",function(ev){
+      if(ev.key==="Enter"||ev.key===" "){
+        ev.preventDefault();
+        onShotActivate(shot);
+      }
+    });
+  });
 }
 function adultoTriPrecioHTML(u){
   var parts=adultoPrecioPagosTiempoParts(u);
@@ -7901,6 +8118,7 @@ function cambiarTipoNegocio(){
     syncPerfilResWrapAfterShell();
     startPbBannerRotation();
     bindPerfilResChrome(DEMO.negocio);
+    bindAdultoGaleria(document.getElementById("wrap"));
     bumpFitDelays();
   }
 }
@@ -9173,6 +9391,7 @@ function setVista(tipo){
   aplicarAccionPerfilDesdeQuery(u);
   startPbBannerRotation();
   bindPerfilResChrome(u);
+  bindAdultoGaleria(document.getElementById("wrap"));
   stopActividadNegocioRotation();
   window.scrollTo({top:0});
   bumpFitDelays();
