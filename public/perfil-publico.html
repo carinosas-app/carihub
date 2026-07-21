@@ -67,13 +67,13 @@
 <script src="js/ch-ui.js"></script>
 <script src="js/carihub-pink-sheen.js"></script>
 <script src="js/carihub-sector-sparkles.js?v=20260719perfil1"></script>
-<script src="js/carihub-resultados-sector.js?v=20260719perfil1"></script>
+<script src="js/carihub-resultados-sector.js?v=20260721bw6"></script>
 <script src="js/carihub-perfil-sector-visual.js?v=20260719perfil1"></script>
 <script src="js/carihub-nav-quick.js"></script>
 <script src="js/registro-negocio-adulto.js"></script>
 <script src="js/data/registro-schema-index.js"></script>
 <script src="js/data/registro-ui-index.js"></script>
-<script src="js/carihub-field-engine-lite.js?v=20260628c"></script>
+<script src="js/carihub-field-engine-lite.js?v=20260721bw2"></script>
 <script src="js/carihub-viajes-desplazamiento.js?v=20260620t"></script>
 <script src="js/carihub-subcategoria-labels.js?v=20260629v3"></script>
 <script src="js/catalogos-carihub.js"></script>
@@ -81,12 +81,12 @@
 <script src="estados.js"></script>
 <script src="ciudades.js"></script>
 <script src="js/perfil-res-sbar-picker.js?v=20260720sbar1"></script>
-<script src="js/carihub-bienestar-sector-render.js?v=20260630f3"></script>
+<script src="js/carihub-bienestar-sector-render.js?v=20260721bw2"></script>
 <script src="js/carihub-eventos-sector-render.js?v=20260627e3"></script>
 <script src="js/data/registro-sector-contract-registry.js?v=20260702reg-v1"></script>
 <script src="js/carihub-gastronomia-sector-render.js?v=20260702gast1"></script>
 <script src="js/carihub-public-render-lite.js?v=20260627e3"></script>
-<script src="js/resultados-demo.js?v=20260719lgbt1"></script>
+<script src="js/resultados-demo.js?v=20260721bw5"></script>
 <script src="js/carihub-multi-perfil.js"></script>
 <script src="js/carihub-blk01-profile-sanitize.js"></script>
 <script src="js/carihub-blk01-hub-adapter.js"></script>
@@ -923,11 +923,21 @@ body.fit[data-playout-shell="1"] .playout.playout--parity .playout__tri{display:
 }
 [data-vista="adult"] .playout__banner-adult,
 [data-tema="adult"] .playout__banner-adult,
-[data-vista="negocio"] .playout__banner-adult{
+[data-vista="negocio"] .playout__banner-adult,
+[data-vista="pro"] .playout__banner-adult,
+[data-vista="empresa"] .playout__banner-adult,
+[data-vista="medico"] .playout__banner-adult,
+[data-playout-shell="1"] .playout.playout--parity .playout__banner-adult{
   grid-column:1 / -1 !important;
   margin-top:0 !important;
   width:100%;
   max-width:100%;
+}
+[data-vista="pro"] .playout__banner-adult .pb-slot--bottom,
+[data-vista="empresa"] .playout__banner-adult .pb-slot--bottom,
+[data-vista="medico"] .playout__banner-adult .pb-slot--bottom,
+[data-playout-shell="1"] .playout.playout--parity .playout__banner-adult .pb-slot--bottom{
+  margin-top:0;margin-bottom:0;width:100%;max-width:100%;
 }
 html.directory-mode [data-vista="adult"] .playout__banner-adult,
 html.directory-mode [data-tema="adult"] .playout__banner-adult,
@@ -2962,6 +2972,19 @@ body:not(.fit) #fitOuter{min-height:calc(100vh - 52px);}
     object-position:center;
     display:block;
   }
+  /* Midband pro: sin docks laterales, el centro usa todo el ancho. */
+  body[data-vista="pro"] .res-midband--pro-simple,
+  body[data-vista="empresa"] .res-midband--pro-simple,
+  body[data-vista="medico"] .res-midband--pro-simple{
+    gap:0;
+  }
+  body[data-vista="pro"] .res-midband--pro-simple .res-midband__center,
+  body[data-vista="empresa"] .res-midband--pro-simple .res-midband__center,
+  body[data-vista="medico"] .res-midband--pro-simple .res-midband__center{
+    flex:1 1 auto !important;
+    width:100% !important;
+    max-width:100% !important;
+  }
 </style>
 </head>
 <body data-tema="adult" class="perfil-publico perfil-desde-resultados">
@@ -2975,7 +2998,17 @@ body:not(.fit) #fitOuter{min-height:calc(100vh - 52px);}
     var s = 'adultos';
     if (k.indexOf('restaur') >= 0 || k.indexOf('marisquer') >= 0 || k.indexOf('taquer') >= 0 || k.indexOf('gastronom') >= 0) s = 'restaurantes';
     else if (k.indexOf('medic') >= 0 || k.indexOf('doctor') >= 0 || k.indexOf('enfermer') >= 0 || k.indexOf('dent') >= 0 || k.indexOf('salud') >= 0) s = 'salud';
-    else if (k.indexOf('bienestar') >= 0 || k.indexOf('yoga') >= 0 || (k.indexOf('masaje') >= 0 && k.indexOf('erot') < 0)) s = 'bienestar';
+    /* Bienestar holístico ANTES de tienda→comercio / spa adultos */
+    else if (
+      k.indexOf('bienestar') >= 0 || k.indexOf('yoga') >= 0 || k.indexOf('pilates') >= 0 ||
+      k.indexOf('reiki') >= 0 || k.indexOf('tarot') >= 0 || k.indexOf('temazcal') >= 0 ||
+      k.indexOf('holistic') >= 0 || k.indexOf('espiritual') >= 0 || k.indexOf('esoteric') >= 0 ||
+      k.indexOf('inciens') >= 0 || k.indexOf('aceite') >= 0 || k.indexOf('vela') >= 0 ||
+      k.indexOf('herbol') >= 0 || k.indexOf('meditacion') >= 0 || k.indexOf('breathwork') >= 0 ||
+      k.indexOf('terapias-holistic') >= 0 || k.indexOf('terapias-energet') >= 0 ||
+      k.indexOf('terapias-alternat') >= 0 || k.indexOf('ayahuasca') >= 0 || k.indexOf('chaman') >= 0 ||
+      (k.indexOf('masaje') >= 0 && k.indexOf('erot') < 0 && k.indexOf('holistic') >= 0)
+    ) s = 'bienestar';
     else if (k.indexOf('mecan') >= 0 || k.indexOf('vulcaniz') >= 0 || k.indexOf('automo') >= 0) s = 'automotriz';
     else if (k.indexOf('abogad') >= 0 || k.indexOf('contador') >= 0 || k.indexOf('profesion') >= 0) s = 'profesionales';
     else if (k.indexOf('plomer') >= 0 || k.indexOf('limpieza') >= 0 || k.indexOf('hogar') >= 0) s = 'hogar';
@@ -5569,20 +5602,6 @@ function pbCarihubSlots(tipo){
     };
   });
 }
-function pbBottomSlot(tipo){
-  if(tipo==="negocio") return PB_BOTTOM_NEGOCIO;
-  if(["adult","escort","acompanante","petit","gigolo","lesbians","tomBoy","tomFem","femboy","singles","edecan","modelos","dotados","dominatrix","masajeIndep","escortGay","escortVip","trans"].indexOf(tipo)>=0) return PB_BOTTOM_ADULT;
-  return {
-    label:"Banner inferior",
-    href:"registro-banner.html?slot=perfil_inferior",
-    bottom:true,
-    slides:[
-      {t:"img",src:PB_IMG+"ad-banner-pink-01.png",alt:"¡Anúnciate aquí! Impulsa tu negocio"},
-      {t:"img",src:PB_IMG+"ad-banner-black-02.png",alt:"Haz crecer tu negocio — anuncia aquí"},
-      {t:"img",src:PB_IMG+"ad-banner-black-03.png",alt:"¡Anúnciate aquí! Más información"}
-    ]
-  };
-}
 function pbSlideDots(count){
   if(count<2) return "";
   var h="";
@@ -5665,18 +5684,28 @@ function pbAdultSlotsAlineadosResultados(){
   var cat=q.categoria||u.categoriaPublica||u.categoria||u.subcategoria||u.subcategoriaId||"Cariñosas";
   var RS=window.CariHubResultadosSector;
   var thematic=RS&&RS.bannersDeSector?RS.bannersDeSector(cat):null;
+  if((!thematic||!thematic.length)&&u.sectorId&&RS&&RS.bannersDeSector){
+    thematic=RS.bannersDeSector(u.sectorId);
+  }
   var isLgbt=RS&&RS.esSubcategoriaLgbt&&RS.esSubcategoriaLgbt(cat);
+  var sector=(RS&&RS.sectorDeCategoria)?RS.sectorDeCategoria(cat):(u.sectorId||"");
+  if((!sector||sector==="adultos")&&u.sectorId) sector=u.sectorId;
+  var sectorLabels=(window.CARIHUB_SECTOR_BANNER_LABELS&&sector)?(window.CARIHUB_SECTOR_BANNER_LABELS[sector]||null):null;
   var labels=isLgbt
     ?Object.assign({
       izquierda:"Anúnciate aquí",
       centro:"Anúnciate aquí",
       derecha:"Anúnciate aquí"
     },window.CARIHUB_LGBT_BANNER_LABELS||{})
-    :{
+    :(sectorLabels?{
+      izquierda:sectorLabels.izquierda||"Anúnciate aquí",
+      centro:sectorLabels.centro||"Haz crecer tu negocio",
+      derecha:sectorLabels.derecha||"Anúnciate aquí"
+    }:{
       izquierda:"¿Eres nueva? Regístrate ahora",
       centro:"Haz crecer tu negocio",
       derecha:"¿Eres nueva? Regístrate ahora"
-    };
+    });
   var placeholders={
     izquierda:[PB_RES+"resultados-es-nueva-izq.png",PB_RES+"resultados1.webp",PB_RES+"resultados3.webp"],
     centro:[PB_RES+"resultados-crecer-centro.png",PB_RES+"resultados-centro-1.png",PB_RES+"resultados-centro-2.png",PB_RES+"resultados-centro-3.png"],
@@ -5684,8 +5713,29 @@ function pbAdultSlotsAlineadosResultados(){
   };
   function imgsEspacio(espacio,offset){
     if(thematic&&thematic.length){
-      var out=[],n=Math.max(3,thematic.length);
-      for(var i=0;i<n;i++) out.push(thematic[(i+offset)%thematic.length]);
+      /* Preferir fotos reales del sector; si solo hay 1, completar con pool del sector (no webp genéricos). */
+      var pool=thematic.slice();
+      if(pool.length<3&&sector&&sector!=="adultos"){
+        var extra=[];
+        if(sector==="bienestar"){
+          extra=[
+            "img/registro-subcats/bienestar/bien-08-aromaterapia.png",
+            "img/registro-subcats/bienestar/bien-05-herbolaria.png",
+            "img/registro-subcats/bienestar/bien-09-cristales.png"
+          ];
+        }else{
+          extra=[
+            "banners/perfil/perfil1.webp",
+            "banners/perfil/perfil2.webp",
+            "banners/perfil/perfil3.webp"
+          ];
+        }
+        for(var e=0;e<extra.length&&pool.length<3;e++){
+          if(pool.indexOf(extra[e])<0) pool.push(extra[e]);
+        }
+      }
+      var out=[],n=Math.max(3,pool.length);
+      for(var i=0;i<n;i++) out.push(pool[(i+offset)%pool.length]);
       return out;
     }
     return (placeholders[espacio]||placeholders.izquierda).slice();
@@ -5713,11 +5763,48 @@ function bannersHTML(tipo){
   if(tipo==="negocio"){
     return '<div class="pb">'+PB_NEGOCIO_SLOTS.map(pbRotSlot).join("")+'</div>';
   }
+  /* Misma lógica Results: sector temático (bienestar, etc.) o placeholders adultos. */
+  if(!esPerfilEmbedChrome()){
+    return '<div class="pb">'+pbAdultSlotsAlineadosResultados().map(pbRotSlot).join("")+'</div>';
+  }
   if(["adult","escort","acompanante","petit","gigolo","lesbians","tomBoy","tomFem","dominatrix","masajeIndep","escortGay","escortVip","trans","edecan","modelos","dotados","femboy","singles"].indexOf(tipo)>=0){
-    var slots=(!esPerfilEmbedChrome()?pbAdultSlotsAlineadosResultados():PB_ADULT_SLOTS);
-    return '<div class="pb">'+slots.map(pbRotSlot).join("")+'</div>';
+    return '<div class="pb">'+PB_ADULT_SLOTS.map(pbRotSlot).join("")+'</div>';
   }
   return '<div class="pb">'+pbCarihubSlots(tipo).map(pbRotSlot).join("")+'</div>';
+}
+function pbBottomSlot(tipo){
+  if(tipo==="negocio") return PB_BOTTOM_NEGOCIO;
+  if(["adult","escort","acompanante","petit","gigolo","lesbians","tomBoy","tomFem","femboy","singles","edecan","modelos","dotados","dominatrix","masajeIndep","escortGay","escortVip","trans"].indexOf(tipo)>=0){
+    return PB_BOTTOM_ADULT;
+  }
+  var q=window.CariHubPerfilPublico?CariHubPerfilPublico.queryPerfilPublico():{};
+  var u=window.__perfilActual||{};
+  var cat=q.categoria||u.categoriaPublica||u.categoria||u.subcategoriaId||"";
+  var RS=window.CariHubResultadosSector;
+  var thematic=RS&&RS.bannersDeSector?RS.bannersDeSector(cat||u.sectorId||""):null;
+  var sector=(RS&&RS.sectorDeCategoria&&cat)?RS.sectorDeCategoria(cat):(u.sectorId||"");
+  var sectorLabels=(window.CARIHUB_SECTOR_BANNER_LABELS&&sector)?window.CARIHUB_SECTOR_BANNER_LABELS[sector]:null;
+  var alt=(sectorLabels&&sectorLabels.inferior)||"Anuncia tu servicio en Cariñosas";
+  if(thematic&&thematic.length){
+    return {
+      slotId:"perfil_inferior",
+      label:alt,
+      href:"registro-banner.html?slot=perfil_inferior",
+      bottom:true,
+      noMixGeneral:true,
+      slides:thematic.map(function(src){ return {t:"img",src:src,alt:alt}; })
+    };
+  }
+  return {
+    label:"Banner inferior",
+    href:"registro-banner.html?slot=perfil_inferior",
+    bottom:true,
+    slides:[
+      {t:"img",src:PB_IMG+"ad-banner-pink-01.png",alt:"¡Anúnciate aquí! Impulsa tu negocio"},
+      {t:"img",src:PB_IMG+"ad-banner-black-02.png",alt:"Haz crecer tu negocio — anuncia aquí"},
+      {t:"img",src:PB_IMG+"ad-banner-black-03.png",alt:"¡Anúnciate aquí! Más información"}
+    ]
+  };
 }
 function bottomBannerHTML(tipo){
   return pbRotSlot(pbBottomSlot(tipo));
@@ -5748,19 +5835,30 @@ function esPerfilEmbedChrome(){
     || document.documentElement.classList.contains("perfil-embed-dashboard");
 }
 function perfilResSeoLine(u){
+  u=u||{};
   var q=window.CariHubPerfilPublico?CariHubPerfilPublico.queryPerfilPublico():{};
-  if(window.CariHubResultadosDemo&&CariHubResultadosDemo.textoSeoResultados){
-    return CariHubResultadosDemo.textoSeoResultados({
-      categoria:q.categoria||u.categoria||u.subcategoria||"",
-      pais:q.pais||u.pais||"",
-      estado:q.estado||u.estado||"",
-      ciudad:q.ciudad||u.ciudad||""
-    })||"";
+  var catRaw=q.categoria||u.categoriaPublica||u.categoria||u.subcategoria||u.subcategoriaId||"";
+  var catLabel=catRaw;
+  if(window.CariHubResultadosDemo&&CariHubResultadosDemo.labelCategoria){
+    try{ catLabel=CariHubResultadosDemo.labelCategoria(catRaw)||catRaw; }catch(eL){ catLabel=catRaw; }
+  }else if(window.CariHubCatalogos&&CariHubCatalogos.labelCategoria){
+    try{ catLabel=CariHubCatalogos.labelCategoria(catRaw)||catRaw; }catch(eC){ catLabel=catRaw; }
   }
-  var parts=[q.categoria||u.categoria||u.subcategoria, q.pais||u.pais, q.estado||u.estado, q.ciudad||u.ciudad]
+  /* Si sigue siendo slug (velas-aromaticas), humanizar. */
+  if(catLabel&&catLabel===catRaw&&/[-_]/.test(catLabel)){
+    catLabel=String(catLabel).replace(/[_-]+/g," ").replace(/\b\w/g,function(ch){return ch.toUpperCase();});
+  }
+  /* Si la URL no trae geo, usar datos del perfil / defaults demo (no dejar solo el slug). */
+  var pais=String(q.pais||u.pais||"México").trim();
+  var estado=String(q.estado||u.estado||"").trim();
+  var ciudad=String(q.ciudad||u.ciudad||"").trim();
+  if(!estado||estado==="Todos los estados") estado="Nuevo León";
+  if(!ciudad||ciudad==="Todas las ciudades") ciudad="Monterrey";
+  if(!pais) pais="México";
+  return [catLabel,pais,estado,ciudad]
     .map(function(x){return String(x||"").trim();})
-    .filter(function(x){return x&&x!=="Todos los estados"&&x!=="Todas las ciudades";});
-  return parts.join(" · ");
+    .filter(Boolean)
+    .join(" · ");
 }
 function perfilResRegistroHref(u){
   var q=window.CariHubPerfilPublico?CariHubPerfilPublico.queryPerfilPublico():{};
@@ -5768,17 +5866,23 @@ function perfilResRegistroHref(u){
   p.set("abrir","registro");
   var cat=q.categoria||u.categoria||u.subcategoria||"";
   if(cat) p.set("categoria",cat);
-  if(q.pais||u.pais) p.set("pais",q.pais||u.pais);
-  if(q.estado||u.estado) p.set("estado",q.estado||u.estado);
-  if(q.ciudad||u.ciudad) p.set("ciudad",q.ciudad||u.ciudad);
+  if(q.pais||u.pais) p.set("pais",q.pais||u.pais||"México");
+  if(q.estado||u.estado) p.set("estado",q.estado||u.estado||"Nuevo León");
+  if(q.ciudad||u.ciudad) p.set("ciudad",q.ciudad||u.ciudad||"Monterrey");
   return "index.html?"+p.toString();
 }
 function perfilResSearchDockHTML(u){
   var q=window.CariHubPerfilPublico?CariHubPerfilPublico.queryPerfilPublico():{};
-  var cat=q.categoria||u.categoria||u.subcategoria||"Cariñosas";
+  var catRaw=q.categoria||u.categoria||u.subcategoria||"Cariñosas";
+  var cat=catRaw;
+  if(window.CariHubResultadosDemo&&CariHubResultadosDemo.labelCategoria){
+    try{ cat=CariHubResultadosDemo.labelCategoria(catRaw)||catRaw; }catch(eCat){ cat=catRaw; }
+  }
   var pais=q.pais||u.pais||"México";
-  var estado=q.estado||u.estado||"";
-  var ciudad=q.ciudad||u.ciudad||"";
+  var estado=q.estado||u.estado||"Nuevo León";
+  var ciudad=q.ciudad||u.ciudad||"Monterrey";
+  if(estado==="Todos los estados") estado="Nuevo León";
+  if(ciudad==="Todas las ciudades") ciudad="Monterrey";
   /* Options se rellenan en CariHubPerfilResSbarPicker.mount (listas reales). */
   return '<div class="res-search-dock res-search-dock--top" id="perfilSearchDock">'+
     '<p class="res-search-dock__hint">Cambiar búsqueda</p>'+
@@ -5819,10 +5923,19 @@ function perfilResChromeHTML(u, backHref){
   var regHref=perfilResRegistroHref(u);
   var volver=backHref&&backHref!=="#"?backHref:"resultados.html";
   var cercaHref=volver.indexOf("?")>=0?volver+"&cerca=1":volver+"?cerca=1";
-  /* Misma estructura que resultados.html → .res-shell__top (sin wrapper propio). */
+  /*
+    Adulto: midband con docks laterales (estados/libe) como Resultados.
+    pro/empresa/medico (bienestar, etc.): SOLO centro — sin docks vacíos
+    de «Estado publicado» / «En vivo» que nadie pidió en esas fichas.
+  */
+  var vistaNow="";
+  try{ vistaNow=document.body.getAttribute("data-vista")||""; }catch(eV){ vistaNow=""; }
+  var esProShell=vistaNow==="pro"||vistaNow==="empresa"||vistaNow==="medico"
+    ||(u&&(u.sectorId==="bienestar"||u.bienestarHolisticoPerfil||u.sectorId==="salud"||u.saludPerfil));
+  var midLaterales=!esProShell;
   return ''+
-    '<div class="res-midband" aria-label="Datos del perfil y acciones">'+
-      '<div class="res-midband__slot res-midband__slot--estados" id="perfilMidEstados" data-slot="perfil_estados" data-directory-hide="estados-libe-docks"></div>'+
+    '<div class="res-midband'+(esProShell?" res-midband--pro-simple":"")+'" aria-label="Datos del perfil y acciones">'+
+      (midLaterales?'<div class="res-midband__slot res-midband__slot--estados" id="perfilMidEstados" data-slot="perfil_estados" data-directory-hide="estados-libe-docks"></div>':'')+
       '<div class="res-midband__center">'+
         '<div class="res-midband__headline">'+
           '<h1 class="res-midband__title">Datos del perfil</h1>'+
@@ -5850,7 +5963,7 @@ function perfilResChromeHTML(u, backHref){
           '</a>'+
         '</div>'+
       '</div>'+
-      '<div class="res-midband__slot res-midband__slot--libe" id="perfilMidLibe" data-slot="perfil_libe" data-directory-hide="estados-libe-docks"></div>'+
+      (midLaterales?'<div class="res-midband__slot res-midband__slot--libe" id="perfilMidLibe" data-slot="perfil_libe" data-directory-hide="estados-libe-docks"></div>':'')+
     '</div>'+
     perfilResSearchDockHTML(u);
 }
@@ -5867,7 +5980,9 @@ function bindPerfilResChrome(u){
     });
   }
   if(window.CariHubBannerPerfilLaterales&&CariHubBannerPerfilLaterales.mount){
-    CariHubBannerPerfilLaterales.mount();
+    if(document.getElementById("perfilMidEstados")||document.getElementById("perfilMidLibe")){
+      CariHubBannerPerfilLaterales.mount();
+    }
   }
 }
 function syncPerfilResWrapAfterShell(){
@@ -5918,7 +6033,7 @@ function shell(tipo, inner, u){
   var backHref=window.CariHubPerfilPublico?CariHubPerfilPublico.resultadosVolverHref(qPerfil):
     (window.CariHubNavQuick?CariHubNavQuick.resultadosHrefFromQuery(qPerfil):"#");
   var brandBlock = '<div class="pbrand__wordmark"><div class="pbrand__name">'+safe(t.brand)+'</div><div class="pbrand__tag">'+safe(t.tag)+'</div></div>';
-  var useResChrome=esCari&&!esPerfilEmbedChrome();
+  var useResChrome=(esCari||PRO_LAYOUTS.indexOf(tipo)>=0)&&!esPerfilEmbedChrome();
   var chrome=useResChrome
     ? perfilResChromeHTML(u, backHref)
     : ('<div class="pbrand pbrand--with-close">'+closeBtn+
@@ -5941,7 +6056,10 @@ function shell(tipo, inner, u){
 }
 
 /* ---------------- Layout referencia Adulto Cariñosas (todas las categorías) ---------------- */
-/* Fase 1 UI: hasta 5 fotos; 3 visibles (principal + 2); extras ciclan en la inferior. */
+/* Fase 1 UI adulto: 3 visibles (principal + 2).
+   Bienestar/pro/empresa/medico: 5 visibles (principal + 4) — saca la foto
+   que quedaba escondida en el carrusel de la última y rellena el hueco
+   inferior de la columna izquierda (p. ej. velas-aromaticas / Zona cobertura). */
 var ADULTO_GAL_MAX=5;
 function adultoGaleriaVisibleSlots(u){
   if(u&&(u.sectorId==="bienestar"||u.bienestarHolisticoPerfil||u.sectorId==="salud"||u.saludPerfil)) return 5;
@@ -5956,7 +6074,7 @@ function adultoGaleriaPool(u){
   if(!u||!Array.isArray(u.galeria)) return out;
   for(var i=0;i<u.galeria.length&&out.length<ADULTO_GAL_MAX;i++){
     var src=demoAssetDesdeResultados(u.galeria[i])||u.galeria[i];
-    if(src) out.push(String(src));
+    if(src&&!/^(a|b|c|d|e|f|g|h)$/i.test(String(src).trim())) out.push(String(src));
   }
   return out;
 }
@@ -5970,7 +6088,7 @@ function adultoGaleriaHTML(u){
     ?('<img class="ch-foto-ph" src="'+safe(pool[0])+'" alt="" loading="lazy">')
     :fotoOImg(u,"adult",0,u.nombre);
   var thumbsHtml="";
-  /* slots visibles: adulto 3; empresa/bienestar/pro/medico 5 (saca foto del carrusel al hueco izq). */
+  /* Siempre slots-1 thumbs (4 cuando hay Zona cobertura → 5 visibles total). */
   if(pool.length>=1 || slots>1){
     for(var ti=1;ti<slots;ti++){
       var isLast=ti===slots-1;
@@ -6318,8 +6436,8 @@ function renderPlayoutAdultoRef(u, cfg){
     :"";
   /*
     Columnas (Owner):
-    - Izq: solo galería (principal + 2)
-    - Der: todas las tarjetas de información
+    - Izq: galería (adulto 3; bienestar/pro/empresa con cobertura → 5 para empatar altura)
+    - Der: todas las tarjetas de información (incluye Zona de cobertura)
     - Abajo: banner largo a lo ancho de las 2 columnas
   */
   var bannerPie=(u&&u.__previewRegistro)?"":('<div class="playout__banner-adult">'+bottomBannerHTML(layoutKey)+'</div>');
@@ -8702,7 +8820,7 @@ function renderProEmpresa(u, esEmpresa){
     '</div>';
 
   var triExtras=
-    (isBs && u.__bienestarPack==='H' ? bienestarPackHCtaHTML(u) : ((isBs || isEv || isGs) ? '' : '<button type="button" class="pro-cta-cita">Agendar cita</button>'))+
+    (isBs && u.__bienestarPack==='H' ? bienestarPackHCtaHTML(u) : ((isBs || isEv || isGs || u.sectorId==="bienestar" || u.bienestarHolisticoPerfil) ? '' : '<button type="button" class="pro-cta-cita">Agendar cita</button>'))+
     proFeatsLineHTML(u);
   var tri=proTriPlayHTML([
     proTriCellHTML("precio","💲 "+safe(priceLbl),safe(String(u.precio||'').replace(/^💲\s*/,'')),safe(u.moneda)+(esEmpresa?(" · "+safe(u.servicioBasico||'')):(" · Por servicio"))),
@@ -8837,6 +8955,38 @@ function resolverPerfilDesdeQuery(q){
       if(pres&&pres.vistaPerfil) vista=pres.vistaPerfil;
     }else if(window.CariHubResultadosDemo&&CariHubResultadosDemo.vistaDeCategoria){
       vista=CariHubResultadosDemo.vistaDeCategoria(q.categoria);
+    }
+  }
+  /*
+    Sin id (o id no resuelto): sembrar demo de bienestar/salud para que
+    hydrate + tema/banners no caigan en DEMO.pro plomería.
+    No aplica a adultos spa/masajes.
+  */
+  if(!perfil&&q.categoria&&window.CariHubResultadosDemo){
+    var sectorHint="";
+    if(window.CariHubResultadosSector&&CariHubResultadosSector.sectorDeCategoria){
+      try{ sectorHint=CariHubResultadosSector.sectorDeCategoria(q.categoria)||""; }catch(eSec){ sectorHint=""; }
+    }
+    var listaSeed=null;
+    if(sectorHint==="bienestar"&&typeof CariHubResultadosDemo.plantillaDemoBienestar==="function"){
+      var presBw=null;
+      if(window.CariHubFieldEngineLite&&CariHubFieldEngineLite.resolvePublicPresentation){
+        try{
+          presBw=CariHubFieldEngineLite.resolvePublicPresentation({
+            categoria:q.categoria,
+            subcategoriaId:CariHubFieldEngineLite.lookupSubcategoriaId(q.categoria)
+          });
+        }catch(ePres){ presBw=null; }
+      }
+      if(!(presBw&&presBw.esAdultoPersona)){
+        listaSeed=CariHubResultadosDemo.plantillaDemoBienestar(q,presBw);
+      }
+    }else if(sectorHint==="salud"&&typeof CariHubResultadosDemo.plantillaDemoSalud==="function"){
+      listaSeed=CariHubResultadosDemo.plantillaDemoSalud(q);
+    }
+    if(listaSeed&&listaSeed.length){
+      perfil=listaSeed[0];
+      if(perfil&&perfil.__vista) vista=perfil.__vista;
     }
   }
   if(!vista) vista="adult";
@@ -9292,6 +9442,38 @@ function aplicarPerfilDesdeRegistro(vista,u){
 }
 function aplicarPerfilResultadosEnDemo(vista,u){
   if(!u||!DEMO[vista]) return;
+  /*
+    Bienestar holístico / espiritualidad / terapias (y salud):
+    no parchear sobre DEMO.pro plomería — usar la misma vía que registro
+    para conservar bienestarHolisticoPerfil / saludPerfil / sectorId y
+    que hydrate + tema/banners de sector funcionen.
+    Adultos spa/masajes (negocio_bienestar) NO entran aquí.
+  */
+  var esAdultosBienestar=window.CariHubBienestarSectorRender&&CariHubBienestarSectorRender.isAdultosBienestar
+    ?CariHubBienestarSectorRender.isAdultosBienestar(u):false;
+  var esBienestarHolo=false;
+  if(!esAdultosBienestar){
+    if(window.CariHubBienestarSectorRender&&CariHubBienestarSectorRender.isBienestarSectorPerfil){
+      esBienestarHolo=!!CariHubBienestarSectorRender.isBienestarSectorPerfil(u);
+    }
+    if(!esBienestarHolo&&(u.sectorId==="bienestar"||u.bienestarHolisticoPerfil)){
+      esBienestarHolo=true;
+    }
+  }
+  var esSaludSector=vista==="medico"||u.sectorId==="salud"||!!u.saludPerfil;
+  if(esBienestarHolo||esSaludSector){
+    aplicarPerfilDesdeRegistro(vista,u);
+    if(DEMO[vista]){
+      DEMO[vista].__previewRegistro=false;
+      if(u.__demo!=null) DEMO[vista].__demo=u.__demo;
+      else DEMO[vista].__demo=true;
+      if(u.__id) DEMO[vista].__id=u.__id;
+      if(u.uid) DEMO[vista].uid=u.uid;
+      if(u.__registrado) DEMO[vista].__registrado=true;
+      else DEMO[vista].__registrado=false;
+    }
+    return;
+  }
   var d=DEMO[vista];
   if(u.nombre) d.nombre=u.nombre;
   if(u.edad) d.edad=u.edad;
@@ -9630,6 +9812,17 @@ function iniciarPerfilPreview(){
   }
   function pintar(resolved){
     if(resolved.perfil){
+      /* Bienestar nunca debe renderizar shell adulto negocio/hotel. */
+      if(resolved.perfil.sectorId==="bienestar"||(window.CariHubBienestarSectorRender&&CariHubBienestarSectorRender.isBienestarSectorPerfil&&CariHubBienestarSectorRender.isBienestarSectorPerfil(resolved.perfil))){
+        var vBw=resolverVistaPerfil(resolved.perfil,q);
+        if(vBw&&vBw!=="negocio"&&vBw!=="hotelMotel"&&vBw!=="spa"&&vBw!=="masajesLocal"){
+          resolved.vista=vBw;
+        }else if(resolved.perfil.__vista==="empresa"||resolved.perfil.__vista==="pro"){
+          resolved.vista=resolved.perfil.__vista;
+        }else{
+          resolved.vista=(resolved.perfil.tipoPerfil==="negocio"||resolved.perfil.deltaPack==="D")?"empresa":"pro";
+        }
+      }
       if(resolved.perfil.__id==="preview-registro"||resolved.perfil.__previewRegistro){
         aplicarPerfilDesdeRegistro(resolved.vista,resolved.perfil);
       }else if(resolved.perfil.__hydratedFromBloques){
