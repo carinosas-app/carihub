@@ -658,6 +658,14 @@
     }
     if (comp === 'ResultCardNegocio' || comp === 'ProfileLayoutNegocio') {
       var retId = String(subId || '').trim().toLowerCase().replace(/_/g, ' ');
+      /* Bienestar retail/comercio: empresa (NO negocio adulto hotel/motel). */
+      if (row && row.sectorId === 'bienestar') {
+        if (row.arquetipo === 'negocio_bienestar') {
+          if (retId === 'masajes') return 'masajesLocal';
+          return 'spa';
+        }
+        return 'empresa';
+      }
       if (retId === 'sex shop' || retId === 'sex_shop') return 'sexShop';
       if (row && row.arquetipo === 'negocio_retail') return 'sexShop';
       if (retId === 'club sw' || retId === 'club_sw' || retId === 'club swinger' || retId === 'club_swinger') return 'clubSw';
@@ -700,6 +708,9 @@
       return 'pro';
     }
     if (comp === 'ResultCardServicio' || comp === 'ProfileLayoutServicio') {
+      if (row && row.sectorId === 'bienestar' && /pack[_-]?d/i.test(String(row.arquetipo || ''))) {
+        return 'empresa';
+      }
       if (row && (row.tipoPerfil === 'negocio' || row.formularioId === 'negocio_empresa')) return 'empresa';
       return 'pro';
     }
@@ -755,11 +766,17 @@
       subcategoriaId: u.subcategoriaId,
       categoria: u.categoria || u.categoriaPublica
     });
-    u.__componenteResultados = pres.componenteResultados;
-    u.__componentePerfil = pres.componentePerfil;
-    u.__vista = pres.vistaPerfil;
+    var preserveBienestar = u.sectorId === 'bienestar' || !!u.bienestarHolisticoPerfil;
+    u.__componenteResultados = preserveBienestar
+      ? (u.__componenteResultados || pres.componenteResultados)
+      : pres.componenteResultados;
+    u.__componentePerfil = preserveBienestar
+      ? (u.__componentePerfil || pres.componentePerfil)
+      : pres.componentePerfil;
+    /* No pisar vista/arquetipo de demos bienestar holístico (FE a veces cae en adult/general). */
+    if (!preserveBienestar || !u.__vista) u.__vista = pres.vistaPerfil;
     if (pres.subcategoriaId) u.subcategoriaId = pres.subcategoriaId;
-    if (pres.arquetipo) u.arquetipo = pres.arquetipo;
+    if (pres.arquetipo && !preserveBienestar) u.arquetipo = pres.arquetipo;
     if (pres.tipoPerfil && !u.tipoPerfil) u.tipoPerfil = pres.tipoPerfil;
     return u;
   }
