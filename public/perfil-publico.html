@@ -5943,6 +5943,14 @@ function shell(tipo, inner, u){
 /* ---------------- Layout referencia Adulto Cariñosas (todas las categorías) ---------------- */
 /* Fase 1 UI: hasta 5 fotos; 3 visibles (principal + 2); extras ciclan en la inferior. */
 var ADULTO_GAL_MAX=5;
+function adultoGaleriaVisibleSlots(u){
+  if(u&&(u.sectorId==="bienestar"||u.bienestarHolisticoPerfil||u.sectorId==="salud"||u.saludPerfil)) return 5;
+  try{
+    var v=document.body&&document.body.getAttribute("data-vista");
+    if(v==="pro"||v==="empresa"||v==="medico") return 5;
+  }catch(eV){}
+  return 3;
+}
 function adultoGaleriaPool(u){
   var out=[];
   if(!u||!Array.isArray(u.galeria)) return out;
@@ -5954,29 +5962,33 @@ function adultoGaleriaPool(u){
 }
 function adultoGaleriaHTML(u){
   var pool=adultoGaleriaPool(u);
+  var slots=adultoGaleriaVisibleSlots(u);
   var count=pool.length||u.fotos||(u.galeria&&u.galeria.length)||0;
   var countHtml=count?('<span class="gal__count">📷 '+count+' fotos</span>'):"";
-  var poolAttr=pool.length?' data-gal-pool="'+encodeURIComponent(JSON.stringify(pool))+'"':"";
+  var poolAttr=pool.length?' data-gal-pool="'+encodeURIComponent(JSON.stringify(pool))+'" data-gal-visible="'+slots+'"':"";
   var mainMedia=pool.length
     ?('<img class="ch-foto-ph" src="'+safe(pool[0])+'" alt="" loading="lazy">')
     :fotoOImg(u,"adult",0,u.nombre);
   var thumbsHtml="";
-  if(pool.length>=2){
-    thumbsHtml+='<div class="t gal__shot" data-gal-idx="1" role="button" tabindex="0" aria-label="Ampliar foto">'+
-      '<img class="ch-foto-ph" src="'+safe(pool[1])+'" alt="" loading="lazy"></div>';
+  /* slots visibles: adulto 3; empresa/bienestar/pro/medico 5 (saca foto del carrusel al hueco izq). */
+  if(pool.length>=1 || slots>1){
+    for(var ti=1;ti<slots;ti++){
+      var isLast=ti===slots-1;
+      var isCarousel=isLast&&pool.length>slots;
+      var arrows=isCarousel
+        ?('<button class="gal__arrow gal__arrow--bottom l" type="button" aria-label="Foto anterior">'+galArrowIcon("l")+'</button>'+
+          '<button class="gal__arrow gal__arrow--bottom r" type="button" aria-label="Foto siguiente">'+galArrowIcon("r")+'</button>')
+        :"";
+      var cls=isCarousel?'t gal__shot gal__shot--carousel':'t gal__shot';
+      var thumbMedia=pool[ti]
+        ?('<img class="ch-foto-ph" src="'+safe(pool[ti])+'" alt="" loading="lazy">')
+        :fotoOImg(u,"adult",ti,u.nombre);
+      thumbsHtml+='<div class="'+cls+'" data-gal-idx="'+ti+'" role="button" tabindex="0" aria-label="Ampliar foto">'+
+        thumbMedia+arrows+'</div>';
+    }
+  }else{
+    thumbsHtml=thumbs(u.fotos,u.nombre,"adult",u.galeria,u,Math.max(1,slots-1));
   }
-  if(pool.length>=3){
-    var arrows=pool.length>3
-      ?('<button class="gal__arrow gal__arrow--bottom l" type="button" aria-label="Foto anterior">'+galArrowIcon("l")+'</button>'+
-        '<button class="gal__arrow gal__arrow--bottom r" type="button" aria-label="Foto siguiente">'+galArrowIcon("r")+'</button>')
-      :"";
-    thumbsHtml+='<div class="t gal__shot gal__shot--carousel" data-gal-idx="2" role="button" tabindex="0" aria-label="Ampliar foto">'+
-      '<img class="ch-foto-ph" src="'+safe(pool[2])+'" alt="" loading="lazy">'+arrows+'</div>';
-  }else if(!pool.length){
-    /* Sin URLs: fallback DEMO SVG / preview — sin flechas laterales. */
-    thumbsHtml=thumbs(u.fotos,u.nombre,"adult",u.galeria,u,2);
-  }
-  /* Owner: columna izq = foto principal + 2 debajo (misma medida); flechas solo en inferior. */
   return '<div class="pcard gal gal--adulto"'+poolAttr+'>'+
       '<div class="gal__main gal__shot" data-gal-idx="0" role="button" tabindex="0" aria-label="Ampliar foto principal">'+
         mainMedia+profileGalleryBadgesHTML(u)+countHtml+
@@ -6031,7 +6043,9 @@ function bindAdultoGaleria(root){
     if(raw) pool=JSON.parse(decodeURIComponent(raw))||[];
   }catch(eP){ pool=[]; }
   if(!Array.isArray(pool)) pool=[];
-  var carouselIdx=2;
+  var visibleSlots=parseInt(gal.getAttribute("data-gal-visible")||"3",10)||3;
+  var carouselMin=Math.max(2, visibleSlots-1);
+  var carouselIdx=carouselMin;
   var bottom=gal.querySelector(".gal__shot--carousel");
   function setBottomSrc(idx){
     if(!bottom||!pool.length) return;
@@ -6041,8 +6055,8 @@ function bindAdultoGaleria(root){
     bottom.setAttribute("data-gal-idx",String(idx));
   }
   function stepCarousel(delta){
-    if(pool.length<=3) return;
-    var min=2,max=pool.length-1;
+    if(pool.length<=visibleSlots) return;
+    var min=carouselMin,max=pool.length-1;
     var next=carouselIdx+delta;
     if(next>max) next=min;
     if(next<min) next=max;
