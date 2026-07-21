@@ -13,6 +13,48 @@
 
   /** Pools de foto por subcategoría LGBT/adulta especializada (no reutilizar Violeta). */
   var FOTOS_POR_SUB = {
+    'velas aromaticas': [
+      'img/registro-subcats/bienestar/bien-08-aromaterapia.png',
+      'img/registro-subcats/bienestar/bien-05-herbolaria.png',
+      'img/registro-subcats/bienestar/bien-09-cristales.png',
+      'img/registro-subcats/bienestar/bien-10-meditacion.png'
+    ],
+    'velas esotericas': [
+      'img/registro-subcats/bienestar/bien-08-aromaterapia.png',
+      'img/registro-subcats/bienestar/bien-09-cristales.png',
+      'img/registro-subcats/bienestar/bien-05-herbolaria.png',
+      'img/registro-subcats/bienestar/bien-02-temazcal.png'
+    ],
+    'venta de velas': [
+      'img/registro-subcats/bienestar/bien-08-aromaterapia.png',
+      'img/registro-subcats/bienestar/bien-05-herbolaria.png',
+      'img/registro-subcats/bienestar/bien-09-cristales.png',
+      'img/registro-subcats/bienestar/bien-01-yoga.png'
+    ],
+    'venta de inciensos': [
+      'img/registro-subcats/bienestar/bien-05-herbolaria.png',
+      'img/registro-subcats/bienestar/bien-08-aromaterapia.png',
+      'img/registro-subcats/bienestar/bien-09-cristales.png',
+      'img/registro-subcats/bienestar/bien-10-meditacion.png'
+    ],
+    'venta de aceites esenciales': [
+      'img/registro-subcats/bienestar/bien-08-aromaterapia.png',
+      'img/registro-subcats/bienestar/bien-05-herbolaria.png',
+      'img/registro-subcats/bienestar/bien-06-masaje.png',
+      'img/registro-subcats/bienestar/bien-10-meditacion.png'
+    ],
+    'venta de aceites': [
+      'img/registro-subcats/bienestar/bien-08-aromaterapia.png',
+      'img/registro-subcats/bienestar/bien-05-herbolaria.png',
+      'img/registro-subcats/bienestar/bien-06-masaje.png',
+      'img/registro-subcats/bienestar/bien-09-cristales.png'
+    ],
+    aromaterapia: [
+      'img/registro-subcats/bienestar/bien-08-aromaterapia.png',
+      'img/registro-subcats/bienestar/bien-05-herbolaria.png',
+      'img/registro-subcats/bienestar/bien-06-masaje.png',
+      'img/registro-subcats/bienestar/bien-10-meditacion.png'
+    ],
     'escort gay': [
       'img/home/escort-gay.jpg',
       'img/home/hero-escort-gay.png',
@@ -350,7 +392,9 @@
     aromaterapia: 'A', 'masajes-holisticos': 'A', 'masajes-relajantes': 'A', 'masajes-terapeuticos': 'A',
     'terapias-holisticas': 'A', 'terapias-energeticas': 'A', 'terapias-alternativas': 'A', yoga: 'B',
     pilates: 'B', meditacion: 'B', breathwork: 'B', 'centros-de-yoga': 'C', 'tiendas-esotericas': 'D',
-    herbolarios: 'D', 'productos-holisticos': 'D', tarot: 'E', astrologia: 'E', numerologia: 'E',
+    herbolarios: 'D', 'productos-holisticos': 'D', 'velas-esotericas': 'D', 'velas-aromaticas': 'D',
+    'venta-de-velas': 'D', 'venta-de-inciensos': 'D',
+    'venta-de-aceites-esenciales': 'D', 'venta-de-aceites': 'D', tarot: 'E', astrologia: 'E', numerologia: 'E',
     'coaching-de-vida': 'F', 'coaching-espiritual': 'F', 'retiros-espirituales': 'G', 'turismo-espiritual': 'G',
     'ceremonias-ayahuasca-rape-plantas-de-poder': 'H', chamanismo: 'H', 'medicina-ancestral': 'H'
   };
@@ -399,9 +443,26 @@
       { alias: 'Manos Sanadoras', precio: '650', tagline: 'Masaje holístico con aceites esenciales.', certificaciones: 'Certificación en masaje terapéutico holístico', modalidadesTerapia: ['Masaje holístico', 'Aromaterapia'], duracionSesionMinutos: '90_min', horario: 'Lun–Sáb 10:00–20:00' }
     ].concat(DEMO_BIENESTAR_BY_PACK.A.slice(0, 2)),
     'tiendas-esotericas': DEMO_BIENESTAR_BY_PACK.D,
+    'velas-esotericas': [
+      { alias: 'Casa de las Velas', precio: '120', tagline: 'Velas rituales, aromáticas y de intención.', certificaciones: 'Comercio esotérico local', nombreComercial: 'Casa de las Velas', surtidoPrincipal: 'Velas rituales · Aromáticas · Intención', categoriasProductoBienestar: ['Velas esotéricas', 'Velas aromáticas'], ventaPresencial: 'Sí', direccion: 'Barrio Antiguo, Monterrey', horario: 'Lun–Sáb 11:00–20:00' },
+      { alias: 'Luz y Cera', precio: '90', tagline: 'Velas artesanales para rituales y meditación.', certificaciones: 'Elaboración artesanal', nombreComercial: 'Luz y Cera', surtidoPrincipal: 'Velas artesanales · Kits rituales', categoriasProductoBienestar: ['Velas esotéricas'], ventaPresencial: 'Sí', horario: 'Mar–Dom 10:00–19:00' }
+    ],
+    'velas-aromaticas': [
+      { alias: 'Aroma y Cera', precio: '110', tagline: 'Velas aromáticas artesanales y de intención.', certificaciones: 'Comercio local', nombreComercial: 'Aroma y Cera', surtidoPrincipal: 'Velas aromáticas · Kits', categoriasProductoBienestar: ['Velas aromáticas'], ventaPresencial: 'Sí', direccion: 'Monterrey', horario: 'Lun–Sáb 10:00–20:00' },
+      { alias: 'Vela Serena', precio: '95', tagline: 'Velas de soya con aromas naturales.', certificaciones: 'Elaboración artesanal', nombreComercial: 'Vela Serena', surtidoPrincipal: 'Velas de soya · Aromáticas', categoriasProductoBienestar: ['Velas aromáticas'], ventaPresencial: 'Sí', horario: 'Mar–Dom 11:00–19:00' }
+    ],
+    'venta-de-inciensos': [
+      { alias: 'Humos Sagrados', precio: '80', tagline: 'Inciensos, sahumerios y resinas naturales.', certificaciones: 'Comercio holístico', nombreComercial: 'Humos Sagrados', surtidoPrincipal: 'Inciensos · Sahumerios · Resinas', categoriasProductoBienestar: ['Inciensos', 'Sahumerios'], ventaPresencial: 'Sí', direccion: 'Centro Monterrey', horario: 'Lun–Sáb 10:00–20:00' },
+      { alias: 'Sahumería Luna', precio: '65', tagline: 'Inciensos importados y de elaboración local.', certificaciones: 'Importación y venta local', nombreComercial: 'Sahumería Luna', surtidoPrincipal: 'Inciensos · Conos · Carbones', categoriasProductoBienestar: ['Inciensos'], ventaPresencial: 'Sí', horario: 'Lun–Vie 11:00–19:00' }
+    ],
+    'venta-de-aceites-esenciales': [
+      { alias: 'Esencias del Valle', precio: '220', tagline: 'Aceites esenciales puros y blends aromáticos.', certificaciones: 'Distribución de aceites terapéuticos', nombreComercial: 'Esencias del Valle', surtidoPrincipal: 'Aceites esenciales · Blends · Difusores', categoriasProductoBienestar: ['Aceites esenciales', 'Aromaterapia'], ventaPresencial: 'Sí', direccion: 'San Pedro Garza García', horario: 'Lun–Sáb 10:00–19:00' },
+      { alias: 'Aroma Puro MX', precio: '180', tagline: 'Aceites esenciales y kits de aromaterapia.', certificaciones: 'Producto natural certificado', nombreComercial: 'Aroma Puro MX', surtidoPrincipal: 'Aceites · Roll-ons · Kits', categoriasProductoBienestar: ['Aceites esenciales'], ventaPresencial: 'Sí', horario: 'Mar–Sáb 11:00–20:00' }
+    ],
     tarot: DEMO_BIENESTAR_BY_PACK.E,
     'coaching-de-vida': DEMO_BIENESTAR_BY_PACK.F,
     'retiros-espirituales': DEMO_BIENESTAR_BY_PACK.G,
+    'turismo-espiritual': DEMO_BIENESTAR_BY_PACK.G,
     'ceremonias-ayahuasca-rape-plantas-de-poder': DEMO_BIENESTAR_BY_PACK.H
   };
 
@@ -719,19 +780,20 @@
     var subId = pres.subcategoriaId || idCategoria(Q.categoria);
     var catLabel = base.categoriaPublica || labelCategoria(Q.categoria);
     var pack = base.deltaPack || bienestarPackDeSub(subId);
-    var alias = base.alias || base.nombre || 'Facilitador demo';
+    var alias = base.alias || base.nombre || base.nombreComercial || 'Facilitador demo';
     var holistico = buildBienestarHolisticoPerfil(base, subId, pack);
     var id = 'demo-bienestar-' + subId + '-' + slug(alias) + '-' + idx;
     var tarifa = base.precio || holistico.tarifaDesde || 'Consultar';
+    var esRetail = pack === 'D' || (pres && (pres.arquetipo === 'negocio_comercio' || pres.tipoPerfil === 'negocio'));
 
     var u = {
       __id: id,
       __demo: true,
-      __vista: 'pro',
+      __vista: esRetail ? 'empresa' : 'pro',
       sectorId: 'bienestar',
       subcategoriaId: subId,
-      arquetipo: 'persona_servicio_bienestar',
-      tipoPerfil: 'persona',
+      arquetipo: esRetail ? 'negocio_comercio' : 'persona_servicio_bienestar',
+      tipoPerfil: esRetail ? 'negocio' : 'persona',
       categoria: catLabel,
       categoriaPublica: catLabel,
       nombre: alias,
@@ -747,8 +809,13 @@
       verificada: base.verificada !== false,
       verificado: base.verificada !== false,
       respuestaRapida: base.respuestaRapida !== false,
-      fotoURL: foto(idx),
-      fotosExtraURL: ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'],
+      fotoURL: fotoPara(subId, idx),
+      fotosExtraURL: [
+        fotoPara(subId, idx + 1),
+        fotoPara(subId, idx + 2),
+        fotoPara(subId, idx + 3),
+        fotoPara(subId, idx + 4)
+      ],
       deltaPack: pack,
       bienestarHolisticoPerfil: holistico
     };
@@ -757,12 +824,35 @@
     if (base.mostrarColaboracionContenidoPublico) {
       u.mostrarColaboracionContenidoPublico = base.mostrarColaboracionContenidoPublico;
     }
+    if (esRetail) {
+      u.nombreComercial = base.nombreComercial || holistico.nombreComercial || alias;
+      u.nombre = u.nombreComercial;
+      if (base.direccion || holistico.direccion) u.direccion = base.direccion || holistico.direccion;
+      if (Array.isArray(holistico.categoriasProductoBienestar)) {
+        u.categoriasProducto = holistico.categoriasProductoBienestar.slice();
+      }
+      if (holistico.surtidoPrincipal) u.surtidoPrincipal = holistico.surtidoPrincipal;
+    }
     if (pack === 'H') {
       u.sensible = true;
       u.regulada = true;
     }
 
-    return enriquecerPerfil(u, Q);
+    if (global.CariHubBienestarSectorRender && CariHubBienestarSectorRender.resolveVistaPerfil) {
+      var vistaBw = CariHubBienestarSectorRender.resolveVistaPerfil(u);
+      if (vistaBw) u.__vista = vistaBw;
+    }
+
+    u = enriquecerPerfil(u, Q);
+    /* Anti-contaminación: field-engine no debe dejar vista=negocio adulto. */
+    if (u.sectorId === 'bienestar' && (u.__vista === 'negocio' || u.__vista === 'hotelMotel' || u.__vista === 'spa' || u.__vista === 'masajesLocal')) {
+      u.__vista = esRetail || pack === 'D' ? 'empresa' : 'pro';
+    }
+    if (global.CariHubBienestarSectorRender && CariHubBienestarSectorRender.resolveVistaPerfil) {
+      var vistaFinal = CariHubBienestarSectorRender.resolveVistaPerfil(u);
+      if (vistaFinal) u.__vista = vistaFinal;
+    }
+    return u;
   }
 
   function poolDemoBienestar(subId) {
@@ -3407,6 +3497,7 @@
     plantillaDemoMascotas: plantillaDemoMascotas,
     plantillaDemoHogar: plantillaDemoHogar,
     plantillaDemoSalud: plantillaDemoSalud,
+    plantillaDemoBienestar: plantillaDemoBienestar,
     plantillaDemoTecnologia: plantillaDemoTecnologia,
     plantillaDemoAutomotriz: plantillaDemoAutomotriz,
     plantillaDemoTransporte: plantillaDemoTransporte,

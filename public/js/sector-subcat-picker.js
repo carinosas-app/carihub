@@ -323,10 +323,10 @@
     { re: /meditacion|breathwork/, img: 9 },
     { re: /reiki|energet|biomagnetismo|limpi/, img: 2 },
     { re: /acupuntura|medicina-tradicional-china|ayurveda/, img: 3 },
-    { re: /herbol|herbolaria|naturista|naturalista|suplementos|incienso|aceites-esenciales|productos-natur/, img: 4 },
+    { re: /herbol|herbolaria|naturista|naturalista|suplementos|incienso|aceites-esenciales|venta-de-aceites|productos-natur/, img: 4 },
     { re: /masaje/, img: 5 },
     { re: /retiro|turismo-espiritual|chamanismo|ceremonias|ancestral/, img: 6 },
-    { re: /aromaterapia|sonoterapia/, img: 7 },
+    { re: /aromaterapia|sonoterapia|vela|velas-aromaticas|velas-esotericas|venta-de-velas/, img: 7 },
     { re: /tarot|astrolog|numerolog|runas|esoter|cristalo|feng-shui|holistic|sanacion|centro/, img: 8 },
     { re: /coaching|desarrollo-personal|crecimiento-personal/, img: 0 }
   ];

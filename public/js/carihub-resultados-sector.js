@@ -40,10 +40,19 @@
      etiquetas/ids comunes a su sector. La fuente real es el schema-index. */
   var FALLBACK_SECTOR = {
     'carinosas': 'adultos', 'escort': 'adultos', 'stripper': 'adultos',
-    'masajes': 'adultos', 'restaurante': 'restaurantes', 'restaurantes': 'restaurantes',
-    'doctor': 'salud', 'medico': 'salud', 'salud': 'salud',
+    'masajes': 'adultos', 'spa': 'adultos', 'restaurante': 'restaurantes', 'restaurantes': 'restaurantes',
+    'doctor': 'salud', 'medico': 'salud', 'salud': 'salud', 'medico-general': 'salud',
     'mecanico': 'automotriz', 'vulcanizadora': 'automotriz',
-    'abogado': 'profesionales', 'veterinario': 'mascotas'
+    'abogado': 'profesionales', 'veterinario': 'mascotas',
+    /* Bienestar holístico / espiritualidad / terapias (no adultos spa/masajes) */
+    'yoga': 'bienestar', 'pilates': 'bienestar', 'meditacion': 'bienestar', 'reiki': 'bienestar',
+    'tarot': 'bienestar', 'astrologia': 'bienestar', 'temazcales': 'bienestar',
+    'terapias-holisticas': 'bienestar', 'terapias-energeticas': 'bienestar', 'terapias-alternativas': 'bienestar',
+    'retiros-espirituales': 'bienestar', 'turismo-espiritual': 'bienestar', 'coaching-espiritual': 'bienestar',
+    'coaching-de-vida': 'bienestar', 'centros-holisticos': 'bienestar', 'centros-de-yoga': 'bienestar',
+    'velas-esotericas': 'bienestar', 'velas-aromaticas': 'bienestar', 'venta-de-inciensos': 'bienestar',
+    'venta-de-aceites-esenciales': 'bienestar', 'productos-holisticos': 'bienestar',
+    'herbolarios': 'bienestar', 'bienestar': 'bienestar'
   };
 
   /** Textos de banners por sector (arriba + abajo). adultos usa los defaults del módulo banner. */
@@ -56,9 +65,9 @@
     },
     bienestar: {
       izquierda: '¿Ofreces bienestar holístico?',
-      centro: 'Encuentra equilibrio cerca de ti',
+      centro: 'Yoga, terapias y espiritualidad',
       derecha: 'Registra tu espacio de bienestar',
-      inferior: 'Anuncia masajes, yoga o temazcal'
+      inferior: 'Anuncia yoga, terapias o espiritualidad'
     },
     restaurantes: {
       izquierda: '¿Tienes un restaurante?',
@@ -174,8 +183,35 @@
     'masajes': 'img/home/banners/ad-banner-adult-masajes-01.png',
     'antro restaurant bar': 'img/home/banners/ad-banner-adult-antro-01.png',
     'antro restaurant bar lgbt': 'img/home/banners/ad-banner-adult-antro-lgbt-01.png',
-    'hotel motel': 'img/home/banners/ad-banner-adult-hotel-motel-01.png'
+    'hotel motel': 'img/home/banners/ad-banner-adult-hotel-motel-01.png',
+    /* Bienestar retail — fotos reales de categoría (no SVG stub). */
+    'velas-aromaticas': 'img/registro-subcats/bienestar/bien-08-aromaterapia.png',
+    'velas aromaticas': 'img/registro-subcats/bienestar/bien-08-aromaterapia.png',
+    'velas-esotericas': 'img/registro-subcats/bienestar/bien-08-aromaterapia.png',
+    'velas esotericas': 'img/registro-subcats/bienestar/bien-08-aromaterapia.png',
+    'venta-de-velas': 'img/registro-subcats/bienestar/bien-08-aromaterapia.png',
+    'venta de velas': 'img/registro-subcats/bienestar/bien-08-aromaterapia.png',
+    'venta-de-inciensos': 'img/registro-subcats/bienestar/bien-05-herbolaria.png',
+    'venta de inciensos': 'img/registro-subcats/bienestar/bien-05-herbolaria.png',
+    'venta-de-aceites-esenciales': 'img/registro-subcats/bienestar/bien-08-aromaterapia.png',
+    'venta de aceites esenciales': 'img/registro-subcats/bienestar/bien-08-aromaterapia.png',
+    'venta-de-aceites': 'img/registro-subcats/bienestar/bien-08-aromaterapia.png',
+    'venta de aceites': 'img/registro-subcats/bienestar/bien-08-aromaterapia.png',
+    aromaterapia: 'img/registro-subcats/bienestar/bien-08-aromaterapia.png',
+    herbolarios: 'img/registro-subcats/bienestar/bien-05-herbolaria.png',
+    'productos-holisticos': 'img/registro-subcats/bienestar/bien-09-cristales.png',
+    'productos holisticos': 'img/registro-subcats/bienestar/bien-09-cristales.png'
   };
+
+  /** Pool fotográfico bienestar para rotar 3 slots (PNG reales, no placeholders). */
+  var BIENESTAR_BANNER_POOL = [
+    'img/home/banners/ad-banner-bienestar-01.png',
+    'img/registro-subcats/bienestar/bien-08-aromaterapia.png',
+    'img/registro-subcats/bienestar/bien-05-herbolaria.png',
+    'img/registro-subcats/bienestar/bien-09-cristales.png',
+    'img/registro-subcats/bienestar/bien-01-yoga.png',
+    'img/registro-subcats/bienestar/bien-10-meditacion.png'
+  ];
 
   function subcategoriaIdDe(cat) {
     var fe = global.CariHubFieldEngineLite;
@@ -222,7 +258,11 @@
   function bannerDeSubcategoria(cat) {
     if (!cat) return null;
     var id = subcategoriaIdDe(cat);
-    return SUBCAT_BANNERS[id] || null;
+    if (SUBCAT_BANNERS[id]) return SUBCAT_BANNERS[id];
+    var spaced = normLgbtSlug(id);
+    if (SUBCAT_BANNERS[spaced]) return SUBCAT_BANNERS[spaced];
+    var dashed = slugCat(id);
+    return SUBCAT_BANNERS[dashed] || null;
   }
 
   function syncSubtemaLgbt(cat) {
@@ -297,6 +337,15 @@
     if (k.indexOf('medic') >= 0 || k.indexOf('doctor') >= 0 || k.indexOf('enfermer') >= 0 || k.indexOf('dent') >= 0) return 'salud';
     if (k.indexOf('mecan') >= 0 || k.indexOf('vulcaniz') >= 0 || k.indexOf('automo') >= 0) return 'automotriz';
     if (k.indexOf('veterin') >= 0 || k.indexOf('mascot') >= 0 || k.indexOf('pet') >= 0) return 'mascotas';
+    /* Spa/masajes adultos: no mapear a bienestar holístico */
+    if (k === 'spa' || k === 'masajes' || k.indexOf('spa ') === 0) return 'adultos';
+    if (k.indexOf('yoga') >= 0 || k.indexOf('reiki') >= 0 || k.indexOf('tarot') >= 0 ||
+        k.indexOf('temazcal') >= 0 || k.indexOf('holistic') >= 0 || k.indexOf('espiritual') >= 0 ||
+        k.indexOf('terapias-holistic') >= 0 || k.indexOf('terapias-energet') >= 0 ||
+        k.indexOf('terapias-alternat') >= 0 || k.indexOf('meditacion') >= 0 || k.indexOf('pilates') >= 0 ||
+        k.indexOf('esoteric') >= 0 || k.indexOf('inciens') >= 0 || k.indexOf('aceite') >= 0 ||
+        k.indexOf('vela') >= 0 || k.indexOf('herbol') >= 0 || k.indexOf('ayahuasca') >= 0 ||
+        k.indexOf('chaman') >= 0 || (k.indexOf('bienestar') >= 0 && k.indexOf('spa') < 0)) return 'bienestar';
     return FALLBACK_SECTOR[k] || 'adultos';
   }
 
@@ -339,14 +388,37 @@
     return sector;
   }
 
+  /** Rota un lead + pool hasta n rutas únicas (fotos reales). */
+  function poolBannersConLead(lead, pool, n) {
+    var out = [];
+    var seen = {};
+    function push(src) {
+      if (!src || seen[src]) return;
+      seen[src] = true;
+      out.push(src);
+    }
+    push(lead);
+    var i;
+    for (i = 0; i < (pool || []).length && out.length < n; i++) push(pool[i]);
+    return out.length ? out : null;
+  }
+
   /** Imágenes de banner temático (null si adultos rosa estándar). */
   function bannersDeSector(catOrSector) {
-    /* Negocio adulto con banner fotográfico propio: prioridad máxima. */
+    /* Negocio adulto / bienestar retail con banner fotográfico propio: prioridad máxima. */
     var subImg = bannerDeSubcategoria(catOrSector);
-    if (subImg) return [subImg];
-    if (esSubcategoriaLgbt(catOrSector)) return LGBT_BANNERS.slice();
     var sector = esSectorValido(catOrSector) ? catOrSector : sectorDeCategoria(catOrSector);
+    if (subImg) {
+      if (sector === 'bienestar') {
+        return poolBannersConLead(subImg, BIENESTAR_BANNER_POOL, 3);
+      }
+      return [subImg];
+    }
+    if (esSubcategoriaLgbt(catOrSector)) return LGBT_BANNERS.slice();
     if (sector === 'adultos') return null;
+    if (sector === 'bienestar') {
+      return BIENESTAR_BANNER_POOL.slice(0, 3);
+    }
     var img = SECTOR_BANNER[sector];
     return img ? [img] : null;
   }

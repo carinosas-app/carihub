@@ -658,6 +658,14 @@
     }
     if (comp === 'ResultCardNegocio' || comp === 'ProfileLayoutNegocio') {
       var retId = String(subId || '').trim().toLowerCase().replace(/_/g, ' ');
+      /* Bienestar retail/comercio: empresa (NO negocio adulto hotel/motel). */
+      if (row && row.sectorId === 'bienestar') {
+        if (row.arquetipo === 'negocio_bienestar') {
+          if (retId === 'masajes') return 'masajesLocal';
+          return 'spa';
+        }
+        return 'empresa';
+      }
       if (retId === 'sex shop' || retId === 'sex_shop') return 'sexShop';
       if (row && row.arquetipo === 'negocio_retail') return 'sexShop';
       if (retId === 'club sw' || retId === 'club_sw' || retId === 'club swinger' || retId === 'club_swinger') return 'clubSw';
@@ -700,6 +708,9 @@
       return 'pro';
     }
     if (comp === 'ResultCardServicio' || comp === 'ProfileLayoutServicio') {
+      if (row && row.sectorId === 'bienestar' && /pack[_-]?d/i.test(String(row.arquetipo || ''))) {
+        return 'empresa';
+      }
       if (row && (row.tipoPerfil === 'negocio' || row.formularioId === 'negocio_empresa')) return 'empresa';
       return 'pro';
     }

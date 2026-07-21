@@ -471,6 +471,7 @@ export const SUB_TO_PACK = {
   "registros-akashicos": "E",
   "cosmetica-natural": "D",
   "velas-esotericas": "D",
+  "velas-aromaticas": "D",
   sahumerios: "D",
 };
 

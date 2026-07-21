@@ -95,13 +95,23 @@
   }
 
   function isBienestarRetailNegocio(u) {
-    if (!isBienestarSectorPerfil(u) || packFrom(u) !== 'D') return false;
-    var p = perfilNested(u);
-    return !!(p.nombreComercial || u.nombreComercial);
+    if (!isBienestarSectorPerfil(u)) return false;
+    if (packFrom(u) === 'D') {
+      var p = perfilNested(u);
+      if (p.nombreComercial || u.nombreComercial || u.tipoPerfil === 'negocio') return true;
+    }
+    if (u.arquetipo === 'negocio_comercio' || u.arquetipo === 'negocio_retail_bienestar') return true;
+    return false;
   }
 
   function resolveVistaPerfil(u) {
-    if (!isBienestarSectorPerfil(u)) return null;
+    if (!isBienestarSectorPerfil(u)) {
+      /* Sector bienestar + comercio sin nested aún (preview temprana). */
+      if (u && u.sectorId === 'bienestar' && (u.arquetipo === 'negocio_comercio' || u.tipoPerfil === 'negocio')) {
+        return 'empresa';
+      }
+      return null;
+    }
     if (isBienestarRetailNegocio(u)) return 'empresa';
     return 'pro';
   }

@@ -26,7 +26,7 @@
     'venta-de-inciensos': 'D', 'venta-de-aceites-esenciales': 'D',
     'ceremonias-ayahuasca-rape-plantas-de-poder': 'H', 'cacao-ceremonial': 'G',
     reflexologia: 'A', 'registros-akashicos': 'E', 'cosmetica-natural': 'D',
-    'velas-esotericas': 'D', sahumerios: 'D'
+    'velas-esotericas': 'D', 'velas-aromaticas': 'D', sahumerios: 'D'
   };
 
   var PACK_H_PROHIBITED_FIELD_IDS = [
