@@ -388,16 +388,24 @@
   /** Demos sector Bienestar holístico (packs A–H). Campos públicos alineados a bienestarHolisticoPerfil. */
   var BIENESTAR_PACK_POR_SUB = {
     temazcales: 'C', 'centros-holisticos': 'C', 'centros-de-bienestar': 'C', 'centros-de-meditacion': 'C',
-    'centros-de-yoga': 'C', 'centros-de-sanacion': 'C', reiki: 'A', biomagnetismo: 'A', acupuntura: 'A',
-    aromaterapia: 'A', 'masajes-holisticos': 'A', 'masajes-relajantes': 'A', 'masajes-terapeuticos': 'A',
-    'terapias-holisticas': 'A', 'terapias-energeticas': 'A', 'terapias-alternativas': 'A', yoga: 'B',
-    pilates: 'B', meditacion: 'B', breathwork: 'B', 'centros-de-yoga': 'C', 'tiendas-esotericas': 'D',
-    herbolarios: 'D', 'productos-holisticos': 'D', 'velas-esotericas': 'D', 'velas-aromaticas': 'D',
-    'venta-de-velas': 'D', 'venta-de-inciensos': 'D',
-    'venta-de-aceites-esenciales': 'D', 'venta-de-aceites': 'D', tarot: 'E', astrologia: 'E', numerologia: 'E',
-    'coaching-de-vida': 'F', 'coaching-espiritual': 'F', 'retiros-espirituales': 'G', 'turismo-espiritual': 'G',
+    'centros-de-yoga': 'C', 'centros-de-sanacion': 'C',
+    'retiros-espirituales': 'G', 'turismo-espiritual': 'G', 'cacao-ceremonial': 'G',
+    'medicina-ancestral': 'H', chamanismo: 'H', 'ceremonias-tradicionales': 'H',
     'ceremonias-ayahuasca-rape-plantas-de-poder': 'H', 'ceremonias-ayahuasca': 'H',
-    chamanismo: 'H', 'medicina-ancestral': 'H'
+    'terapias-holisticas': 'A', reiki: 'A', biomagnetismo: 'A', acupuntura: 'A', aromaterapia: 'A',
+    'terapias-energeticas': 'A', 'terapias-alternativas': 'A', 'medicina-natural': 'A', naturopatia: 'A',
+    'medicina-tradicional-china': 'A', 'flores-de-bach': 'A', homeopatia: 'A',
+    'masajes-holisticos': 'A', 'masajes-relajantes': 'A', 'masajes-terapeuticos': 'A',
+    'limpias-energeticas': 'A', reflexologia: 'A',
+    yoga: 'B', pilates: 'B', meditacion: 'B', breathwork: 'B', sonoterapia: 'B', ayurveda: 'B',
+    herbolaria: 'D', 'tiendas-esotericas': 'D', 'productos-holisticos': 'D', 'productos-naturistas': 'D',
+    'suplementos-naturales': 'D', herbolarios: 'D', naturistas: 'D',
+    'venta-de-inciensos': 'D', 'venta-de-aceites-esenciales': 'D', 'venta-de-aceites': 'D',
+    'venta-de-velas': 'D', 'velas-esotericas': 'D', 'velas-aromaticas': 'D', sahumerios: 'D',
+    'cosmetica-natural': 'D',
+    tarot: 'E', astrologia: 'E', numerologia: 'E', 'lectura-de-cartas': 'E', 'lectura-de-runas': 'E',
+    'feng-shui': 'E', cristaloterapia: 'E', 'registros-akashicos': 'E',
+    'coaching-de-vida': 'F', 'coaching-espiritual': 'F', 'desarrollo-personal': 'F', 'crecimiento-personal': 'F'
   };
 
   var DEMO_BIENESTAR_BY_PACK = {
@@ -437,13 +445,69 @@
   };
 
   var DEMO_BIENESTAR = {
-    reiki: DEMO_BIENESTAR_BY_PACK.A,
-    temazcales: DEMO_BIENESTAR_BY_PACK.C,
-    'centros-de-yoga': DEMO_BIENESTAR_BY_PACK.B,
+    reiki: [
+      { alias: 'Luna Reiki MTY', precio: '600', tagline: 'Sesiones de Reiki presencial y a distancia.', certificaciones: 'Certificación Reiki Usui nivel II', modalidadesTerapia: ['Reiki presencial', 'Reiki a distancia'], duracionSesionMinutos: '60_min', horario: 'Mar–Sáb 10:00–19:00', atencionDomicilio: 'No' }
+    ],
+    acupuntura: [
+      { alias: 'Clínica Meridiano Norte', precio: '700', tagline: 'Acupuntura terapéutica para dolor, estrés y equilibrio.', certificaciones: 'Cédula profesional · formación en acupuntura', modalidadesTerapia: ['Acupuntura', 'Electroacupuntura'], duracionSesionMinutos: '60_min', horario: 'Lun–Sáb 9:00–19:00', atencionDomicilio: 'No' },
+      { alias: 'Acupuntura del Valle', precio: '650', tagline: 'Sesiones de acupuntura con evaluación inicial.', certificaciones: 'Diplomado en medicina tradicional china', modalidadesTerapia: ['Acupuntura', 'Moxibustión'], duracionSesionMinutos: '45_min', horario: 'Mar–Vie 10:00–18:00' }
+    ],
+    biomagnetismo: [
+      { alias: 'BioCampo MTY', precio: '750', tagline: 'Biomagnetismo médico con seguimiento personalizado.', certificaciones: 'Diplomado en biomagnetismo médico', modalidadesTerapia: ['Biomagnetismo'], duracionSesionMinutos: '90_min', horario: 'Con cita previa' }
+    ],
+    aromaterapia: [
+      { alias: 'Esencia Viva', precio: '550', tagline: 'Aromaterapia clínica y blends personalizados.', certificaciones: 'Formación en aromaterapia terapéutica', modalidadesTerapia: ['Aromaterapia', 'Masaje aromático'], duracionSesionMinutos: '60_min', horario: 'Lun–Sáb 11:00–19:00' }
+    ],
+    ayurveda: [
+      { alias: 'Ayurveda Monterrey', precio: '800', tagline: 'Consultas ayurvédicas y rutinas de equilibrio.', certificaciones: 'Formación en Ayurveda clásico', tipoPractica: 'Ayurveda · consulta', modalidadClase: 'presencial', nivelesAtendidos: 'todos', horario: 'Mar–Sáb 10:00–18:00' }
+    ],
+    sonoterapia: [
+      { alias: 'Sonidos del Centro', precio: '500', tagline: 'Baños de gong, cuencos y sonoterapia en grupo.', certificaciones: 'Formación en sound healing', tipoPractica: 'Sonoterapia', modalidadClase: 'presencial', nivelesAtendidos: 'todos', horario: 'Vie–Dom con reservación' }
+    ],
     'masajes-holisticos': [
       { alias: 'Manos Sanadoras', precio: '650', tagline: 'Masaje holístico con aceites esenciales.', certificaciones: 'Certificación en masaje terapéutico holístico', modalidadesTerapia: ['Masaje holístico', 'Aromaterapia'], duracionSesionMinutos: '90_min', horario: 'Lun–Sáb 10:00–20:00' }
-    ].concat(DEMO_BIENESTAR_BY_PACK.A.slice(0, 2)),
+    ],
+    'masajes-relajantes': [
+      { alias: 'Tacto Sereno', precio: '580', tagline: 'Masaje relajante para estrés y tensión muscular.', certificaciones: 'Técnico en masaje relajante', modalidadesTerapia: ['Masaje relajante'], duracionSesionMinutos: '60_min', horario: 'Lun–Dom 10:00–21:00' }
+    ],
+    'masajes-terapeuticos': [
+      { alias: 'Terapia Muscular NX', precio: '720', tagline: 'Masaje terapéutico para rehabilitación y dolor.', certificaciones: 'Certificación en masaje terapéutico', modalidadesTerapia: ['Masaje terapéutico', 'Puntos gatillo'], duracionSesionMinutos: '60_min', horario: 'Lun–Vie 9:00–19:00' }
+    ],
+    temazcales: DEMO_BIENESTAR_BY_PACK.C,
+    'centros-de-yoga': DEMO_BIENESTAR_BY_PACK.B,
+    yoga: DEMO_BIENESTAR_BY_PACK.B,
+    pilates: [
+      { alias: 'Pilates Casa Norte', precio: '400', tagline: 'Pilates mat e reformer en grupos reducidos.', certificaciones: 'Instructora certificada de pilates', tipoPractica: 'Pilates', modalidadClase: 'presencial', nivelesAtendidos: 'todos', horario: 'Lun–Sáb 7:00–20:00' }
+    ],
+    meditacion: [
+      { alias: 'Silencio Práctico', precio: '300', tagline: 'Meditación guiada y mindfulness para principiantes.', certificaciones: 'Instructora de mindfulness', tipoPractica: 'Meditación', modalidadClase: 'hibrido', nivelesAtendidos: 'principiante', horario: 'Mar–Dom 8:00–19:00' }
+    ],
+    breathwork: [
+      { alias: 'Aire Consciente', precio: '450', tagline: 'Breathwork y respiración consciente en sesión grupal.', certificaciones: 'Facilitador de breathwork', tipoPractica: 'Breathwork', modalidadClase: 'presencial', nivelesAtendidos: 'todos', horario: 'Jue–Sáb con cita' }
+    ],
     'tiendas-esotericas': DEMO_BIENESTAR_BY_PACK.D,
+    herbolaria: [
+      { alias: 'Herbolaria del Valle', precio: '80', tagline: 'Plantas medicinales, tinturas y asesoría herbolaria.', certificaciones: 'Herbolaria tradicional', nombreComercial: 'Herbolaria del Valle', surtidoPrincipal: 'Plantas medicinales · Tinturas', categoriasProductoBienestar: ['Herbolaria', 'Tinturas'], ventaPresencial: 'Sí', horario: 'Lun–Vie 9:00–18:00' }
+    ],
+    herbolarios: [
+      { alias: 'Botica Verde', precio: '90', tagline: 'Herbolario con plantas, tés y remedios naturales.', certificaciones: 'Comercio herbolario local', nombreComercial: 'Botica Verde', surtidoPrincipal: 'Tés · Plantas · Ungüentos', categoriasProductoBienestar: ['Herbolaria'], ventaPresencial: 'Sí', direccion: 'Monterrey', horario: 'Lun–Sáb 10:00–19:00' }
+    ],
+    naturistas: [
+      { alias: 'Naturista del Norte', precio: '100', tagline: 'Productos naturistas y orientación de uso cotidiano.', certificaciones: 'Tienda naturista', nombreComercial: 'Naturista del Norte', surtidoPrincipal: 'Suplementos · Tés · Cuidado natural', categoriasProductoBienestar: ['Productos naturistas'], ventaPresencial: 'Sí', horario: 'Lun–Sáb 10:00–20:00' }
+    ],
+    'productos-naturistas': [
+      { alias: 'Casa Naturista', precio: '95', tagline: 'Línea naturista: suplementos, tés y cuidado personal.', certificaciones: 'Distribución naturista', nombreComercial: 'Casa Naturista', surtidoPrincipal: 'Suplementos · Tés · Cremas', categoriasProductoBienestar: ['Productos naturistas'], ventaPresencial: 'Sí', horario: 'Lun–Vie 10:00–19:00' }
+    ],
+    'productos-holisticos': DEMO_BIENESTAR_BY_PACK.D,
+    'suplementos-naturales': [
+      { alias: 'Vitalia Suplementos', precio: '250', tagline: 'Suplementos naturales y asesoría básica de uso.', certificaciones: 'Comercio de suplementos', nombreComercial: 'Vitalia Suplementos', surtidoPrincipal: 'Vitaminas · Minerales · Hierbas', categoriasProductoBienestar: ['Suplementos naturales'], ventaPresencial: 'Sí', horario: 'Lun–Sáb 10:00–20:00' }
+    ],
+    'cosmetica-natural': [
+      { alias: 'Piel Nativa', precio: '180', tagline: 'Cosmética natural artesanal sin fragancias sintéticas.', certificaciones: 'Elaboración artesanal', nombreComercial: 'Piel Nativa', surtidoPrincipal: 'Cremas · Jabones · Aceites faciales', categoriasProductoBienestar: ['Cosmética natural'], ventaPresencial: 'Sí', horario: 'Mar–Sáb 11:00–19:00' }
+    ],
+    sahumerios: [
+      { alias: 'Sahumería Luna', precio: '65', tagline: 'Sahumerios, resinas e inciensos para ritual y hogar.', certificaciones: 'Comercio esotérico local', nombreComercial: 'Sahumería Luna', surtidoPrincipal: 'Sahumerios · Resinas · Carbones', categoriasProductoBienestar: ['Sahumerios', 'Inciensos'], ventaPresencial: 'Sí', horario: 'Lun–Sáb 11:00–19:00' }
+    ],
     'velas-esotericas': [
       { alias: 'Casa de las Velas', precio: '120', tagline: 'Velas rituales, aromáticas y de intención.', certificaciones: 'Comercio esotérico local', nombreComercial: 'Casa de las Velas', surtidoPrincipal: 'Velas rituales · Aromáticas · Intención', categoriasProductoBienestar: ['Velas esotéricas', 'Velas aromáticas'], ventaPresencial: 'Sí', direccion: 'Barrio Antiguo, Monterrey', horario: 'Lun–Sáb 11:00–20:00' },
       { alias: 'Luz y Cera', precio: '90', tagline: 'Velas artesanales para rituales y meditación.', certificaciones: 'Elaboración artesanal', nombreComercial: 'Luz y Cera', surtidoPrincipal: 'Velas artesanales · Kits rituales', categoriasProductoBienestar: ['Velas esotéricas'], ventaPresencial: 'Sí', horario: 'Mar–Dom 10:00–19:00' }
@@ -453,19 +517,55 @@
       { alias: 'Vela Serena', precio: '95', tagline: 'Velas de soya con aromas naturales.', certificaciones: 'Elaboración artesanal', nombreComercial: 'Vela Serena', surtidoPrincipal: 'Velas de soya · Aromáticas', categoriasProductoBienestar: ['Velas aromáticas'], ventaPresencial: 'Sí', horario: 'Mar–Dom 11:00–19:00' }
     ],
     'venta-de-inciensos': [
-      { alias: 'Humos Sagrados', precio: '80', tagline: 'Inciensos, sahumerios y resinas naturales.', certificaciones: 'Comercio holístico', nombreComercial: 'Humos Sagrados', surtidoPrincipal: 'Inciensos · Sahumerios · Resinas', categoriasProductoBienestar: ['Inciensos', 'Sahumerios'], ventaPresencial: 'Sí', direccion: 'Centro Monterrey', horario: 'Lun–Sáb 10:00–20:00' },
-      { alias: 'Sahumería Luna', precio: '65', tagline: 'Inciensos importados y de elaboración local.', certificaciones: 'Importación y venta local', nombreComercial: 'Sahumería Luna', surtidoPrincipal: 'Inciensos · Conos · Carbones', categoriasProductoBienestar: ['Inciensos'], ventaPresencial: 'Sí', horario: 'Lun–Vie 11:00–19:00' }
+      { alias: 'Humos Sagrados', precio: '80', tagline: 'Inciensos, sahumerios y resinas naturales.', certificaciones: 'Comercio holístico', nombreComercial: 'Humos Sagrados', surtidoPrincipal: 'Inciensos · Sahumerios · Resinas', categoriasProductoBienestar: ['Inciensos', 'Sahumerios'], ventaPresencial: 'Sí', direccion: 'Centro Monterrey', horario: 'Lun–Sáb 10:00–20:00' }
     ],
     'venta-de-aceites-esenciales': [
-      { alias: 'Esencias del Valle', precio: '220', tagline: 'Aceites esenciales puros y blends aromáticos.', certificaciones: 'Distribución de aceites terapéuticos', nombreComercial: 'Esencias del Valle', surtidoPrincipal: 'Aceites esenciales · Blends · Difusores', categoriasProductoBienestar: ['Aceites esenciales', 'Aromaterapia'], ventaPresencial: 'Sí', direccion: 'San Pedro Garza García', horario: 'Lun–Sáb 10:00–19:00' },
-      { alias: 'Aroma Puro MX', precio: '180', tagline: 'Aceites esenciales y kits de aromaterapia.', certificaciones: 'Producto natural certificado', nombreComercial: 'Aroma Puro MX', surtidoPrincipal: 'Aceites · Roll-ons · Kits', categoriasProductoBienestar: ['Aceites esenciales'], ventaPresencial: 'Sí', horario: 'Mar–Sáb 11:00–20:00' }
+      { alias: 'Esencias del Valle', precio: '220', tagline: 'Aceites esenciales puros y blends aromáticos.', certificaciones: 'Distribución de aceites terapéuticos', nombreComercial: 'Esencias del Valle', surtidoPrincipal: 'Aceites esenciales · Blends · Difusores', categoriasProductoBienestar: ['Aceites esenciales', 'Aromaterapia'], ventaPresencial: 'Sí', direccion: 'San Pedro Garza García', horario: 'Lun–Sáb 10:00–19:00' }
     ],
     tarot: DEMO_BIENESTAR_BY_PACK.E,
+    astrologia: [
+      { alias: 'Astros MTY', precio: '500', tagline: 'Carta natal y tránsitos con enfoque práctico.', certificaciones: 'Estudios de astrología evolutiva', enfoqueEspiritual: 'Astrología evolutiva', modalidadLectura: 'online', horario: 'Lun–Sáb' }
+    ],
+    numerologia: [
+      { alias: 'Números del Alma', precio: '350', tagline: 'Numerología para decisiones y autoconocimiento.', certificaciones: 'Formación en numerología', enfoqueEspiritual: 'Numerología', modalidadLectura: 'ambas', horario: 'Con cita' }
+    ],
+    'lectura-de-cartas': [
+      { alias: 'Oráculo Serena', precio: '380', tagline: 'Lectura de cartas oráculo y tarot terapéutico.', certificaciones: 'Formación en lectura de cartas', enfoqueEspiritual: 'Oráculo · Tarot', modalidadLectura: 'ambas', horario: 'Mar–Dom con cita' }
+    ],
+    'lectura-de-runas': [
+      { alias: 'Runas del Norte', precio: '360', tagline: 'Lectura de runas con enfoque simbólico y práctico.', certificaciones: 'Estudio de runas nórdicas', enfoqueEspiritual: 'Runas', modalidadLectura: 'presencial', horario: 'Vie–Dom' }
+    ],
+    'feng-shui': [
+      { alias: 'Espacio Armónico', precio: '1,200', tagline: 'Asesoría de feng shui para hogar y negocio.', certificaciones: 'Consultor de feng shui', enfoqueEspiritual: 'Feng shui', modalidadLectura: 'presencial', horario: 'Lun–Vie con visita' }
+    ],
+    cristaloterapia: [
+      { alias: 'Cristales Vivos', precio: '420', tagline: 'Sesiones de cristaloterapia y selección de piedras.', certificaciones: 'Formación en cristaloterapia', enfoqueEspiritual: 'Cristales', modalidadLectura: 'presencial', horario: 'Mar–Sáb' }
+    ],
+    'registros-akashicos': [
+      { alias: 'Akasha Claro', precio: '700', tagline: 'Lectura de registros akáshicos con integración.', certificaciones: 'Facilitadora de registros akáshicos', enfoqueEspiritual: 'Registros akáshicos', modalidadLectura: 'ambas', horario: 'Con cita previa' }
+    ],
     'coaching-de-vida': DEMO_BIENESTAR_BY_PACK.F,
+    'coaching-espiritual': [
+      { alias: 'Despertar Interior', precio: '750', tagline: 'Coaching espiritual y desarrollo personal.', certificaciones: 'Diplomado en coaching ontológico', areaCoaching: 'Desarrollo personal · espiritualidad', modalidadSesionCoaching: 'mixta', horario: 'Con cita previa' }
+    ],
+    'desarrollo-personal': [
+      { alias: 'Ruta Personal', precio: '850', tagline: 'Sesiones de desarrollo personal y hábitos.', certificaciones: 'Coach de desarrollo personal', areaCoaching: 'Hábitos · metas · claridad', modalidadSesionCoaching: 'individual', horario: 'Lun–Vie 9:00–18:00' }
+    ],
+    'crecimiento-personal': [
+      { alias: 'Crece Contigo', precio: '800', tagline: 'Acompañamiento en crecimiento personal y autoconocimiento.', certificaciones: 'Formación en coaching de vida', areaCoaching: 'Crecimiento personal', modalidadSesionCoaching: 'individual', horario: 'Mar–Sáb' }
+    ],
     'retiros-espirituales': DEMO_BIENESTAR_BY_PACK.G,
     'turismo-espiritual': DEMO_BIENESTAR_BY_PACK.G,
+    'cacao-ceremonial': [
+      { alias: 'Círculo de Cacao', precio: '450', tagline: 'Ceremonias de cacao en círculo con música en vivo.', certificaciones: 'Facilitadora de cacao ceremonial', tipoExperiencia: 'ceremonia', duracionExperiencia: '2.5 horas', fechasExperiencia: 'Consultar calendario', lugarExperiencia: 'Monterrey', cupoMaximo: '18', horario: 'Fines de semana' }
+    ],
     'ceremonias-ayahuasca-rape-plantas-de-poder': DEMO_BIENESTAR_BY_PACK.H,
-    'ceremonias-ayahuasca': DEMO_BIENESTAR_BY_PACK.H
+    'ceremonias-ayahuasca': DEMO_BIENESTAR_BY_PACK.H,
+    'ceremonias-tradicionales': [
+      { alias: 'Fogata Ancestral', precio: 'Consultar', tagline: 'Ceremonias tradicionales con protocolo y respeto cultural.', certificaciones: 'Facilitadores con formación en medicina tradicional', tipoExperienciaCeremonial: 'ceremonia_tradicional', acompanamientoCeremonial: ['Guía experimentado', 'Espacio seguro'], requisitosPrevios: 'Mayor de edad · entrevista previa', fechasCeremonia: 'Consultar', cupoCeremonia: '12', lugarCeremonia: 'Espacio ceremonial privado', horario: 'Solo con cita' }
+    ],
+    chamanismo: DEMO_BIENESTAR_BY_PACK.H,
+    'medicina-ancestral': DEMO_BIENESTAR_BY_PACK.H
   };
 
   function norm(t) {
@@ -798,6 +898,8 @@
       tipoPerfil: esRetail ? 'negocio' : 'persona',
       categoria: catLabel,
       categoriaPublica: catLabel,
+      titulo: catLabel,
+      especialidad: catLabel,
       nombre: alias,
       alias: alias,
       precio: tarifa,
