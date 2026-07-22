@@ -739,12 +739,39 @@
     return ['Acabados y mantenimiento', 'Servicios del hogar', 'Cobertura clara', 'Perfil verificable en CariHub'];
   }
 
-  function packFaq(canonId) {
-    var pf = previewFields(canonId);
-    if (pf.faq && pf.faq.length) {
-      return pf.faq.map(function (fid) { return '¿' + fieldLabel(fid) + '?'; });
+  function packFaq(canonId, p) {
+    p = p || {};
+    var faqs = [];
+    function pushFaq(q, a) {
+      if (!q || !a) return;
+      faqs.push({ q: q, a: String(a) });
     }
-    return ['¿Incluyen materiales?', '¿Cuál es la tarifa?', '¿Atienden urgencias?', '¿Cuál es la cobertura?'];
+    function fallbackAnswer(fid) {
+      if (fid === 'garantiaServicioHogar') return 'La garantía publicada aplica sobre mano de obra según el servicio. Pregunta alcance y vigencia antes de autorizar.';
+      if (fid === 'coberturaGeografica') return 'Atendemos la zona publicada. Fuera de cobertura, consulta disponibilidad y costo extra.';
+      if (fid === 'tiempoRespuestaHogar') return 'El tiempo de respuesta depende de la demanda y la zona; confirma por WhatsApp al momento.';
+      if (fid === 'modalidadServicioHogar') return 'Indica si necesitas domicilio, taller o emergencia 24 h según lo publicado en el perfil.';
+      if (fid === 'materialesIncluidos') return 'Los materiales se acuerdan al cotizar: solo mano de obra, con materiales o mixto.';
+      if (fid === 'colaboracionesComerciales') return 'Si colaboramos con otros oficios o constructoras, lo indicamos en el perfil.';
+      return 'Escríbenos por el contacto publicado y te confirmamos detalles al momento.';
+    }
+    var pf = previewFields(canonId);
+    (pf.faq || []).forEach(function (fid) {
+      var label = fieldLabel(fid);
+      var val = formatFieldValue(fid, p[fid]);
+      pushFaq('¿' + label + '?', val || fallbackAnswer(fid));
+    });
+    if (faqs.length < 2) {
+      pushFaq('¿Incluyen materiales?', formatFieldValue('materialesIncluidos', p.materialesIncluidos) || fallbackAnswer('materialesIncluidos'));
+      pushFaq('¿Cuál es la cobertura?', formatFieldValue('coberturaGeografica', p.coberturaGeografica) || fallbackAnswer('coberturaGeografica'));
+    }
+    if (faqs.length < 3) {
+      pushFaq('¿Cuál es el horario?', p.horarioDetalle || 'Consulta el horario publicado en el perfil.');
+    }
+    if (faqs.length < 4) {
+      pushFaq('¿Atienden urgencias?', formatFieldValue('tiempoRespuestaHogar', p.tiempoRespuestaHogar) || fallbackAnswer('tiempoRespuestaHogar'));
+    }
+    return faqs.slice(0, 6);
   }
 
   function resolvePrecioPublico(p, u) {
@@ -776,7 +803,7 @@
     u.__hogarCanon = canonId;
     u.__hogarPack = pack;
     u.sectorId = u.sectorId || 'hogar';
-    u.titulo = u.titulo || p.blockTitle || CANON_BLOCK_TITLES[canonId] || PACK_TITLES[pack] || 'Servicios para el hogar';
+    u.titulo = u.categoriaPublica || u.categoria || p.blockTitle || CANON_BLOCK_TITLES[canonId] || PACK_TITLES[pack] || 'Servicios para el hogar';
     u.especialidad = u.especialidad || (p.especialidadesHogar && p.especialidadesHogar[0]) || (p.serviciosHogar && p.serviciosHogar[0]) || u.titulo;
     u.servicios = u.servicios || u.titulo;
     u.tagline = u.tagline || p.tagline || '';
@@ -800,7 +827,7 @@
     u.rating = u.rating != null ? u.rating : '—';
     u.opiniones = u.opiniones != null ? u.opiniones : 0;
     u.reviews = Array.isArray(u.reviews) ? u.reviews : [];
-    u.faq = Array.isArray(u.faq) && u.faq.length ? u.faq : packFaq(canonId);
+    u.faq = Array.isArray(u.faq) && u.faq.length ? u.faq : packFaq(canonId, p);
     u.noIncluidos = Array.isArray(u.noIncluidos) && u.noIncluidos.length
       ? u.noIncluidos
       : ['Materiales no declarados', 'Servicios fuera del alcance publicado', 'Urgencias no cubiertas salvo indicación'];

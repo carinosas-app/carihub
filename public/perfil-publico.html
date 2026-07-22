@@ -85,11 +85,12 @@
 <script src="js/carihub-perfil-busqueda-filtro.js"></script>
 <script src="js/carihub-comercio-sector-render.js?v=20260721com2"></script>
 <script src="js/carihub-automotriz-sector-render.js?v=20260722auto2"></script>
+<script src="js/carihub-hogar-sector-render.js?v=20260722hog1"></script>
 <script src="js/carihub-eventos-sector-render.js?v=20260627e3"></script>
 <script src="js/data/registro-sector-contract-registry.js?v=20260721faq2"></script>
 <script src="js/carihub-gastronomia-sector-render.js?v=20260702gast1"></script>
 <script src="js/carihub-public-render-lite.js?v=20260627e3"></script>
-<script src="js/resultados-demo.js?v=20260722auto2"></script>
+<script src="js/resultados-demo.js?v=20260722hog1"></script>
 <script src="js/carihub-multi-perfil.js"></script>
 <script src="js/carihub-blk01-profile-sanitize.js"></script>
 <script src="js/carihub-blk01-hub-adapter.js"></script>
@@ -8807,6 +8808,18 @@ function applyAutomotrizSectorHydrate(u){
   }
   return u||{};
 }
+function applyHogarSectorHydrate(u){
+  if(window.CariHubHogarSectorRender&&CariHubHogarSectorRender.hydrateDisplayFields){
+    return CariHubHogarSectorRender.hydrateDisplayFields(u||{});
+  }
+  return u||{};
+}
+function hogarBadgesHTML(u){
+  if(!u||!Array.isArray(u.__hogarBadges)||!u.__hogarBadges.length) return "";
+  return u.__hogarBadges.map(function(b){
+    return '<span class="res-badge '+safe(b.cls)+'">'+safe(b.text)+'</span>';
+  }).join("");
+}
 function automotrizBadgesHTML(u){
   if(!u||!Array.isArray(u.__automotrizBadges)||!u.__automotrizBadges.length) return "";
   return u.__automotrizBadges.map(function(b){
@@ -8859,18 +8872,21 @@ function renderProEmpresa(u, esEmpresa){
   u=applyGastronomiaSectorHydrate(u);
   u=applyComercioSectorHydrate(u);
   u=applyAutomotrizSectorHydrate(u);
+  u=applyHogarSectorHydrate(u);
   u=ensureProUbicacionFields(u);
   var isBs=!!u.__bienestarPack;
   var isEv=!!u.__eventosPack;
   var isGs=!!u.__gastronomiaPack;
   var isCom=!!u.__comercioPack || u.sectorId==="comercio" || !!u.comercioPerfil;
   var isAuto=!!u.__automotrizPack || u.sectorId==="automotriz" || !!u.automotrizPerfil;
-  var isSectorModern=isBs||isEv||isGs||isCom||isAuto;
+  var isHog=!!u.__hogarPack || u.sectorId==="hogar" || !!u.hogarPerfil;
+  var isSectorModern=isBs||isEv||isGs||isCom||isAuto||isHog;
   var loc=[u.ciudad,u.estado].filter(Boolean).join(", ");
   var verLabel = esEmpresa ? "Empresa verificada" : "Verificado";
   var layoutKey=esEmpresa?"empresa":"pro";
 
-  var datos = (isAuto && u.__automotrizDatos && u.__automotrizDatos.length) ? u.__automotrizDatos
+  var datos = (isHog && u.__hogarDatos && u.__hogarDatos.length) ? u.__hogarDatos
+    : (isAuto && u.__automotrizDatos && u.__automotrizDatos.length) ? u.__automotrizDatos
     : (isCom && u.__comercioDatos && u.__comercioDatos.length) ? u.__comercioDatos
     : (isEv && u.__eventosDatos && u.__eventosDatos.length) ? u.__eventosDatos
     : (isBs && u.__bienestarDatos && u.__bienestarDatos.length) ? u.__bienestarDatos
@@ -8889,20 +8905,21 @@ function renderProEmpresa(u, esEmpresa){
     return row(d[0],d[1],d[2]?safe(d[2]):"",block);
   }).join("");
 
-  /* Tabs Plomería/Hogar solo para demo hogar genérico — no contaminar sectores modernos. */
+  /* Tabs Plomería/Hogar solo para demo hogar genérico legacy — no contaminar sectores modernos (incluye Hogar sectorial). */
   var tabs = esEmpresa
     ? ["Plomería","Mantenimiento","Instalaciones","Residencial","Comercial"]
     : ["Servicio","Plomería","Categoría","Hogar",u.experiencia];
   var tabsHTML = isSectorModern ? '' : tabs.map(function(t,i){return '<span class="tb '+(i===1?"on":"")+'">'+safe(t)+'</span>';}).join("");
 
   var pagos = esEmpresa ? u.formasPago : u.metodosPago;
-  var priceLbl = (isAuto && u.__automotrizPriceLabel) ? u.__automotrizPriceLabel
+  var priceLbl = (isHog && u.__hogarPriceLabel) ? u.__hogarPriceLabel
+    : (isAuto && u.__automotrizPriceLabel) ? u.__automotrizPriceLabel
     : (isCom && u.__comercioPriceLabel) ? u.__comercioPriceLabel
     : (isEv && u.__eventosPriceLabel) ? u.__eventosPriceLabel
     : (isBs && u.__bienestarPriceLabel) ? u.__bienestarPriceLabel
     : (isGs && u.__gastronomiaPriceLabel) ? u.__gastronomiaPriceLabel
     : 'Desde';
-  var serviciosTitulo = isAuto ? '✅ Servicios automotrices' : isCom ? '✅ Oferta / surtido' : isEv ? '✅ Servicios para tu evento' : isBs ? '✅ Servicios / enfoque' : isGs ? '✅ Servicios / especialidad' : (esEmpresa ? '✅ Servicios principales' : '✅ Servicios incluidos');
+  var serviciosTitulo = isHog ? '✅ Servicios para el hogar' : isAuto ? '✅ Servicios automotrices' : isCom ? '✅ Oferta / surtido' : isEv ? '✅ Servicios para tu evento' : isBs ? '✅ Servicios / enfoque' : isGs ? '✅ Servicios / especialidad' : (esEmpresa ? '✅ Servicios principales' : '✅ Servicios incluidos');
   var noTitulo = (isSectorModern) ? '⛔ No incluido / no ofrecido' : '⛔ Servicios no incluidos';
   prepareProDerstackTitles(u, serviciosTitulo, noTitulo);
 
@@ -8911,7 +8928,7 @@ function renderProEmpresa(u, esEmpresa){
 
   var perfil=
     '<div class="pcard">'+
-      '<div class="idhead"><h1>'+safe(u.nombre)+'</h1>'+verificadoBadge(verLabel)+bienestarBadgesHTML(u)+eventosBadgesHTML(u)+gastronomiaBadgesHTML(u)+comercioBadgesHTML(u)+automotrizBadgesHTML(u)+(u.edad?'<span class="age" data-pub-block="edad">'+u.edad+' años</span>':'')+'</div>'+
+      '<div class="idhead"><h1>'+safe(u.nombre)+'</h1>'+verificadoBadge(verLabel)+bienestarBadgesHTML(u)+eventosBadgesHTML(u)+gastronomiaBadgesHTML(u)+comercioBadgesHTML(u)+automotrizBadgesHTML(u)+hogarBadgesHTML(u)+(u.edad?'<span class="age" data-pub-block="edad">'+u.edad+' años</span>':'')+'</div>'+
       '<div class="idsub">'+safe(u.titulo)+'</div>'+
       idlocUbicacionHTML(u, loc)+
       (tabsHTML ? '<div class="tabs">'+tabsHTML+'</div>' : '')+
@@ -9104,6 +9121,17 @@ function resolverPerfilDesdeQuery(q){
         }catch(ePresA){ presAuto=null; }
       }
       listaSeed=CariHubResultadosDemo.plantillaDemoAutomotriz(q,presAuto);
+    }else if(sectorHint==="hogar"&&typeof CariHubResultadosDemo.plantillaDemoHogar==="function"){
+      var presHog=null;
+      if(window.CariHubFieldEngineLite&&CariHubFieldEngineLite.resolvePublicPresentation){
+        try{
+          presHog=CariHubFieldEngineLite.resolvePublicPresentation({
+            categoria:q.categoria,
+            subcategoriaId:CariHubFieldEngineLite.lookupSubcategoriaId(q.categoria)
+          });
+        }catch(ePresH){ presHog=null; }
+      }
+      listaSeed=CariHubResultadosDemo.plantillaDemoHogar(q,presHog);
     }
     if(listaSeed&&listaSeed.length){
       perfil=listaSeed[0];
@@ -9126,7 +9154,8 @@ var PERFIL_SECTOR_BRIDGE_EXCLUDED={salud:1,profesionales:1,bienestar:1,eventos:1
 var PERFIL_SECTOR_BRIDGE_RENDER={
   restaurantes:{global:"CariHubGastronomiaSectorRender"},
   comercio:{global:"CariHubComercioSectorRender"},
-  automotriz:{global:"CariHubAutomotrizSectorRender"}
+  automotriz:{global:"CariHubAutomotrizSectorRender"},
+  hogar:{global:"CariHubHogarSectorRender"}
 };
 function perfilBridgeUserHasField(u,key){
   if(!u) return false;
@@ -9624,7 +9653,20 @@ function aplicarPerfilResultadosEnDemo(vista,u){
       if(CariHubResultadosSector.sectorDeCategoria(catAuto)==="automotriz") esAutomotrizSector=true;
     }catch(eAutoCat){ /* opcional */ }
   }
-  if(esBienestarHolo||esSaludSector||esComercioSector||esAutomotrizSector){
+  var esHogarSector=false;
+  if(window.CariHubHogarSectorRender&&CariHubHogarSectorRender.isHogarSectorPerfil){
+    esHogarSector=!!CariHubHogarSectorRender.isHogarSectorPerfil(u);
+  }
+  if(!esHogarSector&&(u.sectorId==="hogar"||u.hogarPerfil)){
+    esHogarSector=true;
+  }
+  if(!esHogarSector&&window.CariHubResultadosSector&&CariHubResultadosSector.sectorDeCategoria){
+    try{
+      var catHog=u.subcategoriaId||u.categoriaPublica||u.categoria||"";
+      if(CariHubResultadosSector.sectorDeCategoria(catHog)==="hogar") esHogarSector=true;
+    }catch(eHogCat){ /* opcional */ }
+  }
+  if(esBienestarHolo||esSaludSector||esComercioSector||esAutomotrizSector||esHogarSector){
     aplicarPerfilDesdeRegistro(vista,u);
     if(DEMO[vista]){
       DEMO[vista].__previewRegistro=false;

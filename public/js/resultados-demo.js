@@ -1497,12 +1497,76 @@
     ]
   };
 
+  /* Demos 1:1 — evita que pack A/B/C/D mezclen plomería, HVAC, cerrajería y jardín. */
   var DEMO_HOGAR = {
-    plomeros: DEMO_HOGAR_BY_PACK.A,
-    electricistas: DEMO_HOGAR_BY_PACK.B,
-    carpinteros: DEMO_HOGAR_BY_PACK.C,
-    pintores: DEMO_HOGAR_BY_PACK.D,
-    jardineria: [DEMO_HOGAR_BY_PACK.D[1]]
+    plomeros: [
+      { alias: 'Plomería Express MTY', precio: '300', tagline: 'Fugas, destapes e instalaciones hidráulicas con garantía.', serviciosHogar: ['Fugas', 'Destapes', 'Instalaciones', 'Boilers'], especialidadesHogar: ['Residencial', 'Comercial'], modalidadServicioHogar: 'domicilio', tiposInmueble: ['casa', 'departamento'], tarifaDesde: '300', tiempoRespuestaHogar: 'mismo_dia', garantiaServicioHogar: '30 días en mano de obra', materialesIncluidos: 'convenir', coberturaGeografica: 'Monterrey y área metropolitana', diferenciadorHogar: 'Diagnóstico de fugas sin romper de más', horario: 'Lun–Dom 7:00–22:00', verificada: true },
+      { alias: 'Hidráulica del Valle', precio: '280', tagline: 'Plomería residencial: tinacos, calentadores y drenaje.', serviciosHogar: ['Tinacos', 'Calentadores', 'Drenaje'], modalidadServicioHogar: 'emergencia_24h', tiempoRespuestaHogar: 'emergencia_2h', tarifaDesde: '280', horario: '24 horas', verificada: true }
+    ],
+    albaniles: [
+      { alias: 'Albañilería del Norte', precio: '450', tagline: 'Muros, aplanados y remodelaciones de obra húmeda.', serviciosHogar: ['Muros', 'Aplanados', 'Remodelación', 'Cimientos'], modalidadServicioHogar: 'domicilio', tiposInmueble: ['casa', 'local'], tarifaDesde: '450', anosExperienciaHogar: '8_15', materialesIncluidos: 'con_materiales', garantiaServicioHogar: 'Garantía en obra según alcance', diferenciadorHogar: 'Cuadrilla propia', horario: 'Lun–Sáb 7:00–18:00', verificada: true },
+      { alias: 'Obra y Acabados NL', precio: '420', tagline: 'Ampliaciones, losas y acabados en albañilería.', serviciosHogar: ['Ampliaciones', 'Losas', 'Acabados'], modalidadServicioHogar: 'domicilio', tarifaDesde: '420', anosExperienciaHogar: '4_7', horario: 'Lun–Vie 8:00–17:00', verificada: true }
+    ],
+    impermeabilizadores: [
+      { alias: 'Impermeabilizaciones Norte', precio: '380', tagline: 'Azoteas, cisternas y sellado contra filtraciones.', serviciosHogar: ['Azoteas', 'Cisternas', 'Sellado', 'Membranas'], modalidadServicioHogar: 'domicilio', tiposInmueble: ['casa', 'edificio', 'local'], tarifaDesde: '380', garantiaServicioHogar: 'Hasta 5 años según sistema', materialesIncluidos: 'con_materiales', diferenciadorHogar: 'Sistemas prefabricados y acrílicos', horario: 'Lun–Sáb 8:00–18:00', verificada: true },
+      { alias: 'Sellado Total MTY', precio: '350', tagline: 'Impermeabilización de techos y muros húmedos.', serviciosHogar: ['Techos', 'Muros húmedos', 'Juntas'], modalidadServicioHogar: 'domicilio', tarifaDesde: '350', horario: 'Lun–Vie 8:00–17:00', verificada: true }
+    ],
+    electricistas: [
+      { alias: 'Electricista Pro MTY', precio: '350', tagline: 'Instalaciones eléctricas, tableros y fallas residenciales.', serviciosHogar: ['Instalación', 'Reparación', 'Tableros', 'Cortos'], especialidadesHogar: ['Residencial', 'Comercial'], modalidadServicioHogar: 'domicilio', tarifaDesde: '350', tiempoRespuestaHogar: '24_48h', garantiaServicioHogar: '90 días en mano de obra', diferenciadorHogar: 'Norma NOM y puesta a tierra', horario: 'Lun–Sáb 8:00–20:00', verificada: true },
+      { alias: 'Circuito Seguro NL', precio: '320', tagline: 'Contactos, luminarias y diagnóstico de fallas.', serviciosHogar: ['Contactos', 'Luminarias', 'Diagnóstico'], especialidadesHogar: ['Residencial'], modalidadServicioHogar: 'domicilio', tarifaDesde: '320', horario: 'Lun–Sáb 9:00–19:00', verificada: true }
+    ],
+    'tecnicos-en-clima-hvac': [
+      { alias: 'Clima & HVAC Norte', precio: '500', tagline: 'Minisplits, mantenimiento y carga de gas refrigerante.', serviciosHogar: ['Instalación minisplit', 'Mantenimiento', 'Carga de gas', 'Reparación'], especialidadesHogar: ['HVAC', 'Minisplit'], modalidadServicioHogar: 'domicilio', tarifaDesde: '500', tiempoRespuestaHogar: 'mismo_dia', diferenciadorHogar: 'Recuperación ecológica de gas', horario: 'Lun–Dom 9:00–20:00', verificada: true },
+      { alias: 'Aire Fresco MTY', precio: '480', tagline: 'Instalación y servicio de aire acondicionado hogar.', serviciosHogar: ['Instalación', 'Limpieza de filtros', 'Reparación'], especialidadesHogar: ['Aire acondicionado'], modalidadServicioHogar: 'domicilio', tarifaDesde: '480', horario: 'Lun–Sáb 9:00–19:00', verificada: true }
+    ],
+    'instaladores-de-paneles-solares': [
+      { alias: 'Solar Paneles NL', precio: 'Consultar', tagline: 'Diseño e instalación de paneles solares residenciales.', serviciosHogar: ['Diseño', 'Instalación', 'Inversores', 'Mantenimiento'], especialidadesHogar: ['Fotovoltaico', 'Residencial'], modalidadServicioHogar: 'domicilio', tarifaDesde: 'Consultar', anosExperienciaHogar: '4_7', diferenciadorHogar: 'Cálculo de ahorro y CFE', horario: 'Lun–Vie 9:00–18:00', verificada: true },
+      { alias: 'Energía Limpia del Norte', precio: 'Consultar', tagline: 'Sistemas solares interconectados y baterías.', serviciosHogar: ['Paneles', 'Baterías', 'Interconexión'], especialidadesHogar: ['Fotovoltaico'], modalidadServicioHogar: 'domicilio', tarifaDesde: 'Consultar', horario: 'Lun–Sáb con cita', verificada: true }
+    ],
+    'tecnicos-en-camaras-de-seguridad': [
+      { alias: 'Cámaras Seguras MTY', precio: '600', tagline: 'CCTV, DVR/NVR y monitoreo residencial.', serviciosHogar: ['Cámaras IP', 'DVR/NVR', 'Acceso remoto', 'Alarmas'], especialidadesHogar: ['CCTV', 'Residencial'], modalidadServicioHogar: 'domicilio', tarifaDesde: '600', diferenciadorHogar: 'App móvil incluida', horario: 'Lun–Sáb 9:00–19:00', verificada: true },
+      { alias: 'Vigilancia Digital Norte', precio: '550', tagline: 'Instalación de cámaras y cableado estructurado.', serviciosHogar: ['Instalación', 'Cableado', 'Configuración remota'], especialidadesHogar: ['CCTV'], modalidadServicioHogar: 'domicilio', tarifaDesde: '550', horario: 'Lun–Vie 9:00–18:00', verificada: true }
+    ],
+    'domotica-casa-inteligente': [
+      { alias: 'Domótica Smart Home', precio: '700', tagline: 'Iluminación, cerraduras y escenas inteligentes.', serviciosHogar: ['Iluminación smart', 'Cerraduras', 'Termostatos', 'Asistentes de voz'], especialidadesHogar: ['Domótica', 'IoT'], modalidadServicioHogar: 'domicilio', tarifaDesde: '700', diferenciadorHogar: 'Integración multi-marca', horario: 'Lun–Sáb con cita', verificada: true },
+      { alias: 'Casa Inteligente NL', precio: '650', tagline: 'Automatización de luces, persianas y seguridad.', serviciosHogar: ['Automatización', 'Persianas', 'Sensores'], especialidadesHogar: ['Domótica'], modalidadServicioHogar: 'domicilio', tarifaDesde: '650', horario: 'Mar–Sáb 10:00–19:00', verificada: true }
+    ],
+    carpinteros: [
+      { alias: 'Carpintería a Medida', precio: '800', tagline: 'Closets, muebles y carpintería fina a medida.', serviciosHogar: ['Closets', 'Muebles', 'Puertas', 'Repisas'], tiposTrabajoHogar: ['A medida', 'Reparación'], materialesIncluidos: 'convenir', modalidadServicioHogar: 'ambos', tarifaDesde: '800', diferenciadorHogar: 'Diseño 3D previo', horario: 'Con cita Lun–Sáb', verificada: true },
+      { alias: 'Madera & Diseño Sur', precio: '750', tagline: 'Cocinas integrales y carpintería residencial.', serviciosHogar: ['Cocinas', 'Closets', 'Acabados'], tiposTrabajoHogar: ['A medida'], modalidadServicioHogar: 'domicilio', tarifaDesde: '750', horario: 'Lun–Vie 9:00–18:00', verificada: true }
+    ],
+    herreros: [
+      { alias: 'Herrería y Estructuras', precio: '600', tagline: 'Portones, barandales y estructuras metálicas.', serviciosHogar: ['Portones', 'Barandales', 'Estructuras', 'Rejas'], tiposTrabajoHogar: ['Fabricación', 'Instalación'], modalidadServicioHogar: 'domicilio', tarifaDesde: '600', materialesIncluidos: 'con_materiales', diferenciadorHogar: 'Soldadura certificada', horario: 'Lun–Sáb 8:00–18:00', verificada: true },
+      { alias: 'Metal Arte Norte', precio: '580', tagline: 'Herrería ornamental y cancelería.', serviciosHogar: ['Ornamental', 'Cancelería', 'Escaleras'], tiposTrabajoHogar: ['Fabricación'], modalidadServicioHogar: 'ambos', tarifaDesde: '580', horario: 'Lun–Vie 8:00–17:00', verificada: true }
+    ],
+    'instaladores-de-pisos': [
+      { alias: 'Pisos & Acabados Pro', precio: '450', tagline: 'Laminados, vinílicos, duela y porcelanato.', serviciosHogar: ['Laminado', 'Vinílico', 'Duela', 'Porcelanato'], tiposTrabajoHogar: ['Instalación', 'Nivelación'], modalidadServicioHogar: 'domicilio', tiposInmueble: ['casa', 'departamento', 'local'], tarifaDesde: '450', materialesIncluidos: 'convenir', diferenciadorHogar: 'Nivelación incluida en presupuesto', horario: 'Lun–Sáb 8:00–18:00', verificada: true },
+      { alias: 'Piso Firme MTY', precio: '420', tagline: 'Instalación de pisos y zoclos residenciales.', serviciosHogar: ['Instalación', 'Zoclos', 'Reparación'], modalidadServicioHogar: 'domicilio', tarifaDesde: '420', horario: 'Lun–Vie 9:00–17:00', verificada: true }
+    ],
+    cerrajeros: [
+      { alias: 'Cerrajería 24h Norte', precio: '400', tagline: 'Aperturas, cambio de chapas y llaves de emergencia.', serviciosHogar: ['Apertura', 'Cambio de chapa', 'Duplicado', 'Cerraduras digitales'], modalidadServicioHogar: 'emergencia_24h', tiempoRespuestaHogar: 'emergencia_2h', tarifaDesde: '400', diferenciadorHogar: 'Servicio 24/7 sin dañar puerta', horario: '24 horas', verificada: true },
+      { alias: 'Llaves Express MTY', precio: '350', tagline: 'Cerrajería residencial y automotriz ligera.', serviciosHogar: ['Apertura', 'Duplicado', 'Cilindros'], modalidadServicioHogar: 'domicilio', tiempoRespuestaHogar: 'mismo_dia', tarifaDesde: '350', horario: 'Lun–Dom 8:00–22:00', verificada: true }
+    ],
+    pintores: [
+      { alias: 'Pintura Profesional MTY', precio: '280', tagline: 'Interiores, exteriores y acabados decorativos.', serviciosHogar: ['Interiores', 'Exteriores', 'Texturizados', 'Impermeable'], modalidadServicioHogar: 'domicilio', tiposInmueble: ['casa', 'departamento', 'local'], tarifaDesde: '280', materialesIncluidos: 'convenir', garantiaServicioHogar: 'Garantía en mano de obra', diferenciadorHogar: 'Preparación de superficie incluida', horario: 'Lun–Sáb 8:00–19:00', verificada: true },
+      { alias: 'Color & Acabado Sur', precio: '260', tagline: 'Pintura residencial y retoques profesionales.', serviciosHogar: ['Interiores', 'Retoques', 'Barniz'], modalidadServicioHogar: 'domicilio', tarifaDesde: '260', horario: 'Lun–Vie 8:00–18:00', verificada: true }
+    ],
+    jardineria: [
+      { alias: 'Jardinería Verde', precio: '400', tagline: 'Diseño, poda y mantenimiento de jardines.', serviciosHogar: ['Diseño', 'Poda', 'Mantenimiento', 'Riego'], modalidadServicioHogar: 'domicilio', tarifaDesde: '400', coberturaGeografica: 'Monterrey sur y Carretera Nacional', diferenciadorHogar: 'Planes mensuales de mantenimiento', horario: 'Mar–Dom 8:00–18:00', verificada: true },
+      { alias: 'Paisaje Norte', precio: '380', tagline: 'Poda de árboles, pasto y jardinería residencial.', serviciosHogar: ['Poda de árboles', 'Pasto', 'Fertilización'], modalidadServicioHogar: 'domicilio', tarifaDesde: '380', horario: 'Lun–Sáb 7:00–17:00', verificada: true }
+    ],
+    fumigacion: [
+      { alias: 'Fumigación Total NL', precio: '450', tagline: 'Control de plagas: cucarachas, roedores y termitas.', serviciosHogar: ['Cucarachas', 'Roedores', 'Termitas', 'Preventivo'], modalidadServicioHogar: 'domicilio', tiposInmueble: ['casa', 'departamento', 'local'], tarifaDesde: '450', garantiaServicioHogar: 'Garantía de 30–90 días según plaga', diferenciadorHogar: 'Productos de baja toxicidad', horario: 'Lun–Sáb 8:00–19:00', verificada: true },
+      { alias: 'Antiplagas Express', precio: '400', tagline: 'Fumigación residencial y comercial express.', serviciosHogar: ['Residencial', 'Comercial', 'Sanitización'], modalidadServicioHogar: 'domicilio', tarifaDesde: '400', horario: 'Lun–Dom 9:00–20:00', verificada: true }
+    ],
+    'limpieza-del-hogar': [
+      { alias: 'Limpieza Express Hogar', precio: '350', tagline: 'Limpieza profunda de casas y departamentos.', serviciosHogar: ['Limpieza profunda', 'Cocina', 'Baños', 'Vidrios'], modalidadServicioHogar: 'domicilio', tiposInmueble: ['casa', 'departamento'], tarifaDesde: '350', tiempoRespuestaHogar: '24_48h', diferenciadorHogar: 'Productos ecológicos opcionales', horario: 'Lun–Sáb 8:00–18:00', verificada: true },
+      { alias: 'Hogar Impecable MTY', precio: '320', tagline: 'Recurrencia semanal o quincenal de limpieza.', serviciosHogar: ['Recurrencia', 'Orden', 'Desinfección'], modalidadServicioHogar: 'domicilio', tarifaDesde: '320', horario: 'Lun–Vie 9:00–17:00', verificada: true }
+    ],
+    'mantenimiento-general': [
+      { alias: 'Mantenimiento Integral Casa', precio: '380', tagline: 'Reparaciones menores, plomería ligera y electricidad básica.', serviciosHogar: ['Reparaciones menores', 'Plomería ligera', 'Electricidad básica', 'Pintura touch-up'], modalidadServicioHogar: 'domicilio', tiposInmueble: ['casa', 'departamento'], tarifaDesde: '380', tiempoRespuestaHogar: 'mismo_dia', diferenciadorHogar: 'Un solo técnico multi-oficio', horario: 'Lun–Sáb 8:00–20:00', verificada: true },
+      { alias: 'Todo en Casa NL', precio: '360', tagline: 'Mantenimiento preventivo y correctivo del hogar.', serviciosHogar: ['Preventivo', 'Correctivo', 'Checklist mensual'], modalidadServicioHogar: 'domicilio', tarifaDesde: '360', horario: 'Lun–Vie 8:00–18:00', verificada: true }
+    ]
   };
 
   function hogarPackDeSub(subId) {
@@ -1525,7 +1589,8 @@
       tiempoRespuestaHogar: base.tiempoRespuestaHogar || '',
       garantiaServicioHogar: base.garantiaServicioHogar || '',
       coberturaGeografica: base.coberturaGeografica || base.zonaCobertura || '',
-      colaboracionesComerciales: base.colaboracionesComerciales || ''
+      colaboracionesComerciales: base.colaboracionesComerciales || '',
+      horarioDetalle: base.horarioDetalle || base.horario || ''
     };
     var keys = [
       'alias', 'serviciosHogar', 'especialidadesHogar', 'tiposTrabajoHogar', 'tiposInmueble',
@@ -1539,7 +1604,7 @@
   }
 
   function armarPerfilHogar(base, idx, Q, pres) {
-    var subId = pres.subcategoriaId || idCategoria(Q.categoria);
+    var subId = (pres && pres.subcategoriaId) || idCategoria(Q.categoria);
     var catLabel = base.categoriaPublica || labelCategoria(Q.categoria);
     var pack = base.deltaPack || hogarPackDeSub(subId);
     var perfil = buildHogarPerfilDemo(base, subId, pack);
@@ -1570,10 +1635,26 @@
       hogarPerfil: perfil,
       alias: perfil.alias || nombre,
       nombre: perfil.alias || nombre,
-      especialidad: (perfil.serviciosHogar && perfil.serviciosHogar[0]) || base.especialidad || ''
+      especialidad: (perfil.especialidadesHogar && perfil.especialidadesHogar[0])
+        || (perfil.serviciosHogar && perfil.serviciosHogar[0])
+        || base.especialidad || ''
     };
 
-    return enriquecerPerfil(u, Q);
+    if (global.CariHubHogarSectorRender && CariHubHogarSectorRender.resolveVistaPerfil) {
+      u.__vista = CariHubHogarSectorRender.resolveVistaPerfil(u);
+    } else {
+      u.__vista = 'pro';
+    }
+
+    u = enriquecerPerfil(u, Q);
+    u.sectorId = 'hogar';
+    u.deltaPack = pack;
+    u.hogarPerfil = perfil;
+    if (global.CariHubHogarSectorRender && CariHubHogarSectorRender.resolveVistaPerfil) {
+      var vistaHogar = CariHubHogarSectorRender.resolveVistaPerfil(u);
+      if (vistaHogar) u.__vista = vistaHogar;
+    }
+    return u;
   }
 
   function poolDemoHogar(subId) {
