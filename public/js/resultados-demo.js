@@ -1892,44 +1892,101 @@
     });
   }
 
-  var AUTOMOTRIZ_NEGOCIO_SUBS = ['agencias-de-autos'];
+  var AUTOMOTRIZ_NEGOCIO_SUBS = ['agencias-de-autos', 'lotes-de-autos'];
 
   var DEMO_AUTOMOTRIZ_BY_PACK = {
     A: [
-      { alias: 'Taller Mecánico del Norte', precio: '500', tagline: 'Mecánica general, frenos y suspensión.', serviciosMecanica: ['Afinación', 'Frenos', 'Suspensión'], especialidadesMecanica: ['Motor', 'Transmisión'], marcasAtendidas: ['Chevrolet', 'Nissan', 'Ford'], modalidadServicioAuto: 'taller_fijo', tarifaDesde: '500', coberturaGeografica: 'Monterrey norte', horario: 'Lun–Sáb 8:00–19:00', verificada: true },
-      { alias: 'Mecánico a Domicilio MTY', precio: '400', tagline: 'Diagnóstico y reparaciones en tu domicilio.', serviciosMecanica: ['Diagnóstico', 'Batería', 'Fugas'], modalidadServicioAuto: 'domicilio', tiempoRespuestaAuto: 'mismo_dia', tarifaDesde: '400', horario: 'Lun–Dom', verificada: true }
+      { alias: 'Taller Mecánico del Norte', precio: '500', tagline: 'Mecánica general, frenos y suspensión.', serviciosMecanica: ['Afinación', 'Frenos', 'Suspensión'], especialidadesMecanica: ['Motor', 'Transmisión'], marcasAtendidas: ['Chevrolet', 'Nissan', 'Ford'], modalidadServicioAuto: 'taller_fijo', tarifaDesde: '500', coberturaGeografica: 'Monterrey norte', horario: 'Lun–Sáb 8:00–19:00', verificada: true }
     ],
     B: [
       { alias: 'Vulcanizadora Rápida', precio: '350', tagline: 'Llantas, balanceo y alineación.', serviciosLlantas: ['Venta', 'Montaje', 'Balanceo', 'Alineación'], tiposLlantas: ['Radial', 'Run flat'], modalidadServicioAuto: 'taller_fijo', tarifaDesde: '350', horario: 'Lun–Sáb 8:00–20:00', verificada: true }
     ],
     C: [
-      { alias: 'Detailing Premium MTY', precio: '800', tagline: 'Lavado, pulido y protección cerámica.', serviciosEsteticaAuto: ['Lavado', 'Detailing', 'Cerámico'], serviciosCarroceria: ['Pulido'], modalidadServicioAuto: 'taller_fijo', tarifaDesde: '800', horario: 'Mar–Dom', verificada: true },
-      { alias: 'Hojalatería y Pintura Sur', precio: 'Consultar', tagline: 'Reparación de carrocería y pintura automotriz.', serviciosCarroceria: ['Hojalatería', 'Pintura'], modalidadServicioAuto: 'taller_fijo', tarifaDesde: 'Consultar', horario: 'Lun–Vie', verificada: true }
+      { alias: 'Detailing Premium MTY', precio: '800', tagline: 'Lavado, pulido y protección cerámica.', serviciosEsteticaAuto: ['Lavado', 'Detailing', 'Cerámico'], modalidadServicioAuto: 'taller_fijo', tarifaDesde: '800', horario: 'Mar–Dom', verificada: true }
     ],
     D: [
-      { alias: 'Refaccionaria Central', precio: 'Consultar', tagline: 'Refacciones originales y genéricas.', serviciosRefacciones: ['Venta', 'Pedido especial'], lineasRefacciones: ['Frenos', 'Suspensión', 'Motor'], modalidadServicioAuto: 'taller_fijo', tarifaDesde: 'Consultar', horario: 'Lun–Sáb 9:00–19:00', verificada: true },
-      { alias: 'A/C Automotriz Pro', precio: '600', tagline: 'Carga de gas, diagnóstico y reparación de A/C.', serviciosEspecialidadAuto: ['A/C', 'Diagnóstico eléctrico'], modalidadServicioAuto: 'ambos', tarifaDesde: '600', horario: 'Lun–Sáb', verificada: true }
+      { alias: 'Refaccionaria Central', precio: 'Consultar', tagline: 'Refacciones originales y genéricas.', serviciosRefacciones: ['Venta', 'Pedido especial'], lineasRefacciones: ['Frenos', 'Suspensión', 'Motor'], modalidadServicioAuto: 'taller_fijo', tarifaDesde: 'Consultar', horario: 'Lun–Sáb 9:00–19:00', verificada: true }
     ],
     E: [
-      { nombreComercial: 'Autos Seminuevos MTY', precio: 'Consultar', tagline: 'Seminuevos certificados con financiamiento.', serviciosVentaAutos: ['Seminuevos', 'Contado', 'Crédito'], tiposVehiculoVenta: ['Sedán', 'SUV', 'Pickup'], financiamientoDisponible: 'Sí', inventarioAproximado: '40 unidades', horario: 'Lun–Sáb 10:00–20:00', verificada: true },
-      { alias: 'Lote de Autos del Valle', precio: 'Consultar', tagline: 'Venta de usados con revisión mecánica.', serviciosVentaAutos: ['Usados', 'Consignación'], tiposVehiculoVenta: ['Económicos', 'SUV'], financiamientoDisponible: 'Parcial', tarifaDesde: 'Consultar', horario: 'Lun–Dom', verificada: true }
+      { nombreComercial: 'Autos Seminuevos MTY', precio: 'Consultar', tagline: 'Seminuevos certificados con financiamiento.', serviciosVentaAutos: ['Seminuevos', 'Contado', 'Crédito'], tiposVehiculoVenta: ['Sedán', 'SUV', 'Pickup'], financiamientoDisponible: 'si_terceros', inventarioAproximado: '40 unidades', horario: 'Lun–Sáb 10:00–20:00', verificada: true }
     ],
     F: [
       { alias: 'Grúa 24 h Norte', precio: '800', tagline: 'Grúa y auxilio vial en carretera y ciudad.', serviciosGrua: ['Grúa', 'Paso de corriente', 'Cambio de llanta'], modalidadServicioAuto: 'unidad_movil', coberturaCarretera: '100 km radio MTY', tiempoRespuestaAuto: 'emergencia_30min', tarifaDesde: '800', horario: '24 horas', verificada: true }
     ]
   };
 
+  /* Demos 1:1 — evita que pack A/C/D/E mezclen mecánico, detailing, A/C y lotes. */
   var DEMO_AUTOMOTRIZ = {
-    'talleres-mecanicos': DEMO_AUTOMOTRIZ_BY_PACK.A,
-    vulcanizadoras: DEMO_AUTOMOTRIZ_BY_PACK.B,
-    'lavado-de-autos': DEMO_AUTOMOTRIZ_BY_PACK.C,
-    refaccionarias: DEMO_AUTOMOTRIZ_BY_PACK.D,
-    'agencias-de-autos': DEMO_AUTOMOTRIZ_BY_PACK.E,
-    'gruas-y-auxilio-vial': DEMO_AUTOMOTRIZ_BY_PACK.F
+    'talleres-mecanicos': [
+      { alias: 'Taller Mecánico del Norte', precio: '500', tagline: 'Mecánica general: afinación, frenos y suspensión.', serviciosMecanica: ['Afinación', 'Frenos', 'Suspensión'], especialidadesMecanica: ['Motor', 'Transmisión'], marcasAtendidas: ['Chevrolet', 'Nissan', 'Ford'], tiposVehiculoAtendidos: ['Sedán', 'SUV', 'Pickup'], modalidadServicioAuto: 'taller_fijo', garantiaServicioAuto: '3 meses en mano de obra', tarifaDesde: '500', coberturaGeografica: 'Monterrey norte', diferenciadorAutomotriz: 'Diagnóstico computarizado', horario: 'Lun–Sáb 8:00–19:00', verificada: true },
+      { alias: 'Taller Express Cumbres', precio: '450', tagline: 'Reparación rápida de frenos, embrague y suspensión.', serviciosMecanica: ['Frenos', 'Embrague', 'Suspensión'], marcasAtendidas: ['VW', 'Nissan', 'Toyota'], modalidadServicioAuto: 'taller_fijo', tarifaDesde: '450', horario: 'Lun–Vie 8:00–18:00', verificada: true }
+    ],
+    electromecanicos: [
+      { alias: 'ElectroAuto Norte', precio: '550', tagline: 'Sistema eléctrico, sensores y diagnóstico OBD.', serviciosMecanica: ['Diagnóstico eléctrico', 'Sensores', 'Alternador'], especialidadesMecanica: ['Eléctrico', 'Electrónica'], marcasAtendidas: ['GM', 'Ford', 'Nissan'], modalidadServicioAuto: 'taller_fijo', tarifaDesde: '550', diferenciadorAutomotriz: 'Escáner multimarca', horario: 'Lun–Sáb 9:00–19:00', verificada: true },
+      { alias: 'Circuito Automotriz', precio: '500', tagline: 'Arranque, cableado y módulos electrónicos.', serviciosMecanica: ['Arranque', 'Cableado', 'Módulos'], modalidadServicioAuto: 'ambos', tiempoRespuestaAuto: 'mismo_dia', tarifaDesde: '500', horario: 'Lun–Sáb', verificada: true }
+    ],
+    'mecanicos-a-domicilio': [
+      { alias: 'Mecánico a Domicilio MTY', precio: '400', tagline: 'Diagnóstico y reparaciones básicas en tu domicilio.', serviciosMecanica: ['Diagnóstico', 'Batería', 'Fugas', 'Afinación ligera'], modalidadServicioAuto: 'domicilio', tiempoRespuestaAuto: 'mismo_dia', tarifaDesde: '400', coberturaGeografica: 'Área metropolitana MTY', diferenciadorAutomotriz: 'Unidad móvil equipada', horario: 'Lun–Dom 8:00–20:00', verificada: true },
+      { alias: 'Taller Móvil del Valle', precio: '450', tagline: 'Mecánica a domicilio para no mover el auto.', serviciosMecanica: ['Frenos', 'Suspensión', 'Cambio de aceite'], modalidadServicioAuto: 'unidad_movil', tiempoRespuestaAuto: '1h', tarifaDesde: '450', horario: 'Lun–Sáb 8:00–19:00', verificada: true }
+    ],
+    vulcanizadoras: [
+      { alias: 'Vulcanizadora Rápida', precio: '350', tagline: 'Venta, montaje, balanceo y alineación de llantas.', serviciosLlantas: ['Venta', 'Montaje', 'Balanceo', 'Alineación'], tiposLlantas: ['Radial', 'Run flat', 'Todo terreno'], modalidadServicioAuto: 'taller_fijo', tarifaDesde: '350', diferenciadorAutomotriz: 'Alineación computarizada', horario: 'Lun–Sáb 8:00–20:00', verificada: true },
+      { alias: 'Llanta Express', precio: '300', tagline: 'Ponchaduras, válvulas y llantas de emergencia.', serviciosLlantas: ['Ponchadura', 'Válvulas', 'Montaje'], tiposLlantas: ['Radial'], modalidadServicioAuto: 'taller_fijo', tarifaDesde: '300', horario: 'Lun–Dom 8:00–21:00', verificada: true }
+    ],
+    'hojalateria-y-pintura': [
+      { alias: 'Hojalatería y Pintura Sur', precio: 'Consultar', tagline: 'Reparación de carrocería, enderezado y pintura automotriz.', serviciosCarroceria: ['Hojalatería', 'Enderezado', 'Pintura', 'Pulido'], modalidadServicioAuto: 'taller_fijo', garantiaServicioAuto: 'Garantía en pintura según trabajo', tarifaDesde: 'Consultar', diferenciadorAutomotriz: 'Cabina de pintura', horario: 'Lun–Vie 8:00–18:00', verificada: true },
+      { alias: 'Carrocerías del Norte', precio: 'Consultar', tagline: 'Golpes, cristales y retoques de pintura.', serviciosCarroceria: ['Hojalatería', 'Pintura', 'Cristales'], modalidadServicioAuto: 'taller_fijo', tarifaDesde: 'Consultar', horario: 'Lun–Sáb 9:00–18:00', verificada: true }
+    ],
+    'lavado-de-autos': [
+      { alias: 'Lavado Express MTY', precio: '180', tagline: 'Lavado exterior, interior y encerado rápido.', serviciosEsteticaAuto: ['Lavado exterior', 'Interior', 'Encerado'], modalidadServicioAuto: 'taller_fijo', tarifaDesde: '180', diferenciadorAutomotriz: 'Servicio en 30–45 min', horario: 'Lun–Dom 8:00–20:00', verificada: true },
+      { alias: 'AutoShine Lavados', precio: '220', tagline: 'Lavado a mano y aspirado profundo.', serviciosEsteticaAuto: ['Lavado a mano', 'Aspirado', 'Aromatización'], modalidadServicioAuto: 'taller_fijo', tarifaDesde: '220', horario: 'Mar–Dom 9:00–19:00', verificada: true }
+    ],
+    'detallado-automotriz-premium': [
+      { alias: 'Detailing Premium MTY', precio: '800', tagline: 'Detailing, pulido y protección cerámica.', serviciosEsteticaAuto: ['Detailing', 'Pulido', 'Cerámico', 'Interior premium'], modalidadServicioAuto: 'taller_fijo', tarifaDesde: '800', diferenciadorAutomotriz: 'Paquetes cerámicos', horario: 'Mar–Dom 9:00–19:00', verificada: true },
+      { alias: 'Brillo Garage', precio: '950', tagline: 'Corrección de pintura y encapsulado.', serviciosEsteticaAuto: ['Corrección de pintura', 'Encapsulado', 'Detailing'], modalidadServicioAuto: 'taller_fijo', tarifaDesde: '950', horario: 'Lun–Sáb con cita', verificada: true }
+    ],
+    refaccionarias: [
+      { alias: 'Refaccionaria Central', precio: 'Consultar', tagline: 'Refacciones originales y genéricas para mecánica general.', serviciosRefacciones: ['Venta mostrador', 'Pedido especial', 'Asesoría'], lineasRefacciones: ['Frenos', 'Suspensión', 'Motor', 'Filtros'], modalidadServicioAuto: 'taller_fijo', tarifaDesde: 'Consultar', diferenciadorAutomotriz: 'Pedidos el mismo día', horario: 'Lun–Sáb 9:00–19:00', verificada: true },
+      { alias: 'Repuestos del Norte', precio: 'Consultar', tagline: 'Refacciones para sedán, SUV y pickup.', serviciosRefacciones: ['Venta', 'Mayoreo ligero'], lineasRefacciones: ['Embrague', 'Dirección', 'Eléctrico'], modalidadServicioAuto: 'taller_fijo', tarifaDesde: 'Consultar', horario: 'Lun–Vie 9:00–18:00', verificada: true }
+    ],
+    'instaladores-de-audio-car-multimedia': [
+      { alias: 'Audio Car MTY', precio: '700', tagline: 'Estéreos, pantallas, cámaras y sonido automotriz.', serviciosEspecialidadAuto: ['Estéreo', 'Pantalla', 'Cámaras', 'Amplificadores'], modalidadServicioAuto: 'taller_fijo', tarifaDesde: '700', diferenciadorAutomotriz: 'Instalación certificada', horario: 'Lun–Sáb 10:00–20:00', verificada: true },
+      { alias: 'Multimedia Automotriz', precio: '650', tagline: 'Android Auto, Apple CarPlay y alarmas.', serviciosEspecialidadAuto: ['CarPlay', 'Android Auto', 'Alarmas'], modalidadServicioAuto: 'taller_fijo', tarifaDesde: '650', horario: 'Mar–Sáb 11:00–19:00', verificada: true }
+    ],
+    'tecnicos-en-baterias': [
+      { alias: 'Baterías Rápidas NL', precio: '450', tagline: 'Diagnóstico, venta e instalación de baterías.', serviciosEspecialidadAuto: ['Diagnóstico de batería', 'Instalación', 'Paso de corriente'], modalidadServicioAuto: 'ambos', tiempoRespuestaAuto: 'mismo_dia', tarifaDesde: '450', coberturaGeografica: 'Monterrey y San Nicolás', diferenciadorAutomotriz: 'Instalación a domicilio', horario: 'Lun–Dom 8:00–21:00', verificada: true },
+      { alias: 'Power Cell Auto', precio: '400', tagline: 'Baterías AGM, litio y convencional.', serviciosEspecialidadAuto: ['Venta de baterías', 'Prueba de carga'], modalidadServicioAuto: 'taller_fijo', tarifaDesde: '400', horario: 'Lun–Sáb 9:00–19:00', verificada: true }
+    ],
+    'tecnicos-en-a-c-automotriz': [
+      { alias: 'A/C Automotriz Pro', precio: '600', tagline: 'Carga de gas, fugas y reparación de A/C automotriz.', serviciosEspecialidadAuto: ['Carga de gas', 'Detección de fugas', 'Compresor'], modalidadServicioAuto: 'ambos', tarifaDesde: '600', diferenciadorAutomotriz: 'Recuperación ecológica de gas', horario: 'Lun–Sáb 9:00–19:00', verificada: true },
+      { alias: 'Clima Auto Norte', precio: '550', tagline: 'Diagnóstico de A/C y climatización.', serviciosEspecialidadAuto: ['Diagnóstico A/C', 'Filtro de cabina', 'Carga'], modalidadServicioAuto: 'taller_fijo', tarifaDesde: '550', horario: 'Lun–Vie 9:00–18:00', verificada: true }
+    ],
+    'agencias-de-autos': [
+      { nombreComercial: 'Autos Seminuevos MTY', precio: 'Consultar', tagline: 'Seminuevos certificados con opciones de financiamiento.', serviciosVentaAutos: ['Seminuevos', 'Contado', 'Crédito'], tiposVehiculoVenta: ['Sedán', 'SUV', 'Pickup'], financiamientoDisponible: 'si_terceros', inventarioAproximado: '40 unidades', cantidadUnidadesAprox: '40', diferenciadorAutomotriz: 'Revisión mecánica incluida', horario: 'Lun–Sáb 10:00–20:00', verificada: true },
+      { nombreComercial: 'Agencia Valle Motors', precio: 'Consultar', tagline: 'Seminuevos premium y toma de tu auto a cuenta.', serviciosVentaAutos: ['Seminuevos', 'Consignación', 'Toma a cuenta'], tiposVehiculoVenta: ['SUV', 'Lujo'], financiamientoDisponible: 'si_propio', inventarioAproximado: '25 unidades', horario: 'Lun–Sáb 10:00–19:00', verificada: true }
+    ],
+    'lotes-de-autos': [
+      { alias: 'Lote de Autos del Valle', precio: 'Consultar', tagline: 'Venta de usados con revisión mecánica básica.', serviciosVentaAutos: ['Usados', 'Consignación'], tiposVehiculoVenta: ['Económicos', 'SUV', 'Sedán'], financiamientoDisponible: 'convenir', inventarioAproximado: '30 unidades', tarifaDesde: 'Consultar', diferenciadorAutomotriz: 'Precios de lote', horario: 'Lun–Dom 10:00–19:00', verificada: true },
+      { alias: 'Lote Carretera Norte', precio: 'Consultar', tagline: 'Autos usados listos para entregar.', serviciosVentaAutos: ['Usados', 'Contado'], tiposVehiculoVenta: ['Sedán', 'Pickup'], financiamientoDisponible: 'contado_solo', inventarioAproximado: '18 unidades', horario: 'Lun–Sáb 9:00–18:00', verificada: true }
+    ],
+    'gruas-y-auxilio-vial': [
+      { alias: 'Grúa 24 h Norte', precio: '800', tagline: 'Grúa y auxilio vial en ciudad y carretera.', serviciosGrua: ['Grúa', 'Paso de corriente', 'Cambio de llanta', 'Gasolina de emergencia'], modalidadServicioAuto: 'unidad_movil', coberturaCarretera: '100 km radio MTY', tiempoRespuestaAuto: 'emergencia_30min', tarifaDesde: '800', diferenciadorAutomotriz: 'Disponibilidad 24/7', horario: '24 horas', verificada: true },
+      { alias: 'Auxilio Vial Express', precio: '700', tagline: 'Rescate urbano y traslados a taller.', serviciosGrua: ['Grúa plataforma', 'Rescate urbano', 'Traslado a taller'], modalidadServicioAuto: 'unidad_movil', coberturaCarretera: 'Área metropolitana', tiempoRespuestaAuto: '1h', tarifaDesde: '700', horario: 'Lun–Dom 6:00–00:00', verificada: true }
+    ]
+  };
+
+  var AUTOMOTRIZ_PACK_POR_SUB = {
+    'talleres-mecanicos': 'A', electromecanicos: 'A', 'mecanicos-a-domicilio': 'A',
+    vulcanizadoras: 'B',
+    'hojalateria-y-pintura': 'C', 'lavado-de-autos': 'C', 'detallado-automotriz-premium': 'C',
+    refaccionarias: 'D', 'instaladores-de-audio-car-multimedia': 'D', 'tecnicos-en-baterias': 'D', 'tecnicos-en-a-c-automotriz': 'D',
+    'agencias-de-autos': 'E', 'lotes-de-autos': 'E',
+    'gruas-y-auxilio-vial': 'F'
   };
 
   function automotrizPackDeSub(subId) {
     var key = String(subId || '').trim().toLowerCase().replace(/_/g, '-');
+    if (AUTOMOTRIZ_PACK_POR_SUB[key]) return AUTOMOTRIZ_PACK_POR_SUB[key];
     if (global.CARIHUB_REGISTRO_AUTOMOTRIZ_SECTOR_BLOCKS && CARIHUB_REGISTRO_AUTOMOTRIZ_SECTOR_BLOCKS.resolvePack) {
       return CARIHUB_REGISTRO_AUTOMOTRIZ_SECTOR_BLOCKS.resolvePack(key);
     }
@@ -1964,7 +2021,7 @@
 
   function armarPerfilAutomotriz(base, idx, Q, pres) {
     var subId = pres.subcategoriaId || idCategoria(Q.categoria);
-    var catLabel = base.categoriaPublica || labelCategoria(Q.categoria);
+    var catLabel = base.categoriaPublica || (pres && (pres.subcategoria || pres.categoriaPublica)) || labelCategoria(Q.categoria);
     var pack = base.deltaPack || automotrizPackDeSub(subId);
     var perfil = buildAutomotrizPerfilDemo(base, subId, pack);
     var esNegocio = AUTOMOTRIZ_NEGOCIO_SUBS.indexOf(subId) >= 0;
@@ -2003,10 +2060,32 @@
     } else {
       u.alias = perfil.alias || nombre;
       u.nombre = u.alias;
-      u.especialidad = (perfil.serviciosMecanica && perfil.serviciosMecanica[0]) || (perfil.serviciosLlantas && perfil.serviciosLlantas[0]) || base.especialidad || '';
+      u.especialidad = (perfil.serviciosEsteticaAuto && perfil.serviciosEsteticaAuto[0])
+        || (perfil.serviciosCarroceria && perfil.serviciosCarroceria[0])
+        || (perfil.serviciosRefacciones && perfil.serviciosRefacciones[0])
+        || (perfil.serviciosVentaAutos && perfil.serviciosVentaAutos[0])
+        || (perfil.serviciosGrua && perfil.serviciosGrua[0])
+        || (perfil.serviciosMecanica && perfil.serviciosMecanica[0])
+        || (perfil.serviciosLlantas && perfil.serviciosLlantas[0])
+        || (perfil.serviciosEspecialidadAuto && perfil.serviciosEspecialidadAuto[0])
+        || base.especialidad || '';
     }
 
-    return enriquecerPerfil(u, Q);
+    if (global.CariHubAutomotrizSectorRender && CariHubAutomotrizSectorRender.resolveVistaPerfil) {
+      u.__vista = CariHubAutomotrizSectorRender.resolveVistaPerfil(u);
+    } else {
+      u.__vista = esNegocio ? 'empresa' : 'pro';
+    }
+
+    u = enriquecerPerfil(u, Q);
+    u.sectorId = 'automotriz';
+    u.deltaPack = pack;
+    u.automotrizPerfil = perfil;
+    if (global.CariHubAutomotrizSectorRender && CariHubAutomotrizSectorRender.resolveVistaPerfil) {
+      var vistaAuto = CariHubAutomotrizSectorRender.resolveVistaPerfil(u);
+      if (vistaAuto) u.__vista = vistaAuto;
+    }
+    return u;
   }
 
   function poolDemoAutomotriz(subId) {

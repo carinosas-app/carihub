@@ -441,7 +441,8 @@
 };
 
   var NEGOCIO_CANON = [
-  "agencias-de-autos"
+  "agencias-de-autos",
+  "lotes-de-autos"
 ];
 
   var PACK_TITLES = {
@@ -722,12 +723,39 @@
     return ['Grúas y auxilio vial', 'Cobertura carretera', 'Tiempos de respuesta', 'Perfil verificable en CariHub'];
   }
 
-  function packFaq(canonId) {
-    var pf = previewFields(canonId);
-    if (pf.faq && pf.faq.length) {
-      return pf.faq.map(function (fid) { return '¿' + fieldLabel(fid) + '?'; });
+  function packFaq(canonId, p) {
+    p = p || {};
+    var faqs = [];
+    function pushFaq(q, a) {
+      if (!q || !a) return;
+      faqs.push({ q: q, a: String(a) });
     }
-    return ['¿Incluyen garantía?', '¿Cuál es la tarifa?', '¿Atienden urgencias?', '¿Cuál es la cobertura?'];
+    function fallbackAnswer(fid) {
+      if (fid === 'garantiaServicioAuto') return 'La garantía publicada aplica sobre mano de obra según el servicio. Pregunta alcance y vigencia antes de autorizar.';
+      if (fid === 'coberturaGeografica' || fid === 'coberturaCarretera') return 'Atendemos la zona publicada. Fuera de cobertura, consulta disponibilidad y costo extra.';
+      if (fid === 'tiempoRespuestaAuto') return 'El tiempo de respuesta depende de la demanda y la zona; confirma por WhatsApp al momento.';
+      if (fid === 'modalidadServicioAuto') return 'Indica si necesitas taller fijo, domicilio o unidad móvil según lo publicado en el perfil.';
+      if (fid === 'financiamientoDisponible') return 'Las opciones de financiamiento están en el perfil; valida requisitos con el vendedor.';
+      if (fid === 'colaboracionesComerciales') return 'Si colaboramos con talleres, agencias o aseguradoras, lo indicamos en el perfil.';
+      return 'Escríbenos por el contacto publicado y te confirmamos detalles al momento.';
+    }
+    var pf = previewFields(canonId);
+    (pf.faq || []).forEach(function (fid) {
+      var label = fieldLabel(fid);
+      var val = formatFieldValue(fid, p[fid]);
+      pushFaq('¿' + label + '?', val || fallbackAnswer(fid));
+    });
+    if (faqs.length < 2) {
+      pushFaq('¿Incluyen garantía?', formatFieldValue('garantiaServicioAuto', p.garantiaServicioAuto) || fallbackAnswer('garantiaServicioAuto'));
+      pushFaq('¿Cuál es la cobertura?', formatFieldValue('coberturaGeografica', p.coberturaGeografica) || formatFieldValue('coberturaCarretera', p.coberturaCarretera) || fallbackAnswer('coberturaGeografica'));
+    }
+    if (faqs.length < 3) {
+      pushFaq('¿Cuál es el horario?', p.horarioDetalle || 'Consulta el horario publicado en el perfil.');
+    }
+    if (faqs.length < 4) {
+      pushFaq('¿Atienden urgencias?', formatFieldValue('tiempoRespuestaAuto', p.tiempoRespuestaAuto) || fallbackAnswer('tiempoRespuestaAuto'));
+    }
+    return faqs.slice(0, 6);
   }
 
   function resolvePrecioPublico(p, u) {
@@ -763,8 +791,18 @@
     u.__automotrizCanon = canonId;
     u.__automotrizPack = pack;
     u.sectorId = u.sectorId || 'automotriz';
-    u.titulo = u.titulo || p.blockTitle || CANON_BLOCK_TITLES[canonId] || PACK_TITLES[pack] || 'Servicios automotrices';
-    u.especialidad = u.especialidad || (p.especialidadesMecanica && p.especialidadesMecanica[0]) || (p.serviciosMecanica && p.serviciosMecanica[0]) || u.titulo;
+    u.titulo = u.categoriaPublica || u.categoria || CANON_BLOCK_TITLES[canonId] || p.blockTitle || PACK_TITLES[pack] || 'Servicios automotrices';
+    u.especialidad = u.especialidad
+      || (p.serviciosEsteticaAuto && p.serviciosEsteticaAuto[0])
+      || (p.serviciosCarroceria && p.serviciosCarroceria[0])
+      || (p.serviciosRefacciones && p.serviciosRefacciones[0])
+      || (p.serviciosVentaAutos && p.serviciosVentaAutos[0])
+      || (p.serviciosGrua && p.serviciosGrua[0])
+      || (p.especialidadesMecanica && p.especialidadesMecanica[0])
+      || (p.serviciosMecanica && p.serviciosMecanica[0])
+      || (p.serviciosLlantas && p.serviciosLlantas[0])
+      || (p.serviciosEspecialidadAuto && p.serviciosEspecialidadAuto[0])
+      || u.titulo;
     u.servicios = u.servicios || u.titulo;
     u.tagline = u.tagline || p.tagline || '';
     u.sobreMi = buildSobreMi(canonId, p, u);
@@ -794,7 +832,7 @@
     u.rating = u.rating != null ? u.rating : '—';
     u.opiniones = u.opiniones != null ? u.opiniones : 0;
     u.reviews = Array.isArray(u.reviews) ? u.reviews : [];
-    u.faq = Array.isArray(u.faq) && u.faq.length ? u.faq : packFaq(canonId);
+    u.faq = Array.isArray(u.faq) && u.faq.length ? u.faq : packFaq(canonId, p);
     u.noIncluidos = Array.isArray(u.noIncluidos) && u.noIncluidos.length
       ? u.noIncluidos
       : ['Refacciones no declaradas', 'Servicios fuera del alcance publicado', 'Auxilio no cubierto salvo indicación'];
