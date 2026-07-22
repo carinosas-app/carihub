@@ -82,11 +82,13 @@
 <script src="ciudades.js"></script>
 <script src="js/perfil-res-sbar-picker.js?v=20260720sbar1"></script>
 <script src="js/carihub-bienestar-sector-render.js?v=20260721demo3"></script>
+<script src="js/carihub-perfil-busqueda-filtro.js"></script>
+<script src="js/carihub-comercio-sector-render.js?v=20260721com2"></script>
 <script src="js/carihub-eventos-sector-render.js?v=20260627e3"></script>
 <script src="js/data/registro-sector-contract-registry.js?v=20260721faq2"></script>
 <script src="js/carihub-gastronomia-sector-render.js?v=20260702gast1"></script>
 <script src="js/carihub-public-render-lite.js?v=20260627e3"></script>
-<script src="js/resultados-demo.js?v=20260721demo3"></script>
+<script src="js/resultados-demo.js?v=20260721com3"></script>
 <script src="js/carihub-multi-perfil.js"></script>
 <script src="js/carihub-blk01-profile-sanitize.js"></script>
 <script src="js/carihub-blk01-hub-adapter.js"></script>
@@ -9014,7 +9016,7 @@ function resolverPerfilDesdeQuery(q){
     }
   }
   /*
-    Sin id (o id no resuelto): sembrar demo de bienestar/salud para que
+    Sin id (o id no resuelto): sembrar demo sectorial para que
     hydrate + tema/banners no caigan en DEMO.pro plomería.
     No aplica a adultos spa/masajes.
   */
@@ -9039,6 +9041,17 @@ function resolverPerfilDesdeQuery(q){
       }
     }else if(sectorHint==="salud"&&typeof CariHubResultadosDemo.plantillaDemoSalud==="function"){
       listaSeed=CariHubResultadosDemo.plantillaDemoSalud(q);
+    }else if(sectorHint==="comercio"&&typeof CariHubResultadosDemo.plantillaDemoComercio==="function"){
+      var presCom=null;
+      if(window.CariHubFieldEngineLite&&CariHubFieldEngineLite.resolvePublicPresentation){
+        try{
+          presCom=CariHubFieldEngineLite.resolvePublicPresentation({
+            categoria:q.categoria,
+            subcategoriaId:CariHubFieldEngineLite.lookupSubcategoriaId(q.categoria)
+          });
+        }catch(ePresC){ presCom=null; }
+      }
+      listaSeed=CariHubResultadosDemo.plantillaDemoComercio(q,presCom);
     }
     if(listaSeed&&listaSeed.length){
       perfil=listaSeed[0];
@@ -9058,7 +9071,10 @@ function demoAssetDesdeResultados(src){
   return ""+s.replace(/^\.\//,"");
 }
 var PERFIL_SECTOR_BRIDGE_EXCLUDED={salud:1,profesionales:1,bienestar:1,eventos:1};
-var PERFIL_SECTOR_BRIDGE_RENDER={restaurantes:{global:"CariHubGastronomiaSectorRender"}};
+var PERFIL_SECTOR_BRIDGE_RENDER={
+  restaurantes:{global:"CariHubGastronomiaSectorRender"},
+  comercio:{global:"CariHubComercioSectorRender"}
+};
 function perfilBridgeUserHasField(u,key){
   if(!u) return false;
   if(key==="stats"||key==="faq"||key==="reviews"||key==="feats"||key==="noIncluidos"||key==="metodosPago"){
@@ -9471,6 +9487,9 @@ function aplicarPerfilDesdeRegistro(vista,u){
   if(window.CariHubBienestarSectorRender&&CariHubBienestarSectorRender.hydrateDisplayFields){
     clean=CariHubBienestarSectorRender.hydrateDisplayFields(clean);
   }
+  if(window.CariHubComercioSectorRender&&CariHubComercioSectorRender.hydrateDisplayFields){
+    clean=CariHubComercioSectorRender.hydrateDisplayFields(clean);
+  }
   if(window.CariHubEventosSectorRender&&CariHubEventosSectorRender.hydrateDisplayFields){
     clean=CariHubEventosSectorRender.hydrateDisplayFields(clean);
   }
@@ -9523,7 +9542,20 @@ function aplicarPerfilResultadosEnDemo(vista,u){
     }
   }
   var esSaludSector=vista==="medico"||u.sectorId==="salud"||!!u.saludPerfil;
-  if(esBienestarHolo||esSaludSector){
+  var esComercioSector=false;
+  if(window.CariHubComercioSectorRender&&CariHubComercioSectorRender.isComercioSectorPerfil){
+    esComercioSector=!!CariHubComercioSectorRender.isComercioSectorPerfil(u);
+  }
+  if(!esComercioSector&&(u.sectorId==="comercio"||u.comercioPerfil)){
+    esComercioSector=true;
+  }
+  if(!esComercioSector&&window.CariHubResultadosSector&&CariHubResultadosSector.sectorDeCategoria){
+    try{
+      var catCom=u.subcategoriaId||u.categoriaPublica||u.categoria||"";
+      if(CariHubResultadosSector.sectorDeCategoria(catCom)==="comercio") esComercioSector=true;
+    }catch(eComCat){ /* opcional */ }
+  }
+  if(esBienestarHolo||esSaludSector||esComercioSector){
     aplicarPerfilDesdeRegistro(vista,u);
     if(DEMO[vista]){
       DEMO[vista].__previewRegistro=false;

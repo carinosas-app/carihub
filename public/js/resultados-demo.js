@@ -2165,33 +2165,69 @@
 
   var DEMO_COMERCIO_BY_PACK = {
     A: [
-      { alias: 'Abarrotes La Esquina', precio: '25', tagline: 'Surte diario y productos de primera necesidad.', categoriasProducto: ['Abarrotes', 'Bebidas', 'Snacks'], serviciosComercio: ['Apartado', 'Pedidos'], modalidadVentaComercio: 'tienda_fisica', formasPagoComercio: ['Efectivo', 'Tarjeta'], entregaDomicilio: 'solo_zona', tarifaDesde: '25', coberturaGeografica: 'Col. Centro y alrededores', horario: 'Lun–Dom 7:00–22:00', verificada: true },
-      { alias: 'Mini Súper del Valle', precio: 'Consultar', tagline: 'Conveniencia y surtido básico cerca de ti.', categoriasProducto: ['Conveniencia', 'Lácteos'], modalidadVentaComercio: 'tienda_fisica', formasPagoComercio: ['Efectivo', 'Transferencia'], tarifaDesde: 'Consultar', horario: 'Lun–Dom 24 h', verificada: true }
+      { alias: 'Abarrotes La Esquina', precio: '25', tagline: 'Surte diario y productos de primera necesidad.', categoriasProducto: ['Abarrotes', 'Bebidas', 'Snacks'], serviciosComercio: ['Apartado', 'Pedidos'], modalidadVentaComercio: 'tienda_fisica', formasPagoComercio: ['Efectivo', 'Tarjeta'], entregaDomicilio: 'solo_zona', tarifaDesde: '25', coberturaGeografica: 'Col. Centro y alrededores', horario: 'Lun–Dom 7:00–22:00', verificada: true }
     ],
     B: [
-      { alias: 'Moda Urbana MTY', precio: '299', tagline: 'Ropa casual y accesorios para toda la familia.', categoriasProducto: ['Ropa casual', 'Accesorios'], generosModa: ['Dama', 'Caballero', 'Joven'], marcasComercializadas: ['Nacionales', 'Importadas'], modalidadVentaComercio: 'ambos', formasPagoComercio: ['Efectivo', 'Tarjeta', 'MSI'], tarifaDesde: '299', horario: 'Lun–Sáb 10:00–20:00', verificada: true },
-      { alias: 'Zapatería El Camino', precio: '450', tagline: 'Calzado escolar, casual y de trabajo.', categoriasProducto: ['Calzado'], generosModa: ['Niño', 'Dama', 'Caballero'], modalidadVentaComercio: 'tienda_fisica', formasPagoComercio: ['Efectivo', 'Tarjeta'], tarifaDesde: '450', horario: 'Lun–Sáb', verificada: true }
+      { alias: 'Moda Urbana MTY', precio: '299', tagline: 'Ropa casual y accesorios para toda la familia.', categoriasProducto: ['Ropa casual', 'Accesorios'], generosModa: ['Dama', 'Caballero', 'Joven'], marcasComercializadas: ['Nacionales', 'Importadas'], modalidadVentaComercio: 'ambos', formasPagoComercio: ['Efectivo', 'Tarjeta', 'MSI'], tarifaDesde: '299', horario: 'Lun–Sáb 10:00–20:00', verificada: true }
     ],
     C: [
-      { alias: 'Ferretería El Martillo', precio: '50', tagline: 'Herramientas, plomería y materiales eléctricos.', categoriasProducto: ['Herramientas', 'Plomería', 'Eléctrico'], serviciosComercio: ['Cortes', 'Asesoría'], modalidadVentaComercio: 'tienda_fisica', formasPagoComercio: ['Efectivo', 'Tarjeta'], tarifaDesde: '50', horario: 'Lun–Sáb 8:00–19:00', verificada: true },
-      { alias: 'Farmacia del Barrio', precio: 'Consultar', tagline: 'Medicamentos y productos de salud cotidianos.', categoriasProducto: ['Medicamentos', 'Higiene'], serviciosComercio: ['Entrega local'], modalidadVentaComercio: 'tienda_fisica', entregaDomicilio: 'solo_zona', formasPagoComercio: ['Efectivo', 'Tarjeta'], tarifaDesde: 'Consultar', horario: 'Lun–Dom', verificada: true }
+      { alias: 'Ferretería El Martillo', precio: '50', tagline: 'Herramientas, plomería y materiales eléctricos.', categoriasProducto: ['Herramientas', 'Plomería', 'Eléctrico'], serviciosComercio: ['Cortes', 'Asesoría'], modalidadVentaComercio: 'tienda_fisica', formasPagoComercio: ['Efectivo', 'Tarjeta'], tarifaDesde: '50', horario: 'Lun–Sáb 8:00–19:00', verificada: true }
     ],
     D: [
-      { alias: 'Mayoreo El Centro', precio: 'Consultar', tagline: 'Surtido a negocios con pedido mínimo.', serviciosMayoreo: ['Mayoreo', 'Surtido'], volumenMinimoPedido: '$1,500', tiposClientesComercio: ['Tienditas', 'Restaurantes'], modalidadVentaComercio: 'tienda_fisica', coberturaGeografica: 'Monterrey y área metropolitana', tarifaDesde: 'Consultar', horario: 'Lun–Sáb 6:00–18:00', verificada: true },
-      { nombreComercial: 'Distribuidora Norte SA', precio: 'Consultar', tagline: 'Distribución y rutas programadas para retail.', serviciosEmpresaComercio: ['Distribución', 'Rutas', 'Crédito'], especialidadesEmpresaComercio: 'Abarrotes y bebidas', tiposClientesComercio: ['Tienditas', 'Mayoristas'], flotaEntrega: '12 unidades', modalidadVentaComercio: 'ambos', horario: 'Lun–Vie', verificada: true }
+      { alias: 'Mayoreo El Centro', precio: 'Consultar', tagline: 'Surtido a negocios con pedido mínimo.', serviciosMayoreo: ['Mayoreo', 'Surtido'], volumenMinimoPedido: '$1,500', tiposClientesComercio: ['Tienditas', 'Restaurantes'], modalidadVentaComercio: 'tienda_fisica', coberturaGeografica: 'Monterrey y área metropolitana', tarifaDesde: 'Consultar', horario: 'Lun–Sáb 6:00–18:00', verificada: true }
     ]
   };
 
+  /* Demos 1:1 por subcategoría — evita que pack C mezcle ferretería con farmacia/papelería. */
   var DEMO_COMERCIO = {
-    abarrotes: DEMO_COMERCIO_BY_PACK.A,
-    zapaterias: DEMO_COMERCIO_BY_PACK.B,
-    ferreterias: DEMO_COMERCIO_BY_PACK.C,
-    mayoreo: DEMO_COMERCIO_BY_PACK.D,
-    distribuidoras: DEMO_COMERCIO_BY_PACK.D
+    abarrotes: [
+      { alias: 'Abarrotes La Esquina', precio: '25', tagline: 'Surte diario: abarrotes, bebidas y snacks de primera necesidad.', categoriasProducto: ['Abarrotes', 'Bebidas', 'Snacks'], serviciosComercio: ['Apartado', 'Pedidos'], modalidadVentaComercio: 'tienda_fisica', formasPagoComercio: ['Efectivo', 'Tarjeta'], entregaDomicilio: 'solo_zona', tarifaDesde: '25', coberturaGeografica: 'Col. Centro y alrededores', diferenciadorComercio: 'Surtido diario fresco', horario: 'Lun–Dom 7:00–22:00', verificada: true },
+      { alias: 'Abarrotes Don Pepe', precio: '20', tagline: 'Abarrotes de barrio con precios accesibles y trato de siempre.', categoriasProducto: ['Abarrotes', 'Lácteos', 'Enlatados'], serviciosComercio: ['Fiado conocido', 'Pedidos'], modalidadVentaComercio: 'tienda_fisica', formasPagoComercio: ['Efectivo', 'Transferencia'], entregaDomicilio: 'convenir', tarifaDesde: '20', coberturaGeografica: 'San Nicolás', horario: 'Lun–Sáb 8:00–21:00', verificada: true }
+    ],
+    'tiendas-de-conveniencia': [
+      { alias: 'Mini Súper del Valle', precio: 'Consultar', tagline: 'Conveniencia 24 h: snacks, bebidas y básicos cerca de ti.', categoriasProducto: ['Conveniencia', 'Bebidas', 'Snacks'], serviciosComercio: ['Cajero', 'Recargas'], modalidadVentaComercio: 'tienda_fisica', formasPagoComercio: ['Efectivo', 'Tarjeta', 'Transferencia'], entregaDomicilio: 'no', tarifaDesde: 'Consultar', coberturaGeografica: 'San Pedro / Valle', diferenciadorComercio: 'Abierto 24 horas', horario: 'Lun–Dom 24 h', verificada: true },
+      { alias: 'Express Night Stop', precio: '35', tagline: 'Tienda de conveniencia nocturna con café y antojitos.', categoriasProducto: ['Conveniencia', 'Café', 'Antojitos'], serviciosComercio: ['Microondas', 'Recargas'], modalidadVentaComercio: 'tienda_fisica', formasPagoComercio: ['Efectivo', 'Tarjeta'], entregaDomicilio: 'no', tarifaDesde: '35', horario: 'Todos los días 18:00–6:00', verificada: true }
+    ],
+    zapaterias: [
+      { alias: 'Zapatería El Camino', precio: '450', tagline: 'Calzado escolar, casual y de trabajo para toda la familia.', categoriasProducto: ['Calzado escolar', 'Calzado casual', 'Calzado de trabajo'], generosModa: ['Niño', 'Dama', 'Caballero'], marcasComercializadas: ['Nacionales'], serviciosComercio: ['Probadores', 'Apartado'], modalidadVentaComercio: 'tienda_fisica', formasPagoComercio: ['Efectivo', 'Tarjeta'], tarifaDesde: '450', diferenciadorComercio: 'Amplia talla infantil', horario: 'Lun–Sáb 10:00–20:00', verificada: true },
+      { alias: 'Pisada Firme', precio: '520', tagline: 'Zapatos industriales y botas de seguridad.', categoriasProducto: ['Calzado industrial', 'Botas de seguridad'], generosModa: ['Caballero', 'Dama'], marcasComercializadas: ['Seguridad industrial'], modalidadVentaComercio: 'ambos', formasPagoComercio: ['Efectivo', 'Tarjeta', 'Transferencia'], tarifaDesde: '520', horario: 'Lun–Vie 9:00–19:00', verificada: true }
+    ],
+    'tiendas-de-ropa': [
+      { alias: 'Moda Urbana MTY', precio: '299', tagline: 'Ropa casual y accesorios para dama, caballero y joven.', categoriasProducto: ['Ropa casual', 'Accesorios'], generosModa: ['Dama', 'Caballero', 'Joven'], marcasComercializadas: ['Nacionales', 'Importadas'], serviciosComercio: ['Probadores', 'Apartado', 'Cambios'], modalidadVentaComercio: 'ambos', formasPagoComercio: ['Efectivo', 'Tarjeta', 'MSI'], tarifaDesde: '299', diferenciadorComercio: 'Colección temporada', horario: 'Lun–Sáb 10:00–20:00', verificada: true },
+      { alias: 'Boutique Norte', precio: '450', tagline: 'Ropa de oficina y outfits para ocasiones especiales.', categoriasProducto: ['Ropa formal', 'Vestidos', 'Blusas'], generosModa: ['Dama'], marcasComercializadas: ['Boutique local'], modalidadVentaComercio: 'tienda_fisica', formasPagoComercio: ['Efectivo', 'Tarjeta', 'MSI'], tarifaDesde: '450', horario: 'Mar–Sáb 11:00–19:00', verificada: true }
+    ],
+    ferreterias: [
+      { alias: 'Ferretería El Martillo', precio: '50', tagline: 'Herramientas, plomería y materiales eléctricos.', categoriasProducto: ['Herramientas', 'Plomería', 'Eléctrico'], serviciosComercio: ['Cortes', 'Asesoría técnica'], modalidadVentaComercio: 'tienda_fisica', formasPagoComercio: ['Efectivo', 'Tarjeta'], entregaDomicilio: 'convenir', tarifaDesde: '50', diferenciadorComercio: 'Asesoría en obra menor', horario: 'Lun–Sáb 8:00–19:00', verificada: true },
+      { alias: 'Todo para la Casa', precio: '40', tagline: 'Tornillería, pintura y refacciones de ferretería general.', categoriasProducto: ['Tornillería', 'Pintura', 'Refacciones'], serviciosComercio: ['Cortes', 'Mezcla de pintura'], modalidadVentaComercio: 'tienda_fisica', formasPagoComercio: ['Efectivo', 'Transferencia'], tarifaDesde: '40', horario: 'Lun–Sáb 8:00–18:00', verificada: true }
+    ],
+    'farmacias-de-barrio': [
+      { alias: 'Farmacia del Barrio', precio: 'Consultar', tagline: 'Medicamentos genéricos y de marca, higiene y primeros auxilios.', categoriasProducto: ['Medicamentos', 'Higiene', 'Primeros auxilios'], serviciosComercio: ['Entrega local', 'Toma de presión'], modalidadVentaComercio: 'tienda_fisica', entregaDomicilio: 'solo_zona', formasPagoComercio: ['Efectivo', 'Tarjeta'], tarifaDesde: 'Consultar', coberturaGeografica: 'Colonia y colonia vecina', diferenciadorComercio: 'Entrega de medicamentos en zona', horario: 'Lun–Dom 8:00–22:00', verificada: true },
+      { alias: 'Botica San José', precio: 'Consultar', tagline: 'Farmacia de barrio con genéricos y vitaminas.', categoriasProducto: ['Genéricos', 'Vitaminas', 'Cuidado personal'], serviciosComercio: ['Asesoría básica'], modalidadVentaComercio: 'tienda_fisica', entregaDomicilio: 'convenir', formasPagoComercio: ['Efectivo', 'Transferencia'], tarifaDesde: 'Consultar', horario: 'Lun–Sáb 9:00–21:00', verificada: true }
+    ],
+    papelerias: [
+      { alias: 'Papelería Estrella', precio: '15', tagline: 'Útiles escolares, impresiones y material de oficina.', categoriasProducto: ['Útiles escolares', 'Papelería', 'Impresiones'], serviciosComercio: ['Impresiones', 'Engargolados', 'Copias'], modalidadVentaComercio: 'tienda_fisica', formasPagoComercio: ['Efectivo', 'Transferencia'], entregaDomicilio: 'no', tarifaDesde: '15', diferenciadorComercio: 'Impresiones el mismo día', horario: 'Lun–Sáb 9:00–19:00', verificada: true },
+      { alias: 'Office Color', precio: '25', tagline: 'Papelería comercial: cartuchos, resmas y artículos de escritorio.', categoriasProducto: ['Resmas', 'Cartuchos', 'Escritorio'], serviciosComercio: ['Pedidos a empresas', 'Facturación'], modalidadVentaComercio: 'ambos', formasPagoComercio: ['Efectivo', 'Tarjeta', 'Transferencia'], tarifaDesde: '25', coberturaGeografica: 'Monterrey centro', horario: 'Lun–Vie 9:00–18:00', verificada: true }
+    ],
+    mayoreo: [
+      { alias: 'Mayoreo El Centro', precio: 'Consultar', tagline: 'Surtido a tienditas y negocios con pedido mínimo.', serviciosMayoreo: ['Mayoreo', 'Surtido', 'Reposición'], volumenMinimoPedido: '$1,500', tiposClientesComercio: ['Tienditas', 'Restaurantes', 'Misceláneas'], modalidadVentaComercio: 'tienda_fisica', formasPagoComercio: ['Efectivo', 'Transferencia'], coberturaGeografica: 'Monterrey y área metropolitana', tarifaDesde: 'Consultar', diferenciadorComercio: 'Pedido mínimo accesible', horario: 'Lun–Sáb 6:00–18:00', verificada: true },
+      { alias: 'Central de Abasto Norte', precio: 'Consultar', tagline: 'Mayoreo de abarrotes y bebidas para reventa.', serviciosMayoreo: ['Mayoreo', 'Carga en piso'], volumenMinimoPedido: '$2,000', tiposClientesComercio: ['Tienditas', 'Mayoristas'], modalidadVentaComercio: 'tienda_fisica', coberturaGeografica: 'NL y Coahuila sur', tarifaDesde: 'Consultar', horario: 'Lun–Sáb 5:00–15:00', verificada: true }
+    ],
+    distribuidoras: [
+      { nombreComercial: 'Distribuidora Norte SA', precio: 'Consultar', tagline: 'Distribución y rutas programadas para retail y abarrotes.', serviciosEmpresaComercio: ['Distribución', 'Rutas', 'Crédito'], especialidadesEmpresaComercio: 'Abarrotes y bebidas', tiposClientesComercio: ['Tienditas', 'Mayoristas', 'Cadenas locales'], flotaEntrega: '12 unidades', modalidadVentaComercio: 'ambos', formasPagoComercio: ['Transferencia', 'Crédito'], coberturaGeografica: 'Nuevo León', tarifaDesde: 'Consultar', horario: 'Lun–Vie 7:00–18:00', verificada: true },
+      { nombreComercial: 'Rutas del Norte Distribución', precio: 'Consultar', tagline: 'Flota propia y surtido programado a puntos de venta.', serviciosEmpresaComercio: ['Rutas', 'Inventario en piso', 'Pedidos app'], especialidadesEmpresaComercio: 'Snacks y bebidas', tiposClientesComercio: ['Conveniencia', 'Tienditas'], flotaEntrega: '8 unidades', modalidadVentaComercio: 'ambos', horario: 'Lun–Sáb', verificada: true }
+    ]
+  };
+
+  var COMERCIO_PACK_POR_SUB = {
+    abarrotes: 'A', 'tiendas-de-conveniencia': 'A',
+    zapaterias: 'B', 'tiendas-de-ropa': 'B',
+    'farmacias-de-barrio': 'C', papelerias: 'C', ferreterias: 'C',
+    mayoreo: 'D', distribuidoras: 'D'
   };
 
   function comercioPackDeSub(subId) {
     var key = String(subId || '').trim().toLowerCase().replace(/_/g, '-');
+    if (COMERCIO_PACK_POR_SUB[key]) return COMERCIO_PACK_POR_SUB[key];
     if (global.CARIHUB_REGISTRO_COMERCIO_SECTOR_BLOCKS && CARIHUB_REGISTRO_COMERCIO_SECTOR_BLOCKS.resolvePack) {
       return CARIHUB_REGISTRO_COMERCIO_SECTOR_BLOCKS.resolvePack(key);
     }
@@ -2224,7 +2260,7 @@
 
   function armarPerfilComercio(base, idx, Q, pres) {
     var subId = pres.subcategoriaId || idCategoria(Q.categoria);
-    var catLabel = base.categoriaPublica || labelCategoria(Q.categoria);
+    var catLabel = base.categoriaPublica || (pres && (pres.subcategoria || pres.categoriaPublica)) || labelCategoria(Q.categoria);
     var pack = base.deltaPack || comercioPackDeSub(subId);
     var perfil = buildComercioPerfilDemo(base, subId, pack);
     var esNegocio = COMERCIO_NEGOCIO_SUBS.indexOf(subId) >= 0;
@@ -2266,7 +2302,21 @@
       u.especialidad = (perfil.categoriasProducto && perfil.categoriasProducto[0]) || base.especialidad || '';
     }
 
-    return enriquecerPerfil(u, Q);
+    if (global.CariHubComercioSectorRender && CariHubComercioSectorRender.resolveVistaPerfil) {
+      u.__vista = CariHubComercioSectorRender.resolveVistaPerfil(u);
+    } else {
+      u.__vista = esNegocio ? 'empresa' : 'pro';
+    }
+
+    u = enriquecerPerfil(u, Q);
+    u.sectorId = 'comercio';
+    u.deltaPack = pack;
+    u.comercioPerfil = perfil;
+    if (global.CariHubComercioSectorRender && CariHubComercioSectorRender.resolveVistaPerfil) {
+      var vistaCom = CariHubComercioSectorRender.resolveVistaPerfil(u);
+      if (vistaCom) u.__vista = vistaCom;
+    }
+    return u;
   }
 
   function poolDemoComercio(subId) {
@@ -2978,6 +3028,11 @@
     if (!u || !Q) return false;
     var F = global.CariHubPerfilBusquedaFiltro;
     if (F && F.perfilCoincideFiltros) return F.perfilCoincideFiltros(u, Q);
+    /* Fallback si el módulo de filtro no cargó (p. ej. perfil-publico): al menos subcategoría. */
+    var qSub = String(Q.subcategoriaId || Q.categoria || '').trim().toLowerCase().replace(/_/g, '-');
+    var uSub = String(u.subcategoriaId || u.categoria || u.categoriaPublica || '').trim().toLowerCase().replace(/_/g, '-');
+    if (qSub && uSub && (uSub === qSub || uSub.indexOf(qSub) >= 0 || qSub.indexOf(uSub) >= 0)) return true;
+    if (u.sectorId && Q.categoria && String(u.sectorId).toLowerCase() === String(Q.categoria).toLowerCase()) return true;
     return false;
   }
 

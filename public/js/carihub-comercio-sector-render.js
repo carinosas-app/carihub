@@ -550,12 +550,38 @@
     return ['Mayoreo y distribución', 'Clientes declarados', 'Cobertura visible', 'Perfil verificable en CariHub'];
   }
 
-  function packFaq(canonId) {
-    var pf = previewFields(canonId);
-    if (pf.faq && pf.faq.length) {
-      return pf.faq.map(function (fid) { return '¿' + fieldLabel(fid) + '?'; });
+  function packFaq(canonId, p) {
+    p = p || {};
+    var faqs = [];
+    function pushFaq(q, a) {
+      if (!q || !a) return;
+      faqs.push({ q: q, a: String(a) });
     }
-    return ['¿Hacen entrega a domicilio?', '¿Cuáles son las formas de pago?', '¿Cuál es el horario?', '¿Cuál es la cobertura?'];
+    function fallbackAnswer(fid) {
+      if (fid === 'entregaDomicilio') return 'Depende de la zona: confirma por WhatsApp o el contacto publicado si hay entrega, solo zona o solo tienda.';
+      if (fid === 'formasPagoComercio') return 'Aceptamos las formas de pago listadas en el perfil. Si necesitas factura u otra opción, pregunta antes de comprar.';
+      if (fid === 'coberturaGeografica') return 'Atendemos la cobertura publicada. Fuera de esa zona, consulta disponibilidad y costo.';
+      if (fid === 'horarioDetalle') return 'Revisa el horario publicado; puede variar en días festivos.';
+      if (fid === 'volumenMinimoPedido') return 'El pedido mínimo de mayoreo está indicado en el perfil; escríbenos para cotizar.';
+      return 'Escríbenos por el contacto publicado y te confirmamos detalles al momento.';
+    }
+    var pf = previewFields(canonId);
+    (pf.faq || []).forEach(function (fid) {
+      var label = fieldLabel(fid);
+      var val = formatFieldValue(fid, p[fid]);
+      pushFaq('¿' + label + '?', val || fallbackAnswer(fid));
+    });
+    if (faqs.length < 2) {
+      pushFaq('¿Hacen entrega a domicilio?', formatFieldValue('entregaDomicilio', p.entregaDomicilio) || fallbackAnswer('entregaDomicilio'));
+      pushFaq('¿Cuáles son las formas de pago?', formatFieldValue('formasPagoComercio', p.formasPagoComercio) || fallbackAnswer('formasPagoComercio'));
+    }
+    if (faqs.length < 3) {
+      pushFaq('¿Cuál es el horario?', p.horarioDetalle || 'Consulta el horario publicado en el perfil.');
+    }
+    if (faqs.length < 4) {
+      pushFaq('¿Cuál es la cobertura?', formatFieldValue('coberturaGeografica', p.coberturaGeografica) || fallbackAnswer('coberturaGeografica'));
+    }
+    return faqs.slice(0, 6);
   }
 
   function resolvePrecioPublico(p, u) {
@@ -593,7 +619,7 @@
     u.__comercioCanon = canonId;
     u.__comercioPack = pack;
     u.sectorId = u.sectorId || 'comercio';
-    u.titulo = u.titulo || p.blockTitle || CANON_BLOCK_TITLES[canonId] || PACK_TITLES[pack] || 'Comercio local';
+    u.titulo = u.categoriaPublica || u.categoria || CANON_BLOCK_TITLES[canonId] || p.blockTitle || PACK_TITLES[pack] || 'Comercio local';
     u.especialidad = u.especialidad || (p.categoriasProducto && p.categoriasProducto[0]) || (p.serviciosComercio && p.serviciosComercio[0]) || (p.serviciosMayoreo && p.serviciosMayoreo[0]) || u.titulo;
     u.servicios = u.servicios || u.titulo;
     u.tagline = u.tagline || p.tagline || '';
@@ -624,7 +650,7 @@
     u.rating = u.rating != null ? u.rating : '—';
     u.opiniones = u.opiniones != null ? u.opiniones : 0;
     u.reviews = Array.isArray(u.reviews) ? u.reviews : [];
-    u.faq = Array.isArray(u.faq) && u.faq.length ? u.faq : packFaq(canonId);
+    u.faq = Array.isArray(u.faq) && u.faq.length ? u.faq : packFaq(canonId, p);
     u.noIncluidos = Array.isArray(u.noIncluidos) && u.noIncluidos.length
       ? u.noIncluidos
       : ['Productos fuera de catálogo publicado', 'Servicios no declarados', 'Entrega fuera de zona salvo indicación'];
