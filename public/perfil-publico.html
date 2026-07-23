@@ -6647,7 +6647,9 @@ function renderPlayoutAdultoRef(u, cfg){
   /* Derecha: Precio + métodos de pago + tiempo (tri completo). */
   var triPrecio=cfg.tri!=null?cfg.tri:adultoTriPrecioHTML(u);
   var perfil=cfg.perfil||"";
+  /* ficha = Categoría/País/Estado/Ciudad (entre pagos y contacto). afterSobre = extras pro/medico. */
   var ficha=cfg.ficha||adultoFichaHTML(u);
+  var afterSobre=cfg.afterSobre||"";
   var contact=cfg.contact!=null?cfg.contact:adultoContactSimpleHTML(u);
   var sobrePersona=cfg.sobre!=null?cfg.sobre:sobrePerfilHTML(u);
   /* Fase 1 / referencia Owner: sin estados ni lives en el playout. */
@@ -6664,7 +6666,7 @@ function renderPlayoutAdultoRef(u, cfg){
   /*
     Columnas (Owner):
     - Izq: galería (adulto 3; bienestar/pro/empresa con cobertura → 5 para empatar altura)
-    - Der: todas las tarjetas de información (incluye Zona de cobertura)
+    - Der: perfil → tri (pagos) → ficha geo → contacto → sobre → extras → ubicación
     - Abajo: banner largo a lo ancho de las 2 columnas
   */
   var bannerPie=(u&&u.__previewRegistro)?"":('<div class="playout__banner-adult">'+bottomBannerHTML(layoutKey)+'</div>');
@@ -6676,9 +6678,10 @@ function renderPlayoutAdultoRef(u, cfg){
     perfil+
     (u.donanteUltimo && !(window.CarihubDirectoryMode && CarihubDirectoryMode.isDirectoryMode())?avisoDonacion(u):"")+
     (triPrecio||"")+
+    ficha+
     (contact||"")+
     (sobrePersona||"")+
-    ficha+
+    afterSobre+
     (ubicCard||"")+
     svcStack;
 
@@ -8825,6 +8828,27 @@ function ensureProUbicacionFields(u){
   }
   return u;
 }
+/* Pro/empresa/medico: tarjeta Categoría · País · Estado · Ciudad (entre pagos y contacto). */
+function proFichaGeoHTML(u){
+  u=u||{};
+  var q={};
+  try{
+    if(typeof queryPerfilPreview==="function") q=queryPerfilPreview()||{};
+    else{
+      var p=new URL(location.href).searchParams;
+      q={categoria:p.get("categoria")||"",pais:p.get("pais")||"",estado:p.get("estado")||"",ciudad:p.get("ciudad")||""};
+    }
+  }catch(eQ){ q={}; }
+  var cat=u.categoriaPublica||u.categoria||u.profesion||q.categoria||"";
+  var pais=u.pais||q.pais||((u.estado||u.ciudad||q.estado||q.ciudad)?"México":"");
+  var estado=u.estado||q.estado||"";
+  var ciudad=u.ciudad||q.ciudad||"";
+  var html=row(pico("user"),"Categoría",safe(cat))+
+    row(pico("globe"),"País",safe(pais))+
+    row(pico("pin"),"Estado",safe(estado))+
+    row(pico("pin"),"Ciudad",safe(ciudad));
+  return '<div class="pcard pcard--ficha-publica"><div class="dlist">'+html+'</div></div>';
+}
 function proFeatsLineHTML(u){
   if(!u||!Array.isArray(u.feats)||!u.feats.length) return "";
   return '<div class="feat-line">'+(u.feats||[]).map(function(f){return '<span>✔ '+safe(f)+'</span>';}).join("")+'</div>';
@@ -8968,7 +8992,7 @@ function renderMedicoProfesional(u){
       '<div class="stats">'+(u.stats||[]).map(function(s){return '<div class="st"><b>'+safe(s[0])+'</b><span>'+safe(s[1])+'</span></div>';}).join("")+'</div>'+
     '</div>';
 
-  var ficha=
+  var afterSobre=
     '<div class="pcard"><div class="pcard__h">🏥 Consultorios</div>'+medicoConsultoriosHTML(u)+'</div>'+
     '<div class="pcard"><div class="pcard__h">🛡️ Seguros aceptados</div><div class="pro-seguros">'+medicoSegurosHTML(u)+'</div></div>'+
     proReviewsCardHTML(u, "Opiniones de pacientes")+
@@ -8988,7 +9012,8 @@ function renderMedicoProfesional(u){
     tri:tri,
     contact:adultoContactSimpleHTML(u),
     sobre:sobre,
-    ficha:ficha
+    ficha:proFichaGeoHTML(u),
+    afterSobre:afterSobre
   });
 }
 
@@ -9118,7 +9143,7 @@ function renderProEmpresa(u, esEmpresa){
       '<div class="stats">'+(u.stats||[]).map(function(s){return '<div class="st"><b>'+safe(s[0])+'</b><span>'+safe(s[1])+'</span></div>';}).join("")+'</div>'+
     '</div>';
 
-  var ficha=
+  var afterSobre=
     certBlock+
     (isBs || isEv || isGs ? '' : proReviewsCardHTML(u, "Opiniones de clientes"))+
     proFaqCardHTML(u)+
@@ -9138,7 +9163,8 @@ function renderProEmpresa(u, esEmpresa){
     tri:tri,
     contact:adultoContactSimpleHTML(u),
     sobre:sobre,
-    ficha:ficha
+    ficha:proFichaGeoHTML(u),
+    afterSobre:afterSobre
   });
 }
 
