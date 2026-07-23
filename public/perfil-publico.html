@@ -834,7 +834,7 @@ body:not(.fit) #fitRoot{width:100%;}
     overflow:visible !important;display:block !important;
   }
   [data-playout-shell="1"] .playout.playout--parity .playout__col--der > .negocio-pie-wrap{
-    flex:1 1 auto !important;min-height:0;display:flex;flex-direction:column;align-self:stretch;
+    flex:0 1 auto !important;min-height:0;max-height:none;display:flex;flex-direction:column;align-self:stretch;
   }
   [data-playout-shell="1"] .playout.playout--parity .playout__col--der > .negocio-pie-wrap .negocio-pie-card{
     flex:1 1 auto;display:flex;flex-direction:column;min-height:0;height:100%;
@@ -861,7 +861,7 @@ body.fit[data-playout-shell="1"] .playout.playout--parity .playout__col--der > .
   flex:0 0 auto !important;min-height:auto !important;height:auto !important;overflow:visible !important;
 }
 body.fit[data-playout-shell="1"] .playout.playout--parity .playout__col--der > .negocio-pie-wrap{
-  flex:1 1 auto !important;min-height:0;display:flex;flex-direction:column;align-self:stretch;
+  flex:0 1 auto !important;min-height:0;display:flex;flex-direction:column;align-self:stretch;
 }
 body.fit[data-playout-shell="1"] .playout.playout--parity .playout__col--der > .negocio-pie-wrap .negocio-pie-card{
   flex:1 1 auto;display:flex;flex-direction:column;min-height:0;height:100%;
@@ -6492,8 +6492,10 @@ function syncAdultoUbicacionStretch(root){
   }
   var gaps=Math.max(0,n-1)*gap;
   var avail=Math.floor(leftH-used-gaps);
+  /* Capar stretch: el hueco se llena con FAQ/servicios, no con Ubicación vacía. */
+  var maxStretch=220;
   if(avail>0){
-    ubic.style.minHeight=avail+"px";
+    ubic.style.minHeight=Math.min(avail, maxStretch)+"px";
   }
 }
 function bindAdultoUbicacionStretch(root){
@@ -6648,9 +6650,10 @@ function renderPlayoutAdultoRef(u, cfg){
   /* Derecha: Precio + métodos de pago + tiempo (tri completo). */
   var triPrecio=cfg.tri!=null?cfg.tri:adultoTriPrecioHTML(u);
   var perfil=cfg.perfil||"";
-  /* ficha = Categoría/País/Estado/Ciudad (entre pagos y contacto). afterSobre = extras pro/medico. */
+  /* ficha = Categoría/País/Estado/Ciudad (entre pagos y contacto). afterSobre / afterSvc = extras. */
   var ficha=cfg.ficha||adultoFichaHTML(u);
   var afterSobre=cfg.afterSobre||"";
+  var afterSvc=cfg.afterSvc||"";
   var contact=cfg.contact!=null?cfg.contact:adultoContactSimpleHTML(u);
   var sobrePersona=cfg.sobre!=null?cfg.sobre:sobrePerfilHTML(u);
   /* Fase 1 / referencia Owner: sin estados ni lives en el playout. */
@@ -6667,7 +6670,7 @@ function renderPlayoutAdultoRef(u, cfg){
   /*
     Columnas (Owner):
     - Izq: galería (adulto 3; bienestar/pro/empresa con cobertura → 5 para empatar altura)
-    - Der: perfil → tri (pagos) → ficha geo → contacto → sobre → extras → ubicación
+    - Der: perfil → tri (pagos) → ficha geo → contacto → sobre → extras → servicios → más extras → ubicación
     - Abajo: banner largo a lo ancho de las 2 columnas
   */
   var bannerPie=(u&&u.__previewRegistro)?"":('<div class="playout__banner-adult">'+bottomBannerHTML(layoutKey)+'</div>');
@@ -6683,8 +6686,9 @@ function renderPlayoutAdultoRef(u, cfg){
     (contact||"")+
     (sobrePersona||"")+
     afterSobre+
-    (ubicCard||"")+
-    svcStack;
+    svcStack+
+    afterSvc+
+    (ubicCard||"");
 
   return '<div class="playout playout--'+safe(layoutKey).replace(/[^a-z0-9_-]/gi,"-")+extraCls+'" data-cat="'+safe(u.subcategoriaId||layoutKey)+'"'+dataExtra+'>'+
     '<div class="playout__col playout__col--izq">'+izq+'</div>'+
@@ -8883,9 +8887,17 @@ function proFaqNormItem(item){
   return {q:String(item||""),a:""};
 }
 function proFaqCardHTML(u){
-  if(!u||!(u.faq||[]).length) return "";
+  var list=(u&&Array.isArray(u.faq))?u.faq.slice():[];
+  if(!list.length){
+    list=[
+      "¿Cuánto tiempo tarda una visita?",
+      "¿Ofrecen garantía en sus servicios?",
+      "¿Emiten factura?",
+      "¿Realizan trabajos de emergencia?"
+    ];
+  }
   return '<div class="pcard faq" data-faq-accordion="1"><div class="pcard__h">❓ Preguntas frecuentes</div>'+
-    (u.faq||[]).map(function(raw){
+    list.map(function(raw){
       var it=proFaqNormItem(raw);
       if(!it.q) return "";
       var a=it.a||"Escríbenos por el contacto publicado y te respondemos con el detalle.";
@@ -9013,7 +9025,8 @@ function renderMedicoProfesional(u){
     '<div class="pcard"><div class="pcard__h">🏥 Consultorios</div>'+medicoConsultoriosHTML(u)+'</div>'+
     '<div class="pcard"><div class="pcard__h">🛡️ Seguros aceptados</div><div class="pro-seguros">'+medicoSegurosHTML(u)+'</div></div>'+
     proReviewsCardHTML(u, "Opiniones de pacientes")+
-    proFaqCardHTML(u)+
+    proFaqCardHTML(u);
+  var afterSvc=
     proCoberturaCardHTML(u, "Zona de atención")+
     proTrustCardHTML([
       ["badge","Cédula profesional verificada"],
@@ -9030,7 +9043,8 @@ function renderMedicoProfesional(u){
     contact:adultoContactSimpleHTML(u),
     sobre:sobre,
     ficha:proFichaGeoHTML(u, medicoDatos),
-    afterSobre:afterSobre
+    afterSobre:afterSobre,
+    afterSvc:afterSvc
   });
 }
 function applyBienestarSectorHydrate(u){
@@ -9166,7 +9180,8 @@ function renderProEmpresa(u, esEmpresa){
     certBlock+
     (isBs || isEv || isGs ? '' : proReviewsCardHTML(u, "Opiniones de clientes"))+
     proFaqCardHTML(u)+
-    (isEv ? eventosReguladaNoticeHTML(u) : (isGs ? gastronomiaReguladaNoticeHTML(u) : (isBs && u.__bienestarPack==='H' ? bienestarPackHNoticeHTML(u) : '')))+
+    (isEv ? eventosReguladaNoticeHTML(u) : (isGs ? gastronomiaReguladaNoticeHTML(u) : (isBs && u.__bienestarPack==='H' ? bienestarPackHNoticeHTML(u) : '')));
+  var afterSvc=
     proCoberturaCardHTML(u, "Zona de cobertura")+
     proTrustCardHTML([
       ["money","Precios justos y transparentes"],
@@ -9183,7 +9198,8 @@ function renderProEmpresa(u, esEmpresa){
     contact:adultoContactSimpleHTML(u),
     sobre:sobre,
     ficha:proFichaGeoHTML(u, datos),
-    afterSobre:afterSobre
+    afterSobre:afterSobre,
+    afterSvc:afterSvc
   });
 }
 
