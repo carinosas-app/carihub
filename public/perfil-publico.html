@@ -82,6 +82,7 @@
 <script src="ciudades.js"></script>
 <script src="js/perfil-res-sbar-picker.js?v=20260720sbar1"></script>
 <script src="js/carihub-bienestar-sector-render.js?v=20260721faq1"></script>
+<script src="js/carihub-hogar-sector-render.js?v=20260723ficha1"></script>
 <script src="js/carihub-eventos-sector-render.js?v=20260627e3"></script>
 <script src="js/data/registro-sector-contract-registry.js?v=20260721faq2"></script>
 <script src="js/carihub-gastronomia-sector-render.js?v=20260702gast1"></script>
@@ -8828,8 +8829,8 @@ function ensureProUbicacionFields(u){
   }
   return u;
 }
-/* Pro/empresa/medico: tarjeta Categoría · País · Estado · Ciudad (entre pagos y contacto). */
-function proFichaGeoHTML(u){
+/* Pro/empresa/medico: ficha pública entre pagos y contacto (geo + datos del oficio). */
+function proFichaGeoHTML(u, datosRows){
   u=u||{};
   var q={};
   try{
@@ -8847,6 +8848,21 @@ function proFichaGeoHTML(u){
     row(pico("globe"),"País",safe(pais))+
     row(pico("pin"),"Estado",safe(estado))+
     row(pico("pin"),"Ciudad",safe(ciudad));
+  var seen={categoria:1,pais:1,estado:1,ciudad:1};
+  (datosRows||[]).forEach(function(d){
+    if(!d||!d[1]) return;
+    var key=String(d[1]).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+    if(seen[key]) return;
+    seen[key]=1;
+    var block=d[3]||((d[1]==="Horario")?"horario":"");
+    html+=row(d[0],d[1],d[2]?safe(d[2]):"",block);
+  });
+  if(u.experiencia&&!seen.experiencia){
+    html+=row(pico("calendar"),"Experiencia",safe(u.experiencia));
+  }
+  if(u.subcategoria&&!seen["subcategoria"]){
+    html+=row(pico("tag"),"Subcategoría",safe(u.subcategoria));
+  }
   return '<div class="pcard pcard--ficha-publica"><div class="dlist">'+html+'</div></div>';
 }
 function proFeatsLineHTML(u){
@@ -8965,16 +8981,17 @@ function renderMedicoProfesional(u){
       '<div class="idsub">'+safe(u.titulo||u.especialidad)+'</div>'+
       idlocUbicacionHTML(u, loc)+
       '<div class="pro-cedula-badge" style="margin-top:10px">🎓 Profesionista verificado · CariHub</div>'+
-      '<div class="dlist" style="margin-top:14px">'+
-        row("heart","Profesión",safe(u.profesion))+
-        row("list","Especialidad",safe(u.especialidad))+
-        row("search","Subespecialidad",safe(u.subespecialidad))+
-        row("clock","Horario",safe(u.horarioAtencion||u.horario),"horario")+
-        row("pin","Atención",safe(u.atencion))+
-        row("chat","Idiomas",safe(u.idiomas))+
-        row("globe","Zona",safe(u.zonaCobertura))+
-      '</div>'+
     '</div>';
+
+  var medicoDatos=[
+    ["heart","Profesión",u.profesion],
+    ["list","Especialidad",u.especialidad],
+    ["search","Subespecialidad",u.subespecialidad],
+    ["clock","Horario",u.horarioAtencion||u.horario,"horario"],
+    ["pin","Atención",u.atencion],
+    ["chat","Idiomas",u.idiomas],
+    ["globe","Zona",u.zonaCobertura]
+  ];
 
   var triExtras=
     (u.consultaEnLinea?'<div class="pro-online">📹 '+safe(u.consultaEnLineaTexto||"Consulta en línea disponible")+'</div>':"")+
@@ -9012,12 +9029,10 @@ function renderMedicoProfesional(u){
     tri:tri,
     contact:adultoContactSimpleHTML(u),
     sobre:sobre,
-    ficha:proFichaGeoHTML(u),
+    ficha:proFichaGeoHTML(u, medicoDatos),
     afterSobre:afterSobre
   });
 }
-
-/* ---------------- PROFESIONAL / EMPRESA (azul) ---------------- */
 function applyBienestarSectorHydrate(u){
   if(window.CariHubBienestarSectorRender&&CariHubBienestarSectorRender.hydrateDisplayFields){
     return CariHubBienestarSectorRender.hydrateDisplayFields(u||{});
@@ -9033,6 +9048,12 @@ function applyEventosSectorHydrate(u){
 function applyGastronomiaSectorHydrate(u){
   if(window.CariHubGastronomiaSectorRender&&CariHubGastronomiaSectorRender.hydrateDisplayFields){
     return CariHubGastronomiaSectorRender.hydrateDisplayFields(u||{});
+  }
+  return u||{};
+}
+function applyHogarSectorHydrate(u){
+  if(window.CariHubHogarSectorRender&&CariHubHogarSectorRender.hydrateDisplayFields){
+    return CariHubHogarSectorRender.hydrateDisplayFields(u||{});
   }
   return u||{};
 }
@@ -9074,15 +9095,17 @@ function renderProEmpresa(u, esEmpresa){
   u=applyBienestarSectorHydrate(u);
   u=applyEventosSectorHydrate(u);
   u=applyGastronomiaSectorHydrate(u);
+  u=applyHogarSectorHydrate(u);
   u=ensureProUbicacionFields(u);
   var isBs=!!u.__bienestarPack;
   var isEv=!!u.__eventosPack;
   var isGs=!!u.__gastronomiaPack;
+  var isHg=!!u.__hogarPack;
   var loc=[u.ciudad,u.estado].filter(Boolean).join(", ");
   var verLabel = esEmpresa ? "Empresa verificada" : "Verificado";
   var layoutKey=esEmpresa?"empresa":"pro";
 
-  var datos = (isEv && u.__eventosDatos && u.__eventosDatos.length) ? u.__eventosDatos : (isBs && u.__bienestarDatos && u.__bienestarDatos.length) ? u.__bienestarDatos : (isGs && u.__gastronomiaDatos && u.__gastronomiaDatos.length) ? u.__gastronomiaDatos : (esEmpresa ? [
+  var datos = (isEv && u.__eventosDatos && u.__eventosDatos.length) ? u.__eventosDatos : (isBs && u.__bienestarDatos && u.__bienestarDatos.length) ? u.__bienestarDatos : (isGs && u.__gastronomiaDatos && u.__gastronomiaDatos.length) ? u.__gastronomiaDatos : (isHg && u.__hogarDatos && u.__hogarDatos.length) ? u.__hogarDatos : (esEmpresa ? [
     ["tag","Categoría",u.categoria],["building","Tipo de empresa",u.tipoEmpresa],["calendar","Años en el mercado",u.aniosMercado],
     ["users","Empleados",u.empleados],["clock","Horario",u.horario],["pin","Zona de cobertura",u.zonaCobertura],
     ["wrench","Atención",u.atencion],["creditCard","Formas de pago",(u.formasPago||[]).join(", ")],["receipt","Facturación",u.facturacion]
@@ -9091,15 +9114,11 @@ function renderProEmpresa(u, esEmpresa){
     ["globe","Zona de cobertura",u.zonaCobertura],["clock","Horario",u.horario],["chat","Idiomas",u.idiomas],
     ["alert","Urgencias 24/7",u.urgencias247],["check2","Garantía",u.garantia]
   ]);
-  var datosHTML = datos.map(function(d){
-    var block=d[3]||((d[1]==="Horario")?"horario":"");
-    return row(d[0],d[1],d[2]?safe(d[2]):"",block);
-  }).join("");
 
   var tabs = esEmpresa
     ? ["Plomería","Mantenimiento","Instalaciones","Residencial","Comercial"]
     : ["Servicio","Plomería","Categoría","Hogar",u.experiencia];
-  var tabsHTML = (isBs || isEv || isGs || !!u.sectorId) ? '' : tabs.map(function(t,i){return '<span class="tb '+(i===1?"on":"")+'">'+safe(t)+'</span>';}).join("");
+  var tabsHTML = (isBs || isEv || isGs || isHg || !!u.sectorId) ? '' : tabs.map(function(t,i){return '<span class="tb '+(i===1?"on":"")+'">'+safe(t)+'</span>';}).join("");
 
   var pagos = esEmpresa ? u.formasPago : u.metodosPago;
   var priceLbl = (isEv && u.__eventosPriceLabel) ? u.__eventosPriceLabel : (isBs && u.__bienestarPriceLabel) ? u.__bienestarPriceLabel : (isGs && u.__gastronomiaPriceLabel) ? u.__gastronomiaPriceLabel : 'Desde';
@@ -9110,13 +9129,13 @@ function renderProEmpresa(u, esEmpresa){
   var certBlock = u.certificaciones ? '<div class="pcard"><div class="pcard__h">🎖️ Certificaciones</div><div class="svc">'+
       u.certificaciones.map(function(c){return '<div><span class="ok">🏅</span><div><b>'+safe(c[0])+'</b><br><span style="color:var(--muted);font-size:12px">Emitido por: '+safe(c[1])+'</span></div></div>';}).join("")+'</div></div>' : '';
 
+  /* Cabecera tipo adulto: nombre/título/ubicación; los datos van en ficha entre pagos y contacto. */
   var perfil=
     '<div class="pcard">'+
       '<div class="idhead"><h1>'+safe(u.nombre)+'</h1>'+verificadoBadge(verLabel)+bienestarBadgesHTML(u)+eventosBadgesHTML(u)+gastronomiaBadgesHTML(u)+(u.edad?'<span class="age" data-pub-block="edad">'+u.edad+' años</span>':'')+'</div>'+
       '<div class="idsub">'+safe(u.titulo)+'</div>'+
       idlocUbicacionHTML(u, loc)+
       (tabsHTML ? '<div class="tabs">'+tabsHTML+'</div>' : '')+
-      '<div class="dlist" style="margin-top:14px">'+datosHTML+'</div>'+
     '</div>';
 
   var triExtras=
@@ -9163,7 +9182,7 @@ function renderProEmpresa(u, esEmpresa){
     tri:tri,
     contact:adultoContactSimpleHTML(u),
     sobre:sobre,
-    ficha:proFichaGeoHTML(u),
+    ficha:proFichaGeoHTML(u, datos),
     afterSobre:afterSobre
   });
 }
