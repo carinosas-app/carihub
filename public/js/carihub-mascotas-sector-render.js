@@ -874,12 +874,39 @@
     return ['Servicios para mascotas', 'Modalidad declarada', 'Cobertura geográfica', 'Perfil verificable en CariHub'];
   }
 
-  function packFaq(canonId) {
-    var pf = previewFields(canonId);
-    if (pf.faq && pf.faq.length) {
-      return pf.faq.map(function (fid) { return '¿' + fieldLabel(fid) + '?'; });
+  function packFaq(canonId, p) {
+    p = p || {};
+    var faqs = [];
+    function pushFaq(q, a) {
+      if (!q || !a) return;
+      faqs.push({ q: q, a: String(a) });
     }
-    return ['¿Atienden mi especie?', '¿Cuál es la tarifa?', '¿Tienen emergencias?', '¿Cuál es la cobertura?'];
+    function fallbackAnswer(fid) {
+      if (fid === 'coberturaGeografica') return 'Atendemos la zona publicada. Fuera de cobertura, consulta disponibilidad y costo extra.';
+      if (fid === 'colaboracionesComerciales') return 'Si colaboramos con veterinarios, refugios o tiendas, lo indicamos en el perfil.';
+      if (fid === 'emergenciasMascotas') return 'Revisa el perfil: algunas fichas ofrecen emergencias 24 h, otras solo en horario o derivación.';
+      if (fid === 'tiempoRespuestaMascotas') return 'El tiempo de respuesta depende de la demanda y la zona; confirma por WhatsApp al momento.';
+      if (fid === 'modalidadServicioMascotas') return 'Indica si necesitas domicilio, consultorio, clínica o instalaciones según lo publicado.';
+      if (fid === 'especiesAtendidas') return 'Atendemos las especies declaradas en el perfil; confirma si tu mascota es de otra especie.';
+      return 'Escríbenos por el contacto publicado y te confirmamos detalles al momento.';
+    }
+    var pf = previewFields(canonId);
+    (pf.faq || []).forEach(function (fid) {
+      var label = fieldLabel(fid);
+      var val = formatFieldValue(fid, p[fid]);
+      pushFaq('¿' + label + '?', val || fallbackAnswer(fid));
+    });
+    if (faqs.length < 2) {
+      pushFaq('¿Atienden mi especie?', formatFieldValue('especiesAtendidas', p.especiesAtendidas) || fallbackAnswer('especiesAtendidas'));
+      pushFaq('¿Cuál es la cobertura?', formatFieldValue('coberturaGeografica', p.coberturaGeografica) || fallbackAnswer('coberturaGeografica'));
+    }
+    if (faqs.length < 3) {
+      pushFaq('¿Cuál es el horario?', p.horarioDetalle || p.horarioAtencion || 'Consulta el horario publicado en el perfil.');
+    }
+    if (faqs.length < 4) {
+      pushFaq('¿Atienden emergencias?', formatFieldValue('emergenciasMascotas', p.emergenciasMascotas) || fallbackAnswer('emergenciasMascotas'));
+    }
+    return faqs.slice(0, 6);
   }
 
   function resolvePrecioPublico(p, u) {
@@ -916,8 +943,8 @@
     u.__mascotasCanon = canonId;
     u.__mascotasPack = pack;
     u.sectorId = u.sectorId || 'mascotas';
-    u.titulo = u.titulo || p.blockTitle || CANON_BLOCK_TITLES[canonId] || PACK_TITLES[pack] || 'Servicios para mascotas';
-    u.especialidad = u.especialidad || p.especialidadVeterinaria || p.especialidadesEmpresaMascotas || u.titulo;
+    u.titulo = u.categoriaPublica || u.categoria || p.blockTitle || CANON_BLOCK_TITLES[canonId] || PACK_TITLES[pack] || 'Servicios para mascotas';
+    u.especialidad = u.especialidad || p.especialidadVeterinaria || (p.serviciosMascotas && p.serviciosMascotas[0]) || p.especialidadesEmpresaMascotas || u.titulo;
     u.servicios = u.servicios || u.titulo;
     u.tagline = u.tagline || p.tagline || '';
     u.sobreMi = buildSobreMi(canonId, p, u);
@@ -948,7 +975,7 @@
     u.rating = u.rating != null ? u.rating : '—';
     u.opiniones = u.opiniones != null ? u.opiniones : 0;
     u.reviews = Array.isArray(u.reviews) ? u.reviews : [];
-    u.faq = Array.isArray(u.faq) && u.faq.length ? u.faq : packFaq(canonId);
+    u.faq = Array.isArray(u.faq) && u.faq.length ? u.faq : packFaq(canonId, p);
     u.noIncluidos = Array.isArray(u.noIncluidos) && u.noIncluidos.length
       ? u.noIncluidos
       : ['Medicamentos sin receta no declarados', 'Servicios fuera del alcance publicado', 'Emergencias no cubiertas salvo indicación'];

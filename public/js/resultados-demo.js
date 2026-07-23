@@ -1358,13 +1358,88 @@
     ]
   };
 
+  /* Demos 1:1 — evita que pack A/B/C/D/E mezclen paseo, vet, groomer y tienda. */
   var DEMO_MASCOTAS = {
-    'paseador-de-perros': DEMO_MASCOTAS_BY_PACK.A,
-    'entrenador-canino': DEMO_MASCOTAS_BY_PACK.B,
-    groomer: DEMO_MASCOTAS_BY_PACK.C,
-    'medico-veterinario': [DEMO_MASCOTAS_BY_PACK.D[0]],
-    'clinica-veterinaria': [DEMO_MASCOTAS_BY_PACK.D[1]],
-    'tienda-de-mascotas': DEMO_MASCOTAS_BY_PACK.E
+    'paseador-de-perros': [
+      { alias: 'Paseos Caninos MTY', precio: '150', tagline: 'Paseos diarios, socialización y reporte con fotos.', serviciosMascotas: ['Paseo', 'Socialización', 'Reporte con fotos'], especiesAtendidas: ['perros'], tamanoMascotasAtendidas: ['pequeno', 'mediano', 'grande'], modalidadServicioMascotas: 'domicilio', tarifaDesde: '150', tiempoRespuestaMascotas: 'mismo_dia', coberturaGeografica: 'Monterrey centro y sur', diferenciadorMascotas: 'Grupo reducido y GPS', horario: 'Lun–Sáb 6:00–20:00', verificada: true },
+      { alias: 'Walkies del Valle', precio: '140', tagline: 'Paseos individuales o en grupo pequeño.', serviciosMascotas: ['Paseo individual', 'Paseo grupal'], especiesAtendidas: ['perros'], modalidadServicioMascotas: 'domicilio', tarifaDesde: '140', horario: 'Lun–Dom 7:00–19:00', verificada: true }
+    ],
+    'cuidador-de-mascotas': [
+      { alias: 'Cuidado Hogar Pet', precio: '280', tagline: 'Cuidado en casa: alimentación, compañía y medicación básica.', serviciosMascotas: ['Cuidado en casa', 'Alimentación', 'Medicación básica'], especiesAtendidas: ['perros', 'gatos'], modalidadServicioMascotas: 'domicilio', tarifaDesde: '280', tiempoRespuestaMascotas: '24_48h', diferenciadorMascotas: 'Visitas con reporte', horario: 'Lun–Dom', verificada: true },
+      { alias: 'Pet Sitter Norte', precio: '260', tagline: 'Cuidado temporal cuando viajas.', serviciosMascotas: ['Visitas', 'Overnight', 'Alimentación'], especiesAtendidas: ['perros', 'gatos'], modalidadServicioMascotas: 'domicilio', tarifaDesde: '260', horario: 'Con reserva', verificada: true }
+    ],
+    'guarderia-para-mascotas': [
+      { alias: 'Guardería Pet Day', precio: '350', tagline: 'Guardería diurna con juego supervisado.', serviciosMascotas: ['Guardería diurna', 'Juego', 'Socialización'], especiesAtendidas: ['perros'], tamanoMascotasAtendidas: ['pequeno', 'mediano'], modalidadServicioMascotas: 'instalaciones', capacidadInstalacion: '20 cupos', tarifaDesde: '350', diferenciadorMascotas: 'Cámaras en vivo', horario: 'Lun–Vie 7:00–19:00', verificada: true },
+      { alias: 'Daycare Canino Sur', precio: '320', tagline: 'Día completo con áreas separadas por tamaño.', serviciosMascotas: ['Día completo', 'Áreas por tamaño'], especiesAtendidas: ['perros'], modalidadServicioMascotas: 'instalaciones', tarifaDesde: '320', horario: 'Lun–Sáb 8:00–18:00', verificada: true }
+    ],
+    'hotel-para-mascotas': [
+      { alias: 'Hotel Canino del Norte', precio: '450', tagline: 'Hospedaje nocturno con supervisión y paseos.', serviciosMascotas: ['Hospedaje', 'Paseos', 'Alimentación'], especiesAtendidas: ['perros', 'gatos'], modalidadServicioMascotas: 'instalaciones', capacidadInstalacion: '15 suites', tarifaDesde: '450', diferenciadorMascotas: 'Suites individuales', horario: 'Check-in diario 8:00–20:00', verificada: true },
+      { alias: 'Pet Hotel Valle', precio: '420', tagline: 'Estancia corta o larga con reporte diario.', serviciosMascotas: ['Estancia', 'Reporte diario', 'Medicación'], especiesAtendidas: ['perros'], modalidadServicioMascotas: 'instalaciones', tarifaDesde: '420', horario: 'Todos los días', verificada: true }
+    ],
+    'entrenador-canino': [
+      { alias: 'Coach Canino Pro', precio: '380', tagline: 'Entrenamiento a domicilio y en parque.', serviciosMascotas: ['Entrenamiento', 'Paseo educativo', 'Refuerzo positivo'], especiesAtendidas: ['perros'], modalidadServicioMascotas: 'domicilio', tarifaDesde: '380', diferenciadorMascotas: 'Sesiones a domicilio', horario: 'Con cita', verificada: true },
+      { alias: 'Entrenamiento Patitas', precio: '360', tagline: 'Obediencia y manejo de correa.', serviciosMascotas: ['Obediencia', 'Correa', 'Socialización'], especiesAtendidas: ['perros'], modalidadServicioMascotas: 'ambos', tarifaDesde: '360', horario: 'Lun–Sáb', verificada: true }
+    ],
+    adiestrador: [
+      { alias: 'Adiestramiento Alfa', precio: '450', tagline: 'Obediencia básica, corrección y socialización.', serviciosMascotas: ['Obediencia básica', 'Corrección conductual', 'Socialización'], especiesAtendidas: ['perros'], modalidadServicioMascotas: 'ambos', tarifaDesde: '450', diferenciadorMascotas: 'Método positivo certificado', horario: 'Lun–Sáb', verificada: true },
+      { alias: 'Adiestra Bien NL', precio: '420', tagline: 'Planes por objetivos: casa, calle y visitas.', serviciosMascotas: ['Plan personalizado', 'Casa y calle'], especiesAtendidas: ['perros'], modalidadServicioMascotas: 'domicilio', tarifaDesde: '420', horario: 'Con cita', verificada: true }
+    ],
+    'centro-de-entrenamiento-canino': [
+      { nombreComercial: 'Centro Canino Elite', precio: '500', tagline: 'Entrenamiento en instalaciones con grupos y privado.', serviciosEmpresaMascotas: ['Grupos', 'Privado', 'Evaluación inicial'], especialidadesEmpresaMascotas: 'Obediencia · Agility básico', especiesAtendidas: ['perros'], modalidadServicioMascotas: 'instalaciones', capacidadInstalacion: '12 perros por turno', tarifaDesde: '500', diferenciadorMascotas: 'Área techada y pista', horario: 'Lun–Sáb 8:00–20:00', verificada: true },
+      { nombreComercial: 'Academia Canina Norte', precio: '480', tagline: 'Cursos de obediencia y socialización en centro.', serviciosEmpresaMascotas: ['Cursos', 'Socialización'], especiesAtendidas: ['perros'], modalidadServicioMascotas: 'instalaciones', tarifaDesde: '480', horario: 'Mar–Sáb', verificada: true }
+    ],
+    groomer: [
+      { alias: 'Groom & Style Pets', precio: '320', tagline: 'Baño, corte y spa para perros y gatos.', serviciosMascotas: ['Baño', 'Corte', 'Spa', 'Uñas'], especiesAtendidas: ['perros', 'gatos'], modalidadServicioMascotas: 'instalaciones', tarifaDesde: '320', diferenciadorMascotas: 'Productos hipoalergénicos', horario: 'Mar–Sáb 9:00–19:00', verificada: true },
+      { alias: 'Groomer Express', precio: '280', tagline: 'Baño y cepillado rápido sin estrés.', serviciosMascotas: ['Baño', 'Cepillado', 'Oídos'], especiesAtendidas: ['perros'], modalidadServicioMascotas: 'instalaciones', tarifaDesde: '280', horario: 'Lun–Vie 10:00–18:00', verificada: true }
+    ],
+    'estetica-canina': [
+      { nombreComercial: 'Estética Canina Bella', precio: '350', tagline: 'Estética, stripping y tratamientos de pelaje.', serviciosEmpresaMascotas: ['Estética', 'Stripping', 'Tratamientos'], especialidadesEmpresaMascotas: 'Razas de pelo · Spa', especiesAtendidas: ['perros'], modalidadServicioMascotas: 'instalaciones', tarifaDesde: '350', diferenciadorMascotas: 'Especialistas en razas', horario: 'Mar–Sáb 9:00–19:00', verificada: true },
+      { nombreComercial: 'Spa Canino del Valle', precio: '380', tagline: 'Spa, perfume y cuidado de piel sensible.', serviciosEmpresaMascotas: ['Spa', 'Piel sensible', 'Perfume'], especiesAtendidas: ['perros', 'gatos'], modalidadServicioMascotas: 'instalaciones', tarifaDesde: '380', horario: 'Mié–Dom', verificada: true }
+    ],
+    'fotografo-de-mascotas': [
+      { alias: 'Foto Mascotas Studio', precio: '1,200', tagline: 'Sesiones fotográficas en estudio y exteriores.', serviciosMascotas: ['Sesión en estudio', 'Exteriores', 'Retoque'], especiesAtendidas: ['perros', 'gatos', 'otros'], modalidadServicioMascotas: 'ambos', tarifaDesde: '1200', diferenciadorMascotas: 'Paquetes con impresión', horario: 'Con cita', verificada: true },
+      { alias: 'Pet Lens MTY', precio: '950', tagline: 'Retratos de mascotas en locación.', serviciosMascotas: ['Retrato', 'Locación', 'Galería digital'], especiesAtendidas: ['perros', 'gatos'], modalidadServicioMascotas: 'domicilio', tarifaDesde: '950', horario: 'Fines de semana', verificada: true }
+    ],
+    'medico-veterinario': [
+      { nombreProfesional: 'Dra. Vet. Laura Soto', precio: '550', tagline: 'Medicina general, vacunas y consultas preventivas.', especialidadVeterinaria: 'Medicina general', serviciosVeterinarios: ['Consulta', 'Vacunación', 'Desparasitación'], especiesAtendidas: ['perros', 'gatos'], modalidadServicioMascotas: 'consultorio', precioConsulta: '550', emergenciasMascotas: 'si_horario', cedulaVerificada: true, diferenciadorMascotas: 'Enfoque preventivo', horario: 'Lun–Vie 9:00–19:00', verificada: true },
+      { nombreProfesional: 'Dr. Vet. Pablo Ríos', precio: '500', tagline: 'Consulta general y seguimiento de crónicos.', especialidadVeterinaria: 'Medicina general', serviciosVeterinarios: ['Consulta', 'Seguimiento', 'Recetas'], especiesAtendidas: ['perros', 'gatos'], modalidadServicioMascotas: 'consultorio', precioConsulta: '500', emergenciasMascotas: 'derivacion', cedulaVerificada: true, horario: 'Lun–Sáb 10:00–18:00', verificada: true }
+    ],
+    'veterinario-especialista': [
+      { nombreProfesional: 'Dra. Vet. Especialista Ruiz', precio: '850', tagline: 'Dermatología y medicina interna veterinaria.', especialidadVeterinaria: 'Dermatología', especialidadesVeterinarias: ['Dermatología', 'Medicina interna'], serviciosVeterinarios: ['Consulta especializada', 'Diagnóstico', 'Seguimiento'], especiesAtendidas: ['perros', 'gatos'], modalidadServicioMascotas: 'consultorio', precioConsulta: '850', emergenciasMascotas: 'no', cedulaVerificada: true, diferenciadorMascotas: 'Referencia de clínicas', horario: 'Mar–Vie con cita', verificada: true },
+      { nombreProfesional: 'Dr. Vet. Cardiólogo Vega', precio: '900', tagline: 'Cardiología veterinaria y ecocardiograma.', especialidadVeterinaria: 'Cardiología', especialidadesVeterinarias: ['Cardiología'], serviciosVeterinarios: ['Eco', 'Consulta cardíaca'], especiesAtendidas: ['perros', 'gatos'], modalidadServicioMascotas: 'clinica', precioConsulta: '900', cedulaVerificada: true, horario: 'Con referencia', verificada: true }
+    ],
+    'cirujano-veterinario': [
+      { nombreProfesional: 'Cirujano Vet. Morales', precio: 'Consultar', tagline: 'Cirugía de tejidos blandos y esterilización.', especialidadVeterinaria: 'Cirugía', serviciosVeterinarios: ['Cirugía tejidos blandos', 'Esterilización', 'Postoperatorio'], especiesAtendidas: ['perros', 'gatos'], modalidadServicioMascotas: 'clinica', precioConsulta: 'Consultar', emergenciasMascotas: 'si_horario', cedulaVerificada: true, diferenciadorMascotas: 'Quirófano propio', horario: 'Lun–Vie con cita', verificada: true },
+      { nombreProfesional: 'Dra. Cirujana Vet. Luna', precio: 'Consultar', tagline: 'Ortopedia y cirugía mayor programada.', especialidadVeterinaria: 'Ortopedia', serviciosVeterinarios: ['Ortopedia', 'Cirugía mayor'], especiesAtendidas: ['perros'], modalidadServicioMascotas: 'clinica', cedulaVerificada: true, horario: 'Con evaluación previa', verificada: true }
+    ],
+    'clinica-veterinaria': [
+      { nombreComercial: 'Clínica Veterinaria del Valle', precio: 'Consultar', tagline: 'Consulta, cirugía y laboratorio en sitio.', serviciosEmpresaMascotas: ['Consulta', 'Cirugía', 'Hospitalización', 'Laboratorio'], especialidadesEmpresaMascotas: 'Medicina interna · Cirugía', capacidadInstalacion: '12 camas', emergenciasMascotas: 'si_24h', modalidadServicioMascotas: 'clinica', tarifaDesde: 'Consultar', diferenciadorMascotas: 'Lab y rayos en sitio', horario: '24 horas', verificada: true },
+      { nombreComercial: 'VetCare Clínica Sur', precio: 'Consultar', tagline: 'Atención integral para perros y gatos.', serviciosEmpresaMascotas: ['Consulta', 'Vacunas', 'Rayos X'], especiesAtendidas: ['perros', 'gatos'], modalidadServicioMascotas: 'clinica', emergenciasMascotas: 'si_horario', tarifaDesde: 'Consultar', horario: 'Lun–Dom 8:00–22:00', verificada: true }
+    ],
+    'hospital-veterinario': [
+      { nombreComercial: 'Hospital Vet 24h Norte', precio: 'Consultar', tagline: 'Hospitalización 24 h, UCI y emergencias.', serviciosEmpresaMascotas: ['UCI', 'Hospitalización', 'Emergencias', 'Cirugía'], especialidadesEmpresaMascotas: 'Urgencias · Intensivos', capacidadInstalacion: '20 camas UCI', emergenciasMascotas: 'si_24h', modalidadServicioMascotas: 'clinica', tarifaDesde: 'Consultar', diferenciadorMascotas: 'Guardia médica 24/7', horario: '24 horas', verificada: true },
+      { nombreComercial: 'Hospital Animal del Valle', precio: 'Consultar', tagline: 'Internamiento y monitoreo continuo.', serviciosEmpresaMascotas: ['Internamiento', 'Monitoreo', 'Cirugía'], modalidadServicioMascotas: 'clinica', emergenciasMascotas: 'si_24h', tarifaDesde: 'Consultar', horario: '24 horas', verificada: true }
+    ],
+    'farmacia-veterinaria': [
+      { nombreProfesional: 'Farmacia Vet Salud Animal', precio: 'Consultar', tagline: 'Medicamentos, dietas y asesoría con receta.', especialidadVeterinaria: 'Farmacia veterinaria', serviciosVeterinarios: ['Medicamentos', 'Dietas', 'Asesoría'], especiesAtendidas: ['perros', 'gatos'], modalidadServicioMascotas: 'consultorio', precioConsulta: 'Consultar', emergenciasMascotas: 'no', cedulaVerificada: true, diferenciadorMascotas: 'Surtido de especialidad', horario: 'Lun–Sáb 9:00–20:00', verificada: true },
+      { nombreProfesional: 'Rx Vet del Norte', precio: 'Consultar', tagline: 'Farmacia y productos de uso veterinario.', especialidadVeterinaria: 'Farmacia veterinaria', serviciosVeterinarios: ['Receta', 'Surtido', 'Suplementos'], especiesAtendidas: ['perros', 'gatos', 'aves'], modalidadServicioMascotas: 'consultorio', cedulaVerificada: true, horario: 'Lun–Vie 9:00–19:00', verificada: true }
+    ],
+    'tienda-de-mascotas': [
+      { nombreComercial: 'Mundo Mascota Shop', precio: 'Consultar', tagline: 'Alimento premium, accesorios y asesoría nutricional.', serviciosEmpresaMascotas: ['Venta', 'Asesoría nutricional', 'Accesorios'], especiesAtendidas: ['perros', 'gatos', 'aves'], modalidadServicioMascotas: 'instalaciones', tarifaDesde: 'Consultar', diferenciadorMascotas: 'Marcas premium', horario: 'Lun–Dom 10:00–20:00', verificada: true },
+      { nombreComercial: 'Pet Market Cumbres', precio: 'Consultar', tagline: 'Alimento, juguetes y snacks para mascotas.', serviciosEmpresaMascotas: ['Alimento', 'Juguetes', 'Snacks'], especiesAtendidas: ['perros', 'gatos'], modalidadServicioMascotas: 'instalaciones', tarifaDesde: 'Consultar', horario: 'Lun–Sáb 10:00–21:00', verificada: true }
+    ],
+    'criadero-autorizado': [
+      { nombreComercial: 'Criadero Autorizado NL', precio: 'Consultar', tagline: 'Cría responsable con papeles y seguimiento.', serviciosEmpresaMascotas: ['Cría', 'Papeles', 'Seguimiento postventa'], especiesAtendidas: ['perros'], modalidadServicioMascotas: 'instalaciones', tarifaDesde: 'Consultar', diferenciadorMascotas: 'Registro y garantías de salud', colaboracionesComerciales: 'si_activo', horario: 'Con cita', verificada: true },
+      { nombreComercial: 'Línea Canina Certificada', precio: 'Consultar', tagline: 'Cachorros con pedigree y vacunas al día.', serviciosEmpresaMascotas: ['Pedigree', 'Vacunas', 'Entrega'], especiesAtendidas: ['perros'], modalidadServicioMascotas: 'instalaciones', tarifaDesde: 'Consultar', horario: 'Sábados con cita', verificada: true }
+    ],
+    'rescatista-independiente': [
+      { alias: 'Rescate Animal NL', precio: 'Donación', tagline: 'Rescate, rehabilitación y adopción responsable.', serviciosMascotas: ['Rescate', 'Rehabilitación', 'Adopción'], especiesAtendidas: ['perros', 'gatos'], modalidadServicioMascotas: 'instalaciones', tarifaDesde: 'Donación', colaboracionesComerciales: 'si_activo', diferenciadorMascotas: 'Hogar temporal verificado', horario: 'Lun–Sáb', verificada: true },
+      { alias: 'Patitas Libres MTY', precio: 'Donación', tagline: 'Adopciones y esterilización con aliados.', serviciosMascotas: ['Adopción', 'Esterilización', 'Fomento'], especiesAtendidas: ['perros', 'gatos'], modalidadServicioMascotas: 'ambos', tarifaDesde: 'Donación', horario: 'Fines de semana', verificada: true }
+    ],
+    'servicio-funerario-para-mascotas': [
+      { alias: 'Despedida Pet Care', precio: 'Consultar', tagline: 'Cremación, urna y acompañamiento digno.', serviciosMascotas: ['Cremación', 'Urna', 'Acompañamiento'], especiesAtendidas: ['perros', 'gatos', 'otros'], modalidadServicioMascotas: 'instalaciones', tarifaDesde: 'Consultar', tiempoRespuestaMascotas: 'inmediato', diferenciadorMascotas: 'Traslado incluido en zona', horario: 'Lun–Dom 8:00–20:00', verificada: true },
+      { alias: 'Memorial Animal Norte', precio: 'Consultar', tagline: 'Servicio funerario y memorial para mascotas.', serviciosMascotas: ['Cremación individual', 'Memorial', 'Traslado'], especiesAtendidas: ['perros', 'gatos'], modalidadServicioMascotas: 'ambos', tarifaDesde: 'Consultar', horario: '24 horas con cita', verificada: true }
+    ]
   };
 
   function mascotasPackDeSub(subId) {
@@ -1387,14 +1462,15 @@
       precioConsulta: base.precio || base.precioConsulta || 'Consultar',
       tiempoRespuestaMascotas: base.tiempoRespuestaMascotas || '',
       coberturaGeografica: base.coberturaGeografica || base.zonaCobertura || '',
-      colaboracionesComerciales: base.colaboracionesComerciales || ''
+      colaboracionesComerciales: base.colaboracionesComerciales || '',
+      horarioDetalle: base.horarioDetalle || base.horario || ''
     };
     var keys = [
       'nombreProfesional', 'alias', 'nombreComercial', 'serviciosMascotas', 'especiesAtendidas',
       'tamanoMascotasAtendidas', 'especialidadVeterinaria', 'serviciosVeterinarios',
       'especialidadesVeterinarias', 'emergenciasMascotas', 'serviciosEmpresaMascotas',
       'especialidadesEmpresaMascotas', 'capacidadInstalacion', 'diferenciadorMascotas',
-      'tiposColaboracionComercial'
+      'tiposColaboracionComercial', 'certificaciones', 'horarioDetalle', 'cedulaVerificada'
     ];
     keys.forEach(function (k) {
       if (base[k] != null && base[k] !== '') p[k] = base[k];
@@ -1403,7 +1479,7 @@
   }
 
   function armarPerfilMascotas(base, idx, Q, pres) {
-    var subId = pres.subcategoriaId || idCategoria(Q.categoria);
+    var subId = (pres && pres.subcategoriaId) || idCategoria(Q.categoria);
     var catLabel = base.categoriaPublica || labelCategoria(Q.categoria);
     var pack = base.deltaPack || mascotasPackDeSub(subId);
     var perfil = buildMascotasPerfilDemo(base, subId, pack);
@@ -1422,7 +1498,7 @@
       categoriaPublica: catLabel,
       precio: precio,
       tagline: base.tagline || '',
-      horario: base.horario || 'Consultar',
+      horario: base.horario || perfil.horarioDetalle || 'Consultar',
       pais: Q.pais,
       estado: Q.estado || 'Nuevo León',
       ciudad: Q.ciudad || 'Monterrey',
@@ -1450,10 +1526,26 @@
     } else {
       u.alias = perfil.alias || nombre;
       u.nombre = u.alias;
-      u.especialidad = (perfil.serviciosMascotas && perfil.serviciosMascotas[0]) || base.especialidad || '';
+      u.especialidad = (perfil.serviciosMascotas && perfil.serviciosMascotas[0])
+        || (perfil.serviciosEmpresaMascotas && perfil.serviciosEmpresaMascotas[0])
+        || base.especialidad || '';
     }
 
-    return enriquecerPerfil(u, Q);
+    if (global.CariHubMascotasSectorRender && CariHubMascotasSectorRender.resolveVistaPerfil) {
+      u.__vista = CariHubMascotasSectorRender.resolveVistaPerfil(u);
+    } else {
+      u.__vista = esNegocio ? 'empresa' : 'pro';
+    }
+
+    u = enriquecerPerfil(u, Q);
+    u.sectorId = 'mascotas';
+    u.deltaPack = pack;
+    u.mascotasPerfil = perfil;
+    if (global.CariHubMascotasSectorRender && CariHubMascotasSectorRender.resolveVistaPerfil) {
+      var vistaMas = CariHubMascotasSectorRender.resolveVistaPerfil(u);
+      if (vistaMas) u.__vista = vistaMas;
+    }
+    return u;
   }
 
   function poolDemoMascotas(subId) {
