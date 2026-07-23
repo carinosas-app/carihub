@@ -592,14 +592,12 @@
     location.href = 'index.html';
   };
 
+  /* Volver desde Resultados: destino estable (home con categorías).
+     No usar history.back(): al entrar por deep-link de ficha (perfil→resultados)
+     el historial no trae la pantalla de categorías y abre un estado incompleto / rosa vacío.
+     replace() evita reabrir ese historial roto con el botón Atrás del navegador. */
   window.resVolverAnterior = function () {
-    try {
-      if (window.history.length > 1) {
-        history.back();
-        return;
-      }
-    } catch (e) { /* noop */ }
-    resVolverInicio();
+    location.replace('index.html');
   };
 
   function paisesLista() {

@@ -806,20 +806,20 @@
       seen[fid] = true;
       var val = formatFieldValue(fid, p[fid]);
       if (!val) return;
-      pushRow(rows, icon || '📋', fieldLabel(fid), val);
+      pushRow(rows, icon || 'list', fieldLabel(fid), val);
     }
-    (pf.stats || []).forEach(function (fid) { addField(fid, '📊'); });
-    (pf.rows || []).forEach(function (fid) { addField(fid, '✨'); });
-    (pf.faq || []).slice(0, 2).forEach(function (fid) { addField(fid, 'ℹ️'); });
-    if (p.horarioAtencion) pushRow(rows, '🕐', 'Horario', p.horarioAtencion, 'horario');
-    else if (p.horarioDetalle) pushRow(rows, '🕐', 'Horario', p.horarioDetalle, 'horario');
-    else if (u.horario) pushRow(rows, '🕐', 'Horario', u.horario, 'horario');
-    if (p.certificaciones) pushRow(rows, '🎖️', 'Certificaciones', p.certificaciones);
-    if (p.diferenciadorMascotas) pushRow(rows, '🐾', 'Tu sello', p.diferenciadorMascotas);
+    (pf.stats || []).forEach(function (fid) { addField(fid, 'bars'); });
+    (pf.rows || []).forEach(function (fid) { addField(fid, 'sparkles'); });
+    (pf.faq || []).slice(0, 2).forEach(function (fid) { addField(fid, 'info'); });
+    if (p.horarioAtencion) pushRow(rows, 'clock', 'Horario', p.horarioAtencion, 'horario');
+    else if (p.horarioDetalle) pushRow(rows, 'clock', 'Horario', p.horarioDetalle, 'horario');
+    else if (u.horario) pushRow(rows, 'clock', 'Horario', u.horario, 'horario');
+    if (p.certificaciones) pushRow(rows, 'badge', 'Certificaciones', p.certificaciones);
+    if (p.diferenciadorMascotas) pushRow(rows, 'paw', 'Tu sello', p.diferenciadorMascotas);
     var loc = [u.zona, u.ciudad, u.estado].filter(function (x) { return txt(x); }).join(', ');
-    if (loc) pushRow(rows, '📍', 'Ubicación', loc);
-    if (p.coberturaGeografica) pushRow(rows, '🗺️', 'Cobertura', p.coberturaGeografica);
-    if (p.direccion) pushRow(rows, '🏠', 'Dirección', p.direccion);
+    if (loc) pushRow(rows, 'pin', 'Ubicación', loc);
+    if (p.coberturaGeografica) pushRow(rows, 'globe', 'Cobertura', p.coberturaGeografica);
+    if (p.direccion) pushRow(rows, 'home', 'Dirección', p.direccion);
     return rows;
   }
 
