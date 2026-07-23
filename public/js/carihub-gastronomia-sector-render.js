@@ -1733,18 +1733,18 @@
       seen[fid] = true;
       var val = formatFieldValue(fid, p[fid]);
       if (!val) return;
-      pushRow(rows, icon || '📋', fieldLabel(fid), val);
+      pushRow(rows, icon || 'list', fieldLabel(fid), val);
     }
-    (pf.stats || []).forEach(function (fid) { addField(fid, '📊'); });
-    (pf.rows || []).forEach(function (fid) { addField(fid, '✨'); });
-    (pf.faq || []).slice(0, 2).forEach(function (fid) { addField(fid, 'ℹ️'); });
-    if (p.horarioAtencionComercial) pushRow(rows, '🕐', 'Horario', p.horarioAtencionComercial, 'horario');
-    else if (p.horarioCocina) pushRow(rows, '🕐', 'Horario de cocina', p.horarioCocina, 'horario');
-    else if (u.horario) pushRow(rows, '🕐', 'Horario', u.horario, 'horario');
-    if (p.menuUrl) pushRow(rows, '📎', 'Menú en línea', 'Disponible');
+    (pf.stats || []).forEach(function (fid) { addField(fid, 'bars'); });
+    (pf.rows || []).forEach(function (fid) { addField(fid, 'sparkles'); });
+    (pf.faq || []).slice(0, 2).forEach(function (fid) { addField(fid, 'info'); });
+    if (p.horarioAtencionComercial) pushRow(rows, 'clock', 'Horario', p.horarioAtencionComercial, 'horario');
+    else if (p.horarioCocina) pushRow(rows, 'clock', 'Horario de cocina', p.horarioCocina, 'horario');
+    else if (u.horario) pushRow(rows, 'clock', 'Horario', u.horario, 'horario');
+    if (p.menuUrl) pushRow(rows, 'link', 'Menú en línea', 'Disponible');
     var loc = [u.zona, u.ciudad, u.estado].filter(function (x) { return txt(x); }).join(', ');
-    if (loc) pushRow(rows, '📍', 'Ubicación', loc);
-    if (p.radioEntregaKm) pushRow(rows, '🗺️', 'Radio de entrega', p.radioEntregaKm + ' km');
+    if (loc) pushRow(rows, 'pin', 'Ubicación', loc);
+    if (p.radioEntregaKm) pushRow(rows, 'globe', 'Radio de entrega', p.radioEntregaKm + ' km');
     return rows;
   }
 

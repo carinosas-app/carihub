@@ -2000,22 +2000,34 @@
   }
 
   function formatPrecioLabel(text) {
-    text = String(text || '').trim();
+    text = String(text || '').trim().replace(/^💲\s*/u, '').trim();
     if (!text) return '';
-    if (/^💲/.test(text)) return text;
-    if (/desde/i.test(text)) return '💲 ' + text;
-    return '💲 ' + text + (/\//.test(text) ? '' : ' desde');
+    if (/desde/i.test(text)) return text;
+    return text + (/\//.test(text) ? '' : ' desde');
+  }
+
+  function precioLabelIconHtml() {
+    if (typeof global.pico === 'function') return global.pico('money');
+    return '';
+  }
+
+  function escapeLabelText(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
   }
 
   function applyPublicProfileLabels(container, labels) {
     labels = labels || {};
     if (labels.precio) {
       container.querySelectorAll('[data-pub-label="precio"]').forEach(function (el) {
-        var txt = String(labels.precio);
+        var txt = formatPrecioLabel(labels.precio);
         if (el.classList.contains('lbl')) {
-          el.textContent = formatPrecioLabel(txt);
+          el.innerHTML = precioLabelIconHtml() + (txt ? (' ' + escapeLabelText(txt)) : '');
         } else if (el.classList.contains('precio-desde')) {
-          el.textContent = /desde/i.test(txt) ? txt.replace(/^💲\s*/, '') : txt;
+          el.textContent = txt;
         }
       });
     }

@@ -82,10 +82,11 @@
 <script src="ciudades.js"></script>
 <script src="js/perfil-res-sbar-picker.js?v=20260720sbar1"></script>
 <script src="js/carihub-bienestar-sector-render.js?v=20260721faq1"></script>
+<script src="js/carihub-hogar-sector-render.js?v=20260723ficha1"></script>
 <script src="js/carihub-eventos-sector-render.js?v=20260627e3"></script>
 <script src="js/data/registro-sector-contract-registry.js?v=20260721faq2"></script>
 <script src="js/carihub-gastronomia-sector-render.js?v=20260702gast1"></script>
-<script src="js/carihub-public-render-lite.js?v=20260627e3"></script>
+<script src="js/carihub-public-render-lite.js?v=20260722pico1"></script>
 <script src="js/resultados-demo.js?v=20260721faq2"></script>
 <script src="js/carihub-multi-perfil.js"></script>
 <script src="js/carihub-blk01-profile-sanitize.js"></script>
@@ -598,6 +599,102 @@ body:not(.fit) #fitRoot{width:100%;}
 .pcard{background:var(--card);border-radius:18px;padding:18px;box-shadow:var(--shadow);border:1px solid var(--card-border);}
 [data-tema="adult"] .pcard__h{color:#E91E63;}
 .pcard--mini{padding:16px 14px;border-radius:18px;min-height:96px;display:flex;flex-direction:column;justify-content:flex-start;background:var(--card);border:1px solid var(--card-border);box-shadow:var(--shadow);}
+/* Pro/empresa: misma altura; título+valor arriba; pie alineado abajo; texto envuelve */
+[data-tema="pro"] .playout__tri,
+[data-tema="empresa"] .playout__tri,
+[data-vista="pro"] .playout__tri,
+[data-vista="empresa"] .playout__tri,
+[data-vista="medico"] .playout__tri{
+  align-items:stretch;
+}
+[data-tema="pro"] .playout__tri > .pcard--mini,
+[data-tema="empresa"] .playout__tri > .pcard--mini,
+[data-vista="pro"] .playout__tri > .pcard--mini,
+[data-vista="empresa"] .playout__tri > .pcard--mini,
+[data-vista="medico"] .playout__tri > .pcard--mini{
+  min-height:120px;
+  height:100%;
+  gap:6px;
+  padding:12px;
+  justify-content:flex-start;
+  overflow:hidden;
+}
+[data-tema="pro"] .playout__tri > .pcard--mini .lbl,
+[data-tema="empresa"] .playout__tri > .pcard--mini .lbl,
+[data-vista="pro"] .playout__tri > .pcard--mini .lbl,
+[data-vista="empresa"] .playout__tri > .pcard--mini .lbl,
+[data-vista="medico"] .playout__tri > .pcard--mini .lbl{
+  flex:0 0 auto;
+  margin-bottom:0;
+  line-height:1.25;
+  flex-wrap:wrap;
+  gap:4px 6px;
+  font-size:11px;
+}
+[data-tema="pro"] .playout__tri > .pcard--mini .precio-big,
+[data-tema="empresa"] .playout__tri > .pcard--mini .precio-big,
+[data-vista="pro"] .playout__tri > .pcard--mini .precio-big,
+[data-vista="empresa"] .playout__tri > .pcard--mini .precio-big,
+[data-vista="medico"] .playout__tri > .pcard--mini .precio-big{
+  flex:0 0 auto;
+  display:block;
+  min-width:0;
+  max-width:100%;
+  margin:0;
+  overflow-wrap:anywhere;
+  word-break:break-word;
+  font-size:clamp(22px,2.4vw,28px);
+  line-height:1.05;
+}
+[data-tema="pro"] .playout__tri > .pcard--mini .precio-big--text,
+[data-tema="empresa"] .playout__tri > .pcard--mini .precio-big--text,
+[data-vista="pro"] .playout__tri > .pcard--mini .precio-big--text,
+[data-vista="empresa"] .playout__tri > .pcard--mini .precio-big--text,
+[data-vista="medico"] .playout__tri > .pcard--mini .precio-big--text{
+  font-size:14px;
+  font-weight:700;
+  line-height:1.35;
+  letter-spacing:0;
+  color:var(--ink,#1a1a1b);
+}
+[data-tema="pro"] .playout__tri > .pcard--mini .precio-sub,
+[data-tema="empresa"] .playout__tri > .pcard--mini .precio-sub,
+[data-vista="pro"] .playout__tri > .pcard--mini .precio-sub,
+[data-vista="empresa"] .playout__tri > .pcard--mini .precio-sub,
+[data-vista="medico"] .playout__tri > .pcard--mini .precio-sub{
+  margin-top:auto;
+  flex:0 0 auto;
+  max-width:100%;
+  line-height:1.25;
+  min-height:1.25em;
+}
+[data-tema="pro"] .playout__tri > .pcard--mini .urg,
+[data-tema="empresa"] .playout__tri > .pcard--mini .urg,
+[data-vista="pro"] .playout__tri > .pcard--mini .urg,
+[data-vista="empresa"] .playout__tri > .pcard--mini .urg,
+[data-vista="medico"] .playout__tri > .pcard--mini .urg{
+  margin-top:auto;
+  flex:0 0 auto;
+  display:block;
+  width:100%;
+  box-sizing:border-box;
+  max-width:100%;
+  white-space:normal;
+  line-height:1.3;
+  padding:7px 10px;
+  font-size:11px;
+  font-weight:800;
+  overflow-wrap:anywhere;
+  word-break:break-word;
+}
+/* Si hay sub + urg, el sub no empuja: solo el último pie usa margen auto */
+[data-tema="pro"] .playout__tri > .pcard--mini .precio-sub:has(+ .urg),
+[data-tema="empresa"] .playout__tri > .pcard--mini .precio-sub:has(+ .urg),
+[data-vista="pro"] .playout__tri > .pcard--mini .precio-sub:has(+ .urg),
+[data-vista="empresa"] .playout__tri > .pcard--mini .precio-sub:has(+ .urg),
+[data-vista="medico"] .playout__tri > .pcard--mini .precio-sub:has(+ .urg){
+  margin-top:2px;
+}
 [data-tema="adult"] .pcard--tiempo{
   background:#fff0f5;border:1px solid #f3c0d4;box-shadow:none;border-radius:20px;
   padding:14px 16px;min-height:88px;
@@ -737,7 +834,7 @@ body:not(.fit) #fitRoot{width:100%;}
     overflow:visible !important;display:block !important;
   }
   [data-playout-shell="1"] .playout.playout--parity .playout__col--der > .negocio-pie-wrap{
-    flex:1 1 auto !important;min-height:0;display:flex;flex-direction:column;align-self:stretch;
+    flex:0 1 auto !important;min-height:0;max-height:none;display:flex;flex-direction:column;align-self:stretch;
   }
   [data-playout-shell="1"] .playout.playout--parity .playout__col--der > .negocio-pie-wrap .negocio-pie-card{
     flex:1 1 auto;display:flex;flex-direction:column;min-height:0;height:100%;
@@ -764,7 +861,7 @@ body.fit[data-playout-shell="1"] .playout.playout--parity .playout__col--der > .
   flex:0 0 auto !important;min-height:auto !important;height:auto !important;overflow:visible !important;
 }
 body.fit[data-playout-shell="1"] .playout.playout--parity .playout__col--der > .negocio-pie-wrap{
-  flex:1 1 auto !important;min-height:0;display:flex;flex-direction:column;align-self:stretch;
+  flex:0 1 auto !important;min-height:0;display:flex;flex-direction:column;align-self:stretch;
 }
 body.fit[data-playout-shell="1"] .playout.playout--parity .playout__col--der > .negocio-pie-wrap .negocio-pie-card{
   flex:1 1 auto;display:flex;flex-direction:column;min-height:0;height:100%;
@@ -2508,6 +2605,67 @@ body.fit[data-vista="negocio"] .playout__col--der > .negocio-pie-wrap .negocio-u
 .idloc .li-ic{display:inline-flex;align-items:center;} .idloc .li-ic svg{width:19px;height:19px;}
 .idloc .li-pin{color:#E91E63;}
 .idloc .av{color:#22c55e;font-weight:700;}
+/* Pro/empresa: ubicación más legible y renglón más compacto */
+[data-tema="pro"] .idloc,
+[data-tema="empresa"] .idloc,
+[data-vista="pro"] .idloc,
+[data-vista="empresa"] .idloc,
+[data-vista="medico"] .idloc{
+  gap:8px;
+  margin-top:8px;
+  font-size:18px;
+  font-weight:700;
+  line-height:1.25;
+  row-gap:4px;
+}
+[data-tema="pro"] .idloc__horario,
+[data-tema="empresa"] .idloc__horario,
+[data-vista="pro"] .idloc__horario,
+[data-vista="empresa"] .idloc__horario,
+[data-vista="medico"] .idloc__horario{
+  font-size:15px;
+  font-weight:600;
+  color:#475569;
+  margin-left:2px;
+}
+[data-tema="pro"] .idloc .ch-flag,
+[data-tema="empresa"] .idloc .ch-flag,
+[data-vista="pro"] .idloc .ch-flag,
+[data-vista="empresa"] .idloc .ch-flag,
+[data-vista="medico"] .idloc .ch-flag{
+  width:28px;
+  height:20px;
+}
+[data-tema="pro"] .idloc .ch-shield,
+[data-tema="empresa"] .idloc .ch-shield,
+[data-vista="pro"] .idloc .ch-shield,
+[data-vista="empresa"] .idloc .ch-shield,
+[data-vista="medico"] .idloc .ch-shield{
+  width:20px;
+  height:24px;
+}
+[data-tema="pro"] .idloc__ic svg,
+[data-tema="empresa"] .idloc__ic svg,
+[data-vista="pro"] .idloc__ic svg,
+[data-vista="empresa"] .idloc__ic svg,
+[data-vista="medico"] .idloc__ic svg,
+[data-tema="pro"] .idloc .li-ic svg,
+[data-tema="empresa"] .idloc .li-ic svg,
+[data-vista="pro"] .idloc .li-ic svg,
+[data-vista="empresa"] .idloc .li-ic svg,
+[data-vista="medico"] .idloc .li-ic svg{
+  width:22px;
+  height:22px;
+}
+[data-tema="pro"] .idloc.idloc--horario,
+[data-tema="empresa"] .idloc.idloc--horario,
+[data-vista="pro"] .idloc.idloc--horario,
+[data-vista="empresa"] .idloc.idloc--horario,
+[data-vista="medico"] .idloc.idloc--horario{
+  margin-top:6px;
+  font-size:16px;
+  gap:8px;
+}
 .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}
 .tabs .tb{background:#f1f5f9;border:1px solid var(--line);border-radius:8px;padding:7px 12px;font-size:12px;font-weight:800;color:var(--muted);}
 .tabs .tb.on{background:#e0e7ff;color:var(--acc);border-color:#c7d2fe;}
@@ -2533,8 +2691,15 @@ body.fit[data-vista="negocio"] .playout__col--der > .negocio-pie-wrap .negocio-u
 .drow .dk{display:flex;align-items:center;gap:10px;color:#3f3f46;font-weight:500;min-width:140px;}
 .drow .dv{margin-left:auto;text-align:right;font-weight:700;color:#1a1a1a;display:flex;align-items:center;gap:6px;}
 /* ícono de campo: línea rosa, sin fondo (como la referencia) */
-.dk .pico{display:inline-flex;align-items:center;justify-content:center;width:24px;flex:0 0 auto;color:#E91E63;}
+.dk .pico{display:inline-flex;align-items:center;justify-content:center;width:24px;flex:0 0 auto;color:#E91E63;vertical-align:middle;}
 .dk .pico svg{width:21px;height:21px;}
+.coberlist .pico{display:inline-flex;align-items:center;justify-content:center;width:18px;flex:0 0 auto;color:var(--acc,#E91E63);}
+.coberlist .pico svg{width:16px;height:16px;}
+.trust .ti .em{display:flex;align-items:center;justify-content:center;min-height:28px;}
+.trust .ti .em .pico{display:inline-flex;align-items:center;justify-content:center;width:28px;color:var(--acc);}
+.trust .ti .em .pico svg{width:26px;height:26px;}
+.pcard--mini .lbl .pico{display:inline-flex;align-items:center;justify-content:center;width:18px;vertical-align:-3px;color:var(--acc,#E91E63);}
+.pcard--mini .lbl .pico svg{width:16px;height:16px;}
 
 /* stats */
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;text-align:center;}
@@ -2707,7 +2872,9 @@ body.fit[data-vista="negocio"] .playout__col--der > .negocio-pie-wrap .negocio-u
 /* trust row */
 .trust{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;text-align:center;}
 .trust .ti{font-size:12px;font-weight:800;color:#475569;}
-.trust .ti .em{font-size:22px;color:var(--acc);}
+.trust .ti .em{font-size:22px;color:var(--acc);display:flex;align-items:center;justify-content:center;min-height:28px;}
+.trust .ti .em .pico{display:inline-flex;align-items:center;justify-content:center;width:28px;color:var(--acc);}
+.trust .ti .em .pico svg{width:26px;height:26px;}
 
 /* bottom ad */
 .bottomad{
@@ -4488,13 +4655,10 @@ const THEME = {
 };
 
 /* ---------------- helpers ---------------- */
-function row(icon,label,value,blockKey){
-  if(!value) return "";
-  var blockAttr=blockKey?' data-pub-block="'+safe(blockKey)+'"':"";
-  return '<div class="drow"'+blockAttr+'><span class="dk">'+icon+' '+safe(label)+':</span><span class="dv">'+value+'</span></div>';
-}
 /* Íconos de línea (SVG, stroke currentColor) — estilo de la referencia */
 function svgIcon(n){
+  if(n==="check") n="check2";
+  if(n==="credit-card") n="creditCard";
   var p={
     search:'<circle cx="11" cy="11" r="6.5"/><path d="M16.5 16.5 20 20"/>',
     results:'<circle cx="10.5" cy="10.5" r="6.8"/><circle cx="8.9" cy="9.7" r=".85" fill="currentColor" stroke="none"/><circle cx="12.1" cy="9.7" r=".85" fill="currentColor" stroke="none"/><path d="M15.8 15.8 19.2 19.2"/>',
@@ -4516,12 +4680,65 @@ function svgIcon(n){
     clock:'<circle cx="12" cy="12" r="8.5"/><path d="M12 8v4.5l3 2"/>',
     money:'<rect x="3" y="6.5" width="18" height="11" rx="2"/><circle cx="12" cy="12" r="2.2"/><path d="M7 9.5h.01M17 14.5h.01"/>',
     plane:'<path d="M16 10l4-2-2 6-2-1-2 3-1-5-5-1 1-3h4l2-3z"/>',
-    star:'<path d="M12 3.8 14.2 9l5.5.5-4.2 3.6 1.3 5.4L12 16.8 7.2 18.5l1.3-5.4L4.3 9.5 9.8 9z"/>'
+    star:'<path d="M12 3.8 14.2 9l5.5.5-4.2 3.6 1.3 5.4L12 16.8 7.2 18.5l1.3-5.4L4.3 9.5 9.8 9z"/>',
+    list:'<path d="M8 6h13M8 12h13M8 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01"/>',
+    sparkles:'<path d="M12 3l1.2 3.8L17 8l-3.8 1.2L12 13l-1.2-3.8L7 8l3.8-1.2L12 3z"/><path d="M18.5 14l.7 2.1 2.1.7-2.1.7-.7 2.1-.7-2.1-2.1-.7 2.1-.7.7-2.1z"/>',
+    info:'<circle cx="12" cy="12" r="9"/><path d="M12 10.5v5.5M12 7.5h.01"/>',
+    wrench:'<path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L4 17v3h3l5.3-5.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.5-2.5z"/>',
+    shield:'<path d="M12 3l7.5 3.2v5.1c0 4.6-3.1 8-7.5 9.7-4.4-1.7-7.5-5.1-7.5-9.7V6.2L12 3z"/><path d="M9 12.2l2 2 4-4.2"/>',
+    users:'<circle cx="9" cy="8.5" r="3"/><circle cx="16.5" cy="9.2" r="2.4"/><path d="M3.5 19c0-3.2 2.5-5 5.5-5s5.5 1.8 5.5 5"/><path d="M14 19c0-2.2 1.6-3.5 3.5-3.5"/>',
+    creditCard:'<rect x="3" y="6.5" width="18" height="11" rx="2"/><path d="M3 10.5h18M7 14.5h3"/>',
+    alert:'<path d="M12 4.5 21 19.5H3L12 4.5z"/><path d="M12 10v4M12 16.5h.01"/>',
+    music:'<path d="M9 18V6l10-2v12"/><circle cx="7" cy="18" r="2.5"/><circle cx="17" cy="16" r="2.5"/>',
+    camera:'<path d="M4.5 8.5h3l1.5-2h6l1.5 2h3v10.5h-15z"/><circle cx="12" cy="13.5" r="3.2"/>',
+    truck:'<path d="M3 7.5h11v9H3z"/><path d="M14 11h4.5l2.5 3v2.5H14"/><circle cx="7" cy="17.5" r="1.6"/><circle cx="17" cy="17.5" r="1.6"/>',
+    flower:'<circle cx="12" cy="12" r="2.2"/><path d="M12 4.5c1.8 1.6 1.8 4.2 0 5.8-1.8-1.6-1.8-4.2 0-5.8zM19.5 12c-1.6 1.8-4.2 1.8-5.8 0 1.6-1.8 4.2-1.8 5.8 0zM12 19.5c-1.8-1.6-1.8-4.2 0-5.8 1.8 1.6 1.8 4.2 0 5.8zM4.5 12c1.6-1.8 4.2-1.8 5.8 0-1.6 1.8-4.2 1.8-5.8 0z"/>',
+    badge:'<circle cx="12" cy="9" r="5.5"/><path d="M8.5 13.5 7 20l5-2.2L17 20l-1.5-6.5"/>',
+    building:'<path d="M4.5 20.5h15M6.5 20.5V6.5l5-3 5 3v14"/><path d="M10 9h1.5M13.5 9H15M10 12.5h1.5M13.5 12.5H15M10 16h1.5M13.5 16H15"/>',
+    store:'<path d="M4 10.5 5.5 5h13L20 10.5"/><path d="M4 10.5h16v9.5H4z"/><path d="M9.5 20v-5h5v5"/>',
+    package:'<path d="M12 3.5 20 8v8l-8 4.5L4 16V8l8-4.5z"/><path d="M12 12.5 20 8M12 12.5 4 8M12 12.5V21"/>',
+    link:'<path d="M10 13a4 4 0 0 0 6 0l2.5-2.5a4 4 0 0 0-5.7-5.7L11.5 6"/><path d="M14 11a4 4 0 0 0-6 0L5.5 13.5a4 4 0 0 0 5.7 5.7L12.5 18"/>',
+    tag:'<path d="M12.5 4.5h6v6l-9.5 9.5-6-6 9.5-9.5z"/><circle cx="16" cy="8" r="1.2"/>',
+    receipt:'<path d="M6 4.5h12v15l-2-1.2-2 1.2-2-1.2-2 1.2-2-1.2-2 1.2z"/><path d="M9 9h6M9 12.5h6M9 16h4"/>',
+    megaphone:'<path d="M4 11.5v3h3l6 3.5V5L7 8.5H4z"/><path d="M13 8.5c1.5.6 2.5 1.8 2.5 3.5s-1 2.9-2.5 3.5"/><path d="M7 14.5v3.5"/>',
+    paw:'<circle cx="7.5" cy="9" r="1.8"/><circle cx="11.2" cy="7.2" r="1.8"/><circle cx="15.5" cy="7.5" r="1.8"/><circle cx="18" cy="10.2" r="1.6"/><path d="M8.5 18c0-2.8 1.6-4.5 3.5-4.5s3.5 1.7 3.5 4.5c0 1.4-1.2 2-3.5 2s-3.5-.6-3.5-2z"/>',
+    corp:'<circle cx="9" cy="8.5" r="3"/><circle cx="16.5" cy="9.2" r="2.4"/><path d="M3.5 19c0-3.2 2.5-5 5.5-5s5.5 1.8 5.5 5"/><path d="M14 19c0-2.2 1.6-3.5 3.5-3.5"/>',
+    wallet:'<rect x="3" y="7" width="18" height="10" rx="2"/><path d="M3 10.5h18"/><circle cx="16.5" cy="13.5" r="1.2" fill="currentColor" stroke="none"/>',
+    bed:'<path d="M3 18v-5.5A2.5 2.5 0 0 1 5.5 10H14a3 3 0 0 1 3 3v5"/><path d="M3 14h18M7 10V8a2 2 0 0 1 2-2h3"/>'
   };
   return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+(p[n]||"")+'</svg>';
 }
 // Ícono de campo: rosa, sin fondo (como la referencia)
 function pico(name){ return '<span class="pico">'+svgIcon(name)+'</span>'; }
+var EMOJI_TO_ICON={
+  "📍":"pin","🗺":"globe","🗺️":"globe","🕐":"clock","⏱":"clock","⏰":"clock","📅":"calendar","📆":"calendar",
+  "💲":"money","💰":"money","💳":"creditCard","📋":"list","✨":"sparkles","ℹ️":"info","ℹ":"info","📊":"bars",
+  "🛠️":"wrench","🛠":"wrench","🔧":"wrench","🛡️":"shield","🛡":"shield","✔":"check2","✅":"check2",
+  "👥":"users","🏢":"building","🏠":"home","🏡":"home","🏷️":"tag","🏷":"tag","🧾":"receipt","🎖️":"badge","🎖":"badge",
+  "🏅":"badge","🚨":"alert","⚠️":"alert","⚠":"alert","🎓":"badge","🏪":"store","🚚":"truck","🚐":"truck",
+  "🚗":"car","🛣️":"globe","🛣":"globe","📦":"package","🛍️":"store","🛍":"store","🔗":"link","📎":"link",
+  "📄":"list","🗣️":"chat","🗣":"chat","🎺":"music","🚁":"plane","🐾":"paw","💡":"bolt","🏭":"building",
+  "⚙️":"wrench","⚙":"wrench","📚":"list","🩺":"heart","🏥":"building","🏫":"building","🔬":"search",
+  "🧘":"sparkles","📡":"globe","🔮":"sparkles","🎯":"star","🌿":"flower","🕯️":"sparkles","🕯":"sparkles",
+  "🌍":"globe","🔞":"alert","🎥":"camera","📹":"camera","📷":"camera","🎵":"music","🎤":"music"
+};
+function normalizeRowIcon(icon){
+  if(icon==null||icon==="") return pico("briefcase");
+  var s=String(icon).trim();
+  if(s.indexOf("<svg")>=0||s.indexOf("class=\"pico\"")>=0||s.indexOf("class='pico'")>=0||s.indexOf("class=pico")>=0) return s;
+  if(s==="check"||s==="credit-card"||s==="creditCard") return pico(s);
+  if(/^[a-zA-Z][a-zA-Z0-9_-]*$/.test(s)) return pico(s);
+  if(EMOJI_TO_ICON[s]) return pico(EMOJI_TO_ICON[s]);
+  var bare=s.replace(/\uFE0F/g,"");
+  if(EMOJI_TO_ICON[bare]) return pico(EMOJI_TO_ICON[bare]);
+  return pico("briefcase");
+}
+function row(icon,label,value,blockKey){
+  if(!value) return "";
+  var blockAttr=blockKey?' data-pub-block="'+safe(blockKey)+'"':"";
+  return '<div class="drow"'+blockAttr+'><span class="dk">'+normalizeRowIcon(icon)+' '+safe(label)+':</span><span class="dv">'+value+'</span></div>';
+}
+if(typeof window!=="undefined"){ window.pico=pico; window.svgIcon=svgIcon; window.normalizeRowIcon=normalizeRowIcon; }
 function verificadoBadge(label){
   var txt = safe(label || "Verificada");
   return '<span class="verok"><span class="verok__ic" aria-hidden="true">'+
@@ -6275,8 +6492,10 @@ function syncAdultoUbicacionStretch(root){
   }
   var gaps=Math.max(0,n-1)*gap;
   var avail=Math.floor(leftH-used-gaps);
+  /* Capar stretch: el hueco se llena con FAQ/servicios, no con Ubicación vacía. */
+  var maxStretch=220;
   if(avail>0){
-    ubic.style.minHeight=avail+"px";
+    ubic.style.minHeight=Math.min(avail, maxStretch)+"px";
   }
 }
 function bindAdultoUbicacionStretch(root){
@@ -6431,7 +6650,10 @@ function renderPlayoutAdultoRef(u, cfg){
   /* Derecha: Precio + métodos de pago + tiempo (tri completo). */
   var triPrecio=cfg.tri!=null?cfg.tri:adultoTriPrecioHTML(u);
   var perfil=cfg.perfil||"";
+  /* ficha = Categoría/País/Estado/Ciudad (entre pagos y contacto). afterSobre / afterSvc = extras. */
   var ficha=cfg.ficha||adultoFichaHTML(u);
+  var afterSobre=cfg.afterSobre||"";
+  var afterSvc=cfg.afterSvc||"";
   var contact=cfg.contact!=null?cfg.contact:adultoContactSimpleHTML(u);
   var sobrePersona=cfg.sobre!=null?cfg.sobre:sobrePerfilHTML(u);
   /* Fase 1 / referencia Owner: sin estados ni lives en el playout. */
@@ -6448,7 +6670,7 @@ function renderPlayoutAdultoRef(u, cfg){
   /*
     Columnas (Owner):
     - Izq: galería (adulto 3; bienestar/pro/empresa con cobertura → 5 para empatar altura)
-    - Der: todas las tarjetas de información (incluye Zona de cobertura)
+    - Der: perfil → tri (pagos) → ficha geo → contacto → sobre → extras → servicios → más extras → ubicación
     - Abajo: banner largo a lo ancho de las 2 columnas
   */
   var bannerPie=(u&&u.__previewRegistro)?"":('<div class="playout__banner-adult">'+bottomBannerHTML(layoutKey)+'</div>');
@@ -6460,11 +6682,13 @@ function renderPlayoutAdultoRef(u, cfg){
     perfil+
     (u.donanteUltimo && !(window.CarihubDirectoryMode && CarihubDirectoryMode.isDirectoryMode())?avisoDonacion(u):"")+
     (triPrecio||"")+
+    ficha+
     (contact||"")+
     (sobrePersona||"")+
-    ficha+
-    (ubicCard||"")+
-    svcStack;
+    afterSobre+
+    svcStack+
+    afterSvc+
+    (ubicCard||"");
 
   return '<div class="playout playout--'+safe(layoutKey).replace(/[^a-z0-9_-]/gi,"-")+extraCls+'" data-cat="'+safe(u.subcategoriaId||layoutKey)+'"'+dataExtra+'>'+
     '<div class="playout__col playout__col--izq">'+izq+'</div>'+
@@ -8609,6 +8833,42 @@ function ensureProUbicacionFields(u){
   }
   return u;
 }
+/* Pro/empresa/medico: ficha pública entre pagos y contacto (geo + datos del oficio). */
+function proFichaGeoHTML(u, datosRows){
+  u=u||{};
+  var q={};
+  try{
+    if(typeof queryPerfilPreview==="function") q=queryPerfilPreview()||{};
+    else{
+      var p=new URL(location.href).searchParams;
+      q={categoria:p.get("categoria")||"",pais:p.get("pais")||"",estado:p.get("estado")||"",ciudad:p.get("ciudad")||""};
+    }
+  }catch(eQ){ q={}; }
+  var cat=u.categoriaPublica||u.categoria||u.profesion||q.categoria||"";
+  var pais=u.pais||q.pais||((u.estado||u.ciudad||q.estado||q.ciudad)?"México":"");
+  var estado=u.estado||q.estado||"";
+  var ciudad=u.ciudad||q.ciudad||"";
+  var html=row(pico("user"),"Categoría",safe(cat))+
+    row(pico("globe"),"País",safe(pais))+
+    row(pico("pin"),"Estado",safe(estado))+
+    row(pico("pin"),"Ciudad",safe(ciudad));
+  var seen={categoria:1,pais:1,estado:1,ciudad:1};
+  (datosRows||[]).forEach(function(d){
+    if(!d||!d[1]) return;
+    var key=String(d[1]).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+    if(seen[key]) return;
+    seen[key]=1;
+    var block=d[3]||((d[1]==="Horario")?"horario":"");
+    html+=row(d[0],d[1],d[2]?safe(d[2]):"",block);
+  });
+  if(u.experiencia&&!seen.experiencia){
+    html+=row(pico("calendar"),"Experiencia",safe(u.experiencia));
+  }
+  if(u.subcategoria&&!seen["subcategoria"]){
+    html+=row(pico("tag"),"Subcategoría",safe(u.subcategoria));
+  }
+  return '<div class="pcard pcard--ficha-publica"><div class="dlist">'+html+'</div></div>';
+}
 function proFeatsLineHTML(u){
   if(!u||!Array.isArray(u.feats)||!u.feats.length) return "";
   return '<div class="feat-line">'+(u.feats||[]).map(function(f){return '<span>✔ '+safe(f)+'</span>';}).join("")+'</div>';
@@ -8627,9 +8887,17 @@ function proFaqNormItem(item){
   return {q:String(item||""),a:""};
 }
 function proFaqCardHTML(u){
-  if(!u||!(u.faq||[]).length) return "";
+  var list=(u&&Array.isArray(u.faq))?u.faq.slice():[];
+  if(!list.length){
+    list=[
+      "¿Cuánto tiempo tarda una visita?",
+      "¿Ofrecen garantía en sus servicios?",
+      "¿Emiten factura?",
+      "¿Realizan trabajos de emergencia?"
+    ];
+  }
   return '<div class="pcard faq" data-faq-accordion="1"><div class="pcard__h">❓ Preguntas frecuentes</div>'+
-    (u.faq||[]).map(function(raw){
+    list.map(function(raw){
       var it=proFaqNormItem(raw);
       if(!it.q) return "";
       var a=it.a||"Escríbenos por el contacto publicado y te respondemos con el detalle.";
@@ -8674,15 +8942,15 @@ function bindProFaqAccordion(root){
 function proCoberturaCardHTML(u, title){
   var tit=title||"Zona de cobertura";
   var isAtencion=/atenci[oó]n/i.test(tit);
-  return '<div class="pcard"><div class="pcard__h">🗺️ '+safe(tit)+'</div>'+
+  return '<div class="pcard"><div class="pcard__h">'+pico("globe")+' '+safe(tit)+'</div>'+
     '<div class="mapwrap"><div class="mapbox">'+S.chMapa(u.ciudad)+'</div>'+
-    '<div class="coberlist">'+(u.cobertura||[]).map(function(c){return '<div>📍 '+safe(c)+'</div>';}).join("")+'</div></div>'+
+    '<div class="coberlist">'+(u.cobertura||[]).map(function(c){return '<div>'+pico("pin")+' '+safe(c)+'</div>';}).join("")+'</div></div>'+
     (isAtencion?"":'<div class="cober-note">¿Tu ciudad no está en la lista? Contáctanos para cotizar.</div>')+
   '</div>';
 }
 function proTrustCardHTML(items){
   return '<div class="pcard"><div class="trust">'+
-    (items||[]).map(function(it){return '<div class="ti"><div class="em">'+it[0]+'</div>'+safe(it[1])+'</div>';}).join("")+
+    (items||[]).map(function(it){return '<div class="ti"><div class="em">'+normalizeRowIcon(it[0])+'</div>'+safe(it[1])+'</div>';}).join("")+
   '</div></div>';
 }
 function proTriPlayHTML(cells, extras){
@@ -8691,9 +8959,12 @@ function proTriPlayHTML(cells, extras){
   return html;
 }
 function proTriCellHTML(block, label, big, sub, urg){
+  var bigTxt=String(big==null?"":big);
+  var bigLong=bigTxt.length>14||/consultar|disponib|agenda/i.test(bigTxt);
+  var bigCls=bigLong?"precio-big precio-big--text":"precio-big";
   return '<div class="pcard pcard--mini"'+(block?' data-pub-block="'+safe(block)+'"':'')+'>'+
     '<div class="lbl"'+(block==="precio"?' data-pub-label="precio"':'')+'>'+label+'</div>'+
-    '<div class="precio-big">'+big+'</div>'+
+    (bigTxt?'<div class="'+bigCls+'">'+big+'</div>':'<div class="precio-big precio-big--text">Consultar</div>')+
     (sub?'<div class="precio-sub">'+sub+'</div>':"")+
     (urg?'<div class="urg">'+urg+'</div>':"")+
   '</div>';
@@ -8722,25 +8993,26 @@ function renderMedicoProfesional(u){
       '<div class="idsub">'+safe(u.titulo||u.especialidad)+'</div>'+
       idlocUbicacionHTML(u, loc)+
       '<div class="pro-cedula-badge" style="margin-top:10px">🎓 Profesionista verificado · CariHub</div>'+
-      '<div class="dlist" style="margin-top:14px">'+
-        row("🩺","Profesión",safe(u.profesion))+
-        row("📋","Especialidad",safe(u.especialidad))+
-        row("🔬","Subespecialidad",safe(u.subespecialidad))+
-        row("🕐","Horario",safe(u.horarioAtencion||u.horario),"horario")+
-        row("📍","Atención",safe(u.atencion))+
-        row("🗣️","Idiomas",safe(u.idiomas))+
-        row("🗺️","Zona",safe(u.zonaCobertura))+
-      '</div>'+
     '</div>';
+
+  var medicoDatos=[
+    ["heart","Profesión",u.profesion],
+    ["list","Especialidad",u.especialidad],
+    ["search","Subespecialidad",u.subespecialidad],
+    ["clock","Horario",u.horarioAtencion||u.horario,"horario"],
+    ["pin","Atención",u.atencion],
+    ["chat","Idiomas",u.idiomas],
+    ["globe","Zona",u.zonaCobertura]
+  ];
 
   var triExtras=
     (u.consultaEnLinea?'<div class="pro-online">📹 '+safe(u.consultaEnLineaTexto||"Consulta en línea disponible")+'</div>':"")+
     '<button type="button" class="pro-cta-cita">Agendar cita</button>'+
     proFeatsLineHTML(u);
   var tri=proTriPlayHTML([
-    proTriCellHTML("precio","💲 Consulta desde","$"+safe(u.precioConsulta||u.precio),safe(u.moneda)+" · "+safe(u.unidadConsulta||"por consulta")),
-    proTriCellHTML("","💳 Métodos de pago",(u.metodosPago||[]).map(safe).join("<br>"),""),
-    proTriCellHTML("","⏱ Tiempo de respuesta",safe(u.tiempoRespuesta),"",safe(u.urgencias||"Agenda disponible"))
+    proTriCellHTML("precio",pico("money")+" Consulta desde","$"+safe(u.precioConsulta||u.precio),safe(u.moneda)+" · "+safe(u.unidadConsulta||"por consulta")),
+    proTriCellHTML("",pico("creditCard")+" Métodos de pago",(u.metodosPago||[]).map(safe).join("<br>"),""),
+    proTriCellHTML("",pico("clock")+" Tiempo de respuesta",safe(u.tiempoRespuesta),"",safe(u.urgencias||"Agenda disponible"))
   ], triExtras);
 
   var sobre=
@@ -8749,17 +9021,18 @@ function renderMedicoProfesional(u){
       '<div class="stats">'+(u.stats||[]).map(function(s){return '<div class="st"><b>'+safe(s[0])+'</b><span>'+safe(s[1])+'</span></div>';}).join("")+'</div>'+
     '</div>';
 
-  var ficha=
+  var afterSobre=
     '<div class="pcard"><div class="pcard__h">🏥 Consultorios</div>'+medicoConsultoriosHTML(u)+'</div>'+
     '<div class="pcard"><div class="pcard__h">🛡️ Seguros aceptados</div><div class="pro-seguros">'+medicoSegurosHTML(u)+'</div></div>'+
     proReviewsCardHTML(u, "Opiniones de pacientes")+
-    proFaqCardHTML(u)+
+    proFaqCardHTML(u);
+  var afterSvc=
     proCoberturaCardHTML(u, "Zona de atención")+
     proTrustCardHTML([
-      ["🎓","Cédula profesional verificada"],
-      ["📹","Consulta presencial y en línea"],
-      ["🛡️","Seguros de gastos médicos"],
-      ["⏱","Agenda con respuesta rápida"]
+      ["badge","Cédula profesional verificada"],
+      ["camera","Consulta presencial y en línea"],
+      ["shield","Seguros de gastos médicos"],
+      ["clock","Agenda con respuesta rápida"]
     ]);
 
   return renderPlayoutAdultoRef(u, {
@@ -8769,11 +9042,11 @@ function renderMedicoProfesional(u){
     tri:tri,
     contact:adultoContactSimpleHTML(u),
     sobre:sobre,
-    ficha:ficha
+    ficha:proFichaGeoHTML(u, medicoDatos),
+    afterSobre:afterSobre,
+    afterSvc:afterSvc
   });
 }
-
-/* ---------------- PROFESIONAL / EMPRESA (azul) ---------------- */
 function applyBienestarSectorHydrate(u){
   if(window.CariHubBienestarSectorRender&&CariHubBienestarSectorRender.hydrateDisplayFields){
     return CariHubBienestarSectorRender.hydrateDisplayFields(u||{});
@@ -8789,6 +9062,12 @@ function applyEventosSectorHydrate(u){
 function applyGastronomiaSectorHydrate(u){
   if(window.CariHubGastronomiaSectorRender&&CariHubGastronomiaSectorRender.hydrateDisplayFields){
     return CariHubGastronomiaSectorRender.hydrateDisplayFields(u||{});
+  }
+  return u||{};
+}
+function applyHogarSectorHydrate(u){
+  if(window.CariHubHogarSectorRender&&CariHubHogarSectorRender.hydrateDisplayFields){
+    return CariHubHogarSectorRender.hydrateDisplayFields(u||{});
   }
   return u||{};
 }
@@ -8830,32 +9109,30 @@ function renderProEmpresa(u, esEmpresa){
   u=applyBienestarSectorHydrate(u);
   u=applyEventosSectorHydrate(u);
   u=applyGastronomiaSectorHydrate(u);
+  u=applyHogarSectorHydrate(u);
   u=ensureProUbicacionFields(u);
   var isBs=!!u.__bienestarPack;
   var isEv=!!u.__eventosPack;
   var isGs=!!u.__gastronomiaPack;
+  var isHg=!!u.__hogarPack;
   var loc=[u.ciudad,u.estado].filter(Boolean).join(", ");
   var verLabel = esEmpresa ? "Empresa verificada" : "Verificado";
   var layoutKey=esEmpresa?"empresa":"pro";
 
-  var datos = (isEv && u.__eventosDatos && u.__eventosDatos.length) ? u.__eventosDatos : (isBs && u.__bienestarDatos && u.__bienestarDatos.length) ? u.__bienestarDatos : (isGs && u.__gastronomiaDatos && u.__gastronomiaDatos.length) ? u.__gastronomiaDatos : (esEmpresa ? [
-    ["🏷️","Categoría",u.categoria],["🏢","Tipo de empresa",u.tipoEmpresa],["📅","Años en el mercado",u.aniosMercado],
-    ["👥","Empleados",u.empleados],["🕐","Horario",u.horario],["📍","Zona de cobertura",u.zonaCobertura],
-    ["🛠️","Atención",u.atencion],["💳","Formas de pago",(u.formasPago||[]).join(", ")],["🧾","Facturación",u.facturacion]
+  var datos = (isEv && u.__eventosDatos && u.__eventosDatos.length) ? u.__eventosDatos : (isBs && u.__bienestarDatos && u.__bienestarDatos.length) ? u.__bienestarDatos : (isGs && u.__gastronomiaDatos && u.__gastronomiaDatos.length) ? u.__gastronomiaDatos : (isHg && u.__hogarDatos && u.__hogarDatos.length) ? u.__hogarDatos : (esEmpresa ? [
+    ["tag","Categoría",u.categoria],["building","Tipo de empresa",u.tipoEmpresa],["calendar","Años en el mercado",u.aniosMercado],
+    ["users","Empleados",u.empleados],["clock","Horario",u.horario],["pin","Zona de cobertura",u.zonaCobertura],
+    ["wrench","Atención",u.atencion],["creditCard","Formas de pago",(u.formasPago||[]).join(", ")],["receipt","Facturación",u.facturacion]
   ] : [
-    ["🛠️","Especialidad",u.especialidad],["📋","Servicios",u.servicios],["📍","Atención",u.atencion],
-    ["🗺️","Zona de cobertura",u.zonaCobertura],["🕐","Horario",u.horario],["🗣️","Idiomas",u.idiomas],
-    ["🚨","Urgencias 24/7",u.urgencias247],["✅","Garantía",u.garantia]
+    ["wrench","Especialidad",u.especialidad],["list","Servicios",u.servicios],["pin","Atención",u.atencion],
+    ["globe","Zona de cobertura",u.zonaCobertura],["clock","Horario",u.horario],["chat","Idiomas",u.idiomas],
+    ["alert","Urgencias 24/7",u.urgencias247],["check2","Garantía",u.garantia]
   ]);
-  var datosHTML = datos.map(function(d){
-    var block=d[3]||((d[1]==="Horario")?"horario":"");
-    return row(d[0],d[1],d[2]?safe(d[2]):"",block);
-  }).join("");
 
   var tabs = esEmpresa
     ? ["Plomería","Mantenimiento","Instalaciones","Residencial","Comercial"]
     : ["Servicio","Plomería","Categoría","Hogar",u.experiencia];
-  var tabsHTML = (isBs || isEv || isGs) ? '' : tabs.map(function(t,i){return '<span class="tb '+(i===1?"on":"")+'">'+safe(t)+'</span>';}).join("");
+  var tabsHTML = (isBs || isEv || isGs || isHg || !!u.sectorId) ? '' : tabs.map(function(t,i){return '<span class="tb '+(i===1?"on":"")+'">'+safe(t)+'</span>';}).join("");
 
   var pagos = esEmpresa ? u.formasPago : u.metodosPago;
   var priceLbl = (isEv && u.__eventosPriceLabel) ? u.__eventosPriceLabel : (isBs && u.__bienestarPriceLabel) ? u.__bienestarPriceLabel : (isGs && u.__gastronomiaPriceLabel) ? u.__gastronomiaPriceLabel : 'Desde';
@@ -8866,22 +9143,31 @@ function renderProEmpresa(u, esEmpresa){
   var certBlock = u.certificaciones ? '<div class="pcard"><div class="pcard__h">🎖️ Certificaciones</div><div class="svc">'+
       u.certificaciones.map(function(c){return '<div><span class="ok">🏅</span><div><b>'+safe(c[0])+'</b><br><span style="color:var(--muted);font-size:12px">Emitido por: '+safe(c[1])+'</span></div></div>';}).join("")+'</div></div>' : '';
 
+  /* Cabecera tipo adulto: nombre/título/ubicación; los datos van en ficha entre pagos y contacto. */
   var perfil=
     '<div class="pcard">'+
       '<div class="idhead"><h1>'+safe(u.nombre)+'</h1>'+verificadoBadge(verLabel)+bienestarBadgesHTML(u)+eventosBadgesHTML(u)+gastronomiaBadgesHTML(u)+(u.edad?'<span class="age" data-pub-block="edad">'+u.edad+' años</span>':'')+'</div>'+
       '<div class="idsub">'+safe(u.titulo)+'</div>'+
       idlocUbicacionHTML(u, loc)+
       (tabsHTML ? '<div class="tabs">'+tabsHTML+'</div>' : '')+
-      '<div class="dlist" style="margin-top:14px">'+datosHTML+'</div>'+
     '</div>';
 
   var triExtras=
     (isBs && u.__bienestarPack==='H' ? bienestarPackHCtaHTML(u) : ((isBs || isEv || isGs || u.sectorId==="bienestar" || u.bienestarHolisticoPerfil) ? '' : '<button type="button" class="pro-cta-cita">Agendar cita</button>'))+
     proFeatsLineHTML(u);
+  var pagosTxt=(pagos&&pagos.length)?pagos.map(safe).join("<br>"):"Consultar";
+  var tiempoRaw=String(u.tiempoRespuesta||"").trim()||"Consultar";
+  var tiempoBig=tiempoRaw;
+  var tiempoSub="";
+  if(/consultar\s+disponibilidad/i.test(tiempoRaw)){
+    tiempoBig="Consultar";
+    tiempoSub="disponibilidad";
+  }
+  var urgTxt=String(u.urgencias||"").trim()||"Atención inmediata";
   var tri=proTriPlayHTML([
-    proTriCellHTML("precio","💲 "+safe(priceLbl),safe(String(u.precio||'').replace(/^💲\s*/,'')),safe(u.moneda)+(esEmpresa?(" · "+safe(u.servicioBasico||'')):(" · Por servicio"))),
-    proTriCellHTML("","💳 Métodos de pago",(pagos||[]).map(safe).join("<br>"),""),
-    proTriCellHTML("","⏱ Tiempo de respuesta",safe(u.tiempoRespuesta),"",safe(u.urgencias)+' · Atención inmediata')
+    proTriCellHTML("precio",pico("money")+" "+safe(priceLbl),safe(String(u.precio||'').replace(/^💲\s*/,'')),safe(u.moneda)+(esEmpresa?(" · "+safe(u.servicioBasico||'')):(" · Por servicio"))),
+    proTriCellHTML("",pico("creditCard")+" Métodos de pago",pagosTxt,"\u00a0"),
+    proTriCellHTML("",pico("clock")+" Respuesta",safe(tiempoBig),tiempoSub?safe(tiempoSub):"",safe(urgTxt))
   ], triExtras);
 
   var sobre=
@@ -8890,17 +9176,18 @@ function renderProEmpresa(u, esEmpresa){
       '<div class="stats">'+(u.stats||[]).map(function(s){return '<div class="st"><b>'+safe(s[0])+'</b><span>'+safe(s[1])+'</span></div>';}).join("")+'</div>'+
     '</div>';
 
-  var ficha=
+  var afterSobre=
     certBlock+
     (isBs || isEv || isGs ? '' : proReviewsCardHTML(u, "Opiniones de clientes"))+
     proFaqCardHTML(u)+
-    (isEv ? eventosReguladaNoticeHTML(u) : (isGs ? gastronomiaReguladaNoticeHTML(u) : (isBs && u.__bienestarPack==='H' ? bienestarPackHNoticeHTML(u) : '')))+
+    (isEv ? eventosReguladaNoticeHTML(u) : (isGs ? gastronomiaReguladaNoticeHTML(u) : (isBs && u.__bienestarPack==='H' ? bienestarPackHNoticeHTML(u) : '')));
+  var afterSvc=
     proCoberturaCardHTML(u, "Zona de cobertura")+
     proTrustCardHTML([
-      ["💲","Precios justos y transparentes"],
-      ["✔","Profesional verificado"],
-      ["🛡️","Servicio garantizado"],
-      ["⏱","Atención rápida y confiable"]
+      ["money","Precios justos y transparentes"],
+      ["check2","Profesional verificado"],
+      ["shield","Servicio garantizado"],
+      ["clock","Atención rápida y confiable"]
     ]);
 
   return renderPlayoutAdultoRef(u, {
@@ -8910,7 +9197,9 @@ function renderProEmpresa(u, esEmpresa){
     tri:tri,
     contact:adultoContactSimpleHTML(u),
     sobre:sobre,
-    ficha:ficha
+    ficha:proFichaGeoHTML(u, datos),
+    afterSobre:afterSobre,
+    afterSvc:afterSvc
   });
 }
 

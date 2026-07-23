@@ -865,22 +865,22 @@
       seen[fid] = true;
       var val = formatFieldValue(fid, p[fid]);
       if (!val) return;
-      pushRow(rows, icon || '📋', fieldLabel(fid), val);
+      pushRow(rows, icon || 'list', fieldLabel(fid), val);
     }
-    (pf.stats || []).forEach(function (fid) { addField(fid, '📊'); });
-    (pf.rows || []).forEach(function (fid) { addField(fid, '✨'); });
-    (pf.faq || []).slice(0, 2).forEach(function (fid) { addField(fid, 'ℹ️'); });
-    if (p.descripcionFormatoFaraFara) pushRow(rows, '🎺', 'Formato Fara Fara', p.descripcionFormatoFaraFara);
-    if (p.licenciaDron === true) pushRow(rows, '🚁', 'Licencia dron', 'Cuenta con licencia/registro');
+    (pf.stats || []).forEach(function (fid) { addField(fid, 'bars'); });
+    (pf.rows || []).forEach(function (fid) { addField(fid, 'sparkles'); });
+    (pf.faq || []).slice(0, 2).forEach(function (fid) { addField(fid, 'info'); });
+    if (p.descripcionFormatoFaraFara) pushRow(rows, 'music', 'Formato Fara Fara', p.descripcionFormatoFaraFara);
+    if (p.licenciaDron === true) pushRow(rows, 'plane', 'Licencia dron', 'Cuenta con licencia/registro');
     if (p.viajaFueraCiudad === true && p.costoTraslado) {
-      pushRow(rows, '🚐', 'Traslado', formatEnumValue('costoTraslado', p.costoTraslado));
+      pushRow(rows, 'truck', 'Traslado', formatEnumValue('costoTraslado', p.costoTraslado));
     }
     if (p.unidadCotizacion || p.cotizacionDesde) {
-      pushRow(rows, '💲', 'Cotización', [formatEnumValue('unidadCotizacion', p.unidadCotizacion), p.cotizacionDesde].filter(Boolean).join(' · '));
+      pushRow(rows, 'money', 'Cotización', [formatEnumValue('unidadCotizacion', p.unidadCotizacion), p.cotizacionDesde].filter(Boolean).join(' · '));
     }
     var loc = [u.zona, u.ciudad, u.estado].filter(function (x) { return txt(x); }).join(', ');
-    if (loc) pushRow(rows, '📍', 'Ubicación', loc);
-    if (p.radioServicioKm) pushRow(rows, '🗺️', 'Radio de servicio', p.radioServicioKm + ' km');
+    if (loc) pushRow(rows, 'pin', 'Ubicación', loc);
+    if (p.radioServicioKm) pushRow(rows, 'globe', 'Radio de servicio', p.radioServicioKm + ' km');
     return rows;
   }
 

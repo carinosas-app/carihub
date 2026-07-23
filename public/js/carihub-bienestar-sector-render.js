@@ -179,46 +179,46 @@
     p = p || {};
     u = u || {};
     var rows = [];
-    pushRow(rows, '🎓', 'Certificaciones', p.certificaciones || u.certificaciones);
-    pushRow(rows, '🕐', 'Horario', p.horarioDetalle || u.horario || u.horarioDetalle, 'horario');
-    pushRow(rows, '📍', 'Ubicación', [u.zona, u.ciudad, u.estado].filter(Boolean).join(', ') || p.direccion || p.lugarCeremonia || p.lugarExperiencia);
+    pushRow(rows, 'badge', 'Certificaciones', p.certificaciones || u.certificaciones);
+    pushRow(rows, 'clock', 'Horario', p.horarioDetalle || u.horario || u.horarioDetalle, 'horario');
+    pushRow(rows, 'pin', 'Ubicación', [u.zona, u.ciudad, u.estado].filter(Boolean).join(', ') || p.direccion || p.lugarCeremonia || p.lugarExperiencia);
 
     if (pack === 'A') {
-      pushRow(rows, '⏱', 'Duración típica', labelMap(DURACION_LABELS, p.duracionSesionMinutos));
-      pushRow(rows, '⚠️', 'Contraindicaciones', p.contraindicacionesGenerales);
-      pushRow(rows, '🏠', 'Atención a domicilio', p.atencionDomicilio);
+      pushRow(rows, 'clock', 'Duración típica', labelMap(DURACION_LABELS, p.duracionSesionMinutos));
+      pushRow(rows, 'alert', 'Contraindicaciones', p.contraindicacionesGenerales);
+      pushRow(rows, 'home', 'Atención a domicilio', p.atencionDomicilio);
     } else if (pack === 'B') {
-      pushRow(rows, '🧘', 'Estilo / linaje', p.tipoPractica);
-      pushRow(rows, '📡', 'Modalidad', labelMap(MODALIDAD_CLASE_LABELS, p.modalidadClase));
-      pushRow(rows, '📊', 'Niveles', p.nivelesAtendidos);
+      pushRow(rows, 'sparkles', 'Estilo / linaje', p.tipoPractica);
+      pushRow(rows, 'globe', 'Modalidad', labelMap(MODALIDAD_CLASE_LABELS, p.modalidadClase));
+      pushRow(rows, 'bars', 'Niveles', p.nivelesAtendidos);
     } else if (pack === 'C') {
-      pushRow(rows, '👥', 'Capacidad', p.capacidadGrupo ? p.capacidadGrupo + ' personas' : '');
+      pushRow(rows, 'users', 'Capacidad', p.capacidadGrupo ? p.capacidadGrupo + ' personas' : '');
     } else if (pack === 'D' && p.nombreComercial) {
-      pushRow(rows, '🏪', 'Nombre comercial', p.nombreComercial);
-      pushRow(rows, '📍', 'Dirección', p.direccion);
-      pushRow(rows, '📦', 'Surtido', p.surtidoPrincipal);
+      pushRow(rows, 'store', 'Nombre comercial', p.nombreComercial);
+      pushRow(rows, 'pin', 'Dirección', p.direccion);
+      pushRow(rows, 'package', 'Surtido', p.surtidoPrincipal);
     } else if (pack === 'D') {
-      pushRow(rows, '🛍️', 'Surtido', p.surtidoPrincipal);
-      pushRow(rows, '🏪', 'Venta presencial', p.ventaPresencial);
+      pushRow(rows, 'store', 'Surtido', p.surtidoPrincipal);
+      pushRow(rows, 'store', 'Venta presencial', p.ventaPresencial);
     } else if (pack === 'E') {
-      pushRow(rows, '🔮', 'Modalidad', labelMap(MODALIDAD_LECTURA_LABELS, p.modalidadLectura));
+      pushRow(rows, 'sparkles', 'Modalidad', labelMap(MODALIDAD_LECTURA_LABELS, p.modalidadLectura));
     } else if (pack === 'F') {
-      pushRow(rows, '🎯', 'Áreas', p.areaCoaching);
-      pushRow(rows, '👥', 'Modalidad sesión', labelMap(MODALIDAD_COACHING_LABELS, p.modalidadSesionCoaching));
+      pushRow(rows, 'star', 'Áreas', p.areaCoaching);
+      pushRow(rows, 'users', 'Modalidad sesión', labelMap(MODALIDAD_COACHING_LABELS, p.modalidadSesionCoaching));
     } else if (pack === 'G') {
-      pushRow(rows, '🌿', 'Experiencia', labelMap(TIPO_EXPERIENCIA_LABELS, p.tipoExperiencia));
-      pushRow(rows, '📅', 'Fechas', p.fechasExperiencia);
-      pushRow(rows, '📍', 'Lugar', p.lugarExperiencia);
-      pushRow(rows, '👥', 'Cupo', p.cupoMaximo);
+      pushRow(rows, 'flower', 'Experiencia', labelMap(TIPO_EXPERIENCIA_LABELS, p.tipoExperiencia));
+      pushRow(rows, 'calendar', 'Fechas', p.fechasExperiencia);
+      pushRow(rows, 'pin', 'Lugar', p.lugarExperiencia);
+      pushRow(rows, 'users', 'Cupo', p.cupoMaximo);
     } else if (pack === 'H') {
-      pushRow(rows, '🕯️', 'Experiencia', labelMap(TIPO_CEREMONIAL_LABELS, p.tipoExperienciaCeremonial));
-      pushRow(rows, '🌍', 'Jurisdicción', p.jurisdiccionDeclarada);
-      pushRow(rows, '⚠️', 'Contraindicaciones', p.contraindicacionesObligatorias);
-      pushRow(rows, '📋', 'Requisitos previos', p.requisitosPrevios);
-      pushRow(rows, '📅', 'Fechas / calendario', p.fechasCeremonia);
-      pushRow(rows, '👥', 'Cupo', p.cupoCeremonia);
-      pushRow(rows, '📍', 'Lugar', p.lugarCeremonia);
-      pushRow(rows, '🔞', 'Edad mínima', p.edadMinimaServicio ? p.edadMinimaServicio + ' años' : '18 años');
+      pushRow(rows, 'sparkles', 'Experiencia', labelMap(TIPO_CEREMONIAL_LABELS, p.tipoExperienciaCeremonial));
+      pushRow(rows, 'globe', 'Jurisdicción', p.jurisdiccionDeclarada);
+      pushRow(rows, 'alert', 'Contraindicaciones', p.contraindicacionesObligatorias);
+      pushRow(rows, 'list', 'Requisitos previos', p.requisitosPrevios);
+      pushRow(rows, 'calendar', 'Fechas / calendario', p.fechasCeremonia);
+      pushRow(rows, 'users', 'Cupo', p.cupoCeremonia);
+      pushRow(rows, 'pin', 'Lugar', p.lugarCeremonia);
+      pushRow(rows, 'alert', 'Edad mínima', p.edadMinimaServicio ? p.edadMinimaServicio + ' años' : '18 años');
     }
     return rows;
   }
