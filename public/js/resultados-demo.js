@@ -388,16 +388,24 @@
   /** Demos sector Bienestar holístico (packs A–H). Campos públicos alineados a bienestarHolisticoPerfil. */
   var BIENESTAR_PACK_POR_SUB = {
     temazcales: 'C', 'centros-holisticos': 'C', 'centros-de-bienestar': 'C', 'centros-de-meditacion': 'C',
-    'centros-de-yoga': 'C', 'centros-de-sanacion': 'C', reiki: 'A', biomagnetismo: 'A', acupuntura: 'A',
-    aromaterapia: 'A', 'masajes-holisticos': 'A', 'masajes-relajantes': 'A', 'masajes-terapeuticos': 'A',
-    'terapias-holisticas': 'A', 'terapias-energeticas': 'A', 'terapias-alternativas': 'A', yoga: 'B',
-    pilates: 'B', meditacion: 'B', breathwork: 'B', 'centros-de-yoga': 'C', 'tiendas-esotericas': 'D',
-    herbolarios: 'D', 'productos-holisticos': 'D', 'velas-esotericas': 'D', 'velas-aromaticas': 'D',
-    'venta-de-velas': 'D', 'venta-de-inciensos': 'D',
-    'venta-de-aceites-esenciales': 'D', 'venta-de-aceites': 'D', tarot: 'E', astrologia: 'E', numerologia: 'E',
-    'coaching-de-vida': 'F', 'coaching-espiritual': 'F', 'retiros-espirituales': 'G', 'turismo-espiritual': 'G',
+    'centros-de-yoga': 'C', 'centros-de-sanacion': 'C',
+    'retiros-espirituales': 'G', 'turismo-espiritual': 'G', 'cacao-ceremonial': 'G',
+    'medicina-ancestral': 'H', chamanismo: 'H', 'ceremonias-tradicionales': 'H',
     'ceremonias-ayahuasca-rape-plantas-de-poder': 'H', 'ceremonias-ayahuasca': 'H',
-    chamanismo: 'H', 'medicina-ancestral': 'H'
+    'terapias-holisticas': 'A', reiki: 'A', biomagnetismo: 'A', acupuntura: 'A', aromaterapia: 'A',
+    'terapias-energeticas': 'A', 'terapias-alternativas': 'A', 'medicina-natural': 'A', naturopatia: 'A',
+    'medicina-tradicional-china': 'A', 'flores-de-bach': 'A', homeopatia: 'A',
+    'masajes-holisticos': 'A', 'masajes-relajantes': 'A', 'masajes-terapeuticos': 'A',
+    'limpias-energeticas': 'A', reflexologia: 'A',
+    yoga: 'B', pilates: 'B', meditacion: 'B', breathwork: 'B', sonoterapia: 'B', ayurveda: 'B',
+    herbolaria: 'D', 'tiendas-esotericas': 'D', 'productos-holisticos': 'D', 'productos-naturistas': 'D',
+    'suplementos-naturales': 'D', herbolarios: 'D', naturistas: 'D',
+    'venta-de-inciensos': 'D', 'venta-de-aceites-esenciales': 'D', 'venta-de-aceites': 'D',
+    'venta-de-velas': 'D', 'velas-esotericas': 'D', 'velas-aromaticas': 'D', sahumerios: 'D',
+    'cosmetica-natural': 'D',
+    tarot: 'E', astrologia: 'E', numerologia: 'E', 'lectura-de-cartas': 'E', 'lectura-de-runas': 'E',
+    'feng-shui': 'E', cristaloterapia: 'E', 'registros-akashicos': 'E',
+    'coaching-de-vida': 'F', 'coaching-espiritual': 'F', 'desarrollo-personal': 'F', 'crecimiento-personal': 'F'
   };
 
   var DEMO_BIENESTAR_BY_PACK = {
@@ -437,13 +445,69 @@
   };
 
   var DEMO_BIENESTAR = {
-    reiki: DEMO_BIENESTAR_BY_PACK.A,
-    temazcales: DEMO_BIENESTAR_BY_PACK.C,
-    'centros-de-yoga': DEMO_BIENESTAR_BY_PACK.B,
+    reiki: [
+      { alias: 'Luna Reiki MTY', precio: '600', tagline: 'Sesiones de Reiki presencial y a distancia.', certificaciones: 'Certificación Reiki Usui nivel II', modalidadesTerapia: ['Reiki presencial', 'Reiki a distancia'], duracionSesionMinutos: '60_min', horario: 'Mar–Sáb 10:00–19:00', atencionDomicilio: 'No' }
+    ],
+    acupuntura: [
+      { alias: 'Clínica Meridiano Norte', precio: '700', tagline: 'Acupuntura terapéutica para dolor, estrés y equilibrio.', certificaciones: 'Cédula profesional · formación en acupuntura', modalidadesTerapia: ['Acupuntura', 'Electroacupuntura'], duracionSesionMinutos: '60_min', horario: 'Lun–Sáb 9:00–19:00', atencionDomicilio: 'No' },
+      { alias: 'Acupuntura del Valle', precio: '650', tagline: 'Sesiones de acupuntura con evaluación inicial.', certificaciones: 'Diplomado en medicina tradicional china', modalidadesTerapia: ['Acupuntura', 'Moxibustión'], duracionSesionMinutos: '45_min', horario: 'Mar–Vie 10:00–18:00' }
+    ],
+    biomagnetismo: [
+      { alias: 'BioCampo MTY', precio: '750', tagline: 'Biomagnetismo médico con seguimiento personalizado.', certificaciones: 'Diplomado en biomagnetismo médico', modalidadesTerapia: ['Biomagnetismo'], duracionSesionMinutos: '90_min', horario: 'Con cita previa' }
+    ],
+    aromaterapia: [
+      { alias: 'Esencia Viva', precio: '550', tagline: 'Aromaterapia clínica y blends personalizados.', certificaciones: 'Formación en aromaterapia terapéutica', modalidadesTerapia: ['Aromaterapia', 'Masaje aromático'], duracionSesionMinutos: '60_min', horario: 'Lun–Sáb 11:00–19:00' }
+    ],
+    ayurveda: [
+      { alias: 'Ayurveda Monterrey', precio: '800', tagline: 'Consultas ayurvédicas y rutinas de equilibrio.', certificaciones: 'Formación en Ayurveda clásico', tipoPractica: 'Ayurveda · consulta', modalidadClase: 'presencial', nivelesAtendidos: 'todos', horario: 'Mar–Sáb 10:00–18:00' }
+    ],
+    sonoterapia: [
+      { alias: 'Sonidos del Centro', precio: '500', tagline: 'Baños de gong, cuencos y sonoterapia en grupo.', certificaciones: 'Formación en sound healing', tipoPractica: 'Sonoterapia', modalidadClase: 'presencial', nivelesAtendidos: 'todos', horario: 'Vie–Dom con reservación' }
+    ],
     'masajes-holisticos': [
       { alias: 'Manos Sanadoras', precio: '650', tagline: 'Masaje holístico con aceites esenciales.', certificaciones: 'Certificación en masaje terapéutico holístico', modalidadesTerapia: ['Masaje holístico', 'Aromaterapia'], duracionSesionMinutos: '90_min', horario: 'Lun–Sáb 10:00–20:00' }
-    ].concat(DEMO_BIENESTAR_BY_PACK.A.slice(0, 2)),
+    ],
+    'masajes-relajantes': [
+      { alias: 'Tacto Sereno', precio: '580', tagline: 'Masaje relajante para estrés y tensión muscular.', certificaciones: 'Técnico en masaje relajante', modalidadesTerapia: ['Masaje relajante'], duracionSesionMinutos: '60_min', horario: 'Lun–Dom 10:00–21:00' }
+    ],
+    'masajes-terapeuticos': [
+      { alias: 'Terapia Muscular NX', precio: '720', tagline: 'Masaje terapéutico para rehabilitación y dolor.', certificaciones: 'Certificación en masaje terapéutico', modalidadesTerapia: ['Masaje terapéutico', 'Puntos gatillo'], duracionSesionMinutos: '60_min', horario: 'Lun–Vie 9:00–19:00' }
+    ],
+    temazcales: DEMO_BIENESTAR_BY_PACK.C,
+    'centros-de-yoga': DEMO_BIENESTAR_BY_PACK.B,
+    yoga: DEMO_BIENESTAR_BY_PACK.B,
+    pilates: [
+      { alias: 'Pilates Casa Norte', precio: '400', tagline: 'Pilates mat e reformer en grupos reducidos.', certificaciones: 'Instructora certificada de pilates', tipoPractica: 'Pilates', modalidadClase: 'presencial', nivelesAtendidos: 'todos', horario: 'Lun–Sáb 7:00–20:00' }
+    ],
+    meditacion: [
+      { alias: 'Silencio Práctico', precio: '300', tagline: 'Meditación guiada y mindfulness para principiantes.', certificaciones: 'Instructora de mindfulness', tipoPractica: 'Meditación', modalidadClase: 'hibrido', nivelesAtendidos: 'principiante', horario: 'Mar–Dom 8:00–19:00' }
+    ],
+    breathwork: [
+      { alias: 'Aire Consciente', precio: '450', tagline: 'Breathwork y respiración consciente en sesión grupal.', certificaciones: 'Facilitador de breathwork', tipoPractica: 'Breathwork', modalidadClase: 'presencial', nivelesAtendidos: 'todos', horario: 'Jue–Sáb con cita' }
+    ],
     'tiendas-esotericas': DEMO_BIENESTAR_BY_PACK.D,
+    herbolaria: [
+      { alias: 'Herbolaria del Valle', precio: '80', tagline: 'Plantas medicinales, tinturas y asesoría herbolaria.', certificaciones: 'Herbolaria tradicional', nombreComercial: 'Herbolaria del Valle', surtidoPrincipal: 'Plantas medicinales · Tinturas', categoriasProductoBienestar: ['Herbolaria', 'Tinturas'], ventaPresencial: 'Sí', horario: 'Lun–Vie 9:00–18:00' }
+    ],
+    herbolarios: [
+      { alias: 'Botica Verde', precio: '90', tagline: 'Herbolario con plantas, tés y remedios naturales.', certificaciones: 'Comercio herbolario local', nombreComercial: 'Botica Verde', surtidoPrincipal: 'Tés · Plantas · Ungüentos', categoriasProductoBienestar: ['Herbolaria'], ventaPresencial: 'Sí', direccion: 'Monterrey', horario: 'Lun–Sáb 10:00–19:00' }
+    ],
+    naturistas: [
+      { alias: 'Naturista del Norte', precio: '100', tagline: 'Productos naturistas y orientación de uso cotidiano.', certificaciones: 'Tienda naturista', nombreComercial: 'Naturista del Norte', surtidoPrincipal: 'Suplementos · Tés · Cuidado natural', categoriasProductoBienestar: ['Productos naturistas'], ventaPresencial: 'Sí', horario: 'Lun–Sáb 10:00–20:00' }
+    ],
+    'productos-naturistas': [
+      { alias: 'Casa Naturista', precio: '95', tagline: 'Línea naturista: suplementos, tés y cuidado personal.', certificaciones: 'Distribución naturista', nombreComercial: 'Casa Naturista', surtidoPrincipal: 'Suplementos · Tés · Cremas', categoriasProductoBienestar: ['Productos naturistas'], ventaPresencial: 'Sí', horario: 'Lun–Vie 10:00–19:00' }
+    ],
+    'productos-holisticos': DEMO_BIENESTAR_BY_PACK.D,
+    'suplementos-naturales': [
+      { alias: 'Vitalia Suplementos', precio: '250', tagline: 'Suplementos naturales y asesoría básica de uso.', certificaciones: 'Comercio de suplementos', nombreComercial: 'Vitalia Suplementos', surtidoPrincipal: 'Vitaminas · Minerales · Hierbas', categoriasProductoBienestar: ['Suplementos naturales'], ventaPresencial: 'Sí', horario: 'Lun–Sáb 10:00–20:00' }
+    ],
+    'cosmetica-natural': [
+      { alias: 'Piel Nativa', precio: '180', tagline: 'Cosmética natural artesanal sin fragancias sintéticas.', certificaciones: 'Elaboración artesanal', nombreComercial: 'Piel Nativa', surtidoPrincipal: 'Cremas · Jabones · Aceites faciales', categoriasProductoBienestar: ['Cosmética natural'], ventaPresencial: 'Sí', horario: 'Mar–Sáb 11:00–19:00' }
+    ],
+    sahumerios: [
+      { alias: 'Sahumería Luna', precio: '65', tagline: 'Sahumerios, resinas e inciensos para ritual y hogar.', certificaciones: 'Comercio esotérico local', nombreComercial: 'Sahumería Luna', surtidoPrincipal: 'Sahumerios · Resinas · Carbones', categoriasProductoBienestar: ['Sahumerios', 'Inciensos'], ventaPresencial: 'Sí', horario: 'Lun–Sáb 11:00–19:00' }
+    ],
     'velas-esotericas': [
       { alias: 'Casa de las Velas', precio: '120', tagline: 'Velas rituales, aromáticas y de intención.', certificaciones: 'Comercio esotérico local', nombreComercial: 'Casa de las Velas', surtidoPrincipal: 'Velas rituales · Aromáticas · Intención', categoriasProductoBienestar: ['Velas esotéricas', 'Velas aromáticas'], ventaPresencial: 'Sí', direccion: 'Barrio Antiguo, Monterrey', horario: 'Lun–Sáb 11:00–20:00' },
       { alias: 'Luz y Cera', precio: '90', tagline: 'Velas artesanales para rituales y meditación.', certificaciones: 'Elaboración artesanal', nombreComercial: 'Luz y Cera', surtidoPrincipal: 'Velas artesanales · Kits rituales', categoriasProductoBienestar: ['Velas esotéricas'], ventaPresencial: 'Sí', horario: 'Mar–Dom 10:00–19:00' }
@@ -453,19 +517,55 @@
       { alias: 'Vela Serena', precio: '95', tagline: 'Velas de soya con aromas naturales.', certificaciones: 'Elaboración artesanal', nombreComercial: 'Vela Serena', surtidoPrincipal: 'Velas de soya · Aromáticas', categoriasProductoBienestar: ['Velas aromáticas'], ventaPresencial: 'Sí', horario: 'Mar–Dom 11:00–19:00' }
     ],
     'venta-de-inciensos': [
-      { alias: 'Humos Sagrados', precio: '80', tagline: 'Inciensos, sahumerios y resinas naturales.', certificaciones: 'Comercio holístico', nombreComercial: 'Humos Sagrados', surtidoPrincipal: 'Inciensos · Sahumerios · Resinas', categoriasProductoBienestar: ['Inciensos', 'Sahumerios'], ventaPresencial: 'Sí', direccion: 'Centro Monterrey', horario: 'Lun–Sáb 10:00–20:00' },
-      { alias: 'Sahumería Luna', precio: '65', tagline: 'Inciensos importados y de elaboración local.', certificaciones: 'Importación y venta local', nombreComercial: 'Sahumería Luna', surtidoPrincipal: 'Inciensos · Conos · Carbones', categoriasProductoBienestar: ['Inciensos'], ventaPresencial: 'Sí', horario: 'Lun–Vie 11:00–19:00' }
+      { alias: 'Humos Sagrados', precio: '80', tagline: 'Inciensos, sahumerios y resinas naturales.', certificaciones: 'Comercio holístico', nombreComercial: 'Humos Sagrados', surtidoPrincipal: 'Inciensos · Sahumerios · Resinas', categoriasProductoBienestar: ['Inciensos', 'Sahumerios'], ventaPresencial: 'Sí', direccion: 'Centro Monterrey', horario: 'Lun–Sáb 10:00–20:00' }
     ],
     'venta-de-aceites-esenciales': [
-      { alias: 'Esencias del Valle', precio: '220', tagline: 'Aceites esenciales puros y blends aromáticos.', certificaciones: 'Distribución de aceites terapéuticos', nombreComercial: 'Esencias del Valle', surtidoPrincipal: 'Aceites esenciales · Blends · Difusores', categoriasProductoBienestar: ['Aceites esenciales', 'Aromaterapia'], ventaPresencial: 'Sí', direccion: 'San Pedro Garza García', horario: 'Lun–Sáb 10:00–19:00' },
-      { alias: 'Aroma Puro MX', precio: '180', tagline: 'Aceites esenciales y kits de aromaterapia.', certificaciones: 'Producto natural certificado', nombreComercial: 'Aroma Puro MX', surtidoPrincipal: 'Aceites · Roll-ons · Kits', categoriasProductoBienestar: ['Aceites esenciales'], ventaPresencial: 'Sí', horario: 'Mar–Sáb 11:00–20:00' }
+      { alias: 'Esencias del Valle', precio: '220', tagline: 'Aceites esenciales puros y blends aromáticos.', certificaciones: 'Distribución de aceites terapéuticos', nombreComercial: 'Esencias del Valle', surtidoPrincipal: 'Aceites esenciales · Blends · Difusores', categoriasProductoBienestar: ['Aceites esenciales', 'Aromaterapia'], ventaPresencial: 'Sí', direccion: 'San Pedro Garza García', horario: 'Lun–Sáb 10:00–19:00' }
     ],
     tarot: DEMO_BIENESTAR_BY_PACK.E,
+    astrologia: [
+      { alias: 'Astros MTY', precio: '500', tagline: 'Carta natal y tránsitos con enfoque práctico.', certificaciones: 'Estudios de astrología evolutiva', enfoqueEspiritual: 'Astrología evolutiva', modalidadLectura: 'online', horario: 'Lun–Sáb' }
+    ],
+    numerologia: [
+      { alias: 'Números del Alma', precio: '350', tagline: 'Numerología para decisiones y autoconocimiento.', certificaciones: 'Formación en numerología', enfoqueEspiritual: 'Numerología', modalidadLectura: 'ambas', horario: 'Con cita' }
+    ],
+    'lectura-de-cartas': [
+      { alias: 'Oráculo Serena', precio: '380', tagline: 'Lectura de cartas oráculo y tarot terapéutico.', certificaciones: 'Formación en lectura de cartas', enfoqueEspiritual: 'Oráculo · Tarot', modalidadLectura: 'ambas', horario: 'Mar–Dom con cita' }
+    ],
+    'lectura-de-runas': [
+      { alias: 'Runas del Norte', precio: '360', tagline: 'Lectura de runas con enfoque simbólico y práctico.', certificaciones: 'Estudio de runas nórdicas', enfoqueEspiritual: 'Runas', modalidadLectura: 'presencial', horario: 'Vie–Dom' }
+    ],
+    'feng-shui': [
+      { alias: 'Espacio Armónico', precio: '1,200', tagline: 'Asesoría de feng shui para hogar y negocio.', certificaciones: 'Consultor de feng shui', enfoqueEspiritual: 'Feng shui', modalidadLectura: 'presencial', horario: 'Lun–Vie con visita' }
+    ],
+    cristaloterapia: [
+      { alias: 'Cristales Vivos', precio: '420', tagline: 'Sesiones de cristaloterapia y selección de piedras.', certificaciones: 'Formación en cristaloterapia', enfoqueEspiritual: 'Cristales', modalidadLectura: 'presencial', horario: 'Mar–Sáb' }
+    ],
+    'registros-akashicos': [
+      { alias: 'Akasha Claro', precio: '700', tagline: 'Lectura de registros akáshicos con integración.', certificaciones: 'Facilitadora de registros akáshicos', enfoqueEspiritual: 'Registros akáshicos', modalidadLectura: 'ambas', horario: 'Con cita previa' }
+    ],
     'coaching-de-vida': DEMO_BIENESTAR_BY_PACK.F,
+    'coaching-espiritual': [
+      { alias: 'Despertar Interior', precio: '750', tagline: 'Coaching espiritual y desarrollo personal.', certificaciones: 'Diplomado en coaching ontológico', areaCoaching: 'Desarrollo personal · espiritualidad', modalidadSesionCoaching: 'mixta', horario: 'Con cita previa' }
+    ],
+    'desarrollo-personal': [
+      { alias: 'Ruta Personal', precio: '850', tagline: 'Sesiones de desarrollo personal y hábitos.', certificaciones: 'Coach de desarrollo personal', areaCoaching: 'Hábitos · metas · claridad', modalidadSesionCoaching: 'individual', horario: 'Lun–Vie 9:00–18:00' }
+    ],
+    'crecimiento-personal': [
+      { alias: 'Crece Contigo', precio: '800', tagline: 'Acompañamiento en crecimiento personal y autoconocimiento.', certificaciones: 'Formación en coaching de vida', areaCoaching: 'Crecimiento personal', modalidadSesionCoaching: 'individual', horario: 'Mar–Sáb' }
+    ],
     'retiros-espirituales': DEMO_BIENESTAR_BY_PACK.G,
     'turismo-espiritual': DEMO_BIENESTAR_BY_PACK.G,
+    'cacao-ceremonial': [
+      { alias: 'Círculo de Cacao', precio: '450', tagline: 'Ceremonias de cacao en círculo con música en vivo.', certificaciones: 'Facilitadora de cacao ceremonial', tipoExperiencia: 'ceremonia', duracionExperiencia: '2.5 horas', fechasExperiencia: 'Consultar calendario', lugarExperiencia: 'Monterrey', cupoMaximo: '18', horario: 'Fines de semana' }
+    ],
     'ceremonias-ayahuasca-rape-plantas-de-poder': DEMO_BIENESTAR_BY_PACK.H,
-    'ceremonias-ayahuasca': DEMO_BIENESTAR_BY_PACK.H
+    'ceremonias-ayahuasca': DEMO_BIENESTAR_BY_PACK.H,
+    'ceremonias-tradicionales': [
+      { alias: 'Fogata Ancestral', precio: 'Consultar', tagline: 'Ceremonias tradicionales con protocolo y respeto cultural.', certificaciones: 'Facilitadores con formación en medicina tradicional', tipoExperienciaCeremonial: 'ceremonia_tradicional', acompanamientoCeremonial: ['Guía experimentado', 'Espacio seguro'], requisitosPrevios: 'Mayor de edad · entrevista previa', fechasCeremonia: 'Consultar', cupoCeremonia: '12', lugarCeremonia: 'Espacio ceremonial privado', horario: 'Solo con cita' }
+    ],
+    chamanismo: DEMO_BIENESTAR_BY_PACK.H,
+    'medicina-ancestral': DEMO_BIENESTAR_BY_PACK.H
   };
 
   function norm(t) {
@@ -798,6 +898,8 @@
       tipoPerfil: esRetail ? 'negocio' : 'persona',
       categoria: catLabel,
       categoriaPublica: catLabel,
+      titulo: catLabel,
+      especialidad: catLabel,
       nombre: alias,
       alias: alias,
       precio: tarifa,
@@ -1256,13 +1358,88 @@
     ]
   };
 
+  /* Demos 1:1 — evita que pack A/B/C/D/E mezclen paseo, vet, groomer y tienda. */
   var DEMO_MASCOTAS = {
-    'paseador-de-perros': DEMO_MASCOTAS_BY_PACK.A,
-    'entrenador-canino': DEMO_MASCOTAS_BY_PACK.B,
-    groomer: DEMO_MASCOTAS_BY_PACK.C,
-    'medico-veterinario': [DEMO_MASCOTAS_BY_PACK.D[0]],
-    'clinica-veterinaria': [DEMO_MASCOTAS_BY_PACK.D[1]],
-    'tienda-de-mascotas': DEMO_MASCOTAS_BY_PACK.E
+    'paseador-de-perros': [
+      { alias: 'Paseos Caninos MTY', precio: '150', tagline: 'Paseos diarios, socialización y reporte con fotos.', serviciosMascotas: ['Paseo', 'Socialización', 'Reporte con fotos'], especiesAtendidas: ['perros'], tamanoMascotasAtendidas: ['pequeno', 'mediano', 'grande'], modalidadServicioMascotas: 'domicilio', tarifaDesde: '150', tiempoRespuestaMascotas: 'mismo_dia', coberturaGeografica: 'Monterrey centro y sur', diferenciadorMascotas: 'Grupo reducido y GPS', horario: 'Lun–Sáb 6:00–20:00', verificada: true },
+      { alias: 'Walkies del Valle', precio: '140', tagline: 'Paseos individuales o en grupo pequeño.', serviciosMascotas: ['Paseo individual', 'Paseo grupal'], especiesAtendidas: ['perros'], modalidadServicioMascotas: 'domicilio', tarifaDesde: '140', horario: 'Lun–Dom 7:00–19:00', verificada: true }
+    ],
+    'cuidador-de-mascotas': [
+      { alias: 'Cuidado Hogar Pet', precio: '280', tagline: 'Cuidado en casa: alimentación, compañía y medicación básica.', serviciosMascotas: ['Cuidado en casa', 'Alimentación', 'Medicación básica'], especiesAtendidas: ['perros', 'gatos'], modalidadServicioMascotas: 'domicilio', tarifaDesde: '280', tiempoRespuestaMascotas: '24_48h', diferenciadorMascotas: 'Visitas con reporte', horario: 'Lun–Dom', verificada: true },
+      { alias: 'Pet Sitter Norte', precio: '260', tagline: 'Cuidado temporal cuando viajas.', serviciosMascotas: ['Visitas', 'Overnight', 'Alimentación'], especiesAtendidas: ['perros', 'gatos'], modalidadServicioMascotas: 'domicilio', tarifaDesde: '260', horario: 'Con reserva', verificada: true }
+    ],
+    'guarderia-para-mascotas': [
+      { alias: 'Guardería Pet Day', precio: '350', tagline: 'Guardería diurna con juego supervisado.', serviciosMascotas: ['Guardería diurna', 'Juego', 'Socialización'], especiesAtendidas: ['perros'], tamanoMascotasAtendidas: ['pequeno', 'mediano'], modalidadServicioMascotas: 'instalaciones', capacidadInstalacion: '20 cupos', tarifaDesde: '350', diferenciadorMascotas: 'Cámaras en vivo', horario: 'Lun–Vie 7:00–19:00', verificada: true },
+      { alias: 'Daycare Canino Sur', precio: '320', tagline: 'Día completo con áreas separadas por tamaño.', serviciosMascotas: ['Día completo', 'Áreas por tamaño'], especiesAtendidas: ['perros'], modalidadServicioMascotas: 'instalaciones', tarifaDesde: '320', horario: 'Lun–Sáb 8:00–18:00', verificada: true }
+    ],
+    'hotel-para-mascotas': [
+      { alias: 'Hotel Canino del Norte', precio: '450', tagline: 'Hospedaje nocturno con supervisión y paseos.', serviciosMascotas: ['Hospedaje', 'Paseos', 'Alimentación'], especiesAtendidas: ['perros', 'gatos'], modalidadServicioMascotas: 'instalaciones', capacidadInstalacion: '15 suites', tarifaDesde: '450', diferenciadorMascotas: 'Suites individuales', horario: 'Check-in diario 8:00–20:00', verificada: true },
+      { alias: 'Pet Hotel Valle', precio: '420', tagline: 'Estancia corta o larga con reporte diario.', serviciosMascotas: ['Estancia', 'Reporte diario', 'Medicación'], especiesAtendidas: ['perros'], modalidadServicioMascotas: 'instalaciones', tarifaDesde: '420', horario: 'Todos los días', verificada: true }
+    ],
+    'entrenador-canino': [
+      { alias: 'Coach Canino Pro', precio: '380', tagline: 'Entrenamiento a domicilio y en parque.', serviciosMascotas: ['Entrenamiento', 'Paseo educativo', 'Refuerzo positivo'], especiesAtendidas: ['perros'], modalidadServicioMascotas: 'domicilio', tarifaDesde: '380', diferenciadorMascotas: 'Sesiones a domicilio', horario: 'Con cita', verificada: true },
+      { alias: 'Entrenamiento Patitas', precio: '360', tagline: 'Obediencia y manejo de correa.', serviciosMascotas: ['Obediencia', 'Correa', 'Socialización'], especiesAtendidas: ['perros'], modalidadServicioMascotas: 'ambos', tarifaDesde: '360', horario: 'Lun–Sáb', verificada: true }
+    ],
+    adiestrador: [
+      { alias: 'Adiestramiento Alfa', precio: '450', tagline: 'Obediencia básica, corrección y socialización.', serviciosMascotas: ['Obediencia básica', 'Corrección conductual', 'Socialización'], especiesAtendidas: ['perros'], modalidadServicioMascotas: 'ambos', tarifaDesde: '450', diferenciadorMascotas: 'Método positivo certificado', horario: 'Lun–Sáb', verificada: true },
+      { alias: 'Adiestra Bien NL', precio: '420', tagline: 'Planes por objetivos: casa, calle y visitas.', serviciosMascotas: ['Plan personalizado', 'Casa y calle'], especiesAtendidas: ['perros'], modalidadServicioMascotas: 'domicilio', tarifaDesde: '420', horario: 'Con cita', verificada: true }
+    ],
+    'centro-de-entrenamiento-canino': [
+      { nombreComercial: 'Centro Canino Elite', precio: '500', tagline: 'Entrenamiento en instalaciones con grupos y privado.', serviciosEmpresaMascotas: ['Grupos', 'Privado', 'Evaluación inicial'], especialidadesEmpresaMascotas: 'Obediencia · Agility básico', especiesAtendidas: ['perros'], modalidadServicioMascotas: 'instalaciones', capacidadInstalacion: '12 perros por turno', tarifaDesde: '500', diferenciadorMascotas: 'Área techada y pista', horario: 'Lun–Sáb 8:00–20:00', verificada: true },
+      { nombreComercial: 'Academia Canina Norte', precio: '480', tagline: 'Cursos de obediencia y socialización en centro.', serviciosEmpresaMascotas: ['Cursos', 'Socialización'], especiesAtendidas: ['perros'], modalidadServicioMascotas: 'instalaciones', tarifaDesde: '480', horario: 'Mar–Sáb', verificada: true }
+    ],
+    groomer: [
+      { alias: 'Groom & Style Pets', precio: '320', tagline: 'Baño, corte y spa para perros y gatos.', serviciosMascotas: ['Baño', 'Corte', 'Spa', 'Uñas'], especiesAtendidas: ['perros', 'gatos'], modalidadServicioMascotas: 'instalaciones', tarifaDesde: '320', diferenciadorMascotas: 'Productos hipoalergénicos', horario: 'Mar–Sáb 9:00–19:00', verificada: true },
+      { alias: 'Groomer Express', precio: '280', tagline: 'Baño y cepillado rápido sin estrés.', serviciosMascotas: ['Baño', 'Cepillado', 'Oídos'], especiesAtendidas: ['perros'], modalidadServicioMascotas: 'instalaciones', tarifaDesde: '280', horario: 'Lun–Vie 10:00–18:00', verificada: true }
+    ],
+    'estetica-canina': [
+      { nombreComercial: 'Estética Canina Bella', precio: '350', tagline: 'Estética, stripping y tratamientos de pelaje.', serviciosEmpresaMascotas: ['Estética', 'Stripping', 'Tratamientos'], especialidadesEmpresaMascotas: 'Razas de pelo · Spa', especiesAtendidas: ['perros'], modalidadServicioMascotas: 'instalaciones', tarifaDesde: '350', diferenciadorMascotas: 'Especialistas en razas', horario: 'Mar–Sáb 9:00–19:00', verificada: true },
+      { nombreComercial: 'Spa Canino del Valle', precio: '380', tagline: 'Spa, perfume y cuidado de piel sensible.', serviciosEmpresaMascotas: ['Spa', 'Piel sensible', 'Perfume'], especiesAtendidas: ['perros', 'gatos'], modalidadServicioMascotas: 'instalaciones', tarifaDesde: '380', horario: 'Mié–Dom', verificada: true }
+    ],
+    'fotografo-de-mascotas': [
+      { alias: 'Foto Mascotas Studio', precio: '1,200', tagline: 'Sesiones fotográficas en estudio y exteriores.', serviciosMascotas: ['Sesión en estudio', 'Exteriores', 'Retoque'], especiesAtendidas: ['perros', 'gatos', 'otros'], modalidadServicioMascotas: 'ambos', tarifaDesde: '1200', diferenciadorMascotas: 'Paquetes con impresión', horario: 'Con cita', verificada: true },
+      { alias: 'Pet Lens MTY', precio: '950', tagline: 'Retratos de mascotas en locación.', serviciosMascotas: ['Retrato', 'Locación', 'Galería digital'], especiesAtendidas: ['perros', 'gatos'], modalidadServicioMascotas: 'domicilio', tarifaDesde: '950', horario: 'Fines de semana', verificada: true }
+    ],
+    'medico-veterinario': [
+      { nombreProfesional: 'Dra. Vet. Laura Soto', precio: '550', tagline: 'Medicina general, vacunas y consultas preventivas.', especialidadVeterinaria: 'Medicina general', serviciosVeterinarios: ['Consulta', 'Vacunación', 'Desparasitación'], especiesAtendidas: ['perros', 'gatos'], modalidadServicioMascotas: 'consultorio', precioConsulta: '550', emergenciasMascotas: 'si_horario', cedulaVerificada: true, diferenciadorMascotas: 'Enfoque preventivo', horario: 'Lun–Vie 9:00–19:00', verificada: true },
+      { nombreProfesional: 'Dr. Vet. Pablo Ríos', precio: '500', tagline: 'Consulta general y seguimiento de crónicos.', especialidadVeterinaria: 'Medicina general', serviciosVeterinarios: ['Consulta', 'Seguimiento', 'Recetas'], especiesAtendidas: ['perros', 'gatos'], modalidadServicioMascotas: 'consultorio', precioConsulta: '500', emergenciasMascotas: 'derivacion', cedulaVerificada: true, horario: 'Lun–Sáb 10:00–18:00', verificada: true }
+    ],
+    'veterinario-especialista': [
+      { nombreProfesional: 'Dra. Vet. Especialista Ruiz', precio: '850', tagline: 'Dermatología y medicina interna veterinaria.', especialidadVeterinaria: 'Dermatología', especialidadesVeterinarias: ['Dermatología', 'Medicina interna'], serviciosVeterinarios: ['Consulta especializada', 'Diagnóstico', 'Seguimiento'], especiesAtendidas: ['perros', 'gatos'], modalidadServicioMascotas: 'consultorio', precioConsulta: '850', emergenciasMascotas: 'no', cedulaVerificada: true, diferenciadorMascotas: 'Referencia de clínicas', horario: 'Mar–Vie con cita', verificada: true },
+      { nombreProfesional: 'Dr. Vet. Cardiólogo Vega', precio: '900', tagline: 'Cardiología veterinaria y ecocardiograma.', especialidadVeterinaria: 'Cardiología', especialidadesVeterinarias: ['Cardiología'], serviciosVeterinarios: ['Eco', 'Consulta cardíaca'], especiesAtendidas: ['perros', 'gatos'], modalidadServicioMascotas: 'clinica', precioConsulta: '900', cedulaVerificada: true, horario: 'Con referencia', verificada: true }
+    ],
+    'cirujano-veterinario': [
+      { nombreProfesional: 'Cirujano Vet. Morales', precio: 'Consultar', tagline: 'Cirugía de tejidos blandos y esterilización.', especialidadVeterinaria: 'Cirugía', serviciosVeterinarios: ['Cirugía tejidos blandos', 'Esterilización', 'Postoperatorio'], especiesAtendidas: ['perros', 'gatos'], modalidadServicioMascotas: 'clinica', precioConsulta: 'Consultar', emergenciasMascotas: 'si_horario', cedulaVerificada: true, diferenciadorMascotas: 'Quirófano propio', horario: 'Lun–Vie con cita', verificada: true },
+      { nombreProfesional: 'Dra. Cirujana Vet. Luna', precio: 'Consultar', tagline: 'Ortopedia y cirugía mayor programada.', especialidadVeterinaria: 'Ortopedia', serviciosVeterinarios: ['Ortopedia', 'Cirugía mayor'], especiesAtendidas: ['perros'], modalidadServicioMascotas: 'clinica', cedulaVerificada: true, horario: 'Con evaluación previa', verificada: true }
+    ],
+    'clinica-veterinaria': [
+      { nombreComercial: 'Clínica Veterinaria del Valle', precio: 'Consultar', tagline: 'Consulta, cirugía y laboratorio en sitio.', serviciosEmpresaMascotas: ['Consulta', 'Cirugía', 'Hospitalización', 'Laboratorio'], especialidadesEmpresaMascotas: 'Medicina interna · Cirugía', capacidadInstalacion: '12 camas', emergenciasMascotas: 'si_24h', modalidadServicioMascotas: 'clinica', tarifaDesde: 'Consultar', diferenciadorMascotas: 'Lab y rayos en sitio', horario: '24 horas', verificada: true },
+      { nombreComercial: 'VetCare Clínica Sur', precio: 'Consultar', tagline: 'Atención integral para perros y gatos.', serviciosEmpresaMascotas: ['Consulta', 'Vacunas', 'Rayos X'], especiesAtendidas: ['perros', 'gatos'], modalidadServicioMascotas: 'clinica', emergenciasMascotas: 'si_horario', tarifaDesde: 'Consultar', horario: 'Lun–Dom 8:00–22:00', verificada: true }
+    ],
+    'hospital-veterinario': [
+      { nombreComercial: 'Hospital Vet 24h Norte', precio: 'Consultar', tagline: 'Hospitalización 24 h, UCI y emergencias.', serviciosEmpresaMascotas: ['UCI', 'Hospitalización', 'Emergencias', 'Cirugía'], especialidadesEmpresaMascotas: 'Urgencias · Intensivos', capacidadInstalacion: '20 camas UCI', emergenciasMascotas: 'si_24h', modalidadServicioMascotas: 'clinica', tarifaDesde: 'Consultar', diferenciadorMascotas: 'Guardia médica 24/7', horario: '24 horas', verificada: true },
+      { nombreComercial: 'Hospital Animal del Valle', precio: 'Consultar', tagline: 'Internamiento y monitoreo continuo.', serviciosEmpresaMascotas: ['Internamiento', 'Monitoreo', 'Cirugía'], modalidadServicioMascotas: 'clinica', emergenciasMascotas: 'si_24h', tarifaDesde: 'Consultar', horario: '24 horas', verificada: true }
+    ],
+    'farmacia-veterinaria': [
+      { nombreProfesional: 'Farmacia Vet Salud Animal', precio: 'Consultar', tagline: 'Medicamentos, dietas y asesoría con receta.', especialidadVeterinaria: 'Farmacia veterinaria', serviciosVeterinarios: ['Medicamentos', 'Dietas', 'Asesoría'], especiesAtendidas: ['perros', 'gatos'], modalidadServicioMascotas: 'consultorio', precioConsulta: 'Consultar', emergenciasMascotas: 'no', cedulaVerificada: true, diferenciadorMascotas: 'Surtido de especialidad', horario: 'Lun–Sáb 9:00–20:00', verificada: true },
+      { nombreProfesional: 'Rx Vet del Norte', precio: 'Consultar', tagline: 'Farmacia y productos de uso veterinario.', especialidadVeterinaria: 'Farmacia veterinaria', serviciosVeterinarios: ['Receta', 'Surtido', 'Suplementos'], especiesAtendidas: ['perros', 'gatos', 'aves'], modalidadServicioMascotas: 'consultorio', cedulaVerificada: true, horario: 'Lun–Vie 9:00–19:00', verificada: true }
+    ],
+    'tienda-de-mascotas': [
+      { nombreComercial: 'Mundo Mascota Shop', precio: 'Consultar', tagline: 'Alimento premium, accesorios y asesoría nutricional.', serviciosEmpresaMascotas: ['Venta', 'Asesoría nutricional', 'Accesorios'], especiesAtendidas: ['perros', 'gatos', 'aves'], modalidadServicioMascotas: 'instalaciones', tarifaDesde: 'Consultar', diferenciadorMascotas: 'Marcas premium', horario: 'Lun–Dom 10:00–20:00', verificada: true },
+      { nombreComercial: 'Pet Market Cumbres', precio: 'Consultar', tagline: 'Alimento, juguetes y snacks para mascotas.', serviciosEmpresaMascotas: ['Alimento', 'Juguetes', 'Snacks'], especiesAtendidas: ['perros', 'gatos'], modalidadServicioMascotas: 'instalaciones', tarifaDesde: 'Consultar', horario: 'Lun–Sáb 10:00–21:00', verificada: true }
+    ],
+    'criadero-autorizado': [
+      { nombreComercial: 'Criadero Autorizado NL', precio: 'Consultar', tagline: 'Cría responsable con papeles y seguimiento.', serviciosEmpresaMascotas: ['Cría', 'Papeles', 'Seguimiento postventa'], especiesAtendidas: ['perros'], modalidadServicioMascotas: 'instalaciones', tarifaDesde: 'Consultar', diferenciadorMascotas: 'Registro y garantías de salud', colaboracionesComerciales: 'si_activo', horario: 'Con cita', verificada: true },
+      { nombreComercial: 'Línea Canina Certificada', precio: 'Consultar', tagline: 'Cachorros con pedigree y vacunas al día.', serviciosEmpresaMascotas: ['Pedigree', 'Vacunas', 'Entrega'], especiesAtendidas: ['perros'], modalidadServicioMascotas: 'instalaciones', tarifaDesde: 'Consultar', horario: 'Sábados con cita', verificada: true }
+    ],
+    'rescatista-independiente': [
+      { alias: 'Rescate Animal NL', precio: 'Donación', tagline: 'Rescate, rehabilitación y adopción responsable.', serviciosMascotas: ['Rescate', 'Rehabilitación', 'Adopción'], especiesAtendidas: ['perros', 'gatos'], modalidadServicioMascotas: 'instalaciones', tarifaDesde: 'Donación', colaboracionesComerciales: 'si_activo', diferenciadorMascotas: 'Hogar temporal verificado', horario: 'Lun–Sáb', verificada: true },
+      { alias: 'Patitas Libres MTY', precio: 'Donación', tagline: 'Adopciones y esterilización con aliados.', serviciosMascotas: ['Adopción', 'Esterilización', 'Fomento'], especiesAtendidas: ['perros', 'gatos'], modalidadServicioMascotas: 'ambos', tarifaDesde: 'Donación', horario: 'Fines de semana', verificada: true }
+    ],
+    'servicio-funerario-para-mascotas': [
+      { alias: 'Despedida Pet Care', precio: 'Consultar', tagline: 'Cremación, urna y acompañamiento digno.', serviciosMascotas: ['Cremación', 'Urna', 'Acompañamiento'], especiesAtendidas: ['perros', 'gatos', 'otros'], modalidadServicioMascotas: 'instalaciones', tarifaDesde: 'Consultar', tiempoRespuestaMascotas: 'inmediato', diferenciadorMascotas: 'Traslado incluido en zona', horario: 'Lun–Dom 8:00–20:00', verificada: true },
+      { alias: 'Memorial Animal Norte', precio: 'Consultar', tagline: 'Servicio funerario y memorial para mascotas.', serviciosMascotas: ['Cremación individual', 'Memorial', 'Traslado'], especiesAtendidas: ['perros', 'gatos'], modalidadServicioMascotas: 'ambos', tarifaDesde: 'Consultar', horario: '24 horas con cita', verificada: true }
+    ]
   };
 
   function mascotasPackDeSub(subId) {
@@ -1285,14 +1462,15 @@
       precioConsulta: base.precio || base.precioConsulta || 'Consultar',
       tiempoRespuestaMascotas: base.tiempoRespuestaMascotas || '',
       coberturaGeografica: base.coberturaGeografica || base.zonaCobertura || '',
-      colaboracionesComerciales: base.colaboracionesComerciales || ''
+      colaboracionesComerciales: base.colaboracionesComerciales || '',
+      horarioDetalle: base.horarioDetalle || base.horario || ''
     };
     var keys = [
       'nombreProfesional', 'alias', 'nombreComercial', 'serviciosMascotas', 'especiesAtendidas',
       'tamanoMascotasAtendidas', 'especialidadVeterinaria', 'serviciosVeterinarios',
       'especialidadesVeterinarias', 'emergenciasMascotas', 'serviciosEmpresaMascotas',
       'especialidadesEmpresaMascotas', 'capacidadInstalacion', 'diferenciadorMascotas',
-      'tiposColaboracionComercial'
+      'tiposColaboracionComercial', 'certificaciones', 'horarioDetalle', 'cedulaVerificada'
     ];
     keys.forEach(function (k) {
       if (base[k] != null && base[k] !== '') p[k] = base[k];
@@ -1301,7 +1479,7 @@
   }
 
   function armarPerfilMascotas(base, idx, Q, pres) {
-    var subId = pres.subcategoriaId || idCategoria(Q.categoria);
+    var subId = (pres && pres.subcategoriaId) || idCategoria(Q.categoria);
     var catLabel = base.categoriaPublica || labelCategoria(Q.categoria);
     var pack = base.deltaPack || mascotasPackDeSub(subId);
     var perfil = buildMascotasPerfilDemo(base, subId, pack);
@@ -1320,7 +1498,7 @@
       categoriaPublica: catLabel,
       precio: precio,
       tagline: base.tagline || '',
-      horario: base.horario || 'Consultar',
+      horario: base.horario || perfil.horarioDetalle || 'Consultar',
       pais: Q.pais,
       estado: Q.estado || 'Nuevo León',
       ciudad: Q.ciudad || 'Monterrey',
@@ -1348,10 +1526,26 @@
     } else {
       u.alias = perfil.alias || nombre;
       u.nombre = u.alias;
-      u.especialidad = (perfil.serviciosMascotas && perfil.serviciosMascotas[0]) || base.especialidad || '';
+      u.especialidad = (perfil.serviciosMascotas && perfil.serviciosMascotas[0])
+        || (perfil.serviciosEmpresaMascotas && perfil.serviciosEmpresaMascotas[0])
+        || base.especialidad || '';
     }
 
-    return enriquecerPerfil(u, Q);
+    if (global.CariHubMascotasSectorRender && CariHubMascotasSectorRender.resolveVistaPerfil) {
+      u.__vista = CariHubMascotasSectorRender.resolveVistaPerfil(u);
+    } else {
+      u.__vista = esNegocio ? 'empresa' : 'pro';
+    }
+
+    u = enriquecerPerfil(u, Q);
+    u.sectorId = 'mascotas';
+    u.deltaPack = pack;
+    u.mascotasPerfil = perfil;
+    if (global.CariHubMascotasSectorRender && CariHubMascotasSectorRender.resolveVistaPerfil) {
+      var vistaMas = CariHubMascotasSectorRender.resolveVistaPerfil(u);
+      if (vistaMas) u.__vista = vistaMas;
+    }
+    return u;
   }
 
   function poolDemoMascotas(subId) {
@@ -1395,12 +1589,76 @@
     ]
   };
 
+  /* Demos 1:1 — evita que pack A/B/C/D mezclen plomería, HVAC, cerrajería y jardín. */
   var DEMO_HOGAR = {
-    plomeros: DEMO_HOGAR_BY_PACK.A,
-    electricistas: DEMO_HOGAR_BY_PACK.B,
-    carpinteros: DEMO_HOGAR_BY_PACK.C,
-    pintores: DEMO_HOGAR_BY_PACK.D,
-    jardineria: [DEMO_HOGAR_BY_PACK.D[1]]
+    plomeros: [
+      { alias: 'Plomería Express MTY', precio: '300', tagline: 'Fugas, destapes e instalaciones hidráulicas con garantía.', serviciosHogar: ['Fugas', 'Destapes', 'Instalaciones', 'Boilers'], especialidadesHogar: ['Residencial', 'Comercial'], modalidadServicioHogar: 'domicilio', tiposInmueble: ['casa', 'departamento'], tarifaDesde: '300', tiempoRespuestaHogar: 'mismo_dia', garantiaServicioHogar: '30 días en mano de obra', materialesIncluidos: 'convenir', coberturaGeografica: 'Monterrey y área metropolitana', diferenciadorHogar: 'Diagnóstico de fugas sin romper de más', horario: 'Lun–Dom 7:00–22:00', verificada: true },
+      { alias: 'Hidráulica del Valle', precio: '280', tagline: 'Plomería residencial: tinacos, calentadores y drenaje.', serviciosHogar: ['Tinacos', 'Calentadores', 'Drenaje'], modalidadServicioHogar: 'emergencia_24h', tiempoRespuestaHogar: 'emergencia_2h', tarifaDesde: '280', horario: '24 horas', verificada: true }
+    ],
+    albaniles: [
+      { alias: 'Albañilería del Norte', precio: '450', tagline: 'Muros, aplanados y remodelaciones de obra húmeda.', serviciosHogar: ['Muros', 'Aplanados', 'Remodelación', 'Cimientos'], modalidadServicioHogar: 'domicilio', tiposInmueble: ['casa', 'local'], tarifaDesde: '450', anosExperienciaHogar: '8_15', materialesIncluidos: 'con_materiales', garantiaServicioHogar: 'Garantía en obra según alcance', diferenciadorHogar: 'Cuadrilla propia', horario: 'Lun–Sáb 7:00–18:00', verificada: true },
+      { alias: 'Obra y Acabados NL', precio: '420', tagline: 'Ampliaciones, losas y acabados en albañilería.', serviciosHogar: ['Ampliaciones', 'Losas', 'Acabados'], modalidadServicioHogar: 'domicilio', tarifaDesde: '420', anosExperienciaHogar: '4_7', horario: 'Lun–Vie 8:00–17:00', verificada: true }
+    ],
+    impermeabilizadores: [
+      { alias: 'Impermeabilizaciones Norte', precio: '380', tagline: 'Azoteas, cisternas y sellado contra filtraciones.', serviciosHogar: ['Azoteas', 'Cisternas', 'Sellado', 'Membranas'], modalidadServicioHogar: 'domicilio', tiposInmueble: ['casa', 'edificio', 'local'], tarifaDesde: '380', garantiaServicioHogar: 'Hasta 5 años según sistema', materialesIncluidos: 'con_materiales', diferenciadorHogar: 'Sistemas prefabricados y acrílicos', horario: 'Lun–Sáb 8:00–18:00', verificada: true },
+      { alias: 'Sellado Total MTY', precio: '350', tagline: 'Impermeabilización de techos y muros húmedos.', serviciosHogar: ['Techos', 'Muros húmedos', 'Juntas'], modalidadServicioHogar: 'domicilio', tarifaDesde: '350', horario: 'Lun–Vie 8:00–17:00', verificada: true }
+    ],
+    electricistas: [
+      { alias: 'Electricista Pro MTY', precio: '350', tagline: 'Instalaciones eléctricas, tableros y fallas residenciales.', serviciosHogar: ['Instalación', 'Reparación', 'Tableros', 'Cortos'], especialidadesHogar: ['Residencial', 'Comercial'], modalidadServicioHogar: 'domicilio', tarifaDesde: '350', tiempoRespuestaHogar: '24_48h', garantiaServicioHogar: '90 días en mano de obra', diferenciadorHogar: 'Norma NOM y puesta a tierra', horario: 'Lun–Sáb 8:00–20:00', verificada: true },
+      { alias: 'Circuito Seguro NL', precio: '320', tagline: 'Contactos, luminarias y diagnóstico de fallas.', serviciosHogar: ['Contactos', 'Luminarias', 'Diagnóstico'], especialidadesHogar: ['Residencial'], modalidadServicioHogar: 'domicilio', tarifaDesde: '320', horario: 'Lun–Sáb 9:00–19:00', verificada: true }
+    ],
+    'tecnicos-en-clima-hvac': [
+      { alias: 'Clima & HVAC Norte', precio: '500', tagline: 'Minisplits, mantenimiento y carga de gas refrigerante.', serviciosHogar: ['Instalación minisplit', 'Mantenimiento', 'Carga de gas', 'Reparación'], especialidadesHogar: ['HVAC', 'Minisplit'], modalidadServicioHogar: 'domicilio', tarifaDesde: '500', tiempoRespuestaHogar: 'mismo_dia', diferenciadorHogar: 'Recuperación ecológica de gas', horario: 'Lun–Dom 9:00–20:00', verificada: true },
+      { alias: 'Aire Fresco MTY', precio: '480', tagline: 'Instalación y servicio de aire acondicionado hogar.', serviciosHogar: ['Instalación', 'Limpieza de filtros', 'Reparación'], especialidadesHogar: ['Aire acondicionado'], modalidadServicioHogar: 'domicilio', tarifaDesde: '480', horario: 'Lun–Sáb 9:00–19:00', verificada: true }
+    ],
+    'instaladores-de-paneles-solares': [
+      { alias: 'Solar Paneles NL', precio: 'Consultar', tagline: 'Diseño e instalación de paneles solares residenciales.', serviciosHogar: ['Diseño', 'Instalación', 'Inversores', 'Mantenimiento'], especialidadesHogar: ['Fotovoltaico', 'Residencial'], modalidadServicioHogar: 'domicilio', tarifaDesde: 'Consultar', anosExperienciaHogar: '4_7', diferenciadorHogar: 'Cálculo de ahorro y CFE', horario: 'Lun–Vie 9:00–18:00', verificada: true },
+      { alias: 'Energía Limpia del Norte', precio: 'Consultar', tagline: 'Sistemas solares interconectados y baterías.', serviciosHogar: ['Paneles', 'Baterías', 'Interconexión'], especialidadesHogar: ['Fotovoltaico'], modalidadServicioHogar: 'domicilio', tarifaDesde: 'Consultar', horario: 'Lun–Sáb con cita', verificada: true }
+    ],
+    'tecnicos-en-camaras-de-seguridad': [
+      { alias: 'Cámaras Seguras MTY', precio: '600', tagline: 'CCTV, DVR/NVR y monitoreo residencial.', serviciosHogar: ['Cámaras IP', 'DVR/NVR', 'Acceso remoto', 'Alarmas'], especialidadesHogar: ['CCTV', 'Residencial'], modalidadServicioHogar: 'domicilio', tarifaDesde: '600', diferenciadorHogar: 'App móvil incluida', horario: 'Lun–Sáb 9:00–19:00', verificada: true },
+      { alias: 'Vigilancia Digital Norte', precio: '550', tagline: 'Instalación de cámaras y cableado estructurado.', serviciosHogar: ['Instalación', 'Cableado', 'Configuración remota'], especialidadesHogar: ['CCTV'], modalidadServicioHogar: 'domicilio', tarifaDesde: '550', horario: 'Lun–Vie 9:00–18:00', verificada: true }
+    ],
+    'domotica-casa-inteligente': [
+      { alias: 'Domótica Smart Home', precio: '700', tagline: 'Iluminación, cerraduras y escenas inteligentes.', serviciosHogar: ['Iluminación smart', 'Cerraduras', 'Termostatos', 'Asistentes de voz'], especialidadesHogar: ['Domótica', 'IoT'], modalidadServicioHogar: 'domicilio', tarifaDesde: '700', diferenciadorHogar: 'Integración multi-marca', horario: 'Lun–Sáb con cita', verificada: true },
+      { alias: 'Casa Inteligente NL', precio: '650', tagline: 'Automatización de luces, persianas y seguridad.', serviciosHogar: ['Automatización', 'Persianas', 'Sensores'], especialidadesHogar: ['Domótica'], modalidadServicioHogar: 'domicilio', tarifaDesde: '650', horario: 'Mar–Sáb 10:00–19:00', verificada: true }
+    ],
+    carpinteros: [
+      { alias: 'Carpintería a Medida', precio: '800', tagline: 'Closets, muebles y carpintería fina a medida.', serviciosHogar: ['Closets', 'Muebles', 'Puertas', 'Repisas'], tiposTrabajoHogar: ['A medida', 'Reparación'], materialesIncluidos: 'convenir', modalidadServicioHogar: 'ambos', tarifaDesde: '800', diferenciadorHogar: 'Diseño 3D previo', horario: 'Con cita Lun–Sáb', verificada: true },
+      { alias: 'Madera & Diseño Sur', precio: '750', tagline: 'Cocinas integrales y carpintería residencial.', serviciosHogar: ['Cocinas', 'Closets', 'Acabados'], tiposTrabajoHogar: ['A medida'], modalidadServicioHogar: 'domicilio', tarifaDesde: '750', horario: 'Lun–Vie 9:00–18:00', verificada: true }
+    ],
+    herreros: [
+      { alias: 'Herrería y Estructuras', precio: '600', tagline: 'Portones, barandales y estructuras metálicas.', serviciosHogar: ['Portones', 'Barandales', 'Estructuras', 'Rejas'], tiposTrabajoHogar: ['Fabricación', 'Instalación'], modalidadServicioHogar: 'domicilio', tarifaDesde: '600', materialesIncluidos: 'con_materiales', diferenciadorHogar: 'Soldadura certificada', horario: 'Lun–Sáb 8:00–18:00', verificada: true },
+      { alias: 'Metal Arte Norte', precio: '580', tagline: 'Herrería ornamental y cancelería.', serviciosHogar: ['Ornamental', 'Cancelería', 'Escaleras'], tiposTrabajoHogar: ['Fabricación'], modalidadServicioHogar: 'ambos', tarifaDesde: '580', horario: 'Lun–Vie 8:00–17:00', verificada: true }
+    ],
+    'instaladores-de-pisos': [
+      { alias: 'Pisos & Acabados Pro', precio: '450', tagline: 'Laminados, vinílicos, duela y porcelanato.', serviciosHogar: ['Laminado', 'Vinílico', 'Duela', 'Porcelanato'], tiposTrabajoHogar: ['Instalación', 'Nivelación'], modalidadServicioHogar: 'domicilio', tiposInmueble: ['casa', 'departamento', 'local'], tarifaDesde: '450', materialesIncluidos: 'convenir', diferenciadorHogar: 'Nivelación incluida en presupuesto', horario: 'Lun–Sáb 8:00–18:00', verificada: true },
+      { alias: 'Piso Firme MTY', precio: '420', tagline: 'Instalación de pisos y zoclos residenciales.', serviciosHogar: ['Instalación', 'Zoclos', 'Reparación'], modalidadServicioHogar: 'domicilio', tarifaDesde: '420', horario: 'Lun–Vie 9:00–17:00', verificada: true }
+    ],
+    cerrajeros: [
+      { alias: 'Cerrajería 24h Norte', precio: '400', tagline: 'Aperturas, cambio de chapas y llaves de emergencia.', serviciosHogar: ['Apertura', 'Cambio de chapa', 'Duplicado', 'Cerraduras digitales'], modalidadServicioHogar: 'emergencia_24h', tiempoRespuestaHogar: 'emergencia_2h', tarifaDesde: '400', diferenciadorHogar: 'Servicio 24/7 sin dañar puerta', horario: '24 horas', verificada: true },
+      { alias: 'Llaves Express MTY', precio: '350', tagline: 'Cerrajería residencial y automotriz ligera.', serviciosHogar: ['Apertura', 'Duplicado', 'Cilindros'], modalidadServicioHogar: 'domicilio', tiempoRespuestaHogar: 'mismo_dia', tarifaDesde: '350', horario: 'Lun–Dom 8:00–22:00', verificada: true }
+    ],
+    pintores: [
+      { alias: 'Pintura Profesional MTY', precio: '280', tagline: 'Interiores, exteriores y acabados decorativos.', serviciosHogar: ['Interiores', 'Exteriores', 'Texturizados', 'Impermeable'], modalidadServicioHogar: 'domicilio', tiposInmueble: ['casa', 'departamento', 'local'], tarifaDesde: '280', materialesIncluidos: 'convenir', garantiaServicioHogar: 'Garantía en mano de obra', diferenciadorHogar: 'Preparación de superficie incluida', horario: 'Lun–Sáb 8:00–19:00', verificada: true },
+      { alias: 'Color & Acabado Sur', precio: '260', tagline: 'Pintura residencial y retoques profesionales.', serviciosHogar: ['Interiores', 'Retoques', 'Barniz'], modalidadServicioHogar: 'domicilio', tarifaDesde: '260', horario: 'Lun–Vie 8:00–18:00', verificada: true }
+    ],
+    jardineria: [
+      { alias: 'Jardinería Verde', precio: '400', tagline: 'Diseño, poda y mantenimiento de jardines.', serviciosHogar: ['Diseño', 'Poda', 'Mantenimiento', 'Riego'], modalidadServicioHogar: 'domicilio', tarifaDesde: '400', coberturaGeografica: 'Monterrey sur y Carretera Nacional', diferenciadorHogar: 'Planes mensuales de mantenimiento', horario: 'Mar–Dom 8:00–18:00', verificada: true },
+      { alias: 'Paisaje Norte', precio: '380', tagline: 'Poda de árboles, pasto y jardinería residencial.', serviciosHogar: ['Poda de árboles', 'Pasto', 'Fertilización'], modalidadServicioHogar: 'domicilio', tarifaDesde: '380', horario: 'Lun–Sáb 7:00–17:00', verificada: true }
+    ],
+    fumigacion: [
+      { alias: 'Fumigación Total NL', precio: '450', tagline: 'Control de plagas: cucarachas, roedores y termitas.', serviciosHogar: ['Cucarachas', 'Roedores', 'Termitas', 'Preventivo'], modalidadServicioHogar: 'domicilio', tiposInmueble: ['casa', 'departamento', 'local'], tarifaDesde: '450', garantiaServicioHogar: 'Garantía de 30–90 días según plaga', diferenciadorHogar: 'Productos de baja toxicidad', horario: 'Lun–Sáb 8:00–19:00', verificada: true },
+      { alias: 'Antiplagas Express', precio: '400', tagline: 'Fumigación residencial y comercial express.', serviciosHogar: ['Residencial', 'Comercial', 'Sanitización'], modalidadServicioHogar: 'domicilio', tarifaDesde: '400', horario: 'Lun–Dom 9:00–20:00', verificada: true }
+    ],
+    'limpieza-del-hogar': [
+      { alias: 'Limpieza Express Hogar', precio: '350', tagline: 'Limpieza profunda de casas y departamentos.', serviciosHogar: ['Limpieza profunda', 'Cocina', 'Baños', 'Vidrios'], modalidadServicioHogar: 'domicilio', tiposInmueble: ['casa', 'departamento'], tarifaDesde: '350', tiempoRespuestaHogar: '24_48h', diferenciadorHogar: 'Productos ecológicos opcionales', horario: 'Lun–Sáb 8:00–18:00', verificada: true },
+      { alias: 'Hogar Impecable MTY', precio: '320', tagline: 'Recurrencia semanal o quincenal de limpieza.', serviciosHogar: ['Recurrencia', 'Orden', 'Desinfección'], modalidadServicioHogar: 'domicilio', tarifaDesde: '320', horario: 'Lun–Vie 9:00–17:00', verificada: true }
+    ],
+    'mantenimiento-general': [
+      { alias: 'Mantenimiento Integral Casa', precio: '380', tagline: 'Reparaciones menores, plomería ligera y electricidad básica.', serviciosHogar: ['Reparaciones menores', 'Plomería ligera', 'Electricidad básica', 'Pintura touch-up'], modalidadServicioHogar: 'domicilio', tiposInmueble: ['casa', 'departamento'], tarifaDesde: '380', tiempoRespuestaHogar: 'mismo_dia', diferenciadorHogar: 'Un solo técnico multi-oficio', horario: 'Lun–Sáb 8:00–20:00', verificada: true },
+      { alias: 'Todo en Casa NL', precio: '360', tagline: 'Mantenimiento preventivo y correctivo del hogar.', serviciosHogar: ['Preventivo', 'Correctivo', 'Checklist mensual'], modalidadServicioHogar: 'domicilio', tarifaDesde: '360', horario: 'Lun–Vie 8:00–18:00', verificada: true }
+    ]
   };
 
   function hogarPackDeSub(subId) {
@@ -1423,7 +1681,8 @@
       tiempoRespuestaHogar: base.tiempoRespuestaHogar || '',
       garantiaServicioHogar: base.garantiaServicioHogar || '',
       coberturaGeografica: base.coberturaGeografica || base.zonaCobertura || '',
-      colaboracionesComerciales: base.colaboracionesComerciales || ''
+      colaboracionesComerciales: base.colaboracionesComerciales || '',
+      horarioDetalle: base.horarioDetalle || base.horario || ''
     };
     var keys = [
       'alias', 'serviciosHogar', 'especialidadesHogar', 'tiposTrabajoHogar', 'tiposInmueble',
@@ -1437,7 +1696,7 @@
   }
 
   function armarPerfilHogar(base, idx, Q, pres) {
-    var subId = pres.subcategoriaId || idCategoria(Q.categoria);
+    var subId = (pres && pres.subcategoriaId) || idCategoria(Q.categoria);
     var catLabel = base.categoriaPublica || labelCategoria(Q.categoria);
     var pack = base.deltaPack || hogarPackDeSub(subId);
     var perfil = buildHogarPerfilDemo(base, subId, pack);
@@ -1468,10 +1727,26 @@
       hogarPerfil: perfil,
       alias: perfil.alias || nombre,
       nombre: perfil.alias || nombre,
-      especialidad: (perfil.serviciosHogar && perfil.serviciosHogar[0]) || base.especialidad || ''
+      especialidad: (perfil.especialidadesHogar && perfil.especialidadesHogar[0])
+        || (perfil.serviciosHogar && perfil.serviciosHogar[0])
+        || base.especialidad || ''
     };
 
-    return enriquecerPerfil(u, Q);
+    if (global.CariHubHogarSectorRender && CariHubHogarSectorRender.resolveVistaPerfil) {
+      u.__vista = CariHubHogarSectorRender.resolveVistaPerfil(u);
+    } else {
+      u.__vista = 'pro';
+    }
+
+    u = enriquecerPerfil(u, Q);
+    u.sectorId = 'hogar';
+    u.deltaPack = pack;
+    u.hogarPerfil = perfil;
+    if (global.CariHubHogarSectorRender && CariHubHogarSectorRender.resolveVistaPerfil) {
+      var vistaHogar = CariHubHogarSectorRender.resolveVistaPerfil(u);
+      if (vistaHogar) u.__vista = vistaHogar;
+    }
+    return u;
   }
 
   function poolDemoHogar(subId) {
@@ -1790,44 +2065,101 @@
     });
   }
 
-  var AUTOMOTRIZ_NEGOCIO_SUBS = ['agencias-de-autos'];
+  var AUTOMOTRIZ_NEGOCIO_SUBS = ['agencias-de-autos', 'lotes-de-autos'];
 
   var DEMO_AUTOMOTRIZ_BY_PACK = {
     A: [
-      { alias: 'Taller Mecánico del Norte', precio: '500', tagline: 'Mecánica general, frenos y suspensión.', serviciosMecanica: ['Afinación', 'Frenos', 'Suspensión'], especialidadesMecanica: ['Motor', 'Transmisión'], marcasAtendidas: ['Chevrolet', 'Nissan', 'Ford'], modalidadServicioAuto: 'taller_fijo', tarifaDesde: '500', coberturaGeografica: 'Monterrey norte', horario: 'Lun–Sáb 8:00–19:00', verificada: true },
-      { alias: 'Mecánico a Domicilio MTY', precio: '400', tagline: 'Diagnóstico y reparaciones en tu domicilio.', serviciosMecanica: ['Diagnóstico', 'Batería', 'Fugas'], modalidadServicioAuto: 'domicilio', tiempoRespuestaAuto: 'mismo_dia', tarifaDesde: '400', horario: 'Lun–Dom', verificada: true }
+      { alias: 'Taller Mecánico del Norte', precio: '500', tagline: 'Mecánica general, frenos y suspensión.', serviciosMecanica: ['Afinación', 'Frenos', 'Suspensión'], especialidadesMecanica: ['Motor', 'Transmisión'], marcasAtendidas: ['Chevrolet', 'Nissan', 'Ford'], modalidadServicioAuto: 'taller_fijo', tarifaDesde: '500', coberturaGeografica: 'Monterrey norte', horario: 'Lun–Sáb 8:00–19:00', verificada: true }
     ],
     B: [
       { alias: 'Vulcanizadora Rápida', precio: '350', tagline: 'Llantas, balanceo y alineación.', serviciosLlantas: ['Venta', 'Montaje', 'Balanceo', 'Alineación'], tiposLlantas: ['Radial', 'Run flat'], modalidadServicioAuto: 'taller_fijo', tarifaDesde: '350', horario: 'Lun–Sáb 8:00–20:00', verificada: true }
     ],
     C: [
-      { alias: 'Detailing Premium MTY', precio: '800', tagline: 'Lavado, pulido y protección cerámica.', serviciosEsteticaAuto: ['Lavado', 'Detailing', 'Cerámico'], serviciosCarroceria: ['Pulido'], modalidadServicioAuto: 'taller_fijo', tarifaDesde: '800', horario: 'Mar–Dom', verificada: true },
-      { alias: 'Hojalatería y Pintura Sur', precio: 'Consultar', tagline: 'Reparación de carrocería y pintura automotriz.', serviciosCarroceria: ['Hojalatería', 'Pintura'], modalidadServicioAuto: 'taller_fijo', tarifaDesde: 'Consultar', horario: 'Lun–Vie', verificada: true }
+      { alias: 'Detailing Premium MTY', precio: '800', tagline: 'Lavado, pulido y protección cerámica.', serviciosEsteticaAuto: ['Lavado', 'Detailing', 'Cerámico'], modalidadServicioAuto: 'taller_fijo', tarifaDesde: '800', horario: 'Mar–Dom', verificada: true }
     ],
     D: [
-      { alias: 'Refaccionaria Central', precio: 'Consultar', tagline: 'Refacciones originales y genéricas.', serviciosRefacciones: ['Venta', 'Pedido especial'], lineasRefacciones: ['Frenos', 'Suspensión', 'Motor'], modalidadServicioAuto: 'taller_fijo', tarifaDesde: 'Consultar', horario: 'Lun–Sáb 9:00–19:00', verificada: true },
-      { alias: 'A/C Automotriz Pro', precio: '600', tagline: 'Carga de gas, diagnóstico y reparación de A/C.', serviciosEspecialidadAuto: ['A/C', 'Diagnóstico eléctrico'], modalidadServicioAuto: 'ambos', tarifaDesde: '600', horario: 'Lun–Sáb', verificada: true }
+      { alias: 'Refaccionaria Central', precio: 'Consultar', tagline: 'Refacciones originales y genéricas.', serviciosRefacciones: ['Venta', 'Pedido especial'], lineasRefacciones: ['Frenos', 'Suspensión', 'Motor'], modalidadServicioAuto: 'taller_fijo', tarifaDesde: 'Consultar', horario: 'Lun–Sáb 9:00–19:00', verificada: true }
     ],
     E: [
-      { nombreComercial: 'Autos Seminuevos MTY', precio: 'Consultar', tagline: 'Seminuevos certificados con financiamiento.', serviciosVentaAutos: ['Seminuevos', 'Contado', 'Crédito'], tiposVehiculoVenta: ['Sedán', 'SUV', 'Pickup'], financiamientoDisponible: 'Sí', inventarioAproximado: '40 unidades', horario: 'Lun–Sáb 10:00–20:00', verificada: true },
-      { alias: 'Lote de Autos del Valle', precio: 'Consultar', tagline: 'Venta de usados con revisión mecánica.', serviciosVentaAutos: ['Usados', 'Consignación'], tiposVehiculoVenta: ['Económicos', 'SUV'], financiamientoDisponible: 'Parcial', tarifaDesde: 'Consultar', horario: 'Lun–Dom', verificada: true }
+      { nombreComercial: 'Autos Seminuevos MTY', precio: 'Consultar', tagline: 'Seminuevos certificados con financiamiento.', serviciosVentaAutos: ['Seminuevos', 'Contado', 'Crédito'], tiposVehiculoVenta: ['Sedán', 'SUV', 'Pickup'], financiamientoDisponible: 'si_terceros', inventarioAproximado: '40 unidades', horario: 'Lun–Sáb 10:00–20:00', verificada: true }
     ],
     F: [
       { alias: 'Grúa 24 h Norte', precio: '800', tagline: 'Grúa y auxilio vial en carretera y ciudad.', serviciosGrua: ['Grúa', 'Paso de corriente', 'Cambio de llanta'], modalidadServicioAuto: 'unidad_movil', coberturaCarretera: '100 km radio MTY', tiempoRespuestaAuto: 'emergencia_30min', tarifaDesde: '800', horario: '24 horas', verificada: true }
     ]
   };
 
+  /* Demos 1:1 — evita que pack A/C/D/E mezclen mecánico, detailing, A/C y lotes. */
   var DEMO_AUTOMOTRIZ = {
-    'talleres-mecanicos': DEMO_AUTOMOTRIZ_BY_PACK.A,
-    vulcanizadoras: DEMO_AUTOMOTRIZ_BY_PACK.B,
-    'lavado-de-autos': DEMO_AUTOMOTRIZ_BY_PACK.C,
-    refaccionarias: DEMO_AUTOMOTRIZ_BY_PACK.D,
-    'agencias-de-autos': DEMO_AUTOMOTRIZ_BY_PACK.E,
-    'gruas-y-auxilio-vial': DEMO_AUTOMOTRIZ_BY_PACK.F
+    'talleres-mecanicos': [
+      { alias: 'Taller Mecánico del Norte', precio: '500', tagline: 'Mecánica general: afinación, frenos y suspensión.', serviciosMecanica: ['Afinación', 'Frenos', 'Suspensión'], especialidadesMecanica: ['Motor', 'Transmisión'], marcasAtendidas: ['Chevrolet', 'Nissan', 'Ford'], tiposVehiculoAtendidos: ['Sedán', 'SUV', 'Pickup'], modalidadServicioAuto: 'taller_fijo', garantiaServicioAuto: '3 meses en mano de obra', tarifaDesde: '500', coberturaGeografica: 'Monterrey norte', diferenciadorAutomotriz: 'Diagnóstico computarizado', horario: 'Lun–Sáb 8:00–19:00', verificada: true },
+      { alias: 'Taller Express Cumbres', precio: '450', tagline: 'Reparación rápida de frenos, embrague y suspensión.', serviciosMecanica: ['Frenos', 'Embrague', 'Suspensión'], marcasAtendidas: ['VW', 'Nissan', 'Toyota'], modalidadServicioAuto: 'taller_fijo', tarifaDesde: '450', horario: 'Lun–Vie 8:00–18:00', verificada: true }
+    ],
+    electromecanicos: [
+      { alias: 'ElectroAuto Norte', precio: '550', tagline: 'Sistema eléctrico, sensores y diagnóstico OBD.', serviciosMecanica: ['Diagnóstico eléctrico', 'Sensores', 'Alternador'], especialidadesMecanica: ['Eléctrico', 'Electrónica'], marcasAtendidas: ['GM', 'Ford', 'Nissan'], modalidadServicioAuto: 'taller_fijo', tarifaDesde: '550', diferenciadorAutomotriz: 'Escáner multimarca', horario: 'Lun–Sáb 9:00–19:00', verificada: true },
+      { alias: 'Circuito Automotriz', precio: '500', tagline: 'Arranque, cableado y módulos electrónicos.', serviciosMecanica: ['Arranque', 'Cableado', 'Módulos'], modalidadServicioAuto: 'ambos', tiempoRespuestaAuto: 'mismo_dia', tarifaDesde: '500', horario: 'Lun–Sáb', verificada: true }
+    ],
+    'mecanicos-a-domicilio': [
+      { alias: 'Mecánico a Domicilio MTY', precio: '400', tagline: 'Diagnóstico y reparaciones básicas en tu domicilio.', serviciosMecanica: ['Diagnóstico', 'Batería', 'Fugas', 'Afinación ligera'], modalidadServicioAuto: 'domicilio', tiempoRespuestaAuto: 'mismo_dia', tarifaDesde: '400', coberturaGeografica: 'Área metropolitana MTY', diferenciadorAutomotriz: 'Unidad móvil equipada', horario: 'Lun–Dom 8:00–20:00', verificada: true },
+      { alias: 'Taller Móvil del Valle', precio: '450', tagline: 'Mecánica a domicilio para no mover el auto.', serviciosMecanica: ['Frenos', 'Suspensión', 'Cambio de aceite'], modalidadServicioAuto: 'unidad_movil', tiempoRespuestaAuto: '1h', tarifaDesde: '450', horario: 'Lun–Sáb 8:00–19:00', verificada: true }
+    ],
+    vulcanizadoras: [
+      { alias: 'Vulcanizadora Rápida', precio: '350', tagline: 'Venta, montaje, balanceo y alineación de llantas.', serviciosLlantas: ['Venta', 'Montaje', 'Balanceo', 'Alineación'], tiposLlantas: ['Radial', 'Run flat', 'Todo terreno'], modalidadServicioAuto: 'taller_fijo', tarifaDesde: '350', diferenciadorAutomotriz: 'Alineación computarizada', horario: 'Lun–Sáb 8:00–20:00', verificada: true },
+      { alias: 'Llanta Express', precio: '300', tagline: 'Ponchaduras, válvulas y llantas de emergencia.', serviciosLlantas: ['Ponchadura', 'Válvulas', 'Montaje'], tiposLlantas: ['Radial'], modalidadServicioAuto: 'taller_fijo', tarifaDesde: '300', horario: 'Lun–Dom 8:00–21:00', verificada: true }
+    ],
+    'hojalateria-y-pintura': [
+      { alias: 'Hojalatería y Pintura Sur', precio: 'Consultar', tagline: 'Reparación de carrocería, enderezado y pintura automotriz.', serviciosCarroceria: ['Hojalatería', 'Enderezado', 'Pintura', 'Pulido'], modalidadServicioAuto: 'taller_fijo', garantiaServicioAuto: 'Garantía en pintura según trabajo', tarifaDesde: 'Consultar', diferenciadorAutomotriz: 'Cabina de pintura', horario: 'Lun–Vie 8:00–18:00', verificada: true },
+      { alias: 'Carrocerías del Norte', precio: 'Consultar', tagline: 'Golpes, cristales y retoques de pintura.', serviciosCarroceria: ['Hojalatería', 'Pintura', 'Cristales'], modalidadServicioAuto: 'taller_fijo', tarifaDesde: 'Consultar', horario: 'Lun–Sáb 9:00–18:00', verificada: true }
+    ],
+    'lavado-de-autos': [
+      { alias: 'Lavado Express MTY', precio: '180', tagline: 'Lavado exterior, interior y encerado rápido.', serviciosEsteticaAuto: ['Lavado exterior', 'Interior', 'Encerado'], modalidadServicioAuto: 'taller_fijo', tarifaDesde: '180', diferenciadorAutomotriz: 'Servicio en 30–45 min', horario: 'Lun–Dom 8:00–20:00', verificada: true },
+      { alias: 'AutoShine Lavados', precio: '220', tagline: 'Lavado a mano y aspirado profundo.', serviciosEsteticaAuto: ['Lavado a mano', 'Aspirado', 'Aromatización'], modalidadServicioAuto: 'taller_fijo', tarifaDesde: '220', horario: 'Mar–Dom 9:00–19:00', verificada: true }
+    ],
+    'detallado-automotriz-premium': [
+      { alias: 'Detailing Premium MTY', precio: '800', tagline: 'Detailing, pulido y protección cerámica.', serviciosEsteticaAuto: ['Detailing', 'Pulido', 'Cerámico', 'Interior premium'], modalidadServicioAuto: 'taller_fijo', tarifaDesde: '800', diferenciadorAutomotriz: 'Paquetes cerámicos', horario: 'Mar–Dom 9:00–19:00', verificada: true },
+      { alias: 'Brillo Garage', precio: '950', tagline: 'Corrección de pintura y encapsulado.', serviciosEsteticaAuto: ['Corrección de pintura', 'Encapsulado', 'Detailing'], modalidadServicioAuto: 'taller_fijo', tarifaDesde: '950', horario: 'Lun–Sáb con cita', verificada: true }
+    ],
+    refaccionarias: [
+      { alias: 'Refaccionaria Central', precio: 'Consultar', tagline: 'Refacciones originales y genéricas para mecánica general.', serviciosRefacciones: ['Venta mostrador', 'Pedido especial', 'Asesoría'], lineasRefacciones: ['Frenos', 'Suspensión', 'Motor', 'Filtros'], modalidadServicioAuto: 'taller_fijo', tarifaDesde: 'Consultar', diferenciadorAutomotriz: 'Pedidos el mismo día', horario: 'Lun–Sáb 9:00–19:00', verificada: true },
+      { alias: 'Repuestos del Norte', precio: 'Consultar', tagline: 'Refacciones para sedán, SUV y pickup.', serviciosRefacciones: ['Venta', 'Mayoreo ligero'], lineasRefacciones: ['Embrague', 'Dirección', 'Eléctrico'], modalidadServicioAuto: 'taller_fijo', tarifaDesde: 'Consultar', horario: 'Lun–Vie 9:00–18:00', verificada: true }
+    ],
+    'instaladores-de-audio-car-multimedia': [
+      { alias: 'Audio Car MTY', precio: '700', tagline: 'Estéreos, pantallas, cámaras y sonido automotriz.', serviciosEspecialidadAuto: ['Estéreo', 'Pantalla', 'Cámaras', 'Amplificadores'], modalidadServicioAuto: 'taller_fijo', tarifaDesde: '700', diferenciadorAutomotriz: 'Instalación certificada', horario: 'Lun–Sáb 10:00–20:00', verificada: true },
+      { alias: 'Multimedia Automotriz', precio: '650', tagline: 'Android Auto, Apple CarPlay y alarmas.', serviciosEspecialidadAuto: ['CarPlay', 'Android Auto', 'Alarmas'], modalidadServicioAuto: 'taller_fijo', tarifaDesde: '650', horario: 'Mar–Sáb 11:00–19:00', verificada: true }
+    ],
+    'tecnicos-en-baterias': [
+      { alias: 'Baterías Rápidas NL', precio: '450', tagline: 'Diagnóstico, venta e instalación de baterías.', serviciosEspecialidadAuto: ['Diagnóstico de batería', 'Instalación', 'Paso de corriente'], modalidadServicioAuto: 'ambos', tiempoRespuestaAuto: 'mismo_dia', tarifaDesde: '450', coberturaGeografica: 'Monterrey y San Nicolás', diferenciadorAutomotriz: 'Instalación a domicilio', horario: 'Lun–Dom 8:00–21:00', verificada: true },
+      { alias: 'Power Cell Auto', precio: '400', tagline: 'Baterías AGM, litio y convencional.', serviciosEspecialidadAuto: ['Venta de baterías', 'Prueba de carga'], modalidadServicioAuto: 'taller_fijo', tarifaDesde: '400', horario: 'Lun–Sáb 9:00–19:00', verificada: true }
+    ],
+    'tecnicos-en-a-c-automotriz': [
+      { alias: 'A/C Automotriz Pro', precio: '600', tagline: 'Carga de gas, fugas y reparación de A/C automotriz.', serviciosEspecialidadAuto: ['Carga de gas', 'Detección de fugas', 'Compresor'], modalidadServicioAuto: 'ambos', tarifaDesde: '600', diferenciadorAutomotriz: 'Recuperación ecológica de gas', horario: 'Lun–Sáb 9:00–19:00', verificada: true },
+      { alias: 'Clima Auto Norte', precio: '550', tagline: 'Diagnóstico de A/C y climatización.', serviciosEspecialidadAuto: ['Diagnóstico A/C', 'Filtro de cabina', 'Carga'], modalidadServicioAuto: 'taller_fijo', tarifaDesde: '550', horario: 'Lun–Vie 9:00–18:00', verificada: true }
+    ],
+    'agencias-de-autos': [
+      { nombreComercial: 'Autos Seminuevos MTY', precio: 'Consultar', tagline: 'Seminuevos certificados con opciones de financiamiento.', serviciosVentaAutos: ['Seminuevos', 'Contado', 'Crédito'], tiposVehiculoVenta: ['Sedán', 'SUV', 'Pickup'], financiamientoDisponible: 'si_terceros', inventarioAproximado: '40 unidades', cantidadUnidadesAprox: '40', diferenciadorAutomotriz: 'Revisión mecánica incluida', horario: 'Lun–Sáb 10:00–20:00', verificada: true },
+      { nombreComercial: 'Agencia Valle Motors', precio: 'Consultar', tagline: 'Seminuevos premium y toma de tu auto a cuenta.', serviciosVentaAutos: ['Seminuevos', 'Consignación', 'Toma a cuenta'], tiposVehiculoVenta: ['SUV', 'Lujo'], financiamientoDisponible: 'si_propio', inventarioAproximado: '25 unidades', horario: 'Lun–Sáb 10:00–19:00', verificada: true }
+    ],
+    'lotes-de-autos': [
+      { alias: 'Lote de Autos del Valle', precio: 'Consultar', tagline: 'Venta de usados con revisión mecánica básica.', serviciosVentaAutos: ['Usados', 'Consignación'], tiposVehiculoVenta: ['Económicos', 'SUV', 'Sedán'], financiamientoDisponible: 'convenir', inventarioAproximado: '30 unidades', tarifaDesde: 'Consultar', diferenciadorAutomotriz: 'Precios de lote', horario: 'Lun–Dom 10:00–19:00', verificada: true },
+      { alias: 'Lote Carretera Norte', precio: 'Consultar', tagline: 'Autos usados listos para entregar.', serviciosVentaAutos: ['Usados', 'Contado'], tiposVehiculoVenta: ['Sedán', 'Pickup'], financiamientoDisponible: 'contado_solo', inventarioAproximado: '18 unidades', horario: 'Lun–Sáb 9:00–18:00', verificada: true }
+    ],
+    'gruas-y-auxilio-vial': [
+      { alias: 'Grúa 24 h Norte', precio: '800', tagline: 'Grúa y auxilio vial en ciudad y carretera.', serviciosGrua: ['Grúa', 'Paso de corriente', 'Cambio de llanta', 'Gasolina de emergencia'], modalidadServicioAuto: 'unidad_movil', coberturaCarretera: '100 km radio MTY', tiempoRespuestaAuto: 'emergencia_30min', tarifaDesde: '800', diferenciadorAutomotriz: 'Disponibilidad 24/7', horario: '24 horas', verificada: true },
+      { alias: 'Auxilio Vial Express', precio: '700', tagline: 'Rescate urbano y traslados a taller.', serviciosGrua: ['Grúa plataforma', 'Rescate urbano', 'Traslado a taller'], modalidadServicioAuto: 'unidad_movil', coberturaCarretera: 'Área metropolitana', tiempoRespuestaAuto: '1h', tarifaDesde: '700', horario: 'Lun–Dom 6:00–00:00', verificada: true }
+    ]
+  };
+
+  var AUTOMOTRIZ_PACK_POR_SUB = {
+    'talleres-mecanicos': 'A', electromecanicos: 'A', 'mecanicos-a-domicilio': 'A',
+    vulcanizadoras: 'B',
+    'hojalateria-y-pintura': 'C', 'lavado-de-autos': 'C', 'detallado-automotriz-premium': 'C',
+    refaccionarias: 'D', 'instaladores-de-audio-car-multimedia': 'D', 'tecnicos-en-baterias': 'D', 'tecnicos-en-a-c-automotriz': 'D',
+    'agencias-de-autos': 'E', 'lotes-de-autos': 'E',
+    'gruas-y-auxilio-vial': 'F'
   };
 
   function automotrizPackDeSub(subId) {
     var key = String(subId || '').trim().toLowerCase().replace(/_/g, '-');
+    if (AUTOMOTRIZ_PACK_POR_SUB[key]) return AUTOMOTRIZ_PACK_POR_SUB[key];
     if (global.CARIHUB_REGISTRO_AUTOMOTRIZ_SECTOR_BLOCKS && CARIHUB_REGISTRO_AUTOMOTRIZ_SECTOR_BLOCKS.resolvePack) {
       return CARIHUB_REGISTRO_AUTOMOTRIZ_SECTOR_BLOCKS.resolvePack(key);
     }
@@ -1862,7 +2194,7 @@
 
   function armarPerfilAutomotriz(base, idx, Q, pres) {
     var subId = pres.subcategoriaId || idCategoria(Q.categoria);
-    var catLabel = base.categoriaPublica || labelCategoria(Q.categoria);
+    var catLabel = base.categoriaPublica || (pres && (pres.subcategoria || pres.categoriaPublica)) || labelCategoria(Q.categoria);
     var pack = base.deltaPack || automotrizPackDeSub(subId);
     var perfil = buildAutomotrizPerfilDemo(base, subId, pack);
     var esNegocio = AUTOMOTRIZ_NEGOCIO_SUBS.indexOf(subId) >= 0;
@@ -1901,10 +2233,32 @@
     } else {
       u.alias = perfil.alias || nombre;
       u.nombre = u.alias;
-      u.especialidad = (perfil.serviciosMecanica && perfil.serviciosMecanica[0]) || (perfil.serviciosLlantas && perfil.serviciosLlantas[0]) || base.especialidad || '';
+      u.especialidad = (perfil.serviciosEsteticaAuto && perfil.serviciosEsteticaAuto[0])
+        || (perfil.serviciosCarroceria && perfil.serviciosCarroceria[0])
+        || (perfil.serviciosRefacciones && perfil.serviciosRefacciones[0])
+        || (perfil.serviciosVentaAutos && perfil.serviciosVentaAutos[0])
+        || (perfil.serviciosGrua && perfil.serviciosGrua[0])
+        || (perfil.serviciosMecanica && perfil.serviciosMecanica[0])
+        || (perfil.serviciosLlantas && perfil.serviciosLlantas[0])
+        || (perfil.serviciosEspecialidadAuto && perfil.serviciosEspecialidadAuto[0])
+        || base.especialidad || '';
     }
 
-    return enriquecerPerfil(u, Q);
+    if (global.CariHubAutomotrizSectorRender && CariHubAutomotrizSectorRender.resolveVistaPerfil) {
+      u.__vista = CariHubAutomotrizSectorRender.resolveVistaPerfil(u);
+    } else {
+      u.__vista = esNegocio ? 'empresa' : 'pro';
+    }
+
+    u = enriquecerPerfil(u, Q);
+    u.sectorId = 'automotriz';
+    u.deltaPack = pack;
+    u.automotrizPerfil = perfil;
+    if (global.CariHubAutomotrizSectorRender && CariHubAutomotrizSectorRender.resolveVistaPerfil) {
+      var vistaAuto = CariHubAutomotrizSectorRender.resolveVistaPerfil(u);
+      if (vistaAuto) u.__vista = vistaAuto;
+    }
+    return u;
   }
 
   function poolDemoAutomotriz(subId) {
@@ -2063,33 +2417,69 @@
 
   var DEMO_COMERCIO_BY_PACK = {
     A: [
-      { alias: 'Abarrotes La Esquina', precio: '25', tagline: 'Surte diario y productos de primera necesidad.', categoriasProducto: ['Abarrotes', 'Bebidas', 'Snacks'], serviciosComercio: ['Apartado', 'Pedidos'], modalidadVentaComercio: 'tienda_fisica', formasPagoComercio: ['Efectivo', 'Tarjeta'], entregaDomicilio: 'solo_zona', tarifaDesde: '25', coberturaGeografica: 'Col. Centro y alrededores', horario: 'Lun–Dom 7:00–22:00', verificada: true },
-      { alias: 'Mini Súper del Valle', precio: 'Consultar', tagline: 'Conveniencia y surtido básico cerca de ti.', categoriasProducto: ['Conveniencia', 'Lácteos'], modalidadVentaComercio: 'tienda_fisica', formasPagoComercio: ['Efectivo', 'Transferencia'], tarifaDesde: 'Consultar', horario: 'Lun–Dom 24 h', verificada: true }
+      { alias: 'Abarrotes La Esquina', precio: '25', tagline: 'Surte diario y productos de primera necesidad.', categoriasProducto: ['Abarrotes', 'Bebidas', 'Snacks'], serviciosComercio: ['Apartado', 'Pedidos'], modalidadVentaComercio: 'tienda_fisica', formasPagoComercio: ['Efectivo', 'Tarjeta'], entregaDomicilio: 'solo_zona', tarifaDesde: '25', coberturaGeografica: 'Col. Centro y alrededores', horario: 'Lun–Dom 7:00–22:00', verificada: true }
     ],
     B: [
-      { alias: 'Moda Urbana MTY', precio: '299', tagline: 'Ropa casual y accesorios para toda la familia.', categoriasProducto: ['Ropa casual', 'Accesorios'], generosModa: ['Dama', 'Caballero', 'Joven'], marcasComercializadas: ['Nacionales', 'Importadas'], modalidadVentaComercio: 'ambos', formasPagoComercio: ['Efectivo', 'Tarjeta', 'MSI'], tarifaDesde: '299', horario: 'Lun–Sáb 10:00–20:00', verificada: true },
-      { alias: 'Zapatería El Camino', precio: '450', tagline: 'Calzado escolar, casual y de trabajo.', categoriasProducto: ['Calzado'], generosModa: ['Niño', 'Dama', 'Caballero'], modalidadVentaComercio: 'tienda_fisica', formasPagoComercio: ['Efectivo', 'Tarjeta'], tarifaDesde: '450', horario: 'Lun–Sáb', verificada: true }
+      { alias: 'Moda Urbana MTY', precio: '299', tagline: 'Ropa casual y accesorios para toda la familia.', categoriasProducto: ['Ropa casual', 'Accesorios'], generosModa: ['Dama', 'Caballero', 'Joven'], marcasComercializadas: ['Nacionales', 'Importadas'], modalidadVentaComercio: 'ambos', formasPagoComercio: ['Efectivo', 'Tarjeta', 'MSI'], tarifaDesde: '299', horario: 'Lun–Sáb 10:00–20:00', verificada: true }
     ],
     C: [
-      { alias: 'Ferretería El Martillo', precio: '50', tagline: 'Herramientas, plomería y materiales eléctricos.', categoriasProducto: ['Herramientas', 'Plomería', 'Eléctrico'], serviciosComercio: ['Cortes', 'Asesoría'], modalidadVentaComercio: 'tienda_fisica', formasPagoComercio: ['Efectivo', 'Tarjeta'], tarifaDesde: '50', horario: 'Lun–Sáb 8:00–19:00', verificada: true },
-      { alias: 'Farmacia del Barrio', precio: 'Consultar', tagline: 'Medicamentos y productos de salud cotidianos.', categoriasProducto: ['Medicamentos', 'Higiene'], serviciosComercio: ['Entrega local'], modalidadVentaComercio: 'tienda_fisica', entregaDomicilio: 'solo_zona', formasPagoComercio: ['Efectivo', 'Tarjeta'], tarifaDesde: 'Consultar', horario: 'Lun–Dom', verificada: true }
+      { alias: 'Ferretería El Martillo', precio: '50', tagline: 'Herramientas, plomería y materiales eléctricos.', categoriasProducto: ['Herramientas', 'Plomería', 'Eléctrico'], serviciosComercio: ['Cortes', 'Asesoría'], modalidadVentaComercio: 'tienda_fisica', formasPagoComercio: ['Efectivo', 'Tarjeta'], tarifaDesde: '50', horario: 'Lun–Sáb 8:00–19:00', verificada: true }
     ],
     D: [
-      { alias: 'Mayoreo El Centro', precio: 'Consultar', tagline: 'Surtido a negocios con pedido mínimo.', serviciosMayoreo: ['Mayoreo', 'Surtido'], volumenMinimoPedido: '$1,500', tiposClientesComercio: ['Tienditas', 'Restaurantes'], modalidadVentaComercio: 'tienda_fisica', coberturaGeografica: 'Monterrey y área metropolitana', tarifaDesde: 'Consultar', horario: 'Lun–Sáb 6:00–18:00', verificada: true },
-      { nombreComercial: 'Distribuidora Norte SA', precio: 'Consultar', tagline: 'Distribución y rutas programadas para retail.', serviciosEmpresaComercio: ['Distribución', 'Rutas', 'Crédito'], especialidadesEmpresaComercio: 'Abarrotes y bebidas', tiposClientesComercio: ['Tienditas', 'Mayoristas'], flotaEntrega: '12 unidades', modalidadVentaComercio: 'ambos', horario: 'Lun–Vie', verificada: true }
+      { alias: 'Mayoreo El Centro', precio: 'Consultar', tagline: 'Surtido a negocios con pedido mínimo.', serviciosMayoreo: ['Mayoreo', 'Surtido'], volumenMinimoPedido: '$1,500', tiposClientesComercio: ['Tienditas', 'Restaurantes'], modalidadVentaComercio: 'tienda_fisica', coberturaGeografica: 'Monterrey y área metropolitana', tarifaDesde: 'Consultar', horario: 'Lun–Sáb 6:00–18:00', verificada: true }
     ]
   };
 
+  /* Demos 1:1 por subcategoría — evita que pack C mezcle ferretería con farmacia/papelería. */
   var DEMO_COMERCIO = {
-    abarrotes: DEMO_COMERCIO_BY_PACK.A,
-    zapaterias: DEMO_COMERCIO_BY_PACK.B,
-    ferreterias: DEMO_COMERCIO_BY_PACK.C,
-    mayoreo: DEMO_COMERCIO_BY_PACK.D,
-    distribuidoras: DEMO_COMERCIO_BY_PACK.D
+    abarrotes: [
+      { alias: 'Abarrotes La Esquina', precio: '25', tagline: 'Surte diario: abarrotes, bebidas y snacks de primera necesidad.', categoriasProducto: ['Abarrotes', 'Bebidas', 'Snacks'], serviciosComercio: ['Apartado', 'Pedidos'], modalidadVentaComercio: 'tienda_fisica', formasPagoComercio: ['Efectivo', 'Tarjeta'], entregaDomicilio: 'solo_zona', tarifaDesde: '25', coberturaGeografica: 'Col. Centro y alrededores', diferenciadorComercio: 'Surtido diario fresco', horario: 'Lun–Dom 7:00–22:00', verificada: true },
+      { alias: 'Abarrotes Don Pepe', precio: '20', tagline: 'Abarrotes de barrio con precios accesibles y trato de siempre.', categoriasProducto: ['Abarrotes', 'Lácteos', 'Enlatados'], serviciosComercio: ['Fiado conocido', 'Pedidos'], modalidadVentaComercio: 'tienda_fisica', formasPagoComercio: ['Efectivo', 'Transferencia'], entregaDomicilio: 'convenir', tarifaDesde: '20', coberturaGeografica: 'San Nicolás', horario: 'Lun–Sáb 8:00–21:00', verificada: true }
+    ],
+    'tiendas-de-conveniencia': [
+      { alias: 'Mini Súper del Valle', precio: 'Consultar', tagline: 'Conveniencia 24 h: snacks, bebidas y básicos cerca de ti.', categoriasProducto: ['Conveniencia', 'Bebidas', 'Snacks'], serviciosComercio: ['Cajero', 'Recargas'], modalidadVentaComercio: 'tienda_fisica', formasPagoComercio: ['Efectivo', 'Tarjeta', 'Transferencia'], entregaDomicilio: 'no', tarifaDesde: 'Consultar', coberturaGeografica: 'San Pedro / Valle', diferenciadorComercio: 'Abierto 24 horas', horario: 'Lun–Dom 24 h', verificada: true },
+      { alias: 'Express Night Stop', precio: '35', tagline: 'Tienda de conveniencia nocturna con café y antojitos.', categoriasProducto: ['Conveniencia', 'Café', 'Antojitos'], serviciosComercio: ['Microondas', 'Recargas'], modalidadVentaComercio: 'tienda_fisica', formasPagoComercio: ['Efectivo', 'Tarjeta'], entregaDomicilio: 'no', tarifaDesde: '35', horario: 'Todos los días 18:00–6:00', verificada: true }
+    ],
+    zapaterias: [
+      { alias: 'Zapatería El Camino', precio: '450', tagline: 'Calzado escolar, casual y de trabajo para toda la familia.', categoriasProducto: ['Calzado escolar', 'Calzado casual', 'Calzado de trabajo'], generosModa: ['Niño', 'Dama', 'Caballero'], marcasComercializadas: ['Nacionales'], serviciosComercio: ['Probadores', 'Apartado'], modalidadVentaComercio: 'tienda_fisica', formasPagoComercio: ['Efectivo', 'Tarjeta'], tarifaDesde: '450', diferenciadorComercio: 'Amplia talla infantil', horario: 'Lun–Sáb 10:00–20:00', verificada: true },
+      { alias: 'Pisada Firme', precio: '520', tagline: 'Zapatos industriales y botas de seguridad.', categoriasProducto: ['Calzado industrial', 'Botas de seguridad'], generosModa: ['Caballero', 'Dama'], marcasComercializadas: ['Seguridad industrial'], modalidadVentaComercio: 'ambos', formasPagoComercio: ['Efectivo', 'Tarjeta', 'Transferencia'], tarifaDesde: '520', horario: 'Lun–Vie 9:00–19:00', verificada: true }
+    ],
+    'tiendas-de-ropa': [
+      { alias: 'Moda Urbana MTY', precio: '299', tagline: 'Ropa casual y accesorios para dama, caballero y joven.', categoriasProducto: ['Ropa casual', 'Accesorios'], generosModa: ['Dama', 'Caballero', 'Joven'], marcasComercializadas: ['Nacionales', 'Importadas'], serviciosComercio: ['Probadores', 'Apartado', 'Cambios'], modalidadVentaComercio: 'ambos', formasPagoComercio: ['Efectivo', 'Tarjeta', 'MSI'], tarifaDesde: '299', diferenciadorComercio: 'Colección temporada', horario: 'Lun–Sáb 10:00–20:00', verificada: true },
+      { alias: 'Boutique Norte', precio: '450', tagline: 'Ropa de oficina y outfits para ocasiones especiales.', categoriasProducto: ['Ropa formal', 'Vestidos', 'Blusas'], generosModa: ['Dama'], marcasComercializadas: ['Boutique local'], modalidadVentaComercio: 'tienda_fisica', formasPagoComercio: ['Efectivo', 'Tarjeta', 'MSI'], tarifaDesde: '450', horario: 'Mar–Sáb 11:00–19:00', verificada: true }
+    ],
+    ferreterias: [
+      { alias: 'Ferretería El Martillo', precio: '50', tagline: 'Herramientas, plomería y materiales eléctricos.', categoriasProducto: ['Herramientas', 'Plomería', 'Eléctrico'], serviciosComercio: ['Cortes', 'Asesoría técnica'], modalidadVentaComercio: 'tienda_fisica', formasPagoComercio: ['Efectivo', 'Tarjeta'], entregaDomicilio: 'convenir', tarifaDesde: '50', diferenciadorComercio: 'Asesoría en obra menor', horario: 'Lun–Sáb 8:00–19:00', verificada: true },
+      { alias: 'Todo para la Casa', precio: '40', tagline: 'Tornillería, pintura y refacciones de ferretería general.', categoriasProducto: ['Tornillería', 'Pintura', 'Refacciones'], serviciosComercio: ['Cortes', 'Mezcla de pintura'], modalidadVentaComercio: 'tienda_fisica', formasPagoComercio: ['Efectivo', 'Transferencia'], tarifaDesde: '40', horario: 'Lun–Sáb 8:00–18:00', verificada: true }
+    ],
+    'farmacias-de-barrio': [
+      { alias: 'Farmacia del Barrio', precio: 'Consultar', tagline: 'Medicamentos genéricos y de marca, higiene y primeros auxilios.', categoriasProducto: ['Medicamentos', 'Higiene', 'Primeros auxilios'], serviciosComercio: ['Entrega local', 'Toma de presión'], modalidadVentaComercio: 'tienda_fisica', entregaDomicilio: 'solo_zona', formasPagoComercio: ['Efectivo', 'Tarjeta'], tarifaDesde: 'Consultar', coberturaGeografica: 'Colonia y colonia vecina', diferenciadorComercio: 'Entrega de medicamentos en zona', horario: 'Lun–Dom 8:00–22:00', verificada: true },
+      { alias: 'Botica San José', precio: 'Consultar', tagline: 'Farmacia de barrio con genéricos y vitaminas.', categoriasProducto: ['Genéricos', 'Vitaminas', 'Cuidado personal'], serviciosComercio: ['Asesoría básica'], modalidadVentaComercio: 'tienda_fisica', entregaDomicilio: 'convenir', formasPagoComercio: ['Efectivo', 'Transferencia'], tarifaDesde: 'Consultar', horario: 'Lun–Sáb 9:00–21:00', verificada: true }
+    ],
+    papelerias: [
+      { alias: 'Papelería Estrella', precio: '15', tagline: 'Útiles escolares, impresiones y material de oficina.', categoriasProducto: ['Útiles escolares', 'Papelería', 'Impresiones'], serviciosComercio: ['Impresiones', 'Engargolados', 'Copias'], modalidadVentaComercio: 'tienda_fisica', formasPagoComercio: ['Efectivo', 'Transferencia'], entregaDomicilio: 'no', tarifaDesde: '15', diferenciadorComercio: 'Impresiones el mismo día', horario: 'Lun–Sáb 9:00–19:00', verificada: true },
+      { alias: 'Office Color', precio: '25', tagline: 'Papelería comercial: cartuchos, resmas y artículos de escritorio.', categoriasProducto: ['Resmas', 'Cartuchos', 'Escritorio'], serviciosComercio: ['Pedidos a empresas', 'Facturación'], modalidadVentaComercio: 'ambos', formasPagoComercio: ['Efectivo', 'Tarjeta', 'Transferencia'], tarifaDesde: '25', coberturaGeografica: 'Monterrey centro', horario: 'Lun–Vie 9:00–18:00', verificada: true }
+    ],
+    mayoreo: [
+      { alias: 'Mayoreo El Centro', precio: 'Consultar', tagline: 'Surtido a tienditas y negocios con pedido mínimo.', serviciosMayoreo: ['Mayoreo', 'Surtido', 'Reposición'], volumenMinimoPedido: '$1,500', tiposClientesComercio: ['Tienditas', 'Restaurantes', 'Misceláneas'], modalidadVentaComercio: 'tienda_fisica', formasPagoComercio: ['Efectivo', 'Transferencia'], coberturaGeografica: 'Monterrey y área metropolitana', tarifaDesde: 'Consultar', diferenciadorComercio: 'Pedido mínimo accesible', horario: 'Lun–Sáb 6:00–18:00', verificada: true },
+      { alias: 'Central de Abasto Norte', precio: 'Consultar', tagline: 'Mayoreo de abarrotes y bebidas para reventa.', serviciosMayoreo: ['Mayoreo', 'Carga en piso'], volumenMinimoPedido: '$2,000', tiposClientesComercio: ['Tienditas', 'Mayoristas'], modalidadVentaComercio: 'tienda_fisica', coberturaGeografica: 'NL y Coahuila sur', tarifaDesde: 'Consultar', horario: 'Lun–Sáb 5:00–15:00', verificada: true }
+    ],
+    distribuidoras: [
+      { nombreComercial: 'Distribuidora Norte SA', precio: 'Consultar', tagline: 'Distribución y rutas programadas para retail y abarrotes.', serviciosEmpresaComercio: ['Distribución', 'Rutas', 'Crédito'], especialidadesEmpresaComercio: 'Abarrotes y bebidas', tiposClientesComercio: ['Tienditas', 'Mayoristas', 'Cadenas locales'], flotaEntrega: '12 unidades', modalidadVentaComercio: 'ambos', formasPagoComercio: ['Transferencia', 'Crédito'], coberturaGeografica: 'Nuevo León', tarifaDesde: 'Consultar', horario: 'Lun–Vie 7:00–18:00', verificada: true },
+      { nombreComercial: 'Rutas del Norte Distribución', precio: 'Consultar', tagline: 'Flota propia y surtido programado a puntos de venta.', serviciosEmpresaComercio: ['Rutas', 'Inventario en piso', 'Pedidos app'], especialidadesEmpresaComercio: 'Snacks y bebidas', tiposClientesComercio: ['Conveniencia', 'Tienditas'], flotaEntrega: '8 unidades', modalidadVentaComercio: 'ambos', horario: 'Lun–Sáb', verificada: true }
+    ]
+  };
+
+  var COMERCIO_PACK_POR_SUB = {
+    abarrotes: 'A', 'tiendas-de-conveniencia': 'A',
+    zapaterias: 'B', 'tiendas-de-ropa': 'B',
+    'farmacias-de-barrio': 'C', papelerias: 'C', ferreterias: 'C',
+    mayoreo: 'D', distribuidoras: 'D'
   };
 
   function comercioPackDeSub(subId) {
     var key = String(subId || '').trim().toLowerCase().replace(/_/g, '-');
+    if (COMERCIO_PACK_POR_SUB[key]) return COMERCIO_PACK_POR_SUB[key];
     if (global.CARIHUB_REGISTRO_COMERCIO_SECTOR_BLOCKS && CARIHUB_REGISTRO_COMERCIO_SECTOR_BLOCKS.resolvePack) {
       return CARIHUB_REGISTRO_COMERCIO_SECTOR_BLOCKS.resolvePack(key);
     }
@@ -2122,7 +2512,7 @@
 
   function armarPerfilComercio(base, idx, Q, pres) {
     var subId = pres.subcategoriaId || idCategoria(Q.categoria);
-    var catLabel = base.categoriaPublica || labelCategoria(Q.categoria);
+    var catLabel = base.categoriaPublica || (pres && (pres.subcategoria || pres.categoriaPublica)) || labelCategoria(Q.categoria);
     var pack = base.deltaPack || comercioPackDeSub(subId);
     var perfil = buildComercioPerfilDemo(base, subId, pack);
     var esNegocio = COMERCIO_NEGOCIO_SUBS.indexOf(subId) >= 0;
@@ -2164,7 +2554,21 @@
       u.especialidad = (perfil.categoriasProducto && perfil.categoriasProducto[0]) || base.especialidad || '';
     }
 
-    return enriquecerPerfil(u, Q);
+    if (global.CariHubComercioSectorRender && CariHubComercioSectorRender.resolveVistaPerfil) {
+      u.__vista = CariHubComercioSectorRender.resolveVistaPerfil(u);
+    } else {
+      u.__vista = esNegocio ? 'empresa' : 'pro';
+    }
+
+    u = enriquecerPerfil(u, Q);
+    u.sectorId = 'comercio';
+    u.deltaPack = pack;
+    u.comercioPerfil = perfil;
+    if (global.CariHubComercioSectorRender && CariHubComercioSectorRender.resolveVistaPerfil) {
+      var vistaCom = CariHubComercioSectorRender.resolveVistaPerfil(u);
+      if (vistaCom) u.__vista = vistaCom;
+    }
+    return u;
   }
 
   function poolDemoComercio(subId) {
@@ -2876,6 +3280,11 @@
     if (!u || !Q) return false;
     var F = global.CariHubPerfilBusquedaFiltro;
     if (F && F.perfilCoincideFiltros) return F.perfilCoincideFiltros(u, Q);
+    /* Fallback si el módulo de filtro no cargó (p. ej. perfil-publico): al menos subcategoría. */
+    var qSub = String(Q.subcategoriaId || Q.categoria || '').trim().toLowerCase().replace(/_/g, '-');
+    var uSub = String(u.subcategoriaId || u.categoria || u.categoriaPublica || '').trim().toLowerCase().replace(/_/g, '-');
+    if (qSub && uSub && (uSub === qSub || uSub.indexOf(qSub) >= 0 || qSub.indexOf(uSub) >= 0)) return true;
+    if (u.sectorId && Q.categoria && String(u.sectorId).toLowerCase() === String(Q.categoria).toLowerCase()) return true;
     return false;
   }
 

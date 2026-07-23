@@ -81,12 +81,17 @@
 <script src="estados.js"></script>
 <script src="ciudades.js"></script>
 <script src="js/perfil-res-sbar-picker.js?v=20260720sbar1"></script>
-<script src="js/carihub-bienestar-sector-render.js?v=20260721faq1"></script>
+<script src="js/carihub-bienestar-sector-render.js?v=20260721demo3"></script>
+<script src="js/carihub-perfil-busqueda-filtro.js"></script>
+<script src="js/carihub-comercio-sector-render.js?v=20260721com2"></script>
+<script src="js/carihub-automotriz-sector-render.js?v=20260722auto2"></script>
+<script src="js/carihub-hogar-sector-render.js?v=20260722hog1"></script>
+<script src="js/carihub-mascotas-sector-render.js?v=20260722mas1"></script>
 <script src="js/carihub-eventos-sector-render.js?v=20260627e3"></script>
 <script src="js/data/registro-sector-contract-registry.js?v=20260721faq2"></script>
 <script src="js/carihub-gastronomia-sector-render.js?v=20260702gast1"></script>
 <script src="js/carihub-public-render-lite.js?v=20260627e3"></script>
-<script src="js/resultados-demo.js?v=20260721faq2"></script>
+<script src="js/resultados-demo.js?v=20260722mas1"></script>
 <script src="js/carihub-multi-perfil.js"></script>
 <script src="js/carihub-blk01-profile-sanitize.js"></script>
 <script src="js/carihub-blk01-hub-adapter.js"></script>
@@ -8792,6 +8797,54 @@ function applyGastronomiaSectorHydrate(u){
   }
   return u||{};
 }
+function applyComercioSectorHydrate(u){
+  if(window.CariHubComercioSectorRender&&CariHubComercioSectorRender.hydrateDisplayFields){
+    return CariHubComercioSectorRender.hydrateDisplayFields(u||{});
+  }
+  return u||{};
+}
+function applyAutomotrizSectorHydrate(u){
+  if(window.CariHubAutomotrizSectorRender&&CariHubAutomotrizSectorRender.hydrateDisplayFields){
+    return CariHubAutomotrizSectorRender.hydrateDisplayFields(u||{});
+  }
+  return u||{};
+}
+function applyHogarSectorHydrate(u){
+  if(window.CariHubHogarSectorRender&&CariHubHogarSectorRender.hydrateDisplayFields){
+    return CariHubHogarSectorRender.hydrateDisplayFields(u||{});
+  }
+  return u||{};
+}
+function applyMascotasSectorHydrate(u){
+  if(window.CariHubMascotasSectorRender&&CariHubMascotasSectorRender.hydrateDisplayFields){
+    return CariHubMascotasSectorRender.hydrateDisplayFields(u||{});
+  }
+  return u||{};
+}
+function mascotasBadgesHTML(u){
+  if(!u||!Array.isArray(u.__mascotasBadges)||!u.__mascotasBadges.length) return "";
+  return u.__mascotasBadges.map(function(b){
+    return '<span class="res-badge '+safe(b.cls)+'">'+safe(b.text)+'</span>';
+  }).join("");
+}
+function hogarBadgesHTML(u){
+  if(!u||!Array.isArray(u.__hogarBadges)||!u.__hogarBadges.length) return "";
+  return u.__hogarBadges.map(function(b){
+    return '<span class="res-badge '+safe(b.cls)+'">'+safe(b.text)+'</span>';
+  }).join("");
+}
+function automotrizBadgesHTML(u){
+  if(!u||!Array.isArray(u.__automotrizBadges)||!u.__automotrizBadges.length) return "";
+  return u.__automotrizBadges.map(function(b){
+    return '<span class="res-badge '+safe(b.cls)+'">'+safe(b.text)+'</span>';
+  }).join("");
+}
+function comercioBadgesHTML(u){
+  if(!u||!Array.isArray(u.__comercioBadges)||!u.__comercioBadges.length) return "";
+  return u.__comercioBadges.map(function(b){
+    return '<span class="res-badge '+safe(b.cls)+'">'+safe(b.text)+'</span>';
+  }).join("");
+}
 function bienestarBadgesHTML(u){
   if(!u||!Array.isArray(u.__bienestarBadges)||!u.__bienestarBadges.length) return "";
   return u.__bienestarBadges.map(function(b){
@@ -8830,15 +8883,31 @@ function renderProEmpresa(u, esEmpresa){
   u=applyBienestarSectorHydrate(u);
   u=applyEventosSectorHydrate(u);
   u=applyGastronomiaSectorHydrate(u);
+  u=applyComercioSectorHydrate(u);
+  u=applyAutomotrizSectorHydrate(u);
+  u=applyHogarSectorHydrate(u);
+  u=applyMascotasSectorHydrate(u);
   u=ensureProUbicacionFields(u);
   var isBs=!!u.__bienestarPack;
   var isEv=!!u.__eventosPack;
   var isGs=!!u.__gastronomiaPack;
+  var isCom=!!u.__comercioPack || u.sectorId==="comercio" || !!u.comercioPerfil;
+  var isAuto=!!u.__automotrizPack || u.sectorId==="automotriz" || !!u.automotrizPerfil;
+  var isHog=!!u.__hogarPack || u.sectorId==="hogar" || !!u.hogarPerfil;
+  var isMas=!!u.__mascotasPack || u.sectorId==="mascotas" || !!u.mascotasPerfil;
+  var isSectorModern=isBs||isEv||isGs||isCom||isAuto||isHog||isMas;
   var loc=[u.ciudad,u.estado].filter(Boolean).join(", ");
   var verLabel = esEmpresa ? "Empresa verificada" : "Verificado";
   var layoutKey=esEmpresa?"empresa":"pro";
 
-  var datos = (isEv && u.__eventosDatos && u.__eventosDatos.length) ? u.__eventosDatos : (isBs && u.__bienestarDatos && u.__bienestarDatos.length) ? u.__bienestarDatos : (isGs && u.__gastronomiaDatos && u.__gastronomiaDatos.length) ? u.__gastronomiaDatos : (esEmpresa ? [
+  var datos = (isMas && u.__mascotasDatos && u.__mascotasDatos.length) ? u.__mascotasDatos
+    : (isHog && u.__hogarDatos && u.__hogarDatos.length) ? u.__hogarDatos
+    : (isAuto && u.__automotrizDatos && u.__automotrizDatos.length) ? u.__automotrizDatos
+    : (isCom && u.__comercioDatos && u.__comercioDatos.length) ? u.__comercioDatos
+    : (isEv && u.__eventosDatos && u.__eventosDatos.length) ? u.__eventosDatos
+    : (isBs && u.__bienestarDatos && u.__bienestarDatos.length) ? u.__bienestarDatos
+    : (isGs && u.__gastronomiaDatos && u.__gastronomiaDatos.length) ? u.__gastronomiaDatos
+    : (esEmpresa ? [
     ["🏷️","Categoría",u.categoria],["🏢","Tipo de empresa",u.tipoEmpresa],["📅","Años en el mercado",u.aniosMercado],
     ["👥","Empleados",u.empleados],["🕐","Horario",u.horario],["📍","Zona de cobertura",u.zonaCobertura],
     ["🛠️","Atención",u.atencion],["💳","Formas de pago",(u.formasPago||[]).join(", ")],["🧾","Facturación",u.facturacion]
@@ -8852,15 +8921,23 @@ function renderProEmpresa(u, esEmpresa){
     return row(d[0],d[1],d[2]?safe(d[2]):"",block);
   }).join("");
 
+  /* Tabs Plomería/Hogar solo para demo hogar genérico legacy — no contaminar sectores modernos. */
   var tabs = esEmpresa
     ? ["Plomería","Mantenimiento","Instalaciones","Residencial","Comercial"]
     : ["Servicio","Plomería","Categoría","Hogar",u.experiencia];
-  var tabsHTML = (isBs || isEv || isGs) ? '' : tabs.map(function(t,i){return '<span class="tb '+(i===1?"on":"")+'">'+safe(t)+'</span>';}).join("");
+  var tabsHTML = isSectorModern ? '' : tabs.map(function(t,i){return '<span class="tb '+(i===1?"on":"")+'">'+safe(t)+'</span>';}).join("");
 
   var pagos = esEmpresa ? u.formasPago : u.metodosPago;
-  var priceLbl = (isEv && u.__eventosPriceLabel) ? u.__eventosPriceLabel : (isBs && u.__bienestarPriceLabel) ? u.__bienestarPriceLabel : (isGs && u.__gastronomiaPriceLabel) ? u.__gastronomiaPriceLabel : 'Desde';
-  var serviciosTitulo = isEv ? '✅ Servicios para tu evento' : isBs ? '✅ Servicios / enfoque' : isGs ? '✅ Servicios / especialidad' : (esEmpresa ? '✅ Servicios principales' : '✅ Servicios incluidos');
-  var noTitulo = (isEv||isBs||isGs) ? '⛔ No incluido / no ofrecido' : '⛔ Servicios no incluidos';
+  var priceLbl = (isMas && u.__mascotasPriceLabel) ? u.__mascotasPriceLabel
+    : (isHog && u.__hogarPriceLabel) ? u.__hogarPriceLabel
+    : (isAuto && u.__automotrizPriceLabel) ? u.__automotrizPriceLabel
+    : (isCom && u.__comercioPriceLabel) ? u.__comercioPriceLabel
+    : (isEv && u.__eventosPriceLabel) ? u.__eventosPriceLabel
+    : (isBs && u.__bienestarPriceLabel) ? u.__bienestarPriceLabel
+    : (isGs && u.__gastronomiaPriceLabel) ? u.__gastronomiaPriceLabel
+    : 'Desde';
+  var serviciosTitulo = isMas ? '✅ Servicios para mascotas' : isHog ? '✅ Servicios para el hogar' : isAuto ? '✅ Servicios automotrices' : isCom ? '✅ Oferta / surtido' : isEv ? '✅ Servicios para tu evento' : isBs ? '✅ Servicios / enfoque' : isGs ? '✅ Servicios / especialidad' : (esEmpresa ? '✅ Servicios principales' : '✅ Servicios incluidos');
+  var noTitulo = (isSectorModern) ? '⛔ No incluido / no ofrecido' : '⛔ Servicios no incluidos';
   prepareProDerstackTitles(u, serviciosTitulo, noTitulo);
 
   var certBlock = u.certificaciones ? '<div class="pcard"><div class="pcard__h">🎖️ Certificaciones</div><div class="svc">'+
@@ -8868,7 +8945,7 @@ function renderProEmpresa(u, esEmpresa){
 
   var perfil=
     '<div class="pcard">'+
-      '<div class="idhead"><h1>'+safe(u.nombre)+'</h1>'+verificadoBadge(verLabel)+bienestarBadgesHTML(u)+eventosBadgesHTML(u)+gastronomiaBadgesHTML(u)+(u.edad?'<span class="age" data-pub-block="edad">'+u.edad+' años</span>':'')+'</div>'+
+      '<div class="idhead"><h1>'+safe(u.nombre)+'</h1>'+verificadoBadge(verLabel)+bienestarBadgesHTML(u)+eventosBadgesHTML(u)+gastronomiaBadgesHTML(u)+comercioBadgesHTML(u)+automotrizBadgesHTML(u)+hogarBadgesHTML(u)+mascotasBadgesHTML(u)+(u.edad?'<span class="age" data-pub-block="edad">'+u.edad+' años</span>':'')+'</div>'+
       '<div class="idsub">'+safe(u.titulo)+'</div>'+
       idlocUbicacionHTML(u, loc)+
       (tabsHTML ? '<div class="tabs">'+tabsHTML+'</div>' : '')+
@@ -8876,7 +8953,7 @@ function renderProEmpresa(u, esEmpresa){
     '</div>';
 
   var triExtras=
-    (isBs && u.__bienestarPack==='H' ? bienestarPackHCtaHTML(u) : ((isBs || isEv || isGs || u.sectorId==="bienestar" || u.bienestarHolisticoPerfil) ? '' : '<button type="button" class="pro-cta-cita">Agendar cita</button>'))+
+    (isBs && u.__bienestarPack==='H' ? bienestarPackHCtaHTML(u) : ((isSectorModern || u.sectorId==="bienestar" || u.bienestarHolisticoPerfil) ? '' : '<button type="button" class="pro-cta-cita">Agendar cita</button>'))+
     proFeatsLineHTML(u);
   var tri=proTriPlayHTML([
     proTriCellHTML("precio","💲 "+safe(priceLbl),safe(String(u.precio||'').replace(/^💲\s*/,'')),safe(u.moneda)+(esEmpresa?(" · "+safe(u.servicioBasico||'')):(" · Por servicio"))),
@@ -8892,7 +8969,7 @@ function renderProEmpresa(u, esEmpresa){
 
   var ficha=
     certBlock+
-    (isBs || isEv || isGs ? '' : proReviewsCardHTML(u, "Opiniones de clientes"))+
+    (isSectorModern ? '' : proReviewsCardHTML(u, "Opiniones de clientes"))+
     proFaqCardHTML(u)+
     (isEv ? eventosReguladaNoticeHTML(u) : (isGs ? gastronomiaReguladaNoticeHTML(u) : (isBs && u.__bienestarPack==='H' ? bienestarPackHNoticeHTML(u) : '')))+
     proCoberturaCardHTML(u, "Zona de cobertura")+
@@ -9014,7 +9091,7 @@ function resolverPerfilDesdeQuery(q){
     }
   }
   /*
-    Sin id (o id no resuelto): sembrar demo de bienestar/salud para que
+    Sin id (o id no resuelto): sembrar demo sectorial para que
     hydrate + tema/banners no caigan en DEMO.pro plomería.
     No aplica a adultos spa/masajes.
   */
@@ -9039,6 +9116,50 @@ function resolverPerfilDesdeQuery(q){
       }
     }else if(sectorHint==="salud"&&typeof CariHubResultadosDemo.plantillaDemoSalud==="function"){
       listaSeed=CariHubResultadosDemo.plantillaDemoSalud(q);
+    }else if(sectorHint==="comercio"&&typeof CariHubResultadosDemo.plantillaDemoComercio==="function"){
+      var presCom=null;
+      if(window.CariHubFieldEngineLite&&CariHubFieldEngineLite.resolvePublicPresentation){
+        try{
+          presCom=CariHubFieldEngineLite.resolvePublicPresentation({
+            categoria:q.categoria,
+            subcategoriaId:CariHubFieldEngineLite.lookupSubcategoriaId(q.categoria)
+          });
+        }catch(ePresC){ presCom=null; }
+      }
+      listaSeed=CariHubResultadosDemo.plantillaDemoComercio(q,presCom);
+    }else if(sectorHint==="automotriz"&&typeof CariHubResultadosDemo.plantillaDemoAutomotriz==="function"){
+      var presAuto=null;
+      if(window.CariHubFieldEngineLite&&CariHubFieldEngineLite.resolvePublicPresentation){
+        try{
+          presAuto=CariHubFieldEngineLite.resolvePublicPresentation({
+            categoria:q.categoria,
+            subcategoriaId:CariHubFieldEngineLite.lookupSubcategoriaId(q.categoria)
+          });
+        }catch(ePresA){ presAuto=null; }
+      }
+      listaSeed=CariHubResultadosDemo.plantillaDemoAutomotriz(q,presAuto);
+    }else if(sectorHint==="hogar"&&typeof CariHubResultadosDemo.plantillaDemoHogar==="function"){
+      var presHog=null;
+      if(window.CariHubFieldEngineLite&&CariHubFieldEngineLite.resolvePublicPresentation){
+        try{
+          presHog=CariHubFieldEngineLite.resolvePublicPresentation({
+            categoria:q.categoria,
+            subcategoriaId:CariHubFieldEngineLite.lookupSubcategoriaId(q.categoria)
+          });
+        }catch(ePresH){ presHog=null; }
+      }
+      listaSeed=CariHubResultadosDemo.plantillaDemoHogar(q,presHog);
+    }else if(sectorHint==="mascotas"&&typeof CariHubResultadosDemo.plantillaDemoMascotas==="function"){
+      var presMas=null;
+      if(window.CariHubFieldEngineLite&&CariHubFieldEngineLite.resolvePublicPresentation){
+        try{
+          presMas=CariHubFieldEngineLite.resolvePublicPresentation({
+            categoria:q.categoria,
+            subcategoriaId:CariHubFieldEngineLite.lookupSubcategoriaId(q.categoria)
+          });
+        }catch(ePresM){ presMas=null; }
+      }
+      listaSeed=CariHubResultadosDemo.plantillaDemoMascotas(q,presMas);
     }
     if(listaSeed&&listaSeed.length){
       perfil=listaSeed[0];
@@ -9058,7 +9179,13 @@ function demoAssetDesdeResultados(src){
   return ""+s.replace(/^\.\//,"");
 }
 var PERFIL_SECTOR_BRIDGE_EXCLUDED={salud:1,profesionales:1,bienestar:1,eventos:1};
-var PERFIL_SECTOR_BRIDGE_RENDER={restaurantes:{global:"CariHubGastronomiaSectorRender"}};
+var PERFIL_SECTOR_BRIDGE_RENDER={
+  restaurantes:{global:"CariHubGastronomiaSectorRender"},
+  comercio:{global:"CariHubComercioSectorRender"},
+  automotriz:{global:"CariHubAutomotrizSectorRender"},
+  hogar:{global:"CariHubHogarSectorRender"},
+  mascotas:{global:"CariHubMascotasSectorRender"}
+};
 function perfilBridgeUserHasField(u,key){
   if(!u) return false;
   if(key==="stats"||key==="faq"||key==="reviews"||key==="feats"||key==="noIncluidos"||key==="metodosPago"){
@@ -9471,6 +9598,12 @@ function aplicarPerfilDesdeRegistro(vista,u){
   if(window.CariHubBienestarSectorRender&&CariHubBienestarSectorRender.hydrateDisplayFields){
     clean=CariHubBienestarSectorRender.hydrateDisplayFields(clean);
   }
+  if(window.CariHubComercioSectorRender&&CariHubComercioSectorRender.hydrateDisplayFields){
+    clean=CariHubComercioSectorRender.hydrateDisplayFields(clean);
+  }
+  if(window.CariHubAutomotrizSectorRender&&CariHubAutomotrizSectorRender.hydrateDisplayFields){
+    clean=CariHubAutomotrizSectorRender.hydrateDisplayFields(clean);
+  }
   if(window.CariHubEventosSectorRender&&CariHubEventosSectorRender.hydrateDisplayFields){
     clean=CariHubEventosSectorRender.hydrateDisplayFields(clean);
   }
@@ -9523,7 +9656,59 @@ function aplicarPerfilResultadosEnDemo(vista,u){
     }
   }
   var esSaludSector=vista==="medico"||u.sectorId==="salud"||!!u.saludPerfil;
-  if(esBienestarHolo||esSaludSector){
+  var esComercioSector=false;
+  if(window.CariHubComercioSectorRender&&CariHubComercioSectorRender.isComercioSectorPerfil){
+    esComercioSector=!!CariHubComercioSectorRender.isComercioSectorPerfil(u);
+  }
+  if(!esComercioSector&&(u.sectorId==="comercio"||u.comercioPerfil)){
+    esComercioSector=true;
+  }
+  if(!esComercioSector&&window.CariHubResultadosSector&&CariHubResultadosSector.sectorDeCategoria){
+    try{
+      var catCom=u.subcategoriaId||u.categoriaPublica||u.categoria||"";
+      if(CariHubResultadosSector.sectorDeCategoria(catCom)==="comercio") esComercioSector=true;
+    }catch(eComCat){ /* opcional */ }
+  }
+  var esAutomotrizSector=false;
+  if(window.CariHubAutomotrizSectorRender&&CariHubAutomotrizSectorRender.isAutomotrizSectorPerfil){
+    esAutomotrizSector=!!CariHubAutomotrizSectorRender.isAutomotrizSectorPerfil(u);
+  }
+  if(!esAutomotrizSector&&(u.sectorId==="automotriz"||u.automotrizPerfil)){
+    esAutomotrizSector=true;
+  }
+  if(!esAutomotrizSector&&window.CariHubResultadosSector&&CariHubResultadosSector.sectorDeCategoria){
+    try{
+      var catAuto=u.subcategoriaId||u.categoriaPublica||u.categoria||"";
+      if(CariHubResultadosSector.sectorDeCategoria(catAuto)==="automotriz") esAutomotrizSector=true;
+    }catch(eAutoCat){ /* opcional */ }
+  }
+  var esHogarSector=false;
+  if(window.CariHubHogarSectorRender&&CariHubHogarSectorRender.isHogarSectorPerfil){
+    esHogarSector=!!CariHubHogarSectorRender.isHogarSectorPerfil(u);
+  }
+  if(!esHogarSector&&(u.sectorId==="hogar"||u.hogarPerfil)){
+    esHogarSector=true;
+  }
+  if(!esHogarSector&&window.CariHubResultadosSector&&CariHubResultadosSector.sectorDeCategoria){
+    try{
+      var catHog=u.subcategoriaId||u.categoriaPublica||u.categoria||"";
+      if(CariHubResultadosSector.sectorDeCategoria(catHog)==="hogar") esHogarSector=true;
+    }catch(eHogCat){ /* opcional */ }
+  }
+  var esMascotasSector=false;
+  if(window.CariHubMascotasSectorRender&&CariHubMascotasSectorRender.isMascotasSectorPerfil){
+    esMascotasSector=!!CariHubMascotasSectorRender.isMascotasSectorPerfil(u);
+  }
+  if(!esMascotasSector&&(u.sectorId==="mascotas"||u.mascotasPerfil)){
+    esMascotasSector=true;
+  }
+  if(!esMascotasSector&&window.CariHubResultadosSector&&CariHubResultadosSector.sectorDeCategoria){
+    try{
+      var catMas=u.subcategoriaId||u.categoriaPublica||u.categoria||"";
+      if(CariHubResultadosSector.sectorDeCategoria(catMas)==="mascotas") esMascotasSector=true;
+    }catch(eMasCat){ /* opcional */ }
+  }
+  if(esBienestarHolo||esSaludSector||esComercioSector||esAutomotrizSector||esHogarSector||esMascotasSector){
     aplicarPerfilDesdeRegistro(vista,u);
     if(DEMO[vista]){
       DEMO[vista].__previewRegistro=false;
